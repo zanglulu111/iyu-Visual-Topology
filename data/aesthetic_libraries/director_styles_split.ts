@@ -1,0 +1,151 @@
+
+import { LibraryItemDef } from '../../types';
+
+export const DIRECTOR_STYLE_ITEMS: LibraryItemDef[] = [
+  // ==========================================
+  // 1. 欧美作者 (Western Auteurs - 20)
+  // ==========================================
+  { id: "aut_kubrick", name: "库布里克 (Stanley Kubrick)", group: "1. 欧美作者", def: "Symmetry, central perspective, cold lighting.", core: "代表作:《2001太空漫游》, 风格: 极致对称与非人称理性。" },
+  { id: "aut_nolan", name: "诺兰 (Christopher Nolan)", group: "1. 欧美作者", def: "Practical effects, IMAX, teal and orange.", core: "代表作:《奥本海默》, 风格: 物理实感下的时空拼贴。" },
+  { id: "aut_villeneuve", name: "维伦纽瓦 (Denis Villeneuve)", group: "1. 欧美作者", def: "Brutalism, atmospheric scale, minimalism.", core: "代表作:《沙丘》, 风格: 宏大寂静与巨物压迫。" },
+  { id: "aut_fincher", name: "芬奇 (David Fincher)", group: "1. 欧美作者", def: "Low-key green/yellow tint, precise movements.", core: "代表作:《社交网络》, 风格: 手术刀般的精确剪辑。" },
+  { id: "aut_tarantino", name: "昆汀 (Quentin Tarantino)", group: "1. 欧美作者", def: "Vivid blood, low angles, high contrast.", core: "代表作:《低俗小说》, 风格: 暴力话痨与波普拼贴。" },
+  { id: "aut_spielberg", name: "斯皮尔伯格 (Steven Spielberg)", group: "1. 欧美作者", def: "Backlighting, dolly zoom, sense of wonder.", core: "代表作:《E.T.》, 风格: 黄金光晕与童心神话。" },
+  { id: "aut_scorsese", name: "斯科塞斯 (Martin Scorsese)", group: "1. 欧美作者", def: "Dolly in, fast pans, rock & roll editing.", core: "代表作:《好家伙》, 风格: 狂热动能与罪恶救赎。" },
+  { id: "aut_wes", name: "韦斯·安德森 (Wes Anderson)", group: "1. 欧美作者", def: "Flat lay, pastel colors, 90-degree whip pan.", core: "代表作:《布达佩斯大饭店》, 风格: 强迫症对称与童话忧郁。" },
+  { id: "aut_scott", name: "雷德利·斯科特 (Ridley Scott)", group: "1. 欧美作者", def: "Chiaroscuro, shafts of light, cinematic smoke.", core: "代表作:《银翼杀手》, 风格: 工业黑与神圣感布光。" },
+  { id: "aut_cameron", name: "卡梅隆 (James Cameron)", group: "1. 欧美作者", def: "Deep blue, bioluminescence, tech-optimism.", core: "代表作:《阿凡达》, 风格: 工业标准与异星奇观。" },
+  { id: "aut_hitchcock", name: "希区柯克 (Alfred Hitchcock)", group: "1. 欧美作者", def: "Voyeuristic gaze, sharp expressionist shadows.", core: "代表作:《后窗》, 风格: 窥视者快感与悬念位移。" },
+  { id: "aut_coppola", name: "科波拉 (Francis Ford Coppola)", group: "1. 欧美作者", def: "Top lighting, amber shadows, operatic drama.", core: "代表作:《教父》, 风格: 歌剧式悲剧与权力阴影。" },
+  { id: "aut_pta", name: "PT·安德森 (Paul Thomas Anderson)", group: "1. 欧美作者", def: "Steadycam, period detail, psychological intensity.", core: "代表作:《血色将至》, 风格: 孤独野心与精湛调度。" },
+  { id: "aut_gerwig", name: "格蕾塔 (Greta Gerwig)", group: "1. 欧美作者", def: "Warm focus, intimate dialogue, female gaze.", core: "代表作:《小妇人》, 风格: 温暖质感与女性主体。" },
+  { id: "aut_chazelle", name: "查泽雷 (Damien Chazelle)", group: "1. 欧美作者", def: "Rhythmic, whip pans, primary colors.", core: "代表作:《爱乐之城》, 风格: 音乐律动与梦想代价。" },
+  { id: "aut_mann", name: "迈克尔·曼 (Michael Mann)", group: "1. 欧美作者", def: "Steel blue night, digital noise, urban isolation.", core: "代表作:《盗火线》, 风格: 冷峻专业感与都市孤独。" },
+  { id: "aut_snyder", name: "施奈德 (Zack Snyder)", group: "1. 欧美作者", def: "Speed ramping, high contrast, mythic framing.", core: "代表作:《300勇士》, 风格: 油画史诗与力量暴政。" },
+  { id: "aut_bigelow", name: "毕格罗 (Kathryn Bigelow)", group: "1. 欧美作者", def: "Gritty realism, blue tint, kinetic energy.", core: "代表作:《拆弹部队》, 风格: 纪实压力与硬核动感。" },
+  { id: "aut_greengrass", name: "格林格拉斯 (Paul Greengrass)", group: "1. 欧美作者", def: "Shaky cam, fast cuts, documentary feel.", core: "代表作:《谍影重重》, 风格: 极速生理临场感。" },
+  { id: "aut_fincher_night", name: "大卫·芬奇夜景 (Fincher Dark)", group: "1. 欧美作者", def: "Under-exposed, flashlight beams, high-res grit.", core: "代表作:《七宗罪》, 风格: 阴湿的病理分析。" },
+  { id: "aut_daniels", name: "丹尼尔组合 (The Daniels)", group: "1. 欧美作者", def: "Maximalist chaos, morphing, bizarre humor.", core: "代表作:《瞬息全宇宙》, 风格: 多元宇宙的视觉过载。" },
+
+  // ==========================================
+  // 2. 东方作者 (Eastern Auteurs - 20)
+  // ==========================================
+  { id: "aut_wkw", name: "王家卫 (Wong Kar-wai)", group: "2. 东方作者", def: "Step-printing, motion blur, neon rain.", core: "代表作:《花样年华》, 风格: 暧昧时间与都市流光。" },
+  { id: "aut_kurosawa", name: "黑泽明 (Akira Kurosawa)", group: "2. 东方作者", def: "Telephoto compression, dynamic weather.", core: "代表作:《乱》, 风格: 几何调度与武士宿命。" },
+  { id: "aut_ozu", name: "小津安二郎 (Yasujirō Ozu)", group: "2. 东方作者", def: "Tatami shot, red teapot, still frames.", core: "代表作:《东京物语》, 风格: 榻榻米视角与物哀留白。" },
+  { id: "aut_yang", name: "杨德昌 (Edward Yang)", group: "2. 东方作者", def: "Fixed shots, city architecture, reflection.", core: "代表作:《一一》, 风格: 都市手术刀与虚无解剖。" },
+  { id: "aut_hou", name: "侯孝贤 (Hou Hsiao-hsien)", group: "2. 东方作者", def: "Long static takes, natural light, distance.", core: "代表作:《聂隐娘》, 风格: 历史尘埃与自然律动。" },
+  { id: "aut_bong", name: "奉俊昊 (Bong Joon-ho)", group: "2. 东方作者", def: "Classified spatial logic, humid textures.", core: "代表作:《寄生虫》, 风格: 阶级差距与类型杂交。" },
+  { id: "aut_park", name: "朴赞郁 (Park Chan-wook)", group: "2. 东方作者", def: "Saturated textures, impossible symmetry.", core: "代表作:《小姐》, 风格: 病态华丽与感官博弈。" },
+  { id: "aut_kitano", name: "北野武 (Takeshi Kitano)", group: "2. 东方作者", def: "Kitano blue, deadpan stillness, sudden violence.", core: "代表作:《花火》, 风格: 极简死亡与顽童反抗。" },
+  { id: "aut_mizoguchi", name: "沟口健二 (Kenji Mizoguchi)", group: "2. 东方作者", def: "Long scrolling takes, tragic beauty.", core: "代表作:《雨月物语》, 风格: 卷轴式凝视与女性悲歌。" },
+  { id: "aut_zhang_yimou", name: "张艺谋 (Zhang Yimou)", group: "2. 东方作者", def: "Extreme color blocks, ritual symmetry.", core: "代表作:《英雄》, 风格: 权力的色彩仪式。" },
+  { id: "aut_chen_kaige", name: "陈凯歌 (Chen Kaige)", group: "2. 东方作者", def: "Operatic drama, period detail, poetic lines.", core: "代表作:《霸王别姬》, 风格: 历史废墟与文人执念。" },
+  { id: "aut_jia_zhangke", name: "贾樟柯 (Jia Zhangke)", group: "2. 东方作者", def: "Raw digital realism, changing landscape.", core: "代表作:《三峡好人》, 风格: 时代的尘土与边缘生命。" },
+  { id: "aut_bi_gan", name: "毕赣 (Bi Gan)", group: "2. 东方作者", def: "Moist blue-green tones, long takes, dream archaeology.", core: "代表作:《路边野餐》, 风格: 潮湿梦境与记忆重组。" },
+  { id: "aut_koreeda", name: "是枝裕和 (Hirokazu Kore-eda)", group: "2. 东方作者", def: "Soft sun, domestic detail, gentle gaze.", core: "代表作:《小偷家族》, 风格: 废弃者的温情与遗憾。" },
+  { id: "aut_iwai", name: "岩井俊二 (Shunji Iwai)", group: "2. 东方作者", def: "Overexposed backlight, nostalgic haze.", core: "代表作:《情书》, 风格: 青春残像与感伤诗学。" },
+  { id: "aut_tsui_hark", name: "徐克 (Tsui Hark)", group: "2. 东方作者", def: "Kinetic wuxia, distorted angles, mythic tech.", core: "代表作:《青蛇》, 风格: 乱世妖异与技术狂想。" },
+  { id: "aut_john_woo", name: "吴宇森 (John Woo)", group: "2. 东方作者", def: "Doves, slow-mo, dual guns, church candle.", core: "代表作:《喋血双雄》, 风格: 暴力芭蕾与英雄情义。" },
+  { id: "aut_to", name: "杜琪峰 (Johnnie To)", group: "2. 东方作者", def: "Geometric blocking, night city, cigarette.", core: "代表作:《枪火》, 风格: 宿命站位与冷硬浪漫。" },
+  { id: "aut_lou_ye", name: "娄烨 (Lou Ye)", group: "2. 东方作者", def: "Shaky handheld, rainy blue, erotic sweat.", core: "代表作:《苏州河》, 风格: 潮湿爱欲与心理迷路。" },
+  { id: "aut_weerasethakul", name: "阿彼察邦 (Apichatpong)", group: "2. 东方作者", def: "Jungle spirit, slow pace, medical bed.", core: "代表作:《能召回前世的布米叔叔》, 风格: 泛灵论记忆与催眠叙事。" },
+  { id: "aut_king_hu", name: "胡金铨 (King Hu)", group: "2. 东方作者", def: "Zen wuxia, bamboo forest, panoramic action.", core: "代表作:《侠女》, 风格: 禅意武侠与京剧动感。" },
+  { id: "aut_chang_cheh", name: "张彻 (Chang Cheh)", group: "2. 东方作者", def: "Heroic bloodshed, bare chested, visceral.", core: "代表作:《独臂刀》, 风格: 阳刚暴力与盘肠大战。" },
+
+  // ==========================================
+  // 3. 邪典与地下 (Cult & Underground - 20)
+  // ==========================================
+  { id: "cul_jodorowsky", name: "佐杜洛夫斯基 (Alejandro Jodorowsky)", group: "3. 邪典地下", def: "Alchemical symbols, desert tarot, grotesque.", core: "代表作:《圣山》, 风格: 精神萨满与神圣亵渎。" },
+  { id: "cul_waters", name: "约翰·沃特斯 (John Waters)", group: "3. 邪典地下", def: "Camp, kitsch, trash aesthetic, provocative.", core: "代表作:《粉红火烈鸟》, 风格: 坏品味之王的冒犯艺术。" },
+  { id: "cul_noe", name: "加斯帕·诺 (Gaspar Noé)", group: "3. 邪典地下", def: "Strobe, vortex camera, neon rot, visceral.", core: "代表作:《进入虚无》, 风格: 视听毒品与极致生理性。" },
+  { id: "cul_anger", name: "肯尼斯·安格 (Kenneth Anger)", group: "3. 邪典地下", def: "Occult icons, leather, pop collage, ritual.", core: "代表作:《天蝎座升起》, 风格: 魔法影像与男色崇拜。" },
+  { id: "cul_lynch_cult", name: "林奇怪奇 (Lynchian Cult)", group: "3. 邪典地下", def: "Subconscious leakage, distorted hum, red room.", core: "代表作:《橡皮头》, 风格: 工业时代的潜意识梦魇。" },
+  { id: "cul_tsukamoto", name: "冢本晋也 (Shinya Tsukamoto)", group: "3. 邪典地下", def: "Metal-flesh fusion, frantic editing, B&W.", core: "代表作:《铁男》, 风格: 肉体异化与工业噪音。" },
+  { id: "cul_miike", name: "三池崇史 (Takashi Miike)", group: "3. 邪典地下", def: "Cartoonish gore, Yakuza excess, weirdness.", core: "代表作:《杀手阿一》, 风格: 无下限的感官狂欢。" },
+  { id: "cul_sono", name: "园子温 (Sion Sono)", group: "3. 邪典地下", def: "Bloody schoolgirls, subversion, screaming colors.", core: "代表作:《自杀俱乐部》, 风格: 朋克破坏与变态纯爱。" },
+  { id: "cul_fulci", name: "弗尔兹 (Lucio Fulci)", group: "3. 邪典地下", def: "Rotting flesh, eye close-ups, Italian gore.", core: "代表作:《僵尸》, 风格: 腐烂质感与感官蹂躏。" },
+  { id: "cul_argento", name: "阿基多 (Dario Argento)", group: "3. 邪典地下", def: "Giallo red, stylized killing, prog-rock sync.", core: "代表作:《阴风阵阵》, 风格: 极艳色彩与美学谋杀。" },
+  { id: "cul_barker", name: "克莱夫·巴克 (Clive Barker)", group: "3. 邪典地下", def: "Body horror, hellish hooks, leather, pain.", core: "代表作:《养鬼吃人》, 风格: 苦痛与享乐的宗教性统一。" },
+  { id: "cul_cronenberg_old", name: "早期柯南伯格 (Old Cronenberg)", group: "3. 邪典地下", def: "Visceral biology, TV signals, tumor chic.", core: "代表作:《录像带谋杀案》, 风格: 生化危机与现实裂痕。" },
+  { id: "cul_raimi", name: "莱米邪典 (Evil Dead Style)", group: "3. 邪典地下", def: "Point-of-view demon cam, splatstick, forest.", core: "代表作:《死玩》, 风格: 廉价快感与暴力幽默。" },
+  { id: "cul_jackson", name: "彼得·杰克逊早期 (Early PJ)", group: "3. 邪典地下", def: "Puppet gore, slapstick splatter, creative props.", core: "代表作:《群尸玩过界》, 风格: 血腥闹剧与极繁主义。" },
+  { id: "cul_ishii", name: "石井聪亘 (Sogo Ishii)", group: "3. 邪典地下", def: "Punk energy, speed, industrial chaos.", core: "代表作:《爆裂都市》, 风格: 视觉无政府主义。" },
+  { id: "cul_cosmatos", name: "帕诺斯 (Panos Cosmatos)", group: "3. 邪典地下", def: "Heavy synth, slow red haze, psychedelic metal.", core: "代表作:《曼蒂》, 风格: 迷幻重金属与复古邪典。" },
+  { id: "cul_eggars_cult", name: "艾格斯怪奇 (Eggers Folk)", group: "3. 邪典地下", def: "Square frame, period language, folk horror.", core: "代表作:《女巫》, 风格: 古老迷信与历史疯狂。" },
+  { id: "cul_b_cronenberg", name: "布兰登·柯南伯格 (Brandon Cronenberg)", group: "3. 邪典地下", def: "Sleek sterile horror, celebrity DNA, cold.", core: "代表作:《占有者》, 风格: 现代疏离与肉体入侵。" },
+  { id: "cul_henenlotter", name: "赫嫩洛特 (Henenlotter)", group: "3. 邪典地下", def: "Gritty NY streets, mutant baskets, weird humor.", core: "代表作:《篮子里的恶魔》, 风格: 畸形与街头真实的拼贴。" },
+  { id: "cul_ed_wood_style", name: "艾德·伍德风 (Ed Wood)", group: "3. 邪典地下", def: "Z-movie props, cardboard sky, awkward earnestness.", core: "代表作:《外太空九号计划》, 风格: 糟糕美学的神圣感。" },
+
+  // ==========================================
+  // 4. 黑色、悬疑与真实 (Noir & Reality - 20)
+  // ==========================================
+  { id: "aut_lang", name: "弗里茨·朗 (Fritz Lang)", group: "4. 黑色悬疑", def: "Expressionist architecture, heavy shadows, crime maze.", core: "代表作:《M就是凶手》, 风格: 表现主义构图与罪恶结构。" },
+  { id: "aut_polanski", name: "波兰斯基 (Roman Polanski)", group: "4. 黑色悬疑", def: "Claustrophobia, apartment horror, paranoid angles.", core: "代表作:《唐人街》, 风格: 幽闭恐惧与人性深渊。" },
+  { id: "aut_haneke", name: "哈内克 (Michael Haneke)", group: "4. 黑色悬疑", def: "Clinical distance, static voyeurism, off-screen violence.", core: "代表作:《趣味游戏》, 风格: 冷暴力的实验性凝视。" },
+  { id: "aut_de_palma", name: "德·帕尔马 (Brian De Palma)", group: "4. 黑色悬疑", def: "Split screen, slow motion, Hitchcockian gaze.", core: "代表作:《疤面煞星》, 风格: 视听过剩与窥视悬念。" },
+  { id: "aut_reed", name: "卡罗尔·里德 (Carol Reed)", group: "4. 黑色悬疑", def: "Dutch angles, wet cobbles, expressionist noir.", core: "代表作:《第三个人》, 风格: 阴湿的后战氛围。" },
+  { id: "aut_melville", name: "让·皮埃尔·梅尔维尔 (Melville)", group: "4. 黑色悬疑", def: "Cool blue, trench coats, silent professionalism.", core: "代表作:《独行杀手》, 风格: 冷色调职业主义。" },
+  { id: "aut_diao", name: "刁亦男 (Diao Yinan)", group: "4. 黑色悬疑", def: "Neon rain, industrial rust, nocturnal China.", core: "代表作:《南方车站的聚会》, 风格: 废土黑色与潮湿能指。" },
+  { id: "aut_na", name: "罗泓轸 (Na Hong-jin)", group: "4. 黑色悬疑", def: "Visceral chase, mud and blood, folk horror mix.", core: "代表作:《黄海》, 风格: 原始暴力与泥泞生存。" },
+  { id: "aut_k_kiyoshi", name: "黑泽清 (Kiyoshi Kurosawa)", group: "4. 黑色悬疑", def: "Empty spaces, wind in curtains, psychological ghost.", core: "代表作:《回路》, 风格: 日常中的虚无与恐怖空镜。" },
+  { id: "aut_kim_jeewoon", name: "金知云 (Kim Jee-woon)", group: "4. 黑色悬疑", def: "Slick action, dark humor, stylistic genre play.", core: "代表作:《看见恶魔》, 风格: 黑色幽默与复仇张力。" },
+  { id: "aut_shashidharan", name: "沙希德哈兰 (Indian Indie Noir)", group: "4. 黑色悬疑", def: "One take, mountain road, social tension.", core: "代表作:《性感杜嘉》, 风格: 漫长夜晚的结构性暴力。" },
+  { id: "aut_villeneuve_noir", name: "维伦纽瓦黑色 (Villeneuve Noir)", group: "4. 黑色悬疑", def: "Low visibility, yellow dust, brutal truth.", core: "代表作:《边境杀手》, 风格: 伦理灰色的视觉压迫。" },
+  { id: "aut_clouzot", name: "克鲁佐 (Henri-Georges Clouzot)", group: "4. 黑色悬疑", def: "Sweat, tension, dark human heart.", core: "代表作:《恶魔》, 风格: 窒息的悬念与人性阴暗。" },
+  { id: "aut_friedkin", name: "弗里德金 (William Friedkin)", group: "4. 黑色悬疑", def: "Urban grit, handheld grit, documentary intensity.", core: "代表作:《法国贩毒网》, 风格: 街头真实与疯狂动能。" },
+  { id: "aut_lumet", name: "吕美特 (Sidney Lumet)", group: "4. 黑色悬疑", def: "Ensemble drama, small room pressure, language.", core: "代表作:《十二怒汉》, 风格: 空间封闭下的语言博弈。" },
+  { id: "aut_ray_nicholas", name: "尼古拉斯·雷 (Nicholas Ray)", group: "4. 黑色悬疑", def: "Color angst, youth rebellion, wide scope shadows.", core: "代表作:《无因的反叛》, 风格: 色彩化的心理挣扎。" },
+  { id: "aut_preminger", name: "普雷明格 (Otto Preminger)", group: "4. 黑色悬疑", def: "Cool clinical gaze, taboo topics, legal maze.", core: "代表作:《桃色血案》, 风格: 挑衅性的道德中立。" },
+  { id: "aut_shimizu", name: "清水崇 (Takashi Shimizu)", group: "4. 黑色悬疑", def: "Blue tint, repeating ghost logic, urban curse.", core: "代表作:《咒怨》, 风格: 逻辑死循环的惊悚。" },
+  { id: "aut_wan", name: "温子仁 (James Wan)", group: "4. 黑色悬疑", def: "Puppet movements, rotating camera, jumpscare prep.", core: "代表作:《死寂》, 风格: 恐怖仪式的精确调度。" },
+  { id: "aut_eggars_noir", name: "艾格斯黑色 (Eggers Noir)", group: "4. 黑色悬疑", def: "Silver gelatin texture, lighthouse gleam.", core: "代表作:《灯塔》, 风格: 灰度分级的心理疯狂。" },
+
+  // ==========================================
+  // 5. 商业、视觉与动感 (Commercial & Motion - 20)
+  // ==========================================
+  { id: "com_bay", name: "迈克尔·贝 (Michael Bay)", group: "5. 商业动感", def: "360 circling, sunset flares, saturation bomb.", core: "风格: 视觉过剩与动感霸权。" },
+  { id: "com_scott_t", name: "托尼·斯科特 (Tony Scott)", group: "5. 商业动感", def: "Frenetic speed, multiple angles, hot highlights.", core: "风格: 焦躁的高能视觉流。" },
+  { id: "com_abrams", name: "JJ·艾布拉姆斯 (J.J. Abrams)", group: "5. 商业动感", def: "Blue lens flares, shaky cam, mystery box.", core: "风格: 溢出的光晕与现代科幻感。" },
+  { id: "com_kosinski", name: "科辛斯基 (Joseph Kosinski)", group: "5. 商业动感", def: "Sleek architecture, clean CGI, sunset warm.", core: "风格: 工业设计的极致美化。" },
+  { id: "com_miller_g", name: "乔治·米勒 (George Miller)", group: "5. 商业动感", def: "Center framing, speed ramping, punk opera.", core: "风格: 动能神话与视觉狂暴。" },
+  { id: "com_luhrmann", name: "巴兹·鲁赫曼 (Baz Luhrmann)", group: "5. 商业动感", def: "Operatic glitter, fast cuts, kitsch luxury.", core: "风格: 绚烂过剩与舞台化狂欢。" },
+  { id: "com_wo_yang", name: "杨福东 (Yang Fudong)", group: "5. 商业动感", def: "Dreamy B&W, slow stroll, high fashion vibe.", core: "风格: 东方文人的时尚游吟。" },
+  { id: "com_shaw", name: "邵氏武侠 (Shaw Brothers)", group: "5. 商业动感", def: "Zoom in/out, painted sets, rhythmic swords.", core: "风格: 邵氏美学与邵氏变焦。" },
+  { id: "com_gondry", name: "冈瑞 (Michel Gondry)", group: "5. 商业动感", def: "Handmade tricks, recursive loops, dream felt.", core: "风格: 手工梦境与视觉魔术。" },
+  { id: "com_jonze", name: "琼斯 (Spike Jonze)", group: "5. 商业动感", def: "Absurd movement, low-fi grit, urban play.", core: "风格: 顽童忧郁与真实异化。" },
+  { id: "com_glazer", name: "格雷泽 (Jonathan Glazer)", group: "5. 商业动感", def: "Slow high-frame explosion, still scale.", core: "风格: 静态奇观与哲学广告。" },
+  { id: "com_williams", name: "海普·威廉姆斯 (Hype Williams)", group: "5. 商业动感", def: "Fisheye, neon suits, gloss black skin.", core: "风格: 嘻哈未来主义与广角统治。" },
+  { id: "com_cunningham", name: "坎宁安 (Chris Cunningham)", group: "5. 商业动感", def: "Digital glitch, biomech, disturbing sync.", core: "风格: 工业噩梦与恐怖谷。" },
+  { id: "com_megaforce", name: "Megaforce", group: "5. 商业动感", def: "Magical realism, rhythmic stunts, chic.", core: "风格: 优雅奇观与地心引力叛离。" },
+  { id: "com_canada", name: "CANADA (Director)", group: "5. 商业动感", def: "Sexy retro, fast collage, film flicker.", core: "风格: 复古性感与拼贴律动。" },
+  { id: "com_romanek", name: "罗曼尼克 (Mark Romanek)", group: "5. 商业动感", def: "Sterile white, macro chrome, minimal lux.", core: "风格: 极致洁癖与物神崇拜。" },
+  { id: "com_brthr", name: "BRTHR", group: "5. 商业动感", def: "Hyper-kinetic, mixed media, Z-gen chaos.", core: "风格: 视觉过载与数字多动症。" },
+  { id: "com_nabil", name: "纳比尔 (Nabil)", group: "5. 商业动感", def: "Gritty grain, underwater, primal vibe.", core: "风格: 原始情感与写实灵性。" },
+  { id: "com_vogue", name: "Vogue 风格 (Vogue Style)", group: "5. 商业动感", def: "Hard flash, white wall, aloof pose.", core: "风格: 权力的傲慢与平面化肢体。" },
+  { id: "com_apple", name: "苹果发布会 (Apple Keynote)", group: "5. 商业动感", def: "Floating pods, shadowless white, 4k macro.", core: "风格: 去人性化的技术神论。" },
+
+  // ==========================================
+  // 6. 诗意、先锋与抽象 (Poetic & Avant-Garde - 20)
+  // ==========================================
+  { id: "aut_tarkovsky", name: "塔可夫斯基 (Tarkovsky)", group: "6. 诗意先锋", def: "Sculpting in time, elemental fog, mirror.", core: "代表作:《潜行者》, 风格: 灵性漫游与时间雕刻。" },
+  { id: "aut_bergman", name: "伯格曼 (Ingmar Bergman)", group: "6. 诗意先锋", def: "Face microscope, silent room, red walls.", core: "代表作:《假面》, 风格: 灵魂解剖与上帝沉默。" },
+  { id: "aut_bresson", name: "布列松 (Robert Bresson)", group: "6. 诗意先锋", def: "Object focus, model action, minimal sound.", core: "代表作:《钱》, 风格: 极简仪式与机械化神圣。" },
+  { id: "aut_varda", name: "瓦尔达 (Agnès Varda)", group: "6. 诗意先锋", def: "Feminine collage, beaches, gleaning life.", core: "代表作:《五至七时的克莱奥》, 风格: 自由拼贴与拾荒者视角。" },
+  { id: "aut_godard", name: "戈达尔 (Jean-Luc Godard)", group: "6. 诗意先锋", def: "Jump cuts, primary colors, typography.", core: "代表作:《随心所欲》, 风格: 影像论文与政治叛逆。" },
+  { id: "aut_antonioni", name: "安东尼奥尼 (Antonioni)", group: "6. 诗意先锋", def: "Void urban space, architecture over man.", core: "代表作:《奇遇》, 风格: 现代疏离与静止危机。" },
+  { id: "aut_parajanov", name: "帕拉杰诺夫 (Parajanov)", group: "6. 诗意先锋", def: "Tableau vivant, colorful folk icons, flat.", core: "代表作:《石榴的颜色》, 风格: 静态民俗与圣像诗篇。" },
+  { id: "aut_pasolini", name: "帕索里尼 (Pier Paolo Pasolini)", group: "6. 诗意先锋", def: "Sacred dirt, primal faces, earthy realism.", core: "代表作:《马太福音》, 风格: 粗糙的神圣与无产阶级史诗。" },
+  { id: "aut_resnais", name: "雷乃 (Alain Resnais)", group: "6. 诗意先锋", def: "Memory tracking, statues, baroque garden.", core: "代表作:《去年在马里昂巴德》, 风格: 记忆迷宫与时间几何。" },
+  { id: "aut_roy_andersson", name: "罗伊·安德森 (Roy Andersson)", group: "6. 诗意先锋", def: "Pale face, static long take, beige hell.", core: "代表作:《寒枝雀静》, 风格: 荒诞平庸与人类挽歌。" },
+  { id: "aut_bunuel", name: "布努埃尔 (Luis Buñuel)", group: "6. 诗意先锋", def: "Surreal insects, middle-class dinner, trap.", core: "代表作:《资产阶级的审慎魅力》, 风格: 阻断的欲望与超现实讽刺。" },
+  { id: "aut_cocteau", name: "考克多 (Jean Cocteau)", group: "6. 诗意先锋", def: "Reverse motion, liquid mirror, white gloves.", core: "代表作:《奥菲斯》, 风格: 诗人的血与冥界镜像。" },
+  { id: "aut_dreyer", name: "德莱叶 (Carl Theodor Dreyer)", group: "6. 诗意先锋", def: "Stark white, extreme close-up, sacrifice.", core: "代表作:《圣女贞德蒙难记》, 风格: 苦难的显微镜与绝对纯净。" },
+  { id: "aut_kieslowski", name: "基耶斯洛夫斯基 (Kieślowski)", group: "6. 诗意先锋", def: "Filter color, close macro detail, destiny.", core: "代表作:《双面薇若妮卡》, 风格: 形而上学与偶然联系。" },
+  { id: "aut_tarkovsky_water", name: "塔式水系 (Tarkovsky Water)", group: "6. 诗意先锋", def: "Submerged plants, rain in room, horse.", core: "风格: 物质的记忆与流动的灵性。" },
+  { id: "aut_bergman_lamp", name: "伯格曼灯火 (Bergman Candle)", group: "6. 诗意先锋", def: "Candlelight, heavy clocks, silence, ticking.", core: "风格: 密闭空间的心灵炼狱。" },
+  { id: "aut_malick_grass", name: "马力克之风 (Malick Wind)", group: "6. 诗意先锋", def: "Hand touching wheat, sun flare, low angle.", core: "风格: 泛灵论的漫游与神启。" },
+  { id: "aut_bunuel_feast", name: "布努埃尔盛宴 (Buñuel Feast)", group: "6. 诗意先锋", def: "Formal wear, animals in palace, repetition.", core: "风格: 欲望的死循环与社会面具。" },
+  { id: "aut_fellini_circus", name: "费里尼马戏 (Fellini Circus)", group: "6. 诗意先锋", def: "Parade, fog, oversized women, nostalgia.", core: "风格: 记忆的游行与怪诞温情。" },
+  { id: "aut_parajanov_still", name: "帕拉杰诺夫静物 (Still Life)", group: "6. 诗意先锋", def: "Dripping pomegranate, ritual lace, silver.", core: "风格: 物质的符号化与视觉圣经。" }
+];
