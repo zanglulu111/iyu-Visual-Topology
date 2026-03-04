@@ -1,5 +1,6 @@
 import { supabase } from './supabaseAuth';
-import { HistoryItem } from '../types';
+import { HistoryItem, CollectionItem } from '../types';
+
 
 export const supabaseDatabase = {
     // --- HISTORY / ARCHIVES ---
@@ -56,6 +57,66 @@ export const supabaseDatabase = {
 
         if (error) {
             console.error('Error clearing cloud history:', error);
+            throw error;
+        }
+    },
+
+    // --- COLLECTIONS ---
+
+    async getCloudCollections(): Promise<CollectionItem[]> {
+        const { data: user } = await supabase.auth.getUser();
+        if (!user.user) return [];
+
+        const { data, error } = await supabase
+            .from('collections')
+            .select('*')
+            .order('save_date', { ascending: false });
+
+        if (error) {
+            console.error('Error fetching cloud collections:', error);
+            return [];
+        }
+
+        return data.map(row => ({
+            ...row.blueprint,
+            id: row.id,
+            saveDate: row.save_date,
+            blueprint: row.blueprint
+        } as CollectionItem));
+    },
+
+    async saveCloudCollectionItem(item: CollectionItem): Promise<void> {
+        const { data: user } = await supabase.auth.getUser();
+        if (!user.user) return;
+
+        const { error } = await supabase
+            .from('collections')
+            .upsert({
+                id: (item.id && item.id.length > 30) ? item.id : undefined,
+                user_id: user.user.id,
+                save_date: item.saveDate,
+                blueprint: item.blueprint,
+                updated_at: new Date().toISOString()
+            });
+
+        if (error) {
+            console.error('Error saving cloud collection:', error);
+            throw error;
+        }
+    },
+
+    async deleteCloudCollectionItem(id: string): Promise<void> {
+        const { data: user } = await supabase.auth.getUser();
+        if (!user.user) return;
+
+        const { error } = await supabase
+            .from('collections')
+            .delete()
+            .eq('id', id)
+            .eq('user_id', user.user.id);
+
+        if (error) {
+            console.error('Error deleting cloud collection:', error);
             throw error;
         }
     },

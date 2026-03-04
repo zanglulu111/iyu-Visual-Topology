@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { SettingsProvider } from './contexts/SettingsContext';
-
+import { CustomAlertProvider } from './components/CustomAlertProvider';
 import { BrowserRouter } from 'react-router-dom';
 
 const rootElement = document.getElementById('root');
@@ -15,7 +15,9 @@ root.render(
   <React.StrictMode>
     <BrowserRouter>
       <SettingsProvider>
-        <App />
+        <CustomAlertProvider>
+          <App />
+        </CustomAlertProvider>
       </SettingsProvider>
     </BrowserRouter>
   </React.StrictMode>

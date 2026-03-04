@@ -48,35 +48,41 @@ export const persistence = {
 
     // Load all history items, sorted by date descending
     getHistory: async (): Promise<HistoryItem[]> => {
-        // Try Cloud first
+        // Fetch local first
+        const db = await openDB();
+        const localItems = await new Promise<HistoryItem[]>((resolve, reject) => {
+            const transaction = db.transaction(STORE_HISTORY, 'readonly');
+            const store = transaction.objectStore(STORE_HISTORY);
+            const request = store.getAll();
+            request.onsuccess = () => resolve(request.result as HistoryItem[]);
+            request.onerror = () => reject(request.error);
+        });
+
+        // Try Cloud
         const { data: user } = await supabase.auth.getUser();
         if (user.user) {
             try {
                 const cloudHistory = await supabaseDatabase.getCloudHistory();
                 if (cloudHistory && cloudHistory.length > 0) {
-                    return cloudHistory;
+                    // MERGE: Combine local and cloud, filter duplicates by ID
+                    const idMap = new Map();
+                    localItems.forEach(item => idMap.set(String(item.id), item));
+                    cloudHistory.forEach(item => idMap.set(String(item.id), item));
+
+                    const merged = Array.from(idMap.values());
+                    merged.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+                    return merged;
                 }
             } catch (err) {
-                console.warn("Could not fetch cloud history, falling back to local.", err);
+                console.warn("Could not fetch cloud history, using local.", err);
             }
         }
 
-        // Fallback to local IndexedDB
-        const db = await openDB();
-        return new Promise((resolve, reject) => {
-            const transaction = db.transaction(STORE_HISTORY, 'readonly');
-            const store = transaction.objectStore(STORE_HISTORY);
-            const request = store.getAll();
-
-            request.onsuccess = () => {
-                const items = request.result as HistoryItem[];
-                // Sort by date descending (newest first)
-                items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-                resolve(items);
-            };
-            request.onerror = () => reject(request.error);
-        });
+        // Sort and return local if no cloud or cloud fetch failed
+        localItems.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        return localItems;
     },
+
 
     // Save a single history item (Update or Insert)
     saveHistoryItem: async (item: HistoryItem) => {
@@ -165,21 +171,51 @@ export const persistence = {
     // --- COLLECTION OPERATIONS ---
 
     getCollections: async (): Promise<CollectionItem[]> => {
+        // Fetch local
         const db = await openDB();
-        return new Promise((resolve, reject) => {
+        const localItems = await new Promise<CollectionItem[]>((resolve, reject) => {
             const transaction = db.transaction(STORE_COLLECTIONS, 'readonly');
             const store = transaction.objectStore(STORE_COLLECTIONS);
             const request = store.getAll();
-            request.onsuccess = () => {
-                const items = request.result as CollectionItem[];
-                items.sort((a, b) => new Date(b.saveDate).getTime() - new Date(a.saveDate).getTime());
-                resolve(items);
-            };
+            request.onsuccess = () => resolve(request.result as CollectionItem[]);
             request.onerror = () => reject(request.error);
         });
+
+        // Try Cloud
+        const { data: user } = await supabase.auth.getUser();
+        if (user.user) {
+            try {
+                const cloudCollections = await supabaseDatabase.getCloudCollections();
+                if (cloudCollections && cloudCollections.length > 0) {
+                    const idMap = new Map();
+                    localItems.forEach(item => idMap.set(item.id, item));
+                    cloudCollections.forEach(item => idMap.set(item.id, item));
+
+                    const merged = Array.from(idMap.values());
+                    merged.sort((a, b) => new Date(b.saveDate).getTime() - new Date(a.saveDate).getTime());
+                    return merged;
+                }
+            } catch (err) {
+                console.warn("Could not fetch cloud collections, using local.", err);
+            }
+        }
+
+        localItems.sort((a, b) => new Date(b.saveDate).getTime() - new Date(a.saveDate).getTime());
+        return localItems;
     },
 
+
     saveCollectionItem: async (item: CollectionItem) => {
+        // Sync to cloud if logged in
+        const { data: user } = await supabase.auth.getUser();
+        if (user.user) {
+            try {
+                await supabaseDatabase.saveCloudCollectionItem(item);
+            } catch (err) {
+                console.error("Failed to sync collection item to cloud", err);
+            }
+        }
+
         const db = await openDB();
         return new Promise<void>((resolve, reject) => {
             const transaction = db.transaction(STORE_COLLECTIONS, 'readwrite');
@@ -190,7 +226,18 @@ export const persistence = {
         });
     },
 
+
     deleteCollectionItem: async (id: string) => {
+        // Sync removal to cloud if logged in
+        const { data: user } = await supabase.auth.getUser();
+        if (user.user) {
+            try {
+                await supabaseDatabase.deleteCloudCollectionItem(id);
+            } catch (err) {
+                console.error("Failed to sync collection deletion to cloud", err);
+            }
+        }
+
         const db = await openDB();
         return new Promise<void>((resolve, reject) => {
             const transaction = db.transaction(STORE_COLLECTIONS, 'readwrite');
@@ -199,5 +246,41 @@ export const persistence = {
             request.onsuccess = () => resolve();
             request.onerror = () => reject(request.error);
         });
+    },
+
+    syncLocalToCloud: async () => {
+        const { data: user } = await supabase.auth.getUser();
+        if (!user.user) throw new Error("User not logged in");
+
+        // 1. Get truly local history (from IndexedDB only, not the merged one)
+        const db = await openDB();
+        const localHistory = await new Promise<HistoryItem[]>((resolve, reject) => {
+            const transaction = db.transaction(STORE_HISTORY, 'readonly');
+            const store = transaction.objectStore(STORE_HISTORY);
+            const request = store.getAll();
+            request.onsuccess = () => resolve(request.result as HistoryItem[]);
+            request.onerror = () => reject(request.error);
+        });
+
+        // 2. Get local collections
+        const localCollections = await new Promise<CollectionItem[]>((resolve, reject) => {
+            const transaction = db.transaction(STORE_COLLECTIONS, 'readonly');
+            const store = transaction.objectStore(STORE_COLLECTIONS);
+            const request = store.getAll();
+            request.onsuccess = () => resolve(request.result as CollectionItem[]);
+            request.onerror = () => reject(request.error);
+        });
+
+        // 3. Push to cloud
+        console.log(`Syncing ${localHistory.length} history items and ${localCollections.length} collections...`);
+
+        for (const item of localHistory) {
+            try { await supabaseDatabase.saveCloudHistoryItem(item); } catch (e) { console.error("Sync history failed", e); }
+        }
+        for (const item of localCollections) {
+            try { await supabaseDatabase.saveCloudCollectionItem(item); } catch (e) { console.error("Sync collection failed", e); }
+        }
+
+        return { historySynced: localHistory.length, collectionsSynced: localCollections.length };
     }
 };

@@ -2,6 +2,8 @@ import React, { useRef, useState } from 'react';
 import { X, LogOut, Coins, Crown, Sparkles, Upload, Loader2 } from 'lucide-react';
 import { User } from '../types';
 import { supabase } from '../services/supabaseAuth';
+import { persistence } from '../services/persistence';
+
 
 interface UserProfileModalProps {
     isOpen: boolean;
@@ -16,6 +18,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
     const [isUploading, setIsUploading] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
 
     if (!isOpen) return null;
 
@@ -33,7 +36,12 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
         lifetimeTitle: lang === 'CN' ? '终身造物主' : 'Lifetime Creator',
         lifetimePrice: lang === 'CN' ? '¥1888 / CORE' : '$288 / CORE',
         lifetimeDesc: lang === 'CN' ? '含全平台特权及永续模型访问支持。' : 'Permanent pro privilege & updates.',
+        syncTitle: lang === 'CN' ? '数据同步' : 'Data Synchronization',
+        syncDesc: lang === 'CN' ? '将本地轨迹与收藏搬迁至云端。' : 'Move local history & favorites to cloud.',
+        syncAction: lang === 'CN' ? '开始同步' : 'Start Sync',
+        syncSuccess: lang === 'CN' ? '同步完成' : 'Sync Complete',
     };
+
 
     const handleAvatarClick = () => {
         fileInputRef.current?.click();
@@ -112,6 +120,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
             setIsProcessing(false);
         }
     };
+
 
     return (
         <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/95 backdrop-blur-xl px-4 py-8 overflow-y-auto w-full animate-in fade-in duration-300">
