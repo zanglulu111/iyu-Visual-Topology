@@ -137,14 +137,18 @@ const App: React.FC = () => {
         const { data: authListener } = supabaseAuthService.onAuthStateChange(async (authUser) => {
             if (authUser) {
                 const profile = await supabaseDatabase.getUserProfile();
+                const tier = profile?.membership_tier || 'free';
+                const isProTierActive = ['pro', 'annual', 'lifetime'].includes(tier);
+                const levelLabel = tier === 'lifetime' ? '终身造物主 (Lifetime Creator)' : tier === 'annual' ? '年度架构师 (Annual Architect)' : '未激活 (Not Activated)';
                 setCurrentUser({
                     id: authUser.id,
                     username: profile?.username || authUser.username || 'User',
-                    level: profile?.membership_tier === 'pro' ? '高阶导演 (Master Director)' : '初级观测者 (Initiate Observer)',
-                    isPro: profile?.membership_tier === 'pro',
+                    level: levelLabel,
+                    isPro: isProTierActive,
+                    membershipTier: tier,
                     avatarColor: profile?.avatar_color || 'bg-zinc-600',
                     avatarUrl: profile?.avatar_url,
-                    tokens: profile?.tokens ?? 10
+                    tokens: profile?.tokens ?? 0
                 });
                 // Reload history since cloud might have user's items
                 loadHistoryFromDB();
@@ -241,14 +245,25 @@ const App: React.FC = () => {
             return false;
         }
 
-        // The `membershipTier` property is not directly available on `currentUser` in the provided `User` type.
-        // Assuming `currentUser.isPro` is the correct check for pro status.
+        // Membership activation check
+        const activeTier = currentUser.membershipTier;
+        const isMembershipActive = ['pro', 'annual', 'lifetime'].includes(activeTier || '');
+
+        if (!isMembershipActive) {
+            alert(lang === 'EN'
+                ? "Your account has not been activated. Please enter an activation code in your profile to unlock the engine."
+                : "您的账户尚未激活。请在「主体观测中心」输入激活码以解锁引擎。");
+            setIsProfileOpen(true);
+            return false;
+        }
+
+        // Pro tiers get unlimited usage
         if (currentUser.isPro) {
-            return true; // Infinite tokens for Pro tiers
+            return true;
         }
 
         if ((currentUser.tokens || 0) < cost) {
-            alert(lang === 'EN' ? "Insufficient Compute Tokens. Please top up in the User Profile." : "算力锚点不足，请前往「主体观测中心」注入算力。");
+            alert(lang === 'EN' ? "Insufficient Compute Tokens. Please use an activation code to add more tokens." : "算力锚点不足，请使用激活码注入算力。");
             return false;
         }
 

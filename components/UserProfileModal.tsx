@@ -1,8 +1,7 @@
 import React, { useRef, useState } from 'react';
-import { X, LogOut, Coins, Crown, Sparkles, Upload, Loader2 } from 'lucide-react';
+import { X, LogOut, Coins, Crown, Sparkles, Upload, Loader2, KeyRound, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { User } from '../types';
 import { supabase } from '../services/supabaseAuth';
-import { persistence } from '../services/persistence';
 
 
 interface UserProfileModalProps {
@@ -16,11 +15,24 @@ interface UserProfileModalProps {
 
 export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, currentUser, onLogout, onProfileUpdate, lang }) => {
     const [isUploading, setIsUploading] = useState(false);
-    const [isProcessing, setIsProcessing] = useState(false);
+    const [isRedeeming, setIsRedeeming] = useState(false);
+    const [isEditingUsername, setIsEditingUsername] = useState(false);
+    const [newUsername, setNewUsername] = useState(currentUser.username);
+    const [redeemCode, setRedeemCode] = useState('');
+    const [redeemResult, setRedeemResult] = useState<{ success: boolean; message: string } | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
 
     if (!isOpen) return null;
+
+    const isActiveMember = currentUser.isPro || ['annual', 'lifetime'].includes(currentUser.membershipTier || '');
+
+    const getMembershipLabel = () => {
+        const tier = currentUser.membershipTier;
+        if (tier === 'lifetime') return lang === 'CN' ? '终身造物主 (Lifetime Creator)' : 'Lifetime Creator';
+        if (tier === 'annual') return lang === 'CN' ? '年度架构师 (Annual Architect)' : 'Annual Architect';
+        return lang === 'CN' ? '未激活 (Not Activated)' : 'Not Activated';
+    };
 
     const t = {
         title: lang === 'CN' ? '主体观测中心' : 'Subject Observation Center',
@@ -28,18 +40,24 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
         tokens: lang === 'CN' ? '算力锚点' : 'Compute Tokens',
         logout: lang === 'CN' ? '切断连接 (Log Out)' : 'Sever Connection (Log Out)',
         uploading: lang === 'CN' ? '传输中...' : 'Uploading...',
-        topup: lang === 'CN' ? '注入 100 算力锚点' : 'Inject 100 Tokens',
-        topupDesc: lang === 'CN' ? '单次充值 ¥10' : 'Single recharge ¥10',
-        annualTitle: lang === 'CN' ? '年度架构师' : 'Annual Architect',
-        annualPrice: lang === 'CN' ? '¥999 / YEAR' : '$149 / YEAR',
-        annualDesc: lang === 'CN' ? '解锁所有核心引擎与无限制调用额度。' : 'Unlock all engines & unlimited compute.',
-        lifetimeTitle: lang === 'CN' ? '终身造物主' : 'Lifetime Creator',
-        lifetimePrice: lang === 'CN' ? '¥1888 / CORE' : '$288 / CORE',
-        lifetimeDesc: lang === 'CN' ? '含全平台特权及永续模型访问支持。' : 'Permanent pro privilege & updates.',
-        syncTitle: lang === 'CN' ? '数据同步' : 'Data Synchronization',
-        syncDesc: lang === 'CN' ? '将本地轨迹与收藏搬迁至云端。' : 'Move local history & favorites to cloud.',
-        syncAction: lang === 'CN' ? '开始同步' : 'Start Sync',
-        syncSuccess: lang === 'CN' ? '同步完成' : 'Sync Complete',
+        redeemTitle: lang === 'CN' ? '激活码兑换' : 'Activation Code',
+        redeemDesc: lang === 'CN' ? '输入激活码以解锁核心引擎权限或注入算力。' : 'Enter an activation code to unlock engine access or inject tokens.',
+        redeemPlaceholder: lang === 'CN' ? '输入激活码 / ENTER CODE' : 'ENTER ACTIVATION CODE',
+        redeemBtn: lang === 'CN' ? '激活' : 'ACTIVATE',
+        redeeming: lang === 'CN' ? '验证中...' : 'VERIFYING...',
+        memberStatus: lang === 'CN' ? '会员状态' : 'Membership Status',
+        active: lang === 'CN' ? '已激活' : 'ACTIVE',
+        inactive: lang === 'CN' ? '未激活' : 'INACTIVE',
+    };
+
+    const redeemMessages: Record<string, string> = {
+        ANNUAL_ACTIVATED: lang === 'CN' ? '🎉 年度架构师权限已激活！欢迎进入核心。' : '🎉 Annual Architect activated! Welcome to the core.',
+        LIFETIME_ACTIVATED: lang === 'CN' ? '🎉 终身造物主权限已激活！永恒归位。' : '🎉 Lifetime Creator activated! Eternal access granted.',
+        TOKENS_ADDED: lang === 'CN' ? '⚡ 算力锚点注入成功！' : '⚡ Compute tokens injected successfully!',
+        CODE_NOT_FOUND: lang === 'CN' ? '激活码无效。请检查输入是否正确。' : 'Invalid activation code. Please check and try again.',
+        CODE_ALREADY_USED: lang === 'CN' ? '此激活码已被使用。' : 'This activation code has already been used.',
+        CODE_EXPIRED: lang === 'CN' ? '此激活码已过期。' : 'This activation code has expired.',
+        NOT_LOGGED_IN: lang === 'CN' ? '请先登录后再兑换激活码。' : 'Please log in before redeeming a code.',
     };
 
 
@@ -81,43 +99,82 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
         }
     };
 
-    const handleTopUp = async () => {
-        setIsProcessing(true);
+    const handleRedeem = async () => {
+        const code = redeemCode.trim();
+        if (!code) return;
+
+        setIsRedeeming(true);
+        setRedeemResult(null);
+
         try {
-            await new Promise(resolve => setTimeout(resolve, 800));
-            const newTokens = (currentUser.tokens || 0) + 100;
+            const { data, error } = await supabase.rpc('redeem_code', { input_code: code });
 
-            const { error: updateError } = await supabase.from('profiles').update({ tokens: newTokens }).eq('id', currentUser.id);
-            if (updateError) throw updateError;
+            if (error) {
+                console.error('Redeem RPC error:', error);
+                setRedeemResult({ success: false, message: lang === 'CN' ? '兑换服务异常，请稍后再试。' : 'Redemption service error. Please try again.' });
+                return;
+            }
 
-            if (onProfileUpdate) {
-                onProfileUpdate({ tokens: newTokens });
+            const result = data as { success: boolean; message: string; type?: string; tokens_added?: number; new_total?: number; error?: string };
+
+            if (result.success) {
+                setRedeemResult({ success: true, message: redeemMessages[result.message] || result.message });
+                setRedeemCode('');
+
+                // Update local user state based on what was redeemed
+                if (onProfileUpdate) {
+                    if (result.type === 'annual') {
+                        onProfileUpdate({
+                            membershipTier: 'annual',
+                            isPro: true,
+                            level: lang === 'CN' ? '年度架构师 (Annual Architect)' : 'Annual Architect'
+                        });
+                    } else if (result.type === 'lifetime') {
+                        onProfileUpdate({
+                            membershipTier: 'lifetime',
+                            isPro: true,
+                            level: lang === 'CN' ? '终身造物主 (Lifetime Creator)' : 'Lifetime Creator'
+                        });
+                    } else if (result.type === 'tokens') {
+                        onProfileUpdate({
+                            tokens: result.new_total ?? (currentUser.tokens + (result.tokens_added ?? 0))
+                        });
+                    }
+                }
+            } else {
+                setRedeemResult({ success: false, message: redeemMessages[result.error || ''] || (lang === 'CN' ? '兑换失败。' : 'Redemption failed.') });
             }
         } catch (err: any) {
-            console.error('Top up failed:', err);
-            alert((lang === 'CN' ? '算力注入失败: ' : 'Top up failed: ') + (err.message || 'Unknown error'));
+            console.error('Redeem failed:', err);
+            setRedeemResult({ success: false, message: (lang === 'CN' ? '兑换异常: ' : 'Redemption error: ') + (err.message || 'Unknown error') });
         } finally {
-            setIsProcessing(false);
+            setIsRedeeming(false);
         }
     };
 
-    const handleUpgrade = async (tier: 'annual' | 'lifetime') => {
-        setIsProcessing(true);
-        try {
-            await new Promise(resolve => setTimeout(resolve, 800));
-            const { error: updateError } = await supabase.from('profiles').update({ membership_tier: tier }).eq('id', currentUser.id);
-            if (updateError) throw updateError;
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' && !isRedeeming && redeemCode.trim()) {
+            handleRedeem();
+        }
+    };
 
-            const level = tier === 'lifetime' ? '终身造物主 (Lifetime Creator)' : '年度架构师 (Annual Architect)';
+    const handleUsernameUpdate = async () => {
+        if (!newUsername.trim() || newUsername === currentUser.username) {
+            setIsEditingUsername(false);
+            return;
+        }
+
+        try {
+            const { error } = await supabase.from('profiles').update({ username: newUsername }).eq('id', currentUser.id);
+            if (error) throw error;
+
             if (onProfileUpdate) {
-                onProfileUpdate({ membershipTier: tier, isPro: true, level });
+                onProfileUpdate({ username: newUsername });
             }
-            alert(lang === 'CN' ? '权限提升成功，欢迎归位核心。' : 'Clearance upgraded successfully.');
+            setIsEditingUsername(false);
         } catch (err: any) {
-            console.error('Upgrade failed:', err);
-            alert((lang === 'CN' ? '升级跃迁失败: ' : 'Upgrade failed: ') + (err.message || 'Unknown error'));
-        } finally {
-            setIsProcessing(false);
+            console.error('Update username failed:', err);
+            alert(lang === 'CN' ? '主体更名失败' : 'Failed to update subject name');
         }
     };
 
@@ -155,68 +212,110 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
                         accept="image/*"
                         className="hidden"
                     />
-                    <h2 className="text-2xl font-serif text-white tracking-tight">{currentUser.username}</h2>
+
+                    {isEditingUsername ? (
+                        <div className="flex items-center gap-2">
+                            <input
+                                autoFocus
+                                type="text"
+                                value={newUsername}
+                                onChange={(e) => setNewUsername(e.target.value)}
+                                onBlur={handleUsernameUpdate}
+                                onKeyDown={(e) => e.key === 'Enter' && handleUsernameUpdate()}
+                                className="bg-black border border-gold-primary/50 rounded px-2 py-1 text-xl font-serif text-white text-center outline-none"
+                            />
+                        </div>
+                    ) : (
+                        <h2
+                            onClick={() => setIsEditingUsername(true)}
+                            className="text-2xl font-serif text-white tracking-tight cursor-pointer hover:text-gold-primary transition-colors group relative"
+                        >
+                            {currentUser.username}
+                            <span className="absolute -right-6 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 text-[10px] text-zinc-500 font-sans uppercase">Edit</span>
+                        </h2>
+                    )}
+
                     <p className="text-[10px] text-zinc-500 uppercase tracking-widest mt-1 text-center">{t.title}</p>
                 </div>
 
                 <div className="space-y-4 mb-8">
-                    <div className="bg-black border border-zinc-800 rounded-xl p-4 flex flex-col gap-2">
+                    {/* Membership Status */}
+                    <div className={`bg-black border rounded-xl p-4 flex items-center justify-between ${isActiveMember ? 'border-gold-primary/40' : 'border-zinc-800'}`}>
                         <div className="flex items-center gap-3">
-                            <Crown size={16} className="text-gold-primary" />
-                            <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{t.level}</span>
+                            <Crown size={16} className={isActiveMember ? 'text-gold-primary' : 'text-zinc-600'} />
+                            <div>
+                                <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{t.memberStatus}</span>
+                                <p className="text-xs font-mono text-white mt-0.5">{getMembershipLabel()}</p>
+                            </div>
                         </div>
-                        <span className="text-xs font-mono text-white pl-7">{currentUser.level}</span>
+                        {isActiveMember ? (
+                            <span className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-400 uppercase tracking-widest bg-emerald-950/40 border border-emerald-800/40 rounded px-3 py-1.5">
+                                <CheckCircle2 size={12} /> {t.active}
+                            </span>
+                        ) : (
+                            <span className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest bg-zinc-900 border border-zinc-800 rounded px-3 py-1.5">
+                                <ShieldCheck size={12} /> {t.inactive}
+                            </span>
+                        )}
                     </div>
 
-                    <div className="bg-black border border-zinc-800 rounded-xl p-4 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <Coins size={16} className="text-gold-primary" />
-                            <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{t.tokens}</span>
+                    {/* Tokens (only show when activated) */}
+                    {isActiveMember && (
+                        <div className="bg-black border border-zinc-800 rounded-xl p-4 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <Coins size={16} className="text-gold-primary" />
+                                <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{t.tokens}</span>
+                            </div>
+                            <span className="text-lg font-mono text-gold-primary flex items-center gap-1">
+                                <Sparkles size={14} /> {currentUser.tokens ?? 0} <span className="text-[10px] text-zinc-600">TOKENS</span>
+                            </span>
                         </div>
-                        <span className="text-lg font-mono text-gold-primary flex items-center gap-1">
-                            <Sparkles size={14} /> {currentUser.tokens ?? 0} <span className="text-[10px] text-zinc-600">TOKENS</span>
-                        </span>
-                    </div>
+                    )}
                 </div>
 
-                {/* Subscriptions & Shop */}
+                {/* Activation Code Redemption */}
                 <div className="space-y-4 mb-8 border-t border-zinc-800/80 pt-6">
-                    <p className="text-[10px] text-zinc-500 font-bold tracking-widest uppercase mb-4">{lang === 'CN' ? '核心特权库 (Store)' : 'Privilege Store'}</p>
+                    <div className="flex items-center gap-2 mb-4">
+                        <KeyRound size={14} className="text-gold-primary" />
+                        <p className="text-[10px] text-zinc-500 font-bold tracking-widest uppercase">{t.redeemTitle}</p>
+                    </div>
 
-                    {/* Token Top Up */}
-                    <div className="bg-black border border-zinc-800 rounded-xl p-4 flex items-center justify-between transition-colors hover:border-gold-primary/30">
-                        <div>
-                            <p className="text-sm font-bold text-white tracking-widest">{t.topup}</p>
-                            <p className="text-[10px] font-mono text-zinc-500 mt-1">{t.topupDesc}</p>
-                        </div>
+                    <p className="text-[10px] font-mono text-zinc-600 leading-relaxed mb-3">{t.redeemDesc}</p>
+
+                    <div className="flex gap-2">
+                        <input
+                            type="text"
+                            value={redeemCode}
+                            onChange={(e) => {
+                                setRedeemCode(e.target.value.toUpperCase());
+                                setRedeemResult(null);
+                            }}
+                            onKeyDown={handleKeyDown}
+                            placeholder={t.redeemPlaceholder}
+                            className="flex-1 bg-black border border-zinc-800 focus:border-gold-primary/50 rounded-lg px-4 py-3 text-xs text-white font-mono tracking-widest focus:outline-none transition-colors placeholder:text-zinc-700"
+                            disabled={isRedeeming}
+                        />
                         <button
-                            onClick={handleTopUp}
-                            disabled={isProcessing}
-                            className="bg-gold-primary hover:bg-gold-primary/90 disabled:opacity-50 text-black font-bold uppercase tracking-[0.2em] px-4 py-2 rounded flex items-center justify-center gap-2 transition-all shadow-[0_0_15px_rgba(212,175,55,0.15)]"
+                            onClick={handleRedeem}
+                            disabled={isRedeeming || !redeemCode.trim()}
+                            className="bg-gold-primary hover:bg-amber-400 disabled:opacity-40 disabled:hover:bg-gold-primary text-black font-bold uppercase tracking-[0.15em] px-5 py-3 rounded-lg flex items-center justify-center gap-2 transition-all shadow-[0_0_15px_rgba(212,175,55,0.15)] min-w-[100px]"
                         >
-                            {isProcessing ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
-                            <span className="text-[10px]">¥ 10</span>
+                            {isRedeeming ? (
+                                <Loader2 size={14} className="animate-spin" />
+                            ) : (
+                                <KeyRound size={14} />
+                            )}
+                            <span className="text-[10px]">{isRedeeming ? t.redeeming : t.redeemBtn}</span>
                         </button>
                     </div>
 
-                    {/* Pro Memberships */}
-                    {(!currentUser.membershipTier || currentUser.membershipTier === 'free' || currentUser.membershipTier === 'annual') && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                            {(!currentUser.membershipTier || currentUser.membershipTier === 'free') && (
-                                <button disabled={isProcessing} onClick={() => handleUpgrade('annual')} className="flex flex-col items-start bg-gradient-to-br from-zinc-900 to-black hover:from-gold-primary/20 hover:to-black border border-zinc-800 hover:border-gold-primary/60 rounded-xl p-5 text-left transition-all group relative overflow-hidden">
-                                    <div className="absolute top-0 right-0 w-16 h-16 bg-gold-primary/10 rounded-full blur-xl group-hover:bg-gold-primary/20 transition-all"></div>
-                                    <h4 className="text-gold-primary text-sm font-bold mb-1 tracking-widest">{t.annualTitle}</h4>
-                                    <p className="text-white text-lg font-mono tracking-tight mb-2">{t.annualPrice}</p>
-                                    <p className="text-[10px] text-zinc-400 leading-relaxed max-w-[90%]">{t.annualDesc}</p>
-                                </button>
-                            )}
-
-                            <button disabled={isProcessing} onClick={() => handleUpgrade('lifetime')} className="flex flex-col items-start bg-gradient-to-br from-zinc-900 to-black hover:from-purple-900/40 hover:to-black border border-zinc-800 hover:border-purple-500/60 rounded-xl p-5 text-left transition-all group relative overflow-hidden">
-                                <div className="absolute top-0 right-0 w-16 h-16 bg-purple-500/10 rounded-full blur-xl group-hover:bg-purple-500/20 transition-all"></div>
-                                <h4 className="text-purple-400 text-sm font-bold mb-1 tracking-widest">{t.lifetimeTitle}</h4>
-                                <p className="text-white text-lg font-mono tracking-tight mb-2">{t.lifetimePrice}</p>
-                                <p className="text-[10px] text-zinc-400 leading-relaxed max-w-[90%]">{t.lifetimeDesc}</p>
-                            </button>
+                    {/* Redeem Result Feedback */}
+                    {redeemResult && (
+                        <div className={`mt-3 p-3 rounded-lg border text-[11px] font-mono leading-relaxed ${redeemResult.success
+                            ? 'bg-emerald-950/30 border-emerald-800/40 text-emerald-300'
+                            : 'bg-red-950/30 border-red-800/40 text-red-400'
+                            }`}>
+                            {redeemResult.message}
                         </div>
                     )}
                 </div>
