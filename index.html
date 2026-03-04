@@ -1,62 +1,71 @@
-
 <!DOCTYPE html>
 <html lang="en" class="dark">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>迷雾学派 Visionary | 实在界入侵</title>
-    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
-    <script>
-      tailwind.config = {
-        darkMode: 'class',
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ['Inter', 'sans-serif'],
-              serif: ['Playfair Display', 'serif'],
-            },
-            colors: {
-              'luxury-black': '#0a0a0a',
-              'luxury-panel': '#121212',
-              'gold-primary': '#D4AF37',
-              'gold-dim': '#8a7328',
-              'col-context': '#3b82f6', // Blue
-              'col-soul': '#8b5cf6',    // Purple
-              'col-look': '#f43f5e',    // Rose
-              'col-tech': '#10b981',    // Emerald
-            }
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>迷雾学派 | 爱欲视觉拓扑学</title>
+  <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            serif: ['Playfair Display', 'serif'],
+          },
+          colors: {
+            'luxury-black': '#0a0a0a',
+            'luxury-panel': '#121212',
+            'gold-primary': '#D4AF37',
+            'gold-dim': '#8a7328',
+            'col-context': '#3b82f6', // Blue
+            'col-soul': '#8b5cf6',    // Purple
+            'col-look': '#f43f5e',    // Rose
+            'col-tech': '#10b981',    // Emerald
           }
         }
       }
-    </script>
-    <style>
-      html, body {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-        background-color: #050505;
-        color: #ffffff;
-        -ms-overflow-style: none;  /* IE and Edge */
-        scrollbar-width: none;  /* Firefox */
-      }
-      /* Globally hide scrollbars for Chrome, Safari and Opera */
-      ::-webkit-scrollbar {
-        display: none;
-      }
-      #root {
-        height: 100%;
-        width: 100%;
-      }
-      .no-scrollbar::-webkit-scrollbar {
-        display: none;
-      }
-      .no-scrollbar {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-      }
-    </style>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    }
+  </script>
+  <style>
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #050505;
+      color: #ffffff;
+      -ms-overflow-style: none;
+      /* IE and Edge */
+      scrollbar-width: none;
+      /* Firefox */
+    }
+
+    /* Globally hide scrollbars for Chrome, Safari and Opera */
+    ::-webkit-scrollbar {
+      display: none;
+    }
+
+    #root {
+      height: 100%;
+      width: 100%;
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap"
+    rel="stylesheet">
   <script type="importmap">
 {
   "imports": {
@@ -64,14 +73,18 @@
     "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
     "react/": "https://aistudiocdn.com/react@^19.2.0/",
     "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.2.0",
+    "react-router": "https://aistudiocdn.com/react-router@^7.2.0",
     "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0"
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
+  <link rel="stylesheet" href="/index.css">
 </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
-  </body>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+
 </html>

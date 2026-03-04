@@ -505,6 +505,12 @@ export interface HistoryItem {
   driverName: string;
   fieldState: NarrativeFieldState;
   worldLaw?: WorldLawConfig;
+  visionInput?: string;
+  visionAnalysis?: string;
+  visionImage?: string | null;
+  subjectType?: SubjectType;
+  aestheticMode?: AestheticMode;
+  colorPalette?: string[];
   blueprint: CreativeBlueprint | null;
   treatments: CreativeTreatment[];
   savedBlueprints?: Record<string, CreativeBlueprint>;

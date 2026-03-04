@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { NarrativeEngineField } from './components/NarrativeEngineField';
 import { BlueprintEditor } from './components/BlueprintEditor';
 import { HistoryModal } from './components/HistoryModal';
@@ -59,6 +60,8 @@ type ViewMode = 'ENGINE' | 'DIVERGENCE' | 'BIBLE' | 'METONYMY';
 
 const App: React.FC = () => {
     const { isOpen: isSettingsOpen, openSettings, closeSettings } = useSettings();
+    const navigate = useNavigate();
+    const location = useLocation();
     const [page, setPage] = useState<0 | 1>(0);
     const [lang, setLang] = useState<'CN' | 'EN'>('CN');
     const [viewMode, setViewMode] = useState<ViewMode>('ENGINE');
@@ -163,6 +166,15 @@ const App: React.FC = () => {
         };
     }, []);
 
+    // Sync URL with modal states
+    useEffect(() => {
+        if (location.pathname === '/codex') {
+            setIsManualOpen(true);
+        } else if (location.pathname === '/') {
+            setIsManualOpen(false);
+        }
+    }, [location.pathname]);
+
     const loadHistoryFromDB = async () => {
         try {
             const items = await persistence.getHistory();
@@ -204,9 +216,22 @@ const App: React.FC = () => {
     };
     const closeHistory = () => setIsHistoryOpen(false);
 
-    const openManual = () => { setIsManualOpen(true); setIsHistoryOpen(false); setIsSutureOpen(false); };
+    const openManual = () => {
+        navigate('/codex');
+        setIsHistoryOpen(false);
+        setIsSutureOpen(false);
+    };
+    const closeManual = () => {
+        navigate('/');
+        setIsManualOpen(false);
+    };
     const openAuth = () => { setIsAuthOpen(true); closeAllModals(); };
-    const closeAllModals = () => { setIsHistoryOpen(false); setIsManualOpen(false); setIsSutureOpen(false); };
+    const closeAllModals = () => {
+        setIsHistoryOpen(false);
+        if (location.pathname === '/codex') navigate('/');
+        setIsManualOpen(false);
+        setIsSutureOpen(false);
+    };
     // Helpers
     const isProTier = (tier: string | undefined) => ['pro', 'annual', 'lifetime'].includes(tier || '');
 
@@ -884,6 +909,12 @@ const App: React.FC = () => {
                     driverName: getDriverName(),
                     fieldState: { ...narrativeFieldState },
                     worldLaw: { ...worldLawConfig },
+                    visionInput: visionInput,
+                    visionAnalysis: visionAnalysis,
+                    visionImage: visionImage,
+                    subjectType: subjectType,
+                    aestheticMode: aestheticMode,
+                    colorPalette: [...colorPalette],
                     blueprint: null,
                     treatments: treatments,
                     savedBlueprints: {}
@@ -1173,9 +1204,9 @@ const App: React.FC = () => {
                                 lang={lang}
                                 activeDriver={selectedDriver}
                                 cachedBlueprints={cachedBlueprints}
-                                fieldState={narrativeFieldState}
-                                visionInput={visionInput}
-                                visionAnalysis={visionAnalysis}
+                                fieldState={activeHistoryItem?.fieldState || narrativeFieldState}
+                                visionInput={activeHistoryItem?.visionInput || visionInput}
+                                visionAnalysis={activeHistoryItem?.visionAnalysis || visionAnalysis}
                             />
                         )}
                         {viewMode === 'BIBLE' && (
@@ -1193,7 +1224,7 @@ const App: React.FC = () => {
                                 onGenerateAssetImage={handleVisionImageGenerate}
                                 onGenerateAssets={undefined}
                                 onAnalyzePsycho={geminiService.analyzePsychoStructure}
-                                fieldState={narrativeFieldState}
+                                fieldState={activeHistoryItem?.fieldState || narrativeFieldState}
                                 treatments={generatedTreatments}
                                 onUpdateBlueprint={handleUpdateBlueprintCache}
                                 driverName={getDriverName()}
@@ -1205,11 +1236,11 @@ const App: React.FC = () => {
                                 onSaveToCollection={handleAddToHistory}
                                 onGlobalCopy={handleGlobalCopy}
                                 selectedDriver={selectedDriver || DriverType.NARRATIVE}
-                                worldLaw={worldLawConfig}
-                                visionInput={visionInput}
-                                visionAnalysis={visionAnalysis}
-                                subjectType={subjectType}
-                                aestheticMode={aestheticMode}
+                                worldLaw={activeHistoryItem?.worldLaw || worldLawConfig}
+                                visionInput={activeHistoryItem?.visionInput || visionInput}
+                                visionAnalysis={activeHistoryItem?.visionAnalysis || visionAnalysis}
+                                subjectType={activeHistoryItem?.subjectType || subjectType}
+                                aestheticMode={activeHistoryItem?.aestheticMode || aestheticMode}
                                 customLibraryDefs={customLibraryDefs}
                             />
                         )}
@@ -1318,7 +1349,7 @@ const App: React.FC = () => {
                 </div>
             )}
 
-            <ProductManualModal isOpen={isManualOpen} onClose={closeAllModals} driverType={selectedDriver} />
+            <ProductManualModal isOpen={isManualOpen} onClose={closeManual} driverType={selectedDriver} />
             {isHistoryOpen && <HistoryModal history={history} onRestore={onHistoryRestore} onClear={onHistoryClear} onClose={closeHistory} lang={lang} />}
 
             {activeBlockId && (
