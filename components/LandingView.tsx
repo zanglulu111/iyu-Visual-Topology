@@ -6,6 +6,7 @@ import { Globe, Wand2, HelpCircle, History as HistoryIcon, Settings, User as Use
 import { ProductManualModal } from './ProductManualModal';
 import { SutureModal } from './SutureModal';
 import { HistoryModal } from './HistoryModal';
+import { BorromeanRings } from './BorromeanRings';
 
 interface LandingViewProps {
   lang: 'CN' | 'EN';
@@ -138,6 +139,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
       </header>
 
       <div className="flex-1 flex overflow-hidden relative">
+        <BorromeanRings />
         {/* Ambient Glow */}
         <div className={`absolute inset-0 pointer-events-none transition-shadow duration-1000 opacity-20 shadow-[inset_0_0_150px_rgba(0,0,0,1)] ${getGlowTheme(hoveredDriver)}`}></div>
 
@@ -246,10 +248,9 @@ export const LandingView: React.FC<LandingViewProps> = ({
             <div className="w-full shrink-0">
               <DriverSelector selectedDriver={selectedDriver} onSelect={onDriverSelect} lang={lang} hoveredDriver={hoveredDriver} onHover={setHoveredDriver} />
             </div>
-
             {/* Additional Info / Footer Widgets */}
             <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-6 opacity-80 shrink-0 pb-12">
-              <div onClick={openManual} className="border border-zinc-900 bg-[#080808]/50 hover:bg-[#0c0c0c] p-6 rounded cursor-pointer transition-all group hover:border-zinc-700">
+              <div onClick={openManual} className="border border-zinc-900 bg-[#080808]/20 hover:bg-[#0c0c0c]/40 backdrop-blur-sm p-6 rounded cursor-pointer transition-all group hover:border-zinc-700">
                 <div className="flex items-center gap-3 mb-3">
                   <BookOpen size={18} className="text-zinc-500 group-hover:text-gold-primary transition-colors" />
                   <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-300 group-hover:text-white transition-colors">
@@ -260,8 +261,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
                   {lang === 'CN' ? '查阅拉康、齐泽克等理论词条，理解底层系统的运转逻辑。' : 'Consult Lacan, Zizek theoretical entries to understand the underlying system logic.'}
                 </p>
               </div>
-
-              <div onClick={openHistory} className="border border-zinc-900 bg-[#080808]/50 hover:bg-[#0c0c0c] p-6 rounded cursor-pointer transition-all group hover:border-zinc-700">
+              <div onClick={openHistory} className="border border-zinc-900 bg-[#080808]/20 hover:bg-[#0c0c0c]/40 backdrop-blur-sm p-6 rounded cursor-pointer transition-all group hover:border-zinc-700">
                 <div className="flex items-center gap-3 mb-3">
                   <HistoryIcon size={18} className="text-zinc-500 group-hover:text-cyan-400 transition-colors" />
                   <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-300 group-hover:text-white transition-colors">
@@ -281,6 +281,6 @@ export const LandingView: React.FC<LandingViewProps> = ({
       <ProductManualModal isOpen={isManualOpen} onClose={closeManual} driverType={hoveredDriver} />
       <SutureModal isOpen={isSutureOpen} onClose={closeSuture} onGenerate={onSutureGenerate} isGenerating={isSutureGenerating} lang={lang} driverType={selectedDriver || DriverType.NARRATIVE} />
       {isHistoryOpen && <HistoryModal history={history} onRestore={onHistoryRestore} onClear={onHistoryClear} onClose={closeHistory} lang={lang} />}
-    </div>
+    </div >
   );
 };
