@@ -2,11 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import { DriverSelector } from './DriverSelector';
 import { DriverType, User } from '../types';
-import { Globe, Wand2, HelpCircle, History as HistoryIcon, Settings, User as UserIcon, BookOpen, Terminal, Database, ShieldAlert, Cpu } from 'lucide-react';
+import { Globe, Wand2, HelpCircle, History as HistoryIcon, Settings, User as UserIcon, BookOpen, Terminal, Database, ShieldAlert, Cpu, Film } from 'lucide-react';
 import { ProductManualModal } from './ProductManualModal';
 import { SutureModal } from './SutureModal';
 import { HistoryModal } from './HistoryModal';
 import { BorromeanRings } from './BorromeanRings';
+import { VideoLibrary } from './VideoLibrary';
 
 const AnimatedText = ({ cn, en, lang, className = "", hClass = "h-5" }: { cn: React.ReactNode, en: React.ReactNode, lang: 'CN' | 'EN', className?: string, hClass?: string }) => (
   <div className={`overflow-hidden relative flex items-start ${hClass}`}>
@@ -77,6 +78,8 @@ export const LandingView: React.FC<LandingViewProps> = ({
   openProfile,
 }) => {
   const [currentTime, setCurrentTime] = useState<string>('');
+  const [isVideoLibraryOpen, setIsVideoLibraryOpen] = useState(false);
+  const isAdmin = currentUser?.membershipTier === 'admin' || (currentUser as any)?.membership_tier === 'admin';
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -208,6 +211,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
             </div>
             {[
               { icon: Wand2, labelCn: '换喻引擎', labelEn: 'METONYMY', onClick: handleOpenMetonymyPage, color: 'text-amber-400' },
+              { icon: Film, labelCn: '影像资料库', labelEn: 'VIDEO ARCHIVE', onClick: () => setIsVideoLibraryOpen(true), color: 'text-cyan-300' },
               { icon: BookOpen, labelCn: '哲学辞典', labelEn: 'CODEX', onClick: openManual, color: 'text-zinc-300' },
               { icon: HistoryIcon, labelCn: '欲望档案', labelEn: 'ARCHIVES', onClick: openHistory, color: 'text-zinc-300' },
               { icon: Settings, labelCn: '系统配置', labelEn: 'CONFIG', onClick: openSettings, color: 'text-zinc-300' }
@@ -292,6 +296,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
               {/* Mobile/Tablet Menu (Hidden on Desktop) */}
               <div className="flex lg:hidden items-center gap-4 mt-4">
                 <button onClick={handleOpenMetonymyPage} className="p-2 border border-zinc-800 rounded hover:bg-white/5 text-amber-500"><Wand2 size={16} /></button>
+                <button onClick={() => setIsVideoLibraryOpen(true)} className="p-2 border border-zinc-800 rounded hover:bg-white/5 text-cyan-400"><Film size={16} /></button>
                 <button onClick={openManual} className="p-2 border border-zinc-800 rounded hover:bg-white/5 text-zinc-400"><BookOpen size={16} /></button>
                 <button onClick={openHistory} className="p-2 border border-zinc-800 rounded hover:bg-white/5 text-zinc-400"><HistoryIcon size={16} /></button>
               </div>
@@ -302,7 +307,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
               <DriverSelector selectedDriver={selectedDriver} onSelect={onDriverSelect} lang={lang} hoveredDriver={hoveredDriver} onHover={setHoveredDriver} />
             </div>
             {/* Additional Info / Footer Widgets */}
-            <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-6 opacity-80 shrink-0 pb-12">
+            <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6 opacity-80 shrink-0 pb-12">
               <div onClick={openManual} className="border border-zinc-900 bg-[#080808]/20 hover:bg-[#0c0c0c]/40 backdrop-blur-sm p-6 rounded cursor-pointer transition-all group hover:border-zinc-700">
                 <div className="flex items-center gap-3 mb-3">
                   <BookOpen size={18} className="text-zinc-500 group-hover:text-gold-primary transition-colors shrink-0" />
@@ -320,6 +325,25 @@ export const LandingView: React.FC<LandingViewProps> = ({
                   className="text-xs text-zinc-600 font-mono leading-relaxed"
                   cn="查阅拉康、齐泽克等理论词条，理解底层系统的运转逻辑。"
                   en="Consult Lacan, Zizek theoretical entries to understand the underlying system logic."
+                />
+              </div>
+              <div onClick={() => setIsVideoLibraryOpen(true)} className="border border-zinc-900 bg-[#080808]/20 hover:bg-[#0c0c0c]/40 backdrop-blur-sm p-6 rounded cursor-pointer transition-all group hover:border-cyan-800">
+                <div className="flex items-center gap-3 mb-3">
+                  <Film size={18} className="text-zinc-500 group-hover:text-cyan-400 transition-colors shrink-0" />
+                  <AnimatedText
+                    lang={lang}
+                    hClass="h-4"
+                    className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-300 group-hover:text-white transition-colors"
+                    cn="影像资料库"
+                    en="VIDEO ARCHIVE"
+                  />
+                </div>
+                <AnimatedText
+                  lang={lang}
+                  hClass="h-[40px]"
+                  className="text-xs text-zinc-600 font-mono leading-relaxed"
+                  cn="浏览迷雾学派的影像资料，深入视觉拓扑学的核心脉络。"
+                  en="Browse the visual archives of Mist School. Dive into the core of visual topology."
                 />
               </div>
               <div onClick={openHistory} className="border border-zinc-900 bg-[#080808]/20 hover:bg-[#0c0c0c]/40 backdrop-blur-sm p-6 rounded cursor-pointer transition-all group hover:border-zinc-700">
@@ -350,6 +374,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
       <ProductManualModal isOpen={isManualOpen} onClose={closeManual} driverType={hoveredDriver} />
       <SutureModal isOpen={isSutureOpen} onClose={closeSuture} onGenerate={onSutureGenerate} isGenerating={isSutureGenerating} lang={lang} driverType={selectedDriver || DriverType.NARRATIVE} />
       {isHistoryOpen && <HistoryModal history={history} onRestore={onHistoryRestore} onClear={onHistoryClear} onClose={closeHistory} lang={lang} />}
+      <VideoLibrary isOpen={isVideoLibraryOpen} onClose={() => setIsVideoLibraryOpen(false)} lang={lang} isAdmin={isAdmin} />
     </div >
   );
 };
