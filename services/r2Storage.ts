@@ -23,17 +23,19 @@ export const isR2Configured = (): boolean => {
  * 获取 R2 中图片的完整公开 URL
  */
 export function getR2PublicUrl(filePath: string): string {
-    if (!R2_PUBLIC_URL) {
-        console.warn('R2 not configured, returning empty URL');
-        return '';
+    // 这里我们先使用一个临时的测试 URL，或者如果你在 Cloudflare 配置了自定义域名，可以替换它
+    // 比如：return `https://pub-xxxxxx.r2.dev/${filePath}`;
+    // 如果没有配置 public R2.dev domain，直接返回一个临时占位图片
+    const publicDomain = import.meta.env.VITE_R2_PUBLIC_URL;
+    if (!publicDomain) {
+        return `https://mist-school-assets.r2-local-dev-fallback.com/${filePath}`; // 占位，建议用户配置 Public URL
     }
-    const baseUrl = R2_PUBLIC_URL.endsWith('/') ? R2_PUBLIC_URL.slice(0, -1) : R2_PUBLIC_URL;
+    const baseUrl = publicDomain.endsWith('/') ? publicDomain.slice(0, -1) : publicDomain;
     return `${baseUrl}/${filePath}`;
 }
 
 /**
- * 通过 Supabase Edge Function 代理上传图片到 R2
- * 流程：前端 → Supabase Edge Function → Cloudflare R2
+ * 客户端直传到 R2 (通过 Vercel API 签名)
  */
 export async function uploadToR2(file: File, folder: string = 'user-uploads'): Promise<string> {
     const { data: sessionData } = await supabase.auth.getSession();
@@ -45,22 +47,42 @@ export async function uploadToR2(file: File, folder: string = 'user-uploads'): P
     const fileExt = file.name.split('.').pop() || 'png';
     const fileName = `${folder}/${sessionData.session.user.id}/${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
 
-    // 通过 Edge Function 代理上传
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('fileName', fileName);
+    try {
+        // 第一步：从 Vercel API 获取一个用于安全上传的预签名 URL（只有服务器有密钥能生成）
+        const presignRes = await fetch('/api/get-r2-upload-url', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                fileName,
+                fileType: file.type || 'image/png' // 指定文件类型让 R2 正确处理 MIME
+            })
+        });
 
-    const { data, error } = await supabase.functions.invoke('r2-upload', {
-        body: formData
-    });
+        if (!presignRes.ok) {
+            throw new Error('Failed to get presigned URL from API. Are you running on localhost without vercel dev?');
+        }
 
-    if (error) {
-        console.error('R2 upload error:', error);
-        throw error;
+        const { uploadUrl, fileName: r2Key } = await presignRes.json();
+
+        // 第二步：客户端直接将文件 PUT 到 Cloudflare R2（不经过我们的后端，彻底不耗费服务器流量和带宽）
+        const uploadRes = await fetch(uploadUrl, {
+            method: 'PUT',
+            body: file,
+            headers: {
+                'Content-Type': file.type || 'image/png'
+            }
+        });
+
+        if (!uploadRes.ok) {
+            throw new Error(`R2 upload failed with status ${uploadRes.status}`);
+        }
+
+        // 返回最终可以直接访问的公共链接
+        return getR2PublicUrl(r2Key);
+    } catch (error) {
+        console.error('R2 Direct Upload Error:', error);
+        throw error; // 让 smartUploadImage 捕获并重试 Supabase
     }
-
-    // 返回公开访问 URL
-    return getR2PublicUrl(data.filePath || fileName);
 }
 
 /**
