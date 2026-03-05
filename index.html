@@ -12,8 +12,8 @@
       theme: {
         extend: {
           fontFamily: {
-            sans: ['Inter', '"Noto Sans SC"', '"PingFang SC"', '"Microsoft YaHei"', 'sans-serif'],
-            serif: ['"Playfair Display"', '"Noto Serif SC"', '"Songti SC"', '"STSong"', '"SimSun"', 'serif'],
+            sans: ['"LXGW WenKai"', 'Inter', '"PingFang SC"', 'sans-serif'],
+            serif: ['"EB Garamond"', '"LXGW WenKai"', '"Playfair Display"', 'serif'],
           },
           colors: {
             'luxury-black': '#0a0a0a',
@@ -29,6 +29,13 @@
       }
     }
   </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <!-- LXGW WenKai Webfont -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-screen-webfont@1.1.0/style.css" />
   <style>
     html,
     body {
@@ -39,9 +46,8 @@
       background-color: #050505;
       color: #ffffff;
       -ms-overflow-style: none;
-      /* IE and Edge */
       scrollbar-width: none;
-      /* Firefox */
+      font-family: "LXGW WenKai", sans-serif;
     }
 
     /* Globally hide scrollbars for Chrome, Safari and Opera */
@@ -63,9 +69,7 @@
       scrollbar-width: none;
     }
   </style>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+
   <script type="importmap">
 {
   "imports": {
