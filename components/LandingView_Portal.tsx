@@ -7,6 +7,20 @@ import { ProductManualModal } from './ProductManualModal';
 import { SutureModal } from './SutureModal';
 import { HistoryModal } from './HistoryModal';
 
+const Clock = () => {
+  const formatTime = () => new Date().toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
+  const [currentTime, setCurrentTime] = useState<string>(formatTime());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(formatTime());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  return <span className="text-[10px] font-mono opacity-50 tracking-widest">{currentTime}</span>;
+};
+
 interface LandingViewProps {
   lang: 'CN' | 'EN';
   setLang: (lang: 'CN' | 'EN') => void;
@@ -60,15 +74,6 @@ export const LandingView: React.FC<LandingViewProps> = ({
   currentUser,
   openProfile,
 }) => {
-  const [currentTime, setCurrentTime] = useState<string>('');
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      const now = new Date();
-      setCurrentTime(now.toISOString().replace('T', ' ').substring(0, 19) + ' UTC');
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
 
   // Dynamic background glow based on hovered driver
   const getGlowTheme = (driverId: DriverType | null) => {
@@ -114,7 +119,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
         </div>
 
         <div className="flex items-center gap-4 hidden md:flex">
-          <span className="text-[10px] font-mono opacity-50 tracking-widest">{currentTime}</span>
+          <Clock />
         </div>
 
         <div className="flex items-center gap-4">

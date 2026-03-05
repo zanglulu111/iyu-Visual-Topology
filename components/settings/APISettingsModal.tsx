@@ -13,6 +13,7 @@ interface APISettingsModalProps {
 
 const LLM_MODELS = [
     { id: 'gemini-3.1-pro-preview', name: 'Gemini 3.1 Pro Preview' },
+    { id: 'gemini-3.1-flash-lite-preview', name: 'Gemini 3.1 Flash Lite Preview' },
     { id: 'gemini-3-pro-preview', name: 'Gemini 3 Pro Preview' },
     { id: 'gemini-3-flash-preview', name: 'Gemini 3 Flash Preview' },
     { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash' },
@@ -136,20 +137,20 @@ export const APISettingsModal: React.FC<APISettingsModalProps> = ({ onClose, lan
 
                             <div className="grid grid-cols-2 gap-6">
                                 <div className="space-y-2">
-                                    <label className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest block">API PROVIDER</label>
+                                    <label className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest block">API PROVIDER</label>
                                     <input
                                         type="text"
                                         value={localSettings.llm.provider}
                                         onChange={(e) => handleChange('llm', 'provider', e.target.value)}
-                                        className="w-full bg-[#050505] border border-zinc-800 rounded-lg px-4 py-3 text-zinc-300 text-sm focus:border-[#D4AF37]/50 focus:outline-none transition-all"
+                                        className="w-full bg-[#050505] border border-zinc-700 rounded-lg px-4 py-3 text-white text-sm focus:border-[#D4AF37]/50 focus:outline-none transition-all placeholder:text-zinc-700"
                                         placeholder="google"
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest block">MODEL</label>
+                                    <label className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest block">MODEL</label>
                                     <select
-                                        className="w-full bg-[#050505] border border-zinc-800 rounded-lg px-4 py-3 text-zinc-300 text-sm focus:border-[#D4AF37]/50 focus:outline-none transition-all appearance-none"
-                                        style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%2352525b\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center', backgroundSize: '1em' }}
+                                        className="w-full bg-[#050505] border border-zinc-700 rounded-lg px-4 py-3 text-white text-sm focus:border-[#D4AF37]/50 focus:outline-none transition-all appearance-none"
+                                        style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%23a1a1aa\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center', backgroundSize: '1em' }}
                                         value={localSettings.llm.model}
                                         onChange={(e) => handleChange('llm', 'model', e.target.value)}
                                     >
@@ -159,12 +160,12 @@ export const APISettingsModal: React.FC<APISettingsModalProps> = ({ onClose, lan
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest block">API KEY</label>
+                                <label className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest block">API KEY</label>
                                 <input
                                     type="password"
                                     value={localSettings.llm.apiKey}
                                     onChange={(e) => handleChange('llm', 'apiKey', e.target.value)}
-                                    className="w-full bg-[#050505] border border-zinc-800 rounded-lg px-4 py-3 text-zinc-300 text-sm focus:border-[#D4AF37]/50 focus:outline-none transition-all font-mono"
+                                    className="w-full bg-[#050505] border border-zinc-700 rounded-lg px-4 py-3 text-white text-sm focus:border-[#D4AF37]/50 focus:outline-none transition-all font-mono placeholder:text-zinc-700"
                                     placeholder="sk-..."
                                 />
                             </div>

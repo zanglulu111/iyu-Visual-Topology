@@ -9,6 +9,20 @@ import { HistoryModal } from './HistoryModal';
 import { BorromeanRings } from './BorromeanRings';
 import { VideoLibrary } from './VideoLibrary';
 
+const Clock = () => {
+  const formatTime = () => new Date().toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
+  const [currentTime, setCurrentTime] = useState<string>(formatTime());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(formatTime());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  return <span className="text-[10px] font-mono opacity-50 tracking-widest">{currentTime}</span>;
+};
+
 const AnimatedText = ({ cn, en, lang, className = "", hClass = "h-5" }: { cn: React.ReactNode, en: React.ReactNode, lang: 'CN' | 'EN', className?: string, hClass?: string }) => (
   <div className={`overflow-hidden relative flex items-start ${hClass}`}>
     <div className={`transition-all duration-700 w-full cubic-bezier(0.4, 0, 0.2, 1) ${lang === 'EN' ? '-translate-y-1/2' : 'translate-y-0'}`}>
@@ -77,17 +91,8 @@ export const LandingView: React.FC<LandingViewProps> = ({
   currentUser,
   openProfile,
 }) => {
-  const [currentTime, setCurrentTime] = useState<string>('');
   const [isVideoLibraryOpen, setIsVideoLibraryOpen] = useState(false);
   const isAdmin = currentUser?.membershipTier === 'admin' || (currentUser as any)?.membership_tier === 'admin';
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      const now = new Date();
-      setCurrentTime(now.toISOString().replace('T', ' ').substring(0, 19) + ' UTC');
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
 
   // Dynamic background glow based on hovered driver
   const getGlowTheme = (driverId: DriverType | null) => {
@@ -137,7 +142,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
         </div>
 
         <div className="flex items-center gap-4 hidden md:flex">
-          <span className="text-[10px] font-mono opacity-50 tracking-widest">{currentTime}</span>
+          <Clock />
         </div>
 
         <div className="flex items-center gap-4">

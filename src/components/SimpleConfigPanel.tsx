@@ -137,7 +137,7 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
             <h3 className="text-xs font-bold tracking-[0.2em] uppercase mb-1" style={{ color: accentColor }}>
               01 / {lang === 'CN' ? "通证" : "TOKEN"}
             </h3>
-            <p className="text-[11px] text-zinc-300 font-light leading-snug">Gemini API Key</p>
+            <p className="text-[11px] text-zinc-100 font-medium leading-snug">Gemini API Key</p>
           </div>
 
           <div className="col-span-6 relative flex items-center gap-2">
@@ -188,7 +188,7 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
             <h3 className="text-xs font-bold tracking-[0.2em] uppercase" style={{ color: accentColor }}>
               02 / {lang === 'CN' ? "引擎映射矩阵" : "ENGINE MAPPING MATRIX"}
             </h3>
-            <span className="text-[9px] text-zinc-500 tracking-widest uppercase">Select Models for Individual Logic Layers</span>
+            <span className="text-[9px] text-zinc-400 tracking-widest uppercase">Select Models for Individual Logic Layers</span>
           </div>
 
           <div className="grid grid-cols-2 gap-2 overflow-y-auto no-scrollbar pr-1">
@@ -200,9 +200,9 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
                       <h4 className="text-[14px] font-bold text-white uppercase tracking-[0.12em] border-l-2 pl-2" style={{ borderColor: accentColor }}>
                         {lang === 'CN' ? engine.name : engine.id.replace(/([A-Z])/g, ' $1').toUpperCase()}
                       </h4>
-                      <span className="text-[8px] text-zinc-600 font-mono">ID_{engine.id.slice(0, 4).toUpperCase()}</span>
+                      <span className="text-[8px] text-zinc-400 font-mono">ID_{engine.id.slice(0, 4).toUpperCase()}</span>
                     </div>
-                    <p className="text-[12px] text-zinc-100 leading-tight font-light">
+                    <p className="text-[12px] text-white leading-tight font-medium opacity-90">
                       {engine.description}
                     </p>
                   </div>
@@ -210,7 +210,7 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
                   <select
                     value={config.engines[engine.id as keyof typeof config.engines]}
                     onChange={(e) => handleSaveEngineModel(engine.id, e.target.value)}
-                    className="w-full bg-black/60 border border-zinc-800/80 rounded-sm px-3 py-1.5 text-zinc-300 text-xs focus:outline-none transition-all appearance-none cursor-pointer hover:border-zinc-700"
+                    className="w-full bg-black/60 border border-zinc-700/80 rounded-sm px-3 py-1.5 text-zinc-100 text-xs focus:outline-none transition-all appearance-none cursor-pointer hover:border-zinc-500"
                     style={{
                       backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%2352525b\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")',
                       backgroundRepeat: 'no-repeat',
@@ -219,7 +219,7 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
                     }}
                   >
                     {(engine.type === 'text' ? AVAILABLE_MODELS.text : AVAILABLE_MODELS.image).map((model) => (
-                      <option key={model} value={model} className="bg-[#0c0c0c] text-zinc-300">{model}</option>
+                      <option key={model} value={model} className="bg-[#0c0c0c] text-white">{model}</option>
                     ))}
                   </select>
                 </div>
