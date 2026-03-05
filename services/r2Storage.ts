@@ -23,13 +23,7 @@ export const isR2Configured = (): boolean => {
  * 获取 R2 中图片的完整公开 URL
  */
 export function getR2PublicUrl(filePath: string): string {
-    // 这里我们先使用一个临时的测试 URL，或者如果你在 Cloudflare 配置了自定义域名，可以替换它
-    // 比如：return `https://pub-xxxxxx.r2.dev/${filePath}`;
-    // 如果没有配置 public R2.dev domain，直接返回一个临时占位图片
-    const publicDomain = import.meta.env.VITE_R2_PUBLIC_URL;
-    if (!publicDomain) {
-        return `https://mist-school-assets.r2-local-dev-fallback.com/${filePath}`; // 占位，建议用户配置 Public URL
-    }
+    const publicDomain = import.meta.env.VITE_R2_PUBLIC_URL || 'https://pub-11c26952660a4be39d866201a7fdb082.r2.dev';
     const baseUrl = publicDomain.endsWith('/') ? publicDomain.slice(0, -1) : publicDomain;
     return `${baseUrl}/${filePath}`;
 }
