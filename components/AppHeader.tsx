@@ -104,7 +104,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           </span>
         </button>
         <div className="h-6 w-px bg-white/10"></div>
-        <span className={`${getHeaderTitleColor()} font-bold text-xs uppercase tracking-wider`}>
+        <span className={`${getHeaderTitleColor()} font-serif font-bold text-xs uppercase tracking-widest`}>
           {lang === 'CN' ? '迷雾学派: ' : 'MIST: '}{driverName}
         </span>
       </div>
@@ -112,7 +112,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden md:flex items-center gap-4 text-[10px] font-bold uppercase tracking-[0.2em]">
         <button
           onClick={() => setViewMode('ENGINE')}
-          className={`flex items-center gap-2 ${viewMode === 'ENGINE' ? getHeaderTitleColor() : "text-zinc-600 hover:text-zinc-400"}`}
+          className={`flex items-center gap-2 font-serif font-bold ${viewMode === 'ENGINE' ? getHeaderTitleColor() : "text-zinc-600 hover:text-zinc-400"}`}
         >
           <Cpu size={12} className={viewMode === 'ENGINE' ? getHeaderIconFill() : ""} />
           {getNarrativeEngineLabel()}

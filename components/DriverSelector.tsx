@@ -71,12 +71,12 @@ export const DriverSelector: React.FC<DriverSelectorProps> = ({ selectedDriver, 
                                     <div className={`transition-all duration-700 cubic-bezier(0.4, 0, 0.2, 1) ${lang === 'EN' ? '-translate-y-1/2' : 'translate-y-0'}`}>
                                         <div className="flex flex-col">
                                             <div className="h-14 flex items-center shrink-0">
-                                                <h3 className={`text-xl md:text-2xl font-serif tracking-wide transition-colors duration-500 leading-tight ${active ? 'text-white' : 'text-zinc-400'}`}>
+                                                <h3 className={`text-xl md:text-2xl font-serif font-bold tracking-wide transition-colors duration-500 leading-tight ${active ? 'text-white' : 'text-zinc-400'}`}>
                                                     {driver.name}
                                                 </h3>
                                             </div>
                                             <div className="h-14 flex items-center shrink-0">
-                                                <h3 className={`text-lg md:text-xl font-serif tracking-wide transition-colors duration-500 leading-tight ${active ? 'text-white' : 'text-zinc-400'}`}>
+                                                <h3 className={`text-lg md:text-xl font-serif font-bold tracking-wide transition-colors duration-500 leading-tight ${active ? 'text-white' : 'text-zinc-400'}`}>
                                                     {driver.nameEn}
                                                 </h3>
                                             </div>

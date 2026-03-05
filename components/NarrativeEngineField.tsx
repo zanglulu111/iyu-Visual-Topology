@@ -279,7 +279,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
             <div className={`flex-shrink-0 px-6 py-4 flex items-center justify-center z-10 bg-[#050505]/95 backdrop-blur relative border-b border-white/5`}>
                 <div className="max-w-5xl mx-auto w-full flex flex-col items-center justify-center relative">
                     <div className="flex-1 flex flex-col items-center justify-center pointer-events-none">
-                        <h2 className="text-3xl md:text-5xl font-serif text-white tracking-tight text-center mb-2 transition-all duration-300">
+                        <h2 className="text-3xl md:text-5xl font-serif font-bold text-white tracking-[0.15em] text-center mb-2 transition-all duration-300">
                             <span className={osTheme.accent}>{getEngineTitle()}</span>
                         </h2>
                         <p className="text-zinc-500 text-[10px] md:text-sm font-light uppercase tracking-widest text-center w-full whitespace-nowrap overflow-hidden text-ellipsis">{getEngineSubtitle()}</p>
@@ -292,7 +292,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                     <div className="relative w-full max-w-5xl">
                         <button onClick={() => openLibrary(currentOSKey)} className={`group relative flex flex-col items-center justify-center w-full p-6 transition-all duration-300 border-2 border-transparent rounded-xl ${osTheme.hover}`}>
                             <div className="flex items-center gap-2 mb-3">{osTheme.icon}<span className={`text-xs uppercase tracking-[0.3em] font-bold text-zinc-400 transition-colors ${osTheme.label}`}>{lang === 'EN' ? osLabel.split('/')[1] : osLabel.split('/')[0]}</span></div>
-                            <div className={`text-3xl md:text-6xl font-serif tracking-wide mb-3 ${currentPsychicOS ? 'text-white' : 'text-zinc-700'}`}>{osDisplay}</div>
+                            <div className={`text-3xl md:text-6xl font-serif font-bold tracking-[0.1em] mb-3 ${currentPsychicOS ? 'text-white' : 'text-zinc-700'}`}>{osDisplay}</div>
                             {osDetails && (
                                 <div className="text-sm md:text-lg text-zinc-300 font-normal w-full px-4 text-center leading-relaxed whitespace-pre-line">
                                     {lang === 'EN' && osDetails.defEn ? osDetails.defEn : osDetails.def}

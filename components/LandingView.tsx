@@ -8,6 +8,21 @@ import { SutureModal } from './SutureModal';
 import { HistoryModal } from './HistoryModal';
 import { BorromeanRings } from './BorromeanRings';
 
+const AnimatedText = ({ cn, en, lang, className = "", hClass = "h-5" }: { cn: React.ReactNode, en: React.ReactNode, lang: 'CN' | 'EN', className?: string, hClass?: string }) => (
+  <div className={`overflow-hidden relative flex items-start ${hClass}`}>
+    <div className={`transition-all duration-700 w-full cubic-bezier(0.4, 0, 0.2, 1) ${lang === 'EN' ? '-translate-y-1/2' : 'translate-y-0'}`}>
+      <div className="flex flex-col w-full">
+        <div className={`${hClass} flex items-center shrink-0 w-full ${className}`}>
+          {cn}
+        </div>
+        <div className={`${hClass} flex items-center shrink-0 w-full ${className}`}>
+          {en}
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
 interface LandingViewProps {
   lang: 'CN' | 'EN';
   setLang: (lang: 'CN' | 'EN') => void;
@@ -66,9 +81,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
   useEffect(() => {
     const timer = setInterval(() => {
       const now = new Date();
-      // Follow user's local computer time
-      const formatted = now.toLocaleString('sv-SE').replace(/\//g, '-');
-      setCurrentTime(formatted);
+      setCurrentTime(now.toISOString().replace('T', ' ').substring(0, 19) + ' UTC');
     }, 1000);
     return () => clearInterval(timer);
   }, []);
@@ -110,10 +123,14 @@ export const LandingView: React.FC<LandingViewProps> = ({
       {/* Global Top Navbar */}
       <header className={`shrink-0 z-50 backdrop-blur-md border-b h-14 flex items-center justify-between px-6 transition-colors duration-500 ${getHeaderTheme(hoveredDriver)} bg-[#050505]/95`}>
         <div className="flex items-center gap-4">
-          <Terminal size={14} className="opacity-70" />
-          <span className="text-[10px] uppercase font-bold tracking-[0.2em] opacity-80">
-            {lang === 'CN' ? '主体观测中心 // 序列号: MIST-O-1' : 'SUBJECT OBSERVATION CENTER // SEQ: MIST-O-1'}
-          </span>
+          <Terminal size={14} className="opacity-70 shrink-0" />
+          <AnimatedText
+            lang={lang}
+            hClass="h-4"
+            className="text-[10px] uppercase font-bold tracking-[0.2em] opacity-80"
+            cn={<span className="whitespace-nowrap">主体观测中心 // 序列号: MIST-O-1</span>}
+            en={<span className="whitespace-nowrap">SUBJECT OBSERVATION CENTER // SEQ: MIST-O-1</span>}
+          />
         </div>
 
         <div className="flex items-center gap-4 hidden md:flex">
@@ -122,7 +139,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
 
         <div className="flex items-center gap-4">
           <button onClick={() => setLang(lang === 'CN' ? 'EN' : 'CN')} className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-white transition-colors">
-            {lang === 'CN' ? 'EN' : '中'}
+            <AnimatedText lang={lang} hClass="h-4" cn="EN" en="中" />
           </button>
           <div className="h-4 w-px bg-zinc-800"></div>
           <button onClick={() => currentUser.id !== 'guest_user' ? openProfile() : openAuth()} className="flex items-center gap-2 group transition-all duration-100">
@@ -133,9 +150,15 @@ export const LandingView: React.FC<LandingViewProps> = ({
             ) : (
               <UserIcon size={14} className="text-zinc-500 group-hover:text-white transition-colors" />
             )}
-            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 group-hover:text-white hidden sm:block">
-              {currentUser.id !== 'guest_user' ? currentUser.username : (lang === 'CN' ? '未登录' : 'GUEST')}
-            </span>
+            <div className="hidden sm:block">
+              <AnimatedText
+                lang={lang}
+                hClass="h-4"
+                className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 group-hover:text-white transition-colors"
+                cn={currentUser.id !== 'guest_user' ? currentUser.username : '未登录'}
+                en={currentUser.id !== 'guest_user' ? currentUser.username : 'GUEST'}
+              />
+            </div>
           </button>
         </div>
       </header>
@@ -154,52 +177,70 @@ export const LandingView: React.FC<LandingViewProps> = ({
               <div className={`transition-all duration-700 cubic-bezier(0.4, 0, 0.2, 1) ${lang === 'EN' ? '-translate-y-1/2' : 'translate-y-0'}`}>
                 <div className="flex flex-col">
                   <div className="h-[60px] flex items-center shrink-0">
-                    <h1 className="text-4xl font-serif text-white tracking-widest">迷雾学派</h1>
+                    <h1 className="text-4xl font-serif font-bold text-white tracking-widest">迷雾学派</h1>
                   </div>
                   <div className="h-[60px] flex items-center shrink-0">
-                    <h1 className="text-3xl font-serif text-white tracking-widest uppercase">MIST</h1>
+                    <h1 className="text-3xl font-serif font-bold text-white tracking-widest uppercase">MIST</h1>
                   </div>
                 </div>
               </div>
             </div>
             <p className="text-[10px] text-zinc-500 uppercase tracking-[0.4em] mb-4">The Visionary Protocol</p>
-            <p className="text-xs text-zinc-400 font-light leading-relaxed">
-              {lang === 'CN'
-                ? '爱欲视觉拓扑学：在实在界的荒漠上，确立一种比现实更坚固的虚构。'
-                : 'Erotic Visual Topology: establishing a fiction more solid than reality.'}
-            </p>
+            <AnimatedText
+              lang={lang}
+              hClass="h-[40px]"
+              className="text-xs text-zinc-400 font-light leading-relaxed"
+              cn="爱欲视觉拓扑学：在实在界的荒漠上，确立一种比现实更坚固的虚构。"
+              en="Erotic Visual Topology: establishing a fiction more solid than reality."
+            />
           </div>
 
           {/* Quick Access Menu */}
           <div className="p-4 border-b border-zinc-900/60 shrink-0 space-y-1">
-            <div className="px-4 py-2 text-[10px] font-bold text-zinc-700 uppercase tracking-widest mb-2">
-              {lang === 'CN' ? '安全协议 / Protocols' : 'SECURITY PROTOCOLS'}
+            <div className="px-4 py-2">
+              <AnimatedText
+                lang={lang}
+                hClass="h-4"
+                className="text-[10px] font-bold text-zinc-700 uppercase tracking-widest mb-2"
+                cn="安全协议 / Protocols"
+                en="SECURITY PROTOCOLS"
+              />
             </div>
             {[
-              { icon: Wand2, label: lang === 'CN' ? '换喻引擎' : 'METONYMY', onClick: handleOpenMetonymyPage, color: 'text-amber-400' },
-              { icon: BookOpen, label: lang === 'CN' ? '哲学辞典' : 'CODEX', onClick: openManual, color: 'text-zinc-300' },
-              { icon: HistoryIcon, label: lang === 'CN' ? '欲望档案' : 'ARCHIVES', onClick: openHistory, color: 'text-zinc-300' },
-              { icon: Settings, label: lang === 'CN' ? '系统配置' : 'CONFIG', onClick: openSettings, color: 'text-zinc-300' }
+              { icon: Wand2, labelCn: '换喻引擎', labelEn: 'METONYMY', onClick: handleOpenMetonymyPage, color: 'text-amber-400' },
+              { icon: BookOpen, labelCn: '哲学辞典', labelEn: 'CODEX', onClick: openManual, color: 'text-zinc-300' },
+              { icon: HistoryIcon, labelCn: '欲望档案', labelEn: 'ARCHIVES', onClick: openHistory, color: 'text-zinc-300' },
+              { icon: Settings, labelCn: '系统配置', labelEn: 'CONFIG', onClick: openSettings, color: 'text-zinc-300' }
             ].map((item, idx) => (
               <button
                 key={idx}
                 onClick={item.onClick}
                 className="w-full text-left px-4 py-3 bg-transparent hover:bg-white/5 rounded-lg flex items-center gap-3 transition-colors group"
               >
-                <item.icon size={14} className={`${item.color} opacity-70 group-hover:opacity-100 transition-opacity`} />
-                <span className={`text-xs font-bold uppercase tracking-widest ${item.color} opacity-80 group-hover:opacity-100 transition-opacity`}>
-                  {item.label}
-                </span>
+                <item.icon size={14} className={`${item.color} opacity-70 group-hover:opacity-100 transition-opacity shrink-0`} />
+                <AnimatedText
+                  lang={lang}
+                  hClass="h-4"
+                  className={`text-xs font-bold uppercase tracking-widest ${item.color} opacity-80 group-hover:opacity-100 transition-opacity`}
+                  cn={item.labelCn}
+                  en={item.labelEn}
+                />
               </button>
             ))}
           </div>
 
           {/* Signal Stream */}
           <div className="flex-1 p-6 overflow-y-auto custom-scrollbar flex flex-col">
-            <h3 className="text-[10px] font-bold text-zinc-600 tracking-[0.2em] uppercase mb-4 flex items-center gap-2">
-              <ShieldAlert size={12} />
-              {lang === 'CN' ? '观测站信号流' : 'SIGNAL STREAM'}
-            </h3>
+            <div className="mb-4 flex items-center gap-2">
+              <ShieldAlert size={12} className="text-zinc-600 shrink-0" />
+              <AnimatedText
+                lang={lang}
+                hClass="h-4"
+                className="text-[10px] font-bold text-zinc-600 tracking-[0.2em] uppercase"
+                cn="观测站信号流"
+                en="SIGNAL STREAM"
+              />
+            </div>
 
             <div className="space-y-4 flex-1">
               {signalLogs.map(log => (
@@ -229,13 +270,23 @@ export const LandingView: React.FC<LandingViewProps> = ({
 
             <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-zinc-900 pb-6 shrink-0">
               <div>
-                <h2 className="text-2xl md:text-3xl font-serif text-white tracking-widest mb-2 flex items-center gap-3">
-                  <Cpu className="text-gold-primary opacity-80" size={24} />
-                  {lang === 'CN' ? '核心驱动器' : 'CORE DRIVERS'}
-                </h2>
-                <p className="text-xs text-zinc-500 uppercase tracking-[0.3em] font-mono">
-                  {lang === 'CN' ? '请选择一种欲望结构进入生产...' : 'Select a desire structure to initiate production...'}
-                </p>
+                <div className="mb-2 flex items-center gap-3">
+                  <Cpu className="text-gold-primary opacity-80 shrink-0" size={24} />
+                  <AnimatedText
+                    lang={lang}
+                    hClass="h-8 md:h-10"
+                    className="text-2xl md:text-3xl font-serif font-bold text-white tracking-widest"
+                    cn="核心驱动器"
+                    en="CORE DRIVERS"
+                  />
+                </div>
+                <AnimatedText
+                  lang={lang}
+                  hClass="h-4"
+                  className="text-xs text-zinc-500 uppercase tracking-[0.3em] font-mono"
+                  cn="请选择一种欲望结构进入生产..."
+                  en="Select a desire structure to initiate production..."
+                />
               </div>
 
               {/* Mobile/Tablet Menu (Hidden on Desktop) */}
@@ -254,25 +305,41 @@ export const LandingView: React.FC<LandingViewProps> = ({
             <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-6 opacity-80 shrink-0 pb-12">
               <div onClick={openManual} className="border border-zinc-900 bg-[#080808]/20 hover:bg-[#0c0c0c]/40 backdrop-blur-sm p-6 rounded cursor-pointer transition-all group hover:border-zinc-700">
                 <div className="flex items-center gap-3 mb-3">
-                  <BookOpen size={18} className="text-zinc-500 group-hover:text-gold-primary transition-colors" />
-                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-300 group-hover:text-white transition-colors">
-                    {lang === 'CN' ? '访问辞典数据' : 'ACCESS CODEX DATA'}
-                  </h3>
+                  <BookOpen size={18} className="text-zinc-500 group-hover:text-gold-primary transition-colors shrink-0" />
+                  <AnimatedText
+                    lang={lang}
+                    hClass="h-4"
+                    className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-300 group-hover:text-white transition-colors"
+                    cn="访问辞典数据"
+                    en="ACCESS CODEX DATA"
+                  />
                 </div>
-                <p className="text-xs text-zinc-600 font-mono leading-relaxed">
-                  {lang === 'CN' ? '查阅拉康、齐泽克等理论词条，理解底层系统的运转逻辑。' : 'Consult Lacan, Zizek theoretical entries to understand the underlying system logic.'}
-                </p>
+                <AnimatedText
+                  lang={lang}
+                  hClass="h-[40px]"
+                  className="text-xs text-zinc-600 font-mono leading-relaxed"
+                  cn="查阅拉康、齐泽克等理论词条，理解底层系统的运转逻辑。"
+                  en="Consult Lacan, Zizek theoretical entries to understand the underlying system logic."
+                />
               </div>
               <div onClick={openHistory} className="border border-zinc-900 bg-[#080808]/20 hover:bg-[#0c0c0c]/40 backdrop-blur-sm p-6 rounded cursor-pointer transition-all group hover:border-zinc-700">
                 <div className="flex items-center gap-3 mb-3">
-                  <HistoryIcon size={18} className="text-zinc-500 group-hover:text-cyan-400 transition-colors" />
-                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-300 group-hover:text-white transition-colors">
-                    {lang === 'CN' ? '检视生成档案' : 'REVIEW ARCHIVES'}
-                  </h3>
+                  <HistoryIcon size={18} className="text-zinc-500 group-hover:text-cyan-400 transition-colors shrink-0" />
+                  <AnimatedText
+                    lang={lang}
+                    hClass="h-4"
+                    className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-300 group-hover:text-white transition-colors"
+                    cn="检视生成档案"
+                    en="REVIEW ARCHIVES"
+                  />
                 </div>
-                <p className="text-xs text-zinc-600 font-mono leading-relaxed">
-                  {lang === 'CN' ? '溯源过去的生成记录，恢复或重启失败的镜像拼接尝试。' : 'Trace past generation records, restore or restart failed mirror splicing.'}
-                </p>
+                <AnimatedText
+                  lang={lang}
+                  hClass="h-[40px]"
+                  className="text-xs text-zinc-600 font-mono leading-relaxed"
+                  cn="溯源过去的生成记录，恢复或重启失败的镜像拼接尝试。"
+                  en="Trace past generation records, restore or restart failed mirror splicing."
+                />
               </div>
             </div>
 

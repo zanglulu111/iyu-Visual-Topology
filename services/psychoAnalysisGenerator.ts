@@ -108,7 +108,7 @@ export const analyzePsychoStructure = async (fieldState: NarrativeFieldState, sy
 export const buildPsychoAnalysisPrompt = (fieldState: NarrativeFieldState, synopsis: string) => {
     const detailedState = buildDetailedContext(fieldState);
     // Use dynamic current date
-    const dateStr = new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '/');
+    const dateStr = new Date().toISOString().substring(0, 10) + ' UTC';
     const algebraicFormula = getAlgebraicTemplate(fieldState);
 
     // Determine M4 Type for prompt instruction

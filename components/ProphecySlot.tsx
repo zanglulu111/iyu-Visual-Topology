@@ -56,7 +56,7 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
     let accentColor = 'text-gold-primary border-gold-primary';
     let labelColor = 'text-gold-primary';
     let labelBorder = 'border-gold-primary/40';
-    let containerClass = "inline-flex flex-wrap items-baseline gap-1 mx-1 relative group/slot align-middle";
+    let containerClass = "inline-flex flex-wrap items-baseline gap-1.5 md:gap-2 mx-1.5 md:mx-2 relative group/slot align-middle";
     let editAccent = 'text-gold-primary border-gold-primary focus:border-gold-primary';
 
     if (isCommercial) {
@@ -166,7 +166,7 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
                                     className={`flex items-center cursor-pointer transition-colors ${activeAccent}`}
                                     onClick={() => !isTagLocked && onOpenLibrary(blockId)}
                                 >
-                                    <span className={`${textSize} font-serif font-bold text-white whitespace-nowrap`}>
+                                    <span className={`${textSize} font-serif font-bold text-white tracking-wide whitespace-nowrap`}>
                                         {getBilingualText(tag)}
                                     </span>
                                 </div>
@@ -218,7 +218,7 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
             ) : (
                 <div className={`flex flex-col items-center group/item relative cursor-pointer align-top ${isBlockLocked ? 'opacity-50 cursor-not-allowed' : ''}`}>
                     <div onClick={() => !isBlockLocked && onOpenLibrary(blockId)} className="flex items-center">
-                        <span className={`${textSize} font-serif font-bold px-0.5 whitespace-nowrap text-zinc-500 ${isTiny ? 'border border-dashed border-zinc-700 rounded px-2 py-0.5 hover:border-zinc-500 hover:text-zinc-300' : 'border-b border-zinc-800 hover:border-zinc-600 hover:text-zinc-300'} transition-all`}>
+                        <span className={`${textSize} font-serif font-bold px-0.5 tracking-wide whitespace-nowrap text-zinc-500 ${isTiny ? 'border border-dashed border-zinc-700 rounded px-2 py-0.5 hover:border-zinc-500 hover:text-zinc-300' : 'border-b border-zinc-800 hover:border-zinc-600 hover:text-zinc-300'} transition-all`}>
                             {isTiny ? displayPlaceholder : (isSmall ? `[${displayPlaceholder}]` : `[ ${displayPlaceholder} ]`)}
                         </span>
                     </div>

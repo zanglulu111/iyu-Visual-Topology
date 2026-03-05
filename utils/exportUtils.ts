@@ -1,15 +1,15 @@
 
 import { DriverType, NarrativeFieldState, CreativeBlueprint, WorldLawConfig, User } from '../types';
-import { 
-    DRIVERS, 
-    NARRATIVE_ENGINE_BLOCKS, 
-    COMMERCIAL_ENGINE_BLOCKS, 
-    EXPERIMENTAL_ENGINE_BLOCKS, 
-    AESTHETIC_ENGINE_BLOCKS, 
-    TRAILER_ENGINE_BLOCKS, 
-    COMM_SKIN_BLOCKS, 
-    EXPERIMENTAL_SKIN_BLOCKS, 
-    TRAILER_SKIN_BLOCKS 
+import {
+    DRIVERS,
+    NARRATIVE_ENGINE_BLOCKS,
+    COMMERCIAL_ENGINE_BLOCKS,
+    EXPERIMENTAL_ENGINE_BLOCKS,
+    AESTHETIC_ENGINE_BLOCKS,
+    TRAILER_ENGINE_BLOCKS,
+    COMM_SKIN_BLOCKS,
+    EXPERIMENTAL_SKIN_BLOCKS,
+    TRAILER_SKIN_BLOCKS
 } from '../constants';
 import { ALL_SKIN_BLOCKS } from '../data/skin_libraries';
 
@@ -29,9 +29,9 @@ export interface GlobalDumpOptions {
 }
 
 export const generateGlobalDump = (options: GlobalDumpOptions): string => {
-    const { 
-        driverId, fieldState, worldLaw, visionInput, visionAnalysis, visionImage, 
-        cachedBlueprints, metonymyBlueprint, viewMode, user, subjectType, lang 
+    const {
+        driverId, fieldState, worldLaw, visionInput, visionAnalysis, visionImage,
+        cachedBlueprints, metonymyBlueprint, viewMode, user, subjectType, lang
     } = options;
 
     const getDriverName = () => {
@@ -43,8 +43,8 @@ export const generateGlobalDump = (options: GlobalDumpOptions): string => {
     const lines: string[] = [];
     const drName = getDriverName();
     lines.push(`# 🎬 VISIONARY 创意资产完整备份 (${drName})`);
-    lines.push(`> 日期: ${new Date().toLocaleString()} | 用户: ${user?.username || 'Guest'}`);
-    
+    lines.push(`> 日期: ${new Date().toISOString().replace('T', ' ').substring(0, 19)} UTC | 用户: ${user?.username || 'Guest'}`);
+
     lines.push(`\n## 0. 输入源与解码 (INPUT & DECODING)`);
     lines.push(`**创意种子:** ${visionInput || '无'}`);
     if (visionAnalysis) lines.push(`**视觉反向解析报告:**\n${visionAnalysis}`);
@@ -54,14 +54,14 @@ export const generateGlobalDump = (options: GlobalDumpOptions): string => {
     lines.push(`**驱动模式:** ${drName}`);
     if (driverId === DriverType.AESTHETIC) lines.push(`**本体选择:** ${subjectType}`);
     lines.push(`**世界法则:** 物理 [${worldLaw.physics}] / 语境 [${worldLaw.context}]`);
-    
+
     const allBlocks = [
-        ...NARRATIVE_ENGINE_BLOCKS, ...COMMERCIAL_ENGINE_BLOCKS, 
-        ...EXPERIMENTAL_ENGINE_BLOCKS, ...AESTHETIC_ENGINE_BLOCKS, 
-        ...TRAILER_ENGINE_BLOCKS, ...ALL_SKIN_BLOCKS, 
+        ...NARRATIVE_ENGINE_BLOCKS, ...COMMERCIAL_ENGINE_BLOCKS,
+        ...EXPERIMENTAL_ENGINE_BLOCKS, ...AESTHETIC_ENGINE_BLOCKS,
+        ...TRAILER_ENGINE_BLOCKS, ...ALL_SKIN_BLOCKS,
         ...COMM_SKIN_BLOCKS, ...EXPERIMENTAL_SKIN_BLOCKS, ...TRAILER_SKIN_BLOCKS
     ];
-    
+
     Object.entries(fieldState).forEach(([k, v]) => {
         const tags = v as string[];
         if (tags && tags.length) {
@@ -75,10 +75,10 @@ export const generateGlobalDump = (options: GlobalDumpOptions): string => {
     if (bibles.length > 0) {
         lines.push(`\n## 2. 创意圣经与文学剧本 (CREATIVE BIBLES)`);
         bibles.forEach((b, i) => {
-            lines.push(`\n### 📜 圣经项目 ${i+1}: ${b.narrative.title}`);
+            lines.push(`\n### 📜 圣经项目 ${i + 1}: ${b.narrative.title}`);
             lines.push(`**风格指向:** ${b.styleName}`);
             lines.push(`**核心 Logline:** ${b.narrative.logline}`);
-            
+
             lines.push(`\n#### [叙事核心 / Narrative Core]`);
             lines.push(b.narrative.synopsis);
 
@@ -111,9 +111,9 @@ export const generateGlobalDump = (options: GlobalDumpOptions): string => {
                 const analysisText = b.narrative.psychoanalysis;
                 const formulaMatch = analysisText.match(/\$\$([\s\S]*?)\$\$/);
                 const coreText = analysisText.replace(/\$\$[\s\S]*?\$\$/, "[详见附件：核心算式]");
-                
+
                 lines.push(coreText);
-                
+
                 if (formulaMatch) {
                     lines.push(`\n[附件: 核心算式 / ATTACHMENT: CORE FORMULA]`);
                     lines.push(`-----------------------------------------`);
