@@ -10,6 +10,7 @@
 //   我们用 Supabase Edge Function 作为安全的上传代理
 
 import { supabase } from './supabaseAuth';
+import imageCompression from 'browser-image-compression';
 
 // R2 公开访问 URL（只读，用于展示图片）
 const R2_PUBLIC_URL = import.meta.env.VITE_R2_PUBLIC_URL || '';
@@ -32,13 +33,28 @@ export function getR2PublicUrl(filePath: string): string {
  * 客户端直传到 R2 (通过 Vercel API 签名)
  */
 export async function uploadToR2(file: File, folder: string = 'user-uploads'): Promise<string> {
+    let compressedFile = file;
+    try {
+        if (file.type.startsWith('image/')) {
+            const options = {
+                maxSizeMB: 2,
+                maxWidthOrHeight: 2560,
+                useWebWorker: true,
+                initialQuality: 0.85
+            };
+            compressedFile = await imageCompression(file, options);
+        }
+    } catch (error) {
+        console.warn('Image compression failed, using original file', error);
+    }
+
     const { data: sessionData } = await supabase.auth.getSession();
     if (!sessionData.session) {
         throw new Error('Must be logged in to upload files');
     }
 
     // 生成文件名
-    const fileExt = file.name.split('.').pop() || 'png';
+    const fileExt = compressedFile.name.split('.').pop() || 'png';
     const fileName = `${folder}/${sessionData.session.user.id}/${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
 
     try {
@@ -48,7 +64,7 @@ export async function uploadToR2(file: File, folder: string = 'user-uploads'): P
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 fileName,
-                fileType: file.type || 'image/png' // 指定文件类型让 R2 正确处理 MIME
+                fileType: compressedFile.type || 'image/png' // 指定文件类型让 R2 正确处理 MIME
             })
         });
 
@@ -61,9 +77,9 @@ export async function uploadToR2(file: File, folder: string = 'user-uploads'): P
         // 第二步：客户端直接将文件 PUT 到 Cloudflare R2（不经过我们的后端，彻底不耗费服务器流量和带宽）
         const uploadRes = await fetch(uploadUrl, {
             method: 'PUT',
-            body: file,
+            body: compressedFile,
             headers: {
-                'Content-Type': file.type || 'image/png'
+                'Content-Type': compressedFile.type || 'image/png'
             }
         });
 

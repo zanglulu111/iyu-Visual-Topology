@@ -1,5 +1,6 @@
 import { supabase } from './supabaseAuth';
 import { HistoryItem, CollectionItem } from '../types';
+import imageCompression from 'browser-image-compression';
 
 
 export const supabaseDatabase = {
@@ -150,12 +151,27 @@ export const supabaseDatabase = {
      * @returns The public URL of the uploaded image or the Base64 data URL
      */
     async uploadImage(file: File, bucket = 'visionary-assets'): Promise<string> {
+        let compressedFile = file;
+        try {
+            if (file.type.startsWith('image/')) {
+                const options = {
+                    maxSizeMB: 2, // Ensure < 20MB files become manageable without visible quality loss
+                    maxWidthOrHeight: 2560, // Clear enough for AI Reference
+                    useWebWorker: true,
+                    initialQuality: 0.85
+                };
+                compressedFile = await imageCompression(file, options);
+            }
+        } catch (error) {
+            console.warn('Image compression failed, using original file', error);
+        }
+
         return new Promise(async (resolve, reject) => {
             const getBase64 = () => {
                 const reader = new FileReader();
                 reader.onloadend = () => resolve(reader.result as string);
                 reader.onerror = reject;
-                reader.readAsDataURL(file);
+                reader.readAsDataURL(compressedFile);
             };
 
             try {
@@ -165,12 +181,12 @@ export const supabaseDatabase = {
                     return getBase64();
                 }
 
-                const fileExt = file.name.split('.').pop();
+                const fileExt = compressedFile.name.split('.').pop();
                 const fileName = `${user.user.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt || 'png'}`;
 
                 const { error: uploadError, data } = await supabase.storage
                     .from(bucket)
-                    .upload(fileName, file, { cacheControl: '3600', upsert: false });
+                    .upload(fileName, compressedFile, { cacheControl: '3600', upsert: false });
 
                 if (uploadError) {
                     console.error("Supabase Storage upload error (bucket might not exist or RLS), falling back to Base64:", uploadError);

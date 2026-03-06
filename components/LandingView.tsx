@@ -2,12 +2,13 @@
 import React, { useState, useEffect } from 'react';
 import { DriverSelector } from './DriverSelector';
 import { DriverType, User } from '../types';
-import { Globe, Wand2, HelpCircle, History as HistoryIcon, Settings, User as UserIcon, BookOpen, Terminal, Database, ShieldAlert, Cpu, Film } from 'lucide-react';
+import { Globe, Wand2, HelpCircle, History as HistoryIcon, Settings, User as UserIcon, BookOpen, Terminal, Database, ShieldAlert, Cpu, Film, Folder } from 'lucide-react';
 import { ProductManualModal } from './ProductManualModal';
 import { SutureModal } from './SutureModal';
 import { HistoryModal } from './HistoryModal';
 import { BorromeanRings } from './BorromeanRings';
 import { VideoLibrary } from './VideoLibrary';
+import { ArchiveDirectoryModal } from './ArchiveDirectoryModal';
 
 const Clock = () => {
   const formatTime = () => new Date().toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
@@ -92,6 +93,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
   openProfile,
 }) => {
   const [isVideoLibraryOpen, setIsVideoLibraryOpen] = useState(false);
+  const [isArchiveOpen, setIsArchiveOpen] = useState(false);
   const isAdmin = currentUser?.membershipTier === 'admin' || (currentUser as any)?.membership_tier === 'admin';
 
   // Dynamic background glow based on hovered driver
@@ -215,7 +217,8 @@ export const LandingView: React.FC<LandingViewProps> = ({
               />
             </div>
             {[
-              { icon: Wand2, labelCn: '换喻引擎', labelEn: 'METONYMY', onClick: handleOpenMetonymyPage, color: 'text-amber-400' },
+              // { icon: Wand2, labelCn: '换喻引擎', labelEn: 'METONYMY', onClick: handleOpenMetonymyPage, color: 'text-amber-400' },
+              { icon: Folder, labelCn: '案例档案', labelEn: 'CASE ARCHIVES', onClick: () => setIsArchiveOpen(true), color: 'text-rose-400' },
               { icon: Film, labelCn: '影像资料库', labelEn: 'VIDEO ARCHIVE', onClick: () => setIsVideoLibraryOpen(true), color: 'text-cyan-300' },
               { icon: BookOpen, labelCn: '哲学辞典', labelEn: 'CODEX', onClick: openManual, color: 'text-zinc-300' },
               { icon: HistoryIcon, labelCn: '欲望档案', labelEn: 'ARCHIVES', onClick: openHistory, color: 'text-zinc-300' },
@@ -380,6 +383,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
       <SutureModal isOpen={isSutureOpen} onClose={closeSuture} onGenerate={onSutureGenerate} isGenerating={isSutureGenerating} lang={lang} driverType={selectedDriver || DriverType.NARRATIVE} />
       {isHistoryOpen && <HistoryModal history={history} onRestore={onHistoryRestore} onClear={onHistoryClear} onClose={closeHistory} lang={lang} />}
       <VideoLibrary isOpen={isVideoLibraryOpen} onClose={() => setIsVideoLibraryOpen(false)} lang={lang} isAdmin={isAdmin} />
+      <ArchiveDirectoryModal isOpen={isArchiveOpen} onClose={() => setIsArchiveOpen(false)} lang={lang} />
     </div >
   );
 };
