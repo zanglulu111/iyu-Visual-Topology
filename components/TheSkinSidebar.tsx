@@ -791,7 +791,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
   return (
     <div className={`
       flex flex-col gap-0 z-40 transition-transform duration-500 cubic-bezier(0.16, 1, 0.3, 1)
-      fixed top-16 left-0 bottom-20 w-[420px] bg-[#050505] border-r border-zinc-800
+      fixed top-16 left-0 bottom-20 w-[380px] bg-[#050505] border-r border-zinc-800
       ${isOpen ? 'translate-x-0' : '-translate-x-full'}
     `}>
       <div className="p-6 pb-5 flex items-center justify-between border-b border-zinc-800 bg-zinc-900/40 shrink-0">

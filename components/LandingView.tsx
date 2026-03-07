@@ -174,7 +174,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
       </header>
 
       <div className="flex-1 flex overflow-hidden relative">
-        <BorromeanRings />
+        <BorromeanRings centered={false} />
         {/* Ambient Glow */}
         <div className={`absolute inset-0 pointer-events-none transition-shadow duration-1000 opacity-20 shadow-[inset_0_0_150px_rgba(0,0,0,1)] ${getGlowTheme(hoveredDriver)}`}></div>
 

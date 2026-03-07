@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { NarrativeFieldState, BlueprintLanguage, DriverType, NarrativeBlockDef, LibraryCategoryDef, SubjectType, AestheticMode, AestheticPreset } from '../types';
 import { Ghost, ScanEye, BrainCircuit, Zap, ChevronRight } from 'lucide-react';
 import { ProphecySlot } from './ProphecySlot';
+import { BorromeanRings } from './BorromeanRings';
 import { NarrativeLibraryModal } from './NarrativeLibraryModal';
 import { AestheticEngineField } from './AestheticEngineField';
 import {
@@ -60,18 +61,19 @@ export interface NarrativeEngineFieldProps {
     colorPalette?: string[];
     onPaletteChange?: (colors: string[]) => void;
     onApplyPreset?: (preset: AestheticPreset) => void;
+    showRings?: boolean;
 }
 
 export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props) => {
     // If Aesthetic driver, delegate to AestheticEngineField
     if (props.driverType === DriverType.AESTHETIC) {
-        return <AestheticEngineField {...props} aestheticMode={props.aestheticMode || 'REALISM'} onAestheticModeChange={props.onAestheticModeChange || (() => { })} />;
+        return <AestheticEngineField {...props} aestheticMode={props.aestheticMode || 'REALISM'} onAestheticModeChange={props.onAestheticModeChange || (() => { })} showRings={props.showRings} />;
     }
 
     const {
         fieldState, onChange, lang, driverType,
         lockedModules, onToggleLock, lockedTags, onToggleTagLock, onRandomizeTag,
-        customLibraryDefs, onAddCustomDef, onEditCustomDef
+        customLibraryDefs, onAddCustomDef, onEditCustomDef, showRings = true
     } = props;
 
     const [libraryModalOpen, setLibraryModalOpen] = useState(false);
@@ -275,8 +277,22 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
     return (
         <div className="w-full h-full flex flex-col relative bg-[#050505] overflow-hidden">
 
-            {/* HEADER: Centered Layout Fix */}
-            <div className={`flex-shrink-0 px-6 py-4 flex items-center justify-center z-10 bg-[#050505]/95 backdrop-blur relative border-b border-white/5`}>
+            {/* Background Borromean Rings - Clear rings with subtle 'frosted' context */}
+            {showRings && (
+                <div className="absolute inset-0 z-0 pointer-events-none transition-all duration-1000" style={{ filter: 'blur(1px)' }}>
+                    <BorromeanRings 
+                        fieldState={fieldState} 
+                        lang={lang} 
+                        driverType={driverType} 
+                        opacity={0.8} 
+                        centered={true}
+                    />
+                </div>
+            )}
+
+            {/* HEADER: Fully Transparent - Background rings visible through text */}
+            <div className={`flex-shrink-0 px-6 py-4 flex items-center justify-center z-20 bg-transparent relative`}>
+                {/* Removed darkened overlay to prevent obscuring background */}
                 <div className="max-w-5xl mx-auto w-full flex flex-col items-center justify-center relative">
                     <div className="flex-1 flex flex-col items-center justify-center pointer-events-none">
                         <h2 className="text-3xl md:text-5xl font-serif font-bold text-white tracking-[0.15em] text-center mb-2 transition-all duration-300">
@@ -287,7 +303,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                 </div>
             </div>
 
-            <div className="flex-1 flex flex-col overflow-y-auto custom-scrollbar">
+            <div className="flex-1 flex flex-col overflow-y-auto custom-scrollbar relative z-10">
                 <div className="flex-shrink-0 py-0 px-4 flex justify-center z-10">
                     <div className="relative w-full max-w-5xl">
                         <button onClick={() => openLibrary(currentOSKey)} className={`group relative flex flex-col items-center justify-center w-full p-6 transition-all duration-300 border-2 border-transparent rounded-xl ${osTheme.hover}`}>

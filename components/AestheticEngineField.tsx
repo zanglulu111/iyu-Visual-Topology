@@ -20,6 +20,7 @@ import { generateAestheticSmartRandom, HUMAN_BLOCKS, CREATURE_BLOCKS, AESTHETIC_
 import { generateAestheticPrompt } from '../utils/promptUtils';
 import { AESTHETIC_LOGIC_TEMPLATES, BLOCK_LIMITS } from '../constants';
 import { findItemFull } from '../services/dataRegistry';
+import { BorromeanRings } from './BorromeanRings';
 
 const iconMap: Record<string, any> = {
     User, Zap, Eye, Palette, Camera, Layout
@@ -69,7 +70,7 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
     fieldState, onChange, lang, driverType, subjectType,
     lockedModules, onToggleLock, lockedTags, onToggleTagLock, onRandomizeTag,
     customLibraryDefs, onAddCustomDef, aestheticMode, onAestheticModeChange,
-    colorPalette = [], onPaletteChange, onApplyPreset
+    colorPalette = [], onPaletteChange, onApplyPreset, showRings = true
 }) => {
     const [libraryModalOpen, setLibraryModalOpen] = useState(false);
     const [activeBlockId, setActiveBlockId] = useState<string | null>(null);
@@ -914,10 +915,22 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
     };
 
     return (
-        <div className="w-full h-full flex flex-col relative bg-[#050505] overflow-hidden pb-24">
-            <div className="flex-1 flex flex-row overflow-hidden min-h-0">
-                <div className="w-1/2 h-full flex flex-col overflow-hidden border-r border-zinc-800">
-                    <div className="shrink-0 z-20 px-6 py-3 bg-[#050505] border-b border-zinc-800 flex items-center justify-between">
+        <div className="w-full h-full flex flex-col relative bg-[#050505] overflow-hidden">
+            {/* Background Borromean Rings - Clear rings with subtle 'frosted' context */}
+            {showRings && (
+                <div className="absolute inset-0 z-0 pointer-events-none transition-all duration-1000" style={{ filter: 'blur(1px)' }}>
+                    <BorromeanRings 
+                        fieldState={fieldState} 
+                        lang={lang} 
+                        driverType={driverType} 
+                        opacity={0.8} 
+                        centered={true}
+                    />
+                </div>
+            )}
+            <div className="flex-1 flex flex-row overflow-hidden min-h-0 relative z-10">
+                <div className="w-1/2 h-full flex flex-col overflow-hidden border-r border-zinc-800 bg-[#050505]/40 backdrop-blur-sm">
+                    <div className="shrink-0 z-20 px-6 py-3 bg-transparent flex items-center justify-between">
                         <div className="pl-6">
                             <h2 className="text-xl font-serif font-bold text-rose-400 tracking-[0.1em]">{lang === 'EN' ? "Aesthetic Engine" : "情绪美学"}</h2>
                         </div>
@@ -945,7 +958,7 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
                     </div>
                 </div>
 
-                <div className="w-1/2 h-full flex flex-col overflow-hidden bg-[#0c0c0c] border-l border-zinc-800 relative min-h-0">
+                <div className="w-1/2 h-full flex flex-col overflow-hidden bg-[#050505]/40 backdrop-blur-sm border-l border-zinc-800 relative min-h-0">
                     <div className="p-6 pb-2 shrink-0">
                         <div className="bg-zinc-900/40 border border-zinc-800 p-3 rounded-xl shadow-lg">
                             <div className="flex items-center justify-between mb-3">
@@ -977,7 +990,7 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
                         </div>
                     </div>
 
-                    <div className="flex-1 min-h-0 flex flex-col mx-6 rounded-xl border border-zinc-800 bg-[#080808] overflow-hidden shadow-2xl">
+                    <div className="flex-1 min-h-0 flex flex-col mx-6 rounded-xl border border-zinc-800 bg-white/5 backdrop-blur-md overflow-hidden shadow-2xl">
                         <div className="flex items-center justify-between px-4 py-2.5 bg-zinc-900 border-b border-zinc-800 shrink-0">
                             <div className="flex items-center gap-3">
                                 <span className="text-[9px] font-mono font-bold text-emerald-500 uppercase tracking-widest flex items-center gap-2">
@@ -1005,7 +1018,7 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
                     </div>
 
                     <div className="flex-1 min-h-0 flex flex-col p-6 pt-2 overflow-hidden">
-                        <div className="flex flex-col h-full rounded-xl border border-rose-500/30 bg-[#0a0a0a] overflow-hidden shadow-2xl relative min-h-0">
+                        <div className="flex flex-col h-full rounded-xl border border-rose-500/30 bg-white/5 backdrop-blur-md overflow-hidden shadow-2xl relative min-h-0">
                             <div className="flex items-center justify-between px-4 py-2.5 bg-zinc-900 border-b border-zinc-800 shrink-0">
                                 <div className="flex items-center gap-2 text-rose-400">
                                     <Edit3 size={12} />

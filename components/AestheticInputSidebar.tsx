@@ -46,7 +46,7 @@ export const AestheticInputSidebar: React.FC<AestheticInputSidebarProps> = ({
   return (
     <div className={`
       flex flex-col gap-0 z-40 transition-transform duration-500 cubic-bezier(0.16, 1, 0.3, 1)
-      fixed top-16 left-0 bottom-20 w-[420px] bg-[#0c0c0c] border-r border-zinc-800 shadow-[20px_0_50px_rgba(0,0,0,0.5)]
+      fixed top-16 left-0 bottom-20 w-[380px] bg-[#0c0c0c] border-r border-zinc-800 shadow-[20px_0_50px_rgba(0,0,0,0.5)]
       ${isOpen ? 'translate-x-0' : '-translate-x-full'}
     `}>
       {/* Header */}

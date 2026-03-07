@@ -1,5 +1,5 @@
 import React from 'react';
-import { Globe, Wand2, HelpCircle, History as HistoryIcon, Cpu, GitFork, BookOpen, Settings, User as UserIcon, LogOut } from 'lucide-react';
+import { Globe, Wand2, HelpCircle, History as HistoryIcon, Cpu, GitFork, BookOpen, Settings, User as UserIcon, LogOut, Aperture } from 'lucide-react';
 import { DriverType, User } from '../types';
 
 type ViewMode = 'ENGINE' | 'DIVERGENCE' | 'BIBLE' | 'METONYMY';
@@ -23,6 +23,8 @@ interface AppHeaderProps {
   openProfile: () => void;
   onLogout: () => void;
   currentUser: User;
+  showRings: boolean;
+  setShowRings: (show: boolean) => void;
 }
 
 export const AppHeader: React.FC<AppHeaderProps> = ({
@@ -44,6 +46,8 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   openProfile,
   currentUser,
   onLogout,
+  showRings,
+  setShowRings,
 }) => {
 
   // --- Helper Functions Moved from App.tsx ---
@@ -137,7 +141,6 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
 
       <div className="flex items-center gap-4">
         {[
-          { icon: Wand2, label: lang === 'CN' ? '换喻' : 'METONYMY', labelCn: '换喻', labelEn: 'METONYMY', onClick: handleOpenMetonymyPage, isActive: viewMode === 'METONYMY' },
           { icon: HelpCircle, label: lang === 'CN' ? '哲学辞典' : 'CODEX', labelCn: '哲学辞典', labelEn: 'CODEX', onClick: openManual, isActive: isManualOpen },
           { icon: HistoryIcon, label: lang === 'CN' ? '欲望档案' : 'ARCHIVE', labelCn: '欲望档案', labelEn: 'ARCHIVE', onClick: openHistory, isActive: isHistoryOpen },
           { icon: Settings, label: lang === 'CN' ? '配置' : 'CONFIG', labelCn: '配置', labelEn: 'CONFIG', onClick: openSettings, isActive: false }
@@ -154,6 +157,16 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           </button>
         ))}
         <div className="h-4 w-px bg-zinc-800"></div>
+        <button
+          onClick={() => setShowRings(!showRings)}
+          className={`flex items-center gap-2 transition-all duration-100 group ${showRings ? "text-rose-400" : "text-zinc-500"}`}
+          title={lang === 'CN' ? "背景圆环开关" : "Background Rings Toggle"}
+        >
+          <Aperture size={16} className={`shrink-0 transition-all duration-300 ${showRings ? 'rotate-180 text-rose-400' : 'text-zinc-600'}`} />
+          <span className="text-[10px] font-bold uppercase tracking-[0.2em]">
+            {lang === 'CN' ? (showRings ? "背景开" : "背景关") : (showRings ? "ASTROLABE" : "ASTROLABE OFF")}
+          </span>
+        </button>
         <button
           onClick={() => setLang(lang === 'CN' ? 'EN' : 'CN')}
           className="flex items-center justify-center w-7 h-7 rounded border border-zinc-800 hover:border-zinc-500 bg-zinc-900/50 text-[10px] font-bold text-zinc-400 hover:text-white transition-all duration-100"

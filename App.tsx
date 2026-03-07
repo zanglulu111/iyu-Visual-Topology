@@ -74,6 +74,7 @@ const App: React.FC = () => {
     const [narrativeFieldState, setNarrativeFieldState] = useState<NarrativeFieldState>({});
     const [savedFieldStates, setSavedFieldStates] = useState<Record<string, NarrativeFieldState>>({});
     const [worldLawConfig, setWorldLawConfig] = useState<WorldLawConfig>({ physics: 'STRICT', context: 'PURE' });
+    const [showRings, setShowRings] = useState(true);
 
     // FIXED: Always maintain 7 slots
     const [colorPalette, setColorPalette] = useState<string[]>(Array(7).fill(""));
@@ -420,15 +421,19 @@ const App: React.FC = () => {
         setCachedBlueprints({});
         setWorldLawConfig({ physics: 'STRICT', context: 'PURE' });
 
-        if (id !== DriverType.AESTHETIC) {
-            setIsSkinOpen(true);
-        } else {
+        // Aesthetic mode: close all sidebars by default
+        if (id === DriverType.AESTHETIC) {
             setIsSkinOpen(false);
+            setIsAestheticInputOpen(false);
+            setIsVisionOpen(false);
             // Ensure palette is clean for new aesthetic session
             setColorPalette(Array(7).fill(""));
+        } else {
+            // Other modes: open both left and right sidebars by default
+            setIsSkinOpen(true);
+            setIsVisionOpen(true);
+            setIsAestheticInputOpen(false);
         }
-        setIsVisionOpen(false);
-        setIsAestheticInputOpen(false);
         closeAllModals();
     };
 
@@ -1174,6 +1179,8 @@ const App: React.FC = () => {
                         openProfile={() => setIsProfileOpen(true)}
                         onLogout={() => supabaseAuthService.signOut()}
                         currentUser={currentUser}
+                        showRings={showRings}
+                        setShowRings={setShowRings}
                     />
 
                     <main className="flex-1 overflow-hidden relative">
@@ -1204,6 +1211,7 @@ const App: React.FC = () => {
                                 onPaletteChange={setColorPalette}
                                 onApplyPreset={handleApplyPreset}
                                 onEditCustomDef={handleEditCustomDef}
+                                showRings={showRings}
                             />
                         )}
                         {viewMode === 'DIVERGENCE' && (
