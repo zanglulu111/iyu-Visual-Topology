@@ -174,6 +174,7 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
     };
 
     const handleAddScene = useCallback(() => {
+        setIsStyleExpanded(false); // Close Visual Bible when manually adding scenes
         const id = Date.now().toString() + Math.random().toString(36).substr(2, 5);
         const title = language === 'EN' ? `Scene ${currentSections.length + 1}` : `第 ${currentSections.length + 1} 场`;
         const newSection: ScreenplaySection = {
@@ -400,6 +401,7 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
     };
 
     const handleAutoBreakdown = useCallback(async (instruction?: string, targetCount?: number) => {
+        setIsStyleExpanded(false); // Close Visual Bible when auto-breaking down scenes
         if (!sourceText.trim()) return;
         setIsBreakingDown(true);
         setBreakdownStartTime(Date.now());

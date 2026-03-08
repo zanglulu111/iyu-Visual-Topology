@@ -54,7 +54,7 @@ export const TaskManagerPanel: React.FC<TaskManagerPanelProps> = ({ isOpen, onCl
     };
 
     return (
-        <div className={`fixed bottom-20 right-6 w-[400px] max-h-[500px] h-[60vh] bg-zinc-950 border border-zinc-800/80 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] z-50 flex flex-col transform transition-all duration-300 origin-bottom ${isOpen ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0 pointer-events-none'}`}>
+        <div className={`fixed bottom-20 right-6 w-[400px] max-h-[500px] h-[60vh] bg-zinc-950 border border-zinc-800/80 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] z-[120] flex flex-col transform transition-all duration-300 origin-bottom ${isOpen ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0 pointer-events-none'}`}>
             <div className="flex justify-between items-center p-4 border-b border-zinc-800/80 bg-zinc-900/50 rounded-t-xl">
                 <div className="flex items-center gap-2">
                     <Activity size={18} className="text-gold-primary" />

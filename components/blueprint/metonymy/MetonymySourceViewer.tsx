@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { FileText, Loader2, Scissors, ListChecks, MousePointer2, Eye, Edit3, CheckSquare, Square, Undo2, Eraser, RefreshCcw, Plus, ChevronDown } from 'lucide-react';
 import { BlueprintLanguage, ScreenplaySection } from '../../../types';
 import { splitIntoParagraphs, getSceneColor } from '../../../utils/metonymyUtils';
@@ -35,13 +35,30 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
     const [targetSceneId, setTargetSceneId] = useState<string | null>(activeSceneId);
     const [isBreakdownModalOpen, setIsBreakdownModalOpen] = useState(false);
 
+    // Measurement ref for fixing position
+    const containerRef = useRef<HTMLDivElement>(null);
+
+
     const paragraphs = useMemo(() => {
         // User Request: Always show the original complete story in this module.
         // Do not switch to base script even if a preset is mounted.
         return splitIntoParagraphs(text);
     }, [text]);
 
-    // Get indices belonging to the currently active scene
+    // Map paragraphs to their assigned scenes for visualization
+    const paraToSceneMap = useMemo(() => {
+        const map = new Map<number, { index: number; color: any; isActive: boolean; sectionId: string }>();
+        sections.forEach((s, sIdx) => {
+            const isActive = s.id === activeSceneId;
+            const color = getSceneColor(sIdx);
+            s.sourceIndices?.forEach(pIdx => {
+                map.set(pIdx, { index: sIdx, color, isActive, sectionId: s.id });
+            });
+        });
+        return map;
+    }, [sections, activeSceneId]);
+
+    // Get indices belonging to the currently active scene (for legacy compatibility/selection mode)
     const activeSceneIndices = useMemo(() => {
         if (!activeSceneId) return new Set<number>();
         const section = sections.find(s => s.id === activeSceneId);
@@ -204,6 +221,8 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
         e.stopPropagation();
         if (text.trim().length === 0) return;
         setIsBreakdownModalOpen(true);
+        // Task 4: Clicking Smart Breakdown should close selection mode
+        setIsSelectionMode(false);
     };
 
     const handleConfirmBreakdown = (instruction: string, targetCount?: number) => {
@@ -212,7 +231,7 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
     };
 
     return (
-        <div className="flex flex-col h-full bg-[#0a0a0a] border-r border-zinc-800 relative group">
+        <div ref={containerRef} className="flex flex-col h-full bg-[#0a0a0a] border-r border-zinc-800 relative group">
             <div className="h-16 border-b border-zinc-800 flex justify-between items-center shrink-0 bg-[#0c0c0c] px-4">
                 <div className="flex items-center gap-2 text-zinc-400 font-bold text-xs uppercase tracking-widest">
                     <FileText size={14} className={themeAccent} />
@@ -252,7 +271,7 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
                 </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-0 bg-[#0a0a0a] pb-24 relative">
+            <div className={`flex-1 overflow-y-auto custom-scrollbar p-0 bg-[#0a0a0a] relative ${isSelectionMode ? 'pb-80' : 'pb-10'}`}>
                 {isEditing ? (
                     <textarea
                         value={text}
@@ -264,16 +283,21 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
                     <div className="flex flex-col min-h-full">
                         {paragraphs.map((para, idx) => {
                             const isSelected = selectedIndices.has(idx);
-                            const isInActiveScene = activeSceneIndices.has(idx);
+                            
+                            // Get scene context for this paragraph
+                            const sceneInfo = paraToSceneMap.get(idx);
+                            const isInAnyScene = !!sceneInfo;
+                            const isInActiveScene = sceneInfo?.isActive || false;
+                            
+                            // Use the specific scene color, fall back to active theme color
+                            const currentSceneColor = sceneInfo?.color || getSceneColor(activeSceneIndex - 1);
 
                             let bgClass = "";
-                            let borderClass = "border-l-2 border-transparent";
+                            let borderClass = "border-l-2 border-r-2 border-transparent";
+                            let borderTopClass = "";
                             let textClass = "text-zinc-400";
                             let sceneLabel = null;
                             let marker = null;
-
-                            // Scene Color for current active scene
-                            const sceneColor = getSceneColor(activeSceneIndex - 1);
 
                             if (isSelectionMode) {
                                 // Selection Mode Visuals
@@ -281,56 +305,62 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
                                     bgClass = "bg-white/10";
                                     // If part of active scene, keep the scene colored border
                                     if (isInActiveScene) {
-                                        borderClass = `border-l-2 ${sceneColor.border}`;
+                                        borderClass = `border-l-2 border-r-2 ${currentSceneColor.border}`;
                                     } else {
-                                        borderClass = "border-l-2 border-white";
+                                        borderClass = "border-l-2 border-r-2 border-white";
                                     }
                                     textClass = "text-white";
-                                    marker = <CheckSquare size={14} className={isInActiveScene ? sceneColor.text : "text-white"} />;
+                                    marker = <CheckSquare size={14} className={isInActiveScene ? currentSceneColor.text : "text-white"} />;
                                 } else {
                                     // Not selected but in mode
                                     bgClass = "hover:bg-zinc-900/50";
                                     textClass = "text-zinc-500";
                                     // If part of active scene, show subtle hint
                                     if (isInActiveScene) {
-                                        borderClass = `border-l-2 ${themeAccent.replace('text-', 'border-').replace('400', '500')}/20`;
+                                        borderClass = `border-l-2 border-r-2 ${themeAccent.replace('text-', 'border-').replace('400', '500')}/20`;
                                     }
                                     marker = <Square size={14} className="text-zinc-700" />;
                                 }
                             } else {
                                 // View Mode Visuals
-                                if (isInActiveScene) {
-                                    // Use Active Scene Color/Style
-                                    bgClass = sceneColor.activeBg;
-                                    borderClass = `border-l-2 ${sceneColor.border}`;
-                                    textClass = "text-zinc-100";
+                                if (isInAnyScene) {
+                                    // Use Scene Block Visuals
+                                    bgClass = currentSceneColor.activeBg;
+                                    borderClass = `border-l-2 border-r-2 ${currentSceneColor.border}`;
+                                    textClass = isInActiveScene ? "text-zinc-100" : "text-zinc-300";
 
-                                    // Show label only if it's the start of the continuous block in this scene
-                                    const prevInScene = activeSceneIndices.has(idx - 1);
-                                    if (!prevInScene) {
-                                        sceneLabel = (
-                                            <div className="mb-2">
-                                                <span className={`
-                                                    text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded
-                                                    ${sceneColor.label}
-                                                `}>
-                                                    {lang === 'EN' ? "ACTIVE SCENE" : "当前场次"}
-                                                </span>
-                                            </div>
-                                        );
+                                    // Block Boundary Check
+                                    const isStartOfBlock = idx === 0 || paraToSceneMap.get(idx - 1)?.sectionId !== sceneInfo.sectionId;
+                                    if (isStartOfBlock) {
+                                        borderTopClass = `border-t-2 ${currentSceneColor.border}`;
+                                        if (isInActiveScene) {
+                                            sceneLabel = (
+                                                <div className="mb-2">
+                                                    <span className={`
+                                                        text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded
+                                                        ${currentSceneColor.label}
+                                                    `}>
+                                                        {lang === 'EN' ? "ACTIVE SCENE" : "当前场次"}
+                                                    </span>
+                                                </div>
+                                            );
+                                        }
                                     }
                                 } else {
                                     bgClass = "hover:bg-zinc-900/30";
                                 }
                             }
 
-                            // Check continuous block for border styling
-                            const nextInActive = activeSceneIndices.has(idx + 1);
-                            const isSameStateAsNext = (isInActiveScene && nextInActive) || (!isInActiveScene && !nextInActive);
-
+                            // Calculate bottom border (either end of block border or divider)
+                            const isEndOfBlock = isInAnyScene && (idx === paragraphs.length - 1 || paraToSceneMap.get(idx + 1)?.sectionId !== sceneInfo.sectionId);
                             let borderBottomClass = 'border-b border-zinc-900/50';
-                            if (!isSelectionMode && isSameStateAsNext && isInActiveScene) {
-                                borderBottomClass = 'border-b border-transparent';
+                            
+                            if (!isSelectionMode && isInAnyScene) {
+                                if (isEndOfBlock) {
+                                    borderBottomClass = `border-b-2 ${currentSceneColor.border}`;
+                                } else {
+                                    borderBottomClass = 'border-b border-transparent';
+                                }
                             }
 
                             return (
@@ -343,6 +373,7 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
                                         ${isSelectionMode ? 'cursor-pointer select-none' : ''}
                                         ${bgClass}
                                         ${borderClass}
+                                        ${borderTopClass}
                                         ${borderBottomClass}
                                     `}
                                 >
@@ -374,64 +405,68 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
             </div>
 
             {isSelectionMode && (
-                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[95%] bg-zinc-950 border border-zinc-700 p-4 rounded-xl shadow-2xl flex flex-col gap-4 animate-in slide-in-from-bottom-2 fade-in z-50">
-                    <div className="flex justify-between items-center text-[10px] text-zinc-400 font-bold uppercase tracking-wider border-b border-zinc-800 pb-2">
-                        <div className="flex items-center gap-2">
-                            <span>{lang === 'EN' ? "Selected Paragraphs" : "已选段落"}: <span className="text-white bg-zinc-800 px-1.5 py-0.5 rounded">{selectedIndices.size}</span></span>
-                            <span className="text-zinc-700">|</span>
-                            <span>Range: <span className={themeAccent}>{getSelectionRangeString()}</span></span>
-                        </div>
-                        <div className="flex gap-3">
-                            <button onClick={handleUndo} disabled={selectionHistory.length === 0} className={`flex items-center gap-1 transition-colors ${selectionHistory.length === 0 ? 'text-zinc-700' : 'text-zinc-400 hover:text-white'}`}>
-                                <Undo2 size={12} /> {lang === 'EN' ? "Undo" : "撤销"}
-                            </button>
-                            <button onClick={clearSelection} className="flex items-center gap-1 hover:text-white transition-colors">
-                                <Eraser size={12} /> {lang === 'EN' ? "Clear" : "清空"}
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Target Scene Selector */}
-                    <div className="flex flex-col gap-2">
-                        <div className="flex items-center gap-2 bg-zinc-900 rounded-lg p-1 border border-zinc-800">
-                            <div className="px-2 text-[10px] font-bold text-zinc-400 uppercase tracking-widest shrink-0">
-                                {lang === 'EN' ? "Target Scene:" : "目标场次："}
+                <div 
+                    className="absolute bottom-4 left-0 right-0 z-[500] flex justify-center animate-in slide-in-from-bottom-2 fade-in pointer-events-none"
+                >
+                    <div className="w-[calc(100%-2rem)] max-w-[420px] bg-zinc-950 border border-zinc-700 p-3 rounded-xl shadow-2xl flex flex-col gap-3 pointer-events-auto">
+                        <div className="flex justify-between items-center text-[9px] text-zinc-400 font-bold uppercase tracking-wider border-b border-zinc-800 pb-2">
+                            <div className="flex items-center gap-2">
+                                <span>{lang === 'EN' ? "Selected Paragraphs" : "已选段落"}: <span className="text-white bg-zinc-800 px-1.5 py-0.5 rounded">{selectedIndices.size}</span></span>
+                                <span className="text-zinc-700">|</span>
+                                <span>Range: <span className={themeAccent}>{getSelectionRangeString()}</span></span>
                             </div>
-                            <div className="relative flex-1">
-                                <select
-                                    value={targetSceneId || ""}
-                                    onChange={(e) => setTargetSceneId(e.target.value)}
-                                    className="w-full bg-transparent text-xs font-bold text-white focus:outline-none appearance-none py-1.5 pl-2 pr-8 cursor-pointer"
+                            <div className="flex gap-3">
+                                <button onClick={handleUndo} disabled={selectionHistory.length === 0} className={`flex items-center gap-1 transition-colors ${selectionHistory.length === 0 ? 'text-zinc-700' : 'text-zinc-400 hover:text-white'}`}>
+                                    <Undo2 size={12} /> {lang === 'EN' ? "Undo" : "撤销"}
+                                </button>
+                                <button onClick={clearSelection} className="flex items-center gap-1 hover:text-white transition-colors">
+                                    <Eraser size={12} /> {lang === 'EN' ? "Clear" : "清空"}
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Target Scene Selector */}
+                        <div className="flex flex-col gap-2">
+                            <div className="flex items-center gap-2 bg-zinc-900 rounded-lg p-1 border border-zinc-800">
+                                <div className="px-2 text-[9px] font-bold text-zinc-400 uppercase tracking-widest shrink-0">
+                                    {lang === 'EN' ? "Target Scene:" : "目标场次："}
+                                </div>
+                                <div className="relative flex-1">
+                                    <select
+                                        value={targetSceneId || ""}
+                                        onChange={(e) => setTargetSceneId(e.target.value)}
+                                        className="w-full bg-transparent text-[10px] font-bold text-white focus:outline-none appearance-none py-1.5 pl-2 pr-8 cursor-pointer"
+                                    >
+                                        <option value="" disabled>{lang === 'EN' ? "Select a Scene..." : "选择目标场次..."}</option>
+                                        {sections.map((s, idx) => (
+                                            <option key={s.id} value={s.id} className="bg-zinc-900 text-zinc-300">
+                                                #{idx + 1} - {s.title}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
+                                </div>
+                            </div>
+
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => handleAction('ASSIGN')}
+                                    disabled={selectedIndices.size === 0 || !targetSceneId}
+                                    className={`flex-1 py-2 px-2 bg-${themeColorBase}/10 border border-${themeColorBase}/30 text-${themeColorBase} hover:bg-${themeColorBase}/20 rounded-lg flex items-center justify-center gap-2 transition-all text-[10px] font-bold disabled:opacity-50 disabled:cursor-not-allowed`}
+                                    title="Sync selected text to target scene"
                                 >
-                                    <option value="" disabled>{lang === 'EN' ? "Select a Scene..." : "选择目标场次..."}</option>
-                                    {sections.map((s, idx) => (
-                                        <option key={s.id} value={s.id} className="bg-zinc-900 text-zinc-300">
-                                            #{idx + 1} - {s.title}
-                                        </option>
-                                    ))}
-                                </select>
-                                <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
+                                    <RefreshCcw size={14} />
+                                    {lang === 'EN' ? "Sync to Target" : "同步至目标场次"}
+                                </button>
+                                <button
+                                    onClick={() => handleAction('NEW')}
+                                    disabled={selectedIndices.size === 0}
+                                    className="flex-1 py-2 px-2 bg-zinc-800 border border-zinc-600 text-zinc-300 hover:text-white hover:border-zinc-500 rounded-lg flex items-center justify-center gap-2 transition-all text-[10px] font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                                    title="Create new scene from selected text"
+                                >
+                                    <Plus size={14} /> {lang === 'EN' ? "Create New Scene" : "新建场次"}
+                                </button>
                             </div>
-                        </div>
-
-                        <div className="flex gap-2">
-                            <button
-                                onClick={() => handleAction('ASSIGN')}
-                                disabled={selectedIndices.size === 0 || !targetSceneId}
-                                className={`flex-1 py-2.5 px-2 bg-${themeColorBase}/10 border border-${themeColorBase}/30 text-${themeColorBase} hover:bg-${themeColorBase}/20 rounded-lg flex items-center justify-center gap-2 transition-all text-xs font-bold disabled:opacity-50 disabled:cursor-not-allowed`}
-                                title="Sync selected text to target scene"
-                            >
-                                <RefreshCcw size={14} />
-                                {lang === 'EN' ? "Sync to Target" : "同步至目标场次"}
-                            </button>
-                            <button
-                                onClick={() => handleAction('NEW')}
-                                disabled={selectedIndices.size === 0}
-                                className="flex-1 py-2.5 px-2 bg-zinc-800 border border-zinc-600 text-zinc-300 hover:text-white hover:border-zinc-500 rounded-lg flex items-center justify-center gap-2 transition-all text-xs font-bold disabled:opacity-50 disabled:cursor-not-allowed"
-                                title="Create new scene from selected text"
-                            >
-                                <Plus size={14} /> {lang === 'EN' ? "Create New Scene" : "新建场次"}
-                            </button>
                         </div>
                     </div>
                 </div>

@@ -642,7 +642,7 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
                                                     setAssetConfigTarget({ type, asset });
                                                 }}
                                                 disabled={isAnalyzingAsset === asset.id}
-                                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition-all text-[10px] font-bold uppercase tracking-wider bg-${colorBase}/10 text-${colorBase} hover:bg-${colorBase}/20 border border-${colorBase}/30 disabled:opacity-50 disabled:cursor-not-allowed`}
+                                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition-all text-[11px] font-bold uppercase tracking-wider bg-${colorBase}/10 text-${colorBase} hover:bg-${colorBase}/20 border border-${colorBase}/30 disabled:opacity-50 disabled:cursor-not-allowed`}
                                                 title={lang === 'EN' ? "Asset Design" : "资产设计"}
                                             >
                                                 {isAnalyzingAsset === asset.id ? <Loader2 size={12} className="animate-spin" /> : <ScanEye size={12} />}
@@ -745,7 +745,7 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
                                     {type !== 'props' && (
                                         <div className="space-y-1">
                                             <div className="flex items-center justify-between gap-2">
-                                                <span className="text-[9px] font-bold text-zinc-100 uppercase tracking-widest block">
+                                                <span className="text-[11px] font-bold text-white uppercase tracking-widest block">
                                                     {lang === 'EN' ? `Concept Art Prompt` : `概念图提示词`}
                                                 </span>
                                             </div>
@@ -798,7 +798,7 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
                         <h3 className="text-base font-bold text-white uppercase tracking-widest">
                             {lang === 'EN' ? "Core Visual Bible" : "核心视觉圣经"}
                         </h3>
-                        <p className="text-[9px] text-zinc-200 font-mono uppercase tracking-[0.2em] mt-0.5">
+                        <p className="text-[11px] text-zinc-300 font-mono uppercase tracking-[0.2em] mt-1">
                             {lang === 'EN' ? "Unified Visual Language & Assets Specification" : "统一视觉语言与资产规范"}
                         </p>
                     </div>
@@ -856,7 +856,7 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
                             ) : (
                                 <Copy size={12} className="group-hover:scale-110 transition-transform" />
                             )}
-                            <span className="text-[10px] font-bold uppercase tracking-widest">{lang === 'EN' ? "Global Copy" : "全局复制"}</span>
+                            <span className="text-[11px] font-bold uppercase tracking-widest">{lang === 'EN' ? "Global Copy" : "全局复制"}</span>
                         </button>
                     </div>
 
@@ -882,7 +882,7 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
                                             <button
                                                 onClick={handleAnalyzeAll}
                                                 disabled={isAnalyzing || isAnalyzingTone}
-                                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition-all text-[10px] font-bold uppercase tracking-wider bg-${colorBase}/10 text-${colorBase} hover:bg-${colorBase}/20 border border-${colorBase}/30 disabled:opacity-50 disabled:cursor-not-allowed`}
+                                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition-all text-[11px] font-bold uppercase tracking-wider bg-${colorBase}/10 text-${colorBase} hover:bg-${colorBase}/20 border border-${colorBase}/30 disabled:opacity-50 disabled:cursor-not-allowed`}
                                                 title={lang === 'EN' ? "Reference Reverse" : (activePreset.id === 'original' ? "参考文本反推" : "参考图视觉反推")}
                                             >
                                                 {isAnalyzing || isAnalyzingTone ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
@@ -937,7 +937,7 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
                                     {activePreset.toneImage ? (
                                         <img src={activePreset.toneImage} className="w-full h-full object-contain opacity-100 transition-opacity" alt="Tone Reference" />
                                     ) : (
-                                        <div className="absolute inset-0 flex flex-col items-center justify-center text-zinc-500 gap-2">
+                                        <div className="absolute inset-0 flex flex-col items-center justify-center text-zinc-400 gap-2">
                                             <ImageIcon size={32} />
                                             <span className="text-xs uppercase font-bold tracking-widest">{lang === 'EN' ? "Upload Reference" : "点击上传参考图"}</span>
                                         </div>

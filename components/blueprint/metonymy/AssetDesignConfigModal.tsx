@@ -124,7 +124,7 @@ export const AssetDesignConfigModal: React.FC<AssetDesignConfigModalProps> = ({
     const currentHints: VisualBibleAnalysisHints = { medium, dialogue, detailImages };
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[100] flex items-start justify-center p-4 pt-16 pb-24 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
             <div className="w-full max-w-2xl bg-[#0c0c0c] border border-zinc-800 rounded-xl shadow-2xl flex flex-col overflow-hidden">
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-900 shrink-0">
@@ -133,7 +133,7 @@ export const AssetDesignConfigModal: React.FC<AssetDesignConfigModalProps> = ({
                             <Sparkles size={18} className={themeAccent} />
                             {lang === 'CN' ? "资产设计" : "Asset Design Configuration"}
                         </h2>
-                        <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mt-0.5">
+                        <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mt-1">
                             {lang === 'CN' ? "提供详细参考与约束以生成精准的资产描述" : "Provide details & constraints to generate accurate asset descriptions"}
                         </span>
                     </div>
@@ -146,7 +146,7 @@ export const AssetDesignConfigModal: React.FC<AssetDesignConfigModalProps> = ({
                 <div className="p-6 space-y-6 overflow-y-auto custom-scrollbar max-h-[70vh]">
                     {/* Medium Selection Grid */}
                     <div className="space-y-3">
-                        <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest px-1">
+                        <label className="text-xs font-bold text-zinc-300 uppercase tracking-widest px-1">
                             {lang === 'CN' ? "1. 选择物理媒介 (黄金准则)" : "1. SELECT PHYSICAL MEDIUM (GOLDEN RULE)"}
                         </label>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -175,15 +175,15 @@ export const AssetDesignConfigModal: React.FC<AssetDesignConfigModalProps> = ({
                     {/* Detail Images Upload */}
                     <div className="space-y-3">
                         <div className="flex items-center justify-between px-1">
-                            <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-2">
+                            <label className="text-xs font-bold text-zinc-300 uppercase tracking-widest flex items-center gap-2">
                                 <ImagePlus size={12} />
                                 {lang === 'CN' ? "2. 附加细节参考图 (最多5张)" : "2. DETAIL REFERENCES (MAX 5)"}
                             </label>
-                            <span className="text-[10px] text-zinc-600">
+                            <span className="text-xs text-zinc-500">
                                 {detailImages.length} / 5
                             </span>
                         </div>
-                        <p className="text-[10px] text-zinc-500 px-1 leading-tight">
+                        <p className="text-xs text-zinc-400 px-1 leading-tight">
                             {lang === 'CN'
                                 ? "强烈建议上传角色的专属武器、配饰、重点材质或面部特征特写等。如果没有附加图，系统将完全以主图为准，绝不擅自增加不存在的道具。"
                                 : "Upload close-ups for weapons, accessories, or specific features. If absent, the AI will strictly adhere ONLY to the main image without hallucinating extra props."}
@@ -232,7 +232,7 @@ export const AssetDesignConfigModal: React.FC<AssetDesignConfigModalProps> = ({
 
                     {/* Additional Dialogue */}
                     <div className="space-y-3">
-                        <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest px-1 flex items-center gap-2">
+                        <label className="text-xs font-bold text-zinc-300 uppercase tracking-widest px-1 flex items-center gap-2">
                             <MessageSquare size={12} />
                             {lang === 'CN' ? "3. 人工引导与纠偏 (可选)" : "3. MANUAL GUIDANCE (OPTIONAL)"}
                         </label>
@@ -279,13 +279,13 @@ export const AssetDesignConfigModal: React.FC<AssetDesignConfigModalProps> = ({
                 <div className="px-6 py-4 border-t border-zinc-900 flex justify-end gap-3 bg-black/20">
                     <button
                         onClick={() => onClose(currentHints)}
-                        className="px-4 py-2 text-xs font-bold text-zinc-500 hover:text-white transition-colors uppercase tracking-widest"
+                        className="px-4 py-2 text-sm font-bold text-zinc-400 hover:text-white transition-colors uppercase tracking-widest"
                     >
                         {lang === 'CN' ? "取消" : "CANCEL"}
                     </button>
                     <button
                         onClick={() => onConfirm(currentHints)}
-                        className={`px-6 py-2 bg-${colorBase}/10 hover:bg-${colorBase}/20 text-${colorBase} border border-${colorBase}/30 font-bold text-xs rounded transition-all flex items-center gap-2 shadow-[0_4px_15px_rgba(0,0,0,0.3)]`}
+                        className={`px-6 py-2 bg-${colorBase}/10 hover:bg-${colorBase}/20 text-${colorBase} border border-${colorBase}/30 font-bold text-sm rounded transition-all flex items-center gap-2 shadow-[0_4px_15px_rgba(0,0,0,0.3)]`}
                     >
                         <Sparkles size={14} />
                         {lang === 'CN' ? "生成资产设计" : "GENERATE DESIGN"}

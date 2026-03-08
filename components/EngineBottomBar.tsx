@@ -38,6 +38,8 @@ interface EngineBottomBarProps {
     hasFieldState: boolean;
     onRandomizeBlock?: (blockId: string) => void;
     onClearBlock?: (blockId: string) => void;
+    isTaskManagerOpen: boolean;
+    setIsTaskManagerOpen: (v: boolean) => void;
 }
 
 export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
@@ -70,9 +72,10 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
     handleTraverseFantasy,
     hasFieldState,
     onRandomizeBlock,
-    onClearBlock
+    onClearBlock,
+    isTaskManagerOpen,
+    setIsTaskManagerOpen
 }) => {
-    const [isTaskManagerOpen, setIsTaskManagerOpen] = React.useState(false);
     const [activeTaskCount, setActiveTaskCount] = React.useState(0);
 
     React.useEffect(() => {
@@ -116,7 +119,7 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
 
     return (
         <div className="fixed bottom-0 left-0 right-0 h-20 bg-black/90 backdrop-blur-md border-t border-white/10 flex items-center justify-between px-6 md:px-12 z-40">
-            <div className="flex items-center gap-4 shrink-0">
+            <div className="flex items-center gap-4 shrink-0 w-[180px] md:w-[240px]">
                 <button onClick={handleBackStep} className="flex items-center gap-3 px-6 py-3 bg-zinc-900/50 hover:bg-zinc-800 border border-zinc-700 rounded-lg text-xs font-bold uppercase tracking-widest text-zinc-300 hover:text-white transition-all duration-100 group min-w-[140px]" >
                     <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
                     <span className="hidden md:inline">{lang === 'CN' ? "返回首页" : "Home"}</span>
@@ -124,14 +127,7 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
             </div>
 
             <div className="flex-1 flex justify-center items-center gap-4 md:gap-6 mx-4 overflow-x-auto no-scrollbar">
-                {selectedDriver === DriverType.AESTHETIC && setIsAestheticInputOpen && (
-                    <button onClick={() => setIsAestheticInputOpen(!isAestheticInputOpen)} className="flex flex-col items-center gap-1.5 shrink-0 min-w-[60px]" >
-                        <MessageSquare size={18} className={isAestheticInputOpen ? "text-rose-400" : "text-zinc-400"} />
-                        <span className={`text-[9px] font-bold uppercase tracking-wider ${isAestheticInputOpen ? "text-rose-400" : "text-zinc-300"}`}>
-                            {lang === 'CN' ? "自然输入" : "Input"}
-                        </span>
-                    </button>
-                )}
+
 
                 {selectedDriver !== DriverType.AESTHETIC && (
                     <button onClick={() => setIsSkinOpen(!isSkinOpen)} className="flex flex-col items-center gap-1.5 shrink-0 min-w-[60px]" >
@@ -242,7 +238,7 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
                 </button>
             </div>
 
-            <div className="flex items-center gap-4 shrink-0">
+            <div className="flex items-center gap-4 shrink-0 w-[180px] md:w-[240px] justify-end">
 
                 <button
                     onClick={() => handleTraverseFantasy(false)}
@@ -257,12 +253,6 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
                     {!isGenerating && <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />}
                 </button>
             </div>
-
-            <TaskManagerPanel
-                isOpen={isTaskManagerOpen}
-                onClose={() => setIsTaskManagerOpen(false)}
-                lang={lang}
-            />
         </div>
     );
 };

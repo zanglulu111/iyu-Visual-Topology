@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { DriverSelector } from './DriverSelector';
 import { DriverType, User } from '../types';
-import { Globe, Wand2, HelpCircle, History as HistoryIcon, Settings, User as UserIcon, BookOpen, Terminal, Database, ShieldAlert, Cpu, Film, Folder } from 'lucide-react';
+import { Globe, Wand2, HelpCircle, History as HistoryIcon, Settings, User as UserIcon, BookOpen, Terminal, Database, ShieldAlert, Cpu, Film, Folder, Aperture, Zap } from 'lucide-react';
 import { ProductManualModal } from './ProductManualModal';
 import { SutureModal } from './SutureModal';
 import { HistoryModal } from './HistoryModal';
@@ -42,6 +42,8 @@ const AnimatedText = ({ cn, en, lang, className = "", hClass = "h-5" }: { cn: Re
 interface LandingViewProps {
   lang: 'CN' | 'EN';
   setLang: (lang: 'CN' | 'EN') => void;
+  setPage: (page: 0 | 1) => void;
+  setViewMode: (mode: any) => void;
   selectedDriver: DriverType | null;
   onDriverSelect: (id: DriverType) => void;
   hoveredDriver: DriverType | null;
@@ -69,6 +71,8 @@ interface LandingViewProps {
 export const LandingView: React.FC<LandingViewProps> = ({
   lang,
   setLang,
+  setPage,
+  setViewMode,
   selectedDriver,
   onDriverSelect,
   hoveredDriver,
@@ -148,23 +152,29 @@ export const LandingView: React.FC<LandingViewProps> = ({
         </div>
 
         <div className="flex items-center gap-4">
-          <button onClick={() => setLang(lang === 'CN' ? 'EN' : 'CN')} className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-white transition-colors">
-            <AnimatedText lang={lang} hClass="h-4" cn="EN" en="中" />
+          <button 
+            onClick={() => setLang(lang === 'CN' ? 'EN' : 'CN')} 
+            className="flex items-center justify-center w-7 h-7 rounded border border-zinc-800 hover:border-zinc-500 bg-zinc-900/50 text-[10px] font-bold text-zinc-400 hover:text-white transition-all duration-100"
+            title="Toggle Language"
+          >
+            {lang === 'CN' ? '中' : 'EN'}
           </button>
           <div className="h-4 w-px bg-zinc-800"></div>
           <button onClick={() => currentUser.id !== 'guest_user' ? openProfile() : openAuth()} className="flex items-center gap-2 group transition-all duration-100">
             {currentUser.id !== 'guest_user' ? (
-              <div className={`w-5 h-5 rounded-full ${!currentUser.avatarUrl && (currentUser.avatarColor || 'bg-gold-primary')} border border-zinc-700 flex items-center justify-center text-[10px] font-bold text-white overflow-hidden`}>
+              <div className={`w-5 h-5 rounded-full ${!currentUser.avatarUrl && (currentUser.avatarColor || 'bg-gold-primary')} border border-zinc-700 flex items-center justify-center text-[10px] font-bold text-white overflow-hidden shadow-lg`}>
                 {currentUser.avatarUrl ? <img src={currentUser.avatarUrl} alt="avatar" className="w-full h-full object-cover" /> : currentUser.username.substring(0, 1).toUpperCase()}
               </div>
             ) : (
-              <UserIcon size={14} className="text-zinc-500 group-hover:text-white transition-colors" />
+              <div className="w-5 h-5 rounded-full border border-zinc-700 flex items-center justify-center bg-zinc-800 text-zinc-500 group-hover:text-white transition-colors">
+                <UserIcon size={12} />
+              </div>
             )}
-            <div className="hidden sm:block">
+            <div className="flex items-center gap-2">
               <AnimatedText
                 lang={lang}
                 hClass="h-4"
-                className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 group-hover:text-white transition-colors"
+                className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 group-hover:text-white transition-colors"
                 cn={currentUser.id !== 'guest_user' ? currentUser.username : '未登录'}
                 en={currentUser.id !== 'guest_user' ? currentUser.username : 'GUEST'}
               />
@@ -174,9 +184,15 @@ export const LandingView: React.FC<LandingViewProps> = ({
       </header>
 
       <div className="flex-1 flex overflow-hidden relative">
-        <BorromeanRings centered={false} />
         {/* Ambient Glow */}
         <div className={`absolute inset-0 pointer-events-none transition-shadow duration-1000 opacity-20 shadow-[inset_0_0_150px_rgba(0,0,0,1)] ${getGlowTheme(hoveredDriver)}`}></div>
+
+        {/* Background Rings */}
+        <div className="absolute inset-0 flex items-center justify-end pr-[5%] opacity-[0.35] pointer-events-none z-0 select-none overflow-hidden scale-[1.1]">
+          <div className="w-[1000px] h-[1000px] flex items-center justify-center translate-x-1/4">
+            <BorromeanRings centered={true} opacity={1} />
+          </div>
+        </div>
 
         {/* LEFT SIDEBAR: SIGNAL MONITOR */}
         <div className="w-80 border-r border-zinc-900/60 bg-[#080808]/40 backdrop-blur flex flex-col shrink-0 hidden lg:flex z-10">
@@ -205,7 +221,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
             />
           </div>
 
-          {/* Quick Access Menu */}
+            {/* Quick Access Menu */}
           <div className="p-4 border-b border-zinc-900/60 shrink-0 space-y-1">
             <div className="px-4 py-2">
               <AnimatedText
@@ -217,13 +233,14 @@ export const LandingView: React.FC<LandingViewProps> = ({
               />
             </div>
             {[
-              // { icon: Wand2, labelCn: '换喻引擎', labelEn: 'METONYMY', onClick: handleOpenMetonymyPage, color: 'text-amber-400' },
+              { icon: Aperture, labelCn: '三界拓扑', labelEn: 'RSI TOPOLOGY', onClick: () => { setPage(1); setViewMode('RSI'); }, color: 'text-gold-primary' },
+              { icon: Zap, labelCn: '欲望图式', labelEn: 'DESIRE GRAPH', onClick: () => { setPage(1); setViewMode('TOPOLOGY'); }, color: 'text-amber-400' },
               { icon: Folder, labelCn: '案例档案', labelEn: 'CASE ARCHIVES', onClick: () => setIsArchiveOpen(true), color: 'text-rose-400' },
               { icon: Film, labelCn: '影像资料库', labelEn: 'VIDEO ARCHIVE', onClick: () => setIsVideoLibraryOpen(true), color: 'text-cyan-300' },
               { icon: BookOpen, labelCn: '哲学辞典', labelEn: 'CODEX', onClick: openManual, color: 'text-zinc-300' },
               { icon: HistoryIcon, labelCn: '欲望档案', labelEn: 'ARCHIVES', onClick: openHistory, color: 'text-zinc-300' },
               { icon: Settings, labelCn: '系统配置', labelEn: 'CONFIG', onClick: openSettings, color: 'text-zinc-300' }
-            ].map((item, idx) => (
+            ].map((item: any, idx) => (
               <button
                 key={idx}
                 onClick={item.onClick}
@@ -315,63 +332,59 @@ export const LandingView: React.FC<LandingViewProps> = ({
               <DriverSelector selectedDriver={selectedDriver} onSelect={onDriverSelect} lang={lang} hoveredDriver={hoveredDriver} onHover={setHoveredDriver} />
             </div>
             {/* Additional Info / Footer Widgets */}
-            <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6 opacity-80 shrink-0 pb-12">
-              <div onClick={openManual} className="border border-zinc-900 bg-[#080808]/20 hover:bg-[#0c0c0c]/40 backdrop-blur-sm p-6 rounded cursor-pointer transition-all group hover:border-zinc-700">
-                <div className="flex items-center gap-3 mb-3">
-                  <BookOpen size={18} className="text-zinc-500 group-hover:text-gold-primary transition-colors shrink-0" />
-                  <AnimatedText
-                    lang={lang}
-                    hClass="h-4"
-                    className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-300 group-hover:text-white transition-colors"
-                    cn="访问辞典数据"
-                    en="ACCESS CODEX DATA"
-                  />
+            <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8 px-4 shrink-0 pb-16">
+              <div onClick={() => { setPage(1); setViewMode('RSI'); }} className="border border-zinc-900/40 bg-[#080808]/20 hover:bg-[#0c0c0c]/40 hover:border-gold-primary/30 backdrop-blur-sm p-6 rounded cursor-pointer transition-all group shadow-[0_5px_15px_rgba(0,0,0,0.2)]">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded border border-zinc-900 flex items-center justify-center bg-zinc-900/20 group-hover:border-gold-primary/40 group-hover:bg-gold-primary/5 transition-all">
+                    <BookOpen size={18} className="text-zinc-500 group-hover:text-gold-primary transition-colors" />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <AnimatedText
+                      lang={lang}
+                      hClass="h-4"
+                      className="text-[13px] font-bold tracking-[0.15em] text-zinc-300 group-hover:text-white transition-colors"
+                      cn="访问辞典数据"
+                      en="ACCESS CODEX DATA"
+                    />
+                    <p className="text-[10px] text-zinc-500 opacity-60 font-light group-hover:opacity-100 transition-opacity">查阅拉康、齐泽克等理论词条，理解底层系统的运转逻辑。</p>
+                  </div>
                 </div>
-                <AnimatedText
-                  lang={lang}
-                  hClass="h-[40px]"
-                  className="text-xs text-zinc-600 font-mono leading-relaxed"
-                  cn="查阅拉康、齐泽克等理论词条，理解底层系统的运转逻辑。"
-                  en="Consult Lacan, Zizek theoretical entries to understand the underlying system logic."
-                />
               </div>
-              <div onClick={() => setIsVideoLibraryOpen(true)} className="border border-zinc-900 bg-[#080808]/20 hover:bg-[#0c0c0c]/40 backdrop-blur-sm p-6 rounded cursor-pointer transition-all group hover:border-cyan-800">
-                <div className="flex items-center gap-3 mb-3">
-                  <Film size={18} className="text-zinc-500 group-hover:text-cyan-400 transition-colors shrink-0" />
-                  <AnimatedText
-                    lang={lang}
-                    hClass="h-4"
-                    className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-300 group-hover:text-white transition-colors"
-                    cn="影像资料库"
-                    en="VIDEO ARCHIVE"
-                  />
+
+              <div onClick={() => setIsVideoLibraryOpen(true)} className="border border-zinc-900/40 bg-[#080808]/20 hover:bg-[#0c0c0c]/40 hover:border-cyan-500/30 backdrop-blur-sm p-6 rounded cursor-pointer transition-all group shadow-[0_5px_15px_rgba(0,0,0,0.2)]">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded border border-zinc-900 flex items-center justify-center bg-zinc-900/20 group-hover:border-cyan-500/40 group-hover:bg-cyan-500/5 transition-all">
+                    <Film size={18} className="text-zinc-500 group-hover:text-cyan-400 transition-colors" />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <AnimatedText
+                      lang={lang}
+                      hClass="h-4"
+                      className="text-[13px] font-bold tracking-[0.15em] text-zinc-300 group-hover:text-white transition-colors"
+                      cn="影像资料库"
+                      en="VIDEO ARCHIVE"
+                    />
+                    <p className="text-[10px] text-zinc-500 opacity-60 font-light group-hover:opacity-100 transition-opacity">浏览迷雾学派的影像资料，深入视觉拓扑学的核心脉络。</p>
+                  </div>
                 </div>
-                <AnimatedText
-                  lang={lang}
-                  hClass="h-[40px]"
-                  className="text-xs text-zinc-600 font-mono leading-relaxed"
-                  cn="浏览迷雾学派的影像资料，深入视觉拓扑学的核心脉络。"
-                  en="Browse the visual archives of Mist School. Dive into the core of visual topology."
-                />
               </div>
-              <div onClick={openHistory} className="border border-zinc-900 bg-[#080808]/20 hover:bg-[#0c0c0c]/40 backdrop-blur-sm p-6 rounded cursor-pointer transition-all group hover:border-zinc-700">
-                <div className="flex items-center gap-3 mb-3">
-                  <HistoryIcon size={18} className="text-zinc-500 group-hover:text-cyan-400 transition-colors shrink-0" />
-                  <AnimatedText
-                    lang={lang}
-                    hClass="h-4"
-                    className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-300 group-hover:text-white transition-colors"
-                    cn="检视生成档案"
-                    en="REVIEW ARCHIVES"
-                  />
+
+              <div onClick={openHistory} className="border border-zinc-900/40 bg-[#080808]/20 hover:bg-[#0c0c0c]/40 hover:border-zinc-700 backdrop-blur-sm p-6 rounded cursor-pointer transition-all group shadow-[0_5px_15px_rgba(0,0,0,0.2)]">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded border border-zinc-900 flex items-center justify-center bg-zinc-900/20 group-hover:border-zinc-700 group-hover:bg-zinc-800 transition-all">
+                    <HistoryIcon size={18} className="text-zinc-500 group-hover:text-zinc-300 transition-colors" />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <AnimatedText
+                      lang={lang}
+                      hClass="h-4"
+                      className="text-[13px] font-bold tracking-[0.15em] text-zinc-300 group-hover:text-white transition-colors"
+                      cn="检视生成档案"
+                      en="REVIEW ARCHIVES"
+                    />
+                    <p className="text-[10px] text-zinc-500 opacity-60 font-light group-hover:opacity-100 transition-opacity">溯源过去的生成记录，恢复或重置失败的镜像拼接尝试。</p>
+                  </div>
                 </div>
-                <AnimatedText
-                  lang={lang}
-                  hClass="h-[40px]"
-                  className="text-xs text-zinc-600 font-mono leading-relaxed"
-                  cn="溯源过去的生成记录，恢复或重启失败的镜像拼接尝试。"
-                  en="Trace past generation records, restore or restart failed mirror splicing."
-                />
               </div>
             </div>
 

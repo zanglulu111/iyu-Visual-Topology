@@ -13,6 +13,7 @@ import { AuthModal } from './components/AuthModal';
 import { UserProfileModal } from './components/UserProfileModal';
 import { AppHeader } from './components/AppHeader';
 import { EngineBottomBar } from './components/EngineBottomBar';
+import { TaskManagerPanel } from './components/TaskManagerPanel';
 import { LandingView } from './components/LandingView';
 import { VisionSidebar } from './components/VisionSidebar';
 import { TheSkinSidebar } from './components/TheSkinSidebar';
@@ -56,7 +57,10 @@ import { supabaseDatabase } from './services/supabaseDatabase';
 import { useSettings } from './contexts/SettingsContext';
 import { SimpleConfigPanel } from './src/components/SimpleConfigPanel';
 
-type ViewMode = 'ENGINE' | 'DIVERGENCE' | 'BIBLE' | 'METONYMY';
+type ViewMode = 'ENGINE' | 'DIVERGENCE' | 'BIBLE' | 'METONYMY' | 'TOPOLOGY' | 'RSI';
+
+import { LacanGraphView } from './components/LacanGraphView';
+import { LacanTopologyView } from './components/LacanTopologyView';
 
 const App: React.FC = () => {
     const { isOpen: isSettingsOpen, openSettings, closeSettings } = useSettings();
@@ -89,6 +93,7 @@ const App: React.FC = () => {
     const [isAuthOpen, setIsAuthOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [libraryModalOpen, setLibraryModalOpen] = useState(false);
+    const [topSidebar, setTopSidebar] = useState<'skin' | 'vision' | null>(null);
 
     const [isAutoFilling, setIsAutoFilling] = useState(false);
     const [visionInput, setVisionInput] = useState("");
@@ -127,6 +132,7 @@ const App: React.FC = () => {
     const [activeBlockId, setActiveBlockId] = useState<string | null>(null);
     const [promptCopied, setPromptCopied] = useState(false);
     const [globalCopied, setGlobalCopied] = useState(false);
+    const [isTaskManagerOpen, setIsTaskManagerOpen] = useState(false);
 
     // DB Initialization and Loading
     useEffect(() => {
@@ -287,7 +293,7 @@ const App: React.FC = () => {
 
     const handleViewChange = (viewMode: ViewMode) => {
         setViewMode(viewMode);
-        if (viewMode === 'DIVERGENCE' || viewMode === 'BIBLE' || viewMode === 'METONYMY') {
+        if (viewMode === 'DIVERGENCE' || viewMode === 'BIBLE' || viewMode === 'METONYMY' || viewMode === 'TOPOLOGY') {
             setIsVisionOpen(false);
             setIsSkinOpen(false);
             setIsAestheticInputOpen(false);
@@ -430,8 +436,8 @@ const App: React.FC = () => {
             setColorPalette(Array(7).fill(""));
         } else {
             // Other modes: open both left and right sidebars by default
-            setIsSkinOpen(true);
-            setIsVisionOpen(true);
+            handleOpenSkin();
+            handleOpenVision();
             setIsAestheticInputOpen(false);
         }
         closeAllModals();
@@ -456,6 +462,16 @@ const App: React.FC = () => {
             updateNarrativeState(result);
         } catch (e) { console.error(e); }
         finally { setIsAutoFilling(false); }
+    };
+
+    const handleOpenSkin = () => {
+        setIsSkinOpen(true);
+        setTopSidebar('skin');
+    };
+
+    const handleOpenVision = () => {
+        setIsVisionOpen(true);
+        setTopSidebar('vision');
     };
 
     const handleVisionAutoFill = async () => {
@@ -883,7 +899,7 @@ const App: React.FC = () => {
         } else if (viewMode === 'METONYMY') {
             handleViewChange('ENGINE');
             setMetonymyBlueprint(null);
-            if (selectedDriver !== DriverType.AESTHETIC) setIsSkinOpen(true);
+            if (selectedDriver !== DriverType.AESTHETIC) handleOpenSkin();
             setIsVisionOpen(false);
             setIsAestheticInputOpen(false);
         } else {
@@ -1131,6 +1147,8 @@ const App: React.FC = () => {
                 <LandingView
                     lang={lang}
                     setLang={setLang}
+                    setPage={setPage}
+                    setViewMode={handleViewChange}
                     selectedDriver={selectedDriver}
                     onDriverSelect={handleDriverSelect}
                     hoveredDriver={hoveredDriver}
@@ -1158,6 +1176,36 @@ const App: React.FC = () => {
                     onHistoryClear={onHistoryClear}
                     openSettings={openSettings}
                 />
+            ) : viewMode === 'TOPOLOGY' ? (
+                <div className="h-screen w-screen overflow-hidden">
+                    <LacanGraphView 
+                        lang={lang} 
+                        onClose={() => {
+                            setPage(0);
+                            setViewMode('ENGINE');
+                        }}
+                        openManual={openManual}
+                        openHistory={openHistory}
+                        openSettings={openSettings}
+                        openProfile={() => setIsProfileOpen(true)}
+                        currentUser={currentUser}
+                    />
+                </div>
+            ) : viewMode === 'RSI' ? (
+                <div className="h-screen w-screen overflow-hidden">
+                    <LacanTopologyView 
+                        lang={lang} 
+                        onClose={() => {
+                            setPage(0);
+                            setViewMode('ENGINE');
+                        }}
+                        openManual={openManual}
+                        openHistory={openHistory}
+                        openSettings={openSettings}
+                        openProfile={() => setIsProfileOpen(true)}
+                        currentUser={currentUser}
+                    />
+                </div>
             ) : (
                 <div className="flex flex-col h-screen overflow-hidden relative">
                     <AppHeader
@@ -1317,6 +1365,8 @@ const App: React.FC = () => {
                             hasFieldState={Object.keys(narrativeFieldState).length > 0}
                             onRandomizeBlock={handleRandomizeBlock}
                             onClearBlock={handleClearBlock}
+                            isTaskManagerOpen={isTaskManagerOpen}
+                            setIsTaskManagerOpen={setIsTaskManagerOpen}
                         />
                     )}
 
@@ -1341,6 +1391,7 @@ const App: React.FC = () => {
                         onUpdateState={updateNarrativeState}
                         onAddCustomDef={handleAddCustomDef}
                         onEditCustomDef={handleEditCustomDef}
+                        zIndex={topSidebar === 'skin' ? 70 : 60}
                     />
 
                     <VisionSidebar
@@ -1360,6 +1411,7 @@ const App: React.FC = () => {
                         onVisionAnalysisChange={setVisionAnalysis}
                         onAnalyzeImage={handleAnalyzeImage}
                         isAnalyzingImage={isAnalyzingImage}
+                        zIndex={topSidebar === 'vision' ? 70 : 60}
                     />
 
                     <AestheticInputSidebar
@@ -1429,6 +1481,11 @@ const App: React.FC = () => {
                     await supabaseAuthService.signOut();
                     setIsProfileOpen(false);
                 }}
+                lang={lang}
+            />
+            <TaskManagerPanel
+                isOpen={isTaskManagerOpen}
+                onClose={() => setIsTaskManagerOpen(false)}
                 lang={lang}
             />
         </div>

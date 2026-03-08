@@ -708,7 +708,7 @@ ${psychoHtml}
         <div className="absolute inset-0 bg-[#080808] flex flex-col z-10 animate-in slide-in-from-bottom-4 duration-500">
 
             {/* Main Content */}
-            <div className="flex-1 flex overflow-hidden relative">
+            <div className="flex-1 flex overflow-hidden relative z-10">
                 {/* PARAMETERS SIDEBAR */}
                 <div className={`
               absolute top-0 bottom-0 left-0 z-20
@@ -824,7 +824,7 @@ ${psychoHtml}
             </div>
 
             {/* Footer */}
-            <footer className="fixed bottom-0 left-0 right-0 h-24 bg-black/90 backdrop-blur-md border-t border-white/10 flex items-center justify-between px-4 md:px-8 z-40">
+            <footer className="h-20 bg-black/90 backdrop-blur-md border-t border-white/10 flex items-center justify-between px-4 md:px-8 shrink-0 relative z-0">
                 <div className="flex items-center gap-4 shrink-0">
                     <button onClick={onGoHome} className="flex items-center gap-3 px-6 py-3 bg-zinc-900/50 hover:bg-zinc-800 border border-zinc-700 rounded-lg text-xs font-bold uppercase tracking-widest text-zinc-400 hover:text-white transition-all group min-w-[140px]">
                         <Home size={16} className="group-hover:scale-110 transition-transform" />

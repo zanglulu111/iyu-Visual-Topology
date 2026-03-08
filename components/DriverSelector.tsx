@@ -55,7 +55,7 @@ export const DriverSelector: React.FC<DriverSelectorProps> = ({ selectedDriver, 
                             onMouseLeave={() => onHover(null)}
                             className={`
                 group relative flex flex-col items-start text-left p-6 md:p-8 rounded-sm transition-all duration-700 
-                border bg-[#080808]/30 backdrop-blur-sm min-h-[300px]
+                border bg-[#080808]/15 backdrop-blur-sm min-h-[300px]
                 ${active
                                     ? `${borderClass} shadow-[0_25px_60px_rgba(0,0,0,0.6)] -translate-y-1`
                                     : 'border-zinc-900/40 hover:border-zinc-800'

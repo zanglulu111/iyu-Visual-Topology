@@ -26,8 +26,8 @@ export const BreakdownConfigModal: React.FC<BreakdownConfigModalProps> = ({
     const colorBase = themeAccent.replace('text-', '');
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="w-full max-w-xl bg-[#0c0c0c] border border-zinc-800 rounded-xl shadow-2xl flex flex-col overflow-hidden">
+        <div className="fixed inset-0 z-[100] flex items-start justify-center p-4 pt-4 pb-24 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="w-full max-w-2xl bg-[#0c0c0c] border border-zinc-800 rounded-xl shadow-2xl flex flex-col overflow-hidden">
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-900 shrink-0">
                     <div className="flex flex-col">
@@ -35,7 +35,7 @@ export const BreakdownConfigModal: React.FC<BreakdownConfigModalProps> = ({
                             <Scissors size={18} className={themeAccent} />
                             {lang === 'CN' ? "剧本分场预设" : "Script Breakdown Config"}
                         </h2>
-                        <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mt-0.5">
+                        <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mt-1">
                             {lang === 'CN' ? "提供分场逻辑指引以生成精准的场次结构" : "Provide breakdown guidance for accurate scene structure"}
                         </span>
                     </div>
@@ -45,10 +45,10 @@ export const BreakdownConfigModal: React.FC<BreakdownConfigModalProps> = ({
                 </div>
 
                 {/* Content */}
-                <div className="p-6 space-y-6">
+                <div className="p-6 space-y-6 overflow-y-auto custom-scrollbar max-h-[55vh]">
                     {/* Target Scene Count */}
                     <div className="space-y-4">
-                        <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest px-1 flex items-center gap-2">
+                        <label className="text-xs font-bold text-zinc-300 uppercase tracking-widest px-1 flex items-center gap-2">
                             <Scissors size={12} />
                             {lang === 'CN' ? "1. 目标分场数量 (可选)" : "1. TARGET SCENE COUNT (OPTIONAL)"}
                         </label>
@@ -60,7 +60,7 @@ export const BreakdownConfigModal: React.FC<BreakdownConfigModalProps> = ({
                                     <button
                                         key={num}
                                         onClick={() => setTargetCount(num)}
-                                        className={`w-8 h-8 flex items-center justify-center rounded text-[10px] font-bold transition-all border ${targetCount === num ? `bg-${colorBase}/20 border-${colorBase}/50 text-white` : 'bg-zinc-900/50 border-zinc-800 text-zinc-500 hover:text-zinc-300 hover:border-zinc-700'}`}
+                                        className={`w-9 h-9 flex items-center justify-center rounded text-xs font-bold transition-all border ${targetCount === num ? `bg-${colorBase}/20 border-${colorBase}/50 text-white` : 'bg-zinc-900/50 border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700'}`}
                                     >
                                         {num}
                                     </button>
@@ -96,7 +96,7 @@ export const BreakdownConfigModal: React.FC<BreakdownConfigModalProps> = ({
                                         <Plus size={14} />
                                     </button>
                                 </div>
-                                <span className="text-[10px] text-zinc-600 italic">
+                                <span className="text-xs text-zinc-500 italic">
                                     {lang === 'CN' ? "最小分场数为 3" : "Min scenes is 3"}
                                 </span>
                             </div>
@@ -105,7 +105,7 @@ export const BreakdownConfigModal: React.FC<BreakdownConfigModalProps> = ({
 
                     {/* Instruction */}
                     <div className="space-y-3">
-                        <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest px-1 flex items-center gap-2">
+                        <label className="text-xs font-bold text-zinc-300 uppercase tracking-widest px-1 flex items-center gap-2">
                             <MessageSquare size={12} />
                             {lang === 'CN' ? "2. 分场要求与指引 (可选)" : "2. BREAKDOWN REQUIREMENTS (OPTIONAL)"}
                         </label>
@@ -117,7 +117,7 @@ export const BreakdownConfigModal: React.FC<BreakdownConfigModalProps> = ({
                                 className="w-full h-32 bg-transparent border-none text-zinc-200 text-xs focus:ring-0 focus:outline-none focus:ring-offset-0 resize-none custom-scrollbar"
                             />
                         </div>
-                        <p className="text-[10px] text-zinc-500 px-1 leading-tight italic">
+                        <p className="text-xs text-zinc-400 px-1 leading-tight italic">
                             {lang === 'CN'
                                 ? "提示：明确的指令能显著提升 AI 对剧情节奏的把控力。"
                                 : "Tip: Clear instructions significantly improve AI's control over pacing."}
@@ -129,13 +129,13 @@ export const BreakdownConfigModal: React.FC<BreakdownConfigModalProps> = ({
                 <div className="px-6 py-4 border-t border-zinc-900 flex justify-end gap-3 bg-black/20">
                     <button
                         onClick={onClose}
-                        className="px-4 py-2 text-xs font-bold text-zinc-500 hover:text-white transition-colors uppercase tracking-widest"
+                        className="px-4 py-2 text-sm font-bold text-zinc-400 hover:text-white transition-colors uppercase tracking-widest"
                     >
                         {lang === 'CN' ? "取消" : "CANCEL"}
                     </button>
                     <button
                         onClick={() => onConfirm(instruction, targetCount === '' ? undefined : targetCount)}
-                        className={`px-6 py-2 bg-${colorBase}/10 hover:bg-${colorBase}/20 text-${colorBase} border border-${colorBase}/30 font-bold text-xs rounded transition-all flex items-center gap-2 shadow-[0_4px_15px_rgba(0,0,0,0.3)]`}
+                        className={`px-6 py-2 bg-${colorBase}/10 hover:bg-${colorBase}/20 text-${colorBase} border border-${colorBase}/30 font-bold text-sm rounded transition-all flex items-center gap-2 shadow-[0_4px_15px_rgba(0,0,0,0.3)]`}
                     >
                         <Sparkles size={14} />
                         {lang === 'CN' ? "开始智能分场" : "START BREAKDOWN"}

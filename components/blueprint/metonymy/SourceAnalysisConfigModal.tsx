@@ -35,7 +35,7 @@ export const SourceAnalysisConfigModal: React.FC<SourceAnalysisConfigModalProps>
                             <Globe size={18} className={themeAccent} />
                             {lang === 'CN' ? "全局原文反推" : "Global Source Analysis"}
                         </h2>
-                        <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mt-0.5">
+                        <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mt-1">
                             {lang === 'CN' ? "深度解析文本以构建统一的视觉圣经" : "Deeply analyze text to build consistent visual bible"}
                         </span>
                     </div>
@@ -48,7 +48,7 @@ export const SourceAnalysisConfigModal: React.FC<SourceAnalysisConfigModalProps>
                 <div className="p-6 space-y-6 overflow-y-auto custom-scrollbar max-h-[70vh]">
                     {/* Section 1: Description */}
                     <div className="space-y-3">
-                        <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest px-1 flex items-center gap-2">
+                        <label className="text-xs font-bold text-zinc-300 uppercase tracking-widest px-1 flex items-center gap-2">
                             <Globe size={12} />
                             {lang === 'CN' ? "1. 全局原文反推说明" : "1. GLOBAL SOURCE ANALYSIS GUIDE"}
                         </label>
@@ -65,7 +65,7 @@ export const SourceAnalysisConfigModal: React.FC<SourceAnalysisConfigModalProps>
 
                     {/* Section 2: Analysis Requirements */}
                     <div className="space-y-3">
-                        <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest px-1 flex items-center gap-2">
+                        <label className="text-xs font-bold text-zinc-300 uppercase tracking-widest px-1 flex items-center gap-2">
                             <MessageSquare size={12} />
                             {lang === 'CN' ? "2. 反推要求 (可选)" : "2. ANALYSIS REQUIREMENTS (OPTIONAL)"}
                         </label>
@@ -84,13 +84,13 @@ export const SourceAnalysisConfigModal: React.FC<SourceAnalysisConfigModalProps>
                 <div className="px-6 py-4 border-t border-zinc-900 flex justify-end gap-3 bg-black/20">
                     <button
                         onClick={onClose}
-                        className="px-4 py-2 text-xs font-bold text-zinc-500 hover:text-white transition-colors uppercase tracking-widest"
+                        className="px-4 py-2 text-sm font-bold text-zinc-400 hover:text-white transition-colors uppercase tracking-widest"
                     >
                         {lang === 'CN' ? "取消" : "CANCEL"}
                     </button>
                     <button
                         onClick={() => onConfirm({ dialogue })}
-                        className={`px-6 py-2 bg-${colorBase}/10 hover:bg-${colorBase}/20 text-${colorBase} border border-${colorBase}/30 font-bold text-xs rounded transition-all flex items-center gap-2 shadow-[0_4px_15px_rgba(0,0,0,0.3)]`}
+                        className={`px-6 py-2 bg-${colorBase}/10 hover:bg-${colorBase}/20 text-${colorBase} border border-${colorBase}/30 font-bold text-sm rounded transition-all flex items-center gap-2 shadow-[0_4px_15px_rgba(0,0,0,0.3)]`}
                     >
                         <Sparkles size={14} />
                         {lang === 'CN' ? "开始全局原文反推" : "START GLOBAL ANALYSIS"}

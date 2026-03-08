@@ -2,7 +2,7 @@ import React from 'react';
 import { Globe, Wand2, HelpCircle, History as HistoryIcon, Cpu, GitFork, BookOpen, Settings, User as UserIcon, LogOut, Aperture } from 'lucide-react';
 import { DriverType, User } from '../types';
 
-type ViewMode = 'ENGINE' | 'DIVERGENCE' | 'BIBLE' | 'METONYMY';
+type ViewMode = 'ENGINE' | 'DIVERGENCE' | 'BIBLE' | 'METONYMY' | 'TOPOLOGY';
 
 interface AppHeaderProps {
   page: number;
@@ -96,7 +96,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   };
 
   return (
-    <header className="h-16 bg-black border-b border-white/5 flex items-center justify-between px-6 z-50 sticky top-0 shrink-0">
+    <header className="h-14 bg-[#050505]/95 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-6 z-50 sticky top-0 shrink-0 transition-colors duration-500">
       <div className="flex items-center gap-4">
         <button
           onClick={() => setPage(0)}
@@ -104,7 +104,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         >
           <Globe size={12} className={`transition-all duration-100 ${getThemeHoverClass()}`} />
           <span className={`transition-all duration-100 ${getThemeHoverClass()}`}>
-            {lang === 'CN' ? "全局" : "Global"}
+            {lang === 'CN' ? "返回全局" : "GLOBAL"}
           </span>
         </button>
         <div className="h-6 w-px bg-white/10"></div>
@@ -116,25 +116,25 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden md:flex items-center gap-4 text-[10px] font-bold uppercase tracking-[0.2em]">
         <button
           onClick={() => setViewMode('ENGINE')}
-          className={`flex items-center gap-2 font-serif font-bold ${viewMode === 'ENGINE' ? getHeaderTitleColor() : "text-zinc-600 hover:text-zinc-400"}`}
+          className={`flex items-center gap-2 font-serif font-bold ${viewMode === 'ENGINE' ? getHeaderTitleColor() : "text-zinc-600 hover:text-zinc-400 font-sans"}`}
         >
-          <Cpu size={12} className={viewMode === 'ENGINE' ? getHeaderIconFill() : ""} />
+          <Cpu size={14} className={viewMode === 'ENGINE' ? getHeaderIconFill() : ""} />
           {getNarrativeEngineLabel()}
         </button>
         <div className="w-4 h-px bg-zinc-800"></div>
         <button
           onClick={() => setViewMode('DIVERGENCE')}
-          className={`flex items-center gap-2 ${viewMode === 'DIVERGENCE' ? getHeaderTitleColor() : "text-zinc-600 hover:text-zinc-400"}`}
+          className={`flex items-center gap-2 ${viewMode === 'DIVERGENCE' ? getHeaderTitleColor() : "text-zinc-600 hover:text-zinc-400 font-sans"}`}
         >
-          <GitFork size={12} />
+          <GitFork size={14} />
           {lang === 'CN' ? "分歧点" : "THE DIVERGENCE"}
         </button>
         <div className="w-4 h-px bg-zinc-800"></div>
         <button
           onClick={() => setViewMode('BIBLE')}
-          className={`flex items-center gap-2 ${viewMode === 'BIBLE' ? getHeaderTitleColor() : "text-zinc-600 hover:text-zinc-400"}`}
+          className={`flex items-center gap-2 ${viewMode === 'BIBLE' ? getHeaderTitleColor() : "text-zinc-600 hover:text-zinc-400 font-sans"}`}
         >
-          <BookOpen size={12} />
+          <BookOpen size={14} />
           {lang === 'CN' ? "创意圣经" : "CREATIVE BIBLE"}
         </button>
       </div>
@@ -143,15 +143,15 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         {[
           { icon: HelpCircle, label: lang === 'CN' ? '哲学辞典' : 'CODEX', labelCn: '哲学辞典', labelEn: 'CODEX', onClick: openManual, isActive: isManualOpen },
           { icon: HistoryIcon, label: lang === 'CN' ? '欲望档案' : 'ARCHIVE', labelCn: '欲望档案', labelEn: 'ARCHIVE', onClick: openHistory, isActive: isHistoryOpen },
-          { icon: Settings, label: lang === 'CN' ? '配置' : 'CONFIG', labelCn: '配置', labelEn: 'CONFIG', onClick: openSettings, isActive: false }
+          { icon: Settings, label: lang === 'CN' ? '系统配置' : 'SYSTEM CONFIG', labelCn: '系统配置', labelEn: 'SYSTEM CONFIG', onClick: openSettings, isActive: false }
         ].map((item, idx) => (
           <button
             key={idx}
             onClick={item.onClick}
             className={`flex items-center gap-2 transition-all duration-100 group ${item.isActive ? getThemeTextColor() : "text-zinc-300"}`}
           >
-            <item.icon size={16} className={`shrink-0 transition-all duration-100 ${item.isActive ? 'text-current' : `text-zinc-400 ${getThemeHoverClass()}`}`} />
-            <span className={`text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-100 ${item.isActive ? 'text-current' : `text-zinc-400 ${getThemeHoverClass()}`}`}>
+            <item.icon size={14} className={`shrink-0 transition-all duration-100 ${item.isActive ? 'text-current' : `text-zinc-500 ${getThemeHoverClass()}`}`} />
+            <span className={`text-[10px] font-bold uppercase tracking-[0.1em] transition-all duration-100 hidden md:block ${item.isActive ? 'text-current' : `text-zinc-500 ${getThemeHoverClass()}`}`}>
               {item.label}
             </span>
           </button>
@@ -162,8 +162,8 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           className={`flex items-center gap-2 transition-all duration-100 group ${showRings ? "text-rose-400" : "text-zinc-500"}`}
           title={lang === 'CN' ? "背景圆环开关" : "Background Rings Toggle"}
         >
-          <Aperture size={16} className={`shrink-0 transition-all duration-300 ${showRings ? 'rotate-180 text-rose-400' : 'text-zinc-600'}`} />
-          <span className="text-[10px] font-bold uppercase tracking-[0.2em]">
+          <Aperture size={14} className={`shrink-0 transition-all duration-300 ${showRings ? 'rotate-180 text-rose-400' : 'text-zinc-600'}`} />
+          <span className="text-[10px] font-bold uppercase tracking-[0.2em] hidden xl:block">
             {lang === 'CN' ? (showRings ? "背景开" : "背景关") : (showRings ? "ASTROLABE" : "ASTROLABE OFF")}
           </span>
         </button>
@@ -180,15 +180,27 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           className="flex items-center gap-2 group transition-all duration-100 hover:scale-105"
         >
           {currentUser.id !== 'guest_user' ? (
-            <div className={`w-5 h-5 rounded-full ${!currentUser.avatarUrl && (currentUser.avatarColor || 'bg-gold-primary')} border border-zinc-700 flex items-center justify-center text-[10px] font-bold text-white shadow-lg overflow-hidden`}>
-              {currentUser.avatarUrl ? (
-                <img src={currentUser.avatarUrl} alt="avatar" className="w-full h-full object-cover" />
-              ) : (
-                currentUser.username.substring(0, 1).toUpperCase()
-              )}
+            <div className="flex items-center gap-2">
+              <div className={`w-5 h-5 rounded-full ${!currentUser.avatarUrl && (currentUser.avatarColor || 'bg-gold-primary')} border border-zinc-700 flex items-center justify-center text-[10px] font-bold text-white shadow-lg overflow-hidden`}>
+                {currentUser.avatarUrl ? (
+                  <img src={currentUser.avatarUrl} alt="avatar" className="w-full h-full object-cover" />
+                ) : (
+                  currentUser.username.substring(0, 1).toUpperCase()
+                )}
+              </div>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 group-hover:text-white transition-colors">
+                {currentUser.username}
+              </span>
             </div>
           ) : (
-            <UserIcon size={16} className={`text-zinc-400 ${getThemeHoverClass()} transition-colors duration-300`} />
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 rounded-full border border-zinc-700 flex items-center justify-center bg-zinc-800 text-zinc-500 group-hover:text-white transition-colors">
+                 <UserIcon size={12} />
+              </div>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 group-hover:text-white transition-colors">
+                {lang === 'CN' ? '未登录' : 'GUEST'}
+              </span>
+            </div>
           )}
         </button>
       </div>

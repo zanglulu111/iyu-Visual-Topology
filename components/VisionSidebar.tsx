@@ -23,6 +23,7 @@ interface VisionSidebarProps {
     onVisionAnalysisChange?: (val: string) => void;
     onAnalyzeImage?: () => void;
     isAnalyzingImage?: boolean;
+    zIndex?: number;
 }
 
 export const VisionSidebar: React.FC<VisionSidebarProps> = ({
@@ -41,7 +42,8 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
     visionAnalysis,
     onVisionAnalysisChange,
     onAnalyzeImage,
-    isAnalyzingImage
+    isAnalyzingImage,
+    zIndex = 60
 }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const isCommercial = driverType === DriverType.COMMERCIAL;
@@ -186,11 +188,14 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
     const isProcessing = isAutoFilling || isAnalyzingImage;
 
     return (
-        <div className={`
-      flex flex-col gap-6 z-[60] transition-transform duration-500 cubic-bezier(0.16, 1, 0.3, 1)
-      fixed top-16 right-0 bottom-20 w-[380px] bg-[#0c0c0c] border-l border-zinc-800 p-8 shadow-[-20px_0_50px_rgba(0,0,0,0.5)] overflow-y-auto custom-scrollbar
-      ${isOpen ? 'translate-x-0' : 'translate-x-full'}
-    `}>
+        <div 
+            style={{ zIndex }}
+            className={`
+                flex flex-col gap-6 transition-transform duration-500 cubic-bezier(0.16, 1, 0.3, 1)
+                fixed top-16 right-0 bottom-20 w-[380px] bg-[#0c0c0c] border-l border-zinc-800 p-8 shadow-[-20px_0_50px_rgba(0,0,0,0.5)] overflow-y-auto custom-scrollbar
+                ${isOpen ? 'translate-x-0' : 'translate-x-full'}
+            `}
+        >
             {/* Header */}
             <div className="flex items-center justify-between text-white border-b border-zinc-800 pb-6 shrink-0">
                 <div className="flex items-center gap-3">
