@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { X, Aperture, BookOpen, Zap, Info, Shield, Layers, HelpCircle, History, Settings, Languages, User as UserIcon } from 'lucide-react';
 import { BlueprintLanguage, User } from '../types';
+import { useTheme } from '../contexts/ThemeContext';
 import { BorromeanRings } from './BorromeanRings';
 
 interface LacanTopologyViewProps {
@@ -101,6 +102,8 @@ export const LacanTopologyView: React.FC<LacanTopologyViewProps> = ({
     openProfile,
     currentUser
 }) => {
+    const { theme } = useTheme();
+    const isRetro = theme === 'retro';
     const [currentLang, setCurrentLang] = useState<BlueprintLanguage>(initialLang);
     const [selectedKey, setSelectedKey] = useState<string>('REAL');
     const [hoveredKey, setHoveredKey] = useState<string | null>(null);
@@ -111,10 +114,11 @@ export const LacanTopologyView: React.FC<LacanTopologyViewProps> = ({
     const activeData = RSI_DESCRIPTIONS[activeKey];
 
     return (
-        <div className="flex flex-col h-full w-full bg-[#050505] text-gold-primary font-sans overflow-hidden animate-in fade-in duration-700">
+        <div className={`flex flex-col h-full w-full bg-[var(--bg-main)] text-[var(--accent-color)] font-sans overflow-hidden animate-in fade-in duration-700 transition-colors duration-500`}>
+            {isRetro && <div className="absolute inset-0 pointer-events-none opacity-30 mix-blend-multiply z-0" style={{ backgroundImage: 'var(--pattern-aged)' }}></div>}
             
             {/* NEW TOP BAR: Mist School Standard */}
-            <header className="h-14 bg-[#050505]/95 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-6 z-50 sticky top-0 shrink-0 transition-colors duration-500">
+            <header className="h-14 bg-[var(--bg-header)] backdrop-blur-md border-b border-[var(--border-main)] flex items-center justify-between px-6 z-50 sticky top-0 shrink-0 transition-colors duration-500">
                 <div className="flex items-center gap-4">
                     <button
                         onClick={onClose}
@@ -131,7 +135,7 @@ export const LacanTopologyView: React.FC<LacanTopologyViewProps> = ({
 
                 {/* CENTERED: MIST SCHOOL */}
                 <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden md:block">
-                     <span className="text-white font-serif font-bold text-sm tracking-[0.5em] uppercase pointer-events-none">
+                     <span className={`${isRetro ? 'text-[var(--text-main)]' : 'text-white'} font-serif font-bold text-sm tracking-[0.5em] uppercase pointer-events-none transition-colors`}>
                          {currentLang === 'CN' ? '迷雾学派' : 'MIST SCHOOL'}
                      </span>
                 </div>
@@ -183,7 +187,7 @@ export const LacanTopologyView: React.FC<LacanTopologyViewProps> = ({
             <div className="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
                 
                 {/* LEFT AREA: Detailed Explanation (1/3) */}
-                <div className="w-full lg:w-[35%] bg-[#08080a] border-r border-gold-primary/10 flex flex-col z-20 shadow-[40px_0_120px_rgba(0,0,0,0.9)] flex-shrink-0 relative overflow-hidden">
+                <div className={`w-full lg:w-[35%] bg-[var(--bg-panel)] border-r border-[var(--border-main)] flex flex-col z-20 shadow-[40px_0_120px_rgba(0,0,0,0.9)] flex-shrink-0 relative overflow-hidden transition-colors duration-500`}>
                     
                     <div className="flex-1 flex flex-col p-8 lg:p-14 overflow-y-auto custom-scrollbar">
                         
@@ -192,30 +196,30 @@ export const LacanTopologyView: React.FC<LacanTopologyViewProps> = ({
                                  <Info size={14} />
                                  {currentLang === 'CN' ? '核心架构解析' : 'ARCHITECTURAL CORE'}
                             </div>
-                            <h2 className="text-5xl lg:text-6xl font-serif font-black text-white leading-tight mb-4">
-                                {activeData[currentLang].title}
-                            </h2>
-                            <p className="text-[14px] font-black text-white tracking-widest uppercase opacity-100 brightness-150 drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]">
-                                {activeData[currentLang].subtitle}
-                            </p>
+                                <h2 className={`text-5xl lg:text-6xl font-serif font-black ${isRetro ? 'text-[var(--text-accent)]' : 'text-white'} leading-tight mb-4 transition-colors`}>
+                                    {activeData[currentLang].title}
+                                </h2>
+                                <p className={`text-[14px] font-black ${isRetro ? 'text-[var(--text-main)] underline decoration-[var(--text-accent)]' : 'text-white brightness-150 drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]'} tracking-widest uppercase transition-colors`}>
+                                    {activeData[currentLang].subtitle}
+                                </p>
                             <div className="h-1 w-28 bg-gold-primary mt-8 shadow-[0_0_15px_rgba(212,175,55,0.3)]"></div>
                         </div>
 
                         <div className="space-y-10">
                             <section>
-                                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-gold-primary/60 mb-4 flex items-center gap-2">
+                                <h3 className={`text-[10px] font-black uppercase tracking-[0.3em] ${isRetro ? 'text-[var(--text-muted)]' : 'text-gold-primary/60'} mb-4 flex items-center gap-2`}>
                                     <BookOpen size={12} /> {currentLang === 'CN' ? '概念界定' : 'CONCEPT DEFINITION'}
                                 </h3>
-                                <p className="text-base lg:text-lg text-white leading-relaxed font-medium text-justify">
+                                <p className={`text-base lg:text-lg ${isRetro ? 'text-[var(--text-main)] italic' : 'text-white'} leading-relaxed font-medium text-justify transition-colors`}>
                                     {activeData[currentLang].desc}
                                 </p>
                             </section>
 
                             <section className="p-8 bg-white/[0.04] border border-gold-primary/20 rounded-sm shadow-inner shadow-black/40">
-                                <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-gold-primary brightness-125 mb-5 flex items-center gap-2">
+                                <h3 className={`text-[11px] font-black uppercase tracking-[0.3em] ${isRetro ? 'text-[var(--text-accent)]' : 'text-gold-primary brightness-125'} mb-5 flex items-center gap-2 transition-colors`}>
                                     <Layers size={12} /> {currentLang === 'CN' ? '与爱欲迷宫的关系' : 'RELATION TO EROTIC MAZE'}
                                 </h3>
-                                <p className="text-base lg:text-lg text-white leading-relaxed font-medium">
+                                <p className={`text-base lg:text-lg ${isRetro ? 'text-[var(--text-main)]' : 'text-white'} leading-relaxed font-medium transition-colors`}>
                                     {activeData[currentLang].connection}
                                 </p>
                             </section>
@@ -246,9 +250,9 @@ export const LacanTopologyView: React.FC<LacanTopologyViewProps> = ({
                 </div>
 
                 {/* RIGHT AREA: Visualization (2/3) */}
-                <div className="flex-1 relative flex items-center justify-center p-8 overflow-hidden bg-[radial-gradient(circle_at_center,_#101012_0%,_#050505_100%)]">
+                <div className={`flex-1 relative flex items-center justify-center p-8 overflow-hidden bg-[var(--bg-main)] transition-colors duration-500`}>
                     
-                    <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#D4AF37 1px, transparent 0)', backgroundSize: '32px 32px' }}></div>
+                    <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: `radial-gradient(${isRetro ? '#8B261D' : '#D4AF37'} 1px, transparent 0)`, backgroundSize: '32px 32px' }}></div>
 
                     {/* The Rings - Large and centered */}
                     <div className="w-full h-full max-w-[1000px] max-h-[1000px] relative flex items-center justify-center -translate-y-12">

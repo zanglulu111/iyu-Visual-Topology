@@ -1,7 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import './styles/theme.css';
 import { SettingsProvider } from './contexts/SettingsContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { CustomAlertProvider } from './components/CustomAlertProvider';
 import { BrowserRouter } from 'react-router-dom';
 
@@ -15,9 +17,11 @@ root.render(
   <React.StrictMode>
     <BrowserRouter>
       <SettingsProvider>
-        <CustomAlertProvider>
-          <App />
-        </CustomAlertProvider>
+        <ThemeProvider>
+          <CustomAlertProvider>
+            <App />
+          </CustomAlertProvider>
+        </ThemeProvider>
       </SettingsProvider>
     </BrowserRouter>
   </React.StrictMode>

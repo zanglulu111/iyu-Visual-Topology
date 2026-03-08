@@ -2,18 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { X, Folder, Eye, ShieldAlert, Moon, Sun, Languages, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ARCHIVE_CASES, ArchiveCategory, CaseStudy } from './archiveCasesData';
 import { ArchiveDetailModal } from './ArchiveDetailModal';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface ArchiveDirectoryModalProps {
     isOpen: boolean;
     onClose: () => void;
     lang: 'CN' | 'EN';
+    isFullScreen?: boolean;
 }
 
 const ITEMS_PER_PAGE = 15;
 
-export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({ isOpen, onClose, lang }) => {
+export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({ isOpen, onClose, lang, isFullScreen = false }) => {
+    const { theme, toggleTheme } = useTheme();
     const [selectedCategory, setSelectedCategory] = useState<ArchiveCategory>('ALL');
-    const [theme, setTheme] = useState<'light' | 'dark'>('light');
     const [localLang, setLocalLang] = useState<'CN' | 'EN'>(lang);
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedCaseId, setSelectedCaseId] = useState<string | null>(null);
@@ -100,11 +102,12 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({ is
 
     return (
         <>
-            <div className={`fixed inset-0 backdrop-blur-md z-[100] flex items-center justify-center p-4 animate-fadeIn ${isDark ? 'bg-black/90' : 'bg-black/80'}`}>
+            <div className={isFullScreen ? "w-full h-full animate-fadeIn" : `fixed inset-0 backdrop-blur-md z-[100] flex items-center justify-center p-4 animate-fadeIn ${isDark ? 'bg-black/90' : 'bg-black/80'}`}>
                 {/* Main Container */}
-                <div className={`${t.bgContainer} ${t.borderContainer} rounded-lg w-full max-w-6xl h-[90vh] flex flex-col overflow-hidden relative shadow-2xl transition-colors duration-500`} style={isDark ? {} : { backgroundImage: t.texturePattern }}>
+                <div className={`${t.bgContainer} ${isFullScreen ? 'w-full h-full' : `${t.borderContainer} rounded-lg w-full max-w-6xl h-[90vh] shadow-2xl`} flex flex-col overflow-hidden relative transition-colors duration-500`} style={isDark ? {} : { backgroundImage: t.texturePattern }}>
                     
-                    {/* Header */}
+                    {/* Header - Only show in modal mode */}
+                    {!isFullScreen && (
                     <div className={`shrink-0 ${t.borderHeader} px-6 lg:px-8 py-4 flex items-center justify-between ${t.bgHeader} backdrop-blur relative z-20`}>
                         <div className="flex items-center gap-3">
                             <Folder size={18} className={`${t.textAccent} opacity-80`} />
@@ -125,7 +128,7 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({ is
                                 </button>
                                 <div className={`w-px h-3 mx-1 ${isDark ? 'bg-zinc-700/50' : 'bg-black/10'}`}></div>
                                 <button 
-                                    onClick={() => setTheme(isDark ? 'light' : 'dark')} 
+                                    onClick={toggleTheme} 
                                     className={`flex items-center gap-1.5 px-2 py-1 rounded-sm text-[10px] font-bold tracking-widest uppercase transition-colors ${t.btnTextHover}`}
                                 >
                                     {isDark ? <Sun size={12} /> : <Moon size={12} />}
@@ -138,6 +141,7 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({ is
                             </button>
                         </div>
                     </div>
+                    )}
 
                     <div className="flex-1 overflow-y-auto custom-scrollbar relative z-10" style={isDark ? {} : { backgroundImage: t.dustPattern }}>
                         <div className="p-8 lg:p-12 max-w-6xl mx-auto flex flex-col min-h-full">

@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { X, Sparkles, Send, Loader2, Eraser, MessageSquare } from 'lucide-react';
 import { BlueprintLanguage } from '../types';
 import { ProcessingTimer } from './SharedBlueprintComponents';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface AestheticInputSidebarProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ export const AestheticInputSidebar: React.FC<AestheticInputSidebarProps> = ({
   isProcessing,
   lang
 }) => {
+  const { theme } = useTheme();
   const [inputText, setTextInput] = useState("");
   const [lastLog, setLastLog] = useState<string | null>(null);
 
@@ -45,12 +47,12 @@ export const AestheticInputSidebar: React.FC<AestheticInputSidebarProps> = ({
 
   return (
     <div className={`
-      flex flex-col gap-0 z-40 transition-transform duration-500 cubic-bezier(0.16, 1, 0.3, 1)
-      fixed top-16 left-0 bottom-20 w-[380px] bg-[#0c0c0c] border-r border-zinc-800 shadow-[20px_0_50px_rgba(0,0,0,0.5)]
+      flex flex-col gap-0 z-40 transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)
+      fixed top-14 left-0 bottom-20 w-[380px] bg-[var(--bg-main)] border-r border-[var(--border-main)] shadow-[20px_0_50px_rgba(0,0,0,0.5)]
       ${isOpen ? 'translate-x-0' : '-translate-x-full'}
     `}>
       {/* Header */}
-      <div className="p-6 pb-5 flex items-center justify-between border-b border-zinc-800 bg-zinc-900/40 shrink-0">
+      <div className={`p-6 pb-5 flex items-center justify-between border-b ${theme === 'retro' ? 'border-[var(--border-main)]/30 bg-[var(--bg-panel)]/40' : 'border-zinc-800 bg-zinc-900/40'} shrink-0 transition-colors duration-500`}>
         <div className="flex items-center gap-3">
           <MessageSquare size={18} className="text-rose-400" />
           <div>
@@ -115,7 +117,7 @@ export const AestheticInputSidebar: React.FC<AestheticInputSidebarProps> = ({
             onChange={(e) => setTextInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={getPlaceholder()}
-            className="w-full h-48 bg-[#080808] border border-zinc-700 focus:border-rose-500 rounded-xl p-4 pr-14 text-xs font-mono text-white placeholder-zinc-600 resize-none focus:outline-none focus:ring-1 focus:ring-rose-500/50 transition-all shadow-inner leading-relaxed custom-scrollbar"
+            className={`w-full h-48 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)] text-[var(--text-main)] placeholder-[var(--text-muted)] focus:ring-[var(--text-accent)]/30' : 'bg-[#080808] border-zinc-700 text-white placeholder-zinc-600 focus:ring-rose-500/50'} border focus:border-rose-500 rounded-xl p-4 pr-14 text-xs font-mono resize-none focus:outline-none focus:ring-1 transition-all shadow-inner leading-relaxed custom-scrollbar`}
           />
           <div className="absolute bottom-3 right-3 flex gap-2">
             {inputText && (

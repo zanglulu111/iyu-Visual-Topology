@@ -3,15 +3,18 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { X, Play, Plus, Trash2, Film, Search, ExternalLink, ChevronDown, Loader2 } from 'lucide-react';
 import { videoService, Video, getEmbedUrl, getYouTubeThumbnail } from '../services/videoService';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface VideoLibraryProps {
     isOpen: boolean;
     onClose: () => void;
     lang: 'CN' | 'EN';
     isAdmin?: boolean;
+    isFullScreen?: boolean;
 }
 
-export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lang, isAdmin = false }) => {
+export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lang, isAdmin = false, isFullScreen = false }) => {
+    const { theme } = useTheme();
     const [videos, setVideos] = useState<Video[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeVideo, setActiveVideo] = useState<Video | null>(null);
@@ -111,17 +114,18 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[100] flex items-center justify-center p-4 animate-fadeIn">
-            <div className="bg-[#0a0a0a] border border-zinc-800 rounded-lg w-full max-w-6xl h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+        <div className={isFullScreen ? "w-full h-full animate-fadeIn" : "fixed inset-0 bg-black/80 backdrop-blur-md z-[100] flex items-center justify-center p-4 animate-fadeIn"}>
+            <div className={`bg-[var(--bg-panel)] ${isFullScreen ? 'w-full h-full' : 'border border-[var(--border-main)] rounded-lg w-full max-w-6xl h-[90vh] shadow-2xl'} flex flex-col overflow-hidden transition-colors duration-500`}>
 
-                {/* Header */}
+                {/* Header - Only hide if in full screen page mode */}
+                {!isFullScreen && (
                 <div className="shrink-0 border-b border-zinc-800 px-6 py-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <Film size={18} className="text-amber-400" />
-                        <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-white">
+                        <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-[var(--text-main)]">
                             {lang === 'CN' ? '影像资料库' : 'VIDEO ARCHIVE'}
                         </h2>
-                        <span className="text-[10px] font-mono text-zinc-500 bg-zinc-900 px-2 py-0.5 rounded">
+                        <span className="text-[10px] font-mono text-[var(--text-muted)] bg-[var(--bg-main)] px-2 py-0.5 rounded border border-[var(--border-main)]">
                             {filteredVideos.length} {lang === 'CN' ? '条目' : 'entries'}
                         </span>
                     </div>
@@ -140,6 +144,7 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                         </button>
                     </div>
                 </div>
+                )}
 
                 {/* Admin Add Form */}
                 {showAddForm && isAdmin && (
@@ -209,7 +214,7 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                 )}
 
                 {/* Search & Filters */}
-                <div className="shrink-0 border-b border-zinc-800 px-6 py-3 flex flex-wrap items-center gap-3">
+                <div className={`shrink-0 border-b border-zinc-800 px-6 py-3 flex flex-wrap items-center gap-3 ${isFullScreen ? 'pt-6' : ''}`}>
                     <div className="relative flex-1 min-w-[200px] max-w-sm">
                         <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600" />
                         <input
@@ -221,6 +226,15 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                         />
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
+                        {isFullScreen && isAdmin && (
+                            <button
+                                onClick={() => setShowAddForm(!showAddForm)}
+                                className={`flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded border transition-colors ${showAddForm ? 'bg-amber-500 text-black border-amber-500' : 'bg-amber-500/10 text-amber-400 border-amber-500/30 hover:bg-amber-500/20'}`}
+                            >
+                                <Plus size={12} />
+                                {lang === 'CN' ? '管理视频' : 'MANAGE'}
+                            </button>
+                        )}
                         <button
                             onClick={() => setSelectedCategory(null)}
                             className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded border transition-colors ${!selectedCategory

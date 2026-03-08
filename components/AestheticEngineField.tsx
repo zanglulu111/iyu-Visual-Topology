@@ -1,5 +1,6 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
+import { useTheme } from '../contexts/ThemeContext';
 import { NarrativeEngineFieldProps } from './NarrativeEngineField';
 import {
     AESTHETIC_ENGINE_BLOCKS,
@@ -32,15 +33,16 @@ const ModuleContainer = ({ id, lockedModules, moveModule, children }: React.Prop
     lockedModules: Record<string, boolean>,
     moveModule: (id: string, dir: 'TOP' | 'UP' | 'DOWN' | 'BOTTOM') => void
 }>) => {
+    const { theme } = useTheme();
     const isLocked = lockedModules[id];
     const isFixed = ['PRESETS', 'PALETTE', 'STYLE'].includes(id);
-    const borderColor = "border-rose-500/20";
+    const borderColor = theme === 'retro' ? "border-black/5" : "border-rose-500/20";
 
     return (
         <div
             className={`flex flex-row gap-0 rounded-xl border ${borderColor} ${isLocked ? 'bg-black/40 grayscale-[0.5]' : 'bg-white/5'} w-full relative transition-all duration-300 shadow-sm`}
         >
-            <div className="flex flex-col items-center justify-center border-r border-white/5 bg-black/20 w-7 shrink-0 py-2 gap-1 rounded-l-xl">
+            <div className={`flex flex-col items-center justify-center border-r ${theme === 'retro' ? 'border-black/10 bg-black/5' : 'border-white/5 bg-black/20'} w-7 shrink-0 py-2 gap-1 rounded-l-xl`}>
                 {!isFixed && (
                     <>
                         <button onClick={() => moveModule(id, 'TOP')} className="p-0.5 text-zinc-600 hover:text-rose-400 transition-colors" title="置顶"><ChevronsUp size={12} /></button>

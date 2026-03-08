@@ -5,6 +5,7 @@ import { BlueprintLanguage, DriverType } from '../types';
 import { supabaseDatabase } from '../services/supabaseDatabase';
 import { generateAestheticReverse } from '../services/aestheticReverseService';
 import { ProcessingTimer } from './SharedBlueprintComponents';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface VisionSidebarProps {
     isOpen: boolean;
@@ -45,6 +46,7 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
     isAnalyzingImage,
     zIndex = 60
 }) => {
+    const { theme: currentTheme } = useTheme();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const isCommercial = driverType === DriverType.COMMERCIAL;
     const isAesthetic = driverType === DriverType.AESTHETIC;
@@ -191,52 +193,51 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
         <div 
             style={{ zIndex }}
             className={`
-                flex flex-col gap-6 transition-transform duration-500 cubic-bezier(0.16, 1, 0.3, 1)
-                fixed top-16 right-0 bottom-20 w-[380px] bg-[#0c0c0c] border-l border-zinc-800 p-8 shadow-[-20px_0_50px_rgba(0,0,0,0.5)] overflow-y-auto custom-scrollbar
+                flex flex-col transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)
+                fixed top-14 right-0 bottom-14 w-[380px] ${currentTheme === 'retro' ? 'bg-[var(--bg-panel)]' : 'bg-[var(--bg-main)]'} border-l border-[var(--border-main)] shadow-[-20px_0_50px_rgba(0,0,0,0.5)] overflow-hidden
                 ${isOpen ? 'translate-x-0' : 'translate-x-full'}
             `}
         >
             {/* Header */}
-            <div className="flex items-center justify-between text-white border-b border-zinc-800 pb-6 shrink-0">
+            <div className={`px-6 py-4 flex items-center justify-between relative shrink-0 transition-all duration-300`}>
                 <div className="flex items-center gap-3">
                     {isCommercial ? <ScanEye size={20} className="text-cyan-400" /> :
                         isExperimental ? <BrainCircuit size={20} className="text-purple-400" /> :
                             <Sparkles size={20} className={theme.text} />}
-                    <div>
-                        <span className={`text-sm font-black uppercase tracking-[0.2em] block ${theme.text}`}>
-                            {getSidebarTitle()}
-                        </span>
-                        <span className="text-[9px] font-mono text-zinc-300 uppercase tracking-wider block mt-1">
-                            {getSidebarSubtitle()}
-                        </span>
-                    </div>
+                    <span className={`text-sm font-black uppercase tracking-[0.25em] ${theme.text}`}>
+                        {getSidebarTitle()}
+                    </span>
                 </div>
-                <button onClick={onClose} className="p-2 text-zinc-400 hover:text-white transition-colors bg-zinc-900 rounded-full border border-zinc-800 hover:border-zinc-600">
-                    <X size={16} />
+                <button onClick={onClose} className={`p-1.5 transition-colors rounded-full border ${currentTheme === 'retro' ? 'bg-black/5 border-black/10 text-black/40 hover:text-black' : 'bg-zinc-900 text-zinc-400 hover:text-white border-zinc-800 hover:border-zinc-600'}`}>
+                    <X size={18} />
                 </button>
+                
+                {/* Short Divider */}
+                <div className={`absolute bottom-0 left-6 right-6 h-[1px] ${currentTheme === 'retro' ? 'bg-black/60' : 'bg-zinc-800'}`} />
             </div>
 
-            {/* Content */}
-            <div className="flex-1 flex flex-col gap-8 pb-10">
+            {/* Content Container */}
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-8">
+                <div className="flex flex-col gap-8 pb-10">
 
                 {/* 1. Text Input */}
                 <div className="space-y-3">
                     <div className="flex justify-between items-baseline">
-                        <label className={`text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 ${theme.text}`}>
-                            <FileText size={12} className={theme.text} />
+                        <label className={`text-xs font-bold uppercase tracking-widest flex items-center gap-2 ${theme.text}`}>
+                            <FileText size={14} className={theme.text} />
                             {isCommercial
                                 ? (lang === 'EN' ? "1. The Symptom (Text)" : "1. 症候描述")
                                 : (lang === 'EN' ? "1. The Seed (Text/Idea)" : "1. 创意种子")}
                             {visionInput && <span className={`w-1.5 h-1.5 rounded-full ${theme.bg} animate-pulse`}></span>}
                         </label>
-                        {visionInput && <button onClick={() => onVisionInputChange("")} className="text-[9px] text-zinc-400 hover:text-red-400 uppercase">{lang === 'EN' ? "Clear" : "清空"}</button>}
+                        {visionInput && <button onClick={() => onVisionInputChange("")} className={`text-[9px] hover:text-red-400 uppercase ${currentTheme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}`}>{lang === 'EN' ? "Clear" : "清空"}</button>}
                     </div>
                     <div className={`relative group ${isCommercial ? 'p-[1px] bg-gradient-to-br from-cyan-900/50 to-transparent rounded-xl' : ''}`}>
                         <textarea
                             value={visionInput}
                             onChange={(e) => onVisionInputChange(e.target.value)}
                             placeholder={getPlaceholder()}
-                            className={`w-full h-32 bg-[#080808] border border-zinc-800 rounded-xl p-5 text-sm text-zinc-200 placeholder-zinc-500 focus:outline-none resize-none font-sans leading-relaxed transition-all ${theme.text} ${theme.focusBorder} ${isCommercial ? 'focus:shadow-[0_0_20px_rgba(6,182,212,0.1)]' : ''}`}
+                            className={`w-full h-32 ${currentTheme === 'retro' ? `bg-[var(--bg-card)] ${theme.border}/20 text-[var(--text-main)] placeholder-black/30 focus:ring-[var(--text-accent)]/30` : `bg-[var(--bg-panel)] ${isCommercial ? 'border-cyan-500/30' : isExperimental ? 'border-purple-500/30' : isAesthetic ? 'border-rose-500/30' : isTrailer ? 'border-orange-500/30' : 'border-[#D4AF37]/40'} text-zinc-200 placeholder-zinc-500`} border-dashed border-2 rounded-xl p-5 text-sm focus:outline-none resize-none font-sans leading-relaxed transition-all ${theme.text} ${theme.focusBorder} ${isCommercial ? 'focus:shadow-[0_0_20px_rgba(6,182,212,0.1)]' : ''}`}
                         />
                         {isCommercial && <div className="absolute bottom-3 right-3 text-[9px] text-cyan-900/40 font-mono pointer-events-none select-none">INPUT_STREAM_ACTIVE</div>}
                     </div>
@@ -245,8 +246,8 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
                 {/* 2. Image Input */}
                 <div className="space-y-3">
                     <div className="flex justify-between items-baseline">
-                        <label className={`text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 ${theme.text}`}>
-                            <ImageIcon size={12} className={theme.text} />
+                        <label className={`text-xs font-bold uppercase tracking-widest flex items-center gap-2 ${theme.text}`}>
+                            <ImageIcon size={14} className={theme.text} />
                             {isCommercial
                                 ? (lang === 'EN' ? "2. The Fetish (Ref Image)" : "2. 拜物对象")
                                 : (lang === 'EN' ? "2. Visual Story (Image)" : "2. 视觉参考")}
@@ -255,7 +256,7 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
                     </div>
 
                     {visionImage ? (
-                        <div className={`relative w-full aspect-video rounded-xl overflow-hidden border border-zinc-700 group shadow-2xl`}>
+                        <div className={`relative w-full aspect-video rounded-xl overflow-hidden border border-dashed border-zinc-700 group shadow-2xl`}>
                             <img src={visionImage} alt="Reference" className="w-full h-full object-cover" />
                             <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3 backdrop-blur-sm">
                                 {onGenerateImage && (
@@ -304,8 +305,8 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
                 {/* 3. Visual Analysis Result */}
                 <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
                     <div className="flex justify-between items-baseline">
-                        <label className={`text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 ${theme.text}`}>
-                            <ScanLine size={14} className={theme.text} />
+                        <label className={`text-xs font-bold uppercase tracking-widest flex items-center gap-2 ${theme.text}`}>
+                            <ScanLine size={16} className={theme.text} />
                             <span>{lang === 'EN' ? "3. Narrative Decoding (Result)" : "3. 视觉叙事解码"}</span>
                             {visionAnalysis && <span className={`w-1.5 h-1.5 rounded-full ${theme.bg} animate-pulse`}></span>}
                         </label>
@@ -326,16 +327,16 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
                             value={visionAnalysis || ""}
                             onChange={(e) => onVisionAnalysisChange?.(e.target.value)}
                             placeholder={lang === 'EN' ? "AI decoded story/style/context will appear here..." : "AI 将在此处生成：\n1. 画面反推提示词\n2. 风格与影调分析\n3. 潜在的故事梗概\n4. 人物与事件推演..."}
-                            className={`w-full h-40 bg-[#0a0a0a] border border-zinc-800 rounded-xl p-5 text-xs text-zinc-300 placeholder-zinc-500 focus:outline-none resize-none font-mono leading-relaxed transition-all ${theme.text} ${theme.focusBorder} focus:shadow-[0_0_15px_rgba(255,255,255,0.02)] custom-scrollbar`}
+                            className={`w-full h-40 ${currentTheme === 'retro' ? `bg-[var(--bg-card)] ${theme.border}/20 text-[var(--text-main)] placeholder-black/30 focus:ring-[var(--text-accent)]/30` : `bg-[var(--bg-panel)] ${isCommercial ? 'border-cyan-500/30' : isExperimental ? 'border-purple-500/30' : isAesthetic ? 'border-rose-500/30' : isTrailer ? 'border-orange-500/30' : 'border-[#D4AF37]/40'} text-zinc-300 placeholder-zinc-500 focus:ring-zinc-700/50`} border-dashed border-2 rounded-xl p-5 text-xs focus:outline-none resize-none font-mono leading-relaxed transition-all ${theme.text} ${theme.focusBorder} focus:shadow-[0_0_15px_rgba(255,255,255,0.02)] custom-scrollbar`}
                         />
-                        <div className="absolute bottom-3 right-3 text-[8px] text-zinc-600 font-mono pointer-events-none select-none uppercase tracking-widest">
+                        <div className={`absolute bottom-3 right-3 text-[8px] ${currentTheme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-600'} font-mono pointer-events-none select-none uppercase tracking-widest`}>
                             {isProcessing ? (lang === 'EN' ? "DECODING..." : "正在解构...") : (lang === 'EN' ? "DECODER_READY" : "解码器就绪")}
                         </div>
                     </div>
                 </div>
 
                 {/* 4. Action Button (Engine Mapping) */}
-                <div className="mt-auto pt-6 border-t border-zinc-800">
+                <div className={`mt-auto ${currentTheme === 'retro' ? '' : 'pt-6 border-t border-zinc-800'}`}>
                     <button
                         onClick={onAutoFill}
                         disabled={isProcessing || (!visionInput && !visionImage && !visionAnalysis)}
@@ -371,5 +372,6 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
                 </div>
             </div>
         </div>
-    );
+    </div>
+);
 };

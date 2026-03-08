@@ -4,6 +4,7 @@ import { ArrowLeft, Settings2, PenTool, Anchor, Undo2, Redo2, User as UserIcon, 
 import { DriverType, WorldLawConfig } from '../types';
 import { FooterActions } from './FooterActions';
 import { ProcessingTimer } from './SharedBlueprintComponents';
+import { useTheme } from '../contexts/ThemeContext';
 import { TaskManagerPanel } from './TaskManagerPanel';
 import { globalTaskManager } from '../services/taskManager';
 
@@ -76,6 +77,7 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
     isTaskManagerOpen,
     setIsTaskManagerOpen
 }) => {
+    const { theme } = useTheme();
     const [activeTaskCount, setActiveTaskCount] = React.useState(0);
 
     React.useEffect(() => {
@@ -118,65 +120,63 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
     };
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 h-20 bg-black/90 backdrop-blur-md border-t border-white/10 flex items-center justify-between px-6 md:px-12 z-40">
+        <div className="fixed bottom-0 left-0 right-0 h-14 bg-[var(--bg-header)] backdrop-blur-md border-t border-[var(--border-main)] flex items-center justify-between px-6 md:px-12 z-40 transition-colors duration-500">
             <div className="flex items-center gap-4 shrink-0 w-[180px] md:w-[240px]">
-                <button onClick={handleBackStep} className="flex items-center gap-3 px-6 py-3 bg-zinc-900/50 hover:bg-zinc-800 border border-zinc-700 rounded-lg text-xs font-bold uppercase tracking-widest text-zinc-300 hover:text-white transition-all duration-100 group min-w-[140px]" >
+                <button onClick={handleBackStep} className={`flex items-center gap-3 px-6 py-3 bg-[var(--bg-panel)]/50 hover:bg-[var(--bg-panel)] border border-[var(--border-main)] rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-300 group min-w-[140px] hover:scale-105 active:scale-95 ${theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'}`} >
                     <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
                     <span className="hidden md:inline">{lang === 'CN' ? "返回首页" : "Home"}</span>
                 </button>
             </div>
-
             <div className="flex-1 flex justify-center items-center gap-4 md:gap-6 mx-4 overflow-x-auto no-scrollbar">
 
-
                 {selectedDriver !== DriverType.AESTHETIC && (
-                    <button onClick={() => setIsSkinOpen(!isSkinOpen)} className="flex flex-col items-center gap-1.5 shrink-0 min-w-[60px]" >
-                        <Settings2 size={18} className={isSkinOpen ? getThemeTextColor() : "text-zinc-400"} />
-                        <span className={`text-[9px] font-bold uppercase tracking-wider ${isSkinOpen ? getThemeTextColor() : "text-zinc-400"}`}>
+                    <button onClick={() => setIsSkinOpen(!isSkinOpen)} className="flex flex-col items-center gap-1.5 shrink-0 min-w-[60px] group transition-all duration-300 hover:scale-105 active:scale-95" >
+                        <Settings2 size={18} className={isSkinOpen ? getThemeTextColor() : (theme === 'retro' ? "text-zinc-600 group-hover:text-black transition-colors" : "text-zinc-400 group-hover:text-white transition-colors")} />
+                        <span className={`text-[9px] font-bold uppercase tracking-wider transition-colors ${isSkinOpen ? getThemeTextColor() : (theme === 'retro' ? "text-zinc-600 group-hover:text-black" : "text-zinc-400 group-hover:text-white")}`}>
                             {lang === 'CN' ? (selectedDriver === DriverType.COMMERCIAL ? "商业执行单" : (selectedDriver === DriverType.EXPERIMENTAL ? "还原协议" : (selectedDriver === DriverType.TRAILER ? "预告片执行单" : "表层设定"))) : (selectedDriver === DriverType.COMMERCIAL ? "Brief" : (selectedDriver === DriverType.EXPERIMENTAL ? "Reduction" : (selectedDriver === DriverType.TRAILER ? "Trailer" : "Skin")))}
                         </span>
                     </button>
                 )}
-                <button onClick={() => setIsVisionOpen(!isVisionOpen)} className="flex flex-col items-center gap-1.5 shrink-0 min-w-[60px]" >
-                    <PenTool size={18} className={selectedDriver === DriverType.AESTHETIC ? (isVisionOpen ? "text-rose-400" : "text-zinc-400") : (isVisionOpen ? getThemeTextColor() : "text-zinc-400")} />
-                    <span className={`text-[9px] font-bold uppercase tracking-wider ${selectedDriver === DriverType.AESTHETIC ? (isVisionOpen ? "text-rose-400" : "text-zinc-400") : (isVisionOpen ? getThemeTextColor() : "text-zinc-400")}`}>
+                <button onClick={() => setIsVisionOpen(!isVisionOpen)} className="flex flex-col items-center gap-1.5 shrink-0 min-w-[60px] group transition-all duration-300 hover:scale-105 active:scale-95" >
+                    <PenTool size={18} className={selectedDriver === DriverType.AESTHETIC ? (isVisionOpen ? "text-rose-400" : (theme === 'retro' ? "text-zinc-600 group-hover:text-black transition-colors" : "text-zinc-400 group-hover:text-white transition-colors")) : (isVisionOpen ? getThemeTextColor() : (theme === 'retro' ? "text-zinc-600 group-hover:text-black transition-colors" : "text-zinc-400 group-hover:text-white transition-colors"))} />
+                    <span className={`text-[9px] font-bold uppercase tracking-wider transition-colors ${selectedDriver === DriverType.AESTHETIC ? (isVisionOpen ? "text-rose-400" : (theme === 'retro' ? "text-zinc-600 group-hover:text-black" : "text-zinc-400 group-hover:text-white")) : (isVisionOpen ? getThemeTextColor() : (theme === 'retro' ? "text-zinc-600 group-hover:text-black" : "text-zinc-400 group-hover:text-white"))}`}>
                         {lang === 'CN' ? (selectedDriver === DriverType.COMMERCIAL ? "欲望输入" : selectedDriver === DriverType.AESTHETIC ? "反推解码" : "植入症候") : (selectedDriver === DriverType.AESTHETIC ? "Decoding" : "Input")}
                     </span>
                 </button>
 
-                <button onClick={() => setIsWorldLawOpen(true)} className="flex flex-col items-center gap-1.5 shrink-0 min-w-[60px]" >
-                    <Anchor size={18} className={worldLawConfig.physics === 'UNBOUND' ? getThemeTextColor() : "text-zinc-400"} />
-                    <span className={`text-[9px] font-bold uppercase tracking-wider ${worldLawConfig.physics === 'UNBOUND' ? getThemeTextColor() : "text-zinc-400"}`}>{lang === 'CN' ? "世界法则" : "Law"}</span>
+                <button onClick={() => setIsWorldLawOpen(true)} className="flex flex-col items-center gap-1.5 shrink-0 min-w-[60px] group transition-all duration-300 hover:scale-105 active:scale-95" >
+                    <Anchor size={18} className={worldLawConfig.physics === 'UNBOUND' ? getThemeTextColor() : (theme === 'retro' ? "text-zinc-600 group-hover:text-black transition-colors" : "text-zinc-400 group-hover:text-white transition-colors")} />
+                    <span className={`text-[9px] font-bold uppercase tracking-wider transition-colors ${worldLawConfig.physics === 'UNBOUND' ? getThemeTextColor() : (theme === 'retro' ? "text-zinc-600 group-hover:text-black" : "text-zinc-400 group-hover:text-white")}`}>{lang === 'CN' ? "世界法则" : "Law"}</span>
                 </button>
 
-                <div className="w-px h-8 bg-zinc-800 shrink-0"></div>
+                <div className="w-px h-8 bg-[var(--border-main)] shrink-0"></div>
                 {selectedDriver === DriverType.AESTHETIC && (
                     <>
-                        <div className="flex bg-zinc-900 border border-zinc-700 rounded-lg p-1 shrink-0">
+                        <div className={`flex ${theme === 'retro' ? 'bg-[#F9F7F1]/80 border-black/30 shadow-sm' : 'bg-zinc-900/50 border-zinc-800'} border rounded-lg p-1 shrink-0 transition-all duration-300 hover:scale-105`}>
                             <button
                                 onClick={handleUndo}
                                 disabled={pastStatesLength === 0}
                                 className={`p-2 transition-all rounded hover:bg-white/5 ${pastStatesLength === 0 ? 'opacity-30 grayscale cursor-not-allowed' : 'text-white'}`}
                                 title={lang === 'CN' ? "撤销" : "Undo"}
                             >
-                                <Undo2 size={18} className={pastStatesLength > 0 ? getFooterThemeColor() : 'text-zinc-600'} />
+                                <Undo2 size={18} className={pastStatesLength > 0 ? (theme === 'retro' ? 'text-black/70 group-hover:text-black' : (theme === 'dark' ? 'text-zinc-400 group-hover:text-white' : getFooterThemeColor())) : (theme === 'retro' ? 'text-black/20' : 'text-zinc-600')} />
                             </button>
-                            <div className="w-px h-4 bg-zinc-700 self-center mx-1"></div>
+                            <div className={`w-px h-4 ${theme === 'retro' ? 'bg-black/10' : 'bg-zinc-800'} self-center mx-1`}></div>
                             <button
                                 onClick={handleRedo}
                                 disabled={futureStatesLength === 0}
                                 className={`p-2 transition-all rounded hover:bg-white/5 ${futureStatesLength === 0 ? 'opacity-30 grayscale cursor-not-allowed' : 'text-white'}`}
                                 title={lang === 'CN' ? "重做" : "Redo"}
                             >
-                                <Redo2 size={18} className={futureStatesLength > 0 ? getFooterThemeColor() : 'text-zinc-600'} />
+                                <Redo2 size={18} className={futureStatesLength > 0 ? (theme === 'retro' ? 'text-black/70 group-hover:text-black' : (theme === 'dark' ? 'text-zinc-400 group-hover:text-white' : getFooterThemeColor())) : (theme === 'retro' ? 'text-black/20' : 'text-zinc-600')} />
                             </button>
                         </div>
                         <div className="w-px h-8 bg-zinc-800 shrink-0 mx-2"></div>
                         <div className="flex bg-zinc-900 border border-zinc-700 rounded-lg p-1 shrink-0">
-                            <button onClick={() => setSubjectType('HUMAN')} className={`px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 transition-all ${subjectType === 'HUMAN' ? 'bg-rose-500 text-black' : 'text-zinc-500 hover:text-white'}`} >
+                            <button onClick={() => setSubjectType('HUMAN')} className={`px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 transition-all ${subjectType === 'HUMAN' ? 'bg-rose-500 text-black' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'}`} >
                                 <UserIcon size={12} /> {lang === 'CN' ? "人类" : "Human"}
                             </button>
-                            <button onClick={() => setSubjectType('CREATURE')} className={`px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 transition-all ${subjectType === 'CREATURE' ? 'bg-rose-500 text-black' : 'text-zinc-500 hover:text-white'}`} >
+                            <button onClick={() => setSubjectType('CREATURE')} className={`px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 transition-all ${subjectType === 'CREATURE' ? 'bg-rose-500 text-black' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'}`} >
                                 <Ghost size={12} /> {lang === 'CN' ? "异种" : "Creature"}
                             </button>
                         </div>
@@ -216,23 +216,24 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
                     canUndo={pastStatesLength > 0}
                     canRedo={futureStatesLength > 0}
                     getFooterThemeColor={getFooterThemeColor}
+                    theme={useTheme().theme}
                 />
 
                 <div className="w-px h-8 bg-zinc-800 shrink-0"></div>
 
                 <button
                     onClick={() => setIsTaskManagerOpen(!isTaskManagerOpen)}
-                    className="flex flex-col items-center gap-1.5 shrink-0 min-w-[60px]"
+                    className="flex flex-col items-center gap-1.5 shrink-0 min-w-[60px] group transition-all duration-300 hover:scale-105 active:scale-95"
                 >
                     <div className="relative">
-                        <Activity size={18} className={`transition-colors ${isTaskManagerOpen ? getThemeTextColor() : "text-zinc-400 hover:text-white"}`} />
+                        <Activity size={18} className={`transition-colors ${isTaskManagerOpen ? getThemeTextColor() : (theme === 'retro' ? "text-zinc-600 group-hover:text-black" : "text-zinc-400 group-hover:text-white")}`} />
                         {activeTaskCount > 0 && (
                             <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-blue-500 rounded-full text-[8px] flex items-center justify-center font-bold text-white shadow-[0_0_10px_rgba(59,130,246,0.5)]">
                                 {activeTaskCount}
                             </span>
                         )}
                     </div>
-                    <span className={`text-[9px] font-bold uppercase tracking-wider ${isTaskManagerOpen ? getThemeTextColor() : "text-zinc-400 hover:text-white transition-all duration-100"}`}>
+                    <span className={`text-[9px] font-bold uppercase tracking-wider transition-all duration-300 ${isTaskManagerOpen ? getThemeTextColor() : (theme === 'retro' ? "text-zinc-600 group-hover:text-black" : "text-zinc-400 group-hover:text-white")}`}>
                         {lang === 'CN' ? '任务中心' : 'Tasks'}
                     </span>
                 </button>

@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { X, Aperture, BookOpen, Layers, List, Compass, ChevronRight, HelpCircle, History, Settings, Languages, User as UserIcon } from 'lucide-react';
 import { BlueprintLanguage, User } from '../types';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface LacanGraphViewProps {
     lang?: BlueprintLanguage;
@@ -253,6 +254,8 @@ export const LacanGraphView: React.FC<LacanGraphViewProps> = ({
     openProfile,
     currentUser
 }) => {
+    const { theme } = useTheme();
+    const isRetro = theme === 'retro';
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [hoveredId, setHoveredId] = useState<string | null>(null);
     const [currentLang, setCurrentLang] = useState<BlueprintLanguage>(initialLang);
@@ -280,10 +283,11 @@ export const LacanGraphView: React.FC<LacanGraphViewProps> = ({
     };
 
     return (
-        <div className="flex flex-col h-full w-full bg-[#050505] text-gold-primary font-sans overflow-hidden animate-in fade-in duration-700">
+        <div className={`flex flex-col h-full w-full bg-[var(--bg-main)] text-[var(--accent-color)] font-sans overflow-hidden animate-in fade-in duration-700 transition-colors duration-500`}>
+            {isRetro && <div className="absolute inset-0 pointer-events-none opacity-30 mix-blend-multiply z-0" style={{ backgroundImage: 'var(--pattern-aged)' }}></div>}
             
             {/* STANDARD MIST HEADER - Matching AppHeader & LacanTopologyView */}
-            <header className="h-14 bg-[#050505]/95 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-6 z-50 sticky top-0 shrink-0 transition-colors duration-500">
+            <header className="h-14 bg-[var(--bg-header)] backdrop-blur-md border-b border-[var(--border-main)] flex items-center justify-between px-6 z-50 sticky top-0 shrink-0 transition-colors duration-500">
                 <div className="flex items-center gap-4">
                     <button
                         onClick={onClose}
@@ -300,7 +304,7 @@ export const LacanGraphView: React.FC<LacanGraphViewProps> = ({
 
                 {/* CENTERED: MIST SCHOOL - Absolute center within header */}
                 <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden md:block">
-                     <span className="text-white font-serif font-bold text-sm tracking-[0.5em] uppercase pointer-events-none">
+                     <span className={`${isRetro ? 'text-[var(--text-main)]' : 'text-white'} font-serif font-bold text-sm tracking-[0.5em] uppercase pointer-events-none transition-colors`}>
                          {currentLang === 'CN' ? '迷雾学派' : 'MIST SCHOOL'}
                      </span>
                 </div>
@@ -352,19 +356,19 @@ export const LacanGraphView: React.FC<LacanGraphViewProps> = ({
             <div className="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
                 
                 {/* LEFT AREA: Content Section */}
-                <div className="w-full lg:w-1/2 bg-[#08080a] border-r border-gold-primary/10 flex flex-col z-20 shadow-[40px_0_120px_rgba(0,0,0,0.9)] flex-shrink-0 relative overflow-hidden">
+                <div className={`w-full lg:w-1/2 bg-[var(--bg-panel)] border-r border-[var(--border-main)] flex flex-col z-20 shadow-[40px_0_120px_rgba(0,0,0,0.9)] flex-shrink-0 relative overflow-hidden transition-colors duration-500`}>
                     
                     <header className="p-8 lg:px-12 pt-12 pb-6 relative z-10 flex-shrink-0">
                         <div className="flex flex-col">
                             <h1 className="text-5xl lg:text-6xl font-serif font-black tracking-tight text-white leading-tight">
                                 {currentLang === 'CN' ? (
-                                    <>拉康<span className="text-gold-primary">欲望图式</span></>
+                                    <>拉康<span className={isRetro ? 'text-[var(--text-accent)]' : 'text-gold-primary'}>欲望图式</span></>
                                 ) : (
-                                    <>LACAN <span className="text-gold-primary">GRAPH OF DESIRE</span></>
+                                    <>LACAN <span className={isRetro ? 'text-[var(--text-accent)]' : 'text-gold-primary'}>GRAPH OF DESIRE</span></>
                                 )}
                             </h1>
                             <div className="h-1 w-24 bg-gold-primary/80 mt-6 shadow-[0_0_15px_rgba(212,175,55,0.3)]"></div>
-                            <p className="mt-5 text-[11px] text-white tracking-[0.3em] font-black uppercase opacity-100 brightness-150 drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
+                            <p className={`mt-5 text-[11px] ${isRetro ? 'text-[var(--text-main)] underline decoration-[var(--text-accent)]' : 'text-white brightness-150 drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]'} tracking-[0.3em] font-black uppercase transition-colors`}>
                                 {currentLang === 'CN' ? '由于大他者的切中而引发主体的分裂' : 'ALIENATION OF THE SUBJECT BY THE OTHER'}
                             </p>
                         </div>
@@ -372,7 +376,7 @@ export const LacanGraphView: React.FC<LacanGraphViewProps> = ({
 
                     <div className="flex-1 flex flex-col overflow-hidden px-8 lg:px-12 pb-6 gap-5">
                         
-                        <div className="flex-1 min-h-0 flex flex-col border border-gold-primary/10 bg-gradient-to-b from-black/60 to-black/20 rounded-sm overflow-hidden relative group">
+                        <div className={`flex-1 min-h-0 flex flex-col border border-[var(--border-main)] bg-[var(--bg-card)] rounded-sm overflow-hidden relative group transition-colors duration-500`}>
                             {activeInfo ? (
                                 <div className="flex-1 flex flex-col overflow-hidden">
                                     <div className="p-5 border-b border-gold-primary/10 bg-white/[0.02] flex-shrink-0">
@@ -491,9 +495,9 @@ export const LacanGraphView: React.FC<LacanGraphViewProps> = ({
                 </div>
 
                 {/* RIGHT AREA: Topology Graph Canvas */}
-                <div className="lg:w-1/2 relative flex items-center justify-center p-4 lg:p-8 overflow-hidden bg-[#050505]">
+                <div className={`lg:w-1/2 relative flex items-center justify-center p-4 lg:p-8 overflow-hidden bg-[var(--bg-main)] transition-colors duration-500`}>
                     
-                    <div className="absolute inset-0 opacity-[0.02] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#D4AF37 1px, transparent 0)', backgroundSize: '40px 40px' }}></div>
+                    <div className="absolute inset-0 opacity-[0.02] pointer-events-none" style={{ backgroundImage: `radial-gradient(${isRetro ? '#8B261D' : '#D4AF37'} 1px, transparent 0)`, backgroundSize: '40px 40px' }}></div>
 
                     <div className="relative w-full h-full max-w-[850px] max-h-[850px] flex items-center justify-center">
                         <svg 

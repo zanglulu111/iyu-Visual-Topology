@@ -57,10 +57,12 @@ import { supabaseDatabase } from './services/supabaseDatabase';
 import { useSettings } from './contexts/SettingsContext';
 import { SimpleConfigPanel } from './src/components/SimpleConfigPanel';
 
-type ViewMode = 'ENGINE' | 'DIVERGENCE' | 'BIBLE' | 'METONYMY' | 'TOPOLOGY' | 'RSI';
+type ViewMode = 'ENGINE' | 'DIVERGENCE' | 'BIBLE' | 'METONYMY' | 'TOPOLOGY' | 'RSI' | 'ARCHIVE' | 'VIDEO';
 
 import { LacanGraphView } from './components/LacanGraphView';
 import { LacanTopologyView } from './components/LacanTopologyView';
+import { ArchiveDirectoryModal } from './components/ArchiveDirectoryModal';
+import { VideoLibrary } from './components/VideoLibrary';
 
 const App: React.FC = () => {
     const { isOpen: isSettingsOpen, openSettings, closeSettings } = useSettings();
@@ -1175,6 +1177,8 @@ const App: React.FC = () => {
                     onHistoryRestore={onHistoryRestore}
                     onHistoryClear={onHistoryClear}
                     openSettings={openSettings}
+                    showRings={showRings}
+                    setShowRings={setShowRings}
                 />
             ) : viewMode === 'TOPOLOGY' ? (
                 <div className="h-screen w-screen overflow-hidden">
@@ -1190,6 +1194,79 @@ const App: React.FC = () => {
                         openProfile={() => setIsProfileOpen(true)}
                         currentUser={currentUser}
                     />
+                </div>
+            ) : viewMode === 'ARCHIVE' ? (
+                <div className="h-screen w-screen overflow-hidden flex flex-col">
+                    <AppHeader
+                        page={page}
+                        lang={lang}
+                        setLang={setLang}
+                        setPage={setPage}
+                        selectedDriver={selectedDriver}
+                        driverName={lang === 'CN' ? '机密档案集' : 'CONFIDENTIAL ARCHIVES'}
+                        viewMode={viewMode}
+                        setViewMode={handleViewChange}
+                        handleOpenMetonymyPage={handleOpenMetonymyPage}
+                        openManual={openManual}
+                        isManualOpen={isManualOpen}
+                        openHistory={openHistory}
+                        isHistoryOpen={isHistoryOpen}
+                        openSettings={openSettings}
+                        openAuth={openAuth}
+                        openProfile={() => setIsProfileOpen(true)}
+                        onLogout={() => supabaseAuthService.signOut()}
+                        currentUser={currentUser}
+                        showRings={showRings}
+                        setShowRings={setShowRings}
+                    />
+                    <div className="flex-1 overflow-hidden relative">
+                        <ArchiveDirectoryModal 
+                            isOpen={true} 
+                            onClose={() => {
+                                setPage(0);
+                                setViewMode('ENGINE');
+                            }} 
+                            lang={lang}
+                            isFullScreen={true}
+                        />
+                    </div>
+                </div>
+            ) : viewMode === 'VIDEO' ? (
+                <div className="h-screen w-screen overflow-hidden flex flex-col">
+                    <AppHeader
+                        page={page}
+                        lang={lang}
+                        setLang={setLang}
+                        setPage={setPage}
+                        selectedDriver={selectedDriver}
+                        driverName={lang === 'CN' ? '影像资料库' : 'VIDEO ARCHIVE'}
+                        viewMode={viewMode}
+                        setViewMode={handleViewChange}
+                        handleOpenMetonymyPage={handleOpenMetonymyPage}
+                        openManual={openManual}
+                        isManualOpen={isManualOpen}
+                        openHistory={openHistory}
+                        isHistoryOpen={isHistoryOpen}
+                        openSettings={openSettings}
+                        openAuth={openAuth}
+                        openProfile={() => setIsProfileOpen(true)}
+                        onLogout={() => supabaseAuthService.signOut()}
+                        currentUser={currentUser}
+                        showRings={showRings}
+                        setShowRings={setShowRings}
+                    />
+                    <div className="flex-1 overflow-hidden relative">
+                        <VideoLibrary 
+                            isOpen={true} 
+                            onClose={() => {
+                                setPage(0);
+                                setViewMode('ENGINE');
+                            }} 
+                            lang={lang}
+                            isAdmin={currentUser?.membershipTier === 'admin' || (currentUser as any)?.membership_tier === 'admin'}
+                            isFullScreen={true}
+                        />
+                    </div>
                 </div>
             ) : viewMode === 'RSI' ? (
                 <div className="h-screen w-screen overflow-hidden">
@@ -1487,6 +1564,7 @@ const App: React.FC = () => {
                 isOpen={isTaskManagerOpen}
                 onClose={() => setIsTaskManagerOpen(false)}
                 lang={lang}
+                driverType={selectedDriver}
             />
         </div>
     );

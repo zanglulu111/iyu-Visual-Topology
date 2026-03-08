@@ -1,4 +1,5 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
+import { useTheme } from '../contexts/ThemeContext';
 import { NarrativeFieldState, BlueprintLanguage, DriverType, NarrativeBlockDef, LibraryCategoryDef, SubjectType, AestheticMode, AestheticPreset } from '../types';
 import { Ghost, ScanEye, BrainCircuit, Zap, ChevronRight } from 'lucide-react';
 import { ProphecySlot } from './ProphecySlot';
@@ -65,6 +66,7 @@ export interface NarrativeEngineFieldProps {
 }
 
 export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props) => {
+    const { theme } = useTheme();
     // If Aesthetic driver, delegate to AestheticEngineField
     if (props.driverType === DriverType.AESTHETIC) {
         return <AestheticEngineField {...props} aestheticMode={props.aestheticMode || 'REALISM'} onAestheticModeChange={props.onAestheticModeChange || (() => { })} showRings={props.showRings} />;
@@ -143,17 +145,22 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
 
     const osDisplay = currentPsychicOS ? getBilingualText(currentPsychicOS) : getOSPlaceholder();
 
-    let osTheme = { accent: 'text-gold-primary', hover: 'hover:bg-amber-900/10 hover:border-gold-primary/30', label: 'text-gold-primary', icon: <Ghost size={16} className="text-gold-primary" /> };
+    let osTheme = {
+        accent: 'text-gold-primary',
+        hover: theme === 'retro' ? 'hover:bg-red-900/5' : 'hover:bg-amber-900/10',
+        label: 'text-gold-primary',
+        icon: <Ghost size={16} className="text-gold-primary" />
+    };
     let osLabel = "结构基底/STRUCTURAL BASE";
 
     if (isCommercial) {
-        osTheme = { accent: 'text-cyan-400', hover: 'hover:bg-cyan-900/10 hover:border-cyan-400/30', label: 'text-cyan-400', icon: <ScanEye size={16} className="text-cyan-400" /> };
+        osTheme = { accent: 'text-mist-cyan', hover: theme === 'retro' ? 'hover:bg-mist-cyan/5' : 'hover:bg-cyan-900/10', label: 'text-mist-cyan', icon: <ScanEye size={16} className="text-mist-cyan" /> };
         osLabel = "欲望锚点/DESIRE ANCHOR";
     } else if (isExperimental) {
-        osTheme = { accent: 'text-purple-400', hover: 'hover:bg-purple-900/10 hover:border-purple-400/30', label: 'text-purple-400', icon: <BrainCircuit size={16} className="text-purple-400" /> };
+        osTheme = { accent: 'text-mist-purple', hover: theme === 'retro' ? 'hover:bg-mist-purple/5' : 'hover:bg-purple-900/10', label: 'text-mist-purple', icon: <BrainCircuit size={16} className="text-mist-purple" /> };
         osLabel = "核心观念/CORE CONCEPT";
     } else if (isTrailer) {
-        osTheme = { accent: 'text-orange-400', hover: 'hover:bg-orange-900/10 hover:border-orange-400/30', label: 'text-orange-400', icon: <Zap size={16} className="text-orange-400" /> };
+        osTheme = { accent: 'text-mist-orange', hover: theme === 'retro' ? 'hover:bg-mist-orange/5' : 'hover:bg-orange-900/10', label: 'text-mist-orange', icon: <Zap size={16} className="text-mist-orange" /> };
         osLabel = "诱饵钩子/THE LURE";
     }
 
@@ -275,7 +282,8 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
     );
 
     return (
-        <div className="w-full h-full flex flex-col relative bg-[#050505] overflow-hidden">
+        <div className="w-full h-full flex flex-col relative bg-[var(--bg-main)] overflow-hidden transition-colors duration-500">
+            {theme === 'retro' && <div className="absolute inset-0 pointer-events-none opacity-40 mix-blend-multiply" style={{ backgroundImage: 'var(--pattern-aged)' }}></div>}
 
             {/* Background Borromean Rings - Clear rings with subtle 'frosted' context */}
             {showRings && (
@@ -295,10 +303,15 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                 {/* Removed darkened overlay to prevent obscuring background */}
                 <div className="max-w-5xl mx-auto w-full flex flex-col items-center justify-center relative">
                     <div className="flex-1 flex flex-col items-center justify-center pointer-events-none">
-                        <h2 className="text-3xl md:text-5xl font-serif font-bold text-white tracking-[0.15em] text-center mb-2 transition-all duration-300">
-                            <span className={osTheme.accent}>{getEngineTitle()}</span>
+                        <h2 className="text-3xl md:text-5xl font-serif font-bold tracking-[0.15em] text-center mb-2 transition-all duration-300">
+                            <span className={`
+                                ${(isCommercial || isExperimental || isTrailer) && theme === 'retro' ? 'text-[var(--text-accent)]' : osTheme.accent}
+                                ${theme === 'retro' && !isCommercial && !isExperimental && !isTrailer ? 'drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] brightness-110 contrast-125' : ''}
+                            `}>
+                                {getEngineTitle()}
+                            </span>
                         </h2>
-                        <p className="text-zinc-500 text-[10px] md:text-sm font-light uppercase tracking-widest text-center w-full whitespace-nowrap overflow-hidden text-ellipsis">{getEngineSubtitle()}</p>
+                        <p className={`text-[10px] md:text-sm font-light uppercase tracking-widest text-center w-full whitespace-nowrap overflow-hidden text-ellipsis ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}`}>{getEngineSubtitle()}</p>
                     </div>
                 </div>
             </div>
@@ -308,11 +321,11 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                     <div className="relative w-full max-w-5xl">
                         <button onClick={() => openLibrary(currentOSKey)} className={`group relative flex flex-col items-center justify-center w-full p-6 transition-all duration-300 border-2 border-transparent rounded-xl ${osTheme.hover}`}>
                             <div className="flex items-center gap-2 mb-3">{osTheme.icon}<span className={`text-xs uppercase tracking-[0.3em] font-bold text-zinc-400 transition-colors ${osTheme.label}`}>{lang === 'EN' ? osLabel.split('/')[1] : osLabel.split('/')[0]}</span></div>
-                            <div className={`text-3xl md:text-6xl font-serif font-bold tracking-[0.1em] mb-3 ${currentPsychicOS ? 'text-white' : 'text-zinc-700'}`}>{osDisplay}</div>
+                            <div className={`text-3xl md:text-6xl font-serif font-bold tracking-[0.1em] mb-3 transition-all duration-300 group-hover:scale-110 ${currentPsychicOS ? (theme === 'retro' ? 'text-black' : 'text-white') : (theme === 'retro' ? 'text-zinc-500 group-hover:text-black' : 'text-zinc-500 group-hover:text-white')}`}>{osDisplay}</div>
                             {osDetails && (
-                                <div className="text-sm md:text-lg text-zinc-300 font-normal w-full px-4 text-center leading-relaxed whitespace-pre-line">
+                                <div className={`text-sm md:text-lg font-normal w-full px-4 text-center leading-relaxed whitespace-pre-line ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}`}>
                                     {lang === 'EN' && osDetails.defEn ? osDetails.defEn : osDetails.def}
-                                    <span className="block text-xs md:text-sm text-zinc-500 italic mt-1">{lang === 'EN' && osDetails.coreEn ? osDetails.coreEn : osDetails.core}</span>
+                                    <span className={`block text-xs md:text-sm italic mt-1 ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}`}>{lang === 'EN' && osDetails.coreEn ? osDetails.coreEn : osDetails.core}</span>
                                 </div>
                             )}
                             <div className={`absolute right-4 top-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity ${osTheme.accent}`}><ChevronRight size={24} /></div>

@@ -6,9 +6,12 @@ interface TaskManagerPanelProps {
     isOpen: boolean;
     onClose: () => void;
     lang: 'CN' | 'EN';
+    driverType?: DriverType | null;
 }
 
-export const TaskManagerPanel: React.FC<TaskManagerPanelProps> = ({ isOpen, onClose, lang }) => {
+import { DriverType } from '../types';
+
+export const TaskManagerPanel: React.FC<TaskManagerPanelProps> = ({ isOpen, onClose, lang, driverType }) => {
     const [tasks, setTasks] = useState<GenerationTask[]>([]);
     const [currentTime, setCurrentTime] = useState(Date.now());
 
@@ -33,9 +36,21 @@ export const TaskManagerPanel: React.FC<TaskManagerPanelProps> = ({ isOpen, onCl
         return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
     };
 
+    const getModeAccent = () => {
+        switch (driverType) {
+            case DriverType.COMMERCIAL: return { text: 'text-cyan-400', bg: 'bg-cyan-500', border: 'border-cyan-500', shadow: 'shadow-[0_0_20px_rgba(6,182,212,0.2)]' };
+            case DriverType.AESTHETIC: return { text: 'text-rose-400', bg: 'bg-rose-500', border: 'border-rose-500', shadow: 'shadow-[0_0_20px_rgba(244,63,94,0.2)]' };
+            case DriverType.EXPERIMENTAL: return { text: 'text-purple-400', bg: 'bg-purple-500', border: 'border-purple-500', shadow: 'shadow-[0_0_20px_rgba(168,85,247,0.2)]' };
+            case DriverType.TRAILER: return { text: 'text-orange-400', bg: 'bg-orange-500', border: 'border-orange-500', shadow: 'shadow-[0_0_20px_rgba(251,146,60,0.2)]' };
+            default: return { text: 'text-gold-primary', bg: 'bg-gold-primary', border: 'border-[#D4AF37]', shadow: 'shadow-[0_0_20px_rgba(212,175,55,0.15)]' };
+        }
+    };
+
+    const modeAccent = getModeAccent();
+
     const getStatusIcon = (status: string) => {
         switch (status) {
-            case 'generating': return <PlayCircle size={16} className="text-blue-400 animate-pulse" />;
+            case 'generating': return <PlayCircle size={16} className={`${modeAccent.text} animate-pulse`} />;
             case 'completed': return <CheckCircle2 size={16} className="text-green-500" />;
             case 'failed': return <XCircle size={16} className="text-red-500" />;
             case 'aborted': return <AlertCircle size={16} className="text-orange-400" />;
@@ -54,10 +69,10 @@ export const TaskManagerPanel: React.FC<TaskManagerPanelProps> = ({ isOpen, onCl
     };
 
     return (
-        <div className={`fixed bottom-20 right-6 w-[400px] max-h-[500px] h-[60vh] bg-zinc-950 border border-zinc-800/80 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] z-[120] flex flex-col transform transition-all duration-300 origin-bottom ${isOpen ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0 pointer-events-none'}`}>
-            <div className="flex justify-between items-center p-4 border-b border-zinc-800/80 bg-zinc-900/50 rounded-t-xl">
+        <div className={`fixed bottom-20 right-6 w-[400px] max-h-[500px] h-[60vh] bg-zinc-950 border-2 ${modeAccent.border} rounded-xl ${modeAccent.shadow} z-[120] flex flex-col transform transition-all duration-300 origin-bottom ${isOpen ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0 pointer-events-none'}`}>
+            <div className={`flex justify-between items-center p-4 border-b ${modeAccent.border}/30 bg-zinc-900/50 rounded-t-xl`}>
                 <div className="flex items-center gap-2">
-                    <Activity size={18} className="text-gold-primary" />
+                    <Activity size={18} className={modeAccent.text} />
                     <h3 className="text-sm font-bold uppercase tracking-wider text-white">
                         {lang === 'CN' ? '生成任务中心' : 'Task Manager'}
                     </h3>
@@ -77,7 +92,7 @@ export const TaskManagerPanel: React.FC<TaskManagerPanelProps> = ({ isOpen, onCl
                     </div>
                 ) : (
                     tasks.map(task => (
-                        <div key={task.id} className="bg-zinc-900 border border-zinc-800 rounded-lg p-3 flex flex-col gap-2 relative overflow-hidden group">
+                        <div key={task.id} className={`bg-zinc-900 border ${modeAccent.border}/20 rounded-lg p-3 flex flex-col gap-2 relative overflow-hidden group hover:${modeAccent.border}/40 transition-colors`}>
                             <div className="flex justify-between items-start">
                                 <div className="flex items-center gap-2 max-w-[70%]">
                                     {getStatusIcon(task.status)}
@@ -91,7 +106,7 @@ export const TaskManagerPanel: React.FC<TaskManagerPanelProps> = ({ isOpen, onCl
                             </div>
 
                             <div className="flex justify-between items-center mt-1">
-                                <span className={`text-[10px] uppercase font-bold tracking-wider ${task.status === 'generating' ? 'text-blue-400' :
+                                <span className={`text-[10px] uppercase font-bold tracking-wider ${task.status === 'generating' ? modeAccent.text :
                                     task.status === 'completed' ? 'text-green-500' :
                                         task.status === 'failed' ? 'text-red-500' : 'text-orange-400'
                                     }`}>
@@ -110,7 +125,7 @@ export const TaskManagerPanel: React.FC<TaskManagerPanelProps> = ({ isOpen, onCl
                             </div>
 
                             {task.status === 'generating' && (
-                                <div className="absolute bottom-0 left-0 h-[2px] bg-blue-500/50 w-full animate-pulse"></div>
+                                <div className={`absolute bottom-0 left-0 h-[2px] ${modeAccent.bg}/50 w-full animate-pulse`}></div>
                             )}
                         </div>
                     ))

@@ -3,6 +3,7 @@ import React from 'react';
 import { DRIVERS } from '../constants';
 import { DriverType } from '../types';
 import { ArrowRight, Sparkles } from 'lucide-react';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface DriverSelectorProps {
     selectedDriver: DriverType | null;
@@ -14,26 +15,42 @@ interface DriverSelectorProps {
 
 export const DriverSelector: React.FC<DriverSelectorProps> = ({ selectedDriver, onSelect, lang, hoveredDriver, onHover }) => {
 
+    const { theme } = useTheme();
+    const isRetro = theme === 'retro';
+
     const getAccentColor = (id: DriverType) => {
         switch (id) {
-            case DriverType.COMMERCIAL: return 'text-cyan-400';
-            case DriverType.NARRATIVE: return 'text-yellow-400';
-            case DriverType.AESTHETIC: return 'text-rose-400';
-            case DriverType.EXPERIMENTAL: return 'text-purple-400';
-            case DriverType.TRAILER: return 'text-orange-400';
+            case DriverType.COMMERCIAL: return 'text-mist-cyan';
+            case DriverType.NARRATIVE: return 'text-mist-gold'; // Narrative is Gold
+            case DriverType.AESTHETIC: return 'text-mist-rose';
+            case DriverType.EXPERIMENTAL: return 'text-mist-purple';
+            case DriverType.TRAILER: return 'text-mist-orange';
             default: return 'text-gold-primary';
         }
     };
 
     const getBorderColor = (id: DriverType, active: boolean) => {
-        if (!active) return 'border-zinc-900';
+        if (!active) return isRetro ? 'border-transparent' : 'border-white/[0.03]';
+        
+        if (isRetro) {
+            switch (id) {
+                case DriverType.COMMERCIAL: return 'border-mist-cyan';
+                case DriverType.NARRATIVE: return 'border-mist-gold';
+                case DriverType.AESTHETIC: return 'border-mist-rose';
+                case DriverType.EXPERIMENTAL: return 'border-mist-purple';
+                case DriverType.TRAILER: return 'border-mist-orange';
+                default: return 'border-gold-primary';
+            }
+        }
+
+        // Dark Mode: Vibrant Colors
         switch (id) {
-            case DriverType.COMMERCIAL: return 'border-cyan-500/50';
-            case DriverType.NARRATIVE: return 'border-yellow-500/50';
-            case DriverType.AESTHETIC: return 'border-rose-500/50';
-            case DriverType.EXPERIMENTAL: return 'border-purple-500/50';
-            case DriverType.TRAILER: return 'border-orange-500/50';
-            default: return 'border-gold-primary/50';
+            case DriverType.COMMERCIAL: return 'border-cyan-500';
+            case DriverType.NARRATIVE: return 'border-[#D4AF37]';
+            case DriverType.AESTHETIC: return 'border-rose-500';
+            case DriverType.EXPERIMENTAL: return 'border-purple-500';
+            case DriverType.TRAILER: return 'border-orange-500';
+            default: return 'border-[#D4AF37]';
         }
     };
 
@@ -47,6 +64,27 @@ export const DriverSelector: React.FC<DriverSelectorProps> = ({ selectedDriver, 
                     const accentClass = getAccentColor(driver.id);
                     const borderClass = getBorderColor(driver.id, active);
 
+                    const getHoverBorder = (id: DriverType) => {
+                        if (isRetro) {
+                            switch (id) {
+                                case DriverType.COMMERCIAL: return 'hover:border-mist-cyan/60';
+                                case DriverType.NARRATIVE: return 'hover:border-mist-gold/60';
+                                case DriverType.AESTHETIC: return 'hover:border-mist-rose/60';
+                                case DriverType.EXPERIMENTAL: return 'hover:border-mist-purple/60';
+                                case DriverType.TRAILER: return 'hover:border-mist-orange/60';
+                                default: return 'hover:border-mist-gold/60';
+                            }
+                        }
+                            switch (id) {
+                                case DriverType.COMMERCIAL: return 'hover:border-cyan-500';
+                                case DriverType.NARRATIVE: return 'hover:border-[#D4AF37]';
+                                case DriverType.AESTHETIC: return 'hover:border-rose-500';
+                                case DriverType.EXPERIMENTAL: return 'hover:border-purple-500';
+                                case DriverType.TRAILER: return 'hover:border-orange-500';
+                                default: return 'hover:border-[#D4AF37]';
+                            }
+                    };
+
                     return (
                         <button
                             key={driver.id}
@@ -55,10 +93,10 @@ export const DriverSelector: React.FC<DriverSelectorProps> = ({ selectedDriver, 
                             onMouseLeave={() => onHover(null)}
                             className={`
                 group relative flex flex-col items-start text-left p-6 md:p-8 rounded-sm transition-all duration-700 
-                border bg-[#080808]/15 backdrop-blur-sm min-h-[300px]
+                border ${isRetro ? 'bg-transparent' : 'bg-[rgb(1,1,1,0.01)]'} backdrop-blur-sm min-h-[300px]
                 ${active
-                                    ? `${borderClass} shadow-[0_25px_60px_rgba(0,0,0,0.6)] -translate-y-1`
-                                    : 'border-zinc-900/40 hover:border-zinc-800'
+                                    ? `${borderClass} shadow-[0_25px_60px_rgba(0,0,0,0.15)] -translate-y-1 ${isRetro ? 'bg-[#F9F7F1]' : (driver.id === DriverType.NARRATIVE ? 'bg-[#D4AF37]/5' : 'bg-zinc-950/100')} backdrop-blur-none`
+                                    : `${isRetro ? 'border-transparent bg-transparent' : 'border-white/[0.03] bg-white/[0.02]'} ${getHoverBorder(driver.id)}`
                                 }
               `}
                         >
@@ -71,12 +109,24 @@ export const DriverSelector: React.FC<DriverSelectorProps> = ({ selectedDriver, 
                                     <div className={`transition-all duration-700 cubic-bezier(0.4, 0, 0.2, 1) ${lang === 'EN' ? '-translate-y-1/2' : 'translate-y-0'}`}>
                                         <div className="flex flex-col">
                                             <div className="h-14 flex items-center shrink-0">
-                                                <h3 className={`text-xl md:text-2xl font-serif font-bold tracking-wide transition-colors duration-500 leading-tight ${active ? 'text-white' : 'text-zinc-400'}`}>
+                                                <h3 className={`text-xl md:text-2xl font-serif font-bold tracking-wide transition-all duration-500 leading-tight ${
+                                                    isRetro 
+                                                        ? (active ? 'text-black' : 'text-black/70') 
+                                                        : (active 
+                                                            ? (driver.id === DriverType.NARRATIVE ? 'text-[#D4AF37]' : 'text-white') 
+                                                            : 'text-white/80')
+                                                }`}>
                                                     {driver.name}
                                                 </h3>
                                             </div>
                                             <div className="h-14 flex items-center shrink-0">
-                                                <h3 className={`text-lg md:text-xl font-serif font-bold tracking-wide transition-colors duration-500 leading-tight ${active ? 'text-white' : 'text-zinc-400'}`}>
+                                                <h3 className={`text-lg md:text-xl font-serif font-bold tracking-wide transition-all duration-500 leading-tight ${
+                                                    isRetro 
+                                                        ? (active ? 'text-black' : 'text-black/70') 
+                                                        : (active 
+                                                            ? (driver.id === DriverType.NARRATIVE ? 'text-gold-primary' : 'text-white') 
+                                                            : 'text-white/80')
+                                                }`}>
                                                     {driver.nameEn}
                                                 </h3>
                                             </div>
@@ -86,10 +136,10 @@ export const DriverSelector: React.FC<DriverSelectorProps> = ({ selectedDriver, 
                                 <div className="h-6 overflow-hidden mt-1">
                                     <div className={`transition-all duration-700 cubic-bezier(0.4, 0, 0.2, 1) ${lang === 'EN' ? '-translate-y-1/2' : 'translate-y-0'}`}>
                                         <div className="flex flex-col">
-                                            <div className={`h-6 flex items-center shrink-0 text-sm font-serif italic transition-all duration-500 ${active ? accentClass : 'text-zinc-600'}`}>
+                                            <div className={`h-6 flex items-center shrink-0 text-sm font-serif italic transition-all duration-500 ${active ? accentClass : 'text-[var(--text-muted)] opacity-60'}`}>
                                                 {driver.coreDriver}
                                             </div>
-                                            <div className={`h-6 flex items-center shrink-0 text-sm font-serif italic transition-all duration-500 ${active ? accentClass : 'text-zinc-600'}`}>
+                                            <div className={`h-6 flex items-center shrink-0 text-sm font-serif italic transition-all duration-500 ${active ? accentClass : 'text-[var(--text-muted)] opacity-60'}`}>
                                                 {driver.coreDriverEn}
                                             </div>
                                         </div>
@@ -104,13 +154,25 @@ export const DriverSelector: React.FC<DriverSelectorProps> = ({ selectedDriver, 
                                         <div className="flex flex-col">
                                             {/* CN Slot */}
                                             <div className="h-[130px] shrink-0">
-                                                <p className={`leading-relaxed font-light transition-colors duration-500 text-[12px] md:text-sm ${active ? 'text-zinc-400' : 'text-zinc-700'}`}>
+                                                <p className={`leading-relaxed font-light transition-all duration-500 text-[12px] md:text-sm ${
+                                                    isRetro 
+                                                        ? (active ? 'text-black/90' : 'text-black/60') 
+                                                        : (active 
+                                                            ? (driver.id === DriverType.NARRATIVE ? 'text-[#D4AF37]/90' : 'text-white') 
+                                                            : 'text-white/70')
+                                                }`}>
                                                     {driver.description}
                                                 </p>
                                             </div>
                                             {/* EN Slot */}
                                             <div className="h-[130px] shrink-0">
-                                                <p className={`leading-relaxed font-light transition-colors duration-500 text-[11px] md:text-[13px] ${active ? 'text-zinc-400' : 'text-zinc-700'}`}>
+                                                <p className={`leading-relaxed font-light transition-all duration-500 text-[11px] md:text-[13px] ${
+                                                    isRetro 
+                                                        ? (active ? 'text-black/90' : 'text-black/60') 
+                                                        : (active 
+                                                            ? (driver.id === DriverType.NARRATIVE ? 'text-gold-primary/90' : 'text-white') 
+                                                            : 'text-white/70')
+                                                }`}>
                                                     {driver.descriptionEn || driver.description}
                                                 </p>
                                             </div>
@@ -119,8 +181,8 @@ export const DriverSelector: React.FC<DriverSelectorProps> = ({ selectedDriver, 
                                 </div>
                             </div>
                             {/* Action Footer */}
-                            <div className={`mt-auto pt-4 w-full flex items-center justify-between border-t border-zinc-900/40 transition-opacity duration-500 ${active ? 'opacity-100' : 'opacity-0'}`}>
-                                <span className={`text-[10px] font-bold uppercase tracking-[0.2em] text-white`}>
+                            <div className={`mt-auto pt-4 w-full flex items-center justify-between border-t ${isRetro ? 'border-[var(--border-main)]' : 'border-[var(--border-main)]/40'} transition-opacity duration-500 ${active ? 'opacity-100' : 'opacity-0'}`}>
+                                <span className={`text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--text-main)]`}>
                                     {lang === 'CN' ? '选取引擎' : 'SELECT ENGINE'}
                                 </span>
                                 <ArrowRight size={14} className={accentClass} />
