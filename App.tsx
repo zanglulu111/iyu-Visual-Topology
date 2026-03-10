@@ -1187,6 +1187,7 @@ const App: React.FC = () => {
                 <div className="h-screen w-screen overflow-hidden">
                     <LacanGraphView 
                         lang={lang} 
+                        setLang={setLang}
                         onClose={() => {
                             setPage(0);
                             setViewMode('ENGINE');
@@ -1196,6 +1197,8 @@ const App: React.FC = () => {
                         openSettings={openSettings}
                         openProfile={() => setIsProfileOpen(true)}
                         currentUser={currentUser}
+                        showRings={showRings}
+                        setShowRings={setShowRings}
                     />
                 </div>
             ) : viewMode === 'ARCHIVE' ? (
@@ -1275,6 +1278,7 @@ const App: React.FC = () => {
                 <div className="h-screen w-screen overflow-hidden">
                     <LacanTopologyView 
                         lang={lang} 
+                        setLang={setLang}
                         onClose={() => {
                             setPage(0);
                             setViewMode('ENGINE');
@@ -1284,6 +1288,8 @@ const App: React.FC = () => {
                         openSettings={openSettings}
                         openProfile={() => setIsProfileOpen(true)}
                         currentUser={currentUser}
+                        showRings={showRings}
+                        setShowRings={setShowRings}
                     />
                 </div>
             ) : (

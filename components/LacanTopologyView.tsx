@@ -1,491 +1,365 @@
-import React, { useState, useMemo } from 'react';
-import { 
-  Globe, 
-  Aperture, 
-  Sun, 
-  Moon, 
-  User as UserIcon, 
-  BookOpen, 
-  Search, 
-  ArrowRight, 
-  Maximize2, 
-  Link as LinkIcon,
-  ChevronRight,
-  ChevronDown,
-  Info,
-  Layers,
-  Zap,
-  Book,
-  Cpu,
-  History,
-  Settings
-} from 'lucide-react';
-import { User } from '../types';
+import React, { useState } from 'react';
+import { X, Aperture, BookOpen, Zap, Info, Shield, Layers, HelpCircle, History as HistoryIcon, Settings, Languages, User as UserIcon, Terminal, Globe, Moon, Sun, Search } from 'lucide-react';
+import { BlueprintLanguage, User, DriverType } from '../types';
 import { useTheme } from '../contexts/ThemeContext';
-import { LACAN_DICTIONARY, LacanConcept } from '../data/lacan_dictionary';
+import { BorromeanRings } from './BorromeanRings';
 
 interface LacanTopologyViewProps {
-  lang: 'CN' | 'EN';
-  setLang: (lang: 'CN' | 'EN') => void;
-  setPage: (page: 0 | 1) => void;
-  currentUser: User;
-  showRings: boolean;
-  setShowRings: (show: boolean) => void;
+    lang: 'CN' | 'EN';
+    setLang: (lang: 'CN' | 'EN') => void;
+    onClose: () => void;
+    openManual?: () => void;
+    openHistory?: () => void;
+    openSettings?: () => void;
+    openProfile?: () => void;
+    currentUser?: User;
+    showRings: boolean;
+    setShowRings: (show: boolean) => void;
 }
 
-export const LacanTopologyView: React.FC<LacanTopologyViewProps> = ({
-  lang,
-  setLang,
-  setPage,
-  currentUser,
-  showRings,
-  setShowRings,
-}) => {
-  const { theme, toggleTheme } = useTheme();
-  const [activeTab, setActiveTab] = useState<'TOPOLOGY' | 'DICTIONARY'>('TOPOLOGY');
-  const [selectedConceptId, setSelectedConceptId] = useState<string>('real');
-  const [isDetailExpanded, setIsDetailExpanded] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-
-  // Flatten dictionary for easy lookup and search
-  const allConcepts = useMemo(() => {
-    return LACAN_DICTIONARY.flatMap(cat => cat.concepts);
-  }, []);
-
-  const selectedConcept = useMemo(() => {
-    return allConcepts.find(c => c.id === selectedConceptId) || allConcepts[0];
-  }, [selectedConceptId, allConcepts]);
-
-  const filteredConcepts = useMemo(() => {
-    if (!searchQuery) return LACAN_DICTIONARY;
-    return LACAN_DICTIONARY.map(cat => ({
-      ...cat,
-      concepts: cat.concepts.filter(c => 
-        c.name.includes(searchQuery) || 
-        c.enName.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    })).filter(cat => cat.concepts.length > 0);
-  }, [searchQuery]);
-
-  const getThemeColor = () => {
-    if (theme === 'retro') return 'text-[#8B261D]';
-    if (selectedConceptId === 'real') return 'text-mist-rose';
-    if (selectedConceptId === 'symbolic') return 'text-mist-cyan';
-    if (selectedConceptId === 'imaginary') return 'text-mist-purple';
-    return 'text-gold-primary';
-  };
-
-  const getThemeBg = () => {
-    if (theme === 'retro') return 'bg-[#FAF9F6]';
-    if (selectedConceptId === 'real') return 'bg-mist-rose/10';
-    if (selectedConceptId === 'symbolic') return 'bg-mist-cyan/10';
-    if (selectedConceptId === 'imaginary') return 'bg-mist-purple/10';
-    return 'bg-gold-primary/10';
-  };
-
-  const getThemeBorder = () => {
-    if (theme === 'retro') return 'border-[#8B261D]/20';
-    if (selectedConceptId === 'real') return 'border-mist-rose/30';
-    if (selectedConceptId === 'symbolic') return 'border-mist-cyan/30';
-    if (selectedConceptId === 'imaginary') return 'border-mist-purple/30';
-    return 'border-gold-primary/30';
-  };
-
-  return (
-    <div className={`flex flex-col h-screen overflow-hidden font-sans selection:bg-gold-primary/30 ${theme === 'retro' ? 'bg-[#FAF9F6] text-zinc-900' : 'bg-[var(--bg-main)] text-white'}`}>
-      
-      {/* Unified Header - Standardized with LandingView */}
-      <header className={`h-14 backdrop-blur-md border-b flex items-center justify-between px-6 z-50 sticky top-0 shrink-0 transition-all duration-500 ${theme === 'retro' ? 'bg-[#FAF9F6]/80 border-[#8B261D]/15' : 'bg-[var(--bg-header)] border-[var(--border-main)]/15'}`}>
-        <div className="flex items-center gap-5">
-          <button
-            onClick={() => setPage(0)}
-            className="flex items-center gap-1.5 transition-all duration-300 group px-2 py-1 rounded-md bg-transparent hover:bg-white/5 hover:scale-105 active:scale-95"
-          >
-            <Globe size={14} className={`${theme === 'retro' ? 'text-zinc-600' : 'text-zinc-400'} group-hover:text-gold-primary shrink-0 transition-all duration-100`} />
-            <span className={`text-[10px] font-bold uppercase tracking-[0.1em] hidden md:block ${theme === 'retro' ? 'text-zinc-600' : 'text-zinc-400'} group-hover:text-gold-primary`}>
-              {lang === 'CN' ? "返回全局" : "GLOBAL"}
-            </span>
-          </button>
-          <div className={`h-4 w-px hidden md:block ${theme === 'retro' ? 'bg-zinc-300' : 'bg-zinc-800'}`}></div>
-          <span className={`font-serif font-bold text-xs uppercase tracking-widest flex items-center gap-2 ${theme === 'retro' ? 'text-[#8B261D]' : 'text-gold-primary'}`}>
-            <Aperture size={14} className="animate-spin-slow opacity-80" />
-            {lang === 'CN' ? '三界拓扑: 视觉辞典' : 'TOPOLOGY: VISUAL CODEX'}
-          </span>
+const AnimatedText = ({ cn, en, lang, className = "", hClass = "h-5" }: { cn: React.ReactNode, en: React.ReactNode, lang: 'CN' | 'EN', className?: string, hClass?: string }) => (
+  <div className={`overflow-hidden relative flex items-start ${hClass}`}>
+    <div className={`transition-all duration-700 w-full cubic-bezier(0.4, 0, 0.2, 1) ${lang === 'EN' ? '-translate-y-1/2' : 'translate-y-0'}`}>
+      <div className="flex flex-col w-full">
+        <div className={`${hClass} flex items-center shrink-0 w-full ${className}`}>
+          {cn}
         </div>
-
-        {/* Central Navigation Toggle */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden lg:flex items-center gap-6">
-          <button
-            onClick={() => setActiveTab('TOPOLOGY')}
-            className={`flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300 hover:scale-105 ${activeTab === 'TOPOLOGY' ? 'text-gold-primary' : (theme === 'retro' ? 'text-zinc-500 hover:text-[#8B261D]' : 'text-zinc-500 hover:text-white')}`}
-          >
-            <Layers size={14} />
-            {lang === 'CN' ? "拓扑图式" : "TOPOLOGY MAP"}
-          </button>
-          <div className={`w-6 h-px ${theme === 'retro' ? 'bg-zinc-300' : 'bg-zinc-800'}`}></div>
-          <button
-            onClick={() => setActiveTab('DICTIONARY')}
-            className={`flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300 hover:scale-105 ${activeTab === 'DICTIONARY' ? 'text-gold-primary' : (theme === 'retro' ? 'text-zinc-500 hover:text-[#8B261D]' : 'text-zinc-500 hover:text-white')}`}
-          >
-            <Book size={14} />
-            {lang === 'CN' ? "概念辞典" : "CONCEPT CODEX"}
-          </button>
+        <div className={`${hClass} flex items-center shrink-0 w-full ${className}`}>
+          {en}
         </div>
-
-        <div className="flex items-center gap-4">
-          <div className={`flex items-center border-r pr-4 mr-2 ${theme === 'retro' ? 'border-zinc-300' : 'border-zinc-800'}`}>
-            <button
-              onClick={() => setLang(lang === 'CN' ? 'EN' : 'CN')}
-              className={`text-[10px] font-bold transition-all duration-300 w-8 h-8 flex items-center justify-center rounded-sm tracking-widest hover:bg-white/5 ${theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'}`}
-            >
-              {lang === 'CN' ? '中' : 'EN'}
-            </button>
-            <button
-              onClick={toggleTheme}
-              className={`flex items-center justify-center w-8 h-8 rounded-sm transition-all duration-300 hover:bg-white/5 ${theme === 'retro' ? 'text-zinc-600 hover:text-[#8B261D]' : 'text-zinc-400 hover:text-white'}`}
-            >
-              {theme === 'dark' ? <Moon size={14} /> : <Sun size={14} className="text-[#8B261D]" />}
-            </button>
-          </div>
-          
-          <button className="flex items-center gap-2 group">
-             <div className={`w-7 h-7 rounded-sm border flex items-center justify-center text-[10px] font-bold shadow-sm transition-all group-hover:scale-110 ${
-                theme === 'retro' ? 'bg-white border-zinc-300 text-zinc-900' : 'bg-zinc-900 border-gold-primary/30 text-gold-primary'
-             }`}>
-                {currentUser.username.charAt(0).toUpperCase()}
-             </div>
-          </button>
-        </div>
-      </header>
-
-      {/* Main Content Area */}
-      <main className="flex-1 flex overflow-hidden relative">
-        
-        {/* Left Sidebar: Detailed Dictionary Index */}
-        <aside className={`w-80 border-r flex flex-col shrink-0 z-20 backdrop-blur-sm shadow-2xl transition-all duration-500 ${theme === 'retro' ? 'bg-[#FAF9F6] border-zinc-200' : 'bg-[var(--bg-panel)] border-[var(--border-main)]/15'}`}>
-          <div className="p-4 border-b border-[var(--border-main)]/10">
-            <div className="relative group">
-              <Search className={`absolute left-3 top-1/2 -translate-y-1/2 transition-colors ${theme === 'retro' ? 'text-zinc-400' : 'text-zinc-500'} group-focus-within:text-gold-primary`} size={14} />
-              <input 
-                type="text" 
-                placeholder={lang === 'CN' ? "搜索拉康概念..." : "Search Concepts..."}
-                className={`w-full border rounded-lg py-2 pl-9 pr-4 text-xs focus:outline-none focus:border-gold-primary/50 focus:ring-1 focus:ring-gold-primary/20 transition-all ${
-                  theme === 'retro' ? 'bg-white border-zinc-200 text-zinc-900' : 'bg-black/40 border-zinc-800 text-white'
-                }`}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-6 pb-20">
-            {filteredConcepts.map((category) => (
-              <div key={category.id} className="space-y-1">
-                <h3 className={`px-3 py-2 text-[10px] font-bold uppercase tracking-widest flex items-center justify-between ${theme === 'retro' ? 'text-zinc-400' : 'text-zinc-500'}`}>
-                  {lang === 'CN' ? category.name : category.enName}
-                  <div className={`w-1 h-1 rounded-full ${theme === 'retro' ? 'bg-zinc-200' : 'bg-zinc-800'}`}></div>
-                </h3>
-                <div className="space-y-0.5">
-                  {category.concepts.map((concept) => (
-                    <button
-                      key={concept.id}
-                      onClick={() => {
-                        setSelectedConceptId(concept.id);
-                        if (activeTab === 'TOPOLOGY') setActiveTab('DICTIONARY');
-                      }}
-                      className={`w-full text-left px-3 py-3 rounded-lg flex items-center justify-between group transition-all duration-300 ${
-                        selectedConceptId === concept.id 
-                        ? (theme === 'retro' ? 'bg-[#8B261D]/5 border-[#8B261D]/10' : 'bg-gold-primary/10 border-gold-primary/20') + ' scale-[1.02] shadow-sm'
-                        : 'hover:bg-zinc-400/5'
-                      }`}
-                    >
-                      <div className="flex flex-col gap-0.5">
-                        <span className={`text-[13px] font-medium transition-colors ${
-                          selectedConceptId === concept.id 
-                          ? (theme === 'retro' ? 'text-[#8B261D]' : 'text-gold-primary')
-                          : (theme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-300 group-hover:text-white')
-                        }`}>
-                          {concept.name}
-                        </span>
-                        <span className="text-[9px] text-zinc-500 font-serif italic tracking-wider opacity-60">
-                          {concept.enName}
-                        </span>
-                      </div>
-                      {selectedConceptId === concept.id && <Zap size={10} className={`${theme === 'retro' ? 'text-[#8B261D]' : 'text-gold-primary'} animate-pulse`} />}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </aside>
-
-        {/* Right Section: Content Display */}
-        <section className={`flex-1 relative flex flex-col overflow-hidden ${theme === 'retro' ? 'bg-white' : 'bg-black/20'}`}>
-          
-          {/* Main Visual or Detail Panel */}
-          <div className="flex-1 p-8 overflow-y-auto custom-scrollbar">
-            {activeTab === 'TOPOLOGY' ? (
-              <div className="h-full flex flex-col items-center justify-center relative py-12">
-                <div className="text-center mb-16 max-w-2xl">
-                  <h2 className={`text-5xl font-serif font-bold mb-4 tracking-tighter ${theme === 'retro' ? 'text-[#8B261D]' : 'text-white'}`}>
-                    {lang === 'CN' ? '博罗米拓扑结构' : 'BORROMEAN TOPOLOGY'}
-                  </h2>
-                  <p className="text-zinc-500 text-sm tracking-[0.3em] uppercase flex items-center justify-center gap-3">
-                    <span className="w-12 h-px bg-zinc-800"></span>
-                    Structural Rigor of the Subject
-                    <span className="w-12 h-px bg-zinc-800"></span>
-                  </p>
-                </div>
-
-                {/* Borromean Rings Visualization Placeholder */}
-                <div className="relative w-[450px] h-[450px] flex items-center justify-center group">
-                   <div className="absolute inset-0 flex items-center justify-center">
-                      <div className={`w-72 h-72 rounded-full border-[10px] border-mist-rose mix-blend-screen transform -translate-x-16 cursor-pointer hover:scale-105 transition-all duration-500 hover:z-20 shadow-2xl ${selectedConceptId === 'real' ? 'opacity-100 scale-105' : 'opacity-30'}`} onClick={() => setSelectedConceptId('real')}></div>
-                      <div className={`w-72 h-72 rounded-full border-[10px] border-mist-cyan mix-blend-screen transform translate-x-16 cursor-pointer hover:scale-105 transition-all duration-500 hover:z-20 shadow-2xl ${selectedConceptId === 'symbolic' ? 'opacity-100 scale-105' : 'opacity-30'}`} onClick={() => setSelectedConceptId('symbolic')}></div>
-                      <div className={`w-72 h-72 rounded-full border-[10px] border-mist-purple mix-blend-screen transform -translate-y-16 cursor-pointer hover:scale-105 transition-all duration-500 hover:z-20 shadow-2xl ${selectedConceptId === 'imaginary' ? 'opacity-100 scale-105' : 'opacity-30'}`} onClick={() => setSelectedConceptId('imaginary')}></div>
-                   </div>
-                   
-                   {/* Center Sinthome */}
-                   <div className={`z-10 bg-black/80 backdrop-blur-xl px-6 py-3 rounded-full border flex items-center gap-3 shadow-2xl transform transition-transform group-hover:scale-110 ${theme === 'retro' ? 'border-zinc-300' : 'border-white/10'}`}>
-                      <Aperture size={16} className="text-gold-primary animate-spin-slow" />
-                      <span className="text-gold-primary font-bold text-xs tracking-[0.2em] uppercase">Sinthome / 圣状</span>
-                   </div>
-
-                   {/* Background Gloom */}
-                   <div className="absolute inset-0 bg-gold-primary/5 rounded-full blur-[100px] -z-10 opacity-30"></div>
-                </div>
-
-                <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-5xl">
-                  {[
-                    { type: 'REAL', color: 'text-mist-rose', border: 'border-mist-rose/20', bg: 'bg-mist-rose/5', desc: 'The traumatic kernel that resists all meaning.' },
-                    { type: 'SYMBOLIC', color: 'text-mist-cyan', border: 'border-mist-cyan/20', bg: 'bg-mist-cyan/5', desc: 'The network of signifiers and universal law.' },
-                    { type: 'IMAGINARY', color: 'text-mist-purple', border: 'border-mist-purple/20', bg: 'bg-mist-purple/5', desc: 'The realm of images, self-deception, and ego.' }
-                  ].map(item => (
-                    <button 
-                      key={item.type} 
-                      onClick={() => setSelectedConceptId(item.type.toLowerCase())}
-                      className={`p-6 border rounded-2xl transition-all duration-500 text-left group hover:scale-105 hover:bg-zinc-800/10 ${item.border} ${theme === 'retro' ? 'bg-zinc-50' : 'bg-zinc-900/40'} border-opacity-30`}
-                    >
-                      <h4 className={`text-[10px] font-bold mb-3 tracking-[0.3em] uppercase flex items-center justify-between ${item.color}`}>
-                        {item.type}
-                        <ArrowRight size={10} className="opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0" />
-                      </h4>
-                      <p className={`text-xs leading-relaxed ${theme === 'retro' ? 'text-zinc-600' : 'text-zinc-400'}`}>
-                        {item.desc}
-                      </p>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="max-w-4xl mx-auto py-12 space-y-16 animate-in fade-in slide-in-from-bottom-6 duration-700">
-                {/* Dictionary Entry Header */}
-                <div className="space-y-8">
-                  <div className="flex items-center gap-4">
-                    <span className={`px-3 py-1 rounded-md text-[10px] font-bold tracking-[0.2em] uppercase border ${getThemeBg()} ${getThemeColor()} ${getThemeBorder()}`}>
-                      {selectedConcept.category}
-                    </span>
-                    <div className="h-px flex-1 bg-zinc-800/50"></div>
-                    <span className="text-zinc-500 text-[9px] font-mono tracking-widest opacity-40">SYSTEM_UID: {selectedConcept.id.toUpperCase()}</span>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <h1 className={`text-6xl font-serif font-bold flex items-baseline gap-6 ${theme === 'retro' ? 'text-zinc-900' : 'text-white'}`}>
-                      {selectedConcept.name}
-                      <span className="text-2xl font-light text-zinc-500 italic tracking-tight">{selectedConcept.enName}</span>
-                    </h1>
-                  </div>
-
-                  {/* High-end Quick Understanding Module */}
-                  <div className={`p-8 rounded-3xl border relative overflow-hidden group shadow-2xl transition-all duration-500 ${getThemeBorder()} ${getThemeBg()} ${theme === 'retro' ? 'bg-opacity-50' : 'bg-opacity-10 hover:bg-opacity-20'}`}>
-                    <div className={`absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity transform rotate-12 ${getThemeColor()}`}>
-                      <Aperture size={120} />
-                    </div>
-                    <div className="flex items-start gap-8 relative z-10">
-                      <div className={`w-14 h-14 rounded-2xl border flex items-center justify-center flex-shrink-0 bg-black/40 shadow-inner ${getThemeBorder()}`}>
-                        <Zap size={28} className={getThemeColor()} />
-                      </div>
-                      <div>
-                        <h4 className={`text-[10px] font-bold mb-3 uppercase tracking-[0.3em] flex items-center gap-2 ${getThemeColor()}`}>
-                          Core Definition / 核心定义
-                          <span className="w-8 h-px bg-current opacity-30"></span>
-                        </h4>
-                        <p className={`text-2xl font-medium leading-[1.45] font-serif ${theme === 'retro' ? 'text-zinc-800' : 'text-white'}`}>
-                          "{selectedConcept.shortDef}"
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Wikipedia-style Information Architecture */}
-                <div className="space-y-10">
-                  <div className="flex items-center justify-between border-b border-zinc-800/50 pb-6">
-                    <h3 className={`text-2xl font-serif font-bold flex items-center gap-4 ${theme === 'retro' ? 'text-[#8B261D]' : 'text-white'}`}>
-                      <BookOpen size={24} className="text-gold-primary" />
-                      学术解析 & 临床实践
-                    </h3>
-                    <button 
-                      onClick={() => setIsDetailExpanded(!isDetailExpanded)}
-                      className={`text-[10px] font-bold flex items-center gap-2 uppercase tracking-[0.3em] transition-all px-4 py-2 rounded-full border border-zinc-800/50 hover:bg-gold-primary hover:text-black hover:border-gold-primary ${theme === 'retro' ? 'text-zinc-500' : 'text-zinc-400'}`}
-                    >
-                      {isDetailExpanded ? "Collapse Content" : "Deep Dive Expansion"}
-                      {isDetailExpanded ? <ChevronDown size={14} /> : <ArrowRight size={14} className="group-hover:translate-x-1" />}
-                    </button>
-                  </div>
-
-                  <div className={`grid grid-cols-1 md:grid-cols-3 gap-12 transition-all duration-1000 ${isDetailExpanded ? 'opacity-100 max-h-[5000px]' : 'opacity-40 max-h-[400px] overflow-hidden grayscale-[0.8] blur-[2px] pointer-events-none'}`}>
-                    <div className="md:col-span-2 space-y-12">
-                      {selectedConcept.detailed ? (
-                        <>
-                          <section className="space-y-6">
-                            <h4 className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.4em] flex items-center gap-4">
-                              <span className="w-3 h-3 rounded-full border-2 border-gold-primary"></span>
-                              Theoretic Analysis / 理论分析
-                            </h4>
-                            <div className={`leading-relaxed text-[16px] space-y-6 whitespace-pre-wrap font-sans font-light ${theme === 'retro' ? 'text-zinc-700' : 'text-zinc-300'}`}>
-                               {selectedConcept.detailed.definition.split('\n').map((para, i) => (
-                                 <p key={i} className="first-letter:text-3xl first-letter:font-serif first-letter:mr-1 first-letter:float-left first-letter:text-gold-primary">{para}</p>
-                               ))}
-                            </div>
-                          </section>
-
-                          <section className={`space-y-6 p-10 rounded-3xl border ${theme === 'retro' ? 'bg-zinc-50 border-zinc-200' : 'bg-zinc-900/40 border-zinc-800/50 shadow-inner'}`}>
-                            <h4 className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.4em] flex items-center gap-3">
-                              <Info size={16} className="text-mist-cyan" />
-                              Clinical Analogy / 案例与类比
-                            </h4>
-                            <div className={`leading-[1.8] text-[15px] italic font-serif whitespace-pre-wrap opacity-80 ${theme === 'retro' ? 'text-zinc-600' : 'text-zinc-300'}`}>
-                              {selectedConcept.detailed.analogy}
-                            </div>
-                          </section>
-                        </>
-                      ) : (
-                        <div className="flex flex-col items-center justify-center p-32 border border-dashed border-zinc-800 rounded-[40px] opacity-30">
-                           <BookOpen size={48} className="text-zinc-700 mb-6" />
-                           <p className="text-zinc-600 text-sm tracking-widest font-serif">AWAITING ARCHIVAL SYNCHRONIZATION...</p>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Sidebar Metadata */}
-                    <div className="space-y-8">
-                      <div className={`p-8 rounded-[32px] border sticky top-24 space-y-8 shadow-2xl ${theme === 'retro' ? 'bg-zinc-50 border-zinc-200' : 'bg-zinc-900/60 border-gold-primary/20 hover:border-gold-primary/40'} transition-all`}>
-                        <div className="space-y-4">
-                          <h4 className="text-[10px] font-bold text-gold-primary uppercase tracking-[0.3em] flex items-center gap-3">
-                            <Cpu size={16} />
-                            Visionary App
-                          </h4>
-                          <p className={`text-[13px] leading-relaxed font-sans italic opacity-80 ${theme === 'retro' ? 'text-zinc-600' : 'text-zinc-400'}`}>
-                            {selectedConcept.detailed?.application || "Synchronizing narrative logic for current topological nodes..."}
-                          </p>
-                        </div>
-                        
-                        <div className={`pt-6 border-t space-y-6 ${theme === 'retro' ? 'border-zinc-200' : 'border-white/5'}`}>
-                           <h5 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em] flex items-center justify-between">
-                              Related nodes
-                              <span className="px-2 py-0.5 rounded-full bg-zinc-800 text-[8px] text-zinc-500">Auto-Link</span>
-                           </h5>
-                           <div className="flex flex-wrap gap-2.5">
-                              {['objet_a', 'big_other', 'lack', 'drive', 'fantasy'].map(id => (
-                                <button 
-                                  key={id}
-                                  onClick={() => {
-                                    setSelectedConceptId(id);
-                                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                                  }}
-                                  className={`px-3 py-1.5 rounded-lg text-[10px] font-mono border transition-all duration-300 ${
-                                    theme === 'retro' 
-                                    ? 'bg-white border-zinc-200 text-zinc-500 hover:border-[#8B261D] hover:text-[#8B261D]' 
-                                    : 'bg-black/40 border-zinc-800 text-zinc-500 hover:border-gold-primary/50 hover:text-gold-primary'
-                                  }`}
-                                >
-                                  @{id.toUpperCase()}
-                                </button>
-                              ))}
-                           </div>
-                        </div>
-
-                        <button 
-                          onClick={() => setPage(0)}
-                          className={`w-full flex items-center justify-between py-4 px-6 rounded-2xl text-[11px] font-bold uppercase tracking-[0.2em] transition-all transform hover:scale-105 active:scale-95 shadow-lg ${
-                            theme === 'retro'
-                            ? 'bg-[#8B261D] text-white hover:bg-black'
-                            : 'bg-gold-primary text-black hover:bg-white hover:text-black'
-                          }`}
-                        >
-                           Linked Philosophy
-                           <ArrowRight size={14} />
-                        </button>
-                      </div>
-
-                      {/* Backlinks Visualization Placeholder */}
-                      <div className={`p-6 rounded-3xl border border-dashed flex flex-col items-center gap-4 ${theme === 'retro' ? 'bg-zinc-50/50 border-zinc-300' : 'bg-black/20 border-zinc-800'}`}>
-                         <LinkIcon size={16} className="text-zinc-700" />
-                         <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest">Backlinks Archive</span>
-                         <div className="w-full space-y-2">
-                            {[1, 2].map(i => (
-                              <div key={i} className="h-6 bg-zinc-800/20 rounded-md animate-pulse"></div>
-                            ))}
-                         </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {!isDetailExpanded && (
-                    <div className="text-center pt-24 relative z-10 pb-20">
-                      <button 
-                        onClick={() => setIsDetailExpanded(true)}
-                        className={`px-12 py-5 rounded-full text-sm font-bold tracking-[0.2em] uppercase transition-all shadow-2xl transform hover:scale-110 active:scale-90 ${
-                          theme === 'retro'
-                          ? 'bg-[#8B261D] text-white hover:bg-black shadow-[#8B261D]/20'
-                          : 'bg-gold-primary text-black hover:bg-white shadow-gold-primary/20'
-                        }`}
-                      >
-                         Initialize Full Transcript
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Institutional Bottom Info Bar */}
-          <footer className={`h-12 border-t px-8 flex items-center justify-between text-[10px] tracking-[0.3em] font-mono transition-colors duration-500 ${
-            theme === 'retro' ? 'bg-[#FAF9F6] border-zinc-200 text-zinc-500' : 'bg-zinc-950 border-zinc-800 text-zinc-600'
-          }`}>
-             <div className="flex items-center gap-6">
-                <div className="flex items-center gap-2">
-                   <div className="w-2 h-2 rounded-full bg-gold-primary animate-ping"></div>
-                   <span>TOPOLOGY_ACTIVE: NODE_{selectedConceptId.toUpperCase()}</span>
-                </div>
-                <span className="opacity-20">|</span>
-                <span>COORD: 35.412 // 09:21</span>
-             </div>
-             <div className="flex items-center gap-8">
-                <div className="flex items-center gap-2 group cursor-help">
-                   <History size={12} className="group-hover:text-gold-primary transition-colors" />
-                   <span>REVISION_HISTORY</span>
-                </div>
-                <div className="flex items-center gap-2">
-                   <Settings size={12} />
-                   <span className="text-gold-primary/60">© 2024 MIST_VISUAL_TOPOLOGY</span>
-                </div>
-             </div>
-          </footer>
-        </section>
-      </main>
-
-      {/* Atmospheric Background Layers */}
-      {showRings && (
-        <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none">
-           <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1200px] h-[1200px] border border-gold-primary/5 rounded-full animate-spin-slow`}></div>
-           <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] border-2 border-gold-primary/5 rounded-full animate-reverse-spin`} style={{animationDuration: '25s'}}></div>
-           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(10,10,10,0)_0%,rgba(0,0,0,0.8)_100%)]"></div>
-        </div>
-      )}
+      </div>
     </div>
-  );
+  </div>
+);
+
+const RSI_DESCRIPTIONS: Record<string, {
+    CN: { title: string; subtitle: string; desc: string; connection: string; implementation: string; keywords: string[] },
+    EN: { title: string; subtitle: string; desc: string; connection: string; implementation: string; keywords: string[] }
+}> = {
+    'REAL': {
+        CN: {
+            title: '实在界 (Le Réel)',
+            subtitle: '不可言说之核心 // THE UNSPEAKABLE CORE',
+            desc: '实在界是语言和象征界之外的剩余，是无法被符号化的“物”（Das Ding）。它不是现实，而是现实中那种由于无法被命名而显得恐怖或创伤的部分。',
+            connection: '在【爱欲迷宫】中，实在界对应着迷宫最深处的“空洞”。当玩家跨越了所有逻辑能指，面对那种无法被解释的原始冲动时，便触碰到了实在。',
+            implementation: '在引擎中，实在界体现为底层的随机性噪声与不可预测的涌现行为。它是系统运行中产生但又无法被逻辑闭环消化的“余数”。',
+            keywords: ['原初物', '创伤', '剩余', '不可能之物']
+        },
+        EN: {
+            title: 'The Real (Le Réel)',
+            subtitle: 'THE UNSPEAKABLE CORE',
+            desc: 'The Real is the remainder outside of language and the Symbolic order, the unsymbolizable "Thing" (Das Ding). It is not reality, but the part of reality that appears traumatic because it cannot be named.',
+            connection: 'In the [Erotic Maze], the Real corresponds to the "Void" at the center. When players move past all signifiers and face inexplainable primitive drives, they touch the Real.',
+            implementation: 'Technically, it manifests as underlying stochastic noise and unpredictable emergent behaviors. It is the "remainder" generated during system runtime that escapes logical closure.',
+            keywords: ['Das Ding', 'Trauma', 'Remainder', 'The Impossible']
+        }
+    },
+    'SYMBOLIC': {
+        CN: {
+            title: '象征界 (Le Symbolique)',
+            subtitle: '法则与秩序 // THE LAW & ORDER',
+            desc: '象征界是语言、法律和社会契约的总和。它是能指的宝库，所有意义都在这个结构中通过差异产生。它是由大他者统治的领域。',
+            connection: '【爱欲迷宫】的路径节点及其逻辑分支构成了象征界。它是迷宫的可视化逻辑，定义了主体在欲望网格中移动的“语法”。',
+            implementation: '引擎的【叙事图式】（Graph Schema）与逻辑门控是象征界的直接体现。它通过元数据与能指链条（Signifier Chains）定义情节的转场与选择。',
+            keywords: ['能指', '大他者', '法律', '语法结构']
+        },
+        EN: {
+            title: 'The Symbolic (Le Symbolique)',
+            subtitle: 'THE LAW & ORDER',
+            desc: 'The Symbolic is the sum of language, law, and social contracts. It is the treasury of signifiers where all meaning is produced through difference. It is the realm ruled by the Big Other.',
+            connection: 'The [Erotic Maze]\'s path nodes and logical branches form the Symbolic. It is the visual logic of the maze, defining the "grammar" for the subject\'s movement in the grid of desire.',
+            implementation: 'The engine\'s [Graph Schema] and logic gates are the direct manifestation. It defines scene transitions and choices through metadata and signifier chains.',
+            keywords: ['Signifier', 'Big Other', 'The Law', 'Grammar']
+        }
+    },
+    'IMAGINARY': {
+        CN: {
+            title: '想象界 (L\'Imaginaire)',
+            subtitle: '镜像的诱惑 // THE LURE OF IMAGE',
+            desc: '想象界是主体通过镜像认同形成的二元关系领域。它是视觉完整性的幻象，充满了诱惑、攻击性、异化和对他者的投射。',
+            connection: '迷宫的视觉表现、UI反馈以及玩家对角色身份的自我代入属于想象界。它是迷宫的“皮肤”，掩盖了底层的冰冷逻辑。',
+            implementation: '在引擎中，这体现为【视觉看板】（Visual Bible）与渲染层。它通过高度美学的界面营造沉浸感，使玩家沉溺于“自我”存在的错觉中。',
+            keywords: ['自我', '镜像阶段', '认同', '视觉幻象']
+        },
+        EN: {
+            title: 'The Imaginary (L\'Imaginaire)',
+            subtitle: 'THE LURE OF IMAGE',
+            desc: 'The Imaginary is the realm of dual relations formed through mirror identification. it is the fantasy of visual wholeness, filled with lures, aggression, and projection.',
+            connection: 'The visual representation of the maze, UI feedback, and player identity belong to the Imaginary. It is the "skin" of the maze, masking the cold underlying logic.',
+            implementation: 'In the engine, this manifests as the [Visual Bible] and the rendering layer. It creates immersion through high-aesthetic interfaces, luring players into the illusion of "Ego".',
+            keywords: ['Ego', 'Mirror Stage', 'Identification', 'Visual Fantasy']
+        }
+    },
+    'SINTHOME': {
+        CN: {
+            title: '圣状 (Le Sinthome)',
+            subtitle: '不解之解 // THE FINAL SUTURE',
+            desc: '圣状是维持R-S-I三界不解解开的第四道环。它是使主体不至于陷入精神分裂崩溃的那个独特的支撑点或创造性缝合。',
+            connection: '【爱欲迷宫】的“零点协议”本身就是圣状。它是整场体验的终极逻辑，将碎片化的欲望体验缝合为一个具备审美完整性的剧作闭环。',
+            implementation: '这是引擎的核心持久层（Persistence Layer）。它通过全局状态机确保在象征界断裂或实在界爆发时，系统的运行逻辑能够维持稳态。',
+            keywords: ['缝合', '乔伊斯', '固定点', '系统稳态']
+        },
+        EN: {
+            title: 'The Sinthome',
+            subtitle: 'THE FINAL SUTURE',
+            desc: 'The Sinthome is the fourth ring that prevents R-S-I from unraveling. It is the unique support point or creative suture that keeps the subject from psychotic collapse.',
+            connection: 'The [Zero Protocol] itself is the Sinthome within the [Erotic Maze]. It is the ultimate logic of the experience, suturing fragmented desires into an aesthetic closure.',
+            implementation: 'This is the engine\'s Core Persistence Layer. It ensures system stability via global state machines even when symbolic chains break or the Real erupts.',
+            keywords: ['Suture', 'James Joyce', 'Fix point', 'Stability']
+        }
+    }
+};
+
+export const LacanTopologyView: React.FC<LacanTopologyViewProps> = ({ 
+    lang, 
+    setLang,
+    onClose,
+    openManual,
+    openHistory,
+    openSettings,
+    openProfile,
+    currentUser,
+    showRings,
+    setShowRings
+}) => {
+    const { theme, toggleTheme } = useTheme();
+    const isRetro = theme === 'retro';
+    const [selectedKey, setSelectedKey] = useState<string>('REAL');
+    const [hoveredKey, setHoveredKey] = useState<string | null>(null);
+    const [activeSection, setActiveSection] = useState<string | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const toggleLang = () => setLang(lang === 'CN' ? 'EN' : 'CN');
+
+    const activeKey = hoveredKey || selectedKey;
+    const activeData = RSI_DESCRIPTIONS[activeKey];
+
+    return (
+        <div className={`flex flex-col h-full w-full bg-[var(--bg-main)] text-[var(--accent-color)] font-sans overflow-hidden animate-in fade-in duration-700 transition-colors duration-500`}>
+            {isRetro && <div className="absolute inset-0 pointer-events-none opacity-30 mix-blend-multiply z-0" style={{ backgroundImage: 'var(--pattern-aged)' }}></div>}
+            
+        {/* Global Top Navbar - EXACT REPLICA OF HOMEPAGE */}
+        <header className={`shrink-0 z-50 backdrop-blur-md h-14 flex items-center justify-between px-6 transition-all duration-500 ${theme === 'retro' ? 'bg-transparent border-b border-[var(--border-main)]' : 'bg-[var(--bg-header)] border-b border-white/10'} relative`}>
+            {/* Theme Divider Line */}
+            <div 
+                className="absolute bottom-0 left-0 right-0 h-px transition-all duration-500 z-10" 
+                style={{ 
+                    backgroundColor: theme === 'retro' ? '#8B261D' : '#D4AF37',
+                    boxShadow: theme === 'retro' ? 'none' : '0 0 10px rgba(212, 175, 55, 0.5)'
+                }} 
+            />
+
+            <div className="flex items-center gap-4">
+                {/* Return Global Button (Added to sub-page context) */}
+                <button 
+                    onClick={onClose}
+                    className="flex items-center gap-1.5 transition-all duration-300 group px-2 py-1 rounded-md bg-transparent hover:bg-white/5 hover:scale-105 active:scale-95 z-20"
+                >
+                    <Globe size={14} className={`shrink-0 transition-all duration-100 ${theme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`} />
+                    <span className={`text-[10px] font-bold uppercase tracking-[0.1em] transition-all duration-100 hidden md:block ${theme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`}>
+                        {lang === 'CN' ? "返回全局" : "GLOBAL"}
+                    </span>
+                </button>
+                <div className={`w-px h-4 ${theme === 'retro' ? 'bg-black/20' : 'bg-white/10'}`}></div>
+
+                <Terminal size={14} className={`shrink-0 transition-colors duration-500 ${theme === 'retro' ? 'text-[#8B261D]' : 'text-gold-primary'}`} />
+                <AnimatedText
+                    lang={lang}
+                    hClass="h-4"
+                    className={`text-[10px] uppercase font-bold tracking-[0.2em] transition-colors duration-500`}
+                    cn={<span className={`whitespace-nowrap transition-colors duration-500 ${theme === 'retro' ? 'text-[#8B261D]' : 'text-gold-primary'}`}>主体观测中心 // 三界拓扑</span>}
+                    en={<span className={`whitespace-nowrap transition-colors duration-500 ${theme === 'retro' ? 'text-[#8B261D]' : 'text-gold-primary'}`}>SUBJECT OBSERVATION CENTER // RSI TOPOLOGY</span>}
+                />
+            </div>
+
+            {/* Center: Search Bar */}
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden lg:flex items-center gap-3">
+                <div className="relative group/search">
+                    <div className={`relative flex items-center ${theme === 'retro' ? 'bg-white/40 border-black/20 group-hover/search:border-black/40 hover:bg-white/60' : 'bg-black/20 border-white/10 hover:bg-black/40'} border rounded-full px-4 py-1.5 transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] shadow-sm hover:shadow-lg w-64 md:w-80 group/input`}>
+                        <Search size={12} className={`mr-2 transition-colors duration-500 ${theme === 'retro' ? 'text-black/40' : 'text-zinc-500'} group-hover/input:scale-110 transition-transform duration-300`} />
+                        <input 
+                            type="text" 
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder={lang === 'CN' ? '搜索协议、档案或理论词条...' : 'Search protocols, archives or codex...'}
+                            className={`bg-transparent border-none outline-none text-[10px] uppercase font-bold tracking-[0.1em] text-[var(--text-main)] ${theme === 'retro' ? 'placeholder:text-black/40' : 'placeholder:text-zinc-400'} w-full transition-all duration-300 focus:tracking-[0.15em]`}
+                        />
+                    </div>
+                </div>
+            </div>
+
+            {/* Right Area: Identical to Homepage */}
+            <div className="hidden md:flex items-center gap-4">
+                <div className="flex items-center flex-row-reverse gap-4">
+                    {/* 1. Profile */}
+                    <button
+                        onClick={openProfile}
+                        className="flex items-center gap-2 group transition-all duration-100 hover:scale-105"
+                    >
+                        <div className="flex items-center flex-row-reverse gap-2">
+                            <div className={`w-5 h-5 rounded-full ${!currentUser?.avatarUrl && (currentUser?.avatarColor || 'bg-gold-primary')} border shadow-sm overflow-hidden transition-all duration-500 ${theme === 'dark' ? 'border-black' : 'border-[var(--border-main)]/30'} flex items-center justify-center text-[10px] font-bold text-white`}>
+                                {currentUser?.avatarUrl ? (
+                                    <img src={currentUser.avatarUrl} alt="avatar" className="w-full h-full object-cover" />
+                                ) : (
+                                    <UserIcon size={12} className={`transition-colors duration-500 ${theme === 'dark' ? 'text-mist-rose' : 'text-[var(--text-accent)]'}`} />
+                                )}
+                            </div>
+                            <span className={`text-[10px] font-bold uppercase tracking-widest transition-colors duration-500 ${theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-[var(--text-muted)]'} group-hover:text-[var(--text-main)]`}>
+                                {currentUser?.username || 'GUEST'}
+                            </span>
+                        </div>
+                    </button>
+
+                    <div className="flex items-center flex-row-reverse gap-1">
+                        {/* 2. Language Toggle */}
+                        <button 
+                            onClick={toggleLang}
+                            className={`text-[10px] font-bold ${theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'} transition-all duration-300 w-7 h-7 flex items-center justify-center rounded-sm tracking-widest hover:bg-white/5 hover:scale-110 active:scale-90`}
+                            title="Toggle Language"
+                        >
+                            {lang === 'CN' ? '中' : 'EN'}
+                        </button>
+
+                        {/* 3. Theme Toggle */}
+                        <button 
+                            onClick={toggleTheme}
+                            className={`flex items-center justify-center w-7 h-7 rounded-sm ${theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'} transition-all duration-300 hover:bg-white/5 hover:scale-110 active:scale-90`}
+                            title={theme === 'dark' ? "切换为复古主题" : "切换为暗黑主题"}
+                        >
+                            {theme === 'dark' ? <Moon size={14} /> : <Sun size={14} className="text-[#8B261D]" />}
+                        </button>
+
+                        {/* 4. Ring Toggle */}
+                        <button
+                            onClick={() => setShowRings(!showRings)}
+                            className={`flex items-center justify-center w-7 h-7 rounded-sm transition-all duration-300 hover:bg-white/5 hover:scale-110 active:scale-90 focus:outline-none ${
+                                showRings 
+                                    ? (theme === 'retro' ? 'text-[#8B261D]' : 'text-gold-primary') 
+                                    : (theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white')
+                            }`}
+                            title={lang === 'CN' ? "背景圆环开关" : "Background Rings Toggle"}
+                        >
+                            <Aperture size={14} className={`shrink-0 transition-all duration-300 ${showRings ? 'rotate-180' : ''}`} />
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+            <div className="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
+                
+                {/* LEFT AREA: Detailed Explanation (1/3) */}
+                <div className={`w-full lg:w-[35%] bg-[var(--bg-panel)] border-r border-[var(--border-main)] flex flex-col z-20 shadow-[40px_0_120px_rgba(0,0,0,0.9)] flex-shrink-0 relative overflow-hidden transition-colors duration-500`}>
+                    
+                    <div className="flex-1 flex flex-col p-8 lg:p-14 overflow-y-auto custom-scrollbar">
+                        
+                        <div className="mb-12">
+                            <div className="flex items-center gap-3 mb-6 text-gold-primary brightness-125 text-[12px] uppercase tracking-[0.4em] font-black underline underline-offset-8 decoration-gold-primary/30">
+                                 <Info size={14} />
+                                 {lang === 'CN' ? '核心架构解析' : 'ARCHITECTURAL CORE'}
+                            </div>
+                                <h2 className={`text-5xl lg:text-6xl font-serif font-black ${isRetro ? 'text-[var(--text-accent)]' : 'text-white'} leading-tight mb-4 transition-colors`}>
+                                    {activeData[lang].title}
+                                </h2>
+                                <p className={`text-[14px] font-black ${isRetro ? 'text-[var(--text-main)] underline decoration-[var(--text-accent)]' : 'text-white brightness-150 drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]'} tracking-widest uppercase transition-colors`}>
+                                    {activeData[lang].subtitle}
+                                </p>
+                            <div className="h-1 w-28 bg-gold-primary mt-8 shadow-[0_0_15px_rgba(212,175,55,0.3)]"></div>
+                        </div>
+
+                        <div className="space-y-10">
+                            <section>
+                                <h3 className={`text-[10px] font-black uppercase tracking-[0.3em] ${isRetro ? 'text-[var(--text-muted)]' : 'text-gold-primary/60'} mb-4 flex items-center gap-2`}>
+                                    <BookOpen size={12} /> {lang === 'CN' ? '概念界定' : 'CONCEPT DEFINITION'}
+                                </h3>
+                                <p className={`text-base lg:text-lg ${isRetro ? 'text-[var(--text-main)] italic' : 'text-white'} leading-relaxed font-medium text-justify transition-colors`}>
+                                    {activeData[lang].desc}
+                                </p>
+                            </section>
+
+                            <section className="p-8 bg-white/[0.04] border border-gold-primary/20 rounded-sm shadow-inner shadow-black/40">
+                                <h3 className={`text-[11px] font-black uppercase tracking-[0.3em] ${isRetro ? 'text-[var(--text-accent)]' : 'text-gold-primary brightness-125'} mb-5 flex items-center gap-2 transition-colors`}>
+                                    <Layers size={12} /> {lang === 'CN' ? '与爱欲迷宫的关系' : 'RELATION TO EROTIC MAZE'}
+                                </h3>
+                                <p className={`text-base lg:text-lg ${isRetro ? 'text-[var(--text-main)]' : 'text-white'} leading-relaxed font-medium transition-colors`}>
+                                    {activeData[lang].connection}
+                                </p>
+                            </section>
+
+                            <section>
+                                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-gold-primary/60 mb-4 flex items-center gap-2">
+                                    <Shield size={12} /> {lang === 'CN' ? '引擎实现逻辑' : 'ENGINE IMPLEMENTATION'}
+                                </h3>
+                                <p className="text-sm lg:text-base text-zinc-100 leading-relaxed font-medium opacity-90">
+                                    {activeData[lang].implementation}
+                                </p>
+                            </section>
+
+                            <section>
+                                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-gold-primary/60 mb-4">
+                                    {lang === 'CN' ? '关键词能指' : 'KEY SIGNIFIERS'}
+                                </h3>
+                                <div className="flex flex-wrap gap-2">
+                                    {activeData[lang].keywords.map((kw, idx) => (
+                                        <span key={idx} className="px-3 py-1.5 rounded-sm border border-gold-primary/30 bg-gold-primary/10 text-[11px] font-black text-white shadow-[0_0_10px_rgba(212,175,55,0.1)]">
+                                            # {kw}
+                                        </span>
+                                    ))}
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+
+                {/* RIGHT AREA: Visualization (2/3) */}
+                <div className={`flex-1 relative flex items-center justify-center p-8 overflow-hidden bg-[var(--bg-main)] transition-colors duration-500`}>
+                    
+                    <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: `radial-gradient(${isRetro ? '#8B261D' : '#D4AF37'} 1px, transparent 0)`, backgroundSize: '32px 32px' }}></div>
+
+                    {/* The Rings - Large and centered */}
+                    <div className="w-full h-full max-w-[1000px] max-h-[1000px] relative flex items-center justify-center -translate-y-12">
+                        <BorromeanRings centered={true} opacity={1} />
+                        
+                        {/* Interactive Targets Overlay - HOVER DISABLED AS PER REQUEST */}
+                        <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 z-10 pointer-events-auto">
+                            {['REAL', 'SYMBOLIC', 'IMAGINARY', 'SINTHOME'].map(key => (
+                                <div 
+                                    key={key}
+                                    onClick={() => setSelectedKey(key)}
+                                    className="cursor-pointer"
+                                />
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Selection Cards at the bottom */}
+                    <div className="absolute bottom-12 flex gap-4 px-8 z-40">
+                        {Object.entries(RSI_DESCRIPTIONS).map(([id, data]) => (
+                            <button 
+                                key={id}
+                                onClick={() => setSelectedKey(id)}
+                                className={`w-40 p-4 border rounded-sm transition-all duration-300 text-left
+                                    ${selectedKey === id 
+                                        ? 'bg-gold-primary/20 border-gold-primary shadow-[0_0_30px_rgba(212,175,55,0.15)] -translate-y-2' 
+                                        : 'bg-black/40 border-white/5 hover:border-white/10 opacity-60 hover:opacity-100'}
+                                `}
+                            >
+                                <div className={`w-6 h-6 flex items-center justify-center rounded-sm font-black text-[10px] mb-2 text-black
+                                    ${id === 'REAL' ? 'bg-amber-500' : 
+                                      id === 'SYMBOLIC' ? 'bg-cyan-500' : 
+                                      id === 'IMAGINARY' ? 'bg-rose-500' : 
+                                      'bg-emerald-500'}
+                                `}>
+                                    {id.charAt(0)}
+                                </div>
+                                <h4 className={`text-xs font-bold transition-colors ${selectedKey === id ? 'text-white' : 'text-zinc-500'}`}>
+                                    {data[lang].title.split(' ')[0]}
+                                </h4>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
 };

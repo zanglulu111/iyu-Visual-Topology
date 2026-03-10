@@ -40,33 +40,33 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({ is
         bgContainer: theme === 'retro' ? 'bg-[var(--bg-main)]' : (isDark ? 'bg-[#0A0A0B]' : 'bg-white'),
         borderContainer: theme === 'retro' ? 'border-[var(--border-main)] border-2 shadow-[0_0_30px_rgba(139,38,29,0.1)]' : (isDark ? 'border-zinc-800 border-4' : 'border-[#3A352F] border-4'),
         bgHeader: theme === 'retro' ? 'bg-[var(--bg-main)]/95' : (isDark ? 'bg-[#0A0A0B]/90' : 'bg-white/95'),
-        borderHeader: theme === 'retro' ? 'border-[var(--border-main)]/20 border-b flex-shrink-0' : (isDark ? 'border-zinc-900 border-b-2 border-dashed' : 'border-[#8B261D]/10 border-b-2 border-dashed'),
-        textTitle: theme === 'retro' ? 'text-[var(--text-accent)]' : (isDark ? 'text-zinc-100' : 'text-[#8B261D]'),
+        borderHeader: theme === 'retro' ? 'border-[var(--border-main)] border-b flex-shrink-0' : (isDark ? 'border-zinc-900 border-b-2 border-dashed' : 'border-[#8B261D]/10 border-b-2 border-dashed'),
+        textTitle: theme === 'retro' ? 'text-[var(--text-accent)]' : (isDark ? 'text-zinc-50' : 'text-[#8B261D]'),
         textAccent: theme === 'retro' ? 'text-[var(--text-accent)]' : (isDark ? 'text-zinc-400' : 'text-[#8B261D]'),
         textTitleAccent: theme === 'retro' ? 'text-[var(--text-accent)]' : (isDark ? 'text-amber-500' : 'text-[#8B261D]'),
-        textNormal: theme === 'retro' ? 'text-black/80' : (isDark ? 'text-zinc-400' : 'text-[#2B2824]'),
-        textMuted: theme === 'retro' ? 'text-black/40' : (isDark ? 'text-zinc-500' : 'text-[#6A665A]'),
+        textNormal: theme === 'retro' ? 'text-black/95' : (isDark ? 'text-zinc-200' : 'text-[#2B2824]'),
+        textMuted: theme === 'retro' ? 'text-black/60' : (isDark ? 'text-zinc-400' : 'text-[#6A665A]'),
         textCode: theme === 'retro' ? 'text-[var(--text-accent)]' : (isDark ? 'text-zinc-300' : 'text-[#3A352F]'),
         btnBg: theme === 'retro' ? 'bg-[var(--bg-main)]' : (isDark ? 'bg-zinc-900' : 'bg-[#F9F7F1]'),
         btnHover: theme === 'retro' ? 'hover:bg-[var(--text-accent)] hover:text-[var(--bg-main)]' : (isDark ? 'hover:bg-zinc-800' : 'hover:bg-white'),
-        btnBorder: theme === 'retro' ? 'border-[var(--border-main)]/20' : (isDark ? 'border-zinc-700' : 'border-[#8B261D]/20'),
+        btnBorder: theme === 'retro' ? 'border-[var(--border-main)]' : (isDark ? 'border-zinc-700' : 'border-[#8B261D]/20'),
         btnTextHover: theme === 'retro' ? 'text-[var(--text-accent)] hover:text-[var(--bg-main)]' : (isDark ? 'hover:text-amber-500 text-zinc-400' : 'hover:text-[#8B261D] text-[#3A352F]'),
         btnDisabled: isDark ? 'opacity-30 cursor-not-allowed' : 'opacity-30 cursor-not-allowed grayscale',
-        cardBg: theme === 'retro' ? 'bg-[var(--bg-main)] shadow-sm' : (isDark ? 'bg-[#111113]' : 'bg-[#EBE7DF]/40'),
-        cardBorder: theme === 'retro' ? 'border-[var(--border-main)]/20 hover:border-[var(--border-accent)]' : (isDark ? 'border-zinc-800 border-2' : 'border-[#8B261D]/5 border-2'),
-        cardHoverBorder: theme === 'retro' ? 'hover:border-[var(--border-main)]' : (isDark ? 'hover:border-zinc-500' : 'hover:border-[#8B261D]/40'),
-        cardShadow: theme === 'retro' ? 'hover:shadow-[0_8px_30px_rgba(139,38,29,0.15)] shadow-sm' : (isDark ? 'hover:shadow-black hover:shadow-xl shadow-sm' : 'hover:shadow-lg shadow-sm'),
-        cardImageBg: theme === 'retro' ? 'bg-[var(--bg-main)]' : (isDark ? 'bg-zinc-900' : 'bg-[#DCD8CF]'),
-        imageEffects: theme === 'retro' ? 'grayscale-[0.3] contrast-[1.1] group-hover:grayscale-0' : (isDark ? 'grayscale-[0.5] group-hover:grayscale-0' : 'grayscale group-hover:grayscale-[0.5] contrast-110 sepia-[0.1]'),
+        cardBg: theme === 'retro' ? 'bg-[#F3EFE7]' : (isDark ? 'bg-[#111113]' : 'bg-[#EBE7DF]/40'),
+        cardBorder: theme === 'retro' ? 'border-[#3A352F]/20 border-2 shadow-[0_4px_12px_rgba(0,0,0,0.05)]' : (isDark ? 'border-zinc-800 border-2' : 'border-[#8B261D]/5 border-2'),
+        cardHoverBorder: theme === 'retro' ? 'hover:border-[#8B261D]/40' : (isDark ? 'hover:border-zinc-500' : 'hover:border-[#8B261D]/40'),
+        cardShadow: theme === 'retro' ? 'hover:shadow-[0_20px_50px_rgba(0,0,0,0.15)]' : (isDark ? 'hover:shadow-black hover:shadow-xl shadow-sm' : 'hover:shadow-lg shadow-sm'),
+        cardImageBg: theme === 'retro' ? 'bg-black/5' : (isDark ? 'bg-zinc-900' : 'bg-[#DCD8CF]'),
+        imageEffects: theme === 'retro' ? 'grayscale-[0.6] sepia-[0.3] contrast-125 group-hover:grayscale-0 group-hover:sepia-0 transition-all duration-700' : (isDark ? 'grayscale-[0.3] group-hover:grayscale-0' : 'grayscale group-hover:grayscale-[0.5] contrast-110 sepia-[0.1]'),
         cardTitleHover: theme === 'retro' ? 'group-hover:text-[var(--text-accent)]' : (isDark ? 'group-hover:text-amber-400' : 'group-hover:text-[#8B261D]'),
         texturePattern: isDark ? '' : "url('https://www.transparenttextures.com/patterns/aged-paper.png')",
         dustPattern: isDark ? '' : "url('https://www.transparenttextures.com/patterns/dust.png')",
-        paperClipColor: theme === 'retro' ? 'bg-[var(--bg-main)] border-[var(--border-main)]/50' : (isDark ? 'bg-white/10 border-white/5' : 'bg-white border-black/10'),
-        tagBorder: theme === 'retro' ? 'border-[var(--border-main)]/20 bg-[var(--bg-main)]' : (isDark ? 'border-zinc-800 bg-zinc-900' : 'border-[#8B261D]/20 bg-white'),
-        dateBorder: theme === 'retro' ? 'border-[var(--border-main)]/30 bg-[var(--bg-main)] text-[var(--text-accent)]/80' : (isDark ? 'border-zinc-800 bg-zinc-900 text-zinc-500' : 'border-[#6A665A]/20 bg-[#F9F7F1] text-[#6A665A]'),
+        paperClipColor: theme === 'retro' ? 'bg-white border-black/10 shadow-sm' : (isDark ? 'bg-white/10 border-white/5' : 'bg-white border-black/10'),
+        tagBorder: theme === 'retro' ? 'border-black/20 bg-white' : (isDark ? 'border-zinc-800 bg-zinc-900' : 'border-[#8B261D]/20 bg-white'),
+        dateBorder: theme === 'retro' ? 'border-black/10 bg-black/5 text-black/60 shadow-inner' : (isDark ? 'border-zinc-800 bg-zinc-900 text-zinc-500' : 'border-[#6A665A]/20 bg-[#F9F7F1] text-[#6A665A]'),
         emptyIconOpacity: isDark ? 'opacity-20' : 'opacity-50',
         emptyMessageBorder: theme === 'retro' ? 'border-[var(--border-main)] text-[var(--text-accent)]' : (isDark ? 'border-zinc-700 text-zinc-500' : 'border-[#8B261D] text-[#8B261D]'),
-        paginationBg: theme === 'retro' ? 'bg-[var(--bg-main)] border-[var(--border-main)]/30 text-[var(--text-accent)]' : (isDark ? 'bg-zinc-900 border-zinc-700 text-zinc-300' : 'bg-white border-[#3A352F] text-[#3A352F]')
+        paginationBg: theme === 'retro' ? 'bg-[var(--bg-main)] border-[var(--border-main)] text-[var(--text-accent)]' : (isDark ? 'bg-zinc-900 border-zinc-700 text-zinc-300' : 'bg-white border-[#3A352F] text-[#3A352F]')
     };
 
     const categories: { id: ArchiveCategory; labelCn: string; labelEn: string; color: string; darkColor: string }[] = [
@@ -202,10 +202,10 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({ is
                                         Archive Directory . TOP SECRET
                                     </span>
                                 </div>
-                                <h1 className={`text-4xl lg:text-5xl font-serif mb-4 tracking-wide font-normal ${t.textTitle}`}>
+                                <h1 className={`text-4xl lg:text-5xl font-serif mb-4 tracking-[0.1em] font-bold uppercase ${t.textTitle}`}>
                                     {localLang === 'CN' ? '主体观测与临床报告' : 'Subject Observation & Clinical Reports'}
                                 </h1>
-                                <p className={`text-xs max-w-2xl leading-relaxed uppercase tracking-widest font-mono ${t.textNormal}`}>
+                                <p className={`text-[11px] font-bold max-w-2xl leading-relaxed uppercase tracking-[0.2em] font-mono ${t.textNormal}`}>
                                     {localLang === 'CN' 
                                         ? '[ 文件来源 ]: 迷雾学派 . [ 目的 ]: 检视短篇研究报告，探索隐秘在字里行间的结构缺陷。在这里，每一次访谈都是一次针对实在界的解码。'
                                         : '[ SOURCE ]: MIST SCHOOL . [ OBJECTIVE ]: Review short research reports of the Mist School, exploring structural flaws hidden between lines. Every interview is a decoding of the Real.'}
@@ -247,14 +247,16 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({ is
                                         <div 
                                             key={c.id} 
                                             onClick={() => handleCaseClick(c.id)}
-                                            className={`group flex flex-col ${t.cardBg} ${t.cardBorder} rounded-sm overflow-hidden cursor-pointer ${t.cardHoverBorder} ${t.cardShadow} transition-all relative`}
+                                            className={`group flex flex-col aspect-[3/4] ${t.cardBg} ${t.cardBorder} rounded-sm overflow-hidden cursor-pointer ${t.cardHoverBorder} ${t.cardShadow} transition-all duration-500 relative
+                                                ${isDark || theme === 'retro' ? 'grayscale-[0.8] opacity-90 hover:grayscale-0 hover:opacity-100 hover:-translate-y-2' : ''}`}
                                         >
                                             
                                             {/* Paper Clip / Tape Effect Top Center */}
                                             <div className={`absolute -top-1 left-1/2 -translate-x-1/2 w-8 h-3 shadow-sm border z-30 transform -rotate-2 mix-blend-multiply ${t.paperClipColor}`}></div>
 
                                             {/* Image */}
-                                            <div className={`h-48 relative overflow-hidden p-4 pb-0 ${t.cardImageBg}`}>
+                                            {/* Image - Fixed 16:9 aspect ratio */}
+                                            <div className={`aspect-video relative overflow-hidden p-4 pb-0 ${t.cardImageBg}`}>
                                                 
                                                 {!isDark && <div className="absolute inset-0 bg-transparent transition-colors z-10 mix-blend-multiply opacity-20" style={{ backgroundImage: t.texturePattern }}></div>}
                                                 {isDark && <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors z-10"></div>}
@@ -262,7 +264,7 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({ is
                                                 <img 
                                                     src={c.imageUrl} 
                                                     alt={localLang === 'CN' ? c.titleCn : c.titleEn} 
-                                                    className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out ${t.imageEffects}`}
+                                                    className={`w-full h-full object-cover transition-transform duration-1000 ease-in-out border border-black/5 ${t.imageEffects}`}
                                                     loading="lazy"
                                                     onError={(e) => {
                                                         (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=600";
@@ -281,17 +283,17 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({ is
                                             <div className={`p-6 flex flex-col flex-1 relative`} style={isDark ? {} : { backgroundImage: t.dustPattern }}>
                                                 {/* File ID/Date */}
                                                 <div className={`flex items-center justify-between mb-4 border-b border-dashed pb-2 ${isDark ? 'border-zinc-800' : 'border-[#CFCBBF]'}`}>
-                                                    <span className={`text-[10px] font-mono tracking-widest uppercase border px-1 ${t.dateBorder}`}>
+                                                    <span className={`text-[10px] font-mono tracking-widest uppercase border px-1 transition-all duration-500 ${t.dateBorder} ${isDark || theme === 'retro' ? 'opacity-40 group-hover:opacity-80' : ''}`}>
                                                         NO. {((currentPage - 1) * ITEMS_PER_PAGE) + 1000 + i}-{c.id.toUpperCase()} // {c.date}
                                                     </span>
                                                     <Eye size={14} className={`opacity-0 group-hover:opacity-100 transition-opacity ${t.textTitleAccent}`} />
                                                 </div>
                                                 
-                                                <h3 className={`text-xl font-serif mb-3 transition-colors font-bold uppercase tracking-wide ${t.textTitle} ${t.cardTitleHover}`}>
+                                                <h3 className={`text-xl lg:text-2xl font-serif mb-4 transition-all duration-500 font-bold uppercase tracking-[0.05em] leading-tight ${t.textTitle} ${t.cardTitleHover} ${isDark || theme === 'retro' ? 'opacity-70 group-hover:opacity-100' : ''}`}>
                                                     {localLang === 'CN' ? c.titleCn : c.titleEn}
                                                 </h3>
                                                 
-                                                <p className={`text-xs leading-loose flex-1 line-clamp-3 transition-colors font-mono ${t.textNormal}`}>
+                                                <p className={`text-[15px] leading-[1.8] flex-1 line-clamp-4 transition-all duration-500 font-serif tracking-normal ${t.textNormal} opacity-40 group-hover:opacity-100`}>
                                                     {localLang === 'CN' ? c.summaryCn : c.summaryEn}
                                                 </p>
 
