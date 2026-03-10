@@ -19,7 +19,8 @@ import {
     ArrowDownAZ,
     ChevronsDown,
     RefreshCw,
-    RotateCcw
+    RotateCcw,
+    AlertCircle
 } from 'lucide-react';
 import { generateSutureScript, generateSutureStoryboard, breakdownScript, transformScriptStyle } from '../../services/geminiService';
 import { analyzeAssetImage } from '../../services/visualBibleGenerator';
@@ -59,10 +60,12 @@ interface MetonymyViewProps {
     fieldState: NarrativeFieldState;
     onSaveToHistory: (blueprint: CreativeBlueprint) => void;
     onGenerateAssetImage?: (prompt: string) => Promise<string | null>;
+    onSutureOpenChange?: (open: boolean) => void;
+    theme?: string;
 }
 
 export const MetonymyView: React.FC<MetonymyViewProps> = ({
-    blueprint, language, onUpdateBlueprint, themeAccent, themeBorder, isFullScreen, onToggleFullScreen, fieldState, onSaveToHistory, onGenerateAssetImage
+    blueprint, language, onUpdateBlueprint, themeAccent, themeBorder, isFullScreen, onToggleFullScreen, fieldState, onSaveToHistory, onGenerateAssetImage, onSutureOpenChange, theme
 }) => {
     const rawMetonymyData = blueprint.metonymyData || { screenplay: [], staticStoryboard: [], dynamicScript: [], stylePresets: [] };
 
@@ -138,6 +141,16 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
 
     // NEW: Focused Scene State
     const [focusedSceneId, setFocusedSceneId] = useState<string | null>(null);
+
+    // Sync local isSutureOpen with parent if callback exists
+    const handleSetSutureOpen = useCallback((open: boolean) => {
+        setIsSutureOpen(open);
+        onSutureOpenChange?.(open);
+    }, [onSutureOpenChange]);
+
+    // NEW: Alert Modal State
+    const [isAlertOpen, setIsAlertOpen] = useState(false);
+    const [alertMessage, setAlertMessage] = useState("");
 
     const updateMetonymyData = useCallback((updates: Partial<typeof rawMetonymyData>) => {
         onUpdateBlueprint({
@@ -488,11 +501,13 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
                 }
                 setIsStyleExpanded(false);
             } else {
-                alert(language === 'EN' ? "Breakdown failed. AI returned empty result." : "分场失败。AI 未能返回有效结果。");
+                setAlertMessage(language === 'EN' ? "Breakdown failed. AI returned empty result." : "分场失败。AI 未能返回有效结果。");
+                setIsAlertOpen(true);
             }
         } catch (e) {
             console.error("Breakdown failed", e);
-            alert(language === 'EN' ? "Error during breakdown process." : "分场过程中发生错误。");
+            setAlertMessage(language === 'EN' ? "Error during breakdown process." : "分场过程中发生错误。");
+            setIsAlertOpen(true);
         } finally {
             setIsBreakingDown(false);
             setBreakdownStartTime(null);
@@ -829,7 +844,8 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
                 // CASE 2: Visual Style Transfer
                 const baseData = section.sutureDataMap?.['original'];
                 if (!baseData || !baseData.literaryScript) {
-                    alert(language === 'EN' ? "Please generate base script (Original Style) first." : "请先切换至【原文风格】生成基础剧本。");
+                    setAlertMessage(language === 'EN' ? "Please generate base script (Original Style) first." : "请先切换至【原文风格】生成基础剧本。");
+                    setIsAlertOpen(true);
                     return null;
                 }
 
@@ -933,12 +949,14 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
         const scriptToUse = currentData?.literaryScript || section.content;
 
         if (presetToUseId !== 'original' && !currentData?.literaryScript) {
-            alert(language === 'EN' ? "Please generate script for this style first." : "请先为此风格生成剧本。");
+            setAlertMessage(language === 'EN' ? "Please generate script for this style first." : "请先为此风格生成剧本。");
+            setIsAlertOpen(true);
             return;
         }
 
         if (!scriptToUse || !scriptToUse.trim()) {
-            alert(language === 'EN' ? "Please input narrative content or generate literary script first." : "请先输入叙事内容或点击【生成剧本】。");
+            setAlertMessage(language === 'EN' ? "Please input narrative content or generate literary script first." : "请先输入叙事内容或点击【生成剧本】。");
+            setIsAlertOpen(true);
             return;
         }
 
@@ -1043,20 +1061,25 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
     const activeSectionSourceContent = activeSection?.content || "";
 
     const btnWidthClass = language === 'EN' ? 'w-[124px]' : 'w-[104px]';
-    const btnBaseClass = `h-9 ${btnWidthClass} justify-center rounded-lg bg-zinc-900 border border-zinc-700 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-white hover:border-zinc-500 transition-all duration-100 active:scale-95 shadow-sm`;
-    const btnAddSceneClass = `h-9 px-4 rounded-lg bg-black border border-${themeColorBase}/50 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest ${themeAccent} hover:bg-${themeColorBase}/10 transition-all duration-100 active:scale-95 shadow-md`;
+    const btnBaseClass = theme === 'retro' 
+        ? `h-9 ${btnWidthClass} justify-center rounded-lg bg-white border border-[#8B261D]/20 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-[#8B261D]/70 hover:text-[#8B261D] hover:border-[#8B261D]/40 transition-all duration-100 active:scale-95 shadow-sm focus:outline-none`
+        : `h-9 ${btnWidthClass} justify-center rounded-lg bg-zinc-900 border border-zinc-700/50 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-white hover:border-zinc-500 transition-all duration-100 active:scale-95 shadow-sm focus:outline-none`;
+
+    const btnAddSceneClass = theme === 'retro'
+        ? `h-9 px-4 rounded-lg bg-[#8B261D] border border-[#8B261D] flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white hover:bg-[#A52A2A] transition-all duration-100 active:scale-95 shadow-md focus:outline-none`
+        : `h-9 px-4 rounded-lg bg-${themeColorBase}/20 border-current flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest ${themeAccent} hover:bg-${themeColorBase}/30 transition-all duration-100 active:scale-95 shadow-md focus:outline-none`;
 
     return (
-        <div className={`${isFullScreen ? 'w-full px-0' : 'w-full'} flex flex-col h-full bg-[#080808]`}>
+        <div className={`${isFullScreen ? 'w-full px-0' : 'w-full'} flex flex-col h-full ${theme === 'retro' ? 'bg-[#F9F7F1]' : 'bg-[#080808]'}`}>
             {/* Header */}
-            <div className="shrink-0 flex items-center justify-between border-b border-zinc-800 bg-[#080808] h-16 px-6">
+            <div className={`shrink-0 flex items-center justify-between border-b ${theme === 'retro' ? 'border-black bg-[#F4EFE0]' : 'border-zinc-800 bg-[#080808]'} h-16 px-6`}>
                 <div className="flex items-center gap-3 flex-1">
-                    <div className={`p-1.5 rounded-lg bg-zinc-900 border border-zinc-700 ${themeAccent}`}><FileText size={16} /></div>
+                    <div className={`p-1.5 rounded-lg ${theme === 'retro' ? 'bg-white border-[#8B261D]/20' : 'bg-zinc-900 border-zinc-700'} border ${themeAccent}`}><FileText size={16} /></div>
                     <div className="flex flex-col justify-center">
-                        <span className="text-[10px] text-zinc-100 uppercase tracking-widest font-bold leading-none mb-0.5">
+                        <span className={`text-[10px] ${theme === 'retro' ? 'text-[#8B261D]/60' : 'text-zinc-100'} uppercase tracking-widest font-bold leading-none mb-0.5`}>
                             {language === 'EN' ? "Metonymy Engine" : "换喻引擎"}
                         </span>
-                        <input value={blueprint.narrative?.title || ""} onChange={handleTitleChange} className="bg-transparent text-white font-serif font-bold text-sm focus:outline-none border-none p-0 w-full min-w-[200px]" />
+                        <input value={blueprint.narrative?.title || ""} onChange={handleTitleChange} className={`bg-transparent ${theme === 'retro' ? 'text-black' : 'text-white'} font-serif font-bold text-sm focus:outline-none border-none p-0 w-full min-w-[200px]`} />
                     </div>
                 </div>
 
@@ -1104,7 +1127,7 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
 
             <div className="flex-1 flex flex-col overflow-hidden">
                 <div className="flex-1 flex overflow-hidden">
-                    <div className={`${isSourceVisible ? 'w-1/3 min-w-[320px] max-w-[500px] translate-x-0' : 'w-0 opacity-0 -translate-x-full overflow-hidden'} border-r border-zinc-800 bg-[#0a0a0a] flex flex-col shrink-0 transition-all duration-310 ease-in-out`}>
+                    <div className={`${isSourceVisible ? 'w-1/3 min-w-[320px] max-w-[500px] translate-x-0' : 'w-0 opacity-0 -translate-x-full overflow-hidden'} border-r ${theme === 'retro' ? 'border-black bg-[#F4EFE0]' : 'border-zinc-800 bg-[#0a0a0a]'} flex flex-col shrink-0 transition-all duration-310 ease-in-out`}>
                         <SourceViewer
                             text={sourceText}
                             onChange={handleSourceTextChange}
@@ -1120,6 +1143,7 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
                             onAutoBreakdown={handleAutoBreakdown}
                             isBreakingDown={isBreakingDown}
                             breakdownStartTime={breakdownStartTime}
+                            theme={theme}
                         />
                     </div>
 
@@ -1133,6 +1157,7 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
                                 onUpdatePresetsAndActive={handleUpdatePresetsAndActive}
                                 lang={language}
                                 themeAccent={themeAccent}
+                                theme={theme}
                                 isExpanded={isStyleExpanded}
                                 onToggleExpand={setIsStyleExpanded}
                                 sourceText={sourceText}
@@ -1140,7 +1165,7 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
                         )}
 
                         {(!isStyleExpanded || focusedSceneId) && (
-                            <div className={`flex-1 bg-[#080808] animate-in fade-in duration-300 ${focusedSceneId ? 'overflow-hidden px-6 pt-6 pb-2 flex flex-col' : 'overflow-y-auto custom-scrollbar p-6 pb-32 space-y-8'}`}>
+                            <div className={`flex-1 ${theme === 'retro' ? 'bg-[#F9F7F1]' : 'bg-[#080808]'} animate-in fade-in duration-300 ${focusedSceneId ? 'overflow-hidden px-6 pt-6 pb-16 flex flex-col' : 'overflow-y-auto custom-scrollbar p-6 pb-32 space-y-8'}`}>
                                 {currentSections.length > 0 ? currentSections
                                     // FILTER: Only show the focused scene if one is selected
                                     .filter(s => focusedSceneId ? s.id === focusedSceneId : true)
@@ -1195,7 +1220,7 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
                                                 onGenerateSuture={() => {
                                                     setActiveSectionId(section.id);
                                                     setScrollSyncTrigger(prev => prev + 1);
-                                                    setIsSutureOpen(true);
+                                                    handleSetSutureOpen(true);
                                                 }}
 
                                                 finalAssets={assetsToDisplay}
@@ -1242,6 +1267,7 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
                                                 onToggleDynamicLang={() => setDynamicDisplayLang(prev => prev === 'CN' ? 'EN' : 'CN')}
                                                 themeAccent={themeAccent}
                                                 themeColorBase={themeColorBase}
+                                                theme={theme}
                                                 language={language}
                                                 onDragStart={(e) => setDraggedSceneId(section.id)}
                                                 onDragOver={(e) => e.preventDefault()}
@@ -1265,11 +1291,11 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
                                             />
                                         )
                                     }) : (
-                                    <div className="flex flex-col items-center justify-center h-full text-zinc-600 gap-4 mt-20">
+                                    <div className={`flex flex-col items-center justify-center h-full gap-4 mt-20 ${theme === 'retro' ? 'text-[#8B261D]/60' : 'text-zinc-600'}`}>
                                         <Layers size={48} className="opacity-20" />
                                         <div className="text-center">
-                                            <p className="text-sm font-bold uppercase tracking-widest text-zinc-500 mb-2">{language === 'EN' ? "No Scenes Yet" : "暂无场次"}</p>
-                                            <p className="text-xs text-zinc-600">{language === 'EN' ? "Use 'Breakdown' or 'Add Scene' to start." : "请使用左侧“AI 智能分场”或右上角“新增场次”开始。"}</p>
+                                            <p className={`text-sm font-bold uppercase tracking-widest mb-2 ${theme === 'retro' ? 'text-[#8B261D]' : 'text-zinc-500'}`}>{language === 'EN' ? "No Scenes Yet" : "暂无场次"}</p>
+                                            <p className={`text-xs ${theme === 'retro' ? 'text-[#8B261D]/60' : 'text-zinc-600'}`}>{language === 'EN' ? "Use 'Breakdown' or 'Add Scene' to start." : "请使用左侧“AI 智能分场”或右上角“新增场次”开始。"}</p>
                                         </div>
                                     </div>
                                 )}
@@ -1281,7 +1307,7 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
 
             <SutureModal
                 isOpen={isSutureOpen}
-                onClose={() => setIsSutureOpen(false)}
+                onClose={() => handleSetSutureOpen(false)}
                 onGenerate={handleSutureGenerate}
                 isGenerating={isGenerating}
                 generationStartTime={generationStartTime}
@@ -1296,7 +1322,34 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
                 presets={currentPresets}
                 activePresetId={currentSections.find(s => s.id === activeSectionId)?.mountedPresetId || currentActivePresetId || 'original'}
             />
-            <PreviewContentModal isOpen={isPreviewOpen} onClose={() => setIsPreviewOpen(false)} content={previewContent} title={previewTitle} themeAccent={themeAccent} lang={language} />
+            <PreviewContentModal isOpen={isPreviewOpen} onClose={() => setIsPreviewOpen(false)} content={previewContent} title={previewTitle} themeAccent={themeAccent} lang={language} theme={theme} />
+
+            {/* Simple Themed Alert Modal */}
+            {isAlertOpen && (
+                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className={`w-full max-w-sm ${theme === 'retro' ? 'bg-[#F9F7F1] border-[#8B261D]' : 'bg-[#0c0c0c] border-zinc-800 shadow-[0_0_20px_rgba(0,0,0,0.5)]'} border-2 rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200`}>
+                        <div className={`px-6 py-8 text-center ${theme === 'retro' ? 'text-black' : 'text-white'}`}>
+                            <div className={`w-14 h-14 rounded-full mx-auto mb-5 flex items-center justify-center ${theme === 'retro' ? 'bg-[#8B261D]/10 text-[#8B261D]' : 'bg-zinc-800 text-zinc-400'}`}>
+                                <AlertCircle size={28} />
+                            </div>
+                            <h3 className={`text-sm font-bold uppercase tracking-[0.2em] mb-3 ${theme === 'retro' ? 'text-[#8B261D]' : 'text-zinc-200'}`}>
+                                {language === 'EN' ? "Attention" : "提示"}
+                            </h3>
+                            <p className={`text-xs ${theme === 'retro' ? 'text-[#3D1A16]/80' : 'text-zinc-400'} leading-relaxed font-medium px-4`}>
+                                {alertMessage}
+                            </p>
+                        </div>
+                        <div className={`p-4 border-t ${theme === 'retro' ? 'border-[#8B261D]/10 bg-[#F4EFE0]/50' : 'border-zinc-900 bg-zinc-950/50'}`}>
+                            <button
+                                onClick={() => setIsAlertOpen(false)}
+                                className={`w-full py-3 rounded-lg text-xs font-bold uppercase tracking-widest transition-all active:scale-95 ${theme === 'retro' ? 'bg-[#8B261D] text-white hover:bg-[#A52A2A] shadow-md' : `bg-${themeColorBase}/20 text-${themeColorBase} hover:bg-${themeColorBase}/30 border border-current`}`}
+                            >
+                                {language === 'EN' ? "Got it" : "确认"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

@@ -15,10 +15,11 @@ interface AssetsViewProps {
     onZoom: (url: string) => void;
     themeAccent: string;
     themeBorder: string;
+    theme?: string;
 }
 
 export const AssetsView: React.FC<AssetsViewProps> = ({
-    blueprint, language, isCommercial, isAesthetic, onUpdateBlueprint, onGenerateAssetImage, onZoom, themeAccent, themeBorder
+    blueprint, language, isCommercial, isAesthetic, onUpdateBlueprint, onGenerateAssetImage, onZoom, themeAccent, themeBorder, theme
 }) => {
 
     // Derived hover background from accent
@@ -72,22 +73,22 @@ export const AssetsView: React.FC<AssetsViewProps> = ({
 
             {/* CHARACTERS */}
             <div>
-                <div className="flex items-center justify-between border-b border-zinc-800 pb-4 mb-8">
-                    <h3 className="text-2xl font-serif text-white flex items-center gap-3">
-                        <User className="text-zinc-500" />
+                <div className={`flex items-center justify-between border-b ${theme === 'retro' ? 'border-[#8B261D]/10' : 'border-zinc-800'} pb-4 mb-8`}>
+                    <h3 className={`text-2xl font-serif ${theme === 'retro' ? 'text-black' : 'text-white'} flex items-center gap-3`}>
+                        <User className={theme === 'retro' ? 'text-[#8B261D]' : 'text-zinc-500'} />
                         {language === 'EN' ? "Characters" : "核心角色"}
                     </h3>
                     <button
                         onClick={() => handleAddAsset('characters')}
-                        className={`text-xs font-bold ${themeAccent} ${themeBorder} ${themeBgHover} border px-3 py-1.5 rounded transition-colors uppercase tracking-wider flex items-center gap-2`}
+                        className={`text-xs font-bold ${themeAccent} ${theme === 'retro' ? 'border-[#8B261D]/30' : themeAccent.replace('text-', 'border-')} ${themeBgHover} border px-3 py-1.5 rounded transition-colors uppercase tracking-wider flex items-center gap-2`}
                     >
                         <Plus size={12} /> {language === 'EN' ? "Add Character" : "添加角色"}
                     </button>
                 </div>
 
                 {blueprint.assets.characters.length === 0 ? (
-                    <div className="text-center py-12 border border-dashed border-zinc-800 rounded-xl bg-zinc-900/20">
-                        <p className="text-zinc-500 mb-4">{language === 'EN' ? "No characters generated yet." : "暂无角色资产。"}</p>
+                    <div className={`text-center py-12 border ${theme === 'retro' ? 'border-[#8B261D]/20 bg-[#F9F7F1]/80' : 'border-zinc-800 bg-zinc-900/20'} border-dashed rounded-xl`}>
+                        <p className={`${theme === 'retro' ? 'text-black/60' : 'text-zinc-500'} mb-4`}>{language === 'EN' ? "No characters generated yet." : "暂无角色资产。"}</p>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -102,6 +103,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({
                                 onGenerateImage={onGenerateAssetImage}
                                 onZoom={onZoom}
                                 onReverseEngineer={(url) => handleReverseAsset(url, 'CHARACTER')}
+                                theme={theme}
                             />
                         ))}
                     </div>
@@ -110,14 +112,14 @@ export const AssetsView: React.FC<AssetsViewProps> = ({
 
             {/* LOCATIONS */}
             <div>
-                <div className="flex items-center justify-between border-b border-zinc-800 pb-4 mb-8">
-                    <h3 className="text-2xl font-serif text-white flex items-center gap-3">
-                        <MapPin className="text-zinc-500" />
+                <div className={`flex items-center justify-between border-b ${theme === 'retro' ? 'border-[#8B261D]/10' : 'border-zinc-800'} pb-4 mb-8`}>
+                    <h3 className={`text-2xl font-serif ${theme === 'retro' ? 'text-black' : 'text-white'} flex items-center gap-3`}>
+                        <MapPin className={theme === 'retro' ? 'text-[#8B261D]' : 'text-zinc-500'} />
                         {language === 'EN' ? "Locations" : "关键场景"}
                     </h3>
                     <button
                         onClick={() => handleAddAsset('locations')}
-                        className={`text-xs font-bold ${themeAccent} ${themeBorder} ${themeBgHover} border px-3 py-1.5 rounded transition-colors uppercase tracking-wider flex items-center gap-2`}
+                        className={`text-xs font-bold ${themeAccent} ${theme === 'retro' ? 'border-[#8B261D]/30' : themeAccent.replace('text-', 'border-')} ${themeBgHover} border px-3 py-1.5 rounded transition-colors uppercase tracking-wider flex items-center gap-2`}
                     >
                         <Plus size={12} /> {language === 'EN' ? "Add Location" : "添加场景"}
                     </button>
@@ -134,6 +136,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({
                             onGenerateImage={onGenerateAssetImage}
                             onZoom={onZoom}
                             onReverseEngineer={(url) => handleReverseAsset(url, 'SCENE')}
+                            theme={theme}
                         />
                     ))}
                 </div>
@@ -141,14 +144,14 @@ export const AssetsView: React.FC<AssetsViewProps> = ({
 
             {/* PROPS */}
             <div>
-                <div className="flex items-center justify-between border-b border-zinc-800 pb-4 mb-8">
-                    <h3 className="text-2xl font-serif text-white flex items-center gap-3">
-                        <Box className="text-zinc-500" />
+                <div className={`flex items-center justify-between border-b ${theme === 'retro' ? 'border-[#8B261D]/10' : 'border-zinc-800'} pb-4 mb-8`}>
+                    <h3 className={`text-2xl font-serif ${theme === 'retro' ? 'text-black' : 'text-white'} flex items-center gap-3`}>
+                        <Box className={theme === 'retro' ? 'text-[#8B261D]' : 'text-zinc-500'} />
                         {language === 'EN' ? "Props (MacGuffins)" : "关键道具"}
                     </h3>
                     <button
                         onClick={() => handleAddAsset('props')}
-                        className={`text-xs font-bold ${themeAccent} ${themeBorder} ${themeBgHover} border px-3 py-1.5 rounded transition-colors uppercase tracking-wider flex items-center gap-2`}
+                        className={`text-xs font-bold ${themeAccent} ${theme === 'retro' ? 'border-[#8B261D]/30' : themeAccent.replace('text-', 'border-')} ${themeBgHover} border px-3 py-1.5 rounded transition-colors uppercase tracking-wider flex items-center gap-2`}
                     >
                         <Plus size={12} /> {language === 'EN' ? "Add Prop" : "添加道具"}
                     </button>
@@ -165,6 +168,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({
                             onGenerateImage={onGenerateAssetImage}
                             onZoom={onZoom}
                             onReverseEngineer={(url) => handleReverseAsset(url, 'PROP')}
+                            theme={theme}
                         />
                     ))}
                 </div>

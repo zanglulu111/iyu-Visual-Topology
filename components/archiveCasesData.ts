@@ -1,3 +1,5 @@
+import { getR2PublicUrl } from '../services/r2Storage';
+
 export type ArchiveCategory = 'ALL' | 'NEUROSIS' | 'PSYCHOSIS' | 'PERVERSION' | 'AUTISM';
 
 export interface CaseStudy {
@@ -93,7 +95,7 @@ const baseCases: CaseStudy[] = [
         category: 'NEUROSIS',
         summaryCn: '分析者总是处于某种还清债务的焦虑中。本文报告了一例通过控制时间来回避阉割的经典强迫症案例。',
         summaryEn: 'The analysand is always in an anxiety of paying off debts. This paper reports a classic case of obsessive-compulsive neurosis avoiding castration through time control.',
-        imageUrl: 'https://images.unsplash.com/photo-1501139083538-0139583c060f?q=80&w=600&auto=format&fit=crop',
+        imageUrl: getR2PublicUrl('archive/c1.jpg'),
         date: '1998.04'
     },
     {
@@ -103,7 +105,7 @@ const baseCases: CaseStudy[] = [
         category: 'PSYCHOSIS',
         summaryCn: '妄想与幻觉作为修补实在界破洞的补丁。在一个重力与逻辑同时失效的迷宫中，清道夫将世界归还绝对寂静。',
         summaryEn: 'Delusions and hallucinations as patches for the Real. In a maze without logic, the scavenger returns the world to absolute silence.',
-        imageUrl: '/c2-mirror.png', 
+        imageUrl: getR2PublicUrl('archive/c2.jpg'), 
         date: '2003.11',
         content: detailedCaseContent
     },
@@ -114,7 +116,7 @@ const baseCases: CaseStudy[] = [
         category: 'PERVERSION',
         summaryCn: '倒错主体并不否认律法，而是充当律法制定的结构。案例探讨了施欲循环中的能指运作。',
         summaryEn: 'The pervert does not deny the law, but acts as the structure that establishes it. The case explores the operation of signifiers in the cycle of desire.',
-        imageUrl: 'https://images.unsplash.com/photo-1509347528160-9a9e33742cdb?q=80&w=600&auto=format&fit=crop',
+        imageUrl: getR2PublicUrl('archive/c3.jpg'),
         date: '2016.02'
     },
     {
@@ -124,7 +126,7 @@ const baseCases: CaseStudy[] = [
         category: 'AUTISM',
         summaryCn: '对符号界浸入的拒绝与自我封闭的堡垒。该案例记录了主体在没有任何大他者担保下的语言构造。',
         summaryEn: 'Rejection of immersion in the Symbolic and a fortress of self-closure. The case records the linguistic construction of the subject without any guarantee from the Big Other.',
-        imageUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=600&auto=format&fit=crop',
+        imageUrl: getR2PublicUrl('archive/c4.jpg'),
         date: '2021.08'
     }
 ];
@@ -139,7 +141,7 @@ export const ARCHIVE_CASES: CaseStudy[] = [
         category: ['NEUROSIS', 'PSYCHOSIS', 'PERVERSION', 'AUTISM'][i % 4] as ArchiveCategory,
         summaryCn: '该记录正在解除封存中，数据正在重新结构化，请等待大他者的进一步索引。',
         summaryEn: 'This record is being declassified. Data is restructuring, pending further indexing by the Big Other.',
-        imageUrl: `https://images.unsplash.com/photo-${1500000000000 + i * 1000000}?q=80&w=600&auto=format&fit=crop`,
+        imageUrl: getR2PublicUrl(`archive/gen-${i+5}.jpg`),
         date: `202${Math.floor(i / 12)}.${String((i % 12) + 1).padStart(2, '0')}`,
         content: detailedCaseContent // attach the same content so any click works
     }))

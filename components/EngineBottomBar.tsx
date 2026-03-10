@@ -41,6 +41,7 @@ interface EngineBottomBarProps {
     onClearBlock?: (blockId: string) => void;
     isTaskManagerOpen: boolean;
     setIsTaskManagerOpen: (v: boolean) => void;
+    isWorldLawOpen: boolean;
 }
 
 export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
@@ -53,6 +54,7 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
     isAestheticInputOpen,
     setIsAestheticInputOpen,
     worldLawConfig,
+    isWorldLawOpen,
     setIsWorldLawOpen,
     handleBackStep,
     handleUndo,
@@ -88,6 +90,7 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
     }, []);
 
     const getFooterThemeColor = () => {
+        if (theme === 'retro') return 'text-[#8B261D] hover:text-[#631B15]';
         if (selectedDriver === DriverType.COMMERCIAL) return 'text-cyan-400 hover:text-cyan-300';
         if (selectedDriver === DriverType.EXPERIMENTAL) return 'text-purple-400 hover:text-purple-300';
         if (selectedDriver === DriverType.AESTHETIC) return 'text-rose-400 hover:text-rose-300';
@@ -96,6 +99,7 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
     };
 
     const getThemeTextColor = () => {
+        if (theme === 'retro') return 'text-[#8B261D]';
         if (selectedDriver === DriverType.COMMERCIAL) return 'text-cyan-400';
         if (selectedDriver === DriverType.EXPERIMENTAL) return 'text-purple-400';
         if (selectedDriver === DriverType.AESTHETIC) return 'text-rose-400';
@@ -104,6 +108,7 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
     };
 
     const getFooterButtonStyle = () => {
+        if (theme === 'retro') return 'bg-[#8B261D] hover:bg-[#631B15] border-[#8B261D] text-white shadow-none';
         if (selectedDriver === DriverType.COMMERCIAL) return 'bg-cyan-500 hover:bg-cyan-400 border-cyan-500 text-black shadow-[0_0_20px_rgba(34,211,238,0.2)]';
         if (selectedDriver === DriverType.EXPERIMENTAL) return 'bg-purple-500 hover:bg-purple-400 border-purple-500 text-black shadow-[0_0_20px_rgba(168,85,247,0.2)]';
         if (selectedDriver === DriverType.AESTHETIC) return 'bg-rose-500 hover:bg-rose-400 border-rose-500 text-black shadow-[0_0_20px_rgba(244,63,94,0.2)]';
@@ -138,67 +143,67 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
                     </button>
                 )}
                 <button onClick={() => setIsVisionOpen(!isVisionOpen)} className="flex flex-col items-center gap-1.5 shrink-0 min-w-[60px] group transition-all duration-300 hover:scale-105 active:scale-95" >
-                    <PenTool size={18} className={selectedDriver === DriverType.AESTHETIC ? (isVisionOpen ? "text-rose-400" : (theme === 'retro' ? "text-zinc-600 group-hover:text-black transition-colors" : "text-zinc-400 group-hover:text-white transition-colors")) : (isVisionOpen ? getThemeTextColor() : (theme === 'retro' ? "text-zinc-600 group-hover:text-black transition-colors" : "text-zinc-400 group-hover:text-white transition-colors"))} />
-                    <span className={`text-[9px] font-bold uppercase tracking-wider transition-colors ${selectedDriver === DriverType.AESTHETIC ? (isVisionOpen ? "text-rose-400" : (theme === 'retro' ? "text-zinc-600 group-hover:text-black" : "text-zinc-400 group-hover:text-white")) : (isVisionOpen ? getThemeTextColor() : (theme === 'retro' ? "text-zinc-600 group-hover:text-black" : "text-zinc-400 group-hover:text-white"))}`}>
+                    <PenTool size={18} className={selectedDriver === DriverType.AESTHETIC ? (isVisionOpen ? (theme === 'retro' ? "text-[#8B261D]" : "text-rose-400") : (theme === 'retro' ? "text-zinc-600 group-hover:text-black transition-colors" : "text-zinc-400 group-hover:text-white transition-colors")) : (isVisionOpen ? getThemeTextColor() : (theme === 'retro' ? "text-zinc-600 group-hover:text-black transition-colors" : "text-zinc-400 group-hover:text-white transition-colors"))} />
+                    <span className={`text-[9px] font-bold uppercase tracking-wider transition-colors ${selectedDriver === DriverType.AESTHETIC ? (isVisionOpen ? (theme === 'retro' ? "text-[#8B261D]" : "text-rose-400") : (theme === 'retro' ? "text-zinc-600 group-hover:text-black" : "text-zinc-400 group-hover:text-white")) : (isVisionOpen ? getThemeTextColor() : (theme === 'retro' ? "text-zinc-600 group-hover:text-black" : "text-zinc-400 group-hover:text-white"))}`}>
                         {lang === 'CN' ? (selectedDriver === DriverType.COMMERCIAL ? "欲望输入" : selectedDriver === DriverType.AESTHETIC ? "反推解码" : "植入症候") : (selectedDriver === DriverType.AESTHETIC ? "Decoding" : "Input")}
                     </span>
                 </button>
 
                 <button onClick={() => setIsWorldLawOpen(true)} className="flex flex-col items-center gap-1.5 shrink-0 min-w-[60px] group transition-all duration-300 hover:scale-105 active:scale-95" >
-                    <Anchor size={18} className={worldLawConfig.physics === 'UNBOUND' ? getThemeTextColor() : (theme === 'retro' ? "text-zinc-600 group-hover:text-black transition-colors" : "text-zinc-400 group-hover:text-white transition-colors")} />
-                    <span className={`text-[9px] font-bold uppercase tracking-wider transition-colors ${worldLawConfig.physics === 'UNBOUND' ? getThemeTextColor() : (theme === 'retro' ? "text-zinc-600 group-hover:text-black" : "text-zinc-400 group-hover:text-white")}`}>{lang === 'CN' ? "世界法则" : "Law"}</span>
+                    <Anchor size={18} className={isWorldLawOpen || worldLawConfig.physics === 'UNBOUND' ? getThemeTextColor() : (theme === 'retro' ? "text-zinc-600 group-hover:text-black transition-colors" : "text-zinc-400 group-hover:text-white transition-colors")} />
+                    <span className={`text-[9px] font-bold uppercase tracking-wider transition-colors ${isWorldLawOpen || worldLawConfig.physics === 'UNBOUND' ? getThemeTextColor() : (theme === 'retro' ? "text-zinc-600 group-hover:text-black" : "text-zinc-400 group-hover:text-white")}`}>{lang === 'CN' ? "世界法则" : "Law"}</span>
                 </button>
 
                 <div className="w-px h-8 bg-[var(--border-main)] shrink-0"></div>
                 {selectedDriver === DriverType.AESTHETIC && (
                     <>
-                        <div className={`flex ${theme === 'retro' ? 'bg-[#F9F7F1]/80 border-black/30 shadow-sm' : 'bg-zinc-900/50 border-zinc-800'} border rounded-lg p-1 shrink-0 transition-all duration-300 hover:scale-105`}>
+                        <div className={`flex ${theme === 'retro' ? 'bg-[#F5F2E8]/80 border-black/10 shadow-sm' : 'bg-zinc-900/50 border-zinc-800'} border rounded-lg p-1 shrink-0 transition-all duration-300 hover:scale-105`}>
                             <button
                                 onClick={handleUndo}
                                 disabled={pastStatesLength === 0}
-                                className={`p-2 transition-all rounded hover:bg-white/5 ${pastStatesLength === 0 ? 'opacity-30 grayscale cursor-not-allowed' : 'text-white'}`}
+                                className={`p-2 transition-all rounded ${theme === 'retro' ? 'hover:bg-black/5' : 'hover:bg-white/5'} ${pastStatesLength === 0 ? 'opacity-30 grayscale cursor-not-allowed' : (theme === 'retro' ? 'text-black' : 'text-white')}`}
                                 title={lang === 'CN' ? "撤销" : "Undo"}
                             >
-                                <Undo2 size={18} className={pastStatesLength > 0 ? (theme === 'retro' ? 'text-black/70 group-hover:text-black' : (theme === 'dark' ? 'text-zinc-400 group-hover:text-white' : getFooterThemeColor())) : (theme === 'retro' ? 'text-black/20' : 'text-zinc-600')} />
+                                <Undo2 size={18} className={pastStatesLength > 0 ? (theme === 'retro' ? 'text-zinc-700 group-hover:text-[#8B261D]' : (theme === 'dark' ? 'text-zinc-400 group-hover:text-white' : getFooterThemeColor())) : (theme === 'retro' ? 'text-zinc-300' : 'text-zinc-600')} />
                             </button>
                             <div className={`w-px h-4 ${theme === 'retro' ? 'bg-black/10' : 'bg-zinc-800'} self-center mx-1`}></div>
                             <button
                                 onClick={handleRedo}
                                 disabled={futureStatesLength === 0}
-                                className={`p-2 transition-all rounded hover:bg-white/5 ${futureStatesLength === 0 ? 'opacity-30 grayscale cursor-not-allowed' : 'text-white'}`}
+                                className={`p-2 transition-all rounded ${theme === 'retro' ? 'hover:bg-black/5' : 'hover:bg-white/5'} ${futureStatesLength === 0 ? 'opacity-30 grayscale cursor-not-allowed' : (theme === 'retro' ? 'text-black' : 'text-white')}`}
                                 title={lang === 'CN' ? "重做" : "Redo"}
                             >
-                                <Redo2 size={18} className={futureStatesLength > 0 ? (theme === 'retro' ? 'text-black/70 group-hover:text-black' : (theme === 'dark' ? 'text-zinc-400 group-hover:text-white' : getFooterThemeColor())) : (theme === 'retro' ? 'text-black/20' : 'text-zinc-600')} />
+                                <Redo2 size={18} className={futureStatesLength > 0 ? (theme === 'retro' ? 'text-zinc-700 group-hover:text-[#8B261D]' : (theme === 'dark' ? 'text-zinc-400 group-hover:text-white' : getFooterThemeColor())) : (theme === 'retro' ? 'text-zinc-300' : 'text-zinc-600')} />
                             </button>
                         </div>
                         <div className="w-px h-8 bg-zinc-800 shrink-0 mx-2"></div>
-                        <div className="flex bg-zinc-900 border border-zinc-700 rounded-lg p-1 shrink-0">
-                            <button onClick={() => setSubjectType('HUMAN')} className={`px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 transition-all ${subjectType === 'HUMAN' ? 'bg-rose-500 text-black' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'}`} >
+                        <div className={`flex border rounded-lg p-1 shrink-0 transition-all duration-300 hover:scale-105 ${theme === 'retro' ? 'bg-[#F5F2E8]/80 border-black/10 shadow-sm' : 'bg-zinc-900 border-zinc-700'}`}>
+                            <button onClick={() => setSubjectType('HUMAN')} className={`px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 transition-all ${subjectType === 'HUMAN' ? (theme === 'retro' ? 'bg-[#8B261D] text-white shadow-md' : 'bg-rose-500 text-black') : (theme === 'retro' ? 'text-zinc-500 hover:text-black hover:bg-black/5' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]')}`} >
                                 <UserIcon size={12} /> {lang === 'CN' ? "人类" : "Human"}
                             </button>
-                            <button onClick={() => setSubjectType('CREATURE')} className={`px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 transition-all ${subjectType === 'CREATURE' ? 'bg-rose-500 text-black' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'}`} >
+                            <button onClick={() => setSubjectType('CREATURE')} className={`px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 transition-all ${subjectType === 'CREATURE' ? (theme === 'retro' ? 'bg-[#8B261D] text-white shadow-md' : 'bg-rose-500 text-black') : (theme === 'retro' ? 'text-zinc-500 hover:text-black hover:bg-black/5' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]')}`} >
                                 <Ghost size={12} /> {lang === 'CN' ? "异种" : "Creature"}
                             </button>
                         </div>
                         <div className="w-px h-8 bg-zinc-800 shrink-0 mx-2"></div>
                         <button onClick={handleAestheticSmartRandom} className="flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]" >
-                            <Sparkles size={18} className="text-rose-400 group-hover:rotate-90 transition-transform" />
-                            <span className="text-[9px] font-bold uppercase tracking-wider text-rose-400">{lang === 'CN' ? "灵感涌现" : "Inspiration Surge"}</span>
+                            <Sparkles size={18} className={`${theme === 'retro' ? 'text-[#8B261D]' : 'text-rose-400'} group-hover:rotate-90 transition-transform`} />
+                            <span className={`text-[9px] font-bold uppercase tracking-wider ${theme === 'retro' ? 'text-[#8B261D]' : 'text-rose-400'}`}>{lang === 'CN' ? "灵感涌现" : "Inspiration Surge"}</span>
                         </button>
 
                         <button
                             onClick={handleCopyAestheticPrompt}
                             className="flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]"
                         >
-                            {promptCopied ? <Check size={18} className="text-green-500" /> : <Terminal size={18} className="text-zinc-400 group-hover:text-rose-400 transition-colors" />}
-                            <span className={`text-[9px] font-bold uppercase tracking-wider ${promptCopied ? 'text-green-500' : 'text-zinc-400 group-hover:text-rose-400'}`}>
+                            {promptCopied ? <Check size={18} className="text-green-500" /> : <Terminal size={18} className={`transition-colors ${theme === 'retro' ? 'text-zinc-400 group-hover:text-[#8B261D]' : 'text-zinc-400 group-hover:text-rose-400'}`} />}
+                            <span className={`text-[9px] font-bold uppercase tracking-wider ${promptCopied ? 'text-green-500' : (theme === 'retro' ? 'text-zinc-400 group-hover:text-[#8B261D]' : 'text-zinc-400 group-hover:text-rose-400')}`}>
                                 {promptCopied ? (lang === 'CN' ? "已复制" : "Copied") : (lang === 'CN' ? "复制指令" : "Copy Prompt")}
                             </span>
                         </button>
 
-                        <button onClick={handleGlobalReset} className="flex flex-col items-center gap-1.5 group text-zinc-300 hover:text-white transition-all duration-100 shrink-0 min-w-[60px]" >
-                            <RotateCcw size={18} className="text-zinc-400 group-hover:text-rose-500 transition-colors" />
-                            <span className="font-bold uppercase tracking-wider" style={{ fontSize: '9px' }}>{lang === 'CN' ? "全局重置" : "Reset All"}</span>
+                        <button onClick={handleGlobalReset} className={`flex flex-col items-center gap-1.5 group transition-all duration-100 shrink-0 min-w-[60px] ${theme === 'retro' ? 'text-zinc-600' : 'text-zinc-300'}`} >
+                            <RotateCcw size={18} className={`transition-colors ${theme === 'retro' ? 'text-zinc-500 group-hover:text-[#8B261D]' : 'text-zinc-400 group-hover:text-rose-500'}`} />
+                            <span className={`font-bold uppercase tracking-wider ${theme === 'retro' ? 'group-hover:text-[#8B261D]' : 'group-hover:text-white'}`} style={{ fontSize: '9px' }}>{lang === 'CN' ? "全局重置" : "Reset All"}</span>
                         </button>
                     </>
                 )}

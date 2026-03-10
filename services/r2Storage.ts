@@ -42,18 +42,24 @@ export async function uploadToR2(file: File, folder: string = 'user-uploads'): P
     const fileName = `${folder}/${sessionData.session.user.id}/${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
 
     try {
-        // 第一步：从 Vercel API 获取一个用于安全上传的预签名 URL（只有服务器有密钥能生成）
+        // 第一步：从 Vercel API 获取一个用于安全上传的预签名 URL
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+
         const presignRes = await fetch('/api/get-r2-upload-url', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 fileName,
-                fileType: file.type || 'image/png' // 指定文件类型让 R2 正确处理 MIME
-            })
+                fileType: file.type || 'image/png'
+            }),
+            signal: controller.signal
         });
+        
+        clearTimeout(timeoutId);
 
         if (!presignRes.ok) {
-            throw new Error('Failed to get presigned URL from API. Are you running on localhost without vercel dev?');
+            throw new Error(`R2 API unavailable: ${presignRes.status}`);
         }
 
         const { uploadUrl, fileName: r2Key } = await presignRes.json();
@@ -98,8 +104,11 @@ export async function smartUploadImage(file: File, folder: string = 'user-upload
         });
     }
 
-    // 优先使用 R2
-    if (isR2Configured()) {
+    // 优先使用 R2 (如果已配置且不是 localhost，或者显式配置了 R2 URL)
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    
+    // 如果是开发环境且没配后端 API，主动跳过 R2，直接去 Supabase
+    if (isR2Configured() && (!isLocalhost || (isLocalhost && R2_PUBLIC_URL.includes('r2.dev')))) {
         try {
             return await uploadToR2(file, folder);
         } catch (err) {

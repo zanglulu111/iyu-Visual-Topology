@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save, ExternalLink, Globe, Wand2 } from 'lucide-react';
+import { useTheme } from '../../contexts/ThemeContext';
 import { useSettings } from '../../contexts/SettingsContext';
 import { APISettings, DriverType } from '../../types';
 import { testConnection } from '../../services/geminiService';
@@ -26,6 +27,7 @@ const IMAGE_MODELS = [
 ];
 
 export const APISettingsModal: React.FC<APISettingsModalProps> = ({ onClose, lang, setLang, selectedDriver }) => {
+    const { theme } = useTheme();
     const { settings, updateSettings } = useSettings();
     const [localSettings, setLocalSettings] = useState<APISettings>(settings);
     const [testStatus, setTestStatus] = useState<{ llm: string; image: string }>({ llm: '', image: '' });
@@ -68,14 +70,14 @@ export const APISettingsModal: React.FC<APISettingsModalProps> = ({ onClose, lan
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
-            <div className="w-[800px] max-h-[90vh] bg-[#0c0c0c] border border-zinc-800 rounded-xl shadow-2xl flex flex-col overflow-hidden">
+            <div className={`w-[800px] max-h-[90vh] ${theme === 'retro' ? 'bg-[#F9F7F1]' : 'bg-[#0c0c0c]'} border ${theme === 'retro' ? 'border-[#8B261D]' : 'border-zinc-800'} rounded-xl shadow-2xl flex flex-col overflow-hidden`}>
                 {/* Header */}
-                <div className="flex items-center justify-between px-8 py-6 border-b border-zinc-800">
+                <div className={`flex items-center justify-between px-8 py-6 border-b ${theme === 'retro' ? 'border-[#8B261D]/20 bg-[#F4EFE0]' : 'border-zinc-800'}`}>
                     <div className="flex flex-col">
-                        <h2 className="text-2xl font-bold text-white tracking-wider leading-none">
+                        <h2 className={`text-2xl font-bold ${theme === 'retro' ? 'text-[#8B261D]' : 'text-white'} tracking-wider leading-none`}>
                             {lang === 'CN' ? "系统设置" : "SYSTEM SETTINGS"}
                         </h2>
-                        <span className="text-[10px] font-bold text-[#D4AF37] uppercase tracking-[0.2em] mt-1.5 opacity-80">
+                        <span className={`text-[10px] font-bold ${theme === 'retro' ? 'text-[#8B261D]/60' : 'text-[#D4AF37]'} uppercase tracking-[0.2em] mt-1.5 opacity-80`}>
                             SYSTEM CONFIGURATION
                         </span>
                     </div>
@@ -83,7 +85,7 @@ export const APISettingsModal: React.FC<APISettingsModalProps> = ({ onClose, lan
                     <div className="flex items-center gap-4">
                         <button
                             onClick={() => setLang(lang === 'CN' ? 'EN' : 'CN')}
-                            className="flex items-center gap-2 px-3 py-1.5 border border-zinc-800 hover:bg-zinc-800 text-zinc-400 hover:text-white rounded-md transition-all text-[10px] font-bold uppercase tracking-widest"
+                            className={`flex items-center gap-2 px-3 py-1.5 border ${theme === 'retro' ? 'border-[#8B261D]/30 text-[#8B261D] hover:bg-[#8B261D]/10' : 'border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-800'} rounded-md transition-all text-[10px] font-bold uppercase tracking-widest`}
                         >
                             <Globe size={14} />
                             {lang}
@@ -91,13 +93,13 @@ export const APISettingsModal: React.FC<APISettingsModalProps> = ({ onClose, lan
 
                         <button
                             onClick={handleSave}
-                            className="flex items-center gap-2 px-5 py-2 bg-[#D4AF37] text-black hover:bg-[#C5A028] font-bold text-xs rounded transition-all shadow-[0_4px_15px_rgba(212,175,55,0.2)]"
+                            className={`flex items-center gap-2 px-5 py-2 ${theme === 'retro' ? 'bg-[#8B261D] text-white hover:bg-[#6D1E16]' : 'bg-[#D4AF37] text-black hover:bg-[#C5A028]'} font-bold text-xs rounded transition-all shadow-[0_4px_15px_rgba(212,175,55,0.2)]`}
                         >
                             <Save size={16} />
                             {lang === 'CN' ? "保存配置" : "SAVE CONFIG"}
                         </button>
 
-                        <button onClick={onClose} className="p-1 text-zinc-500 hover:text-white transition-colors">
+                        <button onClick={onClose} className={`p-1 ${theme === 'retro' ? 'text-[#8B261D]' : 'text-zinc-500 hover:text-white'} transition-colors`}>
                             <X size={24} />
                         </button>
                     </div>
@@ -109,7 +111,7 @@ export const APISettingsModal: React.FC<APISettingsModalProps> = ({ onClose, lan
                     {/* LLM Section */}
                     <div className="space-y-6">
                         <div className="flex items-center justify-between px-1">
-                            <h3 className="text-base font-bold text-[#D4AF37] tracking-wider">
+                            <h3 className={`text-base font-bold ${theme === 'retro' ? 'text-[#8B261D]' : 'text-[#D4AF37]'} tracking-wider`}>
                                 {lang === 'CN' ? "LLM 大语言模型" : "LLM LARGE LANGUAGE MODEL"}
                             </h3>
                             <button
@@ -121,11 +123,11 @@ export const APISettingsModal: React.FC<APISettingsModalProps> = ({ onClose, lan
                             </button>
                         </div>
 
-                        <div className="bg-zinc-900/40 border border-zinc-800/60 rounded-xl p-8 space-y-6">
+                        <div className={`${theme === 'retro' ? 'bg-[#F4EFE0]/50 border-black/10' : 'bg-zinc-900/40 border-zinc-800/60'} rounded-xl p-8 space-y-6 border`}>
                             <div className="space-y-2">
-                                <label className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest block">{lang === 'CN' ? "API 预设方案" : "API PRESET"}</label>
+                                <label className={`text-[10px] ${theme === 'retro' ? 'text-zinc-600' : 'text-zinc-500'} font-bold uppercase tracking-widest block`}>{lang === 'CN' ? "API 预设方案" : "API PRESET"}</label>
                                 <select
-                                    className="w-full bg-[#050505] border border-zinc-800 rounded-lg px-4 py-3 text-zinc-300 text-sm focus:border-[#D4AF37]/50 focus:outline-none transition-all appearance-none"
+                                    className={`w-full ${theme === 'retro' ? 'bg-white border-black/10 text-black' : 'bg-[#050505] border-zinc-800 text-zinc-300'} rounded-lg px-4 py-3 text-sm focus:border-[#D4AF37]/50 focus:outline-none transition-all appearance-none`}
                                     style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%2352525b\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center', backgroundSize: '1em' }}
                                     value={localSettings.llm.provider === 'custom' ? 'custom' : 'default'}
                                     onChange={(e) => handleChange('llm', 'provider', e.target.value === 'custom' ? 'custom' : 'google')}
@@ -137,20 +139,20 @@ export const APISettingsModal: React.FC<APISettingsModalProps> = ({ onClose, lan
 
                             <div className="grid grid-cols-2 gap-6">
                                 <div className="space-y-2">
-                                    <label className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest block">API PROVIDER</label>
+                                    <label className={`text-[10px] ${theme === 'retro' ? 'text-zinc-600' : 'text-zinc-400'} font-bold uppercase tracking-widest block`}>API PROVIDER</label>
                                     <input
                                         type="text"
                                         value={localSettings.llm.provider}
                                         onChange={(e) => handleChange('llm', 'provider', e.target.value)}
-                                        className="w-full bg-[#050505] border border-zinc-700 rounded-lg px-4 py-3 text-white text-sm focus:border-[#D4AF37]/50 focus:outline-none transition-all placeholder:text-zinc-700"
+                                        className={`w-full ${theme === 'retro' ? 'bg-white border-black/10 text-black' : 'bg-[#050505] border-zinc-700 text-white'} rounded-lg px-4 py-3 text-sm focus:border-[#D4AF37]/50 focus:outline-none transition-all placeholder:text-zinc-700`}
                                         placeholder="google"
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest block">MODEL</label>
+                                    <label className={`text-[10px] ${theme === 'retro' ? 'text-zinc-600' : 'text-zinc-400'} font-bold uppercase tracking-widest block`}>MODEL</label>
                                     <select
-                                        className="w-full bg-[#050505] border border-zinc-700 rounded-lg px-4 py-3 text-white text-sm focus:border-[#D4AF37]/50 focus:outline-none transition-all appearance-none"
-                                        style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%23a1a1aa\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center', backgroundSize: '1em' }}
+                                        className={`w-full ${theme === 'retro' ? 'bg-white border-black/10 text-black' : 'bg-[#050505] border-zinc-700 text-white'} rounded-lg px-4 py-3 text-sm focus:border-[#D4AF37]/50 focus:outline-none transition-all appearance-none`}
+                                        style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23${theme === 'retro' ? '8B261D' : 'a1a1aa'}'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center', backgroundSize: '1em' }}
                                         value={localSettings.llm.model}
                                         onChange={(e) => handleChange('llm', 'model', e.target.value)}
                                     >
@@ -160,23 +162,23 @@ export const APISettingsModal: React.FC<APISettingsModalProps> = ({ onClose, lan
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest block">API KEY</label>
+                                <label className={`text-[10px] ${theme === 'retro' ? 'text-zinc-600' : 'text-zinc-500'} font-bold uppercase tracking-widest block`}>API KEY</label>
                                 <input
                                     type="password"
                                     value={localSettings.llm.apiKey}
                                     onChange={(e) => handleChange('llm', 'apiKey', e.target.value)}
-                                    className="w-full bg-[#050505] border border-zinc-700 rounded-lg px-4 py-3 text-white text-sm focus:border-[#D4AF37]/50 focus:outline-none transition-all font-mono placeholder:text-zinc-700"
+                                    className={`w-full ${theme === 'retro' ? 'bg-white border-black/10 text-black placeholder:text-zinc-400' : 'bg-[#050505] border-zinc-700 text-white placeholder:text-zinc-700'} rounded-lg px-4 py-3 text-sm focus:border-[#D4AF37]/50 focus:outline-none transition-all font-mono`}
                                     placeholder="sk-..."
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest block">BASE URL</label>
+                                <label className={`text-[10px] ${theme === 'retro' ? 'text-zinc-600' : 'text-zinc-500'} font-bold uppercase tracking-widest block`}>BASE URL</label>
                                 <input
                                     type="text"
                                     value={localSettings.llm.baseUrl}
                                     onChange={(e) => handleChange('llm', 'baseUrl', e.target.value)}
-                                    className="w-full bg-[#050505] border border-zinc-800 rounded-lg px-4 py-3 text-zinc-300 text-sm focus:border-[#D4AF37]/50 focus:outline-none transition-all"
+                                    className={`w-full ${theme === 'retro' ? 'bg-white border-black/10 text-black placeholder:text-zinc-400' : 'bg-[#050505] border-zinc-800 text-zinc-300 placeholder:text-zinc-700'} rounded-lg px-4 py-3 text-sm focus:border-[#D4AF37]/50 focus:outline-none transition-all`}
                                     placeholder="https://api.example.com/v1"
                                 />
                             </div>
@@ -186,7 +188,7 @@ export const APISettingsModal: React.FC<APISettingsModalProps> = ({ onClose, lan
                     {/* Image Section */}
                     <div className="space-y-6">
                         <div className="flex items-center justify-between px-1">
-                            <h3 className="text-base font-bold text-[#D4AF37] tracking-wider">
+                            <h3 className={`text-base font-bold ${theme === 'retro' ? 'text-[#8B261D]' : 'text-[#D4AF37]'} tracking-wider`}>
                                 {lang === 'CN' ? "图像模型" : "IMAGE SYNTHESIS ENGINE"}
                             </h3>
                             <button
@@ -198,12 +200,12 @@ export const APISettingsModal: React.FC<APISettingsModalProps> = ({ onClose, lan
                             </button>
                         </div>
 
-                        <div className="bg-zinc-900/40 border border-zinc-800/60 rounded-xl p-8 space-y-6">
+                        <div className={`${theme === 'retro' ? 'bg-[#F4EFE0]/50 border-black/10 text-black' : 'bg-zinc-900/40 border-zinc-800/60'} rounded-xl p-8 space-y-6 border`}>
                             <div className="grid grid-cols-2 gap-6">
                                 <div className="space-y-2">
-                                    <label className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest block">PROTOCOL</label>
+                                    <label className={`text-[10px] ${theme === 'retro' ? 'text-zinc-600' : 'text-zinc-500'} font-bold uppercase tracking-widest block`}>PROTOCOL</label>
                                     <select
-                                        className="w-full bg-[#050505] border border-zinc-800 rounded-lg px-4 py-3 text-zinc-300 text-sm focus:border-[#D4AF37]/50 focus:outline-none transition-all appearance-none"
+                                        className={`w-full ${theme === 'retro' ? 'bg-white border-black/10 text-black' : 'bg-[#050505] border-zinc-800 text-zinc-300'} rounded-lg px-4 py-3 text-sm focus:border-[#D4AF37]/50 focus:outline-none transition-all appearance-none`}
                                         style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%2352525b\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center', backgroundSize: '1em' }}
                                         value={localSettings.image.protocol}
                                         onChange={(e) => handleChange('image', 'protocol', e.target.value)}
@@ -213,9 +215,9 @@ export const APISettingsModal: React.FC<APISettingsModalProps> = ({ onClose, lan
                                     </select>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest block">IMAGE MODEL</label>
+                                    <label className={`text-[10px] ${theme === 'retro' ? 'text-zinc-600' : 'text-zinc-500'} font-bold uppercase tracking-widest block`}>IMAGE MODEL</label>
                                     <select
-                                        className="w-full bg-[#050505] border border-zinc-800 rounded-lg px-4 py-3 text-zinc-300 text-sm focus:border-[#D4AF37]/50 focus:outline-none transition-all appearance-none"
+                                        className={`w-full ${theme === 'retro' ? 'bg-white border-black/10 text-black' : 'bg-[#050505] border-zinc-800 text-zinc-300'} rounded-lg px-4 py-3 text-sm focus:border-[#D4AF37]/50 focus:outline-none transition-all appearance-none`}
                                         style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%2352525b\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center', backgroundSize: '1em' }}
                                         value={localSettings.image.model}
                                         onChange={(e) => handleChange('image', 'model', e.target.value)}
@@ -226,12 +228,12 @@ export const APISettingsModal: React.FC<APISettingsModalProps> = ({ onClose, lan
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest block">API KEY</label>
+                                <label className={`text-[10px] ${theme === 'retro' ? 'text-zinc-600' : 'text-zinc-500'} font-bold uppercase tracking-widest block`}>API KEY</label>
                                 <input
                                     type="password"
                                     value={localSettings.image.apiKey}
                                     onChange={(e) => handleChange('image', 'apiKey', e.target.value)}
-                                    className="w-full bg-[#050505] border border-zinc-800 rounded-lg px-4 py-3 text-zinc-300 text-sm focus:border-[#D4AF37]/50 focus:outline-none transition-all font-mono"
+                                    className={`w-full ${theme === 'retro' ? 'bg-white border-black/10 text-black placeholder:text-zinc-400' : 'bg-[#050505] border-zinc-800 text-zinc-300 placeholder:text-zinc-700'} rounded-lg px-4 py-3 text-sm focus:border-[#D4AF37]/50 focus:outline-none transition-all font-mono`}
                                     placeholder="sk-..."
                                 />
                             </div>

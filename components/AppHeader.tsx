@@ -52,9 +52,10 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
 }) => {
   const { theme, toggleTheme } = useTheme();
 
-  // --- Helper Functions Moved from App.tsx ---
+  // --- Helper Functions ---
 
   const getHeaderTitleColor = () => {
+    if (theme === 'retro') return 'text-[#8B261D]';
     if (selectedDriver === DriverType.COMMERCIAL) return 'text-mist-cyan';
     if (selectedDriver === DriverType.EXPERIMENTAL) return 'text-mist-purple';
     if (selectedDriver === DriverType.AESTHETIC) return 'text-mist-rose';
@@ -63,6 +64,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   };
 
   const getHeaderIconFill = () => {
+    if (theme === 'retro') return 'fill-[#8B261D]/20';
     if (selectedDriver === DriverType.COMMERCIAL) return 'fill-cyan-400/20';
     if (selectedDriver === DriverType.EXPERIMENTAL) return 'fill-purple-400/20';
     if (selectedDriver === DriverType.AESTHETIC) return 'fill-rose-400/20';
@@ -78,15 +80,13 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
     return 'text-gold-primary';
   };
 
-  const getThemeHoverClass = () => {
-    // If on homepage (page 0), hover should be white as per user request
-    if (page === 0) return 'group-hover:text-white';
-
-    if (selectedDriver === DriverType.COMMERCIAL) return 'group-hover:text-mist-cyan';
-    if (selectedDriver === DriverType.EXPERIMENTAL) return 'group-hover:text-mist-purple';
-    if (selectedDriver === DriverType.AESTHETIC) return 'group-hover:text-mist-rose';
-    if (selectedDriver === DriverType.TRAILER) return 'group-hover:text-mist-orange';
-    return 'group-hover:text-gold-primary';
+  const getThemeBorderColor = () => {
+    if (theme === 'retro') return 'border-[var(--border-main)]';
+    if (selectedDriver === DriverType.COMMERCIAL) return 'border-cyan-400/15';
+    if (selectedDriver === DriverType.EXPERIMENTAL) return 'border-purple-400/15';
+    if (selectedDriver === DriverType.AESTHETIC) return 'border-rose-400/15';
+    if (selectedDriver === DriverType.TRAILER) return 'border-orange-400/15';
+    return 'border-[#D4AF37]/15';
   };
 
   const getNarrativeEngineLabel = () => {
@@ -98,7 +98,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   };
 
   return (
-    <header className={`h-14 bg-[var(--bg-header)] backdrop-blur-md border-b ${theme === 'retro' ? 'border-[var(--border-main)]' : 'border-white/15'} flex items-center justify-between px-6 z-50 sticky top-0 shrink-0 transition-colors duration-500`}>
+    <header className={`h-14 bg-[var(--bg-header)] backdrop-blur-md border-b ${getThemeBorderColor()} flex items-center justify-between px-6 z-50 sticky top-0 shrink-0 transition-colors duration-500`}>
       <div className="flex items-center gap-5">
         <button
           onClick={() => setPage(0)}
@@ -121,7 +121,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             className={`flex items-center gap-2 font-serif font-bold transition-all duration-300 hover:scale-105 active:scale-95 ${viewMode === 'ENGINE' ? getHeaderTitleColor() : (theme === 'retro' ? "text-zinc-600 hover:text-black font-sans" : "text-zinc-400 hover:text-white font-sans")}`}
           >
             <Cpu size={14} className={viewMode === 'ENGINE' ? getHeaderIconFill() : ""} />
-            {getNarrativeEngineLabel()}
+            {lang === 'CN' ? "核心引擎" : "CORE ENGINE"}
           </button>
           <div className={`w-4 h-px ${theme === 'retro' ? 'bg-black' : 'bg-zinc-800'}`}></div>
           <button
@@ -152,7 +152,17 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             <div className="flex items-center flex-row-reverse gap-2">
               <div className={`w-5 h-5 rounded-full ${!currentUser.avatarUrl && (currentUser.avatarColor || 'bg-gold-primary')} border border-[var(--border-main)]/30 flex items-center justify-center text-[10px] font-bold text-white shadow-sm overflow-hidden group-hover:scale-110 transition-transform`}>
                 {currentUser.avatarUrl ? (
-                  <img src={currentUser.avatarUrl} alt="avatar" className="w-full h-full object-cover" />
+                  <img 
+                    src={currentUser.avatarUrl} 
+                    alt="avatar" 
+                    className="w-full h-full object-cover" 
+                    onError={(e) => {
+                      // Prevent infinite error loop and traffic
+                      (e.target as HTMLImageElement).style.display = 'none';
+                      // Optionally we could notify the parent to clear the URL, 
+                      // but styling it out is the safest immediate fix.
+                    }}
+                  />
                 ) : (
                   currentUser.username.substring(0, 1).toUpperCase()
                 )}
@@ -195,7 +205,11 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           {/* 4. Ring Toggle */}
           <button
             onClick={() => setShowRings(!showRings)}
-            className={`flex items-center justify-center w-7 h-7 rounded-sm transition-all duration-300 hover:bg-white/5 hover:scale-110 active:scale-90 focus:outline-none ${showRings ? (theme === 'retro' ? 'text-[#8B261D]' : 'text-rose-400') : (theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white')}`}
+            className={`flex items-center justify-center w-7 h-7 rounded-sm transition-all duration-300 hover:bg-white/5 hover:scale-110 active:scale-90 focus:outline-none ${
+              showRings 
+                ? (theme === 'retro' ? 'text-[#8B261D]' : getThemeTextColor()) 
+                : (theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white')
+            }`}
             title={lang === 'CN' ? "背景圆环开关" : "Background Rings Toggle"}
           >
             <Aperture size={14} className={`shrink-0 transition-all duration-300 ${showRings ? 'rotate-180' : ''}`} />

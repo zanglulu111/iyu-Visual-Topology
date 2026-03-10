@@ -3,6 +3,7 @@ import { X, Folder, Eye, ShieldAlert, Moon, Sun, Languages, ChevronLeft, Chevron
 import { ARCHIVE_CASES, ArchiveCategory, CaseStudy } from './archiveCasesData';
 import { ArchiveDetailModal } from './ArchiveDetailModal';
 import { useTheme } from '../contexts/ThemeContext';
+import { getR2PublicUrl } from '../services/r2Storage';
 
 interface ArchiveDirectoryModalProps {
     isOpen: boolean;
@@ -36,33 +37,33 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({ is
     
     // Theme variables for consistency mapping
     const t = {
-        bgContainer: isDark ? 'bg-[#0A0A0B]' : 'bg-[#EBE7DF]',
+        bgContainer: isDark ? 'bg-[#0A0A0B]' : 'bg-white',
         borderContainer: isDark ? 'border-zinc-800 border-4' : 'border-[#3A352F] border-4',
-        bgHeader: isDark ? 'bg-[#0A0A0B]/90' : 'bg-[#EBE7DF]/90',
-        borderHeader: isDark ? 'border-zinc-900 border-b-2 border-dashed' : 'border-[#CFCBBF] border-b-2 border-dashed',
-        textTitle: isDark ? 'text-zinc-100' : 'text-[#2B2824]',
+        bgHeader: isDark ? 'bg-[#0A0A0B]/90' : 'bg-white/95',
+        borderHeader: isDark ? 'border-zinc-900 border-b-2 border-dashed' : 'border-[#8B261D]/10 border-b-2 border-dashed',
+        textTitle: isDark ? 'text-zinc-100' : 'text-[#8B261D]',
         textAccent: isDark ? 'text-zinc-400' : 'text-[#8B261D]',
         textTitleAccent: isDark ? 'text-amber-500' : 'text-[#8B261D]',
-        textNormal: isDark ? 'text-zinc-400' : 'text-[#514F48]',
+        textNormal: isDark ? 'text-zinc-400' : 'text-[#2B2824]',
         textMuted: isDark ? 'text-zinc-500' : 'text-[#6A665A]',
         textCode: isDark ? 'text-zinc-300' : 'text-[#3A352F]',
-        btnBg: isDark ? 'bg-zinc-900' : 'bg-[#DCD8CF]',
-        btnHover: isDark ? 'hover:bg-zinc-800' : 'hover:bg-[#CFCBBF]',
-        btnBorder: isDark ? 'border-zinc-700' : 'border-[#CFCBBF]',
+        btnBg: isDark ? 'bg-zinc-900' : 'bg-[#F9F7F1]',
+        btnHover: isDark ? 'hover:bg-zinc-800' : 'hover:bg-white',
+        btnBorder: isDark ? 'border-zinc-700' : 'border-[#8B261D]/20',
         btnTextHover: isDark ? 'hover:text-amber-500 text-zinc-400' : 'hover:text-[#8B261D] text-[#3A352F]',
         btnDisabled: isDark ? 'opacity-30 cursor-not-allowed' : 'opacity-30 cursor-not-allowed grayscale',
-        cardBg: isDark ? 'bg-[#111113]' : 'bg-[#F9F7F1]',
-        cardBorder: isDark ? 'border-zinc-800 border-2' : 'border-[#CFCBBF] border-2',
-        cardHoverBorder: isDark ? 'hover:border-zinc-500' : 'hover:border-[#8B261D]',
-        cardShadow: isDark ? 'hover:shadow-black hover:shadow-xl shadow-sm' : 'hover:shadow-xl shadow-sm',
+        cardBg: isDark ? 'bg-[#111113]' : 'bg-[#EBE7DF]/40',
+        cardBorder: isDark ? 'border-zinc-800 border-2' : 'border-[#8B261D]/5 border-2',
+        cardHoverBorder: isDark ? 'hover:border-zinc-500' : 'hover:border-[#8B261D]/40',
+        cardShadow: isDark ? 'hover:shadow-black hover:shadow-xl shadow-sm' : 'hover:shadow-lg shadow-sm',
         cardImageBg: isDark ? 'bg-zinc-900' : 'bg-[#DCD8CF]',
-        imageEffects: isDark ? 'grayscale-[0.5] group-hover:grayscale-0' : 'grayscale group-hover:grayscale-[0.5] contrast-125 sepia-[0.3] shadow-inner',
+        imageEffects: isDark ? 'grayscale-[0.5] group-hover:grayscale-0' : 'grayscale group-hover:grayscale-[0.5] contrast-110 sepia-[0.1]',
         cardTitleHover: isDark ? 'group-hover:text-amber-400' : 'group-hover:text-[#8B261D]',
         texturePattern: isDark ? '' : "url('https://www.transparenttextures.com/patterns/aged-paper.png')",
         dustPattern: isDark ? '' : "url('https://www.transparenttextures.com/patterns/dust.png')",
-        paperClipColor: isDark ? 'bg-white/10 border-white/5' : 'bg-white/40 border-black/5',
-        tagBorder: isDark ? 'border-zinc-800 bg-zinc-900' : 'border-[#3A352F] bg-white',
-        dateBorder: isDark ? 'border-zinc-800 bg-zinc-900 text-zinc-500' : 'border-[#6A665A] bg-[#EBE7DF] text-[#6A665A]',
+        paperClipColor: isDark ? 'bg-white/10 border-white/5' : 'bg-white border-black/10',
+        tagBorder: isDark ? 'border-zinc-800 bg-zinc-900' : 'border-[#8B261D]/20 bg-white',
+        dateBorder: isDark ? 'border-zinc-800 bg-zinc-900 text-zinc-500' : 'border-[#6A665A]/20 bg-[#F9F7F1] text-[#6A665A]',
         emptyIconOpacity: isDark ? 'opacity-20' : 'opacity-50',
         emptyMessageBorder: isDark ? 'border-zinc-700 text-zinc-500' : 'border-[#8B261D] text-[#8B261D]',
         paginationBg: isDark ? 'bg-zinc-900 border-zinc-700 text-zinc-300' : 'bg-white border-[#3A352F] text-[#3A352F]'
@@ -143,8 +144,55 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({ is
                     </div>
                     )}
 
-                    <div className="flex-1 overflow-y-auto custom-scrollbar relative z-10" style={isDark ? {} : { backgroundImage: t.dustPattern }}>
-                        <div className="p-8 lg:p-12 max-w-6xl mx-auto flex flex-col min-h-full">
+                    {/* Background Texture Overlay (Only Retro) */}
+                    {!isDark && (
+                        <div className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none grayscale contrast-150" style={{ backgroundImage: t.texturePattern }}></div>
+                    )}
+
+                    <div className="flex-1 flex flex-row overflow-hidden relative z-10 h-full">
+                        {/* Left Navigation Sidebar */}
+                        <div className={`w-64 md:w-80 border-r-2 border-dashed flex flex-col pt-24 md:pt-32 opacity-100 shrink-0 ${isDark ? 'border-zinc-900 bg-[#0A0A0B]/80' : 'border-[#89817a]/10 bg-[#EBE7DF] shadow-inner'}`}>
+                            <div className="px-6 pb-6 border-b border-dashed border-zinc-800/10 mb-6">
+                                <h3 className={`text-[10px] font-mono font-bold tracking-[0.3em] uppercase mb-4 ${t.textMuted}`}>
+                                    {localLang === 'CN' ? '按目录浏览' : 'BROWSE BY CATEGORY'}
+                                </h3>
+                                
+                                <div className="space-y-2">
+                                    {categories.map(cat => {
+                                        const isSelected = selectedCategory === cat.id;
+                                        return (
+                                            <button 
+                                                key={cat.id}
+                                                onClick={() => setSelectedCategory(cat.id)}
+                                                className={`w-full flex items-center justify-between px-4 py-3 rounded-sm border-2 transition-all duration-300 group
+                                                ${isSelected 
+                                                    ? (isDark ? 'bg-zinc-800 border-zinc-700 text-zinc-100 shadow-lg' : 'bg-white border-[#8B261D] text-[#8B261D] shadow-md -translate-y-0.5')
+                                                    : (isDark ? 'bg-zinc-950/40 border-zinc-900/50 text-zinc-500 hover:text-zinc-300 hover:border-zinc-700' : 'bg-[#DCD8CF]/30 border-transparent text-[#6A665A] hover:bg-white hover:border-[#8B261D]/20')}`}
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <span className={`w-2 h-2 rounded-full ${isSelected ? (isDark ? 'bg-amber-500' : 'bg-[#8B261D]') : 'bg-zinc-700/50'}`}></span>
+                                                    <span className="text-xs font-bold font-mono tracking-widest uppercase">{localLang === 'CN' ? cat.labelCn : cat.labelEn}</span>
+                                                </div>
+                                                <ChevronRight size={14} className={`opacity-0 group-hover:opacity-100 transition-opacity ${isSelected ? (isDark ? 'text-amber-500' : 'text-[#8B261D]') : 'text-zinc-600'}`} />
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            <div className="p-6 flex-1 flex flex-col justify-end opacity-40 grayscale">
+                                <div className={`border-2 border-dashed p-4 ${isDark ? 'border-zinc-800 text-zinc-600' : 'border-[#CFCBBF] text-[#6A665A]'}`}>
+                                    <ShieldAlert size={24} className="mb-4" />
+                                    <p className="text-[10px] leading-relaxed font-mono font-bold italic">
+                                        RESTRICTED ACCESS. UNAUTHORIZED DUPLICATION IS A VIOLATION OF APPLICABLE LAWS.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Content Grid Area */}
+                        <div className={`flex-1 overflow-y-auto px-6 md:px-12 pt-28 md:pt-36 pb-20 custom-scrollbar relative ${isDark ? 'bg-[#0A0A0B]' : 'bg-white'}`}>
+                            <div className="p-8 lg:p-12 max-w-6xl mx-auto flex flex-col min-h-full">
                             
                             {/* Title Section */}
                             <div className={`shrink-0 mb-12 border-l-4 pl-6 py-2 ${isDark ? 'border-zinc-700' : 'border-[#8B261D]'}`}>
@@ -299,6 +347,7 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({ is
                     </div>
                 </div>
             </div>
+        </div>
 
             {/* Render detail modal when a case is selected */}
             <ArchiveDetailModal 

@@ -56,6 +56,7 @@ import { supabaseAuthService, AuthUser } from './services/supabaseAuth';
 import { supabaseDatabase } from './services/supabaseDatabase';
 import { useSettings } from './contexts/SettingsContext';
 import { SimpleConfigPanel } from './src/components/SimpleConfigPanel';
+import { useTheme } from './contexts/ThemeContext';
 
 type ViewMode = 'ENGINE' | 'DIVERGENCE' | 'BIBLE' | 'METONYMY' | 'TOPOLOGY' | 'RSI' | 'ARCHIVE' | 'VIDEO';
 
@@ -63,8 +64,10 @@ import { LacanGraphView } from './components/LacanGraphView';
 import { LacanTopologyView } from './components/LacanTopologyView';
 import { ArchiveDirectoryModal } from './components/ArchiveDirectoryModal';
 import { VideoLibrary } from './components/VideoLibrary';
+import { PhilosophyCodexPage } from './components/PhilosophyCodexPage';
 
 const App: React.FC = () => {
+    const { theme } = useTheme();
     const { isOpen: isSettingsOpen, openSettings, closeSettings } = useSettings();
     const navigate = useNavigate();
     const location = useLocation();
@@ -429,18 +432,13 @@ const App: React.FC = () => {
         setCachedBlueprints({});
         setWorldLawConfig({ physics: 'STRICT', context: 'PURE' });
 
-        // Aesthetic mode: close all sidebars by default
+        // All modes: close sidebars by default as per user request
+        setIsSkinOpen(false);
+        setIsVisionOpen(false);
+        setIsAestheticInputOpen(false);
         if (id === DriverType.AESTHETIC) {
-            setIsSkinOpen(false);
-            setIsAestheticInputOpen(false);
-            setIsVisionOpen(false);
             // Ensure palette is clean for new aesthetic session
             setColorPalette(Array(7).fill(""));
-        } else {
-            // Other modes: open both left and right sidebars by default
-            handleOpenSkin();
-            handleOpenVision();
-            setIsAestheticInputOpen(false);
         }
         closeAllModals();
     };
@@ -895,13 +893,13 @@ const App: React.FC = () => {
         else if (viewMode === 'DIVERGENCE') {
             handleViewChange('ENGINE');
             setActiveHistoryItem(null);
-            if (selectedDriver !== DriverType.AESTHETIC) setIsSkinOpen(true);
+            setIsSkinOpen(false);
             setIsVisionOpen(false);
             setIsAestheticInputOpen(false);
         } else if (viewMode === 'METONYMY') {
             handleViewChange('ENGINE');
             setMetonymyBlueprint(null);
-            if (selectedDriver !== DriverType.AESTHETIC) handleOpenSkin();
+            setIsSkinOpen(false);
             setIsVisionOpen(false);
             setIsAestheticInputOpen(false);
         } else {
@@ -937,7 +935,12 @@ const App: React.FC = () => {
                 colorPalette.filter(c => c !== "")
             );
             if (treatments?.length) {
-                setGeneratedTreatments(treatments);
+                // Fix: Ensure all treatments have IDs
+                const treatmentsWithIds = treatments.map((t, i) => ({
+                    ...t,
+                    id: t.id || `path-${Date.now()}-${i}`
+                }));
+                setGeneratedTreatments(treatmentsWithIds);
                 handleViewChange('DIVERGENCE');
                 const newItem: HistoryItem = {
                     id: Date.now(),
@@ -1285,28 +1288,30 @@ const App: React.FC = () => {
                 </div>
             ) : (
                 <div className="flex flex-col h-screen overflow-hidden relative">
-                    <AppHeader
-                        page={page}
-                        lang={lang}
-                        setLang={setLang}
-                        setPage={setPage}
-                        selectedDriver={selectedDriver}
-                        driverName={getDriverName()}
-                        viewMode={viewMode}
-                        setViewMode={handleViewChange}
-                        handleOpenMetonymyPage={handleOpenMetonymyPage}
-                        openManual={openManual}
-                        isManualOpen={isManualOpen}
-                        openHistory={openHistory}
-                        isHistoryOpen={isHistoryOpen}
-                        openSettings={openSettings}
-                        openAuth={openAuth}
-                        openProfile={() => setIsProfileOpen(true)}
-                        onLogout={() => supabaseAuthService.signOut()}
-                        currentUser={currentUser}
-                        showRings={showRings}
-                        setShowRings={setShowRings}
-                    />
+                    {!isSutureOpen && (
+                        <AppHeader
+                            page={page}
+                            lang={lang}
+                            setLang={setLang}
+                            setPage={setPage}
+                            selectedDriver={selectedDriver}
+                            driverName={getDriverName()}
+                            viewMode={viewMode}
+                            setViewMode={handleViewChange}
+                            handleOpenMetonymyPage={handleOpenMetonymyPage}
+                            openManual={openManual}
+                            isManualOpen={isManualOpen}
+                            openHistory={openHistory}
+                            isHistoryOpen={isHistoryOpen}
+                            openSettings={openSettings}
+                            openAuth={openAuth}
+                            openProfile={() => setIsProfileOpen(true)}
+                            onLogout={() => supabaseAuthService.signOut()}
+                            currentUser={currentUser}
+                            showRings={showRings}
+                            setShowRings={setShowRings}
+                        />
+                    )}
 
                     <main className="flex-1 overflow-hidden relative">
                         {viewMode === 'ENGINE' && selectedDriver && (
@@ -1360,6 +1365,7 @@ const App: React.FC = () => {
                         {viewMode === 'BIBLE' && (
                             <BlueprintEditor
                                 blueprint={activeBlueprint}
+                                theme={theme}
                                 onClose={() => handleViewChange('DIVERGENCE')}
                                 onGoHome={() => { handleViewChange('ENGINE'); setActiveHistoryItem(null); closeAllModals(); }}
                                 onSave={(bp) => {
@@ -1390,6 +1396,8 @@ const App: React.FC = () => {
                                 subjectType={activeHistoryItem?.subjectType || subjectType}
                                 aestheticMode={activeHistoryItem?.aestheticMode || aestheticMode}
                                 customLibraryDefs={customLibraryDefs}
+                                isSutureOpen={isSutureOpen}
+                                onSutureOpenChange={setIsSutureOpen}
                             />
                         )}
                         {/* MetonymyView integrated into main layout to share EngineBottomBar */}
@@ -1405,12 +1413,13 @@ const App: React.FC = () => {
                                 fieldState={narrativeFieldState}
                                 onSaveToHistory={handleAddToHistory}
                                 onGenerateAssetImage={handleVisionImageGenerate}
+                                onSutureOpenChange={setIsSutureOpen}
                             />
                         )}
                     </main>
 
                     {/* Show EngineBottomBar for ENGINE and METONYMY modes */}
-                    {(viewMode === 'ENGINE' || viewMode === 'METONYMY') && (
+                    {(viewMode === 'ENGINE' || viewMode === 'METONYMY') && !isSutureOpen && (
                         <EngineBottomBar
                             lang={lang}
                             selectedDriver={selectedDriver}
@@ -1421,6 +1430,7 @@ const App: React.FC = () => {
                             isAestheticInputOpen={isAestheticInputOpen}
                             setIsAestheticInputOpen={setIsAestheticInputOpen}
                             worldLawConfig={worldLawConfig}
+                            isWorldLawOpen={isWorldLawOpen}
                             setIsWorldLawOpen={setIsWorldLawOpen}
                             handleBackStep={handleBackStep}
                             handleUndo={handleUndo}
@@ -1501,7 +1511,24 @@ const App: React.FC = () => {
                 </div>
             )}
 
-            <ProductManualModal isOpen={isManualOpen} onClose={closeManual} driverType={selectedDriver} />
+            {/* Full-screen pages */}
+            {isManualOpen && (
+                <PhilosophyCodexPage 
+                    onClose={closeManual} 
+                    driverType={selectedDriver}
+                    lang={lang}
+                    currentUser={currentUser}
+                    setLang={setLang}
+                    openHistory={openHistory}
+                    openSettings={openSettings}
+                    openAuth={openAuth}
+                    openProfile={() => setIsProfileOpen(true)}
+                    showRings={showRings}
+                    setShowRings={setShowRings}
+                />
+            )}
+            
+            {/* Modal removed in favor of full page in the Routes flow above, but we keep the logic tethered to isManualOpen for now to minimize ripple effects */}
             {isHistoryOpen && <HistoryModal history={history} onRestore={onHistoryRestore} onClear={onHistoryClear} onClose={closeHistory} lang={lang} />}
 
             {activeBlockId && (

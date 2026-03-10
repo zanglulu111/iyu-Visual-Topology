@@ -4,7 +4,8 @@ import { CreativeTreatment, StyleConfig, LibraryCategoryDef, BlueprintLanguage, 
 import { STYLE_MATRIX, PERSPECTIVES, SENSORY_MODES } from '../data/style_matrix';
 import { DIRECTOR_STYLES } from '../data/director_styles';
 import { VISUAL_TONES } from '../data/visual_tones';
-import { Sparkles, Film, Zap, BrainCircuit, BookOpen, ArrowRight, RotateCw, Check, Palette, Settings2, ArrowLeft, Copy, Layers, History as HistoryIcon, ClipboardList, GitFork, Gem, Eye, Anchor, Flower, Music, Wind, Globe, Lightbulb, Ghost, User, Fingerprint, List, X, ChevronUp, Database, FileText, ScanLine, Terminal, Activity } from 'lucide-react';
+import { Sparkles, Film, Zap, BrainCircuit, BookOpen, ArrowRight, RotateCw, Check, Palette, Settings2, ArrowLeft, Copy, Layers, History as HistoryIcon, ClipboardList, GitFork, Gem, Eye, Anchor, Flower, Music, Wind, Globe, Lightbulb, Ghost, User, Fingerprint, List, X, ChevronUp, Database, FileText, ScanLine, Terminal, Activity, FileJson } from 'lucide-react';
+import { useTheme } from '../contexts/ThemeContext';
 import { NarrativeLibraryModal } from './NarrativeLibraryModal';
 import { TaskManagerPanel } from './TaskManagerPanel';
 import { globalTaskManager } from '../services/taskManager';
@@ -54,6 +55,7 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
     visionInput,
     visionAnalysis
 }) => {
+    const { theme } = useTheme();
     const [selectedPathId, setSelectedPathId] = useState<string | null>(null);
     const [styleConfig, setStyleConfig] = useState<StyleConfig>({
         styleId: null,
@@ -257,6 +259,7 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
     };
 
     const getThemeColor = () => {
+        if (theme === 'retro') return 'text-[#8B261D]';
         if (isCommercialResults) return 'text-cyan-400';
         if (isExperimentalResults) return 'text-purple-400';
         if (isAestheticResults) return 'text-rose-400';
@@ -265,6 +268,7 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
     }
 
     const getThemeBg = () => {
+        if (theme === 'retro') return 'bg-[#8B261D]';
         if (isCommercialResults) return 'bg-cyan-400';
         if (isExperimentalResults) return 'bg-purple-400';
         if (isAestheticResults) return 'bg-rose-400';
@@ -282,8 +286,9 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
 
     const getGenerateButtonClass = (hasExisting: boolean) => {
         if (hasExisting) {
-            return 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-500';
+            return `bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-500`;
         }
+        if (theme === 'retro') return 'bg-[#8B261D] hover:bg-[#6D1E16] text-white border-[#8B261D]';
         if (isCommercialResults) return 'bg-cyan-500 hover:bg-cyan-400 text-black border-cyan-500';
         if (isExperimentalResults) return 'bg-purple-500 hover:bg-purple-400 text-black border-purple-500';
         if (isAestheticResults) return 'bg-rose-500 hover:bg-rose-400 text-black border-rose-500';
@@ -356,11 +361,11 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
 
     // Use dynamic theme color for the control class
     const themeTextColor = getThemeColor();
-    const controlClass = `flex items-center px-3 py-2 rounded-lg bg-zinc-900 border border-white/20 ${themeTextColor} hover:border-white/50 transition-all w-48`;
+    const controlClass = `flex items-center px-3 py-1.5 rounded-lg ${theme === 'retro' ? 'bg-white border-black/10' : 'bg-zinc-900 border-white/20'} ${themeTextColor} hover:border-white/50 transition-all w-44`;
 
     return (
-        <div className="w-full h-full flex flex-col relative animate-fade-in overflow-hidden">
-            <div className="shrink-0 p-4 bg-[#0a0a0a] border-b border-zinc-800 flex flex-col lg:flex-row items-center justify-between gap-6 shadow-xl z-20">
+        <div className={`w-full h-full flex flex-col relative animate-fade-in overflow-hidden ${theme === 'retro' ? 'bg-[#F9F7F1]' : 'bg-[#0a0a0a]'}`}>
+            <div className={`shrink-0 h-14 ${theme === 'retro' ? 'bg-[#F4EFE0] border-[#8B261D]/20' : 'bg-[#0a0a0a] border-zinc-800'} border-b flex items-center justify-between px-6 shadow-xl z-20`}>
                 <div className="flex items-center gap-4">
                     <div className={`flex items-center gap-2 ${getThemeColor()}`}>
                         <Settings2 size={16} />
@@ -440,12 +445,12 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                         </>
                     )}
 
-                    <div className="w-px h-8 bg-zinc-800 mx-2 hidden lg:block"></div>
+                    <div className={`w-px h-8 ${theme === 'retro' ? 'bg-[#8B261D]/20' : 'bg-zinc-800'} mx-2 hidden lg:block`}></div>
 
                     <button
                         onClick={onRegenerate}
                         disabled={isProcessing}
-                        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-900 border border-zinc-700 hover:border-white text-zinc-400 hover:text-white transition-all text-xs font-bold uppercase tracking-wider"
+                        className={`flex items-center gap-2 px-4 py-1.5 rounded-lg ${theme === 'retro' ? 'bg-white border-black/10 text-zinc-600 hover:text-[#8B261D]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-white'} border transition-all text-xs font-bold uppercase tracking-wider`}
                         title={lang === 'EN' ? "Generate New Paths" : "重新生成路径"}
                     >
                         <RotateCw size={14} className={isProcessing ? "animate-spin" : ""} />
@@ -456,24 +461,23 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
             </div>
 
             <div className="flex-1 w-full relative overflow-hidden flex">
-                {/* PARAMETERS SIDEBAR */}
                 <div className={`
-            absolute top-0 bottom-0 left-0 z-20
-            w-[420px]
-            bg-[#0c0c0c]/95 backdrop-blur-md border-r border-zinc-800
-            transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]
-            ${isParamsPanelOpen ? 'translate-x-0' : '-translate-x-full'}
-            flex flex-col shadow-[10px_0_30px_rgba(0,0,0,0.3)]
-        `}>
+                    absolute top-0 bottom-0 left-0 z-20
+                    w-[400px]
+                    ${theme === 'retro' ? 'bg-[#F4EFE0]/98 border-[#8B261D]/20' : 'bg-[#0c0c0c]/95 border-zinc-800'} border-r backdrop-blur-md
+                    transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]
+                    ${isParamsPanelOpen ? 'translate-x-0' : '-translate-x-full'}
+                    flex flex-col ${theme === 'retro' ? '' : 'shadow-[10px_0_30px_rgba(0,0,0,0.3)]'}
+                `}>
                     {/* Sidebar Content */}
-                    <div className="p-6 border-b border-zinc-800 flex justify-between items-center bg-[#0a0a0a]">
+                    <div className={`p-6 border-b ${theme === 'retro' ? 'border-[#8B261D]/20 bg-[#F4EFE0]' : 'border-zinc-800 bg-[#0a0a0a]'} flex justify-between items-center`}>
                         <div className="flex items-center gap-3">
-                            <Database className={getThemeColor().replace('text-', 'text-')} size={20} />
-                            <span className="text-base font-bold text-white uppercase tracking-widest">
+                            <Database className={getThemeColor()} size={20} />
+                            <span className={`text-base font-bold ${theme === 'retro' ? 'text-[#8B261D]' : 'text-white'} uppercase tracking-widest`}>
                                 {lang === 'EN' ? "Engine Parameters" : "引擎参数概览"}
                             </span>
                         </div>
-                        <span className="text-xs text-zinc-500 font-mono">
+                        <span className={`text-xs ${theme === 'retro' ? 'text-zinc-500' : 'text-zinc-500'} font-mono`}>
                             {fieldState ? Object.keys(fieldState).length : 0} {lang === 'EN' ? "ACTIVE" : "项激活"}
                         </span>
                     </div>
@@ -508,13 +512,13 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                                     const safeValues = values as string[];
                                     if (!safeValues || safeValues.length === 0) return null;
                                     return (
-                                        <div key={key} className="flex flex-col gap-2 p-4 rounded-lg bg-zinc-900/50 border border-zinc-800/50 hover:border-zinc-700 transition-colors">
+                                        <div key={key} className={`flex flex-col gap-2 p-4 rounded-lg ${theme === 'retro' ? 'bg-white border-black/5' : 'bg-zinc-900/50 border-zinc-800/50'} border hover:border-zinc-700 transition-colors`}>
                                             <span className={`text-xs font-bold uppercase tracking-widest ${getThemeColor()} opacity-70 truncate`}>
                                                 {getBlockName(key)}
                                             </span>
                                             <div className="flex flex-wrap gap-2">
                                                 {safeValues.map((v, i) => (
-                                                    <span key={i} className="text-sm text-zinc-200 font-serif leading-tight break-words border-b border-white/10 pb-0.5">
+                                                    <span key={i} className={`text-sm ${theme === 'retro' ? 'text-zinc-800' : 'text-zinc-200'} font-serif leading-tight break-words border-b border-black/5 pb-0.5`}>
                                                         {v.split('(')[0]}
                                                     </span>
                                                 ))}
@@ -586,12 +590,12 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                                         key={item.id || index}
                                         onClick={() => setSelectedPathId(item.id)}
                                         className={`
-                                group relative flex flex-col rounded-xl overflow-hidden text-left h-full transition-all duration-300 border min-h-[500px]
-                                ${isSelected
-                                                ? `bg-zinc-900/80 ${borderColor} shadow-[0_0_50px_rgba(0,0,0,0.5)] scale-[1.01] z-10`
-                                                : 'bg-[#0a0a0a] border-zinc-800 hover:border-zinc-600 hover:-translate-y-1 opacity-90 hover:opacity-100'
+                                            group relative flex flex-col rounded-xl overflow-hidden text-left h-full transition-all duration-300 border min-h-[500px]
+                                            ${isSelected
+                                                ? (theme === 'retro' ? `bg-white border-[#8B261D] shadow-[0_10px_30px_rgba(139,38,29,0.1)] scale-[1.01] z-10` : `bg-zinc-900/80 ${borderColor} shadow-[0_0_50px_rgba(0,0,0,0.5)] scale-[1.01] z-10`)
+                                                : (theme === 'retro' ? 'bg-[#F4EFE0] border-black/5 hover:border-[#8B261D]/30 hover:-translate-y-1' : 'bg-[#0a0a0a] border-zinc-800 hover:border-zinc-600 hover:-translate-y-1 opacity-90 hover:opacity-100')
                                             }
-                            `}
+                                        `}
                                     >
                                         <div className={`h-1 w-full ${accentColor} opacity-50 group-hover:opacity-100 transition-opacity shrink-0`}></div>
 
@@ -618,15 +622,15 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                                             </div>
 
                                             {(item.title) && (
-                                                <h3 className={`${isAestheticResults ? 'text-3xl md:text-4xl' : 'text-2xl md:text-3xl'} font-serif mb-3 leading-tight transition-colors shrink-0 ${isSelected ? textColor : 'text-white group-hover:text-zinc-200'}`}>
+                                                <h3 className={`${isAestheticResults ? 'text-3xl md:text-4xl' : 'text-2xl md:text-3xl'} font-serif mb-3 leading-tight transition-colors shrink-0 ${isSelected ? (theme === 'retro' ? 'text-[#8B261D]' : textColor) : (theme === 'retro' ? 'text-black' : 'text-white group-hover:text-zinc-200')}`}>
                                                     {item.title}
                                                 </h3>
                                             )}
 
                                             {!isAestheticResults && (
-                                                <div className="mb-4 pl-4 border-l-2 border-zinc-800 group-hover:border-white/20 transition-colors shrink-0">
+                                                <div className={`mb-4 pl-4 border-l-2 ${theme === 'retro' ? 'border-[#8B261D]/20' : 'border-zinc-800'} group-hover:border-white/20 transition-colors shrink-0`}>
                                                     <div className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-1">{isCommercialResults ? 'SLOGAN' : 'LOGLINE'}</div>
-                                                    <p className="text-sm text-zinc-200 italic font-serif leading-relaxed">
+                                                    <p className={`text-sm ${theme === 'retro' ? 'text-zinc-600' : 'text-zinc-200'} italic font-serif leading-relaxed`}>
                                                         "{item.tagline}"
                                                     </p>
                                                 </div>
@@ -641,11 +645,11 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                                                 </div>
                                             )}
 
-                                            <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 mb-2 border-t border-zinc-900 pt-4 w-full text-left">
+                                            <div className={`flex-1 overflow-y-auto custom-scrollbar pr-2 mb-2 border-t ${theme === 'retro' ? 'border-[#8B261D]/5' : 'border-zinc-900'} pt-4 w-full text-left`}>
                                                 {isAestheticResults && promptLang === 'UVD' ? (
                                                     <HighlightedUVD text={contentToDisplay} />
                                                 ) : (
-                                                    <div className={`leading-loose whitespace-pre-wrap ${isAestheticResults ? 'font-mono text-zinc-300 text-sm md:text-base' : 'font-light text-zinc-300 text-sm'}`}>
+                                                    <div className={`leading-loose whitespace-pre-wrap ${isAestheticResults ? 'font-mono text-zinc-600 text-sm md:text-base' : `font-light ${theme === 'retro' ? 'text-zinc-600' : 'text-zinc-300'} text-sm`}`}>
                                                         {contentToDisplay}
                                                     </div>
                                                 )}
@@ -659,9 +663,9 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                 </div>
             </div>
 
-            <div className="shrink-0 h-20 bg-black/90 backdrop-blur-md border-t border-white/10 flex items-center justify-between px-6 md:px-12 z-40">
-                <div className="flex gap-4">
-                    <button onClick={onBack} className="flex items-center gap-3 px-6 py-3 bg-zinc-900/50 hover:bg-zinc-800 border border-zinc-700 rounded-lg text-xs font-bold uppercase tracking-widest text-zinc-400 hover:text-white transition-all group min-w-[140px]">
+            <div className="shrink-0 h-14 bg-[var(--bg-header)] backdrop-blur-md border-t border-[var(--border-main)] flex items-center justify-between px-6 md:px-12 z-40 transition-colors duration-500">
+                <div className="flex items-center gap-4 shrink-0 w-[180px] md:w-[240px]">
+                    <button onClick={onBack} className={`flex items-center gap-3 px-6 py-3 bg-[var(--bg-panel)]/50 hover:bg-[var(--bg-panel)] border border-[var(--border-main)] rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-300 group min-w-[140px] hover:scale-105 active:scale-95 ${theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'}`}>
                         <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
                         <span>{lang === 'CN' ? "返回引擎" : "Home"}</span>
                     </button>
@@ -672,35 +676,35 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                         onClick={() => setIsParamsPanelOpen(!isParamsPanelOpen)}
                         className="flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]"
                     >
-                        <List size={18} className={`transition-colors ${isParamsPanelOpen ? getThemeColor() : "text-zinc-400 group-hover:text-white"}`} />
-                        <span className={`text-[9px] font-bold uppercase tracking-wider ${isParamsPanelOpen ? getThemeColor() : "text-zinc-400 group-hover:text-white"}`}>
+                        <List size={18} className={`transition-colors ${isParamsPanelOpen ? getThemeColor() : (theme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white')}`} />
+                        <span className={`text-[9px] font-bold uppercase tracking-wider ${isParamsPanelOpen ? getThemeColor() : (theme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white')}`}>
                             {lang === 'EN' ? "Params" : "参数"}
                         </span>
                     </button>
 
-                    <div className="w-px h-8 bg-zinc-800 shrink-0"></div>
+                    <div className={`w-px h-8 ${theme === 'retro' ? 'bg-[#8B261D]/20' : 'bg-zinc-800'} shrink-0`}></div>
 
                     <button
                         onClick={onOpenHistory}
                         className="flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]"
                     >
-                        <HistoryIcon size={18} className="transition-colors text-zinc-400 group-hover:text-white" />
-                        <span className="text-[9px] font-bold uppercase tracking-wider text-zinc-400 group-hover:text-white">
+                        <HistoryIcon size={18} className={`transition-colors ${theme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`} />
+                        <span className={`text-[9px] font-bold uppercase tracking-wider transition-colors ${theme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`}>
                             {lang === 'EN' ? "History" : "历史"}
                         </span>
                     </button>
 
-                    <div className="w-px h-8 bg-zinc-800 shrink-0"></div>
+                    <div className={`w-px h-8 ${theme === 'retro' ? 'bg-[#8B261D]/20' : 'bg-zinc-800'} shrink-0`}></div>
 
                     {treatments.length > 0 && (
                         <>
                             <button onClick={handleCopyAll} className="flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]">
-                                {copiedAll ? <Check size={18} className="text-green-500" /> : <Copy size={18} className="text-zinc-400 group-hover:text-white" />}
-                                <span className="text-[9px] font-bold uppercase tracking-wider text-zinc-400 group-hover:text-white">
+                                {copiedAll ? <Check size={18} className="text-green-500" /> : <Copy size={18} className={`transition-colors ${theme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`} />}
+                                <span className={`text-[9px] font-bold uppercase tracking-wider transition-colors ${theme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`}>
                                     {copiedAll ? (lang === 'EN' ? "Copied" : "已复制") : (lang === 'EN' ? "Copy" : "复制")}
                                 </span>
                             </button>
-                            <div className="w-px h-8 bg-zinc-800 shrink-0"></div>
+                            <div className={`w-px h-8 ${theme === 'retro' ? 'bg-[#8B261D]/20' : 'bg-zinc-800'} shrink-0`}></div>
                         </>
                     )}
 
@@ -716,14 +720,14 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                                     <div className={`w-4 h-4 rounded-full ${getThemeBg()} opacity-50 animate-pulse blur-sm`}></div>
                                 </div>
                             )}
-                            <Activity size={18} className={`relative z-10 transition-colors ${isTaskManagerOpen ? getThemeColor() : "text-zinc-400 hover:text-white"}`} />
+                            <Activity size={18} className={`relative z-10 transition-colors ${isTaskManagerOpen ? getThemeColor() : (theme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white')}`} />
                             {activeTaskCount > 0 && (
                                 <span className={`absolute -top-1 -right-1 w-4 h-4 bg-[#050505] border border-white/10 ${getThemeColor()} rounded-full text-[9px] flex items-center justify-center font-bold shadow-[0_2px_10px_rgba(0,0,0,0.5)] z-20 leading-none`}>
                                     {activeTaskCount}
                                 </span>
                             )}
                         </div>
-                        <span className={`text-[9px] font-bold uppercase tracking-wider relative z-10 ${isTaskManagerOpen ? getThemeColor() : "text-zinc-400 hover:text-white"}`}>
+                        <span className={`text-[9px] font-bold uppercase tracking-wider relative z-10 transition-colors ${isTaskManagerOpen ? getThemeColor() : (theme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white')}`}>
                             {lang === 'EN' ? "Tasks" : "任务中心"}
                         </span>
                     </button>
@@ -731,10 +735,10 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                 <button
                     onClick={handleGenerate}
                     disabled={isProcessing || !selectedPathId || treatments.length === 0}
-                    className={`flex items-center justify-center gap-3 px-8 py-3 rounded-lg text-xs font-bold uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(212,175,55,0.2)] hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] disabled:opacity-50 disabled:cursor-not-allowed group min-w-[180px] border 
+                    className={`flex items-center justify-center gap-3 px-8 py-3 rounded-lg text-xs font-bold uppercase tracking-widest transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed group min-w-[200px] border 
                 ${selectedPathId
-                            ? getGenerateButtonClass(hasExistingBlueprint)
-                            : 'bg-zinc-900 text-zinc-600 border-zinc-800 cursor-not-allowed'
+                            ? (theme === 'retro' ? 'bg-[#8B261D] hover:bg-[#631B15] border-[#8B261D] text-white shadow-none' : getGenerateButtonClass(hasExistingBlueprint))
+                            : (theme === 'retro' ? 'bg-white border-[#8B261D]/20 text-zinc-400' : 'bg-zinc-900 text-zinc-600 border-zinc-800') + ' cursor-not-allowed'
                         }
              `}
                 >

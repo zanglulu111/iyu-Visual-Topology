@@ -72,17 +72,9 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
 
         setIsUploading(true);
         try {
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${currentUser.id}-${Math.random()}.${fileExt}`;
-            const filePath = `avatars/${fileName}`;
-
-            // Upload the file
-            const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file);
-            if (uploadError) throw uploadError;
-
-            // Get public URL
-            const { data: publicUrlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
-            const avatarUrl = publicUrlData.publicUrl;
+            // Use unified upload logic (handles R2 automatically)
+            const { supabaseDatabase } = await import('../services/supabaseDatabase');
+            const avatarUrl = await supabaseDatabase.uploadImage(file, 'avatars');
 
             // Update user profile table
             const { error: updateError } = await supabase.from('profiles').update({ avatar_url: avatarUrl }).eq('id', currentUser.id);
@@ -182,9 +174,9 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
 
     return (
         <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/70 backdrop-blur-xl px-4 py-8 overflow-y-auto w-full animate-in fade-in duration-300">
-            <div className={`w-full max-w-lg ${theme === 'retro' ? 'bg-[var(--bg-card)] border-[var(--border-main)]' : 'bg-[#0c0c0c] border-zinc-800'} border rounded-2xl shadow-2xl p-8 relative overflow-hidden my-auto transition-colors duration-500`}>
+            <div className={`w-full max-w-lg ${theme === 'retro' ? 'bg-[#F9F7F1] border-[#8B261D]' : 'bg-[#0c0c0c] border-zinc-800'} border rounded-2xl shadow-2xl p-8 relative overflow-hidden my-auto transition-colors duration-500`}>
                 {/* Top Accent */}
-                <div className={`absolute top-0 left-0 w-full h-1 ${theme === 'retro' ? 'bg-[var(--text-accent)]' : 'bg-gradient-to-r from-transparent via-gold-primary to-transparent'} opacity-50`}></div>
+                <div className={`absolute top-0 left-0 w-full h-1 ${theme === 'retro' ? 'bg-[#8B261D]' : 'bg-gradient-to-r from-transparent via-gold-primary to-transparent'} opacity-50`}></div>
 
                 <button onClick={onClose} className="absolute top-4 right-4 text-zinc-500 hover:text-white transition-colors">
                     <X size={20} />
@@ -223,30 +215,30 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
                                 onChange={(e) => setNewUsername(e.target.value)}
                                 onBlur={handleUsernameUpdate}
                                 onKeyDown={(e) => e.key === 'Enter' && handleUsernameUpdate()}
-                                className={`bg-transparent border ${theme === 'retro' ? 'border-[var(--text-accent)]/50' : 'border-gold-primary/50'} rounded px-2 py-1 text-xl font-serif text-[var(--text-main)] text-center outline-none`}
+                                className={`bg-transparent border ${theme === 'retro' ? 'border-[#8B261D]' : 'border-gold-primary/50'} rounded px-2 py-1 text-xl font-serif ${theme === 'retro' ? 'text-black' : 'text-zinc-100'} text-center outline-none`}
                             />
                         </div>
                     ) : (
                         <h2
                             onClick={() => setIsEditingUsername(true)}
-                            className={`text-2xl font-serif ${theme === 'retro' ? 'text-[var(--text-main)] hover:text-[var(--text-accent)]' : 'text-white hover:text-gold-primary'} tracking-tight cursor-pointer transition-colors group relative`}
+                            className={`text-2xl font-serif ${theme === 'retro' ? 'text-black hover:text-[#8B261D]' : 'text-white hover:text-gold-primary'} tracking-tight cursor-pointer transition-colors group relative`}
                         >
                             {currentUser.username}
-                            <span className="absolute -right-6 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 text-[10px] text-[var(--text-muted)] font-sans uppercase">Edit</span>
+                            <span className="absolute -right-6 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 text-[10px] text-zinc-500 font-sans uppercase">Edit</span>
                         </h2>
                     )}
 
-                    <p className={`text-[10px] ${theme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-500'} uppercase tracking-widest mt-1 text-center`}>{t.title}</p>
+                    <p className={`text-[10px] ${theme === 'retro' ? 'text-zinc-500' : 'text-zinc-500'} uppercase tracking-widest mt-1 text-center`}>{t.title}</p>
                 </div>
 
                 <div className="space-y-4 mb-8">
                     {/* Membership Status */}
-                    <div className={`${theme === 'retro' ? 'bg-[var(--bg-main)]/50 border-[var(--border-main)]' : 'bg-black border-zinc-800'} border rounded-xl p-4 flex items-center justify-between`}>
+                    <div className={`${theme === 'retro' ? 'bg-[#F4EFE0]/50 border-[#8B261D]/20' : 'bg-black border-zinc-800'} border rounded-xl p-4 flex items-center justify-between`}>
                         <div className="flex items-center gap-3">
-                            <Crown size={16} className={isActiveMember ? (theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-gold-primary') : (theme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-600')} />
+                            <Crown size={16} className={isActiveMember ? (theme === 'retro' ? 'text-[#8B261D]' : 'text-gold-primary') : (theme === 'retro' ? 'text-zinc-500' : 'text-zinc-600')} />
                             <div>
-                                <span className={`text-xs font-bold ${theme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-400'} uppercase tracking-widest`}>{t.memberStatus}</span>
-                                <p className={`text-xs font-mono ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-white'} mt-0.5`}>{getMembershipLabel()}</p>
+                                <span className={`text-xs font-bold ${theme === 'retro' ? 'text-zinc-500' : 'text-zinc-400'} uppercase tracking-widest`}>{t.memberStatus}</span>
+                                <p className={`text-xs font-mono ${theme === 'retro' ? 'text-black' : 'text-white'} mt-0.5`}>{getMembershipLabel()}</p>
                             </div>
                         </div>
                         {isActiveMember ? (
@@ -262,26 +254,26 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
 
                     {/* Tokens (only show when activated) */}
                     {isActiveMember && (
-                        <div className={`${theme === 'retro' ? 'bg-[var(--bg-main)]/50 border-[var(--border-main)]' : 'bg-black border-zinc-800'} border rounded-xl p-4 flex items-center justify-between transition-colors`}>
+                        <div className={`${theme === 'retro' ? 'bg-[#F4EFE0]/50 border-[#8B261D]/20' : 'bg-black border-zinc-800'} border rounded-xl p-4 flex items-center justify-between transition-colors`}>
                             <div className="flex items-center gap-3">
-                                <Coins size={16} className={theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-gold-primary'} />
-                                <span className={`text-xs font-bold ${theme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-400'} uppercase tracking-widest`}>{t.tokens}</span>
+                                <Coins size={16} className={theme === 'retro' ? 'text-[#8B261D]' : 'text-gold-primary'} />
+                                <span className={`text-xs font-bold ${theme === 'retro' ? 'text-zinc-500' : 'text-zinc-400'} uppercase tracking-widest`}>{t.tokens}</span>
                             </div>
-                            <span className={`text-lg font-mono ${theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-gold-primary'} flex items-center gap-1`}>
-                                <Sparkles size={14} /> {currentUser.tokens ?? 0} <span className={`text-[10px] ${theme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-600'}`}>TOKENS</span>
+                            <span className={`text-lg font-mono ${theme === 'retro' ? 'text-[#8B261D]' : 'text-gold-primary'} flex items-center gap-1`}>
+                                <Sparkles size={14} /> {currentUser.tokens ?? 0} <span className={`text-[10px] ${theme === 'retro' ? 'text-zinc-500' : 'text-zinc-600'}`}>TOKENS</span>
                             </span>
                         </div>
                     )}
                 </div>
 
                 {/* Activation Code Redemption */}
-                <div className={`space-y-4 mb-8 border-t ${theme === 'retro' ? 'border-[var(--border-main)]' : 'border-zinc-800/80'} pt-6 transition-colors`}>
+                <div className={`space-y-4 mb-8 border-t ${theme === 'retro' ? 'border-[#8B261D]/10' : 'border-zinc-800/80'} pt-6 transition-colors`}>
                     <div className="flex items-center gap-2 mb-4">
-                        <KeyRound size={14} className={theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-gold-primary'} />
-                        <p className={`text-[10px] ${theme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-500'} font-bold tracking-widest uppercase`}>{t.redeemTitle}</p>
+                        <KeyRound size={14} className={theme === 'retro' ? 'text-[#8B261D]' : 'text-gold-primary'} />
+                        <p className={`text-[10px] ${theme === 'retro' ? 'text-zinc-500' : 'text-zinc-500'} font-bold tracking-widest uppercase`}>{t.redeemTitle}</p>
                     </div>
 
-                    <p className={`text-[10px] font-mono ${theme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-600'} leading-relaxed mb-3`}>{t.redeemDesc}</p>
+                    <p className={`text-[10px] font-mono ${theme === 'retro' ? 'text-zinc-500' : 'text-zinc-600'} leading-relaxed mb-3`}>{t.redeemDesc}</p>
 
                     <div className="flex gap-2">
                         <input
@@ -293,13 +285,13 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
                             }}
                             onKeyDown={handleKeyDown}
                             placeholder={t.redeemPlaceholder}
-                            className={`flex-1 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]' : 'bg-black border-zinc-800'} border focus:border-[var(--text-accent)]/50 rounded-lg px-4 py-3 text-xs text-[var(--text-main)] font-mono tracking-widest focus:outline-none transition-colors placeholder:text-zinc-700`}
+                            className={`flex-1 ${theme === 'retro' ? 'bg-white border-[#8B261D]/10' : 'bg-black border-zinc-800'} border focus:border-[#8B261D]/50 rounded-lg px-4 py-3 text-xs ${theme === 'retro' ? 'text-black' : 'text-white'} font-mono tracking-widest focus:outline-none transition-colors placeholder:text-zinc-400`}
                             disabled={isRedeeming}
                         />
                         <button
                             onClick={handleRedeem}
                             disabled={isRedeeming || !redeemCode.trim()}
-                            className={`${theme === 'retro' ? 'bg-[var(--text-accent)] text-white hover:opacity-90' : 'bg-gold-primary text-black hover:bg-amber-400'} disabled:opacity-40 font-bold uppercase tracking-[0.15em] px-5 py-3 rounded-lg flex items-center justify-center gap-2 transition-all min-w-[100px]`}
+                            className={`${theme === 'retro' ? 'bg-[#8B261D] text-white hover:bg-[#6D1E16]' : 'bg-gold-primary text-black hover:bg-amber-400'} disabled:opacity-40 font-bold uppercase tracking-[0.15em] px-5 py-3 rounded-lg flex items-center justify-center gap-2 transition-all min-w-[100px]`}
                         >
                             {isRedeeming ? (
                                 <Loader2 size={14} className="animate-spin" />
@@ -326,7 +318,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
                         onLogout();
                         onClose();
                     }}
-                    className={`w-full ${theme === 'retro' ? 'bg-[var(--bg-panel)] text-[var(--text-muted)] border-[var(--border-main)] hover:bg-red-50 hover:text-red-700' : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:bg-red-950/30 hover:text-red-400 hover:border-red-900/50'} border font-bold uppercase tracking-[0.2em] py-4 rounded-lg flex items-center justify-center gap-3 transition-all duration-300`}
+                    className={`w-full ${theme === 'retro' ? 'bg-[#F4EFE0] text-zinc-600 border-[#8B261D]/20 hover:bg-red-50 hover:text-[#8B261D] hover:border-[#8B261D]' : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:bg-red-950/30 hover:text-red-400 hover:border-red-900/50'} border font-bold uppercase tracking-[0.2em] py-4 rounded-lg flex items-center justify-center gap-3 transition-all duration-300 shadow-sm`}
                 >
                     <LogOut size={16} />
                     <span className="text-[10px]">{t.logout}</span>

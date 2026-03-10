@@ -72,6 +72,18 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
     }
 
     const getThemeClasses = () => {
+        if (currentTheme === 'retro') {
+            return {
+                text: 'text-[#8B261D]',
+                bg: 'bg-[#8B261D]',
+                border: 'border-[#8B261D]',
+                focusBorder: 'focus:border-[#8B261D]/50',
+                shadow: 'shadow-none',
+                uploadHover: 'hover:border-[#8B261D]/30 hover:bg-[#8B261D]/5',
+                spinner: 'border-zinc-300 border-t-[#8B261D]',
+                btn: 'bg-white/50 text-[#8B261D] border-[#8B261D]/30 hover:border-[#8B261D]'
+            };
+        }
         switch (driverType) {
             case DriverType.COMMERCIAL:
                 return {
@@ -191,19 +203,21 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
 
     return (
         <div 
-            style={{ zIndex }}
+            style={{ zIndex: isOpen ? zIndex : 0 }}
             className={`
                 flex flex-col transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)
-                fixed top-14 right-0 bottom-14 w-[380px] ${currentTheme === 'retro' ? 'bg-[var(--bg-panel)]' : 'bg-[var(--bg-main)]'} border-l border-[var(--border-main)] shadow-[-20px_0_50px_rgba(0,0,0,0.5)] overflow-hidden
-                ${isOpen ? 'translate-x-0' : 'translate-x-full'}
+                fixed top-14 right-0 bottom-14 w-[380px] ${currentTheme === 'retro' ? 'bg-[var(--bg-panel)] shadow-none' : `bg-[var(--bg-main)] ${isOpen ? 'shadow-[-20px_0_50px_rgba(0,0,0,0.5)]' : ''}`} ${isOpen ? 'border-l border-[var(--border-main)]' : 'border-none'} overflow-hidden
+                ${isOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 pointer-events-none'}
             `}
         >
             {/* Header */}
             <div className={`px-6 py-4 flex items-center justify-between relative shrink-0 transition-all duration-300`}>
                 <div className="flex items-center gap-3">
-                    {isCommercial ? <ScanEye size={20} className="text-cyan-400" /> :
+                    {currentTheme === 'retro' ? <Sparkles size={20} className={theme.text} /> : (
+                        isCommercial ? <ScanEye size={20} className="text-cyan-400" /> :
                         isExperimental ? <BrainCircuit size={20} className="text-purple-400" /> :
-                            <Sparkles size={20} className={theme.text} />}
+                        <Sparkles size={20} className={theme.text} />
+                    )}
                     <span className={`text-sm font-black uppercase tracking-[0.25em] ${theme.text}`}>
                         {getSidebarTitle()}
                     </span>
@@ -336,11 +350,11 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
                 </div>
 
                 {/* 4. Action Button (Engine Mapping) */}
-                <div className={`mt-auto ${currentTheme === 'retro' ? '' : 'pt-6 border-t border-zinc-800'}`}>
+                <div className={`mt-auto ${currentTheme === 'retro' ? '' : 'pt-6'}`}>
                     <button
                         onClick={onAutoFill}
                         disabled={isProcessing || (!visionInput && !visionImage && !visionAnalysis)}
-                        className={`w-full py-4 border rounded-xl flex items-center justify-center gap-3 transition-all disabled:opacity-50 disabled:cursor-not-allowed group relative overflow-hidden ${isCommercial ? 'bg-cyan-500 hover:bg-cyan-400 border-cyan-500 text-black shadow-[0_0_20px_rgba(6,182,212,0.3)]' : isExperimental ? 'bg-purple-500 hover:bg-purple-400 border-purple-500 text-black shadow-[0_0_20px_rgba(168,85,247,0.3)]' : isAesthetic ? 'bg-rose-500 hover:bg-rose-400 border-rose-500 text-black shadow-[0_0_20px_rgba(244,63,94,0.3)]' : isTrailer ? 'bg-orange-500 hover:bg-orange-400 border-orange-500 text-black shadow-[0_0_20px_rgba(251,146,60,0.3)]' : 'bg-gold-primary hover:bg-amber-400 border-gold-primary text-black shadow-[0_0_20px_rgba(212,175,55,0.2)]'}`}
+                        className={`w-full py-4 border rounded-xl flex items-center justify-center gap-3 transition-all disabled:opacity-50 disabled:cursor-not-allowed group relative overflow-hidden ${currentTheme === 'retro' ? 'bg-[#8B261D] hover:bg-[#631B15] border-[#8B261D] text-white shadow-none' : (isCommercial ? 'bg-cyan-500 hover:bg-cyan-400 border-cyan-500 text-black shadow-[0_0_20px_rgba(6,182,212,0.3)]' : isExperimental ? 'bg-purple-500 hover:bg-purple-400 border-purple-500 text-black shadow-[0_0_20px_rgba(168,85,247,0.3)]' : isAesthetic ? 'bg-rose-500 hover:bg-rose-400 border-rose-500 text-black shadow-[0_0_20px_rgba(244,63,94,0.3)]' : isTrailer ? 'bg-orange-500 hover:bg-orange-400 border-orange-500 text-black shadow-[0_0_20px_rgba(251,146,60,0.3)]' : 'bg-gold-primary hover:bg-amber-400 border-gold-primary text-black shadow-[0_0_20px_rgba(212,175,55,0.2)]')}`}
                     >
                         {isAutoFilling ? (
                             <>

@@ -2,7 +2,7 @@
 import React, { useState, useEffect, memo } from 'react';
 import { Copy, Check } from 'lucide-react';
 
-export const CopyButton = ({ text, className = "", label = "" }: { text: string | null, className?: string, label?: string }) => {
+export const CopyButton = ({ text, className = "", label = "", theme = "dark" }: { text: string | null, className?: string, label?: string, theme?: string }) => {
     const [copied, setCopied] = useState(false);
     const handleCopy = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -14,7 +14,7 @@ export const CopyButton = ({ text, className = "", label = "" }: { text: string 
     return (
         <button 
             onClick={handleCopy}
-            className={`p-1.5 rounded hover:bg-white/10 text-zinc-500 hover:text-white transition-colors flex items-center gap-1 ${className}`}
+            className={`transition-all active:scale-95 flex items-center gap-1 ${theme === 'retro' ? 'hover:bg-[#8B261D]/10 text-black/80' : 'hover:bg-white/10 text-zinc-400 hover:text-white'} ${className || 'p-1.5 rounded'}`}
             title="Copy Text"
             disabled={!text}
         >
@@ -34,7 +34,7 @@ export const SimpleTextRenderer = ({ content }: { content: string }) => {
 };
 
 // Memoized to prevent flickering on parent re-renders if content hasn't changed
-export const MarkdownRenderer = memo(({ content, themeAccent = "text-gold-primary" }: { content: string, themeAccent?: string }) => {
+export const MarkdownRenderer = memo(({ content, themeAccent = "text-gold-primary", theme = "dark" }: { content: string, themeAccent?: string, theme?: string }) => {
     if (!content) return null;
 
     // 解析加粗文本并替换为黄色字体
@@ -53,20 +53,20 @@ export const MarkdownRenderer = memo(({ content, themeAccent = "text-gold-primar
     const lines = content.split('\n');
 
     return (
-        <div className="space-y-4 text-zinc-300 font-serif leading-relaxed text-sm md:text-base">
+        <div className={`space-y-4 ${theme === 'retro' ? 'text-[#3D1A16]' : 'text-zinc-300'} font-serif leading-relaxed text-sm md:text-base`}>
           {lines.map((line, i) => {
             const trimmed = line.trim();
             if (!trimmed) return <div key={i} className="h-2"></div>;
 
             // Headers
             if (trimmed.startsWith('### ')) {
-                return <h3 key={i} className={`text-xl font-bold ${themeAccent} mt-8 mb-4 uppercase tracking-wider border-b border-white/10 pb-2`}>{parseFormattedText(trimmed.replace('### ', ''))}</h3>;
+                return <h3 key={i} className={`text-xl font-bold ${themeAccent} mt-8 mb-4 uppercase tracking-wider border-b ${theme === 'retro' ? 'border-[#8B261D]/10' : 'border-white/10'} pb-2`}>{parseFormattedText(trimmed.replace('### ', ''))}</h3>;
             }
             if (trimmed.startsWith('## ')) {
-                return <h2 key={i} className="text-2xl font-bold text-white mt-10 mb-6">{parseFormattedText(trimmed.replace('## ', ''))}</h2>;
+                return <h2 key={i} className={`text-2xl font-bold ${theme === 'retro' ? 'text-black' : 'text-white'} mt-10 mb-6`}>{parseFormattedText(trimmed.replace('## ', ''))}</h2>;
             }
             if (trimmed.startsWith('# ')) {
-                return <h1 key={i} className="text-3xl font-black text-white mt-12 mb-8 border-l-4 border-gold-primary pl-4">{parseFormattedText(trimmed.replace('# ', ''))}</h1>;
+                return <h1 key={i} className={`text-3xl font-black ${theme === 'retro' ? 'text-black' : 'text-white'} mt-12 mb-8 border-l-4 ${theme === 'retro' ? 'border-[#8B261D]' : 'border-gold-primary'} pl-4`}>{parseFormattedText(trimmed.replace('# ', ''))}</h1>;
             }
             
             // Stats / Meta info lines

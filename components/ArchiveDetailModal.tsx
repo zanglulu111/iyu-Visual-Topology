@@ -17,27 +17,27 @@ export const ArchiveDetailModal: React.FC<ArchiveDetailModalProps> = ({ isOpen, 
 
     // Theme Variables mapped from directory modal logic
     const t = {
-        bgContainer: isDark ? 'bg-[#0A0A0B]' : 'bg-[#EBE7DF]',
+        bgContainer: isDark ? 'bg-[#0A0A0B]' : 'bg-white',
         borderContainer: isDark ? 'border-zinc-800 border-4' : 'border-[#3A352F] border-4',
-        bgHeader: isDark ? 'bg-[#0A0A0B]/90' : 'bg-[#EBE7DF]/90',
-        borderHeader: isDark ? 'border-zinc-900 border-b-2 border-dashed' : 'border-[#CFCBBF] border-b-2 border-dashed',
-        textTitle: isDark ? 'text-zinc-100' : 'text-[#2B2824]',
+        bgHeader: isDark ? 'bg-[#0A0A0B]/90' : 'bg-white/95',
+        borderHeader: isDark ? 'border-zinc-900 border-b-2 border-dashed' : 'border-[#8B261D]/10 border-b-2 border-dashed',
+        textTitle: isDark ? 'text-zinc-100' : 'text-[#8B261D]',
         textAccent: isDark ? 'text-zinc-400' : 'text-[#8B261D]',
         textTitleAccent: isDark ? 'text-amber-500' : 'text-[#8B261D]',
-        textNormal: isDark ? 'text-zinc-400' : 'text-[#514F48]',
+        textNormal: isDark ? 'text-zinc-400' : 'text-[#2B2824]',
         textMuted: isDark ? 'text-zinc-500' : 'text-[#6A665A]',
         textCode: isDark ? 'text-zinc-300' : 'text-[#3A352F]',
-        btnBg: isDark ? 'bg-zinc-900' : 'bg-[#DCD8CF]',
-        btnHover: isDark ? 'hover:bg-zinc-800' : 'hover:bg-[#CFCBBF]',
-        btnBorder: isDark ? 'border-zinc-700' : 'border-[#CFCBBF]',
+        btnBg: isDark ? 'bg-zinc-900' : 'bg-[#F9F7F1]',
+        btnHover: isDark ? 'hover:bg-zinc-800' : 'hover:bg-white',
+        btnBorder: isDark ? 'border-zinc-700' : 'border-[#8B261D]/20',
         texturePattern: isDark ? '' : "url('https://www.transparenttextures.com/patterns/aged-paper.png')",
         dustPattern: isDark ? '' : "url('https://www.transparenttextures.com/patterns/dust.png')",
         // Section specific
-        sectionBorder: isDark ? 'border-zinc-800' : 'border-[#CFCBBF]',
+        sectionBorder: isDark ? 'border-zinc-800' : 'border-[#8B261D]/10',
         dnaBg: isDark ? 'bg-[#111113]' : 'bg-[#F9F7F1]',
-        dnaBorder: isDark ? 'border-zinc-800 border-2' : 'border-[#CFCBBF] border-2',
+        dnaBorder: isDark ? 'border-zinc-800 border-2' : 'border-[#8B261D]/10 border-2',
         dnaTextAccent: isDark ? 'text-amber-400' : 'text-[#8B261D]',
-        reportBg: isDark ? 'bg-zinc-900/30' : 'bg-white/50',
+        reportBg: isDark ? 'bg-zinc-900/30' : 'bg-white',
     };
 
     return (

@@ -8,6 +8,9 @@ const DB_VERSION = 1;
 const STORE_HISTORY = 'history';
 const STORE_COLLECTIONS = 'collections';
 
+let lastCloudFetchTime = 0;
+const CLOUD_FETCH_COOLDOWN = 60000; // 60 seconds cooldown
+
 // Helper to open DB
 const openDB = (): Promise<IDBDatabase> => {
     return new Promise((resolve, reject) => {
@@ -61,20 +64,26 @@ export const persistence = {
         // Try Cloud
         const { data: user } = await supabase.auth.getUser();
         if (user.user) {
-            try {
-                const cloudHistory = await supabaseDatabase.getCloudHistory();
-                if (cloudHistory && cloudHistory.length > 0) {
-                    // MERGE: Combine local and cloud, filter duplicates by ID
-                    const idMap = new Map();
-                    localItems.forEach(item => idMap.set(String(item.id), item));
-                    cloudHistory.forEach(item => idMap.set(String(item.id), item));
+            const now = Date.now();
+            if (now - lastCloudFetchTime < CLOUD_FETCH_COOLDOWN && localItems.length > 0) {
+                console.log("Using cached history (cooldown active)");
+            } else {
+                try {
+                    const cloudHistory = await supabaseDatabase.getCloudHistory();
+                    lastCloudFetchTime = now;
+                    if (cloudHistory && cloudHistory.length > 0) {
+                        // MERGE: Combine local and cloud, filter duplicates by ID
+                        const idMap = new Map();
+                        localItems.forEach(item => idMap.set(String(item.id), item));
+                        cloudHistory.forEach(item => idMap.set(String(item.id), item));
 
-                    const merged = Array.from(idMap.values());
-                    merged.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-                    return merged;
+                        const merged = Array.from(idMap.values());
+                        merged.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+                        return merged;
+                    }
+                } catch (err) {
+                    console.warn("Could not fetch cloud history, using local.", err);
                 }
-            } catch (err) {
-                console.warn("Could not fetch cloud history, using local.", err);
             }
         }
 

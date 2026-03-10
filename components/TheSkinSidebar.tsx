@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { NarrativeFieldState, BlueprintLanguage, DriverType } from '../types';
 import {
   Settings2, X, Lock, Unlock, RotateCcw, Shuffle, Trash2,
@@ -114,6 +115,30 @@ const SkinSlot: React.FC<{
     const hasTags = tags.length > 0;
     const libInfo = getBlockLibInfo(blockId);
 
+    // PORTAL TOOLTIP STATE
+    const [hoveredPortal, setHoveredPortal] = useState<{
+      pos: { top: number; left: number };
+      details: any;
+      showAbove?: boolean;
+    } | null>(null);
+
+    const handleMouseEnter = (e: React.MouseEvent, details: any) => {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const showAbove = rect.bottom > window.innerHeight * 0.65;
+      setHoveredPortal({
+        pos: {
+          top: showAbove ? rect.top - 8 : rect.bottom + 8,
+          left: Math.min(rect.left, window.innerWidth - 320)
+        },
+        details,
+        showAbove
+      });
+    };
+
+    const handleMouseLeave = () => {
+      setHoveredPortal(null);
+    };
+
     const getBilingualText = (text: string) => {
       if (!text) return "";
       const englishMatch = text.match(/\((.*?)\)/);
@@ -134,21 +159,24 @@ const SkinSlot: React.FC<{
     let labelColor = 'text-gold-primary';
     let editAccent = 'text-gold-primary border-gold-primary focus:border-gold-primary';
 
-    if (driverType === DriverType.COMMERCIAL) {
+    if (theme === 'retro') {
+      labelColor = 'text-[#8B261D]';
+      editAccent = 'text-[var(--text-main)] border-[var(--border-main)] focus:border-[#8B261D]';
+    } else if (driverType === DriverType.COMMERCIAL) {
       labelColor = 'text-mist-cyan';
-      editAccent = theme === 'retro' ? 'text-[var(--text-main)] border-[var(--border-main)] focus:border-mist-cyan' : 'text-cyan-400 border-cyan-400 focus:border-cyan-400';
+      editAccent = 'text-cyan-400 border-cyan-400 focus:border-cyan-400';
     } else if (driverType === DriverType.EXPERIMENTAL) {
       labelColor = 'text-mist-purple';
-      editAccent = theme === 'retro' ? 'text-[var(--text-main)] border-[var(--border-main)] focus:border-mist-purple' : 'text-purple-400 border-purple-400 focus:border-purple-400';
+      editAccent = 'text-purple-400 border-purple-400 focus:border-purple-400';
     } else if (driverType === DriverType.AESTHETIC) {
       labelColor = 'text-mist-rose';
-      editAccent = theme === 'retro' ? 'text-[var(--text-main)] border-[var(--border-main)] focus:border-mist-rose' : 'text-rose-400 border-rose-400 focus:border-rose-400';
+      editAccent = 'text-rose-400 border-rose-400 focus:border-rose-400';
     } else if (driverType === DriverType.TRAILER) {
       labelColor = 'text-mist-orange';
-      editAccent = theme === 'retro' ? 'text-[var(--text-main)] border-[var(--border-main)] focus:border-mist-orange' : 'text-orange-400 border-orange-400 focus:border-orange-400';
+      editAccent = 'text-orange-400 border-orange-400 focus:border-orange-400';
     } else {
       labelColor = 'text-gold-primary';
-      editAccent = theme === 'retro' ? 'text-[var(--text-main)] border-[var(--border-main)] focus:border-gold-primary' : 'text-gold-primary border-gold-primary focus:border-gold-primary';
+      editAccent = 'text-gold-primary border-gold-primary focus:border-gold-primary';
     }
 
     const lockedClass = getLockedStyle();
@@ -226,6 +254,8 @@ const SkinSlot: React.FC<{
                 <span className="flex items-baseline relative z-10">
                   <span
                     onClick={() => onOpen(blockId)}
+                    onMouseEnter={(e) => safeDetails && handleMouseEnter(e, safeDetails)}
+                    onMouseLeave={handleMouseLeave}
                     className={`
                     cursor-pointer font-serif font-bold transition-all duration-300 hover:scale-110 hover:z-50 inline-block
                     ${isTagLocked
@@ -276,20 +306,27 @@ const SkinSlot: React.FC<{
                   </button>
                 </div>
 
-                {safeDetails && (safeDetails.def || safeDetails.core) && !editingTag && (
-                  <div className="absolute left-0 z-[100] w-max max-w-[300px] text-left bg-zinc-950 border border-zinc-700 p-4 rounded-xl shadow-2xl opacity-0 group-hover/tag:opacity-100 transition-all duration-200 pointer-events-none delay-150 top-[calc(100%+0.5rem)]">
-                    <div className="text-xs font-black text-zinc-400 uppercase tracking-widest mb-2 border-b border-white/10 pb-1 flex items-center gap-2">
-                      <span className={accentTextColor.replace('text-', 'text-')}>{libInfo.name}</span>
+                {hoveredPortal && createPortal(
+                  <div 
+                    className={`fixed z-[9999] w-max max-w-[320px] text-left p-5 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] pointer-events-none animate-in fade-in zoom-in-95 duration-100
+                      ${hoveredPortal.showAbove ? '-translate-y-full' : ''}
+                      ${theme === 'retro' ? 'bg-[#F9F7F1] border-[#1A1814] border' : 'bg-[#0a0a0a]/95 backdrop-blur-xl border-zinc-800 border'}`}
+                    style={{ 
+                      top: hoveredPortal.pos.top, 
+                      left: hoveredPortal.pos.left
+                    }}
+                  >
+                    <div className={`text-[10px] font-black uppercase tracking-[0.2em] mb-2 border-b pb-2 flex items-center gap-2 ${theme === 'retro' ? 'text-zinc-500 border-black/10' : 'text-zinc-500 border-white/10'}`}>
+                      <span className={theme === 'retro' ? 'text-[#8B261D]' : accentTextColor}>{libInfo.name || "DETAILS"}</span>
                     </div>
-                    <div className="text-xs text-zinc-200 font-medium mb-2 leading-relaxed whitespace-pre-line">
-                      {lang === 'EN' && safeDetails.defEn ? safeDetails.defEn : safeDetails.def}
+                    <div className={`text-xs md:text-sm font-bold mb-3 leading-relaxed whitespace-pre-line ${theme === 'retro' ? 'text-black' : 'text-zinc-100'}`}>
+                      {lang === 'EN' && hoveredPortal.details.defEn ? hoveredPortal.details.defEn : hoveredPortal.details.def}
+                      <span className={`block text-[10px] italic mt-2 ${theme === 'retro' ? 'text-[#8B261D]/80' : 'text-zinc-400'}`}>
+                        {lang === 'EN' && hoveredPortal.details.coreEn ? hoveredPortal.details.coreEn : hoveredPortal.details.core}
+                      </span>
                     </div>
-                    {(safeDetails.core || safeDetails.coreEn) && (
-                      <div className={`block text-[10px] italic border-t border-white/5 pt-1 mt-1 ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}`}>
-                        {lang === 'EN' && safeDetails.coreEn ? safeDetails.coreEn : safeDetails.core}
-                      </div>
-                    )}
-                  </div>
+                  </div>,
+                  document.body
                 )}
               </span>
             );
@@ -536,7 +573,10 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
   let iconColor = 'text-gold-primary';
   let lockKey = 'NARR_SKIN';
 
-  if (isCommercial) {
+  if (theme === 'retro') {
+    accentBorder = 'border-[#8B261D]';
+    iconColor = 'text-[#8B261D]';
+  } else if (isCommercial) {
     accentBorder = 'border-cyan-400';
     iconColor = 'text-cyan-400';
     lockKey = 'COMM_SKIN';
@@ -814,11 +854,11 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
 
   return (
     <div 
-      style={{ zIndex }}
+      style={{ zIndex: isOpen ? zIndex : 0 }}
       className={`
         flex flex-col transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)
-        fixed top-14 left-0 bottom-14 w-[380px] ${theme === 'retro' ? 'bg-[var(--bg-panel)]' : 'bg-[var(--bg-main)]'} border-r border-[var(--border-main)]
-        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+        fixed top-14 left-0 bottom-14 w-[380px] ${theme === 'retro' ? 'bg-[var(--bg-panel)] shadow-none' : `bg-[var(--bg-main)] ${isOpen ? 'shadow-[20px_0_50px_rgba(0,0,0,0.5)]' : ''}`} ${isOpen ? 'border-r border-[var(--border-main)]' : 'border-none'}
+        ${isOpen ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0 pointer-events-none'}
       `}
     >
       <div className={`px-6 py-4 flex items-center justify-between relative shrink-0 transition-all duration-300`}>

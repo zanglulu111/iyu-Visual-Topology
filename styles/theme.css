@@ -75,3 +75,12 @@ body {
   opacity: 0.5;
   z-index: 5;
 }
+/* Selection Styles */
+::selection {
+  background-color: var(--selection-bg);
+}
+
+:root.retro ::selection {
+  background-color: rgba(139, 38, 29, 0.25);
+  color: #000000;
+}

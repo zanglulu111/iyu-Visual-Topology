@@ -6,9 +6,10 @@ import {
     X, Wand2, Loader2, ArrowLeft, ArrowRight, History as HistoryIcon,
     Globe, BookOpen, ImageIcon, BrainCircuit, Target, Film, Eye, Box,
     ClipboardCopy, Check, HelpCircle, Home, TestTube, Zap, Palette,
-    Settings2, Layers, Terminal, Feather, Bookmark, Star, FilePlus, Download, List, Database, Lightbulb, ScanLine, Heart, Activity, Upload
+    Settings2, Layers, Terminal, Feather, Bookmark, Star, FilePlus, Download, List, Database, Lightbulb, ScanLine, Heart, Activity, Upload, Flame
 } from 'lucide-react';
 import * as geminiService from '../services/geminiService';
+import { useTheme } from '../contexts/ThemeContext';
 import { CommercialView } from './blueprint/CommercialView';
 import { NarrativeView } from './blueprint/NarrativeView';
 import { AssetsView } from './blueprint/AssetsView';
@@ -68,6 +69,9 @@ interface BlueprintEditorProps {
     aestheticMode: AestheticMode;
     // Added customLibraryDefs to props to propagate to AestheticView
     customLibraryDefs: Record<string, { def: string; core: string }>;
+    theme?: string;
+    isSutureOpen?: boolean;
+    onSutureOpenChange?: (open: boolean) => void;
 }
 
 // ... (Create Empty Blueprint Functions remain the same)
@@ -169,6 +173,9 @@ export const BlueprintEditor: React.FC<BlueprintEditorProps> = ({
     onClose,
     onGoHome,
     onGenerateAssetImage,
+    onUpdateWithAI,
+    onGenerateAssetPrompt,
+    onGenerateAssets,
     onAnalyzePsycho,
     language,
     onToggleLanguage,
@@ -185,15 +192,17 @@ export const BlueprintEditor: React.FC<BlueprintEditorProps> = ({
     worldLaw,
     visionInput,
     visionAnalysis,
-    // Fix: Destructured missing props from interface
     onSaveToHistory,
     onSaveToCollection,
-    /* Destructure new props passed from App */
     subjectType,
     aestheticMode,
-    // Destructure customLibraryDefs from props
-    customLibraryDefs
+    customLibraryDefs,
+    isSutureOpen,
+    onSutureOpenChange,
+    theme
 }) => {
+    const { theme: contextTheme } = useTheme(); // Renamed to avoid conflict, though `theme` prop will override
+    const effectiveTheme = theme || contextTheme;
 
     const defaultBlueprint = useMemo(() => {
         if (initialBlueprint) return initialBlueprint;
@@ -262,20 +271,17 @@ export const BlueprintEditor: React.FC<BlueprintEditorProps> = ({
 
     const uiConfig = useMemo(() => {
         let themeAccent = 'text-gold-primary';
-        let themeBorder = 'border-gold-primary/30';
+        let themeBorder = 'border-[#D4AF37]/30';
         let themeText = 'text-gold-primary';
         let themeHoverText = 'group-hover:text-gold-primary';
         let themeBgActive = 'bg-gold-primary/10';
-        let themeSidebarBorder = 'border-gold-primary';
+        let themeSidebarBorder = 'border-[#D4AF37]/15';
+        let themeActiveBorder = 'border-gold-primary'; // Solid gold for active marker
+        let themeSidebarBg = 'bg-[#0a0a0a]'; // Default for non-retro
+        let themeEmptyPulse = 'bg-gold-primary/20'; // Default for non-retro
         let menuItems: { id: string, label: string, icon: React.ElementType }[] = [];
 
         if (effectiveDriverType === DriverType.COMMERCIAL) {
-            themeAccent = 'text-cyan-400';
-            themeText = 'text-cyan-400';
-            themeHoverText = 'group-hover:text-cyan-400';
-            themeBorder = 'border-cyan-500/30';
-            themeBgActive = 'bg-cyan-900/20';
-            themeSidebarBorder = 'border-cyan-400';
             menuItems = [
                 { id: 'STRATEGY', label: language === 'EN' ? "Core Strategy" : "核心策略", icon: Target },
                 { id: 'SCRIPT', label: language === 'EN' ? "AV Script" : "声画分镜", icon: Film },
@@ -283,55 +289,83 @@ export const BlueprintEditor: React.FC<BlueprintEditorProps> = ({
                 { id: 'ASSETS', label: language === 'EN' ? "Key Assets" : "关键资产", icon: Box },
                 { id: 'METONYMY', label: language === 'EN' ? "Script Metonymy" : "剧本转喻", icon: Wand2 }
             ];
+        } else if (effectiveDriverType === DriverType.EXPERIMENTAL) {
+            menuItems = [
+                { id: 'PHENOMENA', label: language === 'EN' ? "Phenomenology" : "现象学图谱", icon: Eye },
+                { id: 'STRUCTURAL', label: language === 'EN' ? "Structural Form" : "结构形式", icon: Layers },
+                { id: 'MATERIAL', label: language === 'EN' ? "Material Action" : "物质行动", icon: Terminal },
+                { id: 'ALGORITHM', label: language === 'EN' ? "Algorithmic Rules" : "算法规则", icon: Terminal },
+                { id: 'METONYMY', label: language === 'EN' ? "Process Logic" : "生成演练", icon: Wand2 }
+            ];
+        } else if (effectiveDriverType === DriverType.AESTHETIC) {
+            menuItems = [
+                { id: 'AESTHETIC', label: language === 'EN' ? "Aesthetic Rules" : "美学法则", icon: Palette },
+                { id: 'ASSETS', label: language === 'EN' ? "Visual Components" : "组件切片", icon: Box },
+                { id: 'POETIC', label: language === 'EN' ? "Aesthetic Prompt" : "美学提示词", icon: Feather }
+            ];
+        } else if (effectiveDriverType === DriverType.TRAILER) {
+            menuItems = [
+                { id: 'PREMISE', label: language === 'EN' ? "Core Premise" : "核心动因", icon: Flame },
+                { id: 'RHYTHM', label: language === 'EN' ? "Editing Rhythm" : "剪辑律动", icon: Activity },
+                { id: 'TRAILER', label: language === 'EN' ? "Trailer Script" : "预告分镜", icon: Film },
+                { id: 'ASSETS', label: language === 'EN' ? "Key Assets" : "关键资产", icon: Box },
+                { id: 'METONYMY', label: language === 'EN' ? "Script Metonymy" : "剧本转喻", icon: Wand2 }
+            ];
+        } else { // Default for Narrative
+            menuItems = [
+                { id: 'NARRATIVE', label: language === 'EN' ? "Core Narrative" : "核心叙事", icon: BookOpen },
+                { id: 'ASSETS', label: language === 'EN' ? "Scene & Assets" : "场景资产", icon: ImageIcon },
+                { id: 'ANALYSIS', label: language === 'EN' ? "Psycho Analysis" : "心理拓扑", icon: BrainCircuit },
+                { id: 'METONYMY', label: language === 'EN' ? "Script Metonymy" : "剧本转喻", icon: Wand2 }
+            ];
+        }
+
+        if (effectiveTheme === 'retro') {
+            themeAccent = 'text-[#8B261D]';
+            themeText = 'text-[#8B261D]';
+            themeHoverText = 'group-hover:text-[#8B261D]';
+            themeBorder = 'border-[#8B261D]/30';
+            themeBgActive = 'bg-[#8B261D]/10';
+            themeSidebarBg = 'bg-[#F4EFE0]/98';
+            themeSidebarBorder = 'border-black'; // Black divider for retro mode
+            themeActiveBorder = 'border-[#8B261D]';
+            themeEmptyPulse = 'bg-[#8B261D]/20';
+        } else if (effectiveDriverType === DriverType.COMMERCIAL) {
+            themeAccent = 'text-cyan-400';
+            themeText = 'text-cyan-400';
+            themeHoverText = 'group-hover:text-cyan-400';
+            themeBorder = 'border-cyan-500/30';
+            themeBgActive = 'bg-cyan-900/20';
+            themeSidebarBorder = 'border-cyan-400/15';
+            themeActiveBorder = 'border-cyan-400';
         } else if (effectiveDriverType === DriverType.AESTHETIC) {
             themeAccent = 'text-rose-400';
             themeText = 'text-rose-400';
             themeHoverText = 'group-hover:text-rose-400';
             themeBorder = 'border-rose-500/30';
             themeBgActive = 'bg-rose-900/20';
-            themeSidebarBorder = 'border-rose-400';
-            menuItems = [
-                { id: 'L0_SOUL', label: language === 'EN' ? "L0. Soul (Concept)" : "L0. 魂 (核心)", icon: BookOpen },
-                { id: 'L1_L4_MATRIX', label: language === 'EN' ? "L1-L4. Matrix" : "L1-L4. 矩阵", icon: Layers },
-                { id: 'L5_TECH', label: language === 'EN' ? "L5. Tech (Render)" : "L5. 质 (渲染)", icon: Zap },
-                { id: 'ASSETS', label: language === 'EN' ? "Assets" : "视觉资产", icon: ImageIcon }
-            ];
+            themeSidebarBorder = 'border-rose-400/15';
+            themeActiveBorder = 'border-rose-400';
         } else if (effectiveDriverType === DriverType.EXPERIMENTAL) {
             themeAccent = 'text-purple-400';
             themeText = 'text-purple-400';
             themeHoverText = 'group-hover:text-purple-400';
             themeBorder = 'border-purple-500/30';
             themeBgActive = 'bg-purple-900/20';
-            themeSidebarBorder = 'border-purple-400';
-            menuItems = [
-                { id: 'CONCEPT', label: language === 'EN' ? "Concept Axiom" : "核心观念", icon: TestTube },
-                { id: 'PROTOCOL', label: language === 'EN' ? "Operation" : "介入手段", icon: Layers },
-                { id: 'SENSATION', label: language === 'EN' ? "Affect" : "生理情动", icon: Zap },
-                { id: 'ASSETS', label: language === 'EN' ? "Objects" : "意向对象", icon: Box }
-            ];
+            themeSidebarBorder = 'border-purple-400/15';
+            themeActiveBorder = 'border-purple-400';
         } else if (effectiveDriverType === DriverType.TRAILER) {
             themeAccent = 'text-orange-400';
             themeText = 'text-orange-400';
             themeHoverText = 'group-hover:text-orange-400';
             themeBorder = 'border-orange-500/30';
             themeBgActive = 'bg-orange-900/20';
-            themeSidebarBorder = 'border-orange-400';
-            menuItems = [
-                { id: 'HYPE', label: language === 'EN' ? "The Hook" : "诱饵钩子", icon: Zap },
-                { id: 'THE_CUT', label: language === 'EN' ? "The Cut" : "剪辑台", icon: Film },
-                { id: 'ASSETS', label: language === 'EN' ? "Key Frames" : "关键帧", icon: ImageIcon }
-            ];
-        } else {
-            menuItems = [
-                { id: 'NARRATIVE', label: language === 'EN' ? "Narrative" : "叙事核心", icon: BookOpen },
-                { id: 'ASSETS', label: language === 'EN' ? "Visual Assets" : "视觉资产", icon: ImageIcon },
-                { id: 'ANALYSIS', label: language === 'EN' ? "Psychoanalysis" : "精神分析", icon: BrainCircuit },
-                { id: 'METONYMY', label: language === 'EN' ? "Script Metonymy" : "剧本转喻", icon: Wand2 }
-            ];
+            themeSidebarBorder = 'border-orange-400/15';
+            themeActiveBorder = 'border-orange-400';
         }
 
-        return { type: effectiveDriverType, themeAccent, themeBorder, themeText, themeHoverText, themeBgActive, themeSidebarBorder, menuItems };
-    }, [effectiveDriverType, language]);
+        return { type: effectiveDriverType, themeAccent, themeBorder, themeText, themeHoverText, themeBgActive, themeSidebarBorder, themeActiveBorder, themeSidebarBg, themeEmptyPulse, menuItems };
+    }, [effectiveDriverType, language, effectiveTheme]);
 
     const [activeTab, setActiveTab] = useState<string>(uiConfig.menuItems[0].id);
 
@@ -588,6 +622,7 @@ ${psychoHtml}
                     onZoom={setLightboxImage}
                     themeAccent={uiConfig.themeAccent}
                     themeBorder={uiConfig.themeBorder}
+                    theme={effectiveTheme}
                 />
             );
         }
@@ -604,8 +639,10 @@ ${psychoHtml}
                             themeBorder={uiConfig.themeBorder}
                             isFullScreen={!isSidebarOpen}
                             onToggleFullScreen={() => setIsSidebarOpen(prev => !prev)}
+                            onSutureOpenChange={onSutureOpenChange}
                             fieldState={fieldState}
                             onSaveToHistory={onSaveToHistory}
+                            theme={effectiveTheme}
                         />
                     );
                 }
@@ -619,6 +656,7 @@ ${psychoHtml}
                         onUpdateBlueprint={updateCurrentBlueprint}
                         themeAccent={uiConfig.themeAccent}
                         themeBorder={uiConfig.themeBorder}
+                        theme={effectiveTheme}
                     />
                 );
             case DriverType.EXPERIMENTAL:
@@ -630,6 +668,7 @@ ${psychoHtml}
                         onUpdateBlueprint={updateCurrentBlueprint}
                         themeAccent={uiConfig.themeAccent}
                         themeBorder={uiConfig.themeBorder}
+                        theme={effectiveTheme}
                     />
                 );
             case DriverType.AESTHETIC:
@@ -647,9 +686,27 @@ ${psychoHtml}
                         aestheticMode={aestheticMode}
                         // Added customLibraryDefs to propagate to AestheticView
                         customLibraryDefs={customLibraryDefs}
+                        theme={effectiveTheme}
                     />
                 );
             case DriverType.TRAILER:
+                if (activeTab === 'METONYMY') {
+                    return (
+                        <MetonymyView
+                            blueprint={effectiveBlueprint}
+                            language={language}
+                            onUpdateBlueprint={updateCurrentBlueprint}
+                            themeAccent={uiConfig.themeAccent}
+                            themeBorder={uiConfig.themeBorder}
+                            isFullScreen={!isSidebarOpen}
+                            onToggleFullScreen={() => setIsSidebarOpen(prev => !prev)}
+                            onSutureOpenChange={onSutureOpenChange}
+                            fieldState={fieldState}
+                            onSaveToHistory={onSaveToHistory}
+                            theme={effectiveTheme}
+                        />
+                    );
+                }
                 return (
                     <TrailerView
                         blueprint={effectiveBlueprint}
@@ -658,6 +715,7 @@ ${psychoHtml}
                         onUpdateBlueprint={updateCurrentBlueprint}
                         themeAccent={uiConfig.themeAccent}
                         themeBorder={uiConfig.themeBorder}
+                        theme={effectiveTheme}
                     />
                 );
             default: // NARRATIVE
@@ -671,6 +729,7 @@ ${psychoHtml}
                             onUpdateBlueprint={updateCurrentBlueprint}
                             fieldState={fieldState}
                             themeAccent={uiConfig.themeAccent}
+                            theme={effectiveTheme}
                         />
                     );
                 }
@@ -684,8 +743,10 @@ ${psychoHtml}
                             themeBorder={uiConfig.themeBorder}
                             isFullScreen={!isSidebarOpen}
                             onToggleFullScreen={() => setIsSidebarOpen(prev => !prev)}
+                            onSutureOpenChange={onSutureOpenChange}
                             fieldState={fieldState}
                             onSaveToHistory={onSaveToHistory}
+                            theme={effectiveTheme}
                         />
                     );
                 }
@@ -699,30 +760,31 @@ ${psychoHtml}
                         themeBorder={uiConfig.themeBorder}
                         themeBgActive={uiConfig.themeBgActive}
                         onUpdateBlueprint={updateCurrentBlueprint}
+                        theme={effectiveTheme}
                     />
                 );
         }
     };
 
     return (
-        <div className="absolute inset-0 bg-[#080808] flex flex-col z-10 animate-in slide-in-from-bottom-4 duration-500">
+        <div className={`absolute inset-0 ${effectiveTheme === 'retro' ? 'bg-[#F9F7F1]' : 'bg-[#080808]'} flex flex-col z-10 animate-in slide-in-from-bottom-4 duration-500`}>
 
             {/* Main Content */}
             <div className="flex-1 flex overflow-hidden relative z-10">
                 {/* PARAMETERS SIDEBAR */}
                 <div className={`
-              absolute top-0 bottom-0 left-0 z-20
-              w-[420px]
-              bg-[#0c0c0c]/95 backdrop-blur-md border-r border-zinc-800
-              transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]
-              ${isParamsPanelOpen ? 'translate-x-0' : '-translate-x-full'}
-              flex flex-col shadow-[10px_0_30px_rgba(0,0,0,0.3)]
-          `}>
+                    absolute top-0 bottom-0 left-0 z-20
+                    w-[420px]
+                    ${effectiveTheme === 'retro' ? 'bg-[#DCD8CF]' : 'bg-[#0c0c0c]/95 backdrop-blur-md'} border-r ${effectiveTheme === 'retro' ? 'border-[#8B261D]/20' : 'border-zinc-800'}
+                    transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]
+                    ${isParamsPanelOpen ? 'translate-x-0' : '-translate-x-full'}
+                    flex flex-col ${effectiveTheme === 'retro' ? '' : 'shadow-[10px_0_30px_rgba(0,0,0,0.3)]'}
+                `}>
                     {/* Sidebar Content */}
-                    <div className="p-6 border-b border-zinc-800 flex justify-between items-center bg-[#0a0a0a]">
+                    <div className={`p-6 border-b ${effectiveTheme === 'retro' ? 'border-[#8B261D]/10 bg-[#D4D0C5]' : 'border-zinc-800 bg-[#0a0a0a]'} flex justify-between items-center`}>
                         <div className="flex items-center gap-3">
                             <Database className={uiConfig.themeText.replace('text-', 'text-')} size={20} />
-                            <span className="text-base font-bold text-white uppercase tracking-widest">
+                            <span className={`text-base font-bold ${effectiveTheme === 'retro' ? 'text-black' : 'text-white'} uppercase tracking-widest`}>
                                 {language === 'EN' ? "Engine Parameters" : "引擎参数概览"}
                             </span>
                         </div>
@@ -764,13 +826,13 @@ ${psychoHtml}
                                     const safeValues = values as string[];
                                     if (!safeValues || safeValues.length === 0) return null;
                                     return (
-                                        <div key={key} className="flex flex-col gap-2 p-4 rounded-lg bg-zinc-900/50 border border-zinc-800/50 hover:border-zinc-700 transition-colors">
+                                        <div key={key} className={`flex flex-col gap-2 p-4 rounded-lg ${effectiveTheme === 'retro' ? 'bg-white/50 border-[#8B261D]/10' : 'bg-zinc-900/50 border-zinc-800/50'} border hover:border-zinc-700 transition-colors`}>
                                             <span className={`text-xs font-bold uppercase tracking-widest ${uiConfig.themeText} opacity-70 truncate`}>
                                                 {getBlockName(key)}
                                             </span>
                                             <div className="flex flex-wrap gap-2">
                                                 {safeValues.map((v, i) => (
-                                                    <span key={i} className="text-sm text-zinc-200 font-serif leading-tight break-words border-b border-white/10 pb-0.5">
+                                                    <span key={i} className={`text-sm ${effectiveTheme === 'retro' ? 'text-zinc-800' : 'text-zinc-200'} font-serif leading-tight break-words border-b ${effectiveTheme === 'retro' ? 'border-[#8B261D]/10' : 'border-white/10'} pb-0.5`}>
                                                         {v.split('(')[0]}
                                                     </span>
                                                 ))}
@@ -788,204 +850,212 @@ ${psychoHtml}
                     </div>
                 </div>
 
-                <aside className={`${isSidebarOpen ? 'w-64 translate-x-0' : 'w-0 -translate-x-full opacity-0 overflow-hidden'} bg-[#0a0a0a] border-r border-zinc-800 flex flex-col shrink-0 transition-all duration-300 ease-in-out`}>
-                    <div className="w-64 flex flex-col h-full">
-                        <div className="flex-1 flex flex-col py-6">
-                            <div className="px-6 mb-4 text-[10px] font-bold text-zinc-600 uppercase tracking-widest">
-                                {language === 'EN' ? `${uiConfig.type} BIBLE` : `${driverName} 圣经`}
+                {!isSutureOpen && (
+                    <aside className={`${isSidebarOpen ? 'w-64 translate-x-0' : 'w-0 -translate-x-full opacity-0 overflow-hidden'} ${uiConfig.themeSidebarBg} border-r ${uiConfig.themeSidebarBorder} flex flex-col shrink-0 transition-all duration-300 ease-in-out`}>
+                        <div className="w-64 flex flex-col h-full">
+                            <div className="flex-1 flex flex-col py-6">
+                                <div className="px-6 mb-4 text-[10px] font-bold text-zinc-600 uppercase tracking-widest">
+                                    {language === 'EN' ? `${uiConfig.type} BIBLE` : `${driverName} 圣经`}
+                                </div>
+                                <nav className="flex flex-col gap-1">
+                                    {uiConfig.menuItems.map(item => (
+                                        <button
+                                            key={item.id}
+                                            onClick={() => setActiveTab(item.id)}
+                                            className={`w-full text-left px-6 py-4 flex items-center gap-3 transition-all border-r-4 ${activeTab === item.id ? (effectiveTheme === 'retro' ? `bg-white text-[#8B261D] border-[#8B261D]` : `bg-zinc-900 text-white ${uiConfig.themeActiveBorder}`) : (effectiveTheme === 'retro' ? 'text-zinc-600 border-transparent hover:bg-white/50 hover:text-black' : 'text-zinc-500 border-transparent hover:bg-zinc-900/50 hover:text-zinc-300')}`}
+                                        >
+                                            <item.icon size={18} className={activeTab === item.id ? uiConfig.themeText : ''} />
+                                            <span className="text-xs font-bold uppercase tracking-wider">{item.label}</span>
+                                        </button>
+                                    ))}
+                                </nav>
                             </div>
-                            <nav className="flex flex-col gap-1">
-                                {uiConfig.menuItems.map(item => (
-                                    <button
-                                        key={item.id}
-                                        onClick={() => setActiveTab(item.id)}
-                                        className={`w-full text-left px-6 py-4 flex items-center gap-3 transition-all border-r-2 ${activeTab === item.id ? `bg-zinc-900 text-white ${uiConfig.themeSidebarBorder}` : 'text-zinc-500 border-transparent hover:bg-zinc-900/50 hover:text-zinc-300'}`}
-                                    >
-                                        <item.icon size={18} className={activeTab === item.id ? uiConfig.themeText : ''} />
-                                        <span className="text-xs font-bold uppercase tracking-wider">{item.label}</span>
-                                    </button>
-                                ))}
-                            </nav>
                         </div>
-                        <div className="p-6 border-t border-zinc-800">
-                            <span className="text-[10px] font-mono text-zinc-600 block mb-1">
-                                {language === 'EN' ? "STATUS" : "状态"}
-                            </span>
-                            <span className={`text-xs font-bold ${uiConfig.themeText} opacity-80`}>
-                                {effectiveBlueprint.styleName || "Template"}
-                            </span>
-                        </div>
-                    </div>
-                </aside>
+                    </aside>
+                )}
 
-                <main className={`flex-1 ${isMetonymyMode ? 'overflow-hidden' : 'overflow-y-auto custom-scrollbar'} bg-[#080808] ${mainPaddingClass} relative transition-all duration-300`}>
+                <main className={`flex-1 ${isMetonymyMode ? 'overflow-hidden' : 'overflow-y-auto custom-scrollbar'} ${effectiveTheme === 'retro' ? 'bg-[#F4EFE0]' : 'bg-[#080808]'} ${mainPaddingClass} relative transition-all duration-300`}>
                     {renderContent()}
                 </main>
             </div>
 
             {/* Footer */}
-            <footer className="h-20 bg-black/90 backdrop-blur-md border-t border-white/10 flex items-center justify-between px-4 md:px-8 shrink-0 relative z-0">
-                <div className="flex items-center gap-4 shrink-0">
-                    <button onClick={onGoHome} className="flex items-center gap-3 px-6 py-3 bg-zinc-900/50 hover:bg-zinc-800 border border-zinc-700 rounded-lg text-xs font-bold uppercase tracking-widest text-zinc-400 hover:text-white transition-all group min-w-[140px]">
-                        <Home size={16} className="group-hover:scale-110 transition-transform" />
-                        <span>{language === 'EN' ? "Back to Engine" : "返回引擎"}</span>
-                    </button>
-                    <button onClick={onClose} className="flex items-center gap-3 px-6 py-3 bg-zinc-900/50 hover:bg-zinc-800 border border-zinc-700 rounded-lg text-xs font-bold uppercase tracking-widest text-zinc-400 hover:text-white transition-all group min-w-[140px]">
-                        <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-                        <span>{language === 'EN' ? "Back to Paths" : "返回分支"}</span>
-                    </button>
-
-                    <button
-                        onClick={() => setIsParamsPanelOpen(!isParamsPanelOpen)}
-                        className={`flex items-center gap-3 px-6 py-3 rounded-lg text-xs font-bold uppercase tracking-widest transition-all group min-w-[140px] border ${isParamsPanelOpen ? 'bg-zinc-800 border-zinc-600 text-white' : 'bg-zinc-900/50 border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800'}`}
-                    >
-                        <List size={16} />
-                        <span>{language === 'EN' ? "Parameters" : "查看参数"}</span>
-                    </button>
-                </div>
-
-                <div className="flex-1 flex justify-center items-center gap-6 mx-4 overflow-x-auto no-scrollbar">
-                    <button onClick={onOpenHistory} className="flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]">
-                        <HistoryIcon size={18} className={`transition-colors text-zinc-400 ${uiConfig.themeHoverText}`} />
-                        <span className={`text-[9px] font-bold uppercase tracking-wider text-zinc-400 ${uiConfig.themeHoverText}`}>
-                            {language === 'EN' ? "Archive" : "档案馆"}
-                        </span>
-                    </button>
-                    <div className="w-px h-8 bg-zinc-800 shrink-0"></div>
-
-                    <button
-                        onClick={handleSaveToCollection}
-                        className="flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]"
-                    >
-                        <Bookmark
-                            size={18}
-                            className={`transition-colors ${isSaved ? 'text-red-500 fill-red-500 animate-bounce' : `text-zinc-400 ${uiConfig.themeHoverText}`}`}
-                        />
-                        <span className={`text-[9px] font-bold uppercase tracking-wider ${isSaved ? 'text-red-500' : `text-zinc-400 ${uiConfig.themeHoverText}`}`}>
-                            {isSaved ? (language === 'EN' ? "Saved" : "已收藏") : (language === 'EN' ? "Save" : "永久收藏")}
-                        </span>
-                    </button>
-
-                    <div className="w-px h-8 bg-zinc-800 shrink-0"></div>
-                    {uiConfig.type !== DriverType.AESTHETIC && (
-                        <>
-                            <button onClick={() => setIsContinueModalOpen(true)} disabled={isContinuing} className="flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]">
-                                {isContinuing ? <Loader2 size={18} className={`animate-spin ${uiConfig.themeAccent}`} /> : <Wand2 size={18} className={`transition-colors text-zinc-400 ${uiConfig.themeHoverText}`} />}
-                                <span className={`text-[9px] font-bold uppercase tracking-wider text-zinc-400 ${uiConfig.themeHoverText}`}>
-                                    {language === 'EN' ? "Continue" : "续写"}
-                                </span>
-                            </button>
-                            <div className="w-px h-8 bg-zinc-800 shrink-0"></div>
-
-                            {/* Continue with Image Upload */}
-                            <button
-                                onClick={() => !isContinueUploading && continueFileInputRef.current?.click()}
-                                disabled={isContinueUploading}
-                                className="flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]"
-                            >
-                                {isContinueUploading ? (
-                                    <Loader2 size={18} className={`animate-spin ${uiConfig.themeAccent}`} />
-                                ) : (
-                                    <Upload size={18} className={`transition-colors text-zinc-400 ${uiConfig.themeHoverText}`} />
-                                )}
-                                <span className={`text-[9px] font-bold uppercase tracking-wider text-zinc-400 ${uiConfig.themeHoverText}`}>
-                                    {isContinueUploading ? (language === 'EN' ? "Uploading" : "上传中") : (language === 'EN' ? "Image-to-Clip" : "图配文")}
-                                </span>
-                            </button>
-                            <div className="w-px h-8 bg-zinc-800 shrink-0"></div>
-                        </>
-                    )}
-
-                    <button onClick={handleGlobalCopyClick} className="flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]">
-                        {globalCopied ? <Check size={18} className="text-green-500" /> : <ClipboardCopy size={18} className={`transition-colors text-zinc-400 ${uiConfig.themeHoverText}`} />}
-                        <span className={`text-[9px] font-bold uppercase tracking-wider ${globalCopied ? 'text-green-500' : `text-zinc-400 ${uiConfig.themeHoverText}`}`}>
-                            {language === 'EN' ? "Copy All" : "全局复制"}
-                        </span>
-                    </button>
-
-                    <div className="w-px h-8 bg-zinc-800 shrink-0"></div>
-
-                    <button onClick={handleExportHtml} className="flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]">
-                        <Download size={18} className={`transition-colors text-zinc-400 ${uiConfig.themeHoverText}`} />
-                        <span className={`text-[9px] font-bold uppercase tracking-wider text-zinc-400 ${uiConfig.themeHoverText}`}>
-                            {language === 'EN' ? "Download" : "导出HTML"}
-                        </span>
-                    </button>
-
-                    <div className="w-px h-8 bg-zinc-800 shrink-0"></div>
-
-                    <button
-                        onClick={() => setIsTaskManagerOpen(!isTaskManagerOpen)}
-                        className="flex flex-col items-center gap-1.5 shrink-0 min-w-[60px] relative"
-                    >
-                        <div className="relative">
-                            {/* Breathing Light */}
-                            {activeTaskCount > 0 && (
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <div className={`w-6 h-6 rounded-full ${uiConfig.themeText.replace('text-', 'bg-')} opacity-30 animate-pulse blur-md`}></div>
-                                    <div className={`w-4 h-4 rounded-full ${uiConfig.themeText.replace('text-', 'bg-')} opacity-50 animate-pulse blur-sm`}></div>
-                                </div>
-                            )}
-                            <Activity size={18} className={`relative z-10 transition-colors ${isTaskManagerOpen ? uiConfig.themeText : `text-zinc-400 hover:text-white`}`} />
-                            {activeTaskCount > 0 && (
-                                <span className={`absolute -top-1 -right-1 w-4 h-4 bg-[#050505] border border-white/10 ${uiConfig.themeText} rounded-full text-[9px] flex items-center justify-center font-bold shadow-[0_2px_10px_rgba(0,0,0,0.5)] z-20 leading-none`}>
-                                    {activeTaskCount}
-                                </span>
-                            )}
-                        </div>
-                        <span className={`text-[9px] font-bold uppercase tracking-wider relative z-10 ${isTaskManagerOpen ? uiConfig.themeText : `text-zinc-400 hover:text-white`}`}>
-                            {language === 'EN' ? "Tasks" : "任务中心"}
-                        </span>
-                    </button>
-                </div>
-
-                <div className="flex items-center gap-4 shrink-0">
-                    <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mr-2">
-                            {language === 'EN' ? `VER ${currentIndex + 1} / ${timeline.length}` : `第 ${currentIndex + 1} / ${timeline.length} 版`}
-                        </span>
-                        <button onClick={() => setCurrentIndex(prev => Math.max(0, prev - 1))} disabled={currentIndex === 0} className="p-2 bg-zinc-900 border border-zinc-800 rounded hover:bg-zinc-800 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-zinc-400">
-                            <ArrowLeft size={16} />
+            {!isSutureOpen && (
+                <footer className={`fixed bottom-0 left-0 right-0 h-14 bg-[var(--bg-header)] backdrop-blur-md border-t ${uiConfig.themeSidebarBorder} flex items-center justify-between px-6 md:px-12 z-40 transition-colors duration-500`}>
+                    <div className="flex gap-4">
+                        <button onClick={onGoHome} className={`flex items-center gap-3 px-6 py-3 bg-[var(--bg-panel)]/50 hover:bg-[var(--bg-panel)] border ${uiConfig.themeSidebarBorder} rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-300 group min-w-[140px] hover:scale-105 active:scale-95 ${effectiveTheme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'}`}>
+                            <Home size={16} className="group-hover:scale-110 transition-transform" />
+                            <span>{language === 'EN' ? "Back to Engine" : "返回引擎"}</span>
                         </button>
-                        <button onClick={() => setCurrentIndex(prev => Math.min(timeline.length - 1, prev + 1))} disabled={currentIndex === timeline.length - 1} className="p-2 bg-zinc-900 border border-zinc-800 rounded hover:bg-zinc-800 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-zinc-400">
-                            <ArrowRight size={16} />
+                        <button onClick={onClose} className={`flex items-center gap-3 px-6 py-3 bg-[var(--bg-panel)]/50 hover:bg-[var(--bg-panel)] border ${uiConfig.themeSidebarBorder} rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-300 group min-w-[140px] hover:scale-105 active:scale-95 ${effectiveTheme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'}`}>
+                            <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+                            <span>{language === 'EN' ? "Back to Paths" : "返回分支"}</span>
+                        </button>
+    
+                        <button
+                            onClick={() => setIsParamsPanelOpen(!isParamsPanelOpen)}
+                            className={`flex items-center gap-3 px-6 py-3 rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-300 group min-w-[140px] border ${isParamsPanelOpen ? (effectiveTheme === 'retro' ? 'bg-[#8B261D] border-[#8B261D] text-white shadow-none' : 'bg-zinc-800 border-zinc-600 text-white') : `bg-[var(--bg-panel)]/50 hover:bg-[var(--bg-panel)] border-[var(--border-main)] ${effectiveTheme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'}`} hover:scale-105 active:scale-95`}
+                        >
+                            <List size={16} />
+                            <span>{language === 'EN' ? "Parameters" : "查看参数"}</span>
                         </button>
                     </div>
-                </div>
-            </footer>
+    
+                    <div className="flex-1 flex justify-center items-center gap-6 mx-4 overflow-x-auto no-scrollbar">
+                        <button onClick={onOpenHistory} className="flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]">
+                            <HistoryIcon size={18} className={`transition-colors ${effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 ${uiConfig.themeHoverText}`}`} />
+                            <span className={`text-[9px] font-bold uppercase tracking-wider ${effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 ${uiConfig.themeHoverText}`}`}>
+                                {language === 'EN' ? "Archive" : "档案馆"}
+                            </span>
+                        </button>
+                        <div className="w-px h-8 bg-[var(--border-main)] shrink-0"></div>
+    
+                        <button
+                            onClick={handleSaveToCollection}
+                            className="flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]"
+                        >
+                            <Bookmark
+                                size={18}
+                                className={`transition-colors ${isSaved ? 'text-red-500 fill-red-500 animate-bounce' : (effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 ${uiConfig.themeHoverText}`)}`}
+                            />
+                            <span className={`text-[9px] font-bold uppercase tracking-wider ${isSaved ? 'text-red-500' : (effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 ${uiConfig.themeHoverText}`)}`}>
+                                {isSaved ? (language === 'EN' ? "Saved" : "已收藏") : (language === 'EN' ? "Save" : "永久收藏")}
+                            </span>
+                        </button>
+    
+                        <div className="w-px h-8 bg-[var(--border-main)] shrink-0"></div>
+                        {uiConfig.type !== DriverType.AESTHETIC && (
+                            <>
+                                <button onClick={() => setIsContinueModalOpen(true)} disabled={isContinuing} className="flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]">
+                                    {isContinuing ? <Loader2 size={18} className={`animate-spin ${uiConfig.themeAccent}`} /> : <Wand2 size={18} className={`transition-colors ${effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 ${uiConfig.themeHoverText}`}`} />}
+                                    <span className={`text-[9px] font-bold uppercase tracking-wider ${effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 ${uiConfig.themeHoverText}`}`}>
+                                        {language === 'EN' ? "Continue" : "续写"}
+                                    </span>
+                                </button>
+                                <div className={`w-px h-8 ${effectiveTheme === 'retro' ? 'bg-[#8B261D]/20' : 'bg-zinc-800'} shrink-0`}></div>
+    
+                                {/* Continue with Image Upload */}
+                                <button
+                                    onClick={() => !isContinueUploading && continueFileInputRef.current?.click()}
+                                    disabled={isContinueUploading}
+                                    className="flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]"
+                                >
+                                    {isContinueUploading ? (
+                                        <Loader2 size={18} className={`animate-spin ${uiConfig.themeAccent}`} />
+                                    ) : (
+                                        <Upload size={18} className={`transition-colors ${effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 ${uiConfig.themeHoverText}`}`} />
+                                    )}
+                                    <span className={`text-[9px] font-bold uppercase tracking-wider ${effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 ${uiConfig.themeHoverText}`}`}>
+                                        {isContinueUploading ? (language === 'EN' ? "Uploading" : "上传中") : (language === 'EN' ? "Image-to-Clip" : "图配文")}
+                                    </span>
+                                </button>
+                                <div className={`w-px h-8 ${effectiveTheme === 'retro' ? 'bg-[#8B261D]/20' : 'bg-zinc-800'} shrink-0`}></div>
+                            </>
+                        )}
+    
+                        <button onClick={handleGlobalCopyClick} className="flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]">
+                            {globalCopied ? <Check size={18} className="text-green-500" /> : <ClipboardCopy size={18} className={`transition-colors ${effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 ${uiConfig.themeHoverText}`}`} />}
+                            <span className={`text-[9px] font-bold uppercase tracking-wider ${globalCopied ? 'text-green-500' : (effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 ${uiConfig.themeHoverText}`)}`}>
+                                {language === 'EN' ? "Copy All" : "全局复制"}
+                            </span>
+                        </button>
+    
+                                <div className={`w-px h-8 ${effectiveTheme === 'retro' ? 'bg-[#8B261D]/20' : 'bg-zinc-800'} shrink-0`}></div>
+    
+                        <button onClick={handleExportHtml} className="flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]">
+                            <Download size={18} className={`transition-colors ${effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 ${uiConfig.themeHoverText}`}`} />
+                            <span className={`text-[9px] font-bold uppercase tracking-wider ${effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 ${uiConfig.themeHoverText}`}`}>
+                                {language === 'EN' ? "Download" : "导出HTML"}
+                            </span>
+                        </button>
+    
+                                <div className={`w-px h-8 ${effectiveTheme === 'retro' ? 'bg-[#8B261D]/20' : 'bg-zinc-800'} shrink-0`}></div>
+    
+                        <button
+                            onClick={() => setIsTaskManagerOpen(!isTaskManagerOpen)}
+                            className="flex flex-col items-center gap-1.5 shrink-0 min-w-[60px] relative"
+                        >
+                            <div className="relative">
+                                {/* Breathing Light */}
+                                {activeTaskCount > 0 && (
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <div className={`w-6 h-6 rounded-full ${uiConfig.themeEmptyPulse} opacity-30 animate-pulse blur-md`}></div>
+                                        <div className={`w-4 h-4 rounded-full ${uiConfig.themeEmptyPulse} opacity-50 animate-pulse blur-sm`}></div>
+                                    </div>
+                                )}
+                                <Activity size={18} className={`relative z-10 transition-colors ${isTaskManagerOpen ? uiConfig.themeText : (effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 hover:text-white`)}`} />
+                                {activeTaskCount > 0 && (
+                                    <span className={`absolute -top-1 -right-1 w-4 h-4 bg-[#050505] border border-white/10 ${uiConfig.themeText} rounded-full text-[9px] flex items-center justify-center font-bold shadow-[0_2px_10px_rgba(0,0,0,0.5)] z-20 leading-none`}>
+                                        {activeTaskCount}
+                                    </span>
+                                )}
+                            </div>
+                            <span className={`text-[9px] font-bold uppercase tracking-wider relative z-10 ${isTaskManagerOpen ? uiConfig.themeText : (effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 hover:text-white`)}`}>
+                                {language === 'EN' ? "Tasks" : "任务中心"}
+                            </span>
+                        </button>
+                    </div>
+    
+                    <div className="flex items-center gap-4 shrink-0">
+                        <div className="flex items-center gap-2">
+                            <span className={`text-[10px] font-bold ${effectiveTheme === 'retro' ? 'text-zinc-400' : 'text-zinc-500'} uppercase tracking-wider mr-2`}>
+                                {language === 'EN' ? `VER ${currentIndex + 1} / ${timeline.length}` : `第 ${currentIndex + 1} / ${timeline.length} 版`}
+                            </span>
+                            <button onClick={() => setCurrentIndex(prev => Math.max(0, prev - 1))} disabled={currentIndex === 0} className={`p-2 ${effectiveTheme === 'retro' ? 'bg-white border-[#8B261D]/10 hover:text-[#8B261D]' : 'bg-zinc-900 border-zinc-800 hover:bg-zinc-800 hover:text-white'} border rounded disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-zinc-400`}>
+                                <ArrowLeft size={16} />
+                            </button>
+                            <button onClick={() => setCurrentIndex(prev => Math.min(timeline.length - 1, prev + 1))} disabled={currentIndex === timeline.length - 1} className={`p-2 ${effectiveTheme === 'retro' ? 'bg-white border-[#8B261D]/10 hover:text-[#8B261D]' : 'bg-zinc-900 border-zinc-800 hover:bg-zinc-800 hover:text-white'} border rounded disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-zinc-400`}>
+                                <ArrowRight size={16} />
+                            </button>
+                        </div>
+                    </div>
+                    <div className="absolute left-[50%] -translate-x-[50%] flex items-center h-full">
+                        {/* Centered title display if needed */}
+                    </div>
+                </footer>
+            )}
 
             {isContinueModalOpen && (
-                <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-                    <div className="w-full max-w-lg bg-[#0c0c0c] border border-zinc-800 rounded-xl shadow-2xl p-6 relative">
-                        <button onClick={() => setIsContinueModalOpen(false)} className="absolute top-4 right-4 text-zinc-500 hover:text-white"><X size={20} /></button>
-                        <h3 className="text-lg font-bold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
-                            <Wand2 size={18} className={uiConfig.themeAccent} /> {language === 'EN' ? "Continue Story" : "续写故事"}
+                <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                    <div className={`w-full max-w-lg ${effectiveTheme === 'retro' ? 'bg-[#F9F7F1] border-[#8B261D]' : 'bg-[#0c0c0c] border-zinc-800'} border rounded-xl shadow-2xl p-6 relative`}>
+                        <button onClick={() => setIsContinueModalOpen(false)} className={`absolute top-4 right-4 ${effectiveTheme === 'retro' ? 'text-[#8B261D] hover:text-[#6D1E16]' : 'text-zinc-500 hover:text-white'}`}><X size={20} /></button>
+                        <h3 className={`text-lg font-bold ${effectiveTheme === 'retro' ? 'text-black' : 'text-white'} uppercase tracking-wider mb-4 flex items-center gap-2`}>
+                            <Wand2 size={18} className={effectiveTheme === 'retro' ? 'text-[#8B261D]' : uiConfig.themeAccent} /> {language === 'EN' ? "Continue Story" : "续写故事"}
                         </h3>
                         <div className="space-y-4">
                             <div className="space-y-2">
-                                <label className="text-[10px] font-bold uppercase text-zinc-500">{language === 'EN' ? "Instructions" : "续写要求"}</label>
-                                <textarea value={continueInput} onChange={(e) => setContinueInput(e.target.value)} placeholder={language === 'EN' ? "e.g. Introduce a new villain..." : "例如：引入一个新的反派，或者转向内心的冲突..."} className={`w-full h-32 bg-black/50 border border-zinc-800 rounded-lg p-3 text-sm text-white placeholder-zinc-700 focus:outline-none focus:${uiConfig.themeBorder.replace('/30', '/50')} resize-none`} />
+                                <label className={`text-[10px] font-bold uppercase ${effectiveTheme === 'retro' ? 'text-zinc-600' : 'text-zinc-500'}`}>{language === 'EN' ? "Instructions" : "续写要求"}</label>
+                                <textarea 
+                                    value={continueInput} 
+                                    onChange={(e) => setContinueInput(e.target.value)} 
+                                    placeholder={language === 'EN' ? "e.g. Introduce a new villain..." : "例如：引入一个新的反派，或者转向内心的冲突..."} 
+                                    className={`w-full h-32 ${effectiveTheme === 'retro' ? 'bg-white border-black/10 text-black' : 'bg-black/50 border-zinc-800 text-white'} border rounded-lg p-3 text-sm placeholder-zinc-700 focus:outline-none focus:border-[#8B261D]/50 resize-none`} 
+                                />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-[10px] font-bold uppercase text-zinc-500">{language === 'EN' ? "Visual Reference (Optional)" : "视觉参考 (可选)"}</label>
+                                <label className={`text-[10px] font-bold uppercase ${effectiveTheme === 'retro' ? 'text-zinc-600' : 'text-zinc-500'}`}>{language === 'EN' ? "Visual Reference (Optional)" : "视觉参考 (可选)"}</label>
                                 {continueImage ? (
-                                    <div className="relative w-full h-32 rounded-lg border border-zinc-800 overflow-hidden group">
+                                    <div className={`relative w-full h-32 rounded-lg border ${effectiveTheme === 'retro' ? 'border-[#8B261D]/20' : 'border-zinc-800'} overflow-hidden group`}>
                                         <img src={continueImage} className="w-full h-full object-cover" alt="Continue" />
                                         <button onClick={() => setContinueImage(null)} className="absolute top-2 right-2 p-1.5 bg-black/60 text-white rounded-full hover:bg-red-600 transition-colors"><X size={14} /></button>
                                     </div>
                                 ) : (
-                                    <div onClick={() => fileInputRef.current?.click()} className="w-full h-24 border border-dashed border-zinc-800 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-zinc-900/50 hover:border-zinc-600 transition-colors">
-                                        <div className="p-3 bg-zinc-900 rounded-full text-zinc-400 group-hover:text-white transition-all transform group-hover:scale-110 shadow-lg border border-zinc-800">
+                                    <div onClick={() => fileInputRef.current?.click()} className={`w-full h-24 border border-dashed ${effectiveTheme === 'retro' ? 'border-[#8B261D]/20' : 'border-zinc-800'} rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-zinc-900/50 hover:border-zinc-600 transition-all group`}>
+                                        <div className={`p-3 ${effectiveTheme === 'retro' ? 'bg-white border-black/5 text-[#8B261D]' : 'bg-zinc-900 border-zinc-800 text-zinc-400'} rounded-full group-hover:text-[#8B261D] transition-all transform group-hover:scale-110 shadow-sm border`}>
                                             {isContinueUploading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
                                         </div>
-                                        <span className="text-[10px] text-zinc-600 uppercase mt-2">
+                                        <span className={`text-[10px] ${effectiveTheme === 'retro' ? 'text-[#8B261D]/60' : 'text-zinc-600'} uppercase mt-2`}>
                                             {isContinueUploading ? (language === 'EN' ? "Uploading..." : "上传中...") : (language === 'EN' ? "Upload Image" : "上传图片")}
                                         </span>
                                         <input type="file" alt="Continue Image" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleContinueImageUpload} />
                                     </div>
                                 )}
                             </div>
-                            <button onClick={handleContinueSubmit} disabled={!continueInput.trim() && !continueImage} className={`w-full py-3 ${uiConfig.type === DriverType.COMMERCIAL ? 'bg-cyan-500 hover:bg-cyan-400' : (uiConfig.type === DriverType.AESTHETIC ? 'bg-rose-500 hover:bg-rose-400' : 'bg-gold-primary hover:bg-amber-400')} text-black font-bold uppercase tracking-widest rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2`}>
+                            <button 
+                                onClick={handleContinueSubmit} 
+                                disabled={!continueInput.trim() && !continueImage} 
+                                className={`w-full py-3 ${effectiveTheme === 'retro' ? 'bg-[#8B261D] hover:bg-[#6D1E16] text-white shadow-none' : (uiConfig.type === DriverType.COMMERCIAL ? 'bg-cyan-500 hover:bg-cyan-400' : (uiConfig.type === DriverType.AESTHETIC ? 'bg-rose-500 hover:bg-rose-400' : 'bg-gold-primary hover:bg-amber-400'))} font-bold uppercase tracking-widest rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2`}
+                            >
                                 {language === 'EN' ? "Generate Next Chapter" : "生成下一章"}
                             </button>
                         </div>

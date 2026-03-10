@@ -8,15 +8,51 @@ export const splitIntoParagraphs = (text: string): string[] => {
 
 // Scene Colors for visual distinction
 export const SCENE_COLORS = [
-    { name: 'Cyan', border: 'border-cyan-500', bg: 'bg-cyan-500/10', activeBg: 'bg-cyan-500/20', text: 'text-cyan-400', label: 'bg-cyan-900/80 text-cyan-200' },
-    { name: 'Orange', border: 'border-orange-500', bg: 'bg-orange-500/10', activeBg: 'bg-orange-500/20', text: 'text-orange-400', label: 'bg-orange-900/80 text-orange-200' },
-    { name: 'Purple', border: 'border-purple-500', bg: 'bg-purple-500/10', activeBg: 'bg-purple-500/20', text: 'text-purple-400', label: 'bg-purple-900/80 text-purple-200' },
-    { name: 'Emerald', border: 'border-emerald-500', bg: 'bg-emerald-500/10', activeBg: 'bg-emerald-500/20', text: 'text-emerald-400', label: 'bg-emerald-900/80 text-emerald-200' },
-    { name: 'Pink', border: 'border-pink-500', bg: 'bg-pink-500/10', activeBg: 'bg-pink-500/20', text: 'text-pink-400', label: 'bg-pink-900/80 text-pink-200' },
-    { name: 'Yellow', border: 'border-yellow-500', bg: 'bg-yellow-500/10', activeBg: 'bg-yellow-500/20', text: 'text-yellow-400', label: 'bg-yellow-900/80 text-yellow-200' },
-    { name: 'Indigo', border: 'border-indigo-500', bg: 'bg-indigo-500/10', activeBg: 'bg-indigo-500/20', text: 'text-indigo-400', label: 'bg-indigo-900/80 text-indigo-200' },
-    { name: 'Rose', border: 'border-rose-500', bg: 'bg-rose-500/10', activeBg: 'bg-rose-500/20', text: 'text-rose-400', label: 'bg-rose-900/80 text-rose-200' },
-    { name: 'Lime', border: 'border-lime-500', bg: 'bg-lime-500/10', activeBg: 'bg-lime-500/20', text: 'text-lime-400', label: 'bg-lime-900/80 text-lime-200' },
+    { 
+        name: 'Cyan', 
+        border: 'border-cyan-500', bg: 'bg-cyan-500/10', activeBg: 'bg-cyan-500/20', text: 'text-cyan-400', label: 'bg-cyan-900/80 text-cyan-200',
+        retro: { border: 'border-teal-600/30', bg: 'bg-teal-600/5', activeBg: 'bg-teal-600/10', text: 'text-teal-800', label: 'bg-teal-800 text-white' }
+    },
+    { 
+        name: 'Orange', 
+        border: 'border-orange-500', bg: 'bg-orange-500/10', activeBg: 'bg-orange-500/20', text: 'text-orange-400', label: 'bg-orange-900/80 text-orange-200',
+        retro: { border: 'border-amber-700/30', bg: 'bg-amber-700/5', activeBg: 'bg-amber-700/10', text: 'text-amber-900', label: 'bg-amber-900 text-white' }
+    },
+    { 
+        name: 'Purple', 
+        border: 'border-purple-500', bg: 'bg-purple-500/10', activeBg: 'bg-purple-500/20', text: 'text-purple-400', label: 'bg-purple-900/80 text-purple-200',
+        retro: { border: 'border-purple-800/20', bg: 'bg-purple-800/5', activeBg: 'bg-purple-800/10', text: 'text-purple-900', label: 'bg-purple-900 text-white' }
+    },
+    { 
+        name: 'Emerald', 
+        border: 'border-emerald-500', bg: 'bg-emerald-500/10', activeBg: 'bg-emerald-500/20', text: 'text-emerald-400', label: 'bg-emerald-900/80 text-emerald-200',
+        retro: { border: 'border-emerald-800/30', bg: 'bg-emerald-800/5', activeBg: 'bg-emerald-800/10', text: 'text-emerald-900', label: 'bg-emerald-900 text-white' }
+    },
+    { 
+        name: 'Pink', 
+        border: 'border-pink-500', bg: 'bg-pink-500/10', activeBg: 'bg-pink-500/20', text: 'text-pink-400', label: 'bg-pink-900/80 text-pink-200',
+        retro: { border: 'border-rose-800/30', bg: 'bg-rose-800/5', activeBg: 'bg-rose-800/10', text: 'text-rose-900', label: 'bg-rose-900 text-white' }
+    },
+    { 
+        name: 'Yellow', 
+        border: 'border-yellow-500', bg: 'bg-yellow-500/10', activeBg: 'bg-yellow-500/20', text: 'text-yellow-400', label: 'bg-yellow-900/80 text-yellow-200',
+        retro: { border: 'border-yellow-800/40', bg: 'bg-yellow-800/5', activeBg: 'bg-yellow-800/10', text: 'text-yellow-900', label: 'bg-yellow-900 text-white' }
+    },
+    { 
+        name: 'Indigo', 
+        border: 'border-indigo-500', bg: 'bg-indigo-500/10', activeBg: 'bg-indigo-500/20', text: 'text-indigo-400', label: 'bg-indigo-900/80 text-indigo-200',
+        retro: { border: 'border-blue-900/20', bg: 'bg-blue-900/5', activeBg: 'bg-blue-900/10', text: 'text-blue-950', label: 'bg-blue-950 text-white' }
+    },
+    { 
+        name: 'Rose', 
+        border: 'border-rose-500', bg: 'bg-rose-500/10', activeBg: 'bg-rose-500/20', text: 'text-rose-400', label: 'bg-rose-900/80 text-rose-200',
+        retro: { border: 'border-[#8B261D]/30', bg: 'bg-[#8B261D]/5', activeBg: 'bg-[#8B261D]/10', text: 'text-[#8B261D]', label: 'bg-[#8B261D] text-white' }
+    },
+    { 
+        name: 'Lime', 
+        border: 'border-lime-500', bg: 'bg-lime-500/10', activeBg: 'bg-lime-500/20', text: 'text-lime-400', label: 'bg-lime-900/80 text-lime-200',
+        retro: { border: 'border-lime-900/30', bg: 'bg-lime-900/5', activeBg: 'bg-lime-900/10', text: 'text-lime-950', label: 'bg-lime-950 text-white' }
+    },
 ];
 
 export const getSceneColor = (index: number) => SCENE_COLORS[index % SCENE_COLORS.length];

@@ -12,6 +12,7 @@ interface AnalysisViewProps {
     onUpdateBlueprint: (blueprint: CreativeBlueprint) => void;
     fieldState: NarrativeFieldState;
     themeAccent: string;
+    theme?: string;
 }
 
 const SimpleMathRenderer = ({ formula, language }: { formula: string, language: BlueprintLanguage }) => {
@@ -83,7 +84,7 @@ const SimpleMathRenderer = ({ formula, language }: { formula: string, language: 
 }
 
 export const AnalysisView: React.FC<AnalysisViewProps> = ({ 
-    blueprint, language, isAesthetic, onAnalyzePsycho, onUpdateBlueprint, fieldState, themeAccent 
+    blueprint, language, isAesthetic, onAnalyzePsycho, onUpdateBlueprint, fieldState, themeAccent, theme 
 }) => {
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     // Track start time for the processing timer
@@ -148,10 +149,10 @@ export const AnalysisView: React.FC<AnalysisViewProps> = ({
     return (
         <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
             {!blueprint.narrative?.psychoanalysis ? (
-                <div className="flex flex-col items-center justify-center py-20 bg-zinc-900/20 border border-zinc-800 rounded-2xl border-dashed">
-                    <Bot size={48} className="text-zinc-600 mb-6" />
-                    <h3 className="text-xl font-bold text-white mb-2">{language === 'EN' ? "Psychoanalytic Report" : "精神分析诊断报告"}</h3>
-                    <p className="text-zinc-500 text-sm mb-8 text-center max-w-md">
+                <div className={`flex flex-col items-center justify-center py-20 ${theme === 'retro' ? 'bg-white/40 border-black/10' : 'bg-zinc-900/20 border-zinc-800'} border rounded-2xl border-dashed`}>
+                    <Bot size={48} className={`${theme === 'retro' ? 'text-[#8B261D]' : 'text-zinc-600'} mb-6`} />
+                    <h3 className={`text-xl font-bold ${theme === 'retro' ? 'text-black' : 'text-white'} mb-2`}>{language === 'EN' ? "Psychoanalytic Report" : "精神分析诊断报告"}</h3>
+                    <p className={`${theme === 'retro' ? 'text-black/60' : 'text-zinc-500'} text-sm mb-8 text-center max-w-md`}>
                         {language === 'EN' 
                             ? "Generate a deep structural analysis based on Lacanian theory. Reveals hidden desires and ideological symptoms." 
                             : "生成基于拉康理论的深度结构分析。揭示文本背后的潜意识欲望与意识形态症候。"}
@@ -164,7 +165,7 @@ export const AnalysisView: React.FC<AnalysisViewProps> = ({
                     <button 
                         onClick={handleAnalyze}
                         disabled={isAnalyzing}
-                        className={`px-8 py-3 ${isAesthetic ? 'bg-rose-500 hover:bg-rose-400' : 'bg-gold-primary hover:bg-amber-400'} text-black font-bold uppercase tracking-widest rounded-lg flex items-center gap-2 transition-all disabled:opacity-50`}
+                        className={`px-8 py-3 ${theme === 'retro' ? 'bg-[#8B261D] hover:bg-[#631B15] text-white shadow-none' : (isAesthetic ? 'bg-rose-500 hover:bg-rose-400 text-black' : 'bg-gold-primary hover:bg-amber-400 text-black')} font-bold uppercase tracking-widest rounded-lg flex items-center gap-2 transition-all disabled:opacity-50`}
                     >
                         {isAnalyzing ? <Loader2 size={16} className="animate-spin" /> : <Zap size={16} />}
                         {isAnalyzing ? (
@@ -176,26 +177,26 @@ export const AnalysisView: React.FC<AnalysisViewProps> = ({
                     </button>
                 </div>
             ) : (
-                <div className="bg-[#050505] border border-zinc-800 p-10 rounded-2xl shadow-2xl space-y-10">
-                    <div className="flex justify-between items-start border-b border-zinc-800 pb-6">
+                <div className={`${theme === 'retro' ? 'bg-white border-black/10' : 'bg-[#050505] border-zinc-800'} border p-10 rounded-2xl shadow-2xl space-y-10`}>
+                    <div className={`flex justify-between items-start border-b ${theme === 'retro' ? 'border-black/10' : 'border-zinc-800'} pb-6`}>
                         <div className="flex items-center gap-4">
-                            <div className="p-3 bg-zinc-900 border border-zinc-700 rounded-lg">
+                            <div className={`p-3 ${theme === 'retro' ? 'bg-[#F4EFE0] border-black/10' : 'bg-zinc-900 border-zinc-700'} border rounded-lg`}>
                                 <Bot size={24} className={themeAccent} />
                             </div>
                             <div>
-                                <h3 className="text-2xl font-serif text-white">{language === 'EN' ? "Visionary Analysis" : "Visionary 深度诊断"}</h3>
-                                <p className="text-xs text-zinc-500 uppercase tracking-widest mt-1">Lacanian • Zizekian • Cultural Critique</p>
+                                <h3 className={`text-2xl font-serif ${theme === 'retro' ? 'text-black' : 'text-white'}`}>{language === 'EN' ? "Visionary Analysis" : "Visionary 深度诊断"}</h3>
+                                <p className={`text-xs ${theme === 'retro' ? 'text-[#8B261D]' : 'text-zinc-500'} uppercase tracking-widest mt-1`}>Lacanian • Zizekian • Cultural Critique</p>
                             </div>
                         </div>
                         <div className="flex gap-2">
                              <button 
                                 onClick={() => setIsEditing(!isEditing)}
-                                className="bg-zinc-900 px-3 py-2 text-zinc-400 hover:text-white rounded transition-colors flex items-center gap-2"
+                                className={`${theme === 'retro' ? 'bg-[#F4EFE0] text-[#8B261D] hover:bg-[#DCD8CF]' : 'bg-zinc-900 text-zinc-400 hover:text-white'} px-3 py-2 rounded transition-colors flex items-center gap-2`}
                                 title={isEditing ? "Preview Mode" : "Edit Mode"}
                             >
                                 {isEditing ? <Eye size={14} /> : <Edit3 size={14} />}
                             </button>
-                            <CopyButton text={blueprint.narrative?.psychoanalysis} className="bg-zinc-900 px-3 py-2 text-zinc-400 hover:text-white" label="COPY ALL" />
+                            <CopyButton text={blueprint.narrative?.psychoanalysis || ""} className={`${theme === 'retro' ? 'bg-[#F4EFE0] text-[#8B261D] hover:bg-[#DCD8CF]' : 'bg-zinc-900 text-zinc-400 hover:text-white'} px-3 py-2`} label="COPY ALL" />
                         </div>
                     </div>
                     
@@ -204,23 +205,23 @@ export const AnalysisView: React.FC<AnalysisViewProps> = ({
                             <textarea
                                 value={blueprint.narrative?.psychoanalysis || ""}
                                 onChange={(e) => handleUpdateText(e.target.value)}
-                                className="w-full h-[600px] bg-transparent text-zinc-300 leading-loose border border-zinc-800 rounded p-4 focus:ring-1 focus:ring-gold-primary resize-none focus:outline-none custom-scrollbar font-mono text-sm"
+                                className={`w-full h-[600px] bg-transparent ${theme === 'retro' ? 'text-black border-black/10' : 'text-zinc-300 border-zinc-800'} leading-loose border rounded p-4 focus:ring-1 focus:ring-gold-primary resize-none focus:outline-none custom-scrollbar font-mono text-sm`}
                                 placeholder={language === 'EN' ? "Analysis report..." : "分析报告..."}
                             />
                         ) : (
                             <div className="space-y-6">
                                 {/* PART 1: INTRO TEXT (Before Formula) */}
-                                <div className="bg-zinc-900/10 rounded-xl p-2 md:p-4">
+                                <div className={`${theme === 'retro' ? 'bg-[#F4EFE0]' : 'bg-zinc-900/10'} rounded-xl p-2 md:p-4 text-${theme === 'retro' ? 'black' : 'white'}`}>
                                     <MarkdownRenderer content={preText || (language === 'EN' ? "No analysis content." : "暂无分析内容。")} themeAccent={themeAccent} />
                                 </div>
 
                                 {/* PART 2: FORMULA (Attachment Style) */}
                                 {formula && (
-                                    <div className="bg-zinc-900/30 border border-dashed border-zinc-700 rounded-xl p-6 relative overflow-hidden group hover:border-gold-primary/30 transition-colors">
+                                    <div className={`${theme === 'retro' ? 'bg-white border-black/20' : 'bg-zinc-900/30 border-zinc-700'} border border-dashed rounded-xl p-6 relative overflow-hidden group hover:border-${themeAccent.replace('text-', '')}/30 transition-colors`}>
                                         <div className="absolute top-0 right-0 p-3 opacity-5 pointer-events-none">
-                                            <Cpu size={120} className="text-gold-primary" />
+                                            <Cpu size={120} className={themeAccent} />
                                         </div>
-                                        <div className="flex items-center gap-2 text-gold-primary text-[10px] font-bold uppercase tracking-[0.3em] mb-4">
+                                        <div className={`flex items-center gap-2 ${themeAccent} text-[10px] font-bold uppercase tracking-[0.3em] mb-4`}>
                                             <Zap size={12} className="fill-gold-primary" /> 
                                             {language === 'EN' ? "ATTACHMENT: CORE EQUATION" : "附件: 核心算式"}
                                         </div>
@@ -238,7 +239,7 @@ export const AnalysisView: React.FC<AnalysisViewProps> = ({
 
                                 {/* PART 3: REST OF REPORT (After Formula) */}
                                 {postText && (
-                                    <div className="bg-zinc-900/10 rounded-xl p-2 md:p-4">
+                                    <div className={`${theme === 'retro' ? 'bg-[#F4EFE0]' : 'bg-zinc-900/10'} rounded-xl p-2 md:p-4 text-${theme === 'retro' ? 'black' : 'white'}`}>
                                         <MarkdownRenderer content={postText} themeAccent={themeAccent} />
                                     </div>
                                 )}
@@ -246,8 +247,8 @@ export const AnalysisView: React.FC<AnalysisViewProps> = ({
                         )}
                     </div>
 
-                    <div className="mt-8 pt-6 border-t border-zinc-800 text-center flex justify-between items-center">
-                        <p className="text-[10px] text-zinc-600 font-mono uppercase tracking-[0.2em]">End of Confidential Report</p>
+                    <div className={`mt-8 pt-6 border-t ${theme === 'retro' ? 'border-black/10' : 'border-zinc-800'} text-center flex justify-between items-center`}>
+                        <p className={`text-[10px] ${theme === 'retro' ? 'text-[#8B261D]' : 'text-zinc-600'} font-mono uppercase tracking-[0.2em]`}>End of Confidential Report</p>
                          <button 
                             onClick={handleAnalyze}
                             disabled={isAnalyzing}

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { globalTaskManager, GenerationTask } from '../services/taskManager';
 import { Activity, X, PlayCircle, CheckCircle2, XCircle, AlertCircle, Clock, Square } from 'lucide-react';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface TaskManagerPanelProps {
     isOpen: boolean;
@@ -12,6 +13,7 @@ interface TaskManagerPanelProps {
 import { DriverType } from '../types';
 
 export const TaskManagerPanel: React.FC<TaskManagerPanelProps> = ({ isOpen, onClose, lang, driverType }) => {
+    const { theme } = useTheme();
     const [tasks, setTasks] = useState<GenerationTask[]>([]);
     const [currentTime, setCurrentTime] = useState(Date.now());
 
@@ -37,6 +39,7 @@ export const TaskManagerPanel: React.FC<TaskManagerPanelProps> = ({ isOpen, onCl
     };
 
     const getModeAccent = () => {
+        if (theme === 'retro') return { text: 'text-[#8B261D]', bg: 'bg-[#8B261D]', border: 'border-[#8B261D]', shadow: 'shadow-none' };
         switch (driverType) {
             case DriverType.COMMERCIAL: return { text: 'text-cyan-400', bg: 'bg-cyan-500', border: 'border-cyan-500', shadow: 'shadow-[0_0_20px_rgba(6,182,212,0.2)]' };
             case DriverType.AESTHETIC: return { text: 'text-rose-400', bg: 'bg-rose-500', border: 'border-rose-500', shadow: 'shadow-[0_0_20px_rgba(244,63,94,0.2)]' };
@@ -69,11 +72,11 @@ export const TaskManagerPanel: React.FC<TaskManagerPanelProps> = ({ isOpen, onCl
     };
 
     return (
-        <div className={`fixed bottom-20 right-6 w-[400px] max-h-[500px] h-[60vh] bg-zinc-950 border-2 ${modeAccent.border} rounded-xl ${modeAccent.shadow} z-[120] flex flex-col transform transition-all duration-300 origin-bottom ${isOpen ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0 pointer-events-none'}`}>
-            <div className={`flex justify-between items-center p-4 border-b ${modeAccent.border}/30 bg-zinc-900/50 rounded-t-xl`}>
+        <div className={`fixed bottom-20 right-6 w-[400px] max-h-[500px] h-[60vh] ${theme === 'retro' ? 'bg-[#F9F7F1]' : 'bg-zinc-950'} border-2 ${modeAccent.border} rounded-xl ${modeAccent.shadow} z-[120] flex flex-col transform transition-all duration-300 origin-bottom ${isOpen ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0 pointer-events-none'}`}>
+            <div className={`flex justify-between items-center p-4 border-b ${modeAccent.border}/30 ${theme === 'retro' ? 'bg-[#F4EFE0]' : 'bg-zinc-900/50'} rounded-t-xl`}>
                 <div className="flex items-center gap-2">
                     <Activity size={18} className={modeAccent.text} />
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-white">
+                    <h3 className={`text-sm font-bold uppercase tracking-wider ${theme === 'retro' ? 'text-black' : 'text-white'}`}>
                         {lang === 'CN' ? '生成任务中心' : 'Task Manager'}
                     </h3>
                 </div>
@@ -92,14 +95,14 @@ export const TaskManagerPanel: React.FC<TaskManagerPanelProps> = ({ isOpen, onCl
                     </div>
                 ) : (
                     tasks.map(task => (
-                        <div key={task.id} className={`bg-zinc-900 border ${modeAccent.border}/20 rounded-lg p-3 flex flex-col gap-2 relative overflow-hidden group hover:${modeAccent.border}/40 transition-colors`}>
+                        <div key={task.id} className={`${theme === 'retro' ? 'bg-white border-black/10' : 'bg-zinc-900 border-' + modeAccent.border + '/20'} border rounded-lg p-3 flex flex-col gap-2 relative overflow-hidden group hover:${modeAccent.border}/40 transition-colors shadow-sm`}>
                             <div className="flex justify-between items-start">
                                 <div className="flex items-center gap-2 max-w-[70%]">
                                     {getStatusIcon(task.status)}
-                                    <span className="text-xs font-semibold text-zinc-200 truncate" title={task.name}>{task.name}</span>
+                                    <span className={`text-xs font-semibold truncate ${theme === 'retro' ? 'text-black' : 'text-zinc-200'}`} title={task.name}>{task.name}</span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <span className="font-mono text-[10px] text-zinc-500 tabular-nums">
+                                    <span className={`font-mono text-[10px] tabular-nums ${theme === 'retro' ? 'text-zinc-500' : 'text-zinc-500'}`}>
                                         {formatDuration(task.startTime, task.endTime)}
                                     </span>
                                 </div>
@@ -132,10 +135,10 @@ export const TaskManagerPanel: React.FC<TaskManagerPanelProps> = ({ isOpen, onCl
                 )}
             </div>
 
-            <div className="p-4 border-t border-zinc-800/80 bg-zinc-900/30 rounded-b-xl">
+            <div className={`p-4 border-t ${theme === 'retro' ? 'border-black/10 bg-[#F4EFE0]' : 'border-zinc-800/80 bg-zinc-900/30'} rounded-b-xl`}>
                 <button
                     onClick={() => globalTaskManager.clearCompletedTasks()}
-                    className="w-full py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-bold uppercase tracking-wider rounded transition-all"
+                    className={`w-full py-2 ${theme === 'retro' ? 'bg-[#8B261D] text-white' : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-300'} text-xs font-bold uppercase tracking-wider rounded transition-all`}
                 >
                     {lang === 'CN' ? '清除已完成记录' : 'Clear Completed'}
                 </button>

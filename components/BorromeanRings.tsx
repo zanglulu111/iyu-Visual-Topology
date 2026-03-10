@@ -13,27 +13,36 @@ interface BorromeanRingsProps {
 export const BorromeanRings: React.FC<BorromeanRingsProps> = ({ 
     fieldState = {}, 
     lang = 'CN', 
-    driverType = DriverType.NARRATIVE,
+    driverType,
     opacity = 1.0,
     centered = true
 }) => {
     const { theme } = useTheme();
     const isRetro = theme === 'retro';
-    const strokeColor = isRetro ? 'rgba(58, 53, 47, 0.45)' : 'rgba(255, 255, 255, 0.4)';
-    const strokeColorHigh = isRetro ? 'rgba(58, 53, 47, 0.65)' : 'rgba(255, 255, 255, 0.6)';
-    const textColor = isRetro ? '#1A1A1A' : 'rgba(255, 255, 255, 0.9)';
+    const strokeColor = isRetro ? 'rgba(139, 38, 29, 0.2)' : 'rgba(255, 255, 255, 0.35)';
+    const strokeColorHigh = isRetro ? 'rgba(139, 38, 29, 0.35)' : 'rgba(255, 255, 255, 0.55)';
+    const textColor = isRetro ? '#8B261D' : '#FFFFFF';
 
-    // Legible colors for rings in retro mode
+    // Corrected thematic colors for rings based on conceptual mapping:
+    // Real -> Aesthetic (Rose), Symbolic -> Narrative (Gold), Imaginary -> Commercial (Cyan)
     const ringColors = {
-        real: isRetro ? '#823B0B' : (driverType === DriverType.AESTHETIC ? 'var(--gold-primary)' : 'rgba(245, 158, 11, 0.95)'),
-        realText: isRetro ? '#701A10' : (driverType === DriverType.AESTHETIC ? 'var(--gold-primary)' : 'rgba(245, 158, 11, 1.0)'),
-        symbolic: isRetro ? (driverType === DriverType.NARRATIVE ? 'var(--gold-primary)' : '#0D6881') : (driverType === DriverType.NARRATIVE ? 'var(--gold-primary)' : 'rgba(6, 182, 212, 0.95)'),
-        symbolicText: isRetro ? (driverType === DriverType.NARRATIVE ? 'var(--gold-primary)' : '#08556A') : (driverType === DriverType.NARRATIVE ? 'var(--gold-primary)' : 'rgba(6, 182, 212, 1.0)'),
-        imaginary: isRetro ? '#8B261D' : (driverType === DriverType.COMMERCIAL ? 'rgba(22, 189, 202, 0.95)' : 'rgba(244, 63, 94, 0.95)'),
-        imaginaryText: isRetro ? '#701A10' : (driverType === DriverType.COMMERCIAL ? 'rgba(22, 189, 202, 1.0)' : 'rgba(244, 63, 94, 1.0)'),
-        sinthome: isRetro ? '#05543E' : 'rgba(16, 185, 129, 0.95)',
-        sinthomeText: isRetro ? '#044231' : 'rgba(16, 185, 129, 1.0)',
+        // R - Real: Ultra Neon Rose (Aesthetic Emotion)
+        real: isRetro ? 'rgba(139, 38, 29, 0.5)' : 'rgba(255, 45, 85, 0.9)',
+        realText: isRetro ? '#8B261D' : '#FF2D55', 
+        
+        // S - Symbolic: Pure Luminous Gold (Narrative / Erotic Bible)
+        symbolic: isRetro ? 'rgba(212, 175, 55, 0.5)' : 'rgba(255, 215, 0, 0.9)',
+        symbolicText: isRetro ? '#B58B12' : '#FFD700',
+        
+        // I - Imaginary: Cyber Cyan (Commercial / Desire Suture)
+        imaginary: isRetro ? 'rgba(13, 104, 129, 0.5)' : 'rgba(0, 255, 255, 0.9)',
+        imaginaryText: isRetro ? '#08556A' : '#00FFFF',
+        
+        // Σ - Sinthome: Neon Spring Green
+        sinthome: isRetro ? 'rgba(5, 84, 62, 0.5)' : 'rgba(0, 255, 127, 0.8)',
+        sinthomeText: isRetro ? '#044231' : '#00FF7F',
     };
+
 
     // Helper to get text from state or placeholder
     const getTag = (id: string, placeholder: string) => {
@@ -55,13 +64,6 @@ export const BorromeanRings: React.FC<BorromeanRingsProps> = ({
         m5: getTag('engine_m5', '行动驱力'),
         m6: getTag('engine_m6', '终极代价'),
         m7: getTag('engine_m7', '存在落点'),
-        // Support other drivers too
-        ... (driverType === DriverType.COMMERCIAL ? {
-            m0: getTag('comm_c0', '底层欲望'),
-            m1: getTag('comm_c1', '缺失主体'),
-            m2: getTag('comm_c2', '痛点场景'),
-            m3: getTag('comm_c3', '产品图腾')
-        } : {})
     };
 
     const containerClass = centered
@@ -87,13 +89,13 @@ export const BorromeanRings: React.FC<BorromeanRingsProps> = ({
 
                     {/* Outer Rings - Slowly rotating background */}
                     <g className="animate-[spin_260s_linear_infinite]" style={{ transformOrigin: '100px 100px' }}>
-                        <circle cx="100" cy="100" r="90" fill="none" stroke={strokeColor} strokeWidth="0.5" />
-                        <circle cx="100" cy="100" r="88" fill="none" stroke={strokeColorHigh} strokeWidth="0.3" strokeDasharray="1 2" />
-                        <circle cx="100" cy="100" r="80" fill="none" stroke={strokeColor} strokeWidth="1.0" />
+                        <circle cx="100" cy="100" r="90" fill="none" stroke={strokeColor} strokeWidth="0.8" />
+                        <circle cx="100" cy="100" r="88" fill="none" stroke={strokeColorHigh} strokeWidth="0.5" strokeDasharray="1 2" />
+                        <circle cx="100" cy="100" r="80" fill="none" stroke={strokeColor} strokeWidth="1.2" />
 
                         {/* Orbiting Math Text */}
                         <path id="outerPath" d="M 20,100 a 80,80 0 1,1 160,0 a 80,80 0 1,1 -160,0" fill="none" />
-                        <text fill={textColor} fontSize="2.2" fontFamily="'Inter', sans-serif" fontWeight="bold" letterSpacing="0.4" className="uppercase">
+                        <text fill={textColor} fontSize="3.0" fontFamily="'Inter', sans-serif" fontWeight="bold" letterSpacing="0.4" className="uppercase opacity-90">
                             <textPath href="#outerPath" startOffset="5%" textAnchor="start">Topologie Borroméenne</textPath>
                             <textPath href="#outerPath" startOffset="45%" textAnchor="middle">Nœud R.S.I. + Σ</textPath>
                             <textPath href="#outerPath" startOffset="85%" textAnchor="end">Mist Observatory</textPath>
@@ -102,7 +104,7 @@ export const BorromeanRings: React.FC<BorromeanRingsProps> = ({
 
                     {/* New Formula Orbit - Faster and distinct */}
                     <g className="animate-[spin_120s_linear_infinite]" style={{ transformOrigin: '100px 100px' }}>
-                        <text fill={strokeColorHigh} fontSize="1.8" fontFamily="monospace" letterSpacing="0.2">
+                        <text fill={strokeColorHigh} fontSize="2.5" fontFamily="monospace" letterSpacing="0.2">
                             <textPath href="#formulaOuterPath" startOffset="0%">
                                 M0:OS(Ψ) | M1:SUB($) | M2:ENC(!!) | M3:FAN(a) | M4:OTH(A) | M5:DRV(&gt;) | M6:STK(†) | M7:RES(Σ) || STORY = (M1 + M3) / M4 * M5
                             </textPath>
@@ -138,11 +140,11 @@ export const BorromeanRings: React.FC<BorromeanRingsProps> = ({
                         {/* S - THE SYMBOLIC - Cyan - Slowed (25 -> 33) */}
                         <circle 
                             cx="82.68" cy="110" r="30" fill="none" 
-                            stroke={ringColors.symbolic} strokeWidth={driverType === DriverType.NARRATIVE ? "1.8" : "1.2"} 
-                            className={driverType === DriverType.NARRATIVE ? "animate-pulse shadow-[0_0_15px_rgba(212,175,55,0.4)]" : ""}
+                            stroke={ringColors.symbolic} strokeWidth="1.2" 
+                            className=""
                         />
                         <circle cx="82.68" cy="110" r="31" fill="none" stroke={ringColors.symbolic} strokeOpacity="0.4" strokeWidth="0.3" strokeDasharray="1 3" className="animate-[spin_33s_linear_infinite_reverse]" style={{ transformOrigin: '82.68px 110px' }} />
-                        <text fill={ringColors.symbolicText} fontSize={driverType === DriverType.NARRATIVE ? "2.8" : "2.4"} fontFamily="'Playfair Display', serif" fontStyle="italic" fontWeight="bold" letterSpacing="0.1">
+                        <text fill={ringColors.symbolicText} fontSize="2.4" fontFamily="'Playfair Display', serif" fontStyle="italic" fontWeight="bold" letterSpacing="0.1">
                             <textPath href="#symPathUp" startOffset="82%" textAnchor="middle">Le Symbolique: {labels.m1}</textPath>
                         </text>
 

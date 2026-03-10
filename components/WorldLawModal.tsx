@@ -1,7 +1,7 @@
-
 import React from 'react';
 import { X, Scale, Wand2, RefreshCcw, Lock, Layers, Zap, Anchor, Eye, Monitor, Box, Film } from 'lucide-react';
 import { WorldLawConfig, BlueprintLanguage, DriverType } from '../types';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface WorldLawModalProps {
   isOpen: boolean;
@@ -20,6 +20,7 @@ export const WorldLawModal: React.FC<WorldLawModalProps> = ({
   lang = 'CN',
   driverType = DriverType.NARRATIVE
 }) => {
+  const { theme: globalTheme } = useTheme();
   if (!isOpen) return null;
 
   const isCommercial = driverType === DriverType.COMMERCIAL;
@@ -98,32 +99,38 @@ export const WorldLawModal: React.FC<WorldLawModalProps> = ({
   }
 
   // 计算左侧选项（STRICT/PURE）选中时的样式
-  const leftActiveClasses = 'border-zinc-500 bg-zinc-800/50 ring-1 ring-zinc-500/50';
-  const leftActiveText = 'text-white';
+  const leftActiveClasses = globalTheme === 'retro' 
+    ? 'border-[#8B261D] bg-white ring-1 ring-[#8B261D]/50'
+    : 'border-zinc-500 bg-zinc-800/50 ring-1 ring-zinc-500/50';
+  const leftActiveText = globalTheme === 'retro' ? 'text-[#8B261D]' : 'text-white';
   
   // 计算右侧选项（UNBOUND/FUSION）选中时的样式，使用动态主题色
-  const rightActiveClasses = `border-${themeColor} bg-${themeColor.split('-')[0]}-900/20 ring-1 ring-${themeColor}/50`;
-  const rightActiveText = `text-${themeColor}`;
+  const rightActiveClasses = globalTheme === 'retro'
+    ? 'border-[#8B261D] bg-white ring-1 ring-[#8B261D]/50'
+    : `border-${themeColor} bg-${themeColor.split('-')[0]}-900/20 ring-1 ring-${themeColor}/50`;
+  const rightActiveText = globalTheme === 'retro' ? 'text-[#8B261D]' : `text-${themeColor}`;
 
-  const inactiveClasses = 'bg-zinc-900/50 border-zinc-800 hover:border-zinc-700';
+  const inactiveClasses = globalTheme === 'retro'
+    ? 'bg-transparent border-[#8B261D]/10 hover:border-[#8B261D]/30'
+    : 'bg-zinc-900/50 border-zinc-800 hover:border-zinc-700';
 
   const IconPhysics1 = isCommercial ? Box : Scale;
   const IconContext1 = isCommercial ? Film : Layers;
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-[#050505]/95 backdrop-blur-xl animate-in fade-in duration-300 p-4">
-      <div className="w-full max-w-2xl bg-[#0a0a0a] border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden relative flex flex-col">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/90 backdrop-blur-md animate-in fade-in duration-300 p-4">
+      <div className={`w-full max-w-2xl ${globalTheme === 'retro' ? 'bg-[#F9F7F1] border-[#8B261D]' : 'bg-[#0a0a0a] border-zinc-800'} border rounded-xl shadow-2xl overflow-hidden relative flex flex-col`}>
         
         {/* Header */}
-        <div className="p-6 border-b border-zinc-800 bg-zinc-900/50 flex justify-between items-start">
+        <div className={`p-6 border-b ${globalTheme === 'retro' ? 'border-[#8B261D]/20 bg-[#F4EFE0]' : 'border-zinc-800 bg-zinc-900/50'} flex justify-between items-start`}>
           <div>
-            <div className={`flex items-center gap-2 text-${themeColor} mb-1`}>
+            <div className={`flex items-center gap-2 ${globalTheme === 'retro' ? 'text-[#8B261D]' : `text-${themeColor}`} mb-1`}>
                <Anchor size={16} />
                <span className="text-xs font-bold uppercase tracking-[0.2em]">{t.title}</span>
             </div>
-            <p className="text-sm text-zinc-500">{t.subtitle}</p>
+            <p className={`text-sm ${globalTheme === 'retro' ? 'text-zinc-600' : 'text-zinc-500'}`}>{t.subtitle}</p>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full text-zinc-500 hover:text-white transition-colors">
+          <button onClick={onClose} className={`p-2 ${globalTheme === 'retro' ? 'hover:bg-[#8B261D]/10 text-zinc-600' : 'hover:bg-white/10 text-zinc-500'} rounded-full hover:text-[#8B261D] transition-colors`}>
             <X size={20} />
           </button>
         </div>
@@ -133,8 +140,8 @@ export const WorldLawModal: React.FC<WorldLawModalProps> = ({
             
             {/* 1. Dimension 1 (Physics / Reality Protocol) */}
             <div className="space-y-4">
-                <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                    <IconPhysics1 size={16} className={`text-${themeColor}`}/> {t.physicsTitle}
+                <h3 className={`text-sm font-bold ${globalTheme === 'retro' ? 'text-black' : 'text-white'} uppercase tracking-wider flex items-center gap-2`}>
+                    <IconPhysics1 size={16} className={globalTheme === 'retro' ? 'text-[#8B261D]' : `text-${themeColor}`}/> {t.physicsTitle}
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* 左侧：严守现实 */}
@@ -163,8 +170,8 @@ export const WorldLawModal: React.FC<WorldLawModalProps> = ({
 
             {/* 2. Dimension 2 (Context / Fourth Wall) */}
             <div className="space-y-4">
-                <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                    <IconContext1 size={16} className={`text-${themeColor}`}/> {t.contextTitle}
+                <h3 className={`text-sm font-bold ${globalTheme === 'retro' ? 'text-black' : 'text-white'} uppercase tracking-wider flex items-center gap-2`}>
+                    <IconContext1 size={16} className={globalTheme === 'retro' ? 'text-[#8B261D]' : `text-${themeColor}`}/> {t.contextTitle}
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* 左侧：类型纯化 */}
@@ -193,24 +200,25 @@ export const WorldLawModal: React.FC<WorldLawModalProps> = ({
 
             {/* Contextual Note / Warning */}
             <div className={`p-4 border rounded-lg flex gap-3 items-start animate-in fade-in slide-in-from-bottom-2 ${
-              isCommercial ? 'bg-cyan-900/10 border-cyan-500/30' : 
+              globalTheme === 'retro' ? 'bg-white border-[#8B261D]/20' :
+              (isCommercial ? 'bg-cyan-900/10 border-cyan-500/30' : 
               (isAesthetic ? 'bg-rose-900/10 border-rose-500/30' : 
-              (isExperimental ? 'bg-purple-900/10 border-purple-500/30' : 'bg-amber-900/10 border-amber-500/30'))
+              (isExperimental ? 'bg-purple-900/10 border-purple-500/30' : 'bg-amber-900/10 border-amber-500/30')))
             }`}>
-                <Zap size={18} className={`text-${themeColor} shrink-0 mt-0.5`} />
+                <Zap size={18} className={globalTheme === 'retro' ? 'text-[#8B261D]' : `text-${themeColor} shrink-0 mt-0.5`} />
                 <div>
-                    <div className={`text-xs font-bold uppercase tracking-wider mb-1 text-${themeColor}`}>{t.warning}</div>
-                    <div className="text-xs text-zinc-400 leading-relaxed">{t.warningText}</div>
+                    <div className={`text-xs font-bold uppercase tracking-wider mb-1 ${globalTheme === 'retro' ? 'text-[#8B261D]' : `text-${themeColor}`}`}>{t.warning}</div>
+                    <div className={`text-xs ${globalTheme === 'retro' ? 'text-zinc-600' : 'text-zinc-400'} leading-relaxed`}>{t.warningText}</div>
                 </div>
             </div>
 
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t border-zinc-800 bg-zinc-900/50 flex justify-end">
+        <div className={`p-6 border-t ${globalTheme === 'retro' ? 'border-[#8B261D]/20 bg-[#F4EFE0]' : 'border-zinc-800 bg-zinc-900/50'} flex justify-end`}>
             <button 
                 onClick={onClose}
-                className={`px-8 py-3 bg-white hover:bg-zinc-200 text-black font-bold uppercase tracking-widest rounded transition-colors text-xs`}
+                className={`px-8 py-3 ${globalTheme === 'retro' ? 'bg-[#8B261D] text-white hover:bg-[#6D1E16]' : 'bg-white hover:bg-zinc-200 text-black'} font-bold uppercase tracking-widest rounded transition-colors text-xs shadow-sm`}
             >
                 {t.confirm}
             </button>
