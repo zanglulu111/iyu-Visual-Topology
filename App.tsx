@@ -1147,7 +1147,7 @@ const App: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#050505] text-zinc-300 font-sans selection:bg-gold-primary/30 selection:text-white overflow-hidden">
+        <div className="min-h-screen bg-[var(--bg-main)] text-zinc-300 font-sans selection:bg-gold-primary/30 selection:text-white overflow-hidden transition-colors duration-500">
             {page === 0 ? (
                 <LandingView
                     lang={lang}

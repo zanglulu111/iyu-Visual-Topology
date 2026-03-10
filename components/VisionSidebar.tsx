@@ -350,7 +350,7 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
                 </div>
 
                 {/* 4. Action Button (Engine Mapping) */}
-                <div className={`mt-auto ${currentTheme === 'retro' ? '' : 'pt-6'}`}>
+                <div className="mt-8">
                     <button
                         onClick={onAutoFill}
                         disabled={isProcessing || (!visionInput && !visionImage && !visionAnalysis)}

@@ -40,7 +40,7 @@ const ModuleContainer = ({ id, lockedModules, moveModule, children }: React.Prop
 
     return (
         <div
-            className={`flex flex-row gap-0 rounded-xl border ${borderColor} ${isLocked ? (theme === 'retro' ? 'bg-black/5 grayscale-[0.5]' : 'bg-black/40 grayscale-[0.5]') : (theme === 'retro' ? 'bg-[#FDFCF9] shadow-sm' : 'bg-white/5')} w-full relative transition-all duration-300 shadow-sm`}
+            className={`flex flex-row gap-0 rounded-xl border ${borderColor} ${isLocked ? (theme === 'retro' ? 'bg-black/5 grayscale-[0.5]' : 'bg-black/40 grayscale-[0.5]') : (theme === 'retro' ? 'bg-transparent shadow-none' : 'bg-white/5')} w-full relative transition-all duration-300 shadow-none`}
         >
             <div className={`flex flex-col items-center justify-center border-r ${theme === 'retro' ? 'border-black/10 bg-black/5' : 'border-white/5 bg-black/20'} w-7 shrink-0 py-2 gap-1 rounded-l-xl`}>
                 {!isFixed && (
@@ -654,14 +654,14 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
                         <div className="p-1 flex flex-row items-stretch gap-3 pl-3 h-[5rem]">
                             <button
                                 onClick={() => openLibrary('aes_palette_preset')}
-                                className={`shrink-0 h-full px-2 border border-dashed rounded-lg flex flex-col items-center justify-center gap-1 transition-all group/dash w-20 ${theme === 'retro' ? (selectedPresetName ? 'bg-[#8B261D]/10 border-[#8B261D]/40' : 'bg-[#F9F7F1]/30 border-black/10 hover:border-[#8B261D]/50') : (selectedPresetName ? 'bg-rose-500/5 border-rose-500/40' : 'border-zinc-700 hover:bg-white/5 hover:border-rose-500/50')}`}
+                                className={`shrink-0 h-full px-2 border border-dashed rounded-lg flex flex-col items-center justify-center gap-1 transition-all group/dash w-20 ${theme === 'retro' ? (selectedPresetName ? 'bg-[#8B261D]/10 border-[#8B261D]/40' : 'bg-black/[0.02] border-[var(--border-main)] hover:border-[#8B261D]/50') : (selectedPresetName ? 'bg-rose-500/5 border-rose-500/40' : 'border-zinc-700 hover:bg-white/5 hover:border-rose-500/50')}`}
                             >
                                 <Plus size={14} className={selectedPresetName ? (theme === 'retro' ? "text-[#8B261D]" : "text-rose-400") : (theme === 'retro' ? "text-[#8B261D]/60 group-hover/dash:text-[#8B261D]" : "text-zinc-600 group-hover/dash:text-rose-400")} />
                                 <span className={`text-[11px] font-bold uppercase tracking-tight text-center leading-tight ${selectedPresetName ? (theme === 'retro' ? 'text-black' : 'text-white') : (theme === 'retro' ? 'text-[#8B261D]/70 group-hover/dash:text-[#8B261D]' : 'text-zinc-500 group-hover/dash:text-rose-400')}`}>
                                     {selectedPresetName ? formatTag(selectedPresetName) : (lang === 'EN' ? "SELECT" : "库选")}
                                 </span>
                             </button>
-                            <div className={`flex-1 rounded-lg border p-1.5 overflow-hidden ${theme === 'retro' ? 'bg-black/5 border-black/10' : 'bg-black/20 border-zinc-900/50'}`}>
+                            <div className={`flex-1 rounded-lg border p-1.5 overflow-hidden ${theme === 'retro' ? 'bg-black/[0.02] border-[var(--border-main)]' : 'bg-black/20 border-zinc-900/50'}`}>
                                 <div className="h-full overflow-y-auto custom-scrollbar pr-1 grid grid-cols-4 gap-1.5 content-start">
                                     {(isRealism ? MASTER_PRESETS_REALISM : MASTER_PRESETS_STYLIZED).map(preset => {
                                         const isSelected = fieldState['aes_palette_preset']?.includes(preset.name);
@@ -669,7 +669,7 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
                                             <button
                                                 key={preset.id}
                                                 onClick={() => onApplyPreset?.(preset)}
-                                                className={`flex flex-row items-center gap-1.5 p-1 px-2 rounded-md border transition-all text-left group/card relative w-full h-[1.6rem] ${isSelected ? (theme === 'retro' ? 'bg-[#8B261D]/20 border-[#8B261D]/50 shadow-sm' : 'bg-rose-500/10 border-rose-500/40 shadow-sm') : (theme === 'retro' ? 'bg-[#F9F7F1]/50 border-black/5 hover:bg-[#F9F7F1]/80 hover:border-[#8B261D]/30' : 'bg-zinc-900/30 border-white/5 hover:bg-zinc-800 hover:border-white/10')}`}
+                                                className={`flex flex-row items-center gap-1.5 p-1 px-2 rounded-md border transition-all text-left group/card relative w-full h-[1.6rem] ${isSelected ? (theme === 'retro' ? 'bg-[#8B261D]/20 border-[#8B261D]/50 shadow-sm' : 'bg-rose-500/10 border-rose-500/40 shadow-sm') : (theme === 'retro' ? 'bg-transparent border-[var(--border-main)] hover:bg-[#8B261D]/5' : 'bg-zinc-900/30 border-white/5 hover:bg-zinc-800 hover:border-white/10')}`}
                                             >
                                                 <div className="flex gap-0.5 shrink-0">
                                                     {preset.colors.slice(0, 3).map((c, i) => (
@@ -702,7 +702,7 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
                             </div>
                         </div>
                         <div className="p-1 flex flex-row items-stretch gap-3 pl-3 min-h-[2rem]">
-                            <div className={`flex-1 flex items-center justify-center border rounded px-2 ${theme === 'retro' ? 'bg-white/40 border-black/10' : 'bg-zinc-900/30 border-zinc-800'}`}>
+                            <div className={`flex-1 flex items-center justify-center border rounded px-2 ${theme === 'retro' ? 'bg-transparent border-[var(--border-main)]' : 'bg-zinc-900/30 border-zinc-800'}`}>
                                 <ProphecySlot
                                     blockId="aes_color_palette"
                                     placeholderCN="色板库"
@@ -727,9 +727,9 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
                                     getLibraryCount={getLibraryCount}
                                 />
                             </div>
-                            <div className={`flex-1 flex gap-1 border-l ${theme === 'retro' ? 'border-black/10' : 'border-white/10'} pl-3 items-center relative group/hex`}>
+                            <div className={`flex-1 flex gap-1 border-l ${theme === 'retro' ? 'border-[var(--border-main)]' : 'border-white/10'} pl-3 items-center relative group/hex`}>
                                 {colorPalette.map((color, idx) => (
-                                    <div key={idx} className={`flex-1 aspect-square rounded border relative overflow-hidden group/color shadow-md min-w-[18px] max-w-[24px] ${isPaletteBound ? (theme === 'retro' ? 'border-black/5 opacity-60 cursor-not-allowed' : 'border-zinc-800 opacity-60 cursor-not-allowed') : (theme === 'retro' ? 'border-black/20 cursor-pointer hover:border-black' : 'border-zinc-700 cursor-pointer hover:border-zinc-500')}`} style={{ backgroundColor: color || (theme === 'retro' ? '#fff' : '#111') }}>
+                                    <div key={idx} className={`flex-1 aspect-square rounded border relative overflow-hidden group/color shadow-md min-w-[18px] max-w-[24px] ${isPaletteBound ? (theme === 'retro' ? 'border-[var(--border-main)] opacity-60 cursor-not-allowed' : 'border-zinc-800 opacity-60 cursor-not-allowed') : (theme === 'retro' ? 'border-black/20 cursor-pointer hover:border-black' : 'border-zinc-700 cursor-pointer hover:border-zinc-500')}`} style={{ backgroundColor: color || (theme === 'retro' ? '#fff' : '#111') }}>
                                         <input
                                             type="color"
                                             value={color || "#000000"}
@@ -747,7 +747,7 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
                                 ))}
                                 <button
                                     onClick={() => onPaletteChange?.(Array(7).fill(""))}
-                                    className={`ml-2 p-1.5 rounded-md transition-colors border border-transparent shrink-0 ${theme === 'retro' ? 'hover:bg-black/5 text-zinc-400 hover:text-red-600 hover:border-black/5' : 'hover:bg-zinc-800 text-zinc-600 hover:text-red-400 hover:border-zinc-700'}`}
+                                    className={`ml-2 p-1.5 rounded-md transition-colors border border-transparent shrink-0 ${theme === 'retro' ? 'hover:bg-black/5 text-zinc-400 hover:text-[#8B261D] hover:border-black/5' : 'hover:bg-zinc-800 text-zinc-600 hover:text-red-400 hover:border-zinc-700'}`}
                                     title={lang === 'EN' ? "Clear Hex Codes" : "清空色值"}
                                 >
                                     <Eraser size={12} />
@@ -844,7 +844,7 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
                                             value={fieldState['aes_l2_custom']?.[0] || ""}
                                             onChange={(e) => onChange({ ...fieldState, 'aes_l2_custom': [e.target.value] })}
                                             placeholder={lang === 'EN' ? "Custom Subject Detail (Appended to prompt)..." : "自定义主体细节 (追加在 Prompt 之后)..."}
-                                            className={`w-full border rounded px-3 py-2 text-xs placeholder-zinc-700 focus:outline-none transition-colors resize-none overflow-y-auto custom-scrollbar min-h-[4.5rem] ${theme === 'retro' ? 'bg-white/40 border-black/10 text-zinc-800 focus:border-[#8B261D]/50' : 'bg-black/20 border-zinc-800 text-rose-300 focus:border-rose-500/50'}`}
+                                            className={`w-full border rounded px-3 py-2 text-xs placeholder-zinc-700 focus:outline-none transition-colors resize-none overflow-y-auto custom-scrollbar min-h-[4.5rem] ${theme === 'retro' ? 'bg-transparent border-[var(--border-main)] text-zinc-800 focus:border-[#8B261D]/50 shadow-none' : 'bg-black/20 border-zinc-800 text-rose-300 focus:border-rose-500/50'}`}
                                         />
                                     </div>
                                 </div>
@@ -863,7 +863,7 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
                                         value={fieldState['aes_l2_custom']?.[0] || ""}
                                         onChange={(e) => onChange({ ...fieldState, 'aes_l2_custom': [e.target.value] })}
                                         placeholder={lang === 'EN' ? "Custom Creature Detail..." : "自定义生物细节..."}
-                                        className={`w-full border rounded px-3 py-2 text-xs placeholder-zinc-700 focus:outline-none transition-colors resize-none overflow-y-auto custom-scrollbar min-h-[4.5rem] ${theme === 'retro' ? 'bg-[#F9F7F1]/50 border-black/10 text-zinc-800 focus:border-[#8B261D]/50' : 'bg-black/20 border-zinc-800 text-rose-300 focus:border-rose-500/50'}`}
+                                        className={`w-full border rounded px-3 py-2 text-xs placeholder-zinc-700 focus:outline-none transition-colors resize-none overflow-y-auto custom-scrollbar min-h-[4.5rem] ${theme === 'retro' ? 'bg-transparent border-[var(--border-main)] text-zinc-800 focus:border-[#8B261D]/50 shadow-none' : 'bg-black/20 border-zinc-800 text-rose-300 focus:border-rose-500/50'}`}
                                     />
                                 </div>
                             </div>
@@ -903,7 +903,7 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
                                         value={fieldState['aes_l3_custom']?.[0] || ""}
                                         onChange={(e) => onChange({ ...fieldState, 'aes_l3_custom': [e.target.value] })}
                                         placeholder={lang === 'EN' ? "Custom Scene Detail (Appended to prompt)..." : "自定义场景细节 (追加在 Prompt 之后)..."}
-                                        className={`w-full border rounded px-3 py-2 text-xs placeholder-zinc-700 focus:outline-none transition-colors resize-none overflow-y-auto custom-scrollbar min-h-[4.5rem] ${theme === 'retro' ? 'bg-[#F9F7F1]/50 border-black/10 text-zinc-800 focus:border-[#8B261D]/50' : 'bg-black/20 border-zinc-800 text-rose-300 focus:border-rose-500/50'}`}
+                                        className={`w-full border rounded px-3 py-2 text-xs placeholder-zinc-700 focus:outline-none transition-colors resize-none overflow-y-auto custom-scrollbar min-h-[4.5rem] ${theme === 'retro' ? 'bg-transparent border-black/10 text-zinc-800 focus:border-[#8B261D]/50 shadow-none' : 'bg-black/20 border-zinc-800 text-rose-300 focus:border-rose-500/50'}`}
                                     />
                                 </div>
                             </div>
@@ -929,7 +929,7 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
     };
 
     return (
-        <div className={`w-full h-full flex flex-col relative overflow-hidden ${theme === 'retro' ? 'bg-[#EBE7DF]' : 'bg-[#050505]'}`}>
+        <div className={`w-full h-full flex flex-col relative overflow-hidden bg-[var(--bg-main)]`}>
             {/* Background Borromean Rings - Clear rings with subtle 'frosted' context */}
             {showRings && (
                 <div className="absolute inset-0 z-0 pointer-events-none transition-all duration-1000" style={{ filter: 'blur(1px)' }}>
@@ -943,7 +943,7 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
                 </div>
             )}
             <div className="flex-1 flex-row overflow-hidden min-h-0 relative z-10 hidden md:flex">
-                <div className={`w-1/2 h-full flex flex-col overflow-hidden border-r backdrop-blur-md ${theme === 'retro' ? 'border-[#8B261D]/10 bg-[#FDFCF9]/40' : 'border-zinc-800 bg-[#050505]/40'}`}>
+                <div className={`w-1/2 h-full flex flex-col overflow-hidden border-r backdrop-blur-md ${theme === 'retro' ? 'border-[#8B261D]/10 bg-transparent' : 'border-zinc-800 bg-[var(--bg-main)]/40'}`}>
                     <div className="shrink-0 z-20 px-6 py-4 bg-transparent flex items-center justify-between">
                         <div className="pl-6">
                             <h2 className={`text-2xl font-serif font-black tracking-[0.05em] ${theme === 'retro' ? 'text-[#8B261D]' : 'text-rose-400'}`}>
@@ -974,9 +974,9 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
                     </div>
                 </div>
 
-                <div className={`w-1/2 h-full flex flex-col overflow-hidden backdrop-blur-md border-l relative min-h-0 ${theme === 'retro' ? 'border-[#8B261D]/10 bg-[#FDFCF9]/40' : 'border-zinc-800 bg-[#050505]/40'}`}>
+                <div className={`w-1/2 h-full flex flex-col overflow-hidden backdrop-blur-md border-l relative min-h-0 ${theme === 'retro' ? 'border-[#8B261D]/10 bg-transparent' : 'border-zinc-800 bg-[var(--bg-main)]/40'}`}>
                     <div className="p-6 pb-2 shrink-0">
-                        <div className={`border p-3 rounded-xl shadow-lg ${theme === 'retro' ? 'bg-[#F9F7F1]/80 border-black/5' : 'bg-zinc-900/40 border-zinc-800'}`}>
+                        <div className={`border p-3 rounded-xl shadow-none ${theme === 'retro' ? 'bg-transparent border-black/10' : 'bg-zinc-900/40 border-zinc-800'}`}>
                             <div className="flex items-center justify-between mb-3">
                                 <div className="flex items-center gap-2">
                                     <Layout size={12} className={theme === 'retro' ? "text-[#8B261D]" : "text-rose-400"} />
@@ -992,7 +992,7 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
                                         <button
                                             key={template.id}
                                             onClick={() => handleLogicModeChange(template.id)}
-                                            className={`flex flex-col items-center text-center p-1.5 rounded border transition-all duration-300 group ${isActive ? (theme === 'retro' ? 'bg-[#8B261D]/10 border-[#8B261D] shadow-sm' : 'bg-rose-500/10 border-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.1)]') : (theme === 'retro' ? 'bg-[#F9F7F1] border-black/5 hover:border-black/20' : 'bg-zinc-950 border-zinc-800 hover:border-zinc-700')}`}
+                                            className={`flex flex-col items-center text-center p-1.5 rounded border transition-all duration-300 group ${isActive ? (theme === 'retro' ? 'bg-[#8B261D]/10 border-[#8B261D] shadow-sm' : 'bg-rose-500/10 border-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.1)]') : (theme === 'retro' ? 'bg-transparent border-black/5 hover:border-black/20' : 'bg-zinc-950 border-zinc-800 hover:border-zinc-700')}`}
                                             title={lang === 'EN' ? template.descEn : template.desc}
                                         >
                                             <div className={`p-1.5 rounded-full mb-1 transition-colors ${isActive ? (theme === 'retro' ? 'bg-[#8B261D] text-white' : 'bg-rose-500 text-black') : (theme === 'retro' ? 'bg-black/5 text-zinc-400 group-hover:text-black' : 'bg-zinc-900 text-zinc-600 group-hover:text-zinc-400')}`}>
@@ -1006,23 +1006,23 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
                         </div>
                     </div>
 
-                    <div className={`flex-[0.6] min-h-0 flex flex-col mx-6 rounded-xl border backdrop-blur-md overflow-hidden shadow-2xl ${theme === 'retro' ? 'border-black/5 bg-[#F9F7F1]/80' : 'bg-white/5 border-zinc-800'}`}>
+                    <div className={`flex-[0.6] min-h-0 flex flex-col mx-6 rounded-xl border backdrop-blur-md overflow-hidden shadow-none ${theme === 'retro' ? 'border-black/10 bg-transparent' : 'bg-white/5 border-zinc-800'}`}>
                         <div className={`flex items-center justify-between px-4 py-2.5 border-b shrink-0 ${theme === 'retro' ? 'bg-black/5 border-black/10' : 'bg-zinc-900 border-zinc-800'}`}>
                             <div className="flex items-center gap-3">
                                 <span className={`text-[13px] font-mono font-bold uppercase tracking-widest flex items-center gap-2 ${theme === 'retro' ? 'text-[#8B261D]' : 'text-emerald-500'}`}>
                                     <Terminal size={14} />
                                     <span>{lang === 'EN' ? "PROMPT_COMPILER.EXE" : "提示词编译器 (COMPILER)"}</span>
                                 </span>
-                                <div className={`flex rounded p-0.5 border scale-75 origin-left ${theme === 'retro' ? 'bg-[#F9F7F1] border-black/10' : 'bg-black border-zinc-800'}`}>
-                                    <button onClick={() => setCompilerMode('TEXT')} className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase transition-all ${compilerMode === 'TEXT' ? (theme === 'retro' ? 'bg-black text-white' : 'bg-zinc-700 text-white') : 'text-zinc-500 hover:text-black'}`}>TEXT</button>
-                                    <button onClick={() => setCompilerMode('JSON')} className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase transition-all ${compilerMode === 'JSON' ? (theme === 'retro' ? 'bg-black text-white' : 'bg-zinc-700 text-white') : 'text-zinc-500 hover:text-black'}`}>JSON</button>
-                                    <button onClick={() => setCompilerMode('PROMPT')} className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase transition-all ${compilerMode === 'PROMPT' ? (theme === 'retro' ? 'bg-black text-white' : 'bg-zinc-700 text-white') : 'text-zinc-500 hover:text-black'}`}>PROMPT</button>
+                                <div className={`flex rounded p-0.5 border scale-75 origin-left ${theme === 'retro' ? 'bg-transparent border-black/10' : 'bg-black border-zinc-800'}`}>
+                                    <button onClick={() => setCompilerMode('TEXT')} className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase transition-all ${compilerMode === 'TEXT' ? (theme === 'retro' ? 'bg-[#2D2D2D] text-[#EFE9E0]' : 'bg-zinc-700 text-white') : 'text-zinc-500 hover:text-black'}`}>TEXT</button>
+                                    <button onClick={() => setCompilerMode('JSON')} className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase transition-all ${compilerMode === 'JSON' ? (theme === 'retro' ? 'bg-[#2D2D2D] text-[#EFE9E0]' : 'bg-zinc-700 text-white') : 'text-zinc-500 hover:text-black'}`}>JSON</button>
+                                    <button onClick={() => setCompilerMode('PROMPT')} className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase transition-all ${compilerMode === 'PROMPT' ? (theme === 'retro' ? 'bg-[#2D2D2D] text-[#EFE9E0]' : 'bg-zinc-700 text-white') : 'text-zinc-500 hover:text-black'}`}>PROMPT</button>
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
                                 <div className={`flex border rounded overflow-hidden scale-90 ${theme === 'retro' ? 'border-black/10' : 'border-zinc-700'}`}>
-                                    <button onClick={() => setCompilerLang('CN')} className={`px-1.5 py-0.5 text-[8px] font-bold uppercase ${compilerLang === 'CN' ? (theme === 'retro' ? 'bg-black text-white' : 'bg-zinc-700 text-white') : (theme === 'retro' ? 'bg-[#F9F7F1] text-black hover:bg-black/5' : 'bg-zinc-900 text-zinc-500 hover:text-zinc-300')}`}>CN</button>
-                                    <button onClick={() => setCompilerLang('EN')} className={`px-1.5 py-0.5 text-[8px] font-bold uppercase ${compilerLang === 'EN' ? (theme === 'retro' ? 'bg-black text-white' : 'bg-zinc-700 text-white') : (theme === 'retro' ? 'bg-white text-black hover:bg-black/5' : 'bg-zinc-900 text-zinc-500 hover:text-zinc-300')}`}>EN</button>
+                                    <button onClick={() => setCompilerLang('CN')} className={`px-1.5 py-0.5 text-[8px] font-bold uppercase ${compilerLang === 'CN' ? (theme === 'retro' ? 'bg-[#2D2D2D] text-[#EFE9E0]' : 'bg-zinc-700 text-white') : (theme === 'retro' ? 'bg-transparent text-black hover:bg-black/5' : 'bg-zinc-900 text-zinc-500 hover:text-zinc-300')}`}>CN</button>
+                                    <button onClick={() => setCompilerLang('EN')} className={`px-1.5 py-0.5 text-[8px] font-bold uppercase ${compilerLang === 'EN' ? (theme === 'retro' ? 'bg-[#2D2D2D] text-[#EFE9E0]' : 'bg-zinc-700 text-white') : (theme === 'retro' ? 'bg-white text-black hover:bg-black/5' : 'bg-zinc-900 text-zinc-500 hover:text-zinc-300')}`}>EN</button>
                                 </div>
                                 <button onClick={() => { navigator.clipboard.writeText(getCompilerOutput()); setCopiedCategoryId('SUMMARY'); setTimeout(() => setCopiedCategoryId(null), 2000); }} className={`transition-colors ml-1 ${theme === 'retro' ? 'text-zinc-400 hover:text-black' : 'text-zinc-500 hover:text-white'}`} title="Copy">{copiedCategoryId === 'SUMMARY' ? <Check size={12} className="text-green-500" /> : <Copy size={12} />}</button>
                             </div>
@@ -1034,7 +1034,7 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
                     </div>
 
                     <div className="flex-[1.4] min-h-0 flex flex-col p-6 pt-2 pb-16 overflow-hidden">
-                        <div className={`flex flex-col h-full rounded-xl border backdrop-blur-md overflow-hidden shadow-2xl relative min-h-0 ${theme === 'retro' ? 'bg-[#F9F7F1]/80 border-black/5' : 'bg-white/5 border-rose-500/30'}`}>
+                        <div className={`flex flex-col h-full rounded-xl border backdrop-blur-md overflow-hidden shadow-none relative min-h-0 ${theme === 'retro' ? 'bg-transparent border-black/10' : 'bg-white/5 border-rose-500/30'}`}>
                             <div className={`flex items-center justify-between px-4 py-2.5 border-b shrink-0 ${theme === 'retro' ? 'bg-black/5 border-black/10' : 'bg-zinc-900 border-zinc-800'}`}>
                                 <div className={`flex items-center gap-2 ${theme === 'retro' ? 'text-[#8B261D]' : 'text-rose-400'}`}>
                                     <Edit3 size={12} />

@@ -324,10 +324,10 @@ export const BlueprintEditor: React.FC<BlueprintEditorProps> = ({
             themeAccent = 'text-[#8B261D]';
             themeText = 'text-[#8B261D]';
             themeHoverText = 'group-hover:text-[#8B261D]';
-            themeBorder = 'border-[#8B261D]/30';
+            themeBorder = 'border-[#8B261D]/20';
             themeBgActive = 'bg-[#8B261D]/10';
-            themeSidebarBg = 'bg-[#F4EFE0]/98';
-            themeSidebarBorder = 'border-black'; // Black divider for retro mode
+            themeSidebarBg = 'bg-[var(--bg-header)]';
+            themeSidebarBorder = 'border-[#8B261D]/20';
             themeActiveBorder = 'border-[#8B261D]';
             themeEmptyPulse = 'bg-[#8B261D]/20';
         } else if (effectiveDriverType === DriverType.COMMERCIAL) {
@@ -767,21 +767,21 @@ ${psychoHtml}
     };
 
     return (
-        <div className={`absolute inset-0 ${effectiveTheme === 'retro' ? 'bg-[#F9F7F1]' : 'bg-[#080808]'} flex flex-col z-10 animate-in slide-in-from-bottom-4 duration-500`}>
+        <div className={`absolute inset-0 ${effectiveTheme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#080808]'} flex flex-col z-10 animate-in slide-in-from-bottom-4 duration-500`}>
 
             {/* Main Content */}
             <div className="flex-1 flex overflow-hidden relative z-10">
                 {/* PARAMETERS SIDEBAR */}
                 <div className={`
-                    absolute top-0 bottom-0 left-0 z-20
-                    w-[420px]
-                    ${effectiveTheme === 'retro' ? 'bg-[#DCD8CF]' : 'bg-[#0c0c0c]/95 backdrop-blur-md'} border-r ${effectiveTheme === 'retro' ? 'border-[#8B261D]/20' : 'border-zinc-800'}
+                    fixed top-0 bottom-0 left-0 z-50
+                    w-full max-w-lg
+                    ${effectiveTheme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#0a0a0b]/95 backdrop-blur-xl'} border-r ${effectiveTheme === 'retro' ? 'border-[#8B261D]/20' : 'border-zinc-800'}
                     transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]
                     ${isParamsPanelOpen ? 'translate-x-0' : '-translate-x-full'}
                     flex flex-col ${effectiveTheme === 'retro' ? '' : 'shadow-[10px_0_30px_rgba(0,0,0,0.3)]'}
                 `}>
                     {/* Sidebar Content */}
-                    <div className={`p-6 border-b ${effectiveTheme === 'retro' ? 'border-[#8B261D]/10 bg-[#D4D0C5]' : 'border-zinc-800 bg-[#0a0a0a]'} flex justify-between items-center`}>
+                    <div className={`p-6 border-b ${effectiveTheme === 'retro' ? 'border-[#8B261D]/10 bg-[var(--bg-header)]' : 'border-zinc-800 bg-[#0a0a0a]'} flex justify-between items-center`}>
                         <div className="flex items-center gap-3">
                             <Database className={uiConfig.themeText.replace('text-', 'text-')} size={20} />
                             <span className={`text-base font-bold ${effectiveTheme === 'retro' ? 'text-black' : 'text-white'} uppercase tracking-widest`}>
@@ -821,18 +821,18 @@ ${psychoHtml}
                         )}
 
                         {fieldState && Object.keys(fieldState).length > 0 ? (
-                            <div className="flex flex-col gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {Object.entries(fieldState).map(([key, values]) => {
                                     const safeValues = values as string[];
                                     if (!safeValues || safeValues.length === 0) return null;
                                     return (
-                                        <div key={key} className={`flex flex-col gap-2 p-4 rounded-lg ${effectiveTheme === 'retro' ? 'bg-white/50 border-[#8B261D]/10' : 'bg-zinc-900/50 border-zinc-800/50'} border hover:border-zinc-700 transition-colors`}>
+                                        <div key={key} className={`flex flex-col gap-2 p-4 rounded-lg ${effectiveTheme === 'retro' ? 'bg-[#F9F7F1] border-[#8B261D]/10' : 'bg-zinc-900/50 border-zinc-800/50'} border hover:border-zinc-700 transition-colors`}>
                                             <span className={`text-xs font-bold uppercase tracking-widest ${uiConfig.themeText} opacity-70 truncate`}>
                                                 {getBlockName(key)}
                                             </span>
                                             <div className="flex flex-wrap gap-2">
                                                 {safeValues.map((v, i) => (
-                                                    <span key={i} className={`text-sm ${effectiveTheme === 'retro' ? 'text-zinc-800' : 'text-zinc-200'} font-serif leading-tight break-words border-b ${effectiveTheme === 'retro' ? 'border-[#8B261D]/10' : 'border-white/10'} pb-0.5`}>
+                                                    <span key={i} className={`text-sm ${effectiveTheme === 'retro' ? 'text-zinc-800' : 'text-zinc-200'} font-serif leading-tight break-words border-b ${effectiveTheme === 'retro' ? 'border-black/5' : 'border-white/10'} pb-0.5`}>
                                                         {v.split('(')[0]}
                                                     </span>
                                                 ))}
@@ -874,16 +874,16 @@ ${psychoHtml}
                     </aside>
                 )}
 
-                <main className={`flex-1 ${isMetonymyMode ? 'overflow-hidden' : 'overflow-y-auto custom-scrollbar'} ${effectiveTheme === 'retro' ? 'bg-[#F4EFE0]' : 'bg-[#080808]'} ${mainPaddingClass} relative transition-all duration-300`}>
+                <main className={`flex-1 ${isMetonymyMode ? 'overflow-hidden' : 'overflow-y-auto custom-scrollbar'} bg-[var(--bg-main)] ${mainPaddingClass} relative transition-all duration-300`}>
                     {renderContent()}
                 </main>
             </div>
 
             {/* Footer */}
             {!isSutureOpen && (
-                <footer className={`fixed bottom-0 left-0 right-0 h-14 bg-[var(--bg-header)] backdrop-blur-md border-t ${uiConfig.themeSidebarBorder} flex items-center justify-between px-6 md:px-12 z-40 transition-colors duration-500`}>
+                <footer className={`fixed bottom-0 left-0 right-0 h-14 bg-[var(--bg-header)] backdrop-blur-md border-t border-[var(--border-main)] flex items-center justify-between px-6 md:px-12 z-40 transition-colors duration-500`}>
                     <div className="flex gap-4">
-                        <button onClick={onGoHome} className={`flex items-center gap-3 px-6 py-3 bg-[var(--bg-panel)]/50 hover:bg-[var(--bg-panel)] border ${uiConfig.themeSidebarBorder} rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-300 group min-w-[140px] hover:scale-105 active:scale-95 ${effectiveTheme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'}`}>
+                        <button onClick={onGoHome} className={`flex items-center gap-3 px-6 py-3 bg-[var(--bg-panel)]/50 hover:bg-[var(--bg-panel)] border border-[var(--border-main)] rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-300 group min-w-[140px] hover:scale-105 active:scale-95 ${effectiveTheme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'}`}>
                             <Home size={16} className="group-hover:scale-110 transition-transform" />
                             <span>{language === 'EN' ? "Back to Engine" : "返回引擎"}</span>
                         </button>
@@ -891,17 +891,21 @@ ${psychoHtml}
                             <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
                             <span>{language === 'EN' ? "Back to Paths" : "返回分支"}</span>
                         </button>
-    
-                        <button
-                            onClick={() => setIsParamsPanelOpen(!isParamsPanelOpen)}
-                            className={`flex items-center gap-3 px-6 py-3 rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-300 group min-w-[140px] border ${isParamsPanelOpen ? (effectiveTheme === 'retro' ? 'bg-[#8B261D] border-[#8B261D] text-white shadow-none' : 'bg-zinc-800 border-zinc-600 text-white') : `bg-[var(--bg-panel)]/50 hover:bg-[var(--bg-panel)] border-[var(--border-main)] ${effectiveTheme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'}`} hover:scale-105 active:scale-95`}
-                        >
-                            <List size={16} />
-                            <span>{language === 'EN' ? "Parameters" : "查看参数"}</span>
-                        </button>
                     </div>
     
                     <div className="flex-1 flex justify-center items-center gap-6 mx-4 overflow-x-auto no-scrollbar">
+                        <button
+                            onClick={() => setIsParamsPanelOpen(!isParamsPanelOpen)}
+                            className="flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]"
+                        >
+                            <List size={18} className={`transition-colors ${isParamsPanelOpen ? (effectiveTheme === 'retro' ? 'text-[#8B261D]' : uiConfig.themeAccent) : (effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 ${uiConfig.themeHoverText}`)}`} />
+                            <span className={`text-[9px] font-bold uppercase tracking-wider ${isParamsPanelOpen ? (effectiveTheme === 'retro' ? 'text-[#8B261D]' : uiConfig.themeAccent) : (effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 ${uiConfig.themeHoverText}`)}`}>
+                                {language === 'EN' ? "Params" : "参数"}
+                            </span>
+                        </button>
+
+                        <div className="w-px h-8 bg-[var(--border-main)] shrink-0"></div>
+
                         <button onClick={onOpenHistory} className="flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]">
                             <HistoryIcon size={18} className={`transition-colors ${effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 ${uiConfig.themeHoverText}`}`} />
                             <span className={`text-[9px] font-bold uppercase tracking-wider ${effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 ${uiConfig.themeHoverText}`}`}>
@@ -954,8 +958,8 @@ ${psychoHtml}
                         )}
     
                         <button onClick={handleGlobalCopyClick} className="flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]">
-                            {globalCopied ? <Check size={18} className="text-green-500" /> : <ClipboardCopy size={18} className={`transition-colors ${effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 ${uiConfig.themeHoverText}`}`} />}
-                            <span className={`text-[9px] font-bold uppercase tracking-wider ${globalCopied ? 'text-green-500' : (effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 ${uiConfig.themeHoverText}`)}`}>
+                            {globalCopied ? <Check size={18} className={effectiveTheme === 'retro' ? 'text-[#8B261D]' : 'text-green-500'} /> : <ClipboardCopy size={18} className={`transition-colors ${effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 ${uiConfig.themeHoverText}`}`} />}
+                            <span className={`text-[9px] font-bold uppercase tracking-wider ${globalCopied ? (effectiveTheme === 'retro' ? 'text-[#8B261D]' : 'text-green-500') : (effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 ${uiConfig.themeHoverText}`)}`}>
                                 {language === 'EN' ? "Copy All" : "全局复制"}
                             </span>
                         </button>
@@ -1017,7 +1021,7 @@ ${psychoHtml}
 
             {isContinueModalOpen && (
                 <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-                    <div className={`w-full max-w-lg ${effectiveTheme === 'retro' ? 'bg-[#F9F7F1] border-[#8B261D]' : 'bg-[#0c0c0c] border-zinc-800'} border rounded-xl shadow-2xl p-6 relative`}>
+                    <div className={`w-full max-w-lg ${effectiveTheme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]' : 'bg-[#0c0c0c] border-zinc-800'} border rounded-xl shadow-2xl p-6 relative`}>
                         <button onClick={() => setIsContinueModalOpen(false)} className={`absolute top-4 right-4 ${effectiveTheme === 'retro' ? 'text-[#8B261D] hover:text-[#6D1E16]' : 'text-zinc-500 hover:text-white'}`}><X size={20} /></button>
                         <h3 className={`text-lg font-bold ${effectiveTheme === 'retro' ? 'text-black' : 'text-white'} uppercase tracking-wider mb-4 flex items-center gap-2`}>
                             <Wand2 size={18} className={effectiveTheme === 'retro' ? 'text-[#8B261D]' : uiConfig.themeAccent} /> {language === 'EN' ? "Continue Story" : "续写故事"}
@@ -1029,7 +1033,7 @@ ${psychoHtml}
                                     value={continueInput} 
                                     onChange={(e) => setContinueInput(e.target.value)} 
                                     placeholder={language === 'EN' ? "e.g. Introduce a new villain..." : "例如：引入一个新的反派，或者转向内心的冲突..."} 
-                                    className={`w-full h-32 ${effectiveTheme === 'retro' ? 'bg-white border-black/10 text-black' : 'bg-black/50 border-zinc-800 text-white'} border rounded-lg p-3 text-sm placeholder-zinc-700 focus:outline-none focus:border-[#8B261D]/50 resize-none`} 
+                                    className={`w-full h-32 ${effectiveTheme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20 text-black placeholder-[#8B261D]/30' : 'bg-black/50 border-zinc-800 text-white placeholder-zinc-700'} border rounded-lg p-3 text-sm focus:outline-none focus:border-[#8B261D]/50 resize-none custom-scrollbar`} 
                                 />
                             </div>
                             <div className="space-y-2">
@@ -1040,8 +1044,8 @@ ${psychoHtml}
                                         <button onClick={() => setContinueImage(null)} className="absolute top-2 right-2 p-1.5 bg-black/60 text-white rounded-full hover:bg-red-600 transition-colors"><X size={14} /></button>
                                     </div>
                                 ) : (
-                                    <div onClick={() => fileInputRef.current?.click()} className={`w-full h-24 border border-dashed ${effectiveTheme === 'retro' ? 'border-[#8B261D]/20' : 'border-zinc-800'} rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-zinc-900/50 hover:border-zinc-600 transition-all group`}>
-                                        <div className={`p-3 ${effectiveTheme === 'retro' ? 'bg-white border-black/5 text-[#8B261D]' : 'bg-zinc-900 border-zinc-800 text-zinc-400'} rounded-full group-hover:text-[#8B261D] transition-all transform group-hover:scale-110 shadow-sm border`}>
+                                    <div onClick={() => fileInputRef.current?.click()} className={`w-full h-24 border border-dashed ${effectiveTheme === 'retro' ? 'border-[#8B261D]/20 hover:border-[#8B261D]/40' : 'border-zinc-800 hover:bg-zinc-900/50 hover:border-zinc-600'} rounded-lg flex flex-col items-center justify-center cursor-pointer transition-all group`}>
+                                        <div className={`p-3 ${effectiveTheme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/10 text-[#8B261D]' : 'bg-zinc-900 border-zinc-800 text-zinc-400'} rounded-full group-hover:text-[#8B261D] transition-all transform group-hover:scale-110 shadow-sm border`}>
                                             {isContinueUploading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
                                         </div>
                                         <span className={`text-[10px] ${effectiveTheme === 'retro' ? 'text-[#8B261D]/60' : 'text-zinc-600'} uppercase mt-2`}>

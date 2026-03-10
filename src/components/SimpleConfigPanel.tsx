@@ -91,7 +91,7 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
       }}
     >
       {/* Header */}
-      <div className={`flex items-center justify-between px-8 py-3 border-b ${globalTheme === 'retro' ? 'border-[#8B261D]/20 bg-[#F4EFE0]' : 'border-zinc-900/50'} shrink-0`}>
+      <div className={`flex items-center justify-between px-8 py-3 border-b ${globalTheme === 'retro' ? 'border-[#8B261D]/20 bg-[#F9F7F1]' : 'border-zinc-900/50'} shrink-0`}>
         <div className="flex flex-col">
           <h2 className={`text-xl font-serif ${globalTheme === 'retro' ? 'text-[#8B261D]' : 'text-white'} tracking-[0.2em] leading-none uppercase`}>
             {lang === 'CN' ? "系统架构配置" : "SYSTEM ARCHITECTURE"}
@@ -151,7 +151,7 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
                 value={apiKeyInput}
                 onChange={(e) => setApiKeyInput(e.target.value)}
                 placeholder="sk-..."
-                className={`w-full ${globalTheme === 'retro' ? 'bg-white border-[#8B261D]/20 text-black' : 'bg-black/60 border-zinc-800 text-white'} rounded-sm px-4 py-2 text-sm focus:outline-none transition-all font-mono placeholder:text-zinc-800 pr-10`}
+                className={`w-full ${globalTheme === 'retro' ? 'bg-[#F4EFE0] border-[#8B261D]/20 text-black placeholder:text-[#8B261D]/30' : 'bg-black/60 border-zinc-800 text-white placeholder:text-zinc-800'} rounded-sm px-4 py-2 text-sm focus:outline-none transition-all font-mono pr-10`}
                 style={{ borderLeftColor: globalTheme === 'retro' ? '#8B261D' : accentColor, borderLeftWidth: '3px' }}
               />
               {apiKeyInput && (
@@ -197,7 +197,7 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
 
           <div className="grid grid-cols-2 gap-2 overflow-y-auto no-scrollbar pr-1">
             {ENGINE_CONFIGS.map((engine) => (
-              <div key={engine.id} className={`${globalTheme === 'retro' ? 'bg-white border-[#8B261D]/10' : 'bg-zinc-900/10 border-zinc-800/40'} border rounded-sm p-3.5 hover:bg-white/[0.02] transition-colors group`}>
+              <div key={engine.id} className={`${globalTheme === 'retro' ? 'bg-[#F4EFE0] border-[#8B261D]/10 hover:border-[#8B261D]/30' : 'bg-zinc-900/10 border-zinc-800/40 hover:bg-white/[0.02]'} border rounded-sm p-3.5 transition-colors group`}>
                 <div className="flex flex-col h-full justify-between">
                   <div className="space-y-1 mb-2">
                     <div className="flex items-center justify-between mb-1">
@@ -214,7 +214,7 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
                   <select
                     value={config.engines[engine.id as keyof typeof config.engines]}
                     onChange={(e) => handleSaveEngineModel(engine.id, e.target.value)}
-                    className={`w-full ${globalTheme === 'retro' ? 'bg-white border-[#8B261D]/20 text-black' : 'bg-black/60 border-zinc-700/80 text-zinc-100'} rounded-sm px-3 py-1.5 text-xs focus:outline-none transition-all appearance-none cursor-pointer hover:border-zinc-500`}
+                    className={`w-full ${globalTheme === 'retro' ? 'bg-[#F4EFE0] border-[#8B261D]/20 text-black' : 'bg-black/60 border-zinc-700/80 text-zinc-100'} rounded-sm px-3 py-1.5 text-xs focus:outline-none transition-all appearance-none cursor-pointer hover:border-zinc-500`}
                     style={{
                       backgroundImage: globalTheme === 'retro' ? 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%238B261D\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")' : 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%2352525b\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")',
                       backgroundRepeat: 'no-repeat',
@@ -223,7 +223,7 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
                     }}
                   >
                     {(engine.type === 'text' ? AVAILABLE_MODELS.text : AVAILABLE_MODELS.image).map((model) => (
-                      <option key={model} value={model} className={`${globalTheme === 'retro' ? 'bg-white text-black' : 'bg-[#0c0c0c] text-white'}`}>{model}</option>
+                      <option key={model} value={model} className={`${globalTheme === 'retro' ? 'bg-[#F4EFE0] text-black' : 'bg-[#0c0c0c] text-white'}`}>{model}</option>
                     ))}
                   </select>
                 </div>
@@ -234,7 +234,7 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
       </div>
 
       {/* Footer */}
-      <div className={`px-8 py-2.5 border-t ${globalTheme === 'retro' ? 'border-[#8B261D]/10 bg-[#F4EFE0]' : 'border-zinc-900 bg-black/60'} flex justify-between items-center shrink-0`}>
+      <div className={`px-8 py-2.5 border-t ${globalTheme === 'retro' ? 'border-[#8B261D]/10 bg-[#F9F7F1]' : 'border-zinc-900 bg-black/60'} flex justify-between items-center shrink-0`}>
         <button
           onClick={handleReset}
           className={`text-[9px] font-bold ${globalTheme === 'retro' ? 'text-[#8B261D]/40 hover:text-red-600' : 'text-zinc-700 hover:text-red-500/80'} transition-colors uppercase tracking-[0.2em] flex items-center gap-2`}

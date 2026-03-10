@@ -128,7 +128,7 @@ export const AssetCard: React.FC<AssetCardProps> = ({ item, type, language, cont
     const currentPrompt = cardLang === 'EN' ? (item.view?.promptEn || '') : (item.view?.promptCn || item.view?.prompt || '');
 
     return (
-        <div className={`flex flex-col ${theme === 'retro' ? 'bg-white/40 border-black/10 hover:border-black/30' : 'bg-zinc-900/30 border-zinc-800 hover:border-zinc-700'} border rounded-xl overflow-hidden group transition-all shadow-xl`}>
+        <div className={`flex flex-col ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20 hover:border-[#8B261D]/40' : 'bg-zinc-900/30 border-zinc-800 hover:border-zinc-700'} border rounded-xl overflow-hidden group transition-all shadow-xl`}>
             <div className="p-6 pb-4">
                 <div className="flex justify-between items-start mb-4">
                     <div className="flex-1 mr-4 space-y-1">
@@ -168,7 +168,7 @@ export const AssetCard: React.FC<AssetCardProps> = ({ item, type, language, cont
                     <Edit3 size={10} className="absolute -right-2 top-1 text-zinc-700 opacity-0 group-hover/desc:opacity-100 transition-opacity pointer-events-none" />
                 </div>
 
-                <div className={`${theme === 'retro' ? 'bg-[#F4EFE0] border-black/10' : 'bg-black/40 border-zinc-800/50'} p-3 rounded border mb-4 group/prompt`}>
+                <div className={`${theme === 'retro' ? 'bg-[var(--bg-header)]/40 border-[#8B261D]/20' : 'bg-black/40 border-zinc-800/50'} p-3 rounded border mb-4 group/prompt`}>
                     <div className="flex justify-between items-center mb-2">
                         <div className="flex items-center gap-3">
                             <span className={`text-[9px] font-bold ${theme === 'retro' ? 'text-[#8B261D]' : 'text-zinc-600'} uppercase tracking-widest`}>VISUAL ANCHORS</span>
@@ -196,7 +196,7 @@ export const AssetCard: React.FC<AssetCardProps> = ({ item, type, language, cont
                 </div>
             </div>
             
-            <div className={`mt-auto ${theme === 'retro' ? 'bg-[#DCD8CF] border-black/10' : 'bg-black border-zinc-800/50'} border-t aspect-video relative group/img overflow-hidden flex items-center justify-center`}>
+            <div className={`mt-auto ${theme === 'retro' ? 'bg-[var(--bg-header)]/50 border-black/10' : 'bg-black border-zinc-800/50'} border-t aspect-video relative group/img overflow-hidden flex items-center justify-center`}>
                 {activeImage ? (
                     <>
                         <div
@@ -253,13 +253,13 @@ export const AssetCard: React.FC<AssetCardProps> = ({ item, type, language, cont
                         )}
                     </>
                 ) : (
-                    <div className={`flex flex-col items-center justify-center h-full gap-4 w-full ${theme === 'retro' ? 'bg-[#F9F7F1]/50' : 'bg-zinc-900/10'}`}>
+                    <div className={`flex flex-col items-center justify-center h-full gap-4 w-full ${theme === 'retro' ? 'bg-[var(--bg-header)]/40' : 'bg-zinc-900/10'}`}>
                         <span className={`text-[10px] uppercase tracking-[0.3em] font-bold ${theme === 'retro' ? 'text-[#8B261D]/50' : 'text-zinc-700'}`}>Visual Asset Pending</span>
                         <div className="flex gap-3">
                             <button
                                 onClick={handleGenImage}
                                 disabled={isGeneratingImg || !currentPrompt}
-                                className={`flex items-center gap-2 text-[10px] font-black hover:text-white border px-5 py-2.5 rounded shadow-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed uppercase tracking-widest ${theme === 'retro' ? 'bg-white border-[#8B261D]/20 text-[#8B261D] hover:bg-[#F9F7F1]' : 'bg-zinc-800 border-zinc-700 hover:border-gold-primary text-zinc-400'}`}
+                                className={`flex items-center gap-2 text-[10px] font-black hover:text-white border px-5 py-2.5 rounded shadow-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed uppercase tracking-widest ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20 text-[#8B261D] hover:bg-[#F9F7F1]' : 'bg-zinc-800 border-zinc-700 hover:border-gold-primary text-zinc-400'}`}
                             >
                                 {isGeneratingImg ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} className={theme === 'retro' ? "text-[#8B261D]" : "text-purple-400"} />}
                                 {language === 'EN' ? "Generate" : "AI 生成"}
@@ -267,7 +267,7 @@ export const AssetCard: React.FC<AssetCardProps> = ({ item, type, language, cont
                             <button
                                 onClick={() => fileInputRef.current?.click()}
                                 disabled={isUploading}
-                                className={`flex items-center gap-2 text-[10px] font-black border px-5 py-2.5 rounded shadow-lg transition-all uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed ${theme === 'retro' ? 'bg-white border-[#8B261D]/20 hover:border-[#8B261D]/50 text-[#8B261D] hover:bg-[#F9F7F1]' : 'bg-zinc-800 border-zinc-700 hover:border-zinc-500 hover:text-white text-zinc-400'}`}
+                                className={`flex items-center gap-2 text-[10px] font-black border px-5 py-2.5 rounded shadow-lg transition-all uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20 hover:border-[#8B261D]/50 text-[#8B261D] hover:bg-[#F9F7F1]' : 'bg-zinc-800 border-zinc-700 hover:border-zinc-500 hover:text-white text-zinc-400'}`}
                             >
                                 {isUploading ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
                                 {language === 'EN' ? (isUploading ? "Uploading..." : "Upload") : (isUploading ? "上传中..." : "手动上传")}

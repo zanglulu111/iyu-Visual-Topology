@@ -311,7 +311,6 @@ export const LacanGraphView: React.FC<LacanGraphViewProps> = ({
 
                 <div className="flex items-center gap-4">
                     {[
-                        { icon: HelpCircle, label: currentLang === 'CN' ? '哲学辞典' : 'CODEX', onClick: openManual },
                         { icon: History, label: currentLang === 'CN' ? '欲望档案' : 'ARCHIVE', onClick: openHistory },
                         { icon: Settings, label: currentLang === 'CN' ? '系统配置' : 'SYSTEM CONFIG', onClick: openSettings }
                     ].map((item, idx) => (

@@ -28,10 +28,10 @@ export const BreakdownConfigModal: React.FC<BreakdownConfigModalProps> = ({
     const colorBase = themeAccent.replace('text-', '');
 
     return (
-        <div className={`fixed inset-0 z-[100] flex items-start justify-center p-4 pt-4 pb-24 ${theme === 'retro' ? 'bg-[#F4EFE0]/60' : 'bg-black/60'} backdrop-blur-sm animate-in fade-in duration-200`}>
-            <div className={`w-full max-w-2xl ${theme === 'retro' ? 'bg-[#F9F7F1] border-[#8B261D]/20' : 'bg-[#0c0c0c] border-zinc-800'} border rounded-xl shadow-2xl flex flex-col overflow-hidden`}>
+        <div className={`fixed inset-0 z-[100] flex items-start justify-center p-4 pt-4 pb-24 ${theme === 'retro' ? 'bg-[var(--bg-header)]/60' : 'bg-black/60'} backdrop-blur-sm animate-in fade-in duration-200`}>
+            <div className={`w-full max-w-2xl ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20' : 'bg-[#0c0c0c] border-zinc-800'} border rounded-xl shadow-2xl flex flex-col overflow-hidden`}>
                 {/* Header */}
-                <div className={`flex items-center justify-between px-6 py-4 border-b ${theme === 'retro' ? 'border-[#8B261D]/20 bg-[#F9F7F1]' : 'border-zinc-900 bg-zinc-950'} shrink-0`}>
+                <div className={`flex items-center justify-between px-6 py-4 border-b ${theme === 'retro' ? 'border-[#8B261D]/20 bg-[var(--bg-header)]' : 'border-zinc-900 bg-zinc-950'} shrink-0`}>
                     <div className="flex flex-col">
                         <h2 className={`text-lg font-bold ${theme === 'retro' ? 'text-black' : 'text-white'} tracking-wider flex items-center gap-2`}>
                             <Scissors size={18} className={theme === 'retro' ? 'text-[#8B261D]' : themeAccent} />
@@ -107,11 +107,11 @@ export const BreakdownConfigModal: React.FC<BreakdownConfigModalProps> = ({
 
                     {/* Instruction */}
                     <div className="space-y-3">
-                        <label className={`text-xs font-bold ${theme === 'retro' ? 'text-black/60' : 'text-zinc-300'} uppercase tracking-widest px-1 flex items-center gap-2`}>
+                        <label className={`text-xs font-bold ${theme === 'retro' ? 'text-[#8B261D]' : 'text-zinc-300'} uppercase tracking-widest px-1 flex items-center gap-2`}>
                             <MessageSquare size={12} />
                             {lang === 'CN' ? "2. 分场要求与指引 (可选)" : "2. BREAKDOWN REQUIREMENTS (OPTIONAL)"}
                         </label>
-                        <div className={`bg-zinc-950 border ${theme === 'retro' ? 'bg-white border-[#8B261D]/20' : 'bg-zinc-950 border-zinc-800'} rounded-lg p-3`}>
+                        <div className={`border ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20' : 'bg-zinc-950 border-zinc-800'} rounded-lg p-3`}>
                             <textarea
                                 value={instruction}
                                 onChange={(e) => setInstruction(e.target.value)}
@@ -128,7 +128,7 @@ export const BreakdownConfigModal: React.FC<BreakdownConfigModalProps> = ({
                 </div>
 
                 {/* Footer */}
-                <div className={`px-6 py-4 border-t ${theme === 'retro' ? 'border-[#8B261D]/20 bg-[#F9F7F1]' : 'border-zinc-900 bg-black/20'} flex justify-end gap-3`}>
+                <div className={`px-6 py-4 border-t ${theme === 'retro' ? 'border-[#8B261D]/20 bg-[var(--bg-header)]' : 'border-zinc-900 bg-black/20'} flex justify-end gap-3`}>
                     <button
                         onClick={onClose}
                         className={`px-4 py-2 text-sm font-bold ${theme === 'retro' ? 'text-black/60 hover:text-black' : 'text-zinc-400 hover:text-white'} transition-colors uppercase tracking-widest`}

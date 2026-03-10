@@ -29,9 +29,9 @@ export const SourceAnalysisConfigModal: React.FC<SourceAnalysisConfigModalProps>
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 xl:p-12 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className={`w-full max-w-xl ${theme === 'retro' ? 'bg-[#F9F7F1] border-[#8B261D]/20' : 'bg-[#0c0c0c] border-zinc-800'} border rounded-xl shadow-2xl flex flex-col overflow-hidden`}>
+            <div className={`w-full max-w-xl ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20' : 'bg-[#0c0c0c] border-zinc-800'} border rounded-xl shadow-2xl flex flex-col overflow-hidden`}>
                 {/* Header */}
-                <div className={`flex items-center justify-between px-6 py-4 border-b ${theme === 'retro' ? 'border-[#8B261D]/20 bg-[#F9F7F1]' : 'border-zinc-900 bg-zinc-950'} shrink-0`}>
+                <div className={`flex items-center justify-between px-6 py-4 border-b ${theme === 'retro' ? 'border-[#8B261D]/20 bg-[var(--bg-header)]' : 'border-zinc-900 bg-zinc-950'} shrink-0`}>
                     <div className="flex flex-col">
                         <h2 className={`text-lg font-bold ${theme === 'retro' ? 'text-black' : 'text-white'} tracking-wider flex items-center gap-2`}>
                             <Globe size={18} className={theme === 'retro' ? 'text-[#8B261D]' : themeAccent} />
@@ -54,7 +54,7 @@ export const SourceAnalysisConfigModal: React.FC<SourceAnalysisConfigModalProps>
                             <Globe size={12} />
                             {lang === 'CN' ? "1. 全局原文反推说明" : "1. GLOBAL SOURCE ANALYSIS GUIDE"}
                         </label>
-                        <div className={`bg-zinc-900/10 border ${theme === 'retro' ? 'bg-[#F9F7F1] border-[#8B261D]/20' : 'bg-zinc-900/30 border-zinc-800'} rounded-lg p-4 relative overflow-hidden group`}>
+                        <div className={`bg-zinc-900/10 border ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20' : 'bg-zinc-900/30 border-zinc-800'} rounded-lg p-4 relative overflow-hidden group`}>
                             <div className={`absolute top-0 left-0 w-1 h-full ${theme === 'retro' ? 'bg-[#8B261D]' : `bg-${colorBase}/50`}`} />
                             <p className={`text-xs ${theme === 'retro' ? 'text-black' : 'text-zinc-300'} leading-relaxed`}>
                                 {lang === 'CN'
@@ -71,7 +71,7 @@ export const SourceAnalysisConfigModal: React.FC<SourceAnalysisConfigModalProps>
                             <MessageSquare size={12} />
                             {lang === 'CN' ? "2. 反推要求 (可选)" : "2. ANALYSIS REQUIREMENTS (OPTIONAL)"}
                         </label>
-                        <div className={`bg-zinc-950 border ${theme === 'retro' ? 'bg-white border-[#8B261D]/20' : 'bg-zinc-950 border-zinc-800'} rounded-lg p-3`}>
+                        <div className={`border ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20' : 'bg-zinc-950 border-zinc-800'} rounded-lg p-3`}>
                             <textarea
                                 value={dialogue}
                                 onChange={(e) => setDialogue(e.target.value)}
@@ -83,7 +83,7 @@ export const SourceAnalysisConfigModal: React.FC<SourceAnalysisConfigModalProps>
                 </div>
 
                 {/* Footer */}
-                <div className={`px-6 py-4 border-t ${theme === 'retro' ? 'border-[#8B261D]/20 bg-[#F4EFE0]' : 'border-zinc-900 bg-black/20'} flex justify-end gap-3`}>
+                <div className={`px-6 py-4 border-t ${theme === 'retro' ? 'border-[#8B261D]/20 bg-[var(--bg-header)]' : 'border-zinc-900 bg-black/20'} flex justify-end gap-3`}>
                     <button
                         onClick={onClose}
                         className={`px-4 py-2 text-sm font-bold ${theme === 'retro' ? 'text-black/60 hover:text-black' : 'text-zinc-400 hover:text-white'} transition-colors uppercase tracking-widest`}

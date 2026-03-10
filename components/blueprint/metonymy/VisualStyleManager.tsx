@@ -598,7 +598,7 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
                     {list.map(asset => {
                         const currentAssetLang = getAssetLang(asset.id, type);
                         return (
-                            <div key={asset.id} className={`border rounded-lg overflow-hidden flex flex-col group relative ${theme === 'retro' ? 'bg-[#F9F7F1] border-[#8B261D]/20' : 'bg-black/40 border-zinc-800'}`}>
+                            <div key={asset.id} className={`border rounded-lg overflow-hidden flex flex-col group relative ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/30' : 'bg-black/40 border-zinc-800'}`}>
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
@@ -634,7 +634,7 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
                                     ) : (
                                         <div className={`absolute inset-0 flex flex-col items-center justify-center ${theme === 'retro' ? 'text-[#8B261D]/40' : 'text-zinc-500'} gap-2`}>
                                             <ImageIcon size={32} />
-                                            <span className="text-xs uppercase font-bold tracking-widest">{lang === 'EN' ? "Upload" : "上传"}</span>
+                                            <span className="text-xs uppercase font-bold tracking-widest">{lang === 'EN' ? "Upload Asset Image" : "上传资产图"}</span>
                                         </div>
                                     )}
                                 </div>
@@ -744,7 +744,7 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
                                                 next[type] = next[type].map(a => a.id === asset.id ? { ...a, analysis: { ...(a.analysis || { description: "", anchors: "" }), [currentAssetLang === 'CN' ? 'designPrompt' : 'designPromptEn']: e.target.value } } : a);
                                                 updateActivePreset({ assets: next });
                                             }}
-                                            className={`w-full border rounded p-1.5 text-[10px] resize-none focus:outline-none focus:border-zinc-700 leading-relaxed h-16 custom-scrollbar ${theme === 'retro' ? 'bg-white border-[#8B261D]/20 text-[#8B261D]' : 'bg-zinc-950/50 border-zinc-800 text-zinc-100'}`}
+                                            className={`w-full border rounded p-1.5 text-[10px] resize-none focus:outline-none focus:border-zinc-700 leading-relaxed h-16 custom-scrollbar ${theme === 'retro' ? 'bg-[#F4EFE0] border-[#8B261D]/20 text-[#8B261D]' : 'bg-zinc-950 border-zinc-800 text-zinc-100'}`}
                                             placeholder={lang === 'EN' ? "Prompt for generating design sheets..." : "用于生成设计图的提示词..."}
                                         />
                                     </div>
@@ -763,7 +763,7 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
                                                     next[type] = next[type].map(a => a.id === asset.id ? { ...a, analysis: { ...(a.analysis || { description: "", anchors: "" }), [currentAssetLang === 'CN' ? 'conceptPrompt' : 'conceptPromptEn']: e.target.value } } : a);
                                                     updateActivePreset({ assets: next });
                                                 }}
-                                                className={`w-full border rounded p-1.5 text-[10px] resize-none focus:outline-none focus:border-zinc-700 leading-relaxed h-16 custom-scrollbar ${theme === 'retro' ? 'bg-white border-[#8B261D]/20 text-[#8B261D]' : 'bg-zinc-950/50 border-zinc-800 text-zinc-100'}`}
+                                                className={`w-full border rounded p-1.5 text-[10px] resize-none focus:outline-none focus:border-zinc-700 leading-relaxed h-16 custom-scrollbar ${theme === 'retro' ? 'bg-[#F4EFE0] border-[#8B261D]/20 text-[#8B261D]' : 'bg-zinc-950 border-zinc-800 text-zinc-100'}`}
                                                 placeholder={lang === 'EN' ? "Prompt for generating concept art..." : "用于生成概念图的提示词..."}
                                             />
                                         </div>
@@ -780,7 +780,7 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
                                 next[type] = [...next[type], { id: Date.now().toString() + Math.random().toString(36).substr(2, 5), name: "", type: type.toUpperCase() as any, analysis: { description: "", anchors: "" } }];
                                 updateActivePreset({ assets: next });
                             }}
-                            className={`aspect-video border border-dashed rounded-lg flex flex-col items-center justify-center transition-all cursor-pointer group ${theme === 'retro' ? 'bg-white border-[#8B261D]/30 text-[#8B261D]/50 hover:text-[#8B261D] hover:border-[#8B261D]/60' : 'border-zinc-800 text-zinc-500 hover:text-zinc-200 hover:border-zinc-500'}`}
+                            className={`aspect-video border border-dashed rounded-lg flex flex-col items-center justify-center transition-all cursor-pointer group ${theme === 'retro' ? 'bg-[var(--bg-panel)]/30 border-[#8B261D]/30 text-[#8B261D]/50 hover:text-[#8B261D] hover:border-[#8B261D]/60' : 'bg-white/5 border-zinc-800 text-zinc-500 hover:text-zinc-200 hover:border-zinc-500'}`}
                         >
                             <Plus size={32} className="group-hover:scale-110 transition-transform" />
                             <span className="text-xs font-bold uppercase tracking-widest mt-2">{lang === 'EN' ? "Add" : "添加"}</span>
@@ -792,10 +792,10 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
     };
 
     return (
-        <div className={`${theme === 'retro' ? 'bg-[#F9F7F1] border-[#8B261D]/20' : 'bg-[#0a0a0a] border-zinc-800'} border-b flex flex-col shrink-0 ${isExpanded ? 'h-full' : ''}`}>
+        <div className={`${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20' : 'bg-[#0a0a0a] border-zinc-800'} border-b flex flex-col shrink-0 ${isExpanded ? 'h-full' : ''}`}>
             <div
                 onClick={handleToggle}
-                className={`h-16 px-6 flex items-center justify-between cursor-pointer transition-colors border-b sticky top-0 z-20 ${theme === 'retro' ? 'hover:bg-[#8B261D]/5 border-[#8B261D]/20 bg-[#F4EFE0]' : 'hover:bg-white/5 border-zinc-900 bg-[#0a0a0a]'}`}
+                className={`h-16 px-6 flex items-center justify-between cursor-pointer transition-colors border-b sticky top-0 z-20 ${theme === 'retro' ? 'hover:bg-[#8B261D]/5 border-[#8B261D]/20 bg-[var(--bg-header)]' : 'hover:bg-white/5 border-zinc-900 bg-[#0a0a0a]'}`}
             >
                 <div className="flex items-center gap-3">
                     <div className={`p-1.5 rounded-lg border ${theme === 'retro' ? 'bg-white border-[#8B261D]/20 text-[#8B261D]' : `bg-zinc-900 border-zinc-800 ${themeAccent}`}`}>
@@ -818,9 +818,9 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
             </div>
 
             {isExpanded && (
-                <div className={`animate-in slide-in-from-top-2 duration-300 flex-1 overflow-y-auto custom-scrollbar flex flex-col ${theme === 'retro' ? 'bg-[#F9F7F1]' : 'bg-black'}`}>
+                <div className={`animate-in slide-in-from-top-2 duration-300 flex-1 overflow-y-auto custom-scrollbar flex flex-col ${theme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-black'}`}>
                     {/* STICKY HEADER FOR TABS AND GLOBAL COPY */}
-                    <div className={`sticky top-0 z-30 flex items-center border-b shrink-0 ${theme === 'retro' ? 'bg-[#F4EFE0] border-[#8B261D]/20' : 'bg-black border-zinc-800'}`}>
+                    <div className={`sticky top-0 z-30 flex items-center border-b shrink-0 ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20' : 'bg-black border-zinc-800'}`}>
                         {/* PRESET TABS */}
                         <div className="flex-1 flex overflow-x-auto no-scrollbar px-4 items-center">
                             {presets.map(preset => {
@@ -832,7 +832,7 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
                                     <div
                                         key={preset.id}
                                         onClick={() => onSetActivePreset(preset.id)}
-                                        className={`group relative flex items-center py-3 text-xs font-bold uppercase tracking-wider border-b-2 transition-all cursor-pointer whitespace-nowrap ${isTextStyle ? 'px-4' : 'pl-4 pr-1.5'} ${isActive ? (theme === 'retro' ? 'border-[#8B261D] text-[#8B261D] bg-[#F9F7F1]' : `${themeAccent} border-current bg-zinc-950`) : (theme === 'retro' ? 'text-[#8B261D]/50 border-transparent hover:text-[#8B261D] bg-[#F9F7F1]' : 'text-zinc-400 border-transparent hover:text-zinc-100 bg-black/20')}`}
+                                        className={`group relative flex items-center py-3 text-xs font-bold uppercase tracking-wider border-b-2 transition-all cursor-pointer whitespace-nowrap ${isTextStyle ? 'px-4' : 'pl-4 pr-1.5'} ${isActive ? (theme === 'retro' ? 'border-[#8B261D] text-[#8B261D] bg-[var(--bg-header)]' : `${themeAccent} border-current bg-zinc-950`) : (theme === 'retro' ? 'text-[#8B261D]/50 border-transparent hover:text-[#8B261D] bg-[var(--bg-header)]' : 'text-zinc-400 border-transparent hover:text-zinc-100 bg-black/20')}`}
                                     >
                                         <span>{displayName}</span>
 
@@ -856,7 +856,7 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
                         {/* GLOBAL COPY BUTTON */}
                         <button
                             onClick={handleCopyGlobal}
-                            className={`flex items-center gap-1.5 px-4 h-[44px] transition-all border-l group outline-none ${theme === 'retro' ? 'bg-[#F9F7F1] hover:bg-[#F9F7F1]/80 text-[#8B261D] border-[#8B261D]/20' : 'bg-zinc-950 hover:bg-zinc-900 text-zinc-100 hover:text-white border-zinc-800'}`}
+                            className={`flex items-center gap-1.5 px-4 h-[44px] transition-all border-l group outline-none ${theme === 'retro' ? 'bg-[var(--bg-header)] hover:bg-[var(--bg-header)]/80 text-[#8B261D] border-[#8B261D]/20' : 'bg-zinc-950 hover:bg-zinc-900 text-zinc-100 hover:text-white border-zinc-800'}`}
                         >
                             {copiedAll ? (
                                 <Check size={12} className="text-green-500 animate-in zoom-in" />
@@ -932,11 +932,11 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
 
                                 {/* Reference Image Container - Stretches to fill height */}
                                 <div
-                                    className={`flex-1 rounded-lg border relative group overflow-hidden cursor-pointer flex items-center justify-center aspect-[4/3] h-full ${theme === 'retro' ? 'bg-[#F9F7F1] border-[#8B261D]/20 shadow-sm' : 'bg-black border-zinc-800'}`}
+                                    className={`flex-1 rounded-lg border relative group overflow-hidden cursor-pointer flex items-center justify-center aspect-[4/3] h-full ${theme === 'retro' ? 'bg-[#8B261D]/5 border-[#8B261D]/20 shadow-sm' : 'bg-zinc-950 border-zinc-800'}`}
                                     onClick={() => fileInputRef.current?.click()}
                                 >
                                     {isToneUploading ? (
-                                        <div className={`absolute inset-0 flex flex-col items-center justify-center backdrop-blur-sm z-20 ${theme === 'retro' ? 'bg-[#F9F7F1]/80' : 'bg-black/60'}`}>
+                                        <div className={`absolute inset-0 flex flex-col items-center justify-center backdrop-blur-sm z-20 ${theme === 'retro' ? 'bg-[var(--bg-header)]/80' : 'bg-black/60'}`}>
                                             <Loader2 size={24} className={`animate-spin ${themeAccent} mb-2`} />
                                             <span className={`text-[9px] font-bold uppercase tracking-widest ${theme === 'retro' ? 'text-[#8B261D]/60' : 'text-zinc-400'}`}>{lang === 'EN' ? "Uploading..." : "上传中..."}</span>
                                         </div>
@@ -956,7 +956,7 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
                             {/* RIGHT COLUMN: Vertical Palette + Text Areas */}
                             <div className="flex-1 flex gap-2 h-full">
                                 {/* 1. Vertical Color Palette */}
-                                <div className={`w-6 flex flex-col gap-0.5 h-full rounded border p-0.5 ${theme === 'retro' ? 'bg-[#F9F7F1] border-[#8B261D]/20 shadow-sm' : 'bg-black/40 border-zinc-800'}`}>
+                                <div className={`w-6 flex flex-col gap-0.5 h-full rounded border p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20 shadow-sm' : 'bg-black/40 border-zinc-800'}`}>
                                     <div className="h-4 flex items-center justify-center mb-0.5">
                                         <Palette size={10} className={theme === 'retro' ? 'text-[#8B261D]/50' : 'text-zinc-300'} />
                                     </div>
@@ -982,7 +982,7 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
                                 {/* 2. The 4 Text Areas Grid - Now stretches to fill remaining space */}
                                 <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-1 h-full">
                                     {/* Art & Style */}
-                                    <div className={`p-1 rounded border transition-colors flex flex-col h-full overflow-hidden ${theme === 'retro' ? 'bg-[#F9F7F1] border-[#8B261D]/20 hover:border-[#8B261D]/40' : 'bg-black/40 border-zinc-800 hover:border-zinc-700'}`}>
+                                    <div className={`p-1 rounded border transition-colors flex flex-col h-full overflow-hidden ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20 hover:border-[#8B261D]/40' : 'bg-black/40 border-zinc-800 hover:border-zinc-700'}`}>
                                         <div className={`text-[11px] font-bold uppercase mb-0.5 flex items-center gap-1 shrink-0 ${theme === 'retro' ? 'text-[#8B261D]' : 'text-zinc-100'}`}>
                                             <Paintbrush size={10} /> {lang === 'EN' ? "Art & Style" : "艺术与风格"}
                                         </div>
@@ -998,7 +998,7 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
                                     </div>
 
                                     {/* Light & Atmosphere */}
-                                    <div className={`p-1 rounded border transition-colors flex flex-col h-full overflow-hidden ${theme === 'retro' ? 'bg-[#F9F7F1] border-[#8B261D]/20 hover:border-[#8B261D]/40' : 'bg-black/40 border-zinc-800 hover:border-zinc-700'}`}>
+                                    <div className={`p-1 rounded border transition-colors flex flex-col h-full overflow-hidden ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20 hover:border-[#8B261D]/40' : 'bg-black/40 border-zinc-800 hover:border-zinc-700'}`}>
                                         <div className={`text-[11px] font-bold uppercase mb-0.5 flex items-center gap-1 shrink-0 ${theme === 'retro' ? 'text-[#8B261D]' : 'text-zinc-100'}`}>
                                             <Zap size={10} /> {lang === 'EN' ? "Light & Atmosphere" : "光影与氛围"}
                                         </div>
@@ -1014,7 +1014,7 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
                                     </div>
 
                                     {/* Medium & Format */}
-                                    <div className={`p-1 rounded border transition-colors flex flex-col h-full overflow-hidden ${theme === 'retro' ? 'bg-[#F9F7F1] border-[#8B261D]/20 hover:border-[#8B261D]/40' : 'bg-black/40 border-zinc-800 hover:border-zinc-700'}`}>
+                                    <div className={`p-1 rounded border transition-colors flex flex-col h-full overflow-hidden ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20 hover:border-[#8B261D]/40' : 'bg-black/40 border-zinc-800 hover:border-zinc-700'}`}>
                                         <div className={`text-[11px] font-bold uppercase mb-0.5 flex items-center gap-1 shrink-0 ${theme === 'retro' ? 'text-[#8B261D]' : 'text-zinc-100'}`}>
                                             <Camera size={10} /> {lang === 'EN' ? "Medium & Format" : "媒介与格式"}
                                         </div>
@@ -1030,7 +1030,7 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
                                     </div>
 
                                     {/* Texture & Character */}
-                                    <div className={`p-1 rounded border transition-colors flex flex-col h-full overflow-hidden ${theme === 'retro' ? 'bg-[#F9F7F1] border-[#8B261D]/20 hover:border-[#8B261D]/40' : 'bg-black/40 border-zinc-800 hover:border-zinc-700'}`}>
+                                    <div className={`p-1 rounded border transition-colors flex flex-col h-full overflow-hidden ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20 hover:border-[#8B261D]/40' : 'bg-black/40 border-zinc-800 hover:border-zinc-700'}`}>
                                         <div className={`text-[11px] font-bold uppercase mb-0.5 flex items-center gap-1 shrink-0 ${theme === 'retro' ? 'text-[#8B261D]' : 'text-zinc-100'}`}>
                                             <Layers size={10} /> {lang === 'EN' ? "Texture & Character" : "质感与特征"}
                                         </div>
@@ -1097,7 +1097,7 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
             {/* Simple Themed Alert Modal */}
             {isAlertOpen && (
                 <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-                    <div className={`w-full max-w-sm ${theme === 'retro' ? 'bg-[#F9F7F1] border-[#8B261D]' : 'bg-[#0c0c0c] border-zinc-800 shadow-[0_0_20px_rgba(0,0,0,0.5)]'} border-2 rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200`}>
+                    <div className={`w-full max-w-sm ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]' : 'bg-[#0c0c0c] border-zinc-800 shadow-[0_0_20px_rgba(0,0,0,0.5)]'} border-2 rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200`}>
                         <div className={`px-6 py-8 text-center ${theme === 'retro' ? 'text-black' : 'text-white'}`}>
                             <div className={`w-14 h-14 rounded-full mx-auto mb-5 flex items-center justify-center ${theme === 'retro' ? 'bg-[#8B261D]/10 text-[#8B261D]' : 'bg-zinc-800 text-zinc-400'}`}>
                                 <AlertCircle size={28} />
@@ -1109,7 +1109,7 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
                                 {alertMessage}
                             </p>
                         </div>
-                        <div className={`p-4 border-t ${theme === 'retro' ? 'border-[#8B261D]/10 bg-[#F4EFE0]/50' : 'border-zinc-900 bg-zinc-950/50'}`}>
+                        <div className={`p-4 border-t ${theme === 'retro' ? 'border-[#8B261D]/10 bg-[var(--bg-header)]/50' : 'border-zinc-900 bg-zinc-950/50'}`}>
                             <button
                                 onClick={() => setIsAlertOpen(false)}
                                 className={`w-full py-3 rounded-lg text-xs font-bold uppercase tracking-widest transition-all active:scale-95 ${theme === 'retro' ? 'bg-[#8B261D] text-white hover:bg-[#A52A2A] shadow-md' : `bg-${colorBase}/20 text-${colorBase} hover:bg-${colorBase}/30 border border-current`}`}

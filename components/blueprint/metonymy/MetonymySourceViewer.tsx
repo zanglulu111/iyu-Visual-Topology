@@ -274,8 +274,8 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
     };
 
     return (
-        <div ref={containerRef} className={`flex flex-col h-full ${theme === 'retro' ? 'bg-[#F9F7F1]' : 'bg-[#0a0a0a]'} relative group`}>
-            <div className={`h-16 border-b ${theme === 'retro' ? 'border-[#8B261D]/20 bg-[#F9F7F1]' : 'border-zinc-800 bg-[#0c0c0c]'} flex justify-between items-center shrink-0 px-4`}>
+        <div ref={containerRef} className={`flex flex-col h-full ${theme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#0a0a0a]'} relative group`}>
+            <div className={`h-16 border-b ${theme === 'retro' ? 'border-[#8B261D]/20 bg-[var(--bg-header)]' : 'border-zinc-800 bg-[#0c0c0c]'} flex justify-between items-center shrink-0 px-4`}>
                 <div className={`flex items-center gap-2 ${theme === 'retro' ? 'text-black' : 'text-zinc-300'} font-bold text-xs uppercase tracking-widest`}>
                     <FileText size={14} className={themeAccent} />
                     {lang === 'EN' ? "Full Story" : "完整故事"}
@@ -314,7 +314,7 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
                 </div>
             </div>
 
-            <div className={`flex-1 overflow-y-auto custom-scrollbar p-0 ${theme === 'retro' ? 'bg-[#F9F7F1]' : 'bg-[#0a0a0a]'} relative ${isSelectionMode ? 'pb-80' : 'pb-10'}`}>
+            <div className={`flex-1 overflow-y-auto custom-scrollbar p-0 ${theme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#0a0a0a]'} relative ${isSelectionMode ? 'pb-80' : 'pb-10'}`}>
                 {isEditing ? (
                     <textarea
                         value={text}
@@ -452,7 +452,7 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
                     className="absolute bottom-20 left-0 right-0 z-[2000] flex justify-center animate-in slide-in-from-bottom-2 fade-in pointer-events-none"
                     style={{ transform: `translate(${consolePos.x}px, ${consolePos.y}px)` }}
                 >
-                    <div className={`w-[calc(100%-2rem)] max-w-[460px] ${theme === 'retro' ? 'bg-[#F9F7F1] border-[#8B261D]/50' : 'bg-zinc-950 border-zinc-700'} border-2 p-3 pr-4 rounded-xl shadow-2xl flex items-start gap-3 pointer-events-auto`}>
+                    <div className={`w-[calc(100%-2rem)] max-w-[460px] ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/40' : 'bg-zinc-950 border-zinc-700'} border-2 p-3 pr-4 rounded-xl shadow-2xl flex items-start gap-3 pointer-events-auto`}>
                         {/* Drag Handle */}
                         <div 
                             onMouseDown={handleDragStart}
@@ -463,17 +463,17 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
                         </div>
 
                         <div className="flex-1 flex flex-col gap-3">
-                            <div className={`flex justify-between items-center text-[9px] ${theme === 'retro' ? 'text-[#8B261D]/60 border-[#8B261D]/10' : 'text-zinc-400 border-zinc-800'} font-bold uppercase tracking-wider border-b pb-2`}>
+                            <div className={`flex justify-between items-center text-[9px] ${theme === 'retro' ? 'text-black/70 border-[#8B261D]/10' : 'text-zinc-400 border-zinc-800'} font-bold uppercase tracking-wider border-b pb-2`}>
                                 <div className="flex items-center gap-2">
-                                    <span>{lang === 'EN' ? "Selected Paragraphs" : "已选段落"}: <span className={`px-1.5 py-0.5 rounded ${theme === 'retro' ? 'bg-[#8B261D]/10 text-[#8B261D]' : 'bg-zinc-800 text-white'}`}>{selectedIndices.size}</span></span>
-                                    <span className={theme === 'retro' ? 'text-[#8B261D]/20' : 'text-zinc-700'}>|</span>
-                                    <span>Range: <span className={theme === 'retro' ? 'text-[#8B261D]' : themeAccent}>{getSelectionRangeString()}</span></span>
+                                    <span>{lang === 'EN' ? "Selected Paragraphs" : "已选段落"}: <span className={`px-1.5 py-0.5 rounded ${theme === 'retro' ? 'bg-[#8B261D] text-white' : 'bg-zinc-800 text-white'}`}>{selectedIndices.size}</span></span>
+                                    <span className={theme === 'retro' ? 'text-black/20' : 'text-zinc-700'}>|</span>
+                                    <span>Range: <span className={theme === 'retro' ? 'text-black font-black' : themeAccent}>{getSelectionRangeString()}</span></span>
                                 </div>
                                 <div className="flex gap-3">
-                                    <button onClick={handleUndo} disabled={selectionHistory.length === 0} className={`flex items-center gap-1 transition-colors ${selectionHistory.length === 0 ? (theme === 'retro' ? 'text-[#8B261D]/20' : 'text-zinc-700') : (theme === 'retro' ? 'text-[#8B261D]/60 hover:text-[#8B261D]' : 'text-zinc-400 hover:text-white')}`}>
+                                    <button onClick={handleUndo} disabled={selectionHistory.length === 0} className={`flex items-center gap-1 transition-colors ${selectionHistory.length === 0 ? (theme === 'retro' ? 'text-black/20' : 'text-zinc-700') : (theme === 'retro' ? 'text-black/60 hover:text-black' : 'text-zinc-400 hover:text-white')}`}>
                                         <Undo2 size={12} /> {lang === 'EN' ? "Undo" : "撤销"}
                                     </button>
-                                    <button onClick={clearSelection} className={`flex items-center gap-1 transition-colors ${theme === 'retro' ? 'text-[#8B261D]/60 hover:text-[#8B261D]' : 'text-zinc-400 hover:text-white'}`}>
+                                    <button onClick={clearSelection} className={`flex items-center gap-1 transition-colors ${theme === 'retro' ? 'text-black/60 hover:text-black' : 'text-zinc-400 hover:text-white'}`}>
                                         <Eraser size={12} /> {lang === 'EN' ? "Clear" : "清空"}
                                     </button>
                                 </div>
@@ -481,8 +481,8 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
 
                             {/* Target Scene Selector */}
                             <div className="flex flex-col gap-2">
-                                <div className={`flex items-center gap-2 rounded-lg p-1 border ${theme === 'retro' ? 'bg-white border-[#8B261D]/20' : 'bg-zinc-900 border-zinc-800'}`}>
-                                    <div className="px-2 text-[9px] font-bold text-zinc-400 uppercase tracking-widest shrink-0">
+                                <div className={`flex items-center gap-2 rounded-lg p-1 border ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20' : 'bg-zinc-900 border-zinc-800'}`}>
+                                    <div className={`px-2 text-[9px] font-bold ${theme === 'retro' ? 'text-black/60' : 'text-zinc-400'} uppercase tracking-widest shrink-0`}>
                                         {lang === 'EN' ? "Target Scene:" : "目标场次："}
                                     </div>
                                     <div className={`relative flex-1 ${theme === 'retro' ? 'text-black' : 'text-white'}`}>
@@ -493,7 +493,7 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
                                         >
                                             <option value="" disabled>{lang === 'EN' ? "Select a Scene..." : "选择目标场次..."}</option>
                                             {sections.map((s, idx) => (
-                                                <option key={s.id} value={s.id} className={theme === 'retro' ? 'bg-white text-black' : 'bg-zinc-900 text-zinc-300'}>
+                                                <option key={s.id} value={s.id} className={theme === 'retro' ? 'bg-[var(--bg-header)] text-black' : 'bg-zinc-900 text-zinc-300'}>
                                                     #{idx + 1} - {s.title}
                                                 </option>
                                             ))}
@@ -515,7 +515,7 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
                                     <button
                                         onClick={() => handleAction('NEW')}
                                         disabled={selectedIndices.size === 0}
-                                        className={`flex-1 py-2 px-2 border rounded-lg flex items-center justify-center gap-2 transition-all text-[10px] font-bold disabled:opacity-50 disabled:cursor-not-allowed ${theme === 'retro' ? 'bg-white border-[#8B261D]/20 text-[#8B261D]/70 hover:text-[#8B261D] hover:border-[#8B261D]/40' : 'bg-zinc-800 border-zinc-700/50 text-zinc-300 hover:text-white hover:border-zinc-500'}`}
+                                        className={`flex-1 py-2 px-2 border rounded-lg flex items-center justify-center gap-2 transition-all text-[10px] font-bold disabled:opacity-50 disabled:cursor-not-allowed ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20 text-[#8B261D]/70 hover:text-[#8B261D] hover:border-[#8B261D]/40' : 'bg-zinc-900 border-zinc-700/50 text-zinc-300 hover:text-white hover:border-zinc-500'}`}
                                         title="Create new scene from selected text"
                                     >
                                         <Plus size={14} /> {lang === 'EN' ? "Create New Scene" : "新建场次"}

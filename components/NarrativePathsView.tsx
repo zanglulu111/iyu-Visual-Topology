@@ -361,11 +361,11 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
 
     // Use dynamic theme color for the control class
     const themeTextColor = getThemeColor();
-    const controlClass = `flex items-center px-3 py-1.5 rounded-lg ${theme === 'retro' ? 'bg-white border-black/10' : 'bg-zinc-900 border-white/20'} ${themeTextColor} hover:border-white/50 transition-all w-44`;
+    const controlClass = `flex items-center px-3 py-1.5 rounded-lg ${theme === 'retro' ? 'bg-transparent border-[#8B261D]/20 shadow-none' : 'bg-zinc-900 border-white/20'} ${themeTextColor} hover:border-[#8B261D]/50 transition-all w-44`;
 
     return (
-        <div className={`w-full h-full flex flex-col relative animate-fade-in overflow-hidden ${theme === 'retro' ? 'bg-[#F9F7F1]' : 'bg-[#0a0a0a]'}`}>
-            <div className={`shrink-0 h-14 ${theme === 'retro' ? 'bg-[#F4EFE0] border-[#8B261D]/20' : 'bg-[#0a0a0a] border-zinc-800'} border-b flex items-center justify-between px-6 shadow-xl z-20`}>
+        <div className={`w-full h-full flex flex-col relative animate-fade-in overflow-hidden ${theme === 'retro' ? 'bg-[var(--bg-main)]' : 'bg-[#0a0a0a]'}`}>
+            <div className={`shrink-0 h-14 ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20' : 'bg-[#0a0a0a] border-zinc-800'} border-b flex items-center justify-between px-6 shadow-xl z-20`}>
                 <div className="flex items-center gap-4">
                     <div className={`flex items-center gap-2 ${getThemeColor()}`}>
                         <Settings2 size={16} />
@@ -373,22 +373,22 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                     </div>
 
                     {isAestheticResults && (
-                        <div className="flex bg-zinc-900 border border-zinc-700 rounded-lg p-1 ml-4">
+                        <div className={`flex border rounded-lg p-1 ml-4 ${theme === 'retro' ? 'bg-[#8B261D]/5 border-[#8B261D]/30 shadow-inner' : 'bg-zinc-900 border-zinc-700'}`}>
                             <button
                                 onClick={() => setPromptLang('CN')}
-                                className={`px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-wider transition-all ${promptLang === 'CN' ? 'bg-rose-500 text-black' : 'text-zinc-500 hover:text-white'}`}
+                                className={`px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-wider transition-all ${promptLang === 'CN' ? (theme === 'retro' ? 'bg-[#8B261D] text-white shadow-md' : 'bg-rose-500 text-black') : (theme === 'retro' ? 'text-[#8B261D]/60 hover:text-[#8B261D] hover:bg-[#8B261D]/10' : 'text-zinc-500 hover:text-white')}`}
                             >
                                 {lang === 'EN' ? "Concept" : "视觉概念"}
                             </button>
                             <button
                                 onClick={() => setPromptLang('EN')}
-                                className={`px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-wider transition-all ${promptLang === 'EN' ? 'bg-rose-500 text-black' : 'text-zinc-500 hover:text-white'}`}
+                                className={`px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-wider transition-all ${promptLang === 'EN' ? (theme === 'retro' ? 'bg-[#8B261D] text-white shadow-md' : 'bg-rose-500 text-black') : (theme === 'retro' ? 'text-[#8B261D]/60 hover:text-[#8B261D] hover:bg-[#8B261D]/10' : 'text-zinc-500 hover:text-white')}`}
                             >
                                 {lang === 'EN' ? "Prompt" : "MJ 指令"}
                             </button>
                             <button
                                 onClick={() => setPromptLang('UVD')}
-                                className={`px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-wider transition-all ${promptLang === 'UVD' ? 'bg-rose-500 text-black' : 'text-zinc-500 hover:text-white'}`}
+                                className={`px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-wider transition-all ${promptLang === 'UVD' ? (theme === 'retro' ? 'bg-[#8B261D] text-white shadow-md' : 'bg-rose-500 text-black') : (theme === 'retro' ? 'text-[#8B261D]/60 hover:text-[#8B261D] hover:bg-[#8B261D]/10' : 'text-zinc-500 hover:text-white')}`}
                             >
                                 {lang === 'EN' ? "Universal" : "通用指令"}
                             </button>
@@ -397,19 +397,21 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                 </div>
 
                 <div className="flex flex-wrap gap-4 items-center justify-center flex-1">
-                    {/* Visual Tone Button */}
-                    <button
-                        onClick={() => setIsStyleModalOpen(true)}
-                        className={`${controlClass} text-left gap-2`}
-                        title={lang === 'EN' ? "Select Visual Tone" : "选择视觉调性"}
-                    >
-                        <Palette size={14} className="shrink-0" />
-                        <span className="text-xs font-bold truncate">
-                            {currentStyleName
-                                ? formatName(currentStyleName)
-                                : (lang === 'EN' ? "VISUAL TONE" : "视觉调性")}
-                        </span>
-                    </button>
+                    {/* Visual Tone Button - Hidden for Aesthetic driver */}
+                    {!isAestheticResults && (
+                        <button
+                            onClick={() => setIsStyleModalOpen(true)}
+                            className={`${controlClass} text-left gap-2`}
+                            title={lang === 'EN' ? "Select Visual Tone" : "选择视觉调性"}
+                        >
+                            <Palette size={14} className="shrink-0" />
+                            <span className="text-xs font-bold truncate">
+                                {currentStyleName
+                                    ? formatName(currentStyleName)
+                                    : (lang === 'EN' ? "VISUAL TONE" : "视觉调性")}
+                            </span>
+                        </button>
+                    )}
 
                     {(!isCommercialResults && !isExperimentalResults && !isAestheticResults && !isTrailerResults) && (
                         <>
@@ -464,13 +466,13 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                 <div className={`
                     absolute top-0 bottom-0 left-0 z-20
                     w-[400px]
-                    ${theme === 'retro' ? 'bg-[#F4EFE0]/98 border-[#8B261D]/20' : 'bg-[#0c0c0c]/95 border-zinc-800'} border-r backdrop-blur-md
+                    ${theme === 'retro' ? 'bg-[var(--bg-main)] border-[#8B261D]/20' : 'bg-[#0c0c0c]/95 border-zinc-800'} border-r backdrop-blur-md
                     transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]
                     ${isParamsPanelOpen ? 'translate-x-0' : '-translate-x-full'}
                     flex flex-col ${theme === 'retro' ? '' : 'shadow-[10px_0_30px_rgba(0,0,0,0.3)]'}
                 `}>
                     {/* Sidebar Content */}
-                    <div className={`p-6 border-b ${theme === 'retro' ? 'border-[#8B261D]/20 bg-[#F4EFE0]' : 'border-zinc-800 bg-[#0a0a0a]'} flex justify-between items-center`}>
+                    <div className={`p-6 border-b ${theme === 'retro' ? 'border-[#8B261D]/20 bg-[var(--bg-header)]' : 'border-zinc-800 bg-[#0a0a0a]'} flex justify-between items-center`}>
                         <div className="flex items-center gap-3">
                             <Database className={getThemeColor()} size={20} />
                             <span className={`text-base font-bold ${theme === 'retro' ? 'text-[#8B261D]' : 'text-white'} uppercase tracking-widest`}>
@@ -512,7 +514,7 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                                     const safeValues = values as string[];
                                     if (!safeValues || safeValues.length === 0) return null;
                                     return (
-                                        <div key={key} className={`flex flex-col gap-2 p-4 rounded-lg ${theme === 'retro' ? 'bg-white border-black/5' : 'bg-zinc-900/50 border-zinc-800/50'} border hover:border-zinc-700 transition-colors`}>
+                                        <div key={key} className={`flex flex-col gap-2 p-4 rounded-lg ${theme === 'retro' ? 'bg-black/[0.02] border-[#8B261D]/10' : 'bg-zinc-900/50 border-zinc-800/50'} border hover:border-zinc-700 transition-colors`}>
                                             <span className={`text-xs font-bold uppercase tracking-widest ${getThemeColor()} opacity-70 truncate`}>
                                                 {getBlockName(key)}
                                             </span>
@@ -593,7 +595,7 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                                             group relative flex flex-col rounded-xl overflow-hidden text-left h-full transition-all duration-300 border min-h-[500px]
                                             ${isSelected
                                                 ? (theme === 'retro' ? `bg-white border-[#8B261D] shadow-[0_10px_30px_rgba(139,38,29,0.1)] scale-[1.01] z-10` : `bg-zinc-900/80 ${borderColor} shadow-[0_0_50px_rgba(0,0,0,0.5)] scale-[1.01] z-10`)
-                                                : (theme === 'retro' ? 'bg-[#F4EFE0] border-black/5 hover:border-[#8B261D]/30 hover:-translate-y-1' : 'bg-[#0a0a0a] border-zinc-800 hover:border-zinc-600 hover:-translate-y-1 opacity-90 hover:opacity-100')
+                                                : (theme === 'retro' ? 'bg-black/[0.03] border-black/5 hover:border-[#8B261D]/30 hover:-translate-y-1' : 'bg-[#0a0a0a] border-zinc-800 hover:border-zinc-600 hover:-translate-y-1 opacity-90 hover:opacity-100')
                                             }
                                         `}
                                     >

@@ -149,7 +149,7 @@ export const AnalysisView: React.FC<AnalysisViewProps> = ({
     return (
         <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
             {!blueprint.narrative?.psychoanalysis ? (
-                <div className={`flex flex-col items-center justify-center py-20 ${theme === 'retro' ? 'bg-white/40 border-black/10' : 'bg-zinc-900/20 border-zinc-800'} border rounded-2xl border-dashed`}>
+                <div className={`flex flex-col items-center justify-center py-20 ${theme === 'retro' ? 'bg-[var(--bg-header)]/40 border-[#8B261D]/20' : 'bg-zinc-900/20 border-zinc-800'} border rounded-2xl border-dashed`}>
                     <Bot size={48} className={`${theme === 'retro' ? 'text-[#8B261D]' : 'text-zinc-600'} mb-6`} />
                     <h3 className={`text-xl font-bold ${theme === 'retro' ? 'text-black' : 'text-white'} mb-2`}>{language === 'EN' ? "Psychoanalytic Report" : "精神分析诊断报告"}</h3>
                     <p className={`${theme === 'retro' ? 'text-black/60' : 'text-zinc-500'} text-sm mb-8 text-center max-w-md`}>
@@ -177,10 +177,10 @@ export const AnalysisView: React.FC<AnalysisViewProps> = ({
                     </button>
                 </div>
             ) : (
-                <div className={`${theme === 'retro' ? 'bg-white border-black/10' : 'bg-[#050505] border-zinc-800'} border p-10 rounded-2xl shadow-2xl space-y-10`}>
+                <div className={`${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20' : 'bg-[#050505] border-zinc-800'} border p-10 rounded-2xl shadow-2xl space-y-10`}>
                     <div className={`flex justify-between items-start border-b ${theme === 'retro' ? 'border-black/10' : 'border-zinc-800'} pb-6`}>
                         <div className="flex items-center gap-4">
-                            <div className={`p-3 ${theme === 'retro' ? 'bg-[#F4EFE0] border-black/10' : 'bg-zinc-900 border-zinc-700'} border rounded-lg`}>
+                            <div className={`p-3 ${theme === 'retro' ? 'bg-white/40 border-[#8B261D]/10' : 'bg-zinc-900 border-zinc-700'} border rounded-lg`}>
                                 <Bot size={24} className={themeAccent} />
                             </div>
                             <div>
@@ -190,13 +190,13 @@ export const AnalysisView: React.FC<AnalysisViewProps> = ({
                         </div>
                         <div className="flex gap-2">
                              <button 
-                                onClick={() => setIsEditing(!isEditing)}
-                                className={`${theme === 'retro' ? 'bg-[#F4EFE0] text-[#8B261D] hover:bg-[#DCD8CF]' : 'bg-zinc-900 text-zinc-400 hover:text-white'} px-3 py-2 rounded transition-colors flex items-center gap-2`}
-                                title={isEditing ? "Preview Mode" : "Edit Mode"}
+                                 onClick={() => setIsEditing(!isEditing)}
+                                 className={`${theme === 'retro' ? 'bg-white/40 text-[#8B261D] hover:bg-white/60' : 'bg-zinc-900 text-zinc-400 hover:text-white'} px-3 py-2 rounded transition-colors flex items-center gap-2`}
+                                 title={isEditing ? "Preview Mode" : "Edit Mode"}
                             >
                                 {isEditing ? <Eye size={14} /> : <Edit3 size={14} />}
                             </button>
-                            <CopyButton text={blueprint.narrative?.psychoanalysis || ""} className={`${theme === 'retro' ? 'bg-[#F4EFE0] text-[#8B261D] hover:bg-[#DCD8CF]' : 'bg-zinc-900 text-zinc-400 hover:text-white'} px-3 py-2`} label="COPY ALL" />
+                            <CopyButton text={blueprint.narrative?.psychoanalysis || ""} className={`${theme === 'retro' ? 'bg-white/40 text-[#8B261D] hover:bg-white/60' : 'bg-zinc-900 text-zinc-400 hover:text-white'} px-3 py-2`} label="COPY ALL" />
                         </div>
                     </div>
                     
@@ -211,13 +211,13 @@ export const AnalysisView: React.FC<AnalysisViewProps> = ({
                         ) : (
                             <div className="space-y-6">
                                 {/* PART 1: INTRO TEXT (Before Formula) */}
-                                <div className={`${theme === 'retro' ? 'bg-[#F4EFE0]' : 'bg-zinc-900/10'} rounded-xl p-2 md:p-4 text-${theme === 'retro' ? 'black' : 'white'}`}>
+                                <div className={`${theme === 'retro' ? 'bg-white/40' : 'bg-zinc-900/10'} rounded-xl p-2 md:p-4 text-${theme === 'retro' ? 'black' : 'white'}`}>
                                     <MarkdownRenderer content={preText || (language === 'EN' ? "No analysis content." : "暂无分析内容。")} themeAccent={themeAccent} />
                                 </div>
 
                                 {/* PART 2: FORMULA (Attachment Style) */}
                                 {formula && (
-                                    <div className={`${theme === 'retro' ? 'bg-white border-black/20' : 'bg-zinc-900/30 border-zinc-700'} border border-dashed rounded-xl p-6 relative overflow-hidden group hover:border-${themeAccent.replace('text-', '')}/30 transition-colors`}>
+                                    <div className={`${theme === 'retro' ? 'bg-white/40 border-[#8B261D]/20' : 'bg-zinc-900/30 border-zinc-700'} border border-dashed rounded-xl p-6 relative overflow-hidden group hover:border-${themeAccent.replace('text-', '')}/30 transition-colors`}>
                                         <div className="absolute top-0 right-0 p-3 opacity-5 pointer-events-none">
                                             <Cpu size={120} className={themeAccent} />
                                         </div>
@@ -239,7 +239,7 @@ export const AnalysisView: React.FC<AnalysisViewProps> = ({
 
                                 {/* PART 3: REST OF REPORT (After Formula) */}
                                 {postText && (
-                                    <div className={`${theme === 'retro' ? 'bg-[#F4EFE0]' : 'bg-zinc-900/10'} rounded-xl p-2 md:p-4 text-${theme === 'retro' ? 'black' : 'white'}`}>
+                                    <div className={`${theme === 'retro' ? 'bg-white/40' : 'bg-zinc-900/10'} rounded-xl p-2 md:p-4 text-${theme === 'retro' ? 'black' : 'white'}`}>
                                         <MarkdownRenderer content={postText} themeAccent={themeAccent} />
                                     </div>
                                 )}

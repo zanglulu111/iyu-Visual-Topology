@@ -35,8 +35,30 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({ history, onRestore, 
         loadCollections();
     }, []);
 
+    const [isFetchingDetail, setIsFetchingDetail] = useState(false);
+
     useEffect(() => {
-        if (selectedItem) {
+        const fetchDetail = async () => {
+            if (selectedItem && (selectedItem as any).is_partial) {
+                setIsFetchingDetail(true);
+                try {
+                    const { supabaseDatabase } = await import('../services/supabaseDatabase');
+                    const fullItem = await supabaseDatabase.getCloudHistoryDetail(selectedItem.id);
+                    if (fullItem) {
+                        setSelectedItem(fullItem);
+                    }
+                } catch (e) {
+                    console.error("Failed to fetch history detail", e);
+                } finally {
+                    setIsFetchingDetail(false);
+                }
+            }
+        };
+        fetchDetail();
+    }, [selectedItem]);
+
+    useEffect(() => {
+        if (selectedItem && !(selectedItem as any).is_partial) {
             if (selectedItem.type === 'METONYMY') {
                 setActiveTab('SCRIPT');
                 setSelectedTreatmentId(null);
@@ -51,7 +73,7 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({ history, onRestore, 
                 }
             }
         }
-    }, [selectedItem]);
+    }, [selectedItem, (selectedItem as any)?.is_partial]);
 
     const handleRestoreFromCollection = (coll: CollectionItem) => {
         const pseudoItem: HistoryItem = {
@@ -235,7 +257,14 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({ history, onRestore, 
                         </div>
                         <div className="flex items-center gap-2 h-10">
                             {selectedItem && (
-                                <button onClick={() => onRestore(selectedItem)} className={`h-full ${theme === 'retro' ? 'bg-[#8B261D] text-white hover:bg-[#6D1E16]' : 'bg-white hover:bg-zinc-200 text-black'} px-5 rounded-lg text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 shadow-sm transition-all hover:scale-105 active:scale-95`}>{lang === 'EN' ? "Restore" : "恢复会话"} <ArrowRight size={14} /></button>
+                                <button 
+                                    disabled={isFetchingDetail || (selectedItem as any).is_partial}
+                                    onClick={() => onRestore(selectedItem)} 
+                                    className={`h-full ${theme === 'retro' ? 'bg-[#8B261D] text-white hover:bg-[#6D1E16]' : 'bg-white hover:bg-zinc-200 text-black'} px-5 rounded-lg text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 shadow-sm transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed`}
+                                >
+                                    {isFetchingDetail ? (lang === 'EN' ? "Loading..." : "同步中...") : (lang === 'EN' ? "Restore" : "恢复会话")} 
+                                    {!isFetchingDetail && <ArrowRight size={14} />}
+                                </button>
                             )}
                             <button 
                                 onClick={onClose} 
@@ -247,7 +276,12 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({ history, onRestore, 
                     </div>
 
                     <div className="flex-1 overflow-y-auto custom-scrollbar">
-                        {selectedItem && activeTab !== 'COLLECTION' ? (
+                        {isFetchingDetail ? (
+                            <div className="flex-1 flex flex-col items-center justify-center h-full gap-4 text-zinc-500">
+                                <Wand2 size={32} className="animate-spin opacity-50 text-gold-primary" />
+                                <span className="text-[10px] font-bold uppercase tracking-[0.2em]">{lang === 'EN' ? "Fetching Grid Records..." : "正在从矩阵中同步数据..."}</span>
+                            </div>
+                        ) : selectedItem && activeTab !== 'COLLECTION' && !(selectedItem as any).is_partial ? (
                             <div className="p-8 md:p-12">
                                 {activeTab === 'DNA' && (
                                     <div className="animate-in fade-in slide-in-from-bottom-2">

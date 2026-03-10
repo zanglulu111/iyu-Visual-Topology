@@ -189,7 +189,7 @@ export const SutureModal: React.FC<SutureModalProps> = ({
                 hoverBg: 'hover:bg-[#6D1E16]',
                 border: 'border-[#8B261D]/50', 
                 borderSoft: 'border-[#8B261D]/20', 
-                bgSoft: 'bg-[#F4EFE0]',
+                bgSoft: 'bg-[var(--bg-header)]',
                 shadow: 'shadow-none', 
                 hoverShadow: 'hover:shadow-md',
                 spinnerBorder: 'border-t-[#8B261D]', 
@@ -361,12 +361,12 @@ export const SutureModal: React.FC<SutureModalProps> = ({
 
     return (
         <div className="fixed inset-0 z-[200] flex flex-col animate-in fade-in duration-200 overflow-hidden">
-            <div className={`flex-1 w-full ${globalTheme === 'retro' ? 'bg-[#F9F7F1]' : 'bg-[#050505]'} flex flex-col overflow-hidden relative`}>
+            <div className={`flex-1 w-full ${globalTheme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#050505]'} flex flex-col overflow-hidden relative`}>
                 <div className="flex-1 flex overflow-hidden">
                         {/* Left Pane: Sources */}
-                        <div className={`w-[35%] min-w-[380px] border-r ${globalTheme === 'retro' ? 'border-[#8B261D]/20' : 'border-zinc-800'} flex flex-col ${globalTheme === 'retro' ? 'bg-[#F4EFE0]' : 'bg-[#0a0a0a]'}`}>
+                        <div className={`w-[35%] min-w-[380px] border-r ${globalTheme === 'retro' ? 'border-[#8B261D]/20' : 'border-zinc-800'} flex flex-col ${globalTheme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#0a0a0a]'}`}>
                             <div className="flex-1 flex flex-col min-h-0 relative">
-                                <div className={`absolute top-0 left-0 right-0 h-12 border-b ${globalTheme === 'retro' ? 'border-[#8B261D]/30 bg-[#F4EFE0]' : 'border-zinc-700 bg-[#111]'} flex items-center px-6 gap-3 z-10`}>
+                                <div className={`absolute top-0 left-0 right-0 h-12 border-b ${globalTheme === 'retro' ? 'border-[#8B261D]/30 bg-[var(--bg-header)]' : 'border-zinc-700 bg-[#111]'} flex items-center px-6 gap-3 z-10`}>
                                     <FileText size={16} className={theme.text} />
                                     <span className={`text-xs font-bold uppercase tracking-widest ${globalTheme === 'retro' ? 'text-black' : 'text-zinc-100'}`}>{t.SOURCE}</span>
                                     <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded border ${globalTheme === 'retro' ? 'border-[#8B261D]/40 text-[#8B261D]' : 'border-zinc-500 text-zinc-300'}`}>
@@ -386,8 +386,8 @@ export const SutureModal: React.FC<SutureModalProps> = ({
                                 />
                             </div>
 
-                            <div className={`flex-[0.6] flex flex-col min-h-0 border-t ${globalTheme === 'retro' ? 'border-[#8B261D]/20' : 'border-zinc-800'} ${globalTheme === 'retro' ? 'bg-[#F9F7F1]' : 'bg-[#0c0c0c]'} relative`}>
-                                <div className={`absolute top-0 left-0 right-0 h-12 border-b ${globalTheme === 'retro' ? 'border-[#8B261D]/30 bg-[#F9F7F1]' : 'border-zinc-700 bg-[#161616]'} flex items-center px-6 gap-2 z-10`}>
+                            <div className={`flex-[0.6] flex flex-col min-h-0 border-t ${globalTheme === 'retro' ? 'border-[#8B261D]/20' : 'border-zinc-800'} ${globalTheme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#0c0c0c]'} relative`}>
+                                <div className={`absolute top-0 left-0 right-0 h-12 border-b ${globalTheme === 'retro' ? 'border-[#8B261D]/30 bg-[var(--bg-header)]' : 'border-zinc-700 bg-[#161616]'} flex items-center px-6 gap-2 z-10`}>
                                     <BookOpen size={16} className={theme.text} />
                                     <span className={`text-xs font-bold uppercase tracking-widest ${globalTheme === 'retro' ? 'text-black' : 'text-zinc-100'}`}>{lang === 'EN' ? "DIRECTOR'S NOTE" : "导演手记"}</span>
                                 </div>
@@ -401,7 +401,7 @@ export const SutureModal: React.FC<SutureModalProps> = ({
                         </div>
 
                         {/* Middle Pane: Controls */}
-                        <div className={`w-[420px] border-r ${globalTheme === 'retro' ? 'border-[#8B261D]/20' : 'border-zinc-700'} flex flex-col ${globalTheme === 'retro' ? 'bg-[#F9F7F1]' : 'bg-[#0c0c0c]'} shrink-0 relative ${globalTheme === 'retro' ? 'shadow-none' : 'shadow-[10px_0_30px_rgba(0,0,0,0.3)]'} z-10`}>
+                        <div className={`w-[420px] border-r ${globalTheme === 'retro' ? 'border-[#8B261D]/20' : 'border-zinc-700'} flex flex-col ${globalTheme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#0c0c0c]'} shrink-0 relative ${globalTheme === 'retro' ? 'shadow-none' : 'shadow-[10px_0_30px_rgba(0,0,0,0.3)]'} z-10`}>
                             <div className="flex-1 flex flex-col px-10 pt-2 pb-32 overflow-hidden">
                                 <div className="flex-1 flex flex-col justify-between">
                                 {/* Project Info Section integrated into flow */}
@@ -410,7 +410,7 @@ export const SutureModal: React.FC<SutureModalProps> = ({
                                         <Sliders size={16} className={theme.text} />
                                         <span className={`text-sm font-black uppercase tracking-[0.2em] ${theme.text}`}>{t.CONSOLE}</span>
                                     </div>
-                                    <div className={`flex items-center border ${globalTheme === 'retro' ? 'border-[#8B261D]/20 bg-white shadow-sm' : 'border-zinc-800 bg-zinc-900/50'} rounded-lg px-4 py-3`}>
+                                    <div className={`flex items-center border ${globalTheme === 'retro' ? 'border-[#8B261D]/20 bg-[var(--bg-header)] shadow-sm' : 'border-zinc-800 bg-zinc-900/50'} rounded-lg px-4 py-3`}>
                                         <input
                                             value={projectName || ""}
                                             onChange={(e) => onProjectNameChange?.(e.target.value)}
@@ -491,8 +491,8 @@ export const SutureModal: React.FC<SutureModalProps> = ({
                         </div>
 
                         {/* Right Pane: Output */}
-                        <div className={`flex-1 flex flex-col ${globalTheme === 'retro' ? 'bg-white' : 'bg-[#080808]'} relative`}>
-                            <div className={`h-12 border-b ${globalTheme === 'retro' ? 'border-[#8B261D]/30 bg-[#F4EFE0]' : 'border-zinc-700 bg-[#111]'} flex items-center justify-between px-6 shrink-0`}>
+                        <div className={`flex-1 flex flex-col ${globalTheme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#080808]'} relative`}>
+                            <div className={`h-12 border-b ${globalTheme === 'retro' ? 'border-[#8B261D]/30 bg-[var(--bg-header)]' : 'border-zinc-700 bg-[#111]'} flex items-center justify-between px-6 shrink-0`}>
                                 <div className="flex items-center gap-3">
                                     <Film size={16} className={theme.text} />
                                     <span className={`text-xs font-bold uppercase tracking-widest ${globalTheme === 'retro' ? 'text-black' : 'text-zinc-100'}`}>{t.OUT_TITLE}</span>
@@ -504,7 +504,7 @@ export const SutureModal: React.FC<SutureModalProps> = ({
                                             {saved ? t.SAVED : t.SAVE}
                                         </button>
                                     )}
-                                    <button type="button" onClick={handleCopy} className={`flex items-center gap-2 px-3 py-1.5 border ${globalTheme === 'retro' ? 'bg-[#F4EFE0] border-[#8B261D] text-[#8B261D] hover:bg-[#8B261D]/10' : 'bg-transparent border-zinc-600 text-zinc-200 hover:text-white hover:border-zinc-400'} rounded-md text-[11px] font-bold uppercase tracking-wider transition-all`}>
+                                    <button type="button" onClick={handleCopy} className={`flex items-center gap-2 px-3 py-1.5 border ${globalTheme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D] text-[#8B261D] hover:bg-[#8B261D]/10' : 'bg-transparent border-zinc-600 text-zinc-200 hover:text-white hover:border-zinc-400'} rounded-md text-[11px] font-bold uppercase tracking-wider transition-all`}>
                                         {copied ? <Check size={12} className="text-green-400" /> : <Copy size={12} />}
                                         {copied ? t.COPIED : t.COPY}
                                     </button>

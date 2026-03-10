@@ -9,33 +9,53 @@ export const supabaseDatabase = {
         const { data: user } = await supabase.auth.getUser();
         if (!user.user) return [];
 
+        // OPTIMIZATION: Use JSON path extraction to only fetch light metadata for the list.
+        // This prevents massive egress when the user has items with large Base64 images.
         const { data, error } = await supabase
             .from('archives')
-            .select('*')
+            .select('id, created_at, project_data->type, project_data->driverId, project_data->driverName, project_data->blueprint->narrative->title')
             .order('created_at', { ascending: false })
-            .limit(20); // Limit to last 20 items to prevent massive payloads
+            .limit(20);
 
         if (error) {
             console.error('Error fetching cloud history:', error);
             throw error;
         }
 
-        return data.map(row => row.project_data as HistoryItem);
+        return data.map(row => ({
+            id: row.id,
+            date: row.created_at,
+            type: (row as any).type,
+            driverId: (row as any).driverId,
+            driverName: (row as any).driverName,
+            blueprint: { narrative: { title: (row as any).title } },
+            is_partial: true // FLAG for the UI to fetch full data if needed
+        } as any));
+    },
+
+    async getCloudHistoryDetail(id: string | number): Promise<HistoryItem | null> {
+        const { data, error } = await supabase
+            .from('archives')
+            .select('project_data')
+            .eq('id', id)
+            .single();
+
+        if (error || !data) {
+            console.error('Error fetching history detail:', error);
+            return null;
+        }
+
+        return data.project_data as HistoryItem;
     },
 
     async saveCloudHistoryItem(item: HistoryItem): Promise<void> {
         const { data: user } = await supabase.auth.getUser();
         if (!user.user) throw new Error('User must be logged in to save to cloud.');
 
-        // Upsert archive based on project_data id
-        // We cannot easily upsert by nested json id using standard Supabase REST casually without a unique constraint,
-        // so we'll first check if it exists or we can just let it insert a new archive row, but we want 1 row per HistoryItem id realistically.
-        // A better approach is to use the `id` from the HistoryItem as the `id` of the archives row.
         const { error } = await supabase
             .from('archives')
             .upsert({
-                id: item.id, // Ensure HistoryItem.id is a valid UUID, otherwise we might need to map it. If it's string (Date.now() string), we should rely on a text 'local_id' or cast it. 
-                // We'll update our schema to use text for id if it crashes or we map it. Let's assume item.id is a valid string UUID or we use match()
+                id: item.id,
                 user_id: user.user.id,
                 project_data: item,
                 updated_at: new Date().toISOString()
@@ -158,8 +178,9 @@ export const supabaseDatabase = {
                 reader.readAsDataURL(file);
                 reader.onload = () => {
                     const result = reader.result as string;
-                    if (result.length > 3 * 1024 * 1024) { // 3MB limit for Base64
-                        reject(new Error("Image too large (>3MB)"));
+                    // REDUCED BASE64 LIMIT TO 512KB TO PREVENT DATABASE BLOAT
+                    if (result.length > 0.5 * 1024 * 1024) { 
+                        reject(new Error("Image too large for manual capture (>512KB)"));
                     } else {
                         resolve(result);
                     }
@@ -206,9 +227,7 @@ export const supabaseDatabase = {
             // Race the upload against the timeout
             return await Promise.race([performCloudUpload(), timeout]);
         } catch (error: any) {
-            console.error("Upload process failed or timed out. Falling back to Base64 to save progress.", error);
-            // On any failure (timeout, network error, bucket missing), return Base64
-            // This ensures the UI never gets stuck in a loading state forever.
+            console.error("Upload process failed or timed out. Falling back to Base64 (limited) to save progress.", error);
             return await convertToBase64();
         }
     }

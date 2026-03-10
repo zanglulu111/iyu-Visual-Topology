@@ -454,7 +454,7 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
     return (
         <div className="max-w-5xl mx-auto space-y-12 animate-in fade-in slide-in-from-bottom-2 pb-20">
             {/* LOGLINE SECTION */}
-            <div className={`${theme === 'retro' ? 'bg-white border-[#8B261D]/20' : `bg-zinc-900/40 border-zinc-800 hover:${themeAccent.replace('text-', 'border-')}/30`} border p-8 rounded-2xl relative overflow-hidden group transition-all shadow-sm`}>
+            <div className={`${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/15 shadow-sm' : `bg-zinc-900/40 border-zinc-800 hover:${themeAccent.replace('text-', 'border-')}/30`} border p-8 rounded-2xl relative overflow-hidden group transition-all`}>
                 <div className={`absolute top-0 left-0 w-1.5 h-full ${theme === 'retro' ? 'bg-[#8B261D]' : themeAccent.replace('text-', 'bg-')}`}></div>
                 <div className="flex justify-between items-start mb-4">
                     <h3 className={`${theme === 'retro' ? 'text-[#8B261D]' : themeAccent} font-bold text-xs uppercase tracking-[0.2em] flex items-center gap-2`}>
@@ -518,7 +518,7 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
                         <CopyButton text={blueprint.narrative?.synopsis || ""} label={language === 'EN' ? "COPY SCRIPT" : "复制文本"} theme={theme} className={theme === 'retro' ? 'text-[#8B261D]/50 hover:text-[#8B261D]' : 'text-zinc-500'} />
                     </div>
                 </div>
-                <div className={`${theme === 'retro' ? 'bg-white border-[#8B261D]/20 shadow-sm' : 'bg-[#050505] border-zinc-800 shadow-inner'} border p-10 rounded-xl min-h-[400px]`}>
+                <div className={`${theme === 'retro' ? 'bg-[var(--bg-main)] border-[#8B261D]/15 shadow-sm' : 'bg-[var(--bg-main)] border-zinc-800 shadow-inner'} border p-10 rounded-xl min-h-[400px]`}>
                     <textarea
                         value={blueprint.narrative?.synopsis || ""}
                         onChange={(e) => handleUpdate('synopsis', e.target.value)}
@@ -547,7 +547,7 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
-                <div className={`${theme === 'retro' ? 'bg-white border-[#8B261D]/20 shadow-sm' : 'bg-zinc-900/30 border border-zinc-800'} border p-6 rounded-xl transition-colors flex flex-col h-full hover:${theme === 'retro' ? 'border-[#8B261D]/30' : (themeBorder || 'border-zinc-700')}`}>
+                <div className={`${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/15 shadow-sm' : 'bg-zinc-900/30 border border-zinc-800'} border p-6 rounded-xl transition-colors flex flex-col h-full hover:${theme === 'retro' ? 'border-[#8B261D]/30' : (themeBorder || 'border-zinc-700')}`}>
                     <div className="flex justify-between items-center mb-4">
                         <h4 className={`${themeAccent} font-bold text-xs uppercase tracking-widest flex items-center gap-2`}>
                             <Globe size={14} /> {localLang === 'EN' ? "World Rules" : "世界法则"}
@@ -562,7 +562,7 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
                         placeholder={localLang === 'EN' ? "Describe the rules of the world..." : "在此定义世界物理规律、社会秩序与背景..."}
                     />
                 </div>
-                <div className={`${theme === 'retro' ? 'bg-white border-[#8B261D]/20 shadow-sm' : 'bg-zinc-900/30 border border-zinc-800'} border p-6 rounded-xl transition-colors flex flex-col h-full hover:${theme === 'retro' ? 'border-[#8B261D]/30' : (themeBorder || 'border-zinc-700')}`}>
+                <div className={`${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/15 shadow-sm' : 'bg-zinc-900/30 border border-zinc-800'} border p-6 rounded-xl transition-colors flex flex-col h-full hover:${theme === 'retro' ? 'border-[#8B261D]/30' : (themeBorder || 'border-zinc-700')}`}>
                     <div className="flex justify-between items-center mb-4">
                         <h4 className={`${themeAccent} font-bold text-xs uppercase tracking-widest flex items-center gap-2`}>
                             <Palette size={14} /> {localLang === 'EN' ? "Tone & Visuals" : "影调与视觉"}

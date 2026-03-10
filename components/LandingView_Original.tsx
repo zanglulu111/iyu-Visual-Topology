@@ -96,7 +96,6 @@ export const LandingView: React.FC<LandingViewProps> = ({
                             <div className="flex items-center justify-end gap-6 h-6 shrink-0">
                                 {[
                                     { icon: Wand2, label: '换喻', onClick: handleOpenMetonymyPage, isActive: false },
-                                    { icon: HelpCircle, label: '哲学辞典', onClick: openManual, isActive: isManualOpen },
                                     { icon: HistoryIcon, label: '欲望档案', onClick: openHistory, isActive: isHistoryOpen },
                                     { icon: Settings, label: '配置', onClick: openSettings, isActive: false }
                                 ].map((item, idx) => (
@@ -117,7 +116,6 @@ export const LandingView: React.FC<LandingViewProps> = ({
                             <div className="flex items-center justify-end gap-4 h-6 shrink-0">
                                 {[
                                     { icon: Wand2, label: 'METONYMY', onClick: handleOpenMetonymyPage, isActive: false },
-                                    { icon: HelpCircle, label: 'CODEX', onClick: openManual, isActive: isManualOpen },
                                     { icon: HistoryIcon, label: 'ARCHIVE', onClick: openHistory, isActive: isHistoryOpen },
                                     { icon: Settings, label: 'CONFIG', onClick: openSettings, isActive: false }
                                 ].map((item, idx) => (

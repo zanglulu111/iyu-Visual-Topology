@@ -131,14 +131,18 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             <GitFork size={14} />
             {lang === 'CN' ? "分歧点" : "THE DIVERGENCE"}
           </button>
-          <div className={`w-4 h-px ${theme === 'retro' ? 'bg-black' : 'bg-zinc-800'}`}></div>
-          <button
-            onClick={() => setViewMode('BIBLE')}
-            className={`flex items-center gap-2 transition-all duration-300 hover:scale-105 active:scale-95 ${viewMode === 'BIBLE' ? getHeaderTitleColor() : (theme === 'retro' ? "text-zinc-600 hover:text-black font-sans" : "text-zinc-400 hover:text-white font-sans")}`}
-          >
-            <BookOpen size={14} />
-            {lang === 'CN' ? "创意圣经" : "CREATIVE BIBLE"}
-          </button>
+          {selectedDriver !== DriverType.AESTHETIC && (
+            <>
+              <div className={`w-4 h-px ${theme === 'retro' ? 'bg-black' : 'bg-zinc-800'}`}></div>
+              <button
+                onClick={() => setViewMode('BIBLE')}
+                className={`flex items-center gap-2 transition-all duration-300 hover:scale-105 active:scale-95 ${viewMode === 'BIBLE' ? getHeaderTitleColor() : (theme === 'retro' ? "text-zinc-600 hover:text-black font-sans" : "text-zinc-400 hover:text-white font-sans")}`}
+              >
+                <BookOpen size={14} />
+                {lang === 'CN' ? "创意圣经" : "CREATIVE BIBLE"}
+              </button>
+            </>
+          )}
         </div>
       )}
 
@@ -219,7 +223,6 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         {/* Navigation Links */}
         <div className="flex items-center gap-2 mr-4">
           {[
-            { icon: HelpCircle, label: lang === 'CN' ? '哲学辞典' : 'CODEX', labelCn: '哲学辞典', labelEn: 'CODEX', onClick: openManual, isActive: isManualOpen },
             { icon: HistoryIcon, label: lang === 'CN' ? '欲望档案' : 'ARCHIVE', labelCn: '欲望档案', labelEn: 'ARCHIVE', onClick: openHistory, isActive: isHistoryOpen },
             { icon: Settings, label: lang === 'CN' ? '系统配置' : 'SYSTEM CONFIG', labelCn: '系统配置', labelEn: 'SYSTEM CONFIG', onClick: openSettings, isActive: false }
           ].map((item, idx) => (

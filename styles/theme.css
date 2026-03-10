@@ -27,22 +27,23 @@
 }
 
 :root.retro {
-  --bg-main: #EBE7DF;
-  --bg-header: #DCD8CF;
-  --bg-panel: #D4D0C5;
-  --bg-card: #F9F7F1;
-  --border-main: #1A1814;
-  --border-accent: #8B261D; /* Mist School deep red from attachment */
-  --text-main: #000000;
-  --text-accent: #8B261D; /* Reverting to deep red */
-  --text-muted: #2D2B29;
-  --text-code: #1A1814;
-  --selection-bg: rgba(139, 38, 29, 0.2);
-  --pattern-aged: url('https://www.transparenttextures.com/patterns/aged-paper.png');
-  --pattern-dust: url('https://www.transparenttextures.com/patterns/dust.png');
-  --ring-opacity: 0.55;
-  --gold-primary: #856610; /* Returning to deep antique gold for retro */
-  --gold-dim: #6d540d;
+  --bg-main: #EFE9E0;      /* 精确匹配截图中的温暖宣纸底色 */
+  --bg-header: #EFE9E0;
+  --bg-panel: #EFE9E0;
+  --bg-card: #F9F7F1;       /* 略亮的卡面对比色 */
+  --border-main: #D8D2C5;   /* 极细装帧辅助线色 */
+  --border-accent: #8B261D;
+  --text-main: #2D2D2D;     /* 炭黑色墨迹 */
+  --text-accent: #8B261D;   /* 精确匹配图中“核心驱动器”的古法朱砂红 */
+  --text-muted: #2D2D2D99;  /* 60% 墨迹透明度 */
+  --text-code: #2D2D2D;
+  --selection-bg: rgba(139, 38, 29, 0.08);
+  --pattern-aged: url('https://www.transparenttextures.com/patterns/aged-paper.png'), url('https://www.transparenttextures.com/patterns/dust.png');
+  --ring-opacity: 0.45;
+  --gold-primary: #8B261D;
+  --gold-dim: #8B261D66;
+  --gold-bright: #8B261D;
+  --gold-soft: #8B261D;
   
   /* Mist School Palette for Drivers in Retro */
   --mist-cyan: #0E4B50;   /* Deep Teal */

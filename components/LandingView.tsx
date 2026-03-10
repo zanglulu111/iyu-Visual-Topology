@@ -7,45 +7,10 @@ import { ProductManualModal } from './ProductManualModal';
 import { SutureModal } from './SutureModal';
 import { HistoryModal } from './HistoryModal';
 import { BorromeanRings } from './BorromeanRings';
+import { ArchiveContent } from './ArchiveContent';
+import { PhilosophyCodexPage } from './PhilosophyCodexPage';
 import { useTheme } from '../contexts/ThemeContext';
 
-const Clock = ({ lang, theme, accentColor }: { lang: 'CN' | 'EN', theme: 'dark' | 'retro', accentColor?: string }) => {
-  const [now, setNow] = useState(new Date());
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setNow(new Date());
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const formatCN = (d: Date) => {
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    const hours = String(d.getHours()).padStart(2, '0');
-    const minutes = String(d.getMinutes()).padStart(2, '0');
-    const seconds = String(d.getSeconds()).padStart(2, '0');
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds} 北京时间`;
-  };
-
-  const formatEN = (d: Date) => d.toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
-
-  return (
-    <div className="h-5 overflow-hidden relative flex items-start">
-      <div className={`transition-all duration-700 cubic-bezier(0.4, 0, 0.2, 1) ${lang === 'EN' ? '-translate-y-1/2' : 'translate-y-0'}`}>
-        <div className="flex flex-col">
-          <div className="h-5 flex items-center shrink-0">
-            <span className={`text-[10px] font-mono tracking-widest whitespace-nowrap transition-colors duration-500 ${theme === 'retro' ? 'text-black opacity-60' : (accentColor || 'text-white/80')}`}>{formatCN(now)}</span>
-          </div>
-          <div className="h-5 flex items-center shrink-0">
-            <span className={`text-[10px] font-mono tracking-widest whitespace-nowrap transition-colors duration-500 ${theme === 'retro' ? 'text-black opacity-60' : (accentColor || 'text-white/80')}`}>{formatEN(now)}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 
 const AnimatedText = ({ cn, en, lang, className = "", hClass = "h-5" }: { cn: React.ReactNode, en: React.ReactNode, lang: 'CN' | 'EN', className?: string, hClass?: string }) => (
@@ -135,6 +100,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
 }) => {
   const { theme, toggleTheme } = useTheme();
   const [selectedProtocol, setSelectedProtocol] = useState<ProtocolType>(ProtocolType.CORE_DRIVERS);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   const getGlowTheme = (driverId: DriverType | null) => {
     if (theme === 'retro') return 'shadow-none';
@@ -161,14 +127,14 @@ export const LandingView: React.FC<LandingViewProps> = ({
   };
 
   const getBorderAccentColor = (driverId: DriverType | null) => {
-    if (theme === 'retro') return 'rgba(0,0,0,0.6)';
+    if (theme === 'retro') return 'border-black/60';
     switch (driverId) {
-      case DriverType.COMMERCIAL: return 'rgba(34, 211, 238, 0.6)';
-      case DriverType.NARRATIVE: return 'rgba(212, 175, 55, 0.6)';
-      case DriverType.AESTHETIC: return 'rgba(251, 113, 133, 0.6)';
-      case DriverType.EXPERIMENTAL: return 'rgba(192, 132, 252, 0.6)';
-      case DriverType.TRAILER: return 'rgba(251, 146, 60, 0.6)';
-      default: return 'rgba(255, 255, 255, 0.15)';
+      case DriverType.COMMERCIAL: return 'border-mist-cyan';
+      case DriverType.NARRATIVE: return 'border-mist-gold';
+      case DriverType.AESTHETIC: return 'border-mist-rose';
+      case DriverType.EXPERIMENTAL: return 'border-mist-purple';
+      case DriverType.TRAILER: return 'border-mist-orange';
+      default: return 'border-zinc-800';
     }
   };
 
@@ -205,13 +171,18 @@ export const LandingView: React.FC<LandingViewProps> = ({
   ];
 
   return (
-    <div className="fixed inset-0 flex flex-col bg-[var(--bg-main)] selection:bg-[var(--selection-bg)] selection:text-[var(--text-accent)] z-50 overflow-hidden font-sans">
+    <div 
+      className="fixed inset-0 flex flex-col bg-[var(--bg-main)] selection:bg-[var(--selection-bg)] selection:text-[var(--text-accent)] z-50 overflow-hidden font-sans transition-colors duration-500"
+      style={theme === 'retro' ? { backgroundImage: 'var(--pattern-aged)', backgroundBlendMode: 'multiply' } : {}}
+    >
 
       {/* Global Top Navbar */}
-      <header className={`shrink-0 z-50 backdrop-blur-md h-14 flex items-center justify-between px-6 transition-all duration-500 bg-[var(--bg-header)] ${getHeaderShadow(hoveredDriver)} relative`}>
-        {/* Theme Divider Line */}
+      <header className={`shrink-0 z-50 backdrop-blur-md h-14 flex items-center justify-between px-6 transition-all duration-500 ${theme === 'retro' ? 'bg-transparent' : 'bg-[var(--bg-header)]'} ${
+        theme === 'dark' ? 'border-b border-white/10' : (theme === 'retro' ? 'border-b border-[var(--border-main)]' : '')
+      } ${getHeaderShadow(hoveredDriver)} relative`}>
+        {/* Theme Divider Line - Accent Line */}
         <div 
-          className="absolute bottom-0 left-0 right-0 h-px transition-all duration-500" 
+          className="absolute bottom-0 left-0 right-0 h-px transition-all duration-500 z-10" 
           style={{ 
             backgroundColor: getBorderAccentColor(hoveredDriver) as string,
             boxShadow: getLineGlow(hoveredDriver)
@@ -228,9 +199,22 @@ export const LandingView: React.FC<LandingViewProps> = ({
           />
         </div>
 
-        {/* Center: Clock */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden lg:block transition-colors duration-500">
-          <Clock lang={lang} theme={theme} accentColor={hoveredDriver ? getAccentColor(hoveredDriver) : undefined} />
+        {/* Center: Search Bar */}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden lg:flex items-center gap-3">
+          <div className="relative group/search">
+            <div className={`relative flex items-center ${theme === 'retro' ? 'bg-white/40 border-black/20 group-hover/search:border-black/40 hover:bg-white/60' : 'bg-black/20 border-white/10 hover:bg-black/40'} border ${hoveredDriver && theme !== 'retro' ? getBorderAccentColor(hoveredDriver) : ''} rounded-full px-4 py-1.5 transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] shadow-sm hover:shadow-lg w-64 md:w-80 group/input`}>
+              <Terminal size={12} className={`mr-2 transition-colors duration-500 ${hoveredDriver && theme !== 'retro' ? getAccentColor(hoveredDriver) : (theme === 'retro' ? 'text-black/40' : 'text-zinc-500')} group-hover/input:scale-110 transition-transform duration-300`} />
+              <input 
+                type="text" 
+                placeholder={lang === 'CN' ? '搜索协议、档案或理论词条...' : 'Search protocols, archives or codex...'}
+                className={`bg-transparent border-none outline-none text-[10px] uppercase font-bold tracking-[0.1em] text-[var(--text-main)] ${theme === 'retro' ? 'placeholder:text-black/40' : 'placeholder:text-zinc-400'} w-full transition-all duration-300 focus:tracking-[0.15em]`}
+              />
+              <div className="ml-2 flex items-center gap-1 opacity-40 group-hover/input:opacity-80 transition-opacity">
+                <span className={`text-[8px] font-mono border ${theme === 'retro' ? 'border-black/20' : 'border-white/20'} px-1 rounded`}>⌘</span>
+                <span className={`text-[8px] font-mono border ${theme === 'retro' ? 'border-black/20' : 'border-white/20'} px-1 rounded`}>K</span>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Right Area: From Right to Left: Profile, Lang, Theme, Rings */}
@@ -242,11 +226,11 @@ export const LandingView: React.FC<LandingViewProps> = ({
               className="flex items-center gap-2 group transition-all duration-100 hover:scale-105"
             >
               <div className="flex items-center flex-row-reverse gap-2">
-                <div className={`w-5 h-5 rounded-full ${!currentUser?.avatarUrl && (currentUser?.avatarColor || 'bg-gold-primary')} border transition-all duration-500 ${hoveredDriver && theme === 'dark' ? getBorderAccentColor(hoveredDriver).replace('/40', '/60') : 'border-[var(--border-main)]/30'} flex items-center justify-center text-[10px] font-bold text-white shadow-sm overflow-hidden`}>
+                <div className={`w-5 h-5 rounded-full ${!currentUser?.avatarUrl && (currentUser?.avatarColor || 'bg-gold-primary')} border shadow-sm overflow-hidden transition-all duration-500 ${theme === 'dark' ? (hoveredDriver ? getBorderAccentColor(hoveredDriver) : 'border-black') : 'border-[var(--border-main)]/30'} flex items-center justify-center text-[10px] font-bold text-white`}>
                   {currentUser?.avatarUrl ? (
                     <img src={currentUser.avatarUrl} alt="avatar" className="w-full h-full object-cover" />
                   ) : (
-                    <UserIcon size={12} className={`transition-colors duration-500 ${hoveredDriver && theme === 'dark' ? getAccentColor(hoveredDriver) : ''}`} />
+                    <UserIcon size={12} className={`transition-colors duration-500 ${hoveredDriver && theme === 'dark' ? getAccentColor(hoveredDriver) : 'text-[var(--text-accent)]'}`} />
                   )}
                 </div>
                 <span className={`text-[10px] font-bold uppercase tracking-widest transition-colors duration-500 ${hoveredDriver && theme === 'dark' ? getAccentColor(hoveredDriver) : (theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-[var(--text-muted)]')} group-hover:text-[var(--text-main)]`}>
@@ -260,7 +244,8 @@ export const LandingView: React.FC<LandingViewProps> = ({
               {/* 2. Language Toggle */}
               <button 
                 onClick={() => setLang(lang === 'CN' ? 'EN' : 'CN')}
-                className={`text-[10px] font-bold text-[var(--text-muted)] hover:text-[var(--text-main)] transition-all duration-300 w-7 h-7 flex items-center justify-center rounded-sm tracking-widest hover:bg-white/5 transition-colors`}
+                className={`text-[10px] font-bold ${theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'} transition-all duration-300 w-7 h-7 flex items-center justify-center rounded-sm tracking-widest hover:bg-white/5 hover:scale-110 active:scale-90`}
+                title="Toggle Language"
               >
                 {lang === 'CN' ? '中' : 'EN'}
               </button>
@@ -268,8 +253,8 @@ export const LandingView: React.FC<LandingViewProps> = ({
               {/* 3. Theme Toggle */}
               <button 
                 onClick={toggleTheme}
-                className={`flex items-center justify-center w-7 h-7 rounded-sm text-[var(--text-muted)] hover:text-[var(--text-main)] transition-all duration-300 hover:bg-white/5 transition-colors`}
-                title={theme === 'dark' ? "Toggle Retro Theme" : "Toggle Dark Theme"}
+                className={`flex items-center justify-center w-7 h-7 rounded-sm ${theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'} transition-all duration-300 hover:bg-white/5 hover:scale-110 active:scale-90`}
+                title={theme === 'dark' ? "切换为复古主题" : "切换为暗黑主题"}
               >
                 {theme === 'dark' ? <Moon size={14} /> : <Sun size={14} className="text-[#8B261D]" />}
               </button>
@@ -277,7 +262,11 @@ export const LandingView: React.FC<LandingViewProps> = ({
               {/* 4. Ring Toggle */}
               <button
                 onClick={() => setShowRings(!showRings)}
-                className={`flex items-center justify-center w-7 h-7 rounded-sm transition-all duration-300 hover:bg-white/5 transition-colors ${showRings ? (theme === 'retro' ? 'text-[#8B261D]' : (hoveredDriver ? getAccentColor(hoveredDriver) : 'text-white')) : 'text-[var(--text-muted)]'}`}
+                className={`flex items-center justify-center w-7 h-7 rounded-sm transition-all duration-300 hover:bg-white/5 hover:scale-110 active:scale-90 focus:outline-none ${
+                  showRings 
+                    ? (theme === 'retro' ? 'text-[#8B261D]' : (hoveredDriver ? getAccentColor(hoveredDriver) : 'text-white')) 
+                    : (theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white')
+                }`}
                 title={lang === 'CN' ? "背景圆环开关" : "Background Rings Toggle"}
               >
                 <Aperture size={14} className={`shrink-0 transition-all duration-300 ${showRings ? 'rotate-180' : ''}`} />
@@ -289,22 +278,26 @@ export const LandingView: React.FC<LandingViewProps> = ({
 
       <div className="flex-1 flex overflow-hidden relative">
         {/* Ambient Glow */}
-        <div className={`absolute inset-0 pointer-events-none transition-shadow duration-1000 opacity-20 shadow-[inset_0_0_150px_rgba(0,0,0,1)] ${getGlowTheme(hoveredDriver)}`}></div>
-
-        {/* Background Rings */}
-        {showRings && (
-          <div className="absolute inset-0 flex items-center justify-end pr-[5%] opacity-[var(--ring-opacity)] pointer-events-none z-0 select-none overflow-hidden scale-[1.1] transition-opacity duration-1000">
-            <div className="w-[1000px] h-[1000px] flex items-center justify-center translate-x-1/4">
-              <BorromeanRings centered={true} opacity={1} driverType={hoveredDriver || undefined} />
-            </div>
-          </div>
+        {theme !== 'retro' && (
+          <div className={`absolute inset-0 pointer-events-none transition-shadow duration-1000 opacity-20 shadow-[inset_0_0_150px_rgba(0,0,0,1)] ${getGlowTheme(hoveredDriver)}`}></div>
         )}
 
+        {/* Background Rings */}
+        <div className={`absolute inset-0 flex items-center justify-end pr-[5%] pointer-events-none z-0 select-none overflow-hidden transition-all duration-[1500ms] ease-in-out ${
+          showRings 
+            ? 'opacity-[var(--ring-opacity)] scale-[1.1] translate-y-0 rotate-0' 
+            : 'opacity-0 scale-[1.3] translate-y-20 rotate-12'
+        }`}>
+          <div className="w-[1000px] h-[1000px] flex items-center justify-center translate-x-1/4">
+            <BorromeanRings centered={true} opacity={1} driverType={hoveredDriver || undefined} />
+          </div>
+        </div>
+
         {/* LEFT SIDEBAR: SIGNAL MONITOR */}
-        <div className={`w-80 border-r border-[var(--border-main)] bg-[var(--bg-panel)] backdrop-blur flex flex-col shrink-0 hidden lg:flex z-10 transition-colors duration-500`}>
+        <div className={`${isSidebarCollapsed ? 'w-0 opacity-0 -translate-x-full pointer-events-none' : 'w-80 opacity-100 translate-x-0'} border-r border-[var(--border-main)] ${theme === 'retro' ? 'bg-transparent' : 'bg-[var(--bg-panel)]'} flex flex-col shrink-0 hidden lg:flex z-10 transition-all duration-700 ease-in-out`}>
 
           {/* Logo Area */}
-          <div className={`p-8 border-b ${theme === 'retro' ? 'border-black/5' : 'border-white/5'} shrink-0`}>
+          <div className={`p-8 border-b border-[var(--border-main)] shrink-0`}>
             <div className="relative overflow-hidden h-[80px] cursor-default mb-2">
               <div className={`transition-all duration-700 cubic-bezier(0.4, 0, 0.2, 1) ${lang === 'EN' ? '-translate-y-1/2' : 'translate-y-0'}`}>
                 <div className="flex flex-col">
@@ -317,33 +310,33 @@ export const LandingView: React.FC<LandingViewProps> = ({
                 </div>
               </div>
             </div>
-            <p className={`text-[10px] uppercase tracking-[0.4em] mb-4 transition-colors ${theme === 'retro' ? 'text-black/60' : 'text-white/90'}`}>The Visionary Protocol</p>
+            <p className={`text-[10px] uppercase tracking-[0.4em] mb-4 transition-colors ${theme === 'retro' ? 'text-black/40' : 'text-white/90'}`}>The Visionary Protocol</p>
             <AnimatedText
               lang={lang}
               hClass="h-[40px]"
-              className={`text-xs font-light leading-relaxed transition-colors ${theme === 'retro' ? 'text-black/60' : 'text-white/95'}`}
+              className={`text-xs font-light leading-relaxed transition-colors ${theme === 'retro' ? 'text-black/50' : 'text-white/95'}`}
               cn="爱欲视觉拓扑学：在实在界的荒漠上，确立一种比现实更坚固的虚构。"
               en="Erotic Visual Topology: establishing a fiction more solid than reality."
             />
           </div>
 
           {/* Quick Access Sidebar */}
-          <div className={`border-b ${theme === 'retro' ? 'border-black/5' : 'border-white/15'} shrink-0`}>
-            <div className={`p-4 space-y-1 ${theme === 'retro' ? 'bg-black/[0.02]' : ''}`}>
+          <div className={`border-b border-[var(--border-main)] shrink-0`}>
+            <div className={`p-4 space-y-1`}>
               <div className="px-4 py-2">
                 <AnimatedText
                   lang={lang}
                   hClass="h-4"
-                  className={`text-[10px] font-bold ${theme === 'retro' ? 'text-black' : 'text-white'} opacity-70 uppercase tracking-widest mb-2`}
-                  cn="安全协议 / Protocols"
+                  className={`text-[10px] font-bold ${theme === 'retro' ? 'text-black/50' : 'text-white/70'} uppercase tracking-widest mb-2`}
+                  cn="安全协议 // Protocols"
                   en="SECURITY PROTOCOLS"
                 />
               </div>
             {[
               { id: ProtocolType.CORE_DRIVERS, icon: Cpu, labelCn: '核心驱动器', labelEn: 'CORE DRIVERS' },
-              { id: ProtocolType.UTILITIES, icon: Zap, labelCn: '实用工具', labelEn: 'UTILITIES' },
               { id: ProtocolType.CONFIDENTIAL, icon: ShieldAlert, labelCn: '机密文档', labelEn: 'CONFIDENTIAL' },
               { id: ProtocolType.DICTIONARY, icon: BookOpen, labelCn: '迷雾辞典', labelEn: 'DICTIONARY' },
+              { id: ProtocolType.UTILITIES, icon: Zap, labelCn: '实用工具', labelEn: 'UTILITIES' },
               { id: ProtocolType.RSI, icon: Aperture, labelCn: '三界拓扑', labelEn: 'RSI TOPOLOGY' },
               { id: ProtocolType.TOPOLOGY, icon: Zap, labelCn: '欲望图式', labelEn: 'DESIRE GRAPH' },
             ].map((item: any, idx) => (
@@ -354,30 +347,34 @@ export const LandingView: React.FC<LandingViewProps> = ({
                     setPage(1); setViewMode('RSI');
                   } else if (item.id === ProtocolType.TOPOLOGY) {
                     setPage(1); setViewMode('TOPOLOGY');
-                  } else if (item.id === ProtocolType.DICTIONARY) {
-                    openManual();
                   } else {
                     setSelectedProtocol(item.id);
                   }
                 }}
-                className={`w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition-all group ${
+                className={`w-full text-left px-5 py-3 rounded-lg flex items-center gap-3 transition-all group relative ${
                   selectedProtocol === item.id 
-                    ? (theme === 'retro' ? 'bg-black/10' : 'bg-white/10 opacity-100') 
+                    ? (theme === 'retro' ? 'opacity-100' : 'bg-white/10 opacity-100') 
                     : (theme === 'retro' ? 'hover:bg-black/5' : 'hover:bg-white/5')
                 }`}
               >
-                <item.icon size={14} className={`${theme === 'retro' ? 'text-black' : 'text-white'} ${selectedProtocol === item.id ? 'opacity-100' : 'opacity-70'} group-hover:opacity-100 transition-opacity shrink-0`} />
+                {theme === 'retro' && selectedProtocol === item.id && (
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 bg-[var(--text-accent)] rounded-r-full"></div>
+                )}
+                <item.icon size={14} className={`${selectedProtocol === item.id ? (theme === 'retro' ? 'text-[var(--text-accent)] scale-110' : 'text-white opacity-100') : (theme === 'retro' ? 'text-black/40' : 'text-white opacity-70')} group-hover:opacity-100 transition-all shrink-0`} />
                 <AnimatedText
                   lang={lang}
                   hClass="h-4"
-                  className={`text-xs font-bold uppercase tracking-widest ${theme === 'retro' ? 'text-black' : 'text-white'} ${selectedProtocol === item.id ? 'opacity-100' : 'opacity-80'} group-hover:opacity-100 transition-opacity`}
+                  className={`text-xs font-bold uppercase tracking-widest transition-all ${
+                    selectedProtocol === item.id 
+                      ? (theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-white opacity-100') 
+                      : (theme === 'retro' ? 'text-black/60' : 'text-white opacity-80')
+                  } group-hover:opacity-100`}
                   cn={item.labelCn}
                   en={item.labelEn}
                 />
               </button>
             ))}
             </div>
-            <div className={`h-px w-full ${theme === 'retro' ? 'bg-black/5' : 'bg-white/15'}`}></div>
           </div>
 
           {/* Signal Stream */}
@@ -411,8 +408,8 @@ export const LandingView: React.FC<LandingViewProps> = ({
         </div>
 
         {/* RIGHT AREA: CONTENT DYNAMICALLY CHANGED */}
-        <div className="flex-1 overflow-hidden relative z-10 flex flex-col">
-          <div className="p-8 md:p-12 lg:p-16 max-w-7xl mx-auto w-full flex-1 flex flex-col">
+        <div className={`flex-1 overflow-hidden relative z-10 flex flex-col h-full transition-all duration-700 ease-in-out`}>
+          <div className={`${(selectedProtocol === ProtocolType.CONFIDENTIAL || selectedProtocol === ProtocolType.DICTIONARY) ? 'p-0 w-full max-w-none' : 'p-8 md:p-12 lg:p-16 max-w-7xl mx-auto w-full'} ${(selectedProtocol === ProtocolType.CONFIDENTIAL || selectedProtocol === ProtocolType.DICTIONARY) ? 'backdrop-blur-sm' : ''} flex-1 flex flex-col min-h-0 h-full`}>
             
             {/* 1. CORE DRIVERS VIEW */}
             {selectedProtocol === ProtocolType.CORE_DRIVERS && (
@@ -452,21 +449,23 @@ export const LandingView: React.FC<LandingViewProps> = ({
                     <div
                       key={i}
                       onClick={card.onClick}
-                      className={`border p-6 rounded cursor-pointer transition-all duration-500 group shadow-lg ${
+                      className={`p-5 rounded-sm cursor-pointer transition-all duration-700 group hover:-translate-y-1.5 border ${
                         theme === 'retro'
-                          ? 'border-white/10 bg-white/[0.02] hover:bg-[#F9F7F1] hover:border-[#8B261D]/40 shadow-none hover:shadow-black/5 backdrop-blur-sm'
-                          : 'border-zinc-900 bg-white/5 hover:bg-zinc-950 hover:border-white/20 backdrop-blur-sm'
-                      } hover:shadow-[0_40px_80px_rgba(139,38,29,0.1)]`}
+                          ? 'border-transparent bg-transparent hover:bg-[#F9F7F1] hover:border-[var(--border-accent)] hover:shadow-xl'
+                          : 'border-zinc-900 bg-white/5 hover:bg-zinc-950 hover:border-white/20 backdrop-blur-sm shadow-lg hover:shadow-[0_45px_100px_rgba(0,0,0,0.6)]'
+                      }`}
                     >
-                      <div className="flex items-center gap-4">
-                        <div className={`w-10 h-10 rounded border flex items-center justify-center transition-all duration-500 ${
-                          theme === 'retro' ? 'border-transparent group-hover:border-black/20' : 'border-zinc-800 bg-zinc-900 group-hover:border-white/20'
+                      <div className="flex items-center gap-5">
+                        <div className={`w-12 h-12 rounded border flex items-center justify-center transition-all duration-500 ${
+                          theme === 'retro' 
+                            ? 'border-transparent bg-transparent group-hover:border-[var(--border-main)] group-hover:bg-transparent' 
+                            : 'border-zinc-800 bg-zinc-900 group-hover:border-white/20'
                         }`}>
-                          <card.icon size={18} className={`${theme === 'retro' ? 'text-black/70 group-hover:text-black' : 'text-white/80 group-hover:text-white'}`} />
+                          <card.icon size={20} className={`transition-colors duration-500 ${theme === 'retro' ? 'text-black group-hover:text-black' : 'text-white/80 group-hover:text-white'}`} />
                         </div>
-                        <div className="flex flex-col gap-1">
-                          <AnimatedText lang={lang} hClass="h-4" className={`text-[13px] font-bold tracking-[0.15em] ${theme === 'retro' ? 'text-black/70 group-hover:text-black' : 'text-white/80 group-hover:text-white'}`} cn={card.titleCn} en={card.titleEn} />
-                          <AnimatedText lang={lang} hClass="h-8" className={`text-[10px] font-light leading-snug ${theme === 'retro' ? 'text-black/50 group-hover:text-black/90' : 'text-white/70 group-hover:text-white'}`} cn={card.descCn} en={card.descEn} />
+                        <div className="flex flex-col gap-1.5">
+                          <AnimatedText lang={lang} hClass="h-5" className={`text-sm font-bold tracking-[0.1em] transition-colors ${theme === 'retro' ? 'text-black group-hover:text-black' : 'text-white/90 group-hover:text-white'}`} cn={card.titleCn} en={card.titleEn} />
+                          <AnimatedText lang={lang} hClass="h-8" className={`text-[12px] font-medium leading-[1.6] transition-colors ${theme === 'retro' ? 'text-black/60 group-hover:text-black' : 'text-zinc-500 group-hover:text-zinc-300'}`} cn={card.descCn} en={card.descEn} />
                         </div>
                       </div>
                     </div>
@@ -477,98 +476,32 @@ export const LandingView: React.FC<LandingViewProps> = ({
 
             {/* 2. CONFIDENTIAL DOCUMENTS VIEW */}
             {selectedProtocol === ProtocolType.CONFIDENTIAL && (
-              <div className="flex-1 flex flex-col items-center justify-center animate-in fade-in slide-in-from-bottom-8 duration-1000">
-                <div className="mb-16 text-center">
-                  <div className="flex items-center justify-center gap-4 mb-4">
-                    <ShieldAlert size={32} className="text-[#8B261D] animate-pulse" />
-                    <AnimatedText
-                      lang={lang}
-                      hClass="h-12"
-                      className={`text-4xl md:text-5xl font-serif font-black tracking-[0.4em] ${theme === 'retro' ? 'text-[#8B261D]' : 'text-white'}`}
-                      cn="机密文档"
-                      en="CONFIDENTIAL"
-                    />
-                  </div>
-                  <div className="h-px w-64 bg-gradient-to-r from-transparent via-[#8B261D] to-transparent mx-auto mb-4" />
-                  <AnimatedText
-                    lang={lang}
-                    hClass="h-5"
-                    className={`text-[10px] font-mono tracking-[0.5em] uppercase opacity-60 ${theme === 'retro' ? 'text-black' : 'text-white'}`}
-                    cn="// 您正在访问最高安全等级接口 // 机密级数据已就绪"
-                    en="// ACCESSING HIGH-LEVEL SECURITY INTERFACE // TOP SECRET DATA READY"
-                  />
-                </div>
+              <ArchiveContent lang={lang} isDark={theme === 'dark'} />
+            )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-16 w-full max-w-6xl px-4">
-                  {[
-                    {
-                      icon: Database,
-                      titleCn: '迷雾学派: 机密档案集',
-                      titleEn: 'MIST: CONFIDENTIAL ARCHIVES',
-                      descCn: '封存着学派最核心的项目记录与实验数据，非特定许可严禁查阅。其中的每一份文档都可能揭示实在界的裂缝。系统检测到您的身份已获准进入。',
-                      descEn: 'Core project records. Every document may reveal a crack in the Real. Identity verified.',
-                      onClick: () => { setPage(1); setViewMode('ARCHIVE'); }
-                    },
-                    {
-                      icon: Film,
-                      titleCn: '迷雾学派: 影像资料库',
-                      titleEn: 'MIST: VIDEO DATABASE',
-                      descCn: '记录了拓扑空间中的异动影像，捕捉那些无法用语言描述的瞬间。这些影像不仅仅是记录，更是观察的工具。小心，有时影像也在观察你。',
-                      descEn: 'Heterogeneous visual captures. More than records, they are tools for observation. Beware the gaze.',
-                      onClick: () => { setPage(1); setViewMode('VIDEO'); }
-                    }
-                  ].map((card, idx) => (
-                    <div
-                      key={idx}
-                      onClick={card.onClick}
-                      className={`group relative aspect-[3/4] border-2 transition-all duration-1000 cursor-pointer overflow-hidden ${
-                        theme === 'retro'
-                          ? 'bg-[#FDFCF8] border-black/10 hover:border-[#8B261D] shadow-[20px_20px_0_rgba(0,0,0,0.05)] hover:shadow-[30px_30px_0_rgba(139,38,29,0.1)]'
-                          : 'bg-zinc-950 border-white/5 hover:border-[#8B261D]/50 shadow-[0_0_50px_rgba(0,0,0,0.5)]'
-                      }`}
-                    >
-                      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10" />
-                      
-                      <div className="absolute top-0 left-0 w-full p-6 flex justify-between items-start opacity-30 group-hover:opacity-100 transition-opacity">
-                        <card.icon size={20} className={theme === 'retro' ? 'text-[#8B261D]' : 'text-white'} />
-                        <span className="text-[8px] font-mono tracking-widest">SEC-ID: {Math.random().toString(16).slice(2, 10).toUpperCase()}</span>
-                      </div>
-
-                      <div className="absolute inset-0 flex flex-col justify-end p-8 bg-gradient-to-t from-black via-black/40 to-transparent">
-                        <AnimatedText
-                          lang={lang}
-                          hClass="h-8"
-                          className={`text-xl font-bold tracking-[0.2em] mb-2 uppercase ${theme === 'retro' ? 'text-[#8B261D]' : 'text-white'}`}
-                          cn={card.titleCn}
-                          en={card.titleEn}
-                        />
-                        <div className="h-[2px] w-0 group-hover:w-full bg-[#8B261D] transition-all duration-700 mb-4" />
-                        <AnimatedText
-                          lang={lang}
-                          hClass="h-20"
-                          className={`text-xs font-light leading-relaxed text-white/70 group-hover:text-white transition-colors`}
-                          cn={card.descCn}
-                          en={card.descEn}
-                        />
-                      </div>
-
-                      {/* Scanline Effect */}
-                      <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-0 group-hover:opacity-100 transition-opacity">
-                        <div className="w-full h-1 bg-[#8B261D]/20 absolute animate-scanline shadow-[0_0_15px_rgba(139,38,29,0.5)]" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-20 flex items-center gap-8 opacity-20 hover:opacity-60 transition-opacity">
-                  <div className={`h-px w-48 ${theme === 'retro' ? 'bg-[#8B261D]' : 'bg-white'}`} />
-                  <span className={`text-[10px] font-mono tracking-[1em] ${theme === 'retro' ? 'text-[#8B261D]' : 'text-white'}`}>VOID // PROTOCOL</span>
-                  <div className={`h-px w-48 ${theme === 'retro' ? 'bg-[#8B261D]' : 'bg-white'}`} />
-                </div>
+            {/* 3. DICTIONARY VIEW (Philosophy Codex) */}
+            {selectedProtocol === ProtocolType.DICTIONARY && (
+              <div className="flex-1 flex flex-col min-h-0 h-full animate-in fade-in duration-500">
+                <PhilosophyCodexPage 
+                  onClose={() => setSelectedProtocol(ProtocolType.CORE_DRIVERS)} 
+                  driverType={hoveredDriver || selectedDriver}
+                  lang={lang}
+                  currentUser={currentUser}
+                  setLang={setLang}
+                  openHistory={openHistory}
+                  openSettings={openSettings}
+                  openAuth={openAuth}
+                  openProfile={openProfile}
+                  showRings={showRings}
+                  setShowRings={setShowRings}
+                  renderInPlace={true}
+                  onToggleExpand={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                  isExpanded={isSidebarCollapsed}
+                />
               </div>
             )}
 
-            {/* 3. UTILITIES VIEW (Placeholder) */}
+            {/* 4. UTILITIES VIEW (Placeholder) */}
             {selectedProtocol === ProtocolType.UTILITIES && (
               <div className="flex-1 flex flex-col items-center justify-center animate-in fade-in duration-500">
                 <Zap size={48} className="text-amber-500 mb-8 opacity-50 animate-pulse" />

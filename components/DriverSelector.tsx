@@ -80,11 +80,11 @@ export const DriverSelector: React.FC<DriverSelectorProps> = ({ selectedDriver, 
                             onMouseLeave={() => onHover(null)}
                             className={`
                 group relative flex flex-col items-start text-left p-6 md:p-8 rounded-sm transition-all duration-700 
-                border ${isRetro ? 'bg-transparent shadow-none' : 'bg-[rgb(1,1,1,0.01)]'} backdrop-blur-sm min-h-[300px]
+                border backdrop-blur-sm min-h-[300px]
                 ${active
-                                     ? `${borderClass} shadow-[0_45px_100px_rgba(139,38,29,0.15)] -translate-y-1 ${isRetro ? '!bg-[#F9F7F1]' : (driver.id === DriverType.NARRATIVE ? 'bg-[#D4AF37]/5' : 'bg-zinc-950/100')} backdrop-blur-none`
-                                     : `${isRetro ? 'border-white/10 bg-white/[0.02] shadow-none' : 'border-white/[0.03] bg-white/[0.02]'} ${getHoverBorder(driver.id)}`
-                                }
+                    ? `${borderClass} shadow-[0_45px_100px_rgba(158,61,50,0.12)] -translate-y-1 ${isRetro ? '!bg-[#F9F7F1]' : (driver.id === DriverType.NARRATIVE ? 'bg-[#D4AF37]/5' : 'bg-zinc-950/100')} backdrop-blur-none`
+                    : `${isRetro ? 'border-transparent bg-transparent shadow-none' : 'border-white/[0.03] bg-white/[0.02]'} ${getHoverBorder(driver.id)}`
+                }
               `}
                         >
                             {/* Status padding adjustment */}

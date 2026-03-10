@@ -119,10 +119,10 @@ export const WorldLawModal: React.FC<WorldLawModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/90 backdrop-blur-md animate-in fade-in duration-300 p-4">
-      <div className={`w-full max-w-2xl ${globalTheme === 'retro' ? 'bg-[#F9F7F1] border-[#8B261D]' : 'bg-[#0a0a0a] border-zinc-800'} border rounded-xl shadow-2xl overflow-hidden relative flex flex-col`}>
+      <div className={`w-full max-w-2xl ${globalTheme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]' : 'bg-[#0a0a0a] border-zinc-800'} border rounded-xl shadow-2xl overflow-hidden relative flex flex-col`}>
         
         {/* Header */}
-        <div className={`p-6 border-b ${globalTheme === 'retro' ? 'border-[#8B261D]/20 bg-[#F4EFE0]' : 'border-zinc-800 bg-zinc-900/50'} flex justify-between items-start`}>
+        <div className={`p-6 border-b ${globalTheme === 'retro' ? 'border-[#8B261D]/20 bg-[var(--bg-header)]' : 'border-zinc-800 bg-zinc-900/50'} flex justify-between items-start`}>
           <div>
             <div className={`flex items-center gap-2 ${globalTheme === 'retro' ? 'text-[#8B261D]' : `text-${themeColor}`} mb-1`}>
                <Anchor size={16} />
@@ -200,7 +200,7 @@ export const WorldLawModal: React.FC<WorldLawModalProps> = ({
 
             {/* Contextual Note / Warning */}
             <div className={`p-4 border rounded-lg flex gap-3 items-start animate-in fade-in slide-in-from-bottom-2 ${
-              globalTheme === 'retro' ? 'bg-white border-[#8B261D]/20' :
+              globalTheme === 'retro' ? 'bg-[#F4EFE0] border-[#8B261D]/20' :
               (isCommercial ? 'bg-cyan-900/10 border-cyan-500/30' : 
               (isAesthetic ? 'bg-rose-900/10 border-rose-500/30' : 
               (isExperimental ? 'bg-purple-900/10 border-purple-500/30' : 'bg-amber-900/10 border-amber-500/30')))
@@ -215,7 +215,7 @@ export const WorldLawModal: React.FC<WorldLawModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className={`p-6 border-t ${globalTheme === 'retro' ? 'border-[#8B261D]/20 bg-[#F4EFE0]' : 'border-zinc-800 bg-zinc-900/50'} flex justify-end`}>
+        <div className={`p-6 border-t ${globalTheme === 'retro' ? 'border-[#8B261D]/20 bg-[#F9F7F1]' : 'border-zinc-800 bg-zinc-900/50'} flex justify-end`}>
             <button 
                 onClick={onClose}
                 className={`px-8 py-3 ${globalTheme === 'retro' ? 'bg-[#8B261D] text-white hover:bg-[#6D1E16]' : 'bg-white hover:bg-zinc-200 text-black'} font-bold uppercase tracking-widest rounded transition-colors text-xs shadow-sm`}

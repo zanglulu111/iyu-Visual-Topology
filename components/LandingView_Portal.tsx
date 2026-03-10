@@ -178,7 +178,6 @@ export const LandingView: React.FC<LandingViewProps> = ({
             </div>
             {[
               { icon: Wand2, label: lang === 'CN' ? '换喻引擎' : 'METONYMY', onClick: handleOpenMetonymyPage, color: 'text-amber-400' },
-              { icon: BookOpen, label: lang === 'CN' ? '哲学辞典' : 'CODEX', onClick: openManual, color: 'text-zinc-300' },
               { icon: HistoryIcon, label: lang === 'CN' ? '欲望档案' : 'ARCHIVES', onClick: openHistory, color: 'text-zinc-300' },
               { icon: Settings, label: lang === 'CN' ? '系统配置' : 'CONFIG', onClick: openSettings, color: 'text-zinc-300' }
             ].map((item, idx) => (
@@ -253,20 +252,8 @@ export const LandingView: React.FC<LandingViewProps> = ({
             </div>
 
             {/* Additional Info / Footer Widgets */}
-            <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-6 opacity-80 shrink-0 pb-12">
-              <div onClick={openManual} className="border border-zinc-900 bg-[#080808]/50 hover:bg-[#0c0c0c] p-6 rounded cursor-pointer transition-all group hover:border-zinc-700">
-                <div className="flex items-center gap-3 mb-3">
-                  <BookOpen size={18} className="text-zinc-500 group-hover:text-gold-primary transition-colors" />
-                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-300 group-hover:text-white transition-colors">
-                    {lang === 'CN' ? '访问辞典数据' : 'ACCESS CODEX DATA'}
-                  </h3>
-                </div>
-                <p className="text-xs text-zinc-600 font-mono leading-relaxed">
-                  {lang === 'CN' ? '查阅拉康、齐泽克等理论词条，理解底层系统的运转逻辑。' : 'Consult Lacan, Zizek theoretical entries to understand the underlying system logic.'}
-                </p>
-              </div>
-
-              <div onClick={openHistory} className="border border-zinc-900 bg-[#080808]/50 hover:bg-[#0c0c0c] p-6 rounded cursor-pointer transition-all group hover:border-zinc-700">
+            <div className="mt-16 flex justify-center opacity-80 shrink-0 pb-12">
+              <div onClick={openHistory} className="w-full max-w-md border border-zinc-900 bg-[#080808]/50 hover:bg-[#0c0c0c] p-6 rounded cursor-pointer transition-all group hover:border-zinc-700">
                 <div className="flex items-center gap-3 mb-3">
                   <HistoryIcon size={18} className="text-zinc-500 group-hover:text-cyan-400 transition-colors" />
                   <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-300 group-hover:text-white transition-colors">

@@ -1062,7 +1062,7 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
 
     const btnWidthClass = language === 'EN' ? 'w-[124px]' : 'w-[104px]';
     const btnBaseClass = theme === 'retro' 
-        ? `h-9 ${btnWidthClass} justify-center rounded-lg bg-white border border-[#8B261D]/20 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-[#8B261D]/70 hover:text-[#8B261D] hover:border-[#8B261D]/40 transition-all duration-100 active:scale-95 shadow-sm focus:outline-none`
+        ? `h-9 ${btnWidthClass} justify-center rounded-lg bg-[var(--bg-header)] border border-[#8B261D]/20 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-[#8B261D]/70 hover:text-[#8B261D] hover:border-[#8B261D]/40 transition-all duration-100 active:scale-95 shadow-sm focus:outline-none`
         : `h-9 ${btnWidthClass} justify-center rounded-lg bg-zinc-900 border border-zinc-700/50 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-white hover:border-zinc-500 transition-all duration-100 active:scale-95 shadow-sm focus:outline-none`;
 
     const btnAddSceneClass = theme === 'retro'
@@ -1070,9 +1070,9 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
         : `h-9 px-4 rounded-lg bg-${themeColorBase}/20 border-current flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest ${themeAccent} hover:bg-${themeColorBase}/30 transition-all duration-100 active:scale-95 shadow-md focus:outline-none`;
 
     return (
-        <div className={`${isFullScreen ? 'w-full px-0' : 'w-full'} flex flex-col h-full ${theme === 'retro' ? 'bg-[#F9F7F1]' : 'bg-[#080808]'}`}>
+        <div className={`${isFullScreen ? 'w-full px-0' : 'w-full'} flex flex-col h-full ${theme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#080808]'}`}>
             {/* Header */}
-            <div className={`shrink-0 flex items-center justify-between border-b ${theme === 'retro' ? 'border-black bg-[#F4EFE0]' : 'border-zinc-800 bg-[#080808]'} h-16 px-6`}>
+            <div className={`shrink-0 flex items-center justify-between border-b ${theme === 'retro' ? 'border-black/10 bg-[var(--bg-header)]' : 'border-zinc-800 bg-[#080808]'} h-16 px-6`}>
                 <div className="flex items-center gap-3 flex-1">
                     <div className={`p-1.5 rounded-lg ${theme === 'retro' ? 'bg-white border-[#8B261D]/20' : 'bg-zinc-900 border-zinc-700'} border ${themeAccent}`}><FileText size={16} /></div>
                     <div className="flex flex-col justify-center">
@@ -1127,7 +1127,7 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
 
             <div className="flex-1 flex flex-col overflow-hidden">
                 <div className="flex-1 flex overflow-hidden">
-                    <div className={`${isSourceVisible ? 'w-1/3 min-w-[320px] max-w-[500px] translate-x-0' : 'w-0 opacity-0 -translate-x-full overflow-hidden'} border-r ${theme === 'retro' ? 'border-black bg-[#F4EFE0]' : 'border-zinc-800 bg-[#0a0a0a]'} flex flex-col shrink-0 transition-all duration-310 ease-in-out`}>
+                    <div className={`${isSourceVisible ? 'w-1/3 min-w-[320px] max-w-[500px] translate-x-0' : 'w-0 opacity-0 -translate-x-full overflow-hidden'} border-r ${theme === 'retro' ? 'border-black/10 bg-[var(--bg-header)]' : 'border-zinc-800 bg-[#0a0a0a]'} flex flex-col shrink-0 transition-all duration-310 ease-in-out`}>
                         <SourceViewer
                             text={sourceText}
                             onChange={handleSourceTextChange}
@@ -1165,7 +1165,7 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
                         )}
 
                         {(!isStyleExpanded || focusedSceneId) && (
-                            <div className={`flex-1 ${theme === 'retro' ? 'bg-[#F9F7F1]' : 'bg-[#080808]'} animate-in fade-in duration-300 ${focusedSceneId ? 'overflow-hidden px-6 pt-6 pb-16 flex flex-col' : 'overflow-y-auto custom-scrollbar p-6 pb-32 space-y-8'}`}>
+                            <div className={`flex-1 ${theme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#080808]'} animate-in fade-in duration-300 ${focusedSceneId ? 'overflow-hidden px-6 pt-6 pb-16 flex flex-col' : 'overflow-y-auto custom-scrollbar p-6 pb-32 space-y-8'}`}>
                                 {currentSections.length > 0 ? currentSections
                                     // FILTER: Only show the focused scene if one is selected
                                     .filter(s => focusedSceneId ? s.id === focusedSceneId : true)
@@ -1327,7 +1327,7 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
             {/* Simple Themed Alert Modal */}
             {isAlertOpen && (
                 <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-                    <div className={`w-full max-w-sm ${theme === 'retro' ? 'bg-[#F9F7F1] border-[#8B261D]' : 'bg-[#0c0c0c] border-zinc-800 shadow-[0_0_20px_rgba(0,0,0,0.5)]'} border-2 rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200`}>
+                    <div className={`w-full max-w-sm ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]' : 'bg-[#0c0c0c] border-zinc-800 shadow-[0_0_20px_rgba(0,0,0,0.5)]'} border-2 rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200`}>
                         <div className={`px-6 py-8 text-center ${theme === 'retro' ? 'text-black' : 'text-white'}`}>
                             <div className={`w-14 h-14 rounded-full mx-auto mb-5 flex items-center justify-center ${theme === 'retro' ? 'bg-[#8B261D]/10 text-[#8B261D]' : 'bg-zinc-800 text-zinc-400'}`}>
                                 <AlertCircle size={28} />
@@ -1339,7 +1339,7 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
                                 {alertMessage}
                             </p>
                         </div>
-                        <div className={`p-4 border-t ${theme === 'retro' ? 'border-[#8B261D]/10 bg-[#F4EFE0]/50' : 'border-zinc-900 bg-zinc-950/50'}`}>
+                        <div className={`p-4 border-t ${theme === 'retro' ? 'border-[#8B261D]/10 bg-[var(--bg-header)]/50' : 'border-zinc-900 bg-zinc-950/50'}`}>
                             <button
                                 onClick={() => setIsAlertOpen(false)}
                                 className={`w-full py-3 rounded-lg text-xs font-bold uppercase tracking-widest transition-all active:scale-95 ${theme === 'retro' ? 'bg-[#8B261D] text-white hover:bg-[#A52A2A] shadow-md' : `bg-${themeColorBase}/20 text-${themeColorBase} hover:bg-${themeColorBase}/30 border border-current`}`}

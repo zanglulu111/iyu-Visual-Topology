@@ -37,36 +37,36 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({ is
     
     // Theme variables for consistency mapping
     const t = {
-        bgContainer: isDark ? 'bg-[#0A0A0B]' : 'bg-white',
-        borderContainer: isDark ? 'border-zinc-800 border-4' : 'border-[#3A352F] border-4',
-        bgHeader: isDark ? 'bg-[#0A0A0B]/90' : 'bg-white/95',
-        borderHeader: isDark ? 'border-zinc-900 border-b-2 border-dashed' : 'border-[#8B261D]/10 border-b-2 border-dashed',
-        textTitle: isDark ? 'text-zinc-100' : 'text-[#8B261D]',
-        textAccent: isDark ? 'text-zinc-400' : 'text-[#8B261D]',
-        textTitleAccent: isDark ? 'text-amber-500' : 'text-[#8B261D]',
-        textNormal: isDark ? 'text-zinc-400' : 'text-[#2B2824]',
-        textMuted: isDark ? 'text-zinc-500' : 'text-[#6A665A]',
-        textCode: isDark ? 'text-zinc-300' : 'text-[#3A352F]',
-        btnBg: isDark ? 'bg-zinc-900' : 'bg-[#F9F7F1]',
-        btnHover: isDark ? 'hover:bg-zinc-800' : 'hover:bg-white',
-        btnBorder: isDark ? 'border-zinc-700' : 'border-[#8B261D]/20',
-        btnTextHover: isDark ? 'hover:text-amber-500 text-zinc-400' : 'hover:text-[#8B261D] text-[#3A352F]',
+        bgContainer: theme === 'retro' ? 'bg-[var(--bg-main)]' : (isDark ? 'bg-[#0A0A0B]' : 'bg-white'),
+        borderContainer: theme === 'retro' ? 'border-[var(--border-main)] border-2 shadow-[0_0_30px_rgba(139,38,29,0.1)]' : (isDark ? 'border-zinc-800 border-4' : 'border-[#3A352F] border-4'),
+        bgHeader: theme === 'retro' ? 'bg-[var(--bg-main)]/95' : (isDark ? 'bg-[#0A0A0B]/90' : 'bg-white/95'),
+        borderHeader: theme === 'retro' ? 'border-[var(--border-main)]/20 border-b flex-shrink-0' : (isDark ? 'border-zinc-900 border-b-2 border-dashed' : 'border-[#8B261D]/10 border-b-2 border-dashed'),
+        textTitle: theme === 'retro' ? 'text-[var(--text-accent)]' : (isDark ? 'text-zinc-100' : 'text-[#8B261D]'),
+        textAccent: theme === 'retro' ? 'text-[var(--text-accent)]' : (isDark ? 'text-zinc-400' : 'text-[#8B261D]'),
+        textTitleAccent: theme === 'retro' ? 'text-[var(--text-accent)]' : (isDark ? 'text-amber-500' : 'text-[#8B261D]'),
+        textNormal: theme === 'retro' ? 'text-black/80' : (isDark ? 'text-zinc-400' : 'text-[#2B2824]'),
+        textMuted: theme === 'retro' ? 'text-black/40' : (isDark ? 'text-zinc-500' : 'text-[#6A665A]'),
+        textCode: theme === 'retro' ? 'text-[var(--text-accent)]' : (isDark ? 'text-zinc-300' : 'text-[#3A352F]'),
+        btnBg: theme === 'retro' ? 'bg-[var(--bg-main)]' : (isDark ? 'bg-zinc-900' : 'bg-[#F9F7F1]'),
+        btnHover: theme === 'retro' ? 'hover:bg-[var(--text-accent)] hover:text-[var(--bg-main)]' : (isDark ? 'hover:bg-zinc-800' : 'hover:bg-white'),
+        btnBorder: theme === 'retro' ? 'border-[var(--border-main)]/20' : (isDark ? 'border-zinc-700' : 'border-[#8B261D]/20'),
+        btnTextHover: theme === 'retro' ? 'text-[var(--text-accent)] hover:text-[var(--bg-main)]' : (isDark ? 'hover:text-amber-500 text-zinc-400' : 'hover:text-[#8B261D] text-[#3A352F]'),
         btnDisabled: isDark ? 'opacity-30 cursor-not-allowed' : 'opacity-30 cursor-not-allowed grayscale',
-        cardBg: isDark ? 'bg-[#111113]' : 'bg-[#EBE7DF]/40',
-        cardBorder: isDark ? 'border-zinc-800 border-2' : 'border-[#8B261D]/5 border-2',
-        cardHoverBorder: isDark ? 'hover:border-zinc-500' : 'hover:border-[#8B261D]/40',
-        cardShadow: isDark ? 'hover:shadow-black hover:shadow-xl shadow-sm' : 'hover:shadow-lg shadow-sm',
-        cardImageBg: isDark ? 'bg-zinc-900' : 'bg-[#DCD8CF]',
-        imageEffects: isDark ? 'grayscale-[0.5] group-hover:grayscale-0' : 'grayscale group-hover:grayscale-[0.5] contrast-110 sepia-[0.1]',
-        cardTitleHover: isDark ? 'group-hover:text-amber-400' : 'group-hover:text-[#8B261D]',
+        cardBg: theme === 'retro' ? 'bg-[var(--bg-main)] shadow-sm' : (isDark ? 'bg-[#111113]' : 'bg-[#EBE7DF]/40'),
+        cardBorder: theme === 'retro' ? 'border-[var(--border-main)]/20 hover:border-[var(--border-accent)]' : (isDark ? 'border-zinc-800 border-2' : 'border-[#8B261D]/5 border-2'),
+        cardHoverBorder: theme === 'retro' ? 'hover:border-[var(--border-main)]' : (isDark ? 'hover:border-zinc-500' : 'hover:border-[#8B261D]/40'),
+        cardShadow: theme === 'retro' ? 'hover:shadow-[0_8px_30px_rgba(139,38,29,0.15)] shadow-sm' : (isDark ? 'hover:shadow-black hover:shadow-xl shadow-sm' : 'hover:shadow-lg shadow-sm'),
+        cardImageBg: theme === 'retro' ? 'bg-[var(--bg-main)]' : (isDark ? 'bg-zinc-900' : 'bg-[#DCD8CF]'),
+        imageEffects: theme === 'retro' ? 'grayscale-[0.3] contrast-[1.1] group-hover:grayscale-0' : (isDark ? 'grayscale-[0.5] group-hover:grayscale-0' : 'grayscale group-hover:grayscale-[0.5] contrast-110 sepia-[0.1]'),
+        cardTitleHover: theme === 'retro' ? 'group-hover:text-[var(--text-accent)]' : (isDark ? 'group-hover:text-amber-400' : 'group-hover:text-[#8B261D]'),
         texturePattern: isDark ? '' : "url('https://www.transparenttextures.com/patterns/aged-paper.png')",
         dustPattern: isDark ? '' : "url('https://www.transparenttextures.com/patterns/dust.png')",
-        paperClipColor: isDark ? 'bg-white/10 border-white/5' : 'bg-white border-black/10',
-        tagBorder: isDark ? 'border-zinc-800 bg-zinc-900' : 'border-[#8B261D]/20 bg-white',
-        dateBorder: isDark ? 'border-zinc-800 bg-zinc-900 text-zinc-500' : 'border-[#6A665A]/20 bg-[#F9F7F1] text-[#6A665A]',
+        paperClipColor: theme === 'retro' ? 'bg-[var(--bg-main)] border-[var(--border-main)]/50' : (isDark ? 'bg-white/10 border-white/5' : 'bg-white border-black/10'),
+        tagBorder: theme === 'retro' ? 'border-[var(--border-main)]/20 bg-[var(--bg-main)]' : (isDark ? 'border-zinc-800 bg-zinc-900' : 'border-[#8B261D]/20 bg-white'),
+        dateBorder: theme === 'retro' ? 'border-[var(--border-main)]/30 bg-[var(--bg-main)] text-[var(--text-accent)]/80' : (isDark ? 'border-zinc-800 bg-zinc-900 text-zinc-500' : 'border-[#6A665A]/20 bg-[#F9F7F1] text-[#6A665A]'),
         emptyIconOpacity: isDark ? 'opacity-20' : 'opacity-50',
-        emptyMessageBorder: isDark ? 'border-zinc-700 text-zinc-500' : 'border-[#8B261D] text-[#8B261D]',
-        paginationBg: isDark ? 'bg-zinc-900 border-zinc-700 text-zinc-300' : 'bg-white border-[#3A352F] text-[#3A352F]'
+        emptyMessageBorder: theme === 'retro' ? 'border-[var(--border-main)] text-[var(--text-accent)]' : (isDark ? 'border-zinc-700 text-zinc-500' : 'border-[#8B261D] text-[#8B261D]'),
+        paginationBg: theme === 'retro' ? 'bg-[var(--bg-main)] border-[var(--border-main)]/30 text-[var(--text-accent)]' : (isDark ? 'bg-zinc-900 border-zinc-700 text-zinc-300' : 'bg-white border-[#3A352F] text-[#3A352F]')
     };
 
     const categories: { id: ArchiveCategory; labelCn: string; labelEn: string; color: string; darkColor: string }[] = [
@@ -103,9 +103,9 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({ is
 
     return (
         <>
-            <div className={isFullScreen ? "w-full h-full animate-fadeIn" : `fixed inset-0 backdrop-blur-md z-[100] flex items-center justify-center p-4 animate-fadeIn ${isDark ? 'bg-black/90' : 'bg-black/80'}`}>
+            <div className={isFullScreen ? "w-full h-full animate-fadeIn" : `fixed inset-0 backdrop-blur-md z-[100] flex items-center justify-center p-4 animate-fadeIn ${theme === 'retro' ? 'bg-transparent' : (isDark ? 'bg-black/90' : 'bg-black/80')}`}>
                 {/* Main Container */}
-                <div className={`${t.bgContainer} ${isFullScreen ? 'w-full h-full' : `${t.borderContainer} rounded-lg w-full max-w-6xl h-[90vh] shadow-2xl`} flex flex-col overflow-hidden relative transition-colors duration-500`} style={isDark ? {} : { backgroundImage: t.texturePattern }}>
+                <div className={`${t.bgContainer} ${isFullScreen ? 'w-full h-full' : `${t.borderContainer} rounded-lg w-full max-w-6xl h-[90vh] shadow-2xl`} flex flex-col overflow-hidden relative transition-colors duration-500`} style={(isDark || theme === 'retro') ? {} : { backgroundImage: t.texturePattern }}>
                     
                     {/* Header - Only show in modal mode */}
                     {!isFullScreen && (
@@ -144,14 +144,14 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({ is
                     </div>
                     )}
 
-                    {/* Background Texture Overlay (Only Retro) */}
-                    {!isDark && (
+                    {/* Background Texture Overlay (Disabled in Retro to avoid color shift) */}
+                    {(!isDark && theme !== 'retro') && (
                         <div className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none grayscale contrast-150" style={{ backgroundImage: t.texturePattern }}></div>
                     )}
 
                     <div className="flex-1 flex flex-row overflow-hidden relative z-10 h-full">
                         {/* Left Navigation Sidebar */}
-                        <div className={`w-64 md:w-80 border-r-2 border-dashed flex flex-col pt-24 md:pt-32 opacity-100 shrink-0 ${isDark ? 'border-zinc-900 bg-[#0A0A0B]/80' : 'border-[#89817a]/10 bg-[#EBE7DF] shadow-inner'}`}>
+                        <div className={`w-64 md:w-80 border-r-2 border-dashed flex flex-col pt-6 md:pt-10 opacity-100 shrink-0 ${theme === 'retro' ? 'border-[#8B261D]/10 bg-transparent' : (isDark ? 'border-zinc-900 bg-[#0A0A0B]/80' : 'border-[#89817a]/10 bg-[#EBE7DF] shadow-inner')}`}>
                             <div className="px-6 pb-6 border-b border-dashed border-zinc-800/10 mb-6">
                                 <h3 className={`text-[10px] font-mono font-bold tracking-[0.3em] uppercase mb-4 ${t.textMuted}`}>
                                     {localLang === 'CN' ? '按目录浏览' : 'BROWSE BY CATEGORY'}
@@ -191,7 +191,7 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({ is
                         </div>
 
                         {/* Content Grid Area */}
-                        <div className={`flex-1 overflow-y-auto px-6 md:px-12 pt-28 md:pt-36 pb-20 custom-scrollbar relative ${isDark ? 'bg-[#0A0A0B]' : 'bg-white'}`}>
+                        <div className={`flex-1 overflow-y-auto px-6 md:px-12 pt-6 md:pt-10 pb-20 custom-scrollbar relative ${theme === 'retro' ? 'bg-transparent' : (isDark ? 'bg-[#0A0A0B]' : 'bg-white')}`}>
                             <div className="p-8 lg:p-12 max-w-6xl mx-auto flex flex-col min-h-full">
                             
                             {/* Title Section */}
@@ -355,7 +355,6 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({ is
                 onClose={() => setSelectedCaseId(null)}
                 caseData={selectedCaseData}
                 lang={localLang}
-                isDark={isDark}
             />
         </>
     );
