@@ -59,8 +59,6 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({ is
         cardImageBg: theme === 'retro' ? 'bg-black/5' : (isDark ? 'bg-zinc-900' : 'bg-[#DCD8CF]'),
         imageEffects: theme === 'retro' ? 'grayscale-[0.6] sepia-[0.3] contrast-125 group-hover:grayscale-0 group-hover:sepia-0 transition-all duration-700' : (isDark ? 'grayscale-[0.3] group-hover:grayscale-0' : 'grayscale group-hover:grayscale-[0.5] contrast-110 sepia-[0.1]'),
         cardTitleHover: theme === 'retro' ? 'group-hover:text-[var(--text-accent)]' : (isDark ? 'group-hover:text-amber-400' : 'group-hover:text-[#8B261D]'),
-        texturePattern: isDark ? '' : "url('https://www.transparenttextures.com/patterns/aged-paper.png')",
-        dustPattern: isDark ? '' : "url('https://www.transparenttextures.com/patterns/dust.png')",
         paperClipColor: theme === 'retro' ? 'bg-white border-black/10 shadow-sm' : (isDark ? 'bg-white/10 border-white/5' : 'bg-white border-black/10'),
         tagBorder: theme === 'retro' ? 'border-black/20 bg-white' : (isDark ? 'border-zinc-800 bg-zinc-900' : 'border-[#8B261D]/20 bg-white'),
         dateBorder: theme === 'retro' ? 'border-black/10 bg-black/5 text-black/60 shadow-inner' : (isDark ? 'border-zinc-800 bg-zinc-900 text-zinc-500' : 'border-[#6A665A]/20 bg-[#F9F7F1] text-[#6A665A]'),
@@ -105,7 +103,7 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({ is
         <>
             <div className={isFullScreen ? "w-full h-full animate-fadeIn" : `fixed inset-0 backdrop-blur-md z-[100] flex items-center justify-center p-4 animate-fadeIn ${theme === 'retro' ? 'bg-transparent' : (isDark ? 'bg-black/90' : 'bg-black/80')}`}>
                 {/* Main Container */}
-                <div className={`${t.bgContainer} ${isFullScreen ? 'w-full h-full' : `${t.borderContainer} rounded-lg w-full max-w-6xl h-[90vh] shadow-2xl`} flex flex-col overflow-hidden relative transition-colors duration-500`} style={(isDark || theme === 'retro') ? {} : { backgroundImage: t.texturePattern }}>
+                <div className={`${t.bgContainer} ${isFullScreen ? 'w-full h-full' : `${t.borderContainer} rounded-lg w-full max-w-6xl h-[90vh] shadow-2xl`} flex flex-col overflow-hidden relative transition-colors duration-500 texture-paper`}>
                     
                     {/* Header - Only show in modal mode */}
                     {!isFullScreen && (
@@ -144,10 +142,7 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({ is
                     </div>
                     )}
 
-                    {/* Background Texture Overlay (Disabled in Retro to avoid color shift) */}
-                    {(!isDark && theme !== 'retro') && (
-                        <div className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none grayscale contrast-150" style={{ backgroundImage: t.texturePattern }}></div>
-                    )}
+                    {/* Background Texture Overlay - Simplified via CSS classes */}
 
                     <div className="flex-1 flex flex-row overflow-hidden relative z-10 h-full">
                         {/* Left Navigation Sidebar */}
@@ -258,7 +253,7 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({ is
                                             {/* Image - Fixed 16:9 aspect ratio */}
                                             <div className={`aspect-video relative overflow-hidden p-4 pb-0 ${t.cardImageBg}`}>
                                                 
-                                                {!isDark && <div className="absolute inset-0 bg-transparent transition-colors z-10 mix-blend-multiply opacity-20" style={{ backgroundImage: t.texturePattern }}></div>}
+                                                {!isDark && <div className="absolute inset-0 bg-transparent transition-colors z-10 mix-blend-multiply opacity-20 texture-paper"></div>}
                                                 {isDark && <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors z-10"></div>}
                                                 
                                                 <img 
@@ -280,7 +275,7 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({ is
                                             </div>
 
                                             {/* Content */}
-                                            <div className={`p-6 flex flex-col flex-1 relative`} style={isDark ? {} : { backgroundImage: t.dustPattern }}>
+                                            <div className={`p-6 flex flex-col flex-1 relative texture-dust`}>
                                                 {/* File ID/Date */}
                                                 <div className={`flex items-center justify-between mb-4 border-b border-dashed pb-2 ${isDark ? 'border-zinc-800' : 'border-[#CFCBBF]'}`}>
                                                     <span className={`text-[10px] font-mono tracking-widest uppercase border px-1 transition-all duration-500 ${t.dateBorder} ${isDark || theme === 'retro' ? 'opacity-40 group-hover:opacity-80' : ''}`}>

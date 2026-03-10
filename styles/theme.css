@@ -12,10 +12,11 @@
   --text-code: #d1d5db; /* zinc-300 */
   --accent-color: #d4af37;
   --selection-bg: rgba(212, 175, 55, 0.3);
-  --pattern-aged: none;
-  --pattern-dust: none;
-  --gold-primary: #d4af37;
-  --gold-dim: #8a7328;
+  --pattern-aged: url('https://www.transparenttextures.com/patterns/aged-paper.png');
+  --pattern-dust: url('https://www.transparenttextures.com/patterns/dust.png');
+  --texture-opacity: 0.15;
+  --bg-texture: none;
+  --bg-dust-texture: none;
 
   /* Mist School Palette - Dark Mode */
   --mist-cyan: #22d3ee;
@@ -38,7 +39,9 @@
   --text-muted: #2D2D2D99;  /* 60% 墨迹透明度 */
   --text-code: #2D2D2D;
   --selection-bg: rgba(139, 38, 29, 0.08);
-  --pattern-aged: url('https://www.transparenttextures.com/patterns/aged-paper.png'), url('https://www.transparenttextures.com/patterns/dust.png');
+  --bg-texture: url('https://www.transparenttextures.com/patterns/aged-paper.png');
+  --bg-dust-texture: url('https://www.transparenttextures.com/patterns/dust.png');
+  --texture-opacity: 1;
   --ring-opacity: 0.45;
   --gold-primary: #8B261D;
   --gold-dim: #8B261D66;
@@ -56,25 +59,39 @@
 
 /* Global Transitions */
 body {
-  transition: background-color 0.5s ease, color 0.5s ease;
+  transition: background-color 0.4s ease, color 0.4s ease;
   background-color: var(--bg-main);
   color: var(--text-main);
-  background-image: var(--pattern-aged);
+  position: relative;
+  min-height: 100vh;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: var(--bg-texture);
+  opacity: var(--texture-opacity);
+  pointer-events: none;
+  z-index: -1;
+  transition: opacity 0.4s ease;
 }
 
 .theme-transition {
-  transition: all 0.5s ease;
+  transition: all 0.4s ease;
 }
 
-/* Texture Overlays for Retro */
-.retro-pattern::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-image: var(--pattern-dust);
-  opacity: 0.5;
-  z-index: 5;
+/* Texture Utility Classes (No mix-blend-mode for performance) */
+.texture-paper {
+  background-image: var(--bg-texture);
+  background-repeat: repeat;
+  background-attachment: local;
+}
+
+.texture-dust {
+  background-image: var(--bg-dust-texture);
+  background-repeat: repeat;
+  background-attachment: local;
 }
 /* Selection Styles */
 ::selection {

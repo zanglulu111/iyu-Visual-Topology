@@ -33,8 +33,6 @@ export const ArchiveDetailModal: React.FC<ArchiveDetailModalProps> = ({ isOpen, 
         btnBg: theme === 'retro' ? 'bg-[var(--bg-main)]' : (isDark ? 'bg-zinc-900' : 'bg-white'),
         btnHover: theme === 'retro' ? 'hover:bg-[#8B261D] hover:text-[#F9F7F1]' : (isDark ? 'hover:bg-zinc-800' : 'hover:bg-gray-100'),
         btnBorder: theme === 'retro' ? 'border-[#8B261D]/20' : (isDark ? 'border-zinc-700' : 'border-[#8B261D]/20'),
-        texturePattern: isDark ? '' : "url('https://www.transparenttextures.com/patterns/aged-paper.png')",
-        dustPattern: isDark ? '' : "url('https://www.transparenttextures.com/patterns/dust.png')",
         // Section specific
         sectionBorder: theme === 'retro' ? 'border-[#8B261D]/20' : (isDark ? 'border-zinc-800' : 'border-[#8B261D]/10'),
         dnaBg: theme === 'retro' ? 'bg-transparent backdrop-blur-sm' : (isDark ? 'bg-[#111113]' : 'bg-white'),
@@ -44,7 +42,7 @@ export const ArchiveDetailModal: React.FC<ArchiveDetailModalProps> = ({ isOpen, 
     };
 
     const modalContent = (
-        <div className={`${renderInPlace ? 'h-full w-full' : 'h-[95vh] w-full max-w-5xl border-4 rounded-sm shadow-2xl'} ${t.bgContainer} ${renderInPlace ? '' : t.borderContainer} flex flex-col overflow-hidden relative transition-colors duration-500`} style={(isDark || theme === 'retro') ? {} : { backgroundImage: t.texturePattern }}>
+        <div className={`${renderInPlace ? 'h-full w-full' : 'h-[95vh] w-full max-w-5xl border-4 rounded-sm shadow-2xl'} ${t.bgContainer} ${renderInPlace ? '' : t.borderContainer} flex flex-col overflow-hidden relative transition-colors duration-500 texture-paper`}>
             
             {/* Header (Only shown if NOT in place) */}
             {!renderInPlace && (
@@ -84,7 +82,7 @@ export const ArchiveDetailModal: React.FC<ArchiveDetailModalProps> = ({ isOpen, 
                 </div>
             )}
 
-            <div className="flex-1 overflow-y-auto custom-scrollbar relative z-10" style={(isDark || theme === 'retro') ? {} : { backgroundImage: t.dustPattern }}>
+            <div className="flex-1 overflow-y-auto custom-scrollbar relative z-10 texture-dust">
                 
                 {/* Hero Header */}
                 <div className={`pt-20 px-10 md:px-16 lg:px-32 pb-12 relative overflow-hidden`}>

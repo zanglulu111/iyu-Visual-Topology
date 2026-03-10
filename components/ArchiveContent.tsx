@@ -47,8 +47,6 @@ export const ArchiveContent: React.FC<ArchiveContentProps> = ({ lang }) => {
         paginationBg: isDark ? 'bg-zinc-900 border-zinc-700 text-zinc-300' : 'bg-white border-[#3A352F] text-[#3A352F]',
         emptyIconOpacity: isDark ? 'opacity-20' : 'opacity-50',
         emptyMessageBorder: isDark ? 'border-zinc-700 text-zinc-500' : 'border-[#8B261D] text-[#8B261D]',
-        texturePattern: isDark ? '' : "url('https://www.transparenttextures.com/patterns/aged-paper.png')",
-        dustPattern: isDark ? '' : "url('https://www.transparenttextures.com/patterns/dust.png')"
     };
 
     const categories: { id: ArchiveCategory; labelCn: string; labelEn: string; color: string; darkColor: string }[] = [
@@ -82,10 +80,7 @@ export const ArchiveContent: React.FC<ArchiveContentProps> = ({ lang }) => {
         <div className="flex-1 overflow-hidden relative">
             {!selectedCaseId ? (
                 <div className="h-full overflow-y-auto custom-scrollbar">
-                    {/* Background Texture Overlay (Only Retro - handled by parent in new logic) */}
-                    {!isDark && theme !== 'retro' && (
-                        <div className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none grayscale contrast-150" style={{ backgroundImage: t.texturePattern }}></div>
-                    )}
+                    {/* Background Texture Overlay - Handled via global CSS classes */}
                     
                     <div className="pt-20 pb-40 px-10 md:px-16 lg:px-24 flex flex-col min-h-0 relative z-10 scroll-mt-20">
                         {/* Title Section */}
@@ -147,7 +142,7 @@ export const ArchiveContent: React.FC<ArchiveContentProps> = ({ lang }) => {
                                         <div className={`absolute -top-1 left-1/2 -translate-x-1/2 w-8 h-3 shadow-sm border z-30 transform -rotate-2 mix-blend-multiply ${t.paperClipColor}`}></div>
 
                                         <div className={`aspect-video relative overflow-hidden p-4 pb-0 ${t.cardImageBg}`}>
-                                            {!isDark && <div className="absolute inset-0 bg-transparent transition-colors z-10 mix-blend-multiply opacity-20" style={{ backgroundImage: t.texturePattern }}></div>}
+                                            {!isDark && <div className="absolute inset-0 bg-transparent transition-colors z-10 mix-blend-multiply opacity-20 texture-paper"></div>}
                                             {isDark && <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors z-10"></div>}
                                             
                                             <img 
@@ -167,7 +162,7 @@ export const ArchiveContent: React.FC<ArchiveContentProps> = ({ lang }) => {
                                             </div>
                                         </div>
 
-                                        <div className={`p-5 flex flex-col flex-1 relative`} style={isDark ? {} : { backgroundImage: t.dustPattern }}>
+                                        <div className={`p-5 flex flex-col flex-1 relative texture-dust`}>
                                             <div className={`flex items-center justify-between mb-3 border-b border-dashed pb-2 ${isDark ? 'border-zinc-800' : 'border-[#CFCBBF]'}`}>
                                                 <span className={`text-[9px] font-mono tracking-widest uppercase border px-1 transition-all duration-500 ${t.dateBorder} ${isDark || theme === 'retro' ? 'opacity-40 group-hover:opacity-80' : ''}`}>
                                                     NO. {((currentPage - 1) * ITEMS_PER_PAGE) + 1000 + i}-{c.id.toUpperCase()}
