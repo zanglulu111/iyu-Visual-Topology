@@ -9,7 +9,7 @@ interface AppHeaderProps {
   page: number;
   lang: 'CN' | 'EN';
   setLang: (lang: 'CN' | 'EN') => void;
-  setPage: (page: 0 | 1) => void;
+  setPage: (page: -1 | 0 | 1) => void;
   selectedDriver: DriverType | null;
   driverName: string;
   viewMode: ViewMode;

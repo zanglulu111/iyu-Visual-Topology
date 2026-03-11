@@ -25,6 +25,13 @@
   --mist-purple: #c084fc;
   --mist-orange: #fb923c;
   --mist-red: #8B261D;  /* The Red is always Mist Red */
+
+  /* Gold variants (dark mode) */
+  --gold-primary: #D4AF37;
+  --gold-dim: rgba(212, 175, 55, 0.4);
+  --gold-bright: #FFD700;
+  --gold-soft: rgba(212, 175, 55, 0.6);
+  --ring-opacity: 0.35;
 }
 
 :root.retro {

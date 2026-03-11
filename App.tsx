@@ -15,6 +15,7 @@ import { AppHeader } from './components/AppHeader';
 import { EngineBottomBar } from './components/EngineBottomBar';
 import { TaskManagerPanel } from './components/TaskManagerPanel';
 import { LandingView } from './components/LandingView';
+import { UniversePortal } from './components/UniversePortal';
 import { VisionSidebar } from './components/VisionSidebar';
 import { TheSkinSidebar } from './components/TheSkinSidebar';
 import { AestheticInputSidebar } from './components/AestheticInputSidebar';
@@ -71,7 +72,7 @@ const App: React.FC = () => {
     const { isOpen: isSettingsOpen, openSettings, closeSettings } = useSettings();
     const navigate = useNavigate();
     const location = useLocation();
-    const [page, setPage] = useState<0 | 1>(0);
+    const [page, setPage] = useState<-1 | 0 | 1>(-1);
     const [lang, setLang] = useState<'CN' | 'EN'>('CN');
     const [viewMode, setViewMode] = useState<ViewMode>('ENGINE');
     const [selectedDriver, setSelectedDriver] = useState<DriverType | null>(null);
@@ -1148,7 +1149,17 @@ const App: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-[var(--bg-main)] text-zinc-300 font-sans selection:bg-gold-primary/30 selection:text-white overflow-hidden transition-colors duration-500">
-            {page === 0 ? (
+            {page === -1 ? (
+                <UniversePortal
+                    lang={lang}
+                    setLang={setLang}
+                    setPage={setPage}
+                    setViewMode={handleViewChange}
+                    currentUser={currentUser}
+                    openAuth={openAuth}
+                    openProfile={() => setIsProfileOpen(true)}
+                />
+            ) : page === 0 ? (
                 <LandingView
                     lang={lang}
                     setLang={setLang}

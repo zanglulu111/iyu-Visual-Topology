@@ -31,7 +31,7 @@ const AnimatedText = ({ cn, en, lang, className = "", hClass = "h-5" }: { cn: Re
 interface LandingViewProps {
   lang: 'CN' | 'EN';
   setLang: (lang: 'CN' | 'EN') => void;
-  setPage: (page: 0 | 1) => void;
+  setPage: (page: -1 | 0 | 1) => void;
   setViewMode: (mode: any) => void;
   selectedDriver: DriverType | null;
   onDriverSelect: (id: DriverType) => void;
@@ -189,6 +189,17 @@ export const LandingView: React.FC<LandingViewProps> = ({
           }} 
         />
         <div className="flex items-center gap-4">
+          <button
+            onClick={() => setPage(-1)}
+            className={`text-[9px] font-mono tracking-[0.15em] transition-all duration-300 hover:scale-105 active:scale-95 px-2 py-1 rounded-sm border ${
+              theme === 'retro'
+                ? 'text-[var(--text-muted)] hover:text-[var(--text-accent)] border-[var(--border-main)] hover:border-[var(--border-accent)]'
+                : 'text-zinc-500 hover:text-white/80 border-zinc-800 hover:border-zinc-600'
+            }`}
+            title={lang === 'CN' ? '返回迷雾学派入口' : 'Return to Mist Portal'}
+          >
+            ← {lang === 'CN' ? '入口' : 'PORTAL'}
+          </button>
           <Terminal size={14} className={`shrink-0 transition-colors duration-500 ${hoveredDriver ? getAccentColor(hoveredDriver) : 'text-[var(--text-main)] opacity-70'}`} />
           <AnimatedText
             lang={lang}
