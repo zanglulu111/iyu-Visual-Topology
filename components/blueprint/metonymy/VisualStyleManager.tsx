@@ -157,8 +157,14 @@ export const VisualStyleManager: React.FC<VisualStyleManagerProps> = ({
         if (file) {
             setIsToneUploading(true);
             try {
+                const oldToneImage = activePreset.toneImage;
                 const url = await supabaseDatabase.uploadImage(file);
                 if (url) {
+                    // 删除旧的色调参考图
+                    if (oldToneImage) {
+                        const { deleteFromR2 } = await import('../../../services/r2Storage');
+                        deleteFromR2(oldToneImage);
+                    }
                     updateActivePreset({ toneImage: url });
                 }
             } catch (err) {
@@ -175,8 +181,13 @@ export const VisualStyleManager: React.FC<VisualStyleManagerProps> = ({
     // Handler to delete Tone Reference Image
     const handleDeleteToneImage = (e: React.MouseEvent) => {
         e.stopPropagation();
+        const oldToneImage = activePreset.toneImage;
         updateActivePreset({ toneImage: undefined });
         if (fileInputRef.current) fileInputRef.current.value = '';
+        // 删除 R2 文件
+        if (oldToneImage) {
+            import('../../../services/r2Storage').then(({ deleteFromR2 }) => deleteFromR2(oldToneImage));
+        }
     };
 
     // Handler for the Asset Grid Images
@@ -186,15 +197,20 @@ export const VisualStyleManager: React.FC<VisualStyleManagerProps> = ({
             const { type, id } = pendingAssetUpload;
             setIsAssetUploadingMap(prev => ({ ...prev, [id]: true }));
             try {
+                const assets = activePreset.assets || { characters: [], scenes: [], props: [] };
+                const oldImageUrl = assets[type]?.find(a => a.id === id)?.imageUrl;
                 const url = await supabaseDatabase.uploadImage(file);
                 if (url) {
-                    const assets = activePreset.assets || { characters: [], scenes: [], props: [] };
+                    // 删除旧素材图
+                    if (oldImageUrl) {
+                        const { deleteFromR2 } = await import('../../../services/r2Storage');
+                        deleteFromR2(oldImageUrl);
+                    }
                     const next = { ...assets };
                     if (next[type]) {
                         const targetAsset = next[type].find(a => a.id === id);
                         if (targetAsset) {
-                            const updatedAsset = { ...targetAsset, imageUrl: url };
-                            next[type] = next[type].map(a => a.id === id ? updatedAsset : a);
+                            next[type] = next[type].map(a => a.id === id ? { ...a, imageUrl: url } : a);
                             updateActivePreset({ assets: next });
                         }
                     }

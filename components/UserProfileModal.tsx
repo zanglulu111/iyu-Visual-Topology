@@ -72,7 +72,8 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
 
         setIsUploading(true);
         try {
-            // Use unified upload logic (handles R2 automatically)
+            const oldAvatarUrl = currentUser.avatarUrl;
+
             const { supabaseDatabase } = await import('../services/supabaseDatabase');
             const avatarUrl = await supabaseDatabase.uploadImage(file, 'avatars');
 
@@ -80,7 +81,12 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
             const { error: updateError } = await supabase.from('profiles').update({ avatar_url: avatarUrl }).eq('id', currentUser.id);
             if (updateError) throw updateError;
 
-            // Update local state
+            // 删除旧头像（仅 R2 文件，静默失败）
+            if (oldAvatarUrl) {
+                const { deleteFromR2 } = await import('../services/r2Storage');
+                deleteFromR2(oldAvatarUrl);
+            }
+
             if (onProfileUpdate) {
                 onProfileUpdate({ avatarUrl });
             }
