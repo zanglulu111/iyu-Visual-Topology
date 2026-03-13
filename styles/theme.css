@@ -109,3 +109,49 @@ body::before {
   background-color: rgba(139, 38, 29, 0.25);
   color: #000000;
 }
+
+/* Premium Page Transitions */
+@keyframes pageEntrance {
+  0% {
+    opacity: 0;
+    transform: scale(0.99) translateY(15px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-page-entrance {
+  animation: pageEntrance 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Subtle Zoom for specific sections */
+@keyframes sectionZoom {
+  0% {
+    opacity: 0;
+    transform: scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-section-zoom {
+  animation: sectionZoom 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Page Dissolve - Pure fade-in for faster, stable transitions */
+@keyframes pageDissolve {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.animate-page-dissolve {
+  animation: pageDissolve 0.75s cubic-bezier(0.215, 0.61, 0.355, 1) both;
+}

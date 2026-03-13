@@ -364,7 +364,7 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
     const controlClass = `flex items-center px-3 py-1.5 rounded-lg ${theme === 'retro' ? 'bg-transparent border-[#8B261D]/20 shadow-none' : 'bg-zinc-900 border-white/20'} ${themeTextColor} hover:border-[#8B261D]/50 transition-all w-44`;
 
     return (
-        <div className={`w-full h-full flex flex-col relative animate-fade-in overflow-hidden ${theme === 'retro' ? 'bg-[var(--bg-main)]' : 'bg-[#0a0a0a]'}`}>
+        <div className={`w-full h-full flex flex-col relative overflow-hidden ${theme === 'retro' ? 'bg-[var(--bg-main)]' : 'bg-[#0a0a0a]'}`}>
             <div className={`shrink-0 h-14 ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20' : 'bg-[#0a0a0a] border-zinc-800'} border-b flex items-center justify-between px-6 shadow-xl z-20`}>
                 <div className="flex items-center gap-4">
                     <div className={`flex items-center gap-2 ${getThemeColor()}`}>

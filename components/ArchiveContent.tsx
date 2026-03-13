@@ -11,6 +11,21 @@ interface ArchiveContentProps {
 
 const ITEMS_PER_PAGE = 12;
 
+const AnimatedText = ({ cn, en, lang, className = "", hClass = "h-5" }: { cn: React.ReactNode, en: React.ReactNode, lang: 'CN' | 'EN', className?: string, hClass?: string }) => (
+  <div className={`overflow-hidden relative flex items-start ${hClass}`}>
+    <div className={`transition-all duration-[1500ms] w-full ease-[cubic-bezier(0.16,1,0.3,1)] ${lang === 'EN' ? '-translate-y-1/2' : 'translate-y-0'}`}>
+      <div className="flex flex-col w-full">
+        <div className={`${hClass} flex items-center shrink-0 w-full ${className}`}>
+          {cn}
+        </div>
+        <div className={`${hClass} flex items-center shrink-0 w-full ${className}`}>
+          {en}
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
 export const ArchiveContent: React.FC<ArchiveContentProps> = ({ lang }) => {
     const { theme } = useTheme();
     const isDark = theme === 'dark';
@@ -77,28 +92,34 @@ export const ArchiveContent: React.FC<ArchiveContentProps> = ({ lang }) => {
     const selectedCaseData = ARCHIVE_CASES.find(c => c.id === selectedCaseId) || null;
 
     return (
-        <div className="flex-1 overflow-hidden relative">
+        <div className="flex-1 flex flex-col overflow-hidden relative">
             {!selectedCaseId ? (
                 <div className="h-full overflow-y-auto custom-scrollbar">
                     {/* Background Texture Overlay - Handled via global CSS classes */}
                     
                     <div className="pt-20 pb-40 px-10 md:px-16 lg:px-24 flex flex-col min-h-0 relative z-10 scroll-mt-20">
                         {/* Title Section */}
-                        <div className={`shrink-0 mb-12 border-l-4 pl-6 py-2 ${isDark ? 'border-zinc-700' : 'border-[#8B261D]'} animate-in fade-in slide-in-from-top-4 duration-700`}>
+                        <div className={`shrink-0 mb-12 border-l-4 pl-6 py-2 ${isDark ? 'border-zinc-700' : 'border-[#8B261D]'}`}>
                             <div className="flex items-center gap-2 mb-3">
                                 <ShieldAlert size={14} className={t.textTitleAccent} />
                                 <span className={`text-[11px] font-mono tracking-[0.2em] uppercase font-bold ${t.textTitleAccent}`}>
                                     Archive Directory . TOP SECRET
                                 </span>
                             </div>
-                            <h1 className={`text-4xl lg:text-5xl font-serif mb-4 tracking-[0.1em] font-bold uppercase ${t.textTitle}`}>
-                                {lang === 'CN' ? '主体观测与临床报告' : 'Subject Observation & Clinical Reports'}
-                            </h1>
-                            <p className={`text-[11px] font-bold max-w-2xl leading-relaxed uppercase tracking-[0.2em] font-mono ${t.textNormal}`}>
-                                {lang === 'CN' 
-                                    ? '[ 文件来源 ]: 迷雾学派 . [ 目的 ]: 检视短篇研究报告，探索隐秘在字里行间的结构缺陷。在这里，每一次访谈都是一次针对实在界的解码。'
-                                    : '[ SOURCE ]: MIST SCHOOL . [ OBJECTIVE ]: Review short research reports, exploring structural flaws hidden between lines. Every interview is a decoding of the Real.'}
-                            </p>
+                            <AnimatedText
+                                lang={lang}
+                                hClass="h-14 lg:h-16"
+                                className={`text-4xl lg:text-5xl font-serif mb-4 tracking-[0.1em] font-bold uppercase ${t.textTitle}`}
+                                cn="主体观测与临床报告"
+                                en="Subject Observation & Clinical Reports"
+                            />
+                            <AnimatedText
+                                lang={lang}
+                                hClass="h-28 md:h-32"
+                                className={`text-[11px] font-bold max-w-2xl leading-relaxed uppercase tracking-[0.2em] font-mono ${t.textNormal}`}
+                                cn="[ 文件来源 ]: 迷雾学派 . [ 目的 ]: 检视短篇研究报告，探索隐秘在字里行间的结构缺陷。在这里，每一次访谈都是一次针对实在界的解码。"
+                                en="[ SOURCE ]: MIST SCHOOL . [ OBJECTIVE ]: Review short research reports, exploring structural flaws hidden between lines. Every interview is a decoding of the Real."
+                            />
                         </div>
 
                         {/* Filters */}
@@ -170,13 +191,21 @@ export const ArchiveContent: React.FC<ArchiveContentProps> = ({ lang }) => {
                                                 <Eye size={12} className={`opacity-0 group-hover:opacity-100 transition-opacity ${t.textTitleAccent}`} />
                                             </div>
                                             
-                                            <h3 className={`text-xl lg:text-2xl font-serif mb-3 transition-all duration-500 font-bold uppercase tracking-[0.05em] leading-tight ${t.textTitle} ${t.cardTitleHover} ${isDark || theme === 'retro' ? 'opacity-75 group-hover:opacity-100' : ''}`}>
-                                                {lang === 'CN' ? c.titleCn : c.titleEn}
-                                            </h3>
+                                            <AnimatedText
+                                                lang={lang}
+                                                hClass="h-16 lg:h-20"
+                                                className={`text-xl lg:text-2xl font-serif mb-3 transition-all duration-500 font-bold uppercase tracking-[0.05em] leading-tight ${t.textTitle} ${t.cardTitleHover} ${isDark || theme === 'retro' ? 'opacity-75 group-hover:opacity-100' : ''}`}
+                                                cn={c.titleCn}
+                                                en={c.titleEn}
+                                            />
                                             
-                                            <p className={`text-[15px] leading-[1.8] flex-1 line-clamp-4 transition-all duration-500 font-serif tracking-normal ${t.textNormal} opacity-40 group-hover:opacity-100`}>
-                                                {lang === 'CN' ? c.summaryCn : c.summaryEn}
-                                            </p>
+                                            <AnimatedText
+                                                lang={lang}
+                                                hClass="h-24 lg:h-28"
+                                                className={`text-[15px] leading-[1.8] flex-1 line-clamp-4 transition-all duration-500 font-serif tracking-normal ${t.textNormal} opacity-40 group-hover:opacity-100`}
+                                                cn={c.summaryCn}
+                                                en={c.summaryEn}
+                                            />
                                         </div>
                                     </div>
                                 ))}

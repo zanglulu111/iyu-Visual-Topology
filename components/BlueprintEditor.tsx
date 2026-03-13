@@ -767,7 +767,7 @@ ${psychoHtml}
     };
 
     return (
-        <div className={`absolute inset-0 ${effectiveTheme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#080808]'} flex flex-col z-10 animate-in slide-in-from-bottom-4 duration-500`}>
+        <div className={`absolute inset-0 ${effectiveTheme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#080808]'} flex flex-col z-10`}>
 
             {/* Main Content */}
             <div className="flex-1 flex overflow-hidden relative z-10">

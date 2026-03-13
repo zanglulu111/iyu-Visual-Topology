@@ -20,7 +20,7 @@ export const ArchiveDetailModal: React.FC<ArchiveDetailModalProps> = ({ isOpen, 
 
     // Theme Variables mapped from directory modal logic
     const t = {
-        bgContainer: theme === 'retro' ? 'bg-transparent backdrop-blur-sm' : (isDark ? 'bg-[#0A0A0B]' : 'bg-white'),
+        bgContainer: theme === 'retro' ? 'bg-[var(--bg-main)]' : (isDark ? 'bg-[#0A0A0B]' : 'bg-white'),
         borderContainer: theme === 'retro' ? 'border-[#8B261D]/10 border-2 shadow-2xl' : (isDark ? 'border-zinc-800 border-4' : 'border-[#3A352F] border-4'),
         bgHeader: theme === 'retro' ? 'bg-transparent' : (isDark ? 'bg-[#0A0A0B]/90' : 'bg-white/95'),
         borderHeader: theme === 'retro' ? 'border-[#8B261D]/20 border-b-2 border-dashed' : (isDark ? 'border-zinc-900 border-b-2 border-dashed' : 'border-[#8B261D]/10 border-b-2 border-dashed'),
@@ -68,13 +68,13 @@ export const ArchiveDetailModal: React.FC<ArchiveDetailModalProps> = ({ isOpen, 
                         className={`group flex flex-col items-center gap-4 py-8 px-2 border-y border-r rounded-r-lg transition-all active:scale-95 shadow-2xl ${
                             isDark 
                                 ? 'bg-[#0F0F11] border-zinc-800 hover:bg-zinc-900 text-zinc-400' 
-                                : 'bg-[var(--bg-main)] border-[#8B261D]/30 hover:bg-white text-[#8B261D]'
+                                : theme === 'retro' ? 'bg-[#F9F7F1] border-[#8B261D]/60 hover:bg-white text-[#8B261D] shadow-[0_4px_20px_rgba(139,38,29,0.1)]' : 'bg-white border-[#8B261D]/30 hover:bg-white text-[#8B261D]'
                         }`}
                         style={{ marginLeft: '-1px' }}
                     >
                         <ShieldAlert size={16} className={`${t.textTitleAccent} mb-4 opacity-50 group-hover:opacity-100 transition-opacity`} />
                         <span 
-                            className={`text-[12px] font-mono font-black uppercase tracking-[0.4em] [writing-mode:vertical-rl] opacity-40 group-hover:opacity-100 transition-opacity whitespace-nowrap`}
+                            className={`text-[12px] font-mono font-black uppercase tracking-[0.4em] [writing-mode:vertical-rl] opacity-60 group-hover:opacity-100 transition-opacity whitespace-nowrap`}
                         >
                             {lang === 'CN' ? '回到索引库' : 'BACK TO INDEX'}
                         </span>

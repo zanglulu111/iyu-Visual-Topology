@@ -1148,7 +1148,7 @@ const App: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[var(--bg-main)] text-zinc-300 font-sans selection:bg-gold-primary/30 selection:text-white overflow-hidden transition-colors duration-500">
+        <div className="min-h-screen bg-[var(--bg-main)] text-zinc-300 font-sans selection:bg-gold-primary/30 selection:text-white overflow-hidden transition-colors duration-1000">
             {page === -1 ? (
                 <UniversePortal
                     lang={lang}
@@ -1195,7 +1195,7 @@ const App: React.FC = () => {
                     setShowRings={setShowRings}
                 />
             ) : viewMode === 'TOPOLOGY' ? (
-                <div className="h-screen w-screen overflow-hidden">
+                <div className="h-screen w-screen overflow-hidden animate-page-entrance">
                     <LacanGraphView 
                         lang={lang} 
                         setLang={setLang}
@@ -1213,7 +1213,7 @@ const App: React.FC = () => {
                     />
                 </div>
             ) : viewMode === 'ARCHIVE' ? (
-                <div className="h-screen w-screen overflow-hidden flex flex-col">
+                <div className="h-screen w-screen overflow-hidden animate-page-entrance flex flex-col">
                     <AppHeader
                         page={page}
                         lang={lang}
@@ -1286,7 +1286,7 @@ const App: React.FC = () => {
                     </div>
                 </div>
             ) : viewMode === 'RSI' ? (
-                <div className="h-screen w-screen overflow-hidden">
+                <div className="h-screen w-screen overflow-hidden animate-page-entrance">
                     <LacanTopologyView 
                         lang={lang} 
                         setLang={setLang}
@@ -1330,9 +1330,11 @@ const App: React.FC = () => {
                         />
                     )}
 
-                    <main className="flex-1 overflow-hidden relative">
+                    <main className="flex-1 overflow-hidden relative bg-[var(--bg-main)] transition-colors duration-500">
                         {viewMode === 'ENGINE' && selectedDriver && (
-                            <NarrativeEngineField
+                            <div className="w-full h-full animate-page-entrance">
+                                <NarrativeEngineField
+                                key={selectedDriver}
                                 fieldState={narrativeFieldState}
                                 onChange={handleNarrativeChange}
                                 onAutoFill={handleAutoFill}
@@ -1360,10 +1362,12 @@ const App: React.FC = () => {
                                 onEditCustomDef={handleEditCustomDef}
                                 showRings={showRings}
                             />
+                            </div>
                         )}
                         {viewMode === 'DIVERGENCE' && (
-                            <NarrativePathsView
-                                treatments={generatedTreatments}
+                            <div className="w-full h-full animate-page-entrance">
+                                <NarrativePathsView
+                                    treatments={generatedTreatments}
                                 onSelect={handleBibleGenerate}
                                 isProcessing={isGenerating}
                                 bibleStartTime={bibleStartTime}
@@ -1377,11 +1381,13 @@ const App: React.FC = () => {
                                 fieldState={activeHistoryItem?.fieldState || narrativeFieldState}
                                 visionInput={activeHistoryItem?.visionInput || visionInput}
                                 visionAnalysis={activeHistoryItem?.visionAnalysis || visionAnalysis}
-                            />
+                                />
+                            </div>
                         )}
                         {viewMode === 'BIBLE' && (
-                            <BlueprintEditor
-                                blueprint={activeBlueprint}
+                            <div className="w-full h-full animate-page-entrance">
+                                <BlueprintEditor
+                                    blueprint={activeBlueprint}
                                 theme={theme}
                                 onClose={() => handleViewChange('DIVERGENCE')}
                                 onGoHome={() => { handleViewChange('ENGINE'); setActiveHistoryItem(null); closeAllModals(); }}
@@ -1416,11 +1422,13 @@ const App: React.FC = () => {
                                 isSutureOpen={isSutureOpen}
                                 onSutureOpenChange={setIsSutureOpen}
                             />
+                            </div>
                         )}
                         {/* MetonymyView integrated into main layout to share EngineBottomBar */}
                         {viewMode === 'METONYMY' && metonymyBlueprint && (
-                            <MetonymyView
-                                blueprint={metonymyBlueprint}
+                            <div className="w-full h-full animate-page-entrance">
+                                <MetonymyView
+                                    blueprint={metonymyBlueprint}
                                 language={lang}
                                 onUpdateBlueprint={handleUpdateBlueprintCache}
                                 themeAccent={getMetonymyThemeAccent()}
@@ -1432,6 +1440,7 @@ const App: React.FC = () => {
                                 onGenerateAssetImage={handleVisionImageGenerate}
                                 onSutureOpenChange={setIsSutureOpen}
                             />
+                            </div>
                         )}
                     </main>
 

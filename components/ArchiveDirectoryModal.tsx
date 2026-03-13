@@ -101,7 +101,7 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({ is
 
     return (
         <>
-            <div className={isFullScreen ? "w-full h-full animate-fadeIn" : `fixed inset-0 backdrop-blur-md z-[100] flex items-center justify-center p-4 animate-fadeIn ${theme === 'retro' ? 'bg-transparent' : (isDark ? 'bg-black/90' : 'bg-black/80')}`}>
+            <div className={isFullScreen ? "w-full h-full" : `fixed inset-0 backdrop-blur-md z-[100] flex items-center justify-center p-4 ${theme === 'retro' ? 'bg-transparent' : (isDark ? 'bg-black/90' : 'bg-black/80')}`}>
                 {/* Main Container */}
                 <div className={`${t.bgContainer} ${isFullScreen ? 'w-full h-full' : `${t.borderContainer} rounded-lg w-full max-w-6xl h-[90vh] shadow-2xl`} flex flex-col overflow-hidden relative transition-colors duration-500 texture-paper`}>
                     

@@ -5,6 +5,19 @@ import { useTheme } from '../contexts/ThemeContext';
 
 type ViewMode = 'ENGINE' | 'DIVERGENCE' | 'BIBLE' | 'METONYMY' | 'TOPOLOGY' | 'RSI' | 'ARCHIVE' | 'VIDEO';
 
+const AnimatedText = ({ cn, en, lang, className = "", hClass = "h-5" }: { cn: React.ReactNode, en: React.ReactNode, lang: 'CN' | 'EN', className?: string, hClass?: string }) => (
+  <div className={`overflow-hidden relative ${hClass} ${className}`}>
+    <div className={`transition-all duration-[1500ms] w-full ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col ${lang === 'EN' ? '-translate-y-1/2' : 'translate-y-0'}`}>
+      <div className={`${hClass} flex items-center shrink-0 w-full leading-none`}>
+        {cn}
+      </div>
+      <div className={`${hClass} flex items-center shrink-0 w-full leading-none`}>
+        {en}
+      </div>
+    </div>
+  </div>
+);
+
 interface AppHeaderProps {
   page: number;
   lang: 'CN' | 'EN';
@@ -147,52 +160,38 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
       )}
 
       <div className="flex items-center flex-row-reverse gap-4">
-        {/* 1. Profile */}
-        <button
-          onClick={() => currentUser.id !== 'guest_user' ? openProfile() : openAuth()}
-          className="flex items-center gap-2 group transition-all duration-100 hover:scale-105"
-        >
-          {currentUser.id !== 'guest_user' ? (
-            <div className="flex items-center flex-row-reverse gap-2">
+        {/* Rightmost 4 Buttons Group */}
+        <div className="flex items-center flex-row-reverse gap-1.5">
+          {/* 1. Profile */}
+          <button
+            onClick={() => currentUser.id !== 'guest_user' ? openProfile() : openAuth()}
+            className="flex items-center gap-2 group transition-all duration-100 hover:scale-105"
+          >
+            <div className="flex items-center flex-row-reverse gap-1">
               <div className={`w-5 h-5 rounded-full ${!currentUser.avatarUrl && (currentUser.avatarColor || 'bg-gold-primary')} border border-[var(--border-main)]/30 flex items-center justify-center text-[10px] font-bold text-white shadow-sm overflow-hidden group-hover:scale-110 transition-transform`}>
                 {currentUser.avatarUrl ? (
-                  <img 
-                    src={currentUser.avatarUrl} 
-                    alt="avatar" 
-                    className="w-full h-full object-cover" 
-                    onError={(e) => {
-                      // Prevent infinite error loop and traffic
-                      (e.target as HTMLImageElement).style.display = 'none';
-                      // Optionally we could notify the parent to clear the URL, 
-                      // but styling it out is the safest immediate fix.
-                    }}
-                  />
+                  <img src={currentUser.avatarUrl} alt="avatar" className="w-full h-full object-cover" />
                 ) : (
-                  currentUser.username.substring(0, 1).toUpperCase()
+                  currentUser.id === 'guest_user' ? <UserIcon size={12} /> : currentUser.username.substring(0, 1).toUpperCase()
                 )}
               </div>
-              <span className={`text-[10px] font-bold uppercase tracking-widest transition-all duration-300 ${theme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`}>
-                {currentUser.username}
-              </span>
-            </div>
-          ) : (
-            <div className="flex items-center flex-row-reverse gap-2">
-              <div className="w-5 h-5 rounded-full border border-[var(--border-main)]/30 flex items-center justify-center bg-[var(--bg-panel)]/40 text-[var(--text-muted)] group-hover:text-[var(--text-main)] transition-all duration-300 group-hover:scale-110">
-                 <UserIcon size={14} />
+              <div className="w-12 flex items-center justify-end">
+                <AnimatedText
+                  lang={lang}
+                  hClass="h-4"
+                  className={`text-[10px] font-bold uppercase tracking-widest transition-all duration-300 ${theme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`}
+                  cn={currentUser?.id === 'guest_user' ? '访客' : currentUser.username}
+                  en={currentUser?.id === 'guest_user' ? 'GUEST' : currentUser.username}
+                />
               </div>
-              <span className={`text-[10px] font-bold uppercase tracking-widest transition-all duration-300 ${theme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`}>
-                {lang === 'CN' ? '未登录' : 'GUEST'}
-              </span>
             </div>
-          )}
-        </button>
+          </button>
 
-        <div className="flex items-center flex-row-reverse gap-1">
           {/* 2. Language Toggle */}
           <button
             onClick={() => setLang(lang === 'CN' ? 'EN' : 'CN')}
             className={`text-[10px] font-bold ${theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'} transition-all duration-300 w-7 h-7 flex items-center justify-center rounded-sm tracking-widest hover:bg-white/5 hover:scale-110 active:scale-90`}
-            title="Toggle Language"
+            title={lang === 'CN' ? 'Switch to English' : '切换至中文'}
           >
             {lang === 'CN' ? '中' : 'EN'}
           </button>

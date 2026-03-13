@@ -3,6 +3,7 @@ import { X, User, ShieldCheck, Fingerprint, ArrowRight, Sparkles, UserPlus, LogI
 import { User as UserType } from '../types';
 import { supabaseAuthService } from '../services/supabaseAuth';
 import { supabaseDatabase } from '../services/supabaseDatabase';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -23,6 +24,7 @@ const GoogleIcon: React.FC<{ size?: number }> = ({ size = 18 }) => (
 );
 
 export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, lang }) => {
+  const { theme } = useTheme();
   const [isRegister, setIsRegister] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -139,20 +141,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, 
   };
 
   return (
-    <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/95 backdrop-blur-xl animate-in fade-in duration-300 p-4">
-      <div className="w-full max-w-md bg-[#0c0c0c] border border-zinc-800 rounded-2xl shadow-2xl p-8 relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-gold-primary to-transparent opacity-50"></div>
+    <div className={`fixed inset-0 z-[300] flex items-center justify-center ${theme === 'retro' ? 'bg-black/20' : 'bg-black/95'} backdrop-blur-xl animate-in fade-in duration-300 p-4`}>
+      <div className={`w-full max-w-md ${theme === 'retro' ? 'bg-[#F9F7F1] border-[#8B261D]/30' : 'bg-[#0c0c0c] border-zinc-800'} border rounded-2xl shadow-2xl p-8 relative overflow-hidden transition-colors duration-500`}>
+        <div className={`absolute top-0 left-0 w-full h-1 ${theme === 'retro' ? 'bg-[#8B261D]' : 'bg-gradient-to-r from-transparent via-gold-primary to-transparent'} opacity-50`}></div>
 
-        <button onClick={onClose} className="absolute top-4 right-4 text-zinc-500 hover:text-white transition-colors">
+        <button onClick={onClose} className={`absolute top-4 right-4 ${theme === 'retro' ? 'text-zinc-400 hover:text-black' : 'text-zinc-500 hover:text-white'} transition-colors`}>
           <X size={20} />
         </button>
 
         <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 bg-zinc-900 border border-gold-primary/30 rounded-full flex items-center justify-center text-gold-primary mb-4 shadow-[0_0_20px_rgba(212,175,55,0.2)]">
+          <div className={`w-16 h-16 ${theme === 'retro' ? 'bg-[#F4EFE0] border-[#8B261D]/20 text-[#8B261D]' : 'bg-zinc-900 border-gold-primary/30 text-gold-primary'} border rounded-full flex items-center justify-center mb-4 shadow-sm`}>
             {isRegister ? <UserPlus size={32} /> : <Fingerprint size={32} />}
           </div>
-          <h2 className="text-2xl font-serif text-white tracking-tight">{t.title}</h2>
-          <p className="text-xs text-zinc-500 uppercase tracking-widest mt-2 text-center">{t.sub}</p>
+          <h2 className={`text-2xl font-serif ${theme === 'retro' ? 'text-black' : 'text-white'} tracking-tight`}>{t.title}</h2>
+          <p className={`text-xs ${theme === 'retro' ? 'text-zinc-500' : 'text-zinc-500'} uppercase tracking-widest mt-2 text-center`}>{t.sub}</p>
         </div>
 
         {/* Google Login Button */}
@@ -174,37 +176,37 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, 
 
         {/* Divider */}
         <div className="flex items-center gap-4 mb-6">
-          <div className="flex-1 h-px bg-zinc-800"></div>
-          <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.3em]">{t.divider}</span>
-          <div className="flex-1 h-px bg-zinc-800"></div>
+          <div className={`flex-1 h-px ${theme === 'retro' ? 'bg-[#8B261D]/10' : 'bg-zinc-800'}`}></div>
+          <span className={`text-[10px] font-bold ${theme === 'retro' ? 'text-zinc-500' : 'text-zinc-600'} uppercase tracking-[0.3em]`}>{t.divider}</span>
+          <div className={`flex-1 h-px ${theme === 'retro' ? 'bg-[#8B261D]/10' : 'bg-zinc-800'}`}></div>
         </div>
 
         <form onSubmit={handleAuth} className="space-y-6">
           <div className="space-y-2">
-            <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] ml-1">{t.user}</label>
+            <label className={`text-[10px] font-bold ${theme === 'retro' ? 'text-zinc-500' : 'text-zinc-500'} uppercase tracking-[0.2em] ml-1`}>{t.user}</label>
             <div className="relative">
-              <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-700" />
+              <User size={16} className={`absolute left-4 top-1/2 -translate-y-1/2 ${theme === 'retro' ? 'text-zinc-400' : 'text-zinc-700'}`} />
               <input
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Subject ID"
-                className="w-full bg-black border border-zinc-800 rounded-lg pl-12 pr-4 py-4 text-sm text-white focus:outline-none focus:border-gold-primary/50 transition-all font-mono"
+                className={`w-full ${theme === 'retro' ? 'bg-white border-[#8B261D]/10 text-black focus:border-[#8B261D]/40' : 'bg-black border-zinc-800 text-white focus:border-gold-primary/50'} border rounded-lg pl-12 pr-4 py-4 text-sm transition-all font-mono`}
                 required
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] ml-1">{t.pass}</label>
+            <label className={`text-[10px] font-bold ${theme === 'retro' ? 'text-zinc-500' : 'text-zinc-500'} uppercase tracking-[0.2em] ml-1`}>{t.pass}</label>
             <div className="relative">
-              <ShieldCheck size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-700" />
+              <ShieldCheck size={16} className={`absolute left-4 top-1/2 -translate-y-1/2 ${theme === 'retro' ? 'text-zinc-400' : 'text-zinc-700'}`} />
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="********"
-                className="w-full bg-black border border-zinc-800 rounded-lg pl-12 pr-4 py-4 text-sm text-white focus:outline-none focus:border-gold-primary/50 transition-all font-mono"
+                className={`w-full ${theme === 'retro' ? 'bg-white border-[#8B261D]/10 text-black focus:border-[#8B261D]/40' : 'bg-black border-zinc-800 text-white focus:border-gold-primary/50'} border rounded-lg pl-12 pr-4 py-4 text-sm transition-all font-mono`}
                 required
               />
             </div>
@@ -215,7 +217,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, 
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-gold-primary hover:bg-amber-400 text-black font-bold uppercase tracking-[0.2em] py-4 rounded-lg flex items-center justify-center gap-3 shadow-[0_0_30px_rgba(212,175,55,0.2)] transition-all transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+            className={`w-full ${theme === 'retro' ? 'bg-[#8B261D] hover:bg-[#6D1E16] text-white shadow-lg' : 'bg-gold-primary hover:bg-amber-400 text-black shadow-[0_0_30px_rgba(212,175,55,0.2)]'} font-bold uppercase tracking-[0.2em] py-4 rounded-lg flex items-center justify-center gap-3 transition-all transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed`}
           >
             <span>{isLoading ? (lang === 'CN' ? '建立链接中...' : 'CONNECTING...') : t.btn}</span>
             {!isLoading && <ArrowRight size={18} />}
@@ -224,14 +226,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, 
 
         <button
           onClick={() => setIsRegister(!isRegister)}
-          className="w-full mt-6 text-[10px] font-bold text-zinc-500 hover:text-white uppercase tracking-widest transition-colors"
+          className={`w-full mt-6 text-[10px] font-bold ${theme === 'retro' ? 'text-zinc-500 hover:text-[#8B261D]' : 'text-zinc-500 hover:text-white'} uppercase tracking-widest transition-colors`}
         >
           {t.switch}
         </button>
 
-        <div className="mt-8 pt-6 border-t border-zinc-900 flex items-center justify-center gap-2">
-          <Sparkles size={14} className="text-gold-primary" />
-          <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">{t.member}</span>
+        <div className={`mt-8 pt-6 border-t ${theme === 'retro' ? 'border-[#8B261D]/10' : 'border-zinc-900'} flex items-center justify-center gap-2`}>
+          <Sparkles size={14} className={theme === 'retro' ? 'text-[#8B261D]' : 'text-gold-primary'} />
+          <span className={`text-[10px] font-bold ${theme === 'retro' ? 'text-zinc-500' : 'text-zinc-600'} uppercase tracking-widest`}>{t.member}</span>
         </div>
       </div>
     </div>

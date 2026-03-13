@@ -14,15 +14,13 @@ import { useTheme } from '../contexts/ThemeContext';
 
 
 const AnimatedText = ({ cn, en, lang, className = "", hClass = "h-5" }: { cn: React.ReactNode, en: React.ReactNode, lang: 'CN' | 'EN', className?: string, hClass?: string }) => (
-  <div className={`overflow-hidden relative flex items-start ${hClass}`}>
-    <div className={`transition-all duration-700 w-full cubic-bezier(0.4, 0, 0.2, 1) ${lang === 'EN' ? '-translate-y-1/2' : 'translate-y-0'}`}>
-      <div className="flex flex-col w-full">
-        <div className={`${hClass} flex items-center shrink-0 w-full ${className}`}>
-          {cn}
-        </div>
-        <div className={`${hClass} flex items-center shrink-0 w-full ${className}`}>
-          {en}
-        </div>
+  <div className={`overflow-hidden relative ${hClass} ${className}`}>
+    <div className={`transition-all duration-[1500ms] w-full ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col ${lang === 'EN' ? '-translate-y-1/2' : 'translate-y-0'}`}>
+      <div className={`${hClass} flex items-center shrink-0 w-full leading-none`}>
+        {cn}
+      </div>
+      <div className={`${hClass} flex items-center shrink-0 w-full leading-none`}>
+        {en}
       </div>
     </div>
   </div>
@@ -98,9 +96,16 @@ export const LandingView: React.FC<LandingViewProps> = ({
   showRings,
   setShowRings,
 }) => {
+  const [localMounted, setLocalMounted] = useState(false);
+  
+  useEffect(() => {
+    setLocalMounted(true);
+  }, []);
+
   const { theme, toggleTheme } = useTheme();
   const [selectedProtocol, setSelectedProtocol] = useState<ProtocolType>(ProtocolType.CORE_DRIVERS);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const getGlowTheme = (driverId: DriverType | null) => {
     if (theme === 'retro') return 'shadow-none';
@@ -173,7 +178,9 @@ export const LandingView: React.FC<LandingViewProps> = ({
   return (
     <div 
       className="fixed inset-0 flex flex-col bg-[var(--bg-main)] selection:bg-[var(--selection-bg)] selection:text-[var(--text-accent)] z-50 overflow-hidden font-sans transition-colors duration-500"
-      style={theme === 'retro' ? { backgroundImage: 'var(--pattern-aged)', backgroundBlendMode: 'multiply' } : {}}
+      style={{ 
+        ...(theme === 'retro' ? { backgroundImage: 'var(--pattern-aged)', backgroundBlendMode: 'multiply' } : {})
+      }}
     >
 
       {/* Global Top Navbar */}
@@ -191,14 +198,20 @@ export const LandingView: React.FC<LandingViewProps> = ({
         <div className="flex items-center gap-4">
           <button
             onClick={() => setPage(-1)}
-            className={`text-[9px] font-mono tracking-[0.15em] transition-all duration-300 hover:scale-105 active:scale-95 px-2 py-1 rounded-sm border ${
+            className={`text-[9px] font-mono tracking-[0.15em] transition-all duration-300 hover:scale-105 active:scale-95 px-2 py-1 rounded-sm border w-[72px] flex items-center justify-center ${
               theme === 'retro'
                 ? 'text-[var(--text-muted)] hover:text-[var(--text-accent)] border-[var(--border-main)] hover:border-[var(--border-accent)]'
                 : 'text-zinc-500 hover:text-white/80 border-zinc-800 hover:border-zinc-600'
             }`}
             title={lang === 'CN' ? '返回迷雾学派入口' : 'Return to Mist Portal'}
           >
-            ← {lang === 'CN' ? '入口' : 'PORTAL'}
+            <AnimatedText
+              lang={lang}
+              hClass="h-4"
+              className="w-full"
+              cn={<div className="w-full flex justify-center">← 入口</div>}
+              en={<div className="w-full flex justify-center">← PORTAL</div>}
+            />
           </button>
           <Terminal size={14} className={`shrink-0 transition-colors duration-500 ${hoveredDriver ? getAccentColor(hoveredDriver) : 'text-[var(--text-main)] opacity-70'}`} />
           <AnimatedText
@@ -214,11 +227,23 @@ export const LandingView: React.FC<LandingViewProps> = ({
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden lg:flex items-center gap-3">
           <div className="relative group/search">
             <div className={`relative flex items-center ${theme === 'retro' ? 'bg-white/40 border-black/20 group-hover/search:border-black/40 hover:bg-white/60' : 'bg-black/20 border-white/10 hover:bg-black/40'} border ${hoveredDriver && theme !== 'retro' ? getBorderAccentColor(hoveredDriver) : ''} rounded-full px-4 py-1.5 transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] shadow-sm hover:shadow-lg w-64 md:w-80 group/input`}>
-              <Terminal size={12} className={`mr-2 transition-colors duration-500 ${hoveredDriver && theme !== 'retro' ? getAccentColor(hoveredDriver) : (theme === 'retro' ? 'text-black/40' : 'text-zinc-500')} group-hover/input:scale-110 transition-transform duration-300`} />
+              <Terminal size={12} className={`mr-2 transition-colors duration-500 z-20 ${hoveredDriver && theme !== 'retro' ? getAccentColor(hoveredDriver) : (theme === 'retro' ? 'text-black/40' : 'text-zinc-500')} group-hover/input:scale-110 transition-transform duration-300`} />
+              <div className="absolute inset-0 left-10 right-10 flex items-center pointer-events-none overflow-hidden h-full">
+                {!searchQuery && (
+                  <AnimatedText
+                    lang={lang}
+                    hClass="h-4"
+                    className={`text-[10px] uppercase font-bold tracking-[0.1em] transition-all duration-500 ${theme === 'retro' ? 'text-black/40' : 'text-zinc-400'}`}
+                    cn="搜索协议、档案或理论词条..."
+                    en="Search protocols, archives or codex..."
+                  />
+                )}
+              </div>
               <input 
                 type="text" 
-                placeholder={lang === 'CN' ? '搜索协议、档案或理论词条...' : 'Search protocols, archives or codex...'}
-                className={`bg-transparent border-none outline-none text-[10px] uppercase font-bold tracking-[0.1em] text-[var(--text-main)] ${theme === 'retro' ? 'placeholder:text-black/40' : 'placeholder:text-zinc-400'} w-full transition-all duration-300 focus:tracking-[0.15em]`}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className={`bg-transparent border-none outline-none text-[10px] uppercase font-bold tracking-[0.1em] text-[var(--text-main)] w-full transition-all duration-300 focus:tracking-[0.15em] relative z-20`}
               />
               <div className="ml-2 flex items-center gap-1 opacity-40 group-hover/input:opacity-80 transition-opacity">
                 <span className={`text-[8px] font-mono border ${theme === 'retro' ? 'border-black/20' : 'border-white/20'} px-1 rounded`}>⌘</span>
@@ -230,13 +255,13 @@ export const LandingView: React.FC<LandingViewProps> = ({
 
         {/* Right Area: From Right to Left: Profile, Lang, Theme, Rings */}
         <div className="hidden md:flex items-center gap-4">
-          <div className="flex items-center flex-row-reverse gap-4">
+          <div className="flex items-center flex-row-reverse gap-1.5">
             {/* 1. Profile (Avatar + Name) */}
             <button
               onClick={() => currentUser.id !== 'guest_user' ? openProfile() : openAuth()}
               className="flex items-center gap-2 group transition-all duration-100 hover:scale-105"
             >
-              <div className="flex items-center flex-row-reverse gap-2">
+              <div className="flex items-center flex-row-reverse gap-1">
                 <div className={`w-5 h-5 rounded-full ${!currentUser?.avatarUrl && (currentUser?.avatarColor || 'bg-gold-primary')} border shadow-sm overflow-hidden transition-all duration-500 ${theme === 'dark' ? (hoveredDriver ? getBorderAccentColor(hoveredDriver) : 'border-black') : 'border-[var(--border-main)]/30'} flex items-center justify-center text-[10px] font-bold text-white`}>
                   {currentUser?.avatarUrl ? (
                     <img src={currentUser.avatarUrl} alt="avatar" className="w-full h-full object-cover" />
@@ -244,45 +269,48 @@ export const LandingView: React.FC<LandingViewProps> = ({
                     <UserIcon size={12} className={`transition-colors duration-500 ${hoveredDriver && theme === 'dark' ? getAccentColor(hoveredDriver) : 'text-[var(--text-accent)]'}`} />
                   )}
                 </div>
-                <span className={`text-[10px] font-bold uppercase tracking-widest transition-colors duration-500 ${hoveredDriver && theme === 'dark' ? getAccentColor(hoveredDriver) : (theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-[var(--text-muted)]')} group-hover:text-[var(--text-main)]`}>
-                  {currentUser?.username || 'GUEST'}
-                </span>
+                <div className="w-12 flex items-center justify-end">
+                  <AnimatedText
+                    lang={lang}
+                    hClass="h-4"
+                    className={`text-[10px] font-bold uppercase tracking-widest transition-colors duration-500 ${hoveredDriver && theme === 'dark' ? getAccentColor(hoveredDriver) : (theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-[var(--text-muted)]')} group-hover:text-[var(--text-main)]`}
+                    cn={currentUser?.id === 'guest_user' ? '访客' : currentUser?.username}
+                    en={currentUser?.id === 'guest_user' ? 'GUEST' : currentUser?.username}
+                  />
+                </div>
               </div>
             </button>
 
+            {/* 2. Language Toggle */}
+            <button
+              onClick={() => setLang(lang === 'CN' ? 'EN' : 'CN')}
+              className={`text-[10px] font-bold ${theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'} transition-all duration-300 w-7 h-7 flex items-center justify-center rounded-sm tracking-widest hover:bg-white/5 hover:scale-110 active:scale-90`}
+              title={lang === 'CN' ? 'Switch to English' : '切换至中文'}
+            >
+              {lang === 'CN' ? '中' : 'EN'}
+            </button>
 
-            <div className="flex items-center flex-row-reverse gap-1">
-              {/* 2. Language Toggle */}
-              <button 
-                onClick={() => setLang(lang === 'CN' ? 'EN' : 'CN')}
-                className={`text-[10px] font-bold ${theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'} transition-all duration-300 w-7 h-7 flex items-center justify-center rounded-sm tracking-widest hover:bg-white/5 hover:scale-110 active:scale-90`}
-                title="Toggle Language"
-              >
-                {lang === 'CN' ? '中' : 'EN'}
-              </button>
+            {/* 3. Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className={`flex items-center justify-center w-7 h-7 rounded-sm ${theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'} transition-all duration-300 hover:bg-white/5 hover:scale-110 active:scale-90`}
+              title={theme === 'dark' ? "切换为复古主题" : "切换为暗黑主题"}
+            >
+              {theme === 'dark' ? <Moon size={14} /> : <Sun size={14} className="text-[#8B261D]" />}
+            </button>
 
-              {/* 3. Theme Toggle */}
-              <button 
-                onClick={toggleTheme}
-                className={`flex items-center justify-center w-7 h-7 rounded-sm ${theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'} transition-all duration-300 hover:bg-white/5 hover:scale-110 active:scale-90`}
-                title={theme === 'dark' ? "切换为复古主题" : "切换为暗黑主题"}
-              >
-                {theme === 'dark' ? <Moon size={14} /> : <Sun size={14} className="text-[#8B261D]" />}
-              </button>
-
-              {/* 4. Ring Toggle */}
-              <button
-                onClick={() => setShowRings(!showRings)}
-                className={`flex items-center justify-center w-7 h-7 rounded-sm transition-all duration-300 hover:bg-white/5 hover:scale-110 active:scale-90 focus:outline-none ${
-                  showRings 
-                    ? (theme === 'retro' ? 'text-[#8B261D]' : (hoveredDriver ? getAccentColor(hoveredDriver) : 'text-white')) 
-                    : (theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white')
-                }`}
-                title={lang === 'CN' ? "背景圆环开关" : "Background Rings Toggle"}
-              >
-                <Aperture size={14} className={`shrink-0 transition-all duration-300 ${showRings ? 'rotate-180' : ''}`} />
-              </button>
-            </div>
+            {/* 4. Ring Toggle */}
+            <button
+              onClick={() => setShowRings(!showRings)}
+              className={`flex items-center justify-center w-7 h-7 rounded-sm transition-all duration-300 hover:bg-white/5 hover:scale-110 active:scale-90 focus:outline-none ${
+                showRings 
+                  ? (theme === 'retro' ? 'text-[#8B261D]' : (hoveredDriver ? getAccentColor(hoveredDriver) : 'text-[var(--text-main)]')) 
+                  : (theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white')
+              }`}
+              title={lang === 'CN' ? "背景圆环开关" : "Background Rings Toggle"}
+            >
+              <Aperture size={14} className={`shrink-0 transition-all duration-300 ${showRings ? 'rotate-180' : ''}`} />
+            </button>
           </div>
         </div>
       </header>
@@ -294,13 +322,13 @@ export const LandingView: React.FC<LandingViewProps> = ({
         )}
 
         {/* Background Rings */}
-        <div className={`absolute inset-0 flex items-center justify-end pr-[5%] pointer-events-none z-0 select-none overflow-hidden transition-all duration-[1500ms] ease-in-out ${
-          showRings 
-            ? 'opacity-[var(--ring-opacity)] scale-[1.1] translate-y-0 rotate-0' 
-            : 'opacity-0 scale-[1.3] translate-y-20 rotate-12'
+        <div className={`absolute inset-0 flex items-center justify-end pr-[5%] pointer-events-none z-0 select-none overflow-hidden transition-all duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          (showRings && localMounted)
+            ? 'opacity-100 scale-[1.1] translate-y-0 rotate-0 blur-0'
+            : 'opacity-0 scale-[1.2] translate-y-20 rotate-[10deg] blur-lg'
         }`}>
           <div className="w-[1000px] h-[1000px] flex items-center justify-center translate-x-1/4">
-            <BorromeanRings centered={true} opacity={1} driverType={hoveredDriver || undefined} />
+            <BorromeanRings centered={true} opacity={theme === 'retro' ? 0.35 : 0.45} driverType={hoveredDriver || undefined} />
           </div>
         </div>
 
@@ -309,23 +337,19 @@ export const LandingView: React.FC<LandingViewProps> = ({
 
           {/* Logo Area */}
           <div className={`p-8 border-b border-[var(--border-main)] shrink-0`}>
-            <div className="relative overflow-hidden h-[80px] cursor-default mb-2">
-              <div className={`transition-all duration-700 cubic-bezier(0.4, 0, 0.2, 1) ${lang === 'EN' ? '-translate-y-1/2' : 'translate-y-0'}`}>
-                <div className="flex flex-col">
-                  <div className="h-[80px] flex items-center shrink-0">
-                    <h1 className={`text-4xl md:text-5xl font-serif font-bold ${theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-[var(--text-main)]'} tracking-widest leading-none`}>迷雾学派</h1>
-                  </div>
-                  <div className="h-[80px] flex items-center shrink-0">
-                    <h1 className={`text-3xl md:text-4xl font-serif font-bold ${theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-[var(--text-main)]'} tracking-widest uppercase leading-none`}>MIST</h1>
-                  </div>
-                </div>
-              </div>
+            <div className="relative overflow-hidden cursor-default mb-2">
+              <AnimatedText
+                lang={lang}
+                hClass="h-[80px]"
+                cn={<h1 className={`text-4xl md:text-5xl font-serif font-bold ${theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-[var(--text-main)]'} tracking-widest leading-none`}>迷雾学派</h1>}
+                en={<h1 className={`text-3xl md:text-4xl font-serif font-bold ${theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-[var(--text-main)]'} tracking-widest uppercase leading-none`}>MIST</h1>}
+              />
             </div>
-            <p className={`text-[10px] uppercase tracking-[0.4em] mb-4 transition-colors ${theme === 'retro' ? 'text-black/40' : 'text-white/90'}`}>The Visionary Protocol</p>
+            <p className={`text-[10px] uppercase tracking-[0.4em] mb-4 transition-colors ${theme === 'retro' ? 'text-black/60' : 'text-white font-semibold shadow-sm'}`}>The Visionary Protocol</p>
             <AnimatedText
               lang={lang}
               hClass="h-[40px]"
-              className={`text-xs font-light leading-relaxed transition-colors ${theme === 'retro' ? 'text-black/50' : 'text-white/95'}`}
+              className={`text-xs font-medium leading-relaxed transition-colors ${theme === 'retro' ? 'text-black/80' : 'text-white shadow-sm'}`}
               cn="爱欲视觉拓扑学：在实在界的荒漠上，确立一种比现实更坚固的虚构。"
               en="Erotic Visual Topology: establishing a fiction more solid than reality."
             />
@@ -424,7 +448,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
             
             {/* 1. CORE DRIVERS VIEW */}
             {selectedProtocol === ProtocolType.CORE_DRIVERS && (
-              <div className="flex-1 flex flex-col animate-in fade-in duration-500">
+              <div className="flex-1 flex flex-col animate-page-dissolve overflow-hidden min-h-0">
                 <div className={`mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4 border-b pb-6 shrink-0 transition-colors ${theme === 'retro' ? 'border-black/5' : 'border-white/15'}`}>
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-3">
@@ -487,12 +511,14 @@ export const LandingView: React.FC<LandingViewProps> = ({
 
             {/* 2. CONFIDENTIAL DOCUMENTS VIEW */}
             {selectedProtocol === ProtocolType.CONFIDENTIAL && (
-              <ArchiveContent lang={lang} isDark={theme === 'dark'} />
+              <div className="flex-1 flex flex-col animate-page-dissolve overflow-hidden min-h-0">
+                <ArchiveContent lang={lang} isDark={theme === 'dark'} />
+              </div>
             )}
 
             {/* 3. DICTIONARY VIEW (Philosophy Codex) */}
             {selectedProtocol === ProtocolType.DICTIONARY && (
-              <div className="flex-1 flex flex-col min-h-0 h-full animate-in fade-in duration-500">
+              <div className="flex-1 flex flex-col min-h-0 h-full animate-page-dissolve overflow-hidden">
                 <PhilosophyCodexPage 
                   onClose={() => setSelectedProtocol(ProtocolType.CORE_DRIVERS)} 
                   driverType={hoveredDriver || selectedDriver}
@@ -514,7 +540,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
 
             {/* 4. UTILITIES VIEW (Placeholder) */}
             {selectedProtocol === ProtocolType.UTILITIES && (
-              <div className="flex-1 flex flex-col items-center justify-center animate-in fade-in duration-500">
+              <div className="flex-1 flex flex-col items-center justify-center animate-page-dissolve overflow-hidden min-h-0">
                 <Zap size={48} className="text-amber-500 mb-8 opacity-50 animate-pulse" />
                 <h2 className="text-2xl font-serif tracking-[0.3em] uppercase opacity-60">实用工具正在初始化...</h2>
                 <div className="mt-4 flex gap-2">

@@ -301,7 +301,7 @@ export const LacanGraphView: React.FC<LacanGraphViewProps> = ({
     };
 
     return (
-        <div className={`flex flex-col h-full w-full bg-[var(--bg-main)] text-[var(--accent-color)] font-sans overflow-hidden animate-in fade-in duration-700 transition-colors duration-500`}>
+        <div className={`flex flex-col h-full w-full bg-[var(--bg-main)] text-[var(--accent-color)] font-sans overflow-hidden transition-colors duration-500`}>
             {isRetro && <div className="absolute inset-0 pointer-events-none opacity-30 mix-blend-multiply z-0" style={{ backgroundImage: 'var(--pattern-aged)' }}></div>}
             
         {/* Global Top Navbar - EXACT REPLICA OF HOMEPAGE */}
@@ -356,58 +356,62 @@ export const LacanGraphView: React.FC<LacanGraphViewProps> = ({
 
             {/* Right Area: Identical to Homepage */}
             <div className="hidden md:flex items-center gap-4">
-                <div className="flex items-center flex-row-reverse gap-4">
+                <div className="flex items-center flex-row-reverse gap-1.5">
                     {/* 1. Profile */}
                     <button
                         onClick={openProfile}
                         className="flex items-center gap-2 group transition-all duration-100 hover:scale-105"
                     >
-                        <div className="flex items-center flex-row-reverse gap-2">
-                            <div className={`w-5 h-5 rounded-full ${!currentUser?.avatarUrl && (currentUser?.avatarColor || 'bg-gold-primary')} border shadow-sm overflow-hidden transition-all duration-500 ${theme === 'dark' ? 'border-black' : 'border-[var(--border-main)]/30'} flex items-center justify-center text-[10px] font-bold text-white`}>
+                        <div className="flex items-center flex-row-reverse gap-1">
+                            <div className={`w-5 h-5 rounded-full ${!currentUser?.avatarUrl && (currentUser?.avatarColor || 'bg-gold-primary')} border shadow-sm overflow-hidden transition-all duration-500 ${theme === 'dark' ? 'border-black' : 'border-[var(--border-main)]/30'} flex items-center justify-center text-[10px] font-bold text-white group-hover:scale-110 transition-transform`}>
                                 {currentUser?.avatarUrl ? (
                                     <img src={currentUser.avatarUrl} alt="avatar" className="w-full h-full object-cover" />
                                 ) : (
                                     <UserIcon size={12} className={`transition-colors duration-500 ${theme === 'dark' ? 'text-mist-rose' : 'text-[var(--text-accent)]'}`} />
                                 )}
                             </div>
-                            <span className={`text-[10px] font-bold uppercase tracking-widest transition-colors duration-500 ${theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-[var(--text-muted)]'} group-hover:text-[var(--text-main)]`}>
-                                {currentUser?.username || 'GUEST'}
-                            </span>
+                            <div className="w-12 flex items-center justify-end">
+                                <AnimatedText
+                                    lang={lang}
+                                    hClass="h-4"
+                                    className={`text-[10px] font-bold uppercase tracking-widest transition-all duration-300 ${theme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`}
+                                    cn={currentUser?.username || '访客'}
+                                    en={currentUser?.username || 'GUEST'}
+                                />
+                            </div>
                         </div>
                     </button>
 
-                    <div className="flex items-center flex-row-reverse gap-1">
-                        {/* 2. Language Toggle */}
-                        <button 
-                            onClick={toggleLang}
-                            className={`text-[10px] font-bold ${theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'} transition-all duration-300 w-7 h-7 flex items-center justify-center rounded-sm tracking-widest hover:bg-white/5 hover:scale-110 active:scale-90`}
-                            title="Toggle Language"
-                        >
-                            {lang === 'CN' ? '中' : 'EN'}
-                        </button>
+                    {/* 2. Language Toggle */}
+                    <button 
+                        onClick={toggleLang}
+                        className={`text-[10px] font-bold ${theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'} transition-all duration-300 w-7 h-7 flex items-center justify-center rounded-sm tracking-widest hover:bg-white/5 hover:scale-110 active:scale-90`}
+                        title="Toggle Language"
+                    >
+                        {lang === 'CN' ? '中' : 'EN'}
+                    </button>
 
-                        {/* 3. Theme Toggle */}
-                        <button 
-                            onClick={toggleTheme}
-                            className={`flex items-center justify-center w-7 h-7 rounded-sm ${theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'} transition-all duration-300 hover:bg-white/5 hover:scale-110 active:scale-90`}
-                            title={theme === 'dark' ? "切换为复古主题" : "切换为暗黑主题"}
-                        >
-                            {theme === 'dark' ? <Moon size={14} /> : <Sun size={14} className="text-[#8B261D]" />}
-                        </button>
+                    {/* 3. Theme Toggle */}
+                    <button 
+                        onClick={toggleTheme}
+                        className={`flex items-center justify-center w-7 h-7 rounded-sm ${theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'} transition-all duration-300 hover:bg-white/5 hover:scale-110 active:scale-90`}
+                        title={theme === 'dark' ? "切换为复古主题" : "切换为暗黑主题"}
+                    >
+                        {theme === 'dark' ? <Moon size={14} /> : <Sun size={14} className="text-[#8B261D]" />}
+                    </button>
 
-                        {/* 4. Ring Toggle */}
-                        <button
-                            onClick={() => setShowRings(!showRings)}
-                            className={`flex items-center justify-center w-7 h-7 rounded-sm transition-all duration-300 hover:bg-white/5 hover:scale-110 active:scale-90 focus:outline-none ${
-                                showRings 
-                                    ? (theme === 'retro' ? 'text-[#8B261D]' : 'text-gold-primary') 
-                                    : (theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white')
-                            }`}
-                            title={lang === 'CN' ? "背景圆环开关" : "Background Rings Toggle"}
-                        >
-                            <Aperture size={14} className={`shrink-0 transition-all duration-300 ${showRings ? 'rotate-180' : ''}`} />
-                        </button>
-                    </div>
+                    {/* 4. Ring Toggle */}
+                    <button
+                        onClick={() => setShowRings(!showRings)}
+                        className={`flex items-center justify-center w-7 h-7 rounded-sm transition-all duration-300 hover:bg-white/5 hover:scale-110 active:scale-90 focus:outline-none ${
+                            showRings 
+                                ? (theme === 'retro' ? 'text-[#8B261D]' : 'text-gold-primary') 
+                                : (theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white')
+                        }`}
+                        title={lang === 'CN' ? "背景圆环开关" : "Background Rings Toggle"}
+                    >
+                        <Aperture size={14} className={`shrink-0 transition-all duration-300 ${showRings ? 'rotate-180' : ''}`} />
+                    </button>
                 </div>
             </div>
         </header>

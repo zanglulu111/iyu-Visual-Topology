@@ -93,7 +93,7 @@ export const DriverSelector: React.FC<DriverSelectorProps> = ({ selectedDriver, 
                             {/* Title Section */}
                             <div className="mb-4 w-full">
                                 <div className="h-14 overflow-hidden">
-                                    <div className={`transition-all duration-700 cubic-bezier(0.4, 0, 0.2, 1) ${lang === 'EN' ? '-translate-y-1/2' : 'translate-y-0'}`}>
+                                    <div className={`transition-all duration-[1500ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${lang === 'EN' ? '-translate-y-1/2' : 'translate-y-0'}`}>
                                         <div className="flex flex-col">
                                             <div className="h-14 flex items-center shrink-0">
                                                 <h3 className={`text-xl md:text-2xl font-serif font-bold tracking-wide transition-all duration-500 leading-tight ${
@@ -121,7 +121,7 @@ export const DriverSelector: React.FC<DriverSelectorProps> = ({ selectedDriver, 
                                     </div>
                                 </div>
                                 <div className="h-6 overflow-hidden mt-1">
-                                    <div className={`transition-all duration-700 cubic-bezier(0.4, 0, 0.2, 1) ${lang === 'EN' ? '-translate-y-1/2' : 'translate-y-0'}`}>
+                                    <div className={`transition-all duration-[1500ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${lang === 'EN' ? '-translate-y-1/2' : 'translate-y-0'}`}>
                                         <div className="flex flex-col">
                                              <div className={`h-6 flex items-center shrink-0 text-sm font-serif italic transition-all duration-500 ${active ? accentClass : (isRetro ? 'text-black opacity-60' : 'text-[var(--text-muted)] opacity-60')}`}>
                                                  {driver.coreDriver}
@@ -137,7 +137,7 @@ export const DriverSelector: React.FC<DriverSelectorProps> = ({ selectedDriver, 
                             {/* Description Section with robust sliding */}
                             <div className="max-w-[98%] mb-6">
                                 <div className="h-[130px] overflow-hidden relative">
-                                    <div className={`transition-all duration-700 cubic-bezier(0.4, 0, 0.2, 1) ${lang === 'EN' ? '-translate-y-1/2' : 'translate-y-0'}`}>
+                                    <div className={`transition-all duration-[1500ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${lang === 'EN' ? '-translate-y-1/2' : 'translate-y-0'}`}>
                                         <div className="flex flex-col">
                                             {/* CN Slot */}
                                             <div className="h-[130px] shrink-0">
