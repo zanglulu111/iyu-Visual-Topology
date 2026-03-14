@@ -152,7 +152,7 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <div>
                                 <label className="text-[10px] uppercase tracking-widest text-zinc-500 font-bold mb-1 block">
-                                    {lang === 'CN' ? '视频链接 (YouTube / Bilibili)' : 'VIDEO URL'}
+                                    {lang === 'CN' ? '视频链接 (YouTube / Bilibili / Cloudflare R2 / 直连)' : 'VIDEO URL (YouTube / Bilibili / Cloudflare R2 / Direct)'}
                                 </label>
                                 <input
                                     type="text"
@@ -361,15 +361,25 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                     {activeVideo && (
                         <div className="flex-1 flex flex-col overflow-hidden bg-black">
                             {/* Player */}
-                            <div className="flex-1 relative">
-                                <iframe
-                                    src={getEmbedUrl(activeVideo.platform, activeVideo.video_id)}
-                                    className="absolute inset-0 w-full h-full"
-                                    frameBorder="0"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowFullScreen
-                                    title={activeVideo.title}
-                                />
+                            <div className="flex-1 relative bg-black">
+                                {activeVideo.platform === 'direct' ? (
+                                    <video
+                                        src={activeVideo.video_id}
+                                        controls
+                                        autoPlay
+                                        className="absolute inset-0 w-full h-full object-contain"
+                                        onContextMenu={e => e.preventDefault()}
+                                    />
+                                ) : (
+                                    <iframe
+                                        src={getEmbedUrl(activeVideo.platform, activeVideo.video_id)}
+                                        className="absolute inset-0 w-full h-full"
+                                        frameBorder="0"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowFullScreen
+                                        title={activeVideo.title}
+                                    />
+                                )}
                             </div>
                             {/* Video Info Bar */}
                             <div className="shrink-0 bg-[#0a0a0a] border-t border-zinc-800 px-6 py-4">
@@ -393,7 +403,9 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                                     <a
                                         href={activeVideo.platform === 'youtube'
                                             ? `https://www.youtube.com/watch?v=${activeVideo.video_id}`
-                                            : `https://www.bilibili.com/video/${activeVideo.video_id}`
+                                            : activeVideo.platform === 'bilibili'
+                                                ? `https://www.bilibili.com/video/${activeVideo.video_id}`
+                                                : activeVideo.video_id
                                         }
                                         target="_blank"
                                         rel="noopener noreferrer"

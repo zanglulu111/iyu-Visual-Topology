@@ -3,7 +3,7 @@ import { Globe, Wand2, HelpCircle, History as HistoryIcon, Cpu, GitFork, BookOpe
 import { DriverType, User } from '../types';
 import { useTheme } from '../contexts/ThemeContext';
 
-type ViewMode = 'ENGINE' | 'DIVERGENCE' | 'BIBLE' | 'METONYMY' | 'TOPOLOGY' | 'RSI' | 'ARCHIVE' | 'VIDEO';
+type ViewMode = 'ENGINE' | 'DIVERGENCE' | 'BIBLE' | 'METONYMY' | 'TOPOLOGY' | 'RSI' | 'ARCHIVE' | 'VIDEO' | 'RORSCHACH';
 
 const AnimatedText = ({ cn, en, lang, className = "", hClass = "h-5" }: { cn: React.ReactNode, en: React.ReactNode, lang: 'CN' | 'EN', className?: string, hClass?: string }) => (
   <div className={`overflow-hidden relative ${hClass} ${className}`}>
@@ -95,11 +95,25 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
 
   const getThemeBorderColor = () => {
     if (theme === 'retro') return 'border-[var(--border-main)]';
-    if (selectedDriver === DriverType.COMMERCIAL) return 'border-cyan-400/15';
-    if (selectedDriver === DriverType.EXPERIMENTAL) return 'border-purple-400/15';
-    if (selectedDriver === DriverType.AESTHETIC) return 'border-rose-400/15';
-    if (selectedDriver === DriverType.TRAILER) return 'border-orange-400/15';
-    return 'border-[#D4AF37]/15';
+    return 'border-white/[0.06]';
+  };
+
+  const getBorderAccentColor = () => {
+    if (theme === 'retro') return 'transparent';
+    if (selectedDriver === DriverType.COMMERCIAL) return 'rgba(34, 211, 238, 0.15)';
+    if (selectedDriver === DriverType.EXPERIMENTAL) return 'rgba(192, 132, 252, 0.15)';
+    if (selectedDriver === DriverType.AESTHETIC) return 'rgba(251, 113, 133, 0.15)';
+    if (selectedDriver === DriverType.TRAILER) return 'rgba(251, 146, 60, 0.15)';
+    return 'rgba(212, 175, 55, 0.15)';
+  };
+
+  const getLineGlow = () => {
+    if (theme === 'retro') return '';
+    if (selectedDriver === DriverType.COMMERCIAL) return '0 0 10px rgba(34,211,238,0.1)';
+    if (selectedDriver === DriverType.EXPERIMENTAL) return '0 0 10px rgba(192,132,252,0.1)';
+    if (selectedDriver === DriverType.AESTHETIC) return '0 0 10px rgba(251,113,133,0.1)';
+    if (selectedDriver === DriverType.TRAILER) return '0 0 10px rgba(251,146,60,0.1)';
+    return '0 0 10px rgba(212,175,55,0.1)';
   };
 
   const getNarrativeEngineLabel = () => {
@@ -111,7 +125,15 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   };
 
   return (
-    <header className={`h-14 bg-[var(--bg-header)] backdrop-blur-md border-b ${getThemeBorderColor()} flex items-center justify-between px-6 z-50 sticky top-0 shrink-0 transition-colors duration-500`}>
+    <header className={`h-14 bg-[var(--bg-header)] backdrop-blur-md border-b ${getThemeBorderColor()} flex items-center justify-between px-6 z-50 sticky top-0 shrink-0 transition-all duration-500 animate-page-dissolve relative`}>
+      {/* Theme Divider Line - Global Consistency Accent */}
+      <div 
+        className="absolute bottom-0 left-0 right-0 h-px transition-all duration-500 z-10" 
+        style={{ 
+          backgroundColor: getBorderAccentColor(),
+          boxShadow: getLineGlow()
+        }} 
+      />
       <div className="flex items-center gap-5">
         <button
           onClick={() => setPage(0)}
@@ -136,7 +158,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             <Cpu size={14} className={viewMode === 'ENGINE' ? getHeaderIconFill() : ""} />
             {lang === 'CN' ? "核心引擎" : "CORE ENGINE"}
           </button>
-          <div className={`w-4 h-px ${theme === 'retro' ? 'bg-black' : 'bg-zinc-800'}`}></div>
+          <div className={`w-4 h-px ${theme === 'retro' ? 'bg-black/20' : 'bg-white/[0.04]'}`}></div>
           <button
             onClick={() => setViewMode('DIVERGENCE')}
             className={`flex items-center gap-2 transition-all duration-300 hover:scale-105 active:scale-95 ${viewMode === 'DIVERGENCE' ? getHeaderTitleColor() : (theme === 'retro' ? "text-zinc-600 hover:text-black font-sans" : "text-zinc-400 hover:text-white font-sans")}`}
@@ -146,7 +168,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           </button>
           {selectedDriver !== DriverType.AESTHETIC && (
             <>
-              <div className={`w-4 h-px ${theme === 'retro' ? 'bg-black' : 'bg-zinc-800'}`}></div>
+              <div className={`w-4 h-px ${theme === 'retro' ? 'bg-black/20' : 'bg-white/[0.04]'}`}></div>
               <button
                 onClick={() => setViewMode('BIBLE')}
                 className={`flex items-center gap-2 transition-all duration-300 hover:scale-105 active:scale-95 ${viewMode === 'BIBLE' ? getHeaderTitleColor() : (theme === 'retro' ? "text-zinc-600 hover:text-black font-sans" : "text-zinc-400 hover:text-white font-sans")}`}

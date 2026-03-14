@@ -59,13 +59,14 @@ import { useSettings } from './contexts/SettingsContext';
 import { SimpleConfigPanel } from './src/components/SimpleConfigPanel';
 import { useTheme } from './contexts/ThemeContext';
 
-type ViewMode = 'ENGINE' | 'DIVERGENCE' | 'BIBLE' | 'METONYMY' | 'TOPOLOGY' | 'RSI' | 'ARCHIVE' | 'VIDEO';
+type ViewMode = 'ENGINE' | 'DIVERGENCE' | 'BIBLE' | 'METONYMY' | 'TOPOLOGY' | 'RSI' | 'ARCHIVE' | 'VIDEO' | 'RORSCHACH';
 
 import { LacanGraphView } from './components/LacanGraphView';
 import { LacanTopologyView } from './components/LacanTopologyView';
 import { ArchiveDirectoryModal } from './components/ArchiveDirectoryModal';
 import { VideoLibrary } from './components/VideoLibrary';
 import { PhilosophyCodexPage } from './components/PhilosophyCodexPage';
+import { RorschachView } from './components/RorschachView';
 
 const App: React.FC = () => {
     const { theme } = useTheme();
@@ -1195,9 +1196,9 @@ const App: React.FC = () => {
                     setShowRings={setShowRings}
                 />
             ) : viewMode === 'TOPOLOGY' ? (
-                <div className="h-screen w-screen overflow-hidden animate-page-entrance">
-                    <LacanGraphView 
-                        lang={lang} 
+                <div className="h-screen w-screen overflow-hidden animate-page-dissolve">
+                    <LacanGraphView
+                        lang={lang}
                         setLang={setLang}
                         onClose={() => {
                             setPage(0);
@@ -1213,7 +1214,7 @@ const App: React.FC = () => {
                     />
                 </div>
             ) : viewMode === 'ARCHIVE' ? (
-                <div className="h-screen w-screen overflow-hidden animate-page-entrance flex flex-col">
+                <div className="h-screen w-screen overflow-hidden animate-page-dissolve flex flex-col">
                     <AppHeader
                         page={page}
                         lang={lang}
@@ -1249,7 +1250,7 @@ const App: React.FC = () => {
                     </div>
                 </div>
             ) : viewMode === 'VIDEO' ? (
-                <div className="h-screen w-screen overflow-hidden flex flex-col">
+                <div className="h-screen w-screen overflow-hidden animate-page-dissolve flex flex-col">
                     <AppHeader
                         page={page}
                         lang={lang}
@@ -1286,7 +1287,7 @@ const App: React.FC = () => {
                     </div>
                 </div>
             ) : viewMode === 'RSI' ? (
-                <div className="h-screen w-screen overflow-hidden animate-page-entrance">
+                <div className="h-screen w-screen overflow-hidden animate-page-dissolve">
                     <LacanTopologyView 
                         lang={lang} 
                         setLang={setLang}
@@ -1302,6 +1303,50 @@ const App: React.FC = () => {
                         showRings={showRings}
                         setShowRings={setShowRings}
                     />
+                </div>
+            ) : viewMode === 'RORSCHACH' ? (
+                <div className="h-screen w-screen overflow-hidden flex flex-col animate-page-dissolve">
+                    <AppHeader
+                        page={page}
+                        lang={lang}
+                        setLang={setLang}
+                        setPage={setPage}
+                        selectedDriver={selectedDriver}
+                        driverName={lang === 'CN' ? '罗夏墨迹测验' : 'RORSCHACH TEST'}
+                        viewMode={viewMode}
+                        setViewMode={handleViewChange}
+                        handleOpenMetonymyPage={handleOpenMetonymyPage}
+                        openManual={openManual}
+                        isManualOpen={isManualOpen}
+                        openHistory={openHistory}
+                        isHistoryOpen={isHistoryOpen}
+                        openSettings={openSettings}
+                        openAuth={openAuth}
+                        openProfile={() => setIsProfileOpen(true)}
+                        onLogout={() => supabaseAuthService.signOut()}
+                        currentUser={currentUser}
+                        showRings={showRings}
+                        setShowRings={setShowRings}
+                    />
+                    <div className="flex-1 overflow-hidden relative">
+                        <RorschachView
+                            lang={lang}
+                            setLang={setLang}
+                            setPage={setPage}
+                            setViewMode={setViewMode}
+                            onClose={() => {
+                                setPage(0);
+                                setViewMode('ENGINE');
+                            }}
+                            openManual={openManual}
+                            openHistory={openHistory}
+                            openSettings={openSettings}
+                            openProfile={() => setIsProfileOpen(true)}
+                            currentUser={currentUser}
+                            showRings={showRings}
+                            setShowRings={setShowRings}
+                        />
+                    </div>
                 </div>
             ) : (
                 <div className="flex flex-col h-screen overflow-hidden relative">
@@ -1332,7 +1377,7 @@ const App: React.FC = () => {
 
                     <main className="flex-1 overflow-hidden relative bg-[var(--bg-main)] transition-colors duration-500">
                         {viewMode === 'ENGINE' && selectedDriver && (
-                            <div className="w-full h-full animate-page-entrance">
+                            <div className="w-full h-full animate-page-dissolve">
                                 <NarrativeEngineField
                                 key={selectedDriver}
                                 fieldState={narrativeFieldState}

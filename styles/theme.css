@@ -155,3 +155,35 @@ body::before {
 .animate-page-dissolve {
   animation: pageDissolve 0.75s cubic-bezier(0.215, 0.61, 0.355, 1) both;
 }
+
+/* Focus Blur - Option C: Science-fictional focus effect */
+@keyframes focusBlur {
+  0% {
+    opacity: 0;
+    filter: blur(12px) brightness(1.2);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0) brightness(1);
+  }
+}
+
+.animate-focus-blur {
+  animation: focusBlur 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Portal Title Breathing - Deep, slow rhythm */
+@keyframes portalBreathing {
+  0%, 100% {
+    transform: scale(1);
+    filter: brightness(1) drop-shadow(0 0 0px rgba(255,255,255,0));
+  }
+  50% {
+    transform: scale(1.02);
+    filter: brightness(1.1) drop-shadow(0 0 15px rgba(255,255,255,0.2));
+  }
+}
+
+.animate-portal-breathing {
+  animation: portalBreathing 8s ease-in-out infinite;
+}

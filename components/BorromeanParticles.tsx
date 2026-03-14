@@ -164,10 +164,7 @@ export const BorromeanParticles: React.FC<BorromeanParticlesProps> = ({ opacity 
             const svgScale = Math.min(W / 200, H / 200);
 
             ctx.globalCompositeOperation = 'source-over';
-            // In retro mode, we use a fully transparent clear to avoid "the box" on white backgrounds
-            ctx.fillStyle = isRetro ? 'rgba(235, 230, 215, 0)' : 'rgba(1, 1, 4, 0.35)';
-            ctx.clearRect(0, 0, W, H); 
-            ctx.fillRect(0, 0, W, H);
+            ctx.clearRect(0, 0, W, H);
 
             ctx.globalCompositeOperation = isRetro ? 'multiply' : 'screen';
 

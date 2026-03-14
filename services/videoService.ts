@@ -6,8 +6,8 @@ export interface Video {
     id: string;
     title: string;
     description?: string;
-    platform: 'youtube' | 'bilibili';
-    video_id: string;
+    platform: 'youtube' | 'bilibili' | 'direct';
+    video_id: string; // URL for direct, ID for others
     thumbnail_url?: string;
     category?: string;
     tags?: string[];
@@ -20,7 +20,7 @@ export interface Video {
 export interface VideoCreateInput {
     title: string;
     description?: string;
-    platform: 'youtube' | 'bilibili';
+    platform: 'youtube' | 'bilibili' | 'direct';
     video_id: string;
     thumbnail_url?: string;
     category?: string;
@@ -82,7 +82,8 @@ export function getYouTubeThumbnail(videoId: string, quality: 'default' | 'mediu
 /**
  * 生成嵌入播放器 URL
  */
-export function getEmbedUrl(platform: 'youtube' | 'bilibili', videoId: string): string {
+export function getEmbedUrl(platform: 'youtube' | 'bilibili' | 'direct', videoId: string): string {
+    if (platform === 'direct') return videoId;
     if (platform === 'youtube') {
         return `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`;
     }
@@ -108,12 +109,25 @@ class VideoService {
 
         const { data, error } = await query;
 
+        const hardcodedVideo: Video = {
+            id: 'r2-test-video',
+            title: 'Sora 大洋芋去水 (R2 直连测试)',
+            description: '这是一个挂载在 Cloudflare R2 的免广告视频测试。点击即可原生纯净播放。',
+            platform: 'direct',
+            video_id: 'https://pub-07da2beba4a34f5f82f770c7f67c003f.r2.dev/mist%20movie/The%20overall%20color%20palette%20must%20be%20restricted%20to%20dark%20bluegr%20-Sora%E5%A4%A7%E6%B4%8B%E8%8A%8B%E5%8E%BB%E6%B0%B4.mp4',
+            category: 'Testing',
+            sort_order: 9999,
+            is_published: true,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+        };
+
         if (error) {
             console.error('Error fetching videos:', error);
-            return [];
+            return [hardcodedVideo];
         }
 
-        return data as Video[];
+        return [hardcodedVideo, ...(data as Video[])];
     }
 
     /**
@@ -126,12 +140,25 @@ class VideoService {
             .order('sort_order', { ascending: false })
             .order('created_at', { ascending: false });
 
+        const hardcodedVideo: Video = {
+            id: 'r2-test-video',
+            title: 'Sora 大洋芋去水 (R2 直连测试)',
+            description: '这是一个挂载在 Cloudflare R2 的免广告视频测试。点击即可原生纯净播放。',
+            platform: 'direct',
+            video_id: 'https://pub-07da2beba4a34f5f82f770c7f67c003f.r2.dev/mist%20movie/The%20overall%20color%20palette%20must%20be%20restricted%20to%20dark%20bluegr%20-Sora%E5%A4%A7%E6%B4%8B%E8%8A%8B%E5%8E%BB%E6%B0%B4.mp4',
+            category: 'Testing',
+            sort_order: 9999,
+            is_published: true,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+        };
+
         if (error) {
             console.error('Error fetching all videos:', error);
-            return [];
+            return [hardcodedVideo];
         }
 
-        return data as Video[];
+        return [hardcodedVideo, ...(data as Video[])];
     }
 
     /**
@@ -149,8 +176,8 @@ class VideoService {
             return [];
         }
 
-        const categories = [...new Set(data.map(v => v.category).filter(Boolean))] as string[];
-        return categories;
+        const categories = [...new Set(data.map(v => v.category).filter(Boolean)), 'Testing'] as string[];
+        return [...new Set(categories)];
     }
 
     /**
@@ -224,12 +251,17 @@ class VideoService {
     /**
      * 智能解析视频链接并自动识别平台
      */
-    parseVideoUrl(url: string): { platform: 'youtube' | 'bilibili'; video_id: string } | null {
+    parseVideoUrl(url: string): { platform: 'youtube' | 'bilibili' | 'direct'; video_id: string } | null {
         const youtubeId = extractYouTubeId(url);
         if (youtubeId) return { platform: 'youtube', video_id: youtubeId };
 
         const bilibiliId = extractBilibiliId(url);
         if (bilibiliId) return { platform: 'bilibili', video_id: bilibiliId };
+
+        // 识别直接链接 (R2, Cloudflare, or direct mp4/webm/mov/url)
+        if (url.match(/\.(mp4|webm|mov|ogg)(\?.*)?$/i) || url.includes('r2.dev') || url.startsWith('http')) {
+            return { platform: 'direct', video_id: url };
+        }
 
         return null;
     }

@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { User } from '../types';
 import { BorromeanRings } from './BorromeanRings';
-import { User as UserIcon, Moon, Sun } from 'lucide-react';
+import { User as UserIcon, Moon, Sun, Volume2, VolumeX, Cloud } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { ShaderBackground } from './ShaderBackground';
+import { ECGCircuitTimeline } from './ECGCircuitTimeline';
 
-type ViewMode = 'ENGINE' | 'DIVERGENCE' | 'BIBLE' | 'METONYMY' | 'TOPOLOGY' | 'RSI' | 'ARCHIVE' | 'VIDEO';
+type ViewMode = 'ENGINE' | 'DIVERGENCE' | 'BIBLE' | 'METONYMY' | 'TOPOLOGY' | 'RSI' | 'ARCHIVE' | 'VIDEO' | 'RORSCHACH';
 
 interface UniversePortalProps {
   lang: 'CN' | 'EN';
@@ -19,13 +21,15 @@ interface UniversePortalProps {
 const AnimatedText = ({ cn, en, lang, className = "", hClass = "h-5", style = {} }: { cn: React.ReactNode, en: React.ReactNode, lang: 'CN' | 'EN', className?: string, hClass?: string, style?: React.CSSProperties }) => (
   <div className={`overflow-hidden relative ${hClass}`} style={style}>
     <div 
-      className="w-full transition-transform duration-[1500ms] ease-[cubic-bezier(0.16,1,0.3,1)]"
-      style={{ transform: lang === 'EN' ? 'translateY(-50%)' : 'translateY(0)' }}
+      className="w-full transition-transform duration-[1500ms] ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col"
+      style={{ 
+        transform: lang === 'EN' ? 'translateY(-50%)' : 'translateY(0)' 
+      }}
     >
-      <div className={`${hClass} flex items-center justify-center shrink-0 w-full ${className}`}>
+      <div className={`flex items-center justify-center shrink-0 w-full ${hClass} ${className}`}>
         {cn}
       </div>
-      <div className={`${hClass} flex items-center justify-center shrink-0 w-full ${className}`}>
+      <div className={`flex items-center justify-center shrink-0 w-full ${hClass} ${className}`}>
         {en}
       </div>
     </div>
@@ -86,15 +90,28 @@ const REALMS: RealmDef[] = [
     iconSymbol: 'Ψ',
     target: { page: 1, viewMode: 'RSI' },
   },
+  {
+    id: 'rorschach',
+    titleCn: '潜意识映射',
+    titleEn: 'RORSCHACH',
+    subtitleCn: '罗夏墨迹 // 潜意识探测',
+    subtitleEn: 'INKBLOT // UNCONSCIOUS PROBE',
+    descCn: '观察罗夏墨迹的动态演变，直面潜意识的投影与幻象。',
+    descEn: 'Observe the dynamic evolution of Rorschach inkblots, confront the projection of the unconscious.',
+    color: '#a855f7',
+    glowRgba: 'rgba(168, 85, 247, 0.2)',
+    iconSymbol: '☤',
+    target: { page: 1, viewMode: 'RORSCHACH' },
+  },
 ];
 
-const QUOTES = [
-  { cn: '被压抑的梦比现实更真实', en: 'The repressed dream is more real than reality' },
-  { cn: '欲望是大他者的欲望', en: 'Desire is the desire of the Other' },
-  { cn: '无意识像语言一样结构', en: 'The unconscious is structured like a language' },
-  { cn: '爱，是给予你没有的东西', en: 'Love is giving what you don\'t have' },
-  { cn: '在你不存在的地方，思考', en: 'I think where I am not' },
-  { cn: '真理有虚构的结构', en: 'Truth has the structure of fiction' },
+const LACANIAN_QUOTES = [
+  { cn: '“欲望是大他者的欲望”', en: '“Man\'s desire is the desire of the Other”' },
+  { cn: '“在你不存在的地方思考”', en: '“I think where I am not, therefore I am where I do not think”' },
+  { cn: '“实在界是无法被符号化的”', en: '“The Real is that which resists symbolization absolutely”' },
+  { cn: '“爱就是把你并没有的东西献给并不想要它的人”', en: '“To love is to give what one does not have to someone who does not want it”' },
+  { cn: '“无意识像语言一样结构”', en: '“The unconscious is structured like a language”' },
+  { cn: '“真理有虚构的结构”', en: '“Truth has the structure of fiction”' },
 ];
 
 export const UniversePortal: React.FC<UniversePortalProps> = ({
@@ -105,13 +122,78 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
   const [hoveredRealm, setHoveredRealm] = useState<string | null>(null);
   const [isExiting, setIsExiting] = useState(false);
   const [exitTarget, setExitTarget] = useState<string | null>(null);
-  const [quoteIndex] = useState(() => Math.floor(Math.random() * QUOTES.length));
+  const [lacanianQuoteIndex, setLacanianQuoteIndex] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [mistEnabled, setMistEnabled] = useState(true);
   const [mounted, setMounted] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const toggleQuote = () => {
+    setLacanianQuoteIndex((prev) => (prev + 1) % LACANIAN_QUOTES.length);
+  };
 
   useEffect(() => {
-    const t = setTimeout(() => setMounted(true), 50);
-    return () => clearTimeout(t);
+    setMounted(true);
   }, []);
+
+  useEffect(() => {
+    // ── BACKGROUND MUSIC LOGIC ──
+    const audio = new Audio('/audio/portal-bgm.mp3');
+    audio.loop = true;
+    audio.volume = 0; 
+    audioRef.current = audio;
+
+    const playAudio = () => {
+      audio.play().catch(() => {
+        const startOnInteraction = () => {
+          audio.play().catch(() => {});
+          window.removeEventListener('click', startOnInteraction);
+        };
+        window.addEventListener('click', startOnInteraction);
+      });
+    };
+
+    playAudio();
+    setIsPlaying(true);
+
+    // Fade-in volume slowly
+    let fadeIn = setInterval(() => {
+      if (!audioRef.current) return;
+      if (audioRef.current.paused) return; // Wait if paused
+      
+      if (audioRef.current.volume < 0.35) {
+        audioRef.current.volume = Math.min(0.35, audioRef.current.volume + 0.01);
+      } else {
+        clearInterval(fadeIn);
+      }
+    }, 150);
+
+    return () => {
+      clearInterval(fadeIn);
+      // Fade out on unmount
+      const audioToFade = audioRef.current;
+      if (!audioToFade) return;
+      
+      let fadeOut = setInterval(() => {
+        if (audioToFade.volume > 0.005) {
+          audioToFade.volume -= 0.005;
+        } else {
+          audioToFade.pause();
+          clearInterval(fadeOut);
+        }
+      }, 40); // Total fade-out duration: ~2 seconds
+    };
+  }, []);
+
+  const toggleMusic = () => {
+    if (!audioRef.current) return;
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play().catch(() => {});
+    }
+    setIsPlaying(!isPlaying);
+  };
 
   const handleRealmClick = (realm: RealmDef) => {
     if (isExiting) return;
@@ -123,7 +205,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
     }, 700);
   };
 
-  const quote = QUOTES[quoteIndex];
+  const quote = LACANIAN_QUOTES[lacanianQuoteIndex];
 
   return (
     <div className={`fixed inset-0 overflow-hidden transition-opacity duration-700 ease-in ${isExiting ? 'opacity-0' : 'opacity-100'}`}>
@@ -157,18 +239,24 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
           to { opacity: 1; }
         }
         @keyframes glowLine {
-          0%, 100% { opacity: 0.3; }
-          50% { opacity: 0.9; }
+          0%, 100% { opacity: 0.1; }
+          50% { opacity: 0.4; }
         }
-        @keyframes slideFadeIn {
-          from { opacity: 0; transform: translateY(10px) scale(0.98); }
-          to { opacity: 1; transform: translateY(0) scale(1); }
+        @keyframes subtleVignette {
+          0%, 100% { opacity: 0.4; }
+          50% { opacity: 0.6; }
+        }
+        .text-glow {
+          text-shadow: 0 0 20px rgba(0,0,0,0.8), 0 0 40px rgba(0,0,0,0.4);
+        }
+        .retro-text-glow {
+          text-shadow: 0 0 15px rgba(235, 230, 215, 0.9), 0 0 30px rgba(235, 230, 215, 0.6);
         }
         .portal-realm-card {
-          transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+          transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .portal-realm-card:hover {
-          transform: translateY(-8px);
+          transform: translateY(-4px);
         }
         /* Smooth SVG theme transitions */
         svg circle, svg path, svg text, svg stop {
@@ -176,236 +264,198 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
         }
       `}</style>
 
-      {/* Layer 0: Void background */}
-      <div className={`absolute inset-0 transition-colors duration-1000 ${isRetro ? 'bg-[#ebe6d7]' : 'bg-[#020205]'}`} />
+      {/* Layer 0: Deep Background */}
+      <div className={`absolute inset-0 transition-colors duration-[2000ms] ${isRetro ? 'bg-[var(--bg-main)]' : 'bg-[#020202]'} pointer-events-none`} />
       
-      {/* Layer 0.1: Aged Texture Overlay (Smooth transition) */}
+      {/* Decorative Radial Ambient Light */}
+      <div className="absolute inset-0 opacity-40 pointer-events-none z-[1]" 
+           style={{ background: isRetro ? 'none' : 'radial-gradient(circle at center, #0a0a10 0%, transparent 80%)' }} />
+      
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none z-[1] mix-blend-overlay"
+           style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }} />
+
+      {/* Layer 1: Transparent Shader background (Mist) */}
       <div 
-        className={`absolute inset-0 transition-opacity duration-[1500ms] pointer-events-none z-[1] ${isRetro ? 'opacity-30' : 'opacity-0'}`} 
+        className={`absolute inset-0 transition-all duration-[2000ms] ease-in-out ${isRetro ? 'opacity-80' : 'opacity-100'}`}
         style={{ 
-          backgroundImage: 'var(--pattern-aged)',
-          backgroundBlendMode: 'multiply'
+            opacity: mistEnabled ? (isRetro ? 0.8 : 1) : 0,
+            visibility: mistEnabled ? 'visible' : 'hidden'
         }}
-      />
+      >
+        <ShaderBackground />
+      </div>
 
-      {/* Layer 0.5: Vignette (Hidden in retro for clarity) */}
-      {!isRetro && (
-        <div
-          className="absolute inset-0 pointer-events-none z-[1]"
-          style={{
-            background: 'radial-gradient(ellipse 70% 60% at 50% 45%, transparent 30%, rgba(0,0,0,0.7) 100%)',
-            animation: 'vignettePulse 12s ease-in-out infinite',
-          }}
-        />
-      )}
 
-      {/* Layer 1: Fog layers */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: 'radial-gradient(ellipse 80% 60% at 30% 40%, rgba(212,175,55,0.08), transparent 70%)',
-          animation: 'mistDrift1 30s ease-in-out infinite',
-          filter: 'blur(40px)',
-          willChange: 'transform',
-        }}
-      />
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: 'radial-gradient(ellipse 70% 50% at 70% 60%, rgba(34,211,238,0.06), transparent 60%)',
-          animation: 'mistDrift2 40s ease-in-out infinite',
-          filter: 'blur(50px)',
-          willChange: 'transform',
-        }}
-      />
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: 'radial-gradient(circle at 50% 45%, rgba(251,113,133,0.05), transparent 50%)',
-          animation: 'mistDrift1 20s ease-in-out infinite', /* portalPulse removed */
-          filter: 'blur(60px)',
-          willChange: 'transform, opacity',
-        }}
-      />
-
-      {/* Layer 2: BorromeanRings gateway */}
+      {/* Layer 2: BorromeanRings gateway - THE MIDGROUND (Strengthened) */}
       <div
         className="absolute inset-0 flex items-center justify-center pointer-events-none z-[2]"
         style={{
-          animation: mounted ? 'fadeIn 2s ease-out both' : 'none',
-          animationDelay: '0.3s',
+          animation: mounted ? 'fadeIn 3s ease-out both' : 'none',
+          animationDelay: '0.6s',
           opacity: 0,
         }}
       >
+        {/* Subtle Depth Blur - Reduced to keep rings sharp */}
+        <div className="absolute inset-x-0 h-[40vh] flex items-center justify-center pointer-events-none">
+          <div className="w-full h-full bg-transparent backdrop-blur-[1px] opacity-20"
+               style={{ maskImage: 'radial-gradient(circle at center, black 20%, transparent 60%)', WebkitMaskImage: 'radial-gradient(circle at center, black 20%, transparent 60%)' }} />
+        </div>
+        
         <div 
-            className="w-[50vh] h-[50vh] max-w-[500px] max-h-[500px] -translate-y-[5vh] overflow-visible transition-all duration-[1500ms] ease-in-out"
+            className="w-[55vh] h-[55vh] max-w-[550px] max-h-[550px] overflow-visible transition-all duration-[2000ms] ease-in-out"
             style={{ 
-              opacity: isRetro ? 0.35 : 0.45
+              opacity: isRetro ? 0.7 : 0.8
             }}
           >
-            <BorromeanRings centered={true} opacity={1} lang={lang === 'CN' ? 'CN' : 'EN'} />
+            <BorromeanRings centered={true} opacity={1} lang={lang === 'CN' ? 'CN' : 'EN'} driverType={isRetro ? undefined : undefined} isHomepage={true} />
           </div>
       </div>
 
-      {/* Layer 3: Title treatment */}
-      <div
-        className="absolute top-[10vh] md:top-[12vh] left-0 right-0 text-center z-[10] px-4"
+      {/* Layer 3: Central Content (Focus point) */}
+      <div 
+        className={`absolute top-[8vh] md:top-[10.5vh] left-0 right-0 text-center z-[20] px-4 select-none transition-all duration-1000 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
         style={{
-          animation: mounted ? 'fadeInUp 2s ease-out both' : 'none',
+          animation: mounted ? 'fadeInUp 2.5s ease-out both' : 'none',
           opacity: 0,
         }}
       >
-        <AnimatedText
-          lang={lang}
-          hClass="h-[64px] sm:h-[80px] md:h-[96px] lg:h-[110px]"
-          className={`text-[48px] sm:text-[64px] md:text-[80px] lg:text-[96px] font-black tracking-[0.15em] sm:tracking-[0.2em] leading-none transition-all duration-1000 ${isRetro ? 'text-black/80' : 'text-white/90'}`}
-          style={{
-            fontFamily: "'Noto Serif SC', 'Playfair Display', serif",
-            textShadow: isRetro ? 'none' : '0 0 120px rgba(212,175,55,0.08), 0 2px 40px rgba(0,0,0,0.6)',
-          }}
-          cn="迷雾学派"
-          en="MIST SCHOOL"
-        />
-
-        <div className="mt-3 sm:mt-4">
+        {/* Anti-Clash Mask for Title */}
+        <div className="absolute inset-x-0 -top-10 bottom-0 pointer-events-none z-[-1] opacity-60"
+             style={{ background: isRetro ? 'none' : 'radial-gradient(ellipse at center, rgba(2,2,5,0.8) 0%, transparent 70%)' }} />
+        
+        <div className="transition-transform duration-700 ease-out">
           <AnimatedText
             lang={lang}
-            hClass="h-4"
-            className={`text-[10px] sm:text-[11px] uppercase tracking-[0.4em] sm:tracking-[0.6em] font-black transition-all duration-1000 ${isRetro ? 'text-black/40' : 'text-white'}`}
-            style={{
-              textShadow: isRetro ? 'none' : '0 2px 10px rgba(0,0,0,1), 0 0 20px rgba(255,255,255,0.2)'
-            }}
-            cn="爱欲视觉拓扑学 // EROTIC VISUAL TOPOLOGY"
-            en="EROTIC VISUAL TOPOLOGY // MIST OBSERVATORY"
-          />
-        </div>
-
-        <div className="mt-5 sm:mt-6">
-          <AnimatedText
-            lang={lang}
-            hClass="h-6"
-            className={`text-xs sm:text-sm md:text-base font-serif italic max-w-md mx-auto transition-all duration-1000 font-medium ${isRetro ? 'text-black/60' : 'text-white'}`}
+            hClass="h-[80px] sm:h-[96px] md:h-[110px] lg:h-[130px]"
+            className={`text-[40px] sm:text-[60px] md:text-[80px] lg:text-[96px] font-black tracking-[0.15em] sm:tracking-[0.2em] leading-none transition-all duration-1000 animate-portal-breathing whitespace-nowrap ${isRetro ? 'text-[var(--text-accent)]' : 'text-white/90'}`}
             style={{
               fontFamily: "'Noto Serif SC', 'Playfair Display', serif",
-              textShadow: isRetro ? 'none' : '0 2px 20px rgba(0,0,0,1), 0 0 10px rgba(0,0,0,0.5)',
+              textShadow: isRetro ? '0 1px 1px rgba(255, 255, 255, 0.7)' : '0 1px 4px rgba(0,0,0,0.8), 0 2px 6px rgba(0,0,0,0.5)',
             }}
-            cn={`“${quote.cn}”`}
-            en={`“${quote.en}”`}
+            cn="迷雾学派"
+            en="MIST SCHOOL"
           />
-        </div>
-      </div>
 
-      {/* Layer 4: Three realm portals */}
-      <div className="absolute bottom-[6vh] sm:bottom-[8vh] md:bottom-[10vh] left-0 right-0 flex flex-col sm:flex-row justify-center items-center sm:items-end gap-4 sm:gap-6 md:gap-10 lg:gap-12 px-4 sm:px-6 z-[10]">
-        {REALMS.map((realm, i) => (
-          <button
-            key={realm.id}
-            onClick={() => handleRealmClick(realm)}
-            onMouseEnter={() => setHoveredRealm(realm.id)}
-            onMouseLeave={() => setHoveredRealm(null)}
-            className={`portal-realm-card relative w-full sm:w-[220px] md:w-[260px] lg:w-[280px] h-[140px] sm:h-[160px] md:h-[190px] lg:h-[210px] rounded-sm border
-              flex flex-col items-center justify-center gap-2 sm:gap-3 text-center cursor-pointer group
-              ${hoveredRealm === realm.id
-                ? 'border-white/30 bg-white/[0.12]'
-                : 'border-white/[0.15] bg-white/[0.05]'
-              }
-              ${isExiting && exitTarget === realm.id ? '!scale-105 !brightness-150 !border-white/30' : ''}
-              ${isExiting && exitTarget !== realm.id ? '!opacity-0 !translate-y-8 pointer-events-none' : ''}
-            `}
-            style={{
-              animation: mounted ? `fadeInUp 0.8s ease-out both` : 'none',
-              animationDelay: `${1.2 + i * 0.15}s`,
-              opacity: 0,
-              boxShadow: hoveredRealm === realm.id ? `0 0 80px -15px ${realm.glowRgba}, inset 0 0 60px -30px ${realm.glowRgba}` : 'none',
-              transition: isExiting ? 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)' : undefined,
-            }}
-          >
-            {/* Top accent line */}
-            <div
-              className="absolute top-0 left-3 right-3 sm:left-4 sm:right-4 h-px transition-all duration-700"
-              style={{
-                backgroundColor: realm.color,
-                opacity: hoveredRealm === realm.id ? 0.8 : 0.2,
-                animation: hoveredRealm === realm.id ? 'glowLine 3s ease-in-out infinite' : 'none',
-                boxShadow: hoveredRealm === realm.id ? `0 0 12px ${realm.glowRgba}` : 'none',
-              }}
-            />
-
-            {/* Icon */}
-            <span
-              className="text-xl sm:text-2xl transition-all duration-700"
-              style={{
-                color: hoveredRealm === realm.id ? realm.color : 'rgba(255,255,255,0.25)',
-                animation: 'breathe 4s ease-in-out infinite',
-                transform: hoveredRealm === realm.id ? 'scale(1.15)' : 'scale(1)',
-                filter: hoveredRealm === realm.id ? `drop-shadow(0 0 8px ${realm.glowRgba})` : 'none',
-              }}
-            >
-              {realm.iconSymbol}
-            </span>
-
-            {/* Title */}
-            <AnimatedText
-              lang={lang}
-              hClass="h-7"
-              className="text-base sm:text-lg tracking-[0.2em] sm:tracking-[0.3em] font-bold transition-colors duration-700"
-              style={{
-                fontFamily: "'Noto Serif SC', 'Playfair Display', serif",
-                color: hoveredRealm === realm.id ? realm.color : 'rgba(255,255,255,0.55)',
-                textShadow: hoveredRealm === realm.id ? `0 0 20px ${realm.glowRgba}` : 'none',
-              }}
-              cn={realm.titleCn}
-              en={realm.titleEn}
-            />
-
-            {/* Subtitle */}
+          <div className="mt-4 sm:mt-5 scale-90 sm:scale-100 opacity-60">
             <AnimatedText
               lang={lang}
               hClass="h-4"
-              className="text-[8px] sm:text-[9px] font-mono uppercase tracking-[0.15em] sm:tracking-[0.2em] text-white/20 transition-colors duration-700"
-              cn={realm.subtitleCn}
-              en={realm.subtitleEn}
+              className={`text-[9px] sm:text-[10px] uppercase tracking-[0.6em] sm:tracking-[0.8em] font-light transition-all duration-1000 ${isRetro ? 'text-black/30' : 'text-white/40'}`}
+              cn="爱欲视觉拓扑学 // EROTIC VISUAL TOPOLOGY"
+              en="EROTIC VISUAL TOPOLOGY // MIST OBSERVATORY"
             />
+          </div>
 
-            {/* Description (hover reveal) */}
-            <div className={`transition-all duration-700 ${hoveredRealm === realm.id ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
-              <AnimatedText
-                lang={lang}
-                hClass="h-10"
-                className="text-[10px] sm:text-[11px] font-light text-white/25 max-w-[220px] leading-relaxed transition-all duration-700 px-3"
-                cn={realm.descCn}
-                en={realm.descEn}
-              />
-            </div>
-
-            {/* Enter indicator (hover reveal) */}
-            <div className={`absolute bottom-2 sm:bottom-3 left-3 right-3 sm:left-4 sm:right-4 flex items-center justify-center gap-2 transition-all duration-700 ${
-              hoveredRealm === realm.id ? 'opacity-50' : 'opacity-0'
-            }`}>
-              <div className="flex-1 h-px bg-white/10" />
-              <AnimatedText
-                lang={lang}
-                hClass="h-4"
-                className="text-[10px] sm:text-[10px] font-mono tracking-[0.3em] text-white/40 uppercase"
-                cn="进入"
-                en="ENTER"
-              />
-              <div className="flex-1 h-px bg-white/10" />
-            </div>
-
-            {/* Bottom accent line (mirror of top, subtle) */}
-            <div
-              className="absolute bottom-0 left-3 right-3 sm:left-4 sm:right-4 h-px transition-all duration-700"
-              style={{
-                backgroundColor: realm.color,
-                opacity: hoveredRealm === realm.id ? 0.3 : 0.05,
-              }}
+          <div 
+            key={lacanianQuoteIndex}
+            className="mt-8 sm:mt-12 group/quote relative inline-block cursor-pointer pointer-events-auto"
+            onClick={(e) => { e.stopPropagation(); toggleQuote(); }}
+            style={{
+              animation: 'fadeIn 4.0s cubic-bezier(0.19, 1, 0.22, 1) both'
+            }}
+          >
+            <AnimatedText
+              lang={lang}
+              hClass="h-6"
+              className={`text-[13px] sm:text-[15px] md:text-[17px] tracking-[0.3em] font-light italic transition-colors duration-1000 ${isRetro ? 'text-black/60 hover:text-black/90' : 'text-white/60 hover:text-white/95'}`}
+              style={{ fontFamily: "'Noto Serif SC', 'Playfair Display', serif" }}
+              cn={LACANIAN_QUOTES[lacanianQuoteIndex].cn}
+              en={LACANIAN_QUOTES[lacanianQuoteIndex].en}
             />
-          </button>
-        ))}
+            <div className={`mt-2 w-0 group-hover/quote:w-12 h-px mx-auto transition-all duration-700 opacity-40 ${isRetro ? 'bg-black' : 'bg-white'}`} />
+          </div>
+        </div>
       </div>
 
-      {/* Layer 5: Top-right minimal UI */}
+      {/* Layer 4: Realm portals (Academic Navigation) - Centered Alignment */}
+      <div className="absolute inset-0 pointer-events-none z-[10] flex flex-col justify-center items-center">
+        {/* ECG Circuit Timeline - Passing through the core (Strengthened) */}
+        <div className="relative w-full max-w-[1240px] mx-auto opacity-80 sm:opacity-70 transition-all duration-1000 hover:opacity-100">
+          <ECGCircuitTimeline hoveredIndex={hoveredRealm ? REALMS.findIndex(r => r.id === hoveredRealm) : -1} isRetro={isRetro} />
+        </div>
+
+        {/* Navigation Group - Aligned with the centered timeline */}
+        <div className="relative w-full max-w-[1240px] mx-auto mt-0 sm:mt-0 flex flex-row justify-between items-center px-12 md:px-20 h-0 overflow-visible">
+          {REALMS.map((realm, i) => {
+            const isHovered = hoveredRealm === realm.id;
+            return (
+              <button
+                key={realm.id}
+                onClick={() => handleRealmClick(realm)}
+                onMouseEnter={() => setHoveredRealm(realm.id)}
+                onMouseLeave={() => setHoveredRealm(null)}
+                className={`relative group flex flex-col items-center text-center pointer-events-auto transition-all duration-1000
+                  ${isExiting && exitTarget === realm.id ? '!brightness-125' : ''}
+                  ${isExiting && exitTarget !== realm.id ? '!opacity-0 pointer-events-none' : ''}
+                `}
+                style={{
+                  animation: mounted ? `fadeInUp 1.2s ease-out both` : 'none',
+                  animationDelay: `${1.8 + i * 0.15}s`,
+                }}
+              >
+                {/* Tech Code Marker - Shifted up (Fixed Clipping via Outer Scale) */}
+                <div className="mb-[60px] sm:mb-[80px] flex justify-center overflow-visible">
+                  <AnimatedText
+                    lang={lang}
+                    hClass="h-10 w-40"
+                    className={`text-[9px] font-mono tracking-[0.3em] uppercase
+                      ${isHovered ? 'opacity-100 brightness-125' : 'opacity-60'} ${isRetro ? 'text-black' : 'text-white'}
+                    `}
+                    style={{
+                      textShadow: isRetro ? 'none' : '0 2px 8px rgba(0,0,0,0.8)',
+                      transform: isHovered ? 'scale(1.15)' : 'scale(1)',
+                      transition: 'transform 1.8s cubic-bezier(0.19, 1, 0.22, 1), opacity 1.8s ease',
+                      transformOrigin: 'center'
+                    }}
+                    cn={`MOD // 0${i + 1}`}
+                    en={`MOD // 0${i + 1}`}
+                  />
+                </div>
+
+                {/* Main Menu Label - Shifted down (Enhanced Visibility) */}
+                <div className="mt-[20px] sm:mt-[30px]">
+                  <AnimatedText
+                    lang={lang}
+                    hClass="h-8"
+                    className={`text-[15px] sm:text-[17px] tracking-[0.4em] uppercase whitespace-nowrap
+                      ${isHovered ? (isRetro ? 'text-black' : 'text-white') : (isRetro ? 'text-black/70' : 'text-white/80')}
+                    `}
+                    style={{
+                      fontFamily: "'Noto Serif SC', 'Playfair Display', serif",
+                      fontWeight: isHovered ? 500 : 300,
+                      transform: isHovered ? 'scale(1.1)' : 'scale(1)',
+                      transition: 'transform 1.8s cubic-bezier(0.19, 1, 0.22, 1), color 1.8s ease, opacity 1.8s ease',
+                      willChange: 'transform',
+                      textShadow: 'none'
+                    }}
+                    cn={realm.titleCn}
+                    en={realm.titleEn}
+                  />
+
+                  {/* Technical Sub-description (Reveal on hover) */}
+                    <div className={`mt-6 absolute top-full left-1/2 -translate-x-1/2 flex flex-col items-center transition-all duration-[1800ms] cubic-bezier(0.19, 1, 0.22, 1)
+                    ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'}
+                  `}>
+                    <div className={`w-16 h-px mb-4 transition-all duration-1000 ${isHovered ? 'scale-x-100' : 'scale-x-0'} ${isRetro ? 'bg-black/20' : 'bg-white/20'}`} />
+                    <AnimatedText
+                      lang={lang}
+                      hClass="h-[100px] sm:h-[80px]"
+                      className={`text-[13px] sm:text-[14px] font-normal tracking-[0.1em] w-[240px] sm:w-[280px] leading-relaxed text-center
+                        ${isRetro ? 'text-black/80' : 'text-white/80'}
+                      `}
+                      cn={realm.descCn}
+                      en={realm.descEn}
+                    />
+                    {/* Decorative Corner Brackets on Hover */}
+                    <div className={`absolute -inset-x-4 -inset-y-2 border-x border-current opacity-20 transition-all duration-1000 pointer-events-none ${isHovered ? 'opacity-20 scale-100' : 'opacity-0 scale-95'}`} style={{ borderImage: 'linear-gradient(to bottom, currentColor 10%, transparent 10%, transparent 90%, currentColor 90%) 1' }} />
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       <div
         className="absolute top-4 sm:top-6 right-4 sm:right-6 flex items-center gap-3 sm:gap-4 z-[20]"
         style={{
@@ -414,6 +464,36 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
           opacity: 0,
         }}
       >
+        <button
+          onClick={() => setMistEnabled(!mistEnabled)}
+          className={`group/mist p-1.5 rounded-full transition-all duration-300 flex items-center justify-center ${isRetro ? 'hover:bg-black/5' : 'hover:bg-white/5'}`}
+          title={mistEnabled ? (lang === 'CN' ? '关闭迷雾' : 'Disable Mist') : (lang === 'CN' ? '开启迷雾' : 'Enable Mist')}
+        >
+          <div className="relative flex items-center justify-center">
+            <Cloud size={12} strokeWidth={2} className={`transition-all duration-300 ${mistEnabled ? (isRetro ? 'text-black/60 shadow-[0_0_8px_rgba(0,0,0,0.1)]' : 'text-white/80 shadow-[0_0_8px_rgba(255,255,255,0.2)]') : (isRetro ? 'text-black/20' : 'text-white/20')}`} />
+            {mistEnabled && (
+                <div className={`absolute -inset-1 rounded-full animate-pulse opacity-10 ${isRetro ? 'bg-black' : 'bg-white'}`} style={{ animationDuration: '4s' }} />
+            )}
+          </div>
+        </button>
+        <div className={`w-px h-3 transition-colors duration-700 ${isRetro ? 'bg-black/10' : 'bg-white/10'}`} />
+
+        <button
+          onClick={toggleMusic}
+          className={`group/music p-1.5 rounded-full transition-all duration-300 flex items-center justify-center ${isRetro ? 'hover:bg-black/5' : 'hover:bg-white/5'}`}
+          title={isPlaying ? (lang === 'CN' ? '关闭背景音乐' : 'Mute Music') : (lang === 'CN' ? '开启背景音乐' : 'Unmute Music')}
+        >
+          {isPlaying ? (
+            <div className="relative flex items-center justify-center">
+              <Volume2 size={12} strokeWidth={2} className={`transition-colors duration-300 ${isRetro ? 'text-black/40 group-hover/music:text-black/80' : 'text-white/30 group-hover/music:text-white/80'}`} />
+              <div className={`absolute -inset-1 rounded-full animate-ping opacity-20 ${isRetro ? 'bg-black' : 'bg-white'}`} style={{ animationDuration: '3s' }} />
+            </div>
+          ) : (
+            <VolumeX size={12} strokeWidth={2} className={`transition-colors duration-300 ${isRetro ? 'text-black/40 group-hover/music:text-black/80' : 'text-white/30 group-hover/music:text-white/80'}`} />
+          )}
+        </button>
+        <div className={`w-px h-3 transition-colors duration-700 ${isRetro ? 'bg-black/10' : 'bg-white/10'}`} />
+        
         <button
           onClick={() => setLang(lang === 'CN' ? 'EN' : 'CN')}
           className="relative h-4 overflow-hidden group/lang flex flex-col items-center"
@@ -453,16 +533,18 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
         </button>
       </div>
 
-      {/* Layer 6: Bottom system designation */}
       <div
-        className="absolute bottom-2 left-0 right-0 text-center z-[10] pointer-events-none"
+        className="absolute bottom-4 left-0 right-0 text-center z-[10] pointer-events-none"
         style={{
-          animation: mounted ? 'fadeIn 2s ease-out both' : 'none',
-          animationDelay: '1.5s',
+          animation: mounted ? 'fadeIn 3s ease-out both' : 'none',
+          animationDelay: '2.5s',
           opacity: 0,
         }}
       >
-        <p className="text-[7px] sm:text-[8px] font-mono tracking-[0.4em] sm:tracking-[0.5em] text-white/20 uppercase">
+        <p 
+          className="text-[8px] font-mono tracking-[0.8em] transition-opacity duration-1000 uppercase opacity-30 hover:opacity-60 pointer-events-auto"
+          style={{ transitionProperty: 'opacity' }}
+        >
           MIST OBSERVATORY // BORROMEAN GATEWAY v2.24 // {new Date().toISOString().substring(0, 10).replace(/-/g, '.')}
         </p>
       </div>

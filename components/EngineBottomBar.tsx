@@ -125,7 +125,7 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
     };
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 h-14 bg-[var(--bg-header)] backdrop-blur-md border-t border-[var(--border-main)] flex items-center justify-between px-6 md:px-12 z-40 transition-colors duration-500">
+        <div className="fixed bottom-0 left-0 right-0 h-14 bg-[var(--bg-header)] backdrop-blur-md border-t border-[var(--border-main)] flex items-center justify-between px-6 md:px-12 z-40 transition-colors duration-500 animate-page-dissolve">
             <div className="flex items-center gap-4 shrink-0 w-[180px] md:w-[240px]">
                 <button onClick={handleBackStep} className={`flex items-center gap-3 px-6 py-3 bg-[var(--bg-panel)]/50 hover:bg-[var(--bg-panel)] border border-[var(--border-main)] rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-300 group min-w-[140px] hover:scale-105 active:scale-95 ${theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'}`} >
                     <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
