@@ -202,8 +202,8 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
                   onClick={() => setSelectedItem({ type: 'CONCEPT', data: concept })}
                   className={`group relative p-6 rounded-2xl cursor-pointer transition-all duration-700 hover:-translate-y-1.5 overflow-hidden border ${
                     theme === 'retro'
-                      ? 'bg-white/5 border-black/5 backdrop-blur-sm hover:border-[var(--border-accent)] hover:bg-white hover:backdrop-blur-none shadow-none hover:shadow-[0_45px_100px_rgba(139,38,29,0.1)]'
-                      : 'bg-white/[0.03] backdrop-blur-md border-white/5 hover:bg-black hover:border-white/20 hover:backdrop-blur-none shadow-none hover:shadow-[0_45px_100_px_rgba(0,0,0,0.6)]'
+                      ? 'bg-white/[0.01] border-transparent backdrop-blur-2xl hover:border-[var(--border-accent)] hover:bg-white hover:backdrop-blur-none shadow-none hover:shadow-[0_45px_100px_rgba(139,38,29,0.1)]'
+                      : 'bg-white/[0.01] border-transparent backdrop-blur-2xl hover:bg-black hover:border-white/20 hover:backdrop-blur-none shadow-none hover:shadow-[0_45px_100px_rgba(0,0,0,0.6)]'
                   }`}
                 >
                   <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-current to-transparent opacity-0 group-hover:opacity-[0.03] transition-opacity ${theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-white'}`}></div>
@@ -231,8 +231,8 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
           onClick={() => setSelectedItem({ type: 'PERSONNEL', data: person })}
           className={`group relative transition-all duration-700 cursor-pointer flex flex-col md:flex-row h-full md:h-72 rounded-2xl overflow-hidden border ${
             theme === 'retro' 
-              ? 'bg-white/5 border-black/5 backdrop-blur-sm hover:border-[var(--border-accent)] hover:bg-white hover:backdrop-blur-none shadow-none hover:shadow-[0_45px_100px_rgba(139,38,29,0.1)] hover:-translate-y-1.5'
-              : 'bg-white/[0.03] backdrop-blur-md border-white/5 hover:bg-black hover:border-white/20 hover:backdrop-blur-none shadow-none hover:shadow-[0_45px_100px_rgba(0,0,0,0.6)] hover:-translate-y-1.5'
+              ? 'bg-white/[0.01] border-transparent backdrop-blur-2xl hover:border-[var(--border-accent)] hover:bg-white hover:backdrop-blur-none shadow-none hover:shadow-[0_45px_100px_rgba(139,38,29,0.1)] hover:-translate-y-1.5'
+              : 'bg-white/[0.01] border-transparent backdrop-blur-2xl hover:bg-black hover:border-white/20 hover:backdrop-blur-none shadow-none hover:shadow-[0_45px_100px_rgba(0,0,0,0.6)] hover:-translate-y-1.5'
           }`}
         >
           <div className="w-full md:w-48 bg-zinc-900 shrink-0 relative overflow-hidden flex items-center justify-center">
@@ -287,8 +287,8 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
           onClick={() => setSelectedItem({ type: 'RESEARCH', data: caseStudy })}
           className={`group transition-all duration-700 cursor-pointer relative rounded-2xl overflow-hidden border ${
             theme === 'retro' 
-              ? 'bg-white/5 border-black/5 backdrop-blur-sm hover:border-[var(--border-accent)] hover:bg-white hover:backdrop-blur-none shadow-none hover:shadow-[0_45px_100px_rgba(139,38,29,0.1)] hover:-translate-y-1.5'
-              : 'bg-white/[0.03] backdrop-blur-md border-white/5 hover:bg-black hover:border-white/20 hover:backdrop-blur-none shadow-none hover:shadow-[0_45px_100px_rgba(0,0,0,0.6)] hover:-translate-y-1.5'
+              ? 'bg-white/[0.01] border-transparent backdrop-blur-2xl hover:border-[var(--border-accent)] hover:bg-white hover:backdrop-blur-none shadow-none hover:shadow-[0_45px_100px_rgba(139,38,29,0.1)] hover:-translate-y-1.5'
+              : 'bg-white/[0.01] border-transparent backdrop-blur-2xl hover:bg-black hover:border-white/20 hover:backdrop-blur-none shadow-none hover:shadow-[0_45px_100px_rgba(0,0,0,0.6)] hover:-translate-y-1.5'
           }`}
          >
            <div className={`h-48 relative overflow-hidden ${theme === 'retro' ? 'bg-black/5' : 'bg-zinc-900'}`}>
@@ -508,7 +508,7 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
         <div className="flex-1 overflow-y-auto custom-scrollbar relative">
           {/* Background Decorative Rings (Very faint) */}
           <div className="absolute inset-x-0 top-0 h-[800px] pointer-events-none opacity-[0.05] z-0 flex items-center justify-center overflow-hidden">
-             <BorromeanRings centered={true} opacity={1} driverType={driverType || undefined} />
+             <BorromeanRings centered={true} opacity={1} driverType={driverType || undefined} vivid={true} />
           </div>
 
           <div className="max-w-6xl mx-auto py-12 md:py-20 px-8 relative z-10">
@@ -655,7 +655,7 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
             : 'opacity-0 scale-[1.3] translate-y-20 rotate-12'
         }`}>
            <div className="w-[1000px] h-[1000px] flex items-center justify-center translate-x-1/4">
-              <BorromeanRings centered={true} opacity={1} driverType={driverType || undefined} />
+              <BorromeanRings centered={true} opacity={1} driverType={driverType || undefined} vivid={true} />
            </div>
         </div>
       )}

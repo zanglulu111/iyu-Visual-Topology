@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { CreativeBlueprint, BlueprintLanguage, NarrativeFieldState } from '../../types';
-import { Bot, Zap, Loader2, Edit3, Eye, AlertCircle, Cpu } from 'lucide-react';
+import { Bot, Zap, Loader2, Edit3, Eye, AlertCircle, Cpu, ArrowLeft } from 'lucide-react';
 import { CopyButton, ProcessingTimer, MarkdownRenderer } from '../SharedBlueprintComponents';
 
 interface AnalysisViewProps {
@@ -13,6 +13,7 @@ interface AnalysisViewProps {
     fieldState: NarrativeFieldState;
     themeAccent: string;
     theme?: string;
+    onBack?: () => void;
 }
 
 const SimpleMathRenderer = ({ formula, language }: { formula: string, language: BlueprintLanguage }) => {
@@ -84,7 +85,7 @@ const SimpleMathRenderer = ({ formula, language }: { formula: string, language: 
 }
 
 export const AnalysisView: React.FC<AnalysisViewProps> = ({ 
-    blueprint, language, isAesthetic, onAnalyzePsycho, onUpdateBlueprint, fieldState, themeAccent, theme 
+    blueprint, language, isAesthetic, onAnalyzePsycho, onUpdateBlueprint, fieldState, themeAccent, theme, onBack 
 }) => {
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     // Track start time for the processing timer
@@ -147,15 +148,24 @@ export const AnalysisView: React.FC<AnalysisViewProps> = ({
     const postText = formulaMatch ? fullText.substring(formulaMatch.index! + formulaMatch[0].length).trim() : "";
 
     return (
-        <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
+        <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20 pt-10 px-6">
+            {onBack && (
+                <button 
+                    onClick={onBack}
+                    className={`mb-8 flex items-center gap-2 text-xs font-bold uppercase tracking-widest ${theme === 'retro' ? 'text-zinc-500 hover:text-black' : 'text-zinc-500 hover:text-white'} transition-colors group`}
+                >
+                    <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
+                    {language === 'EN' ? "Back to Bible" : "返回圣经"}
+                </button>
+            )}
             {!blueprint.narrative?.psychoanalysis ? (
                 <div className={`flex flex-col items-center justify-center py-20 ${theme === 'retro' ? 'bg-[var(--bg-header)]/40 border-[#8B261D]/20' : 'bg-zinc-900/20 border-zinc-800'} border rounded-2xl border-dashed`}>
                     <Bot size={48} className={`${theme === 'retro' ? 'text-[#8B261D]' : 'text-zinc-600'} mb-6`} />
-                    <h3 className={`text-xl font-bold ${theme === 'retro' ? 'text-black' : 'text-white'} mb-2`}>{language === 'EN' ? "Psychoanalytic Report" : "精神分析诊断报告"}</h3>
+                    <h3 className={`text-xl font-bold ${theme === 'retro' ? 'text-black' : 'text-white'} mb-2`}>{language === 'EN' ? "Mist Dictionary" : "迷雾辞典"}</h3>
                     <p className={`${theme === 'retro' ? 'text-black/60' : 'text-zinc-500'} text-sm mb-8 text-center max-w-md`}>
                         {language === 'EN' 
-                            ? "Generate a deep structural analysis based on Lacanian theory. Reveals hidden desires and ideological symptoms." 
-                            : "生成基于拉康理论的深度结构分析。揭示文本背后的潜意识欲望与意识形态症候。"}
+                            ? "A structural glossary based on Lacanian theory. Reveals the symbolic topology of desire." 
+                            : "解析基于拉康理论的结构性辞典。揭示欲望在象征界的拓扑映射。"}
                     </p>
                     {errorMsg && (
                         <div className="flex items-center gap-2 text-red-400 text-xs mb-4 bg-red-900/20 px-4 py-2 rounded">
@@ -170,10 +180,10 @@ export const AnalysisView: React.FC<AnalysisViewProps> = ({
                         {isAnalyzing ? <Loader2 size={16} className="animate-spin" /> : <Zap size={16} />}
                         {isAnalyzing ? (
                             <span className="flex items-center">
-                                {language === 'EN' ? "Diagnosing..." : "诊断中..."}
+                                {language === 'EN' ? "Compiling..." : "编纂中..."}
                                 <ProcessingTimer startTime={analysisStartTime} />
                             </span>
-                        ) : (language === 'EN' ? "Run Diagnosis" : "开始诊断")}
+                        ) : (language === 'EN' ? "Open Dictionary" : "查看辞典")}
                     </button>
                 </div>
             ) : (
@@ -184,8 +194,8 @@ export const AnalysisView: React.FC<AnalysisViewProps> = ({
                                 <Bot size={24} className={themeAccent} />
                             </div>
                             <div>
-                                <h3 className={`text-2xl font-serif ${theme === 'retro' ? 'text-black' : 'text-white'}`}>{language === 'EN' ? "Visionary Analysis" : "Visionary 深度诊断"}</h3>
-                                <p className={`text-xs ${theme === 'retro' ? 'text-[#8B261D]' : 'text-zinc-500'} uppercase tracking-widest mt-1`}>Lacanian • Zizekian • Cultural Critique</p>
+                                <h3 className={`text-2xl font-serif ${theme === 'retro' ? 'text-black' : 'text-white'}`}>{language === 'EN' ? "Mist Dictionary" : "Visionary 迷雾辞典"}</h3>
+                                <p className={`text-xs ${theme === 'retro' ? 'text-[#8B261D]' : 'text-zinc-500'} uppercase tracking-widest mt-1`}>Topological • Lacanian • Symbolic Order</p>
                             </div>
                         </div>
                         <div className="flex gap-2">
@@ -255,7 +265,7 @@ export const AnalysisView: React.FC<AnalysisViewProps> = ({
                             className={`text-xs font-bold uppercase tracking-wider ${themeAccent} hover:text-white transition-colors flex items-center gap-2`}
                         >
                             {isAnalyzing ? <Loader2 size={12} className="animate-spin" /> : <Zap size={12} />}
-                            {language === 'EN' ? "Re-Run Diagnosis" : "重新诊断"}
+                            {language === 'EN' ? "Update Dictionary" : "更新辞典"}
                         </button>
                     </div>
                 </div>

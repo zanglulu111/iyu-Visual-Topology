@@ -315,7 +315,7 @@ export const BlueprintEditor: React.FC<BlueprintEditorProps> = ({
             menuItems = [
                 { id: 'NARRATIVE', label: language === 'EN' ? "Core Narrative" : "核心叙事", icon: BookOpen },
                 { id: 'ASSETS', label: language === 'EN' ? "Scene & Assets" : "场景资产", icon: ImageIcon },
-                { id: 'ANALYSIS', label: language === 'EN' ? "Psycho Analysis" : "心理拓扑", icon: BrainCircuit },
+                { id: 'ANALYSIS', label: language === 'EN' ? "Mist Dictionary" : "迷雾辞典", icon: BrainCircuit },
                 { id: 'METONYMY', label: language === 'EN' ? "Script Metonymy" : "剧本转喻", icon: Wand2 }
             ];
         }
@@ -606,8 +606,9 @@ ${psychoHtml}
         return id;
     };
 
+    const isAnalysisMode = activeTab === 'ANALYSIS';
     const isMetonymyMode = activeTab === 'METONYMY';
-    const mainPaddingClass = isMetonymyMode ? 'p-0' : 'p-8 md:p-12';
+    const mainPaddingClass = (isMetonymyMode || isAnalysisMode) ? 'p-0' : 'p-8 md:p-12';
 
     const renderContent = () => {
         if (activeTab === 'ASSETS') {
@@ -730,6 +731,7 @@ ${psychoHtml}
                             fieldState={fieldState}
                             themeAccent={uiConfig.themeAccent}
                             theme={effectiveTheme}
+                            onBack={() => setActiveTab('NARRATIVE')}
                         />
                     );
                 }
@@ -850,7 +852,7 @@ ${psychoHtml}
                     </div>
                 </div>
 
-                {!isSutureOpen && (
+                {!isSutureOpen && !isAnalysisMode && (
                     <aside className={`${isSidebarOpen ? 'w-64 translate-x-0' : 'w-0 -translate-x-full opacity-0 overflow-hidden'} ${uiConfig.themeSidebarBg} border-r ${uiConfig.themeSidebarBorder} flex flex-col shrink-0 transition-all duration-300 ease-in-out`}>
                         <div className="w-64 flex flex-col h-full">
                             <div className="flex-1 flex flex-col py-6">

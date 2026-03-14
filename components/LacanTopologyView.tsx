@@ -135,7 +135,12 @@ export const LacanTopologyView: React.FC<LacanTopologyViewProps> = ({
     const activeData = RSI_DESCRIPTIONS[activeKey];
 
     return (
-        <div className={`flex flex-col h-full w-full bg-[var(--bg-main)] text-[var(--accent-color)] font-sans overflow-hidden transition-colors duration-500`}>
+        <div 
+            className={`flex flex-col h-full w-full bg-[var(--bg-main)] text-[var(--accent-color)] font-sans overflow-hidden transition-all duration-500`}
+            style={{ 
+                filter: isRetro ? 'saturate(1.05) brightness(1.01)' : 'saturate(1.2) brightness(1.15)'
+            }}
+        >
             {isRetro && <div className="absolute inset-0 pointer-events-none opacity-30 mix-blend-multiply z-0" style={{ backgroundImage: 'var(--pattern-aged)' }}></div>}
             
         {/* Global Top Navbar - EXACT REPLICA OF HOMEPAGE */}
@@ -276,7 +281,7 @@ export const LacanTopologyView: React.FC<LacanTopologyViewProps> = ({
                                 <h3 className={`text-[10px] font-black uppercase tracking-[0.3em] ${isRetro ? 'text-[var(--text-muted)]' : 'text-gold-primary/60'} mb-4 flex items-center gap-2`}>
                                     <BookOpen size={12} /> {lang === 'CN' ? '概念界定' : 'CONCEPT DEFINITION'}
                                 </h3>
-                                <p className={`text-base lg:text-lg ${isRetro ? 'text-[var(--text-main)] italic' : 'text-white'} leading-relaxed font-medium text-justify transition-colors`}>
+                                <p className={`text-base lg:text-lg ${isRetro ? 'text-[var(--text-main)] italic' : 'text-white brightness-125'} leading-relaxed font-medium text-justify transition-colors`}>
                                     {activeData[lang].desc}
                                 </p>
                             </section>
@@ -322,7 +327,7 @@ export const LacanTopologyView: React.FC<LacanTopologyViewProps> = ({
 
                     {/* The Rings - Large and centered */}
                     <div className="w-full h-full max-w-[1000px] max-h-[1000px] relative flex items-center justify-center -translate-y-12">
-                        <BorromeanRings centered={true} opacity={1} />
+                        <BorromeanRings centered={true} opacity={1} vivid={true} />
                         
                         {/* Interactive Targets Overlay - HOVER DISABLED AS PER REQUEST */}
                         <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 z-10 pointer-events-auto">

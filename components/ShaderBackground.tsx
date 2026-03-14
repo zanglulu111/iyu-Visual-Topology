@@ -71,13 +71,13 @@ const fragmentShaderSource = `
       vec3 color1 = vec3(0.35, 0.35, 0.35); // Mid-tone cloud
       vec3 color3 = vec3(0.55, 0.55, 0.55); // Bright highlights
       
-      float highlight = smoothstep(0.5, 0.8, noise1 * (1.0 - mouseInfluence * 0.5));
-      vec3 finalColor = mix(vec3(0.05), color1, pattern);
+      float highlight = smoothstep(0.6, 0.9, noise1 * (1.0 - mouseInfluence * 0.5));
+      vec3 finalColor = mix(vec3(0.02), color1, pattern);
       finalColor = mix(finalColor, color3, highlight);
       
       // Make dark areas transparent so the background color shows through
-      float mistAlpha = clamp(pattern * 1.5, 0.0, 1.0);
-      mistAlpha = clamp(mistAlpha + highlight, 0.0, 1.0);
+      float mistAlpha = clamp(pattern * 0.8, 0.0, 0.7);
+      mistAlpha = clamp(mistAlpha + highlight * 0.5, 0.0, 1.0);
       
       gl_FragColor = vec4(finalColor, mistAlpha);
   }

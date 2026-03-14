@@ -309,6 +309,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                         driverType={driverType} 
                         opacity={0.8} 
                         centered={true}
+                        vivid={true}
                     />
                 </div>
             )}

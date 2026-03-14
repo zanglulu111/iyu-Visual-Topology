@@ -328,7 +328,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
             : 'opacity-0 scale-[1.2] translate-y-20 rotate-[10deg] blur-lg'
         }`}>
           <div className="w-[1000px] h-[1000px] flex items-center justify-center translate-x-1/4">
-            <BorromeanRings centered={true} opacity={theme === 'retro' ? 0.35 : 0.45} driverType={hoveredDriver || undefined} />
+            <BorromeanRings centered={true} opacity={theme === 'retro' ? 0.75 : 0.8} driverType={hoveredDriver || undefined} vivid={true} />
           </div>
         </div>
 
@@ -484,10 +484,10 @@ export const LandingView: React.FC<LandingViewProps> = ({
                     <div
                       key={i}
                       onClick={card.onClick}
-                      className={`p-5 rounded-sm cursor-pointer transition-all duration-700 group hover:-translate-y-1.5 border ${
+                      className={`p-6 rounded-sm cursor-pointer transition-all duration-700 group hover:-translate-y-1.5 border ${
                         theme === 'retro'
-                          ? 'border-transparent bg-transparent hover:bg-[#F9F7F1] hover:border-[var(--border-accent)] hover:shadow-xl'
-                          : 'border-zinc-900 bg-white/5 hover:bg-zinc-950 hover:border-white/20 backdrop-blur-sm shadow-lg hover:shadow-[0_45px_100px_rgba(0,0,0,0.6)]'
+                          ? 'bg-white/[0.01] border-transparent hover:bg-[#FDFCF8] hover:border-[var(--border-accent)] hover:shadow-xl backdrop-blur-2xl hover:backdrop-blur-none'
+                          : 'bg-white/[0.01] border-transparent hover:bg-zinc-950 hover:border-white/20 shadow-none hover:shadow-[0_45px_100px_rgba(0,0,0,0.6)] backdrop-blur-2xl hover:backdrop-blur-none'
                       }`}
                     >
                       <div className="flex items-center gap-5">

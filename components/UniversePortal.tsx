@@ -285,6 +285,17 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
         <ShaderBackground />
       </div>
 
+      {/* Layer 1.5: Retro Paper Overlay - Separates dynamic background from text interaction layer */}
+      {isRetro && (
+        <div 
+          className="absolute inset-0 pointer-events-none z-[5] transition-opacity duration-[2000ms] ease-in-out"
+          style={{ 
+            backgroundColor: 'rgba(235, 230, 215, 0.45)',
+            mixBlendMode: 'normal'
+          }}
+        />
+      )}
+
 
       {/* Layer 2: BorromeanRings gateway - THE MIDGROUND (Strengthened) */}
       <div
@@ -304,7 +315,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
         <div 
             className="w-[55vh] h-[55vh] max-w-[550px] max-h-[550px] overflow-visible transition-all duration-[2000ms] ease-in-out"
             style={{ 
-              opacity: isRetro ? 0.7 : 0.8
+              opacity: isRetro ? 0.35 : 0.8
             }}
           >
             <BorromeanRings centered={true} opacity={1} lang={lang === 'CN' ? 'CN' : 'EN'} driverType={isRetro ? undefined : undefined} isHomepage={true} />
@@ -321,13 +332,13 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
       >
         {/* Anti-Clash Mask for Title */}
         <div className="absolute inset-x-0 -top-10 bottom-0 pointer-events-none z-[-1] opacity-60"
-             style={{ background: isRetro ? 'none' : 'radial-gradient(ellipse at center, rgba(2,2,5,0.8) 0%, transparent 70%)' }} />
+             style={{ background: isRetro ? 'radial-gradient(ellipse at center, rgba(255,255,252,0.4) 0%, transparent 70%)' : 'radial-gradient(ellipse at center, rgba(2,2,5,0.8) 0%, transparent 70%)' }} />
         
         <div className="transition-transform duration-700 ease-out">
           <AnimatedText
             lang={lang}
             hClass="h-[80px] sm:h-[96px] md:h-[110px] lg:h-[130px]"
-            className={`text-[40px] sm:text-[60px] md:text-[80px] lg:text-[96px] font-black tracking-[0.15em] sm:tracking-[0.2em] leading-none transition-all duration-1000 animate-portal-breathing whitespace-nowrap ${isRetro ? 'text-[var(--text-accent)]' : 'text-white/90'}`}
+            className={`text-[40px] sm:text-[60px] md:text-[80px] lg:text-[96px] font-black tracking-[0.15em] sm:tracking-[0.2em] leading-none transition-all duration-1000 animate-portal-breathing whitespace-nowrap ${isRetro ? 'text-[#8B261D]' : 'text-white/90'}`}
             style={{
               fontFamily: "'Noto Serif SC', 'Playfair Display', serif",
               textShadow: isRetro ? '0 1px 1px rgba(255, 255, 255, 0.7)' : '0 1px 4px rgba(0,0,0,0.8), 0 2px 6px rgba(0,0,0,0.5)',
@@ -340,7 +351,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
             <AnimatedText
               lang={lang}
               hClass="h-4"
-              className={`text-[9px] sm:text-[10px] uppercase tracking-[0.6em] sm:tracking-[0.8em] font-light transition-all duration-1000 ${isRetro ? 'text-black/30' : 'text-white/40'}`}
+              className={`text-[9px] sm:text-[10px] uppercase tracking-[0.6em] sm:tracking-[0.8em] font-light transition-all duration-1000 ${isRetro ? 'text-[#8B261D]/50' : 'text-white/40'}`}
               cn="爱欲视觉拓扑学 // EROTIC VISUAL TOPOLOGY"
               en="EROTIC VISUAL TOPOLOGY // MIST OBSERVATORY"
             />
@@ -357,12 +368,12 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
             <AnimatedText
               lang={lang}
               hClass="h-6"
-              className={`text-[13px] sm:text-[15px] md:text-[17px] tracking-[0.3em] font-light italic transition-colors duration-1000 ${isRetro ? 'text-black/60 hover:text-black/90' : 'text-white/60 hover:text-white/95'}`}
+              className={`text-[13px] sm:text-[15px] md:text-[17px] tracking-[0.3em] font-light italic transition-colors duration-1000 ${isRetro ? 'text-[#8B261D]/70 hover:text-[#8B261D]' : 'text-white/60 hover:text-white/95'}`}
               style={{ fontFamily: "'Noto Serif SC', 'Playfair Display', serif" }}
               cn={LACANIAN_QUOTES[lacanianQuoteIndex].cn}
               en={LACANIAN_QUOTES[lacanianQuoteIndex].en}
             />
-            <div className={`mt-2 w-0 group-hover/quote:w-12 h-px mx-auto transition-all duration-700 opacity-40 ${isRetro ? 'bg-black' : 'bg-white'}`} />
+            <div className={`mt-2 w-0 group-hover/quote:w-12 h-px mx-auto transition-all duration-700 opacity-40 ${isRetro ? 'bg-[#8B261D]' : 'bg-white'}`} />
           </div>
         </div>
       </div>
@@ -399,7 +410,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
                     lang={lang}
                     hClass="h-10 w-40"
                     className={`text-[9px] font-mono tracking-[0.3em] uppercase
-                      ${isHovered ? 'opacity-100 brightness-125' : 'opacity-60'} ${isRetro ? 'text-black' : 'text-white'}
+                      ${isHovered ? 'opacity-100 brightness-125' : (isRetro ? 'opacity-75' : 'opacity-60')} ${isRetro ? 'text-[#8B261D]' : 'text-white'}
                     `}
                     style={{
                       textShadow: isRetro ? 'none' : '0 2px 8px rgba(0,0,0,0.8)',
@@ -418,15 +429,15 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
                     lang={lang}
                     hClass="h-8"
                     className={`text-[15px] sm:text-[17px] tracking-[0.4em] uppercase whitespace-nowrap
-                      ${isHovered ? (isRetro ? 'text-black' : 'text-white') : (isRetro ? 'text-black/70' : 'text-white/80')}
+                      ${isHovered ? (isRetro ? 'text-[#8B261D]' : 'text-white') : (isRetro ? 'text-[#8B261D]' : 'text-white/80')}
                     `}
                     style={{
                       fontFamily: "'Noto Serif SC', 'Playfair Display', serif",
-                      fontWeight: isHovered ? 500 : 300,
+                      fontWeight: isHovered ? 700 : 500,
                       transform: isHovered ? 'scale(1.1)' : 'scale(1)',
                       transition: 'transform 1.8s cubic-bezier(0.19, 1, 0.22, 1), color 1.8s ease, opacity 1.8s ease',
                       willChange: 'transform',
-                      textShadow: 'none'
+                      textShadow: isRetro ? '0 0.5px 1px rgba(255, 255, 255, 0.8)' : 'none'
                     }}
                     cn={realm.titleCn}
                     en={realm.titleEn}
@@ -440,8 +451,8 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
                     <AnimatedText
                       lang={lang}
                       hClass="h-[100px] sm:h-[80px]"
-                      className={`text-[13px] sm:text-[14px] font-normal tracking-[0.1em] w-[240px] sm:w-[280px] leading-relaxed text-center
-                        ${isRetro ? 'text-black/80' : 'text-white/80'}
+                      className={`text-[13px] sm:text-[14px] tracking-[0.05em] w-[240px] sm:w-[280px] leading-relaxed text-center
+                        ${isRetro ? 'text-[#8B261D] font-medium' : 'text-white/80 font-normal'}
                       `}
                       cn={realm.descCn}
                       en={realm.descEn}

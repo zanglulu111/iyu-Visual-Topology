@@ -939,6 +939,7 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
                         driverType={driverType} 
                         opacity={0.8} 
                         centered={true}
+                        vivid={true}
                     />
                 </div>
             )}
