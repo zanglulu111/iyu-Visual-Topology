@@ -1,0 +1,131 @@
+{
+  "nodes": [
+    {
+      "id": "socrates",
+      "name": "苏格拉底",
+      "nameEn": "Socrates",
+      "era": "古希腊",
+      "years": "470-399 BC",
+      "school": "古希腊哲学",
+      "summary": "西方哲学的奠基人之一。以'我知道我一无所知'著称，发展了苏格拉底式问答法（辩证法）。认为美德即知识，追求灵魂的净化与真理。",
+      "keywords": ["辩证法", "美德即知识", "灵魂", "无知之知"],
+      "color": "#8B7355"
+    },
+    {
+      "id": "plato",
+      "name": "柏拉图",
+      "nameEn": "Plato",
+      "era": "古希腊",
+      "years": "428-348 BC",
+      "school": "古希腊哲学",
+      "summary": "苏格拉底的学生，亚里士多德的老师。提出理念论——真实存在的是永恒不变的理念世界，感官世界只是其影子。著有《理想国》，构想了哲学王统治的理想城邦。",
+      "keywords": ["理念论", "洞穴比喻", "理想国", "哲学王"],
+      "color": "#6B8E9F"
+    },
+    {
+      "id": "aristotle",
+      "name": "亚里士多德",
+      "nameEn": "Aristotle",
+      "era": "古希腊",
+      "years": "384-322 BC",
+      "school": "古希腊哲学",
+      "summary": "柏拉图的学生，百科全书式的哲学家。反对柏拉图的理念论，认为形式内在于事物之中。建立了逻辑学、伦理学、政治学、诗学等学科体系。",
+      "keywords": ["形式与质料", "四因说", "逻辑学", "幸福论"],
+      "color": "#7B9E6B"
+    },
+    {
+      "id": "kant",
+      "name": "康德",
+      "nameEn": "Immanuel Kant",
+      "era": "启蒙时代",
+      "years": "1724-1804",
+      "school": "德国古典哲学",
+      "summary": "完成了哲学上的哥白尼革命。认为人的认识能力决定了我们所能认识的世界的结构。提出定言命令作为道德的基础，强调人是目的而非手段。",
+      "keywords": ["纯粹理性批判", "定言命令", "物自体", "先验哲学"],
+      "color": "#9E7B8E"
+    },
+    {
+      "id": "hegel",
+      "name": "黑格尔",
+      "nameEn": "G.W.F. Hegel",
+      "era": "19世纪",
+      "years": "1770-1831",
+      "school": "德国古典哲学",
+      "summary": "辩证法的集大成者。认为历史是绝对精神自我实现的过程，通过正-反-合的辩证运动不断发展。《精神现象学》是其代表作，影响了马克思、海德格尔等后世哲学家。",
+      "keywords": ["辩证法", "绝对精神", "历史哲学", "主奴辩证法"],
+      "color": "#8E9E7B"
+    },
+    {
+      "id": "marx",
+      "name": "马克思",
+      "nameEn": "Karl Marx",
+      "era": "19世纪",
+      "years": "1818-1883",
+      "school": "马克思主义",
+      "summary": "将黑格尔的辩证法颠倒过来，建立了历史唯物主义。认为经济基础决定上层建筑，阶级斗争是历史发展的动力。与恩格斯合著《共产党宣言》，著有《资本论》。",
+      "keywords": ["历史唯物主义", "剩余价值", "阶级斗争", "异化"],
+      "color": "#C0392B"
+    },
+    {
+      "id": "habermas",
+      "name": "哈贝马斯",
+      "nameEn": "Jurgen Habermas",
+      "era": "当代",
+      "years": "1929-",
+      "school": "法兰克福学派",
+      "summary": "法兰克福学派第二代代表人物。提出交往行为理论，区分工具理性与交往理性。认为现代性危机在于系统对生活世界的殖民化，主张通过理性商谈实现民主。",
+      "keywords": ["交往行为理论", "公共领域", "生活世界", "商谈伦理"],
+      "color": "#2980B9"
+    },
+    {
+      "id": "nietzsche",
+      "name": "尼采",
+      "nameEn": "Friedrich Nietzsche",
+      "era": "19世纪",
+      "years": "1844-1900",
+      "school": "生命哲学",
+      "summary": "宣告上帝已死，批判西方形而上学传统。提出权力意志、超人哲学和永恒轮回。对存在主义、后现代主义产生深远影响。",
+      "keywords": ["权力意志", "超人", "永恒轮回", "上帝已死"],
+      "color": "#8E44AD"
+    },
+    {
+      "id": "heidegger",
+      "name": "海德格尔",
+      "nameEn": "Martin Heidegger",
+      "era": "20世纪",
+      "years": "1889-1976",
+      "school": "存在主义",
+      "summary": "追问存在的意义，批判西方哲学遗忘了存在问题。提出此在（Dasein）分析，强调人的存在是在世界中存在。《存在与时间》是其代表作。",
+      "keywords": ["存在与时间", "此在", "在世存在", "本真性"],
+      "color": "#16A085"
+    },
+    {
+      "id": "foucault",
+      "name": "福柯",
+      "nameEn": "Michel Foucault",
+      "era": "20世纪",
+      "years": "1926-1984",
+      "school": "后结构主义",
+      "summary": "分析权力与知识的关系，揭示现代社会的规训机制。研究疯狂、监狱、性等边缘领域，挑战主流话语的合法性。对后现代主义和批判理论影响深远。",
+      "keywords": ["权力/知识", "规训", "话语", "生命政治"],
+      "color": "#E67E22"
+    }
+  ],
+  "links": [
+    { "source": "socrates", "target": "plato", "relation": "师承" },
+    { "source": "plato", "target": "aristotle", "relation": "师承" },
+    { "source": "aristotle", "target": "kant", "relation": "影响" },
+    { "source": "plato", "target": "kant", "relation": "影响" },
+    { "source": "kant", "target": "hegel", "relation": "影响" },
+    { "source": "hegel", "target": "marx", "relation": "影响/批判" },
+    { "source": "marx", "target": "habermas", "relation": "影响/批判" },
+    { "source": "hegel", "target": "habermas", "relation": "影响" },
+    { "source": "kant", "target": "habermas", "relation": "影响" },
+    { "source": "nietzsche", "target": "heidegger", "relation": "影响" },
+    { "source": "hegel", "target": "nietzsche", "relation": "批判" },
+    { "source": "heidegger", "target": "foucault", "relation": "影响" },
+    { "source": "nietzsche", "target": "foucault", "relation": "影响" },
+    { "source": "marx", "target": "foucault", "relation": "批判/对话" },
+    { "source": "habermas", "target": "foucault", "relation": "论战" }
+  ]
+}

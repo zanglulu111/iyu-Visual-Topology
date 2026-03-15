@@ -66,7 +66,7 @@
 
 /* Global Transitions */
 body {
-  transition: background-color 0.4s ease, color 0.4s ease;
+  transition: background-color 0.5s ease, color 0.5s ease;
   background-color: var(--bg-main);
   color: var(--text-main);
   position: relative;
@@ -81,11 +81,16 @@ body::before {
   opacity: var(--texture-opacity);
   pointer-events: none;
   z-index: -1;
-  transition: opacity 0.4s ease;
+  transition: opacity 0.5s ease, background-image 0.5s ease;
+}
+
+/* Unified theme-switched property transitions across all elements */
+*, *::before, *::after {
+  transition-duration: inherit;
 }
 
 .theme-transition {
-  transition: all 0.4s ease;
+  transition: all 0.5s ease;
 }
 
 /* Texture Utility Classes (No mix-blend-mode for performance) */

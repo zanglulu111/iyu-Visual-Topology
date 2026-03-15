@@ -3,7 +3,7 @@ import { Globe, Wand2, HelpCircle, History as HistoryIcon, Cpu, GitFork, BookOpe
 import { DriverType, User } from '../types';
 import { useTheme } from '../contexts/ThemeContext';
 
-type ViewMode = 'ENGINE' | 'DIVERGENCE' | 'BIBLE' | 'METONYMY' | 'TOPOLOGY' | 'RSI' | 'ARCHIVE' | 'VIDEO' | 'RORSCHACH';
+type ViewMode = 'ENGINE' | 'DIVERGENCE' | 'BIBLE' | 'METONYMY' | 'TOPOLOGY' | 'RSI' | 'ARCHIVE' | 'VIDEO' | 'RORSCHACH' | 'ANALYSIS';
 
 const AnimatedText = ({ cn, en, lang, className = "", hClass = "h-5" }: { cn: React.ReactNode, en: React.ReactNode, lang: 'CN' | 'EN', className?: string, hClass?: string }) => (
   <div className={`overflow-hidden relative ${hClass} ${className}`}>
@@ -22,7 +22,7 @@ interface AppHeaderProps {
   page: number;
   lang: 'CN' | 'EN';
   setLang: (lang: 'CN' | 'EN') => void;
-  setPage: (page: -1 | 0 | 1) => void;
+  setPage: (page: -1 | 0 | 1 | 2) => void;
   selectedDriver: DriverType | null;
   driverName: string;
   viewMode: ViewMode;
@@ -69,6 +69,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
 
   const getHeaderTitleColor = () => {
     if (theme === 'retro') return 'text-[#8B261D]';
+    if (viewMode === 'RORSCHACH' || viewMode === 'ARCHIVE' || viewMode === 'ANALYSIS') return 'text-white';
     if (selectedDriver === DriverType.COMMERCIAL) return 'text-mist-cyan';
     if (selectedDriver === DriverType.EXPERIMENTAL) return 'text-mist-purple';
     if (selectedDriver === DriverType.AESTHETIC) return 'text-mist-rose';
@@ -78,6 +79,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
 
   const getHeaderIconFill = () => {
     if (theme === 'retro') return 'fill-[#8B261D]/20';
+    if (viewMode === 'RORSCHACH' || viewMode === 'ARCHIVE' || viewMode === 'ANALYSIS') return 'fill-white/20';
     if (selectedDriver === DriverType.COMMERCIAL) return 'fill-cyan-400/20';
     if (selectedDriver === DriverType.EXPERIMENTAL) return 'fill-purple-400/20';
     if (selectedDriver === DriverType.AESTHETIC) return 'fill-rose-400/20';
@@ -86,6 +88,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   };
 
   const getThemeTextColor = () => {
+    if (viewMode === 'RORSCHACH' || viewMode === 'ARCHIVE' || viewMode === 'ANALYSIS') return 'text-white';
     if (selectedDriver === DriverType.COMMERCIAL) return 'text-mist-cyan';
     if (selectedDriver === DriverType.EXPERIMENTAL) return 'text-mist-purple';
     if (selectedDriver === DriverType.AESTHETIC) return 'text-mist-rose';
@@ -100,6 +103,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
 
   const getBorderAccentColor = () => {
     if (theme === 'retro') return 'transparent';
+    if (viewMode === 'RORSCHACH' || viewMode === 'ARCHIVE' || viewMode === 'ANALYSIS') return 'transparent';
     if (selectedDriver === DriverType.COMMERCIAL) return 'rgba(34, 211, 238, 0.15)';
     if (selectedDriver === DriverType.EXPERIMENTAL) return 'rgba(192, 132, 252, 0.15)';
     if (selectedDriver === DriverType.AESTHETIC) return 'rgba(251, 113, 133, 0.15)';
@@ -109,6 +113,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
 
   const getLineGlow = () => {
     if (theme === 'retro') return '';
+    if (viewMode === 'RORSCHACH' || viewMode === 'ARCHIVE' || viewMode === 'ANALYSIS') return '';
     if (selectedDriver === DriverType.COMMERCIAL) return '0 0 10px rgba(34,211,238,0.1)';
     if (selectedDriver === DriverType.EXPERIMENTAL) return '0 0 10px rgba(192,132,252,0.1)';
     if (selectedDriver === DriverType.AESTHETIC) return '0 0 10px rgba(251,113,133,0.1)';
@@ -135,21 +140,45 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         }} 
       />
       <div className="flex items-center gap-5">
-        <button
-          onClick={() => setPage(0)}
-          className={`flex items-center gap-1.5 transition-all duration-300 group px-2 py-1 rounded-md bg-transparent hover:bg-white/5 hover:scale-105 active:scale-95`}
-        >
-          <Globe size={14} className={`shrink-0 transition-all duration-100 ${theme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`} />
-          <span className={`text-[10px] font-bold uppercase tracking-[0.1em] transition-all duration-100 hidden md:block ${theme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`}>
-            {lang === 'CN' ? "返回全局" : "GLOBAL"}
-          </span>
-        </button>
+        {/* Portal-origin pages: ← 入口 button, returns to UniversePortal */}
+        {(viewMode === 'RORSCHACH' || viewMode === 'ARCHIVE' || viewMode === 'VIDEO') ? (
+          <button
+            onClick={() => setPage(-1)}
+            className={`text-[9px] font-mono tracking-[0.15em] transition-all duration-300 hover:scale-105 active:scale-95 px-2 py-1 rounded-sm border w-[72px] flex items-center justify-center ${
+              theme === 'retro'
+                ? 'text-[var(--text-accent)] border-[var(--border-main)] hover:border-[var(--border-accent)]'
+                : 'text-zinc-500 hover:text-white/80 border-zinc-800 hover:border-zinc-600'
+            }`}
+            title={lang === 'CN' ? '返回迷雾学派入口' : 'Return to Mist Portal'}
+          >
+            <div className="overflow-hidden relative h-4 w-full">
+              <div className={`transition-all duration-[1500ms] w-full ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col ${lang === 'EN' ? '-translate-y-1/2' : 'translate-y-0'}`}>
+                <div className="h-4 flex items-center shrink-0 w-full leading-none justify-center">← 入口</div>
+                <div className="h-4 flex items-center shrink-0 w-full leading-none justify-center">← PORTAL</div>
+              </div>
+            </div>
+          </button>
+        ) : (
+          /* Tool-layer pages: 返回全局 Globe button, returns to LandingView (page 0) */
+          <button
+            onClick={() => setPage(0)}
+            className={`flex items-center gap-1.5 transition-all duration-300 group px-2 py-1 rounded-md bg-transparent hover:bg-white/5 hover:scale-105 active:scale-95`}
+          >
+            <Globe size={14} className={`shrink-0 transition-all duration-100 ${theme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`} />
+            <span className={`text-[10px] font-bold uppercase tracking-[0.1em] transition-all duration-100 hidden md:block ${theme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`}>
+              {lang === 'CN' ? "返回全局" : "GLOBAL"}
+            </span>
+          </button>
+        )}
         <span className={`${getHeaderTitleColor()} font-serif font-bold text-xs uppercase tracking-widest`}>
-          {lang === 'CN' ? '迷雾学派: ' : 'MIST: '}{driverName}
+          {lang === 'CN' 
+            ? (driverName && driverName.startsWith('迷雾学派') ? driverName : `迷雾学派：${driverName}`)
+            : (driverName && driverName.startsWith('MIST') ? driverName : `MIST: ${driverName}`)
+          }
         </span>
       </div>
 
-      {!(viewMode === 'ARCHIVE' || viewMode === 'VIDEO' || viewMode === 'TOPOLOGY' || viewMode === 'RSI') && (
+      {!(viewMode === 'ARCHIVE' || viewMode === 'VIDEO' || viewMode === 'TOPOLOGY' || viewMode === 'RSI' || viewMode === 'RORSCHACH' || viewMode === 'ANALYSIS') && (
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden md:flex items-center gap-4 text-[10px] font-bold uppercase tracking-[0.2em]">
           <button
             onClick={() => setViewMode('ENGINE')}

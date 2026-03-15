@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { X, Aperture, BookOpen, Zap, Info, Shield, Layers, HelpCircle, History as HistoryIcon, Settings, Languages, User as UserIcon, Terminal, Globe, Moon, Sun, Search } from 'lucide-react';
+import { X, Aperture, BookOpen, Zap, Info, Shield, Layers, HelpCircle, History as HistoryIcon, Settings, Languages, User as UserIcon, Terminal, Globe, Moon, Sun, Search, Clock } from 'lucide-react';
 import { BlueprintLanguage, User, DriverType } from '../types';
 import { useTheme } from '../contexts/ThemeContext';
 import { BorromeanRings } from './BorromeanRings';
+import { PhilosophyTimeline } from './PhilosophyTimeline';
 
 interface LacanTopologyViewProps {
     lang: 'CN' | 'EN';
@@ -15,6 +16,7 @@ interface LacanTopologyViewProps {
     currentUser?: User;
     showRings: boolean;
     setShowRings: (show: boolean) => void;
+    hideSidebar?: boolean;
 }
 
 const AnimatedText = ({ cn, en, lang, className = "", hClass = "h-5" }: { cn: React.ReactNode, en: React.ReactNode, lang: 'CN' | 'EN', className?: string, hClass?: string }) => (
@@ -110,8 +112,8 @@ const RSI_DESCRIPTIONS: Record<string, {
     }
 };
 
-export const LacanTopologyView: React.FC<LacanTopologyViewProps> = ({ 
-    lang, 
+export const LacanTopologyView: React.FC<LacanTopologyViewProps> = ({
+    lang,
     setLang,
     onClose,
     openManual,
@@ -120,7 +122,8 @@ export const LacanTopologyView: React.FC<LacanTopologyViewProps> = ({
     openProfile,
     currentUser,
     showRings,
-    setShowRings
+    setShowRings,
+    hideSidebar
 }) => {
     const { theme, toggleTheme } = useTheme();
     const isRetro = theme === 'retro';
@@ -128,6 +131,7 @@ export const LacanTopologyView: React.FC<LacanTopologyViewProps> = ({
     const [hoveredKey, setHoveredKey] = useState<string | null>(null);
     const [activeSection, setActiveSection] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const [viewMode, setViewMode] = useState<'topology' | 'timeline'>('topology');
 
     const toggleLang = () => setLang(lang === 'CN' ? 'EN' : 'CN');
 
@@ -156,7 +160,7 @@ export const LacanTopologyView: React.FC<LacanTopologyViewProps> = ({
 
             <div className="flex items-center gap-4">
                 {/* Return Global Button (Added to sub-page context) */}
-                <button 
+                <button
                     onClick={onClose}
                     className="flex items-center gap-1.5 transition-all duration-300 group px-2 py-1 rounded-md bg-transparent hover:bg-white/5 hover:scale-105 active:scale-95 z-20"
                 >
@@ -172,9 +176,40 @@ export const LacanTopologyView: React.FC<LacanTopologyViewProps> = ({
                     lang={lang}
                     hClass="h-4"
                     className={`text-[10px] uppercase font-bold tracking-[0.2em] transition-colors duration-500`}
-                    cn={<span className={`whitespace-nowrap transition-colors duration-500 ${theme === 'retro' ? 'text-[#8B261D]' : 'text-gold-primary'}`}>主体观测中心 // 三界拓扑</span>}
-                    en={<span className={`whitespace-nowrap transition-colors duration-500 ${theme === 'retro' ? 'text-[#8B261D]' : 'text-gold-primary'}`}>SUBJECT OBSERVATION CENTER // RSI TOPOLOGY</span>}
+                    cn={<span className={`whitespace-nowrap transition-colors duration-500 ${theme === 'retro' ? 'text-[#8B261D]' : 'text-gold-primary'}`}>主体观测中心 // {viewMode === 'topology' ? '三界拓扑' : '哲学时间轴'}</span>}
+                    en={<span className={`whitespace-nowrap transition-colors duration-500 ${theme === 'retro' ? 'text-[#8B261D]' : 'text-gold-primary'}`}>SUBJECT OBSERVATION CENTER // {viewMode === 'topology' ? 'RSI TOPOLOGY' : 'PHILOSOPHY TIMELINE'}</span>}
                 />
+
+                <div className={`w-px h-4 ${theme === 'retro' ? 'bg-black/20' : 'bg-white/10'}`}></div>
+
+                {/* View Mode Toggle */}
+                <div className="flex items-center gap-1 bg-black/20 rounded-md p-1">
+                    <button
+                        onClick={() => setViewMode('topology')}
+                        className={`px-3 py-1 rounded text-[10px] font-bold uppercase tracking-wider transition-all duration-300 ${
+                            viewMode === 'topology'
+                                ? 'bg-gold-primary text-black'
+                                : theme === 'retro'
+                                ? 'text-zinc-600 hover:text-black'
+                                : 'text-zinc-400 hover:text-white'
+                        }`}
+                    >
+                        {lang === 'CN' ? 'RSI' : 'RSI'}
+                    </button>
+                    <button
+                        onClick={() => setViewMode('timeline')}
+                        className={`px-3 py-1 rounded text-[10px] font-bold uppercase tracking-wider transition-all duration-300 flex items-center gap-1 ${
+                            viewMode === 'timeline'
+                                ? 'bg-gold-primary text-black'
+                                : theme === 'retro'
+                                ? 'text-zinc-600 hover:text-black'
+                                : 'text-zinc-400 hover:text-white'
+                        }`}
+                    >
+                        <Clock size={12} />
+                        {lang === 'CN' ? '时间轴' : 'TIMELINE'}
+                    </button>
+                </div>
             </div>
 
             {/* Center: Search Bar */}
@@ -256,8 +291,15 @@ export const LacanTopologyView: React.FC<LacanTopologyViewProps> = ({
         </header>
 
             <div className="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
-                
+
+                {viewMode === 'timeline' ? (
+                    /* Philosophy Timeline View */
+                    <PhilosophyTimeline lang={lang} />
+                ) : (
+                    /* Original RSI Topology View */
+                    <>
                 {/* LEFT AREA: Detailed Explanation (1/3) */}
+                {!hideSidebar && (
                 <div className={`w-full lg:w-[35%] bg-[var(--bg-panel)] border-r border-[var(--border-main)] flex flex-col z-20 shadow-[40px_0_120px_rgba(0,0,0,0.9)] flex-shrink-0 relative overflow-hidden transition-colors duration-500`}>
                     
                     <div className="flex-1 flex flex-col p-8 lg:p-14 overflow-y-auto custom-scrollbar">
@@ -319,6 +361,7 @@ export const LacanTopologyView: React.FC<LacanTopologyViewProps> = ({
                         </div>
                     </div>
                 </div>
+                )}
 
                 {/* RIGHT AREA: Visualization (2/3) */}
                 <div className={`flex-1 relative flex items-center justify-center p-8 overflow-hidden bg-[var(--bg-main)] transition-colors duration-500`}>
@@ -368,6 +411,8 @@ export const LacanTopologyView: React.FC<LacanTopologyViewProps> = ({
                         ))}
                     </div>
                 </div>
+                    </>
+                )}
             </div>
         </div>
     );

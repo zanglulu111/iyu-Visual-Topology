@@ -402,7 +402,7 @@ interface RorschachViewProps {
   onClose: () => void;
   lang: 'CN' | 'EN';
   setLang: (lang: 'CN' | 'EN') => void;
-  setPage: (page: -1 | 0 | 1) => void;
+  setPage: (page: -1 | 0 | 1 | 2) => void;
   setViewMode: (mode: any) => void;
   openManual: () => void;
   openHistory: () => void;
@@ -743,7 +743,7 @@ export const RorschachView: React.FC<RorschachViewProps> = ({ onClose, lang }) =
 
   // ─────────────────────────────────────────────────────────────
   return (
-    <div className="absolute inset-0 flex overflow-hidden" style={{ backgroundColor: bg }}>
+    <div className="absolute inset-0 flex overflow-hidden" style={{ backgroundColor: bg, transition: 'background-color 0.5s ease, color 0.5s ease' }}>
       <style>{`
         @keyframes typeIn {
           from { opacity: 0; transform: translateY(6px); }

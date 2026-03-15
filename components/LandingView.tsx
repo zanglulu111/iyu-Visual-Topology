@@ -29,7 +29,7 @@ const AnimatedText = ({ cn, en, lang, className = "", hClass = "h-5" }: { cn: Re
 interface LandingViewProps {
   lang: 'CN' | 'EN';
   setLang: (lang: 'CN' | 'EN') => void;
-  setPage: (page: -1 | 0 | 1) => void;
+  setPage: (page: -1 | 0 | 1 | 2) => void;
   setViewMode: (mode: any) => void;
   selectedDriver: DriverType | null;
   onDriverSelect: (id: DriverType) => void;
@@ -37,6 +37,7 @@ interface LandingViewProps {
   setHoveredDriver: (id: DriverType | null) => void;
   handleOpenMetonymyPage: () => void;
   openManual: () => void;
+  initialProtocol?: string;
   isManualOpen: boolean;
   closeManual: () => void;
   openHistory: () => void;
@@ -52,6 +53,7 @@ interface LandingViewProps {
   openSettings: () => void;
   openAuth: () => void;
   openProfile: () => void;
+  onLogout: () => void;
   currentUser: User;
   showRings: boolean;
   setShowRings: (show: boolean) => void;
@@ -93,17 +95,21 @@ export const LandingView: React.FC<LandingViewProps> = ({
   openAuth,
   currentUser,
   openProfile,
+  onLogout,
   showRings,
   setShowRings,
+  initialProtocol,
 }) => {
   const [localMounted, setLocalMounted] = useState(false);
-  
+
   useEffect(() => {
     setLocalMounted(true);
   }, []);
 
   const { theme, toggleTheme } = useTheme();
-  const [selectedProtocol, setSelectedProtocol] = useState<ProtocolType>(ProtocolType.CORE_DRIVERS);
+  const [selectedProtocol, setSelectedProtocol] = useState<ProtocolType>(
+    (initialProtocol as ProtocolType) || ProtocolType.CORE_DRIVERS
+  );
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -141,6 +147,19 @@ export const LandingView: React.FC<LandingViewProps> = ({
       case DriverType.TRAILER: return 'border-mist-orange';
       default: return 'border-zinc-800';
     }
+  };
+
+  const getProtocolTitle = () => {
+    if (selectedProtocol === ProtocolType.DICTIONARY) {
+       return lang === 'CN' ? '迷雾学派：迷雾辞典' : 'MIST: DICTIONARY';
+    }
+    if (selectedProtocol === ProtocolType.CONFIDENTIAL) {
+       return lang === 'CN' ? '迷雾学派：主体档案' : 'MIST: SUBJECT ARCHIVE';
+    }
+    if (selectedProtocol === ProtocolType.RSI || selectedProtocol === ProtocolType.TOPOLOGY) {
+       return lang === 'CN' ? '迷雾学派：拓扑三界' : 'MIST: TOPOLOGY';
+    }
+    return lang === 'CN' ? '主体观测中心 // 序列号: MIST-O-1' : 'SUBJECT OBSERVATION CENTER // SEQ: MIST-O-1';
   };
 
   const getLineGlow = (driverId: DriverType | null) => {
@@ -195,31 +214,29 @@ export const LandingView: React.FC<LandingViewProps> = ({
             boxShadow: getLineGlow(hoveredDriver)
           }} 
         />
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-5">
           <button
             onClick={() => setPage(-1)}
             className={`text-[9px] font-mono tracking-[0.15em] transition-all duration-300 hover:scale-105 active:scale-95 px-2 py-1 rounded-sm border w-[72px] flex items-center justify-center ${
               theme === 'retro'
-                ? 'text-[var(--text-muted)] hover:text-[var(--text-accent)] border-[var(--border-main)] hover:border-[var(--border-accent)]'
+                ? 'text-[var(--text-accent)] border-[var(--border-main)] hover:border-[var(--border-accent)]'
                 : 'text-zinc-500 hover:text-white/80 border-zinc-800 hover:border-zinc-600'
             }`}
             title={lang === 'CN' ? '返回迷雾学派入口' : 'Return to Mist Portal'}
           >
-            <AnimatedText
-              lang={lang}
-              hClass="h-4"
-              className="w-full"
-              cn={<div className="w-full flex justify-center">← 入口</div>}
-              en={<div className="w-full flex justify-center">← PORTAL</div>}
-            />
+            <div className="overflow-hidden relative h-4 w-full">
+              <div className={`transition-all duration-[1500ms] w-full ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col ${lang === 'EN' ? '-translate-y-1/2' : 'translate-y-0'}`}>
+                <div className="h-4 flex items-center shrink-0 w-full leading-none justify-center">← 入口</div>
+                <div className="h-4 flex items-center shrink-0 w-full leading-none justify-center">← PORTAL</div>
+              </div>
+            </div>
           </button>
-          <Terminal size={14} className={`shrink-0 transition-colors duration-500 ${hoveredDriver ? getAccentColor(hoveredDriver) : 'text-[var(--text-main)] opacity-70'}`} />
           <AnimatedText
             lang={lang}
             hClass="h-4"
-            className={`text-[10px] uppercase font-bold tracking-[0.2em] transition-colors duration-500 ${hoveredDriver ? '' : 'opacity-80'}`}
-            cn={<span className={`whitespace-nowrap transition-colors duration-500 ${hoveredDriver ? getAccentColor(hoveredDriver) : 'text-[var(--text-main)]'}`}>主体观测中心 // 序列号: MIST-O-1</span>}
-            en={<span className={`whitespace-nowrap transition-colors duration-500 ${hoveredDriver ? getAccentColor(hoveredDriver) : 'text-[var(--text-main)]'}`}>SUBJECT OBSERVATION CENTER // SEQ: MIST-O-1</span>}
+            className={`${theme === 'retro' ? 'text-[#8B261D]' : 'text-white'} font-serif font-bold text-xs uppercase tracking-widest transition-colors duration-500`}
+            cn={<span className="whitespace-nowrap">{getProtocolTitle()}</span>}
+            en={<span className="whitespace-nowrap">{getProtocolTitle()}</span>}
           />
         </div>
 
@@ -333,7 +350,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
         </div>
 
         {/* LEFT SIDEBAR: SIGNAL MONITOR */}
-        <div className={`${isSidebarCollapsed ? 'w-0 opacity-0 -translate-x-full pointer-events-none' : 'w-80 opacity-100 translate-x-0'} border-r border-[var(--border-main)] ${theme === 'retro' ? 'bg-transparent' : 'bg-[var(--bg-panel)]'} flex flex-col shrink-0 hidden lg:flex z-10 transition-all duration-700 ease-in-out`}>
+        <div className={`${(isSidebarCollapsed || selectedProtocol === ProtocolType.DICTIONARY) ? 'w-0 opacity-0 -translate-x-full pointer-events-none' : 'w-80 opacity-100 translate-x-0'} border-r border-[var(--border-main)] ${theme === 'retro' ? 'bg-transparent' : 'bg-[var(--bg-panel)]'} flex flex-col shrink-0 hidden lg:flex z-10 transition-all duration-700 ease-in-out`}>
 
           {/* Logo Area */}
           <div className={`p-8 border-b border-[var(--border-main)] shrink-0`}>
@@ -477,7 +494,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
 
                 <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-8 px-4 shrink-0 pb-10">
                   {[
-                    { icon: BookOpen, titleCn: '访问辞条数据', titleEn: 'CODEX DATA', descCn: '查阅拉康、齐泽克等理论词条，理解底层系统的运转逻辑。', descEn: 'Theoretical corpus to understand system logic.', onClick: () => { setPage(1); setViewMode('RSI'); } },
+                    { icon: BookOpen, titleCn: '访问辞条数据', titleEn: 'CODEX DATA', descCn: '查阅拉康、齐泽克等理论词条，理解底层系统的运转逻辑。', descEn: 'Theoretical corpus to understand system logic.', onClick: () => { setSelectedProtocol(ProtocolType.DICTIONARY); } },
                     { icon: Film, titleCn: '影像资料库', titleEn: 'VIDEO ARCHIVE', descCn: '浏览迷雾学派的影像资料，深入视觉拓扑学的核心脉络。', descEn: 'Visual data capture of the topology threads.', onClick: () => { setPage(1); setViewMode('VIDEO'); } },
                     { icon: HistoryIcon, titleCn: '检视生成档案', titleEn: 'REVIEW ARCHIVES', descCn: '溯源过去的生成记录，恢复或重置失败的镜像拼接尝试。', descEn: 'Review past session records and attempts.', onClick: openHistory }
                   ].map((card, i) => (
@@ -519,8 +536,8 @@ export const LandingView: React.FC<LandingViewProps> = ({
             {/* 3. DICTIONARY VIEW (Philosophy Codex) */}
             {selectedProtocol === ProtocolType.DICTIONARY && (
               <div className="flex-1 flex flex-col min-h-0 h-full animate-page-dissolve overflow-hidden">
-                <PhilosophyCodexPage 
-                  onClose={() => setSelectedProtocol(ProtocolType.CORE_DRIVERS)} 
+                <PhilosophyCodexPage
+                  onClose={() => setSelectedProtocol(ProtocolType.CORE_DRIVERS)}
                   driverType={hoveredDriver || selectedDriver}
                   lang={lang}
                   currentUser={currentUser}
@@ -532,8 +549,10 @@ export const LandingView: React.FC<LandingViewProps> = ({
                   showRings={showRings}
                   setShowRings={setShowRings}
                   renderInPlace={true}
-                  onToggleExpand={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-                  isExpanded={isSidebarCollapsed}
+                  {...(!initialProtocol && {
+                    onToggleExpand: () => setIsSidebarCollapsed(!isSidebarCollapsed),
+                    isExpanded: isSidebarCollapsed
+                  })}
                 />
               </div>
             )}

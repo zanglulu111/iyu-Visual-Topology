@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Fingerprint, Database, FileText, Activity, ShieldAlert } from 'lucide-react';
+import { X, Fingerprint, Database, FileText, Activity, ShieldAlert, ChevronLeft } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import type { CaseStudy } from './archiveCasesData';
 
@@ -216,7 +216,20 @@ export const ArchiveDetailModal: React.FC<ArchiveDetailModalProps> = ({ isOpen, 
                         </div>
                     </section>
 
-                    <div className={`text-center py-10 border-t-2 border-dashed ${t.sectionBorder} mt-8`}>
+                    <div className={`text-center py-10 border-t-2 border-dashed ${t.sectionBorder} mt-8 flex flex-col items-center gap-6`}>
+                        {renderInPlace && (
+                            <button 
+                                onClick={onClose}
+                                className={`px-8 py-3 rounded-sm border-2 font-mono text-xs font-black tracking-[0.3em] uppercase transition-all active:scale-95 flex items-center gap-3 shadow-sm ${
+                                    isDark 
+                                        ? 'bg-zinc-900 border-zinc-700 hover:bg-zinc-800 text-zinc-300' 
+                                        : theme === 'retro' ? 'bg-[#F9F7F1] border-[#8B261D] hover:bg-white text-[#8B261D]' : 'bg-white border-[#8B261D] hover:bg-[#8B261D] hover:text-white text-[#8B261D]'
+                                }`}
+                            >
+                                <ChevronLeft size={14} />
+                                {lang === 'CN' ? '回到索引库' : 'BACK TO INDEX'}
+                            </button>
+                        )}
                         <p className={`text-[10px] font-mono uppercase tracking-[0.3em] ${t.textMuted}`}>
                             End of Document . EOF
                         </p>

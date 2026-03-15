@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { NarrativeEngineField } from './components/NarrativeEngineField';
 import { BlueprintEditor } from './components/BlueprintEditor';
+import { AnalysisView } from './components/blueprint/AnalysisView';
 import { HistoryModal } from './components/HistoryModal';
 import { NarrativePathsView } from './components/NarrativePathsView';
 import { ProductManualModal } from './components/ProductManualModal';
@@ -16,9 +17,11 @@ import { EngineBottomBar } from './components/EngineBottomBar';
 import { TaskManagerPanel } from './components/TaskManagerPanel';
 import { LandingView } from './components/LandingView';
 import { UniversePortal } from './components/UniversePortal';
+import { GlobalHomePage } from './components/GlobalHomePage';
 import { VisionSidebar } from './components/VisionSidebar';
 import { TheSkinSidebar } from './components/TheSkinSidebar';
 import { AestheticInputSidebar } from './components/AestheticInputSidebar';
+import PhilosophyGraph from './components/PhilosophyGraph';
 import {
     DriverType,
     CreativeTreatment,
@@ -59,7 +62,7 @@ import { useSettings } from './contexts/SettingsContext';
 import { SimpleConfigPanel } from './src/components/SimpleConfigPanel';
 import { useTheme } from './contexts/ThemeContext';
 
-type ViewMode = 'ENGINE' | 'DIVERGENCE' | 'BIBLE' | 'METONYMY' | 'TOPOLOGY' | 'RSI' | 'ARCHIVE' | 'VIDEO' | 'RORSCHACH';
+type ViewMode = 'ENGINE' | 'DIVERGENCE' | 'BIBLE' | 'METONYMY' | 'TOPOLOGY' | 'RSI' | 'ARCHIVE' | 'VIDEO' | 'RORSCHACH' | 'ANALYSIS';
 
 import { LacanGraphView } from './components/LacanGraphView';
 import { LacanTopologyView } from './components/LacanTopologyView';
@@ -73,10 +76,12 @@ const App: React.FC = () => {
     const { isOpen: isSettingsOpen, openSettings, closeSettings } = useSettings();
     const navigate = useNavigate();
     const location = useLocation();
-    const [page, setPage] = useState<-1 | 0 | 1>(-1);
+    const [page, setPage] = useState<-1 | 0 | 1 | 2>(-1);
     const [lang, setLang] = useState<'CN' | 'EN'>('CN');
     const [viewMode, setViewMode] = useState<ViewMode>('ENGINE');
     const [selectedDriver, setSelectedDriver] = useState<DriverType | null>(null);
+    const [initialProtocol, setInitialProtocol] = useState<string | undefined>(undefined);
+    const [hideSidebar, setHideSidebar] = useState(false);
     const [hoveredDriver, setHoveredDriver] = useState<DriverType | null>(null);
     const [subjectType, setSubjectType] = useState<SubjectType>('HUMAN');
     const [aestheticMode, setAestheticMode] = useState<AestheticMode>('REALISM');
@@ -1148,6 +1153,11 @@ const App: React.FC = () => {
         }
     };
 
+    // Philosophy graph route
+    if (location.pathname === '/philosophy') {
+        return <PhilosophyGraph />;
+    }
+
     return (
         <div className="min-h-screen bg-[var(--bg-main)] text-zinc-300 font-sans selection:bg-gold-primary/30 selection:text-white overflow-hidden transition-colors duration-1000">
             {page === -1 ? (
@@ -1156,9 +1166,27 @@ const App: React.FC = () => {
                     setLang={setLang}
                     setPage={setPage}
                     setViewMode={handleViewChange}
+                    setInitialProtocol={setInitialProtocol}
                     currentUser={currentUser}
                     openAuth={openAuth}
                     openProfile={() => setIsProfileOpen(true)}
+                />
+            ) : page === 2 ? (
+                <GlobalHomePage
+                    lang={lang}
+                    setLang={setLang}
+                    setPage={setPage}
+                    setViewMode={handleViewChange}
+                    setInitialProtocol={setInitialProtocol}
+                    onDriverSelect={setSelectedDriver}
+                    currentUser={currentUser}
+                    openAuth={openAuth}
+                    openProfile={() => setIsProfileOpen(true)}
+                    showRings={showRings}
+                    setShowRings={setShowRings}
+                    openManual={openManual}
+                    openHistory={openHistory}
+                    openSettings={openSettings}
                 />
             ) : page === 0 ? (
                 <LandingView
@@ -1194,6 +1222,7 @@ const App: React.FC = () => {
                     openSettings={openSettings}
                     showRings={showRings}
                     setShowRings={setShowRings}
+                    initialProtocol={initialProtocol}
                 />
             ) : viewMode === 'TOPOLOGY' ? (
                 <div className="h-screen w-screen overflow-hidden animate-page-dissolve">
@@ -1221,7 +1250,7 @@ const App: React.FC = () => {
                         setLang={setLang}
                         setPage={setPage}
                         selectedDriver={selectedDriver}
-                        driverName={lang === 'CN' ? '机密档案集' : 'CONFIDENTIAL ARCHIVES'}
+                        driverName={lang === 'CN' ? '迷雾学派：主体档案' : 'MIST: SUBJECT ARCHIVE'}
                         viewMode={viewMode}
                         setViewMode={handleViewChange}
                         handleOpenMetonymyPage={handleOpenMetonymyPage}
@@ -1288,12 +1317,13 @@ const App: React.FC = () => {
                 </div>
             ) : viewMode === 'RSI' ? (
                 <div className="h-screen w-screen overflow-hidden animate-page-dissolve">
-                    <LacanTopologyView 
-                        lang={lang} 
+                    <LacanTopologyView
+                        lang={lang}
                         setLang={setLang}
                         onClose={() => {
                             setPage(0);
                             setViewMode('ENGINE');
+                            setHideSidebar(false);
                         }}
                         openManual={openManual}
                         openHistory={openHistory}
@@ -1302,6 +1332,7 @@ const App: React.FC = () => {
                         currentUser={currentUser}
                         showRings={showRings}
                         setShowRings={setShowRings}
+                        hideSidebar={initialProtocol === 'DICTIONARY'}
                     />
                 </div>
             ) : viewMode === 'RORSCHACH' ? (
@@ -1312,7 +1343,7 @@ const App: React.FC = () => {
                         setLang={setLang}
                         setPage={setPage}
                         selectedDriver={selectedDriver}
-                        driverName={lang === 'CN' ? '罗夏墨迹测验' : 'RORSCHACH TEST'}
+                        driverName={lang === 'CN' ? '迷雾学派：精神分析' : 'MIST: PSYCHOANALYSIS'}
                         viewMode={viewMode}
                         setViewMode={handleViewChange}
                         handleOpenMetonymyPage={handleOpenMetonymyPage}
@@ -1347,6 +1378,46 @@ const App: React.FC = () => {
                             setShowRings={setShowRings}
                         />
                     </div>
+                </div>
+            ) : viewMode === 'ANALYSIS' ? (
+                <div className="h-screen w-screen overflow-hidden animate-page-dissolve">
+                    <AnalysisView
+                        blueprint={activeBlueprint || {
+                            treatmentId: Date.now().toString(),
+                            driverType: DriverType.NARRATIVE,
+                            narrative: {
+                                title: '',
+                                logline: '',
+                                synopsis: '',
+                                psychoanalysis: ''
+                            },
+                            context: {
+                                world: '',
+                                tone: '',
+                                colorPalette: [],
+                                moodboard: {
+                                    prompt: null,
+                                    images: [],
+                                    selectedImageId: null
+                                }
+                            },
+                            assets: { characters: [], scenes: [], props: [] }
+                        }}
+                        language={lang === 'CN' ? 'CN' : 'EN'}
+                        isAesthetic={false}
+                        onAnalyzePsycho={async (fieldState, synopsis) => {
+                            const result = await geminiService.analyzePsychoStructure(fieldState, synopsis);
+                            return result || '';
+                        }}
+                        onUpdateBlueprint={(bp) => setActiveBlueprint(bp)}
+                        fieldState={narrativeFieldState}
+                        themeAccent="text-rose-400"
+                        theme={theme}
+                        onBack={() => {
+                            setPage(0);
+                            setViewMode('ENGINE');
+                        }}
+                    />
                 </div>
             ) : (
                 <div className="flex flex-col h-screen overflow-hidden relative">

@@ -1,12 +1,12 @@
 import React, { useState, useMemo } from 'react';
 import { 
-  Globe, 
-  HelpCircle, 
-  History as HistoryIcon, 
-  Settings, 
-  User as UserIcon, 
-  Aperture, 
-  Sun, 
+  Globe,
+  HelpCircle,
+  History as HistoryIcon,
+  Settings,
+  User as UserIcon,
+  Aperture,
+  Sun,
   Moon,
   Search,
   ChevronRight,
@@ -27,10 +27,12 @@ import {
   Sparkles,
   Command,
   Hash,
-  X 
+  Clock,
+  X
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { DriverType, User } from '../types';
+import { PhilosophyTimeline } from './PhilosophyTimeline';
 import { LACAN_DICTIONARY, LacanConcept } from '../data/lacan_dictionary';
 import { ZIZEK_DICTIONARY } from '../data/philosophy_zizek';
 import { MARX_DICTIONARY } from '../data/philosophy_marx';
@@ -70,7 +72,7 @@ const AnimatedText = ({ cn, en, lang, className = "", hClass = "h-5" }: { cn: Re
   </div>
 );
 
-type CodexSection = 'CONCEPTS' | 'PERSONNEL' | 'RESEARCH' | 'COLLECTIVE';
+type CodexSection = 'CONCEPTS' | 'PERSONNEL' | 'RESEARCH' | 'COLLECTIVE' | 'TIMELINE';
 
 export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({ 
   onClose, 
@@ -98,20 +100,12 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
 
   const getHeaderTitleColor = () => {
     if (theme === 'retro') return 'text-[#8B261D]';
-    if (driverType === DriverType.COMMERCIAL) return 'text-mist-cyan';
-    if (driverType === DriverType.EXPERIMENTAL) return 'text-mist-purple';
-    if (driverType === DriverType.AESTHETIC) return 'text-mist-rose';
-    if (driverType === DriverType.TRAILER) return 'text-mist-orange';
-    return 'text-gold-primary';
+    return 'text-white';
   };
 
   const getThemeTextColor = () => {
     if (theme === 'retro') return 'text-[#8B261D]';
-    if (driverType === DriverType.COMMERCIAL) return 'text-mist-cyan';
-    if (driverType === DriverType.EXPERIMENTAL) return 'text-mist-purple';
-    if (driverType === DriverType.AESTHETIC) return 'text-mist-rose';
-    if (driverType === DriverType.TRAILER) return 'text-mist-orange';
-    return 'text-gold-primary';
+    return 'text-white';
   };
 
   const getThemeBorderColor = () => {
@@ -123,12 +117,7 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
   const themeColors = {
     accent: getThemeTextColor(),
     border: getThemeBorderColor(),
-    bg: (theme === 'retro') ? 'bg-[#8B261D]' : (
-          driverType === DriverType.COMMERCIAL ? 'bg-mist-cyan' :
-          driverType === DriverType.EXPERIMENTAL ? 'bg-mist-purple' :
-          driverType === DriverType.AESTHETIC ? 'bg-mist-rose' :
-          driverType === DriverType.TRAILER ? 'bg-mist-orange' : 'bg-gold-primary'
-        ),
+    bg: (theme === 'retro') ? 'bg-[#8B261D]' : 'bg-white',
   };
 
   const dictionaries = {
@@ -163,12 +152,12 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
   // --- Rendering Functions ---
 
   const renderConcepts = () => (
-    <div className={`flex-1 flex flex-col overflow-hidden ${
+      <div className={`flex-1 flex flex-col overflow-hidden transition-all duration-500 ${
       renderInPlace 
         ? 'bg-transparent' 
         : (theme === 'retro' ? 'bg-transparent' : 'bg-black/40 backdrop-blur-sm rounded-xl border border-zinc-800/50 shadow-2xl')
-    } transition-all duration-500`}>
-      <div className={`h-14 flex items-center gap-2 px-6 border-b ${theme === 'retro' ? 'border-[var(--border-main)] bg-transparent' : 'border-white/10'} overflow-x-auto no-scrollbar shrink-0`}>
+    }`}>
+      <div className={`h-14 flex items-center gap-2 px-6 border-b ${theme === 'retro' ? 'border-[var(--border-main)] bg-transparent' : 'border-white/10'} overflow-x-auto no-scrollbar shrink-0 transition-all duration-500`}>
         {Object.entries(dictionaries).map(([id, info]) => (
           <button
             key={id}
@@ -176,7 +165,7 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
             className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest transition-all whitespace-nowrap border ${
               activeDictionary === id 
                 ? (theme === 'retro' ? 'bg-[var(--text-accent)] text-white shadow-md border-transparent' : 'bg-black text-white border-white/20 shadow-[0_0_15px_rgba(0,0,0,0.5)]')
-                : (theme === 'retro' ? 'text-black/50 hover:text-black hover:bg-black/5 border-transparent' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5 border-transparent')
+                : (theme === 'retro' ? 'text-[#8B261D] hover:bg-black/5 border-transparent' : 'text-white hover:bg-white/5 border-transparent')
             }`}
           >
             {info.icon}
@@ -637,7 +626,7 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
   return (
     <div className={`${renderInPlace ? 'relative w-full h-full p-0 flex flex-col' : 'fixed inset-0 z-[100] flex flex-col'} ${
       theme === 'retro' ? 'bg-transparent' : (renderInPlace ? 'bg-black/40' : 'bg-[var(--bg-main)]')
-    } overflow-hidden transition-colors duration-500`}>
+    } overflow-hidden transition-all duration-500`}>
       {/* BACKGROUND ELEMENTS */}
       {!renderInPlace && (
         <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-[var(--ring-opacity)]">
@@ -662,7 +651,7 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
 
       {/* HEADER - Replicating AppHeader Style EXACTLY */}
       {!renderInPlace && (
-        <header className={`h-14 bg-[var(--bg-header)] backdrop-blur-md border-b ${getThemeBorderColor()} flex items-center justify-between px-6 z-50 sticky top-0 shrink-0 transition-colors duration-500`}>
+        <header className={`h-14 bg-[var(--bg-header)] backdrop-blur-md border-b ${getThemeBorderColor()} flex items-center justify-between px-6 z-50 sticky top-0 shrink-0 transition-all duration-500`}>
           {/* Left Section */}
           <div className="flex items-center gap-5">
             <button
@@ -684,8 +673,8 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
               lang={lang}
               hClass="h-4"
               className={`${getHeaderTitleColor()} font-serif font-bold text-xs uppercase tracking-widest`}
-              cn="迷雾学派: 哲学辞典"
-              en="MIST: PHILOSOPHY CODEX"
+              cn="迷雾学派：迷雾辞典"
+              en="MIST: DICTIONARY"
             />
           </div>
 
@@ -806,19 +795,20 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
            { id: 'PERSONNEL', label: lang === 'CN' ? '人物档案' : 'SUBJECTS', en: 'SUBJECTS', icon: <Users size={16} /> },
            { id: 'RESEARCH', label: lang === 'CN' ? '研究报告' : 'RESEARCH', en: 'RESEARCH', icon: <FileText size={16} /> },
            { id: 'COLLECTIVE', label: lang === 'CN' ? '共鸣场' : 'RESONANCE', en: 'RESONANCE', icon: <Sparkles size={16} /> },
+           { id: 'TIMELINE', label: lang === 'CN' ? '哲学时间轴' : 'TIMELINE', en: 'TIMELINE', icon: <Clock size={16} /> },
          ].map(tab => (
             <button
               key={tab.id}
               onClick={() => { setActiveSection(tab.id as CodexSection); setSelectedItem(null); }}
               className={`flex items-center gap-3 transition-all relative px-6 py-2 h-10 group/tab rounded-md border ${
                 activeSection === tab.id 
-                  ? (theme === 'retro' ? 'text-[var(--text-accent)] border-transparent' : 'text-white bg-black shadow-[0_0_20px_rgba(0,0,0,0.8)] border-white/10') 
-                  : (theme === 'retro' ? 'text-black/50 hover:text-black border-transparent' : 'text-zinc-500 hover:text-zinc-300 border-transparent')
+                  ? (theme === 'retro' ? 'text-[#8B261D] border-transparent' : 'text-white bg-black shadow-[0_0_20px_rgba(0,0,0,0.8)] border-white/10') 
+                  : (theme === 'retro' ? 'text-[#8B261D] hover:text-[#8B261D] border-transparent' : 'text-white hover:text-white border-transparent')
               }`}
             >
-              <span className={`transition-all duration-500 ${activeSection === tab.id ? (theme === 'retro' ? themeColors.accent : 'text-white') + ' scale-110' : "group-hover/tab:scale-110"}`}>{tab.icon}</span>
+              <span className={`transition-all duration-500 ${activeSection === tab.id ? (theme === 'retro' ? 'text-[#8B261D]' : 'text-white') + ' scale-110' : "group-hover/tab:scale-110"}`}>{tab.icon}</span>
               <div className="flex flex-col items-start justify-center">
-                 <span className={`text-[11px] font-bold tracking-[0.25em] uppercase transition-all duration-300 ${activeSection === tab.id ? 'opacity-100' : 'opacity-60 group-hover/tab:opacity-100'}`}>
+                 <span className={`text-[11px] font-bold tracking-[0.25em] uppercase transition-all duration-300 opacity-100 group-hover/tab:opacity-100`}>
                    {lang === 'CN' ? tab.label : tab.en}
                  </span>
               </div>
@@ -858,6 +848,7 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
          {activeSection === 'PERSONNEL' && renderPersonnel()}
          {activeSection === 'RESEARCH' && renderResearch()}
          {activeSection === 'COLLECTIVE' && renderCollective()}
+         {activeSection === 'TIMELINE' && <PhilosophyTimeline lang={lang} />}
       </main>
 
       {/* DETAIL MODAL OVERLAY */}
