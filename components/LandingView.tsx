@@ -8,7 +8,6 @@ import { SutureModal } from './SutureModal';
 import { HistoryModal } from './HistoryModal';
 import { BorromeanRings } from './BorromeanRings';
 import { ArchiveContent } from './ArchiveContent';
-import { PhilosophyCodexPage } from './PhilosophyCodexPage';
 import { useTheme } from '../contexts/ThemeContext';
 
 
@@ -63,7 +62,6 @@ enum ProtocolType {
   CORE_DRIVERS = 'CORE_DRIVERS',
   UTILITIES = 'UTILITIES',
   CONFIDENTIAL = 'CONFIDENTIAL',
-  DICTIONARY = 'DICTIONARY',
   RSI = 'RSI',
   TOPOLOGY = 'TOPOLOGY'
 }
@@ -108,7 +106,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
 
   const { theme, toggleTheme } = useTheme();
   const [selectedProtocol, setSelectedProtocol] = useState<ProtocolType>(
-    (initialProtocol as ProtocolType) || ProtocolType.CORE_DRIVERS
+    (initialProtocol && Object.values(ProtocolType).includes(initialProtocol as any) ? initialProtocol as ProtocolType : ProtocolType.CORE_DRIVERS)
   );
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -150,9 +148,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
   };
 
   const getProtocolTitle = () => {
-    if (selectedProtocol === ProtocolType.DICTIONARY) {
-       return lang === 'CN' ? '迷雾学派：迷雾辞典' : 'MIST: DICTIONARY';
-    }
+
     if (selectedProtocol === ProtocolType.CONFIDENTIAL) {
        return lang === 'CN' ? '迷雾学派：主体档案' : 'MIST: SUBJECT ARCHIVE';
     }
@@ -345,12 +341,12 @@ export const LandingView: React.FC<LandingViewProps> = ({
             : 'opacity-0 scale-[1.2] translate-y-20 rotate-[10deg] blur-lg'
         }`}>
           <div className="w-[1000px] h-[1000px] flex items-center justify-center translate-x-1/4">
-            <BorromeanRings centered={true} opacity={theme === 'retro' ? 0.75 : 0.8} driverType={hoveredDriver || undefined} vivid={true} />
+            <BorromeanRings centered={true} opacity={theme === 'retro' ? 0.85 : 0.95} driverType={hoveredDriver || undefined} vivid={true} />
           </div>
         </div>
 
         {/* LEFT SIDEBAR: SIGNAL MONITOR */}
-        <div className={`${(isSidebarCollapsed || selectedProtocol === ProtocolType.DICTIONARY) ? 'w-0 opacity-0 -translate-x-full pointer-events-none' : 'w-80 opacity-100 translate-x-0'} border-r border-[var(--border-main)] ${theme === 'retro' ? 'bg-transparent' : 'bg-[var(--bg-panel)]'} flex flex-col shrink-0 hidden lg:flex z-10 transition-all duration-700 ease-in-out`}>
+        <div className={`${isSidebarCollapsed ? 'w-0 opacity-0 -translate-x-full pointer-events-none' : 'w-80 opacity-100 translate-x-0'} border-r border-[var(--border-main)] ${theme === 'retro' ? 'bg-transparent' : 'bg-[var(--bg-panel)]'} flex flex-col shrink-0 hidden lg:flex z-10 transition-all duration-700 ease-in-out`}>
 
           {/* Logo Area */}
           <div className={`p-8 border-b border-[var(--border-main)] shrink-0`}>
@@ -387,7 +383,6 @@ export const LandingView: React.FC<LandingViewProps> = ({
             {[
               { id: ProtocolType.CORE_DRIVERS, icon: Cpu, labelCn: '核心驱动器', labelEn: 'CORE DRIVERS' },
               { id: ProtocolType.CONFIDENTIAL, icon: ShieldAlert, labelCn: '机密文档', labelEn: 'CONFIDENTIAL' },
-              { id: ProtocolType.DICTIONARY, icon: BookOpen, labelCn: '迷雾辞典', labelEn: 'DICTIONARY' },
               { id: ProtocolType.UTILITIES, icon: Zap, labelCn: '实用工具', labelEn: 'UTILITIES' },
               { id: ProtocolType.RSI, icon: Aperture, labelCn: '三界拓扑', labelEn: 'RSI TOPOLOGY' },
               { id: ProtocolType.TOPOLOGY, icon: Zap, labelCn: '欲望图式', labelEn: 'DESIRE GRAPH' },
@@ -461,7 +456,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
 
         {/* RIGHT AREA: CONTENT DYNAMICALLY CHANGED */}
         <div className={`flex-1 overflow-hidden relative z-10 flex flex-col h-full transition-all duration-700 ease-in-out`}>
-          <div className={`${(selectedProtocol === ProtocolType.CONFIDENTIAL || selectedProtocol === ProtocolType.DICTIONARY) ? 'p-0 w-full max-w-none' : 'p-8 md:p-12 lg:p-16 max-w-7xl mx-auto w-full'} ${(selectedProtocol === ProtocolType.CONFIDENTIAL || selectedProtocol === ProtocolType.DICTIONARY) ? 'backdrop-blur-sm' : ''} flex-1 flex flex-col min-h-0 h-full`}>
+          <div className={`${(selectedProtocol === ProtocolType.CONFIDENTIAL) ? 'p-0 w-full max-w-none' : 'p-8 md:p-12 lg:p-16 max-w-7xl mx-auto w-full'} ${(selectedProtocol === ProtocolType.CONFIDENTIAL) ? 'backdrop-blur-sm' : ''} flex-1 flex flex-col min-h-0 h-full`}>
             
             {/* 1. CORE DRIVERS VIEW */}
             {selectedProtocol === ProtocolType.CORE_DRIVERS && (
@@ -492,9 +487,8 @@ export const LandingView: React.FC<LandingViewProps> = ({
                   <DriverSelector selectedDriver={selectedProtocol === ProtocolType.CORE_DRIVERS ? selectedDriver : null} onSelect={onDriverSelect} lang={lang} hoveredDriver={hoveredDriver} onHover={setHoveredDriver} />
                 </div>
 
-                <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-8 px-4 shrink-0 pb-10">
+                <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8 px-4 shrink-0 pb-10">
                   {[
-                    { icon: BookOpen, titleCn: '访问辞条数据', titleEn: 'CODEX DATA', descCn: '查阅拉康、齐泽克等理论词条，理解底层系统的运转逻辑。', descEn: 'Theoretical corpus to understand system logic.', onClick: () => { setSelectedProtocol(ProtocolType.DICTIONARY); } },
                     { icon: Film, titleCn: '影像资料库', titleEn: 'VIDEO ARCHIVE', descCn: '浏览迷雾学派的影像资料，深入视觉拓扑学的核心脉络。', descEn: 'Visual data capture of the topology threads.', onClick: () => { setPage(1); setViewMode('VIDEO'); } },
                     { icon: HistoryIcon, titleCn: '检视生成档案', titleEn: 'REVIEW ARCHIVES', descCn: '溯源过去的生成记录，恢复或重置失败的镜像拼接尝试。', descEn: 'Review past session records and attempts.', onClick: openHistory }
                   ].map((card, i) => (
@@ -533,29 +527,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
               </div>
             )}
 
-            {/* 3. DICTIONARY VIEW (Philosophy Codex) */}
-            {selectedProtocol === ProtocolType.DICTIONARY && (
-              <div className="flex-1 flex flex-col min-h-0 h-full animate-page-dissolve overflow-hidden">
-                <PhilosophyCodexPage
-                  onClose={() => setSelectedProtocol(ProtocolType.CORE_DRIVERS)}
-                  driverType={hoveredDriver || selectedDriver}
-                  lang={lang}
-                  currentUser={currentUser}
-                  setLang={setLang}
-                  openHistory={openHistory}
-                  openSettings={openSettings}
-                  openAuth={openAuth}
-                  openProfile={openProfile}
-                  showRings={showRings}
-                  setShowRings={setShowRings}
-                  renderInPlace={true}
-                  {...(!initialProtocol && {
-                    onToggleExpand: () => setIsSidebarCollapsed(!isSidebarCollapsed),
-                    isExpanded: isSidebarCollapsed
-                  })}
-                />
-              </div>
-            )}
+
 
             {/* 4. UTILITIES VIEW (Placeholder) */}
             {selectedProtocol === ProtocolType.UTILITIES && (

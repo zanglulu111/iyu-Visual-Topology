@@ -34,6 +34,7 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
   const accentColor = getThemeColor(driverType);
 
   useEffect(() => {
+    console.log("SimpleConfigPanel Mounted");
     const loadedConfig = configService.getConfig();
     setConfig(loadedConfig);
     setApiKeyInput(loadedConfig.apiKey);
@@ -82,7 +83,7 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
 
   return (
     <div
-      className={`w-[900px] ${globalTheme === 'retro' ? 'bg-[#F9F7F1]' : 'bg-[#0c0c0c]/98 blur-3xl'} rounded-sm flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-500 relative`}
+      className={`w-[900px] ${globalTheme === 'retro' ? 'bg-[#F9F7F1]' : 'bg-[#0c0c0c]/90 backdrop-blur-xl'} rounded-sm flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-500 relative`}
       style={{
         border: globalTheme === 'retro' ? '2px solid #8B261D' : `1px solid ${accentColor}44`,
         boxShadow: globalTheme === 'retro' 

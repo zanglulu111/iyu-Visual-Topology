@@ -23,23 +23,29 @@ export const BorromeanRings: React.FC<BorromeanRingsProps> = ({
 }) => {
     const { theme } = useTheme();
     const isRetro = theme === 'retro';
-    const strokeColor = isRetro ? (vivid ? 'rgba(139, 38, 29, 0.6)' : 'rgba(139, 38, 29, 0.4)') : (vivid ? 'rgba(255, 255, 255, 0.8)' : 'rgba(255, 255, 255, 0.45)');
-    const strokeColorHigh = isRetro ? (vivid ? 'rgba(139, 38, 29, 0.9)' : 'rgba(139, 38, 29, 0.7)') : (vivid ? 'rgba(255, 255, 255, 1.0)' : 'rgba(255, 255, 255, 0.8)');
+    const strokeColor = isRetro ? (vivid ? 'rgba(139, 38, 29, 0.85)' : 'rgba(139, 38, 29, 0.75)') : (vivid ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.8)');
+    const strokeColorHigh = isRetro ? (vivid ? 'rgba(139, 38, 29, 1.0)' : 'rgba(139, 38, 29, 0.9)') : (vivid ? 'rgba(255, 255, 255, 1.0)' : 'rgba(255, 255, 255, 0.95)');
     const textColor = isRetro ? '#5D2E2B' : '#FFFFFF';
 
-    // Premium themed palette — Desaturated or Vivid
-    const ringHex = vivid ? {
+    // Premium themed palette — Desaturated or Vivid or Homepage Faint (Based on RSI)
+    const ringHex = isHomepage ? {
+        // More visible RSI-based palette for Homepage gateway/background
+        real: isRetro ? 'rgba(139, 38, 29, 0.45)' : 'rgba(245, 158, 11, 0.55)',       // Real (Amber-based)
+        symbolic: isRetro ? 'rgba(156, 130, 74, 0.75)' : 'rgba(6, 182, 212, 0.5)',   // Symbolic (Cyan-based)
+        imaginary: isRetro ? 'rgba(106, 125, 106, 0.75)' : 'rgba(244, 63, 94, 0.5)',  // Imaginary (Rose-based)
+        sinthome: isRetro ? 'rgba(80, 102, 120, 0.7)' : 'rgba(16, 185, 129, 0.45)',   // Sinthome (Emerald-based)
+    } : vivid ? {
         // Vivid mode for Topology View - "Conservatory Matte"
-        real: isRetro ? '#A3483E' : '#F59E0B',       // Pompeian Red (Matte Earth Red)
-        symbolic: isRetro ? '#9C824A' : '#06B6D4',   // Ochre Gold (Aged Brass)
-        imaginary: isRetro ? '#6A7D6A' : '#F43F5E',  // Verdigris Green (Mineral Sage)
-        sinthome: isRetro ? '#506678' : '#10B981',   // Deep Mineral Blue (Slate)
+        real: isRetro ? '#A3483E' : '#F59E0B',       // Pompeian Red 
+        symbolic: isRetro ? '#9C824A' : '#06B6D4',   // Ochre Gold
+        imaginary: isRetro ? '#6A7D6A' : '#F43F5E',  // Verdigris Green
+        sinthome: isRetro ? '#506678' : '#10B981',   // Deep Mineral Blue
     } : {
-        // Default mode for Homepage
-        real: isRetro ? '#6D4340' : 'rgba(130, 160, 190, 0.6)',       // Desaturated red / Ghostly Blue
-        symbolic: isRetro ? '#5C543D' : 'rgba(180, 160, 120, 0.6)',   // Muted Ochre / Dark Gold
-        imaginary: isRetro ? '#343B43' : 'rgba(100, 130, 160, 0.6)',  // Muted Navy / Deep Cyan
-        sinthome: isRetro ? '#333333' : 'rgba(255, 255, 255, 0.3)',   // Charcoal / Ghost White
+        // Default mode for other views
+        real: isRetro ? '#6D4340' : 'rgba(130, 160, 190, 0.6)',       
+        symbolic: isRetro ? '#5C543D' : 'rgba(180, 160, 120, 0.6)',   
+        imaginary: isRetro ? '#343B43' : 'rgba(100, 130, 160, 0.6)',  
+        sinthome: isRetro ? '#333333' : 'rgba(255, 255, 255, 0.3)',   
     };
 
     const getTag = (id: string, placeholder: string) => {

@@ -3,7 +3,7 @@ import { Globe, Wand2, HelpCircle, History as HistoryIcon, Cpu, GitFork, BookOpe
 import { DriverType, User } from '../types';
 import { useTheme } from '../contexts/ThemeContext';
 
-type ViewMode = 'ENGINE' | 'DIVERGENCE' | 'BIBLE' | 'METONYMY' | 'TOPOLOGY' | 'RSI' | 'ARCHIVE' | 'VIDEO' | 'RORSCHACH' | 'ANALYSIS';
+type ViewMode = 'ENGINE' | 'DIVERGENCE' | 'BIBLE' | 'METONYMY' | 'TOPOLOGY' | 'RSI' | 'ARCHIVE' | 'VIDEO' | 'RORSCHACH' | 'ANALYSIS' | 'DICTIONARY';
 
 const AnimatedText = ({ cn, en, lang, className = "", hClass = "h-5" }: { cn: React.ReactNode, en: React.ReactNode, lang: 'CN' | 'EN', className?: string, hClass?: string }) => (
   <div className={`overflow-hidden relative ${hClass} ${className}`}>
@@ -141,7 +141,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
       />
       <div className="flex items-center gap-5">
         {/* Portal-origin pages: ← 入口 button, returns to UniversePortal */}
-        {(viewMode === 'RORSCHACH' || viewMode === 'ARCHIVE' || viewMode === 'VIDEO') ? (
+        {(viewMode === 'RORSCHACH' || viewMode === 'ARCHIVE' || viewMode === 'VIDEO' || viewMode === 'DICTIONARY') ? (
           <button
             onClick={() => setPage(-1)}
             className={`text-[9px] font-mono tracking-[0.15em] transition-all duration-300 hover:scale-105 active:scale-95 px-2 py-1 rounded-sm border w-[72px] flex items-center justify-center ${

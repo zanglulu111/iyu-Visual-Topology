@@ -47,8 +47,14 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         localStorage.setItem('api_settings', JSON.stringify(newSettings));
     };
 
-    const openSettings = () => setIsOpen(true);
-    const closeSettings = () => setIsOpen(false);
+    const openSettings = () => {
+        console.log("SettingsContext: Setting isOpen to true");
+        setIsOpen(true);
+    };
+    const closeSettings = () => {
+        console.log("SettingsContext: Setting isOpen to false");
+        setIsOpen(false);
+    };
 
     return (
         <SettingsContext.Provider value={{ settings, updateSettings, isOpen, openSettings, closeSettings }}>

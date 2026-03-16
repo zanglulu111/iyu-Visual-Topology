@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { User } from '../types';
 import { BorromeanRings } from './BorromeanRings';
-import { User as UserIcon, Moon, Sun, Volume2, VolumeX, Cloud, Globe } from 'lucide-react';
+import { Globe, Volume2, VolumeX, Cloud, CloudOff, User as UserIcon, Moon, Sun, ChevronRight, Archive, Sparkles, BookText, Brain, Play, Settings } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { ShaderBackground } from './ShaderBackground';
 import { ECGCircuitTimeline } from './ECGCircuitTimeline';
 
-type ViewMode = 'ENGINE' | 'DIVERGENCE' | 'BIBLE' | 'METONYMY' | 'TOPOLOGY' | 'RSI' | 'ARCHIVE' | 'VIDEO' | 'RORSCHACH' | 'ANALYSIS';
+type ViewMode = 'ENGINE' | 'DIVERGENCE' | 'BIBLE' | 'METONYMY' | 'TOPOLOGY' | 'RSI' | 'ARCHIVE' | 'VIDEO' | 'RORSCHACH' | 'ANALYSIS' | 'DICTIONARY';
 
 interface UniversePortalProps {
   lang: 'CN' | 'EN';
@@ -16,26 +16,31 @@ interface UniversePortalProps {
   setInitialProtocol?: (protocol: string) => void;
   currentUser: User;
   openAuth: () => void;
+  openSettings: () => void;
   openProfile: () => void;
+  openManual: () => void;
 }
 
-const AnimatedText = ({ cn, en, lang, className = "", hClass = "h-5", style = {} }: { cn: React.ReactNode, en: React.ReactNode, lang: 'CN' | 'EN', className?: string, hClass?: string, style?: React.CSSProperties }) => (
-  <div className={`overflow-hidden relative ${hClass}`} style={style}>
-    <div 
-      className="w-full transition-transform duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col"
-      style={{ 
-        transform: lang === 'EN' ? 'translateY(-50%)' : 'translateY(0)' 
-      }}
-    >
-      <div className={`flex items-center justify-center shrink-0 w-full ${hClass} ${className}`}>
-        {cn}
-      </div>
-      <div className={`flex items-center justify-center shrink-0 w-full ${hClass} ${className}`}>
-        {en}
+const AnimatedText = ({ cn, en, lang, className = "", hClass = "h-5", style = {} }: { cn: React.ReactNode, en: React.ReactNode, lang: 'CN' | 'EN', className?: string, hClass?: string, style?: React.CSSProperties }) => {
+  const isEn = lang === 'EN';
+  return (
+    <div className={`overflow-hidden relative ${hClass} ${className}`} style={style}>
+      <div 
+        className="w-full transition-transform duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col"
+        style={{ 
+          transform: isEn ? 'translateY(-50%)' : 'translateY(0)' 
+        }}
+      >
+        <div className={`flex items-center justify-center shrink-0 w-full ${hClass}`}>
+          {cn}
+        </div>
+        <div className={`flex items-center justify-center shrink-0 w-full ${hClass}`}>
+          {en}
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 interface RealmDef {
   id: string;
@@ -48,14 +53,14 @@ interface RealmDef {
   color: string;
   glowRgba: string;
   iconSymbol: string;
-  target: { page: -1 | 0 | 1 | 2; viewMode?: ViewMode; initialProtocol?: string };
+  target: { page: -1 | 0 | 1; viewMode?: ViewMode; initialProtocol?: string };
 }
 
 const REALMS: RealmDef[] = [
   {
     id: 'mist',
     titleCn: '主体档案',
-    titleEn: 'SUBJECT ARCHIVE',
+    titleEn: 'SUBJECT\nARCHIVE',
     subtitleCn: '沉浸式叙事 // 梦之档案',
     subtitleEn: 'IMMERSIVE NARRATIVE // DREAM ARCHIVE',
     descCn: '在被压抑之物回归的迷雾中，阅读与漫游。每一个档案都是某人被遗忘的梦。',
@@ -66,11 +71,37 @@ const REALMS: RealmDef[] = [
     target: { page: 1, viewMode: 'ARCHIVE' },
   },
   {
+    id: 'video',
+    titleCn: '邪典影像',
+    titleEn: 'CULT\nVIDEO',
+    subtitleCn: '视觉探索 // 邪典拓扑',
+    subtitleEn: 'VISUAL EXPLORATION // CULT TOPOLOGY',
+    descCn: '在光影的缝隙中，直面实在界的闪烁。解析欲望在影像中的流动。',
+    descEn: 'In the cracks of light and shadow, confront the flicker of the Real. Parse the flow of desire in images.',
+    color: '#fbbf24',
+    glowRgba: 'rgba(251, 191, 36, 0.2)',
+    iconSymbol: '🎬',
+    target: { page: 1, viewMode: 'VIDEO' },
+  },
+  {
+    id: 'engine',
+    titleCn: '欲望再生产',
+    titleEn: 'DESIRE\nREPRODUCTION',
+    subtitleCn: '创作引擎 // 符号链条',
+    subtitleEn: 'CREATIVE ENGINE // SYMBOLIC CHAIN',
+    descCn: '启动核心驱动器，进入视觉生产的符号链。构建你自己的迷雾。',
+    descEn: 'Activate the core driver. Enter the symbolic chain of visual production.',
+    color: '#D4AF37',
+    glowRgba: 'rgba(212, 175, 55, 0.2)',
+    iconSymbol: '⚙',
+    target: { page: 0 },
+  },
+  {
     id: 'dictionary',
     titleCn: '迷雾辞典',
-    titleEn: 'MIST DICTIONARY',
-    subtitleCn: '理论词条 // 拉康拓扑',
-    subtitleEn: 'THEORETICAL CODEX // LACANIAN TOPOLOGY',
+    titleEn: 'MIST\nDICTIONARY',
+    subtitleCn: '理论词条 // 自他者性',
+    subtitleEn: 'THEORETICAL CODEX // ALTERITY',
     descCn: '在拉康的拓扑空间中，直面实在界的裂缝。解析欲望的结构。',
     descEn: 'In Lacanian topology, confront the crack in the Real. Parse the structure of desire.',
     color: '#fb7185',
@@ -81,7 +112,7 @@ const REALMS: RealmDef[] = [
   {
     id: 'psychoanalysis',
     titleCn: '精神分析',
-    titleEn: 'PSYCHOANALYSIS',
+    titleEn: 'PSYCHO\nANALYSIS',
     subtitleCn: '罗夏墨迹 // 潜意识探测',
     subtitleEn: 'INKBLOT // UNCONSCIOUS PROBE',
     descCn: '观察罗夏墨迹的动态演变，直面潜意识的投影与幻象。',
@@ -90,19 +121,6 @@ const REALMS: RealmDef[] = [
     glowRgba: 'rgba(168, 85, 247, 0.2)',
     iconSymbol: '☤',
     target: { page: 1, viewMode: 'RORSCHACH' },
-  },
-  {
-    id: 'engine',
-    titleCn: '工具层',
-    titleEn: 'THE ENGINE',
-    subtitleCn: '创作引擎 // 欲望生产',
-    subtitleEn: 'CREATIVE ENGINE // DESIRE PRODUCTION',
-    descCn: '启动核心驱动器，进入视觉生产的符号链。构建你自己的迷雾。',
-    descEn: 'Activate the core driver. Enter the symbolic chain of visual production.',
-    color: '#D4AF37',
-    glowRgba: 'rgba(212, 175, 55, 0.2)',
-    iconSymbol: '⚙',
-    target: { page: 2 },
   },
 ];
 
@@ -118,7 +136,10 @@ const LACANIAN_QUOTES = [
 let hasVisitedPortalSession = false;
 
 export const UniversePortal: React.FC<UniversePortalProps> = ({
-  lang, setLang, setPage, setViewMode, setInitialProtocol, currentUser, openAuth, openProfile
+  lang, setLang, setPage, setViewMode, setInitialProtocol, currentUser, openAuth,
+  openSettings,
+  openProfile,
+  openManual
 }) => {
   const { theme, toggleTheme } = useTheme();
   const isRetro = theme === 'retro';
@@ -199,6 +220,13 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
 
   const handleRealmClick = (realm: RealmDef) => {
     if (isExiting) return;
+    
+    // De-couple path: If it's dictionary, we open the manual (codex) directly
+    if (realm.id === 'dictionary') {
+      openManual();
+      return;
+    }
+
     setIsExiting(true);
     setExitTarget(realm.id);
     setTimeout(() => {
@@ -320,7 +348,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
         <div 
             className="w-[55vh] h-[55vh] max-w-[550px] max-h-[550px] overflow-visible transition-all duration-[1200ms] ease-in-out"
             style={{ 
-              opacity: isRetro ? 0.35 : 0.8
+              opacity: isRetro ? 0.95 : 1.0
             }}
           >
             <BorromeanRings centered={true} opacity={1} lang={lang === 'CN' ? 'CN' : 'EN'} driverType={isRetro ? undefined : undefined} isHomepage={true} />
@@ -334,10 +362,6 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
           animation: (!isReturning && mounted) ? 'fadeInUp 1.2s ease-out both' : 'none',
         }}
       >
-        {/* Anti-Clash Mask for Title */}
-        <div className="absolute inset-x-0 -top-10 bottom-0 pointer-events-none z-[-1] opacity-60"
-             style={{ background: isRetro ? 'radial-gradient(ellipse at center, rgba(255,255,252,0.4) 0%, transparent 70%)' : 'radial-gradient(ellipse at center, rgba(2,2,5,0.8) 0%, transparent 70%)' }} />
-        
         <div className="transition-transform duration-500 ease-out">
           <AnimatedText
             lang={lang}
@@ -351,7 +375,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
             en="MIST SCHOOL"
           />
 
-          <div className="mt-4 sm:mt-5 scale-90 sm:scale-100 opacity-60">
+          <div className="mt-1 sm:mt-2 scale-90 sm:scale-100 opacity-60">
             <AnimatedText
               lang={lang}
               hClass="h-4"
@@ -435,20 +459,26 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
                 <div className="mt-[20px] sm:mt-[30px] flex flex-col items-center">
                   <AnimatedText
                     lang={lang}
-                    hClass="h-8"
-                    className={`text-[15px] sm:text-[17px] tracking-[0.4em] uppercase whitespace-nowrap
+                    hClass="h-16"
+                    className={`text-[14px] sm:text-[16px] tracking-[0.3em] font-medium uppercase leading-relaxed
                       ${isHovered ? (isRetro ? 'text-[#8B261D]' : 'text-white') : (isRetro ? 'text-[#8B261D]/90' : 'text-white/80')}
                     `}
                     style={{
                       fontFamily: "'Noto Serif SC', 'Playfair Display', serif",
                       fontWeight: isHovered ? (isRetro ? 700 : 500) : (isRetro ? 500 : 300),
-                      transform: isHovered ? 'scale(1.1)' : 'scale(1)',
+                      transform: isHovered ? 'scale(1.05)' : 'scale(1)',
                       transition: 'transform 1.2s cubic-bezier(0.19, 1, 0.22, 1), color 1.2s ease, opacity 1.2s ease',
                       willChange: 'transform',
                       textShadow: isRetro ? '0.5px 0.5px 0.5px rgba(255,255,255,0.8)' : 'none'
                     }}
                     cn={realm.titleCn}
-                    en={realm.titleEn}
+                    en={
+                      <div className="flex flex-col items-center">
+                        {realm.titleEn.split('\n').map((line, idx) => (
+                          <span key={idx}>{line}</span>
+                        ))}
+                      </div>
+                    }
                   />
 
                   {/* Technical Sub-description (Reveal on hover) */}
@@ -480,7 +510,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
       </div>
 
       <div
-        className="absolute top-4 sm:top-6 right-4 sm:right-6 flex items-center gap-3 sm:gap-4 z-[20]"
+        className="absolute top-4 sm:top-6 right-4 sm:right-6 flex items-center gap-3 sm:gap-4 z-[100]"
         style={{
           animation: mounted ? 'fadeIn 1.5s ease-out both' : 'none',
           animationDelay: '0.5s',
@@ -488,7 +518,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
         }}
       >
         <button
-          onClick={() => setPage(0)}
+          onClick={() => setPage(2)}
           className={`text-[10px] font-mono tracking-[0.15em] transition-colors duration-300 flex items-center gap-1.5 ${isRetro ? 'text-black/40 hover:text-black/80' : 'text-white/25 hover:text-white/70'}`}
           title={lang === 'CN' ? '回到全局主页' : 'Global Home'}
         >
@@ -552,6 +582,18 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
           title={theme === 'dark' ? (lang === 'CN' ? "切换为复古主题" : "Switch to Retro") : (lang === 'CN' ? "切换为暗黑主题" : "Switch to Dark")}
         >
           {theme === 'dark' ? <Moon size={11} strokeWidth={2.5} /> : <Sun size={11} strokeWidth={2.5} className="text-[#8B261D]/60 hover:text-[#8B261D]" />}
+        </button>
+
+        <button
+          onClick={openSettings}
+          className={`p-2 sm:p-2.5 rounded-full transition-all duration-300 hover:scale-110 active:scale-95 group relative ${
+            theme === 'retro' 
+              ? 'bg-[#8B261D]/5 hover:bg-[#8B261D]/10 text-[#8B261D]' 
+              : 'bg-white/5 hover:bg-white/10 text-white shadow-[0_0_15px_rgba(255,255,255,0.05)]'
+          }`}
+          title={lang === 'CN' ? '系统配置' : 'Settings'}
+        >
+          <Settings size={18} className="sm:w-5 sm:h-5" />
         </button>
 
         <button

@@ -21,7 +21,6 @@ import { GlobalHomePage } from './components/GlobalHomePage';
 import { VisionSidebar } from './components/VisionSidebar';
 import { TheSkinSidebar } from './components/TheSkinSidebar';
 import { AestheticInputSidebar } from './components/AestheticInputSidebar';
-import PhilosophyGraph from './components/PhilosophyGraph';
 import {
     DriverType,
     CreativeTreatment,
@@ -62,7 +61,7 @@ import { useSettings } from './contexts/SettingsContext';
 import { SimpleConfigPanel } from './src/components/SimpleConfigPanel';
 import { useTheme } from './contexts/ThemeContext';
 
-type ViewMode = 'ENGINE' | 'DIVERGENCE' | 'BIBLE' | 'METONYMY' | 'TOPOLOGY' | 'RSI' | 'ARCHIVE' | 'VIDEO' | 'RORSCHACH' | 'ANALYSIS';
+type ViewMode = 'ENGINE' | 'DIVERGENCE' | 'BIBLE' | 'METONYMY' | 'TOPOLOGY' | 'RSI' | 'ARCHIVE' | 'VIDEO' | 'RORSCHACH' | 'ANALYSIS' | 'DICTIONARY';
 
 import { LacanGraphView } from './components/LacanGraphView';
 import { LacanTopologyView } from './components/LacanTopologyView';
@@ -73,7 +72,11 @@ import { RorschachView } from './components/RorschachView';
 
 const App: React.FC = () => {
     const { theme } = useTheme();
-    const { isOpen: isSettingsOpen, openSettings, closeSettings } = useSettings();
+    const { isOpen: isSettingsOpen, openSettings: openSettingsContext, closeSettings } = useSettings();
+    const openSettings = () => {
+        console.log("Portal/Header: Requesting to open settings...");
+        openSettingsContext();
+    };
     const navigate = useNavigate();
     const location = useLocation();
     const [page, setPage] = useState<-1 | 0 | 1 | 2>(-1);
@@ -239,15 +242,6 @@ const App: React.FC = () => {
     };
     const closeHistory = () => setIsHistoryOpen(false);
 
-    const openManual = () => {
-        navigate('/codex');
-        setIsHistoryOpen(false);
-        setIsSutureOpen(false);
-    };
-    const closeManual = () => {
-        navigate('/');
-        setIsManualOpen(false);
-    };
     const openAuth = () => { setIsAuthOpen(true); closeAllModals(); };
     const closeAllModals = () => {
         setIsHistoryOpen(false);
@@ -471,6 +465,10 @@ const App: React.FC = () => {
         finally { setIsAutoFilling(false); }
     };
 
+    const openManual = () => {
+        setPage(1);
+        handleViewChange('DICTIONARY');
+    };
     const handleOpenSkin = () => {
         setIsSkinOpen(true);
         setTopSidebar('skin');
@@ -1153,11 +1151,6 @@ const App: React.FC = () => {
         }
     };
 
-    // Philosophy graph route
-    if (location.pathname === '/philosophy') {
-        return <PhilosophyGraph />;
-    }
-
     return (
         <div className="min-h-screen bg-[var(--bg-main)] text-zinc-300 font-sans selection:bg-gold-primary/30 selection:text-white overflow-hidden transition-colors duration-1000">
             {page === -1 ? (
@@ -1169,7 +1162,9 @@ const App: React.FC = () => {
                     setInitialProtocol={setInitialProtocol}
                     currentUser={currentUser}
                     openAuth={openAuth}
+                    openSettings={openSettings}
                     openProfile={() => setIsProfileOpen(true)}
+                    openManual={openManual}
                 />
             ) : page === 2 ? (
                 <GlobalHomePage
@@ -1178,15 +1173,11 @@ const App: React.FC = () => {
                     setPage={setPage}
                     setViewMode={handleViewChange}
                     setInitialProtocol={setInitialProtocol}
-                    onDriverSelect={setSelectedDriver}
                     currentUser={currentUser}
                     openAuth={openAuth}
                     openProfile={() => setIsProfileOpen(true)}
                     showRings={showRings}
                     setShowRings={setShowRings}
-                    openManual={openManual}
-                    openHistory={openHistory}
-                    openSettings={openSettings}
                 />
             ) : page === 0 ? (
                 <LandingView
@@ -1224,6 +1215,23 @@ const App: React.FC = () => {
                     setShowRings={setShowRings}
                     initialProtocol={initialProtocol}
                 />
+            ) : viewMode === 'DICTIONARY' ? (
+                        <div className="h-screen w-screen overflow-hidden animate-page-dissolve">
+                            <PhilosophyCodexPage
+                                onClose={() => setPage(-1)}
+                                driverType={selectedDriver}
+                                lang={lang}
+                                currentUser={currentUser}
+                                setLang={setLang}
+                                openHistory={openHistory}
+                                openSettings={openSettings}
+                                openAuth={openAuth}
+                                openProfile={() => setIsProfileOpen(true)}
+                                showRings={showRings}
+                                setShowRings={setShowRings}
+                                renderInPlace={false}
+                            />
+                        </div>
             ) : viewMode === 'TOPOLOGY' ? (
                 <div className="h-screen w-screen overflow-hidden animate-page-dissolve">
                     <LacanGraphView
@@ -1286,7 +1294,7 @@ const App: React.FC = () => {
                         setLang={setLang}
                         setPage={setPage}
                         selectedDriver={selectedDriver}
-                        driverName={lang === 'CN' ? '影像资料库' : 'VIDEO ARCHIVE'}
+                        driverName={lang === 'CN' ? '迷雾学派：邪典影像' : 'MIST: CULT VIDEO'}
                         viewMode={viewMode}
                         setViewMode={handleViewChange}
                         handleOpenMetonymyPage={handleOpenMetonymyPage}
@@ -1401,7 +1409,7 @@ const App: React.FC = () => {
                                     selectedImageId: null
                                 }
                             },
-                            assets: { characters: [], scenes: [], props: [] }
+                            assets: { characters: [], locations: [], props: [] }
                         }}
                         language={lang === 'CN' ? 'CN' : 'EN'}
                         isAesthetic={false}
@@ -1653,22 +1661,7 @@ const App: React.FC = () => {
                 </div>
             )}
 
-            {/* Full-screen pages */}
-            {isManualOpen && (
-                <PhilosophyCodexPage 
-                    onClose={closeManual} 
-                    driverType={selectedDriver}
-                    lang={lang}
-                    currentUser={currentUser}
-                    setLang={setLang}
-                    openHistory={openHistory}
-                    openSettings={openSettings}
-                    openAuth={openAuth}
-                    openProfile={() => setIsProfileOpen(true)}
-                    showRings={showRings}
-                    setShowRings={setShowRings}
-                />
-            )}
+
             
             {/* Modal removed in favor of full page in the Routes flow above, but we keep the logic tethered to isManualOpen for now to minimize ripple effects */}
             {isHistoryOpen && <HistoryModal history={history} onRestore={onHistoryRestore} onClear={onHistoryClear} onClose={closeHistory} lang={lang} />}
@@ -1707,7 +1700,7 @@ const App: React.FC = () => {
                 driverType={selectedDriver || DriverType.NARRATIVE}
             />
             {isSettingsOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200] p-4">
                     <SimpleConfigPanel lang={lang} onClose={closeSettings} />
                 </div>
             )}

@@ -13,8 +13,8 @@ export const ECGCircuitTimeline: React.FC<ECGCircuitTimelineProps> = ({ hoveredI
   const height = 100;
   const midY = 50;
 
-  // The 4 items distributed. We fine-tune nodes X so the beats appear exactly at button centers.
-  const nodes = [120, 360, 615, 872];
+  // The 5 items distributed. We fine-tune nodes X so the beats appear exactly at button centers.
+  const nodes = [121, 310, 500, 690, 879];
 
   const pathData = useMemo(() => {
     let d = `M 0 ${midY} `;
@@ -22,7 +22,7 @@ export const ECGCircuitTimeline: React.FC<ECGCircuitTimelineProps> = ({ hoveredI
     // Intro segment
     d += `L 30 ${midY} L 40 ${midY - 5} L 50 ${midY} L ${nodes[0] - 40} ${midY} `;
     
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 5; i++) {
       const x = nodes[i];
       const isHovered = hoveredIndex === i;
       
@@ -41,8 +41,11 @@ export const ECGCircuitTimeline: React.FC<ECGCircuitTimelineProps> = ({ hoveredI
           d += `L ${x - 18} ${midY - 20} L ${x - 12} ${midY + 15} L ${x - 6} ${midY - 40} L ${x} ${midY + 25} L ${x + 6} ${midY - 15} L ${x + 12} ${midY + 8} L ${x + 18} ${midY - 4} L ${x + 22} ${midY} `;
         } else if (i === 2) {
           d += `L ${x - 18} ${midY - 10} L ${x - 12} ${midY - 35} L ${x - 6} ${midY + 10} L ${x} ${midY - 45} L ${x + 6} ${midY + 30} L ${x + 12} ${midY - 15} L ${x + 18} ${midY + 5} L ${x + 22} ${midY} `;
+        } else if (i === 3) {
+          // Dictionary / Symbolic Wave
+          d += `L ${x - 18} ${midY + 10} L ${x - 12} ${midY - 15} L ${x - 6} ${midY + 30} L ${x} ${midY - 40} L ${x + 6} ${midY + 20} L ${x + 12} ${midY - 10} L ${x + 18} ${midY + 4} L ${x + 22} ${midY} `;
         } else {
-          // Rorschach Asymmetric Wave - Now with 8 points parity
+          // Psychoanalysis / Rorschach Asymmetric Wave
           d += `L ${x - 18} ${midY + 6} L ${x - 12} ${midY - 45} L ${x - 6} ${midY + 12} L ${x} ${midY + 30} L ${x + 6} ${midY + 10} L ${x + 12} ${midY - 25} L ${x + 18} ${midY + 5} L ${x + 22} ${midY} `;
         }
       } else {

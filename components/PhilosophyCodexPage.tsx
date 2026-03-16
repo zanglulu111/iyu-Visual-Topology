@@ -625,7 +625,7 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
 
   return (
     <div className={`${renderInPlace ? 'relative w-full h-full p-0 flex flex-col' : 'fixed inset-0 z-[100] flex flex-col'} ${
-      theme === 'retro' ? 'bg-transparent' : (renderInPlace ? 'bg-black/40' : 'bg-[var(--bg-main)]')
+      theme === 'retro' ? 'bg-transparent' : (renderInPlace ? 'bg-black/40' : 'bg-[var(--bg-header)]')
     } overflow-hidden transition-all duration-500`}>
       {/* BACKGROUND ELEMENTS */}
       {!renderInPlace && (
@@ -656,17 +656,18 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
           <div className="flex items-center gap-5">
             <button
               onClick={onClose}
-              className={`flex items-center gap-1.5 transition-all duration-300 group px-2 py-1 rounded-md bg-transparent hover:bg-white/5 hover:scale-105 active:scale-95 w-[72px] justify-start`}
+              className={`text-[9px] font-mono tracking-[0.15em] transition-all duration-300 hover:scale-105 active:scale-95 px-2 py-1 rounded-sm border w-[72px] flex items-center justify-center ${
+                theme === 'retro'
+                  ? 'text-[var(--text-accent)] border-[var(--border-main)] hover:border-[var(--border-accent)]'
+                  : 'text-zinc-500 hover:text-white/80 border-zinc-800 hover:border-zinc-600'
+              }`}
+              title={lang === 'CN' ? '返回迷雾学派入口' : 'Return to Mist Portal'}
             >
-              <Globe size={14} className={`shrink-0 transition-all duration-100 ${theme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`} />
-              <div className="hidden md:block w-full">
-                <AnimatedText
-                  lang={lang}
-                  hClass="h-4"
-                  className="w-full"
-                  cn={<div className="w-full">返回全局</div>}
-                  en={<div className="w-full">GLOBAL</div>}
-                />
+              <div className="overflow-hidden relative h-4 w-full">
+                <div className={`transition-all duration-[1500ms] w-full ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col ${lang === 'EN' ? '-translate-y-1/2' : 'translate-y-0'}`}>
+                  <div className="h-4 flex items-center shrink-0 w-full leading-none justify-center">← 入口</div>
+                  <div className="h-4 flex items-center shrink-0 w-full leading-none justify-center">← PORTAL</div>
+                </div>
               </div>
             </button>
             <AnimatedText
