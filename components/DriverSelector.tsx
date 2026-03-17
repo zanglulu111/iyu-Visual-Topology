@@ -78,16 +78,12 @@ export const DriverSelector: React.FC<DriverSelectorProps> = ({ selectedDriver, 
                             onClick={() => onSelect(driver.id)}
                             onMouseEnter={() => onHover(driver.id)}
                             onMouseLeave={() => onHover(null)}
-                            style={{
-                                backdropFilter: active ? 'none' : 'blur(24px)',
-                                WebkitBackdropFilter: active ? 'none' : 'blur(24px)',
-                            }}
                             className={`
                 group relative flex flex-col items-start text-left p-6 md:p-8 rounded-sm transition-all duration-700
                 border min-h-[300px]
                 ${active
                     ? `${borderClass} shadow-[0_45px_100px_rgba(0,0,0,0.1)] -translate-y-1 ${isRetro ? 'bg-[#FDFCF8]' : 'bg-zinc-950'}`
-                    : `border-transparent shadow-none ${isRetro ? 'bg-white/[0.15]' : 'bg-black/[0.15]'}`
+                    : `border-transparent shadow-none bg-transparent`
                 }
               `}
                         >

@@ -33,8 +33,20 @@ class DataService {
                 return this.cache.get(category);
             }
 
-            // 读取文件
-            const filePath = path.join(DATA_DIR, `${category}.ts`);
+            // 检查文件是否存在，如果不存在则尝试在 codex/ 下查找
+            let filePath = path.join(DATA_DIR, `${category}.ts`);
+            try {
+                await fs.access(filePath);
+            } catch (e) {
+                const codexPath = path.join(DATA_DIR, 'codex', `${category}.ts`);
+                try {
+                    await fs.access(codexPath);
+                    filePath = codexPath;
+                } catch (e2) {
+                    // 如果都不存在，则按原样报错
+                }
+            }
+            
             const fileContent = await fs.readFile(filePath, 'utf-8');
 
             // 简单的正则表达式解析 (生产环境可考虑使用 TypeScript compiler API)
@@ -56,10 +68,24 @@ class DataService {
      */
     async getAvailableCategories() {
         try {
-            const files = await fs.readdir(DATA_DIR);
-            return files
-                .filter(f => f.endsWith('.ts') && !f.startsWith('.'))
-                .map(f => f.replace('.ts', ''));
+            const entries = await fs.readdir(DATA_DIR, { withFileTypes: true });
+            const categories = entries
+                .filter(e => e.isFile() && e.name.endsWith('.ts') && !e.name.startsWith('.'))
+                .map(e => e.name.replace('.ts', ''));
+                
+            // 也包含 codex 子目录
+            const codexDir = path.join(DATA_DIR, 'codex');
+            try {
+                const codexEntries = await fs.readdir(codexDir, { withFileTypes: true });
+                const codexCategories = codexEntries
+                    .filter(e => e.isFile() && e.name.endsWith('.ts') && !e.name.startsWith('.'))
+                    .map(e => `codex/${e.name.replace('.ts', '')}`);
+                categories.push(...codexCategories);
+            } catch (e) {
+                // Ignore if codex doesn't exist
+            }
+            
+            return categories;
         } catch (error) {
             throw new Error(`Failed to get categories: ${error.message}`);
         }
@@ -107,8 +133,8 @@ class DataService {
     // 私有方法
 
     private isValidCategoryName(name: string): boolean {
-        // 只允许字母、数字、下划线
-        return /^[a-zA-Z0-9_]+$/.test(name);
+        // 只允许字母、数字、下划线、中划线和路径分隔符
+        return /^[a-zA-Z0-9_\-\/]+$/.test(name);
     }
 
     private parseTypeScriptExport(content: string): any {

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { 
+import {
   Globe,
   HelpCircle,
   History as HistoryIcon,
@@ -33,14 +33,13 @@ import {
 import { useTheme } from '../contexts/ThemeContext';
 import { DriverType, User } from '../types';
 import { PhilosophyTimeline } from './PhilosophyTimeline';
-import { LACAN_DICTIONARY, LacanConcept } from '../data/lacan_dictionary';
-import { ZIZEK_DICTIONARY } from '../data/philosophy_zizek';
-import { MARX_DICTIONARY } from '../data/philosophy_marx';
-import { HEGEL_DICTIONARY } from '../data/philosophy_hegel';
-import { OTHER_DICTIONARY } from '../data/philosophy_other';
-import { ANALYSIS_LIBRARY } from '../data/analysis_data';
+import { LacanConcept } from '../data/codex/lacan_dictionary';
+import { HEGEL_INDEX, MARX_INDEX, LACAN_INDEX, ZIZEK_INDEX } from '../data/codex/philosophy_refined';
+import { OTHER_DICTIONARY } from '../data/codex/philosophy_other';
+import { ANALYSIS_LIBRARY } from '../data/codex/analysis_data';
 import { ARCHIVE_CASES, CaseStudy } from './archiveCasesData';
 import { BorromeanRings } from './BorromeanRings';
+import { usePhilosophyIndex, usePhilosophySummaries, usePhilosophyDetail, usePreloadPopularConcepts } from '../hooks/usePhilosophy';
 
 interface PhilosophyCodexPageProps {
   onClose: () => void;
@@ -74,9 +73,9 @@ const AnimatedText = ({ cn, en, lang, className = "", hClass = "h-5" }: { cn: Re
 
 type CodexSection = 'CONCEPTS' | 'PERSONNEL' | 'RESEARCH' | 'COLLECTIVE' | 'TIMELINE';
 
-export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({ 
-  onClose, 
-  driverType, 
+export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
+  onClose,
+  driverType,
   lang,
   currentUser,
   setLang,
@@ -92,9 +91,31 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
 }) => {
   const { theme, toggleTheme } = useTheme();
   const [activeSection, setActiveSection] = useState<CodexSection>('CONCEPTS');
-  const [activeDictionary, setActiveDictionary] = useState<string>('LACAN');
+  const [activeDictionary, setActiveDictionary] = useState<string>('HEGEL');
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [detailActiveTab, setDetailActiveTab] = useState<'DEFINITION' | 'ANALOGY' | 'APPLICATION'>('DEFINITION');
+
+  React.useEffect(() => {
+    if (selectedItem) {
+      setDetailActiveTab('DEFINITION');
+    }
+  }, [selectedItem]);
+
+  // 使用新的数据加载系统
+  // 异步数据加载系统 (用于加载大体积详细内容)
+  // 动态选择当前哲学家，并将 ID 转换为路径格式 (小写)
+  const currentPhilosopherPath = activeDictionary.toLowerCase();
+  const isMainPhilosopher = ['HEGEL', 'MARX', 'LACAN', 'ZIZEK'].includes(activeDictionary);
+
+  const { data: selectedDetail, isLoading: isLoadingDetail } = usePhilosophyDetail(
+    currentPhilosopherPath,
+    selectedItem?.data?.id || '',
+    isMainPhilosopher && !!selectedItem?.data?.id
+  );
+
+  // 预加载热门词条
+  usePreloadPopularConcepts(currentPhilosopherPath, isMainPhilosopher && activeSection === 'CONCEPTS');
 
   // --- Helper Functions (Identical to AppHeader) ---
 
@@ -120,11 +141,13 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
     bg: (theme === 'retro') ? 'bg-[#8B261D]' : 'bg-white',
   };
 
+
+
   const dictionaries = {
-    LACAN: { name: '拉康 (Lacan)', data: LACAN_DICTIONARY, icon: <Fingerprint size={16} /> },
-    ZIZEK: { name: '齐泽克 (Zizek)', data: ZIZEK_DICTIONARY, icon: <Zap size={16} /> },
-    MARX: { name: '马克思 (Marx)', data: MARX_DICTIONARY, icon: <Activity size={16} /> },
-    HEGEL: { name: '黑格尔 (Hegel)', data: HEGEL_DICTIONARY, icon: <Layers size={16} /> },
+    HEGEL: { name: '黑格尔 (Hegel)', data: HEGEL_INDEX, icon: <Layers size={16} /> },
+    MARX: { name: '马克思 (Marx)', data: MARX_INDEX, icon: <Activity size={16} /> },
+    LACAN: { name: '拉康 (Lacan)', data: LACAN_INDEX, icon: <Fingerprint size={16} /> },
+    ZIZEK: { name: '齐泽克 (Zizek)', data: ZIZEK_INDEX, icon: <Zap size={16} /> },
     OTHER: { name: '其他 (Other)', data: OTHER_DICTIONARY, icon: <Microscope size={16} /> },
     ANALYSIS: { name: '分析 (Analysis)', data: ANALYSIS_LIBRARY, icon: <Brain size={16} /> },
   };
@@ -175,26 +198,41 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
       </div>
       
       <div className={`flex-1 overflow-y-auto ${renderInPlace ? 'p-8 pt-10' : 'p-6'} custom-scrollbar`}>
-        {filteredConcepts.map((category: any) => (
-          <div key={category.id} className="mb-14">
-            <div className="flex items-center gap-4 mb-8">
-              <div className={`w-10 h-px ${theme === 'retro' ? 'bg-[var(--border-main)]' : 'bg-white/10'}`}></div>
-              <h3 className={`text-2xl font-serif tracking-widest leading-none ${theme === 'retro' ? 'text-[var(--text-accent)] font-black' : 'text-white'}`}>
-                {lang === 'CN' ? category.name : category.enName}
-              </h3>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {category.concepts.map((concept: LacanConcept) => (
-                <button
-                  key={concept.id}
-                  onClick={() => setSelectedItem({ type: 'CONCEPT', data: concept })}
-                  className={`group relative p-6 rounded-2xl cursor-pointer transition-all duration-700 hover:-translate-y-1.5 overflow-hidden border ${
-                    theme === 'retro'
-                      ? 'bg-white/[0.01] border-transparent backdrop-blur-2xl hover:border-[var(--border-accent)] hover:bg-white hover:backdrop-blur-none shadow-none hover:shadow-[0_45px_100px_rgba(139,38,29,0.1)]'
-                      : 'bg-white/[0.01] border-transparent backdrop-blur-2xl hover:bg-black hover:border-white/20 hover:backdrop-blur-none shadow-none hover:shadow-[0_45px_100px_rgba(0,0,0,0.6)]'
-                  }`}
-                >
+        {filteredConcepts.map((category: any, index: number) => {
+          const prevCategory = index > 0 ? filteredConcepts[index - 1] : null;
+          const isSameHeader = prevCategory && (lang === 'CN' ? prevCategory.name === category.name : prevCategory.enName === category.enName);
+          
+          return (
+            <div key={category.id} className={isSameHeader ? "mb-10 mt-[-20px]" : "mb-14"}>
+              {!isSameHeader && (
+                <div className="flex items-center gap-4 mb-8">
+                  <div className={`w-10 h-px ${theme === 'retro' ? 'bg-[var(--border-main)]' : 'bg-white/10'}`}></div>
+                  <h3 className={`text-2xl font-serif tracking-widest leading-none ${theme === 'retro' ? 'text-[var(--text-accent)] font-black' : 'text-white'}`}>
+                    {lang === 'CN' ? category.name : category.enName}
+                  </h3>
+                </div>
+              )}
+              
+              {category.desc && (
+                <div className="flex items-baseline gap-3 mb-6 ml-2">
+                  <div className={`w-1.5 h-1.5 rounded-full ${theme === 'retro' ? 'bg-[var(--text-accent)]' : 'bg-gold-primary/60'}`}></div>
+                  <h4 className={`text-base font-serif tracking-wide opacity-90 ${theme === 'retro' ? 'text-black font-bold' : 'text-zinc-300'}`}>
+                    {category.desc}
+                  </h4>
+                </div>
+              )}
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {category.concepts.map((concept: LacanConcept) => (
+                  <button
+                    key={concept.id}
+                    onClick={() => setSelectedItem({ type: 'CONCEPT', data: concept })}
+                    className={`group relative p-6 rounded-2xl cursor-pointer transition-all duration-700 hover:-translate-y-1.5 overflow-hidden border ${
+                      theme === 'retro'
+                        ? 'bg-white/[0.01] border-transparent backdrop-blur-2xl hover:border-[var(--border-accent)] hover:bg-white hover:backdrop-blur-none shadow-none hover:shadow-[0_45px_100px_rgba(139,38,29,0.1)]'
+                        : 'bg-white/[0.01] border-transparent backdrop-blur-2xl hover:bg-black hover:border-white/20 hover:backdrop-blur-none shadow-none hover:shadow-[0_45px_100px_rgba(0,0,0,0.6)]'
+                    }`}
+                  >
                   <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-current to-transparent opacity-0 group-hover:opacity-[0.03] transition-opacity ${theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-white'}`}></div>
                   <h4 className={`text-xl font-serif mb-1 tracking-wide ${theme === 'retro' ? 'text-black font-extrabold group-hover:text-[var(--text-accent)]' : 'text-white'}`}>{concept.name}</h4>
                   <p className={`text-[10px] font-mono mb-5 uppercase tracking-[0.2em] font-black ${theme === 'retro' ? 'text-[#8B261D]/60' : 'text-zinc-500'}`}>{concept.enName}</p>
@@ -207,7 +245,8 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
               ))}
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -352,6 +391,9 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
     
     let listItems: React.ReactNode[] = [];
     let listType: 'ul' | 'ol' | null = null;
+    let codeBlock: string[] = [];
+    let isCodeBlock = false;
+    let codeLang = '';
 
     const flushList = () => {
       if (listItems.length > 0) {
@@ -365,7 +407,45 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
       }
     };
 
+    const flushCode = () => {
+      if (codeBlock.length > 0) {
+        elements.push(
+          <div key={`code-${elements.length}`} className={`my-6 rounded-xl overflow-hidden border ${theme === 'retro' ? 'border-black/10 bg-black/5' : 'border-white/10 bg-black/50'}`}>
+            <div className={`px-4 py-2 border-b text-[9px] font-mono tracking-widest uppercase flex justify-between items-center ${theme === 'retro' ? 'border-black/5 bg-black/5 text-[#8B261D]/60' : 'border-white/5 bg-white/5 text-zinc-500'}`}>
+              <span>{codeLang || 'code'}</span>
+              <span className="opacity-50">SCANNED_SOURCE</span>
+            </div>
+            <pre className="p-6 overflow-x-auto custom-scrollbar">
+              <code className={`text-xs font-mono leading-relaxed block ${theme === 'retro' ? 'text-black/80' : 'text-amber-200/90'}`}>
+                {codeBlock.join('\n')}
+              </code>
+            </pre>
+          </div>
+        );
+        codeBlock = [];
+        isCodeBlock = false;
+        codeLang = '';
+      }
+    };
+
     lines.forEach((line, index) => {
+      // Code Block: ```lang
+      if (line.trim().startsWith('```')) {
+        if (isCodeBlock) {
+          flushCode();
+        } else {
+          flushList();
+          isCodeBlock = true;
+          codeLang = line.trim().slice(3);
+        }
+        return;
+      }
+
+      if (isCodeBlock) {
+        codeBlock.push(line);
+        return;
+      }
+
       // Process bold, italic, and inline code with regex
       const processInline = (str: string) => {
         let parts: (string | React.ReactNode)[] = [str];
@@ -409,10 +489,14 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
         return parts;
       };
 
-      // Header: ### text
+      // Header: ### text or #### text
       if (line.startsWith('### ')) {
         flushList();
         elements.push(<h3 key={index} className={`text-xl font-serif mt-10 mb-6 font-bold tracking-wider ${theme === 'retro' ? 'text-[#8B261D]' : 'text-white'}`}>{processInline(line.slice(4))}</h3>);
+      }
+      else if (line.startsWith('#### ')) {
+        flushList();
+        elements.push(<h4 key={index} className={`text-lg font-serif mt-8 mb-4 font-bold tracking-wider ${theme === 'retro' ? 'text-[#8B261D]/80' : 'text-white/80'}`}>{processInline(line.slice(5))}</h4>);
       }
       // Ordered list: 1. text
       else if (/^\d+\.\s/.test(line)) {
@@ -442,179 +526,226 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
     });
 
     flushList();
+    if (isCodeBlock) flushCode();
     return elements;
   };
 
   const renderDetailView = () => {
     if (!selectedItem) return null;
-    
+
+    // Hybrid Data Logic: Prioritize static content in the TS file, fallback to fetched JSON
+    const conceptData = selectedItem.data;
     const isConcept = selectedItem.type === 'CONCEPT';
     const isPersonnel = selectedItem.type === 'PERSONNEL';
     const isResearch = selectedItem.type === 'RESEARCH';
-    const data = selectedItem.data;
+
+    // Get the detailed content (Definition, Analogy, Application)
+    // Preference: Static detailed > Fetched detailed > Static shortDef
+    const detailed = conceptData.detailed || (selectedDetail as any) || {};
+    
+    const displayData = {
+      ...conceptData,
+      detailed: {
+        definition: detailed.definition || conceptData.shortDef || "DATA_PENDING",
+        analogy: detailed.analogy || "",
+        application: detailed.application || ""
+      }
+    };
+    
+    // Alias for the rendering section below
+    const data = displayData;
 
     // Theme values for the detail view
     const dt = {
-      overlayBg: theme === 'retro' ? 'bg-[#EFE9E0]/90 backdrop-blur-md' : 'bg-[#050505]/95 backdrop-blur-2xl',
-      headerBg: theme === 'retro' ? 'bg-transparent border-black/10' : 'bg-black/20 border-white/5',
-      textColor: theme === 'retro' ? 'text-black/80' : 'text-zinc-300',
+      overlayBg: theme === 'retro' ? 'bg-[#EFE9E0]' : 'bg-[var(--bg-header)]',
+      headerBg: 'bg-[var(--bg-header)] backdrop-blur-md',
+      textColor: theme === 'retro' ? 'text-black/80' : 'text-zinc-400',
       titleColor: theme === 'retro' ? 'text-[#8B261D]' : 'text-white',
       accentColor: theme === 'retro' ? 'text-[#8B261D]' : themeColors.accent,
-      cardBg: theme === 'retro' ? 'bg-white/40 border-black/5 shadow-sm' : 'bg-white/[0.02] border-white/5 shadow-2xl',
-      sidebarBg: theme === 'retro' ? 'bg-[#8B261D]/5 border-black/5' : 'bg-white/[0.03] border-white/5',
+      cardBg: theme === 'retro' ? 'bg-white/40 border-black/10' : 'bg-white/[0.03] border-white/10',
     };
 
     return (
-      <div className={`fixed inset-0 z-[100] ${dt.overlayBg} flex flex-col animate-in fade-in zoom-in-95 duration-500 overflow-hidden`}>
-        {/* Detail Header */}
-        <div className={`h-16 border-b ${dt.headerBg} flex items-center justify-between px-8 relative z-20`}>
-          <button 
-            onClick={() => setSelectedItem(null)}
-            className={`flex items-center gap-3 transition-all group ${theme === 'retro' ? 'text-black/60 hover:text-black' : 'text-zinc-500 hover:text-white'}`}
-          >
-            <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
-            <span className="text-[10px] font-bold uppercase tracking-[0.3em] font-mono">
-              {lang === 'CN' ? '返回索引' : 'BACK TO INDEX'}
-            </span>
-          </button>
-          
-          <div className={`flex items-center gap-6 text-[9px] font-mono font-bold tracking-widest ${theme === 'retro' ? 'text-black/20' : 'text-zinc-600'}`}>
-             <span className="flex items-center gap-2">
-                <div className={`w-1 h-1 rounded-full ${theme === 'retro' ? 'bg-[#8B261D]' : 'bg-green-500'} animate-pulse`}></div> 
-                {lang === 'CN' ? '双向加密通路' : 'ENCRYPTED DUPLEX'}
-             </span>
-             <span className="hidden md:flex items-center gap-2 underline decoration-current/30 decoration-dotted underline-offset-4">HOST: MIST_TOPOLOGY_v2.4.0</span>
+      <div className={`fixed inset-0 z-[100] ${dt.overlayBg} flex flex-col animate-in fade-in duration-500 overflow-hidden`}>
+        {/* Uniform Header Section */}
+        <header className={`h-14 ${dt.headerBg} border-b ${getThemeBorderColor()} flex items-center justify-between px-6 z-50 sticky top-0 shrink-0`}>
+          <div className="flex items-center gap-5">
+            <button
+              onClick={() => setSelectedItem(null)}
+              className={`text-[9px] font-mono tracking-[0.15em] transition-all duration-300 hover:scale-105 active:scale-95 px-2 py-1 rounded-sm border w-[72px] flex items-center justify-center ${
+                theme === 'retro'
+                  ? 'text-[var(--text-accent)] border-[var(--border-main)] hover:border-[var(--border-accent)]'
+                  : 'text-zinc-500 hover:text-white/80 border-zinc-800 hover:border-zinc-600'
+              }`}
+            >
+              <div className="overflow-hidden relative h-4 w-full">
+                <div className={`transition-all duration-[1500ms] w-full ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col ${lang === 'EN' ? '-translate-y-1/2' : 'translate-y-0'}`}>
+                  <div className="h-4 flex items-center shrink-0 w-full leading-none justify-center">← 返回</div>
+                  <div className="h-4 flex items-center shrink-0 w-full leading-none justify-center">← BACK</div>
+                </div>
+              </div>
+            </button>
+            <AnimatedText
+              lang={lang}
+              hClass="h-4"
+              className={`${getHeaderTitleColor()} font-serif font-bold text-xs uppercase tracking-widest`}
+              cn={`迷雾学派：${data.name}`}
+              en={`MIST: ${data.enName}`}
+            />
           </div>
-
           <button 
             onClick={() => setSelectedItem(null)}
             className={`p-2 rounded-full transition-all ${theme === 'retro' ? 'hover:bg-black/5 text-black/40' : 'hover:bg-white/5 text-white/40 hover:text-white'}`}
           >
-            <X size={20} />
+            <X size={18} />
           </button>
-        </div>
+        </header>
         
-        <div className="flex-1 overflow-y-auto custom-scrollbar relative">
-          {/* Background Decorative Rings (Very faint) */}
-          <div className="absolute inset-x-0 top-0 h-[800px] pointer-events-none opacity-[0.05] z-0 flex items-center justify-center overflow-hidden">
+        <div className="flex-1 relative overflow-hidden flex flex-col">
+          {/* Background Decorative Rings */}
+          <div className="absolute inset-0 pointer-events-none opacity-[0.03] flex items-center justify-center overflow-hidden">
              <BorromeanRings centered={true} opacity={1} driverType={driverType || undefined} vivid={true} />
           </div>
 
-          <div className="max-w-6xl mx-auto py-12 md:py-20 px-8 relative z-10">
+          <div className="flex-1 flex flex-col max-w-7xl mx-auto w-full p-6 md:p-10 relative z-10 overflow-hidden">
             {isConcept && (
-               <div className="animate-in slide-in-from-bottom-8 duration-700">
-                  <div className="mb-16 text-center md:text-left">
-                     <div className="flex items-center justify-center md:justify-start gap-4 mb-6">
-                        <div className={`w-12 h-px ${theme === 'retro' ? 'bg-[#8B261D]/20' : 'bg-white/10'}`}></div>
-                        <span className={`text-xs font-bold uppercase tracking-[0.5em] py-1 px-3 rounded-full border ${theme === 'retro' ? 'border-[#8B261D]/20 text-[#8B261D]' : 'border-white/10 text-[var(--accent-color)] bg-white/5'}`}>
-                           {data.category}
-                        </span>
-                     </div>
-                     <h1 className={`text-5xl md:text-8xl font-serif ${dt.titleColor} mb-6 tracking-tighter leading-none`}>
+               <div className="flex-1 flex flex-col gap-8 overflow-hidden animate-in slide-in-from-bottom-4 duration-700">
+                  {/* Title Area Removed from right column as it is inside the card */}
+                  <div className="shrink-0 hidden">
+                     <h1 className={`text-4xl md:text-5xl font-serif ${dt.titleColor} tracking-tighter leading-tight`}>
                         {data.name}
                      </h1>
-                     <div className={`text-sm md:text-lg font-mono uppercase tracking-[0.4em] mb-12 opacity-50 ${dt.textColor}`}>
-                        {data.enName}
-                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 xl:gap-20">
-                     {/* Main Content Column */}
-                     <div className="lg:col-span-8 space-y-16">
-                        {/* 1. Definition Section */}
-                        <section className="relative">
-                           <div className={`absolute -left-8 top-0 bottom-0 w-[2px] ${theme === 'retro' ? 'bg-[#8B261D]/10' : 'bg-white/5'}`}></div>
-                           <h2 className={`text-xs font-bold uppercase tracking-[0.3em] mb-8 flex items-center gap-3 ${dt.accentColor}`}>
-                              <Fingerprint size={16} /> {lang === 'CN' ? '核心定义' : 'CORE DEFINITION'}
-                           </h2>
-                           <div className={`text-xl md:text-2xl ${dt.textColor} font-serif leading-relaxed italic opacity-95`}>
-                              {renderMarkdown(data.detailed?.definition || data.shortDef)}
+                  {/* Modular Content Layout: Left Sidebar & Right Content */}
+                  <div className="flex-1 flex flex-col md:flex-row gap-8 overflow-hidden min-h-0">
+                     
+                     {/* LEFT COLUMN: Sidebar Nav */}
+                     <div className="md:w-80 flex flex-col gap-6 shrink-0 h-full overflow-y-auto custom-scrollbar pr-2">
+                        {/* Concept Info Card */}
+                        <div className={`p-6 rounded-2xl border ${theme === 'retro' ? 'bg-[#EFE9E0]/80 border-[#8B261D]/20 shadow-[0_4px_20px_rgba(139,38,29,0.08)]' : 'bg-black/60 border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.5)]'} backdrop-blur-xl relative overflow-hidden`}>
+                           <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-current to-transparent opacity-5 pointer-events-none ${theme === 'retro' ? 'text-[#8B261D]' : 'text-white'}`}></div>
+                           
+                           <div className={`text-[9px] font-mono tracking-[0.2em] uppercase mb-4 flex items-center gap-2 ${theme === 'retro' ? 'text-[#8B261D]/60' : 'text-zinc-500'}`}>
+                              <Database size={12} />
+                              <span>CONCEPT DATA CARD</span>
                            </div>
-                        </section>
-                        
-                        {/* 2. Analogy Section */}
-                        <section>
-                           <h2 className={`text-xs font-bold uppercase tracking-[0.3em] mb-8 border-b ${theme === 'retro' ? 'border-black/5' : 'border-white/5'} pb-4 flex items-center gap-3 ${dt.accentColor}`}>
-                              <Layers size={16} /> {lang === 'CN' ? '拓扑类比与案例' : 'TOPOLOGICAL ANALOGY'}
+                           
+                           <h2 className={`text-3xl font-serif font-black mb-1 leading-tight ${theme === 'retro' ? 'text-black' : 'text-white'}`}>
+                              {data.name}
                            </h2>
-                           <div className={`text-base md:text-lg ${dt.textColor} leading-loose space-y-4`}>
-                              {renderMarkdown(data.detailed?.analogy)}
-                           </div>
-                        </section>
+                           <h3 className={`text-xs font-mono tracking-[0.15em] uppercase mb-6 ${theme === 'retro' ? 'text-[#8B261D]' : 'text-zinc-400'}`}>
+                              {data.enName}
+                           </h3>
 
-                        {/* 3. Engine Application Section */}
-                        <section className={`p-8 md:p-12 rounded-3xl ${dt.cardBg}`}>
-                           <h2 className={`text-xs font-bold uppercase tracking-[0.3em] mb-8 flex items-center gap-3 ${dt.accentColor}`}>
-                              <Zap size={16} /> {lang === 'CN' ? '叙事引擎部署指示' : 'ENGINE COUPLING'}
-                           </h2>
-                           <div className={`text-sm md:text-base ${dt.textColor} leading-relaxed opacity-80`}>
-                              {renderMarkdown(data.detailed?.application)}
+                           <div className="space-y-4">
+                              <div className="flex flex-col gap-1">
+                                 <span className={`text-[9px] font-bold uppercase tracking-[0.2em] ${theme === 'retro' ? 'text-black/40' : 'text-zinc-600'}`}>AUTHOR / SCHOLAR</span>
+                                 <span className={`text-sm font-serif ${theme === 'retro' ? 'text-black/80 font-bold' : 'text-zinc-300'}`}>
+                                    {data.author || (activeDictionary === 'HEGEL' ? 'G.W.F. Hegel' : activeDictionary === 'MARX' ? 'Karl Marx' : activeDictionary === 'LACAN' ? 'Jacques Lacan' : activeDictionary === 'ZIZEK' ? 'Slavoj Žižek' : 'Unknown')}
+                                 </span>
+                              </div>
+                              <div className="flex flex-col gap-1">
+                                 <span className={`text-[9px] font-bold uppercase tracking-[0.2em] ${theme === 'retro' ? 'text-black/40' : 'text-zinc-600'}`}>SOURCE TEXT / ORIGIN</span>
+                                 <span className={`text-xs font-serif italic ${theme === 'retro' ? 'text-black/70' : 'text-zinc-400'}`}>
+                                    {data.source || (activeDictionary === 'HEGEL' ? '《精神现象学》(Phenomenology of Spirit)' : 'Archived Text')}
+                                 </span>
+                              </div>
+                              
+                              {/* Tags */}
+                              <div className="flex flex-col gap-2 pt-2">
+                                 <span className={`text-[9px] font-bold uppercase tracking-[0.2em] ${theme === 'retro' ? 'text-black/40' : 'text-zinc-600'}`}>INDEX TAGS</span>
+                                 <div className="flex flex-wrap gap-1.5">
+                                    {(data.tags || ['PHILOSOPHY', 'THEORY', 'CONCEPT']).map((tag: string, i: number) => (
+                                       <span key={i} className={`text-[9px] px-2 py-0.5 rounded-sm border font-mono tracking-wider ${theme === 'retro' ? 'border-[#8B261D]/20 bg-[#8B261D]/5 text-[#8B261D] font-bold' : 'border-white/10 bg-white/5 text-zinc-400'}`}>
+                                          #{tag}
+                                       </span>
+                                    ))}
+                                 </div>
+                              </div>
+                              
+                              {/* Related Concepts */}
+                              <div className={`flex flex-col gap-2 pt-4 mt-2 border-t ${theme === 'retro' ? 'border-black/10' : 'border-white/10'}`}>
+                                 <span className={`text-[9px] font-bold uppercase tracking-[0.2em] ${theme === 'retro' ? 'text-black/40' : 'text-zinc-600'}`}>RELATED NODES</span>
+                                 <div className="flex flex-wrap gap-3">
+                                    {(data.related || ['主体 (Subject)', '他者 (The Other)']).map((rel: string, i: number) => (
+                                       <span key={i} className={`text-xs font-serif underline decoration-dashed underline-offset-4 cursor-pointer transition-colors ${theme === 'retro' ? 'text-[#8B261D]/80 hover:text-black font-medium' : 'text-zinc-400 hover:text-white'}`}>
+                                          {rel}
+                                       </span>
+                                    ))}
+                                 </div>
+                              </div>
                            </div>
-                        </section>
+                        </div>
+
+                        {/* Tabs */}
+                        <div className="flex flex-col gap-2">
+                           <button 
+                              onClick={() => setDetailActiveTab('DEFINITION')}
+                              className={`px-5 py-3.5 rounded-xl border flex items-center gap-3 transition-all duration-300 text-left ${
+                                 detailActiveTab === 'DEFINITION'
+                                    ? (theme === 'retro' ? 'bg-[#8B261D] text-white border-transparent shadow-lg' : 'bg-white text-black border-transparent shadow-[0_0_20px_rgba(255,255,255,0.2)]')
+                                    : (theme === 'retro' ? 'bg-white/40 border-black/10 text-black/60 hover:bg-white/80' : 'bg-white/[0.03] border-white/10 text-zinc-400 hover:bg-white/10')
+                              }`}
+                           >
+                              <Fingerprint size={16} className={detailActiveTab === 'DEFINITION' ? (theme === 'retro' ? 'text-white' : 'text-black') : dt.accentColor} />
+                              <div>
+                                 <div className={`text-[9px] font-bold uppercase tracking-[0.2em] mb-0.5 ${detailActiveTab === 'DEFINITION' ? (theme === 'retro' ? 'text-white/80' : 'text-black/60') : 'opacity-60'}`}>Part. 1</div>
+                                 <h3 className={`font-serif tracking-widest text-sm ${detailActiveTab === 'DEFINITION' ? 'font-bold' : ''}`}>{lang === 'CN' ? '核心定义' : 'CORE DEFINITION'}</h3>
+                              </div>
+                           </button>
+
+                           <button 
+                              onClick={() => setDetailActiveTab('ANALOGY')}
+                              className={`px-5 py-3.5 rounded-xl border flex items-center gap-3 transition-all duration-300 text-left ${
+                                 detailActiveTab === 'ANALOGY'
+                                    ? (theme === 'retro' ? 'bg-[#8B261D] text-white border-transparent shadow-lg' : 'bg-white text-black border-transparent shadow-[0_0_20px_rgba(255,255,255,0.2)]')
+                                    : (theme === 'retro' ? 'bg-white/40 border-black/10 text-black/60 hover:bg-white/80' : 'bg-white/[0.03] border-white/10 text-zinc-400 hover:bg-white/10')
+                              }`}
+                           >
+                              <Layers size={16} className={detailActiveTab === 'ANALOGY' ? (theme === 'retro' ? 'text-white' : 'text-black') : dt.accentColor} />
+                              <div>
+                                 <div className={`text-[9px] font-bold uppercase tracking-[0.2em] mb-0.5 ${detailActiveTab === 'ANALOGY' ? (theme === 'retro' ? 'text-white/80' : 'text-black/60') : 'opacity-60'}`}>Part. 2</div>
+                                 <h3 className={`font-serif tracking-widest text-sm ${detailActiveTab === 'ANALOGY' ? 'font-bold' : ''}`}>{lang === 'CN' ? '拓扑类比与案例' : 'TOPOLOGICAL ANALOGY'}</h3>
+                              </div>
+                           </button>
+
+                           <button 
+                              onClick={() => setDetailActiveTab('APPLICATION')}
+                              className={`px-5 py-3.5 rounded-xl border flex items-center gap-3 transition-all duration-300 text-left ${
+                                 detailActiveTab === 'APPLICATION'
+                                    ? (theme === 'retro' ? 'bg-[#8B261D] text-white border-transparent shadow-lg' : 'bg-white text-black border-transparent shadow-[0_0_20px_rgba(255,255,255,0.2)]')
+                                    : (theme === 'retro' ? 'bg-white/40 border-black/10 text-black/60 hover:bg-white/80' : 'bg-white/[0.03] border-white/10 text-zinc-400 hover:bg-white/10')
+                              }`}
+                           >
+                              <Zap size={16} className={detailActiveTab === 'APPLICATION' ? (theme === 'retro' ? 'text-white' : 'text-black') : dt.accentColor} />
+                              <div>
+                                 <div className={`text-[9px] font-bold uppercase tracking-[0.2em] mb-0.5 ${detailActiveTab === 'APPLICATION' ? (theme === 'retro' ? 'text-white/80' : 'text-black/60') : 'opacity-60'}`}>Part. 3</div>
+                                 <h3 className={`font-serif tracking-widest text-sm ${detailActiveTab === 'APPLICATION' ? 'font-bold' : ''}`}>{lang === 'CN' ? '叙事引擎部署指示' : 'ENGINE COUPLING'}</h3>
+                              </div>
+                           </button>
+                        </div>
                      </div>
                      
-                     {/* Sidebar Info Column */}
-                     <div className="lg:col-span-4 space-y-8">
-                        {/* Parameters Component */}
-                        <div className={`p-8 rounded-3xl border ${dt.sidebarBg}`}>
-                           <h4 className={`text-[10px] font-bold uppercase tracking-[0.2em] mb-8 flex items-center gap-3 ${theme === 'retro' ? 'text-black/40' : 'text-zinc-500'}`}>
-                              <Activity size={14} /> {lang === 'CN' ? '主体拓扑参数' : 'TOPOLOGY METRICS'}
-                           </h4>
-                           <div className="space-y-6">
-                              {[
-                                 { label: 'Eros Intensity', val: 78 },
-                                 { label: 'Symbolic Load', val: 42 },
-                                 { label: 'Real Encroachment', val: 15 },
-                                 { label: 'Graph Complexity', val: 64 }
-                              ].map(param => (
-                                <div key={param.label} className="space-y-2">
-                                   <div className="flex items-center justify-between px-1">
-                                      <span className={`text-[9px] font-mono tracking-widest uppercase ${theme === 'retro' ? 'text-black/50' : 'text-zinc-600'}`}>{param.label}</span>
-                                      <span className={`text-[9px] font-mono font-bold ${theme === 'retro' ? 'text-black' : 'text-zinc-400'}`}>{param.val}%</span>
-                                   </div>
-                                   <div className={`h-1.5 w-full rounded-full overflow-hidden ${theme === 'retro' ? 'bg-black/[0.03]' : 'bg-white/[0.03]'}`}>
-                                      <div 
-                                         className={`h-full transition-all duration-[2s] ${theme === 'retro' ? 'bg-[#8B261D]' : themeColors.bg}`} 
-                                         style={{width: `${param.val}%`}}
-                                      ></div>
-                                   </div>
-                                </div>
-                              ))}
+                     {/* RIGHT COLUMN: Content Area */}
+                     <div className={`flex-1 flex flex-col rounded-2xl border ${dt.cardBg} overflow-hidden backdrop-blur-md`}>
+                        <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+                           <div className={`text-sm md:text-base ${dt.textColor} font-serif leading-relaxed tracking-wide animate-in fade-in duration-500`}>
+                              {detailActiveTab === 'DEFINITION' && renderMarkdown(data.detailed?.definition || data.shortDef)}
+                              {detailActiveTab === 'ANALOGY' && renderMarkdown(data.detailed?.analogy || "*(空)*")}
+                              {detailActiveTab === 'APPLICATION' && renderMarkdown(data.detailed?.application || "*(空)*")}
                            </div>
-                        </div>
-                        
-                        {/* Note Component */}
-                        <div className={`p-8 rounded-3xl border border-dashed ${theme === 'retro' ? 'border-black/10 bg-transparent' : 'border-white/10 bg-transparent'}`}>
-                           <h4 className={`text-[10px] font-bold uppercase tracking-[0.2em] mb-4 flex items-center gap-3 ${theme === 'retro' ? 'text-black/40' : 'text-zinc-500'}`}>
-                              <Eye size={14} /> {lang === 'CN' ? '观测记录' : 'OBSERVATION NOTES'}
-                           </h4>
-                           <p className={`text-[11px] font-light leading-relaxed italic ${dt.textColor} opacity-60`}>
-                              "Subjective stabilization requires the persistent use of the symbolic net. Failure to suture these concepts in a coherent chain may lead to total Imaginary collapse."
-                           </p>
-                        </div>
-
-                        {/* Share/Actions */}
-                        <div className="flex flex-col gap-3">
-                           <button className={`w-full py-4 rounded-xl text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300 border ${
-                              theme === 'retro' 
-                                ? 'border-[#8B261D] text-[#8B261D] hover:bg-[#8B261D] hover:text-white' 
-                                : 'border-white/10 text-white hover:bg-white/5 active:scale-95'
-                           }`}>
-                              {lang === 'CN' ? '导出档案副本' : 'EXPORT DATA COPY'}
-                           </button>
                         </div>
                      </div>
                   </div>
                </div>
             )}
             
-            {/* Personnel & Research could have similar refined templates here if needed */}
             {!isConcept && (
-              <div className="flex flex-col items-center justify-center py-20 text-center space-y-6">
-                <Database size={48} className="text-zinc-700 animate-pulse" />
-                <h2 className="text-2xl font-serif text-zinc-400">DATA UNDER RECONSTRUCTION</h2>
-                <p className="text-sm text-zinc-600 font-mono">ENCRYPTED_OFFSET_ERROR: Please retry access from Global Index.</p>
-                <button onClick={() => setSelectedItem(null)} className="px-10 py-2 border border-zinc-700 rounded-full text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-zinc-200 hover:border-zinc-200 transition-all">CLOSE_CONNECTION</button>
+              <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6">
+                <Database size={40} className="text-zinc-700 animate-pulse" />
+                <h2 className="text-xl font-serif text-zinc-400 uppercase tracking-widest">DATA UNDER RECONSTRUCTION</h2>
+                <button onClick={() => setSelectedItem(null)} className="px-8 py-2 border border-zinc-700 rounded-full text-[9px] font-bold uppercase tracking-widest text-zinc-500 hover:text-zinc-200 hover:border-zinc-200 transition-all">CLOSE_CONNECTION</button>
               </div>
             )}
           </div>

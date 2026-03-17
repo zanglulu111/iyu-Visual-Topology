@@ -4,7 +4,11 @@
       "Bash(npm run dev)",
       "Bash(git restore components/BorromeanRings.tsx components/BorromeanParticles.tsx components/LandingView.tsx)",
       "Bash(grep -n \"分析层\" components/*.tsx)",
-      "Bash(npm run build)"
+      "Bash(npm run build)",
+      "Bash(git checkout data/philosophy_refined.ts)",
+      "Bash(node scripts/split-philosophy-data.js)",
+      "Bash(npm install @tanstack/react-query)",
+      "Bash(npm install)"
     ]
   }
 }

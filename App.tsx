@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { NarrativeEngineField } from './components/NarrativeEngineField';
 import { BlueprintEditor } from './components/BlueprintEditor';
 import { AnalysisView } from './components/blueprint/AnalysisView';
@@ -48,6 +49,17 @@ import { ANIMATION_GENRE_CATEGORIES } from './data/animation_genres';
 import { MASTER_PRESETS } from './data/master_presets';
 import * as geminiService from './services/geminiService';
 import * as randomizerService from './services/randomizer';
+
+// 创建 React Query 客户端
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: Infinity, // 哲学内容不会变化，永久缓存
+      gcTime: 1000 * 60 * 60 * 24, // 24小时后清理
+      retry: 1,
+    },
+  },
+});
 import { supabase } from './services/supabaseAuth';
 import { generateGlobalDump } from './utils/exportUtils';
 import { generateAestheticPrompt } from './utils/promptUtils';
@@ -1152,7 +1164,8 @@ const App: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[var(--bg-main)] text-zinc-300 font-sans selection:bg-gold-primary/30 selection:text-white overflow-hidden transition-colors duration-1000">
+        <QueryClientProvider client={queryClient}>
+            <div className="min-h-screen bg-[var(--bg-main)] text-zinc-300 font-sans selection:bg-gold-primary/30 selection:text-white overflow-hidden transition-colors duration-1000">
             {page === -1 ? (
                 <UniversePortal
                     lang={lang}
@@ -1728,7 +1741,8 @@ const App: React.FC = () => {
                 lang={lang}
                 driverType={selectedDriver}
             />
-        </div>
+            </div>
+        </QueryClientProvider>
     );
 };
 

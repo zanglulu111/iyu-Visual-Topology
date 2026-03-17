@@ -198,19 +198,19 @@ export const HEGEL_DICTIONARY: LacanCategory[] = [
                 }
             },
             {
-                id: "essence",
-                name: "本质",
-                enName: "Essence",
-                category: "Logic",
-                shortDef: "存在的真理是本质。本质是反思后的存在。",
+                id: “essence”,
+                name: “本质”,
+                enName: “Essence”,
+                category: “Logic”,
+                shortDef: “存在的真理是本质。本质是反思后的存在。”,
                 detailed: {
-                    definition: "我们不再直接看事物（像感性确定性那样），而是看“事物的背后”。\n本质总是成对出现的：同一与差异、内容与形式、原因与结果。",
-                    analogy: "**案例：侦探视角**\n不再看表象（尸体），而是看本质（动机与凶手）。",
-                    application: "M3 (幻想)：试图挖掘表象之下的“深层真实”。"
+                    definition: “我们不再直接看事物（像感性确定性那样），而是看\”事物的背后\”。\\n本质总是成对出现的：同一与差异、内容与形式、原因与结果。”,
+                    analogy: “**案例：侦探视角**\\n不再看表象（尸体），而是看本质（动机与凶手）。”,
+                    application: “M3 (幻想)：试图挖掘表象之下的\”深层真实\”。”
                 }
             },
             {
-                id: "appearance_actuality",
+                id: “appearance_actuality”,
                 name: "现象与现实",
                 enName: "Appearance & Actuality",
                 category: "Logic",

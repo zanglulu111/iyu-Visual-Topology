@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 /* Added ArrowLeft to lucide-react imports */
 import { X, BookOpen, ChevronRight, Quote, ArrowRight, ArrowLeft, Lightbulb, GraduationCap, Microscope, Cpu, Layers, Scale, Fingerprint, Zap, Ghost, BrainCircuit, ScanEye, ScanLine } from 'lucide-react';
-import { LACAN_DICTIONARY, LacanConcept } from '../data/lacan_dictionary';
-import { ZIZEK_DICTIONARY } from '../data/philosophy_zizek';
-import { MARX_DICTIONARY } from '../data/philosophy_marx';
-import { HEGEL_DICTIONARY } from '../data/philosophy_hegel';
-import { OTHER_DICTIONARY } from '../data/philosophy_other';
-import { ANALYSIS_LIBRARY } from '../data/analysis_data';
+import { LACAN_DICTIONARY, LacanConcept } from '../data/codex/lacan_dictionary';
+import { ZIZEK_DICTIONARY } from '../data/codex/philosophy_zizek';
+import { MARX_DICTIONARY } from '../data/codex/philosophy_marx';
+import { HEGEL_DICTIONARY } from '../data/codex/philosophy_hegel';
+import { OTHER_DICTIONARY } from '../data/codex/philosophy_other';
+import { ANALYSIS_LIBRARY } from '../data/codex/analysis_data';
 import { WHITEPAPER_DATA, WhitepaperSection } from '../data/whitepaper_data';
 import { DriverType } from '../types';
 

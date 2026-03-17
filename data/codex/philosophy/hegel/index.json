@@ -1,0 +1,51 @@
+[
+  {
+    "id": "h_substance_subject",
+    "name": "实体即主体",
+    "enName": "Substance is Subject",
+    "category": "Core",
+    "shortDef": "真理不仅被理解和表述为实体，而且同样地被理解和表述为主体。"
+  },
+  {
+    "id": "h_dialectic",
+    "name": "辩证法",
+    "enName": "Dialectics",
+    "category": "Core",
+    "shortDef": "正、反、合的运动过程，矛盾是发展的动力。"
+  },
+  {
+    "id": "h_aufhebung",
+    "name": "扬弃",
+    "enName": "Aufhebung",
+    "category": "Core",
+    "shortDef": "既克服又保留，在更高层面上达成统一。"
+  },
+  {
+    "id": "h_negativity",
+    "name": "否定性",
+    "enName": "Negativity",
+    "category": "Core",
+    "shortDef": "主体的核心力量，通过否定确立自身。"
+  },
+  {
+    "id": "h_unity_opposites",
+    "name": "矛盾的统一",
+    "enName": "Unity of Opposites",
+    "category": "Core",
+    "shortDef": "对立面在统一体中相互包含与转化。"
+  },
+  {
+    "id": "h_concrete_universal",
+    "name": "具体的普遍性",
+    "enName": "Concrete Universality",
+    "category": "Core",
+    "shortDef": "普遍性不是抽象的，而是包含所有特殊性的具体整体。"
+  },
+  {
+    "id": "h_teleology",
+    "name": "内在目的论",
+    "enName": "Intrinsic Teleology",
+    "category": "Core",
+    "shortDef": "事物发展的目的蕴含在其自身的变化逻辑之中。"
+  }
+]
