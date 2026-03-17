@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { globalTaskManager, GenerationTask } from '../services/taskManager';
 import { Activity, X, PlayCircle, CheckCircle2, XCircle, AlertCircle, Clock, Square } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { DriverType } from '../types';
 
 interface TaskManagerPanelProps {
     isOpen: boolean;
@@ -9,8 +10,6 @@ interface TaskManagerPanelProps {
     lang: 'CN' | 'EN';
     driverType?: DriverType | null;
 }
-
-import { DriverType } from '../types';
 
 export const TaskManagerPanel: React.FC<TaskManagerPanelProps> = ({ isOpen, onClose, lang, driverType }) => {
     const { theme } = useTheme();
@@ -82,7 +81,7 @@ export const TaskManagerPanel: React.FC<TaskManagerPanelProps> = ({ isOpen, onCl
 
     return (
         <div className={`fixed bottom-20 right-6 w-[400px] max-h-[500px] h-[60vh] ${theme === 'retro' ? 'bg-[#F9F7F1]' : 'bg-zinc-950'} border-2 ${theme === 'retro' ? 'border-[#8B261D]' : modeAccent.border} rounded-xl ${modeAccent.shadow} z-[120] flex flex-col transform transition-all duration-300 origin-bottom ${isOpen ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0 pointer-events-none'}`}>
-            <div className={`flex justify-between items-center p-4 border-b ${theme === 'retro' ? 'border-[#8B261D]/30 bg-[#F9F7F1]' : modeAccent.border + '/30 ' + (theme === 'retro' ? 'bg-[#F4EFE0]' : 'bg-zinc-900/50')} rounded-t-xl`}>
+            <div className={`flex justify-between items-center p-4 border-b ${theme === 'retro' ? 'border-[#8B261D]/30 bg-[#F9F7F1]' : modeAccent.border + '/30 bg-zinc-900/50'} rounded-t-xl`}>
                 <div className="flex items-center gap-2">
                     <Activity size={18} className={theme === 'retro' ? 'text-[#8B261D]' : modeAccent.text} />
                     <h3 className={`text-sm font-bold uppercase tracking-wider ${theme === 'retro' ? 'text-[#8B261D]' : 'text-white'}`}>

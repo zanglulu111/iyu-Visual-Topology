@@ -1,5 +1,5 @@
 
-import { LacanCategory } from './lacan_dictionary';
+import { LacanCategory } from './philosophy_refined';
 
 // --- 8. 理论分析 (THEORETICAL ANALYSIS - USER CONVERSATIONS) ---
 /**

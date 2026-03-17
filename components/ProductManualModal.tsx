@@ -1,11 +1,7 @@
 import React, { useState } from 'react';
 /* Added ArrowLeft to lucide-react imports */
 import { X, BookOpen, ChevronRight, Quote, ArrowRight, ArrowLeft, Lightbulb, GraduationCap, Microscope, Cpu, Layers, Scale, Fingerprint, Zap, Ghost, BrainCircuit, ScanEye, ScanLine } from 'lucide-react';
-import { LACAN_DICTIONARY, LacanConcept } from '../data/codex/lacan_dictionary';
-import { ZIZEK_DICTIONARY } from '../data/codex/philosophy_zizek';
-import { MARX_DICTIONARY } from '../data/codex/philosophy_marx';
-import { HEGEL_DICTIONARY } from '../data/codex/philosophy_hegel';
-import { OTHER_DICTIONARY } from '../data/codex/philosophy_other';
+import { HEGEL_INDEX, MARX_INDEX, LACAN_INDEX, ZIZEK_INDEX, LacanConcept } from '../data/codex/philosophy_refined';
 import { ANALYSIS_LIBRARY } from '../data/codex/analysis_data';
 import { WHITEPAPER_DATA, WhitepaperSection } from '../data/whitepaper_data';
 import { DriverType } from '../types';
@@ -68,11 +64,10 @@ export const ProductManualModal: React.FC<ProductManualModalProps> = ({ isOpen, 
     };
 
     const counts = {
-        lacan: getCount(LACAN_DICTIONARY),
-        zizek: getCount(ZIZEK_DICTIONARY),
-        marx: getCount(MARX_DICTIONARY),
-        hegel: getCount(HEGEL_DICTIONARY),
-        other: getCount(OTHER_DICTIONARY),
+        lacan: getCount(LACAN_INDEX),
+        zizek: getCount(ZIZEK_INDEX),
+        marx: getCount(MARX_INDEX),
+        hegel: getCount(HEGEL_INDEX),
         analysis: getCount(ANALYSIS_LIBRARY),
     };
 
@@ -154,8 +149,7 @@ export const ProductManualModal: React.FC<ProductManualModalProps> = ({ isOpen, 
                                 { id: 'THEORY_ZIZEK', label: '2. 齐泽克辞典', icon: <Zap size={16} />, count: counts.zizek },
                                 { id: 'THEORY_MARX', label: '3. 马克思辞典', icon: <Scale size={16} />, count: counts.marx },
                                 { id: 'THEORY_HEGEL', label: '4. 黑格尔辞典', icon: <Layers size={16} />, count: counts.hegel },
-                                { id: 'THEORY_OTHER', label: '5. 其他哲学', icon: <Microscope size={16} />, count: counts.other },
-                                { id: 'THEORY_ANALYSIS', label: '6. 理论分析', icon: <Quote size={16} />, count: counts.analysis },
+                                { id: 'THEORY_ANALYSIS', label: '5. 理论分析', icon: <Quote size={16} />, count: counts.analysis },
                             ].map(item => (
                                 <button
                                     key={item.id}
@@ -319,11 +313,10 @@ export const ProductManualModal: React.FC<ProductManualModalProps> = ({ isOpen, 
                                     </div>
                                 )}
 
-                                {activeSection === 'THEORY_LACAN' && renderDictionarySection(LACAN_DICTIONARY)}
-                                {activeSection === 'THEORY_ZIZEK' && renderDictionarySection(ZIZEK_DICTIONARY)}
-                                {activeSection === 'THEORY_MARX' && renderDictionarySection(MARX_DICTIONARY)}
-                                {activeSection === 'THEORY_HEGEL' && renderDictionarySection(HEGEL_DICTIONARY)}
-                                {activeSection === 'THEORY_OTHER' && renderDictionarySection(OTHER_DICTIONARY)}
+                                {activeSection === 'THEORY_LACAN' && renderDictionarySection(LACAN_INDEX)}
+                                {activeSection === 'THEORY_ZIZEK' && renderDictionarySection(ZIZEK_INDEX)}
+                                {activeSection === 'THEORY_MARX' && renderDictionarySection(MARX_INDEX)}
+                                {activeSection === 'THEORY_HEGEL' && renderDictionarySection(HEGEL_INDEX)}
                                 {activeSection === 'THEORY_ANALYSIS' && renderDictionarySection(ANALYSIS_LIBRARY)}
                             </div>
                         )}

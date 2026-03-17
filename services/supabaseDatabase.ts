@@ -82,6 +82,22 @@ export const supabaseDatabase = {
         }
     },
 
+    async deleteCloudHistoryItem(id: string | number): Promise<void> {
+        const { data: user } = await supabase.auth.getUser();
+        if (!user.user) return;
+
+        const { error } = await supabase
+            .from('archives')
+            .delete()
+            .eq('id', id)
+            .eq('user_id', user.user.id);
+
+        if (error) {
+            console.error('Error deleting cloud history item:', error);
+            throw error;
+        }
+    },
+
     // --- COLLECTIONS ---
 
     async getCloudCollections(): Promise<CollectionItem[]> {

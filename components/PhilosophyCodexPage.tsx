@@ -33,9 +33,8 @@ import {
 import { useTheme } from '../contexts/ThemeContext';
 import { DriverType, User } from '../types';
 import { PhilosophyTimeline } from './PhilosophyTimeline';
-import { LacanConcept } from '../data/codex/lacan_dictionary';
-import { HEGEL_INDEX, MARX_INDEX, LACAN_INDEX, ZIZEK_INDEX } from '../data/codex/philosophy_refined';
-import { OTHER_DICTIONARY } from '../data/codex/philosophy_other';
+import { HEGEL_INDEX, MARX_INDEX, LACAN_INDEX, ZIZEK_INDEX, LacanConcept, LacanCategory } from '../data/codex/philosophy_refined';
+
 import { ANALYSIS_LIBRARY } from '../data/codex/analysis_data';
 import { ARCHIVE_CASES, CaseStudy } from './archiveCasesData';
 import { BorromeanRings } from './BorromeanRings';
@@ -148,7 +147,6 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
     MARX: { name: '马克思 (Marx)', data: MARX_INDEX, icon: <Activity size={16} /> },
     LACAN: { name: '拉康 (Lacan)', data: LACAN_INDEX, icon: <Fingerprint size={16} /> },
     ZIZEK: { name: '齐泽克 (Zizek)', data: ZIZEK_INDEX, icon: <Zap size={16} /> },
-    OTHER: { name: '其他 (Other)', data: OTHER_DICTIONARY, icon: <Microscope size={16} /> },
     ANALYSIS: { name: '分析 (Analysis)', data: ANALYSIS_LIBRARY, icon: <Brain size={16} /> },
   };
 
@@ -448,7 +446,7 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
 
       // Process bold, italic, and inline code with regex
       const processInline = (str: string) => {
-        let parts: (string | React.ReactNode)[] = [str];
+        let parts: any[] = [str];
         
         // Bold: **text**
         parts = parts.flatMap(part => {

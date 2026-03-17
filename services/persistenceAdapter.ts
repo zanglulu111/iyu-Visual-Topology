@@ -42,14 +42,16 @@ export const persistenceAdapter = {
         return localPersistence.getHistoryItem(id);
     },
 
-    saveHistory: async (item: HistoryItem): Promise<HistoryItem> => {
+    saveHistory: async (item: HistoryItem): Promise<void> => {
         if (useRemote) {
             if (item.id) {
-                return backendAPI.updateHistory(item.id, item);
+                await backendAPI.updateHistory(item.id, item);
+                return;
             }
-            return backendAPI.saveHistory(item as any);
+            await backendAPI.saveHistory(item as any);
+            return;
         }
-        return localPersistence.saveHistory(item);
+        return localPersistence.saveHistoryItem(item);
     },
 
     deleteHistory: async (id: number): Promise<void> => {
@@ -68,35 +70,18 @@ export const persistenceAdapter = {
         return localPersistence.getCollections();
     },
 
-    getCollection: async (id: string): Promise<CollectionItem | null> => {
+    saveCollection: async (item: CollectionItem): Promise<void> => {
         if (useRemote) {
-            try {
-                return await backendAPI.getCollection(id);
-            } catch {
-                return null;
-            }
+            await backendAPI.updateCollection(item.id, item);
+            return;
         }
-        return localPersistence.getCollection(id);
-    },
-
-    saveCollection: async (item: CollectionItem): Promise<CollectionItem> => {
-        if (useRemote) {
-            return backendAPI.updateCollection(item.id, item);
-        }
-        return localPersistence.saveCollection(item);
-    },
-
-    saveCollectionBlueprint: async (blueprint: any): Promise<CollectionItem> => {
-        if (useRemote) {
-            return backendAPI.saveCollection(blueprint);
-        }
-        return localPersistence.saveCollectionBlueprint(blueprint);
+        return localPersistence.saveCollectionItem(item);
     },
 
     deleteCollection: async (id: string): Promise<void> => {
         if (useRemote) {
             return backendAPI.deleteCollection(id);
         }
-        return localPersistence.deleteCollection(id);
+        return localPersistence.deleteCollectionItem(id);
     }
 };

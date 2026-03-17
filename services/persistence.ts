@@ -117,6 +117,37 @@ export const persistence = {
         });
     },
 
+    getHistoryItem: async (id: number): Promise<HistoryItem | null> => {
+        const db = await openDB();
+        return new Promise<HistoryItem | null>((resolve, reject) => {
+            const transaction = db.transaction(STORE_HISTORY, 'readonly');
+            const store = transaction.objectStore(STORE_HISTORY);
+            const request = store.get(id);
+            request.onsuccess = () => resolve(request.result as HistoryItem || null);
+            request.onerror = () => reject(request.error);
+        });
+    },
+
+    deleteHistory: async (id: number): Promise<void> => {
+        const { data: user } = await supabase.auth.getUser();
+        if (user.user) {
+            try {
+                await supabaseDatabase.deleteCloudHistoryItem(id);
+            } catch (err) {
+                console.error("Failed to sync history deletion to cloud", err);
+            }
+        }
+
+        const db = await openDB();
+        return new Promise<void>((resolve, reject) => {
+            const transaction = db.transaction(STORE_HISTORY, 'readwrite');
+            const store = transaction.objectStore(STORE_HISTORY);
+            const request = store.delete(id);
+            request.onsuccess = () => resolve();
+            request.onerror = () => reject(request.error);
+        });
+    },
+
     // Sync entire history array (Use carefully, mainly for migration or bulk updates)
     // For performance, we usually prefer saveHistoryItem, but to keep app logic simple we might sync.
     // Optimization: We will only save the top item if we assume it's an append, 
