@@ -252,7 +252,7 @@ export const MARX_INDEX: LacanCategory[] = [
             { id: "m_exploitation_rate", name: "剥削率", enName: "Rate of Exploitation", category: "Economics", shortDef: "掠夺的数学：剩余价值与可变资本的比率，揭示资本的残酷效率。" },
             { id: "m_capital_accumulation", name: "资本积累", enName: "Capital Accumulation", category: "Economics", shortDef: "剩余价值的再生产：资本规模在剥夺中无限扩张的狂热过程。" },
             { id: "m_organic_composition", name: "资本的有机构成", enName: "Organic Composition", category: "Economics", shortDef: "机器取代肉身：不变资本相对于可变资本的占比提升，技术进步带来的社会性排挤。" },
-            { id: "m_falling_profit_rate", name: "利润率下降趋势", enName: "Falling Rate of Profit", category: "Economics", shortDef: "资本的自我诅咒：由于由于有机构成提高而导致的内在盈利困境与危机。" }
+            { id: "m_falling_profit_rate", name: "利润率下降趋势", enName: "Falling Rate of Profit", category: "Economics", shortDef: "资本的自我诅咒：由于有机构成提高而导致的内在盈利困境与危机。" }
         ]
     },
     {
@@ -290,9 +290,9 @@ export const MARX_INDEX: LacanCategory[] = [
             { id: "m_production_mode", name: "生产方式", enName: "Mode of Production", category: "History", shortDef: "社会生存的这种总体架构：生产力与生产关系的辩证统一，规定了整个时代的影调。" },
             { id: "m_forces_relations_production", name: "生产关系", enName: "Relations of Production", category: "History", shortDef: "社会演进的这种底层齿轮：生产工具的质变终将撑破陈旧的所有制外壳。" },
             { id: "m_base_superstructure", name: "经济基础与上层建筑", enName: "Base & Superstructure", category: "History", shortDef: "建筑学的社会隐喻：生产关系总和支撑起法权与政治的华丽宫殿，并决定其意识形态的影调。" },
-            { id: "m_social_formations", name: "社会形态演变", enName: "Social Formations", category: "History", shortDef: "从原始公社到共产主义：由于由于自由度的这种规律性扩张与所有制的颠覆性跨越。" },
+            { id: "m_social_formations", name: "社会形态演变", enName: "Social Formations", category: "History", shortDef: "从原始公社到共产主义：由于自由度的这种规律性扩张与所有制的颠覆性跨越。" },
             { id: "m_class_struggle", name: "阶级斗争", enName: "Class Struggle", category: "History", shortDef: "至今一切社会的历史都是阶级斗争的历史。" },
-            { id: "m_proletariat", name: "无产阶级", enName: "Proletariat", category: "History", shortDef: "历史的这种决斗者：除了自身的劳动力以外一无所有的阶级，由于由于极致的这种匮乏而承载了绝对的这种革命潜能。" },
+            { id: "m_proletariat", name: "无产阶级", enName: "Proletariat", category: "History", shortDef: "历史的这种决斗者：除了自身的劳动力以外一无所有的阶级，由于极致的这种匮乏而承载了绝对的这种革命潜能。" },
             { id: "m_revolution_theory", name: "革命", enName: "Revolution", category: "History", shortDef: "阶级统治的这种剧烈断裂：通过暴力打破国家机器，作为通往新世界的逻辑中点。" }
         ]
     },
@@ -302,7 +302,7 @@ export const MARX_INDEX: LacanCategory[] = [
         enName: "Ideology Theory",
         desc: "统治秩序的这种视觉滤镜。",
         concepts: [
-            { id: "m_ideology_false", name: "意识形态作为虚假意识", enName: "Ideology as False Consciousness", category: "Ideology", shortDef: "被遮蔽的真实：主体由于通过扭曲的观念框架来解释自身的处境，从而由于由于在服从而不自知。" },
+            { id: "m_ideology_false", name: "意识形态作为虚假意识", enName: "Ideology as False Consciousness", category: "Ideology", shortDef: "被遮蔽的真实：主体由于通过扭曲的观念框架来解释自身的处境，从而由于在服从而不自知。" },
             { id: "m_ruling_class_ideas", name: "统治阶级的思想", enName: "Ruling Class Ideas", category: "Ideology", shortDef: "话语的霸权：占统治地位的物质力量在观念领域中同步确立的霸权形式。" },
             { id: "m_isa_althusser", name: "意识形态国家机器", enName: "ISA", category: "Ideology", shortDef: "无形的纠偏：学校、家庭、传媒等机构在潜意识层面完成的这种主体呼唤与功能性服从。" },
             { id: "m_commodity_fetishism_ideology", name: "商品拜物教作为意识形态", enName: "Commodity Fetishism as Ideology", category: "Ideology", shortDef: "商品的这种神学魅力：市场交换的这种客观性假象对社会阶级关系的这种系统性遮蔽。" }

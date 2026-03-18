@@ -147,6 +147,8 @@ const App: React.FC = () => {
     const [traverseStartTime, setTraverseStartTime] = useState<number | null>(null);
     const [bibleStartTime, setBibleStartTime] = useState<number | null>(null);
     const [visionStartTime, setVisionStartTime] = useState<number | null>(null);
+    const [codexDictionary, setCodexDictionary] = useState<string>('LACAN');
+    const [codexSection, setCodexSection] = useState<string>('CONCEPTS');
 
     const [generatedTreatments, setGeneratedTreatments] = useState<CreativeTreatment[]>([]);
 
@@ -1242,7 +1244,12 @@ const App: React.FC = () => {
                                 openProfile={() => setIsProfileOpen(true)}
                                 showRings={showRings}
                                 setShowRings={setShowRings}
+                                setViewMode={handleViewChange}
                                 renderInPlace={false}
+                                initialDictionary={codexDictionary}
+                                initialSection={codexSection as any}
+                                onDictionaryChange={setCodexDictionary}
+                                onSectionChange={setCodexSection}
                             />
                         </div>
             ) : viewMode === 'TOPOLOGY' ? (
@@ -1251,8 +1258,7 @@ const App: React.FC = () => {
                         lang={lang}
                         setLang={setLang}
                         onClose={() => {
-                            setPage(0);
-                            setViewMode('ENGINE');
+                            setViewMode('DICTIONARY');
                         }}
                         openManual={openManual}
                         openHistory={openHistory}
@@ -1342,8 +1348,7 @@ const App: React.FC = () => {
                         lang={lang}
                         setLang={setLang}
                         onClose={() => {
-                            setPage(0);
-                            setViewMode('ENGINE');
+                            setViewMode('DICTIONARY');
                             setHideSidebar(false);
                         }}
                         openManual={openManual}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Aperture, BookOpen, Layers, List, Compass, ChevronRight, HelpCircle, History as HistoryIcon, Settings, Languages, User as UserIcon, Terminal, Globe, Moon, Sun, Search } from 'lucide-react';
+import { X, Aperture, BookOpen, Layers, List, Compass, ChevronRight, HelpCircle, History as HistoryIcon, Settings, Languages, User as UserIcon, Moon, Sun, Search } from 'lucide-react';
 import { BlueprintLanguage, User } from '../types';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -304,38 +304,34 @@ export const LacanGraphView: React.FC<LacanGraphViewProps> = ({
         <div className={`flex flex-col h-full w-full bg-[var(--bg-main)] text-[var(--accent-color)] font-sans overflow-hidden transition-colors duration-500`}>
             {isRetro && <div className="absolute inset-0 pointer-events-none opacity-30 mix-blend-multiply z-0" style={{ backgroundImage: 'var(--pattern-aged)' }}></div>}
             
-        {/* Global Top Navbar - EXACT REPLICA OF HOMEPAGE */}
-        <header className={`shrink-0 z-50 backdrop-blur-md h-14 flex items-center justify-between px-6 transition-all duration-500 ${theme === 'retro' ? 'bg-transparent border-b border-[var(--border-main)]' : 'bg-[var(--bg-header)] border-b border-white/10'} relative`}>
-            {/* Theme Divider Line */}
-            <div 
-                className="absolute bottom-0 left-0 right-0 h-px transition-all duration-500 z-10" 
-                style={{ 
-                    backgroundColor: theme === 'retro' ? '#8B261D' : '#D4AF37',
-                    boxShadow: theme === 'retro' ? 'none' : '0 0 10px rgba(212, 175, 55, 0.5)'
-                }} 
+        {/* Header - Unified AppHeader Style */}
+        <header className={`shrink-0 z-50 h-14 flex items-center justify-between px-6 transition-all duration-500 bg-[var(--bg-header)] backdrop-blur-md border-b ${theme === 'retro' ? 'border-[var(--border-main)]' : 'border-white/[0.06]'} relative animate-page-dissolve`}>
+            {/* Accent bottom line */}
+            <div
+                className="absolute bottom-0 left-0 right-0 h-px transition-all duration-500 z-10"
+                style={{ backgroundColor: 'rgba(212,175,55,0.15)', boxShadow: '0 0 10px rgba(212,175,55,0.1)' }}
             />
 
-            <div className="flex items-center gap-4">
-                {/* Return Global Button (Added to sub-page context) */}
-                <button 
+            {/* Left: ← 返回 + Title */}
+            <div className="flex items-center gap-5">
+                <button
                     onClick={onClose}
-                    className="flex items-center gap-1.5 transition-all duration-300 group px-2 py-1 rounded-md bg-transparent hover:bg-white/5 hover:scale-105 active:scale-95 z-20"
+                    className={`text-[9px] font-mono tracking-[0.15em] transition-all duration-300 hover:scale-105 active:scale-95 px-2 py-1 rounded-sm border w-[72px] flex items-center justify-center ${
+                        theme === 'retro'
+                            ? 'text-[var(--text-accent)] border-[var(--border-main)] hover:border-[var(--border-accent)]'
+                            : 'text-zinc-500 hover:text-white/80 border-zinc-800 hover:border-zinc-600'
+                    }`}
                 >
-                    <Globe size={14} className={`shrink-0 transition-all duration-100 ${theme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`} />
-                    <span className={`text-[10px] font-bold uppercase tracking-[0.1em] transition-all duration-100 hidden md:block ${theme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`}>
-                        {lang === 'CN' ? "返回全局" : "GLOBAL"}
-                    </span>
+                    <div className="overflow-hidden relative h-4 w-full">
+                        <div className={`transition-all duration-[1500ms] w-full ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col ${lang === 'EN' ? '-translate-y-1/2' : 'translate-y-0'}`}>
+                            <div className="h-4 flex items-center shrink-0 w-full leading-none justify-center">← 返回</div>
+                            <div className="h-4 flex items-center shrink-0 w-full leading-none justify-center">← BACK</div>
+                        </div>
+                    </div>
                 </button>
-                <div className={`w-px h-4 ${theme === 'retro' ? 'bg-black/20' : 'bg-white/10'}`}></div>
-
-                <Terminal size={14} className={`shrink-0 transition-colors duration-500 ${theme === 'retro' ? 'text-[#8B261D]' : 'text-gold-primary'}`} />
-                <AnimatedText
-                    lang={lang}
-                    hClass="h-4"
-                    className={`text-[10px] uppercase font-bold tracking-[0.2em] transition-colors duration-500`}
-                    cn={<span className={`whitespace-nowrap transition-colors duration-500 ${theme === 'retro' ? 'text-[#8B261D]' : 'text-gold-primary'}`}>主体观测中心 // 欲望图式</span>}
-                    en={<span className={`whitespace-nowrap transition-colors duration-500 ${theme === 'retro' ? 'text-[#8B261D]' : 'text-gold-primary'}`}>SUBJECT OBSERVATION CENTER // DESIRE GRAPH</span>}
-                />
+                <span className={`font-serif font-bold text-xs uppercase tracking-widest ${theme === 'retro' ? 'text-[#8B261D]' : 'text-gold-primary'}`}>
+                    {lang === 'CN' ? '迷雾学派：欲望图式' : 'MIST: GRAPH OF DESIRE'}
+                </span>
             </div>
 
             {/* Center: Search Bar */}
@@ -354,8 +350,23 @@ export const LacanGraphView: React.FC<LacanGraphViewProps> = ({
                 </div>
             </div>
 
-            {/* Right Area: Identical to Homepage */}
+            {/* Right Area: Identical to AppHeader */}
             <div className="hidden md:flex items-center gap-4">
+                <div className="flex items-center gap-2 mr-4">
+                    {[
+                        { icon: HistoryIcon, labelCn: '欲望档案', labelEn: 'ARCHIVE', onClick: openHistory },
+                        { icon: Settings, labelCn: '系统配置', labelEn: 'SYSTEM CONFIG', onClick: openSettings },
+                    ].map((item, idx) => (
+                        <button key={idx} onClick={item.onClick}
+                            className={`flex items-center gap-1.5 transition-all duration-300 group px-2 py-1 rounded-md bg-transparent hover:bg-white/5 hover:scale-105 active:scale-95 ${theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'}`}
+                        >
+                            <item.icon size={14} className={`shrink-0 transition-all duration-100 ${theme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`} />
+                            <span className={`text-[10px] font-bold uppercase tracking-[0.1em] transition-all duration-100 hidden md:block ${theme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`}>
+                                {lang === 'CN' ? item.labelCn : item.labelEn}
+                            </span>
+                        </button>
+                    ))}
+                </div>
                 <div className="flex items-center flex-row-reverse gap-1.5">
                     {/* 1. Profile */}
                     <button

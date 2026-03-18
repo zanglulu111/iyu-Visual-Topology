@@ -61,7 +61,6 @@ interface LandingViewProps {
 enum ProtocolType {
   CORE_DRIVERS = 'CORE_DRIVERS',
   UTILITIES = 'UTILITIES',
-  CONFIDENTIAL = 'CONFIDENTIAL',
   RSI = 'RSI',
   TOPOLOGY = 'TOPOLOGY'
 }
@@ -149,9 +148,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
 
   const getProtocolTitle = () => {
 
-    if (selectedProtocol === ProtocolType.CONFIDENTIAL) {
-       return lang === 'CN' ? '迷雾学派：主体档案' : 'MIST: SUBJECT ARCHIVE';
-    }
+
     if (selectedProtocol === ProtocolType.RSI || selectedProtocol === ProtocolType.TOPOLOGY) {
        return lang === 'CN' ? '迷雾学派：拓扑三界' : 'MIST: TOPOLOGY';
     }
@@ -335,10 +332,10 @@ export const LandingView: React.FC<LandingViewProps> = ({
         )}
 
         {/* Background Rings */}
-        <div className={`absolute inset-0 flex items-center justify-end pr-[5%] pointer-events-none z-0 select-none overflow-hidden transition-all duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
+        <div key={selectedProtocol} className={`absolute inset-0 flex items-center justify-end pr-[5%] pointer-events-none z-0 select-none overflow-hidden ${
           (showRings && localMounted)
-            ? 'opacity-100 scale-[1.1] translate-y-0 rotate-0 blur-0'
-            : 'opacity-0 scale-[1.2] translate-y-20 rotate-[10deg] blur-lg'
+            ? 'animate-ring-entrance'
+            : 'opacity-0'
         }`}>
           <div className="w-[1000px] h-[1000px] flex items-center justify-center translate-x-1/4">
             <BorromeanRings centered={true} opacity={theme === 'retro' ? 0.85 : 0.95} driverType={hoveredDriver || undefined} vivid={true} />
@@ -380,23 +377,14 @@ export const LandingView: React.FC<LandingViewProps> = ({
                   en="SECURITY PROTOCOLS"
                 />
               </div>
-            {[
-              { id: ProtocolType.CORE_DRIVERS, icon: Cpu, labelCn: '核心驱动器', labelEn: 'CORE DRIVERS' },
-              { id: ProtocolType.CONFIDENTIAL, icon: ShieldAlert, labelCn: '机密文档', labelEn: 'CONFIDENTIAL' },
-              { id: ProtocolType.UTILITIES, icon: Zap, labelCn: '实用工具', labelEn: 'UTILITIES' },
-              { id: ProtocolType.RSI, icon: Aperture, labelCn: '三界拓扑', labelEn: 'RSI TOPOLOGY' },
-              { id: ProtocolType.TOPOLOGY, icon: Zap, labelCn: '欲望图式', labelEn: 'DESIRE GRAPH' },
+              {[
+                { id: ProtocolType.CORE_DRIVERS, icon: Cpu, labelCn: '核心驱动器', labelEn: 'CORE DRIVERS' },
+                { id: ProtocolType.UTILITIES, icon: Zap, labelCn: '实用工具', labelEn: 'UTILITIES' },
             ].map((item: any, idx) => (
               <button
                 key={idx}
                 onClick={() => {
-                  if (item.id === ProtocolType.RSI) {
-                    setPage(1); setViewMode('RSI');
-                  } else if (item.id === ProtocolType.TOPOLOGY) {
-                    setPage(1); setViewMode('TOPOLOGY');
-                  } else {
-                    setSelectedProtocol(item.id);
-                  }
+                  setSelectedProtocol(item.id);
                 }}
                 className={`w-full text-left px-5 py-3 rounded-lg flex items-center gap-3 transition-all group relative ${
                   selectedProtocol === item.id 
@@ -456,11 +444,11 @@ export const LandingView: React.FC<LandingViewProps> = ({
 
         {/* RIGHT AREA: CONTENT DYNAMICALLY CHANGED */}
         <div className={`flex-1 overflow-hidden relative z-10 flex flex-col h-full transition-all duration-700 ease-in-out`}>
-          <div className={`${(selectedProtocol === ProtocolType.CONFIDENTIAL) ? 'p-0 w-full max-w-none' : 'p-8 md:p-12 lg:p-16 max-w-7xl mx-auto w-full'} ${(selectedProtocol === ProtocolType.CONFIDENTIAL) ? 'backdrop-blur-sm' : ''} flex-1 flex flex-col min-h-0 h-full`}>
+          <div className={`p-8 md:p-12 lg:p-16 max-w-7xl mx-auto w-full flex-1 flex flex-col min-h-0 h-full`}>
             
             {/* 1. CORE DRIVERS VIEW */}
             {selectedProtocol === ProtocolType.CORE_DRIVERS && (
-              <div className="flex-1 flex flex-col animate-page-dissolve overflow-hidden min-h-0">
+              <div className="flex-1 flex flex-col animate-focus-blur overflow-hidden min-h-0">
                 <div className={`mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4 border-b pb-6 shrink-0 transition-colors ${theme === 'retro' ? 'border-black/5' : 'border-white/15'}`}>
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-3">
@@ -520,12 +508,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
               </div>
             )}
 
-            {/* 2. CONFIDENTIAL DOCUMENTS VIEW */}
-            {selectedProtocol === ProtocolType.CONFIDENTIAL && (
-              <div className="flex-1 flex flex-col animate-page-dissolve overflow-hidden min-h-0">
-                <ArchiveContent lang={lang} isDark={theme === 'dark'} />
-              </div>
-            )}
+
 
 
 

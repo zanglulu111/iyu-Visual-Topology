@@ -4,6 +4,10 @@ export interface LacanConcept {
   enName: string;
   category: string;
   shortDef: string;
+  author?: string;
+  source?: string;
+  tags?: string[];
+  related?: string[];
   detailed?: {
       definition: string;
       analogy: string;
@@ -252,7 +256,7 @@ export const MARX_INDEX: LacanCategory[] = [
             { id: "m_exploitation_rate", name: "剥削率", enName: "Rate of Exploitation", category: "Economics", shortDef: "掠夺的数学：剩余价值与可变资本的比率，揭示资本的残酷效率。" },
             { id: "m_capital_accumulation", name: "资本积累", enName: "Capital Accumulation", category: "Economics", shortDef: "剩余价值的再生产：资本规模在剥夺中无限扩张的狂热过程。" },
             { id: "m_organic_composition", name: "资本的有机构成", enName: "Organic Composition", category: "Economics", shortDef: "机器取代肉身：不变资本相对于可变资本的占比提升，技术进步带来的社会性排挤。" },
-            { id: "m_falling_profit_rate", name: "利润率下降趋势", enName: "Falling Rate of Profit", category: "Economics", shortDef: "资本的自我诅咒：由于由于有机构成提高而导致的内在盈利困境与危机。" }
+            { id: "m_falling_profit_rate", name: "利润率下降趋势", enName: "Falling Rate of Profit", category: "Economics", shortDef: "资本的自我诅咒：由于有机构成提高而导致的内在盈利困境与危机。" }
         ]
     },
     {
@@ -290,9 +294,9 @@ export const MARX_INDEX: LacanCategory[] = [
             { id: "m_production_mode", name: "生产方式", enName: "Mode of Production", category: "History", shortDef: "社会生存的这种总体架构：生产力与生产关系的辩证统一，规定了整个时代的影调。" },
             { id: "m_forces_relations_production", name: "生产关系", enName: "Relations of Production", category: "History", shortDef: "社会演进的这种底层齿轮：生产工具的质变终将撑破陈旧的所有制外壳。" },
             { id: "m_base_superstructure", name: "经济基础与上层建筑", enName: "Base & Superstructure", category: "History", shortDef: "建筑学的社会隐喻：生产关系总和支撑起法权与政治的华丽宫殿，并决定其意识形态的影调。" },
-            { id: "m_social_formations", name: "社会形态演变", enName: "Social Formations", category: "History", shortDef: "从原始公社到共产主义：由于由于自由度的这种规律性扩张与所有制的颠覆性跨越。" },
+            { id: "m_social_formations", name: "社会形态演变", enName: "Social Formations", category: "History", shortDef: "从原始公社到共产主义：由于自由度的这种规律性扩张与所有制的颠覆性跨越。" },
             { id: "m_class_struggle", name: "阶级斗争", enName: "Class Struggle", category: "History", shortDef: "至今一切社会的历史都是阶级斗争的历史。" },
-            { id: "m_proletariat", name: "无产阶级", enName: "Proletariat", category: "History", shortDef: "历史的这种决斗者：除了自身的劳动力以外一无所有的阶级，由于由于极致的这种匮乏而承载了绝对的这种革命潜能。" },
+            { id: "m_proletariat", name: "无产阶级", enName: "Proletariat", category: "History", shortDef: "历史的这种决斗者：除了自身的劳动力以外一无所有的阶级，由于极致的这种匮乏而承载了绝对的这种革命潜能。" },
             { id: "m_revolution_theory", name: "革命", enName: "Revolution", category: "History", shortDef: "阶级统治的这种剧烈断裂：通过暴力打破国家机器，作为通往新世界的逻辑中点。" }
         ]
     },
@@ -302,7 +306,7 @@ export const MARX_INDEX: LacanCategory[] = [
         enName: "Ideology Theory",
         desc: "统治秩序的这种视觉滤镜。",
         concepts: [
-            { id: "m_ideology_false", name: "意识形态作为虚假意识", enName: "Ideology as False Consciousness", category: "Ideology", shortDef: "被遮蔽的真实：主体由于通过扭曲的观念框架来解释自身的处境，从而由于由于在服从而不自知。" },
+            { id: "m_ideology_false", name: "意识形态作为虚假意识", enName: "Ideology as False Consciousness", category: "Ideology", shortDef: "被遮蔽的真实：主体由于通过扭曲的观念框架来解释自身的处境，从而由于在服从而不自知。" },
             { id: "m_ruling_class_ideas", name: "统治阶级的思想", enName: "Ruling Class Ideas", category: "Ideology", shortDef: "话语的霸权：占统治地位的物质力量在观念领域中同步确立的霸权形式。" },
             { id: "m_isa_althusser", name: "意识形态国家机器", enName: "ISA", category: "Ideology", shortDef: "无形的纠偏：学校、家庭、传媒等机构在潜意识层面完成的这种主体呼唤与功能性服从。" },
             { id: "m_commodity_fetishism_ideology", name: "商品拜物教作为意识形态", enName: "Commodity Fetishism as Ideology", category: "Ideology", shortDef: "商品的这种神学魅力：市场交换的这种客观性假象对社会阶级关系的这种系统性遮蔽。" }
@@ -338,19 +342,111 @@ export const MARX_INDEX: LacanCategory[] = [
 
 
 export const LACAN_INDEX: LacanCategory[] = [
+  {
+    id: 'lacan-schema',
+    name: '零、拉康图式',
+    enName: '0. Lacan Schema',
+    desc: '核心结构模型与拓扑演示',
+    concepts: [
+      {
+        id: 'rsi-topology-card',
+        name: '三界拓扑',
+        enName: 'RSI Topology',
+        category: 'Methodology',
+        shortDef: '想象界(I)、象征界(S)与实在界(R)的波罗米纽结结构演示。通过拓扑学视角理解主体结构的动态平衡。'
+      },
+      {
+        id: 'desire-graph-card',
+        name: '欲望图式',
+        enName: 'Graph of Desire',
+        category: 'Methodology',
+        shortDef: '拉康欲望图式的动态交互。揭示大他者、符号化与剩余享乐如何在主体路径中交织。'
+      }
+    ]
+  },
     {
         id: "l_methodology",
         name: "一、核心命题与方法论",
         enName: "Core Propositions & Methodology",
         desc: "拉康理论的本体论前提：语言、分裂与不可能性。",
         concepts: [
-            { id: "l_unconscious_language", name: "无意识结构如语言", enName: "The Unconscious as Language", category: "Methodology", shortDef: "无意识是关于能指的某种组织形式。" },
-            { id: "l_barred_subject", name: "主体是分裂的 ($)", enName: "The Barred Subject", category: "Methodology", shortDef: "进入语言后主体必然的异化与分裂。" },
-            { id: "l_desire_other", name: "欲望是他者的欲望", enName: "Desire is the Other's", category: "Methodology", shortDef: "欲望总是由外部的象征秩序所塑造。" },
-            { id: "l_no_sexual_relation", name: "没有性关系", enName: "No Sexual Relation", category: "Methodology", shortDef: "主体之间在实在界层面无法达成真正的合一。" },
-            { id: "l_woman_not_exist", name: "女人不存在", enName: "Woman Doesn't Exist", category: "Methodology", shortDef: "女性作为能指在象征界中没有整体的对应项。" },
-            { id: "l_real_impossible", name: "实在界不可能被象征化", enName: "Real as Impossible", category: "Methodology", shortDef: "实在界是语言无法触及的创伤性残留。" },
-            { id: "l_alienation_separation", name: "异化与分离", enName: "Alienation & Separation", category: "Methodology", shortDef: "主体在语言中诞生的双重逻辑步骤。" }
+            { 
+                id: "l_unconscious_language", 
+                name: "无意识结构如语言", 
+                enName: "The Unconscious as Language", 
+                category: "Methodology", 
+                shortDef: "无意识不是本能，而是关于能指的某些遵循语言学规律（隐喻/转喻）的组织形式。",
+                author: "Jacques Lacan",
+                source: "《文集》(Écrits) / 研讨班 (Seminars)",
+                tags: ["SIGNIFIER", "METAPHOR", "METONYMY", "STRUCTURE"],
+                related: ["大他者 (The Other)", "能指链 (Signifier Chain)", "隐喻与转喻"]
+            },
+            { 
+                id: "l_barred_subject", 
+                name: "主体是分裂的 ($)", 
+                enName: "The Barred Subject", 
+                category: "Methodology", 
+                shortDef: "进入语言后主体必然的异化与裂离，主体无法在语言中找回真实的自身。",
+                author: "Jacques Lacan",
+                source: "《研讨班 XI：精神分析的四个基本概念》",
+                tags: ["SUBJECT", "ALIENATION", "FADING", "LACK"],
+                related: ["异化与分离", "镜像阶段", "对象小a (objet a)"]
+            },
+            { 
+                id: "l_desire_other", 
+                name: "欲望是他者的欲望", 
+                enName: "Desire is the Other's", 
+                category: "Methodology", 
+                shortDef: "主体的欲望并非源于内在，而是由大他者的象征秩序所塑造和中介的。",
+                author: "Jacques Lacan",
+                source: "《研讨班 XI：精神分析的四个基本概念》 / 《文集》",
+                tags: ["DESIRE", "THE OTHER", "LACK", "DEMAND"],
+                related: ["大他者 (The Other)", "对象小a (objet a)", "剥夺 (Privation)"]
+            },
+            { 
+                id: "l_no_sexual_relation", 
+                name: "性关系不存在", 
+                enName: "No Sexual Relation", 
+                category: "Methodology", 
+                shortDef: "主体之间在实在界层面不存在合意的、互补的比例关系，性关系仅存在于幻想与象征秩序中。",
+                author: "Jacques Lacan",
+                source: "《研讨班 XX：再来一次》(Encore)",
+                tags: ["SEXUAL RELATION", "THE REAL", "IMPOSSIBLE", "MATHEME"],
+                related: ["女人不存在", "性别化公式", "享乐 (Jouissance)"]
+            },
+            { 
+                id: "l_woman_not_exist", 
+                name: "女人不存在", 
+                enName: "Woman Doesn't Exist", 
+                category: "Methodology", 
+                shortDef: "这并非性别歧视，而是指在象征界逻辑中，并不存在一个涵盖所有女性且对应统一能指的母集中心。",
+                author: "Jacques Lacan",
+                source: "《研讨班 XX：再来一次》(Encore)",
+                tags: ["WOMAN", "NOT-ALL", "SYMBOLIC ORDER", "EXCESS"],
+                related: ["没有性关系", "非全 (Pas-tout)", "大他者的享乐"]
+            },
+            { 
+                id: "l_real_impossible", 
+                name: "实在界不可能被象征化", 
+                enName: "Real as Impossible", 
+                category: "Methodology", 
+                shortDef: "实在界并非现实，而是指那些永远无法被语言网格捕获、拒绝被符号化的创伤性残留与硬核。",
+                author: "Jacques Lacan",
+                source: "《研讨班 XI：精神分析的四个基本概念》 / 《研讨班 XX》",
+                tags: ["THE REAL", "IMPOSSIBLE", "TRAUMA", "MATTER"],
+                related: ["实在界的创伤", "对象小a (objet a)", "享乐 (Jouissance)"]
+            },
+            { 
+                id: "l_alienation_separation", 
+                name: "异化与分离", 
+                enName: "Alienation & Separation", 
+                category: "Methodology", 
+                shortDef: "主体在进入象征界（语言）过程中必经的双重逻辑步骤：首先是由于能指代表而产生的异化，其次是通过捕捉他者欲望缝隙而实现的分离。",
+                author: "Jacques Lacan",
+                source: "《研讨班 XI：精神分析的四个基本概念》",
+                tags: ["ALIENATION", "SEPARATION", "V-VEL", "CHE VUOI"],
+                related: ["主体是分裂的 ($)", "大他者 (The Other)", "对象小a (objet a)"]
+            },
         ]
     },
     {
@@ -359,21 +455,171 @@ export const LACAN_INDEX: LacanCategory[] = [
         enName: "The Three Orders (RSI)",
         desc: "人类经验的三种寄存器及其拓扑扣连。",
         concepts: [
-            { id: "l_imaginary", name: "想象界", enName: "The Imaginary", category: "RSI", shortDef: "自我的误认、镜像阶段、幻觉的完整性。" },
-            { id: "l_mirror_stage", name: "镜像阶段", enName: "The Mirror Stage", category: "RSI", shortDef: "主体在镜子中获得虚假统一性的瞬间。" },
-            { id: "l_symbolic", name: "象征界", enName: "The Symbolic", category: "RSI", shortDef: "语言、律法、大他者的统治领域。" },
-            { id: "l_big_other", name: "大他者", enName: "The Big Other", category: "RSI", shortDef: "象征秩序的保证者，语言与规则的场所。" },
-            { id: "l_signifier_chain", name: "能指链", enName: "Signifier Chain", category: "RSI", shortDef: "在时间中滑动的语言符号序列。" },
-            { id: "l_master_signifier", name: "主人能指 (S1)", enName: "Master Signifier", category: "RSI", shortDef: "缝合意义秩序的那个无意义的符号。" },
-            { id: "l_knowledge_s2", name: "知识 (S2)", enName: "Knowledge", category: "RSI", shortDef: "在能指链中产生的逻辑网络。" },
-            { id: "l_name_of_father", name: "父之名", enName: "Name-of-the-Father", category: "RSI", shortDef: "建立禁令与法律的核心象征功能。" },
-            { id: "l_castration", name: "阉割", enName: "Castration", category: "RSI", shortDef: "在象征界中接受缺失与限制的过程。" },
-            { id: "l_phallus", name: "菲勒斯", enName: "The Phallus", category: "RSI", shortDef: "代表欲望缺失与权力的能指。" },
-            { id: "l_real", name: "实在界", enName: "The Real", category: "RSI", shortDef: "不可能之物，无法被捕获的物质性剩余。" },
-            { id: "l_trauma_real", name: "实在界的创伤", enName: "Trauma of the Real", category: "RSI", shortDef: "由于语言失效导致的真实崩塌。" },
-            { id: "l_jouissance", name: "享乐", enName: "Jouissance", category: "RSI", shortDef: "痛苦中的狂喜，超越快乐原则的致命快感。" },
-            { id: "l_object_a", name: "对象小a", enName: "objet petit a", category: "RSI", shortDef: "欲望的原因，实在界的掉落物。" },
-            { id: "l_symptom", name: "症状 / 圣状", enName: "Symptom / Sinthome", category: "RSI", shortDef: "主体用来弥补三界裂痕的某种发明的扣连方式。" },
+            { 
+                id: "l_imaginary", 
+                name: "想象界", 
+                enName: "The Imaginary", 
+                category: "RSI", 
+                shortDef: "主体的第一个维度，涉及镜像阶段的自我误认、对完整性的幻觉、以及二元关系的对映与迷恋。",
+                author: "Jacques Lacan",
+                source: "《文集》 / 《研讨班 I：弗洛伊德的技术性著作》",
+                tags: ["IMAGINARY", "MIRROR STAGE", "MISRECOGNITION", "EGO"],
+                related: ["镜像阶段", "自我 (Ego)", "二元关系"]
+            },
+            { 
+                id: "l_mirror_stage", 
+                name: "镜像阶段", 
+                enName: "The Mirror Stage", 
+                category: "RSI", 
+                shortDef: "主体在镜像中首次获得虚假统一性的瞬间，通过这种“由于惊喜而产生”的误认，奠定了‘自我’作为异化结构的基石。",
+                author: "Jacques Lacan",
+                source: "《文集》(Écrits) - 关于作为‘我’之功能形成的镜像阶段",
+                tags: ["MIRROR STAGE", "IDEAL-I", "IDENTIFICATION", "EGO FORMATION"],
+                related: ["想象界", "理想我 (Ideal-I)", "误认 (Méconnaissance)"]
+            },
+            { 
+                id: "l_symbolic", 
+                name: "象征界", 
+                enName: "The Symbolic", 
+                category: "RSI", 
+                shortDef: "主体经验的符号维度，由大他者、语言律法与能指链构成，是由于人类进入文明社会而必须服从的结构性场所。",
+                author: "Jacques Lacan",
+                source: "《研讨班 II》 / 《研讨班 III：精神病》 / 《文集》",
+                tags: ["SYMBOLIC", "BIG OTHER", "LANGUAGE", "LAW", "SIGNIFIER"],
+                related: ["大他者 (The Other)", "能指链", "元语言不存在"]
+            },
+            { 
+                id: "l_big_other", 
+                name: "大他者", 
+                enName: "The Big Other", 
+                category: "RSI", 
+                shortDef: "象征秩序的保证者，它是语言、法律和规则的共同体场所，也是主体欲望之源的‘秘密见证者’。",
+                author: "Jacques Lacan",
+                source: "《研讨班 II》 / 《研讨班 VII：精神分析的伦理》",
+                tags: ["BIG OTHER", "THE OTHER", "WITNESS", "SYMBOLS", "DESIRE"],
+                related: ["象征界", "欲望是他者的欲望", "主人能指"]
+            },
+            { 
+                id: "l_signifier_chain", 
+                name: "能指链", 
+                enName: "Signifier Chain", 
+                category: "RSI", 
+                shortDef: "语言符号在时间维度上的线性滑动序列，意义通过能指间的差异生成，主体被这一非人的符号矩阵所捕获并代表。",
+                author: "Jacques Lacan",
+                source: "《研讨班 III》 / 《文集》(能指在无意识中的主权)",
+                tags: ["SIGNIFIER", "CHAIN", "METONYMY", "METAPHOR", "S1-S2"],
+                related: ["大他者 (The Big Other)", "主体是分裂的 ($)", "缝合点"]
+            },
+            { 
+                id: "l_master_signifier", 
+                name: "主人能指 (S1)", 
+                enName: "Master Signifier", 
+                category: "RSI", 
+                shortDef: "象征秩序中的核心奇点，是一个由于其空洞和无意义而能缝合整条能指链的符号，是权力、认同与法律的基石。",
+                author: "Jacques Lacan",
+                source: "《研讨班 XVII：精神分析的反面》",
+                tags: ["MASTER SIGNIFIER", "S1", "QUILTING POINT", "IDENTIFICATION", "AUTHORITY"],
+                related: ["能指链", "知识 (S2)", "大他者 (The Big Other)"]
+            },
+            { 
+                id: "l_knowledge_s2", 
+                name: "知识 (S2)", 
+                enName: "Knowledge", 
+                category: "RSI", 
+                shortDef: "由能指组成的逻辑网络，它是象征秩序的操作手册和百科全书，在主人话语中扮演劳动的、负责解释与防御的从属角色。",
+                author: "Jacques Lacan",
+                source: "《研讨班 XVII：精神分析的反面》",
+                tags: ["KNOWLEDGE", "S2", "BUREAUCRACY", "SLAVE'S DISCOURSE", "ENCYCLOPEDIA"],
+                related: ["主人能指 (S1)", "大他者 (The Big Other)", "对象小a (objet a)"]
+            },
+            { 
+                id: "l_name_of_father", 
+                name: "父之名", 
+                enName: "Name-of-the-Father", 
+                category: "RSI", 
+                shortDef: "象征秩序中的最高能指和法律功能，它通过一席禁令切断了主体与母亲的想象界迷恋，建立了人类进入文明的底层契约。",
+                author: "Jacques Lacan",
+                source: "《研讨班 III》 / 《文集》(关于精神病的一种可能处理)",
+                tags: ["NAME OF THE FATHER", "PATERNAL METAPHOR", "LAW", "PROHIBITION", "AUTHORITY"],
+                related: ["大他者 (The Big Other)", "能指链", "阉割"]
+            },
+            { 
+                id: "l_castration", 
+                name: "阉割", 
+                enName: "Castration", 
+                category: "RSI", 
+                shortDef: "主体进入象征界必须缴纳的本体论关税，指主体舍弃原初全能感与极致享乐，接受符号法律的限制，从而产生欲望。同时也涉及发现大他者本身的欠缺。",
+                author: "Jacques Lacan",
+                source: "《研讨班 IV：对象关系》 / 《研讨班 X：焦虑》",
+                tags: ["CASTRATION", "LACK ($)", "JOUISSANCE", "SYMBOLIC LAW", "DESIRE"],
+                related: ["父之名", "缺失 (Lack)", "对象小a (objet a)"]
+            },
+            { 
+                id: "l_phallus", 
+                name: "菲勒斯", 
+                enName: "The Phallus", 
+                category: "RSI", 
+                shortDef: "象征界中的至高能指，代表了欲望的缺失与权力的逻辑占位。它是调节主体间关系和性差异认同的核心中介，其权威源于其自身的空洞性。",
+                author: "Jacques Lacan",
+                source: "《文集》(菲勒斯的意义) / 《研讨班 XX：再来一次》",
+                tags: ["PHALLUS", "SIGNIFIER OF DESIRE", "LACK", "BEING/HAVING", "SEXUAL DIFFERENCE"],
+                related: ["阉割", "大他者 (The Big Other)", "主人能指 (S1)"]
+            },
+            { 
+                id: "l_real", 
+                name: "实在界", 
+                enName: "The Real", 
+                category: "RSI", 
+                shortDef: "主体经验中那个拒绝被符号化和想象化的、不可消化的物质性硬核。它是创伤的源头，也是所有象征秩序最终会撞击而不复存在的‘不可能之墙’。",
+                author: "Jacques Lacan",
+                source: "《研讨班 XI：精神分析的四个基本概念》",
+                tags: ["THE REAL", "IMPOSSIBLE", "TRAUMA", "MATTER", "TUCHÉ"],
+                related: ["实在界的创伤", "对象小a (objet a)", "享乐 (Jouissance)"]
+            },
+            { 
+                id: "l_trauma_real", 
+                name: "实在界的创伤", 
+                enName: "Trauma of the Real", 
+                category: "RSI", 
+                shortDef: "主体与不可象征化的实在界发生的偶然撞击（Tuché），它在象征秩序中留下一个永久的空洞，导致主体产生强迫性的重复行为以试图捕获这一无法言说的真实。",
+                author: "Jacques Lacan",
+                source: "《研讨班 XI：精神分析的四个基本概念》",
+                tags: ["TRAUMA", "REAL", "TUCHÉ", "REPETITION", "HOLE"],
+                related: ["实在界", "享乐 (Jouissance)", "对象小a (objet a)"]
+            },
+            { 
+                id: "l_jouissance", 
+                name: "享乐", 
+                enName: "Jouissance", 
+                category: "RSI", 
+                shortDef: "超越快乐原则的致命快感，是一种带有痛苦质感的极致充盈。它不服从法律的调节，代表了实在界对主体的入侵与异化，是主体欲望与自毁倾向的动力源。",
+                author: "Jacques Lacan",
+                source: "《研讨班 VII：精神分析的伦理》 / 《研讨班 XX》",
+                tags: ["JOUISSANCE", "SURPLUS-ENJOYMENT", "BEYOND PLEASURE", "PAIN", "REAL"],
+                related: ["实在界", "实在界的创伤", "对象小a (objet a)"]
+            },
+            { 
+                id: "l_object_a", 
+                name: "对象小a", 
+                enName: "objet petit a", 
+                category: "RSI", 
+                shortDef: "欲望的原因（而非对象），是实在界在主体进入象征界时脱落的残余碎屑，表现为凝视、声音等，它通过自身的‘不可得’驱动了无止境的欲望链条。",
+                author: "Jacques Lacan",
+                source: "《研讨班 X：焦虑》 / 《研讨班 XI：精神分析的四个基本概念》",
+                tags: ["OBJET A", "CAUSE OF DESIRE", "THE GAZE", "SURPLUS-ENJOYMENT", "LACK"],
+                related: ["欲望是他者的欲望", "幻象 ($ <> a)", "剩余享乐"]
+            },
+            { 
+                id: "l_symptom", 
+                name: "症状 / 圣状", 
+                enName: "Symptom / Sinthome", 
+                category: "RSI", 
+                shortDef: "主体用来弥补三界裂痕的独特发明。圣状是博罗米纽结中的第四个环，它将实在、象征与想象强行扣连在一起，是主体在虚无中赖以生存的最后支柱。",
+                author: "Jacques Lacan",
+                source: "《研讨班 XXIII：圣状》(Le Sinthome)",
+                tags: ["SINTHOME", "SYMPTOM", "BORROMEAN KNOT", "JOYCE", "IDENTIFICATION"],
+                related: ["博罗米结", "实在是、象征、想象", "享乐 (Jouissance)"]
+            },
             { id: "l_borromean", name: "博罗米结", enName: "Borromean Knot", category: "RSI", shortDef: "三界互相扣连的拓扑结构。" }
         ]
     },
@@ -383,9 +629,39 @@ export const LACAN_INDEX: LacanCategory[] = [
         enName: "Theory of the Subject",
         desc: "主体的分裂、消隐及其与能指的辩证关系。",
         concepts: [
-            { id: "l_subject_signifier", name: "能指代表主体面向另一个能指", enName: "Signifier and Subject", category: "Subject", shortDef: "主体由能指在运动中定位。" },
-            { id: "l_moi_sujet", name: "自我 (moi) 与主体 (sujet) 的区别", enName: "Ego vs Subject", category: "Subject", shortDef: "镜象认同的自我与符号网络的主体。" },
-            { id: "l_fading", name: "主体的消隐 (fading)", enName: "Fading of Subject", category: "Subject", shortDef: "主体在能指链闭合时的瞬间爆发与消失。" }
+            { 
+                id: "l_subject_signifier", 
+                name: "能指代表主体面向另一个能指", 
+                enName: "Signifier and Subject", 
+                category: "Subject", 
+                shortDef: "拉康关于主体的基本定义。主体并非先于语言存在的实体，而是在能指链的替换运动中被短暂代表并随即消隐的‘消失的主体’效应。",
+                author: "Jacques Lacan",
+                source: "《研讨班 XI》(Seminar XI) / 《文集》(Écrits)",
+                tags: ["SIGNIFIER", "S1-S2", "FADING", "SUBJECT"],
+                related: ["分裂主体 ($)", "能指链", "消隐 (Fading)"]
+            },
+            { 
+                id: "l_moi_sujet", 
+                name: "自我 (moi) 与主体 (sujet) 的区别", 
+                enName: "Ego vs Subject", 
+                category: "Subject", 
+                shortDef: "拉康精神分析的核心临床界线。自我（moi）是想象界的误认产物与防御盔甲；主体（sujet）则是象征界能指缝隙中的分裂存在，是欲望的真实承担者。",
+                author: "Jacques Lacan",
+                source: "《研讨班 II》(Seminar II) / 《文集》(Écrits)",
+                tags: ["EGO", "SUBJECT", "IMAGINARY", "SYMBOLIC", "MIRROR STAGE"],
+                related: ["镜像阶段", "大他者", "对象小a"]
+            },
+            { 
+                id: "l_fading", 
+                name: "主体的消隐 (fading)", 
+                enName: "Fading of Subject", 
+                category: "Subject", 
+                shortDef: "主体在能指链条的替换运动中瞬间显现并随即被遮蔽的‘闪烁’效应，揭示了主体作为‘无’的本体论硬核。",
+                author: "Jacques Lacan",
+                source: "《研讨班 XI》(Seminar XI)",
+                tags: ["FADING", "APHANISIS", "PULSE", "UNCONSCIOUS"],
+                related: ["分裂主体 ($)", "能指代表主体", "异化与分离"]
+            }
         ]
     },
     {
@@ -394,7 +670,17 @@ export const LACAN_INDEX: LacanCategory[] = [
         enName: "Theory of Desire",
         desc: "需要、要求与欲望的辨析，驱力的圆周运动。",
         concepts: [
-            { id: "l_need_demand_desire", name: "需要/要求/欲望的区分", enName: "Need, Demand, Desire", category: "Desire", shortDef: "欲望是剔除需求后的纯粹剩余。" },
+                        { 
+                id: "l_need_demand_desire", 
+                name: "需要/要求/欲望的区分", 
+                enName: "Need, Demand, Desire", 
+                category: "Desire", 
+                shortDef: "拉康欲望理论的基础架构。需要（Need）是生物性的稳态要求；要求（Demand）是经由大他者能指表达的对爱的无条件请求；欲望（Desire）则是要求剔除需要后的纯粹剩余，是永恒滑动的转喻运动。",
+                author: "Jacques Lacan",
+                source: "《研讨班 XI》(Seminar XI) / 《文集》(Écrits)",
+                tags: ["DESIRE", "DEMAND", "NEED", "METONYMY", "LACK"],
+                related: ["大他者之欲望", "对象小a", "异化 (Alienation)"]
+            },
             { id: "l_desire_metonymy", name: "欲望是转喻的", enName: "Desire as Metonymy", category: "Desire", shortDef: "欲望永远在能指之间滑动而无法停步。" },
             { id: "l_graph_desire", name: "欲望的图表", enName: "Graph of Desire", category: "Desire", shortDef: "描绘主体与他者欲望交互纠缠的拓扑图。" },
             { id: "l_fantasy_formula", name: "幻象 ($ ◇ a)", enName: "Fundamental Fantasy", category: "Desire", shortDef: "支撑主体现实的象征性屏障。" },
