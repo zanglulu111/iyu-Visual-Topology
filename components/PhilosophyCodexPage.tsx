@@ -28,7 +28,9 @@ import {
   Command,
   Hash,
   Clock,
-  X
+  X,
+  Shuffle,
+  ChevronLeft
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { DriverType, User } from '../types';
@@ -87,8 +89,6 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
   openSettings,
   openAuth,
   openProfile,
-  showRings,
-  setShowRings,
   setViewMode,
   renderInPlace = false,
   onToggleExpand,
@@ -104,6 +104,8 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [detailActiveTab, setDetailActiveTab] = useState<'DEFINITION' | 'ANALOGY' | 'APPLICATION'>('DEFINITION');
+  const [atmosphericsEnabled, setAtmosphericsEnabled] = useState(true); // 新：氛围系统开关
+  const [showRings, setShowRings] = useState(true); // 新：背景圆环开关
 
   React.useEffect(() => {
     if (selectedItem) {
@@ -148,7 +150,7 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
 
   const getThemeBorderColor = () => {
     if (theme === 'retro') return 'border-[var(--border-main)]';
-    return 'border-white/10';
+    return 'border-[var(--border-main)]';
   };
 
   // --- Theme Utility for UI Elements ---
@@ -188,26 +190,65 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
     })).filter(cat => cat.concepts.length > 0);
   }, [activeDictionary, searchQuery]);
 
+  const allConcepts = useMemo(() => {
+    return filteredConcepts.flatMap((cat: any) => cat.concepts);
+  }, [filteredConcepts]);
+
+  const currentIndex = allConcepts.findIndex((c: any) => c.id === (selectedItem?.data?.id || selectedItem?.data?.fileId));
+
+  const handlePrevious = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (allConcepts.length <= 1) return;
+    const prevIndex = (currentIndex - 1 + allConcepts.length) % allConcepts.length;
+    setSelectedItem({ ...selectedItem, data: allConcepts[prevIndex] });
+  };
+
+  const handleNext = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (allConcepts.length <= 1) return;
+    const nextIndex = (currentIndex + 1) % allConcepts.length;
+    setSelectedItem({ ...selectedItem, data: allConcepts[nextIndex] });
+  };
+
+  const handleRandom = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (allConcepts.length <= 1) return;
+    let randomIndex = currentIndex;
+    while (randomIndex === currentIndex) {
+      randomIndex = Math.floor(Math.random() * allConcepts.length);
+    }
+    setSelectedItem({ ...selectedItem, data: allConcepts[randomIndex] });
+  };
+
+
   // --- Rendering Functions ---
 
   const renderConcepts = () => (
-      <div className={`flex-1 flex flex-col overflow-hidden transition-all duration-500 ${
+      <div className={`flex-1 flex flex-col overflow-hidden transition-all duration-700 relative ${
       renderInPlace 
         ? 'bg-transparent' 
-        : (theme === 'retro' ? 'bg-transparent' : 'bg-black/40 backdrop-blur-sm rounded-xl border border-zinc-800/50 shadow-2xl')
-    }`}>
+        : (theme === 'retro' ? 'bg-transparent' : 'bg-transparent rounded-xl shadow-none')
+    } theme-${activeDictionary.toLowerCase()}`}>
+      
+      {/* 氛围背景光 (Atmospheric Glow) */}
+      {theme === 'dark' && atmosphericsEnabled && (
+        <div className="absolute inset-0 pointer-events-none overflow-hidden animate-mist-glow">
+           <div className="absolute -top-[20%] -left-[10%] w-[60%] h-[60%] rounded-full opacity-20 blur-[120px]" style={{ background: 'var(--philosopher-glow)' }}></div>
+           <div className="absolute -bottom-[10%] -right-[10%] w-[50%] h-[50%] rounded-full opacity-10 blur-[100px]" style={{ background: 'var(--philosopher-glow)' }}></div>
+        </div>
+      )}
       <div className={`h-14 flex items-center gap-2 px-6 border-b ${theme === 'retro' ? 'border-[var(--border-main)] bg-transparent' : 'border-white/10'} overflow-x-auto no-scrollbar shrink-0 transition-all duration-500`}>
         {Object.entries(dictionaries).map(([id, info]) => (
           <button
             key={id}
             onClick={() => setActiveDictionary(id)}
-            className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest transition-all whitespace-nowrap border ${
+            className={`flex items-center gap-2 px-5 py-2 rounded-sm text-[10px] font-extrabold uppercase tracking-widest transition-all whitespace-nowrap border ${
               activeDictionary === id 
-                ? (theme === 'retro' ? 'bg-[var(--text-accent)] text-white shadow-md border-transparent' : 'bg-black text-white border-white/20 shadow-[0_0_15px_rgba(0,0,0,0.5)]')
-                : (theme === 'retro' ? 'text-[#8B261D] hover:bg-black/5 border-transparent' : 'text-white hover:bg-white/5 border-transparent')
+                ? (theme === 'retro' ? 'bg-[#8B261D] text-white shadow-sm border-transparent' : 'bg-[var(--philosopher-accent)]/10 text-[var(--philosopher-accent)] border-[var(--philosopher-accent)] shadow-[0_0_15px_var(--philosopher-accent)]/30')
+                : (theme === 'retro' ? 'text-[#8B261D] hover:bg-[#8B261D]/5 border-[#8B261D]/10' : 'text-zinc-500 hover:text-white/80 border-transparent')
             }`}
           >
-            {info.icon}
+            <span className={activeDictionary === id ? "animate-pulse" : ""}>{info.icon}</span>
             {info.name}
           </button>
         ))}
@@ -222,8 +263,8 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
             <div key={category.id} className={isSameHeader ? "mb-10 mt-[-20px]" : "mb-14"}>
               {!isSameHeader && (
                 <div className="flex items-center gap-4 mb-8">
-                  <div className={`w-10 h-px ${theme === 'retro' ? 'bg-[var(--border-main)]' : 'bg-white/10'}`}></div>
-                  <h3 className={`text-2xl font-serif tracking-widest leading-none ${theme === 'retro' ? 'text-[var(--text-accent)] font-black' : 'text-white'}`}>
+                  <div className={`w-10 h-px transition-all duration-700 ${theme === 'retro' ? 'bg-[var(--border-main)]' : 'bg-[var(--philosopher-accent)]/30 shadow-[0_0_8px_var(--philosopher-accent)]'}`}></div>
+                  <h3 className={`text-2xl font-serif tracking-widest leading-none ${theme === 'retro' ? 'text-[var(--text-accent)] font-black' : 'text-gradient-silver font-bold'}`}>
                     {lang === 'CN' ? category.name : category.enName}
                   </h3>
                 </div>
@@ -231,7 +272,7 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
               
               {category.desc && (
                 <div className="flex items-baseline gap-3 mb-6 ml-2">
-                  <div className={`w-1.5 h-1.5 rounded-full ${theme === 'retro' ? 'bg-[var(--text-accent)]' : 'bg-gold-primary/60'}`}></div>
+                  <div className={`w-1.5 h-1.5 rounded-full transition-all duration-700 ${theme === 'retro' ? 'bg-[var(--text-accent)]' : 'bg-[var(--philosopher-accent)]/60 shadow-[0_0_8px_var(--philosopher-accent)]'}`}></div>
                   <h4 className={`text-base font-serif tracking-wide opacity-90 ${theme === 'retro' ? 'text-black font-bold' : 'text-zinc-300'}`}>
                     {category.desc}
                   </h4>
@@ -251,19 +292,25 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
                         setSelectedItem({ type: 'CONCEPT', data: concept });
                       }
                     }}
-                    className={`group relative p-6 rounded-2xl cursor-pointer transition-all duration-700 hover:-translate-y-1.5 overflow-hidden border ${
+                    className={`group relative p-6 cursor-pointer transition-all duration-[1300ms] ease-[cubic-bezier(0.23,1,0.32,1)] overflow-hidden border rounded-none ${
                       theme === 'retro'
-                        ? 'bg-white/[0.01] border-transparent backdrop-blur-2xl hover:border-[var(--border-accent)] hover:bg-white hover:backdrop-blur-none shadow-none hover:shadow-[0_45px_100px_rgba(139,38,29,0.1)]'
-                        : 'bg-white/[0.01] border-transparent backdrop-blur-2xl hover:bg-black hover:border-white/20 hover:backdrop-blur-none shadow-none hover:shadow-[0_45px_100px_rgba(0,0,0,0.6)]'
+                        ? 'bg-transparent border-transparent hover:border-[#8B261D] hover:bg-white hover:shadow-[0_25px_60px_rgba(139,38,29,0.1)] backdrop-blur-[48px] hover:backdrop-blur-none hover:-translate-y-2'
+                        : 'premium-card backdrop-blur-[48px] hover:backdrop-blur-none hover:-translate-y-2'
                     }`}
                   >
-                  <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-current to-transparent opacity-0 group-hover:opacity-[0.03] transition-opacity ${theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-white'}`}></div>
-                  <h4 className={`text-xl font-serif mb-1 tracking-wide ${theme === 'retro' ? 'text-black font-extrabold group-hover:text-[var(--text-accent)]' : 'text-white'}`}>{concept.name}</h4>
-                  <p className={`text-[10px] font-mono mb-5 uppercase tracking-[0.2em] font-black ${theme === 'retro' ? 'text-[#8B261D]/60' : 'text-zinc-500'}`}>{concept.enName}</p>
-                  <p className={`text-[13px] leading-relaxed line-clamp-4 font-light tracking-wide ${theme === 'retro' ? 'text-black/80 font-medium' : 'text-zinc-300'}`}>{concept.shortDef}</p>
-                  <div className="mt-6 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span className={`text-[9px] font-bold uppercase tracking-widest ${theme === 'retro' ? 'text-black/40' : 'text-zinc-600'}`}>Access Link</span>
-                    <ChevronRight size={14} className={themeColors.accent} />
+                  <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-current to-transparent opacity-0 group-hover:opacity-[0.05] transition-opacity ${theme === 'retro' ? 'text-[#8B261D]' : 'text-[var(--philosopher-accent)]'}`}></div>
+                  
+                  {/* Topological Accent Element */}
+                  {theme === 'dark' && (
+                    <div className="absolute -bottom-4 -left-4 w-20 h-20 rounded-full opacity-0 group-hover:opacity-10 blur-xl transition-all duration-700 bg-[var(--philosopher-accent)]"></div>
+                  )}
+
+                  <h4 className={`text-lg font-serif mb-1.5 tracking-wide ${theme === 'retro' ? 'text-black font-extrabold group-hover:text-[var(--text-accent)]' : 'text-gradient-silver font-bold'}`}>{concept.name}</h4>
+                  <p className={`text-[9px] font-mono mb-4 uppercase tracking-[0.25em] font-black ${theme === 'retro' ? 'text-[#8B261D]/60' : 'text-zinc-500 group-hover:text-[var(--philosopher-accent)]/80'}`}>{concept.enName}</p>
+                  <p className={`text-[12px] leading-relaxed line-clamp-3 font-light tracking-wide ${theme === 'retro' ? 'text-black/80 font-medium' : 'text-zinc-400 group-hover:text-zinc-200'}`}>{concept.shortDef}</p>
+                  <div className="mt-5 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span className={`text-[8px] font-bold uppercase tracking-widest ${theme === 'retro' ? 'text-black/40' : 'text-zinc-500'}`}>Access Link</span>
+                    <ChevronRight size={12} className={themeColors.accent} />
                   </div>
                 </button>
               ))}
@@ -281,48 +328,46 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
         <div 
           key={person.id}
           onClick={() => setSelectedItem({ type: 'PERSONNEL', data: person })}
-          className={`group relative transition-all duration-700 cursor-pointer flex flex-col md:flex-row h-full md:h-72 rounded-2xl overflow-hidden border ${
+          className={`group relative transition-all duration-700 cursor-pointer flex flex-col md:flex-row h-full md:h-72 border ${
             theme === 'retro' 
-              ? 'bg-white/[0.01] border-transparent backdrop-blur-2xl hover:border-[var(--border-accent)] hover:bg-white hover:backdrop-blur-none shadow-none hover:shadow-[0_45px_100px_rgba(139,38,29,0.1)] hover:-translate-y-1.5'
-              : 'bg-white/[0.01] border-transparent backdrop-blur-2xl hover:bg-black hover:border-white/20 hover:backdrop-blur-none shadow-none hover:shadow-[0_45px_100px_rgba(0,0,0,0.6)] hover:-translate-y-1.5'
+              ? 'bg-white/[0.01] border-transparent backdrop-blur-2xl hover:border-[var(--border-accent)] hover:bg-white hover:backdrop-blur-none shadow-none hover:shadow-[0_45px_100px_rgba(139,38,29,0.1)] hover:-translate-y-1.5 rounded-2xl'
+              : 'premium-card hover:bg-[#1c1f26] border-white/5'
           }`}
         >
-          <div className="w-full md:w-48 bg-zinc-900 shrink-0 relative overflow-hidden flex items-center justify-center">
-             <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
-             <Users size={64} className="text-zinc-800 group-hover:text-zinc-700 transition-colors" />
-             <div className={`absolute bottom-0 left-0 right-0 h-1 ${person.color.replace('text', 'bg')}`}></div>
+          {/* Dossier ID Marker */}
+          {theme === 'dark' && <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-transparent via-[var(--philosopher-accent)] to-transparent opacity-40"></div>}
+          
+          <div className="w-full md:w-52 bg-zinc-950 shrink-0 relative overflow-hidden flex items-center justify-center grayscale group-hover:grayscale-0 transition-all duration-700">
+             <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
+             {/* Scanlines effect */}
+             {theme === 'dark' && <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[var(--philosopher-accent)]/5 to-transparent h-4 w-full animate-scanline pointer-events-none opacity-50"></div>}
+             <Users size={72} className="text-zinc-800 group-hover:text-zinc-600 transition-colors" />
+             <div className={`absolute bottom-0 left-0 right-0 h-1.5 ${person.color.replace('text', 'bg')}`}></div>
           </div>
-          <div className="flex-1 p-8 flex flex-col justify-between">
+          <div className="flex-1 p-8 flex flex-col justify-between relative">
             <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-mono text-zinc-600 tracking-[0.3em] font-bold">{person.fileId}</span>
-                <span className={`text-[9px] font-bold px-2 py-0.5 rounded border border-zinc-800/50 bg-black/50 ${person.status === 'ACTIVE' ? 'text-green-500 border-green-500/20' : 'text-zinc-500'}`}>{person.status}</span>
+              <div className="flex items-center justify-between mb-3">
+                <span className={`text-[10px] font-mono tracking-[0.35em] font-bold ${theme === 'retro' ? 'text-zinc-500' : 'text-zinc-600'}`}>ID_REF: {person.fileId}</span>
+                <span className={`text-[9px] font-bold px-2 py-0.5 rounded border ${person.status === 'ACTIVE' ? 'text-green-500 border-green-500/20 bg-green-500/5' : 'text-zinc-500 border-zinc-800 bg-zinc-900/50'}`}>{person.status}</span>
               </div>
               <AnimatedText
                 lang={lang}
-                hClass="h-8"
-                className={`text-2xl font-serif mb-1 group-hover:text-gold-primary transition-colors ${theme === 'retro' ? 'text-black font-extrabold' : 'text-white'}`}
+                hClass="h-9"
+                className={`text-2xl font-serif mb-2 transition-colors ${theme === 'retro' ? 'text-black font-extrabold' : 'text-gradient-silver font-bold'}`}
                 cn={person.name}
                 en={person.title}
               />
-              <AnimatedText
-                lang={lang}
-                hClass="h-4"
-                className={`text-[10px] font-bold uppercase tracking-widest ${person.color} mb-4`}
-                cn={person.role}
-                en={person.role === '迷雾学派奠基人 / 精神分析学家' ? 'MIST FOUNDER / PSYCHOANALYST' : person.role} // Simple mapping or just use original if no EN
-              />
-              <AnimatedText
-                lang={lang}
-                hClass="h-10"
-                className={`text-sm leading-relaxed line-clamp-2 ${theme === 'retro' ? 'text-black/80 font-medium' : 'text-zinc-500'}`}
-                cn={person.summary}
-                en={person.summary} // If no separate summaryEn provided, we can keep it same or wrap it
-              />
+              <div className={`text-[10px] font-bold uppercase tracking-[0.2em] ${person.color} mb-5 flex items-center gap-2`}>
+                <div className={`w-2 h-2 rounded-full ${person.color.replace('text', 'bg')} animate-pulse`}></div>
+                {person.role}
+              </div>
+              <div className={`text-sm leading-[1.7] line-clamp-3 font-light tracking-wide ${theme === 'retro' ? 'text-black/80 font-medium' : 'text-zinc-400 group-hover:text-zinc-300'}`}>
+                {person.summary}
+              </div>
             </div>
-            <div className="flex items-center gap-4 pt-4 border-t border-zinc-800/50 mt-4 overflow-hidden">
-               {['Structure', 'Real', 'Mirror', 'Logic'].map(tag => (
-                 <span key={tag} className="text-[9px] font-mono text-zinc-700 uppercase">{tag}</span>
+            <div className="flex items-center gap-4 pt-5 border-t border-white/5 mt-5">
+               {['BIOMETRY', 'EGO_SCAN', 'MIRROR_STG', 'SYN_LOGIC'].map(tag => (
+                 <span key={tag} className="text-[8px] font-mono text-zinc-700 uppercase tracking-widest">{tag}</span>
                ))}
             </div>
           </div>
@@ -602,11 +647,30 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
     };
 
     return (
-      <div className={`fixed inset-0 z-[100] ${dt.overlayBg} flex flex-col animate-in fade-in duration-500 overflow-hidden`}>
+      <div className={`fixed inset-0 z-[100] ${theme === 'retro' ? 'bg-[#EFE9E0]' : 'bg-[var(--bg-main)]'} flex flex-col animate-in fade-in duration-700 overflow-hidden theme-${activeDictionary.toLowerCase()}`}>
+        
+        {/* Detail Ambient Background (Solid + Atmospheric Pulse) */}
+        {!renderInPlace && (
+          <div className="absolute inset-0 pointer-events-none z-0">
+             {/* Note: NO RINGS in detail view as requested for solid focus */}
+             
+             {theme === 'dark' && atmosphericsEnabled && (
+                <div className="absolute inset-0 opacity-[0.03] animate-mist-glow" style={{ background: 'var(--philosopher-glow)' }}></div>
+             )}
+          </div>
+        )}
+
         {/* Uniform Header Section */}
         <header className={`h-14 ${dt.headerBg} border-b ${getThemeBorderColor()} flex items-center justify-between px-6 z-50 sticky top-0 shrink-0 relative animate-page-dissolve`}>
           {/* Accent line */}
-          <div className="absolute bottom-0 left-0 right-0 h-px z-10" style={{ backgroundColor: 'rgba(212,175,55,0.15)', boxShadow: '0 0 10px rgba(212,175,55,0.1)' }} />
+          <div 
+            className="absolute bottom-0 left-0 right-0 h-px z-10" 
+            style={{ 
+               backgroundColor: theme === 'retro' ? '#8B261D' : 'var(--philosopher-accent)', 
+               opacity: theme === 'retro' ? 0.2 : 0.15, 
+               boxShadow: theme === 'retro' ? 'none' : '0 0 15px var(--philosopher-accent)' 
+            }} 
+          />
           {/* Left */}
           <div className="flex items-center gap-5">
             <button
@@ -653,15 +717,17 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
                   </div>
                 </div>
               </button>
-              {/* Lang */}
+              {/* 4. Language Toggle (Ensuring it exists in detail view) */}
               <button onClick={() => setLang(lang === 'CN' ? 'EN' : 'CN')}
                 className={`text-[10px] font-bold ${theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'} transition-all duration-300 w-7 h-7 flex items-center justify-center rounded-sm tracking-widest hover:bg-white/5 hover:scale-110 active:scale-90`}
               >{lang === 'CN' ? '中' : 'EN'}</button>
-              {/* Theme */}
+
+              {/* 5. Theme Toggle */}
               <button onClick={toggleTheme}
                 className={`flex items-center justify-center w-7 h-7 rounded-sm ${theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'} transition-all duration-300 hover:bg-white/5 hover:scale-110 active:scale-90`}
               >{theme === 'dark' ? <Moon size={14} /> : <Sun size={14} className="text-[#8B261D]" />}</button>
-              {/* Rings */}
+              
+              {/* 6. Rings Toggle */}
               <button onClick={() => setShowRings(!showRings)}
                 className={`flex items-center justify-center w-7 h-7 rounded-sm transition-all duration-300 hover:bg-white/5 hover:scale-110 active:scale-90 focus:outline-none ${showRings ? (theme === 'retro' ? 'text-[#8B261D]' : getThemeTextColor()) : (theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white')}`}
                 title={lang === 'CN' ? '背景圆环开关' : 'Background Rings Toggle'}
@@ -707,8 +773,8 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
                      
                      {/* LEFT COLUMN: Sidebar Nav */}
                      <div className="md:w-80 flex flex-col gap-6 shrink-0 h-full overflow-y-auto custom-scrollbar pr-2">
-                        {/* Concept Info Card */}
-                        <div className={`p-6 rounded-2xl border ${theme === 'retro' ? 'bg-[#EFE9E0]/80 border-[#8B261D]/20 shadow-[0_4px_20px_rgba(139,38,29,0.08)]' : 'bg-black/60 border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.5)]'} backdrop-blur-xl relative overflow-hidden`}>
+                        {/* Concept Info Card (High Transparency) */}
+                        <div className={`p-6 rounded-2xl relative overflow-hidden transition-all duration-500`}>
                            <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-current to-transparent opacity-5 pointer-events-none ${theme === 'retro' ? 'text-[#8B261D]' : 'text-white'}`}></div>
                            
                            <div className={`text-[9px] font-mono tracking-[0.2em] uppercase mb-4 flex items-center gap-2 ${theme === 'retro' ? 'text-[#8B261D]/60' : 'text-zinc-500'}`}>
@@ -716,45 +782,48 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
                               <span>CONCEPT DATA CARD</span>
                            </div>
                            
-                           <h2 className={`text-3xl font-serif font-black mb-1 leading-tight ${theme === 'retro' ? 'text-black' : 'text-white'}`}>
+                           <h2 className={`text-3xl font-serif font-black mb-1 leading-tight ${theme === 'retro' ? 'text-[#8B261D]' : 'text-white'}`}>
                               {data.name}
                            </h2>
                            <h3 className={`text-xs font-mono tracking-[0.15em] uppercase mb-6 ${theme === 'retro' ? 'text-[#8B261D]' : 'text-zinc-400'}`}>
                               {data.enName}
                            </h3>
 
-                           <div className="space-y-4">
-                              <div className="flex flex-col gap-1">
+                           <div className="space-y-5">
+                              <div className="flex flex-col gap-1.5">
                                  <span className={`text-[9px] font-bold uppercase tracking-[0.2em] ${theme === 'retro' ? 'text-black/40' : 'text-zinc-600'}`}>AUTHOR / SCHOLAR</span>
                                  <span className={`text-sm font-serif ${theme === 'retro' ? 'text-black/80 font-bold' : 'text-zinc-300'}`}>
                                     {data.author || (activeDictionary === 'HEGEL' ? 'G.W.F. Hegel' : activeDictionary === 'MARX' ? 'Karl Marx' : activeDictionary === 'LACAN' ? 'Jacques Lacan' : activeDictionary === 'ZIZEK' ? 'Slavoj Žižek' : 'Unknown')}
                                  </span>
                               </div>
-                              <div className="flex flex-col gap-1">
+                              
+                              <div className="flex flex-col gap-1.5">
                                  <span className={`text-[9px] font-bold uppercase tracking-[0.2em] ${theme === 'retro' ? 'text-black/40' : 'text-zinc-600'}`}>SOURCE TEXT / ORIGIN</span>
                                  <span className={`text-xs font-serif italic ${theme === 'retro' ? 'text-black/70' : 'text-zinc-400'}`}>
                                     {data.source || (activeDictionary === 'HEGEL' ? '《精神现象学》(Phenomenology of Spirit)' : 'Archived Text')}
                                  </span>
                               </div>
                               
-                              {/* Tags */}
-                              <div className="flex flex-col gap-2 pt-2">
+                              <div className="flex flex-col gap-3 pt-2">
                                  <span className={`text-[9px] font-bold uppercase tracking-[0.2em] ${theme === 'retro' ? 'text-black/40' : 'text-zinc-600'}`}>INDEX TAGS</span>
-                                 <div className="flex flex-wrap gap-1.5">
+                                 <div className="flex flex-wrap gap-2">
                                     {(data.tags || ['PHILOSOPHY', 'THEORY', 'CONCEPT']).map((tag: string, i: number) => (
-                                       <span key={i} className={`text-[9px] px-2 py-0.5 rounded-sm border font-mono tracking-wider ${theme === 'retro' ? 'border-[#8B261D]/20 bg-[#8B261D]/5 text-[#8B261D] font-bold' : 'border-white/10 bg-white/5 text-zinc-400'}`}>
-                                          #{tag}
+                                       <span key={i} className={`text-[9px] px-2.5 py-1 rounded-sm border font-mono tracking-widest transition-all duration-300 ${
+                                          theme === 'retro' 
+                                             ? 'border-[#8B261D]/20 bg-[#8B261D]/5 text-[#8B261D] font-bold' 
+                                             : 'border-white/5 bg-white/[0.03] text-zinc-500 hover:text-[var(--philosopher-accent)] hover:border-[var(--philosopher-accent)]/30'
+                                       }`}>
+                                          {tag}
                                        </span>
                                     ))}
                                  </div>
                               </div>
                               
-                              {/* Related Concepts */}
-                              <div className={`flex flex-col gap-2 pt-4 mt-2 border-t ${theme === 'retro' ? 'border-black/10' : 'border-white/10'}`}>
+                              <div className={`flex flex-col gap-3 pt-5 mt-2 border-t ${theme === 'retro' ? 'border-black/10' : 'border-white/5'}`}>
                                  <span className={`text-[9px] font-bold uppercase tracking-[0.2em] ${theme === 'retro' ? 'text-black/40' : 'text-zinc-600'}`}>RELATED NODES</span>
                                  <div className="flex flex-wrap gap-3">
                                     {(data.related || ['主体 (Subject)', '他者 (The Other)']).map((rel: string, i: number) => (
-                                       <span key={i} className={`text-xs font-serif underline decoration-dashed underline-offset-4 cursor-pointer transition-colors ${theme === 'retro' ? 'text-[#8B261D]/80 hover:text-black font-medium' : 'text-zinc-400 hover:text-white'}`}>
+                                       <span key={i} className={`text-xs font-serif underline underline-offset-4 cursor-pointer transition-all hover:translate-x-1 ${theme === 'retro' ? 'text-[#8B261D]/80 hover:text-black font-medium decoration-dashed' : 'text-zinc-400 hover:text-[var(--philosopher-accent)] decoration-white/20'}`}>
                                           {rel}
                                        </span>
                                     ))}
@@ -767,58 +836,119 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
                         <div className="flex flex-col gap-2">
                            <button 
                               onClick={() => setDetailActiveTab('DEFINITION')}
-                              className={`px-5 py-3.5 rounded-xl border flex items-center gap-3 transition-all duration-300 text-left ${
+                              className={`px-5 py-3.5 rounded-xl border flex items-center gap-3 transition-all duration-500 text-left relative overflow-hidden group/bt ${
                                  detailActiveTab === 'DEFINITION'
-                                    ? (theme === 'retro' ? 'bg-[#8B261D] text-white border-transparent shadow-lg' : 'bg-white text-black border-transparent shadow-[0_0_20px_rgba(255,255,255,0.2)]')
-                                    : (theme === 'retro' ? 'bg-white/40 border-black/10 text-black/60 hover:bg-white/80' : 'bg-white/[0.03] border-white/10 text-zinc-400 hover:bg-white/10')
+                                    ? (theme === 'retro' ? 'bg-[#8B261D] text-white border-transparent shadow-lg' : 'bg-[var(--philosopher-accent)]/10 text-white border-[var(--philosopher-accent)]/50 shadow-[0_0_20px_var(--philosopher-glow)]')
+                                    : (theme === 'retro' ? 'bg-white/40 border-black/10 text-black/60 hover:bg-white/80' : 'bg-white/[0.03] border-white/5 text-zinc-500 hover:bg-white/[0.08] hover:text-zinc-300')
                               }`}
                            >
-                              <Fingerprint size={16} className={detailActiveTab === 'DEFINITION' ? (theme === 'retro' ? 'text-white' : 'text-black') : dt.accentColor} />
+                              {/* Active Indicator Light */}
+                              {detailActiveTab === 'DEFINITION' && theme !== 'retro' && (
+                                 <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-1/2 bg-[var(--philosopher-accent)] blur-[1px]"></div>
+                              )}
+
+                              <Fingerprint size={16} className={detailActiveTab === 'DEFINITION' ? (theme === 'retro' ? 'text-white' : 'text-[var(--philosopher-accent)]') : 'text-zinc-600 group-hover/bt:text-zinc-400'} />
                               <div>
-                                 <div className={`text-[9px] font-bold uppercase tracking-[0.2em] mb-0.5 ${detailActiveTab === 'DEFINITION' ? (theme === 'retro' ? 'text-white/80' : 'text-black/60') : 'opacity-60'}`}>Part. 1</div>
+                                 <div className={`text-[9px] font-bold uppercase tracking-[0.2em] mb-0.5 ${detailActiveTab === 'DEFINITION' ? (theme === 'retro' ? 'text-white/80' : 'text-[var(--philosopher-accent)]/60') : 'text-zinc-700'}`}>Part. 1</div>
                                  <h3 className={`font-serif tracking-widest text-sm ${detailActiveTab === 'DEFINITION' ? 'font-bold' : ''}`}>{lang === 'CN' ? '核心定义' : 'CORE DEFINITION'}</h3>
                               </div>
                            </button>
 
                            <button 
                               onClick={() => setDetailActiveTab('ANALOGY')}
-                              className={`px-5 py-3.5 rounded-xl border flex items-center gap-3 transition-all duration-300 text-left ${
+                              className={`px-5 py-3.5 rounded-xl border flex items-center gap-3 transition-all duration-500 text-left relative overflow-hidden group/bt ${
                                  detailActiveTab === 'ANALOGY'
-                                    ? (theme === 'retro' ? 'bg-[#8B261D] text-white border-transparent shadow-lg' : 'bg-white text-black border-transparent shadow-[0_0_20px_rgba(255,255,255,0.2)]')
-                                    : (theme === 'retro' ? 'bg-white/40 border-black/10 text-black/60 hover:bg-white/80' : 'bg-white/[0.03] border-white/10 text-zinc-400 hover:bg-white/10')
+                                    ? (theme === 'retro' ? 'bg-[#8B261D] text-white border-transparent shadow-lg' : 'bg-[var(--philosopher-accent)]/10 text-white border-[var(--philosopher-accent)]/50 shadow-[0_0_20px_var(--philosopher-glow)]')
+                                    : (theme === 'retro' ? 'bg-white/40 border-black/10 text-black/60 hover:bg-white/80' : 'bg-white/[0.03] border-white/5 text-zinc-500 hover:bg-white/[0.08] hover:text-zinc-300')
                               }`}
                            >
-                              <Layers size={16} className={detailActiveTab === 'ANALOGY' ? (theme === 'retro' ? 'text-white' : 'text-black') : dt.accentColor} />
+                              {detailActiveTab === 'ANALOGY' && theme !== 'retro' && (
+                                 <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-1/2 bg-[var(--philosopher-accent)] blur-[1px]"></div>
+                              )}
+                              <Layers size={16} className={detailActiveTab === 'ANALOGY' ? (theme === 'retro' ? 'text-white' : 'text-[var(--philosopher-accent)]') : 'text-zinc-600 group-hover/bt:text-zinc-400'} />
                               <div>
-                                 <div className={`text-[9px] font-bold uppercase tracking-[0.2em] mb-0.5 ${detailActiveTab === 'ANALOGY' ? (theme === 'retro' ? 'text-white/80' : 'text-black/60') : 'opacity-60'}`}>Part. 2</div>
-                                 <h3 className={`font-serif tracking-widest text-sm ${detailActiveTab === 'ANALOGY' ? 'font-bold' : ''}`}>{lang === 'CN' ? '拓扑类比与案例' : 'TOPOLOGICAL ANALOGY'}</h3>
+                                 <div className={`text-[9px] font-bold uppercase tracking-[0.2em] mb-0.5 ${detailActiveTab === 'ANALOGY' ? (theme === 'retro' ? 'text-white/80' : 'text-[var(--philosopher-accent)]/60') : 'text-zinc-700'}`}>Part. 2</div>
+                                 <h3 className={`font-serif tracking-widest text-sm ${detailActiveTab === 'ANALOGY' ? 'font-bold' : ''}`}>{lang === 'CN' ? '拓扑类比与案例' : 'ANALOGY & CASE'}</h3>
                               </div>
                            </button>
 
                            <button 
                               onClick={() => setDetailActiveTab('APPLICATION')}
-                              className={`px-5 py-3.5 rounded-xl border flex items-center gap-3 transition-all duration-300 text-left ${
+                              className={`px-5 py-3.5 rounded-xl border flex items-center gap-3 transition-all duration-500 text-left relative overflow-hidden group/bt ${
                                  detailActiveTab === 'APPLICATION'
-                                    ? (theme === 'retro' ? 'bg-[#8B261D] text-white border-transparent shadow-lg' : 'bg-white text-black border-transparent shadow-[0_0_20px_rgba(255,255,255,0.2)]')
-                                    : (theme === 'retro' ? 'bg-white/40 border-black/10 text-black/60 hover:bg-white/80' : 'bg-white/[0.03] border-white/10 text-zinc-400 hover:bg-white/10')
+                                    ? (theme === 'retro' ? 'bg-[#8B261D] text-white border-transparent shadow-lg' : 'bg-[var(--philosopher-accent)]/10 text-white border-[var(--philosopher-accent)]/50 shadow-[0_0_20px_var(--philosopher-glow)]')
+                                    : (theme === 'retro' ? 'bg-white/40 border-black/10 text-black/60 hover:bg-white/80' : 'bg-white/[0.03] border-white/5 text-zinc-500 hover:bg-white/[0.08] hover:text-zinc-300')
                               }`}
                            >
-                              <Zap size={16} className={detailActiveTab === 'APPLICATION' ? (theme === 'retro' ? 'text-white' : 'text-black') : dt.accentColor} />
+                              {detailActiveTab === 'APPLICATION' && theme !== 'retro' && (
+                                 <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-1/2 bg-[var(--philosopher-accent)] blur-[1px]"></div>
+                              )}
+                              <Zap size={16} className={detailActiveTab === 'APPLICATION' ? (theme === 'retro' ? 'text-white' : 'text-[var(--philosopher-accent)]') : 'text-zinc-600 group-hover/bt:text-zinc-400'} />
                               <div>
-                                 <div className={`text-[9px] font-bold uppercase tracking-[0.2em] mb-0.5 ${detailActiveTab === 'APPLICATION' ? (theme === 'retro' ? 'text-white/80' : 'text-black/60') : 'opacity-60'}`}>Part. 3</div>
-                                 <h3 className={`font-serif tracking-widest text-sm ${detailActiveTab === 'APPLICATION' ? 'font-bold' : ''}`}>{lang === 'CN' ? '叙事引擎部署指示' : 'ENGINE COUPLING'}</h3>
+                                 <div className={`text-[9px] font-bold uppercase tracking-[0.2em] mb-0.5 ${detailActiveTab === 'APPLICATION' ? (theme === 'retro' ? 'text-white/80' : 'text-[var(--philosopher-accent)]/60') : 'text-zinc-700'}`}>Part. 3</div>
+                                 <h3 className={`font-serif tracking-widest text-sm ${detailActiveTab === 'APPLICATION' ? 'font-bold' : ''}`}>{lang === 'CN' ? '叙事引擎部署指示' : 'NARRATIVE DEPLOYMENT'}</h3>
                               </div>
                            </button>
+
+                           {/* Concept Navigation Controls */}
+                           <div className="mt-8 flex flex-col gap-2 animate-in fade-in slide-in-from-left-4 duration-700">
+                              <div className={`text-[9px] font-bold uppercase tracking-[0.3em] mb-1 px-1 ${theme === 'retro' ? 'text-black/40 font-black' : 'text-zinc-600 font-bold'}`}>
+                                {lang === 'CN' ? '词条导航' : 'LEXICON NAV'}
+                              </div>
+                              <div className="grid grid-cols-3 gap-2">
+                                 <button
+                                   onClick={handlePrevious}
+                                   title={lang === 'CN' ? '上一个词条' : 'Previous Concept'}
+                                   className={`flex flex-col items-center justify-center gap-1.5 py-3 rounded-xl border transition-all duration-300 ${
+                                     theme === 'retro' 
+                                       ? 'bg-white/40 border-black/10 text-black/60 hover:bg-[#8B261D] hover:text-white shadow-sm' 
+                                       : 'bg-white/[0.03] border-white/10 text-zinc-500 hover:bg-white hover:text-black shadow-[0_4px_15px_rgba(0,0,0,0.2)]'
+                                   }`}
+                                 >
+                                   <ChevronLeft size={16} />
+                                   <span className="text-[8px] font-bold uppercase tracking-wider">{lang === 'CN' ? '上一个' : 'PREV'}</span>
+                                 </button>
+                                 
+                                 <button
+                                   onClick={handleRandom}
+                                   title={lang === 'CN' ? '随机切换' : 'Random Shuffle'}
+                                   className={`flex flex-col items-center justify-center gap-1.5 py-3 rounded-xl border transition-all duration-300 ${
+                                     theme === 'retro' 
+                                       ? 'bg-white/40 border-black/10 text-black/60 hover:bg-[#8B261D] hover:text-white shadow-sm' 
+                                       : 'bg-white/[0.03] border-white/10 text-zinc-500 hover:bg-white hover:text-black shadow-[0_4px_15px_rgba(0,0,0,0.2)]'
+                                   }`}
+                                 >
+                                   <Shuffle size={16} />
+                                   <span className="text-[8px] font-bold uppercase tracking-wider">{lang === 'CN' ? '随机' : 'RAND'}</span>
+                                 </button>
+                                 
+                                 <button
+                                   onClick={handleNext}
+                                   title={lang === 'CN' ? '下一个词条' : 'Next Concept'}
+                                   className={`flex flex-col items-center justify-center gap-1.5 py-3 rounded-xl border transition-all duration-300 ${
+                                     theme === 'retro' 
+                                       ? 'bg-white/40 border-black/10 text-black/60 hover:bg-[#8B261D] hover:text-white shadow-sm' 
+                                       : 'bg-white/[0.03] border-white/10 text-zinc-500 hover:bg-white hover:text-black shadow-[0_4px_15px_rgba(0,0,0,0.2)]'
+                                   }`}
+                                 >
+                                   <ChevronRight size={16} />
+                                   <span className="text-[8px] font-bold uppercase tracking-wider">{lang === 'CN' ? '下一个' : 'NEXT'}</span>
+                                 </button>
+                              </div>
+                           </div>
                         </div>
                      </div>
                      
-                     {/* RIGHT COLUMN: Content Area */}
-                     <div className={`flex-1 flex flex-col rounded-2xl border ${dt.cardBg} overflow-hidden backdrop-blur-md`}>
-                        <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
-                           <div className={`text-sm md:text-base ${dt.textColor} font-serif leading-relaxed tracking-wide animate-in fade-in duration-500`}>
-                              {detailActiveTab === 'DEFINITION' && renderMarkdown(data.detailed?.definition || data.shortDef)}
-                              {detailActiveTab === 'ANALOGY' && renderMarkdown(data.detailed?.analogy || "*(空)*")}
-                              {detailActiveTab === 'APPLICATION' && renderMarkdown(data.detailed?.application || "*(空)*")}
+                     {/* RIGHT COLUMN: Content Area (High Transparency) */}
+                     <div className={`flex-1 flex flex-col overflow-hidden relative transition-all duration-500`}>
+                        {/* Subtle Interior Glow */}
+                        {theme === 'dark' && <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[var(--philosopher-accent)]/20 to-transparent"></div>}
+                        
+                        <div className="flex-1 overflow-y-auto p-10 md:p-14 custom-scrollbar">
+                           <div className={`text-sm md:text-lg ${theme === 'retro' ? 'text-black/90' : 'text-zinc-300/90'} font-serif leading-[1.85] tracking-wide animate-in fade-in duration-700 max-w-4xl mx-auto detail-markdown-content`}>
+                              {detailActiveTab === 'DEFINITION' && renderMarkdown((data.detailed?.definition || data.shortDef).trim().replace(/\n\s*---\s*$/, ''))}
+                              {detailActiveTab === 'ANALOGY' && renderMarkdown((data.detailed?.analogy || "*(空)*").trim().replace(/\n\s*---\s*$/, ''))}
+                              {detailActiveTab === 'APPLICATION' && renderMarkdown((data.detailed?.application || "*(空)*").trim().replace(/\n\s*---\s*$/, ''))}
                            </div>
                         </div>
                      </div>
@@ -841,8 +971,12 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
 
   return (
     <div className={`${renderInPlace ? 'relative w-full h-full p-0 flex flex-col' : 'fixed inset-0 z-[100] flex flex-col'} ${
-      theme === 'retro' ? 'bg-transparent' : (renderInPlace ? 'bg-black/40' : 'bg-[var(--bg-header)]')
-    } overflow-hidden transition-all duration-500`}>
+      theme === 'retro' ? 'bg-transparent' : (renderInPlace ? 'bg-transparent' : 'bg-transparent')
+    } overflow-hidden transition-all duration-500 theme-${activeDictionary.toLowerCase()}`}>
+      
+      {/* 噪点纹理覆盖 */}
+      {theme === 'dark' && atmosphericsEnabled && <div className="mist-grain opacity-[0.03]"></div>}
+
       {/* BACKGROUND ELEMENTS */}
       {!renderInPlace && (
         <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-[var(--ring-opacity)]">
@@ -950,14 +1084,16 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
                 </div>
               </button>
 
-              {/* 2. Language Toggle */}
-              <button
-                onClick={() => setLang(lang === 'CN' ? 'EN' : 'CN')}
-                className={`text-[10px] font-bold ${theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'} transition-all duration-300 w-7 h-7 flex items-center justify-center rounded-sm tracking-widest hover:bg-white/5 hover:scale-110 active:scale-90`}
-                title={lang === 'CN' ? 'Switch to English' : '切换至中文'}
-              >
-                {lang === 'CN' ? '中' : 'EN'}
-              </button>
+<div className="hidden">
+               {/* 2. Language Toggle (Hidden from main header to avoid duplication with global AppHeader) */}
+               <button
+                 onClick={() => setLang(lang === 'CN' ? 'EN' : 'CN')}
+                 className={`text-[10px] font-bold ${theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'} transition-all duration-300 w-7 h-7 flex items-center justify-center rounded-sm tracking-widest hover:bg-white/5 hover:scale-110 active:scale-90`}
+                 title={lang === 'CN' ? 'Switch to English' : '切换至中文'}
+               >
+                 {lang === 'CN' ? '中' : 'EN'}
+               </button>
+              </div>
 
               {/* 3. Theme Toggle */}
               <button
@@ -968,7 +1104,7 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
                 {theme === 'dark' ? <Moon size={14} /> : <Sun size={14} className="text-[#8B261D]" />}
               </button>
 
-              {/* 4. Ring Toggle */}
+              {/* 5. Rings Toggle */}
               <button
                 onClick={() => setShowRings(!showRings)}
                 className={`flex items-center justify-center w-7 h-7 rounded-sm transition-all duration-300 hover:bg-white/5 hover:scale-110 active:scale-90 focus:outline-none ${
@@ -1016,20 +1152,20 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
            { id: 'PERSONNEL', label: lang === 'CN' ? '人物档案' : 'SUBJECTS', en: 'SUBJECTS', icon: <Users size={16} /> },
            { id: 'RESEARCH', label: lang === 'CN' ? '研究报告' : 'RESEARCH', en: 'RESEARCH', icon: <FileText size={16} /> },
            { id: 'COLLECTIVE', label: lang === 'CN' ? '共鸣场' : 'RESONANCE', en: 'RESONANCE', icon: <Sparkles size={16} /> },
-           { id: 'TIMELINE', label: lang === 'CN' ? '哲学时间轴' : 'TIMELINE', en: 'TIMELINE', icon: <Clock size={16} /> },
+           { id: 'TIMELINE', label: lang === 'CN' ? '时间轴' : 'TIMELINE', en: 'TIMELINE', icon: <Clock size={16} /> },
          ].map(tab => (
             <button
               key={tab.id}
               onClick={() => { setActiveSection(tab.id as CodexSection); setSelectedItem(null); }}
-              className={`flex items-center gap-3 transition-all relative px-6 py-2 h-10 group/tab rounded-md border ${
+              className={`flex items-center gap-3 transition-all relative px-7 py-3 h-12 group/tab select-none border-b-2 ${
                 activeSection === tab.id 
-                  ? (theme === 'retro' ? 'text-[#8B261D] border-transparent' : 'text-white bg-black shadow-[0_0_20px_rgba(0,0,0,0.8)] border-white/10') 
-                  : (theme === 'retro' ? 'text-[#8B261D] hover:text-[#8B261D] border-transparent' : 'text-white hover:text-white border-transparent')
+                  ? (theme === 'retro' ? 'text-[#8B261D] border-[#8B261D]' : 'text-[var(--philosopher-accent)] border-[var(--philosopher-accent)] bg-[var(--philosopher-glow)] shadow-[inset_0_-10px_20px_-10px_var(--philosopher-glow)]') 
+                  : (theme === 'retro' ? 'text-zinc-500 hover:text-[#8B261D] border-transparent' : 'text-zinc-400 hover:text-white border-transparent hover:bg-white/[0.02]')
               }`}
             >
-              <span className={`transition-all duration-500 ${activeSection === tab.id ? (theme === 'retro' ? 'text-[#8B261D]' : 'text-white') + ' scale-110' : "group-hover/tab:scale-110"}`}>{tab.icon}</span>
+              <span className={`transition-all duration-500 ${activeSection === tab.id ? 'scale-110 rotate-12' : "group-hover/tab:scale-110 opacity-60 group-hover/tab:opacity-100"}`}>{tab.icon}</span>
               <div className="flex flex-col items-start justify-center">
-                 <span className={`text-[11px] font-bold tracking-[0.25em] uppercase transition-all duration-300 opacity-100 group-hover/tab:opacity-100`}>
+                 <span className={`text-[10px] font-black tracking-[0.3em] uppercase transition-all duration-300`}>
                    {lang === 'CN' ? tab.label : tab.en}
                  </span>
               </div>

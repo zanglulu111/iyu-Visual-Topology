@@ -1,38 +1,47 @@
 :root {
-  /* Dark Theme (Default) */
-  --bg-main: #050505;
-  --bg-panel: #0a0a0a;
-  --bg-card: #111113;
-  --bg-header: #050505f2;
-  --border-main: #27272a; /* zinc-700 */
-  --border-accent: #d4af37; /* gold-primary */
-  --text-main: #ffffff;
-  --text-muted: #71717a; /* zinc-500 */
-  --text-accent: #d4af37;
-  --text-code: #d1d5db; /* zinc-300 */
+  /* --- 核心背景：由死黑改为带有“月度蓝系探测”质感的深蓝黑 --- */
+  --bg-main: #0c0d10;         /* 极深蓝黑，柔和感提升，减少对比度差 */
+  --bg-panel: #111318;        
+  --bg-card: #161920;         
+  --bg-header: rgba(12, 13, 16, 0.88); 
+  
+  /* --- 边界与线条：引入“电流”质感 --- */
+  --border-main: rgba(255, 255, 255, 0.06); 
+  --border-accent: #d4af37;
+  --border-glass: rgba(255, 255, 255, 0.03);
+  
+  /* --- 文字体系：保护视力的“月光白”系统 --- */
+  --text-main: #cbd5e1;       /* 柔和的浅天蓝灰，正文颜色 */
+  --text-muted: #64748b;      
+  --text-accent: #d4af37;     
+  --text-code: #94a3b8;
+  --text-header: #f8fafc;     /* 标题用近纯白，拉开层级 */
+  
+  /* --- 动态哲学家氛围色 (Glow Archetypes) --- */
+  --philosopher-glow: rgba(212, 175, 55, 0.2); /* 默认迷雾金 */
+  --philosopher-accent: #d4af37;
+
+  /* --- 交互与效果 --- */
+  --selection-bg: rgba(212, 175, 55, 0.12);
   --accent-color: #d4af37;
-  --selection-bg: rgba(212, 175, 55, 0.3);
-  --pattern-aged: url('https://www.transparenttextures.com/patterns/aged-paper.png');
-  --pattern-dust: url('https://www.transparenttextures.com/patterns/dust.png');
-  --texture-opacity: 0.15;
+  --accent-glow: rgba(212, 175, 55, 0.15);
+  
+  /* 材质与纹理 */
+  --texture-opacity: 0.1;
   --bg-texture: none;
   --bg-dust-texture: none;
-
-  /* Mist School Palette - Dark Mode */
-  --mist-cyan: #22d3ee;
   --mist-gold: #D4AF37;
-  --mist-rose: #fb7185;
+  --mist-cyan: #22d3ee;
+  --mist-red: #cc0000;
   --mist-purple: #c084fc;
-  --mist-orange: #fb923c;
-  --mist-red: #8B261D;  /* The Red is always Mist Red */
-
-  /* Gold variants (dark mode) */
-  --gold-primary: #D4AF37;
-  --gold-dim: rgba(212, 175, 55, 0.4);
-  --gold-bright: #FFD700;
-  --gold-soft: rgba(212, 175, 55, 0.6);
-  --ring-opacity: 0.35;
 }
+
+/* 哲学主题氛围类 */
+.theme-hegel { --philosopher-glow: rgba(212, 175, 55, 0.25); --philosopher-accent: #d4af37; }
+.theme-marx { --philosopher-glow: rgba(255, 118, 117, 0.1); --philosopher-accent: #ff7675; } /* 马克思色：改用明度更高的“暮色红”，显著提升黑暗模式下的可读性 */
+.theme-lacan { --philosopher-glow: rgba(34, 211, 238, 0.15); --philosopher-accent: #22d3ee; }
+.theme-zizek { --philosopher-glow: rgba(192, 132, 252, 0.15); --philosopher-accent: #c084fc; }
+.theme-analysis { --philosopher-glow: rgba(251, 113, 133, 0.15); --philosopher-accent: #fb7185; }
 
 :root.retro {
   --bg-main: #EFE9E0;      /* 精确匹配截图中的温暖宣纸底色 */
@@ -208,4 +217,170 @@ body::before {
 
 .animate-portal-breathing {
   animation: portalBreathing 8s ease-in-out infinite;
+}
+
+/* --- Premium UI Components --- */
+
+/* 1. 高级感卡片 - 带有微光边框和海拔感 */
+.premium-card {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 0; /* Square corners specifically for the dictionary archival look */
+  transition: all 1300ms cubic-bezier(0.23, 1, 0.32, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.premium-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top right, var(--philosopher-glow), transparent 70%);
+  opacity: 0;
+  transition: opacity 1300ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.premium-card:hover {
+  transform: translateY(-8px);
+  background: #12141a;
+  border-color: var(--philosopher-accent);
+  box-shadow: 0 20px 50px rgba(var(--philosopher-glow-rgb), 0.3);
+}
+
+.detail-markdown-content strong,
+.detail-markdown-content b {
+  color: var(--philosopher-accent);
+  font-weight: 700;
+  filter: drop-shadow(0 0 8px var(--philosopher-glow));
+}
+
+:root.retro .detail-markdown-content strong,
+:root.retro .detail-markdown-content b {
+  color: var(--text-accent);
+  font-weight: 900;
+  filter: none;
+}
+
+.detail-markdown-content em, 
+.detail-markdown-content i {
+  color: #f8fafc;
+  opacity: 0.9;
+  font-style: italic;
+  font-family: serif;
+}
+
+:root.retro .detail-markdown-content em,
+:root.retro .detail-markdown-content i {
+  color: var(--text-main);
+  opacity: 0.8;
+  font-style: italic;
+}
+
+.detail-markdown-content p {
+  margin-bottom: 2rem;
+}
+
+.detail-markdown-content h1,
+.detail-markdown-content h2,
+.detail-markdown-content h3 {
+  color: #fff;
+  margin-top: 3rem;
+  margin-bottom: 1.5rem;
+}
+
+:root.retro .detail-markdown-content h1,
+:root.retro .detail-markdown-content h2,
+:root.retro /* --- Retro Theme (Dictionary Specific Polish) --- */
+:root.retro {
+  --bg-main: #EFE9E0;
+  --bg-card: rgba(255, 255, 255, 0.4);
+  --border-main: rgba(139, 38, 29, 0.15);
+  --text-main: #2d2d2d;
+  --text-accent: #8B261D;
+  --philosopher-accent: #8B261D; 
+}
+
+.retro .concept-box {
+  background: transparent !important;
+  border: 1px solid rgba(139, 38, 29, 0.08) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  transition: all 0.3s ease;
+}
+
+.retro .concept-box:hover {
+  background: white !important;
+  border-color: #8B261D !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 38, 29, 0.05) !important;
+}
+
+.retro .philosopher-tab {
+  border: 1px solid rgba(139, 38, 29, 0.1) !important;
+  background: transparent !important;
+  color: #8B261D !important;
+  transition: all 0.3s ease;
+}
+
+.retro .philosopher-tab-active {
+  background-color: #8B261D !important;
+  color: #EFE9E0 !important;
+  border-color: #8B261D !important;
+}
+
+.retro .philosopher-tab-active * {
+  color: inherit !important;
+}
+
+.retro .philosopher-tab-active svg {
+  fill: #EFE9E0 !important;
+  opacity: 0.9;
+}
+
+.retro .detail-header-divider {
+  border-bottom: 2px solid #8B261D !important;
+  box-shadow: none !important;
+}
+
+/* 2. 文本渐变 - 用于标题，产生“映射”质感 */
+.text-gradient-silver {
+  background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+.text-gradient-gold {
+  background: linear-gradient(135deg, #D4AF37 0%, #856610 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+/* 3. 磨砂玻璃容器 */
+.glass-container {
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  background-color: rgba(15, 17, 19, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* 4. 优化滚动条样式 */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--mist-gold);
 }

@@ -744,13 +744,16 @@ export const ZIZEK_INDEX: LacanCategory[] = [
         id: "z_methodology",
         name: "一、核心命题与方法论",
         enName: "Core Propositions & Methodology",
-        desc: "齐泽克理论的激进姿态：意识形态批判与实在界的政治化。",
+        desc: "新辩证唯物主义与本体论（《少于无》与《绝对反冲》核心）。",
         concepts: [
-            { id: "z_ideology_fantasy_core", name: "意识形态批判的核心：幻象而非幻觉", enName: "Critique as Fantasy", category: "Methodology", shortDef: "意识形态不仅是虚假意识，更是支撑现实的社会幻象。" },
-            { id: "z_cynical_reason", name: "犬儒主义：他们知道自己在做什么，但他们仍然在做", enName: "Cynical Reason", category: "Methodology", shortDef: "主体在行为上服从而非信仰上认同。" },
-            { id: "z_real_core", name: "实在界是意识形态的核心，而非外部", enName: "The Real in Ideology", category: "Methodology", shortDef: "意识形态是为了掩盖实在界的僵局。" },
-            { id: "z_universality_failure", name: "普遍性只能通过特殊性的失败来显现", enName: "Universality through Failure", category: "Methodology", shortDef: "真理存在于系统无法整合的那一点。" },
-            { id: "z_act_moment", name: "行动 (Act) 作为主体性的真正时刻", enName: "The Act", category: "Methodology", shortDef: "真正的行动改变了可能性的坐标。" }
+            { id: "z_less_than_nothing", name: "少于无", enName: "Less Than Nothing", category: "Methodology", shortDef: "虚无不是单纯的“没有”，而是带负值的空洞；存在是为了掩盖这个创伤而分泌的幻象。" },
+            { id: "z_absolute_recoil", name: "绝对反冲", enName: "Absolute Recoil", category: "Methodology", shortDef: "退行或撤回的动作本身，创生了它所要撤回的那个源头。结果在时间中回溯性地创造了原因。" },
+            { id: "z_quantum_ontology", name: "量子本体论与实在界的未完成", enName: "Quantum Ontology", category: "Methodology", shortDef: "宇宙/客体本身就是未编程完整的、不一致的；现实在观察之前没有确定的状态。" },
+            { id: "z_materialist_negation", name: "否定之否定的唯物主义", enName: "Materialist Negation of Negation", category: "Methodology", shortDef: "第二次否定不是找回失去的东西，而是主体意识到自己根本不想要那个曾经失去的东西。" },
+            { id: "z_parallax_ontology", name: "视差本体论", enName: "Parallax Ontology", category: "Methodology", shortDef: "视差不仅是视角的差异，更是存在物自身的内在裂纹，任何客体都无法与自身同一。" },
+            { id: "z_divine_atheism", name: "神圣的无神论 (大他者的死亡)", enName: "Divine Atheism", category: "Methodology", shortDef: "基督在十字架上的绝望呼喊意味着神意识到自身非存在，唯物主义出路是穿透这种绝望。" },
+            { id: "z_death_drive_undead", name: "死亡驱力与“非僵尸”状态", enName: "Death Drive and the Undead", category: "Methodology", shortDef: "一种永远无法死去的、盲目且机械的重复冲动，这是生命力深处的冷酷引擎。" },
+            { id: "z_event_creatio", name: "事件", enName: "The Event", category: "Methodology", shortDef: "从虚无中突然降临的断裂，它重写了现实世界中“什么是可能”的先验坐标系。" }
         ]
     },
     {
@@ -764,7 +767,9 @@ export const ZIZEK_INDEX: LacanCategory[] = [
             { id: "z_empty_signifier", name: "空洞能指", enName: "Empty Signifier", category: "Ideology", shortDef: "没有固定所指、用以缝合社会整体的符号。" },
             { id: "z_traversing_fantasy", name: "幻象的穿越", enName: "Traversing the Fantasy", category: "Ideology", shortDef: "承认大他者的不可能性和认同的偶然性。" },
             { id: "z_symptom_truth", name: "症状作为意识形态的真相", enName: "Symptom as Truth", category: "Ideology", shortDef: "社会不一致性的物质化体现。" },
-            { id: "z_isa_rereading", name: "意识形态国家机器的再读", enName: "ISA Rereading", category: "Ideology", shortDef: "结合分析理论重新定义阿尔都塞的机器。" }
+            { id: "z_isa_rereading", name: "意识形态国家机器的再读", enName: "ISA Rereading", category: "Ideology", shortDef: "结合分析理论重新定义阿尔都塞的机器。" },
+            { id: "z_ideology_fantasy_core", name: "意识形态批判的核心：幻象而非幻觉", enName: "Critique as Fantasy", category: "Ideology", shortDef: "意识形态不仅是虚假意识，更是支撑现实的社会幻象。" },
+            { id: "z_cynical_reason", name: "犬儒主义：他们知道自己在做什么，但他们仍然在做", enName: "Cynical Reason", category: "Ideology", shortDef: "主体在行为上服从而非信仰上认同。" }
         ]
     },
     {
@@ -777,7 +782,9 @@ export const ZIZEK_INDEX: LacanCategory[] = [
             { id: "z_cartesian_subject", name: "笛卡尔主体的保留与改造", enName: "Cartesian Subject", category: "Subject", shortDef: "找回作为纯粹Cogito（空洞点）的主体。" },
             { id: "z_authentic_act", name: "行动 (Act)", enName: "The Act", category: "Subject", shortDef: "切断符号链条、重写现实规则的决断。" },
             { id: "z_parallax_gap", name: "平行差距", enName: "Parallax Gap", category: "Subject", shortDef: "由于视角转换导致的客体本体论断裂。" },
-            { id: "z_subject_universality", name: "主体与普遍性", enName: "Subject & Universality", category: "Subject", shortDef: "主体代表了整体中由于排斥而产生的真理性位置。" }
+            { id: "z_subject_universality", name: "主体与普遍性", enName: "Subject & Universality", category: "Subject", shortDef: "主体代表了整体中由于排斥而产生的真理性位置。" },
+            { id: "z_universality_failure", name: "普遍性只能通过特殊性的失败来显现", enName: "Universality through Failure", category: "Subject", shortDef: "真理存在于系统无法整合的那一点。" },
+            { id: "z_act_moment", name: "行动 (Act) 作为主体性的真正时刻", enName: "The Act", category: "Subject", shortDef: "真正的行动改变了可能性的坐标。" }
         ]
     },
     {
@@ -814,7 +821,8 @@ export const ZIZEK_INDEX: LacanCategory[] = [
             { id: "z_real_trauma", name: "实在界作为创伤性内核", enName: "Real as Trauma", category: "Real", shortDef: "无法被语言缝合的生命真相。" },
             { id: "z_real_three_forms", name: "实在界的三种形态", enName: "Three Forms of Real", category: "Real", shortDef: "象征前、象征失败、象征后。" },
             { id: "z_politics_real", name: "实在界的政治", enName: "Politics of Real", category: "Real", shortDef: "在政治领域直面无法化约的冲突点。" },
-            { id: "z_disaster_real", name: "灾难与实在界", enName: "Disaster & Real", category: "Real", shortDef: "灾难作为日常实在界崩塌的瞬间。" }
+            { id: "z_disaster_real", name: "灾难与实在界", enName: "Disaster & Real", category: "Real", shortDef: "灾难作为日常实在界崩塌的瞬间。" },
+            { id: "z_real_core", name: "实在界是意识形态的核心，而非外部", enName: "The Real in Ideology", category: "Real", shortDef: "意识形态是为了掩盖实在界的僵局。" }
         ]
     },
     {

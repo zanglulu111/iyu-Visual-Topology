@@ -64,8 +64,8 @@ function parseCodexMarkdown(content) {
 
     // 截取区块内容（跳过标题行本身）
     let sectionContent = content.slice(startPos, endPos);
-    // 移除区块标题行
-    sectionContent = sectionContent.replace(/^##\s*.+$/m, '').trim();
+    // 移除区块标题行，并修剪首尾空白及其余留的分割线
+    sectionContent = sectionContent.replace(/^##\s*.+$/m, '').trim().replace(/\n\s*---\s*$/, '');
     
     result[key] = sectionContent;
   }
