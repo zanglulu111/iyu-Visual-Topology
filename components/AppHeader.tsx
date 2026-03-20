@@ -1,9 +1,8 @@
 import React from 'react';
 import { Globe, Wand2, HelpCircle, History as HistoryIcon, Cpu, GitFork, BookOpen, Settings, User as UserIcon, LogOut, Aperture, Sun, Moon } from 'lucide-react';
-import { DriverType, User } from '../types';
+import { DriverType, User, ViewMode } from '../types';
 import { useTheme } from '../contexts/ThemeContext';
 
-type ViewMode = 'ENGINE' | 'DIVERGENCE' | 'BIBLE' | 'METONYMY' | 'TOPOLOGY' | 'RSI' | 'ARCHIVE' | 'VIDEO' | 'RORSCHACH' | 'ANALYSIS' | 'DICTIONARY';
 
 const AnimatedText = ({ cn, en, lang, className = "", hClass = "h-5" }: { cn: React.ReactNode, en: React.ReactNode, lang: 'CN' | 'EN', className?: string, hClass?: string }) => (
   <div className={`overflow-hidden relative ${hClass} ${className}`}>
@@ -69,17 +68,24 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
 
   const getHeaderTitleColor = () => {
     if (theme === 'retro') return 'text-[#8B261D]';
-    if (viewMode === 'RORSCHACH' || viewMode === 'ARCHIVE' || viewMode === 'ANALYSIS') return 'text-white';
+    
+    // Decouple specific portal pages from engine colors
+    if (viewMode === 'RORSCHACH' || viewMode === 'ARCHIVE' || viewMode === 'VIDEO' || viewMode === 'ANALYSIS') return 'text-white';
+    if (viewMode === 'DICTIONARY') return 'text-[var(--philosopher-accent)]';
+    
+    // Engine specific colors
+    if (selectedDriver === DriverType.NARRATIVE) return 'text-gold-primary';
     if (selectedDriver === DriverType.COMMERCIAL) return 'text-mist-cyan';
     if (selectedDriver === DriverType.EXPERIMENTAL) return 'text-mist-purple';
     if (selectedDriver === DriverType.AESTHETIC) return 'text-mist-rose';
     if (selectedDriver === DriverType.TRAILER) return 'text-mist-orange';
-    return 'text-gold-primary';
+    
+    return 'text-[var(--philosopher-accent)]';
   };
 
   const getHeaderIconFill = () => {
     if (theme === 'retro') return 'fill-[#8B261D]/20';
-    if (viewMode === 'RORSCHACH' || viewMode === 'ARCHIVE' || viewMode === 'ANALYSIS') return 'fill-white/20';
+    if (viewMode === 'RORSCHACH' || viewMode === 'ARCHIVE' || viewMode === 'VIDEO' || viewMode === 'ANALYSIS') return 'fill-white/20';
     if (selectedDriver === DriverType.COMMERCIAL) return 'fill-cyan-400/20';
     if (selectedDriver === DriverType.EXPERIMENTAL) return 'fill-purple-400/20';
     if (selectedDriver === DriverType.AESTHETIC) return 'fill-rose-400/20';
@@ -88,7 +94,12 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   };
 
   const getThemeTextColor = () => {
-    if (viewMode === 'RORSCHACH' || viewMode === 'ARCHIVE' || viewMode === 'ANALYSIS') return 'text-white';
+    if (theme === 'retro') return 'text-[#8B261D]';
+    
+    if (viewMode === 'RORSCHACH' || viewMode === 'ARCHIVE' || viewMode === 'VIDEO' || viewMode === 'ANALYSIS') return 'text-white';
+    if (viewMode === 'DICTIONARY') return 'text-[var(--philosopher-accent)]';
+    
+    if (selectedDriver === DriverType.NARRATIVE) return 'text-gold-primary';
     if (selectedDriver === DriverType.COMMERCIAL) return 'text-mist-cyan';
     if (selectedDriver === DriverType.EXPERIMENTAL) return 'text-mist-purple';
     if (selectedDriver === DriverType.AESTHETIC) return 'text-mist-rose';
@@ -103,21 +114,32 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
 
   const getBorderAccentColor = () => {
     if (theme === 'retro') return 'transparent';
-    if (viewMode === 'RORSCHACH' || viewMode === 'ARCHIVE' || viewMode === 'ANALYSIS') return 'transparent';
+    
+    // Decouple certain pages from engines: Archive and Video always white/transparent
+    if (viewMode === 'RORSCHACH' || viewMode === 'ARCHIVE' || viewMode === 'VIDEO' || viewMode === 'ANALYSIS' || viewMode === 'DICTIONARY') return 'transparent';
+
+    // Engine specific accent colors
     if (selectedDriver === DriverType.COMMERCIAL) return 'rgba(34, 211, 238, 0.15)';
     if (selectedDriver === DriverType.EXPERIMENTAL) return 'rgba(192, 132, 252, 0.15)';
     if (selectedDriver === DriverType.AESTHETIC) return 'rgba(251, 113, 133, 0.15)';
     if (selectedDriver === DriverType.TRAILER) return 'rgba(251, 146, 60, 0.15)';
+    if (selectedDriver === DriverType.NARRATIVE) return 'rgba(212, 175, 55, 0.15)';
+
     return 'rgba(212, 175, 55, 0.15)';
   };
 
   const getLineGlow = () => {
     if (theme === 'retro') return '';
-    if (viewMode === 'RORSCHACH' || viewMode === 'ARCHIVE' || viewMode === 'ANALYSIS') return '';
+    
+    if (viewMode === 'RORSCHACH' || viewMode === 'ARCHIVE' || viewMode === 'VIDEO' || viewMode === 'ANALYSIS' || viewMode === 'DICTIONARY') return '';
+    
+    // Decouple engines: Engine colors take precedence
     if (selectedDriver === DriverType.COMMERCIAL) return '0 0 10px rgba(34,211,238,0.1)';
     if (selectedDriver === DriverType.EXPERIMENTAL) return '0 0 10px rgba(192,132,252,0.1)';
     if (selectedDriver === DriverType.AESTHETIC) return '0 0 10px rgba(251,113,133,0.1)';
     if (selectedDriver === DriverType.TRAILER) return '0 0 10px rgba(251,146,60,0.1)';
+    if (selectedDriver === DriverType.NARRATIVE) return '0 0 10px rgba(212,175,55,0.1)';
+
     return '0 0 10px rgba(212,175,55,0.1)';
   };
 
@@ -135,8 +157,9 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
       <div 
         className="absolute bottom-0 left-0 right-0 h-px transition-all duration-500 z-10" 
         style={{ 
-          backgroundColor: getBorderAccentColor(),
-          boxShadow: getLineGlow()
+          backgroundColor: theme === 'retro' ? '#8B261D' : (getBorderAccentColor() !== 'transparent' ? getBorderAccentColor() : 'var(--philosopher-accent)'),
+          opacity: theme === 'retro' ? 0.2 : 0.15,
+          boxShadow: theme === 'retro' ? 'none' : (getLineGlow() ? getLineGlow() : '0 0 15px var(--philosopher-accent)')
         }} 
       />
       <div className="flex items-center gap-5">
@@ -170,7 +193,10 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             </span>
           </button>
         )}
-        <span className={`${getHeaderTitleColor()} font-serif font-bold text-xs uppercase tracking-widest`}>
+        <span 
+          className={`${getHeaderTitleColor()} font-serif font-bold text-xs uppercase tracking-widest`}
+          style={theme === 'retro' ? { color: '#8B261D' } : {}}
+        >
           {lang === 'CN' 
             ? (driverName && driverName.startsWith('迷雾学派') ? driverName : `迷雾学派：${driverName}`)
             : (driverName && driverName.startsWith('MIST') ? driverName : `MIST: ${driverName}`)

@@ -1,9 +1,9 @@
 :root {
   /* --- 核心背景：由死黑改为带有“月度蓝系探测”质感的深蓝黑 --- */
-  --bg-main: #0c0d10;         /* 极深蓝黑，柔和感提升，减少对比度差 */
-  --bg-panel: #111318;        
-  --bg-card: #161920;         
-  --bg-header: rgba(12, 13, 16, 0.88); 
+  --bg-main: #000000;         
+  --bg-panel: #000000;        
+  --bg-card: #000000;         
+  --bg-header: #000000; 
   
   /* --- 边界与线条：引入“电流”质感 --- */
   --border-main: rgba(255, 255, 255, 0.06); 
@@ -34,6 +34,13 @@
   --mist-cyan: #22d3ee;
   --mist-red: #cc0000;
   --mist-purple: #c084fc;
+  --mist-rose: #fb7185;
+  --mist-orange: #fb923c;
+  
+  --gold-primary: #D4AF37;
+  --gold-dim: rgba(212, 175, 55, 0.4);
+  --gold-bright: #FFD700;
+  --gold-soft: rgba(212, 175, 55, 0.15);
 }
 
 /* 哲学主题氛围类 */
@@ -249,7 +256,7 @@ body::before {
 
 .detail-markdown-content strong,
 .detail-markdown-content b {
-  color: var(--philosopher-accent);
+  color: var(--philosopher-accent) !important;
   font-weight: 700;
   filter: drop-shadow(0 0 8px var(--philosopher-glow));
 }
@@ -283,14 +290,19 @@ body::before {
 .detail-markdown-content h1,
 .detail-markdown-content h2,
 .detail-markdown-content h3 {
-  color: #fff;
+  color: var(--philosopher-accent) !important;
   margin-top: 3rem;
   margin-bottom: 1.5rem;
+  filter: drop-shadow(0 0 12px var(--philosopher-glow));
 }
 
 :root.retro .detail-markdown-content h1,
 :root.retro .detail-markdown-content h2,
-:root.retro /* --- Retro Theme (Dictionary Specific Polish) --- */
+:root.retro .detail-markdown-content h3 {
+  color: #8B261D;
+}
+
+/* --- Retro Theme (Dictionary Specific Polish) --- */
 :root.retro {
   --bg-main: #EFE9E0;
   --bg-card: rgba(255, 255, 255, 0.4);

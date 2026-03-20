@@ -14,6 +14,7 @@ interface CommercialViewProps {
     onUpdateBlueprint: (blueprint: CreativeBlueprint) => void;
     themeAccent: string;
     themeBorder: string;
+    theme?: string;
 }
 
 // Added StrategyCardProps interface to handle props typing including React's reserved 'key'

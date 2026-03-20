@@ -34,12 +34,12 @@ export const BorromeanRings: React.FC<BorromeanRingsProps> = ({
         symbolic: isRetro ? 'rgba(156, 130, 74, 0.75)' : 'rgba(6, 182, 212, 0.5)',   // Symbolic (Cyan-based)
         imaginary: isRetro ? 'rgba(106, 125, 106, 0.75)' : 'rgba(244, 63, 94, 0.5)',  // Imaginary (Rose-based)
         sinthome: isRetro ? 'rgba(80, 102, 120, 0.7)' : 'rgba(16, 185, 129, 0.45)',   // Sinthome (Emerald-based)
-    } : vivid ? {
-        // Vivid mode for Topology View - "Conservatory Matte"
-        real: isRetro ? '#A3483E' : '#F59E0B',       // Pompeian Red 
-        symbolic: isRetro ? '#9C824A' : '#06B6D4',   // Ochre Gold
-        imaginary: isRetro ? '#6A7D6A' : '#F43F5E',  // Verdigris Green
-        sinthome: isRetro ? '#506678' : '#10B981',   // Deep Mineral Blue
+    } : (driverType || vivid) ? {
+        // Vivid mode or Driver-based mode for Topology View
+        real: isRetro ? '#A3483E' : (driverType === DriverType.COMMERCIAL ? '#06B6D4' : driverType === DriverType.EXPERIMENTAL ? '#A855F7' : driverType === DriverType.AESTHETIC ? '#F43F5E' : driverType === DriverType.TRAILER ? '#F97316' : '#F59E0B'),
+        symbolic: isRetro ? '#9C824A' : (driverType === DriverType.COMMERCIAL ? '#22D3EE' : driverType === DriverType.EXPERIMENTAL ? '#C084FC' : driverType === DriverType.AESTHETIC ? '#FB7185' : driverType === DriverType.TRAILER ? '#FB923C' : '#06B6D4'),
+        imaginary: isRetro ? '#6A7D6A' : (driverType === DriverType.COMMERCIAL ? '#0891B2' : driverType === DriverType.EXPERIMENTAL ? '#9333EA' : driverType === DriverType.AESTHETIC ? '#E11D48' : driverType === DriverType.TRAILER ? '#EA580C' : '#F43F5E'),
+        sinthome: isRetro ? '#506678' : (driverType === DriverType.COMMERCIAL ? '#0E7490' : driverType === DriverType.EXPERIMENTAL ? '#7E22CE' : driverType === DriverType.AESTHETIC ? '#BE123C' : driverType === DriverType.TRAILER ? '#C2410C' : '#10B981'),
     } : {
         // Default mode for other views
         real: isRetro ? '#6D4340' : 'rgba(130, 160, 190, 0.6)',       

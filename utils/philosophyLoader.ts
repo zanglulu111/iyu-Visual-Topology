@@ -25,6 +25,8 @@ export interface PhilosophyDetail {
   application: string;
 }
 
+const CACHE_VERSION = 'v24_03_20'; // Increment this whenever data structure changes significantly
+
 // 缓存管理
 class PhilosophyCache {
   private summariesCache: Map<string, PhilosophySummary[]> = new Map();
@@ -33,7 +35,7 @@ class PhilosophyCache {
   // 从 localStorage 加载缓存
   loadFromStorage() {
     try {
-      const summariesData = localStorage.getItem('philosophy_summaries');
+      const summariesData = localStorage.getItem(`philosophy_summaries_${CACHE_VERSION}`);
       if (summariesData) {
         const parsed = JSON.parse(summariesData);
         Object.entries(parsed).forEach(([key, value]) => {
@@ -41,7 +43,7 @@ class PhilosophyCache {
         });
       }
 
-      const detailsData = localStorage.getItem('philosophy_details');
+      const detailsData = localStorage.getItem(`philosophy_details_${CACHE_VERSION}`);
       if (detailsData) {
         const parsed = JSON.parse(detailsData);
         Object.entries(parsed).forEach(([key, value]) => {
@@ -57,10 +59,10 @@ class PhilosophyCache {
   saveToStorage() {
     try {
       const summariesObj = Object.fromEntries(this.summariesCache);
-      localStorage.setItem('philosophy_summaries', JSON.stringify(summariesObj));
+      localStorage.setItem(`philosophy_summaries_${CACHE_VERSION}`, JSON.stringify(summariesObj));
 
       const detailsObj = Object.fromEntries(this.detailsCache);
-      localStorage.setItem('philosophy_details', JSON.stringify(detailsObj));
+      localStorage.setItem(`philosophy_details_${CACHE_VERSION}`, JSON.stringify(detailsObj));
     } catch (error) {
       console.warn('Failed to save philosophy cache to localStorage:', error);
     }
@@ -87,8 +89,8 @@ class PhilosophyCache {
   clear() {
     this.summariesCache.clear();
     this.detailsCache.clear();
-    localStorage.removeItem('philosophy_summaries');
-    localStorage.removeItem('philosophy_details');
+    localStorage.removeItem(`philosophy_summaries_${CACHE_VERSION}`);
+    localStorage.removeItem(`philosophy_details_${CACHE_VERSION}`);
   }
 }
 
@@ -96,19 +98,30 @@ class PhilosophyCache {
 const cache = new PhilosophyCache();
 cache.loadFromStorage();
 
+// Layer 1: 索引数据（直接导入，打包在前端）
+import { HEGEL_INDEX, MARX_INDEX, LACAN_INDEX, ZIZEK_INDEX } from '../data/codex/philosophy_refined';
+
 /**
  * 获取索引数据（Layer 1）
- * 直接从打包的 JSON 文件读取，无需网络请求
+ * 直接从打包的 TS 文件读取，确保本地万无一失
  */
 export function getPhilosophyIndex(philosopher: string): PhilosophyConcept[] {
-  switch (philosopher.toLowerCase()) {
-    case 'hegel':
-      return hegelIndex as PhilosophyConcept[];
-    // 未来可以添加其他哲学家
-    // case 'lacan':
-    //   return lacanIndex;
-    default:
-      return [];
+  try {
+    switch (philosopher.toLowerCase()) {
+      case 'hegel':
+        return HEGEL_INDEX.flatMap(cat => cat.concepts) as unknown as PhilosophyConcept[];
+      case 'marx':
+        return MARX_INDEX.flatMap(cat => cat.concepts) as unknown as PhilosophyConcept[];
+      case 'lacan':
+        return LACAN_INDEX.flatMap(cat => cat.concepts) as unknown as PhilosophyConcept[];
+      case 'zizek':
+        return ZIZEK_INDEX.flatMap(cat => cat.concepts) as unknown as PhilosophyConcept[];
+      default:
+        return [];
+    }
+  } catch (err) {
+    console.error("Critical index loading error, site might be unstable:", err);
+    return [];
   }
 }
 
@@ -145,38 +158,53 @@ export async function getPhilosophySummaries(
   }
 }
 
+
 /**
  * 获取详细内容（Layer 3）
  * 按需加载，缓存到 localStorage
+ * 升级版：优先从 Firebase Firestore 云端获取重构后的细腻词条。
+ * 策略：缓存优先 -> 云端获取 -> 本地 fetch 兜底。
  */
 export async function getPhilosophyDetail(
   philosopher: string,
   conceptId: string
 ): Promise<PhilosophyDetail | null> {
-  // 1. 检查缓存
+  // 1. 本地硬盘缓存秒开 (最高优先级)
   const cached = cache.getDetail(conceptId);
   if (cached) {
     return cached;
   }
 
-  // 2. 从服务器加载
+  // 2. 动态加载 Firebase (为了防止包未装好导致白屏)
   try {
-    const response = await fetch(
-      `/data/codex/${philosopher}/details/${conceptId}.json`
-    );
-
-    if (!response.ok) {
-      throw new Error(`Failed to load detail: ${response.statusText}`);
+    // 采用动态导入，确保如果 firebase 包还没被识别，也不会拖垮整个入口
+    const { firebaseDatabase } = await import('../services/firebaseDatabase');
+    const entryData = await firebaseDatabase.getEntryContent(conceptId);
+    
+    if (entryData && entryData.detailed) {
+      const detail: PhilosophyDetail = {
+        definition: entryData.detailed.definition,
+        analogy: entryData.detailed.analogy,
+        application: entryData.detailed.application
+      };
+      cache.setDetail(conceptId, detail);
+      return detail;
     }
+  } catch (err) {
+    console.warn("[Firebase] Skipping Cloud Fetch (maybe SDK not ready yet), falling back to local...");
+  }
 
-    const detail: PhilosophyDetail = await response.json();
-
-    // 3. 缓存到内存和 localStorage
-    cache.setDetail(conceptId, detail);
-
-    return detail;
+  // 3. 原有逻辑兜底
+  try {
+    const response = await fetch(`/data/codex/${philosopher}/details/${conceptId}.json`);
+    if (response.ok) {
+      const detail: PhilosophyDetail = await response.json();
+      cache.setDetail(conceptId, detail);
+      return detail;
+    }
+    return null;
   } catch (error) {
-    console.error(`Failed to load detail for ${conceptId}:`, error);
+    console.error(`[Codex] Full fail for ${conceptId}`, error);
     return null;
   }
 }

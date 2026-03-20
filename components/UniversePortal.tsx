@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { User } from '../types';
+import { User, ViewMode } from '../types';
 import { BorromeanRings } from './BorromeanRings';
 import { Globe, Volume2, VolumeX, Cloud, CloudOff, User as UserIcon, Moon, Sun, ChevronRight, Archive, Sparkles, BookText, Brain, Play, Settings } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { ShaderBackground } from './ShaderBackground';
 import { ECGCircuitTimeline } from './ECGCircuitTimeline';
 
-type ViewMode = 'ENGINE' | 'DIVERGENCE' | 'BIBLE' | 'METONYMY' | 'TOPOLOGY' | 'RSI' | 'ARCHIVE' | 'VIDEO' | 'RORSCHACH' | 'ANALYSIS' | 'DICTIONARY';
 
 interface UniversePortalProps {
   lang: 'CN' | 'EN';

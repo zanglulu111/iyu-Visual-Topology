@@ -315,7 +315,7 @@ export const BlueprintEditor: React.FC<BlueprintEditorProps> = ({
             menuItems = [
                 { id: 'NARRATIVE', label: language === 'EN' ? "Core Narrative" : "核心叙事", icon: BookOpen },
                 { id: 'ASSETS', label: language === 'EN' ? "Scene & Assets" : "场景资产", icon: ImageIcon },
-                { id: 'ANALYSIS', label: language === 'EN' ? "Mist Dictionary" : "迷雾辞典", icon: BrainCircuit },
+                { id: 'ANALYSIS', label: language === 'EN' ? "Psychoanalysis" : "精神分析", icon: BrainCircuit },
                 { id: 'METONYMY', label: language === 'EN' ? "Script Metonymy" : "剧本转喻", icon: Wand2 }
             ];
         }

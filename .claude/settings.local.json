@@ -8,7 +8,9 @@
       "Bash(git checkout data/philosophy_refined.ts)",
       "Bash(node scripts/split-philosophy-data.js)",
       "Bash(npm install @tanstack/react-query)",
-      "Bash(npm install)"
+      "Bash(npm install)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(lsof -ti:5173)"
     ]
   }
 }

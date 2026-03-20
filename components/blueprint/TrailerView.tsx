@@ -11,10 +11,11 @@ interface TrailerViewProps {
     onUpdateBlueprint: (blueprint: CreativeBlueprint) => void;
     themeAccent: string;
     themeBorder: string;
+    theme?: string;
 }
 
 export const TrailerView: React.FC<TrailerViewProps> = ({ 
-    blueprint, activeTab, language, onUpdateBlueprint, themeAccent, themeBorder 
+    blueprint, activeTab, language, onUpdateBlueprint, themeAccent, themeBorder, theme 
 }) => {
     const data = blueprint.trailerData || {
         hook: "TRAILER HOOK",

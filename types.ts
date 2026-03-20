@@ -25,6 +25,8 @@ export enum DriverType {
   TRAILER = 'TRAILER'
 }
 
+export type ViewMode = 'ENGINE' | 'DIVERGENCE' | 'BIBLE' | 'METONYMY' | 'TOPOLOGY' | 'RSI' | 'ARCHIVE' | 'VIDEO' | 'RORSCHACH' | 'ANALYSIS' | 'DICTIONARY';
+
 export type SubjectType = 'HUMAN' | 'CREATURE';
 export type AestheticMode = 'REALISM' | 'STYLIZED';
 

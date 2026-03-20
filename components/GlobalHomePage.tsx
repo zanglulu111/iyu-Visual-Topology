@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User } from '../types';
+import { User, ViewMode } from '../types';
 import {
   Globe, User as UserIcon, Moon, Sun, Aperture, BookOpen,
   Archive, Film, Cpu, ChevronRight, ArrowLeft
@@ -8,7 +8,6 @@ import { useTheme } from '../contexts/ThemeContext';
 import { BorromeanRings } from './BorromeanRings';
 
 // ─── 类型声明 ───────────────────────────────────────────────
-type ViewMode = 'ENGINE' | 'DIVERGENCE' | 'BIBLE' | 'METONYMY' | 'TOPOLOGY' | 'RSI' | 'ARCHIVE' | 'VIDEO' | 'RORSCHACH' | 'ANALYSIS';
 
 interface GlobalHomePageProps {
   lang: 'CN' | 'EN';

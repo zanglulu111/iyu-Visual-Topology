@@ -11,10 +11,11 @@ interface ExperimentalViewProps {
     onUpdateBlueprint: (blueprint: CreativeBlueprint) => void;
     themeAccent: string;
     themeBorder: string;
+    theme?: string;
 }
 
 export const ExperimentalView: React.FC<ExperimentalViewProps> = ({ 
-    blueprint, activeTab, language, onUpdateBlueprint, themeAccent, themeBorder 
+    blueprint, activeTab, language, onUpdateBlueprint, themeAccent, themeBorder, theme 
 }) => {
     
     // 强制初始化实验数据结构
