@@ -396,3 +396,31 @@ body::before {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: var(--mist-gold);
 }
+
+/* --- Mission Critical Animations (Mist v4) --- */
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes pageEntrance {
+  0% { opacity: 0; transform: translateY(15px) scale(0.995); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Aligning classes with the component usage */
+.animate-pageEntrance {
+  animation: pageEntrance 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* CIPHER DECODER animations (Option C) */
+@keyframes cipherPulse {
+  0%, 100% { opacity: 0.2; transform: scale(0.98); }
+  50% { opacity: 0.6; transform: scale(1.02); }
+}
+
+.cipher-char-flicker {
+  animation: cipherPulse 1.5s ease-in-out infinite;
+}
+

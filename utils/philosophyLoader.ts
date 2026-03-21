@@ -5,6 +5,7 @@
 
 // Layer 1: 索引数据（直接导入，打包在前端）
 import hegelIndex from '../data/codex/philosophy/hegel/index.json';
+import { firebaseDatabase } from '../services/firebaseDatabase';
 
 // 类型定义
 export interface PhilosophyConcept {
@@ -171,18 +172,21 @@ export async function getPhilosophyDetail(
 ): Promise<PhilosophyDetail | null> {
   // 1. 本地硬盘缓存秒开 (最高优先级)
   const cached = cache.getDetail(conceptId);
-  if (cached) {
+  // 加强防御：如果缓存内容显然不对 (例如只有一个字符 '#')，则强制重新拉取
+  // 注意：本地 JSON 文件没有 id 字段，所以不检查 id 匹配
+  if (cached && cached.definition && cached.definition.length > 20) {
     return cached;
   }
 
-  // 2. 动态加载 Firebase (为了防止包未装好导致白屏)
+  // 2. 从 Firebase Firestore 云端获取重构后的细腻词条
   try {
-    // 采用动态导入，确保如果 firebase 包还没被识别，也不会拖垮整个入口
-    const { firebaseDatabase } = await import('../services/firebaseDatabase');
     const entryData = await firebaseDatabase.getEntryContent(conceptId);
     
-    if (entryData && entryData.detailed) {
-      const detail: PhilosophyDetail = {
+    // 验证 Firebase 数据是否包含实质内容（不只是占位符如 '#'）
+    if (entryData && entryData.detailed && 
+        entryData.detailed.definition && entryData.detailed.definition.length > 20) {
+      const detail: any = {
+        id: conceptId, 
         definition: entryData.detailed.definition,
         analogy: entryData.detailed.analogy,
         application: entryData.detailed.application
@@ -191,7 +195,7 @@ export async function getPhilosophyDetail(
       return detail;
     }
   } catch (err) {
-    console.warn("[Firebase] Skipping Cloud Fetch (maybe SDK not ready yet), falling back to local...");
+    console.warn("[Firebase] Skipping Cloud Fetch...", err);
   }
 
   // 3. 原有逻辑兜底

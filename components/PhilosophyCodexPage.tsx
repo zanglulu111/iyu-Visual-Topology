@@ -62,6 +62,8 @@ interface PhilosophyCodexPageProps {
   initialSection?: CodexSection;
   onDictionaryChange?: (dict: string) => void;
   onSectionChange?: (section: CodexSection) => void;
+  initialDetailTab?: 'DEFINITION' | 'ANALOGY' | 'APPLICATION';
+  onDetailTabChange?: (tab: 'DEFINITION' | 'ANALOGY' | 'APPLICATION') => void;
 }
 
 const AnimatedText = ({ cn, en, lang, className = "", hClass = "h-5" }: { cn: React.ReactNode, en: React.ReactNode, lang: 'CN' | 'EN', className?: string, hClass?: string }) => (
@@ -76,6 +78,8 @@ const AnimatedText = ({ cn, en, lang, className = "", hClass = "h-5" }: { cn: Re
     </div>
   </div>
 );
+
+const CIPHER_CHARS = "ψφΔσηλξθΠΣΩαβγδεζηθικλμνξοπρστυφχψω";
 
 type CodexSection = 'CONCEPTS' | 'PERSONNEL' | 'RESEARCH' | 'COLLECTIVE' | 'TIMELINE';
 
@@ -98,20 +102,20 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
   initialDictionary,
   initialSection,
   onDictionaryChange,
-  onSectionChange
+  onSectionChange,
+  initialDetailTab,
+  onDetailTabChange
 }) => {
   const { theme, toggleTheme } = useTheme();
   const [activeSection, setActiveSection] = useState<CodexSection>(initialSection || 'CONCEPTS');
   const [activeDictionary, setActiveDictionary] = useState<string>(initialDictionary || 'HEGEL');
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [detailActiveTab, setDetailActiveTab] = useState<'DEFINITION' | 'ANALOGY' | 'APPLICATION'>('DEFINITION');
+  const [detailActiveTab, setDetailActiveTab] = useState<'DEFINITION' | 'ANALOGY' | 'APPLICATION'>(initialDetailTab || 'DEFINITION');
 
   React.useEffect(() => {
-    if (selectedItem) {
-      setDetailActiveTab('DEFINITION');
-    }
-  }, [selectedItem]);
+    if (onDetailTabChange) onDetailTabChange(detailActiveTab);
+  }, [detailActiveTab, onDetailTabChange]);
 
   React.useEffect(() => {
     if (onDictionaryChange) onDictionaryChange(activeDictionary);
@@ -490,11 +494,11 @@ const renderMarkdown = (text: string = "") => {
     }
   };
 
-  // 递归解析多级行内语法
-  const processInline = (str: string): React.ReactNode[] => {
+  // Recursive parser for inline syntax with offset-based keys to avoid duplicates
+  const processInline = (str: string, offset: number = 0): React.ReactNode[] => {
     if (!str) return [];
 
-    // 正则匹配顺序：$$块 > $行内 > **粗体 > *斜体 > `代码
+    // Order: $$block > $inline > **bold > *italic > `code
     const regex = /(\$\$.*?\$\$)|(\$(?:\\\$|[^\$])*?\$)|(\*\*.*?\*\*)|(\*[^\*].*?\*)|(`.*?`)/;
     const match = str.match(regex);
 
@@ -505,6 +509,8 @@ const renderMarkdown = (text: string = "") => {
     const before = str.slice(0, start);
     const after = str.slice(start + tag.length);
 
+    const absoluteStart = offset + start;
+
     const renderToken = () => {
       // 1. Block Math: $$...$$
       if (tag.startsWith('$$')) {
@@ -512,6 +518,7 @@ const renderMarkdown = (text: string = "") => {
         if (typeof (window as any).katex !== 'undefined') {
           try {
             const html = (window as any).katex.renderToString(math, { throwOnError: false, displayMode: true });
+            // Using a div for block math
             return <div className="my-6 overflow-x-auto custom-scrollbar" dangerouslySetInnerHTML={{ __html: html }} />;
           } catch (e) { return <code>{tag}</code>; }
         }
@@ -532,12 +539,12 @@ const renderMarkdown = (text: string = "") => {
 
       // 3. Bold: **...**
       if (tag.startsWith('**')) {
-        return <strong className={`font-bold ${theme === 'retro' ? 'text-black' : 'text-[var(--philosopher-accent)]'}`}>{processInline(tag.slice(2, -2))}</strong>;
+        return <strong className={`font-bold ${theme === 'retro' ? 'text-black' : 'text-[var(--philosopher-accent)]'}`}>{processInline(tag.slice(2, -2), absoluteStart + 2)}</strong>;
       }
 
       // 4. Italic: *...*
       if (tag.startsWith('*')) {
-        return <em className="italic opacity-90">{processInline(tag.slice(1, -1))}</em>;
+        return <em className="italic opacity-90">{processInline(tag.slice(1, -1), absoluteStart + 1)}</em>;
       }
 
       // 5. Code: `...`
@@ -548,7 +555,11 @@ const renderMarkdown = (text: string = "") => {
       return tag;
     };
 
-    return [...processInline(before), <React.Fragment key={start}>{renderToken()}</React.Fragment>, ...processInline(after)];
+    return [
+      ...processInline(before, offset), 
+      <React.Fragment key={absoluteStart}>{renderToken()}</React.Fragment>, 
+      ...processInline(after, absoluteStart + tag.length)
+    ];
   };
 
   lines.forEach((line, index) => {
@@ -560,25 +571,36 @@ const renderMarkdown = (text: string = "") => {
     }
     if (isCodeBlock) { codeBlock.push(line); return; }
 
+    // Block Math: $$...$$
+    if (line.match(/^\$\$(.*)\$\$$/)) {
+      flushList();
+      const formula = line.match(/^\$\$(.*)\$\$$/)![1];
+      if (typeof (window as any).katex !== 'undefined') {
+        const html = (window as any).katex.renderToString(formula, { displayMode: true, throwOnError: false });
+        elements.push(<div key={index} className="my-8 py-4 overflow-x-auto text-center" dangerouslySetInnerHTML={{ __html: html }} />);
+      }
+      return;
+    }
+
     // Content Headers
     if (line.startsWith('### ')) {
       flushList();
-      elements.push(<h3 key={index} className={`text-xl font-serif mt-10 mb-6 font-bold tracking-wider ${headerColor}`}>{processInline(line.slice(4))}</h3>);
+      elements.push(<h3 key={index} className={`text-xl font-serif mt-10 mb-6 font-bold tracking-wider ${headerColor}`}>{processInline(line.slice(4), index * 1000)}</h3>);
     }
     else if (line.startsWith('#### ')) {
       flushList();
-      elements.push(<h4 key={index} className={`text-lg font-serif mt-8 mb-4 font-bold tracking-wider ${isRetro ? 'text-[#8B261D]/80' : 'text-white/80'}`}>{processInline(line.slice(5))}</h4>);
+      elements.push(<h4 key={index} className={`text-lg font-serif mt-8 mb-4 font-bold tracking-wider ${isRetro ? 'text-[#8B261D]/80' : 'text-white/80'}`}>{processInline(line.slice(5), index * 1000)}</h4>);
     }
     // List parsing
     else if (/^\d+\.\s/.test(line)) {
       if (listType !== 'ol') flushList();
       listType = 'ol';
-      listItems.push(<li key={index} className="leading-relaxed">{processInline(line.replace(/^\d+\.\s/, ''))}</li>);
+      listItems.push(<li key={index} className="leading-relaxed">{processInline(line.replace(/^\d+\.\s/, ''), index * 1000)}</li>);
     }
     else if (/^[\*\-]\s/.test(line)) {
       if (listType !== 'ul') flushList();
       listType = 'ul';
-      listItems.push(<li key={index} className="leading-relaxed">{processInline(line.slice(2))}</li>);
+      listItems.push(<li key={index} className="leading-relaxed">{processInline(line.slice(2), index * 1000)}</li>);
     }
     else if (line.trim() === '') {
       flushList();
@@ -589,9 +611,14 @@ const renderMarkdown = (text: string = "") => {
       elements.push(<hr key={index} className={`my-12 border-none h-px ${isRetro ? 'bg-black/10' : 'bg-white/10'}`} />);
     }
     // Standard Paragraph
+    // Standard Paragraph
     else {
-      if (listType) { listType = null; flushList(); }
-      elements.push(<p key={index} className="leading-[1.8] mb-6 tracking-wide font-normal">{processInline(line)}</p>);
+      flushList();
+      elements.push(
+        <div key={index} className="leading-[1.8] mb-6 tracking-wide font-normal">
+          {processInline(line, index * 1000)}
+        </div>
+      );
     }
   });
 
@@ -599,6 +626,101 @@ const renderMarkdown = (text: string = "") => {
   if (isCodeBlock) flushCode();
   return elements;
 };
+
+  // --- Detail Section Logic ---
+  // Renders the actual content tabs (Definition, Analogy, Application)
+  // Incorporates the "Cipher Decoder" skeleton screen for the loading state.
+  const renderDetailContent = (content: string | undefined, type: 'def' | 'analogy' | 'app') => {
+    const isSkeleton = content === "LOADING_STATE";
+
+    if (isSkeleton) {
+      const loaderColor = theme === 'retro' ? '#8B261D' : 'var(--philosopher-accent)';
+      
+      return (
+        <div key="cipher-loader" className="animate-pulse space-y-8 opacity-90 px-1 py-4 font-mono select-none pointer-events-none">
+          {/* Option C: Cipher Decoder / Symbolic Bitstream */}
+          <div className="space-y-6">
+            {/* Refined Data Stream Header instead of gray bar */}
+            <div className="flex items-center gap-4 mb-10 opacity-60">
+              <div 
+                className={`text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-0.5 border rounded-sm`} 
+                style={{ 
+                  color: loaderColor,
+                  borderColor: theme === 'retro' ? 'rgba(139, 38, 29, 0.4)' : 'rgba(255, 255, 255, 0.2)'
+                }}
+              >
+                {lang === 'CN' ? '概念解构' : 'SEGMENT_DECO'}
+              </div>
+              <div className="flex-1 h-[1px] relative overflow-hidden">
+                <div 
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-[var(--philosopher-accent)]/40 to-transparent translate-x-[-100%] animate-[shimmer_2s_infinite]"
+                  style={{ 
+                    background: theme === 'retro' 
+                      ? 'linear-gradient(to right, transparent, rgba(139, 38, 29, 0.4), transparent)' 
+                      : undefined 
+                  }}
+                ></div>
+                <div 
+                  className="w-full h-full opacity-20"
+                  style={{ backgroundColor: loaderColor }}
+                ></div>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              {[0, 1, 2, 3].map(row => (
+                <div 
+                  key={row} 
+                  className="flex flex-wrap gap-x-2.5 gap-y-1.5 overflow-hidden h-10 border-l-2 pl-4 py-1"
+                  style={{ borderColor: theme === 'retro' ? 'rgba(139, 38, 29, 0.3)' : undefined }}
+                >
+                  {Array.from({ length: row === 3 ? 15 : 30 }).map((_, i) => (
+                    <span 
+                      key={i} 
+                      className="text-[12px] font-bold transition-all duration-300 cipher-char-flicker"
+                      style={{ 
+                        color: loaderColor,
+                        opacity: 0.35 + ((i + row) % 5) * 0.15,
+                        animationDelay: `${(i + row) * 50}ms`
+                      }}
+                    >
+                      {CIPHER_CHARS[(i + row * 7) % CIPHER_CHARS.length]}
+                    </span>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div 
+            className="pt-12 flex items-center gap-3 text-[10px] font-mono tracking-[0.3em] uppercase font-bold"
+            style={{ color: loaderColor }}
+          >
+            <div 
+              className="w-4 h-[1px] animate-ping"
+              style={{ backgroundColor: loaderColor }}
+            ></div>
+            {lang === 'CN' ? '能指序列解构中...' : 'DECODING_CONCEPT_SIGNIFIERS...'}
+          </div>
+        </div>
+      );
+    }
+
+    if (!content) {
+      return (
+        <div className="py-20 text-center opacity-40 font-mono text-[10px] uppercase tracking-[0.5em] animate-pageEntrance">
+          {lang === 'CN' ? '*( 档案库空虚 )*' : '*( REPOSITORY_EMPTY )*'}
+        </div>
+      );
+    }
+
+    return (
+      <div className="animate-pageEntrance">
+        {renderMarkdown(content)}
+      </div>
+    );
+  };
+
 
 const renderDetailView = () => {
   if (!selectedItem) return null;
@@ -609,21 +731,25 @@ const renderDetailView = () => {
   const isPersonnel = selectedItem.type === 'PERSONNEL';
   const isResearch = selectedItem.type === 'RESEARCH';
 
-  // Get the detailed content (Definition, Analogy, Application)
-  // Preference: Static detailed > Fetched detailed > Static shortDef
-  const detailed = conceptData.detailed || (selectedDetail as any) || {};
+  // 确定数据加载状态：检查 selectedDetail 是否包含有效内容（definition 字段且长度 > 20）
+  // 本地 JSON 文件没有 id 字段，所以不能用 id 匹配来判断数据是否加载完成
+  // 同时过滤掉 Firebase 中的占位符数据（如仅包含 '#' 的词条）
+  const actualDetail = (selectedDetail && (selectedDetail as any).definition && (selectedDetail as any).definition.length > 20) ? (selectedDetail as any) : null;
+  const isFetchingActualContent = isLoadingDetail && !conceptData.detailed && !actualDetail;
 
   const displayData = {
     ...conceptData,
     detailed: {
-      definition: detailed.definition || conceptData.shortDef || "DATA_PENDING",
-      analogy: detailed.analogy || "",
-      application: detailed.application || ""
+      definition: isFetchingActualContent ? "LOADING_STATE" : (actualDetail?.definition || conceptData.detailed?.definition || conceptData.shortDef || ""),
+      analogy: isFetchingActualContent ? "LOADING_STATE" : (actualDetail?.analogy || conceptData.detailed?.analogy || ""),
+      application: isFetchingActualContent ? "LOADING_STATE" : (actualDetail?.application || conceptData.detailed?.application || "")
     }
   };
 
-  // Alias for the rendering section below
   const data = displayData;
+
+  // ... Consolidated with renderDetailContent above ...
+
 
   // Theme values for the detail view
   const dt = {
@@ -842,37 +968,62 @@ const renderDetailView = () => {
                           <button
                             onClick={handlePrevious}
                             className={`p-2 rounded-lg border flex items-center justify-center transition-all ${theme === 'retro' ? 'bg-white/40 border-black/10 hover:bg-white text-black/60' : 'bg-transparent border-zinc-700/80 hover:bg-white/[0.05] text-zinc-500'}`}
-                            title="Previous Concept"
+                            title={lang === 'CN' ? '上一个' : 'Previous Concept'}
                           >
                             <ChevronLeft size={16} />
                           </button>
+                          
                           <button
                             onClick={handleRandom}
                             className={`p-2 rounded-lg border flex items-center justify-center transition-all ${theme === 'retro' ? 'bg-white/40 border-black/10 hover:bg-white text-black/60' : 'bg-transparent border-zinc-700/80 hover:bg-white/[0.05] text-zinc-500'}`}
-                            title="Random Concept"
+                            title={lang === 'CN' ? '随机挑选' : 'Random Concept'}
                           >
                             <Dices size={16} />
                           </button>
+
                           <button
                             onClick={handleNext}
                             className={`p-2 rounded-lg border flex items-center justify-center transition-all ${theme === 'retro' ? 'bg-white/40 border-black/10 hover:bg-white text-black/60' : 'bg-transparent border-zinc-700/80 hover:bg-white/[0.05] text-zinc-500'}`}
-                            title="Next Concept"
+                            title={lang === 'CN' ? '下一个' : 'Next Concept'}
                           >
                             <ChevronRight size={16} />
                           </button>
                         </div>
                       </div>
+
                     </div>
                   </div>
                 </div>
 
                 {/* RIGHT COLUMN: Content Area */}
                 <div className={`flex-1 flex flex-col rounded-2xl ${dt.cardBg} overflow-hidden backdrop-blur-md transition-all duration-500`}>
-                  <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
-                    <div className={`text-sm md:text-base ${dt.textColor} font-serif leading-relaxed tracking-wide animate-in fade-in duration-500`}>
-                      {detailActiveTab === 'DEFINITION' && renderMarkdown(data.detailed?.definition || data.shortDef)}
-                      {detailActiveTab === 'ANALOGY' && renderMarkdown(data.detailed?.analogy || "*(空)*")}
-                      {detailActiveTab === 'APPLICATION' && renderMarkdown(data.detailed?.application || "*(空)*")}
+                  {/* Definition Tab Container */}
+                  <div 
+                    key="tab-container-definition"
+                    className={`flex-1 overflow-y-auto p-8 custom-scrollbar ${detailActiveTab === 'DEFINITION' ? 'block animate-in fade-in duration-300' : 'hidden'}`}
+                  >
+                    <div className={`text-sm md:text-base ${dt.textColor} font-serif leading-relaxed tracking-wide`}>
+                      {renderDetailContent(data.detailed?.definition || "", 'def')}
+                    </div>
+                  </div>
+
+                  {/* Analogy Tab Container */}
+                  <div 
+                    key="tab-container-analogy"
+                    className={`flex-1 overflow-y-auto p-8 custom-scrollbar ${detailActiveTab === 'ANALOGY' ? 'block animate-in fade-in duration-300' : 'hidden'}`}
+                  >
+                    <div className={`text-sm md:text-base ${dt.textColor} font-serif leading-relaxed tracking-wide`}>
+                      {renderDetailContent(data.detailed?.analogy || "", 'analogy')}
+                    </div>
+                  </div>
+
+                  {/* Application Tab Container */}
+                  <div 
+                    key="tab-container-application"
+                    className={`flex-1 overflow-y-auto p-8 custom-scrollbar ${detailActiveTab === 'APPLICATION' ? 'block animate-in fade-in duration-300' : 'hidden'}`}
+                  >
+                    <div className={`text-sm md:text-base ${dt.textColor} font-serif leading-relaxed tracking-wide`}>
+                      {renderDetailContent(data.detailed?.application || "", 'app')}
                     </div>
                   </div>
                 </div>

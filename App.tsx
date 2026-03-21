@@ -149,6 +149,7 @@ const App: React.FC = () => {
     const [visionStartTime, setVisionStartTime] = useState<number | null>(null);
     const [codexDictionary, setCodexDictionary] = useState<string>('LACAN');
     const [codexSection, setCodexSection] = useState<string>('CONCEPTS');
+    const [codexDetailTab, setCodexDetailTab] = useState<'DEFINITION' | 'ANALOGY' | 'APPLICATION'>('DEFINITION');
 
     const [generatedTreatments, setGeneratedTreatments] = useState<CreativeTreatment[]>([]);
 
@@ -1248,8 +1249,10 @@ const App: React.FC = () => {
                                 renderInPlace={false}
                                 initialDictionary={codexDictionary}
                                 initialSection={codexSection as any}
+                                initialDetailTab={codexDetailTab}
                                 onDictionaryChange={setCodexDictionary}
                                 onSectionChange={setCodexSection}
+                                onDetailTabChange={setCodexDetailTab}
                             />
                         </div>
             ) : viewMode === 'TOPOLOGY' ? (
