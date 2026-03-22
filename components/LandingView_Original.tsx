@@ -192,10 +192,10 @@ export const LandingView: React.FC<LandingViewProps> = ({
                         <div className="relative h-12 md:h-8 overflow-hidden mt-2">
                             <div className={`transition-all duration-700 cubic-bezier(0.4, 0, 0.2, 1) ${lang === 'EN' ? '-translate-y-1/2' : 'translate-y-0'}`}>
                                 <div className="flex flex-col">
-                                    <p className="h-12 md:h-8 flex items-center justify-center text-zinc-400 text-xs md:text-sm font-light tracking-widest uppercase max-w-2xl mx-auto leading-relaxed shrink-0">
+                                    <p className="h-16 md:h-12 flex items-center justify-center text-zinc-400 text-xs md:text-sm font-light tracking-widest uppercase max-w-2xl mx-auto leading-loose shrink-0">
                                         爱欲视觉拓扑学：在实在界的荒漠上，确立一种比现实更坚固的虚构。
                                     </p>
-                                    <p className="h-12 md:h-8 flex items-center justify-center text-zinc-400 text-xs md:text-sm font-light tracking-widest uppercase max-w-2xl mx-auto leading-relaxed shrink-0">
+                                    <p className="h-16 md:h-12 flex items-center justify-center text-zinc-400 text-xs md:text-sm font-light tracking-widest uppercase max-w-2xl mx-auto leading-loose shrink-0">
                                         Erotic Visual Topology: Upon the desert of the Real, establishing a fiction more solid than reality.
                                     </p>
                                 </div>

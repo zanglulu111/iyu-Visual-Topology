@@ -15,10 +15,8 @@ interface APISettingsModalProps {
 const LLM_MODELS = [
     { id: 'gemini-3.1-pro-preview', name: 'Gemini 3.1 Pro Preview' },
     { id: 'gemini-3.1-flash-lite-preview', name: 'Gemini 3.1 Flash Lite Preview' },
-    { id: 'gemini-3-pro-preview', name: 'Gemini 3 Pro Preview' },
-    { id: 'gemini-3-flash-preview', name: 'Gemini 3 Flash Preview' },
-    { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash' },
-    { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro' },
+    { id: 'claude-opus-4-6', name: 'Claude 4.6 Opus' },
+    { id: 'claude-sonnet-4-6', name: 'Claude 4.6 Sonnet' },
 ];
 
 const IMAGE_MODELS = [
@@ -161,15 +159,27 @@ export const APISettingsModal: React.FC<APISettingsModalProps> = ({ onClose, lan
                                 </div>
                             </div>
 
-                            <div className="space-y-2">
-                                <label className={`text-[10px] ${theme === 'retro' ? 'text-zinc-600' : 'text-zinc-500'} font-bold uppercase tracking-widest block`}>API KEY</label>
-                                <input
-                                    type="password"
-                                    value={localSettings.llm.apiKey}
-                                    onChange={(e) => handleChange('llm', 'apiKey', e.target.value)}
-                                    className={`w-full ${theme === 'retro' ? 'bg-white border-black/10 text-black placeholder:text-zinc-400' : 'bg-[#050505] border-zinc-700 text-white placeholder:text-zinc-700'} rounded-lg px-4 py-3 text-sm focus:border-[#D4AF37]/50 focus:outline-none transition-all font-mono`}
-                                    placeholder="sk-..."
-                                />
+                            <div className="grid grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className={`text-[10px] ${theme === 'retro' ? 'text-zinc-600' : 'text-zinc-500'} font-bold uppercase tracking-widest block`}>Gemini API KEY</label>
+                                    <input
+                                        type="password"
+                                        value={localSettings.llm.apiKey}
+                                        onChange={(e) => handleChange('llm', 'apiKey', e.target.value)}
+                                        className={`w-full ${theme === 'retro' ? 'bg-white border-black/10 text-black placeholder:text-zinc-400' : 'bg-[#050505] border-zinc-700 text-white placeholder:text-zinc-700'} rounded-lg px-4 py-3 text-sm focus:border-[#D4AF37]/50 focus:outline-none transition-all font-mono`}
+                                        placeholder="Gemini Key"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className={`text-[10px] ${theme === 'retro' ? 'text-zinc-600' : 'text-zinc-500'} font-bold uppercase tracking-widest block`}>Claude API KEY</label>
+                                    <input
+                                        type="password"
+                                        value={localSettings.llm.claudeApiKey || ''}
+                                        onChange={(e) => handleChange('llm', 'claudeApiKey', e.target.value)}
+                                        className={`w-full ${theme === 'retro' ? 'bg-white border-black/10 text-black placeholder:text-zinc-400' : 'bg-[#050505] border-zinc-700 text-white placeholder:text-zinc-700'} rounded-lg px-4 py-3 text-sm focus:border-[#D4AF37]/50 focus:outline-none transition-all font-mono`}
+                                        placeholder="Claude Key"
+                                    />
+                                </div>
                             </div>
 
                             <div className="space-y-2">

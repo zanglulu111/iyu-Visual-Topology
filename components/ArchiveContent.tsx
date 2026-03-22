@@ -248,7 +248,6 @@ export const ArchiveContent: React.FC<ArchiveContentProps> = ({ lang }) => {
                     onClose={() => setSelectedCaseId(null)}
                     caseData={selectedCaseData}
                     lang={lang}
-                    isDark={isDark}
                     renderInPlace={true}
                 />
             )}

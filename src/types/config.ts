@@ -1,8 +1,31 @@
 // types/config.ts
 /**
- * 简化的配置类型
- * 只包含两部分：API KEY + 6个引擎的模型配置
+ * API 配置系统 V2
+ * 
+ * 核心设计：
+ * - 每个 Provider（Gemini / Claude）独立配置：API Key + 接入模式 + Base URL
+ * - Gemini 支持两种模式：官方直连（Google SDK）和第三方代理（OpenAI-compatible）
+ * - Claude 只支持第三方代理模式（浏览器端无法直连 Anthropic API，CORS 限制）
+ * - 每个引擎独立选择使用哪个模型，系统自动根据模型名路由到对应 Provider
  */
+
+// ============================================================
+// Provider 配置
+// ============================================================
+
+export type ProviderMode = 'official' | 'proxy';
+export type ApiFormat = 'anthropic' | 'openai';  // anthropic = /v1/messages, openai = /chat/completions
+
+export interface ProviderConfig {
+  apiKey: string;
+  mode: ProviderMode;    // 'official' = 官方SDK直连, 'proxy' = 第三方代理
+  baseUrl: string;       // 代理模式下的基地址 (e.g. https://xxx.com/claude)
+  apiFormat?: ApiFormat; // API 协议格式：'anthropic'(默认) 或 'openai'
+}
+
+// ============================================================
+// 引擎模型映射
+// ============================================================
 
 export interface EngineModelConfig {
   // 1. 核心叙事引擎
@@ -24,44 +47,77 @@ export interface EngineModelConfig {
   imageGen: string;
 }
 
+// ============================================================
+// 完整配置结构
+// ============================================================
+
 export interface APIConfig {
-  // API KEY
-  apiKey: string;
+  // 两个 Provider 独立配置
+  gemini: ProviderConfig;
+  claude: ProviderConfig;
 
   // 6个引擎的模型配置
   engines: EngineModelConfig;
 }
 
+// ============================================================
 // 默认配置
+// ============================================================
+
 export const DEFAULT_CONFIG: APIConfig = {
-  apiKey: '',
+  gemini: {
+    apiKey: '',
+    mode: 'official',  // 默认使用官方直连
+    baseUrl: '',
+  },
+  claude: {
+    apiKey: '',
+    mode: 'proxy',         // Claude 必须走代理
+    baseUrl: '',
+    apiFormat: 'anthropic', // 默认使用 Anthropic 原生格式
+  },
   engines: {
     coreEngine: 'gemini-3.1-pro-preview',
     metonymyEngine: 'gemini-3.1-pro-preview',
-    psychoAnalysis: 'gemini-3.1-pro-preview',
+    psychoAnalysis: 'gemini-3.1-flash-lite-preview',
     visualBible: 'gemini-3.1-pro-preview',
     visualSeed: 'gemini-3-pro-image-preview',
     imageGen: 'gemini-3-pro-image-preview',
   }
 };
 
-// 可用的模型列表
+// ============================================================
+// 可用模型列表
+// ============================================================
+
 export const AVAILABLE_MODELS = {
+  // 前四个文本引擎可用的模型（支持 Gemini 和 Claude）
+  core: [
+    'gemini-3.1-pro-preview',
+    'gemini-3.1-flash-lite-preview',
+    'claude-opus-4-6',
+    'claude-sonnet-4-6',
+  ],
+  // 所有文本模型
   text: [
     'gemini-3.1-pro-preview',
-    'gemini-3-pro-preview',
     'gemini-3.1-flash-lite-preview',
-    'gemini-3-flash-preview',
+    'claude-opus-4-6',
+    'claude-sonnet-4-6',
     'gemini-3-pro-image-preview',
     'gemini-3-flash-image-preview',
   ],
+  // 图像生成专用模型（仅 Gemini）
   image: [
     'gemini-3-pro-image-preview',
     'gemini-3-flash-image-preview',
   ]
 };
 
+// ============================================================
 // 引擎配置元信息
+// ============================================================
+
 export const ENGINE_CONFIGS = [
   {
     id: 'coreEngine',
@@ -100,3 +156,15 @@ export const ENGINE_CONFIGS = [
     type: 'image',
   },
 ];
+
+// ============================================================
+// 工具函数
+// ============================================================
+
+/**
+ * 根据模型名判断属于哪个 Provider
+ */
+export function getProviderForModel(modelId: string): 'gemini' | 'claude' {
+  if (modelId.includes('claude')) return 'claude';
+  return 'gemini';
+}

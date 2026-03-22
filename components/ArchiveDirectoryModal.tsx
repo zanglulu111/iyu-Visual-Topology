@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { X, Folder, Eye, ShieldAlert, Moon, Sun, Languages, ChevronLeft, ChevronRight } from 'lucide-react';
-import { ARCHIVE_CASES, ArchiveCategory, CaseStudy } from './archiveCasesData';
+import React, { useState, useEffect, useCallback } from 'react';
+import { ARCHIVE_CASES } from './archiveCasesData';
 import { ArchiveDetailModal } from './ArchiveDetailModal';
 import { useTheme } from '../contexts/ThemeContext';
-import { getR2PublicUrl } from '../services/r2Storage';
+import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, Globe, Instagram, Twitter, Mail } from 'lucide-react';
 
 interface ArchiveDirectoryModalProps {
     isOpen: boolean;
@@ -12,313 +11,485 @@ interface ArchiveDirectoryModalProps {
     isFullScreen?: boolean;
 }
 
-const ITEMS_PER_PAGE = 15;
-
-export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({ isOpen, onClose, lang, isFullScreen = false }) => {
-    const { theme, toggleTheme } = useTheme();
-    const [selectedCategory, setSelectedCategory] = useState<ArchiveCategory>('ALL');
-    const [localLang, setLocalLang] = useState<'CN' | 'EN'>(lang);
-    const [currentPage, setCurrentPage] = useState(1);
+export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({ 
+    isOpen, 
+    onClose, 
+    lang
+}) => {
+    const { theme } = useTheme();
     const [selectedCaseId, setSelectedCaseId] = useState<string | null>(null);
+    const [hasEntered, setHasEntered] = useState(false);
+    const scrollContainerRef = React.useRef<HTMLDivElement>(null);
+    const contentRef = React.useRef<HTMLDivElement>(null);
+    const lastScrollPos = React.useRef(0);
+    const activityRef = React.useRef(0);
+    const [openingId, setOpeningId] = useState<string | null>(null);
+    const [isTransitioning, setIsTransitioning] = useState(false);
+    const targetScrollRef = React.useRef(0);
+    const cardsRef = React.useRef<HTMLElement[]>([]);
+    const viewportWidthRef = React.useRef(0);
+    const lastInternalScrollPos = React.useRef(0);
+
+    const items = ARCHIVE_CASES;
+    const cardWidth = 110;
+    const winWidth = typeof window !== 'undefined' ? window.innerWidth : 1200;
+    const centerPadding = winWidth / 2 - cardWidth / 2;
+
+    // Initial entrance effect - Staggered
+    useEffect(() => {
+        if (isOpen) {
+            const timer = setTimeout(() => {
+                setHasEntered(true);
+            }, 100);
+            return () => clearTimeout(timer);
+        } else {
+            setHasEntered(false);
+        }
+    }, [isOpen]);
+
+    // Dismiss expanded card on scroll/swipe
+    const handleScrollDismiss = useCallback((e: WheelEvent) => {
+        if (openingId && (Math.abs(e.deltaX) > 10 || Math.abs(e.deltaY) > 10)) {
+            setOpeningId(null);
+            setIsTransitioning(false);
+        }
+    }, [openingId]);
 
     useEffect(() => {
-        setLocalLang(lang);
-    }, [lang]);
+        const container = scrollContainerRef.current;
+        if (!container) return;
 
-    // Reset pagination when category changes
+        const updateViewport = () => {
+            viewportWidthRef.current = container.offsetWidth;
+        };
+        updateViewport();
+        window.addEventListener('resize', updateViewport);
+
+        // Remove scroll event listener as we'll handle sync in the animation loop
+        // to avoid conflicts with our custom momentum logic.
+        
+        const handleWheel = (e: WheelEvent) => {
+            if (openingId) {
+                if (Math.abs(e.deltaX) > 10 || Math.abs(e.deltaY) > 10) {
+                    setOpeningId(null);
+                    setIsTransitioning(false);
+                }
+                return;
+            }
+
+            const isDiscrete = Math.abs(e.deltaY) >= 100 || e.deltaMode !== 0;
+            
+            if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+                if (isDiscrete) {
+                    targetScrollRef.current += e.deltaY;
+                    e.preventDefault();
+                } else {
+                    container.scrollLeft += e.deltaY;
+                    targetScrollRef.current = container.scrollLeft;
+                    e.preventDefault();
+                }
+            }
+        };
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (openingId) {
+                if (e.key === 'Escape') {
+                    setOpeningId(null);
+                    setIsTransitioning(false);
+                }
+                return;
+            }
+
+            if (e.key === 'ArrowRight') {
+                targetScrollRef.current += 400;
+            } else if (e.key === 'ArrowLeft') {
+                targetScrollRef.current -= 400;
+            }
+        };
+
+        container.addEventListener('wheel', handleWheel, { passive: false });
+        window.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            window.removeEventListener('resize', updateViewport);
+            container.removeEventListener('wheel', handleWheel);
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [openingId, handleScrollDismiss]);
+
+    // Wave Effect Logic
     useEffect(() => {
-        setCurrentPage(1);
-    }, [selectedCategory]);
+        if (!isOpen || !scrollContainerRef.current) return;
+
+        let rafId: number;
+        const container = scrollContainerRef.current;
+        
+        const updateWave = () => {
+            if (!container) return;
+
+            // Sync target back to reel world if user uses scrollbar directly (detected via jump)
+            if (Math.abs(container.scrollLeft - lastInternalScrollPos.current) > 1 && !openingId) {
+                targetScrollRef.current = container.scrollLeft;
+            }
+
+            // 1. Smooth Scroll Interpolation (Momentum)
+            const maxScroll = container.scrollWidth - container.offsetWidth;
+            targetScrollRef.current = Math.max(0, Math.min(maxScroll, targetScrollRef.current));
+            
+            const scrollDiff = targetScrollRef.current - container.scrollLeft;
+            if (Math.abs(scrollDiff) > 0.1 && !openingId) {
+                container.scrollLeft += scrollDiff * 0.12; 
+                lastInternalScrollPos.current = container.scrollLeft;
+            } else if (Math.abs(scrollDiff) <= 0.1 && !openingId) {
+                container.scrollLeft = targetScrollRef.current;
+                lastInternalScrollPos.current = container.scrollLeft;
+            }
+            
+            if (openingId) {
+                activityRef.current *= 0.85; 
+            } else {
+                const currentScroll = container.scrollLeft;
+                const diff = Math.abs(currentScroll - lastScrollPos.current);
+                lastScrollPos.current = currentScroll;
+                
+                // Sensitivity: we want it to react quickly but also have a nice decay
+                const targetActivity = Math.min(1.5, diff * 0.15); 
+                activityRef.current = activityRef.current * 0.9 + targetActivity * 0.1;
+            }
+
+            if (activityRef.current < 0.005) activityRef.current = 0;
+
+            const viewportCenter = viewportWidthRef.current / 2;
+            const scrollLeft = container.scrollLeft;
+            
+            // Re-cache cards if needed (rare)
+            if (cardsRef.current.length === 0) {
+                cardsRef.current = Array.from(container.querySelectorAll('.archive-card-wrapper'));
+            }
+            
+            cardsRef.current.forEach((card: any, i: number) => {
+                const cardId = card.getAttribute('data-id');
+                if (cardId === openingId) return;
+
+                // 2. Performant Position Calculation (No getBoundingClientRect)
+                // centerPadding + i * (cardWidth + gap)
+                const cardWidth = 110;
+                const gap = 24; 
+                const cardPosInContent = centerPadding + i * (cardWidth + gap) + cardWidth / 2;
+                const cardCenter = cardPosInContent - scrollLeft;
+                
+                const distFromCenter = Math.abs(cardCenter - viewportCenter);
+                
+                const horizon = 700; 
+                const proximity = Math.pow(Math.max(0, 1 - distFromCenter / horizon), 1.3); 
+                const intensity = proximity * activityRef.current;
+                
+                const zTranslate = intensity * 480; 
+                const scale = 1 + (intensity * 0.18); 
+                const rotateY = (cardCenter - viewportCenter) * -0.15 * intensity; 
+                
+                const inner = card.querySelector('.archive-card-inner');
+                if (inner) {
+                    inner.style.transition = activityRef.current > 0.01 ? 'none' : 'all 0.8s cubic-bezier(0.16, 1, 0.3, 1)';
+                    inner.style.transform = `translate3d(0, 0, ${zTranslate}px) scale(${scale}) rotateY(${rotateY}deg)`;
+                    
+                    const img = inner.querySelector('img');
+                    if (img) {
+                        // User Request: Colorize ONLY during scrolling. Fade when stopped.
+                        // Center 7 cards should be colored, middle one saturated.
+                        // Proximity is roughly > 0.4 for ~7 cards in a standard viewport.
+                        const activeFactor = Math.min(1.0, activityRef.current * 4.0); 
+                        const colorIntensity = Math.pow(proximity, 1.5) * activeFactor;
+                        
+                        const grayscale = Math.max(0, 100 - (colorIntensity * 105));
+                        const brightness = 35 + (colorIntensity * 65);
+                        
+                        img.style.filter = `grayscale(${grayscale}%) brightness(${brightness}%) contrast(105%)`;
+                    }
+                }
+            });
+
+            rafId = requestAnimationFrame(updateWave);
+        };
+
+        rafId = requestAnimationFrame(updateWave);
+        return () => cancelAnimationFrame(rafId);
+    }, [isOpen, openingId]);
+
+    const handleCardClick = (e: React.MouseEvent, id: string) => {
+        e.stopPropagation();
+        if (openingId) return;
+        setOpeningId(id);
+        setIsTransitioning(true);
+    };
+
+    const handleExplore = (id: string) => {
+        setIsTransitioning(true);
+        setTimeout(() => {
+            setSelectedCaseId(id);
+            setIsTransitioning(false);
+            setOpeningId(null);
+        }, 800);
+    };
 
     if (!isOpen) return null;
 
-    // Theme Configs
-    const isDark = theme === 'dark';
-    
-    // Theme variables for consistency mapping
-    const t = {
-        bgContainer: theme === 'retro' ? 'bg-[var(--bg-main)]' : (isDark ? 'bg-[#0A0A0B]' : 'bg-white'),
-        borderContainer: theme === 'retro' ? 'border-[var(--border-main)] border-2 shadow-[0_0_30px_rgba(139,38,29,0.1)]' : (isDark ? 'border-zinc-800 border-4' : 'border-[#3A352F] border-4'),
-        bgHeader: theme === 'retro' ? 'bg-[var(--bg-main)]/95' : (isDark ? 'bg-[#0A0A0B]/90' : 'bg-white/95'),
-        borderHeader: theme === 'retro' ? 'border-[var(--border-main)] border-b flex-shrink-0' : (isDark ? 'border-zinc-900 border-b-2 border-dashed' : 'border-[#8B261D]/10 border-b-2 border-dashed'),
-        textTitle: theme === 'retro' ? 'text-[var(--text-accent)]' : (isDark ? 'text-zinc-50' : 'text-[#8B261D]'),
-        textAccent: theme === 'retro' ? 'text-[var(--text-accent)]' : (isDark ? 'text-zinc-400' : 'text-[#8B261D]'),
-        textTitleAccent: theme === 'retro' ? 'text-[var(--text-accent)]' : (isDark ? 'text-amber-500' : 'text-[#8B261D]'),
-        textNormal: theme === 'retro' ? 'text-black/95' : (isDark ? 'text-zinc-200' : 'text-[#2B2824]'),
-        textMuted: theme === 'retro' ? 'text-black/60' : (isDark ? 'text-zinc-400' : 'text-[#6A665A]'),
-        textCode: theme === 'retro' ? 'text-[var(--text-accent)]' : (isDark ? 'text-zinc-300' : 'text-[#3A352F]'),
-        btnBg: theme === 'retro' ? 'bg-[var(--bg-main)]' : (isDark ? 'bg-zinc-900' : 'bg-[#F9F7F1]'),
-        btnHover: theme === 'retro' ? 'hover:bg-[var(--text-accent)] hover:text-[var(--bg-main)]' : (isDark ? 'hover:bg-zinc-800' : 'hover:bg-white'),
-        btnBorder: theme === 'retro' ? 'border-[var(--border-main)]' : (isDark ? 'border-zinc-700' : 'border-[#8B261D]/20'),
-        btnTextHover: theme === 'retro' ? 'text-[var(--text-accent)] hover:text-[var(--bg-main)]' : (isDark ? 'hover:text-amber-500 text-zinc-400' : 'hover:text-[#8B261D] text-[#3A352F]'),
-        btnDisabled: isDark ? 'opacity-30 cursor-not-allowed' : 'opacity-30 cursor-not-allowed grayscale',
-        cardBg: theme === 'retro' ? 'bg-[#F3EFE7]' : (isDark ? 'bg-[#111113]' : 'bg-[#EBE7DF]/40'),
-        cardBorder: theme === 'retro' ? 'border-[#3A352F]/20 border-2 shadow-[0_4px_12px_rgba(0,0,0,0.05)]' : (isDark ? 'border-zinc-800 border-2' : 'border-[#8B261D]/5 border-2'),
-        cardHoverBorder: theme === 'retro' ? 'hover:border-[#8B261D]/40' : (isDark ? 'hover:border-zinc-500' : 'hover:border-[#8B261D]/40'),
-        cardShadow: theme === 'retro' ? 'hover:shadow-[0_20px_50px_rgba(0,0,0,0.15)]' : (isDark ? 'hover:shadow-black hover:shadow-xl shadow-sm' : 'hover:shadow-lg shadow-sm'),
-        cardImageBg: theme === 'retro' ? 'bg-black/5' : (isDark ? 'bg-zinc-900' : 'bg-[#DCD8CF]'),
-        imageEffects: theme === 'retro' ? 'sepia-[0.4] contrast-110 brightness-[0.9] grayscale-[0.1] group-hover:sepia-0 group-hover:grayscale-0 group-hover:brightness-100 group-hover:contrast-100 transition-all duration-700' : (isDark ? 'desaturate-[0.5] contrast-125 brightness-75 group-hover:brightness-100 transition-all duration-700' : 'grayscale group-hover:grayscale-[0.5] contrast-110 sepia-[0.1]'),
-        cardTitleHover: theme === 'retro' ? 'group-hover:text-[var(--text-accent)]' : (isDark ? 'group-hover:text-amber-400' : 'group-hover:text-[#8B261D]'),
-        paperClipColor: theme === 'retro' ? 'bg-white border-black/10 shadow-sm' : (isDark ? 'bg-white/10 border-white/5' : 'bg-white border-black/10'),
-        tagBorder: theme === 'retro' ? 'border-black/20 bg-white' : (isDark ? 'border-zinc-800 bg-zinc-900' : 'border-[#8B261D]/20 bg-white'),
-        dateBorder: theme === 'retro' ? 'border-black/10 bg-black/5 text-black/60 shadow-inner' : (isDark ? 'border-zinc-800 bg-zinc-900 text-zinc-500' : 'border-[#6A665A]/20 bg-[#F9F7F1] text-[#6A665A]'),
-        emptyIconOpacity: isDark ? 'opacity-20' : 'opacity-50',
-        emptyMessageBorder: theme === 'retro' ? 'border-[var(--border-main)] text-[var(--text-accent)]' : (isDark ? 'border-zinc-700 text-zinc-500' : 'border-[#8B261D] text-[#8B261D]'),
-        paginationBg: theme === 'retro' ? 'bg-[var(--bg-main)] border-[var(--border-main)] text-[var(--text-accent)]' : (isDark ? 'bg-zinc-900 border-zinc-700 text-zinc-300' : 'bg-white border-[#3A352F] text-[#3A352F]')
-    };
-
-    const categories: { id: ArchiveCategory; labelCn: string; labelEn: string; color: string; darkColor: string }[] = [
-        { id: 'ALL', labelCn: '全部案例', labelEn: 'All', color: 'text-[#8B261D] bg-[#EBE7DF] border-[#8B261D]', darkColor: 'text-white bg-black/40 border-white shadow-[0_0_10px_rgba(255,255,255,0.2)]' },
-        { id: 'NEUROSIS', labelCn: '神经症', labelEn: 'Neurosis', color: 'text-[#304B35] bg-[#EBE7DF] border-[#304B35]/30', darkColor: 'text-[#4ADE80] bg-black/40 border-[#4ADE80] shadow-[0_0_10px_rgba(74,222,128,0.2)]' },
-        { id: 'PSYCHOSIS', labelCn: '精神病', labelEn: 'Psychosis', color: 'text-[#702424] bg-[#EBE7DF] border-[#702424]/30', darkColor: 'text-[#F87171] bg-black/40 border-[#F87171] shadow-[0_0_10px_rgba(248,113,113,0.2)]' },
-        { id: 'PERVERSION', labelCn: '倒错', labelEn: 'Perversion', color: 'text-[#3B2C4F] bg-[#EBE7DF] border-[#3B2C4F]/30', darkColor: 'text-[#C084FC] bg-black/40 border-[#C084FC] shadow-[0_0_10px_rgba(192,132,252,0.2)]' },
-        { id: 'AUTISM', labelCn: '孤独症', labelEn: 'Autism', color: 'text-[#263E5A] bg-[#EBE7DF] border-[#263E5A]/30', darkColor: 'text-[#60A5FA] bg-black/40 border-[#60A5FA] shadow-[0_0_10px_rgba(96,165,250,0.2)]' }
-    ];
-
-    const getCategoryStyles = (catId: ArchiveCategory) => {
-        const cat = categories.find(c => c.id === catId);
-        if (!cat) return '';
-        return isDark ? cat.darkColor : cat.color;
-    };
-
-    const getCategoryTagStyles = (catId: ArchiveCategory) => {
-        return `px-2 py-0.5 text-[9px] font-mono uppercase tracking-[0.2em] border shadow-md font-black rounded-sm ${getCategoryStyles(catId)}`;
-    };
-
-    const filteredCases = selectedCategory === 'ALL' 
-        ? ARCHIVE_CASES 
-        : ARCHIVE_CASES.filter(c => c.category === selectedCategory);
-
-    // Pagination Logic
-    const totalPages = Math.ceil(filteredCases.length / ITEMS_PER_PAGE);
-    const currentCases = filteredCases.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
-
-    const handleCaseClick = (id: string) => {
-        setSelectedCaseId(id);
-    };
-
-    const selectedCaseData = ARCHIVE_CASES.find(c => c.id === selectedCaseId) || null;
+    const selectedCase = items.find(item => item.id === (openingId || selectedCaseId));
 
     return (
-        <>
-            <div className={isFullScreen ? "w-full h-full" : `fixed inset-0 backdrop-blur-md z-[100] flex items-center justify-center p-4 ${theme === 'retro' ? 'bg-transparent' : (isDark ? 'bg-black/90' : 'bg-black/80')}`}>
-                {/* Main Container */}
-                <div className={`${t.bgContainer} ${isFullScreen ? 'w-full h-full' : `${t.borderContainer} rounded-lg w-full max-w-6xl h-[90vh] shadow-2xl`} flex flex-col overflow-hidden relative transition-all duration-500 texture-paper`}>
-                    
-                    {/* Header - Only show in modal mode */}
-                    {!isFullScreen && (
-                    <div className={`shrink-0 ${t.borderHeader} px-6 lg:px-8 py-4 flex items-center justify-between ${t.bgHeader} backdrop-blur relative z-20`}>
-                        <div className="flex items-center gap-3">
-                            <Folder size={18} className={`${t.textAccent} opacity-80`} />
-                            <h2 className={`text-xs font-bold uppercase tracking-[0.2em] font-mono ${t.textCode}`}>
-                                {localLang === 'CN' ? '机密档案集 / CONFIDENTIAL ARCHIVES' : 'CONFIDENTIAL ARCHIVES'}
-                            </h2>
-                        </div>
-                        
-                        {/* Controls */}
-                        <div className="flex items-center gap-3">
-                            <div className={`flex items-center rounded-sm p-1 border ${isDark ? 'bg-white/5 border-zinc-700/50' : 'bg-black/5 border-black/10'}`}>
-                                <button 
-                                    onClick={() => setLocalLang(localLang === 'CN' ? 'EN' : 'CN')} 
-                                    className={`flex items-center gap-1.5 px-2 py-1 rounded-sm text-[10px] font-bold tracking-widest uppercase transition-colors ${t.btnTextHover}`}
-                                >
-                                    <Languages size={12} />
-                                    {localLang}
-                                </button>
-                                <div className={`w-px h-3 mx-1 ${isDark ? 'bg-zinc-700/50' : 'bg-black/10'}`}></div>
-                                <button 
-                                    onClick={toggleTheme} 
-                                    className={`flex items-center gap-1.5 px-2 py-1 rounded-sm text-[10px] font-bold tracking-widest uppercase transition-colors ${t.btnTextHover}`}
-                                >
-                                    {isDark ? <Sun size={12} /> : <Moon size={12} />}
-                                    {isDark ? 'LIGHT' : 'DARK'}
-                                </button>
-                            </div>
+        <div 
+            onClick={() => {
+                if (openingId) {
+                    setOpeningId(null);
+                    setIsTransitioning(false);
+                }
+            }}
+            className={`relative w-full h-full font-sans overflow-hidden bg-black text-white perspective-2000 transition-colors duration-1000 ${openingId ? 'cursor-zoom-out' : ''}`}>
+            
+            {/* Cinematic Background Typography (Split Letters) */}
+            {(openingId || selectedCaseId) && selectedCase && (
+                <div className={`absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden z-0 transition-all duration-1000 ease-out ${openingId ? 'opacity-30 scale-100' : 'opacity-5 scale-95 blur-md'}`}>
+                   <h1 className="text-[35vw] font-black uppercase tracking-[-0.08em] mountain-title flex select-none">
+                        {selectedCase.titleEn.split(' ')[0].split('').map((char, i) => (
+                            <span 
+                                key={i} 
+                                className="inline-block transition-all duration-[1200ms] cubic-bezier(0.16, 1, 0.3, 1)"
+                                style={{ 
+                                    transform: openingId ? 'translateZ(0) scale(1.1)' : 'translateZ(-500px) scale(0.5)',
+                                    opacity: openingId ? 0.3 : 0,
+                                    transitionDelay: `${i * 60}ms`
+                                }}
+                            >
+                                {char}
+                            </span>
+                        ))}
+                   </h1>
+                </div>
+            )}
 
-                            <button onClick={onClose} className={`p-1.5 transition-colors rounded-sm border shadow-sm ${t.btnBg} ${t.btnHover} ${t.btnBorder} ${t.btnTextHover} outline-none`}>
-                                <X size={16} />
-                            </button>
-                        </div>
-                    </div>
-                    )}
-
-                    {/* Main Content Area: Sidebar + Grid/Detail */}
-                    <div className="flex-1 flex flex-row overflow-hidden relative z-10 h-full">
-                        {/* Left Navigation Sidebar */}
-                        <div className={`w-64 md:w-80 border-r-2 border-dashed flex flex-col pt-6 md:pt-10 opacity-100 shrink-0 transition-all duration-500 ${theme === 'retro' ? 'border-[#8B261D]/10 bg-transparent' : (isDark ? 'border-zinc-900 bg-[#0A0A0B]/80' : 'border-[#89817a]/10 bg-[#EBE7DF] shadow-inner')}`}>
-                            <div className="px-6 pb-6 border-b border-dashed border-zinc-800/10 mb-6">
-                                <h3 className={`text-[10px] font-mono font-bold tracking-[0.3em] uppercase mb-4 ${t.textMuted}`}>
-                                    {localLang === 'CN' ? '按目录浏览' : 'BROWSE BY CATEGORY'}
-                                </h3>
-                                
-                                <div className="space-y-2">
-                                    {categories.map(cat => {
-                                        const isSelected = selectedCategory === cat.id;
-                                        return (
-                                            <button 
-                                                key={cat.id}
-                                                onClick={() => setSelectedCategory(cat.id)}
-                                                className={`w-full flex items-center justify-between px-4 py-3 rounded-sm border-2 transition-all duration-300 group
-                                                ${isSelected 
-                                                    ? (isDark ? 'bg-zinc-800 border-zinc-700 text-zinc-100 shadow-lg' : (theme === 'retro' ? 'bg-[#8B261D]/10 border-[#8B261D] text-[#8B261D] shadow-sm' : 'bg-white border-[#8B261D] text-[#8B261D] shadow-md -translate-y-0.5'))
-                                                    : (isDark ? 'bg-zinc-950/40 border-zinc-900/50 text-zinc-500 hover:text-zinc-300 hover:border-zinc-700' : 'bg-[#DCD8CF]/30 border-transparent text-[#6A665A] hover:bg-white hover:border-[#8B261D]/20')}`}
-                                            >
-                                                <div className="flex items-center gap-3">
-                                                    <span className={`w-2 h-2 rounded-full ${isSelected ? (isDark ? 'bg-amber-500' : 'bg-[#8B261D]') : 'bg-zinc-700/50'}`}></span>
-                                                    <span className="text-xs font-bold font-mono tracking-widest uppercase">{localLang === 'CN' ? cat.labelCn : cat.labelEn}</span>
-                                                </div>
-                                                <ChevronRight size={14} className={`opacity-0 group-hover:opacity-100 transition-opacity ${isSelected ? (isDark ? 'text-amber-500' : 'text-[#8B261D]') : 'text-zinc-600'}`} />
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-
-                            <div className="p-6 flex-1 flex flex-col justify-end opacity-40 grayscale">
-                                <div className={`border-2 border-dashed p-4 ${isDark ? 'border-zinc-800 text-zinc-600' : 'border-[#CFCBBF] text-[#6A665A]'}`}>
-                                    <ShieldAlert size={24} className="mb-4" />
-                                    <p className="text-[10px] leading-relaxed font-mono font-bold italic">
-                                        RESTRICTED ACCESS. UNAUTHORIZED DUPLICATION IS A VIOLATION OF APPLICABLE LAWS.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Content Area */}
-                        <div className={`flex-1 overflow-y-auto custom-scrollbar relative transition-all duration-500 ${theme === 'retro' ? 'bg-transparent' : (isDark ? 'bg-[#0A0A0B]' : 'bg-white')}`}>
-                            {selectedCaseId ? (
-                                <ArchiveDetailModal 
-                                    isOpen={true} 
-                                    onClose={() => setSelectedCaseId(null)}
-                                    caseData={selectedCaseData}
-                                    lang={localLang}
-                                    renderInPlace={true}
-                                />
-                            ) : (
-                                <div className="p-8 lg:p-12 max-w-6xl mx-auto flex flex-col min-h-full transition-all animate-in fade-in duration-700">
-                                    {/* Title Section */}
-                                    <div className={`shrink-0 mb-12 border-l-4 pl-6 py-2 ${isDark ? 'border-zinc-700' : 'border-[#8B261D]'}`}>
-                                        <div className="flex items-center gap-2 mb-4">
-                                            <ShieldAlert size={14} className={t.textTitleAccent} />
-                                            <span className={`text-[12px] font-mono tracking-[0.2em] uppercase font-bold ${t.textTitleAccent}`}>
-                                                Archive Directory . TOP SECRET
-                                            </span>
-                                        </div>
-                                        <h1 className={`text-4xl lg:text-5xl font-serif mb-4 tracking-[0.1em] font-bold uppercase ${t.textTitle}`}>
-                                            {localLang === 'CN' ? '主体观测与临床报告' : 'Subject Observation & Clinical Reports'}
-                                        </h1>
-                                        <p className={`text-[11px] font-bold max-w-2xl leading-relaxed uppercase tracking-[0.2em] font-mono ${t.textNormal}`}>
-                                            {localLang === 'CN' 
-                                                ? '[ 文件来源 ]: 迷雾学派 [ 目的 ]: 检视短篇研究报告，探索隐秘在字里行间的结构缺陷。在这里，每一次访谈都是一次针对实在界的解码。'
-                                                : '[ SOURCE ]: MIST SCHOOL [ OBJECTIVE ]: Review short research reports of the Mist School, exploring structural flaws hidden between lines. Every interview is a decoding of the Real.'}
-                                        </p>
-                                    </div>
-
-                                    {/* Grid */}
-                                    <div className="flex-1">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                            {currentCases.map((c, i) => (
-                                                <div 
-                                                    key={c.id} 
-                                                    onClick={() => handleCaseClick(c.id)}
-                                                    className={`group flex flex-col aspect-[3/4] ${t.cardBg} ${t.cardBorder} rounded-sm overflow-hidden cursor-pointer ${t.cardHoverBorder} ${t.cardShadow} transition-all duration-500 relative
-                                                        ${isDark || theme === 'retro' ? 'grayscale-[0.8] opacity-90 hover:grayscale-0 hover:opacity-100 hover:-translate-y-2' : ''}`}
-                                                >
-                                                    {/* Paper Clip */}
-                                                    <div className={`absolute -top-1 left-1/2 -translate-x-1/2 w-8 h-3 shadow-sm border z-30 transform -rotate-2 mix-blend-multiply ${t.paperClipColor}`}></div>
-
-                                                    {/* Image */}
-                                                    <div className={`aspect-video relative overflow-hidden p-4 pb-0 ${t.cardImageBg}`}>
-                                                        {!isDark && <div className="absolute inset-0 bg-transparent transition-colors z-10 mix-blend-multiply opacity-20 texture-paper"></div>}
-                                                        {isDark && <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors z-10"></div>}
-                                                        <img 
-                                                            src={c.imageUrl} 
-                                                            alt={localLang === 'CN' ? c.titleCn : c.titleEn} 
-                                                            className={`w-full h-full object-cover transition-transform duration-1000 ease-in-out border border-black/5 ${t.imageEffects}`}
-                                                            loading="lazy"
-                                                            onError={(e) => {
-                                                                (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=600";
-                                                                (e.target as HTMLImageElement).onerror = null;
-                                                            }}
-                                                        />
-                                                        <div className="absolute top-6 right-6 z-20">
-                                                            <div className={getCategoryTagStyles(c.category)}>
-                                                                [ {categories.find(cat => cat.id === c.category)?.[localLang === 'CN' ? 'labelCn' : 'labelEn']} ]
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Content */}
-                                                    <div className={`p-6 flex flex-col flex-1 relative texture-dust`}>
-                                                        <div className={`flex items-center justify-between mb-4 border-b border-dashed pb-2 ${isDark ? 'border-zinc-800' : 'border-[#CFCBBF]'}`}>
-                                                            <span className={`text-[10px] font-mono tracking-widest uppercase border px-1 transition-all duration-500 ${t.dateBorder} ${isDark || theme === 'retro' ? 'opacity-40 group-hover:opacity-80' : ''}`}>
-                                                                NO. {((currentPage - 1) * ITEMS_PER_PAGE) + 1000 + i}-{c.id.toUpperCase()} // {c.date}
-                                                            </span>
-                                                            <Eye size={14} className={`opacity-0 group-hover:opacity-100 transition-opacity ${t.textTitleAccent}`} />
-                                                        </div>
-                                                        <h3 className={`text-xl lg:text-2xl font-serif mb-4 transition-all duration-500 font-bold uppercase tracking-[0.05em] leading-tight ${t.textTitle} ${t.cardTitleHover} ${isDark || theme === 'retro' ? 'opacity-70 group-hover:opacity-100' : ''}`}>
-                                                            {localLang === 'CN' ? c.titleCn : c.titleEn}
-                                                        </h3>
-                                                        <p className={`text-[15px] leading-[1.8] flex-1 line-clamp-4 transition-all duration-500 font-serif tracking-normal ${t.textNormal} opacity-40 group-hover:opacity-100`}>
-                                                            {localLang === 'CN' ? c.summaryCn : c.summaryEn}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                        
-                                        {filteredCases.length === 0 && (
-                                            <div className={`py-20 flex flex-col items-center justify-center ${t.textTitleAccent}`}>
-                                                <Folder size={48} className={`mb-4 ${t.emptyIconOpacity}`} />
-                                                <p className={`text-sm tracking-widest font-mono font-bold border-2 border-dashed p-4 transform -rotate-2 mix-blend-multiply ${t.emptyMessageBorder}`}>
-                                                    {localLang === 'CN' ? 'CLASSIFIED / 档案封存中' : 'ARCHIVE CLASSIFIED OR EMPTY'}
-                                                </p>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* Pagination */}
-                                    {totalPages > 1 && (
-                                        <div className={`shrink-0 flex justify-center items-center gap-6 mt-16 pb-8`}>
-                                            <button 
-                                                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                                                disabled={currentPage === 1}
-                                                className={`flex items-center gap-1 p-2 rounded-sm border-2 shadow-sm uppercase font-mono text-xs font-bold tracking-widest transition-all
-                                                ${currentPage === 1 ? t.btnDisabled : `hover:shadow-md ${t.btnHover}`} ${t.paginationBg}`}
-                                            >
-                                                <ChevronLeft size={16} />
-                                                {localLang === 'CN' ? '上一页' : 'PREV'}
-                                            </button>
-                                            <div className={`font-mono text-sm tracking-widest font-bold ${t.textTitle}`}>
-                                                [ {currentPage} / {totalPages} ]
-                                            </div>
-                                            <button 
-                                                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                                                disabled={currentPage === totalPages}
-                                                className={`flex items-center gap-1 p-2 rounded-sm border-2 shadow-sm uppercase font-mono text-xs font-bold tracking-widest transition-all
-                                                ${currentPage === totalPages ? t.btnDisabled : `hover:shadow-md ${t.btnHover}`} ${t.paginationBg}`}
-                                            >
-                                                {localLang === 'CN' ? '下一页' : 'NEXT'}
-                                                <ChevronRight size={16} />
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
+            {/* Top-left Title Overlay (Restored Version) */}
+            <div className={`absolute top-0 left-0 w-full p-8 md:p-12 flex justify-between items-start pointer-events-none z-50 mix-blend-difference text-white transition-opacity duration-700 ${openingId ? 'opacity-0' : 'opacity-100'}`}>
+                <div className="flex flex-col">
+                    <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none m-0.5">
+                        {lang === 'CN' ? '主体观测档案' : 'SUBJECT ARCHIVE'}
+                    </h1>
+                    <div className="font-mono text-xs uppercase tracking-[0.3em] ml-1 mt-2 font-bold opacity-50">
+                        VOL.001 / DECLASSIFIED
                     </div>
                 </div>
             </div>
 
-            {/* Fallback detail modal - kept for safety but disabled */}
-            {false && (
-                <ArchiveDetailModal 
-                    isOpen={!!selectedCaseId} 
+
+            {/* Main Scene: Native scroll with wave listener */}
+            <div 
+                ref={scrollContainerRef}
+                className={`absolute inset-0 flex items-center overflow-x-auto overflow-y-hidden scrollbar-hide overscroll-contain perspective-2000 transition-opacity duration-1000 ${selectedCaseId ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+                style={{ 
+                    scrollPaddingLeft: `${centerPadding}px`,
+                }}
+            >
+                <div 
+                    ref={contentRef}
+                    className="flex items-center gap-6 h-[500px] preserve-3d"
+                    style={{
+                        paddingLeft: `${centerPadding}px`,
+                        paddingRight: `${centerPadding}px`,
+                    }}
+                >
+                    {items.map((item, i) => {
+                        const isOpening = openingId === item.id;
+                        const isOtherOpening = openingId && !isOpening;
+
+                        return (
+                            <div
+                                key={`${item.id}-${i}`}
+                                data-id={item.id}
+                                className={`archive-card-wrapper relative shrink-0 preserve-3d transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                                    isOpening 
+                                        ? 'z-[1000] w-[80vw] max-w-[800px] h-[45vw] max-h-[450px]' 
+                                        : (isOtherOpening ? 'opacity-0 scale-75 blur-md w-[0px] h-[480px] gap-0 mx-[-20px]' : 'z-10 w-[110px] h-[480px]')
+                                }`}
+                                style={{
+                                    transform: isOpening 
+                                        ? `translate3d(18vw, -60px, 200px)` 
+                                        : (hasEntered ? 'translate3d(0, 0, 0)' : `translate3d(${1000 + i * 200}px, 0, 0)`),
+                                    transitionDelay: isOpening ? '0s' : (hasEntered ? '0s' : `${0.2 + i * 0.05}s`)
+                                }}
+                            >
+                                     <div 
+                                        className={`archive-card-inner w-full h-full relative cursor-pointer group preserve-3d transition-all duration-300 will-change-transform active:scale-95 ${isOpening ? 'cursor-default' : ''}`}
+                                        onClick={(e) => handleCardClick(e, item.id)}
+                                    >
+                                        <style>{`
+                                            @keyframes scanline {
+                                                0% { transform: translateY(-100%); }
+                                                100% { transform: translateY(100%); }
+                                            }
+                                            @keyframes crtFlicker {
+                                                0% { opacity: 0.01; }
+                                                5% { opacity: 0.05; }
+                                                10% { opacity: 0.02; }
+                                                15% { opacity: 0.06; }
+                                                20% { opacity: 0.01; }
+                                                100% { opacity: 0.02; }
+                                            }
+                                            .crt-overlay::before {
+                                                content: "";
+                                                position: absolute;
+                                                inset: 0;
+                                                background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+                                                background-size: 100% 4px, 3px 100%;
+                                                z-index: 20;
+                                                pointer-events: none;
+                                            }
+                                            .scanline-beam {
+                                                position: absolute;
+                                                top: 0;
+                                                left: 0;
+                                                width: 100%;
+                                                height: 100px;
+                                                background: linear-gradient(to bottom, transparent, rgba(34, 211, 238, 0.15), transparent);
+                                                z-index: 21;
+                                                animation: scanline 4s linear infinite;
+                                                pointer-events: none;
+                                            }
+                                            /* Mouse Hover Colorization */
+                                            .archive-card-inner:hover img {
+                                                filter: grayscale(0%) brightness(100%) !important;
+                                                transition: filter 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+                                            }
+                                        `}</style>
+                                        
+                                        {/* Image Container */}
+                                        <div className={`w-full h-full relative overflow-hidden border border-white/5 bg-zinc-900 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] backface-hidden transition-all duration-1000 ${isOpening ? 'rounded-lg' : 'rounded-sm'}`}>
+                                            <div className="absolute inset-0 z-0">
+                                                <img
+                                                    src={item.imageUrl}
+                                                    className={`w-full h-full object-cover transition-all duration-1000 ${isOpening ? 'scale-100 !grayscale-0 !brightness-100' : 'grayscale'}`}
+                                                    style={{ filter: isOpening ? 'none' : 'grayscale(100%) brightness(35%) contrast(110%)' }}
+                                                    alt={item.titleEn}
+                                                />
+                                            </div>
+
+                                            {/* CRT & Scanner Effects - Only when opening/opened */}
+                                            {isOpening && (
+                                                <>
+                                                    <div className="absolute inset-0 z-[15] crt-overlay opacity-40"></div>
+                                                    <div className="absolute inset-0 z-[16] bg-black animate-[crtFlicker_0.15s_infinite] pointer-events-none"></div>
+                                                    <div className="scanline-beam"></div>
+                                                    {/* Vignette */}
+                                                    <div className="absolute inset-x-0 inset-y-0 z-[22] pointer-events-none shadow-[inset_0_0_120px_rgba(0,0,0,0.8)]"></div>
+                                                </>
+                                            )}
+
+                                            <div className={`absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10 pointer-events-none transition-opacity duration-1000 ${isOpening ? 'opacity-20' : 'opacity-100'}`}></div>
+
+                                            {/* Card Info - Hidden when expanded */}
+                                            <div className={`absolute inset-0 p-4 flex flex-col justify-between z-20 pointer-events-none text-white transition-opacity duration-500 ${isOpening ? 'opacity-0' : 'opacity-100'}`}>
+                                                <div className="text-[8px] font-mono tracking-[0.2em] font-bold opacity-30">
+                                                    SERIAL_{1001 + i}
+                                                </div>
+                                                <div>
+                                                    <h2 className="text-xs font-black uppercase tracking-tight leading-tight [writing-mode:vertical-lr] mb-2 group-hover:tracking-widest transition-all duration-500">
+                                                        {lang === 'CN' ? item.titleCn : item.titleEn}
+                                                    </h2>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+
+            {/* Manual Navigation Arrows (For mouse users) */}
+            {!openingId && !selectedCaseId && (
+                <>
+                    <button 
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            targetScrollRef.current = Math.max(0, targetScrollRef.current - 600);
+                        }}
+                        className="absolute left-8 top-1/2 -translate-y-1/2 z-[60] w-12 h-12 flex items-center justify-center rounded-full border border-white/10 bg-black/40 text-white/40 hover:bg-white/10 hover:text-white transition-all duration-300 backdrop-blur-md group pointer-events-auto"
+                        title="Scroll Left"
+                    >
+                        <ChevronLeft size={24} className="group-hover:-translate-x-0.5 transition-transform" />
+                    </button>
+                    <button 
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            const container = scrollContainerRef.current;
+                            const maxScroll = container ? container.scrollWidth - container.offsetWidth : 9999;
+                            targetScrollRef.current = Math.min(maxScroll, targetScrollRef.current + 600);
+                        }}
+                        className="absolute right-8 top-1/2 -translate-y-1/2 z-[60] w-12 h-12 flex items-center justify-center rounded-full border border-white/10 bg-black/40 text-white/40 hover:bg-white/10 hover:text-white transition-all duration-300 backdrop-blur-sm group pointer-events-auto"
+                        title="Scroll Right"
+                    >
+                        <ChevronRight size={24} className="group-hover:translate-x-0.5 transition-transform" />
+                    </button>
+                </>
+            )}
+
+
+            {/* Bottom UI - Expanded State Only */}
+            {openingId && selectedCase && (
+                <div className="absolute bottom-0 left-0 w-full p-10 md:p-14 flex items-end justify-between z-[2000] animate-in fade-in slide-in-from-bottom-8 duration-1000">
+                    <div className="flex gap-16 text-[10px] font-bold uppercase tracking-[0.3em] text-white/40">
+                        <div className="flex flex-col gap-2">
+                            <span className="text-white/20">A — COMPLETED</span>
+                            <span className="text-white">{selectedCase.date}</span>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                            <span className="text-white/20">B — TYPE</span>
+                            <span className="text-white">{selectedCase.category}</span>
+                        </div>
+                        <div className="flex flex-col gap-2 hidden lg:flex">
+                            <span className="text-white/20">C — ROLE</span>
+                            <span className="text-white">SUBJECT OBSERVER</span>
+                        </div>
+                        <div className="flex flex-col gap-2 hidden lg:flex">
+                            <span className="text-white/20">D — CLIENT</span>
+                            <span className="text-white">ARCHIVE BUREAU</span>
+                        </div>
+                    </div>
+
+                    <div className="flex flex-col items-center gap-6">
+                        <button 
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleExplore(selectedCase.id);
+                            }}
+                            className="group relative px-12 py-4 flex items-center gap-3 overflow-hidden bg-white text-black font-black uppercase tracking-[0.4em] text-xs hover:px-14 transition-all duration-500"
+                        >
+                            <span>Explore</span>
+                            <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                        </button>
+                        <div className="text-[9px] font-mono tracking-widest text-white/20 uppercase">
+                            Swipe to return
+                        </div>
+                    </div>
+
+                    <div className="hidden xl:flex gap-8 text-white/30">
+                        <Twitter size={16} className="hover:text-white transition-colors cursor-pointer" />
+                        <Instagram size={16} className="hover:text-white transition-colors cursor-pointer" />
+                        <Mail size={16} className="hover:text-white transition-colors cursor-pointer" />
+                    </div>
+                </div>
+            )}
+
+            {/* Archive Detail Modal */}
+            {selectedCaseId && (
+                <ArchiveDetailModal
+                    isOpen={!!selectedCaseId}
                     onClose={() => setSelectedCaseId(null)}
-                    caseData={selectedCaseData}
-                    lang={localLang}
+                    caseData={ARCHIVE_CASES.find(c => c.id === selectedCaseId) || null}
+                    lang={lang}
+                    renderInPlace={true}
                 />
             )}
-        </>
+        </div>
     );
 };
+
+

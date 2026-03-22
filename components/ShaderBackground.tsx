@@ -41,46 +41,40 @@ const fragmentShaderSource = `
       return sum;
   }
 
-  vec2 rotate2D(vec2 p, float angle) {
-      float s = sin(angle);
-      float c = cos(angle);
-      return mat2(c, -s, s, c) * p;
-  }
-
   void main() {
       vec2 uv = v_uv;
       vec2 aspect = vec2(u_resolution.x/u_resolution.y, 1.0);
-      uv = (uv - 0.5) * aspect + 0.5;
+      vec2 p = (uv - 0.5) * aspect;
       
-      float mouseInfluence = distance(u_mouse, uv) * 2.0;
+      // Removed mouse warp distortion as requested
+      // We keep a very subtle mouse brightness influence for 'presence'
+      vec2 mousePos = (u_mouse - 0.5) * aspect;
+      float dist = distance(p, mousePos);
       
-      vec2 p = uv * 3.0;
-      p = rotate2D(p, u_time * 0.1);
+      // Base noise for cloud texture (blue-grey tinted)
+      float n1 = fbm(p * 2.5 + u_time * 0.12);
+      vec2 p_with_drift = p + vec2(n1 * 0.05);
       
-      float noise1 = fbm(p + u_time * 0.2);
-      float noise2 = fbm(p - u_time * 0.15 + noise1);
+      float finalNoise = fbm(p_with_drift * 1.8 - u_time * 0.08);
+      float cloud = smoothstep(0.15, 0.85, finalNoise);
       
-      float pattern = noise2 * (1.0 + sin(u_time * 0.5));
-      pattern += smoothstep(0.3, 0.7, noise1) * (1.0 - mouseInfluence);
+      // Very subtle mouse glow without warping the texture
+      float mouseGlow = smoothstep(0.4, 0.0, dist) * 0.08;
       
-      // Dithering
-      float dither = rand(uv + u_time * 0.01) * 0.05;
-      pattern += dither;
+      // Premium blue-grey mist color palette
+      vec3 colorMist = vec3(0.38, 0.4, 0.44); // Desaturated blue-grey
+      vec3 colorHigh = vec3(0.6, 0.65, 0.7);  // Bright bluish highlight
       
-      // Base color adjusted for neutral / black-and-white mist
-      vec3 color1 = vec3(0.35, 0.35, 0.35); // Mid-tone cloud
-      vec3 color3 = vec3(0.55, 0.55, 0.55); // Bright highlights
+      vec3 finalColor = mix(vec3(0.012), colorMist, cloud);
+      finalColor += colorHigh * smoothstep(0.75, 0.98, finalNoise) * 0.4;
+      finalColor += mouseGlow * colorMist; // Presence without warp
       
-      float highlight = smoothstep(0.6, 0.9, noise1 * (1.0 - mouseInfluence * 0.5));
-      vec3 finalColor = mix(vec3(0.02), color1, pattern);
-      finalColor = mix(finalColor, color3, highlight);
+      float alpha = clamp(cloud * 0.7 + mouseGlow, 0.0, 0.8);
       
-      // Make dark areas transparent so the background color shows through
-      float mistAlpha = clamp(pattern * 0.8, 0.0, 0.7);
-      mistAlpha = clamp(mistAlpha + highlight * 0.5, 0.0, 1.0);
-      
-      gl_FragColor = vec4(finalColor, mistAlpha);
+      gl_FragColor = vec4(finalColor, alpha);
   }
+
+
 `;
 
 function createShader(gl: WebGLRenderingContext, type: number, source: string) {
@@ -96,8 +90,9 @@ function createShader(gl: WebGLRenderingContext, type: number, source: string) {
   return shader;
 }
 
-export const ShaderBackground: React.FC = () => {
+export const ShaderBackground: React.FC<{ theme?: string }> = ({ theme = 'dark' }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const isRetro = theme === 'retro';
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -106,7 +101,79 @@ export const ShaderBackground: React.FC = () => {
     if (!gl) return;
 
     const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
-    const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+    const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, `
+      precision mediump float;
+      uniform float u_time;
+      uniform vec2 u_mouse;
+      uniform vec2 u_resolution;
+      uniform float u_isRetro;
+      varying vec2 v_uv;
+
+      float rand(vec2 n) {
+          return fract(sin(dot(n, vec2(12.9898, 4.1414))) * 43758.5453);
+      }
+
+      float noise(vec2 p) {
+          vec2 i = floor(p);
+          vec2 f = fract(p);
+          f = f * f * (3.0 - 2.0 * f);
+          return mix(mix(rand(i), rand(i + vec2(1.0, 0.0)), f.x),
+                     mix(rand(i + vec2(0.0, 1.0)), rand(i + vec2(1.0, 1.0)), f.x), f.y);
+      }
+
+      float fbm(vec2 p) {
+          float sum = 0.0;
+          float amp = 0.5;
+          float freq = 1.0;
+          for(int i = 0; i < 6; i++) {
+              sum += noise(p * freq) * amp;
+              freq *= 2.0;
+              amp *= 0.5;
+          }
+          return sum;
+      }
+
+      void main() {
+          vec2 uv = v_uv;
+          vec2 aspect = vec2(u_resolution.x/u_resolution.y, 1.0);
+          vec2 p = (uv - 0.5) * aspect;
+          
+          vec2 mousePos = (u_mouse - 0.5) * aspect;
+          float dist = distance(p, mousePos);
+          
+          float n1 = fbm(p * 2.5 + u_time * 0.12);
+          vec2 p_with_drift = p + vec2(n1 * 0.05);
+          
+          float finalNoise = fbm(p_with_drift * 1.8 - u_time * 0.08);
+          float cloud = smoothstep(0.15, 0.85, finalNoise);
+          
+          float mouseGlow = smoothstep(0.4, 0.0, dist) * 0.08;
+          
+          vec3 colorMist;
+          vec3 colorHigh;
+          float alpha;
+
+          if (u_isRetro > 0.5) {
+              // Retro: Greyscale/Black clouds (Like ink fog)
+              colorMist = vec3(0.08, 0.08, 0.08); 
+              colorHigh = vec3(0.15, 0.15, 0.15);  
+              vec3 finalColor = mix(vec3(0.0), colorMist, cloud);
+              finalColor += colorHigh * smoothstep(0.75, 0.98, finalNoise) * 0.2;
+              finalColor += mouseGlow * colorMist;
+              alpha = clamp(cloud * 0.4 + mouseGlow * 0.2, 0.0, 0.5);
+              gl_FragColor = vec4(finalColor, alpha);
+          } else {
+              // Dark theme: Original Blue-Grey Mist
+              colorMist = vec3(0.38, 0.4, 0.44); 
+              colorHigh = vec3(0.6, 0.65, 0.7);  
+              vec3 finalColor = mix(vec3(0.012), colorMist, cloud);
+              finalColor += colorHigh * smoothstep(0.75, 0.98, finalNoise) * 0.4;
+              finalColor += mouseGlow * colorMist;
+              alpha = clamp(cloud * 0.7 + mouseGlow, 0.0, 0.8);
+              gl_FragColor = vec4(finalColor, alpha);
+          }
+      }
+    `);
 
     if (!vertexShader || !fragmentShader) return;
 
@@ -138,6 +205,7 @@ export const ShaderBackground: React.FC = () => {
     const timeLocation = gl.getUniformLocation(program, 'u_time');
     const resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
     const mouseLocation = gl.getUniformLocation(program, 'u_mouse');
+    const isRetroLocation = gl.getUniformLocation(program, 'u_isRetro');
 
     let mouseX = 0;
     let mouseY = 0;
@@ -169,6 +237,7 @@ export const ShaderBackground: React.FC = () => {
       gl.uniform1f(timeLocation, (time - startTime) * 0.001);
       gl.uniform2f(resolutionLocation, gl.canvas.width, gl.canvas.height);
       gl.uniform2f(mouseLocation, mouseX, mouseY);
+      gl.uniform1f(isRetroLocation, isRetro ? 1.0 : 0.0);
 
       gl.drawArrays(gl.TRIANGLES, 0, 6);
 
@@ -181,7 +250,7 @@ export const ShaderBackground: React.FC = () => {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener('mousemove', handleMouseMove);
     };
-  }, []);
+  }, [isRetro]);
 
   return (
     <canvas

@@ -84,8 +84,15 @@ export const ArchiveDetailModal: React.FC<ArchiveDetailModalProps> = ({ isOpen, 
 
             <div className="flex-1 overflow-y-auto custom-scrollbar relative z-10 texture-dust">
                 
+                {/* Background Hero Typography */}
+                <div className="absolute top-0 left-0 w-full h-[600px] flex items-center justify-center pointer-events-none overflow-hidden opacity-5 z-0 select-none">
+                    <h1 className="text-[30vw] font-black uppercase tracking-tighter leading-none whitespace-nowrap transform -rotate-12 translate-y-[-20%]">
+                        {caseData.titleEn.split(' ')[0]}
+                    </h1>
+                </div>
+                
                 {/* Hero Header */}
-                <div className={`pt-20 px-10 md:px-16 lg:px-32 pb-12 relative overflow-hidden`}>
+                <div className={`pt-32 px-10 md:px-16 lg:px-32 pb-12 relative overflow-hidden z-10 animate-in fade-in slide-in-from-bottom-12 duration-1000`}>
                     <div className="absolute top-0 right-0 w-64 h-64 bg-black/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
                     
                     <div className="flex items-center gap-2 mb-6">
@@ -95,24 +102,27 @@ export const ArchiveDetailModal: React.FC<ArchiveDetailModalProps> = ({ isOpen, 
                         </span>
                     </div>
 
-                    <h1 className={`text-4xl lg:text-5xl font-serif mb-6 tracking-wide font-bold ${t.textTitle}`}>
+                    <h1 className={`text-5xl lg:text-7xl font-black uppercase tracking-tighter mb-6 leading-[0.85] ${t.textTitle}`}>
                         {lang === 'CN' ? caseData.titleCn : caseData.titleEn}
                     </h1>
 
-                    {/* Thin refined divider - not full width */}
-                    <div className={`h-px w-32 ${isDark ? 'bg-zinc-800' : 'bg-[#8B261D]/20'} mb-10`}></div>
-
-                    <div className="flex items-center gap-4">
-                        <span className={`px-2 py-1 text-[10px] font-mono font-bold uppercase tracking-widest border-2 border-dashed ${t.sectionBorder} ${t.textMuted}`}>
-                            TARGET: {caseData.category}
-                        </span>
-                        <span className={`px-2 py-1 text-[10px] font-mono font-bold uppercase tracking-widest border-2 border-dashed ${t.sectionBorder} ${t.textMuted}`}>
-                            LOG DATE: {caseData.date}
-                        </span>
+                    <div className="flex items-center gap-6 mt-12 mb-10">
+                        <div className="flex flex-col gap-1">
+                            <span className="text-[10px] uppercase font-mono tracking-widest opacity-40">Classification</span>
+                            <span className={`text-xs font-bold uppercase tracking-widest border-b border-dashed ${t.sectionBorder} pb-1 ${t.textMuted}`}>
+                                {caseData.category}
+                            </span>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                            <span className="text-[10px] uppercase font-mono tracking-widest opacity-40">Date</span>
+                            <span className={`text-xs font-bold uppercase tracking-widest border-b border-dashed ${t.sectionBorder} pb-1 ${t.textMuted}`}>
+                                {caseData.date}
+                            </span>
+                        </div>
                     </div>
                 </div>
 
-                <div className="px-10 md:px-16 lg:px-32 pt-8 flex flex-col gap-16">
+                <div className="px-10 md:px-16 lg:px-32 pt-8 flex flex-col gap-24 relative z-10 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-300 fill-mode-both">
                     
                     {/* Part 1: DNA Parameters */}
                     <section>

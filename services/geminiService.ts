@@ -29,23 +29,11 @@ export interface ModifyInsertionRequest {
     instruction: string;
 }
 
+// V1 legacy settings fallback (will be removed once migration is complete)
 const getSettings = (): APISettings | null => {
     if (typeof window === 'undefined') return null;
     const saved = localStorage.getItem('api_settings');
     return saved ? JSON.parse(saved) : null;
-};
-
-// Helper function to get API client using the new config system
-const getNewConfigClient = () => {
-    try {
-        const apiKey = configService.getApiKey();
-        if (apiKey) {
-            return new GoogleGenAI({ apiKey });
-        }
-    } catch (error) {
-        console.warn('Failed to get config from new system:', error);
-    }
-    return null;
 };
 
 class OpenAIAdapter {
@@ -82,28 +70,56 @@ class OpenAIAdapter {
                     messages.unshift({ role: 'system', content: params.config.systemInstruction });
                 }
 
-                const fetchUrl = this.baseUrl.endsWith('/') ? `${this.baseUrl}chat/completions` : `${this.baseUrl}/chat/completions`;
+                const cleanBaseUrl = this.baseUrl.trim().replace(/\/+$/, "");
+                const fetchUrl = `${cleanBaseUrl}/chat/completions`;
+
+                console.log(`[ProxyRequest] Calling: ${fetchUrl} with model: ${model}`);
 
                 const response = await fetch(fetchUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${this.apiKey}`
+                        'Authorization': `Bearer ${this.apiKey}`,
+                        // 一些代理需要这个头来识别请求来自浏览器
+                        'X-Requested-With': 'XMLHttpRequest'
                     },
                     body: JSON.stringify({
                         model: model,
                         messages: messages,
-                        temperature: params.config?.temperature,
-                        max_tokens: params.config?.maxOutputTokens,
+                        temperature: params.config?.temperature || 0.7,
+                        max_tokens: params.config?.maxOutputTokens || 4096,
+                        stream: false,
+                        ...(params.config?.responseMimeType === 'application/json' ? { response_format: { type: 'json_object' } } : {})
                     })
                 });
 
                 if (!response.ok) {
                     const err = await response.text();
-                    throw new Error(`OpenAI API Error: ${response.status} ${err}`);
+                    let errMsg = `Proxy Error: ${response.status}`;
+                    if (response.status === 404) {
+                        errMsg += ` (URL Not Found: ${fetchUrl}). 请确认您的代理地址 (Base URL) 是否正确。`;
+                    }
+                    // 检测 HTML 响应（说明 URL 不对，打到了网页而非 API）
+                    if (err.trim().startsWith('<') || err.includes('<!DOCTYPE') || err.includes('<!--')) {
+                        errMsg = `代理地址错误：返回了 HTML 页面而非 API 响应。\n请检查您的 Base URL 是否正确。\n当前请求地址: ${fetchUrl}\n\n常见的 Base URL 格式: https://your-proxy.com/v1`;
+                    }
+                    throw new Error(`${errMsg}\nDetail: ${err.substring(0, 200)}`);
                 }
 
-                const data = await response.json();
+                // 检测响应是否为 HTML（某些代理 200 状态也可能返回网页）
+                const contentType = response.headers.get('content-type') || '';
+                const responseText = await response.text();
+                
+                if (!contentType.includes('application/json') && (responseText.trim().startsWith('<') || responseText.includes('<!DOCTYPE'))) {
+                    throw new Error(`代理地址错误：返回了 HTML 页面而非 JSON。\n请检查您的 Base URL 是否正确。\n当前请求地址: ${fetchUrl}\n\n常见的 Base URL 格式: https://your-proxy.com/v1`);
+                }
+
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch (parseErr) {
+                    throw new Error(`代理返回的数据不是有效的 JSON。\n请检查 Base URL 是否正确。\n当前请求地址: ${fetchUrl}\n\n返回内容预览: ${responseText.substring(0, 150)}`);
+                }
                 const text = data.choices?.[0]?.message?.content || "";
 
                 return {
@@ -119,23 +135,189 @@ class OpenAIAdapter {
     }
 }
 
-const getAI = () => {
-    const apiKey = configService.getApiKey();
-    if (!apiKey) {
-        // Fallback to old system if no key in new system
-        const settings = getSettings();
-        const llmSettings = settings?.llm;
-        const key = llmSettings?.apiKey || process.env.API_KEY || "";
-        return new GoogleGenAI({ apiKey: key });
+// ═══════════════════════════════════════════════════════════
+// Anthropic 原生 API 适配器
+// 用于支持 Anthropic 原生格式的代理 (/v1/messages)
+// 例如：https://luckycodecc.cn/claude → /v1/messages
+// ═══════════════════════════════════════════════════════════
+class AnthropicAdapter {
+    constructor(private apiKey: string, private baseUrl: string) { }
+
+    get models() {
+        return {
+            generateContent: async (params: any) => {
+                const model = params.model;
+                const contents = params.contents;
+
+                let messages: any[] = [];
+                let systemPrompt: string | undefined;
+
+                if (params.config?.systemInstruction) {
+                    systemPrompt = params.config.systemInstruction;
+                }
+
+                if (typeof contents === 'string') {
+                    messages.push({ role: 'user', content: contents });
+                } else if (contents.parts) {
+                    const contentParts = contents.parts.map((part: any) => {
+                        if (part.text) return { type: 'text', text: part.text };
+                        if (part.inlineData) return {
+                            type: 'image',
+                            source: {
+                                type: 'base64',
+                                media_type: part.inlineData.mimeType,
+                                data: part.inlineData.data
+                            }
+                        };
+                        return null;
+                    }).filter(Boolean);
+
+                    if (contentParts.length === 1 && contentParts[0].type === 'text') {
+                        messages.push({ role: 'user', content: contentParts[0].text });
+                    } else {
+                        messages.push({ role: 'user', content: contentParts });
+                    }
+                }
+
+                const cleanBaseUrl = this.baseUrl.trim().replace(/\/+$/, "");
+                const fetchUrl = `${cleanBaseUrl}/v1/messages`;
+
+                console.log(`[AnthropicRequest] Calling: ${fetchUrl} with model: ${model}`);
+
+                const requestBody: any = {
+                    model: model,
+                    messages: messages,
+                    max_tokens: params.config?.maxOutputTokens || 4096,
+                    temperature: params.config?.temperature || 0.7,
+                };
+
+                if (systemPrompt) {
+                    requestBody.system = systemPrompt;
+                }
+
+                const response = await fetch(fetchUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': this.apiKey,
+                        'anthropic-version': '2023-06-01',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) {
+                    const err = await response.text();
+                    let errMsg = `Anthropic API Error: ${response.status}`;
+
+                    if (err.trim().startsWith('<') || err.includes('<!DOCTYPE') || err.includes('<!--')) {
+                        errMsg = `代理地址错误：返回了 HTML 页面而非 API 响应。\n请检查您的 Base URL 是否正确。\n当前请求地址: ${fetchUrl}`;
+                        throw new Error(errMsg);
+                    }
+
+                    try {
+                        const errJson = JSON.parse(err);
+                        if (errJson.error?.message) {
+                            errMsg += `: ${errJson.error.message}`;
+                        } else {
+                            errMsg += `\n${err.substring(0, 200)}`;
+                        }
+                    } catch {
+                        errMsg += `\n${err.substring(0, 200)}`;
+                    }
+
+                    throw new Error(errMsg);
+                }
+
+                const contentType = response.headers.get('content-type') || '';
+                const responseText = await response.text();
+
+                if (!contentType.includes('application/json') && (responseText.trim().startsWith('<') || responseText.includes('<!DOCTYPE'))) {
+                    throw new Error(`代理地址错误：返回了 HTML 页面而非 JSON。\n请检查 Base URL。\n当前请求地址: ${fetchUrl}`);
+                }
+
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch (parseErr) {
+                    throw new Error(`代理返回的数据不是有效的 JSON。\n当前请求地址: ${fetchUrl}\n\n返回内容预览: ${responseText.substring(0, 150)}`);
+                }
+
+                // Anthropic 响应格式: { content: [{ type: "text", text: "..." }] }
+                const text = data.content?.map((block: any) => block.text || '').join('') || "";
+
+                return {
+                    text: text,
+                    candidates: [{
+                        content: {
+                            parts: [{ text: text }]
+                        }
+                    }]
+                } as GenerateContentResponse;
+            }
+        };
     }
-    return new GoogleGenAI({ apiKey });
+}
+
+const getAI = () => {
+    const settings = getSettings();
+    const fullConfig = configService.getConfig();
+    
+    // Gemini Provider 配置
+    const geminiConfig = fullConfig.gemini;
+    const geminiKey = geminiConfig.apiKey || settings?.llm.apiKey || process.env.API_KEY || "";
+    
+    // Claude Provider 配置
+    const claudeConfig = fullConfig.claude;
+    const claudeKey = claudeConfig.apiKey || settings?.llm.claudeApiKey || "";
+    
+    return {
+        models: {
+            generateContent: async (params: any) => {
+                const modelId = params.model;
+                const isClaude = modelId?.includes('claude');
+                
+                if (isClaude) {
+                    // ═══ Claude 路径：必须走代理 ═══
+                    const apiKey = claudeKey;
+                    const baseUrl = claudeConfig.baseUrl || settings?.llm.baseUrl || '';
+                    
+                    if (!baseUrl) {
+                        throw new Error('Claude 模型需要配置代理地址 (Base URL)。请在系统配置中设置 Claude 的代理地址。');
+                    }
+                    
+                    // 根据 API 格式选择适配器
+                    const format = claudeConfig.apiFormat || 'anthropic';
+                    if (format === 'anthropic') {
+                        // Anthropic 原生格式: /v1/messages (如 luckycodecc.cn/claude)
+                        const adapter = new AnthropicAdapter(apiKey, baseUrl);
+                        return adapter.models.generateContent(params);
+                    } else {
+                        // OpenAI 兼容格式: /chat/completions
+                        const adapter = new OpenAIAdapter(apiKey, baseUrl);
+                        return adapter.models.generateContent(params);
+                    }
+                }
+                
+                if (geminiConfig.mode === 'proxy' && geminiConfig.baseUrl) {
+                    // ═══ Gemini 代理路径：通过第三方 OpenAI-compatible 代理 ═══
+                    const adapter = new OpenAIAdapter(geminiKey, geminiConfig.baseUrl);
+                    return adapter.models.generateContent(params);
+                }
+                
+                // ═══ Gemini 官方路径：直连 Google SDK ═══
+                const genAI = new GoogleGenAI({ apiKey: geminiKey });
+                return (genAI as any).models.generateContent(params);
+            }
+        }
+    };
 };
 
 export const testConnection = async (section: 'llm' | 'image'): Promise<boolean> => {
     try {
         const model = configService.getEngineModel(section === 'llm' ? 'coreEngine' : 'imageGen');
         const response = await getAI().models.generateContent({
-            model: model || (section === 'llm' ? 'gemini-3-flash-preview' : 'gemini-3.1-pro-preview'),
+            model: model || (section === 'llm' ? 'gemini-3.1-flash-lite-preview' : 'gemini-3-pro-image-preview'),
             contents: { parts: [{ text: "ping" }] },
             config: { maxOutputTokens: 5 }
         });
@@ -248,7 +430,9 @@ const handleApiError = (context: string, e: any) => {
     console.error(`[GeminiServiceError] ${context}:`, e);
     const errorMsg = e?.message || e?.toString() || "Unknown error";
     if (typeof window !== 'undefined') {
-        if (errorMsg.includes("429") || errorMsg.toLowerCase().includes("quota") || errorMsg.toLowerCase().includes("token") || errorMsg.includes("exhausted")) {
+        if (errorMsg.includes("代理地址错误") || errorMsg.includes("Base URL")) {
+            alert(`代理配置错误 (Proxy Config Error)。\n\n${errorMsg}`);
+        } else if (errorMsg.includes("429") || errorMsg.toLowerCase().includes("quota") || errorMsg.includes("exhausted") || errorMsg.toLowerCase().includes("rate limit")) {
             alert(`API 额度已达上限或请求过于频繁 (Quota Exceeded)。\n请检查 API Key 额度或稍后重试。\n\n${errorMsg}`);
         } else if (errorMsg.includes("503") || errorMsg.toLowerCase().includes("unavailable") || errorMsg.toLowerCase().includes("high demand")) {
             alert(`当前模型请求量过大，服务暂时不可用 (503 Service Unavailable)。\n请稍后重试。\n\n${errorMsg}`);
@@ -288,7 +472,7 @@ export const generateSutureScript = async (
     });
 
     try {
-        const model = configService.getEngineModel('metonymyEngine') || 'gemini-3.1-pro-preview';
+        const model = configService.getEngineModel('metonymyEngine') || 'gemini-3-pro-preview';
         console.log(`[Metonymy] Generating Suture Script with model: ${model}`);
         const res1 = await retryWithBackoff<GenerateContentResponse>(() => getAI().models.generateContent({
             model: model,
@@ -335,7 +519,7 @@ export const transformScriptStyle = async (
     );
 
     try {
-        const model = configService.getEngineModel('metonymyEngine') || 'gemini-3.1-pro-preview';
+        const model = configService.getEngineModel('metonymyEngine') || 'gemini-3-pro-preview';
         console.log(`[Metonymy] Transforming Script Style with model: ${model}`);
         const response = await retryWithBackoff<GenerateContentResponse>(() => getAI().models.generateContent({
             model: model,
@@ -397,7 +581,7 @@ export const generateSutureStoryboard = async (
     });
 
     try {
-        const model = configService.getEngineModel('metonymyEngine') || 'gemini-3.1-pro-preview';
+        const model = configService.getEngineModel('metonymyEngine') || 'gemini-3-pro-preview';
         console.log(`[Metonymy] Generating Storyboard with model: ${model}`);
         const response = await retryWithBackoff<GenerateContentResponse>(() => getAI().models.generateContent({
             model: model,
@@ -567,7 +751,7 @@ export const breakdownScript = async (sourceText: string, instruction?: string, 
     const numberedText = paragraphs.map((p, i) => `[${i + 1}] ${p}`).join('\n\n');
     const prompt = buildScriptBreakdownPrompt(numberedText, instruction, targetCount);
     try {
-        const model = configService.getEngineModel('metonymyEngine') || 'gemini-3.1-pro-preview';
+        const model = configService.getEngineModel('metonymyEngine') || 'gemini-3-pro-preview';
         console.log(`[Metonymy] Breaking Down Script with model: ${model}`);
         const response = await retryWithBackoff<GenerateContentResponse>(() => getAI().models.generateContent({
             model: model,
@@ -666,7 +850,7 @@ export const generateAssetPrompts = async (blueprint: CreativeBlueprint) => {
 export const analyzePsychoStructure = async (fieldState: NarrativeFieldState, synopsis: string) => {
     const prompt = buildPsychoAnalysisPrompt(fieldState, synopsis);
     try {
-        const model = configService.getEngineModel('psychoAnalysis') || 'gemini-3-flash-preview';
+        const model = configService.getEngineModel('psychoAnalysis') || 'gemini-3.1-flash-lite-preview';
         console.log(`[PsychoAnalysis] Analyzing Structure with model: ${model}`);
         const response = await retryWithBackoff<GenerateContentResponse>(() => getAI().models.generateContent({
             model: model,

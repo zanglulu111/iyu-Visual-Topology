@@ -267,7 +267,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           {/* 2. Language Toggle */}
           <button
             onClick={() => setLang(lang === 'CN' ? 'EN' : 'CN')}
-            className={`text-[10px] font-bold ${theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'} transition-all duration-300 w-7 h-7 flex items-center justify-center rounded-sm tracking-widest hover:bg-white/5 hover:scale-110 active:scale-90`}
+            className={`text-[10px] font-bold ${theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'} transition-all duration-300 w-8 h-8 flex items-center justify-center rounded-full tracking-widest hover:bg-white/10 hover:scale-110 active:scale-90`}
             title={lang === 'CN' ? 'Switch to English' : '切换至中文'}
           >
             {lang === 'CN' ? '中' : 'EN'}
@@ -276,7 +276,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           {/* 3. Theme Toggle */}
           <button
             onClick={toggleTheme}
-            className={`flex items-center justify-center w-7 h-7 rounded-sm ${theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'} transition-all duration-300 hover:bg-white/5 hover:scale-110 active:scale-90`}
+            className={`flex items-center justify-center w-8 h-8 rounded-full ${theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'} transition-all duration-300 hover:bg-white/10 hover:scale-110 active:scale-90`}
             title={theme === 'dark' ? "切换为复古主题" : "切换为暗黑主题"}
           >
             {theme === 'dark' ? <Moon size={14} /> : <Sun size={14} className="text-[#8B261D]" />}
@@ -285,7 +285,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           {/* 4. Ring Toggle */}
           <button
             onClick={() => setShowRings(!showRings)}
-            className={`flex items-center justify-center w-7 h-7 rounded-sm transition-all duration-300 hover:bg-white/5 hover:scale-110 active:scale-90 focus:outline-none ${
+            className={`flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300 hover:bg-white/10 hover:scale-110 active:scale-90 focus:outline-none ${
               showRings 
                 ? (theme === 'retro' ? 'text-[#8B261D]' : getThemeTextColor()) 
                 : (theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white')
@@ -300,12 +300,11 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         <div className="flex items-center gap-2 mr-4">
           {[
             { icon: HistoryIcon, label: lang === 'CN' ? '欲望档案' : 'ARCHIVE', labelCn: '欲望档案', labelEn: 'ARCHIVE', onClick: openHistory, isActive: isHistoryOpen },
-            { icon: Settings, label: lang === 'CN' ? '系统配置' : 'SYSTEM CONFIG', labelCn: '系统配置', labelEn: 'SYSTEM CONFIG', onClick: openSettings, isActive: false }
           ].map((item, idx) => (
             <button
               key={idx}
               onClick={item.onClick}
-              className={`flex items-center gap-1.5 transition-all duration-300 group px-2 py-1 rounded-md bg-transparent hover:bg-white/5 hover:scale-105 active:scale-95 ${item.isActive ? getThemeTextColor() : (theme === 'retro' ? "text-zinc-600 hover:text-black" : "text-zinc-400 hover:text-white")}`}
+              className={`flex items-center gap-1.5 transition-all duration-300 group px-3 py-1.5 rounded-full bg-transparent hover:bg-white/10 hover:scale-105 active:scale-95 ${item.isActive ? getThemeTextColor() : (theme === 'retro' ? "text-zinc-600 hover:text-black" : "text-zinc-400 hover:text-white")}`}
             >
               <item.icon size={14} className={`shrink-0 transition-all duration-100 ${item.isActive ? 'text-current' : (theme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white')}`} />
               <span className={`text-[10px] font-bold uppercase tracking-[0.1em] transition-all duration-100 hidden md:block ${item.isActive ? 'text-current' : (theme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white')}`}>

@@ -164,7 +164,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
               </div>
             </div>
             <p className="text-[10px] text-zinc-500 uppercase tracking-[0.4em] mb-4">The Visionary Protocol</p>
-            <p className="text-xs text-zinc-400 font-light leading-relaxed">
+            <p className="text-xs text-zinc-400 font-light leading-loose">
               {lang === 'CN'
                 ? '爱欲视觉拓扑学：在实在界的荒漠上，确立一种比现实更坚固的虚构。'
                 : 'Erotic Visual Topology: establishing a fiction more solid than reality.'}

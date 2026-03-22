@@ -12,13 +12,13 @@ import { useTheme } from '../contexts/ThemeContext';
 
 
 
-const AnimatedText = ({ cn, en, lang, className = "", hClass = "h-5" }: { cn: React.ReactNode, en: React.ReactNode, lang: 'CN' | 'EN', className?: string, hClass?: string }) => (
+const AnimatedText = ({ cn, en, lang, className = "", hClass = "h-5", leading = "leading-none" }: { cn: React.ReactNode, en: React.ReactNode, lang: 'CN' | 'EN', className?: string, hClass?: string, leading?: string }) => (
   <div className={`overflow-hidden relative ${hClass} ${className}`}>
     <div className={`transition-all duration-[1500ms] w-full ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col ${lang === 'EN' ? '-translate-y-1/2' : 'translate-y-0'}`}>
-      <div className={`${hClass} flex items-center shrink-0 w-full leading-none`}>
+      <div className={`${hClass} flex items-center shrink-0 w-full ${leading}`}>
         {cn}
       </div>
-      <div className={`${hClass} flex items-center shrink-0 w-full leading-none`}>
+      <div className={`${hClass} flex items-center shrink-0 w-full ${leading}`}>
         {en}
       </div>
     </div>
@@ -358,8 +358,9 @@ export const LandingView: React.FC<LandingViewProps> = ({
             <p className={`text-[10px] uppercase tracking-[0.4em] mb-4 transition-colors ${theme === 'retro' ? 'text-black/60' : 'text-white font-semibold shadow-sm'}`}>The Visionary Protocol</p>
             <AnimatedText
               lang={lang}
-              hClass="h-[40px]"
-              className={`text-xs font-medium leading-relaxed transition-colors ${theme === 'retro' ? 'text-black/80' : 'text-white shadow-sm'}`}
+              hClass="h-[56px]"
+              leading="leading-loose"
+              className={`text-xs font-medium transition-colors ${theme === 'retro' ? 'text-black/80' : 'text-white shadow-sm'}`}
               cn="爱欲视觉拓扑学：在实在界的荒漠上，确立一种比现实更坚固的虚构。"
               en="Erotic Visual Topology: establishing a fiction more solid than reality."
             />

@@ -6,6 +6,7 @@ export interface APISettings {
     provider: string; // 'google' | 'openai' | 'custom'
     model: string;
     apiKey: string;
+    claudeApiKey?: string;
     baseUrl?: string;
   };
   image: {

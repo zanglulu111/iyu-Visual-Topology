@@ -240,9 +240,9 @@ export const BorromeanRings: React.FC<BorromeanRingsProps> = ({
                             <circle cx="100" cy="62" r="1.5" fill="none" stroke={ringHex.sinthome} strokeWidth="0.2" />
                         </g>
 
-                        <circle cx="100" cy="100" r="1.2" fill={strokeColorHigh} opacity="0.9" />
-                        <circle cx="100" cy="100" r="4" fill="none" stroke={strokeColorHigh} strokeWidth={isRetro ? "0.2" : "0.1"} strokeDasharray="1 1" />
-                        <g>
+                        <circle cx="100" cy="100" r="1.2" fill={strokeColorHigh} opacity="0.3" />
+                        <circle cx="100" cy="100" r="4" fill="none" stroke={strokeColorHigh} strokeWidth={isRetro ? "0.2" : "0.1"} strokeDasharray="1 1" opacity="0.3" />
+                        <g opacity="0.3">
                             <animateTransform attributeName="transform" type="rotate"
                                 from="0 100 100" to="360 100 100" dur="15s"
                                 additive="sum" repeatCount="indefinite" />
