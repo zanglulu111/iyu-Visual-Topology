@@ -121,12 +121,20 @@ export const GlobalHomePage: React.FC<GlobalHomePageProps> = ({
     >
       {/* ── 顶部导航栏 ── */}
       <header
-        className={`shrink-0 h-14 flex items-center justify-between px-6 z-20 backdrop-blur-md transition-colors duration-700 ${
-          isRetro
-            ? 'bg-transparent border-b border-[var(--border-main)]'
-            : 'bg-black/30 border-b border-white/8'
-        }`}
+        className={`shrink-0 h-14 flex items-center justify-between px-6 md:px-12 z-50 backdrop-blur-md transition-all duration-500 bg-[var(--bg-header)] border-b ${
+          isRetro ? 'border-[var(--border-main)]' : 'border-white/[0.06]'
+        } relative`}
       >
+        {/* Theme Divider Line - Global Consistency Accent */}
+        <div 
+          className="absolute bottom-0 left-0 right-0 h-px transition-all duration-500 z-10" 
+          style={{ 
+            backgroundColor: isRetro ? '#8B261D' : 'rgba(212, 175, 55, 0.15)',
+            opacity: isRetro ? 0.2 : 0.15,
+            boxShadow: isRetro ? 'none' : '0 0 10px rgba(212,175,55,0.1)'
+          }} 
+        />
+
         {/* 左侧：返回入口 */}
         <div className="flex items-center gap-5">
           <button
@@ -148,66 +156,78 @@ export const GlobalHomePage: React.FC<GlobalHomePageProps> = ({
             />
           </button>
 
-          <AnimatedText
-            lang={lang}
-            hClass="h-4"
-            className={`text-xs font-bold uppercase tracking-widest transition-colors duration-500 ${
+          <span 
+            className={`font-serif font-bold text-xs uppercase tracking-widest transition-colors duration-500 ${
               isRetro ? 'text-[#8B261D]' : 'text-white'
             }`}
-            cn="迷雾学派：全局主页"
-            en="MIST: GLOBAL HOME"
-          />
+          >
+            {lang === 'CN' ? '迷雾学派：全局主页' : 'MIST: GLOBAL HOME'}
+          </span>
         </div>
 
-        {/* 右侧：控制区 */}
-        <div className="flex items-center gap-4">
-          {/* 圆环切换 */}
-          <button
-            onClick={() => setShowRings(!showRings)}
-            className={`flex items-center justify-center w-7 h-7 rounded-sm transition-all duration-300 hover:bg-white/5 hover:scale-110 active:scale-90 focus:outline-none ${
-              showRings
-                ? isRetro ? 'text-[#8B261D]' : 'text-white/80'
-                : isRetro ? 'text-zinc-600 hover:text-black' : 'text-zinc-500 hover:text-white'
-            }`}
-            title={lang === 'CN' ? '背景圆环开关' : 'Background Rings Toggle'}
-          >
-            <Aperture size={14} className={`shrink-0 transition-all duration-300 ${showRings ? 'rotate-180' : ''}`} />
-          </button>
+        {/* 右侧：控制区 - Synchronized with AppHeader */}
+        <div className="flex items-center flex-row-reverse gap-4">
+          <div className={`flex items-center gap-1 px-1 py-1 rounded-full transition-all duration-500 border border-transparent hover:border-white/5 backdrop-blur-sm hover:backdrop-blur-md 
+            ${isRetro ? 'hover:bg-[#FDFCF8]/90 hover:border-[#8B261D]/15' : 'hover:bg-black/30'}`}>
+            
+            {/* 1. Ring Toggle */}
+            <button
+              onClick={() => setShowRings(!showRings)}
+              className={`flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300 border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-90 focus:outline-none ${
+                showRings
+                  ? isRetro ? 'text-[#8B261D]' : 'text-white/80'
+                  : isRetro ? 'text-zinc-600 hover:text-black' : 'text-zinc-500 hover:text-white'
+              }`}
+              title={lang === 'CN' ? '背景圆环开关' : 'Background Rings Toggle'}
+            >
+              <Aperture size={13} className={`shrink-0 transition-all duration-300 ${showRings ? 'rotate-180' : ''}`} />
+            </button>
 
-          {/* 语言切换 */}
-          <button
-            onClick={() => setLang(lang === 'CN' ? 'EN' : 'CN')}
-            className={`text-[10px] font-bold transition-all duration-300 w-7 h-7 flex items-center justify-center rounded-sm tracking-widest hover:scale-110 active:scale-90 ${
-              isRetro ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'
-            }`}
-            title={lang === 'CN' ? 'Switch to English' : '切换至中文'}
-          >
-            {lang === 'CN' ? '中' : 'EN'}
-          </button>
+            {/* 2. Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className={`flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300 border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-90 ${
+                isRetro ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'
+              }`}
+              title={theme === 'dark' ? (lang === 'CN' ? '切换为复古主题' : 'Switch to Retro') : (lang === 'CN' ? '切换为暗黑主题' : 'Switch to Dark')}
+            >
+              {theme === 'dark' ? <Moon size={13} strokeWidth={2} /> : <Sun size={13} strokeWidth={2} className="text-[#8B261D]" />}
+            </button>
 
-          {/* 主题切换 */}
-          <button
-            onClick={toggleTheme}
-            className={`flex items-center justify-center w-7 h-7 rounded-sm transition-all duration-300 hover:scale-110 active:scale-90 ${
-              isRetro ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'
-            }`}
-            title={theme === 'dark' ? '切换为复古主题' : '切换为暗黑主题'}
-          >
-            {theme === 'dark' ? <Moon size={14} /> : <Sun size={14} className="text-[#8B261D]" />}
-          </button>
+            {/* 3. Language Toggle */}
+            <button
+              onClick={() => setLang(lang === 'CN' ? 'EN' : 'CN')}
+              className={`w-8 h-8 flex items-center justify-center rounded-full transition-all duration-300 border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-90 ${
+                isRetro ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'
+              }`}
+              title={lang === 'CN' ? 'Switch to English' : '切换至中文'}
+            >
+              <span className="text-[10px] font-bold uppercase tracking-widest">{lang === 'CN' ? '中' : 'EN'}</span>
+            </button>
 
-          {/* 用户 */}
-          <button
-            onClick={() => currentUser.id !== 'guest_user' ? openProfile() : openAuth()}
-            className={`flex items-center gap-2 text-[10px] font-mono tracking-[0.15em] transition-all duration-300 hover:scale-105 active:scale-95 ${
-              isRetro ? 'text-black/40 hover:text-black/80' : 'text-white/30 hover:text-white/70'
-            }`}
-          >
-            <UserIcon size={11} />
-            <span className="hidden sm:block">
-              {currentUser.id !== 'guest_user' ? currentUser.username : (lang === 'CN' ? '访客' : 'GUEST')}
-            </span>
-          </button>
+            {/* 4. Profile / User */}
+            <button
+              onClick={() => currentUser.id !== 'guest_user' ? openProfile() : openAuth()}
+              className={`flex items-center gap-2 group transition-all duration-300 px-2 h-8 rounded-full border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-95`}
+            >
+              <div className={`w-5 h-5 rounded-full ${!currentUser.avatarUrl && (currentUser.avatarColor || 'bg-zinc-600')} border border-[var(--border-main)]/30 flex items-center justify-center text-[10px] font-bold text-white shadow-sm overflow-hidden group-hover:scale-110 transition-transform`}>
+                {currentUser.avatarUrl ? (
+                  <img src={currentUser.avatarUrl} alt="avatar" className="w-full h-full object-cover" />
+                ) : (
+                  currentUser.id === 'guest_user' ? <UserIcon size={12} /> : currentUser.username.substring(0, 1).toUpperCase()
+                )}
+              </div>
+              <div className="hidden sm:flex items-center h-4">
+                <AnimatedText
+                  lang={lang}
+                  hClass="h-4"
+                  className={`text-[10px] font-bold uppercase tracking-widest transition-all duration-300 ${isRetro ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`}
+                  cn={currentUser?.id === 'guest_user' ? '访客' : currentUser.username}
+                  en={currentUser?.id === 'guest_user' ? 'GUEST' : currentUser.username}
+                />
+              </div>
+            </button>
+          </div>
         </div>
       </header>
 

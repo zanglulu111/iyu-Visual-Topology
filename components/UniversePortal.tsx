@@ -130,6 +130,7 @@ const LACANIAN_QUOTES = [
   { cn: '“爱就是把你并没有的东西献给并不想要它的人”', en: '“To love is to give what one does not have to someone who does not want it”' },
   { cn: '“无意识像语言一样结构”', en: '“The unconscious is structured like a language”' },
   { cn: '“真理有虚构的结构”', en: '“Truth has the structure of fiction”' },
+  { cn: '“记住我们曾经也活过、爱过、笑过”', en: '“Remember us for we too have lived, loved and laughed”' },
 ];
 
 let hasVisitedPortalSession = false;
@@ -160,6 +161,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
   const [glitchActive, setGlitchActive] = useState<boolean[]>([false, false, false, false, false]);
   const glitchTimers = useRef<(ReturnType<typeof setTimeout> | null)[]>([null, null, null, null, null]);
   const realmAudioRefs = useRef<(HTMLAudioElement | null)[]>([null, null, null, null, null]);
+  const confirmAudioRefs = useRef<(HTMLAudioElement | null)[]>([]);
 
   // Parallax & Cursor tracking
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -177,7 +179,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
     // Auto-change quotes every 12 seconds
     const quoteInterval = setInterval(() => {
       toggleQuote();
-    }, 12000);
+    }, 8000);
 
     const handleMouseMove = (e: MouseEvent) => {
       const x = (e.clientX / window.innerWidth - 0.5) * 2;
@@ -210,6 +212,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
     // Initialize glitch sound effect
     const glitchAudio = new Audio('/audio/glitch.mp3');
     glitchAudio.volume = 0.8; // Increased volume as requested
+    glitchAudio.loop = true; // Loop while hovered as requested
     glitchAudioRef.current = glitchAudio;
 
     // Initialize realm-specific glitch sounds
@@ -217,6 +220,13 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
       const audio = new Audio(`/audio/realm-0${num}.mp3`);
       audio.volume = 0.6;
       realmAudioRefs.current[i] = audio;
+    });
+
+    // Initialize per-realm confirm sounds (user to provide files confirm-01 to confirm-05)
+    [1, 2, 3, 4, 5].forEach((num, i) => {
+      const audio = new Audio(`/audio/confirm-0${num}.mp3`);
+      audio.volume = 0.8;
+      confirmAudioRefs.current[i] = audio;
     });
 
     if (isFirstVisit) {
@@ -277,6 +287,13 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
     }
   };
 
+  const playConfirmSound = (index: number) => {
+    if (confirmAudioRefs.current[index]) {
+      confirmAudioRefs.current[index]!.currentTime = 0;
+      confirmAudioRefs.current[index]!.play().catch(() => {});
+    }
+  };
+
   const handleRealmHover = (index: number) => {
     // Start visual glitch
     const nextGlitch = [...glitchActive];
@@ -321,17 +338,19 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
     }
   };
 
-  const handleRealmClick = (realm: RealmDef) => {
+  const handleRealmClick = (realm: RealmDef, index: number) => {
     if (isExiting) return;
     
     // De-couple path: If it's dictionary, we open the manual (codex) directly
     if (realm.id === 'dictionary') {
       openManual();
+      playConfirmSound(index); // Play sound even for dictionary
       return;
     }
 
     setIsExiting(true);
     setExitTarget(realm.id);
+    playConfirmSound(index);
     setTimeout(() => {
       if (realm.target.viewMode) setViewMode(realm.target.viewMode);
       if (setInitialProtocol) {
@@ -450,7 +469,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
         @keyframes quoteFadeSeamless {
           0% { opacity: 0; transform: translateY(2px); }
           15% { opacity: 1; transform: translateY(0); }
-          80% { opacity: 1; transform: translateY(0); }
+          95% { opacity: 1; transform: translateY(0); }
           100% { opacity: 0; transform: translateY(-2px); }
         }
         @keyframes text-jitter-dispersion {
@@ -489,7 +508,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
           opacity: 1 !important;
         }
         .quote-container {
-          animation: quoteFadeSeamless 12s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+          animation: quoteFadeSeamless 8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
       `}</style>
 
@@ -605,7 +624,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
 
           <div 
             key={`${lacanianQuoteIndex}`}
-            className="mt-8 sm:mt-12 group/quote relative inline-block cursor-pointer pointer-events-auto quote-container"
+            className="mt-4 sm:mt-6 group/quote relative inline-block cursor-pointer pointer-events-auto quote-container transition-transform duration-500 hover:scale-110"
             onClick={(e) => { e.stopPropagation(); toggleQuote(); }}
           >
             <AnimatedText
@@ -642,7 +661,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
               return (
                 <button
                   key={realm.id}
-                  onClick={() => handleRealmClick(realm)}
+                  onClick={() => handleRealmClick(realm, i)}
                   onMouseEnter={() => {
                     setHoveredRealm(realm.id);
                     handleRealmHover(i);
@@ -755,10 +774,9 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
       </div>
 
       <div
-        className={`absolute top-4 sm:top-6 right-4 sm:right-6 flex items-center gap-2 sm:gap-3 z-[100] p-1 sm:p-1.5 rounded-full transition-all duration-500
-          ${isRetro ? 'bg-[var(--bg-main)]/50 hover:bg-[#FDFCF8]/90 border border-transparent hover:border-[#8B261D]/15' 
-                    : 'bg-transparent hover:bg-black/40 border border-transparent hover:border-white/5'}
-          backdrop-blur-sm hover:backdrop-blur-md pointer-events-auto`}
+        className={`absolute top-4 sm:top-6 right-4 sm:right-6 flex items-center gap-1 z-[100] p-1 rounded-full transition-all duration-500 border border-transparent backdrop-blur-sm hover:backdrop-blur-md pointer-events-auto
+          ${isRetro ? 'bg-[var(--bg-main)]/50 hover:bg-[#FDFCF8]/90 hover:border-[#8B261D]/15' 
+                    : 'bg-transparent hover:bg-black/30 hover:border-white/5'}`}
         style={{
           animation: mounted ? 'fadeIn 1.5s ease-out both' : 'none',
           animationDelay: '0.5s',
@@ -767,15 +785,16 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
       >
         <button
           onClick={() => setPage(2)}
-          className={`text-[10px] font-mono tracking-[0.15em] transition-all duration-300 flex items-center gap-1.5 px-3 py-1.5 rounded-full ${isRetro ? 'text-black/40 hover:text-black/80 hover:bg-black/5' : 'text-white/25 hover:text-white/70 hover:bg-white/10'}`}
+          className={`h-8 px-3 rounded-full transition-all duration-300 flex items-center gap-1.5 border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-95
+            ${isRetro ? 'text-black/40 hover:text-black/80 hover:border-black/5' : 'text-white/25 hover:text-white/70'}`}
           title={lang === 'CN' ? '回到全局主页' : 'Global Home'}
         >
-          <Globe size={11} />
+          <Globe size={13} />
           <div className="hidden sm:block">
             <AnimatedText
               lang={lang}
               hClass="h-4"
-              className="text-[10px] font-mono tracking-[0.15em]"
+              className="text-[10px] font-mono font-bold tracking-[0.15em]"
               cn="全局主页"
               en="GLOBAL HOME"
             />
@@ -784,11 +803,12 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
 
         <button
           onClick={() => setMistEnabled(!mistEnabled)}
-          className={`group/mist p-2 rounded-full transition-all duration-300 flex items-center justify-center ${isRetro ? 'hover:bg-black/5' : 'hover:bg-white/10'}`}
+          className={`w-8 h-8 rounded-full transition-all duration-300 flex items-center justify-center border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-90
+            ${isRetro ? 'hover:border-black/5' : ''}`}
           title={mistEnabled ? (lang === 'CN' ? '关闭迷雾' : 'Disable Mist') : (lang === 'CN' ? '开启迷雾' : 'Enable Mist')}
         >
           <div className="relative flex items-center justify-center">
-            <Cloud size={12} strokeWidth={2} className={`transition-all duration-300 ${mistEnabled ? (isRetro ? 'text-black/60 shadow-[0_0_8px_rgba(0,0,0,0.1)]' : 'text-white/80 shadow-[0_0_8px_rgba(255,255,255,0.2)]') : (isRetro ? 'text-black/20' : 'text-white/20')}`} />
+            <Cloud size={13} strokeWidth={2} className={`transition-all duration-300 ${mistEnabled ? (isRetro ? 'text-black/60 shadow-[0_0_8px_rgba(0,0,0,0.1)]' : 'text-white/80 shadow-[0_0_8px_rgba(255,255,255,0.2)]') : (isRetro ? 'text-black/20' : 'text-white/20')}`} />
             {mistEnabled && (
                 <div className={`absolute -inset-1 rounded-full animate-pulse opacity-10 ${isRetro ? 'bg-black' : 'bg-white'}`} style={{ animationDuration: '4s' }} />
             )}
@@ -797,22 +817,24 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
 
         <button
           onClick={toggleMusic}
-          className={`group/music p-2 rounded-full transition-all duration-300 flex items-center justify-center ${isRetro ? 'hover:bg-black/5' : 'hover:bg-white/10'}`}
+          className={`w-8 h-8 rounded-full transition-all duration-300 flex items-center justify-center border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-90
+            ${isRetro ? 'hover:border-black/5' : ''}`}
           title={isPlaying ? (lang === 'CN' ? '关闭背景音乐' : 'Mute Music') : (lang === 'CN' ? '开启背景音乐' : 'Unmute Music')}
         >
           {isPlaying ? (
             <div className="relative flex items-center justify-center">
-              <Volume2 size={12} strokeWidth={2} className={`transition-colors duration-300 ${isRetro ? 'text-black/40 group-hover/music:text-black/80' : 'text-white/30 group-hover/music:text-white/80'}`} />
+              <Volume2 size={13} strokeWidth={2} className={`transition-colors duration-300 ${isRetro ? 'text-black/40 hover:text-black/80' : 'text-white/30 hover:text-white/80'}`} />
               <div className={`absolute -inset-1 rounded-full animate-ping opacity-20 ${isRetro ? 'bg-black' : 'bg-white'}`} style={{ animationDuration: '3s' }} />
             </div>
           ) : (
-            <VolumeX size={12} strokeWidth={2} className={`transition-colors duration-300 ${isRetro ? 'text-black/40 group-hover/music:text-black/80' : 'text-white/30 group-hover/music:text-white/80'}`} />
+            <VolumeX size={13} strokeWidth={2} className={`transition-colors duration-300 ${isRetro ? 'text-black/40 hover:text-black/80' : 'text-white/30 hover:text-white/80'}`} />
           )}
         </button>
         
         <button
           onClick={() => setLang(lang === 'CN' ? 'EN' : 'CN')}
-          className={`h-8 w-8 rounded-full flex flex-col items-center justify-center transition-all duration-300 ${isRetro ? 'hover:bg-black/5' : 'hover:bg-white/10'}`}
+          className={`w-8 h-8 rounded-full flex flex-col items-center justify-center transition-all duration-300 border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-90
+            ${isRetro ? 'hover:border-black/5' : ''}`}
           title={lang === 'CN' ? 'Switch to English' : '切换至中文'}
         >
           <div className="h-4 overflow-hidden group/lang">
@@ -820,30 +842,32 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
               className="transition-transform duration-[1500ms] ease-[cubic-bezier(0.16,1,0.3,1)]"
               style={{ transform: lang === 'CN' ? 'translateY(0)' : 'translateY(-50%)' }}
             >
-              <span className={`block text-[10px] font-mono tracking-[0.2em] leading-4 transition-colors duration-300 ${isRetro ? 'text-black/40 group-hover/lang:text-black/80' : 'text-white/30 group-hover/lang:text-white/80'}`}>中</span>
-              <span className={`block text-[10px] font-mono tracking-[0.2em] leading-4 transition-colors duration-300 ${isRetro ? 'text-black/40 group-hover/lang:text-black/80' : 'text-white/30 group-hover/lang:text-white/80'}`}>EN</span>
+              <span className={`block text-[10px] font-mono font-bold tracking-[0.2em] leading-4 transition-colors duration-300 ${isRetro ? 'text-black/40 group-hover/lang:text-black/80' : 'text-white/30 group-hover/lang:text-white/80'}`}>中</span>
+              <span className={`block text-[10px] font-mono font-bold tracking-[0.2em] leading-4 transition-colors duration-300 ${isRetro ? 'text-black/40 group-hover/lang:text-black/80' : 'text-white/30 group-hover/lang:text-white/80'}`}>EN</span>
             </div>
           </div>
         </button>
 
         <button
           onClick={toggleTheme}
-          className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-90 ${isRetro ? 'text-black/40 hover:text-black/80 hover:bg-black/5' : 'text-white/30 hover:text-white/80 hover:bg-white/10'}`}
+          className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-90
+            ${isRetro ? 'text-black/40 hover:text-black/80 hover:border-black/5' : 'text-white/30 hover:text-white/80'}`}
           title={theme === 'dark' ? (lang === 'CN' ? "切换为复古主题" : "Switch to Retro") : (lang === 'CN' ? "切换为暗黑主题" : "Switch to Dark")}
         >
-          {theme === 'dark' ? <Moon size={11} strokeWidth={2.5} /> : <Sun size={11} strokeWidth={2.5} className="text-[#8B261D]/60 hover:text-[#8B261D]" />}
+          {theme === 'dark' ? <Moon size={12} strokeWidth={2.5} /> : <Sun size={12} strokeWidth={2.5} className="text-[#8B261D]/60 hover:text-[#8B261D]" />}
         </button>
 
         <button
           onClick={() => currentUser.id !== 'guest_user' ? openProfile() : openAuth()}
-          className={`text-[10px] font-mono tracking-[0.15em] transition-all duration-300 flex items-center gap-1.5 px-3 py-1.5 rounded-full ${isRetro ? 'text-black/40 hover:text-black/80 hover:bg-black/5' : 'text-white/25 hover:text-white/70 hover:bg-white/10'}`}
+          className={`h-8 px-3 rounded-full transition-all duration-300 flex items-center gap-1.5 border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-95
+            ${isRetro ? 'text-black/40 hover:text-black/80 hover:border-black/5' : 'text-white/25 hover:text-white/70'}`}
         >
-          <UserIcon size={11} />
+          <UserIcon size={12} />
           <div className="hidden sm:block">
             <AnimatedText
               lang={lang}
               hClass="h-4"
-              className="text-[10px] font-mono tracking-[0.15em]"
+              className="text-[10px] font-mono font-bold tracking-[0.15em]"
               cn={currentUser.id !== 'guest_user' ? currentUser.username : '访客'}
               en={currentUser.id !== 'guest_user' ? currentUser.username : 'GUEST'}
             />

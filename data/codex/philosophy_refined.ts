@@ -334,6 +334,7 @@ export const MARX_INDEX: LacanCategory[] = [
 
 
 export const LACAN_INDEX: LacanCategory[] = [
+/*
   {
     id: 'lacan-schema',
     name: '零、拉康图式',
@@ -356,6 +357,7 @@ export const LACAN_INDEX: LacanCategory[] = [
       }
     ]
   },
+*/
     {
         id: "l_methodology",
         name: "一、核心命题与方法论",

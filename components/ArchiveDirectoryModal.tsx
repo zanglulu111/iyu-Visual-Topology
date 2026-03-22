@@ -26,6 +26,12 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
     const [openingId, setOpeningId] = useState<string | null>(null);
     const [isTransitioning, setIsTransitioning] = useState(false);
     const targetScrollRef = React.useRef(0);
+    // Audio Refs
+    const scrollAudioRef = React.useRef<HTMLAudioElement | null>(null);
+    const tickAudioRef = React.useRef<HTMLAudioElement | null>(null);
+    const hoverAudioRef = React.useRef<HTMLAudioElement | null>(null);
+    const confirmAudioRef = React.useRef<HTMLAudioElement | null>(null);
+    const lastTickIndex = React.useRef(-1);
     const cardsRef = React.useRef<HTMLElement[]>([]);
     const viewportWidthRef = React.useRef(0);
     const lastInternalScrollPos = React.useRef(0);
@@ -69,6 +75,9 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
         // to avoid conflicts with our custom momentum logic.
         
         const handleWheel = (e: WheelEvent) => {
+            // Prevent interference if user is reading a selected case
+            if (selectedCaseId) return;
+
             if (openingId) {
                 if (Math.abs(e.deltaX) > 10 || Math.abs(e.deltaY) > 10) {
                     setOpeningId(null);
@@ -77,18 +86,13 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
                 return;
             }
 
-            const isDiscrete = Math.abs(e.deltaY) >= 100 || e.deltaMode !== 0;
+            // Determine the dominant scroll direction (some users scroll vertically, trackpads horizontally)
+            const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
             
-            if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-                if (isDiscrete) {
-                    targetScrollRef.current += e.deltaY;
-                    e.preventDefault();
-                } else {
-                    container.scrollLeft += e.deltaY;
-                    targetScrollRef.current = container.scrollLeft;
-                    e.preventDefault();
-                }
-            }
+            // Apply delta directly to targetScrollRef for consistent momentum,
+            // regardless of whether it's a discrete mouse wheel or continuous trackpad
+            targetScrollRef.current += delta;
+            e.preventDefault();
         };
 
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -117,6 +121,45 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
         };
     }, [openingId, handleScrollDismiss]);
 
+    // Initialize Sounds
+    useEffect(() => {
+        if (isOpen) {
+            // Scroll sound: a subtle hum or mechanical rattle
+            scrollAudioRef.current = new Audio('/audio/archive-scroll.mp3');
+            scrollAudioRef.current.loop = true;
+            scrollAudioRef.current.volume = 0;
+            
+            // Tick sound: a short mechanical click
+            tickAudioRef.current = new Audio('/audio/archive-tick.mp3');
+            tickAudioRef.current.volume = 0.25;
+            
+            // Hover sound: a very subtle blip or static crackle
+            hoverAudioRef.current = new Audio('/audio/archive-hover.mp3');
+            hoverAudioRef.current.volume = 0.15;
+            
+            // Re-use confirm sound for selection
+            confirmAudioRef.current = new Audio('/audio/confirm-05.mp3');
+        }
+        return () => {
+            if (scrollAudioRef.current) {
+                scrollAudioRef.current.pause();
+                scrollAudioRef.current = null;
+            }
+            if (tickAudioRef.current) {
+                tickAudioRef.current.pause();
+                tickAudioRef.current = null;
+            }
+            if (hoverAudioRef.current) {
+                hoverAudioRef.current.pause();
+                hoverAudioRef.current = null;
+            }
+            if (confirmAudioRef.current) {
+                confirmAudioRef.current.pause();
+                confirmAudioRef.current = null;
+            }
+        };
+    }, [isOpen]);
+
     // Wave Effect Logic
     useEffect(() => {
         if (!isOpen || !scrollContainerRef.current) return;
@@ -126,11 +169,6 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
         
         const updateWave = () => {
             if (!container) return;
-
-            // Sync target back to reel world if user uses scrollbar directly (detected via jump)
-            if (Math.abs(container.scrollLeft - lastInternalScrollPos.current) > 1 && !openingId) {
-                targetScrollRef.current = container.scrollLeft;
-            }
 
             // 1. Smooth Scroll Interpolation (Momentum)
             const maxScroll = container.scrollWidth - container.offsetWidth;
@@ -159,9 +197,38 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
 
             if (activityRef.current < 0.005) activityRef.current = 0;
 
+            // --- Dynamic Scroll Audio Control ---
+            if (scrollAudioRef.current) {
+                if (activityRef.current > 0.01 && !openingId) {
+                    if (scrollAudioRef.current.paused) {
+                        scrollAudioRef.current.play().catch(() => {});
+                    }
+                    // Map activity to volume and playback rate
+                    // Volume 0 to 0.5, Speed 1.0 to 1.6
+                    const targetVolume = Math.min(0.5, activityRef.current * 0.35);
+                    const targetRate = 1.0 + Math.min(0.6, activityRef.current * 0.25);
+                    
+                    // Smooth volume transition
+                    scrollAudioRef.current.volume = scrollAudioRef.current.volume * 0.8 + targetVolume * 0.2;
+                    scrollAudioRef.current.playbackRate = targetRate;
+                } else {
+                    // Fade out
+                    if (scrollAudioRef.current.volume > 0.01) {
+                        scrollAudioRef.current.volume *= 0.85;
+                    } else if (!scrollAudioRef.current.paused) {
+                        scrollAudioRef.current.pause();
+                    }
+                }
+            }
+
             const viewportCenter = viewportWidthRef.current / 2;
             const scrollLeft = container.scrollLeft;
             
+            // --- Center Alignment Detection for Tick Sound ---
+            let closestIndex = -1;
+            let minDistance = 9999;
+            const tickSenseRadius = 60; // Larger sense area for robust detection
+
             // Re-cache cards if needed (rare)
             if (cardsRef.current.length === 0) {
                 cardsRef.current = Array.from(container.querySelectorAll('.archive-card-wrapper'));
@@ -171,14 +238,18 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
                 const cardId = card.getAttribute('data-id');
                 if (cardId === openingId) return;
 
-                // 2. Performant Position Calculation (No getBoundingClientRect)
-                // centerPadding + i * (cardWidth + gap)
                 const cardWidth = 110;
                 const gap = 24; 
                 const cardPosInContent = centerPadding + i * (cardWidth + gap) + cardWidth / 2;
                 const cardCenter = cardPosInContent - scrollLeft;
                 
                 const distFromCenter = Math.abs(cardCenter - viewportCenter);
+
+                // Tracking the most centered card
+                if (distFromCenter < tickSenseRadius && distFromCenter < minDistance) {
+                    minDistance = distFromCenter;
+                    closestIndex = i;
+                }
                 
                 const horizon = 700; 
                 const proximity = Math.pow(Math.max(0, 1 - distFromCenter / horizon), 1.3); 
@@ -209,6 +280,21 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
                 }
             });
 
+            // Trigger Tick sound if we just centered a NEW card
+            if (closestIndex !== -1 && closestIndex !== lastTickIndex.current) {
+                if (tickAudioRef.current) {
+                    tickAudioRef.current.currentTime = 0;
+                    // Dynamic volume: louder when alignment is perfect or activity is higher
+                    const vol = Math.min(0.3, 0.1 + activityRef.current * 0.12);
+                    tickAudioRef.current.volume = vol;
+                    tickAudioRef.current.play().catch(() => {});
+                }
+                lastTickIndex.current = closestIndex;
+            } else if (closestIndex === -1 && lastTickIndex.current !== -1) {
+                // If we moved completely away from cards, reset
+                lastTickIndex.current = -1;
+            }
+
             rafId = requestAnimationFrame(updateWave);
         };
 
@@ -219,6 +305,13 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
     const handleCardClick = (e: React.MouseEvent, id: string) => {
         e.stopPropagation();
         if (openingId) return;
+
+        // Play confirmation sound
+        if (confirmAudioRef.current) {
+            confirmAudioRef.current.currentTime = 0;
+            confirmAudioRef.current.play().catch(() => {});
+        }
+
         setOpeningId(id);
         setIsTransitioning(true);
     };
@@ -319,6 +412,12 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
                                      <div 
                                         className={`archive-card-inner w-full h-full relative cursor-pointer group preserve-3d transition-all duration-300 will-change-transform active:scale-95 ${isOpening ? 'cursor-default' : ''}`}
                                         onClick={(e) => handleCardClick(e, item.id)}
+                                        onMouseEnter={() => {
+                                            if (!openingId && hoverAudioRef.current) {
+                                                hoverAudioRef.current.currentTime = 0;
+                                                hoverAudioRef.current.play().catch(() => {});
+                                            }
+                                        }}
                                     >
                                         <style>{`
                                             @keyframes scanline {

@@ -6,7 +6,8 @@ import {
     X, Wand2, Loader2, ArrowLeft, ArrowRight, History as HistoryIcon,
     Globe, BookOpen, ImageIcon, BrainCircuit, Target, Film, Eye, Box,
     ClipboardCopy, Check, HelpCircle, Home, TestTube, Zap, Palette,
-    Settings2, Layers, Terminal, Feather, Bookmark, Star, FilePlus, Download, List, Database, Lightbulb, ScanLine, Heart, Activity, Upload, Flame
+    Settings2, Layers, Terminal, Feather, Bookmark, Star, FilePlus, Download, List, Database, Lightbulb, ScanLine, Heart, Activity, Upload, Flame,
+    Archive, Save, Hexagon
 } from 'lucide-react';
 import * as geminiService from '../services/geminiService';
 import { useTheme } from '../contexts/ThemeContext';
@@ -895,113 +896,105 @@ ${psychoHtml}
                         </button>
                     </div>
     
-                    <div className="flex-1 flex justify-center items-center gap-6 mx-4 overflow-x-auto no-scrollbar">
-                        <button
-                            onClick={() => setIsParamsPanelOpen(!isParamsPanelOpen)}
-                            className="flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]"
-                        >
-                            <List size={18} className={`transition-colors ${isParamsPanelOpen ? (effectiveTheme === 'retro' ? 'text-[#8B261D]' : uiConfig.themeAccent) : (effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 ${uiConfig.themeHoverText}`)}`} />
-                            <span className={`text-[9px] font-bold uppercase tracking-wider ${isParamsPanelOpen ? (effectiveTheme === 'retro' ? 'text-[#8B261D]' : uiConfig.themeAccent) : (effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 ${uiConfig.themeHoverText}`)}`}>
-                                {language === 'EN' ? "Params" : "参数"}
-                            </span>
-                        </button>
+                    <div className="flex-1 flex justify-center items-center px-4 overflow-x-auto no-scrollbar">
+                        {/* Params Button */}
+                        <div className={`p-1 flex items-center gap-1 rounded-full border border-transparent hover:border-white/5 backdrop-blur-sm transition-all duration-500 ${effectiveTheme === 'retro' ? 'hover:bg-[#FDFCF8]/90 hover:border-[#8B261D]/15' : 'hover:bg-black/30'}`}>
+                            <button
+                                onClick={() => setIsParamsPanelOpen(!isParamsPanelOpen)}
+                                className={`flex items-center gap-1.5 px-3 h-8 rounded-full border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-95 transition-all duration-300 group`}
+                            >
+                                <List size={13} strokeWidth={2} className={`transition-colors ${isParamsPanelOpen ? (effectiveTheme === 'retro' ? 'text-[#8B261D]' : uiConfig.themeAccent) : (effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 ${uiConfig.themeHoverText}`)}`} />
+                                <span className={`text-[10px] font-bold uppercase tracking-wider ${isParamsPanelOpen ? (effectiveTheme === 'retro' ? 'text-[#8B261D]' : uiConfig.themeAccent) : (effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 ${uiConfig.themeHoverText}`)}`}>
+                                    {language === 'EN' ? "Params" : "参数"}
+                                </span>
+                            </button>
+                        </div>
 
-                        <div className="w-px h-8 bg-[var(--border-main)] shrink-0"></div>
+                        {/* Middle Group: Archive, Save, Copy All, Download */}
+                        <div className={`p-1 flex items-center gap-1 mx-6 rounded-full border border-transparent hover:border-white/5 backdrop-blur-sm transition-all duration-500 ${effectiveTheme === 'retro' ? 'hover:bg-[#FDFCF8]/90 hover:border-[#8B261D]/15' : 'hover:bg-black/30'}`}>
+                            <button
+                                onClick={onOpenHistory}
+                                className={`flex items-center gap-1.5 px-3 h-8 rounded-full border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-95 transition-all duration-300 group`}
+                                title={language === 'EN' ? "Archive" : "归档"}
+                            >
+                                <Archive size={13} strokeWidth={2} className={`text-zinc-400 group-hover:text-white transition-colors ${effectiveTheme === 'retro' ? 'group-hover:text-black' : ''}`} />
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 group-hover:text-white transition-colors">{language === 'EN' ? "Archive" : "档案馆"}</span>
+                            </button>
+                            
+                            <button
+                                onClick={handleSaveToCollection}
+                                className={`flex items-center gap-1.5 px-3 h-8 rounded-full border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-95 transition-all duration-300 group`}
+                                title={language === 'EN' ? "Save" : "保存"}
+                            >
+                                <Bookmark size={13} strokeWidth={2} className={`transition-colors ${isSaved ? 'text-red-500 fill-red-500 animate-bounce' : (effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 group-hover:text-white`)}`} />
+                                <span className={`text-[10px] font-bold uppercase tracking-wider transition-colors ${isSaved ? 'text-red-500' : (effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 group-hover:text-white`)}`}>
+                                    {isSaved ? (language === 'EN' ? "Saved" : "已收藏") : (language === 'EN' ? "Save" : "收藏")}
+                                </span>
+                            </button>
 
-                        <button onClick={onOpenHistory} className="flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]">
-                            <HistoryIcon size={18} className={`transition-colors ${effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 ${uiConfig.themeHoverText}`}`} />
-                            <span className={`text-[9px] font-bold uppercase tracking-wider ${effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 ${uiConfig.themeHoverText}`}`}>
-                                {language === 'EN' ? "Archive" : "档案馆"}
-                            </span>
-                        </button>
-                        <div className="w-px h-8 bg-[var(--border-main)] shrink-0"></div>
-    
-                        <button
-                            onClick={handleSaveToCollection}
-                            className="flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]"
-                        >
-                            <Bookmark
-                                size={18}
-                                className={`transition-colors ${isSaved ? 'text-red-500 fill-red-500 animate-bounce' : (effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 ${uiConfig.themeHoverText}`)}`}
-                            />
-                            <span className={`text-[9px] font-bold uppercase tracking-wider ${isSaved ? 'text-red-500' : (effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 ${uiConfig.themeHoverText}`)}`}>
-                                {isSaved ? (language === 'EN' ? "Saved" : "已收藏") : (language === 'EN' ? "Save" : "永久收藏")}
-                            </span>
-                        </button>
-    
-                        <div className="w-px h-8 bg-[var(--border-main)] shrink-0"></div>
-                        {uiConfig.type !== DriverType.AESTHETIC && (
-                            <>
-                                <button onClick={() => setIsContinueModalOpen(true)} disabled={isContinuing} className="flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]">
-                                    {isContinuing ? <Loader2 size={18} className={`animate-spin ${uiConfig.themeAccent}`} /> : <Wand2 size={18} className={`transition-colors ${effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 ${uiConfig.themeHoverText}`}`} />}
-                                    <span className={`text-[9px] font-bold uppercase tracking-wider ${effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 ${uiConfig.themeHoverText}`}`}>
-                                        {language === 'EN' ? "Continue" : "续写"}
-                                    </span>
-                                </button>
-                                <div className={`w-px h-8 ${effectiveTheme === 'retro' ? 'bg-[#8B261D]/20' : 'bg-zinc-800'} shrink-0`}></div>
-    
-                                {/* Continue with Image Upload */}
-                                <button
-                                    onClick={() => !isContinueUploading && continueFileInputRef.current?.click()}
-                                    disabled={isContinueUploading}
-                                    className="flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]"
-                                >
-                                    {isContinueUploading ? (
-                                        <Loader2 size={18} className={`animate-spin ${uiConfig.themeAccent}`} />
-                                    ) : (
-                                        <Upload size={18} className={`transition-colors ${effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 ${uiConfig.themeHoverText}`}`} />
+                            <button
+                                onClick={handleGlobalCopyClick}
+                                className={`flex items-center gap-1.5 px-3 h-8 rounded-full border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-95 transition-all duration-300 group`}
+                                title={language === 'EN' ? "Copy All" : "复制全部"}
+                            >
+                                {globalCopied ? (
+                                    <Check size={13} strokeWidth={2} className="text-emerald-400" />
+                                ) : (
+                                    <ClipboardCopy size={13} strokeWidth={2} className={`text-zinc-400 group-hover:text-white transition-colors ${effectiveTheme === 'retro' ? 'group-hover:text-black' : ''}`} />
+                                )}
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 group-hover:text-white transition-colors">{language === 'EN' ? "Copy" : "复制"}</span>
+                            </button>
+
+                            <button
+                                onClick={handleExportHtml}
+                                className={`flex items-center gap-1.5 px-3 h-8 rounded-full border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-95 transition-all duration-300 group`}
+                                title={language === 'EN' ? "Download" : "下载"}
+                            >
+                                <Download size={13} strokeWidth={2} className={`text-zinc-400 group-hover:text-white transition-colors ${effectiveTheme === 'retro' ? 'group-hover:text-black' : ''}`} />
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 group-hover:text-white transition-colors">{language === 'EN' ? "Download" : "导出"}</span>
+                            </button>
+                        </div>
+
+                        {/* Right Group: Continue, Image, Tasks */}
+                        <div className={`p-1 flex items-center gap-1 rounded-full border border-transparent hover:border-white/5 backdrop-blur-sm transition-all duration-500 ${effectiveTheme === 'retro' ? 'hover:bg-[#FDFCF8]/90 hover:border-[#8B261D]/15' : 'hover:bg-black/30'}`}>
+                            <button
+                                onClick={() => setIsContinueModalOpen(true)}
+                                className={`flex items-center gap-1.5 px-3 h-8 rounded-full border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-95 transition-all duration-300 group`}
+                                disabled={isContinuing}
+                            >
+                                {isContinuing ? <Loader2 size={13} className={`animate-spin ${uiConfig.themeAccent}`} /> : <Zap size={13} strokeWidth={2} className={`text-zinc-400 group-hover:text-white transition-colors ${effectiveTheme === 'retro' ? 'group-hover:text-black' : ''}`} />}
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 group-hover:text-white transition-colors">{language === 'EN' ? "Continue" : "续写"}</span>
+                            </button>
+                            
+                            <button
+                                onClick={() => !isContinueUploading && continueFileInputRef.current?.click()}
+                                className={`flex items-center gap-1.5 px-3 h-8 rounded-full border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-95 transition-all duration-300 group`}
+                                disabled={isContinueUploading}
+                            >
+                                {isContinueUploading ? (
+                                    <Loader2 size={13} className={`animate-spin ${uiConfig.themeAccent}`} />
+                                ) : (
+                                    <Upload size={13} strokeWidth={2} className={`text-zinc-400 group-hover:text-white transition-colors ${effectiveTheme === 'retro' ? 'group-hover:text-black' : ''}`} />
+                                )}
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 group-hover:text-white transition-colors">{language === 'EN' ? "Upload" : "图配文"}</span>
+                            </button>
+
+                            <button
+                                onClick={() => setIsTaskManagerOpen(!isTaskManagerOpen)}
+                                className={`flex items-center gap-1.5 px-3 h-8 rounded-full border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-95 transition-all duration-300 group relative`}
+                            >
+                                <div className="relative">
+                                    <Activity size={13} strokeWidth={2} className={`transition-colors ${isTaskManagerOpen ? (effectiveTheme === 'retro' ? 'text-[#8B261D]' : uiConfig.themeAccent) : (effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 ${uiConfig.themeHoverText}`)}`} />
+                                    {activeTaskCount > 0 && (
+                                        <span className={`absolute -top-1 -right-1 w-2.5 h-2.5 bg-blue-500 rounded-full border border-black/20 animate-pulse`}></span>
                                     )}
-                                    <span className={`text-[9px] font-bold uppercase tracking-wider ${effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 ${uiConfig.themeHoverText}`}`}>
-                                        {isContinueUploading ? (language === 'EN' ? "Uploading" : "上传中") : (language === 'EN' ? "Image-to-Clip" : "图配文")}
-                                    </span>
-                                </button>
-                                <div className={`w-px h-8 ${effectiveTheme === 'retro' ? 'bg-[#8B261D]/20' : 'bg-zinc-800'} shrink-0`}></div>
-                            </>
-                        )}
-    
-                        <button onClick={handleGlobalCopyClick} className="flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]">
-                            {globalCopied ? <Check size={18} className={effectiveTheme === 'retro' ? 'text-[#8B261D]' : 'text-green-500'} /> : <ClipboardCopy size={18} className={`transition-colors ${effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 ${uiConfig.themeHoverText}`}`} />}
-                            <span className={`text-[9px] font-bold uppercase tracking-wider ${globalCopied ? (effectiveTheme === 'retro' ? 'text-[#8B261D]' : 'text-green-500') : (effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 ${uiConfig.themeHoverText}`)}`}>
-                                {language === 'EN' ? "Copy All" : "全局复制"}
-                            </span>
-                        </button>
-    
-                                <div className={`w-px h-8 ${effectiveTheme === 'retro' ? 'bg-[#8B261D]/20' : 'bg-zinc-800'} shrink-0`}></div>
-    
-                        <button onClick={handleExportHtml} className="flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]">
-                            <Download size={18} className={`transition-colors ${effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 ${uiConfig.themeHoverText}`}`} />
-                            <span className={`text-[9px] font-bold uppercase tracking-wider ${effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 ${uiConfig.themeHoverText}`}`}>
-                                {language === 'EN' ? "Download" : "导出HTML"}
-                            </span>
-                        </button>
-    
-                                <div className={`w-px h-8 ${effectiveTheme === 'retro' ? 'bg-[#8B261D]/20' : 'bg-zinc-800'} shrink-0`}></div>
-    
-                        <button
-                            onClick={() => setIsTaskManagerOpen(!isTaskManagerOpen)}
-                            className="flex flex-col items-center gap-1.5 shrink-0 min-w-[60px] relative"
-                        >
-                            <div className="relative">
-                                {/* Breathing Light */}
-                                {activeTaskCount > 0 && (
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                        <div className={`w-6 h-6 rounded-full ${uiConfig.themeEmptyPulse} opacity-30 animate-pulse blur-md`}></div>
-                                        <div className={`w-4 h-4 rounded-full ${uiConfig.themeEmptyPulse} opacity-50 animate-pulse blur-sm`}></div>
-                                    </div>
-                                )}
-                                <Activity size={18} className={`relative z-10 transition-colors ${isTaskManagerOpen ? uiConfig.themeText : (effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 hover:text-white`)}`} />
-                                {activeTaskCount > 0 && (
-                                    <span className={`absolute -top-1 -right-1 w-4 h-4 bg-[#050505] border border-white/10 ${uiConfig.themeText} rounded-full text-[9px] flex items-center justify-center font-bold shadow-[0_2px_10px_rgba(0,0,0,0.5)] z-20 leading-none`}>
-                                        {activeTaskCount}
-                                    </span>
-                                )}
-                            </div>
-                            <span className={`text-[9px] font-bold uppercase tracking-wider relative z-10 ${isTaskManagerOpen ? uiConfig.themeText : (effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 hover:text-white`)}`}>
-                                {language === 'EN' ? "Tasks" : "任务中心"}
-                            </span>
-                        </button>
+                                </div>
+                                <span className={`text-[10px] font-bold uppercase tracking-wider ${isTaskManagerOpen ? (effectiveTheme === 'retro' ? 'text-[#8B261D]' : uiConfig.themeAccent) : (effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 ${uiConfig.themeHoverText}`)}`}>
+                                    {language === 'EN' ? "Tasks" : "任务中心"}
+                                </span>
+                            </button>
+                        </div>
                     </div>
-    
                     <div className="flex items-center gap-4 shrink-0">
                         <div className="flex items-center gap-2">
                             <span className={`text-[10px] font-bold ${effectiveTheme === 'retro' ? 'text-zinc-400' : 'text-zinc-500'} uppercase tracking-wider mr-2`}>

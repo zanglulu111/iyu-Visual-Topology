@@ -38,6 +38,7 @@ interface AppHeaderProps {
   currentUser: User;
   showRings: boolean;
   setShowRings: (show: boolean) => void;
+  children?: React.ReactNode;
 }
 
 export const AppHeader: React.FC<AppHeaderProps> = ({
@@ -61,6 +62,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   onLogout,
   showRings,
   setShowRings,
+  children,
 }) => {
   const { theme, toggleTheme } = useTheme();
 
@@ -152,7 +154,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   };
 
   return (
-    <header className={`h-14 bg-[var(--bg-header)] backdrop-blur-md border-b ${getThemeBorderColor()} flex items-center justify-between px-6 z-50 sticky top-0 shrink-0 transition-all duration-500 animate-page-dissolve relative`}>
+    <header className={`h-14 bg-[var(--bg-header)] backdrop-blur-md border-b ${getThemeBorderColor()} flex items-center justify-between px-4 md:px-5 z-50 sticky top-0 shrink-0 transition-all duration-500 animate-page-dissolve relative`}>
       {/* Theme Divider Line - Global Consistency Accent */}
       <div 
         className="absolute bottom-0 left-0 right-0 h-px transition-all duration-500 z-10" 
@@ -199,119 +201,127 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         >
           {lang === 'CN' 
             ? (driverName && driverName.startsWith('迷雾学派') ? driverName : `迷雾学派：${driverName}`)
-            : (driverName && driverName.startsWith('MIST') ? driverName : `MIST: ${driverName}`)
-          }
+            : (driverName && driverName.startsWith('Mist School') ? driverName : `Mist School: ${driverName}`)}
         </span>
       </div>
 
-      {!(viewMode === 'ARCHIVE' || viewMode === 'VIDEO' || viewMode === 'TOPOLOGY' || viewMode === 'RSI' || viewMode === 'RORSCHACH' || viewMode === 'ANALYSIS') && (
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden md:flex items-center gap-4 text-[10px] font-bold uppercase tracking-[0.2em]">
-          <button
-            onClick={() => setViewMode('ENGINE')}
-            className={`flex items-center gap-2 font-serif font-bold transition-all duration-300 hover:scale-105 active:scale-95 ${viewMode === 'ENGINE' ? getHeaderTitleColor() : (theme === 'retro' ? "text-zinc-600 hover:text-black font-sans" : "text-zinc-400 hover:text-white font-sans")}`}
-          >
-            <Cpu size={14} className={viewMode === 'ENGINE' ? getHeaderIconFill() : ""} />
-            {lang === 'CN' ? "核心引擎" : "CORE ENGINE"}
-          </button>
-          <div className={`w-4 h-px ${theme === 'retro' ? 'bg-black/20' : 'bg-white/[0.04]'}`}></div>
-          <button
-            onClick={() => setViewMode('DIVERGENCE')}
-            className={`flex items-center gap-2 transition-all duration-300 hover:scale-105 active:scale-95 ${viewMode === 'DIVERGENCE' ? getHeaderTitleColor() : (theme === 'retro' ? "text-zinc-600 hover:text-black font-sans" : "text-zinc-400 hover:text-white font-sans")}`}
-          >
-            <GitFork size={14} />
-            {lang === 'CN' ? "分歧点" : "THE DIVERGENCE"}
-          </button>
-          {selectedDriver !== DriverType.AESTHETIC && (
-            <>
-              <div className={`w-4 h-px ${theme === 'retro' ? 'bg-black/20' : 'bg-white/[0.04]'}`}></div>
-              <button
-                onClick={() => setViewMode('BIBLE')}
-                className={`flex items-center gap-2 transition-all duration-300 hover:scale-105 active:scale-95 ${viewMode === 'BIBLE' ? getHeaderTitleColor() : (theme === 'retro' ? "text-zinc-600 hover:text-black font-sans" : "text-zinc-400 hover:text-white font-sans")}`}
-              >
-                <BookOpen size={14} />
-                {lang === 'CN' ? "创意圣经" : "CREATIVE BIBLE"}
-              </button>
-            </>
-          )}
+      {children ? (
+        <div className="flex-1 max-w-xl mx-auto px-4 flex items-center justify-center h-full relative z-20">
+          {children}
         </div>
+      ) : (
+        !(viewMode === 'ARCHIVE' || viewMode === 'VIDEO' || viewMode === 'TOPOLOGY' || viewMode === 'RSI' || viewMode === 'RORSCHACH' || viewMode === 'ANALYSIS' || viewMode === 'DICTIONARY') && (
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden md:flex items-center gap-4 text-[10px] font-bold uppercase tracking-[0.2em]">
+            <button
+              onClick={() => setViewMode('ENGINE')}
+              className={`flex items-center gap-2 font-serif font-bold transition-all duration-300 hover:scale-105 active:scale-95 ${viewMode === 'ENGINE' ? getHeaderTitleColor() : (theme === 'retro' ? "text-zinc-600 hover:text-black font-sans" : "text-zinc-400 hover:text-white font-sans")}`}
+            >
+              <Cpu size={14} className={viewMode === 'ENGINE' ? getHeaderIconFill() : ""} />
+              {lang === 'CN' ? "核心引擎" : "CORE ENGINE"}
+            </button>
+            <div className={`w-4 h-px ${theme === 'retro' ? 'bg-black/20' : 'bg-white/[0.04]'}`}></div>
+            <button
+              onClick={() => setViewMode('DIVERGENCE')}
+              className={`flex items-center gap-2 transition-all duration-300 hover:scale-105 active:scale-95 ${viewMode === 'DIVERGENCE' ? getHeaderTitleColor() : (theme === 'retro' ? "text-zinc-600 hover:text-black font-sans" : "text-zinc-400 hover:text-white font-sans")}`}
+            >
+              <GitFork size={14} />
+              {lang === 'CN' ? "分歧点" : "THE DIVERGENCE"}
+            </button>
+            {selectedDriver !== DriverType.AESTHETIC && (
+              <>
+                <div className={`w-4 h-px ${theme === 'retro' ? 'bg-black/20' : 'bg-white/[0.04]'}`}></div>
+                <button
+                  onClick={() => setViewMode('BIBLE')}
+                  className={`flex items-center gap-2 transition-all duration-300 hover:scale-105 active:scale-95 ${viewMode === 'BIBLE' ? getHeaderTitleColor() : (theme === 'retro' ? "text-zinc-600 hover:text-black font-sans" : "text-zinc-400 hover:text-white font-sans")}`}
+                >
+                  <BookOpen size={14} />
+                  {lang === 'CN' ? "创意圣经" : "CREATIVE BIBLE"}
+                </button>
+              </>
+            )}
+          </div>
+        )
       )}
 
-      <div className="flex items-center flex-row-reverse gap-4">
-        {/* Rightmost 4 Buttons Group */}
-        <div className="flex items-center flex-row-reverse gap-1.5">
-          {/* 1. Profile */}
-          <button
-            onClick={() => currentUser.id !== 'guest_user' ? openProfile() : openAuth()}
-            className="flex items-center gap-2 group transition-all duration-100 hover:scale-105"
-          >
-            <div className="flex items-center flex-row-reverse gap-1">
-              <div className={`w-5 h-5 rounded-full ${!currentUser.avatarUrl && (currentUser.avatarColor || 'bg-gold-primary')} border border-[var(--border-main)]/30 flex items-center justify-center text-[10px] font-bold text-white shadow-sm overflow-hidden group-hover:scale-110 transition-transform`}>
-                {currentUser.avatarUrl ? (
-                  <img src={currentUser.avatarUrl} alt="avatar" className="w-full h-full object-cover" />
-                ) : (
-                  currentUser.id === 'guest_user' ? <UserIcon size={12} /> : currentUser.username.substring(0, 1).toUpperCase()
-                )}
-              </div>
-              <div className="w-12 flex items-center justify-end">
-                <AnimatedText
-                  lang={lang}
-                  hClass="h-4"
-                  className={`text-[10px] font-bold uppercase tracking-widest transition-all duration-300 ${theme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`}
-                  cn={currentUser?.id === 'guest_user' ? '访客' : currentUser.username}
-                  en={currentUser?.id === 'guest_user' ? 'GUEST' : currentUser.username}
-                />
-              </div>
-            </div>
-          </button>
+      <div className="flex items-center justify-end gap-2 ml-auto">
+        {/* Navigation Links — ARCHIVE ONLY */}
+        {!(viewMode === 'ARCHIVE' || viewMode === 'VIDEO' || viewMode === 'DICTIONARY' || viewMode === 'RORSCHACH' || viewMode === 'ANALYSIS') && (
+          <div className={`flex items-center p-1 rounded-full transition-all duration-300 border border-transparent hover:border-white/5
+            ${theme === 'retro' ? 'hover:bg-[#FDFCF8]/90 hover:border-[#8B261D]/15' : 'hover:bg-black/30'}`}>
+            {[
+              { icon: HistoryIcon, label: lang === 'CN' ? '欲望档案' : 'ARCHIVE', labelCn: '欲望档案', labelEn: 'ARCHIVE', onClick: openHistory, isActive: isHistoryOpen },
+            ].map((item, idx) => (
+              <button
+                key={idx}
+                onClick={item.onClick}
+                className={`flex items-center gap-1.5 transition-all duration-300 group px-3 h-8 rounded-full border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-95 ${item.isActive ? getThemeTextColor() : (theme === 'retro' ? "text-zinc-600 hover:text-black hover:border-black/5" : "text-zinc-400 hover:text-white")}`}
+              >
+                <item.icon size={13} className={`shrink-0 transition-all duration-100 ${item.isActive ? 'text-current' : (theme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white')}`} />
+                <span className={`text-[10px] font-bold uppercase tracking-[0.1em] transition-all duration-100 hidden md:block ${item.isActive ? 'text-current' : (theme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white')}`}>
+                  {item.label}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
 
-          {/* 2. Language Toggle */}
-          <button
-            onClick={() => setLang(lang === 'CN' ? 'EN' : 'CN')}
-            className={`text-[10px] font-bold ${theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'} transition-all duration-300 w-8 h-8 flex items-center justify-center rounded-full tracking-widest hover:bg-white/10 hover:scale-110 active:scale-90`}
-            title={lang === 'CN' ? 'Switch to English' : '切换至中文'}
-          >
-            {lang === 'CN' ? '中' : 'EN'}
-          </button>
-
-          {/* 3. Theme Toggle */}
-          <button
-            onClick={toggleTheme}
-            className={`flex items-center justify-center w-8 h-8 rounded-full ${theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'} transition-all duration-300 hover:bg-white/10 hover:scale-110 active:scale-90`}
-            title={theme === 'dark' ? "切换为复古主题" : "切换为暗黑主题"}
-          >
-            {theme === 'dark' ? <Moon size={14} /> : <Sun size={14} className="text-[#8B261D]" />}
-          </button>
-
-          {/* 4. Ring Toggle */}
+        {/* Rightmost Toolbar Group */}
+        <div className={`flex items-center gap-1 px-1 py-1 rounded-full transition-all duration-500 border border-transparent hover:border-white/5 backdrop-blur-sm hover:backdrop-blur-md 
+          ${theme === 'retro' ? 'hover:bg-[#FDFCF8]/90 hover:border-[#8B261D]/15' : 'hover:bg-black/30'}`}>
+          
+          {/* 1. Ring Toggle */}
           <button
             onClick={() => setShowRings(!showRings)}
-            className={`flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300 hover:bg-white/10 hover:scale-110 active:scale-90 focus:outline-none ${
+            className={`flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300 border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-90 focus:outline-none ${
               showRings 
                 ? (theme === 'retro' ? 'text-[#8B261D]' : getThemeTextColor()) 
-                : (theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white')
+                : (theme === 'retro' ? 'text-zinc-600 hover:text-black hover:border-black/5' : 'text-zinc-400 hover:text-white')
             }`}
             title={lang === 'CN' ? "背景圆环开关" : "Background Rings Toggle"}
           >
-            <Aperture size={14} className={`shrink-0 transition-all duration-300 ${showRings ? 'rotate-180' : ''}`} />
+            <Aperture size={13} className={`shrink-0 transition-all duration-300 ${showRings ? 'rotate-180' : ''}`} />
           </button>
-        </div>
 
-        {/* Navigation Links */}
-        <div className="flex items-center gap-2 mr-4">
-          {[
-            { icon: HistoryIcon, label: lang === 'CN' ? '欲望档案' : 'ARCHIVE', labelCn: '欲望档案', labelEn: 'ARCHIVE', onClick: openHistory, isActive: isHistoryOpen },
-          ].map((item, idx) => (
-            <button
-              key={idx}
-              onClick={item.onClick}
-              className={`flex items-center gap-1.5 transition-all duration-300 group px-3 py-1.5 rounded-full bg-transparent hover:bg-white/10 hover:scale-105 active:scale-95 ${item.isActive ? getThemeTextColor() : (theme === 'retro' ? "text-zinc-600 hover:text-black" : "text-zinc-400 hover:text-white")}`}
-            >
-              <item.icon size={14} className={`shrink-0 transition-all duration-100 ${item.isActive ? 'text-current' : (theme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white')}`} />
-              <span className={`text-[10px] font-bold uppercase tracking-[0.1em] transition-all duration-100 hidden md:block ${item.isActive ? 'text-current' : (theme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white')}`}>
-                {item.label}
-              </span>
-            </button>
-          ))}
+          {/* 2. Theme Toggle */}
+          <button
+            onClick={toggleTheme}
+            className={`flex items-center justify-center w-8 h-8 rounded-full border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-90 transition-all duration-300 ${theme === 'retro' ? 'text-zinc-600 hover:text-black hover:border-black/5' : 'text-zinc-400 hover:text-white'}`}
+            title={theme === 'dark' ? (lang === 'CN' ? "切换为复古主题" : "Switch to Retro") : (lang === 'CN' ? "切换为暗黑主题" : "Switch to Dark")}
+          >
+            {theme === 'dark' ? <Moon size={13} strokeWidth={2} /> : <Sun size={13} strokeWidth={2} className="text-[#8B261D]" />}
+          </button>
+
+          {/* 3. Language Toggle */}
+          <button
+            onClick={() => setLang(lang === 'CN' ? 'EN' : 'CN')}
+            className={`w-8 h-8 flex items-center justify-center rounded-full border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-90 transition-all duration-300 ${theme === 'retro' ? 'text-zinc-600 hover:text-black hover:border-black/5' : 'text-zinc-400 hover:text-white'}`}
+            title={lang === 'CN' ? 'Switch to English' : '切换至中文'}
+          >
+            <span className="text-[10px] font-bold uppercase tracking-widest">{lang === 'CN' ? '中' : 'EN'}</span>
+          </button>
+
+          {/* 4. Profile / User */}
+          <button
+            onClick={() => currentUser.id !== 'guest_user' ? openProfile() : openAuth()}
+            className={`flex items-center gap-2 group transition-all duration-300 px-2 h-8 rounded-full border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-95`}
+          >
+            <div className={`w-5 h-5 rounded-full ${!currentUser.avatarUrl && (currentUser.avatarColor || 'bg-gold-primary')} border border-[var(--border-main)]/30 flex items-center justify-center text-[10px] font-bold text-white shadow-sm overflow-hidden group-hover:scale-110 transition-transform`}>
+              {currentUser.avatarUrl ? (
+                <img src={currentUser.avatarUrl} alt="avatar" className="w-full h-full object-cover" />
+              ) : (
+                currentUser.id === 'guest_user' ? <UserIcon size={12} /> : currentUser.username.substring(0, 1).toUpperCase()
+              )}
+            </div>
+            <div className="hidden sm:flex items-center h-4">
+              <AnimatedText
+                lang={lang}
+                hClass="h-4"
+                className={`text-[10px] font-bold uppercase tracking-widest transition-all duration-300 ${theme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`}
+                cn={currentUser?.id === 'guest_user' ? '访客' : currentUser.username}
+                en={currentUser?.id === 'guest_user' ? 'GUEST' : currentUser.username}
+              />
+            </div>
+          </button>
         </div>
       </div>
     </header>

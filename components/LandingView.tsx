@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { DriverSelector } from './DriverSelector';
 import { DriverType, User } from '../types';
-import { Globe, Wand2, HelpCircle, History as HistoryIcon, Settings, User as UserIcon, BookOpen, Terminal, Database, ShieldAlert, Cpu, Film, Folder, Aperture, Zap, Sun, Moon } from 'lucide-react';
+import { Globe, Wand2, HelpCircle, History as HistoryIcon, Settings, User as UserIcon, BookOpen, Terminal, Database, ShieldAlert, Cpu, Film, Folder, Aperture, Zap, Sun, Moon, Search } from 'lucide-react';
 import { ProductManualModal } from './ProductManualModal';
 import { SutureModal } from './SutureModal';
 import { HistoryModal } from './HistoryModal';
@@ -12,8 +12,8 @@ import { useTheme } from '../contexts/ThemeContext';
 
 
 
-const AnimatedText = ({ cn, en, lang, className = "", hClass = "h-5", leading = "leading-none" }: { cn: React.ReactNode, en: React.ReactNode, lang: 'CN' | 'EN', className?: string, hClass?: string, leading?: string }) => (
-  <div className={`overflow-hidden relative ${hClass} ${className}`}>
+const AnimatedText = ({ cn, en, lang, className = "", hClass = "h-5", leading = "leading-none", style = {} }: { cn: React.ReactNode, en: React.ReactNode, lang: 'CN' | 'EN', className?: string, hClass?: string, leading?: string, style?: React.CSSProperties }) => (
+  <div className={`overflow-hidden relative ${hClass} ${className}`} style={style}>
     <div className={`transition-all duration-[1500ms] w-full ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col ${lang === 'EN' ? '-translate-y-1/2' : 'translate-y-0'}`}>
       <div className={`${hClass} flex items-center shrink-0 w-full ${leading}`}>
         {cn}
@@ -99,6 +99,16 @@ export const LandingView: React.FC<LandingViewProps> = ({
 }) => {
   const [localMounted, setLocalMounted] = useState(false);
 
+  const getThemeTextColor = () => {
+    if (theme === 'retro') return 'text-[#8B261D]';
+    if (hoveredDriver === 'NARRATIVE') return 'text-gold-primary';
+    if (hoveredDriver === 'COMMERCIAL') return 'text-mist-cyan';
+    if (hoveredDriver === 'EXPERIMENTAL') return 'text-mist-purple';
+    if (hoveredDriver === 'AESTHETIC') return 'text-mist-rose';
+    if (hoveredDriver === 'TRAILER') return 'text-mist-orange';
+    return 'text-white';
+  };
+
   useEffect(() => {
     setLocalMounted(true);
   }, []);
@@ -123,26 +133,26 @@ export const LandingView: React.FC<LandingViewProps> = ({
   };
 
   const getAccentColor = (driverId: DriverType | null) => {
-    if (theme === 'retro') return 'text-black';
+    if (theme === 'retro') return '#2D2D2D';
     switch (driverId) {
-      case DriverType.COMMERCIAL: return 'text-mist-cyan';
-      case DriverType.NARRATIVE: return 'text-mist-gold';
-      case DriverType.AESTHETIC: return 'text-mist-rose';
-      case DriverType.EXPERIMENTAL: return 'text-mist-purple';
-      case DriverType.TRAILER: return 'text-mist-orange';
-      default: return 'text-white/80';
+      case DriverType.COMMERCIAL: return 'var(--mist-cyan)';
+      case DriverType.NARRATIVE: return 'var(--mist-gold)';
+      case DriverType.AESTHETIC: return 'var(--mist-rose)';
+      case DriverType.EXPERIMENTAL: return 'var(--mist-purple)';
+      case DriverType.TRAILER: return 'var(--mist-orange)';
+      default: return 'rgba(255,255,255,0.8)';
     }
   };
 
   const getBorderAccentColor = (driverId: DriverType | null) => {
-    if (theme === 'retro') return 'border-black/60';
+    if (theme === 'retro') return '#8B261D';
     switch (driverId) {
-      case DriverType.COMMERCIAL: return 'border-mist-cyan';
-      case DriverType.NARRATIVE: return 'border-mist-gold';
-      case DriverType.AESTHETIC: return 'border-mist-rose';
-      case DriverType.EXPERIMENTAL: return 'border-mist-purple';
-      case DriverType.TRAILER: return 'border-mist-orange';
-      default: return 'border-zinc-800';
+      case DriverType.COMMERCIAL: return 'var(--mist-cyan)';
+      case DriverType.NARRATIVE: return 'var(--mist-gold)';
+      case DriverType.AESTHETIC: return 'var(--mist-rose)';
+      case DriverType.EXPERIMENTAL: return 'var(--mist-purple)';
+      case DriverType.TRAILER: return 'var(--mist-orange)';
+      default: return 'var(--border-main)';
     }
   };
 
@@ -196,15 +206,16 @@ export const LandingView: React.FC<LandingViewProps> = ({
     >
 
       {/* Global Top Navbar */}
-      <header className={`shrink-0 z-50 backdrop-blur-md h-14 flex items-center justify-between px-6 transition-all duration-500 ${theme === 'retro' ? 'bg-transparent' : 'bg-[var(--bg-header)]'} ${
-        theme === 'dark' ? 'border-b border-white/10' : (theme === 'retro' ? 'border-b border-[var(--border-main)]' : '')
+      <header className={`shrink-0 z-50 backdrop-blur-md h-14 flex items-center justify-between px-4 md:px-5 transition-all duration-300 bg-[var(--bg-header)] ${
+        theme === 'dark' ? 'border-b border-white/10' : (theme === 'retro' ? 'border-b border-[var(--border-main)]' : 'border-b border-[var(--border-main)]')
       } ${getHeaderShadow(hoveredDriver)} relative`}>
-        {/* Theme Divider Line - Accent Line */}
+        {/* Theme Divider Line - Global Consistency Accent */}
         <div 
           className="absolute bottom-0 left-0 right-0 h-px transition-all duration-500 z-10" 
           style={{ 
             backgroundColor: getBorderAccentColor(hoveredDriver) as string,
-            boxShadow: getLineGlow(hoveredDriver)
+            opacity: theme === 'retro' ? 0.2 : 0.15,
+            boxShadow: theme === 'retro' ? 'none' : (getLineGlow(hoveredDriver) || '0 0 15px var(--philosopher-accent)')
           }} 
         />
         <div className="flex items-center gap-5">
@@ -236,14 +247,21 @@ export const LandingView: React.FC<LandingViewProps> = ({
         {/* Center: Search Bar */}
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden lg:flex items-center gap-3">
           <div className="relative group/search">
-            <div className={`relative flex items-center ${theme === 'retro' ? 'bg-white/40 border-black/20 group-hover/search:border-black/40 hover:bg-white/60' : 'bg-black/20 border-white/10 hover:bg-black/40'} border ${hoveredDriver && theme !== 'retro' ? getBorderAccentColor(hoveredDriver) : ''} rounded-full px-4 py-1.5 transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] shadow-sm hover:shadow-lg w-64 md:w-80 group/input`}>
-              <Terminal size={12} className={`mr-2 transition-colors duration-500 z-20 ${hoveredDriver && theme !== 'retro' ? getAccentColor(hoveredDriver) : (theme === 'retro' ? 'text-black/40' : 'text-zinc-500')} group-hover/input:scale-110 transition-transform duration-300`} />
+            <div 
+              className={`relative flex items-center ${theme === 'retro' ? 'bg-white/40 border-black/20 group-hover/search:border-black/40 hover:bg-white/60' : 'bg-black/20 border-white/10 hover:bg-black/40'} border rounded-full px-4 py-1.5 transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] shadow-sm hover:shadow-lg w-64 group/input`}
+              style={hoveredDriver && theme !== 'retro' ? { borderColor: getBorderAccentColor(hoveredDriver) as string } : {}}
+            >
+              <Search 
+                size={12} 
+                className={`mr-2 transition-colors duration-500 z-20 group-hover/input:scale-110 transition-transform duration-300 ${!hoveredDriver || theme === 'retro' ? (theme === 'retro' ? 'text-black/40' : 'text-zinc-500') : ''}`} 
+                style={hoveredDriver && theme !== 'retro' ? { color: getAccentColor(hoveredDriver) as string } : {}}
+              />
               <div className="absolute inset-0 left-10 right-10 flex items-center pointer-events-none overflow-hidden h-full">
                 {!searchQuery && (
                   <AnimatedText
                     lang={lang}
                     hClass="h-4"
-                    className={`text-[10px] uppercase font-bold tracking-[0.1em] transition-all duration-500 ${theme === 'retro' ? 'text-black/40' : 'text-zinc-400'}`}
+                    className={`text-[10px] uppercase font-bold tracking-[0.1em] transition-all duration-500 ${theme === 'retro' ? 'text-black/40' : 'text-zinc-400'} opacity-60`}
                     cn="搜索协议、档案或理论词条..."
                     en="Search protocols, archives or codex..."
                   />
@@ -263,63 +281,82 @@ export const LandingView: React.FC<LandingViewProps> = ({
           </div>
         </div>
 
-        {/* Right Area: From Right to Left: Profile, Lang, Theme, Rings */}
-        <div className="hidden md:flex items-center gap-4">
-          <div className="flex items-center flex-row-reverse gap-1.5">
-            {/* 1. Profile (Avatar + Name) */}
+        {/* Right Section */}
+        <div className="flex items-center justify-end gap-2 ml-auto">
+          {/* Navigation Links */}
+          <div className={`flex items-center p-1 rounded-full transition-all duration-300 border border-transparent hover:border-white/5
+            ${theme === 'retro' ? 'hover:bg-[#FDFCF8]/90 hover:border-[#8B261D]/15' : 'hover:bg-black/30'}`}>
             <button
-              onClick={() => currentUser.id !== 'guest_user' ? openProfile() : openAuth()}
-              className="flex items-center gap-2 group transition-all duration-100 hover:scale-105"
+              onClick={openHistory}
+              className={`h-8 px-4 flex items-center gap-2 rounded-full transition-all duration-300 border border-transparent hover:border-white/10 hover:bg-white/5 group active:scale-95`}
             >
-              <div className="flex items-center flex-row-reverse gap-1">
-                <div className={`w-5 h-5 rounded-full ${!currentUser?.avatarUrl && (currentUser?.avatarColor || 'bg-gold-primary')} border shadow-sm overflow-hidden transition-all duration-500 ${theme === 'dark' ? (hoveredDriver ? getBorderAccentColor(hoveredDriver) : 'border-black') : 'border-[var(--border-main)]/30'} flex items-center justify-center text-[10px] font-bold text-white`}>
-                  {currentUser?.avatarUrl ? (
-                    <img src={currentUser.avatarUrl} alt="avatar" className="w-full h-full object-cover" />
-                  ) : (
-                    <UserIcon size={12} className={`transition-colors duration-500 ${hoveredDriver && theme === 'dark' ? getAccentColor(hoveredDriver) : 'text-[var(--text-accent)]'}`} />
-                  )}
-                </div>
-                <div className="w-12 flex items-center justify-end">
-                  <AnimatedText
-                    lang={lang}
-                    hClass="h-4"
-                    className={`text-[10px] font-bold uppercase tracking-widest transition-colors duration-500 ${hoveredDriver && theme === 'dark' ? getAccentColor(hoveredDriver) : (theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-[var(--text-muted)]')} group-hover:text-[var(--text-main)]`}
-                    cn={currentUser?.id === 'guest_user' ? '访客' : currentUser?.username}
-                    en={currentUser?.id === 'guest_user' ? 'GUEST' : currentUser?.username}
-                  />
-                </div>
-              </div>
+              <HistoryIcon size={14} className={`transition-colors duration-300 ${theme === 'retro' ? 'text-black/60 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`} />
+              <AnimatedText
+                lang={lang}
+                hClass="h-4"
+                className={`text-[10px] font-bold uppercase tracking-widest transition-all duration-300 ${theme === 'retro' ? 'text-black/60 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`}
+                cn="欲望档案"
+                en="ARCHIVES"
+              />
             </button>
+          </div>
 
-            {/* 2. Language Toggle */}
-            <button
-              onClick={() => setLang(lang === 'CN' ? 'EN' : 'CN')}
-              className={`text-[10px] font-bold ${theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'} transition-all duration-300 w-7 h-7 flex items-center justify-center rounded-sm tracking-widest hover:bg-white/5 hover:scale-110 active:scale-90`}
-              title={lang === 'CN' ? 'Switch to English' : '切换至中文'}
-            >
-              {lang === 'CN' ? '中' : 'EN'}
-            </button>
-
-            {/* 3. Theme Toggle */}
-            <button
-              onClick={toggleTheme}
-              className={`flex items-center justify-center w-7 h-7 rounded-sm ${theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'} transition-all duration-300 hover:bg-white/5 hover:scale-110 active:scale-90`}
-              title={theme === 'dark' ? "切换为复古主题" : "切换为暗黑主题"}
-            >
-              {theme === 'dark' ? <Moon size={14} /> : <Sun size={14} className="text-[#8B261D]" />}
-            </button>
-
-            {/* 4. Ring Toggle */}
+          {/* Rightmost Toolbar Group */}
+          <div className={`flex items-center gap-1 px-1 py-1 rounded-full transition-all duration-500 border border-transparent hover:border-white/5 backdrop-blur-sm hover:backdrop-blur-md 
+            ${theme === 'retro' ? 'hover:bg-[#FDFCF8]/90 hover:border-[#8B261D]/15' : 'hover:bg-black/30'}`}>
+            
+            {/* 1. Ring Toggle */}
             <button
               onClick={() => setShowRings(!showRings)}
-              className={`flex items-center justify-center w-7 h-7 rounded-sm transition-all duration-300 hover:bg-white/5 hover:scale-110 active:scale-90 focus:outline-none ${
+              className={`flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300 border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-90 focus:outline-none ${
                 showRings 
-                  ? (theme === 'retro' ? 'text-[#8B261D]' : (hoveredDriver ? getAccentColor(hoveredDriver) : 'text-[var(--text-main)]')) 
-                  : (theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white')
+                  ? (theme === 'retro' ? 'text-[#8B261D]' : getThemeTextColor()) 
+                  : (theme === 'retro' ? 'text-zinc-600 hover:text-black hover:border-black/5' : 'text-zinc-400 hover:text-white')
               }`}
               title={lang === 'CN' ? "背景圆环开关" : "Background Rings Toggle"}
             >
-              <Aperture size={14} className={`shrink-0 transition-all duration-300 ${showRings ? 'rotate-180' : ''}`} />
+              <Aperture size={13} className={`shrink-0 transition-all duration-300 ${showRings ? 'rotate-180' : ''}`} />
+            </button>
+
+            {/* 2. Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className={`flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300 border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-90 focus:outline-none ${theme === 'retro' ? 'text-zinc-600 hover:text-black hover:border-black/5' : 'text-zinc-400 hover:text-white'}`}
+              title={lang === 'CN' ? '切换主题' : 'Toggle Theme'}
+            >
+              {theme === 'dark' ? <Moon size={13} strokeWidth={2} /> : <Sun size={13} strokeWidth={2} className={`${theme === 'retro' ? 'text-[#8B261D]' : ''}`} />}
+            </button>
+
+            {/* 3. Language Toggle */}
+            <button
+              onClick={() => setLang(lang === 'CN' ? 'EN' : 'CN')}
+              className={`w-8 h-8 flex items-center justify-center rounded-full border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-90 transition-all duration-300 ${theme === 'retro' ? 'text-zinc-600 hover:text-black hover:border-black/5' : 'text-zinc-400 hover:text-white'}`}
+              title={lang === 'CN' ? 'Switch to English' : '切换至中文'}
+            >
+              <span className="text-[10px] font-bold uppercase tracking-widest">{lang === 'CN' ? '中' : 'EN'}</span>
+            </button>
+
+            {/* 4. Profile / User */}
+            <button
+              onClick={() => currentUser.id !== 'guest_user' ? openProfile() : openAuth()}
+              className={`flex items-center gap-2 group transition-all duration-300 px-2 h-8 rounded-full border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-95`}
+            >
+              <div className={`w-5 h-5 rounded-full ${!currentUser.avatarUrl && (currentUser.avatarColor || 'bg-gold-primary')} border border-[var(--border-main)]/30 flex items-center justify-center text-[10px] font-bold text-white shadow-sm overflow-hidden group-hover:scale-110 transition-transform`}>
+                {currentUser.avatarUrl ? (
+                  <img src={currentUser.avatarUrl} alt="avatar" className="w-full h-full object-cover" />
+                ) : (
+                  currentUser.id === 'guest_user' ? <UserIcon size={12} /> : currentUser.username.substring(0, 1).toUpperCase()
+                )}
+              </div>
+              <div className="hidden sm:flex items-center h-4">
+                <AnimatedText
+                  lang={lang}
+                  hClass="h-4"
+                  className={`text-[10px] font-bold uppercase tracking-widest transition-all duration-300 ${theme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`}
+                  cn={currentUser?.id === 'guest_user' ? '访客' : currentUser.username}
+                  en={currentUser?.id === 'guest_user' ? 'GUEST' : currentUser.username}
+                />
+              </div>
             </button>
           </div>
         </div>
@@ -396,7 +433,11 @@ export const LandingView: React.FC<LandingViewProps> = ({
                 {theme === 'retro' && selectedProtocol === item.id && (
                   <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 bg-[var(--text-accent)] rounded-r-full"></div>
                 )}
-                <item.icon size={14} className={`${selectedProtocol === item.id ? (theme === 'retro' ? 'text-[var(--text-accent)] scale-110' : 'text-white opacity-100') : (theme === 'retro' ? 'text-black/40' : 'text-white opacity-70')} group-hover:opacity-100 transition-all shrink-0`} />
+                <item.icon 
+                  size={14} 
+                  className={`group-hover:opacity-100 transition-all shrink-0 ${selectedProtocol !== item.id || theme === 'retro' ? (theme === 'retro' ? 'text-black/40' : 'text-white opacity-70') : ''}`} 
+                  style={selectedProtocol === item.id && theme !== 'retro' ? { color: 'white', opacity: 1 } : (theme === 'retro' && selectedProtocol === item.id ? { color: 'var(--text-accent)' } : {})}
+                />
                 <AnimatedText
                   lang={lang}
                   hClass="h-4"
