@@ -905,19 +905,7 @@ const renderDetailView = () => {
             </button>
           </div>
 
-          {/* Navigation Links — ARCHIVE ONLY */}
-          <div className={`flex items-center p-1 rounded-full transition-all duration-500 border border-transparent hover:border-white/5 mr-4
-            ${theme === 'retro' ? 'hover:bg-[#FDFCF8]/90 hover:border-[#8B261D]/15' : 'hover:bg-black/30'}`}>
-            <button
-              onClick={openHistory}
-              className={`flex items-center gap-1.5 transition-all duration-300 group px-3 h-8 rounded-full border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-95 ${theme === 'retro' ? "text-zinc-600 hover:text-black hover:border-black/5" : "text-zinc-400 hover:text-white"}`}
-            >
-              <HistoryIcon size={14} className={`shrink-0 transition-all duration-100 ${theme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`} />
-              <span className={`text-[10px] font-bold uppercase tracking-[0.1em] transition-all duration-100 hidden md:block ${theme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`}>
-                {lang === 'CN' ? '欲望档案' : 'ARCHIVE'}
-              </span>
-            </button>
-          </div>
+          {/* Navigation area kept for spacing if needed, but button removed */}
         </div>
       </header>
 
