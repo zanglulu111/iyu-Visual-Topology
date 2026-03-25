@@ -20,7 +20,7 @@ export const ArchiveDetailModal: React.FC<ArchiveDetailModalProps> = ({ isOpen, 
 
     // Theme Variables mapped from directory modal logic
     const t = {
-        bgContainer: theme === 'retro' ? 'bg-[var(--bg-main)]' : (isDark ? 'bg-[#0A0A0B]' : 'bg-white'),
+        bgContainer: theme === 'retro' ? 'bg-[#EFE9E0]' : (isDark ? 'bg-[#0A0A0B]' : 'bg-white'),
         borderContainer: theme === 'retro' ? 'border-[#8B261D]/10 border-2 shadow-2xl' : (isDark ? 'border-zinc-800 border-4' : 'border-[#3A352F] border-4'),
         bgHeader: theme === 'retro' ? 'bg-transparent' : (isDark ? 'bg-[#0A0A0B]/90' : 'bg-white/95'),
         borderHeader: theme === 'retro' ? 'border-[#8B261D]/20 border-b-2 border-dashed' : (isDark ? 'border-zinc-900 border-b-2 border-dashed' : 'border-[#8B261D]/10 border-b-2 border-dashed'),
@@ -30,7 +30,7 @@ export const ArchiveDetailModal: React.FC<ArchiveDetailModalProps> = ({ isOpen, 
         textNormal: theme === 'retro' ? 'text-black/80' : (isDark ? 'text-zinc-400' : 'text-[#2B2824]'),
         textMuted: theme === 'retro' ? 'text-black/40' : (isDark ? 'text-zinc-500' : 'text-[#6A665A]'),
         textCode: theme === 'retro' ? 'text-[#8B261D]' : (isDark ? 'text-zinc-300' : 'text-[#3A352F]'),
-        btnBg: theme === 'retro' ? 'bg-[var(--bg-main)]' : (isDark ? 'bg-zinc-900' : 'bg-white'),
+        btnBg: theme === 'retro' ? 'bg-[#EFE9E0]' : (isDark ? 'bg-zinc-900' : 'bg-white'),
         btnHover: theme === 'retro' ? 'hover:bg-[#8B261D] hover:text-[#F9F7F1]' : (isDark ? 'hover:bg-zinc-800' : 'hover:bg-gray-100'),
         btnBorder: theme === 'retro' ? 'border-[#8B261D]/20' : (isDark ? 'border-zinc-700' : 'border-[#8B261D]/20'),
         // Section specific

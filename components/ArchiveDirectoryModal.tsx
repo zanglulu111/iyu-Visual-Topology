@@ -3,6 +3,7 @@ import { ARCHIVE_CASES } from './archiveCasesData';
 import { ArchiveDetailModal } from './ArchiveDetailModal';
 import { useTheme } from '../contexts/ThemeContext';
 import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, Globe, Instagram, Twitter, Mail } from 'lucide-react';
+import { soundManager } from '../utils/soundManager';
 
 interface ArchiveDirectoryModalProps {
     isOpen: boolean;
@@ -27,11 +28,8 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
     const [isTransitioning, setIsTransitioning] = useState(false);
     const targetScrollRef = React.useRef(0);
     // Audio Refs
-    const scrollAudioRef = React.useRef<HTMLAudioElement | null>(null);
-    const tickAudioRef = React.useRef<HTMLAudioElement | null>(null);
-    const hoverAudioRef = React.useRef<HTMLAudioElement | null>(null);
-    const confirmAudioRef = React.useRef<HTMLAudioElement | null>(null);
     const lastTickIndex = React.useRef(-1);
+    const scrollPlayingRef = React.useRef(false);
     const cardsRef = React.useRef<HTMLElement[]>([]);
     const viewportWidthRef = React.useRef(0);
     const lastInternalScrollPos = React.useRef(0);
@@ -122,41 +120,17 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
     }, [openingId, handleScrollDismiss]);
 
     // Initialize Sounds
+    // Preload Sounds on Mount
     useEffect(() => {
         if (isOpen) {
-            // Scroll sound: a subtle hum or mechanical rattle
-            scrollAudioRef.current = new Audio('/audio/archive-scroll.mp3');
-            scrollAudioRef.current.loop = true;
-            scrollAudioRef.current.volume = 0;
-            
-            // Tick sound: a short mechanical click
-            tickAudioRef.current = new Audio('/audio/archive-tick.mp3');
-            tickAudioRef.current.volume = 0.25;
-            
-            // Hover sound: a very subtle blip or static crackle
-            hoverAudioRef.current = new Audio('/audio/archive-hover.mp3');
-            hoverAudioRef.current.volume = 0.15;
-            
-            // Re-use confirm sound for selection
-            confirmAudioRef.current = new Audio('/audio/confirm-05.mp3');
+            soundManager.preload('archiveScroll', '/audio/archive-scroll.mp3');
+            soundManager.preload('archiveTick', '/audio/archive-tick1.mp3');
+            soundManager.preload('archiveHover', '/audio/archive-hover.mp3');
+            soundManager.preload('confirm', '/audio/confirm-05.mp3');
         }
         return () => {
-            if (scrollAudioRef.current) {
-                scrollAudioRef.current.pause();
-                scrollAudioRef.current = null;
-            }
-            if (tickAudioRef.current) {
-                tickAudioRef.current.pause();
-                tickAudioRef.current = null;
-            }
-            if (hoverAudioRef.current) {
-                hoverAudioRef.current.pause();
-                hoverAudioRef.current = null;
-            }
-            if (confirmAudioRef.current) {
-                confirmAudioRef.current.pause();
-                confirmAudioRef.current = null;
-            }
+            soundManager.stop('archiveScroll');
+            scrollPlayingRef.current = false;
         };
     }, [isOpen]);
 
@@ -175,50 +149,54 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
             targetScrollRef.current = Math.max(0, Math.min(maxScroll, targetScrollRef.current));
             
             const scrollDiff = targetScrollRef.current - container.scrollLeft;
-            if (Math.abs(scrollDiff) > 0.1 && !openingId) {
-                container.scrollLeft += scrollDiff * 0.12; 
+            if (Math.abs(scrollDiff) > 0.05 && !openingId) {
+                container.scrollLeft += scrollDiff * 0.18; // Smoother but faster target following
                 lastInternalScrollPos.current = container.scrollLeft;
-            } else if (Math.abs(scrollDiff) <= 0.1 && !openingId) {
+            } else if (Math.abs(scrollDiff) <= 0.05 && !openingId) {
                 container.scrollLeft = targetScrollRef.current;
                 lastInternalScrollPos.current = container.scrollLeft;
             }
             
             if (openingId) {
-                activityRef.current *= 0.85; 
+                activityRef.current *= 0.8; 
             } else {
                 const currentScroll = container.scrollLeft;
                 const diff = Math.abs(currentScroll - lastScrollPos.current);
                 lastScrollPos.current = currentScroll;
                 
-                // Sensitivity: we want it to react quickly but also have a nice decay
-                const targetActivity = Math.min(1.5, diff * 0.15); 
-                activityRef.current = activityRef.current * 0.9 + targetActivity * 0.1;
+                // Sensitivity: faster reaction to movement
+                const targetActivity = Math.min(1.8, diff * 0.2); 
+                activityRef.current = activityRef.current * 0.8 + targetActivity * 0.2;
             }
 
-            if (activityRef.current < 0.005) activityRef.current = 0;
+            if (activityRef.current < 0.001) activityRef.current = 0;
 
-            // --- Dynamic Scroll Audio Control ---
-            if (scrollAudioRef.current) {
-                if (activityRef.current > 0.01 && !openingId) {
-                    if (scrollAudioRef.current.paused) {
-                        scrollAudioRef.current.play().catch(() => {});
-                    }
-                    // Map activity to volume and playback rate
-                    // Volume 0 to 0.5, Speed 1.0 to 1.6
-                    const targetVolume = Math.min(0.5, activityRef.current * 0.35);
-                    const targetRate = 1.0 + Math.min(0.6, activityRef.current * 0.25);
-                    
-                    // Smooth volume transition
-                    scrollAudioRef.current.volume = scrollAudioRef.current.volume * 0.8 + targetVolume * 0.2;
-                    scrollAudioRef.current.playbackRate = targetRate;
-                } else {
-                    // Fade out
-                    if (scrollAudioRef.current.volume > 0.01) {
-                        scrollAudioRef.current.volume *= 0.85;
-                    } else if (!scrollAudioRef.current.paused) {
-                        scrollAudioRef.current.pause();
+            // --- Stable Scroll Audio Control ---
+            if (!openingId) {
+                if (!scrollPlayingRef.current) {
+                    const played = soundManager.play('archiveScroll', { loop: true, volume: 0, stopExisting: true });
+                    if (played) {
+                        scrollPlayingRef.current = true;
                     }
                 }
+                
+                // Sensitivity: modulate volume based on activity
+                const volThreshold = 0.002; 
+                if (scrollPlayingRef.current) {
+                    // Reduce pitch modulation range to avoid deformation
+                    // Volume: 0 to 0.65 based on movement
+                    // Rate: 0.95 (slowest) to 1.10 (fastest) for subtler feel
+                    const targetVolume = activityRef.current > volThreshold ? Math.min(0.65, activityRef.current * 0.6) : 0;
+                    const targetRate = 0.95 + Math.min(0.15, activityRef.current * 0.1); 
+                    
+                    soundManager.setVolume('archiveScroll', targetVolume, true); 
+                    soundManager.setPlaybackRate('archiveScroll', targetRate, true);
+                }
+            } else if (scrollPlayingRef.current) {
+                // Fade out and stop when card is opened
+                soundManager.setVolume('archiveScroll', 0, true);
+                soundManager.stop('archiveScroll', true);
+                scrollPlayingRef.current = false;
             }
 
             const viewportCenter = viewportWidthRef.current / 2;
@@ -244,12 +222,6 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
                 const cardCenter = cardPosInContent - scrollLeft;
                 
                 const distFromCenter = Math.abs(cardCenter - viewportCenter);
-
-                // Tracking the most centered card
-                if (distFromCenter < tickSenseRadius && distFromCenter < minDistance) {
-                    minDistance = distFromCenter;
-                    closestIndex = i;
-                }
                 
                 const horizon = 700; 
                 const proximity = Math.pow(Math.max(0, 1 - distFromCenter / horizon), 1.3); 
@@ -266,9 +238,6 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
                     
                     const img = inner.querySelector('img');
                     if (img) {
-                        // User Request: Colorize ONLY during scrolling. Fade when stopped.
-                        // Center 7 cards should be colored, middle one saturated.
-                        // Proximity is roughly > 0.4 for ~7 cards in a standard viewport.
                         const activeFactor = Math.min(1.0, activityRef.current * 4.0); 
                         const colorIntensity = Math.pow(proximity, 1.5) * activeFactor;
                         
@@ -279,21 +248,6 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
                     }
                 }
             });
-
-            // Trigger Tick sound if we just centered a NEW card
-            if (closestIndex !== -1 && closestIndex !== lastTickIndex.current) {
-                if (tickAudioRef.current) {
-                    tickAudioRef.current.currentTime = 0;
-                    // Dynamic volume: louder when alignment is perfect or activity is higher
-                    const vol = Math.min(0.3, 0.1 + activityRef.current * 0.12);
-                    tickAudioRef.current.volume = vol;
-                    tickAudioRef.current.play().catch(() => {});
-                }
-                lastTickIndex.current = closestIndex;
-            } else if (closestIndex === -1 && lastTickIndex.current !== -1) {
-                // If we moved completely away from cards, reset
-                lastTickIndex.current = -1;
-            }
 
             rafId = requestAnimationFrame(updateWave);
         };
@@ -307,10 +261,7 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
         if (openingId) return;
 
         // Play confirmation sound
-        if (confirmAudioRef.current) {
-            confirmAudioRef.current.currentTime = 0;
-            confirmAudioRef.current.play().catch(() => {});
-        }
+        soundManager.play('confirm', { volume: 0.5 });
 
         setOpeningId(id);
         setIsTransitioning(true);
@@ -337,12 +288,16 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
                     setIsTransitioning(false);
                 }
             }}
-            className={`relative w-full h-full font-sans overflow-hidden bg-black text-white perspective-2000 transition-colors duration-1000 ${openingId ? 'cursor-zoom-out' : ''}`}>
+            className={`relative w-full h-full font-sans overflow-hidden ${theme === 'retro' ? 'bg-[#EFE9E0] text-[#2D2D2D]' : 'bg-black text-white'} perspective-2000 transition-colors duration-1000 ${openingId ? 'cursor-zoom-out' : ''}`}>
             
+            {theme === 'retro' && (
+                <div className="absolute inset-0 pointer-events-none opacity-20 texture-paper animate-in fade-in duration-1000 z-0"></div>
+            )}
+
             {/* Cinematic Background Typography (Split Letters) */}
             {(openingId || selectedCaseId) && selectedCase && (
                 <div className={`absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden z-0 transition-all duration-1000 ease-out ${openingId ? 'opacity-30 scale-100' : 'opacity-5 scale-95 blur-md'}`}>
-                   <h1 className="text-[35vw] font-black uppercase tracking-[-0.08em] mountain-title flex select-none">
+                   <h1 className={`text-[35vw] font-black uppercase tracking-[-0.08em] mountain-title flex select-none ${theme === 'retro' ? 'text-[#8B261D]' : ''}`}>
                         {selectedCase.titleEn.split(' ')[0].split('').map((char, i) => (
                             <span 
                                 key={i} 
@@ -361,7 +316,7 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
             )}
 
             {/* Top-left Title Overlay (Restored Version) */}
-            <div className={`absolute top-0 left-0 w-full p-8 md:p-12 flex justify-between items-start pointer-events-none z-50 mix-blend-difference text-white transition-opacity duration-700 ${openingId ? 'opacity-0' : 'opacity-100'}`}>
+            <div className={`absolute top-0 left-0 w-full p-8 md:p-12 flex justify-between items-start pointer-events-none z-50 ${theme === 'retro' ? 'text-[#8B261D]' : 'mix-blend-difference text-white'} transition-opacity duration-700 ${openingId ? 'opacity-0' : 'opacity-100'}`}>
                 <div className="flex flex-col">
                     <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none m-0.5">
                         {lang === 'CN' ? '主体观测档案' : 'SUBJECT ARCHIVE'}
@@ -413,9 +368,8 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
                                         className={`archive-card-inner w-full h-full relative cursor-pointer group preserve-3d transition-all duration-300 will-change-transform active:scale-95 ${isOpening ? 'cursor-default' : ''}`}
                                         onClick={(e) => handleCardClick(e, item.id)}
                                         onMouseEnter={() => {
-                                            if (!openingId && hoverAudioRef.current) {
-                                                hoverAudioRef.current.currentTime = 0;
-                                                hoverAudioRef.current.play().catch(() => {});
+                                            if (!openingId) {
+                                                soundManager.play('archiveHover', { volume: 0.25, stopExisting: true });
                                             }
                                         }}
                                     >
@@ -460,7 +414,7 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
                                         `}</style>
                                         
                                         {/* Image Container */}
-                                        <div className={`w-full h-full relative overflow-hidden border border-white/5 bg-zinc-900 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] backface-hidden transition-all duration-1000 ${isOpening ? 'rounded-lg' : 'rounded-sm'}`}>
+                                        <div className={`w-full h-full relative overflow-hidden border ${theme === 'retro' ? 'border-[#8B261D]/10 bg-[#D8D2C5]/30' : 'border-white/5 bg-zinc-900'} shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] backface-hidden transition-all duration-1000 ${isOpening ? 'rounded-lg' : 'rounded-sm'}`}>
                                             <div className="absolute inset-0 z-0">
                                                 <img
                                                     src={item.imageUrl}
@@ -473,18 +427,18 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
                                             {/* CRT & Scanner Effects - Only when opening/opened */}
                                             {isOpening && (
                                                 <>
-                                                    <div className="absolute inset-0 z-[15] crt-overlay opacity-40"></div>
-                                                    <div className="absolute inset-0 z-[16] bg-black animate-[crtFlicker_0.15s_infinite] pointer-events-none"></div>
-                                                    <div className="scanline-beam"></div>
+                                                    <div className={`absolute inset-0 z-[15] crt-overlay ${theme === 'retro' ? 'opacity-20 mix-blend-multiply' : 'opacity-40'}`}></div>
+                                                    <div className={`absolute inset-0 z-[16] ${theme === 'retro' ? 'bg-[#8B261D]/10' : 'bg-black'} animate-[crtFlicker_0.15s_infinite] pointer-events-none`}></div>
+                                                    <div className={`scanline-beam ${theme === 'retro' ? 'opacity-50' : 'opacity-100'}`}></div>
                                                     {/* Vignette */}
-                                                    <div className="absolute inset-x-0 inset-y-0 z-[22] pointer-events-none shadow-[inset_0_0_120px_rgba(0,0,0,0.8)]"></div>
+                                                    <div className={`absolute inset-x-0 inset-y-0 z-[22] pointer-events-none shadow-[inset_0_0_120px_rgba(0,0,0,0.8)] ${theme === 'retro' ? 'opacity-0' : 'opacity-100'}`}></div>
                                                 </>
                                             )}
 
-                                            <div className={`absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10 pointer-events-none transition-opacity duration-1000 ${isOpening ? 'opacity-20' : 'opacity-100'}`}></div>
+                                            <div className={`absolute inset-0 bg-gradient-to-t ${theme === 'retro' ? 'from-[#EFE9E0]/90 via-transparent' : 'from-black/80 via-transparent'} to-transparent z-10 pointer-events-none transition-opacity duration-1000 ${isOpening ? 'opacity-20' : 'opacity-100'}`}></div>
 
                                             {/* Card Info - Hidden when expanded */}
-                                            <div className={`absolute inset-0 p-4 flex flex-col justify-between z-20 pointer-events-none text-white transition-opacity duration-500 ${isOpening ? 'opacity-0' : 'opacity-100'}`}>
+                                            <div className={`absolute inset-0 p-4 flex flex-col justify-between z-20 pointer-events-none ${theme === 'retro' ? 'text-[#8B261D]' : 'text-white'} transition-opacity duration-500 ${isOpening ? 'opacity-0' : 'opacity-100'}`}>
                                                 <div className="text-[8px] font-mono tracking-[0.2em] font-bold opacity-30">
                                                     SERIAL_{1001 + i}
                                                 </div>
@@ -510,7 +464,7 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
                             e.stopPropagation();
                             targetScrollRef.current = Math.max(0, targetScrollRef.current - 600);
                         }}
-                        className="absolute left-8 top-1/2 -translate-y-1/2 z-[60] w-12 h-12 flex items-center justify-center rounded-full border border-white/10 bg-black/40 text-white/40 hover:bg-white/10 hover:text-white transition-all duration-300 backdrop-blur-md group pointer-events-auto"
+                        className={`absolute left-8 top-1/2 -translate-y-1/2 z-[60] w-12 h-12 flex items-center justify-center rounded-full border transition-all duration-300 backdrop-blur-md group pointer-events-auto ${theme === 'retro' ? 'border-[#8B261D]/20 bg-white/40 text-[#8B261D]/40 hover:bg-white/80 hover:text-[#8B261D]' : 'border-white/10 bg-black/40 text-white/40 hover:bg-white/10 hover:text-white'}`}
                         title="Scroll Left"
                     >
                         <ChevronLeft size={24} className="group-hover:-translate-x-0.5 transition-transform" />
@@ -522,7 +476,7 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
                             const maxScroll = container ? container.scrollWidth - container.offsetWidth : 9999;
                             targetScrollRef.current = Math.min(maxScroll, targetScrollRef.current + 600);
                         }}
-                        className="absolute right-8 top-1/2 -translate-y-1/2 z-[60] w-12 h-12 flex items-center justify-center rounded-full border border-white/10 bg-black/40 text-white/40 hover:bg-white/10 hover:text-white transition-all duration-300 backdrop-blur-sm group pointer-events-auto"
+                        className={`absolute right-8 top-1/2 -translate-y-1/2 z-[60] w-12 h-12 flex items-center justify-center rounded-full border transition-all duration-300 backdrop-blur-sm group pointer-events-auto ${theme === 'retro' ? 'border-[#8B261D]/20 bg-white/40 text-[#8B261D]/40 hover:bg-white/80 hover:text-[#8B261D]' : 'border-white/10 bg-black/40 text-white/40 hover:bg-white/10 hover:text-white'}`}
                         title="Scroll Right"
                     >
                         <ChevronRight size={24} className="group-hover:translate-x-0.5 transition-transform" />
@@ -534,22 +488,22 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
             {/* Bottom UI - Expanded State Only */}
             {openingId && selectedCase && (
                 <div className="absolute bottom-0 left-0 w-full p-10 md:p-14 flex items-end justify-between z-[2000] animate-in fade-in slide-in-from-bottom-8 duration-1000">
-                    <div className="flex gap-16 text-[10px] font-bold uppercase tracking-[0.3em] text-white/40">
+                    <div className={`flex gap-16 text-[10px] font-bold uppercase tracking-[0.3em] ${theme === 'retro' ? 'text-[#8B261D]/50' : 'text-white/40'}`}>
                         <div className="flex flex-col gap-2">
-                            <span className="text-white/20">A — COMPLETED</span>
-                            <span className="text-white">{selectedCase.date}</span>
+                            <span className={`${theme === 'retro' ? 'text-[#8B261D]/30' : 'text-white/20'}`}>A — COMPLETED</span>
+                            <span className={`${theme === 'retro' ? 'text-[#8B261D]' : 'text-white'}`}>{selectedCase.date}</span>
                         </div>
                         <div className="flex flex-col gap-2">
-                            <span className="text-white/20">B — TYPE</span>
-                            <span className="text-white">{selectedCase.category}</span>
+                            <span className={`${theme === 'retro' ? 'text-[#8B261D]/30' : 'text-white/20'}`}>B — TYPE</span>
+                            <span className={`${theme === 'retro' ? 'text-[#8B261D]' : 'text-white'}`}>{selectedCase.category}</span>
                         </div>
                         <div className="flex flex-col gap-2 hidden lg:flex">
-                            <span className="text-white/20">C — ROLE</span>
-                            <span className="text-white">SUBJECT OBSERVER</span>
+                            <span className={`${theme === 'retro' ? 'text-[#8B261D]/30' : 'text-white/20'}`}>C — ROLE</span>
+                            <span className={`${theme === 'retro' ? 'text-[#8B261D]' : 'text-white'}`}>SUBJECT OBSERVER</span>
                         </div>
                         <div className="flex flex-col gap-2 hidden lg:flex">
-                            <span className="text-white/20">D — CLIENT</span>
-                            <span className="text-white">ARCHIVE BUREAU</span>
+                            <span className={`${theme === 'retro' ? 'text-[#8B261D]/30' : 'text-white/20'}`}>D — CLIENT</span>
+                            <span className={`${theme === 'retro' ? 'text-[#8B261D]' : 'text-white'}`}>ARCHIVE BUREAU</span>
                         </div>
                     </div>
 
@@ -559,20 +513,20 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
                                 e.stopPropagation();
                                 handleExplore(selectedCase.id);
                             }}
-                            className="group relative px-12 py-4 flex items-center gap-3 overflow-hidden bg-white text-black font-black uppercase tracking-[0.4em] text-xs hover:px-14 transition-all duration-500"
+                            className={`group relative px-12 py-4 flex items-center gap-3 overflow-hidden ${theme === 'retro' ? 'bg-[#8B261D] text-[#EFE9E0] hover:bg-[#A83226]' : 'bg-white text-black'} font-black uppercase tracking-[0.4em] text-xs hover:px-14 transition-all duration-500`}
                         >
                             <span>Explore</span>
                             <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
                         </button>
-                        <div className="text-[9px] font-mono tracking-widest text-white/20 uppercase">
+                        <div className={`text-[9px] font-mono tracking-widest ${theme === 'retro' ? 'text-[#8B261D]/30' : 'text-white/20'} uppercase`}>
                             Swipe to return
                         </div>
                     </div>
 
-                    <div className="hidden xl:flex gap-8 text-white/30">
-                        <Twitter size={16} className="hover:text-white transition-colors cursor-pointer" />
-                        <Instagram size={16} className="hover:text-white transition-colors cursor-pointer" />
-                        <Mail size={16} className="hover:text-white transition-colors cursor-pointer" />
+                    <div className={`hidden xl:flex gap-8 ${theme === 'retro' ? 'text-[#8B261D]/40' : 'text-white/30'}`}>
+                        <Twitter size={16} className={`cursor-pointer transition-colors ${theme === 'retro' ? 'hover:text-[#8B261D]' : 'hover:text-white'}`} />
+                        <Instagram size={16} className={`cursor-pointer transition-colors ${theme === 'retro' ? 'hover:text-[#8B261D]' : 'hover:text-white'}`} />
+                        <Mail size={16} className={`cursor-pointer transition-colors ${theme === 'retro' ? 'hover:text-[#8B261D]' : 'hover:text-white'}`} />
                     </div>
                 </div>
             )}

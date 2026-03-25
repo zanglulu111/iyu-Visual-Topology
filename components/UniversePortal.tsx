@@ -153,9 +153,11 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
   const isReturning = isReturningRef.current;
   const [mounted, setMounted] = useState(isReturning);
   const [isTitleHovered, setIsTitleHovered] = useState(false);
+  const [isQuoteHovered, setIsQuoteHovered] = useState(false);
   const titleContainerRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const glitchAudioRef = useRef<HTMLAudioElement | null>(null);
+  const quoteHoverAudioRef = useRef<HTMLAudioElement | null>(null);
 
   // Real-time glitch states for individual realms
   const [glitchActive, setGlitchActive] = useState<boolean[]>([false, false, false, false, false]);
@@ -214,6 +216,13 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
     glitchAudio.volume = 0.8; // Increased volume as requested
     glitchAudio.loop = true; // Loop while hovered as requested
     glitchAudioRef.current = glitchAudio;
+
+    // Initialize unique quote hover sound
+    const quoteHoverAudio = new Audio('/audio/glitch.mp3'); // Using glitch.mp3 as base, can be swapped for a unique file
+    quoteHoverAudio.volume = 0.6;
+    quoteHoverAudio.playbackRate = 1.2; // Slightly higher pitch for "unique" feel
+    quoteHoverAudio.loop = true;
+    quoteHoverAudioRef.current = quoteHoverAudio;
 
     // Initialize realm-specific glitch sounds
     [1, 2, 3, 4, 5].forEach((num, i) => {
@@ -284,6 +293,20 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
     if (glitchAudioRef.current) {
       glitchAudioRef.current.pause();
       glitchAudioRef.current.currentTime = 0;
+    }
+  };
+
+  const playQuoteHoverSound = () => {
+    if (quoteHoverAudioRef.current) {
+      quoteHoverAudioRef.current.currentTime = 0;
+      quoteHoverAudioRef.current.play().catch(() => {});
+    }
+  };
+
+  const stopQuoteHoverSound = () => {
+    if (quoteHoverAudioRef.current) {
+      quoteHoverAudioRef.current.pause();
+      quoteHoverAudioRef.current.currentTime = 0;
     }
   };
 
@@ -449,6 +472,18 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
           75% { text-shadow: -4px 2px 1.2px rgba(255, 0, 255, 0.75), 4px -2px 1.2px rgba(0, 255, 255, 0.75); }
         }
 
+        @keyframes retro-portal-glitch {
+          0%, 100% { text-shadow: -1px -0.5px 0.5px rgba(139,38,29, 0.3), 1px 0.5px 0.5px rgba(139,38,29, 0.3); transform: translate(0, 0); clip-path: none; filter: brightness(1); }
+          25% { text-shadow: -3px 0.8px 1px rgba(139,38,29, 0.5), 3px -0.8px 1px rgba(139,38,29, 0.5); transform: translate(-1.5px, 0.8px) skewX(1deg); clip-path: inset(30% 0 65% 0); filter: brightness(1.2); }
+          50% { text-shadow: 2px -2px 1.5px rgba(139,38,29, 0.4), -2px 2px 1.5px rgba(139,38,29, 0.4); transform: translate(1px, -1.2px); clip-path: none; filter: brightness(0.9); }
+          75% { text-shadow: -3px 2px 1px rgba(139,38,29, 0.5), 3px -2px 1px rgba(139,38,29, 0.5); transform: translate(-1px, 1.5px) skewX(-1deg); clip-path: inset(70% 0 25% 0); filter: brightness(1.1); }
+        }
+
+        @keyframes retro-subtle-flow {
+          0%, 100% { text-shadow: -1.5px -0.5px 0.5px rgba(139,38,29, 0.3), 1.5px 0.5px 0.5px rgba(139,38,29, 0.3); opacity: 0.9; }
+          50% { text-shadow: 2px 1px 1.5px rgba(139,38,29, 0.5), -2px -1px 1.5px rgba(139,38,29, 0.5); opacity: 1; }
+        }
+
         .rgb-split-hover:hover, .rgb-split-active {
           animation: rgb-portal-glitch 0.45s ease-in-out infinite;
           color: #fff;
@@ -462,9 +497,13 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
         }
 
         .retro-flicker-hover:hover, .retro-flicker-active {
-          animation: retro-dusty-flicker 0.15s steps(2) infinite;
+          animation: retro-portal-glitch 0.45s ease-in-out infinite;
           color: #8B261D;
-          text-shadow: 0 0 1px rgba(139,38,29,0.1);
+        }
+
+        .retro-subtle-active {
+          animation: retro-subtle-flow 2.2s ease-in-out infinite;
+          color: #8B261D;
         }
         @keyframes quoteFadeSeamless {
           0% { opacity: 0; transform: translateY(2px); }
@@ -567,9 +606,13 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
           </div>
           
           <div 
-              className="w-[55vh] h-[55vh] max-w-[550px] max-h-[550px] overflow-visible transition-all duration-[1200ms] ease-in-out"
+              className="w-[110vh] h-[110vh] max-w-[1300px] max-h-[1300px] overflow-visible"
               style={{ 
-                opacity: isRetro ? 0.95 : 1.0
+                transition: 'opacity 1200ms ease-in-out, filter 1200ms ease-in-out',
+                opacity: isRetro ? (hoveredRealm ? 0.2 : 0.95) : (hoveredRealm ? 0.25 : 1.0),
+                filter: hoveredRealm ? 'blur(15px)' : 'blur(0px)',
+                transform: 'scale(1) translateZ(0)',
+                willChange: 'opacity, filter'
               }}
             >
               <BorromeanRings centered={true} opacity={1} lang={lang === 'CN' ? 'CN' : 'EN'} driverType={isRetro ? undefined : undefined} isHomepage={true} />
@@ -624,18 +667,34 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
 
           <div 
             key={`${lacanianQuoteIndex}`}
-            className="mt-4 sm:mt-6 group/quote relative inline-block cursor-pointer pointer-events-auto quote-container transition-transform duration-500 hover:scale-110"
-            onClick={(e) => { e.stopPropagation(); toggleQuote(); }}
+            className="mt-4 sm:mt-6 quote-container"
           >
-            <AnimatedText
-              lang={lang}
-              hClass="h-6"
-              className={`text-[13px] sm:text-[15px] md:text-[17px] tracking-[0.3em] font-light italic transition-colors duration-700 ${isRetro ? 'text-[#8B261D]/70 hover:text-[#8B261D]' : 'text-white/60 hover:text-white/95'} ${isTitleHovered ? (isRetro ? 'retro-flicker-active text-[#8B261D]' : 'rgb-subtle-active text-white/95') : ''}`}
-              style={{ fontFamily: "'Noto Serif SC', 'Playfair Display', serif" }}
-              cn={LACANIAN_QUOTES[lacanianQuoteIndex].cn}
-              en={LACANIAN_QUOTES[lacanianQuoteIndex].en}
-            />
-            <div className={`mt-2 w-0 group-hover/quote:w-12 h-px mx-auto transition-all duration-500 opacity-40 ${isRetro ? 'bg-[#8B261D]' : 'bg-white'}`} />
+            <div 
+              className="group/quote relative inline-block cursor-pointer pointer-events-auto transition-all duration-1000 ease-[cubic-bezier(0.19,1,0.22,1)]"
+              style={{ 
+                transform: isQuoteHovered ? 'scale(1.15)' : 'scale(1)',
+                filter: isQuoteHovered ? 'drop-shadow(0 0 10px rgba(255,255,255,0.1))' : 'none'
+              }}
+              onMouseEnter={() => {
+                setIsQuoteHovered(true);
+                playQuoteHoverSound();
+              }}
+              onMouseLeave={() => {
+                setIsQuoteHovered(false);
+                stopQuoteHoverSound();
+              }}
+              onClick={(e) => { e.stopPropagation(); toggleQuote(); }}
+            >
+              <AnimatedText
+                lang={lang}
+                hClass="h-6"
+                className={`text-[13px] sm:text-[15px] md:text-[17px] tracking-[0.3em] font-light italic transition-colors duration-700 ${isRetro ? 'text-[#8B261D]/70 hover:text-[#8B261D]' : 'text-white/60 hover:text-white/95'} ${(isTitleHovered || isQuoteHovered) ? (isRetro ? 'retro-subtle-active' : 'rgb-subtle-active text-white/95') : ''}`}
+                style={{ fontFamily: "'Noto Serif SC', 'Playfair Display', serif" }}
+                cn={LACANIAN_QUOTES[lacanianQuoteIndex].cn}
+                en={LACANIAN_QUOTES[lacanianQuoteIndex].en}
+              />
+              <div className={`mt-2 w-0 group-hover/quote:w-12 h-px mx-auto transition-all duration-500 opacity-40 ${isRetro ? 'bg-[#8B261D]' : 'bg-white'}`} />
+            </div>
           </div>
         </div>
       </div>
@@ -648,7 +707,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
             <ECGCircuitTimeline 
               hoveredIndex={hoveredRealm ? REALMS.findIndex(r => r.id === hoveredRealm) : -1} 
               isRetro={isRetro} 
-              isTitleHovered={isTitleHovered}
+              isTitleHovered={isTitleHovered || isQuoteHovered}
               glitchActiveSegments={glitchActive}
             />
           </div>
@@ -692,7 +751,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
                     hClass="h-10 w-40"
                     className={`text-[9px] font-mono uppercase tracking-[0.3em] text-center
                       ${isHovered ? (isRetro ? 'text-[#8B261D]' : 'text-white') : (isRetro ? 'text-[#8B261D]/60' : 'text-white/45')}
-                      ${isTitleHovered ? (isRetro ? 'retro-flicker-active text-[#8B261D]' : 'rgb-subtle-active text-white') : ''}
+                      ${isTitleHovered ? (isRetro ? 'retro-subtle-active' : 'rgb-subtle-active text-white') : ''}
                       ${(!isTitleHovered && glitchActive[i]) ? (isRetro ? 'retro-jitter-active text-[#8B261D]' : 'rgb-jitter-active text-white') : ''}
                     `}
                     style={{
@@ -714,7 +773,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
                     hClass="h-16"
                     className={`text-[14px] sm:text-[16px] tracking-[0.3em] font-medium uppercase leading-relaxed
                       ${isHovered ? (isRetro ? 'text-[#8B261D]' : 'text-white') : (isRetro ? 'text-[#8B261D]/90' : 'text-white/80')}
-                      ${isTitleHovered ? (isRetro ? 'retro-flicker-active text-[#8B261D]' : 'rgb-subtle-active text-white') : ''}
+                      ${isTitleHovered ? (isRetro ? 'retro-subtle-active' : 'rgb-subtle-active text-white') : ''}
                       ${(!isTitleHovered && glitchActive[i]) ? (isRetro ? 'retro-jitter-active text-[#8B261D]' : 'rgb-jitter-active text-white') : ''}
                     `}
                     style={{

@@ -79,15 +79,20 @@ export const BorromeanRings: React.FC<BorromeanRingsProps> = ({
         <div className={containerClass} style={{ opacity }}>
             <div className={innerContainerClass} style={centered ? { transform: 'scale(1.0)', transformOrigin: 'center' } : {}}>
                 <style>{`
-                    svg circle, svg path, svg text, svg stop, svg rect, svg line, svg polygon {
-                        transition: stroke 1s ease-in-out, fill 1s ease-in-out, stroke-opacity 1s ease-in-out, stop-color 1s ease-in-out, stop-opacity 1s ease-in-out;
+                    .borromean-svg-root * {
+                        transition: stroke 1.2s cubic-bezier(0.16, 1, 0.3, 1), 
+                                    fill 1.2s cubic-bezier(0.16, 1, 0.3, 1), 
+                                    stroke-opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), 
+                                    stop-color 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+                        will-change: stroke, fill, stroke-opacity;
                     }
                 `}</style>
 
                 <svg
                     viewBox="0 0 200 200"
                     xmlns="http://www.w3.org/2000/svg"
-                    className="w-full h-full overflow-visible pointer-events-auto"
+                    className="w-full h-full overflow-visible pointer-events-auto borromean-svg-root"
+                    shapeRendering="geometricPrecision"
                 >
                     <defs>
                         <path id="formulaOuterPath" d="M 5,100 a 95,95 0 1,1 190,0 a 95,95 0 1,1 -190,0" />

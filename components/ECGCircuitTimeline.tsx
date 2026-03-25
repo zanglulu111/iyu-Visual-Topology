@@ -25,7 +25,7 @@ export const ECGCircuitTimeline: React.FC<ECGCircuitTimelineProps> = ({
 
   const getSegmentPath = (i: number) => {
     const x = nodes[i];
-    const isActive = hoveredIndex === i || (isTitleHovered && !isRetro) || glitchActiveSegments[i];
+    const isActive = hoveredIndex === i || isTitleHovered || glitchActiveSegments[i];
     let d = "";
     
     // Header for the segment (connect from previous or start)
@@ -39,11 +39,11 @@ export const ECGCircuitTimeline: React.FC<ECGCircuitTimelineProps> = ({
 
     // Standard heartbeat wave (Exactly 8 'L' points for morphing parity)
     if (isActive) {
-      if (i === 0) d += `L ${x - 18} ${midY} L ${x - 12} ${midY - 4} L ${x - 8} ${midY - 35} L ${x - 2} ${midY + 30} L ${x + 4} ${midY - 10} L ${x + 10} ${midY + 6} L ${x + 16} ${midY - 2} L ${x + 22} ${midY}`;
-      else if (i === 1) d += `L ${x - 18} ${midY - 20} L ${x - 12} ${midY + 15} L ${x - 6} ${midY - 40} L ${x} ${midY + 25} L ${x + 6} ${midY - 15} L ${x + 12} ${midY + 8} L ${x + 18} ${midY - 4} L ${x + 22} ${midY}`;
-      else if (i === 2) d += `L ${x - 18} ${midY - 10} L ${x - 12} ${midY - 35} L ${x - 6} ${midY + 10} L ${x} ${midY - 45} L ${x + 6} ${midY + 30} L ${x + 12} ${midY - 15} L ${x + 18} ${midY + 5} L ${x + 22} ${midY}`;
-      else if (i === 3) d += `L ${x - 18} ${midY + 10} L ${x - 12} ${midY - 15} L ${x - 6} ${midY + 30} L ${x} ${midY - 40} L ${x + 6} ${midY + 20} L ${x + 12} ${midY - 10} L ${x + 18} ${midY + 4} L ${x + 22} ${midY}`;
-      else d += `L ${x - 18} ${midY + 6} L ${x - 12} ${midY - 45} L ${x - 6} ${midY + 12} L ${x} ${midY + 30} L ${x + 6} ${midY + 10} L ${x + 12} ${midY - 25} L ${x + 18} ${midY + 5} L ${x + 22} ${midY}`;
+      if (i === 0) d += `L ${x - 18} ${midY} L ${x - 12} ${midY - 4} L ${x - 8} ${midY - 40} L ${x - 2} ${midY + 35} L ${x + 4} ${midY - 12} L ${x + 10} ${midY + 8} L ${x + 16} ${midY - 4} L ${x + 22} ${midY}`;
+      else if (i === 1) d += `L ${x - 18} ${midY - 25} L ${x - 12} ${midY + 20} L ${x - 6} ${midY - 45} L ${x} ${midY + 30} L ${x + 6} ${midY - 20} L ${x + 12} ${midY + 12} L ${x + 18} ${midY - 6} L ${x + 22} ${midY}`;
+      else if (i === 2) d += `L ${x - 18} ${midY - 15} L ${x - 12} ${midY - 40} L ${x - 6} ${midY + 15} L ${x} ${midY - 50} L ${x + 6} ${midY + 35} L ${x + 12} ${midY - 20} L ${x + 18} ${midY + 8} L ${x + 22} ${midY}`;
+      else if (i === 3) d += `L ${x - 18} ${midY + 15} L ${x - 12} ${midY - 20} L ${x - 6} ${midY + 35} L ${x} ${midY - 45} L ${x + 6} ${midY + 25} L ${x + 12} ${midY - 12} L ${x + 18} ${midY + 6} L ${x + 22} ${midY}`;
+      else d += `L ${x - 18} ${midY + 10} L ${x - 12} ${midY - 50} L ${x - 6} ${midY + 15} L ${x} ${midY + 35} L ${x + 6} ${midY + 12} L ${x + 12} ${midY - 30} L ${x + 18} ${midY + 8} L ${x + 22} ${midY}`;
     } else {
       d += `L ${x - 18} ${midY - 0.5} L ${x - 12} ${midY + 0.8} L ${x - 6} ${midY - 0.4} L ${x} ${midY + 0.6} L ${x + 6} ${midY - 0.3} L ${x + 12} ${midY + 0.5} L ${x + 18} ${midY - 0.2} L ${x + 22} ${midY}`;
     }
@@ -87,9 +87,32 @@ export const ECGCircuitTimeline: React.FC<ECGCircuitTimelineProps> = ({
             66%, 78% { transform: translate(-1.2px, 0.8px); filter: drop-shadow(1.5px 0 0 rgba(139,38,29,0.4)); }
             79%, 100% { transform: translate(0, 0); filter: drop-shadow(1px 0 0 rgba(139,38,29,0.3)); }
           }
+          @keyframes line-rgb-split {
+            0%, 100% { filter: drop-shadow(-1.5px -0.5px 0.5px rgba(255, 0, 255, 0.7)) drop-shadow(1.5px 0.5px 0.5px rgba(0, 255, 255, 0.7)); transform: translate(0, 0); }
+            20% { filter: drop-shadow(-4px 1px 1px rgba(255, 0, 255, 0.9)) drop-shadow(4px -1px 1px rgba(0, 255, 255, 0.9)); transform: translate(-2px, 1px) skewX(2deg); }
+            40% { filter: drop-shadow(3px -3px 1.5px rgba(255, 0, 255, 0.8)) drop-shadow(-3px 3px 1.5px rgba(0, 255, 255, 0.8)); transform: translate(1.5px, -1.5px); }
+            60% { filter: drop-shadow(-5px 2px 1.2px rgba(255, 0, 255, 0.9)) drop-shadow(5px -2px 1.2px rgba(0, 255, 255, 0.9)); transform: translate(-2.5px, 2px) skewX(-3deg); }
+            80% { filter: drop-shadow(2px 3px 1px rgba(255, 0, 255, 0.7)) drop-shadow(-2px -3px 1px rgba(0, 255, 255, 0.7)); transform: translate(1px, 1.5px); }
+          }
+          @keyframes line-retro-split {
+            0%, 100% { filter: drop-shadow(-1.5px -0.5px 0.5px rgba(139,38,29, 0.4)) drop-shadow(1.5px 0.5px 0.5px rgba(139,38,29, 0.4)); transform: translate(0, 0); }
+            20% { filter: drop-shadow(-3px 1px 1px rgba(139,38,29, 0.6)) drop-shadow(3px -1px 1px rgba(139,38,29, 0.6)); transform: translate(-1.5px, 0.5px) skewX(1deg); }
+            40% { filter: drop-shadow(2px -2px 1.5px rgba(139,38,29, 0.5)) drop-shadow(-2px 2px 1.5px rgba(139,38,29, 0.5)); transform: translate(1px, -1px); }
+            60% { filter: drop-shadow(-4px 2px 1.2px rgba(139,38,29, 0.6)) drop-shadow(4px -2px 1.2px rgba(139,38,29, 0.6)); transform: translate(-2px, 1.5px) skewX(-2deg); }
+            80% { filter: drop-shadow(1.5px 2px 1px rgba(139,38,29, 0.4)) drop-shadow(-1.5px -2px 1px rgba(139,38,29, 0.4)); transform: translate(0.5px, 1px); }
+          }
+          @keyframes line-glitch-clip {
+            0%, 100% { clip-path: none; }
+            20% { clip-path: inset(20% 0 50% 0); }
+            40% { clip-path: inset(0 0 0 0); }
+            60% { clip-path: inset(60% 0 10% 0); }
+            80% { clip-path: inset(0 0 0 0); }
+          }
           .line-glitch-active {
-            animation: line-rgb-split 0.45s ease-in-out infinite, line-glitch-clip 3s step-end infinite;
-            animation-delay: 0.3s;
+            animation: line-rgb-split 0.2s ease-in-out infinite, line-glitch-clip 2s step-end infinite;
+          }
+          .line-glitch-retro-active {
+            animation: line-retro-split 0.2s ease-in-out infinite, line-glitch-clip 2s step-end infinite;
           }
           .line-jitter-active {
             animation: line-jitter-dispersion 1s linear 1 forwards;
@@ -115,12 +138,11 @@ export const ECGCircuitTimeline: React.FC<ECGCircuitTimelineProps> = ({
             strokeLinejoin="round"
             strokeLinecap="round"
             fill="none"
-            className={`transition-all duration-[1200ms] ease-[cubic-bezier(0.19,1,0.22,1)] 
-              ${(isTitleHovered && !isRetro) ? 'line-glitch-active' : ''} 
+            className={`transition-all duration-700 ease-[cubic-bezier(0.19,1,0.22,1)] 
+              ${isTitleHovered ? (isRetro ? 'line-glitch-retro-active' : 'line-glitch-active') : ''}
               ${(!isTitleHovered && glitchActiveSegments[i]) ? (isRetro ? 'line-jitter-retro-active' : 'line-jitter-active') : ''}`}
             style={{ 
-              transitionProperty: 'd', 
-              opacity: 0.8,
+              opacity: (hoveredIndex === i || isTitleHovered || glitchActiveSegments[i]) ? 1 : 0.45,
               transitionDelay: (isTitleHovered && hoveredIndex === -1) ? `${RANDOM_DELAYS[i]}s` : '0s',
               animationDelay: (isTitleHovered && hoveredIndex === -1) ? `${RANDOM_DELAYS[i] + 0.3}s` : '0.3s'
             }}
@@ -137,12 +159,11 @@ export const ECGCircuitTimeline: React.FC<ECGCircuitTimelineProps> = ({
             strokeLinejoin="round"
             strokeLinecap="round"
             fill="none"
-            className={`transition-all duration-[1500ms] ease-[cubic-bezier(0.19,1,0.22,1)] 
-              ${(isTitleHovered && !isRetro) ? 'line-glitch-active' : ''}
+            className={`transition-all duration-1000 ease-[cubic-bezier(0.19,1,0.22,1)] 
+              ${isTitleHovered ? (isRetro ? 'line-glitch-retro-active' : 'line-glitch-active') : ''}
               ${(!isTitleHovered && glitchActiveSegments[i]) ? (isRetro ? 'line-jitter-retro-active' : 'line-jitter-active') : ''}`}
             style={{ 
-              transitionProperty: 'd', 
-              opacity: isRetro ? 0.15 : 0.08, 
+              opacity: isTitleHovered ? 0.3 : (isRetro ? 0.15 : 0.08), 
               filter: 'blur(1px)', 
               transform: 'translateY(1px)',
               transitionDelay: (isTitleHovered && hoveredIndex === -1) ? `${RANDOM_DELAYS[i] + 0.15}s` : '0s',
@@ -164,7 +185,7 @@ export const ECGCircuitTimeline: React.FC<ECGCircuitTimelineProps> = ({
 
         {/* Markers above the nodes */}
         {nodes.map((nx, i) => (
-          <g key={`f-${i}`} transform={`translate(${nx}, ${midY - 45})`} className="transition-all duration-1000" style={{ opacity: (hoveredIndex === i || (isTitleHovered && !isRetro)) ? 1 : 0.3 }}>
+          <g key={`f-${i}`} transform={`translate(${nx}, ${midY - 45})`} className="transition-all duration-1000" style={{ opacity: (hoveredIndex === i || isTitleHovered) ? 1 : 0.3 }}>
             <line x1={0} y1={-10} x2={0} y2={10} stroke={dimmedColor} strokeWidth={0.5} />
             <line x1={-5} y1={0} x2={5} y2={0} stroke={dimmedColor} strokeWidth={0.5} />
             <line x1={-15} y1={5} x2={15} y2={5} stroke={dimmedColor} strokeWidth={0.3} strokeDasharray="1 3" />

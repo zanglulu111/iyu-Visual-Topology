@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { DriverSelector } from './DriverSelector';
 import { DriverType, User } from '../types';
 import { Globe, Wand2, HelpCircle, History as HistoryIcon, Settings, User as UserIcon, BookOpen, Terminal, Database, ShieldAlert, Cpu, Film, Folder, Aperture, Zap, Sun, Moon, Search } from 'lucide-react';
@@ -98,6 +98,9 @@ export const LandingView: React.FC<LandingViewProps> = ({
   initialProtocol,
 }) => {
   const [localMounted, setLocalMounted] = useState(false);
+  // 圆环动画：始终挂载元素，用 key 强制重置动画
+  const [ringAnimClass, setRingAnimClass] = useState('animate-ring-entrance');
+  const [ringAnimKey, setRingAnimKey] = useState(0);
 
   const getThemeTextColor = () => {
     if (theme === 'retro') return 'text-[#8B261D]';
@@ -112,6 +115,17 @@ export const LandingView: React.FC<LandingViewProps> = ({
   useEffect(() => {
     setLocalMounted(true);
   }, []);
+
+  // 圆环开关：showRings 变化时切换动画 class 并递增 key 强制重新播放
+  useEffect(() => {
+    if (!localMounted) return;
+    if (showRings) {
+      setRingAnimClass('animate-ring-entrance');
+    } else {
+      setRingAnimClass('animate-ring-exit');
+    }
+    setRingAnimKey(prev => prev + 1);
+  }, [showRings, localMounted]);
 
   const { theme, toggleTheme } = useTheme();
   const [selectedProtocol, setSelectedProtocol] = useState<ProtocolType>(
@@ -368,12 +382,11 @@ export const LandingView: React.FC<LandingViewProps> = ({
           <div className={`absolute inset-0 pointer-events-none transition-shadow duration-1000 opacity-20 shadow-[inset_0_0_150px_rgba(0,0,0,1)] ${getGlowTheme(hoveredDriver)}`}></div>
         )}
 
-        {/* Background Rings */}
-        <div key={selectedProtocol} className={`absolute inset-0 flex items-center justify-end pr-[5%] pointer-events-none z-0 select-none overflow-hidden ${
-          (showRings && localMounted)
-            ? 'animate-ring-entrance'
-            : 'opacity-0'
-        }`}>
+        {/* Background Rings - 始终挂载，用 key 强制触发CSS动画 */}
+        <div
+          key={`rings-anim-${ringAnimKey}`}
+          className={`absolute inset-0 flex items-center justify-end pr-[5%] pointer-events-none z-0 select-none overflow-hidden ${ringAnimClass}`}
+        >
           <div className="w-[1000px] h-[1000px] flex items-center justify-center translate-x-1/4">
             <BorromeanRings centered={true} opacity={theme === 'retro' ? 0.85 : 0.95} driverType={hoveredDriver || undefined} vivid={true} />
           </div>

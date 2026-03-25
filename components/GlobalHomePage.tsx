@@ -64,10 +64,25 @@ export const GlobalHomePage: React.FC<GlobalHomePageProps> = ({
   const [mounted, setMounted] = useState(false);
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
 
+  // 圆环动画：始终挂载元素，用 key 强制重置动画
+  const [ringAnimClass, setRingAnimClass] = useState('animate-ring-entrance');
+  const [ringAnimKey, setRingAnimKey] = useState(0);
+
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 50);
     return () => clearTimeout(t);
   }, []);
+
+  // 圆环开关：showRings 变化时切换动画 class 并递增 key
+  useEffect(() => {
+    if (!mounted) return;
+    if (showRings) {
+      setRingAnimClass('animate-ring-entrance');
+    } else {
+      setRingAnimClass('animate-ring-exit');
+    }
+    setRingAnimKey(prev => prev + 1);
+  }, [showRings, mounted]);
 
   // 导航卡片定义
   const navCards: NavCard[] = [
@@ -234,13 +249,10 @@ export const GlobalHomePage: React.FC<GlobalHomePageProps> = ({
       {/* ── 主体内容 ── */}
       <div className="flex-1 flex overflow-hidden relative">
 
-        {/* 背景圆环 */}
+        {/* 背景圆环 - 始终挂载，用 key 强制触发CSS动画 */}
         <div
-          className={`absolute inset-0 flex items-center justify-end pr-[5%] pointer-events-none z-0 select-none overflow-hidden transition-all duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
-            (showRings && mounted)
-              ? 'opacity-100 scale-[1.05] translate-y-0'
-              : 'opacity-0 scale-[1.15] translate-y-20 blur-lg'
-          }`}
+          key={`rings-anim-${ringAnimKey}`}
+          className={`absolute inset-0 flex items-center justify-end pr-[5%] pointer-events-none z-0 select-none overflow-hidden ${ringAnimClass}`}
         >
           <div className="w-[900px] h-[900px] flex items-center justify-center translate-x-1/4">
             <BorromeanRings centered={true} opacity={isRetro ? 1.0 : 0.95} isHomepage={true} />

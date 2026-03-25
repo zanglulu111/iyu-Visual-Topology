@@ -178,7 +178,8 @@ export async function getPhilosophyDetail(
     return cached;
   }
 
-  // 2. 从 Firebase Firestore 云端获取重构后的细腻词条
+  // 2. 从 Firebase Firestore 云端获取重构后的细腻词条 (本地模式暂时屏蔽，确保本地修改立即生效)
+  /*
   try {
     const entryData = await firebaseDatabase.getEntryContent(conceptId);
     
@@ -197,6 +198,7 @@ export async function getPhilosophyDetail(
   } catch (err) {
     console.warn("[Firebase] Skipping Cloud Fetch...", err);
   }
+  */
 
   // 3. 原有逻辑兜底
   try {

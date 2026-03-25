@@ -66,6 +66,34 @@ interface PhilosophyCodexPageProps {
   onDetailTabChange?: (tab: 'DEFINITION' | 'ANALOGY' | 'APPLICATION') => void;
 }
 
+const ConceptCard = React.memo(({ concept, onClick, activeDictionary, theme, themeColors }: any) => {
+  const isSelected = activeDictionary === concept.id;
+  
+  return (
+    <button
+      onClick={() => onClick(concept)}
+      className={`group relative p-6 rounded-2xl cursor-pointer transition-[transform,background-color,border-color,box-shadow] duration-300 cubic-bezier(0.4, 0, 0.2, 1) hover:-translate-y-1.5 overflow-hidden border ${theme === 'retro'
+          ? 'bg-white/0 border-transparent hover:border-[#8B261D]/40 hover:bg-white shadow-none hover:shadow-[0_45px_100px_rgba(139,38,29,0.15)]'
+          : 'bg-black/20 border-transparent hover:border-[#FFD700]/80 hover:bg-black/40 hover:shadow-[0_0_25px_rgba(255,215,0,0.2)]'
+        }`}
+      style={{ 
+        boxShadow: (theme !== 'retro' && isSelected) ? '0 0 40px var(--philosopher-glow)' : undefined,
+        backdropFilter: theme === 'retro' ? 'none' : 'blur(10px)'
+      }}
+    >
+      <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-[var(--philosopher-accent)] to-transparent opacity-0 group-hover:opacity-[0.25] transition-all duration-700 blur-sm`}></div>
+      <div className={`absolute bottom-0 left-0 w-20 h-20 bg-gradient-to-tr from-[var(--philosopher-accent)] to-transparent opacity-0 group-hover:opacity-[0.15] transition-all duration-700 blur-sm`}></div>
+      <h4 className={`text-xl font-serif mb-1 tracking-wide transition-colors duration-500 ${theme === 'retro' ? 'text-black font-extrabold group-hover:text-[var(--text-accent)]' : 'text-white group-hover:text-[#FFD700]'}`}>{concept.name}</h4>
+      <p className={`text-[10px] font-mono mb-5 uppercase tracking-[0.2em] font-black ${theme === 'retro' ? 'text-[#8B261D]/60' : 'text-zinc-500'}`}>{concept.enName}</p>
+      <p className={`text-[13px] leading-relaxed line-clamp-4 font-light tracking-wide ${theme === 'retro' ? 'text-black/80 font-medium' : 'text-zinc-400'}`}>{concept.shortDef}</p>
+      <div className="mt-6 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
+        <span className={`text-[9px] font-bold uppercase tracking-widest ${theme === 'retro' ? 'text-black/40' : 'text-zinc-600'}`}>Access Link</span>
+        <ChevronRight size={14} className={themeColors.accent} />
+      </div>
+    </button>
+  );
+});
+
 const AnimatedText = ({ cn, en, lang, className = "", hClass = "h-5" }: { cn: React.ReactNode, en: React.ReactNode, lang: 'CN' | 'EN', className?: string, hClass?: string }) => (
   <div className={`overflow-hidden relative ${hClass} ${className}`}>
     <div className={`transition-all duration-[1500ms] w-full ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col ${lang === 'EN' ? '-translate-y-1/2' : 'translate-y-0'}`}>
@@ -278,7 +306,7 @@ const renderConcepts = () => (
       ? 'bg-white/0'
       : (theme === 'retro' ? 'bg-[var(--bg-main)]' : 'bg-white/[0.015] backdrop-blur-2xl rounded-xl border-transparent')
     }`}
-    style={{ backdropFilter: theme === 'retro' ? 'blur(0px)' : 'blur(40px)' }}
+    style={{ backdropFilter: theme === 'retro' ? 'none' : 'blur(16px)' }}
     >
     <div className={`h-14 flex items-center gap-2 px-6 border-b border-transparent overflow-x-auto no-scrollbar shrink-0 transition-all duration-500`}>
       {Object.entries(dictionaries).map(([id, info]) => (
@@ -323,9 +351,13 @@ const renderConcepts = () => (
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {category.concepts.map((concept: LacanConcept) => (
-                <button
+                <ConceptCard
                   key={concept.id}
-                  onClick={() => {
+                  concept={concept}
+                  theme={theme}
+                  activeDictionary={activeDictionary}
+                  themeColors={themeColors}
+                  onClick={(concept: any) => {
                     if (concept.id === 'rsi-topology-card' && setViewMode) {
                       setViewMode('RSI');
                     } else if (concept.id === 'desire-graph-card' && setViewMode) {
@@ -334,25 +366,7 @@ const renderConcepts = () => (
                       setSelectedItem({ type: 'CONCEPT', data: concept });
                     }
                   }}
-                  className={`group relative p-6 rounded-2xl cursor-pointer transition-all duration-700 cubic-bezier(0.4, 0, 0.2, 1) hover:-translate-y-1.5 overflow-hidden border will-change-[transform,background-color,backdrop-filter] ${theme === 'retro'
-                      ? 'bg-white/0 border-transparent hover:border-[#8B261D]/40 hover:bg-white shadow-none hover:shadow-[0_45px_100px_rgba(139,38,29,0.15)]'
-                      : 'bg-black/20 border-transparent hover:border-[#FFD700]/80 hover:bg-black hover:shadow-[0_0_25px_rgba(255,215,0,0.2)]'
-                    }`}
-                  style={{ 
-                    boxShadow: (theme !== 'retro' && activeDictionary === concept.id) ? '0 0 40px var(--philosopher-glow)' : undefined,
-                    backdropFilter: theme === 'retro' ? 'blur(0px)' : 'blur(40px)'
-                  }}
-                >
-                  <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-[var(--philosopher-accent)] to-transparent opacity-0 group-hover:opacity-[0.25] transition-all duration-700 blur-sm`}></div>
-                  <div className={`absolute bottom-0 left-0 w-20 h-20 bg-gradient-to-tr from-[var(--philosopher-accent)] to-transparent opacity-0 group-hover:opacity-[0.15] transition-all duration-700 blur-sm`}></div>
-                  <h4 className={`text-xl font-serif mb-1 tracking-wide transition-colors duration-500 ${theme === 'retro' ? 'text-black font-extrabold group-hover:text-[var(--text-accent)]' : 'text-white group-hover:text-[#FFD700]'}`}>{concept.name}</h4>
-                  <p className={`text-[10px] font-mono mb-5 uppercase tracking-[0.2em] font-black ${theme === 'retro' ? 'text-[#8B261D]/60' : 'text-zinc-500'}`}>{concept.enName}</p>
-                  <p className={`text-[13px] leading-relaxed line-clamp-4 font-light tracking-wide ${theme === 'retro' ? 'text-black/80 font-medium' : 'text-zinc-400'}`}>{concept.shortDef}</p>
-                  <div className="mt-6 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span className={`text-[9px] font-bold uppercase tracking-widest ${theme === 'retro' ? 'text-black/40' : 'text-zinc-600'}`}>Access Link</span>
-                    <ChevronRight size={14} className={themeColors.accent} />
-                  </div>
-                </button>
+                />
               ))}
             </div>
           </div>
@@ -494,9 +508,7 @@ const renderCollective = () => (
 const renderMarkdown = (text: string = "") => {
   if (!text) return null;
 
-  // Theme references for nested processing
   const isRetro = theme === 'retro';
-  const textColor = isRetro ? 'text-black' : 'text-[var(--philosopher-accent)]';
   const headerColor = isRetro ? 'text-[#8B261D]' : 'text-[var(--philosopher-accent)]';
 
   const lines = text.split('\n');
@@ -525,11 +537,11 @@ const renderMarkdown = (text: string = "") => {
       elements.push(
         <div key={`code-${elements.length}`} className={`my-6 rounded-xl overflow-hidden border ${isRetro ? 'border-black/10 bg-black/5' : 'border-white/10 bg-black/50'}`}>
           <div className={`px-4 py-2 border-b text-[9px] font-mono tracking-widest uppercase flex justify-between items-center ${isRetro ? 'border-black/5 bg-black/5 text-[#8B261D]/60' : 'border-white/5 bg-white/5 text-zinc-500'}`}>
-            <span>{codeLang || 'code'}</span>
+            <span>{codeLang || 'CODE'}</span>
             <span className="opacity-50">SCANNED_SOURCE</span>
           </div>
-          <pre className="p-6 overflow-x-auto custom-scrollbar">
-            <code className={`text-xs font-mono leading-relaxed block ${isRetro ? 'text-black/80' : 'text-amber-200/90'}`}>
+          <pre className="p-4 text-xs font-mono leading-relaxed overflow-x-auto custom-scrollbar">
+            <code className={isRetro ? 'text-black' : 'text-zinc-300'}>
               {codeBlock.join('\n')}
             </code>
           </pre>
@@ -541,12 +553,9 @@ const renderMarkdown = (text: string = "") => {
     }
   };
 
-  // Recursive parser for inline syntax with offset-based keys to avoid duplicates
-  const processInline = (str: string, offset: number = 0): React.ReactNode[] => {
+  const processInline = (str: string, offset: number): React.ReactNode[] => {
     if (!str) return [];
-
-    // Order: $$block > $inline > **bold > *italic > `code
-    const regex = /(\$\$.*?\$\$)|(\$(?:\\\$|[^\$])*?\$)|(\*\*.*?\*\*)|(\*[^\*].*?\*)|(`.*?`)/;
+    const regex = /(\$\$.*?\$\$)|(\$(?:\\\$|[^\$])*?\$)|(\*\*.*?\*\*)|(\*[^\*].*?\*)|(_.*?_)|(`.*?`)/;
     const match = str.match(regex);
 
     if (!match) return [str];
@@ -555,24 +564,20 @@ const renderMarkdown = (text: string = "") => {
     const start = match.index!;
     const before = str.slice(0, start);
     const after = str.slice(start + tag.length);
-
     const absoluteStart = offset + start;
 
     const renderToken = () => {
-      // 1. Block Math: $$...$$
       if (tag.startsWith('$$')) {
         const math = tag.slice(2, -2);
         if (typeof (window as any).katex !== 'undefined') {
           try {
             const html = (window as any).katex.renderToString(math, { throwOnError: false, displayMode: true });
-            // Using a div for block math
             return <div className="my-6 overflow-x-auto custom-scrollbar" dangerouslySetInnerHTML={{ __html: html }} />;
           } catch (e) { return <code>{tag}</code>; }
         }
         return <code>{tag}</code>;
       }
 
-      // 2. Inline Math: $...$
       if (tag.startsWith('$')) {
         const math = tag.slice(1, -1);
         if (typeof (window as any).katex !== 'undefined') {
@@ -584,44 +589,53 @@ const renderMarkdown = (text: string = "") => {
         return <code>{tag}</code>;
       }
 
-      // 3. Bold: **...**
       if (tag.startsWith('**')) {
-        return <strong className={`font-bold ${theme === 'retro' ? 'text-black' : 'text-[var(--philosopher-accent)]'}`}>{processInline(tag.slice(2, -2), absoluteStart + 2)}</strong>;
+        return <strong className={`font-bold ${isRetro ? 'text-black' : 'text-[var(--philosopher-accent)]'}`}>{processInline(tag.slice(2, -2), absoluteStart + 2)}</strong>;
       }
 
-      // 4. Italic: *...*
-      if (tag.startsWith('*')) {
+      if (tag.startsWith('*') || tag.startsWith('_')) {
         return <em className="italic opacity-90">{processInline(tag.slice(1, -1), absoluteStart + 1)}</em>;
       }
 
-      // 5. Code: `...`
       if (tag.startsWith('`')) {
         return <code className={`px-1.5 py-0.5 rounded font-mono text-xs ${isRetro ? 'bg-black/5 text-[#8B261D]' : 'bg-white/10 text-amber-500'}`}>{tag.slice(1, -1)}</code>;
       }
-
       return tag;
     };
 
     return [
-      ...processInline(before, offset), 
-      <React.Fragment key={absoluteStart}>{renderToken()}</React.Fragment>, 
+      ...processInline(before, offset),
+      <React.Fragment key={absoluteStart}>{renderToken()}</React.Fragment>,
       ...processInline(after, absoluteStart + tag.length)
     ];
   };
 
+  let firstHeaderFound = false;
+
   lines.forEach((line, index) => {
-    // Handle Code Block start/end
-    if (line.trim().startsWith('```')) {
-      if (isCodeBlock) { flushCode(); }
-      else { flushList(); isCodeBlock = true; codeLang = line.trim().slice(3); }
+    const trimmedLine = line.trim();
+    if (trimmedLine.startsWith('```')) {
+      if (isCodeBlock) flushCode();
+      else { flushList(); isCodeBlock = true; codeLang = trimmedLine.slice(3); }
       return;
     }
     if (isCodeBlock) { codeBlock.push(line); return; }
 
-    // Block Math: $$...$$
-    if (line.match(/^\$\$(.*)\$\$$/)) {
+    if (trimmedLine === '---') return;
+
+    if (line.startsWith('# ')) {
+      if (!firstHeaderFound) {
+        firstHeaderFound = true;
+        if (line.includes('【定义】')) return;
+      }
       flushList();
-      const formula = line.match(/^\$\$(.*)\$\$$/)![1];
+      elements.push(<h1 key={index} className={`text-3xl font-serif mt-12 mb-8 font-black tracking-widest ${headerColor}`}>{processInline(line.slice(2), index * 1000)}</h1>);
+      return;
+    }
+
+    if (trimmedLine.match(/^\$\$(.*)\$\$$/)) {
+      flushList();
+      const formula = trimmedLine.match(/^\$\$(.*)\$\$$/)![1];
       if (typeof (window as any).katex !== 'undefined') {
         const html = (window as any).katex.renderToString(formula, { displayMode: true, throwOnError: false });
         elements.push(<div key={index} className="my-8 py-4 overflow-x-auto text-center" dangerouslySetInnerHTML={{ __html: html }} />);
@@ -629,8 +643,11 @@ const renderMarkdown = (text: string = "") => {
       return;
     }
 
-    // Content Headers
-    if (line.startsWith('### ')) {
+    if (line.startsWith('## ')) {
+      flushList();
+      elements.push(<h2 key={index} className={`text-2xl font-serif mt-12 mb-6 font-extrabold tracking-widest ${headerColor}`}>{processInline(line.slice(3), index * 1000)}</h2>);
+    }
+    else if (line.startsWith('### ')) {
       flushList();
       elements.push(<h3 key={index} className={`text-xl font-serif mt-10 mb-6 font-bold tracking-wider ${headerColor}`}>{processInline(line.slice(4), index * 1000)}</h3>);
     }
@@ -638,27 +655,28 @@ const renderMarkdown = (text: string = "") => {
       flushList();
       elements.push(<h4 key={index} className={`text-lg font-serif mt-8 mb-4 font-bold tracking-wider ${isRetro ? 'text-[#8B261D]/80' : 'text-white/80'}`}>{processInline(line.slice(5), index * 1000)}</h4>);
     }
-    // List parsing
-    else if (/^\d+\.\s/.test(line)) {
+    else if (trimmedLine.startsWith('> ')) {
+      flushList();
+      elements.push(
+        <blockquote key={index} className={`border-l-4 pl-6 py-2 my-8 italic font-light tracking-widest leading-relaxed ${isRetro ? 'border-[#8B261D]/30 text-black/70' : 'border-[var(--philosopher-accent)]/30 text-white/70'}`}>
+          {processInline(trimmedLine.slice(2), index * 1000)}
+        </blockquote>
+      );
+    }
+    else if (/^\d+\.\s/.test(trimmedLine)) {
       if (listType !== 'ol') flushList();
       listType = 'ol';
-      listItems.push(<li key={index} className="leading-relaxed">{processInline(line.replace(/^\d+\.\s/, ''), index * 1000)}</li>);
+      listItems.push(<li key={index}>{processInline(trimmedLine.replace(/^\d+\.\s/, ''), index * 1000)}</li>);
     }
-    else if (/^[\*\-]\s/.test(line)) {
+    else if (/^[\*\-]\s/.test(trimmedLine)) {
       if (listType !== 'ul') flushList();
       listType = 'ul';
-      listItems.push(<li key={index} className="leading-relaxed">{processInline(line.slice(2), index * 1000)}</li>);
+      listItems.push(<li key={index}>{processInline(trimmedLine.slice(2), index * 1000)}</li>);
     }
-    else if (line.trim() === '') {
+    else if (trimmedLine === '') {
       flushList();
       elements.push(<div key={index} className="h-4"></div>);
     }
-    else if (line.trim() === '---') {
-      flushList();
-      elements.push(<hr key={index} className={`my-12 border-none h-px ${isRetro ? 'bg-black/10' : 'bg-white/10'}`} />);
-    }
-    // Standard Paragraph
-    // Standard Paragraph
     else {
       flushList();
       elements.push(
@@ -1050,11 +1068,12 @@ const renderDetailView = () => {
                 </div>
 
                 {/* RIGHT COLUMN: Content Area */}
-                <div className={`flex-1 flex flex-col rounded-2xl ${dt.cardBg} overflow-hidden backdrop-blur-md transition-all duration-500`}>
+                <div className={`flex-1 flex flex-col rounded-2xl ${dt.cardBg} overflow-hidden border border-white/5 transition-opacity duration-300`}>
                   {/* Definition Tab Container */}
                   <div 
                     key="tab-container-definition"
                     className={`flex-1 overflow-y-auto p-8 custom-scrollbar ${detailActiveTab === 'DEFINITION' ? 'block animate-in fade-in duration-300' : 'hidden'}`}
+                    style={{ transform: 'translateZ(0)' }}
                   >
                     <div className={`text-sm md:text-base ${dt.textColor} font-serif leading-relaxed tracking-wide`}>
                       {renderDetailContent(data.detailed?.definition || "", 'def')}
@@ -1065,6 +1084,7 @@ const renderDetailView = () => {
                   <div 
                     key="tab-container-analogy"
                     className={`flex-1 overflow-y-auto p-8 custom-scrollbar ${detailActiveTab === 'ANALOGY' ? 'block animate-in fade-in duration-300' : 'hidden'}`}
+                    style={{ transform: 'translateZ(0)' }}
                   >
                     <div className={`text-sm md:text-base ${dt.textColor} font-serif leading-relaxed tracking-wide`}>
                       {renderDetailContent(data.detailed?.analogy || "", 'analogy')}
@@ -1075,6 +1095,7 @@ const renderDetailView = () => {
                   <div 
                     key="tab-container-application"
                     className={`flex-1 overflow-y-auto p-8 custom-scrollbar ${detailActiveTab === 'APPLICATION' ? 'block animate-in fade-in duration-300' : 'hidden'}`}
+                    style={{ transform: 'translateZ(0)' }}
                   >
                     <div className={`text-sm md:text-base ${dt.textColor} font-serif leading-relaxed tracking-wide`}>
                       {renderDetailContent(data.detailed?.application || "", 'app')}

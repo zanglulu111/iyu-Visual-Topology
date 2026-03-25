@@ -4,6 +4,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Plus, Trash2, Loader2, ExternalLink, Volume2, VolumeX, Pause, Play, Info, X, ArrowDown } from 'lucide-react';
 import { videoService, Video, getEmbedUrl, getYouTubeThumbnail } from '../services/videoService';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface VideoLibraryProps {
     isOpen: boolean;
@@ -25,11 +26,22 @@ const decorativeNumberStyle: React.CSSProperties = {
 };
 
 // 主色调 - cream/gold 色系 (参照601)
-const CREAM = '#d4c79f';
-const CREAM_DIM = 'rgba(212, 199, 159, 0.5)';
-const CREAM_VERY_DIM = 'rgba(212, 199, 159, 0.25)';
-
 export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lang, isAdmin = false, isFullScreen = false }) => {
+    const { theme } = useTheme();
+    const isRetro = theme === 'retro';
+
+    // 主色调 - 根据主题切换
+    const CREAM = isRetro ? '#8B261D' : '#d4c79f';
+    const CREAM_DIM = isRetro ? 'rgba(139, 38, 29, 0.6)' : 'rgba(212, 199, 159, 0.5)';
+    const CREAM_VERY_DIM = isRetro ? 'rgba(139, 38, 29, 0.25)' : 'rgba(212, 199, 159, 0.25)';
+    const BG_COLOR = isRetro ? '#EFE9E0' : '#000000';
+    const BG_OPACITY = isRetro ? 'rgba(239, 233, 224, 0.95)' : 'rgba(10, 10, 10, 0.95)';
+
+    // 修改装饰性样式以适应主题
+    const currentDecorativeNumberStyle = {
+        ...decorativeNumberStyle,
+        color: isRetro ? 'rgba(139, 38, 29, 0.12)' : 'rgba(212, 199, 159, 0.15)',
+    };
     const [videos, setVideos] = useState<Video[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeVideo, setActiveVideo] = useState<Video | null>(null);
@@ -204,7 +216,7 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
     // ═══════════════════════════════════════════════════
     if (activeVideo) {
         return (
-            <div className="w-full h-full" style={{ background: '#000' }}>
+            <div className="w-full h-full" style={{ background: BG_COLOR }}>
                 {/* 内嵌 CSS 动画 */}
                 <style>{`
                     @keyframes cultFadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -229,7 +241,7 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                             border: `1px solid ${CREAM_DIM}`,
                             borderRadius: '20px',
                             background: showInfo ? CREAM : 'transparent',
-                            color: showInfo ? '#000' : CREAM,
+                            color: showInfo ? BG_COLOR : CREAM,
                             fontSize: '11px',
                             fontWeight: 600,
                             letterSpacing: '0.15em',
@@ -420,7 +432,7 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
     // 主页面 - 画廊 / 档案模式
     // ═══════════════════════════════════════════════════
     return (
-        <div style={{ width: '100%', height: '100%', background: '#0a0a0a', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ width: '100%', height: '100%', background: BG_COLOR, position: 'relative', overflow: 'hidden' }}>
             {/* 内嵌 CSS */}
             <style>{`
                 @keyframes cultFadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -441,7 +453,7 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                     transition: background 0.3s ease, color 0.3s ease;
                 }
                 .cult-archive-row:hover {
-                    background: rgba(212, 199, 159, 0.03) !important;
+                    background: ${isRetro ? 'rgba(139, 38, 29, 0.05)' : 'rgba(212, 199, 159, 0.03)'} !important;
                 }
                 .cult-thumbnail-hover {
                     transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.8s ease;
@@ -451,11 +463,11 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                 }
                 .cult-thumbnail-hover:hover {
                     transform: perspective(1500px) rotateX(4deg) rotateY(-6deg) rotateZ(0deg) scale(0.95);
-                    box-shadow: -30px 30px 80px rgba(212, 199, 159, 0.15);
+                    box-shadow: -30px 30px 80px ${isRetro ? 'rgba(139, 38, 29, 0.2)' : 'rgba(212, 199, 159, 0.15)'};
                 }
                 .cult-input {
-                    background: rgba(255,255,255,0.03);
-                    border: 1px solid rgba(212,199,159,0.15);
+                    background: ${isRetro ? 'rgba(139, 38, 29, 0.05)' : 'rgba(255,255,255,0.03)'};
+                    border: 1px solid ${isRetro ? 'rgba(139, 38, 29, 0.15)' : 'rgba(212,199,159,0.15)'};
                     color: ${CREAM};
                     font-size: 12px;
                     padding: 10px 14px;
@@ -469,7 +481,7 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                     border-color: ${CREAM_DIM};
                 }
                 .cult-input::placeholder {
-                    color: rgba(212,199,159,0.2);
+                    color: ${isRetro ? 'rgba(139, 38, 29, 0.3)' : 'rgba(212,199,159,0.2)'};
                 }
             `}</style>
 
@@ -478,7 +490,7 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                 position: 'absolute', top: 0, left: 0, right: 0, zIndex: 30,
                 display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
                 padding: '28px 40px',
-                background: 'linear-gradient(to bottom, rgba(10,10,10,0.95) 0%, rgba(10,10,10,0.6) 70%, transparent 100%)',
+                background: isRetro ? `linear-gradient(to bottom, ${BG_OPACITY} 0%, rgba(239, 233, 224, 0.6) 70%, transparent 100%)` : 'linear-gradient(to bottom, rgba(10,10,10,0.95) 0%, rgba(10,10,10,0.6) 70%, transparent 100%)',
                 pointerEvents: 'none',
             }}>
                 {/* 左上: 装饰性标志 */}
@@ -531,43 +543,43 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                                     outline: 'none',
                                 }}
                             >
-                                <option value="" style={{ background: '#111' }}>
-                                    {lang === 'CN' ? '分类' : 'FILTER'}
-                                </option>
-                                {categories.map(cat => (
-                                    <option key={cat} value={cat} style={{ background: '#111' }}>{cat}</option>
-                                ))}
-                            </select>
-                            <span style={{
-                                position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)',
-                                width: '6px', height: '6px', borderRadius: '50%',
-                                background: selectedCategory ? CREAM : CREAM_VERY_DIM,
-                                transition: 'background 0.3s',
-                            }} />
-                        </div>
-                    )}
-                    <button
-                        onClick={() => setViewMode(viewMode === 'gallery' ? 'archive' : 'gallery')}
-                        style={{
-                            background: 'none', border: 'none', cursor: 'pointer',
-                            color: CREAM_DIM, fontSize: '11px', fontWeight: 600,
-                            letterSpacing: '0.15em', textTransform: 'uppercase',
-                            display: 'flex', alignItems: 'center', gap: '8px',
-                            fontFamily: "'Helvetica Neue', sans-serif",
-                            transition: 'color 0.3s',
-                        }}
-                        onMouseEnter={e => e.currentTarget.style.color = CREAM}
-                        onMouseLeave={e => e.currentTarget.style.color = CREAM_DIM}
-                    >
-                        {viewMode === 'gallery'
-                            ? (lang === 'CN' ? '档案' : 'ARCHIVE')
-                            : (lang === 'CN' ? '画廊' : 'GALLERY')
-                        }
-                        <span style={{
-                            width: '6px', height: '6px', borderRadius: '50%',
-                            background: CREAM_DIM,
-                        }} />
-                    </button>
+                                 <option value="" style={{ background: BG_COLOR }}>
+                                     {lang === 'CN' ? '分类' : 'FILTER'}
+                                 </option>
+                                 {categories.map(cat => (
+                                     <option key={cat} value={cat} style={{ background: BG_COLOR }}>{cat}</option>
+                                 ))}
+                             </select>
+                             <span style={{
+                                 position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)',
+                                 width: '6px', height: '6px', borderRadius: '50%',
+                                 background: selectedCategory ? CREAM : CREAM_VERY_DIM,
+                                 transition: 'background 0.3s',
+                             }} />
+                         </div>
+                     )}
+                     <button
+                         onClick={() => setViewMode(viewMode === 'gallery' ? 'archive' : 'gallery')}
+                         style={{
+                             background: 'none', border: 'none', cursor: 'pointer',
+                             color: CREAM_DIM, fontSize: '11px', fontWeight: 600,
+                             letterSpacing: '0.15em', textTransform: 'uppercase',
+                             display: 'flex', alignItems: 'center', gap: '8px',
+                             fontFamily: "'Helvetica Neue', sans-serif",
+                             transition: 'color 0.3s',
+                         }}
+                         onMouseEnter={e => e.currentTarget.style.color = CREAM}
+                         onMouseLeave={e => e.currentTarget.style.color = CREAM_DIM}
+                     >
+                         {viewMode === 'gallery'
+                             ? (lang === 'CN' ? '档案' : 'ARCHIVE')
+                             : (lang === 'CN' ? '画廊' : 'GALLERY')
+                         }
+                         <span style={{
+                             width: '6px', height: '6px', borderRadius: '50%',
+                             background: CREAM_DIM,
+                         }} />
+                     </button>
                 </div>
             </div>
 
@@ -576,7 +588,7 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                 <div style={{
                     position: 'absolute', inset: 0, display: 'flex',
                     alignItems: 'center', justifyContent: 'center', zIndex: 40,
-                    background: '#0a0a0a',
+                    background: BG_COLOR,
                 }}>
                     <Loader2 size={24} className="animate-spin" style={{ color: CREAM_VERY_DIM }} />
                 </div>
@@ -652,7 +664,7 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                                         {/* 银幕外框 (暗色) */}
                                         <div style={{
                                             position: 'absolute', inset: '-12%',
-                                            background: 'linear-gradient(135deg, rgba(30,28,22,0.6) 0%, rgba(15,14,10,0.8) 100%)',
+                                            background: isRetro ? `linear-gradient(135deg, ${BG_COLOR} 0%, rgba(220, 214, 204, 1) 100%)` : 'linear-gradient(135deg, rgba(10,10,10,1) 0%, rgba(20,18,14,1) 100%)',
                                             borderRadius: '2px',
                                             filter: 'blur(0px)',
                                         }} />
@@ -680,7 +692,7 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                                                 <div style={{
                                                     width: '100%', height: '100%',
                                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                    background: 'linear-gradient(135deg, rgba(10,10,10,1) 0%, rgba(20,18,14,1) 100%)',
+                                                    background: isRetro ? `linear-gradient(135deg, ${BG_COLOR} 0%, rgba(220, 214, 204, 1) 100%)` : 'linear-gradient(135deg, rgba(10,10,10,1) 0%, rgba(20,18,14,1) 100%)',
                                                 }}>
                                                     {video.thumbnail_url ? (
                                                         <img
@@ -708,7 +720,7 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                                                 <div style={{
                                                     width: '100%', height: '100%',
                                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                    background: 'linear-gradient(135deg, rgba(10,10,10,1) 0%, rgba(20,18,14,1) 100%)',
+                                                    background: isRetro ? `linear-gradient(135deg, ${BG_COLOR} 0%, rgba(220, 214, 204, 1) 100%)` : 'linear-gradient(135deg, rgba(10,10,10,1) 0%, rgba(20,18,14,1) 100%)',
                                                 }}>
                                                     <Play size={48} style={{ color: CREAM_VERY_DIM }} />
                                                 </div>
@@ -730,7 +742,7 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                                                     border: `2px solid ${CREAM_DIM}`,
                                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                                                     backdropFilter: 'blur(8px)',
-                                                    background: 'rgba(0,0,0,0.3)',
+                                                    background: isRetro ? 'rgba(139, 38, 29, 0.2)' : 'rgba(0,0,0,0.3)',
                                                 }}>
                                                     <Play size={24} style={{ color: CREAM, marginLeft: '3px' }} />
                                                 </div>
@@ -772,7 +784,7 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                         position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 30,
                         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                         padding: '20px 40px',
-                        background: 'linear-gradient(to top, rgba(10,10,10,0.95) 0%, rgba(10,10,10,0.6) 70%, transparent 100%)',
+                        background: isRetro ? `linear-gradient(to top, ${BG_OPACITY} 0%, rgba(239, 233, 224, 0.6) 70%, transparent 100%)` : 'linear-gradient(to top, rgba(10,10,10,0.95) 0%, rgba(10,10,10,0.6) 70%, transparent 100%)',
                     }}>
                         {/* 左下: 搜索 / 管理 */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
@@ -937,9 +949,9 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                             style={{
                                 display: 'grid',
                                 gridTemplateColumns: '100px 1fr 1fr 180px',
-                                gap: '16px', padding: '18px 0',
-                                borderBottom: '1px solid rgba(212,199,159,0.06)',
-                                cursor: 'pointer', alignItems: 'center',
+                                 gap: '16px', padding: '18px 0',
+                                 borderBottom: isRetro ? '1px solid rgba(139, 38, 29, 0.08)' : '1px solid rgba(212,199,159,0.06)',
+                                 cursor: 'pointer', alignItems: 'center',
                                 animationDelay: `${index * 0.03}s`,
                             }}
                         >
@@ -1009,7 +1021,7 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
             {showAddForm && isAdmin && (
                 <div className="cult-slide-up" style={{
                     position: 'absolute', bottom: '60px', left: '40px', right: '40px',
-                    zIndex: 40, background: 'rgba(10,10,10,0.95)',
+                    zIndex: 40, background: BG_OPACITY,
                     border: `1px solid ${CREAM_VERY_DIM}`,
                     borderRadius: '4px', padding: '28px',
                     backdropFilter: 'blur(20px)',
@@ -1077,7 +1089,7 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                                 disabled={addLoading}
                                 style={{
                                     padding: '10px 24px', background: CREAM,
-                                    color: '#0a0a0a', border: 'none',
+                                    color: BG_COLOR, border: 'none',
                                     fontSize: '11px', fontWeight: 700,
                                     letterSpacing: '0.15em', textTransform: 'uppercase',
                                     cursor: addLoading ? 'wait' : 'pointer',
@@ -1109,7 +1121,7 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                 <div className="cult-fade-in" style={{
                     position: 'absolute', top: '-3%', left: '-2%',
                     zIndex: 5, pointerEvents: 'none',
-                    ...decorativeNumberStyle,
+                    ...currentDecorativeNumberStyle,
                     fontSize: 'clamp(100px, 18vw, 280px)',
                     opacity: 0.06,
                 }}>
