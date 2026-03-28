@@ -106,7 +106,7 @@ const REALMS: RealmDef[] = [
     color: '#fb7185',
     glowRgba: 'rgba(251, 113, 133, 0.2)',
     iconSymbol: 'Ψ',
-    target: { page: 0, initialProtocol: 'DICTIONARY' },
+    target: { page: 1, viewMode: 'DICTIONARY' },
   },
   {
     id: 'psychoanalysis',
@@ -366,8 +366,13 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
     
     // De-couple path: If it's dictionary, we open the manual (codex) directly
     if (realm.id === 'dictionary') {
-      openManual();
-      playConfirmSound(index); // Play sound even for dictionary
+      setIsExiting(true);
+      setExitTarget(realm.id);
+      playConfirmSound(index);
+      setTimeout(() => {
+        setPage(1);
+        setViewMode('DICTIONARY');
+      }, 350);
       return;
     }
 

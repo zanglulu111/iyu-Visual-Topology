@@ -4,21 +4,21 @@
     "name": "实体即主体",
     "enName": "Substance is Subject",
     "category": "Core",
-    "shortDef": "真理不仅被理解和表述为实体，而且同样地被理解和表述为主体。"
+    "shortDef": "真理不仅被理解为实体，且同样被理解为主体。"
   },
   {
     "id": "h_dialectic",
     "name": "辩证法",
     "enName": "Dialectics",
     "category": "Core",
-    "shortDef": "正、反、合的运动过程，矛盾是发展的动力。"
+    "shortDef": "正-反-合的内在运动逻辑。"
   },
   {
     "id": "h_aufhebung",
     "name": "扬弃",
     "enName": "Aufhebung",
     "category": "Core",
-    "shortDef": "既克服又保留，在更高层面上达成统一。"
+    "shortDef": "既克服又保留，在更高层面达成统一。"
   },
   {
     "id": "h_negativity",
@@ -26,6 +26,13 @@
     "enName": "Negativity",
     "category": "Core",
     "shortDef": "主体的核心力量，通过否定确立自身。"
+  },
+  {
+    "id": "h_negation_negation",
+    "name": "否定之否定",
+    "enName": "Negation of Negation",
+    "category": "Core",
+    "shortDef": "通过双重否定达成更高层面的肯定。"
   },
   {
     "id": "h_unity_opposites",
@@ -39,13 +46,356 @@
     "name": "具体的普遍性",
     "enName": "Concrete Universality",
     "category": "Core",
-    "shortDef": "普遍性不是抽象的，而是包含所有特殊性的具体整体。"
+    "shortDef": "包含所有特殊性的具体整体。"
   },
   {
     "id": "h_teleology",
     "name": "内在目的论",
     "enName": "Intrinsic Teleology",
     "category": "Core",
-    "shortDef": "事物发展的目的蕴含在其自身的变化逻辑之中。"
+    "shortDef": "事物发展的目的蕴含在其自身逻辑中。"
+  },
+  {
+    "id": "h_pure_being_nothing",
+    "name": "存在与虚无（纯有/无）",
+    "enName": "Being and Nothing",
+    "category": "Logic",
+    "shortDef": "绝对起点的真空状态：极致的饱满在逻辑原点塌缩为绝对的空无。"
+  },
+  {
+    "id": "h_becoming",
+    "name": "变",
+    "enName": "Becoming",
+    "category": "Logic",
+    "shortDef": "有与无之间的辩证统一，生成的法则。"
+  },
+  {
+    "id": "h_dasein",
+    "name": "定在",
+    "enName": "Determinate Being",
+    "category": "Logic",
+    "shortDef": "具体的、有规定性的存在。"
+  },
+  {
+    "id": "h_being_for_self",
+    "name": "自为存在",
+    "enName": "Being-for-self",
+    "category": "Logic",
+    "shortDef": "否定了外部限制、回到自身的存在。"
+  },
+  {
+    "id": "h_quality_quantity_measure",
+    "name": "质量度",
+    "enName": "Quality, Quantity, Measure",
+    "category": "Logic",
+    "shortDef": "存在论的三个演化阶段。"
+  },
+  {
+    "id": "h_identity_difference",
+    "name": "同一与差异",
+    "enName": "Identity & Difference",
+    "category": "Logic",
+    "shortDef": "本质的反思运动。"
+  },
+  {
+    "id": "h_contradiction",
+    "name": "矛盾",
+    "enName": "Contradiction",
+    "category": "Logic",
+    "shortDef": "本质运动的真理，发展的动力。"
+  },
+  {
+    "id": "h_ground",
+    "name": "根据",
+    "enName": "Ground",
+    "category": "Logic",
+    "shortDef": "事物存在的根本支撑。"
+  },
+  {
+    "id": "h_essence_appearance",
+    "name": "现象与本质",
+    "enName": "Appearance & Essence",
+    "category": "Logic",
+    "shortDef": "本质及其表现形式的辩证关系。"
+  },
+  {
+    "id": "h_actuality",
+    "name": "现实性",
+    "enName": "Actuality",
+    "category": "Logic",
+    "shortDef": "本质与现象的统一。"
+  },
+  {
+    "id": "h_subjective_concept",
+    "name": "主观概念",
+    "enName": "Subjective Concept",
+    "category": "Logic",
+    "shortDef": "判断与推论的逻辑形式。"
+  },
+  {
+    "id": "h_objectivity",
+    "name": "客观性",
+    "enName": "Objectivity",
+    "category": "Logic",
+    "shortDef": "概念在客体中的外化。"
+  },
+  {
+    "id": "h_idea",
+    "name": "理念",
+    "enName": "The Idea",
+    "category": "Logic",
+    "shortDef": "主观性与客观性的绝对统一。"
+  },
+  {
+    "id": "h_sense_certainty",
+    "name": "感性确定性",
+    "enName": "Sensuous Certainty",
+    "category": "Phenomenology",
+    "shortDef": "直接经验的匮乏及其真理。"
+  },
+  {
+    "id": "h_perception",
+    "name": "知觉",
+    "enName": "Perception",
+    "category": "Phenomenology",
+    "shortDef": "事物作为多重属性的统一。"
+  },
+  {
+    "id": "h_understanding",
+    "name": "知性",
+    "enName": "Understanding",
+    "category": "Phenomenology",
+    "shortDef": "透过现象看本质的规律运作。"
+  },
+  {
+    "id": "h_desire_phen",
+    "name": "欲望",
+    "enName": "Desire",
+    "category": "Phenomenology",
+    "shortDef": "意识确立自身的原动力。"
+  },
+  {
+    "id": "h_master_slave",
+    "name": "主奴辩证法",
+    "enName": "Master-Slave",
+    "category": "Phenomenology",
+    "shortDef": "通过承认实现自我意识的生死斗争。"
+  },
+  {
+    "id": "h_recognition",
+    "name": "承认",
+    "enName": "Recognition",
+    "category": "Phenomenology",
+    "shortDef": "主体性确立的社会条件，在对他者的承认中实现自身。"
+  },
+  {
+    "id": "h_alienation",
+    "name": "异化",
+    "enName": "Alienation",
+    "category": "Phenomenology",
+    "shortDef": "自我的残酷外化：主体通过制造一个敌对的客观世界来确证自身的创造伟力。"
+  },
+  {
+    "id": "h_ansich_fursich",
+    "name": "自在与自为",
+    "enName": "In-itself & For-itself",
+    "category": "Phenomenology",
+    "shortDef": "精神的觉醒律点：从混沌的潜能（自在）向彻底、清醒且痛苦的自我实现（自为）的质变。"
+  },
+  {
+    "id": "h_stoicism",
+    "name": "斯多葛主义",
+    "enName": "Stoicism",
+    "category": "Phenomenology",
+    "shortDef": "退回思想内里的抽象自由。"
+  },
+  {
+    "id": "h_skepticism",
+    "name": "怀疑主义",
+    "enName": "Skepticism",
+    "category": "Phenomenology",
+    "shortDef": "对外部现实的否定性力量。"
+  },
+  {
+    "id": "h_unhappy_consciousness",
+    "name": "苦恼意识",
+    "enName": "Unhappy Consciousness",
+    "category": "Phenomenology",
+    "shortDef": "内部分裂的主体及其彼岸投射。"
+  },
+  {
+    "id": "h_observing_reason",
+    "name": "观察的理性",
+    "enName": "Observing Reason",
+    "category": "Phenomenology",
+    "shortDef": "将自然视为客体的认知阶段。"
+  },
+  {
+    "id": "h_practical_reason",
+    "name": "实践的理性",
+    "enName": "Practical Reason",
+    "category": "Phenomenology",
+    "shortDef": "理性的暴力降临：通过行动消解现状，将世界强制扭曲为主体的镜像。"
+  },
+  {
+    "id": "h_individuality_all",
+    "name": "个体性与普遍性",
+    "enName": "Individuality & Universality",
+    "category": "Phenomenology",
+    "shortDef": "精神动物园的生存游戏：个体 Vanity 向虚假普遍性能指的危险跃迁。"
+  },
+  {
+    "id": "h_ethical_world",
+    "name": "伦理世界",
+    "enName": "Ethical World",
+    "category": "Phenomenology",
+    "shortDef": "静默的绝对权力：个体在习俗与法律的无形网格中，作为“零件”而获得的神圣整体性。"
+  },
+  {
+    "id": "h_culture_alienation",
+    "name": "教化",
+    "enName": "Culture (Bildung)",
+    "category": "Phenomenology",
+    "shortDef": "人格的自我破碎与重组：主体通过投身于异己的文明秩序，在自我的彻底丧失中换取社会性的通行证。"
+  },
+  {
+    "id": "h_morality_view",
+    "name": "道德世界观",
+    "enName": "Moral Worldview",
+    "category": "Phenomenology",
+    "shortDef": "伪君子的最高语法：主体通过推迟‘至善’的实现，在无休止的道德表演中维持一种虚假的内心圆满。"
+  },
+  {
+    "id": "h_religion_phen",
+    "name": "宗教（精神现象学阶段）",
+    "enName": "Religion in Phenomenology",
+    "category": "Phenomenology",
+    "shortDef": "精神的自我投影：主体通过将自身力量异化为神圣表象，在‘彼岸’的幻象中寻找‘此岸’的真相。"
+  },
+  {
+    "id": "h_absolute_knowing",
+    "name": "绝对知识",
+    "enName": "Absolute Knowing",
+    "category": "Phenomenology",
+    "shortDef": "莫比乌斯环的闭合：精神彻底剥离感性外壳，意识到整个异化的世界史不过是它自身逻辑的波澜。"
+  },
+  {
+    "id": "h_property",
+    "name": "所有权",
+    "enName": "Property",
+    "category": "Objective Spirit",
+    "shortDef": "意志的首次拓殖：主体通过对外部物的占有，将空洞的自由意志转化为客观的人格存在。"
+  },
+  {
+    "id": "h_contract",
+    "name": "契约",
+    "enName": "Contract",
+    "category": "Objective Spirit",
+    "shortDef": "欲望的和平协议：两个隔离的意志通过物的转让达成公认，是主体在客观世界中互相捕获的法律仪式。"
+  },
+  {
+    "id": "h_wrong",
+    "name": "不法",
+    "enName": "Wrong (Unrecht)",
+    "category": "Objective Spirit",
+    "shortDef": "法的崩裂缝隙：意志对普遍契约的背叛，从无意识的偏离、精致的欺诈到挑战系统主权的暴力犯罪。"
+  },
+  {
+    "id": "h_purpose_responsibility",
+    "name": "意图与责任",
+    "enName": "Purpose & Responsibility",
+    "category": "Objective Spirit",
+    "shortDef": "行动的判决书：主体通过对其致动范围内因果链的认领，在残酷的历史后果中确证自身的道德存有。"
+  },
+  {
+    "id": "h_good_conscience",
+    "name": "善与良心",
+    "enName": "The Good & Conscience",
+    "category": "Objective Spirit",
+    "shortDef": "内心的最高独裁：主观意志在'至善'旗帜下的自我法庭，是个体对抗外部世界的最后一道虚妄或神圣的防线。"
+  },
+  {
+    "id": "h_ethical_life",
+    "name": "伦理生活",
+    "enName": "Ethical Life (Sittlichkeit)",
+    "category": "Objective Spirit",
+    "shortDef": "伦理是个体与社会秩序的血肉统一：它是“已经成为了习惯、成为了制度、成为了空气的善”。"
+  },
+  {
+    "id": "h_family",
+    "name": "家庭",
+    "enName": "The Family",
+    "category": "Objective Spirit",
+    "shortDef": "家庭是客观精神的第一个阶段：以‘爱’为天然纽带的伦性实体，是个体通过放弃自私而获得的最初社会性安置。"
+  },
+  {
+    "id": "h_civil_society",
+    "name": "市民社会",
+    "enName": "Civil Society",
+    "category": "Objective Spirit",
+    "shortDef": "市民社会是“众人对众人的战争”的文明化修辞：每个人通过追逐私利而产生的一个由相互依赖织就的物质关系场。"
+  },
+  {
+    "id": "h_state",
+    "name": "国家",
+    "enName": "The State",
+    "category": "Objective Spirit",
+    "shortDef": "国家是地上行走的神：客观精神的终极完成，是普遍性利益与个体主观自由达成绝对和解的钢铁迷宫。"
+  },
+  {
+    "id": "h_world_spirit",
+    "name": "世界精神",
+    "enName": "World Spirit (Weltgeist)",
+    "category": "Objective Spirit",
+    "shortDef": "世界精神是历史背后真正的总调度师：是个体英雄意志在不知情中完成宏大历史逻辑的神秘指挥官。"
+  },
+  {
+    "id": "h_hist_teleology",
+    "name": "历史目的论",
+    "enName": "Teleology of History",
+    "category": "Objective Spirit",
+    "shortDef": "历史绝非偶然碎片的堆砌，而是绝对精神为了实现其自我意识而展开的一场宏大且由于残酷的自由进军。"
+  },
+  {
+    "id": "h_historical_freedom",
+    "name": "历史中的自由",
+    "enName": "Progression of Freedom",
+    "category": "Objective Spirit",
+    "shortDef": "世界历史是自由意识的进展过程：精神从个体的绝对独裁到普遍的本质自由的跨次元演进。"
+  },
+  {
+    "id": "h_historical_stages",
+    "name": "史观阶段 (东方/希腊/罗马/日耳曼)",
+    "enName": "Four Stages of History",
+    "category": "Objective Spirit",
+    "shortDef": "精神进化的四幕剧：从东方自然的沉睡到日耳曼精神理性的彻底觉醒。"
+  },
+  {
+    "id": "h_art",
+    "name": "艺术",
+    "enName": "Absolute Spirit: Art",
+    "category": "Absolute Spirit",
+    "shortDef": "艺术是绝对精神在感性形象中的显现：真理为了被看见而披上的最美外衣，是理念在有限物质中的华丽投射。"
+  },
+  {
+    "id": "h_religion_abs",
+    "name": "绝对宗教",
+    "enName": "Absolute Spirit: Religion",
+    "category": "Absolute Spirit",
+    "shortDef": "宗教是精神在表象中对自身的意识：通过神圣的仪式与教义，将逻辑的深刻性转化为集体的情感与象征。"
+  },
+  {
+    "id": "h_philosophy_abs",
+    "name": "哲学",
+    "enName": "Absolute Spirit: Philosophy",
+    "category": "Absolute Spirit",
+    "shortDef": "哲学是绝对精神最高级的自我认知：密涅瓦的猫头鹰在黄昏起飞，是历史与经验向纯粹思维的最终升华。"
+  },
+  {
+    "id": "h_absolute_spirit_key",
+    "name": "绝对精神关键",
+    "enName": "Key to Absolute Spirit",
+    "category": "Absolute Spirit",
+    "shortDef": "绝对精神的支柱：主观精神与客观精神在更高层面的综合，真理在自身中实现最后的自足。"
   }
 ]

@@ -304,14 +304,10 @@ export const SutureModal: React.FC<SutureModalProps> = ({
     const getOptionName = (options: any[], id: string) => {
         const opt = options.find(o => o.id === id);
         if (!opt) return id;
-        let name = opt.name;
-        if (lang === 'CN') {
-            name = name.split('(')[0];
-        } else {
-            const match = name.match(/\((.*?)\)/);
-            if (match) name = match[1];
+        if (lang === 'EN') {
+            return opt.nameEn || opt.name.match(/\((.*?)\)/)?.[1] || opt.name;
         }
-        return name;
+        return opt.name.split('(')[0].trim();
     };
 
     const getCustomLibraryData = (): LibraryCategoryDef[] | undefined => {

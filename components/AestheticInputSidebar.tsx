@@ -48,7 +48,7 @@ export const AestheticInputSidebar: React.FC<AestheticInputSidebarProps> = ({
   return (
     <div className={`
       flex flex-col gap-0 z-40 transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)
-      fixed top-14 left-0 bottom-14 w-[380px] bg-[var(--bg-main)] border-r border-[var(--border-main)] 
+      fixed top-14 left-0 bottom-14 w-[420px] bg-[var(--bg-main)] border-r border-[var(--border-main)] 
       ${theme === 'retro' ? 'shadow-none' : (isOpen ? 'shadow-[20px_0_50px_rgba(0,0,0,0.5)]' : '')}
       ${isOpen ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0 pointer-events-none'}
     `}>

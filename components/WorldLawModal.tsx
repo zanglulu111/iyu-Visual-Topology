@@ -10,6 +10,8 @@ interface WorldLawModalProps {
   onChange: (newConfig: WorldLawConfig) => void;
   lang?: BlueprintLanguage;
   driverType?: DriverType;
+  fieldState?: Record<string, string[]>;
+  getItemDetails?: (tagName: string, blockId?: string) => any;
 }
 
 export const WorldLawModal: React.FC<WorldLawModalProps> = ({
@@ -18,8 +20,11 @@ export const WorldLawModal: React.FC<WorldLawModalProps> = ({
   config,
   onChange,
   lang = 'CN',
-  driverType = DriverType.NARRATIVE
+  driverType = DriverType.NARRATIVE,
+  fieldState = {},
+  getItemDetails
 }) => {
+  const [copied, setCopied] = React.useState(false);
   const { theme: globalTheme } = useTheme();
   if (!isOpen) return null;
 
@@ -52,8 +57,8 @@ export const WorldLawModal: React.FC<WorldLawModalProps> = ({
         contextPureDesc: lang === 'EN' ? "Strict consistency. If tags conflict (e.g. Ancient + Cyber), the dominant era wins. No mashups." : "强制一致性。若标签冲突（如古代+赛博），AI将强制过滤掉不和谐元素，保持单一风格的纯正。",
         contextFusion: lang === 'EN' ? "FUSION (Synthesis)" : "混搭融合 (Fusion)",
         contextFusionDesc: lang === 'EN' ? "Creative mashup. Actively blends conflicting tags to create a new hybrid aesthetic." : "拥抱冲突。AI将主动融合不相容的元素（如古代+赛博），创造出独特的混合美学。",
-        confirm: lang === 'EN' ? "CONFIRM LAWS" : "确认法则",
-        warning: lang === 'EN' ? "LOGIC NOTE:" : "生成逻辑提示:",
+        confirm: lang === 'EN' ? "SUTURE (Suture)" : "缝合 (Suture)",
+        warning: lang === 'EN' ? "生成逻辑提示:" : "生成逻辑提示:",
         warningText: config.physics === 'STRICT' && config.context === 'FUSION'
             ? (lang === 'EN' ? "Strict + Fusion = Analog Translation (e.g. A 'computer' in 1800s will be a steam engine)." : "【严守现实】+【混搭融合】= 模拟信号转译。例如：1800年代的'电脑'会被转译为复杂的蒸汽差分机。")
             : (lang === 'EN' ? "These settings control how the AI interprets conflicting tags." : "此设置决定AI如何处理互相冲突的提示词。")
@@ -72,7 +77,7 @@ export const WorldLawModal: React.FC<WorldLawModalProps> = ({
         contextPureDesc: lang === 'EN' ? "Cinematic storytelling. Characters don't know they are in an ad. The camera is invisible." : "电影感。构建封闭的完美世界，角色不知道自己在拍广告。观众是窥视者。",
         contextFusion: lang === 'EN' ? "META-AWARE (Non-Diegetic)" : "元叙事 (Meta-Aware)",
         contextFusionDesc: lang === 'EN' ? "Breaking the 4th wall. Acknowledging the camera, talking to audience, self-referential humor." : "打破第四面墙。承认这是广告，直接对话观众，使用跳戏、自嘲或后台视角。",
-        confirm: lang === 'EN' ? "APPLY LOGIC" : "确认逻辑",
+        confirm: lang === 'EN' ? "SUTURE (Suture)" : "缝合 (Suture)",
         warning: lang === 'EN' ? "CREATIVE NOTE:" : "导演备注:",
         warningText: config.physics === 'STRICT' 
             ? (lang === 'EN' ? "Literalism works best for Tech/Pharma." : "【功能直呈】最适合：硬科技、医药、测评类。")
@@ -92,7 +97,7 @@ export const WorldLawModal: React.FC<WorldLawModalProps> = ({
         contextPureDesc: lang === 'EN' ? "Strict adherence to genre tropes. No mixing." : "强制清洗异质元素。武侠就是纯武侠，无外来干扰。",
         contextFusion: lang === 'EN' ? "GENRE FUSION" : "混搭融合 (Fusion)",
         contextFusionDesc: lang === 'EN' ? "Creative mixing of genres (e.g. Wuxia + Cyberpunk)." : "允许跨类型元素碰撞。如：赛博朋克+古代背景。",
-        confirm: lang === 'EN' ? "CONFIRM LAWS" : "确认法则",
+        confirm: lang === 'EN' ? "SUTURE (Suture)" : "缝合 (Suture)",
         warning: lang === 'EN' ? "CONFLICT DETECTED:" : "冲突预警:",
         warningText: lang === 'EN' ? "Strict Physics + Fusion Genre (e.g. Ancient Cyberpunk) will result in 'Analog Translation' (e.g. Clockwork Tech)." : "【严守现实】+【混搭融合】(如古代赛博) 将触发「模拟信号转译」：高科技将被转译为该时代的机关术或社会结构。"
       };
@@ -109,6 +114,29 @@ export const WorldLawModal: React.FC<WorldLawModalProps> = ({
     ? 'border-[#8B261D] bg-white ring-1 ring-[#8B261D]/50'
     : `border-${themeColor} bg-${themeColor.split('-')[0]}-900/20 ring-1 ring-${themeColor}/50`;
   const rightActiveText = globalTheme === 'retro' ? 'text-[#8B261D]' : `text-${themeColor}`;
+  
+  const handleCopyAll = () => {
+    if (!getItemDetails) return;
+    
+    let text = "";
+    Object.entries(fieldState).forEach(([blockId, tags]) => {
+      tags.forEach(tag => {
+        const details = getItemDetails(tag, blockId);
+        if (details) {
+          text += `【${tag}】\n`;
+          text += `${lang === 'EN' ? "Definition" : "定义"}：${details.def || "..."}\n`;
+          text += `${lang === 'EN' ? "Core Logic" : "核心逻辑"}：${details.core || "..."}\n`;
+          text += `---\n`;
+        }
+      });
+    });
+
+    if (text) {
+      navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   const inactiveClasses = globalTheme === 'retro'
     ? 'bg-transparent border-[#8B261D]/10 hover:border-[#8B261D]/30'
@@ -214,12 +242,24 @@ export const WorldLawModal: React.FC<WorldLawModalProps> = ({
 
         </div>
 
-        {/* Footer */}
-        <div className={`p-6 border-t ${globalTheme === 'retro' ? 'border-[#8B261D]/20 bg-[#F9F7F1]' : 'border-zinc-800 bg-zinc-900/50'} flex justify-end`}>
+        <div className={`p-6 border-t ${globalTheme === 'retro' ? 'border-[#8B261D]/20 bg-[#F9F7F1]' : 'border-zinc-800 bg-zinc-900/50'} flex justify-between items-center`}>
+            <button
+                onClick={handleCopyAll}
+                className={`flex items-center gap-2 px-4 py-3 rounded text-xs font-bold transition-all ${
+                    globalTheme === 'retro' 
+                        ? 'text-[#8B261D] hover:bg-[#8B261D]/5' 
+                        : (copied ? 'text-green-500 bg-green-500/10' : 'text-zinc-400 hover:text-white hover:bg-white/5')
+                }`}
+            >
+                <Wand2 size={14} className={copied ? 'animate-bounce' : ''} />
+                {copied ? (lang === 'EN' ? "COPIED" : "已复制") : (lang === 'EN' ? "COPY ALL TAGS" : "一键复制全词条")}
+            </button>
+
             <button 
                 onClick={onClose}
-                className={`px-8 py-3 ${globalTheme === 'retro' ? 'bg-[#8B261D] text-white hover:bg-[#6D1E16]' : 'bg-white hover:bg-zinc-200 text-black'} font-bold uppercase tracking-widest rounded transition-colors text-xs shadow-sm`}
+                className={`flex items-center gap-2 px-8 py-3 ${globalTheme === 'retro' ? 'bg-[#8B261D] text-white hover:bg-[#6D1E16]' : 'bg-white hover:bg-zinc-200 text-black'} font-bold uppercase tracking-widest rounded transition-colors text-xs shadow-sm`}
             >
+                <RefreshCcw size={14} className="group-hover:rotate-180 transition-transform duration-500" />
                 {t.confirm}
             </button>
         </div>

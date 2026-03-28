@@ -1,12 +1,12 @@
 
 import { NarrativeBlockDef, LibraryCategoryDef } from '../types';
-import { ENGINE_SUBJECTS } from './engine_subjects';
-import { ENGINE_ENCOUNTERS } from './engine_encounters';
-import { ENGINE_FANTASIES } from './engine_fantasies';
-import { ENGINE_BIG_OTHER } from './engine_big_other';
-import { ENGINE_DRIVES } from './engine_drives';
-import { ENGINE_STAKES } from './engine_stakes';
-import { ENGINE_RESOLUTIONS } from './engine_resolutions';
+import { ENGINE_SUBJECTS } from './engine_core/engine_subjects';
+import { ENGINE_ENCOUNTERS } from './engine_core/engine_encounters';
+import { ENGINE_FANTASIES } from './engine_core/engine_fantasies';
+import { ENGINE_BIG_OTHER } from './engine_core/engine_big_other';
+import { ENGINE_DRIVES } from './engine_core/engine_drives';
+import { ENGINE_STAKES } from './engine_core/engine_stakes';
+import { ENGINE_RESOLUTIONS } from './engine_core/engine_resolutions';
 
 export const NARRATIVE_ENGINE_BLOCKS: NarrativeBlockDef[] = [
   // MODULE 0: GLOBAL CONTROLLER

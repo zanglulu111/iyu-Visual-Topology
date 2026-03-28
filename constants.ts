@@ -1,7 +1,7 @@
 
 import { DriverType, DriverDef, LayerConfig, LogicTemplateDef } from './types';
 import { Briefcase, Film, TestTube, Clapperboard, Music, Palette, Zap, Ghost, Feather, User, Eye, Box, Camera, Layout } from 'lucide-react';
-import { NARRATIVE_ENGINE_BLOCKS, NARRATIVE_ENGINE_LIBRARY } from './data/narrative_engine';
+import { NARRATIVE_ENGINE_BLOCKS, NARRATIVE_ENGINE_LIBRARY } from './data/engine_core/narrative_engine';
 import { COMMERCIAL_ENGINE_BLOCKS, COMMERCIAL_ENGINE_LIBRARY } from './data/commercial_data';
 import { AESTHETIC_ENGINE_BLOCKS, AESTHETIC_ENGINE_LIBRARY } from './data/aesthetic_data';
 import { TRAILER_ENGINE_BLOCKS, TRAILER_ENGINE_LIBRARY } from './data/trailer_data';

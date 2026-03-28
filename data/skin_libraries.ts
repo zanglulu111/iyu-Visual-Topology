@@ -12,80 +12,80 @@ import { PROFESSION_CATEGORIES, ORIGIN_CATEGORIES } from './identities';
 export const SKIN_BLOCKS: NarrativeBlockDef[] = [
   { 
     id: "skin_era", 
-    name: "时空锚点", 
-    enName: "Spacetime Anchor", 
+    name: "SUR4.时空锚点", 
+    enName: "sur4.Spacetime Anchor", 
     description: "决定叙事发生的时代背景、历史张力或神话坐标。它是社会矛盾与因果逻辑发生的原始“温床”。", 
     descriptionEn: "Determines the historical tension, mythic coordinates, or temporal setting where social conflicts and causal logic brew.", 
     tags: [] 
   },
   { 
     id: "skin_location", 
-    name: "空间", 
-    enName: "Location", 
+    name: "SUR5.空间场景", 
+    enName: "sur5.Location", 
     description: "故事发生的物理空间。", 
     descriptionEn: "The physical space where events occur.", 
     tags: [] 
   },
   { 
     id: "skin_society", 
-    name: "社会形态", 
-    enName: "Society", 
+    name: "SUR6.社会形态", 
+    enName: "sur6.Society", 
     description: "政治与社会阶级结构。", 
     descriptionEn: "The political and social hierarchy.", 
     tags: [] 
   },
   { 
     id: "skin_ideology", 
-    name: "意识形态", 
-    enName: "Ideology", 
+    name: "SUR7.意识形态", 
+    enName: "sur7.Ideology", 
     description: "世界的主导哲学或“思想软件”。", 
     descriptionEn: "The dominant philosophy or 'software' of the world.", 
     tags: [] 
   },
   { 
     id: "skin_gender", 
-    name: "性别", 
-    enName: "Gender", 
+    name: "SUR9.性别", 
+    enName: "sur9.Gender", 
     description: "角色的生理性别或外观呈现（纯粹选角层面）。", 
     descriptionEn: "Biological sex or visual presentation (Pure Casting Level).", 
     tags: [] 
   },
   { 
     id: "skin_age", 
-    name: "年龄", 
-    enName: "Age", 
+    name: "SUR8.年龄段", 
+    enName: "sur8.Age", 
     description: "角色的生理年龄与身体机能。", 
     descriptionEn: "Chronological age and physiological function.", 
     tags: [] 
   },
   { 
     id: "skin_profession", 
-    name: "职业", 
-    enName: "Profession", 
+    name: "SUR10.职业", 
+    enName: "sur10.Profession", 
     description: "社会角色或生存手段。", 
     descriptionEn: "The social role or survival means.", 
     tags: [] 
   },
   { 
     id: "skin_origin", 
-    name: "阶级", 
-    enName: "Class / Origin", 
+    name: "SUR11.阶级出身", 
+    enName: "sur11.Class / Origin", 
     description: "社会经济背景与出身权利。", 
     descriptionEn: "The socioeconomic background and birthright.", 
     tags: [] 
   },
   { 
     id: "skin_structure", 
-    name: "叙事结构", 
-    enName: "Structure", 
+    name: "SUR12.叙事结构", 
+    enName: "sur12.Structure", 
     description: "情节的建筑框架。", 
     descriptionEn: "The architectural framework of the plot.", 
     tags: [] 
   },
   { 
     id: "skin_volume", 
-    name: "故事体量", 
-    enName: "Volume", 
+    name: "SUR13.故事体量", 
+    enName: "sur13.Volume", 
     description: "故事的结构密度与时长约束。", 
     descriptionEn: "The structural density and duration constraint of the story.", 
     tags: [] 
@@ -95,16 +95,16 @@ export const SKIN_BLOCKS: NarrativeBlockDef[] = [
 export const ALL_SKIN_BLOCKS = [
     { 
       id: "skin_genre", 
-      name: "类型基因", 
-      enName: "GENRE (LIVE ACTION)", 
+      name: "SUR1.类型基因", 
+      enName: "sur1.GENRE (LIVE ACTION)", 
       description: "决定故事骨架与皮相的类型（真人）。", 
       descriptionEn: "Primary Bone & Secondary Skin (Live Action).", 
       tags: [] 
     },
     { 
       id: "skin_animation_genre", 
-      name: "动画基因", 
-      enName: "ANIMATION GENRE", 
+      name: "SUR2.动画基因", 
+      enName: "sur2.ANIMATION GENRE", 
       description: "决定故事的动画风格与表现逻辑（动画）。", 
       descriptionEn: "Animation style and expressive logic.", 
       tags: [] 

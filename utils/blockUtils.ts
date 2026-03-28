@@ -12,7 +12,6 @@ import {
 } from '../constants';
 
 export const getBlockName = (blockId: string, lang: 'CN' | 'EN'): string => {
-    if (blockId === 'skin_genre') return lang === 'EN' ? "GENRE" : "类型基因";
     if (blockId === 'aes_palette_preset') return lang === 'EN' ? "MASTER VISUAL PRESET" : "视觉集成预设";
     
     const allBlocks = [

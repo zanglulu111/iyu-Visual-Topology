@@ -12,7 +12,8 @@
       "Bash(npx tsc --noEmit)",
       "Bash(lsof -ti:5173)",
       "Bash(python3 -:*)",
-      "Bash(git checkout components/ArchiveDirectoryModal.tsx)"
+      "Bash(git checkout components/ArchiveDirectoryModal.tsx)",
+      "Bash(find '/Users/lujiaqi/Desktop/【迷雾学派】爱欲视觉拓扑学 2-24版/lexicon/hegel/applications/' -name *.md)"
     ]
   }
 }

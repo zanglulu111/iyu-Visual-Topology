@@ -35,7 +35,7 @@ import {
 import { useTheme } from '../contexts/ThemeContext';
 import { DriverType, User } from '../types';
 import { PhilosophyTimeline } from './PhilosophyTimeline';
-import { HEGEL_INDEX, MARX_INDEX, LACAN_INDEX, ZIZEK_INDEX, LacanConcept, LacanCategory } from '../data/codex/philosophy_refined';
+import { MIST_INDEX, HEGEL_INDEX, MARX_INDEX, LACAN_INDEX, ZIZEK_INDEX, LacanConcept, LacanCategory } from '../data/codex/philosophy_refined';
 
 // import { ANALYSIS_LIBRARY } from '../data/codex/analysis_data';
 import { ARCHIVE_CASES, CaseStudy } from './archiveCasesData';
@@ -136,7 +136,7 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
 }) => {
   const { theme, toggleTheme } = useTheme();
   const [activeSection, setActiveSection] = useState<CodexSection>(initialSection || 'CONCEPTS');
-  const [activeDictionary, setActiveDictionary] = useState<string>(initialDictionary || 'HEGEL');
+  const [activeDictionary, setActiveDictionary] = useState<string>(initialDictionary || 'MIST');
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [detailActiveTab, setDetailActiveTab] = useState<'DEFINITION' | 'ANALOGY' | 'APPLICATION'>(initialDetailTab || 'DEFINITION');
@@ -208,7 +208,7 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
   // 异步数据加载系统 (用于加载大体积详细内容)
   // 动态选择当前哲学家，并将 ID 转换为路径格式 (小写)
   const currentPhilosopherPath = activeDictionary.toLowerCase();
-  const isMainPhilosopher = ['HEGEL', 'MARX', 'LACAN', 'ZIZEK'].includes(activeDictionary);
+  const isMainPhilosopher = ['MIST', 'HEGEL', 'MARX', 'LACAN', 'ZIZEK'].includes(activeDictionary);
 
   const { data: selectedDetail, isLoading: isLoadingDetail } = usePhilosophyDetail(
     currentPhilosopherPath,
@@ -240,9 +240,10 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
   const themeColors = {
     accent: getThemeTextColor(),
     border: getThemeBorderColor(),
-    bg: (theme === 'retro') ? 'bg-[#8B261D]' : (activeDictionary === 'MARX' ? 'bg-[#FF7675]' : activeDictionary === 'HEGEL' ? 'bg-[#D4AF37]' : activeDictionary === 'LACAN' ? 'bg-[#22D3EE]' : activeDictionary === 'ZIZEK' ? 'bg-[#C084FC]' : 'bg-white'),
+    bg: (theme === 'retro') ? 'bg-[#8B261D]' : (activeDictionary === 'MIST' ? 'bg-[#9CA3AF]' : activeDictionary === 'MARX' ? 'bg-[#FF7675]' : activeDictionary === 'HEGEL' ? 'bg-[#D4AF37]' : activeDictionary === 'LACAN' ? 'bg-[#22D3EE]' : activeDictionary === 'ZIZEK' ? 'bg-[#C084FC]' : 'bg-white'),
   };
   const dictionaries = {
+    MIST: { name: '迷雾学派 (Mist)', data: MIST_INDEX, icon: <Sparkles size={16} /> },
     HEGEL: { name: '黑格尔 (Hegel)', data: HEGEL_INDEX, icon: <Aperture size={16} /> },
     MARX: { name: '马克思 (Marx)', data: MARX_INDEX, icon: <Sun size={16} /> },
     LACAN: { name: '拉康 (Lacan)', data: LACAN_INDEX, icon: <Moon size={16} /> },
@@ -965,13 +966,13 @@ const renderDetailView = () => {
                         <div className="flex flex-col gap-1">
                           <span className={`text-[9px] font-bold uppercase tracking-[0.2em] ${theme === 'retro' ? 'text-black/40' : 'text-zinc-600'}`}>AUTHOR / SCHOLAR</span>
                           <span className={`text-sm font-serif ${theme === 'retro' ? 'text-black/80 font-bold' : 'text-[var(--philosopher-accent)]/80 font-medium'}`}>
-                            {data.author || (activeDictionary === 'HEGEL' ? 'G.W.F. Hegel' : activeDictionary === 'MARX' ? 'Karl Marx' : activeDictionary === 'LACAN' ? 'Jacques Lacan' : activeDictionary === 'ZIZEK' ? 'Slavoj Žižek' : 'Unknown')}
+                            {data.author || (activeDictionary === 'MIST' ? '迷雾学派 (Mist School)' : activeDictionary === 'HEGEL' ? 'G.W.F. Hegel' : activeDictionary === 'MARX' ? 'Karl Marx' : activeDictionary === 'LACAN' ? 'Jacques Lacan' : activeDictionary === 'ZIZEK' ? 'Slavoj Žižek' : 'Unknown')}
                           </span>
                         </div>
                         <div className="flex flex-col gap-1">
                           <span className={`text-[9px] font-bold uppercase tracking-[0.2em] ${theme === 'retro' ? 'text-black/40' : 'text-zinc-600'}`}>SOURCE TEXT / ORIGIN</span>
                           <span className={`text-xs font-serif italic ${theme === 'retro' ? 'text-black/70' : 'text-zinc-400'}`}>
-                            {data.source || (activeDictionary === 'HEGEL' ? '《精神现象学》(Phenomenology of Spirit)' : 'Archived Text')}
+                            {data.source || (activeDictionary === 'MIST' ? '《迷雾学派辞典》(Mist School Lexicon)' : activeDictionary === 'HEGEL' ? '《精神现象学》(Phenomenology of Spirit)' : 'Archived Text')}
                           </span>
                         </div>
                         {/* Related Concepts */}

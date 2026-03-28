@@ -62,7 +62,8 @@ enum ProtocolType {
   CORE_DRIVERS = 'CORE_DRIVERS',
   UTILITIES = 'UTILITIES',
   RSI = 'RSI',
-  TOPOLOGY = 'TOPOLOGY'
+  TOPOLOGY = 'TOPOLOGY',
+  DICTIONARY = 'DICTIONARY'
 }
 
 export const LandingView: React.FC<LandingViewProps> = ({
@@ -576,6 +577,35 @@ export const LandingView: React.FC<LandingViewProps> = ({
                   {[1,2,3].map(i => <div key={i} className="w-8 h-1 bg-amber-500/20" />)}
                 </div>
                 <p className="text-[10px] font-mono mt-6 tracking-[0.2em] opacity-40 uppercase">INITIALIZING SYSTEM MODULES // UTILITIES_CORE_V1.0</p>
+              </div>
+            )}
+
+            {/* 5. DICTIONARY / THEORY VIEW */}
+            {selectedProtocol === ProtocolType.DICTIONARY && (
+                <div className="flex-1 flex flex-col items-center justify-center animate-page-dissolve overflow-hidden min-h-0">
+                    <BookOpen size={48} className="text-rose-500 mb-8 opacity-50 animate-pulse" />
+                    <h2 className="text-2xl font-serif tracking-[0.3em] uppercase opacity-60">迷雾辞典正在重连...</h2>
+                    <button 
+                        onClick={() => { setPage(1); setViewMode('DICTIONARY'); }}
+                        className="mt-8 px-6 py-2 border border-rose-500/30 text-rose-500/60 hover:bg-rose-500/10 transition-all font-mono text-xs tracking-widest"
+                    >
+                        GO DIRECTLY TO CODEX
+                    </button>
+                </div>
+            )}
+
+            {/* 6. TOPOLOGY / RSI FALLBACK */}
+            {(selectedProtocol === ProtocolType.TOPOLOGY || selectedProtocol === ProtocolType.RSI) && (
+              <div className="flex-1 flex flex-col items-center justify-center animate-page-dissolve overflow-hidden min-h-0">
+                <Aperture size={48} className="text-zinc-500 mb-8 opacity-30 animate-spin-slow" />
+                <h2 className="text-xl font-serif tracking-[0.2em] uppercase opacity-40">此拓扑节点暂未开放</h2>
+                <p className="text-[10px] font-mono mt-4 tracking-[0.1em] opacity-30 uppercase">STAY IN THE REAL // AWAITING RSI MAPPING</p>
+                <button 
+                    onClick={() => setSelectedProtocol(ProtocolType.CORE_DRIVERS)}
+                    className="mt-10 text-[10px] font-bold text-zinc-500 hover:text-white underline underline-offset-4 tracking-[0.2em]"
+                >
+                    RETURN TO CORE
+                </button>
               </div>
             )}
 

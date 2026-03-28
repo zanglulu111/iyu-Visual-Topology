@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Cpu } from 'lucide-react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { NarrativeEngineField } from './components/NarrativeEngineField';
@@ -1472,10 +1473,13 @@ const App: React.FC = () => {
                             currentUser={currentUser}
                             showRings={showRings}
                             setShowRings={setShowRings}
+                            setInitialProtocol={setInitialProtocol}
                         />
                     )}
 
-                    <main className="flex-1 overflow-hidden relative bg-[var(--bg-main)] transition-colors duration-500">
+                    <main 
+                        className="flex-1 overflow-hidden relative bg-[var(--bg-main)] transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)"
+                    >
                         {viewMode === 'ENGINE' && selectedDriver && (
                             <div className="w-full h-full animate-page-dissolve">
                                 <NarrativeEngineField
@@ -1507,6 +1511,27 @@ const App: React.FC = () => {
                                 onEditCustomDef={handleEditCustomDef}
                                 showRings={showRings}
                             />
+                            </div>
+                        )}
+
+                        {/* Safety fallback for lost driver selection */}
+                        {viewMode === 'ENGINE' && !selectedDriver && (
+                            <div className="w-full h-full flex flex-col items-center justify-center animate-page-dissolve p-10 text-center">
+                                <div className="w-20 h-20 rounded-full border border-gold-primary/20 flex items-center justify-center mb-8 animate-pulse">
+                                    <Cpu size={32} className="text-gold-primary/40" />
+                                </div>
+                                <h2 className="text-2xl font-serif tracking-[0.3em] uppercase text-gold-primary/60 mb-4">引擎未激活 // ENGINE INACTIVE</h2>
+                                <p className="max-w-md text-sm text-zinc-500 font-medium leading-relaxed mb-10">
+                                    {lang === 'EN' 
+                                        ? "No desire structure detected. Please select a core driver to initiate production."
+                                        : "未检测到任务欲望结构。请选择一个核心驱动器以开始生产。"}
+                                </p>
+                                <button
+                                    onClick={() => setPage(0)}
+                                    className="px-10 py-3 bg-gold-primary/10 hover:bg-gold-primary/20 border border-gold-primary/30 text-gold-primary text-xs font-black tracking-[0.4em] uppercase transition-all"
+                                >
+                                    {lang === 'EN' ? "SELECT DRIVER" : "选择驱动器"}
+                                </button>
                             </div>
                         )}
                         {viewMode === 'DIVERGENCE' && (
@@ -1719,6 +1744,8 @@ const App: React.FC = () => {
                 onChange={setWorldLawConfig}
                 lang={lang}
                 driverType={selectedDriver || DriverType.NARRATIVE}
+                fieldState={narrativeFieldState}
+                getItemDetails={getItemDetails}
             />
             {isSettingsOpen && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200] p-4">

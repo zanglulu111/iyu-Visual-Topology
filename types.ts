@@ -36,18 +36,31 @@ export type AestheticLogicMode = 'DEFAULT' | 'IDENTITY' | 'ACTION' | 'ATMOSPHERE
 export interface LibraryItemDef {
   id: string;
   name: string;
+  nameEn?: string;
   def: string;
-  core?: string;
-  group?: string;
-  flaw?: string;
   defEn?: string;
+  core?: string;
   coreEn?: string;
+  group?: string;
+  groupEn?: string;
+  flaw?: string;
+  flawEn?: string;
   topology?: string;
+  topologyEn?: string;
   skeletons?: string[];
+  logic?: string;
+  logicEn?: string;
+  patch?: {
+    mechanics?: string;
+    mechanicsEn?: string;
+    aesthetic?: string;
+    aestheticEn?: string;
+    runtime?: string;
+    runtimeEn?: string;
+  };
 }
 
 export interface AestheticPreset extends LibraryItemDef {
-  nameEn: string;
   colors: string[];
   params: Record<string, string[]>;
 }
@@ -491,7 +504,9 @@ export interface TerritoryGroup {
 export interface LibraryCategoryDef {
   id: string;
   name: string;
+  nameEn?: string;
   desc: string;
+  descEn?: string;
   items: LibraryItemDef[];
   isTimeline?: boolean;
   isTerritory?: boolean;

@@ -28,6 +28,105 @@ export interface LacanCategory {
  * Based on the user provided outline for Hegel, Marx, Lacan, and Zizek.
  */
 
+// 0. 迷雾学派 (MIST SCHOOL)
+export const MIST_INDEX: LacanCategory[] = [
+    {
+        id: "mist_volume_1",
+        name: "第一卷：总纲",
+        enName: "Volume I: General Overview",
+        desc: "迷雾学派的正式理论体系与核心架构。",
+        concepts: [
+            { id: "mist_school", name: "迷雾学派", enName: "Mist School", category: "Core", shortDef: "一个以拉康、黑格尔、马克思、齐泽克等理论为内核的“生产型学派”。" },
+            { id: "erotic_structural_topology", name: "爱欲结构拓扑学", enName: "Erotic Structural Topology", category: "Theory", shortDef: "学派正式理论名。欲望如何在结构位中以拓扑形式显形。骨头始终藏在血肉之内。" },
+            { id: "generative_engine", name: "爱欲结构发生器", enName: "Erotic Structural Generator", category: "System", shortDef: "从解释世界到生产世界的转向，将结构哲学推进为欲望生成引擎。" },
+            { id: "structural_visualization_method", name: "结构可视化", enName: "Structural Visualization", category: "Methodology", shortDef: "本体论卫生学，通过锚点、污点、剩余物来显形抽象结构的方法论总纲。" },
+            { id: "exception_of_structure_goal", name: "结构的例外", enName: "Exception of Structure", category: "Core", shortDef: "先建立结构，再去看结构的例外与逃逸，是实践的更高目标。" }
+        ]
+    },
+    {
+        id: "mist_volume_2",
+        name: "第二卷：精神底盘与结构继承",
+        enName: "Volume II: Structural Inheritance",
+        desc: "来自拉康、黑格尔、马克思、齐泽克的哲学底盘。",
+        concepts: [
+            { id: "mist_lack", name: "缺失", enName: "Lack", category: "Concept", shortDef: "缺失不是缺点，而是主体成为主体的结构条件。" },
+            { id: "mist_objet_a", name: "对象 a", enName: "Objet petit a", category: "Concept", shortDef: "欲望的非对象性，作为剩余物的诱饵。" },
+            { id: "mist_fantasy", name: "幻想", enName: "Fantasy", category: "Concept", shortDef: "支撑现实的幕布，不是纯粹谎言。" },
+            { id: "mist_drive", name: "驱力", enName: "Drive", category: "Concept", shortDef: "围绕失落物循环的回返与重复。" },
+            { id: "mist_sinthome_knot", name: "结与圣状", enName: "Sinthome & Knot", category: "Concept", shortDef: "三界需要圣状来扣住；症状作为生存方式。" },
+            { id: "mist_negativity", name: "否定性", enName: "Negativity", category: "Concept", shortDef: "产生裂缝的根本驱动，内部不可融合的硬核。" },
+            { id: "mist_aufhebung", name: "扬弃", enName: "Aufhebung", category: "Concept", shortDef: "克服与保存的双重运动。" },
+            { id: "mist_retroactivity", name: "回溯性建构", enName: "Retroactive Construction", category: "Concept", shortDef: "结局重写开端，事后确立因果。" },
+            { id: "mist_alienation", name: "异化", enName: "Alienation", category: "Concept", shortDef: "主体在社会机器中的残渣化。" },
+            { id: "mist_fetishism", name: "商品拜物教", enName: "Commodity Fetishism", category: "Concept", shortDef: "欲望被商品形式捕获的结构。" },
+            { id: "mist_parallax", name: "视差之见", enName: "Parallax View", category: "Concept", shortDef: "同一对象因观看位置不同而发生的本体论裂缝。" },
+            { id: "mist_stain", name: "污点", enName: "Stain", category: "Concept", shortDef: "图像中最真实且无法去除的剩余。" },
+            { id: "mist_sublime_object", name: "崇高客体", enName: "Sublime Object", category: "Concept", shortDef: "意识形态缝合中的核心对象变体。" }
+        ]
+    },
+    {
+        id: "mist_volume_3",
+        name: "第三卷：叙事生成引擎 (M0-M7)",
+        enName: "Volume III: Narrative Engine",
+        desc: "将哲学结构转译为角色、遭遇、阻断、行动、代价、落点的方程。",
+        concepts: [
+            { id: "mist_m0", name: "M0: 精神底色", enName: "M0: Ontological Base", category: "Engine", shortDef: "主体与现实裂缝间的根本关系模式。" },
+            { id: "mist_m1", name: "M1: 缺失主体", enName: "M1: Subject of Lack", category: "Engine", shortDef: "主体之伤痕处，其被结构切开的位置。" },
+            { id: "mist_m2", name: "M2: 真实遭遇", enName: "M2: Encounter with the Real", category: "Engine", shortDef: "实在界撞击日常秩序，不可预期的失效。" },
+            { id: "mist_m3", name: "M3: 欲望幻想", enName: "M3: Fantasy of Desire", category: "Engine", shortDef: "裂口发亮时的诱饵界面，对象a的叙事投影。" },
+            { id: "mist_m4", name: "M4: 大他者阻断", enName: "M4: Blockage of Big Other", category: "Engine", shortDef: "必定折损欲望的结构性阻碍、制度与法则。" },
+            { id: "mist_m5", name: "M5: 行动驱力", enName: "M5: Drive of Action", category: "Engine", shortDef: "主体被驱力推推攘攘的冲撞及重复宿命。" },
+            { id: "mist_m6", name: "M6: 终极代价", enName: "M6: Ultimate Price", category: "Engine", shortDef: "主体在符号秩序界面承担的结构性剥夺与抹除。" },
+            { id: "mist_m7", name: "M7: 存在落点", enName: "M7: Existential Drop", category: "Engine", shortDef: "主体与裂隙最终重新结环的特定方式（Knotting）。" }
+        ]
+    },
+    {
+        id: "mist_volume_4",
+        name: "第四卷：图像与视觉体系",
+        enName: "Volume IV: Image & Visuals",
+        desc: "本体论卫生学与视觉转译架构。",
+        concepts: [
+            { id: "mist_ontological_hygiene", name: "本体论卫生学", enName: "Ontological Hygiene", category: "Aesthetics", shortDef: "迷雾学派独创视觉方法，使无菌与沾染构成对位显形。" },
+            { id: "mist_sterile", name: "无菌", enName: "Sterile", category: "Aesthetics", shortDef: "象征秩序封闭的光滑表面，纯净且规训。" },
+            { id: "mist_bacterial", name: "有菌", enName: "Bacterial", category: "Aesthetics", shortDef: "实在界的生命性、腐败性溢出。" },
+            { id: "mist_contamination", name: "沾染", enName: "Contamination", category: "Aesthetics", shortDef: "裂隙的渗透性显形，秩序表面的局部故障与污迹。" },
+            { id: "mist_anchor_point", name: "锚点", enName: "Anchor Point", category: "Aesthetics", shortDef: "视觉画面中稳定结构的核心标识。" },
+            { id: "mist_image_rift", name: "图像裂口", enName: "Image Rift", category: "Aesthetics", shortDef: "不仅是伤痕，而是使内部结构可见的外翻处。" },
+            { id: "mist_tactile_vision", name: "触觉视觉", enName: "Tactile Vision", category: "Aesthetics", shortDef: "诉诸粗糙度与创伤记忆的切肤画面触感。" },
+            { id: "mist_defamiliarization", name: "陌生化", enName: "Defamiliarization", category: "Aesthetics", shortDef: "通过剥离日常属性，揭示物之实在界维度的视觉手段。" }
+        ]
+    },
+    {
+        id: "mist_volume_5",
+        name: "第五卷：创作协议与隐蔽显形",
+        enName: "Volume V: Creation Protocol",
+        desc: "将哲学操作为生成工具的一系列具体创作法则。",
+        concepts: [
+            { id: "mist_translation_protocol", name: "转译协议", enName: "Translation Protocol", category: "Methodology", shortDef: "将抽象结构转译为具体叙事元素的操作准则。" },
+            { id: "mist_mask_protocol", name: "面具协议", enName: "Mask Protocol", category: "Methodology", shortDef: "赋予角色象征界界面，使其真实在面具缝隙中透出。" },
+            { id: "mist_invisible_weaving", name: "隐形织造", enName: "Invisible Weaving", category: "Methodology", shortDef: "不显露哲学词汇，而在叙事骨架层面暗缝理论肌理。" },
+            { id: "mist_era_dimensionality", name: "时代降维", enName: "Era Dimensionality Reduction", category: "Methodology", shortDef: "将宏大历史矛盾降维到极度微观的个体切面中。" },
+            { id: "mist_naming_protocol", name: "命名协议", enName: "Naming Protocol", category: "Methodology", shortDef: "使用带有工业感、病理、拓扑学隐喻的黑硬词汇系统。" },
+            { id: "mist_anti_kitsch", name: "反刻奇", enName: "Anti-Kitsch", category: "Methodology", shortDef: "拒绝廉价的伤感与和解，保卫裂缝的不可愈合性。" }
+        ]
+    },
+    {
+        id: "mist_volume_6",
+        name: "第六卷：例外与逃逸",
+        enName: "Volume VI: The Exception",
+        desc: "无法被符号完全收编的边缘余量。",
+        concepts: [
+            { id: "mist_the_exception", name: "结构的例外", enName: "The Exception", category: "Theory", shortDef: "系统中无法被缝合、必定滑落的存在点。" },
+            { id: "mist_symptom_survival", name: "症状作为生存方式", enName: "Symptom as Survival", category: "Theory", shortDef: "不求治愈症状，而是依托症状与结构打结共存。" },
+            { id: "mist_creation_as_knotting", name: "创作作为结", enName: "Creation as Knotting", category: "Theory", shortDef: "创作不是表达自我，而是为松散的世界打结的过程。" },
+            { id: "mist_remainder", name: "剩余物", enName: "The Remainder", category: "Theory", shortDef: "符号化过程后剩下的那个坚硬、不可消化的物质。" },
+            { id: "mist_glitch", name: "故障", enName: "Glitch", category: "Theory", shortDef: "秩序运行中的瞬间卡顿——恰是真实的闪现时刻。" },
+            { id: "mist_escape", name: "逃逸路徑", enName: "Line of Flight", category: "Theory", shortDef: "欲望在结构压迫中溢出其原有轨道的流动方向。" },
+            { id: "mist_the_impossible", name: "不可能之物", enName: "The Impossible", category: "Theory", shortDef: "实在界的核心特征，绝对抵抗符号化、不可企及之物。" }
+        ]
+    }
+];
+
 // 1. 黑格尔思想索引 (HEGEL)
 export const HEGEL_INDEX: LacanCategory[] = [
     {
@@ -151,27 +250,49 @@ export const HEGEL_INDEX: LacanCategory[] = [
         ]
     },
     {
-        id: "hegel_obj_right",
-        name: "四、客观精神（《法哲学原理》）",
+        id: "hegel_obj_spirit",
+        name: "四、客观精神 (Objective Spirit)",
         enName: "Objective Spirit",
-        desc: "1、抽象法",
+        desc: "法哲学与伦理社会",
         concepts: [
             { id: "h_property", name: "所有权", enName: "Property", category: "Objective Spirit", shortDef: "意志的首次拓殖：主体通过对外部物的占有，将空洞的自由意志转化为客观的人格存在。" },
             { id: "h_contract", name: "契约", enName: "Contract", category: "Objective Spirit", shortDef: "欲望的和平协议：两个隔离的意志通过物的转让达成公认，是主体在客观世界中互相捕获的法律仪式。" },
             { id: "h_wrong", name: "不法", enName: "Wrong (Unrecht)", category: "Objective Spirit", shortDef: "法的崩裂缝隙：意志对普遍契约的背叛，从无意识的偏离、精致的欺诈到挑战系统主权的暴力犯罪。" },
+            { id: "h_purpose_responsibility", name: "意图与责任", enName: "Purpose & Responsibility", category: "Objective Spirit", shortDef: "行动的判决书：主体通过对其致动范围内因果链的认领，在残酷的历史后果中确证自身的道德存有。" },
+            { id: "h_good_conscience", name: "善与良心", enName: "The Good & Conscience", category: "Objective Spirit", shortDef: "内心的最高独裁：主观意志在'至善'旗帜下的自我法庭，是个体对抗外部世界的最后一道虚妄或神圣的防线。" },
+            { id: "h_ethical_life", name: "伦理生活", enName: "Ethical Life (Sittlichkeit)", category: "Objective Spirit", shortDef: "伦理是个体与社会秩序的血肉统一：它是“已经成为了习惯、成为了制度、成为了空气的善”。" },
+            { id: "h_family", name: "家庭", enName: "The Family", category: "Objective Spirit", shortDef: "家庭是客观精神的第一个阶段：以‘爱’为天然纽带的伦性实体，是个体通过放弃自私而获得的最初社会性安置。" },
+            { id: "h_civil_society", name: "市民社会", enName: "Civil Society", category: "Objective Spirit", shortDef: "市民社会是“众人对众人的战争”的文明化修辞：每个人通过追逐私利而产生的一个由相互依赖织就的物质关系场。" },
+            { id: "h_state", name: "国家", enName: "The State", category: "Objective Spirit", shortDef: "国家是地上行走的神：客观精神的终极完成，是普遍性利益与个体主观自由达成绝对和解的钢铁迷宫。" }
         ]
     },
     {
-        id: "hegel_obj_morality",
-        name: "四、客观精神（《法哲学原理》）",
-        enName: "Objective Spirit",
-        desc: "2、道德",
+        id: "hegel_hist_phi",
+        name: "五、历史观阶段 (Philosophy of History)",
+        enName: "Philosophy of History",
+        desc: "世界历史的进程",
         concepts: [
-            { id: "h_purpose_responsibility", name: "意图与责任", enName: "Purpose & Responsibility", category: "Objective Spirit", shortDef: "行动的判决书：主体通过对其致动范围内因果链的认领，在残酷的历史后果中确证自身的道德存有。" },
-            { id: "h_good_conscience", name: "善与良心", enName: "The Good & Conscience", category: "Objective Spirit", shortDef: "内心的最高独裁：主观意志在'至善'旗帜下的自我法庭，是个体对抗外部世界的最后一道虚妄或神圣的防线。" }
+            { id: "h_world_spirit", name: "世界精神", enName: "World Spirit (Weltgeist)", category: "Objective Spirit", shortDef: "世界精神是历史背后真正的总调度师：是个体英雄意志在不知情中完成宏大历史逻辑的神秘指挥官。" },
+            { id: "h_hist_teleology", name: "历史目的论", enName: "Teleology of History", category: "Objective Spirit", shortDef: "历史绝非偶然碎片的堆砌，而是绝对精神为了实现其自我意识而展开的一场宏大且由于残酷的自由进军。" },
+            { id: "h_historical_freedom", name: "历史中的自由", enName: "Progression of Freedom", category: "Objective Spirit", shortDef: "世界历史是自由意识的进展过程：精神从个体的绝对独裁到普遍的本质自由的跨次元演进。" },
+            { id: "h_historical_stages", name: "史观阶段 (东方/希腊/罗马/日耳曼)", enName: "Four Stages of History", category: "Objective Spirit", shortDef: "精神进化的四幕剧：从东方自然的沉睡到日耳曼精神理性的彻底觉醒。" }
+        ]
+    },
+    {
+        id: "hegel_abs_spirit",
+        name: "六、绝对精神阶段 (Absolute Spirit)",
+        enName: "Absolute Spirit",
+        desc: "精神演化的终极形态",
+        concepts: [
+             { id: "h_art", name: "艺术", enName: "Absolute Spirit: Art", category: "Absolute Spirit", shortDef: "艺术是绝对精神在感性形象中的显现：真理为了被看见而披上的最美外衣，是理念在有限物质中的华丽投射。" },
+            { id: "h_religion_abs", name: "绝对宗教", enName: "Absolute Spirit: Religion", category: "Absolute Spirit", shortDef: "宗教是精神在表象中对自身的意识：通过神圣的仪式与教义，将逻辑的深刻性转化为集体的情感与象征。" },
+            { id: "h_philosophy_abs", name: "哲学", enName: "Absolute Spirit: Philosophy", category: "Absolute Spirit", shortDef: "哲学是绝对精神最高级的自我认知：密涅瓦的猫头鹰在黄昏起飞，是历史与经验向纯粹思维的最终升华。" },
+            { id: "h_absolute_spirit_key", name: "绝对精神关键", enName: "Key to Absolute Spirit", category: "Absolute Spirit", shortDef: "绝对精神的支柱：主观精神与客观精神在更高层面的综合，真理在自身中实现最后的自足。" }
         ]
     }
 ];
+
+
 
 export const MARX_INDEX: LacanCategory[] = [
     {

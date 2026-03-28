@@ -250,7 +250,7 @@ const SkinSlot: React.FC<{
             const safeDetails = details as { def?: string; core?: string; defEn?: string; coreEn?: string } | null;
 
             return (
-              <span key={tag} className="inline-flex flex-col items-start group/tag relative align-top">
+              <span key={`${blockId}-${idx}`} className="inline-flex flex-col items-start group/tag relative align-top">
                 <span className="flex items-baseline relative z-10">
                   <span
                     onClick={() => onOpen(blockId)}
@@ -270,7 +270,7 @@ const SkinSlot: React.FC<{
                   {idx < tags.length - 1 && <span className={`font-bold mx-0.5 text-lg ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}`}>、</span>}
                 </span>
 
-                <div className={`flex items-center gap-1 mt-1 z-10 ${theme === 'retro' ? 'bg-[var(--bg-panel)]' : 'bg-black/80'} rounded p-1 shadow-md border ${theme === 'retro' ? 'border-[var(--border-main)]/40' : 'border-zinc-800'}`}>
+                <div className={`flex items-center gap-1 mt-1 z-10 ${theme === 'retro' ? 'bg-[var(--bg-panel)]' : 'bg-black/80'} rounded p-1 shadow-md border ${theme === 'retro' ? 'border-[var(--border-main)]/40' : 'border-zinc-800'} opacity-0 group-hover/tag:opacity-100 transition-opacity duration-300`}>
                   <button
                     onClick={(e) => { e.stopPropagation(); onRandomizeTag?.(blockId, tag); }}
                     disabled={isTagLocked}
@@ -339,7 +339,7 @@ const SkinSlot: React.FC<{
             >
               [{placeholder}]
             </span>
-            <div className={`flex items-center gap-1 mt-1 z-10 ${theme === 'retro' ? 'bg-[var(--bg-panel)]' : 'bg-black/80'} rounded p-1 border ${theme === 'retro' ? 'border-[var(--border-main)]/40' : 'border-zinc-800'} shadow-md`}>
+            <div className={`flex items-center gap-1 mt-1 z-10 ${theme === 'retro' ? 'bg-[var(--bg-panel)]' : 'bg-black/80'} rounded p-1 border ${theme === 'retro' ? 'border-[var(--border-main)]/40' : 'border-zinc-800'} shadow-md opacity-0 group-hover/tag:opacity-100 transition-opacity duration-300`}>
               <button
                 onClick={(e) => { e.stopPropagation(); onRandomizeBlock?.(blockId); }}
                 disabled={isBlockLocked}
@@ -857,11 +857,11 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
       style={{ zIndex: isOpen ? zIndex : 0 }}
       className={`
         flex flex-col transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)
-        fixed top-14 left-0 bottom-14 w-[380px] ${theme === 'retro' ? 'bg-[var(--bg-panel)] shadow-none' : `bg-[var(--bg-main)] ${isOpen ? 'shadow-[20px_0_50px_rgba(0,0,0,0.5)]' : ''}`} ${isOpen ? 'border-r border-[var(--border-main)]' : 'border-none'}
+        fixed top-14 left-0 bottom-[58px] w-[420px] ${theme === 'retro' ? 'bg-[var(--bg-panel)] shadow-none' : `bg-[var(--bg-main)] ${isOpen ? 'shadow-[20px_0_50px_rgba(0,0,0,0.5)]' : ''}`} ${isOpen ? 'border-r border-[var(--border-main)]' : 'border-none'}
         ${isOpen ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0 pointer-events-none'}
       `}
     >
-      <div className={`px-6 py-4 flex items-center justify-between relative shrink-0 transition-all duration-300`}>
+      <div className={`px-4 py-4 flex items-center justify-between relative shrink-0 transition-all duration-300`}>
         <div className="flex items-center gap-2">
           <Settings2 size={18} className={iconColor} />
           <span className={`text-sm font-black uppercase tracking-[0.25em] ${iconColor}`}>
@@ -905,10 +905,11 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
         </div>
         
         {/* Short Divider */}
-        <div className={`absolute bottom-0 left-6 right-6 h-[1px] ${theme === 'retro' ? 'bg-black/60' : 'bg-zinc-800'}`} />
+        <div className={`absolute bottom-0 left-4 right-4 h-[1px] ${theme === 'retro' ? 'bg-black/60' : 'bg-zinc-800'}`} />
       </div>
 
-      <div className={`flex-1 overflow-y-auto custom-scrollbar p-8 pt-6 space-y-6 ${theme === 'retro' ? 'bg-[var(--bg-panel)]' : 'bg-[#050505]'}`}>
+      <div className={`flex-1 overflow-y-auto custom-scrollbar ${theme === 'retro' ? 'bg-[var(--bg-panel)]' : 'bg-[#050505]'}`}>
+        <div className="min-h-full flex flex-col justify-start px-4 pt-12 pb-0 space-y-4">
 
         {isCommercial ? (
           <div className="space-y-8">
@@ -977,47 +978,60 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
             </section>
           </div>
         ) : (
-          <div className="space-y-8">
-            <section>
-              <div className={`leading-[2.2] font-serif text-sm md:text-base ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}`}>
-                <span>{lang === 'EN' ? "Based on" : "本片以"}</span> <SkinSlot blockId="skin_genre" placeholder={lang === 'EN' ? "Genre" : "类型基因"} isBlockLocked={lockedModules["skin_genre"]} {...slotProps} /> <SkinSlot blockId="skin_animation_genre" placeholder={lang === 'EN' ? "Animation" : "动画基因"} isBlockLocked={lockedModules["skin_animation_genre"]} {...slotProps} /> <span>{lang === 'EN' ? "genre." : "作为叙事底色。"}</span>
-              </div>
-            </section>
+          <div className="space-y-6">
+            <section className={`p-6 rounded-xl border ${theme === 'retro' ? 'bg-white/40 border-[#8B261D]/20 shadow-inner' : 'bg-black/20 border-white/5 shadow-2xl relative overflow-hidden group'}`}>
+              <div className={`space-y-4 font-serif text-base md:text-lg ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}`}>
+                {/* Sentence 1: Foundation */}
+                <div className="leading-relaxed">
+                  <span>{lang === 'EN' ? "Based on " : "本作以 "}</span>
+                  <SkinSlot blockId="skin_genre" placeholder={lang === 'EN' ? "Genre" : "类型基因"} isBlockLocked={lockedModules["skin_genre"]} {...slotProps} />
+                  {((fieldState['skin_genre']?.length || 0) > 0 && (fieldState['skin_animation_genre']?.length || 0) > 0) && (
+                    <span className="mx-0.5">、</span>
+                  )}
+                  <SkinSlot blockId="skin_animation_genre" placeholder={lang === 'EN' ? "Animation" : "动画基因"} isBlockLocked={lockedModules["skin_animation_genre"]} {...slotProps} />
+                  <span>{lang === 'EN' ? " as the narrative foundation." : " 铺设叙事底色。"}</span>
+                </div>
 
-            <section>
-              <div className={`leading-[2.2] font-serif text-sm md:text-base ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}`}>
-                <span>{lang === 'EN' ? "This is a story set in" : "这是一个发生在"}</span>
-                {/* Specific UI for Narrative Mode's Time/Country Slot - Now using renderTimeLocationSlot */}
-                {renderTimeLocationSlot()}
+                {/* Sentence 2: World Anchors */}
+                <div className="leading-relaxed">
+                  <span>{lang === 'EN' ? "Rooted in the cultural coordinates of " : "故事根植于 "}</span>
+                  {renderTimeLocationSlot()}
+                  <span>{lang === 'EN' ? ", with " : " 的文化坐标中，以 "}</span>
+                  <SkinSlot blockId="skin_era" placeholder={lang === 'EN' ? "Time Anchor" : "时空锚点"} isBlockLocked={lockedModules["skin_era"]} {...slotProps} />
+                  <span>{lang === 'EN' ? " as the environmental matrix, anchoring the subject in " : " 为环境母体，将主体锚定在 "}</span>
+                  <SkinSlot blockId="skin_location" placeholder={lang === 'EN' ? "Location" : "空间场景"} isBlockLocked={lockedModules["skin_location"]} {...slotProps} />
+                  <span>{lang === 'EN' ? " - a physical container." : " 这一物理容器。"}</span>
+                </div>
 
-                <span>{lang === 'EN' ? ", based on" : "，基于"}</span>
-                <SkinSlot blockId="skin_era" placeholder={lang === 'EN' ? "Culture/Era" : "文化背景"} isBlockLocked={lockedModules["skin_era"]} {...slotProps} />
-                <span>{lang === 'EN' ? "context, taking place in" : "的背景下，主要场景发生于"}</span>
-                <SkinSlot blockId="skin_location" placeholder={lang === 'EN' ? "Location" : "空间场景"} isBlockLocked={lockedModules["skin_location"]} {...slotProps} />
-                <span>{lang === 'EN' ? "." : "的故事。"}</span>
-              </div>
-            </section>
+                {/* Sentence 3: System Logic */}
+                <div className="leading-relaxed">
+                  <span>{lang === 'EN' ? "The symbolic order operates on a " : "象征秩序运行于 "}</span>
+                  <SkinSlot blockId="skin_society" placeholder={lang === 'EN' ? "Society" : "社会形态"} isBlockLocked={lockedModules["skin_society"]} {...slotProps} />
+                  <span>{lang === 'EN' ? " structure, governed by the underlying logic of " : " 结构之上，其底层逻辑深受 "}</span>
+                  <SkinSlot blockId="skin_ideology" placeholder={lang === 'EN' ? "Ideology" : "意识形态"} isBlockLocked={lockedModules["skin_ideology"]} {...slotProps} />
+                  <span>{lang === 'EN' ? "." : " 的支配。"}</span>
+                </div>
 
-            <section>
-              <div className={`leading-[2.2] font-serif text-sm md:text-base ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}`}>
-                <span>{lang === 'EN' ? "Society:" : "世界运行于"}</span> <SkinSlot blockId="skin_society" placeholder={lang === 'EN' ? "Society" : "社会形态"} isBlockLocked={lockedModules["skin_society"]} {...slotProps} />
-                <span>{lang === 'EN' ? ", Ideology:" : "结构，深受"}</span> <SkinSlot blockId="skin_ideology" placeholder={lang === 'EN' ? "Ideology" : "意识形态"} isBlockLocked={lockedModules["skin_ideology"]} {...slotProps} /> <span>{lang === 'EN' ? "." : "的影响。"}</span>
-              </div>
-            </section>
+                {/* Sentence 4: Subject Profile */}
+                <div className="leading-relaxed">
+                  <span>{lang === 'EN' ? "The subject is a " : "观测主体是一名处于 "}</span>
+                  <SkinSlot blockId="skin_age" placeholder={lang === 'EN' ? "Age" : "年龄段"} isBlockLocked={lockedModules["skin_age"]} {...slotProps} />
+                  <span>{lang === 'EN' ? " " : " 的 "}</span>
+                  <SkinSlot blockId="skin_gender" placeholder={lang === 'EN' ? "Gender" : "性别"} isBlockLocked={lockedModules["skin_gender"]} {...slotProps} />
+                  <SkinSlot blockId="skin_profession" placeholder={lang === 'EN' ? "Profession" : "职业"} isBlockLocked={lockedModules["skin_profession"]} {...slotProps} />
+                  <span>{lang === 'EN' ? ", whose lack points to " : "，其本源匮乏指向 "}</span>
+                  <SkinSlot blockId="skin_origin" placeholder={lang === 'EN' ? "Class/Origin" : "阶级出身"} isBlockLocked={lockedModules["skin_origin"]} {...slotProps} />
+                  <span>{lang === 'EN' ? "." : "。"}</span>
+                </div>
 
-            <section>
-              <div className={`leading-[2.2] font-serif text-sm md:text-base ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}`}>
-                <span>{lang === 'EN' ? "Protagonist is a" : "主体是一名"}</span> <SkinSlot blockId="skin_gender" placeholder={lang === 'EN' ? "Gender" : "性别"} isBlockLocked={lockedModules["skin_gender"]} {...slotProps} />
-                <span>{lang === 'EN' ? "," : "、"}</span> <SkinSlot blockId="skin_age" placeholder={lang === 'EN' ? "Age" : "年龄段"} isBlockLocked={lockedModules["skin_age"]} {...slotProps} />
-                <span>{lang === 'EN' ? "" : "的"}</span> <SkinSlot blockId="skin_profession" placeholder={lang === 'EN' ? "Profession" : "职业属性"} isBlockLocked={lockedModules["skin_profession"]} {...slotProps} />
-                <span>{lang === 'EN' ? ", Class:" : "，其社会背景源自"}</span> <SkinSlot blockId="skin_origin" placeholder={lang === 'EN' ? "Class" : "阶级出身"} isBlockLocked={lockedModules["skin_origin"]} {...slotProps} /><span>{lang === 'EN' ? "." : "。"}</span>
-              </div>
-            </section>
-
-            <section>
-              <div className={`leading-[2.2] font-serif text-sm md:text-base ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}`}>
-                <span>{lang === 'EN' ? "Structure:" : "整篇采用"}</span> <SkinSlot blockId="skin_structure" placeholder={lang === 'EN' ? "Structure" : "叙事结构"} isBlockLocked={lockedModules["skin_structure"]} {...slotProps} />
-                <span>{lang === 'EN' ? ", Volume:" : "逻辑，整体体量设定为"}</span> <SkinSlot blockId="skin_volume" placeholder={lang === 'EN' ? "Volume" : "故事体量"} isBlockLocked={lockedModules["skin_volume"]} {...slotProps} /><span>{lang === 'EN' ? "." : "。"}</span>
+                {/* Sentence 5: Meta Controls */}
+                <div className="leading-relaxed">
+                  <span>{lang === 'EN' ? "The whole piece follows " : "全篇遵循 "}</span>
+                  <SkinSlot blockId="skin_structure" placeholder={lang === 'EN' ? "Structure" : "叙事结构"} isBlockLocked={lockedModules["skin_structure"]} {...slotProps} />
+                  <span>{lang === 'EN' ? " logic, constrained by the density of " : " 逻辑进行语法展开，整体受控于 "}</span>
+                  <SkinSlot blockId="skin_volume" placeholder={lang === 'EN' ? "Volume" : "故事体量"} isBlockLocked={lockedModules["skin_volume"]} {...slotProps} />
+                  <span>{lang === 'EN' ? "." : " 的密度约束。"}</span>
+                </div>
               </div>
             </section>
           </div>
@@ -1025,6 +1039,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
 
         <div className="h-20"></div>
       </div>
+    </div>
 
       {/* TIME LOCATION MODAL */}
       {isTimeModalOpen && (
@@ -1035,7 +1050,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
             </button>
             <div className={`flex items-center gap-3 mb-6 border-b ${theme === 'retro' ? 'border-[var(--border-main)]/30' : 'border-zinc-800'} pb-4`}>
               <Globe size={20} className="text-gold-primary" />
-              <h2 className={`text-lg font-serif font-bold ${theme === 'retro' ? 'text-gold-primary' : 'text-white'} tracking-wider`}>{lang === 'EN' ? "Coordinates" : "时空坐标"}</h2>
+              <h2 className={`text-lg font-serif font-bold ${theme === 'retro' ? 'text-gold-primary' : 'text-white'} tracking-wider`}>{lang === 'EN' ? "SUR3.Coordinates" : "SUR3.国家/年份"}</h2>
             </div>
 
             {renderTimeLocationUI()}

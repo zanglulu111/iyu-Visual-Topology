@@ -30,44 +30,94 @@ const c = {
 /**
  * 解析 Markdown 文件，提取三个区块
  * 区块标识：## 定义 | ## 类比 | ## 应用
+ * 
+ * 针对迷雾学派叙事引擎 (M0-M7)，会自动把：
+ *   "一、位点界定" + "二、动力学触发" + "三、拓扑解析" -> definition
+ *   "四、叙事生产映射" -> analogy
+ *   "五、结构约束" -> application
  */
 function parseCodexMarkdown(content) {
-  // 支持中文和英文两种区块标题
-  const SECTION_PATTERNS = {
+  // 1. 标准模式匹配
+  const STANDARD_PATTERNS = {
     definition: /^##\s*(定义|Definition|DEFINITION)\s*$/m,
     analogy:    /^##\s*(类比|Analogy|ANALOGY)\s*$/m,
     application:/^##\s*(应用|Application|APPLICATION)\s*$/m,
   };
 
+  // 2. 叙事引擎模式匹配 (M0-M7)
+  const ENGINE_PATTERNS = {
+    locus:      /^##\s*一、\s*(位点界定|概念原典与本体论界定)/m,
+    trigger:    /^##\s*二、\s*(动力学触发|哲学史考古与理论同构)/m,
+    topology:   /^##\s*三、\s*(逻辑公式与拓扑解析|引擎位点动力学解析)/m,
+    mapping:    /^##\s*四、\s*(叙事生产映射|参数族谱与叙事生产映射)/m,
+    constraints: /^##\s*五、\s*(结构约束与参数化|方法论制约与操作手册)/m,
+  };
+
   const result = { definition: '', analogy: '', application: '' };
   
-  // 找到每个区块的起始位置
-  const positions = {};
-  for (const [key, pattern] of Object.entries(SECTION_PATTERNS)) {
-    const match = content.match(pattern);
-    if (match) {
-      positions[key] = match.index;
+  // 检查是否包含引擎关键字
+  const isEngineSchema = Object.values(ENGINE_PATTERNS).some(p => p.test(content));
+
+  if (isEngineSchema) {
+    // 提取引擎区块
+    const getSection = (startPattern, endPatterns = []) => {
+      const match = content.match(startPattern);
+      if (!match) return '';
+      const startPos = match.index;
+      
+      let endPos = content.length;
+      for (const p of endPatterns) {
+        const endMatch = content.match(p);
+        if (endMatch && endMatch.index > startPos) {
+          endPos = Math.min(endPos, endMatch.index);
+        }
+      }
+      
+      let section = content.slice(startPos, endPos).trim();
+      // 移除标题行
+      section = section.replace(/^##\s*.+$/m, '').trim();
+      return section;
+    };
+
+    const locus = getSection(ENGINE_PATTERNS.locus, [ENGINE_PATTERNS.trigger, ENGINE_PATTERNS.topology, ENGINE_PATTERNS.mapping, ENGINE_PATTERNS.constraints]);
+    const trigger = getSection(ENGINE_PATTERNS.trigger, [ENGINE_PATTERNS.topology, ENGINE_PATTERNS.mapping, ENGINE_PATTERNS.constraints]);
+    const topology = getSection(ENGINE_PATTERNS.topology, [ENGINE_PATTERNS.mapping, ENGINE_PATTERNS.constraints]);
+    const mapping = getSection(ENGINE_PATTERNS.mapping, [ENGINE_PATTERNS.constraints]);
+    const constraints = getSection(ENGINE_PATTERNS.constraints);
+
+    result.definition = [
+      locus ? `### 1. 位点界定\n\n${locus}` : '',
+      trigger ? `### 2. 动力学触发\n\n${trigger}` : '',
+      topology ? `### 3. 逻辑公式与拓扑解析\n\n${topology}` : ''
+    ].filter(Boolean).join('\n\n');
+
+    result.analogy = mapping ? `### 叙事生产映射\n\n${mapping}` : '';
+    result.application = constraints ? `### 结构约束与参数化\n\n${constraints}` : '';
+
+  } else {
+    // 按标准模式提取
+    const positions = {};
+    for (const [key, pattern] of Object.entries(STANDARD_PATTERNS)) {
+      const match = content.match(pattern);
+      if (match) {
+        positions[key] = match.index;
+      }
     }
-  }
 
-  // 按位置排序
-  const sortedKeys = Object.entries(positions)
-    .sort(([, a], [, b]) => a - b)
-    .map(([key]) => key);
+    const sortedKeys = Object.entries(positions)
+      .sort(([, a], [, b]) => a - b)
+      .map(([key]) => key);
 
-  // 提取每个区块的内容（从区块标题后一行到下一个区块或文件末尾）
-  for (let i = 0; i < sortedKeys.length; i++) {
-    const key = sortedKeys[i];
-    const startPos = positions[key];
-    const nextKey = sortedKeys[i + 1];
-    const endPos = nextKey ? positions[nextKey] : content.length;
+    for (let i = 0; i < sortedKeys.length; i++) {
+      const key = sortedKeys[i];
+      const startPos = positions[key];
+      const nextKey = sortedKeys[i + 1];
+      const endPos = nextKey ? positions[nextKey] : content.length;
 
-    // 截取区块内容（跳过标题行本身）
-    let sectionContent = content.slice(startPos, endPos);
-    // 移除区块标题行，并修剪首尾空白及其余留的分割线
-    sectionContent = sectionContent.replace(/^##\s*.+$/m, '').trim().replace(/\n\s*---\s*$/, '');
-    
-    result[key] = sectionContent;
+      let sectionContent = content.slice(startPos, endPos);
+      sectionContent = sectionContent.replace(/^##\s*.+$/m, '').trim().replace(/\n\s*---\s*$/, '');
+      result[key] = sectionContent;
+    }
   }
 
   return result;
@@ -80,11 +130,11 @@ function convertFile(mdPath) {
   const relativePath = path.relative(DRAFTS_DIR, mdPath);
   const parts = relativePath.split(path.sep);
   
-  // 必须是 philosopher/concept_id.md 格式
-  if (parts.length !== 2) return;
+  // 必须至少包含一级目录 (philosopher/)
+  if (parts.length < 2) return;
   
   const philosopher = parts[0];
-  const filename = parts[1];
+  const filename = parts[parts.length - 1];
   
   // 跳过以 _ 开头的文件（如 _模板说明.md）
   if (filename.startsWith('_')) return;
@@ -180,23 +230,21 @@ function convertAll() {
   }
 
   let count = 0;
-  const philosophers = fs.readdirSync(DRAFTS_DIR).filter(d => {
-    const fullPath = path.join(DRAFTS_DIR, d);
-    return fs.statSync(fullPath).isDirectory();
-  });
 
-  for (const philosopher of philosophers) {
-    const dirPath = path.join(DRAFTS_DIR, philosopher);
-    const files = fs.readdirSync(dirPath).filter(f => f.endsWith('.md') && !f.startsWith('_'));
-
-    if (files.length > 0) {
-      console.log(c.bold(`\n【${philosopher}】`));
-      for (const file of files) {
-        const result = convertFile(path.join(dirPath, file));
+  function walk(dir) {
+    const entries = fs.readdirSync(dir);
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry);
+      if (fs.statSync(fullPath).isDirectory()) {
+        walk(fullPath);
+      } else if (entry.endsWith('.md') && !entry.startsWith('_')) {
+        const result = convertFile(fullPath);
         if (result) count++;
       }
     }
   }
+
+  walk(DRAFTS_DIR);
 
   console.log(c.green(`\n✅ 完成！共转换 ${count} 个词条\n`));
 }

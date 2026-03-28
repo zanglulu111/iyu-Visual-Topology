@@ -206,7 +206,7 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
             style={{ zIndex: isOpen ? zIndex : 0 }}
             className={`
                 flex flex-col transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)
-                fixed top-14 right-0 bottom-14 w-[380px] ${currentTheme === 'retro' ? 'bg-[var(--bg-panel)] shadow-none' : `bg-[var(--bg-main)] ${isOpen ? 'shadow-[-20px_0_50px_rgba(0,0,0,0.5)]' : ''}`} ${isOpen ? 'border-l border-[var(--border-main)]' : 'border-none'} overflow-hidden
+                fixed top-14 right-0 bottom-14 w-[420px] ${currentTheme === 'retro' ? 'bg-[var(--bg-panel)] shadow-none' : `bg-[var(--bg-main)] ${isOpen ? 'shadow-[-20px_0_50px_rgba(0,0,0,0.5)]' : ''}`} ${isOpen ? 'border-l border-[var(--border-main)]' : 'border-none'} overflow-hidden
                 ${isOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 pointer-events-none'}
             `}
         >

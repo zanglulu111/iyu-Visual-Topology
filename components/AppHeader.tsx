@@ -38,6 +38,7 @@ interface AppHeaderProps {
   currentUser: User;
   showRings: boolean;
   setShowRings: (show: boolean) => void;
+  setInitialProtocol?: (p: string | undefined) => void;
   children?: React.ReactNode;
 }
 
@@ -62,6 +63,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   onLogout,
   showRings,
   setShowRings,
+  setInitialProtocol,
   children,
 }) => {
   const { theme, toggleTheme } = useTheme();
@@ -186,7 +188,10 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         ) : (
           /* Tool-layer pages: 返回全局 Globe button, returns to LandingView (page 0) */
           <button
-            onClick={() => setPage(0)}
+            onClick={() => {
+              if (setInitialProtocol) setInitialProtocol(undefined);
+              setPage(0);
+            }}
             className={`flex items-center gap-1.5 transition-all duration-300 group px-2 py-1 rounded-md bg-transparent hover:bg-white/5 hover:scale-105 active:scale-95`}
           >
             <Globe size={14} className={`shrink-0 transition-all duration-100 ${theme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`} />

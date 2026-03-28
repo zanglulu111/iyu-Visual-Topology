@@ -100,7 +100,7 @@ const cache = new PhilosophyCache();
 cache.loadFromStorage();
 
 // Layer 1: 索引数据（直接导入，打包在前端）
-import { HEGEL_INDEX, MARX_INDEX, LACAN_INDEX, ZIZEK_INDEX } from '../data/codex/philosophy_refined';
+import { MIST_INDEX, HEGEL_INDEX, MARX_INDEX, LACAN_INDEX, ZIZEK_INDEX } from '../data/codex/philosophy_refined';
 
 /**
  * 获取索引数据（Layer 1）
@@ -109,6 +109,8 @@ import { HEGEL_INDEX, MARX_INDEX, LACAN_INDEX, ZIZEK_INDEX } from '../data/codex
 export function getPhilosophyIndex(philosopher: string): PhilosophyConcept[] {
   try {
     switch (philosopher.toLowerCase()) {
+      case 'mist':
+        return MIST_INDEX.flatMap(cat => cat.concepts) as unknown as PhilosophyConcept[];
       case 'hegel':
         return HEGEL_INDEX.flatMap(cat => cat.concepts) as unknown as PhilosophyConcept[];
       case 'marx':

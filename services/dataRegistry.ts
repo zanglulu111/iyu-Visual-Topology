@@ -2,7 +2,8 @@
 import { LibraryCategoryDef, LibraryItemDef } from '../types';
 
 // 核心叙事数据
-import { NARRATIVE_ENGINE_LIBRARY } from '../data/narrative_engine';
+import { NARRATIVE_ENGINE_LIBRARY } from '../data/engine_core/narrative_engine';
+
 
 // 皮肤与商业/实验/预告片库
 import { SKIN_LIBRARY } from '../data/skin_libraries';
@@ -103,8 +104,9 @@ export const findItemDetails = (tagName: string, blockId?: string): string => {
     const item = findItemFull(tagName, blockId);
     if (item) {
         let details = `Definition: ${item.def}`;
-        if (item.core) details += ` | Core Logic: ${item.core}`;
+        if (item.core) details += ` | Core: ${item.core}`;
         if (item.flaw) details += ` | Symptom: ${item.flaw}`;
+        if (item.logic) details += ` | Logical Constraint: ${item.logic}`;
         return details;
     }
     return "";

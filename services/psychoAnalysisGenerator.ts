@@ -1,7 +1,8 @@
 
 import { NarrativeFieldState } from '../types';
-import { ENGINE_BIG_OTHER } from '../data/engine_big_other';
-import { NARRATIVE_ENGINE_FORMULA } from '../data/narrative_protocols';
+import { ENGINE_BIG_OTHER } from '../data/engine_core/engine_big_other';
+import { NARRATIVE_ENGINE_FORMULA } from '../data/engine_core/narrative_protocols';
+
 import { findItemDetails } from './dataRegistry';
 import { runWithTask, getCallerName } from './taskManager';
 // Added Gemini API imports per guidelines

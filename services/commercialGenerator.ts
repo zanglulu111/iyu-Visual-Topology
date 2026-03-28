@@ -2,7 +2,8 @@
 import { NarrativeFieldState, CreativeTreatment, WorldLawConfig, StyleConfig } from '../types';
 import { COMMERCIAL_ENGINE_BLOCKS } from '../data/commercial_data';
 import { COMM_SKIN_BLOCKS as SKIN_BLOCKS } from '../data/commercial_skin';
-import { getVisionAnchorProtocol } from '../data/narrative_protocols';
+import { getVisionAnchorProtocol } from '../data/engine_core/narrative_protocols';
+
 import { findItemDetails } from './dataRegistry';
 
 const buildContext = (fieldState: NarrativeFieldState) => {

@@ -1,7 +1,8 @@
 
 import { NarrativeFieldState, SubjectType, LibraryItemDef, WorldLawConfig, CreativeTreatment, StyleConfig } from '../types';
 import { AESTHETIC_ENGINE_BLOCKS } from '../data/aesthetic_data';
-import { getVisionAnchorProtocol } from '../data/narrative_protocols';
+import { getVisionAnchorProtocol } from '../data/engine_core/narrative_protocols';
+
 import { findItemDetails } from './dataRegistry';
 
 // Block Definitions for Detection

@@ -12,7 +12,7 @@ import {
 } from '../types';
 import { 
   NARRATIVE_ENGINE_BLOCKS 
-} from '../data/narrative_engine';
+} from '../data/engine_core/narrative_engine';
 import { ALL_SKIN_BLOCKS } from '../data/skin_libraries';
 import { STORY_VOLUMES } from '../data/story_volumes';
 import { GENRE_CATEGORIES } from '../data/genres';
@@ -31,7 +31,7 @@ import {
     STYLE_LOGIC_PROTOCOL,
     getVisionAnchorProtocol,
     THE_MASK_PROTOCOL
-} from '../data/narrative_protocols';
+} from '../data/engine_core/narrative_protocols';
 
 // Import Registry instead of raw data
 import { findItemDetails, findItemFull } from './dataRegistry';
@@ -144,6 +144,7 @@ export const buildNarrativePrompt = (
   let psychoProtocol = "";
   if (m0Tags && m0Tags.length > 0) {
       const tag = m0Tags[0];
+      const item = findItemFull(tag) as any;
       const details = findItemDetails(tag);
       psychoProtocol = `
 ## 🧠 PSYCHIC STRUCTURE PROTOCOL (M0: CRITICAL PRIORITY)
@@ -151,7 +152,11 @@ export const buildNarrativePrompt = (
 
 **DIAGNOSIS:** ${details}
 
+**Logical Constraint (Algebraic Rule):** ${item.logic || "Follow the standard OS logic."}
+
 **INSTRUCTION:**
+- **STRICT ADHERENCE:** You MUST treat the 'Logical Constraint' above as a hard mathematical rule that governs how the narrative energy (M1-M7) is calculated within this story.
+- **SURVIVAL VS COLLAPSE:** M0 determines if the subject's universe survives the M2 Encounter or if it collapses into a specific crystalline symptom.
 - **IF [Ordinary Psychosis]:** Do NOT write a standard "madman" story. The subject appears normal but relies on a specific "Patch" (Work/Hobby/Ritual) to hold their reality together. The story MUST be about the threat to this Patch.
 - **IF [Autism]:** The logic must be about "Closure" and "Defense" against the Big Other's intrusion. A world without the Other.
 - **IF [Perversion]:** The logic must be about "Disavowal" and "Instrumentality". The subject knows the law but enjoys transversing it, or makes themselves an instrument of the Other's enjoyment.
@@ -438,8 +443,9 @@ export const buildNarrativeBiblePrompt = (
         const m0Tags = fieldState['engine_m0'];
         if (m0Tags && m0Tags.length > 0) {
             const tag = m0Tags[0];
+            const item = findItemFull(tag) as any;
             const details = findItemDetails(tag);
-            psychoProtocol = `## 🧠 PSYCHIC STRUCTURE PROTOCOL\n**Mechanism:** ${details}`;
+            psychoProtocol = `## 🧠 PSYCHIC STRUCTURE PROTOCOL\n**Mechanism:** ${details}\n**Logical Constraint:** ${item?.logic || "Standard OS"}`;
         }
     }
     
