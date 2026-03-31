@@ -8,86 +8,97 @@ import { NARRATIVE_ERA_CATEGORIES } from './narrative_spacetime_anchors';
 import { LOCATION_CATEGORIES } from './locations'; 
 import { SOCIETY_CATEGORIES, IDEOLOGY_CATEGORIES } from './societies_ideologies';
 import { PROFESSION_CATEGORIES, ORIGIN_CATEGORIES } from './identities';
+import { SYNTHESIZER_SUR4X } from './engine_core/synthesizer/sur4x';
+import { SYNTHESIZER_SUR11X } from './engine_core/synthesizer/sur11x';
 
 export const SKIN_BLOCKS: NarrativeBlockDef[] = [
   { 
     id: "skin_era", 
-    name: "SUR4.时空锚点", 
-    enName: "sur4.Spacetime Anchor", 
+    name: "SUR3.时空锚点", 
+    enName: "sur3.Spacetime Anchor", 
     description: "决定叙事发生的时代背景、历史张力或神话坐标。它是社会矛盾与因果逻辑发生的原始“温床”。", 
     descriptionEn: "Determines the historical tension, mythic coordinates, or temporal setting where social conflicts and causal logic brew.", 
     tags: [] 
   },
   { 
-    id: "skin_location", 
-    name: "SUR5.空间场景", 
-    enName: "sur5.Location", 
-    description: "故事发生的物理空间。", 
-    descriptionEn: "The physical space where events occur.", 
-    tags: [] 
-  },
-  { 
     id: "skin_society", 
-    name: "SUR6.社会形态", 
-    enName: "sur6.Society", 
-    description: "政治与社会阶级结构。", 
-    descriptionEn: "The political and social hierarchy.", 
+    name: "SUR4.社会形态", 
+    enName: "sur4.Social Order", 
+    description: "界定压盖在人物头顶的终极秩序，如：算法统治、黑暗神权、宗法礼教、寡头垄断。", 
+    descriptionEn: "Defines the ultimate order that dominates the characters, such as algorithmic rule, dark autocracy, or clan laws.", 
     tags: [] 
   },
   { 
-    id: "skin_ideology", 
-    name: "SUR7.意识形态", 
-    enName: "sur7.Ideology", 
-    description: "世界的主导哲学或“思想软件”。", 
-    descriptionEn: "The dominant philosophy or 'software' of the world.", 
+    id: "skin_everything", 
+    name: "SUR5.欲望锚点 (Everything)", 
+    enName: "sur5.Desire Anchor / Everything", 
+    description: "这就是无所不包的 Everything。它可以是一个麦高芬、一段代码、一本绝世秘籍，是卷动命运的风眼。", 
+    descriptionEn: "The all-encompassing Everything object. A MacGuffin, a piece of code, a secret manual—the eye of the storm.", 
+    tags: [] 
+  },
+  { 
+    id: "skin_location", 
+    name: "SUR6.空间场景", 
+    enName: "sur6.Scenes", 
+    description: "提供事件发生的具体物理容器。包含特定场景与通用场景库。", 
+    descriptionEn: "Provides the physical container for events, including specific and generic scene libraries.", 
     tags: [] 
   },
   { 
     id: "skin_gender", 
-    name: "SUR9.性别", 
-    enName: "sur9.Gender", 
-    description: "角色的生理性别或外观呈现（纯粹选角层面）。", 
-    descriptionEn: "Biological sex or visual presentation (Pure Casting Level).", 
+    name: "SUR7.主体性别", 
+    enName: "sur7.Subject Gender", 
+    description: "主体的生理性别或外观呈现（纯粹选角层面）。", 
+    descriptionEn: "The subject's biological sex or visual presentation (Casting level).", 
     tags: [] 
   },
   { 
     id: "skin_age", 
-    name: "SUR8.年龄段", 
-    enName: "sur8.Age", 
-    description: "角色的生理年龄与身体机能。", 
-    descriptionEn: "Chronological age and physiological function.", 
+    name: "SUR8.主体年龄", 
+    enName: "sur8.Subject Age", 
+    description: "主体的生理年龄与身体机能，定义机体的基础磨损度。", 
+    descriptionEn: "Standardized biological age and physiological state.", 
     tags: [] 
   },
   { 
     id: "skin_profession", 
-    name: "SUR10.职业", 
-    enName: "sur10.Profession", 
-    description: "社会角色或生存手段。", 
-    descriptionEn: "The social role or survival means.", 
+    name: "SUR9.主体职业", 
+    enName: "sur9.Subject Occupation", 
+    description: "主体的社会角色或生存手段，即“出厂负债”与社会外壳。", 
+    descriptionEn: "The subject's social role or means of survival.", 
     tags: [] 
   },
   { 
     id: "skin_origin", 
-    name: "SUR11.阶级出身", 
-    enName: "sur11.Class / Origin", 
-    description: "社会经济背景与出身权利。", 
-    descriptionEn: "The socioeconomic background and birthright.", 
+    name: "SUR10.主体背景", 
+    enName: "sur10.Class / Background", 
+    description: "社会经济背景与出身权利。定义主角在权力结构中的原始坐标。", 
+    descriptionEn: "Socioeconomic background and birthright coordinates.", 
     tags: [] 
   },
   { 
+    id: "skin_ideology", 
+    name: "SUR11.哲学信念", 
+    enName: "sur11.Philosophy / Ism", 
+    description: "主体自认为用以填补内心缺失的意识形态（如：虚无主义、英雄主义）。", 
+    descriptionEn: "The ideology used to fill the subject's inner void (e.g., Nihilism).", 
+    tags: [] 
+  },
+
+  { 
     id: "skin_structure", 
-    name: "SUR12.叙事结构", 
-    enName: "sur12.Structure", 
-    description: "情节的建筑框架。", 
-    descriptionEn: "The architectural framework of the plot.", 
+    name: "SV1.叙事结构", 
+    enName: "sv1.Narrative Structure", 
+    description: "负责故事本身的骨架排布模板（不仅是风格，更是工程学图纸）。", 
+    descriptionEn: "The structural template for the plot (Engineering blueprints).", 
     tags: [] 
   },
   { 
     id: "skin_volume", 
-    name: "SUR13.故事体量", 
-    enName: "sur13.Volume", 
-    description: "故事的结构密度与时长约束。", 
-    descriptionEn: "The structural density and duration constraint of the story.", 
+    name: "SV2.故事体量", 
+    enName: "sv2.Story Volume", 
+    description: "负责数值化输出的范围：时间跨度、节奏密度与总长。", 
+    descriptionEn: "The numerical output scope: temporal span, density, and duration.", 
     tags: [] 
   },
 ];
@@ -95,21 +106,37 @@ export const SKIN_BLOCKS: NarrativeBlockDef[] = [
 export const ALL_SKIN_BLOCKS = [
     { 
       id: "skin_genre", 
-      name: "SUR1.类型基因", 
-      enName: "sur1.GENRE (LIVE ACTION)", 
-      description: "决定故事骨架与皮相的类型（真人）。", 
-      descriptionEn: "Primary Bone & Secondary Skin (Live Action).", 
+      name: "SUR1.叙事动力", 
+      enName: "sur1.Drive", 
+      description: "决定能量喷发的物理形式，如：爱情、复仇、寻宝、逃杀。", 
+      descriptionEn: "The physical form of energy eruption (e.g., Revenge).", 
       tags: [] 
     },
     { 
       id: "skin_animation_genre", 
-      name: "SUR2.动画基因", 
-      enName: "sur2.ANIMATION GENRE", 
-      description: "决定故事的动画风格与表现逻辑（动画）。", 
-      descriptionEn: "Animation style and expressive logic.", 
+      name: "SUR2.世界模体", 
+      enName: "sur2.World Motif", 
+      description: "提供世界的视觉与感官滤镜，如：赛博、武侠、废土等。", 
+      descriptionEn: "Visual and sensory filter for the world (e.g., Cyberpunk).", 
       tags: [] 
     },
-    ...SKIN_BLOCKS
+    ...SKIN_BLOCKS,
+    { 
+      id: "sur4x", 
+      name: "SUR4X.物理阶层阻力", 
+      enName: "sur4x.Social Resistance", 
+      description: "社会形态的粘滞度，影响角色在阶层间移动的难度。", 
+      descriptionEn: "Viscosity of social order affecting class mobility.", 
+      tags: [] 
+    },
+    { 
+      id: "sur11x", 
+      name: "SUR11X.象征界缝合度", 
+      enName: "sur11x.Symbolic Suture", 
+      description: "主体对于外在秩序的认同与屈从深度。", 
+      descriptionEn: "Subject's depth of submission to the Symbolic Order.", 
+      tags: [] 
+    }
 ];
 
 const FLAT_STRUCTURE_ITEMS: LibraryItemDef[] = NARRATIVE_STRUCTURES.map(item => ({
@@ -129,9 +156,18 @@ const FLAT_VOLUME_ITEMS: LibraryItemDef[] = STORY_VOLUMES.map(item => ({
 
 export const SKIN_LIBRARY: LibraryCategoryDef[] = [
     {
+        id: "skin_genre_lib",
+        name: "叙事动力 (Narrative Drive)",
+        desc: "决定能量喷发的物理形式。",
+        items: GENRE_CATEGORIES.flatMap(cat => cat.items.map(item => ({
+            ...item,
+            group: cat.name
+        })))
+    },
+    {
         id: "skin_animation_genre_lib",
-        name: "动画基因 (Animation Genre)",
-        desc: "决定故事的动画风格与表现逻辑。动画赋予了叙事超越物理法则的自由。",
+        name: "世界模体 (World Motif / Animation)",
+        desc: "决定故事的美学风格与感官滤镜。",
         items: ANIMATION_GENRE_CATEGORIES.flatMap(cat => cat.items.map(item => ({
             ...item,
             group: cat.name
@@ -140,92 +176,111 @@ export const SKIN_LIBRARY: LibraryCategoryDef[] = [
     {
         id: "skin_era_lib", 
         name: "时空锚点 (Spacetime Anchor)", 
-        desc: "决定叙事发生的时代背景、历史张力或神话坐标。它是社会矛盾与因果逻辑发生的原始‘温床’。",
+        desc: "决定叙事发生的时代背景。它是社会矛盾发生的原始“温床”。",
         items: NARRATIVE_ERA_CATEGORIES.flatMap(cat => cat.items.map(item => ({
             ...item,
             group: cat.name
         })))
     },
     {
-        id: "skin_location_lib", 
-        name: "空间 (Location)", 
-        desc: "The physical space where events occur.",
-        items: LOCATION_CATEGORIES.flatMap(cat => cat.items.map(item => ({
-            ...item,
-            group: cat.name
-        })))
-    },
-    {
         id: "skin_society_lib", 
-        name: "社会形态 (Society)", 
-        desc: "Who rules? The structure of power and relation.",
+        name: "社会形态 (Social Order)", 
+        desc: "谁掌握着秩序？界定压盖在人物头等级的终极法则。",
         items: SOCIETY_CATEGORIES.flatMap(cat => cat.items.map(item => ({
             ...item,
             group: cat.name
         })))
     },
     {
-        id: "skin_ideology_lib", 
-        name: "意识形态 (Ideology)", 
-        desc: "Dominant philosophy or 'software' of the world. What do they believe?",
-        items: IDEOLOGY_CATEGORIES.flatMap(cat => cat.items.map(item => ({
+        id: "skin_everything_lib", 
+        name: "欲望锚点 (Desire Anchor - Everything)", 
+        desc: "这就是无所不包的 Everything。它是卷动命运的风眼。",
+        items: [
+            { id: "everything_macguffin", name: "麦高芬 (MacGuffin)", group: "欲望对象", def: "一种作为推动力的纯粹目标物。", core: "不具有实质逻辑功能，但所有人都在抢它。", defEn: "Pure driver.", coreEn: "Empty object that drives everything." },
+            { id: "everything_relic", name: "秘密代码/秘籍", group: "虚无化物件", def: "承载着某种颠覆性知识的媒介。", core: "一旦显影，必将导致现存秩序的崩解。", defEn: "Subversive knowledge.", coreEn: "Media carrying disruptive data." }
+        ]
+    },
+    {
+        id: "skin_location_lib", 
+        name: "空间场景 (Scenes)", 
+        desc: "提供事件发生的具体物理容器。",
+        items: LOCATION_CATEGORIES.flatMap(cat => cat.items.map(item => ({
             ...item,
             group: cat.name
         })))
     },
     {
         id: "skin_gender_lib", 
-        name: "性别 (Gender)", 
-        desc: "Physiological & Visual Presentation (Zero Degree)",
+        name: "主体性别 (Gender)", 
+        desc: "Physiological & Visual Presentation",
         items: [
-            { id: "gen_m", name: "男性 (Male)", group: "基础性别 (Base Gender)", def: "生理男性/雄性特征。", core: "视觉特征：骨骼结构、肌肉张力、低频声线。作为物质的阳性身体。", defEn: "Biological Male.", coreEn: "Visuals: Bone structure, muscle tension, vocal resonance." },
-            { id: "gen_f", name: "女性 (Female)", group: "基础性别 (Base Gender)", def: "生理女性/雌性特征。", core: "视觉特征：身体曲线、脂肪分布、高频声线。作为物质的阴性身体。", defEn: "Biological Female.", coreEn: "Visuals: Silhouette, gesture dynamics, vocal tone." },
-            { id: "gen_nb", name: "非二元 (Non-Binary)", group: "基础性别 (Base Gender)", def: "拒绝传统的男/女外观分类。", core: "视觉特征：混合的性征、模糊的轮廓、难以被一眼识别的性别信号。", defEn: "Outside binary.", coreEn: "Visuals: Ambiguity, blending of traits, defying classification." },
-            { id: "gen_androgynous", name: "中性/双性化 (Androgynous)", group: "基础性别 (Base Gender)", def: "同时具有显著的男性和女性美学特征。", core: "视觉特征：这种身体本身就是一个谜题，具有奇异的吸引力。", defEn: "Androgynous.", coreEn: "Visuals: Mixing distinct male and female aesthetics." },
-            { id: "gen_construct", name: "义体/无性 (Construct/Null)", group: "基础性别 (Base Gender)", def: "机器人、玩偶或去性化的身体。", core: "视觉特征：光滑、无生殖特征、纯粹的功能性或装饰性。", defEn: "Construct/Null.", coreEn: "Visuals: Smoothness, absence of sexual characteristics." }
+            { id: "gen_m", name: "男性 (Male)", group: "基础性别", def: "生理男性/雄性特征。", core: "生理重力：阳性身体的物质呈现。", defEn: "Biological Male.", coreEn: "Visuals: Masculine resonance." },
+            { id: "gen_f", name: "女性 (Female)", group: "基础性别", def: "生理女性/雌性特征。", core: "生理重力：阴性身体的物质呈现。", defEn: "Biological Female.", coreEn: "Visuals: Feminine resonance." },
+            { id: "gen_nb", name: "非二元 (Non-Binary)", group: "基础性别", def: "模糊的轮廓、难以被一眼识别的性别信号。", core: "拒绝分类。", defEn: "Outside binary.", coreEn: "Defying classification." }
         ]
     },
     {
         id: "skin_age_lib", 
-        name: "年龄 (Age)", 
-        desc: "Chronological & Physiological Stage",
+        name: "主体年龄 (Age)", 
+        desc: "Chronological Stage",
         items: [
-            { id: "age_child", name: "儿童 (Child / 6-12)", group: "生理年龄 (Age)", def: "发育前。身体未成熟。", core: "生理特征：低视角、动作的随机性、充沛但不可控的能量。", defEn: "Pre-puberty.", coreEn: "Physiology: Low vantage point, unrefined motor skills." },
-            { id: "age_teen", name: "少年 (Teen / 13-19)", group: "生理年龄 (Age)", def: "发育期。第二性征出现。", core: "生理特征：肢体的不协调感（抽条）、变声期、皮肤的质感变化（青春痘/汗水）。", defEn: "Puberty.", coreEn: "Physiology: Rapid changes, breaking voice, awkward limbs." },
-            { id: "age_youth", name: "青年 (Young Adult / 20-35)", group: "生理年龄 (Age)", def: "全盛期。身体机能的巅峰。", core: "生理特征：力量、速度、生殖能力的完备。代谢最旺盛的时刻。", defEn: "Prime.", coreEn: "Physiology: Peak physical performance, reproductive maturity." },
-            { id: "age_mid", name: "中年 (Middle Age / 36-55)", group: "生理年龄 (Age)", def: "稳定期。衰老的最初迹象。", core: "生理特征：重力的影响（下垂）、体重的增加、动作变得沉稳或迟缓。", defEn: "Middle Age.", coreEn: "Physiology: Weight of gravity, slower metabolism, stability." },
-            { id: "age_elder", name: "老年 (Elder / 60+)", group: "生理年龄 (Age)", def: "衰退期。机能的丧失。", core: "生理特征：皱纹（时间的地图）、骨骼的萎缩、震颤、浑浊的眼睛。", defEn: "Senior.", coreEn: "Physiology: Wrinkles, frailty, physical history on the face." },
-            { id: "age_ancient", name: "极高龄 (Ancient / 100+)", group: "生理年龄 (Age)", def: "枯竭期。接近无机物。", core: "生理特征：像干尸或古树一样的质感。极度缓慢，仿佛时间停止。", defEn: "Ancient.", coreEn: "Physiology: Withered texture, near-inorganic stillness." }
+            { id: "age_child", name: "儿童 (Child / 6-12)", group: "生理阶段", def: "发育前。", core: "低视角、动作的随机性。", defEn: "Pre-puberty.", coreEn: "Low vantage point." },
+            { id: "age_teen", name: "少年 (Teen / 13-19)", group: "生理阶段", def: "发育期。", core: "变声期、肢体不协调感。", defEn: "Puberty.", coreEn: "Rapid changes." },
+            { id: "age_youth", name: "青年 (Young Adult / 20-35)", group: "生理阶段", def: "鼎盛期。", core: "机能巅峰。", defEn: "Prime.", coreEn: "Peak performance." },
+            { id: "age_mid", name: "中年 (Middle Age / 36-55)", group: "生理阶段", def: "稳定期。", core: "重力的下沉。", defEn: "穩定期。", coreEn: "Stability." },
+            { id: "age_elder", name: "老年 (Elder / 60+)", group: "生理阶段", def: "衰退期。", core: "时间的地图。", defEn: "Senior.", coreEn: "Physical history." }
         ]
     },
-  {
-    id: "skin_profession_lib", 
-    name: "职业 (Profession)", 
-    desc: "Class Role / Occupation",
-    items: PROFESSION_CATEGORIES.flatMap(cat => cat.items.map(item => ({
-      ...item,
-      group: cat.name
-    })))
-  },
-  {
-    id: "skin_origin_lib", 
-    name: "阶级 (Class/Origin)", 
-    desc: "Socioeconomic background and birthright.",
-    items: ORIGIN_CATEGORIES.flatMap(cat => cat.items.map(item => ({
-      ...item,
-      group: cat.name
-    })))
-  },
-  {
-    id: "skin_structure_lib", 
-    name: "叙事结构 (Structure)", 
-    desc: "The architectural framework of the plot.",
-    items: FLAT_STRUCTURE_ITEMS
-  },
-  {
-    id: "skin_volume_lib", 
-    name: "故事体量 (Volume)", 
-    desc: "The structural density and duration constraint.",
-    items: FLAT_VOLUME_ITEMS
-  },
+    {
+        id: "skin_profession_lib", 
+        name: "主体职业 (Profession)", 
+        desc: "Survival Means / Social Mask",
+        items: PROFESSION_CATEGORIES.flatMap(cat => cat.items.map(item => ({
+            ...item,
+            group: cat.name
+        })))
+    },
+    {
+        id: "skin_origin_lib", 
+        name: "主体背景 (Background)", 
+        desc: "Socioeconomic background and birthright.",
+        items: ORIGIN_CATEGORIES.flatMap(cat => cat.items.map(item => ({
+            ...item,
+            group: cat.name
+        })))
+    },
+    {
+        id: "skin_ideology_lib", 
+        name: "哲学信念 (Philosophy)", 
+        desc: "What do they believe to fill the void?",
+        items: IDEOLOGY_CATEGORIES.flatMap(cat => cat.items.map(item => ({
+            ...item,
+            group: cat.name
+        })))
+    },
+
+    {
+        id: "skin_structure_lib", 
+        name: "叙事结构 (Structure - SV1)", 
+        desc: "The architectural framework of the plot.",
+        items: FLAT_STRUCTURE_ITEMS
+    },
+    {
+        id: "skin_volume_lib", 
+        name: "故事体量 (Volume - SV2)", 
+        desc: "Target scope and rhythm density.",
+        items: FLAT_VOLUME_ITEMS
+    },
+    {
+        id: "sur4x_lib",
+        name: "物理阶层阻力 (Social Resistance)",
+        desc: "界定压盖在人物头顶阶层固化的程度。",
+        items: SYNTHESIZER_SUR4X.map(item => ({...item, group: "物理阶层阻力"}))
+    },
+    {
+        id: "sur11x_lib",
+        name: "象征界缝合度 (Symbolic Suture)",
+        desc: "对待信仰的‘当真程度’滑块。",
+        items: SYNTHESIZER_SUR11X.map(item => ({...item, group: "象征界缝合度"}))
+    }
 ];

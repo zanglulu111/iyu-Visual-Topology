@@ -8,13 +8,16 @@ import { ENGINE_DRIVES } from './engine_drives';
 import { ENGINE_STAKES } from './engine_stakes';
 import { ENGINE_RESOLUTIONS } from './engine_resolutions';
 import { ENGINE_M0_OS } from './m0';
+import { SYNTHESIZER_M2X } from './synthesizer/m2x';
+import { SYNTHESIZER_M4X } from './synthesizer/m4x';
+import { SYNTHESIZER_M5X } from './synthesizer/m5x';
 
 export const NARRATIVE_ENGINE_BLOCKS: NarrativeBlockDef[] = [
   // MODULE 0: GLOBAL CONTROLLER
   {
     id: "engine_m0",
-    name: "M0. 心理操作系统",
-    enName: "M0. PSYCHIC OS (Structure)",
+    name: "M0. 精神拓扑",
+    enName: "M0. PSYCHIC TOPOLOGY",
     description: "【底层操作系统】包裹叙事公式的逻辑闭包。决定主角处理“缺失”时的绝对肯定性（折叠/超导/零度）。",
     descriptionEn: "The underlying Operating System wrapping the narrative formula. Dictates the subject's absolute positivity when facing lack (Folding/Superconduct/Zero-Degree).",
     tags: []
@@ -55,9 +58,34 @@ export const NARRATIVE_ENGINE_BLOCKS: NarrativeBlockDef[] = [
   {
     id: "engine_m5",
     name: "M5. 行动驱力",
-    enName: "M5. THE DRIVE",
-    description: "主角采取的具体抵抗姿态或生存手段。如何面对阻碍？",
-    descriptionEn: "The specific stance of resistance or survival method adopted by the protagonist. How to face the obstacle?",
+    enName: "M5. THE DRIVE (Act)",
+    description: "对抗或者顺应冲突。主体采取的破坏性存续手段。",
+    descriptionEn: "The specific stance of resistance or survival method adopted by the protagonist.",
+    tags: []
+  },
+  // COEFFICIENTS (X-Factors)
+  {
+    id: "engine_m2x",
+    name: "M2X. 实在界入侵当量",
+    enName: "M2X. WORLD COLLAPSE (Coefficient)",
+    description: "象征界的崩坏程度，调节世界观破裂的烈度。",
+    descriptionEn: "Degree of collapse of the symbolic order.",
+    tags: []
+  },
+  {
+    id: "engine_m4x",
+    name: "M4X. 外部压迫能级",
+    enName: "M4X. BLOCKAGE INTENSITY (Coefficient)",
+    description: "大他者施加阻力的形式。从隐性剥削到直接抹杀。",
+    descriptionEn: "Form of resistance applied by the Big Other.",
+    tags: []
+  },
+  {
+    id: "engine_m5x",
+    name: "M5X. 死亡驱力流速",
+    enName: "M5X. DRIVE VELOCITY (Coefficient)",
+    description: "主体采取行动的破坏性程度。从顺从到自我毁灭。",
+    descriptionEn: "Destructiveness of the subject's action.",
     tags: []
   },
   {
@@ -81,8 +109,8 @@ export const NARRATIVE_ENGINE_BLOCKS: NarrativeBlockDef[] = [
 export const NARRATIVE_ENGINE_LIBRARY: LibraryCategoryDef[] = [
   {
     id: "engine_m0_lib",
-    name: "M0. 心理操作系统",
-    nameEn: "M0. Psychic OS",
+    name: "M0. 精神拓扑",
+    nameEn: "M0. Psychic Topology",
     desc: "包裹叙事的逻辑骨架与防溢出机制，在面临实在界崩塌时产生“漏电与火花”。这是主角的宿命式底层编译器。",
     descEn: "The underlying compiler of fate. Functions as a logical framework and safety mechanism that generates 'leakage and sparks' during the collapse of the Real.",
     items: ENGINE_M0_OS
@@ -142,5 +170,29 @@ export const NARRATIVE_ENGINE_LIBRARY: LibraryCategoryDef[] = [
     desc: "故事的哲学结局与命运审判。欲望最终导向何处？",
     descEn: "The philosophical ending and judgment of fate. Where does desire ultimately lead?",
     items: ENGINE_RESOLUTIONS
+  },
+  {
+    id: "engine_m2x_lib",
+    name: "M2X. 实在界入侵当量 (系数)",
+    nameEn: "M2X. World Collapse",
+    desc: "象征界的崩坏程度，调节世界观破裂的烈度。",
+    descEn: "Degree of collapse of the symbolic order.",
+    items: SYNTHESIZER_M2X
+  },
+  {
+    id: "engine_m4x_lib",
+    name: "M4X. 外部压迫能级 (系数)",
+    nameEn: "M4X. Blockage Intensity",
+    desc: "大他者施加阻力的形式。从隐性剥削到直接抹杀。",
+    descEn: "Form of resistance applied by the Big Other.",
+    items: SYNTHESIZER_M4X
+  },
+  {
+    id: "engine_m5x_lib",
+    name: "M5X. 死亡驱力流速 (系数)",
+    nameEn: "M5X. Drive Velocity",
+    desc: "主体采取行动的破坏性程度。从顺从到自我毁灭。",
+    descEn: "Destructiveness of the subject's action.",
+    items: SYNTHESIZER_M5X
   }
 ];

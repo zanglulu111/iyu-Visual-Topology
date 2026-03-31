@@ -33,13 +33,17 @@ interface ProphecySlotProps {
     onEditCustomDef?: (oldName: string, newName: string, def: string, core: string) => void;
     onAddCustomDef?: (name: string, def: string, core: string) => void;
     onManualUpdate?: (blockId: string, tags: string[]) => void;
+    showLevelToggle?: boolean;
+    hideAffixes?: boolean;
 }
 
 export const ProphecySlot: React.FC<ProphecySlotProps> = ({
     blockId, placeholderCN, placeholderEN, prefixCN = "", prefixEN = "", suffixCN = "", suffixEN = "",
     fieldState, lang, driverType, onOpenLibrary, onRemoveTag, onClearBlock, getItemDetails, getBilingualText, ENGINE_BLOCKS, isSmall = false, isTiny = false,
     onRandomizeBlock, onToggleLockBlock, isBlockLocked,
-    lockedTags, onToggleTagLock, onRandomizeTag, getLibraryCount, onEditCustomDef, onAddCustomDef, onManualUpdate
+    lockedTags, onToggleTagLock, onRandomizeTag, getLibraryCount, onEditCustomDef, onAddCustomDef, onManualUpdate,
+    showLevelToggle = false,
+    hideAffixes = false
 }) => {
     const { theme } = useTheme();
     const isRetro = theme === 'retro';
@@ -56,9 +60,6 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
 
     const handleMouseEnter = (e: React.MouseEvent, details: any) => {
         const rect = e.currentTarget.getBoundingClientRect();
-        
-        // Default logic: show above for non-aesthetic, below for aesthetic
-        // Overridden if too close to edges
         let showAbove = driverType !== DriverType.AESTHETIC;
         if (rect.bottom > window.innerHeight * 0.7) {
             showAbove = true;
@@ -81,8 +82,8 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
     };
 
     const displayPlaceholder = lang === 'EN' ? placeholderEN : placeholderCN;
-    const prefix = lang === 'EN' ? prefixEN : prefixCN;
-    const suffix = lang === 'EN' ? suffixEN : suffixCN;
+    const prefix = hideAffixes ? "" : (lang === 'EN' ? prefixEN : prefixCN);
+    const suffix = hideAffixes ? "" : (lang === 'EN' ? suffixEN : suffixCN);
 
     const isAesthetic = driverType === DriverType.AESTHETIC;
     const isCommercial = driverType === DriverType.COMMERCIAL;
@@ -91,47 +92,34 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
 
     let accentColor = 'text-gold-primary border-gold-primary';
     let labelColor = 'text-gold-primary';
-    let labelBorder = 'border-gold-primary/40';
     let containerClass = "inline-flex flex-wrap items-baseline gap-1.5 md:gap-2 mx-1.5 md:mx-2 relative group/slot align-middle";
     let editAccent = 'text-gold-primary border-gold-primary focus:border-gold-primary';
 
     if (theme === 'retro') {
         accentColor = 'text-[#8B261D] border-[#8B261D]';
         labelColor = 'text-[#8B261D]';
-        labelBorder = 'border-[#8B261D]/40';
         editAccent = 'text-[var(--text-main)] border-[var(--border-main)] focus:border-[#8B261D]';
     } else if (isCommercial) {
         accentColor = 'text-mist-cyan border-mist-cyan';
         labelColor = 'text-mist-cyan';
-        labelBorder = 'border-mist-cyan/40';
         editAccent = 'text-cyan-400 border-cyan-400 focus:border-cyan-400';
     } else if (isExperimental) {
         accentColor = 'text-mist-purple border-mist-purple';
         labelColor = 'text-mist-purple';
-        labelBorder = 'border-mist-purple/40';
         editAccent = 'text-purple-400 border-purple-400 focus:border-purple-400';
     } else if (isAesthetic) {
         accentColor = 'text-mist-rose border-mist-rose';
         labelColor = 'text-mist-rose';
-        labelBorder = 'border-mist-rose/40';
         editAccent = 'text-rose-400 border-rose-400 focus:border-rose-400';
     } else if (isTrailer) {
         accentColor = 'text-mist-orange border-mist-orange';
         labelColor = 'text-mist-orange';
-        labelBorder = 'border-mist-orange/40';
         editAccent = 'text-orange-400 border-orange-400 focus:border-orange-400';
-    } else {
-        // Labyrinth of Eros (Default)
-        accentColor = 'text-gold-primary border-gold-primary';
-        labelColor = 'text-gold-primary';
-        labelBorder = 'border-gold-primary/40';
-        editAccent = 'text-gold-primary border-gold-primary focus:border-gold-primary';
     }
 
     const textSize = isTiny ? 'text-xs' : (isSmall ? 'text-sm md:text-base' : 'text-xl md:text-3xl');
     const prefixSize = isTiny ? 'text-[10px]' : (isSmall ? 'text-sm md:text-base' : 'text-lg md:text-2xl');
 
-    // Edit state
     const [editingTag, setEditingTag] = useState<string | null>(null);
     const [isCreatingNew, setIsCreatingNew] = useState(false);
     const [editName, setEditName] = useState("");
@@ -173,23 +161,14 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
 
     const handleSaveEdit = () => {
         if (!editName.trim()) return;
-
         if (isCreatingNew) {
-            // Create New
             if (onAddCustomDef && onManualUpdate) {
                 onAddCustomDef(editName, editDef, editCore);
-                // Assuming single selection logic for simplicity in direct edit, 
-                // or just append if multi-select? 
-                // Given the UI often implies replacing the placeholder, let's set it as the single tag for now 
-                // or add to list if that's the expected behavior. 
-                // Based on "Rapidly write custom tag on panel", usually means setting the value.
                 onManualUpdate(blockId, [editName]);
             }
         } else if (editingTag && onEditCustomDef) {
-            // Edit Existing
             onEditCustomDef(editingTag, editName, editDef, editCore);
         }
-
         handleCloseEdit();
     };
 
@@ -226,17 +205,7 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
                                 <div className={`absolute top-[calc(100%+6px)] left-1/2 -translate-x-1/2 flex items-center gap-1 z-10 opacity-60 hover:opacity-100 transition-all duration-300 ${isRetro ? 'bg-[var(--bg-panel)]/40' : 'bg-black/40'} rounded p-0.5 border ${isRetro ? 'border-[var(--border-main)]/20' : 'border-zinc-800/50'}`}>
                                     <button onClick={(e) => { e.stopPropagation(); onRandomizeTag?.(blockId, tag); }} disabled={isTagLocked} className={`flex items-center justify-center p-0.5 ${isRetro ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--border-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isTagLocked ? 'opacity-30 cursor-not-allowed' : ''}`} title="Randomize This Item"><Shuffle size={10} /></button>
                                     <button onClick={(e) => { e.stopPropagation(); onToggleTagLock?.(blockId, tag); }} className={`flex items-center justify-center p-0.5 ${isRetro ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isTagLocked ? (isRetro ? 'border-[var(--text-accent)] text-black bg-[var(--text-accent)]/10' : 'border-rose-500/50 text-rose-500 bg-rose-900/20') : ''}`} title={isTagLocked ? "Unlock Item" : "Lock Item"}>{isTagLocked ? <Lock size={10} /> : <Unlock size={10} />}</button>
-
-                                    {/* Edit Button - Always visible in group hover */}
-                                    <button
-                                        onClick={(e) => handleEditClick(tag, e)}
-                                        disabled={isTagLocked}
-                                        className={`flex items-center justify-center p-0.5 ${isRetro ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isTagLocked ? 'opacity-30 cursor-not-allowed' : ''}`}
-                                        title={lang === 'EN' ? "Customize" : "自定义"}
-                                    >
-                                        <Edit2 size={10} />
-                                    </button>
-
+                                    <button onClick={(e) => handleEditClick(tag, e)} disabled={isTagLocked} className={`flex items-center justify-center p-0.5 ${isRetro ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isTagLocked ? 'opacity-30 cursor-not-allowed' : ''}`} title={lang === 'EN' ? "Customize" : "自定义"}><Edit2 size={10} /></button>
                                     <button onClick={(e) => { e.stopPropagation(); onRemoveTag(blockId, tag); }} disabled={isTagLocked} className={`flex items-center justify-center p-0.5 ${isRetro ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-red-700' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-red-500/50 hover:bg-red-950/20 hover:text-red-400'} border rounded transition-colors ${isTagLocked ? 'opacity-30 cursor-not-allowed' : ''}`} title="Delete This Item"><Trash2 size={10} /></button>
                                 </div>
                             )}
@@ -248,7 +217,6 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
                                 </div>
                             )}
 
-                            {/* HOVER TOOLTIP PORTAL */}
                             {hoveredPortal && !editingTag && !isCreatingNew && createPortal(
                                 <div 
                                     className={`fixed z-[9999] w-max max-w-[340px] text-left p-5 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] pointer-events-none animate-in fade-in zoom-in-95 duration-100 ${hoveredPortal.showAbove ? '-translate-y-full' : ''}
@@ -284,16 +252,7 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
                     <div className={`absolute top-[calc(100%+6px)] left-1/2 -translate-x-1/2 flex items-center gap-1 z-10 opacity-60 hover:opacity-100 transition-all duration-300 ${isRetro ? 'bg-[var(--bg-panel)]/40' : 'bg-black/40'} rounded p-0.5 border ${isRetro ? 'border-[var(--border-main)]/20' : 'border-zinc-800/50'}`}>
                         <button onClick={(e) => { e.stopPropagation(); onRandomizeBlock(blockId); }} disabled={isBlockLocked} className={`flex items-center justify-center p-0.5 ${isRetro ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--border-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors`}><Dice5 size={10} /></button>
                         <button onClick={(e) => { e.stopPropagation(); onToggleLockBlock(blockId); }} className={`flex items-center justify-center p-0.5 ${isRetro ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isBlockLocked ? (isRetro ? 'border-[var(--text-accent)] text-black bg-[var(--text-accent)]/10' : (isCommercial ? 'text-cyan-400 border-cyan-400' : isExperimental ? 'text-purple-400 border-purple-400' : isAesthetic ? 'text-rose-400 border-rose-400' : isTrailer ? 'text-orange-400 border-orange-400' : 'text-gold-primary border-gold-primary')) : ''}`}>{isBlockLocked ? <Lock size={10} /> : <Unlock size={10} />}</button>
-
-                        <button
-                            onClick={handleCreateClick}
-                            disabled={isBlockLocked}
-                            className={`flex items-center justify-center p-0.5 ${isRetro ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isBlockLocked ? 'opacity-30 cursor-not-allowed' : ''}`}
-                            title={lang === 'EN' ? "Create Custom Item" : "创建自定义词条"}
-                        >
-                            <Edit2 size={10} />
-                        </button>
-
+                        <button onClick={handleCreateClick} disabled={isBlockLocked} className={`flex items-center justify-center p-0.5 ${isRetro ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isBlockLocked ? 'opacity-30 cursor-not-allowed' : ''}`} title={lang === 'EN' ? "Create Custom Item" : "创建自定义词条"}><Edit2 size={10} /></button>
                         <button onClick={(e) => { e.stopPropagation(); onClearBlock(blockId); }} disabled={isBlockLocked} className={`flex items-center justify-center p-0.5 ${isRetro ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-red-700' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-red-500/50 hover:bg-red-950/20 hover:text-red-400'} border rounded transition-colors`}><Trash2 size={10} /></button>
                     </div>
 
@@ -306,13 +265,11 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
                 </div>
             )}
 
-            {/* COMMON EDIT MODAL */}
             {(editingTag || isCreatingNew) && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200" onClick={(e) => { e.stopPropagation(); handleCloseEdit(); }}>
                     <div className="bg-[var(--bg-card)] border border-[var(--border-main)] p-6 rounded-xl shadow-2xl w-80 relative transition-colors duration-500" onClick={(e) => e.stopPropagation()}>
                         <button onClick={handleCloseEdit} className="absolute top-4 right-4 text-zinc-400 hover:text-white"><X size={16} /></button>
                         <h3 className={`text-xs font-bold uppercase tracking-widest mb-4 ${labelColor}`}>{isCreatingNew ? (lang === 'EN' ? "Create Custom Item" : "创建自定义词条") : (lang === 'EN' ? "Customize Item" : "自定义词条")}</h3>
-
                         <div className="space-y-3">
                             <div>
                                 <label className={`text-[10px] ${isRetro ? 'text-[var(--text-muted)]' : 'text-zinc-400'} uppercase font-bold block mb-1`}>{lang === 'EN' ? "Name" : "名称"}</label>
@@ -342,19 +299,8 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
                                 />
                             </div>
                             <div className="flex justify-between pt-2">
-                                <button
-                                    onClick={handleResetEdit}
-                                    className={`px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider ${isRetro ? 'bg-[var(--bg-panel)] text-[var(--text-muted)] border-[var(--border-main)] hover:text-red-700' : 'bg-zinc-900 text-zinc-400 border-zinc-700 hover:text-red-400 hover:border-red-500/50'} border transition-colors flex items-center gap-2`}
-                                    title={lang === 'EN' ? "Clear Inputs" : "清空输入"}
-                                >
-                                    <RotateCcw size={12} /> {lang === 'EN' ? "Reset" : "重置"}
-                                </button>
-                                <button
-                                    onClick={handleSaveEdit}
-                                    className={`px-4 py-1.5 rounded text-xs font-bold uppercase tracking-wider ${isRetro ? 'bg-[var(--text-accent)] text-white hover:bg-opacity-90' : 'bg-white text-black hover:bg-zinc-200'} transition-colors flex items-center gap-2`}
-                                >
-                                    <Check size={12} /> {lang === 'EN' ? "Save" : "保存"}
-                                </button>
+                                <button onClick={handleResetEdit} className={`px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider ${isRetro ? 'bg-[var(--bg-panel)] text-[var(--text-muted)] border-[var(--border-main)] hover:text-red-700' : 'bg-zinc-900 text-zinc-400 border-zinc-700 hover:text-red-400 hover:border-red-500/50'} border transition-colors flex items-center gap-2`} title={lang === 'EN' ? "Clear Inputs" : "清空输入"}><RotateCcw size={12} /> {lang === 'EN' ? "Reset" : "重置"}</button>
+                                <button onClick={handleSaveEdit} className={`px-4 py-1.5 rounded text-xs font-bold uppercase tracking-wider ${isRetro ? 'bg-[var(--text-accent)] text-white hover:bg-opacity-90' : 'bg-white text-black hover:bg-zinc-200'} transition-colors flex items-center gap-2`}><Check size={12} /> {lang === 'EN' ? "Save" : "保存"}</button>
                             </div>
                         </div>
                     </div>
@@ -362,6 +308,18 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
             )}
 
             {suffix && <span className={`font-serif ${prefixSize} font-light select-none whitespace-nowrap self-start mt-0.5 text-[var(--text-main)]`}>{suffix}</span>}
+            {showLevelToggle && (
+                <button
+                    onClick={(e) => { e.stopPropagation(); onOpenLibrary(blockId); }}
+                    className={`w-10 h-10 flex items-center justify-center border font-mono text-sm font-bold transition-all self-center shrink-0 ml-1 ${isRetro ? 'border-[#8B261D] text-[#8B261D] bg-[#F9F7F1] hover:bg-[#8B261D] hover:text-white' : 'border-zinc-700 text-zinc-400 bg-zinc-900/20 hover:border-zinc-500 hover:text-white'} rounded active:scale-90`}
+                >
+                    {(() => {
+                        const currentTag = tags[0] || "";
+                        const match = currentTag.match(/^L([1-5])/);
+                        return match ? `L${match[1]}` : "L3";
+                    })()}
+                </button>
+            )}
         </div>
     );
 };
