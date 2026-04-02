@@ -59,18 +59,17 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
     } | null>(null);
 
     const handleMouseEnter = (e: React.MouseEvent, details: any) => {
+        if (!details) return;
         const rect = e.currentTarget.getBoundingClientRect();
-        let showAbove = driverType !== DriverType.AESTHETIC;
-        if (rect.bottom > window.innerHeight * 0.7) {
-            showAbove = true;
-        } else if (rect.top < 120) {
-            showAbove = false;
-        }
+        
+        // Better positioning: if it's in the lower half of the screen, show above.
+        // If it's in the upper half, show below.
+        const showAbove = rect.top > window.innerHeight / 2;
         
         setHoveredPortal({
             pos: {
                 top: showAbove ? rect.top - 8 : rect.bottom + 8,
-                left: Math.min(rect.left, window.innerWidth - 340)
+                left: Math.max(16, Math.min(rect.left, window.innerWidth - 360))
             },
             details,
             showAbove
@@ -217,34 +216,22 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
                                 </div>
                             )}
 
-                            {hoveredPortal && !editingTag && !isCreatingNew && createPortal(
-                                <div 
-                                    className={`fixed z-[9999] w-max max-w-[340px] text-left p-5 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] pointer-events-none animate-in fade-in zoom-in-95 duration-100 ${hoveredPortal.showAbove ? '-translate-y-full' : ''}
-                                        ${theme === 'retro' ? 'bg-[#F9F7F1] border-[#1A1814] border' : 'bg-[#0a0a0a]/95 backdrop-blur-xl border-zinc-700/80 border'}`}
-                                    style={{ 
-                                        top: hoveredPortal.pos.top, 
-                                        left: hoveredPortal.pos.left
-                                    }}
-                                >
-                                    <div className={`text-sm font-black uppercase tracking-[0.15em] mb-2 border-b pb-2 flex items-center gap-2 ${theme === 'retro' ? 'text-zinc-500 border-black/10' : 'text-zinc-400 border-white/10'}`}>
-                                        <span className={labelColor}>{lang === 'EN' && blockDef?.enName ? blockDef.enName : blockDef?.name}</span>
-                                        {libCount > 0 && <span className={`${theme === 'retro' ? 'text-black' : 'text-white'} ml-1`}>({libCount})</span>}
-                                    </div>
-                                    <div className={`text-xs md:text-sm font-bold mb-3 leading-relaxed whitespace-pre-line ${theme === 'retro' ? 'text-black' : 'text-zinc-100'}`}>
-                                        {lang === 'EN' && hoveredPortal.details.defEn ? hoveredPortal.details.defEn : hoveredPortal.details.def}
-                                        <span className={`block text-[10px] italic mt-2 ${theme === 'retro' ? 'text-[#8B261D]/80' : 'text-zinc-300'}`}>
-                                            {lang === 'EN' && hoveredPortal.details.coreEn ? hoveredPortal.details.coreEn : hoveredPortal.details.core}
-                                        </span>
-                                    </div>
-                                </div>,
-                                document.body
-                            )}
                         </div>
                     );
                 })
             ) : (
                 <div className={`flex flex-col items-center group/item relative cursor-pointer align-top ${isBlockLocked ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                    <div onClick={() => !isBlockLocked && onOpenLibrary(blockId)} className="flex items-center">
+                    <div 
+                        onClick={() => !isBlockLocked && onOpenLibrary(blockId)} 
+                        onMouseEnter={(e) => blockDef && handleMouseEnter(e, {
+                            def: blockDef.description,
+                            defEn: blockDef.descriptionEn,
+                            core: "",
+                            coreEn: ""
+                        })}
+                        onMouseLeave={handleMouseLeave}
+                        className="flex items-center"
+                    >
                         <span className={`${textSize} font-serif font-bold px-0.5 tracking-wide whitespace-nowrap transition-all duration-300 hover:scale-110 hover:z-50 inline-block ${theme === 'retro' ? 'text-zinc-500 hover:text-black' : 'text-zinc-500 hover:text-white'} ${isTiny ? 'border border-dashed border-zinc-700 rounded px-2 py-0.5 hover:border-zinc-500' : 'border-b border-zinc-800 hover:border-zinc-600'} transition-all`}>
                             {isTiny ? displayPlaceholder : (isSmall ? `[${displayPlaceholder}]` : `[ ${displayPlaceholder} ]`)}
                         </span>
@@ -256,12 +243,6 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
                         <button onClick={(e) => { e.stopPropagation(); onClearBlock(blockId); }} disabled={isBlockLocked} className={`flex items-center justify-center p-0.5 ${isRetro ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-red-700' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-red-500/50 hover:bg-red-950/20 hover:text-red-400'} border rounded transition-colors`}><Trash2 size={10} /></button>
                     </div>
 
-                    {!isBlockLocked && !isCreatingNew && (
-                        <span className={`absolute left-1/2 -translate-x-1/2 -top-6 px-2 py-0.5 rounded border text-[9px] font-mono font-black tracking-[0.1em] opacity-0 group-hover/item:opacity-100 transition-all duration-100 whitespace-nowrap z-50 pointer-events-none shadow-xl 
-                            ${theme === 'retro' ? 'bg-[#F9F7F1] border-[#1A1814]' : 'bg-black/95 border-zinc-700'} ${labelColor}`}>
-                            {lang === 'EN' && blockDef?.enName ? blockDef.enName : blockDef?.name} {libCount > 0 ? <span className={theme === 'retro' ? 'text-black' : 'text-white'}>({libCount})</span> : ''}
-                        </span>
-                    )}
                 </div>
             )}
 
@@ -319,6 +300,30 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
                         return match ? `L${match[1]}` : "L3";
                     })()}
                 </button>
+            )}
+            {hoveredPortal && !editingTag && !isCreatingNew && createPortal(
+                <div 
+                    className={`fixed z-[9999] w-max max-w-[340px] max-h-[60vh] overflow-y-auto text-left p-5 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] pointer-events-none animate-in fade-in zoom-in-95 duration-150 ${hoveredPortal.showAbove ? '-translate-y-full' : ''}
+                        ${theme === 'retro' ? 'bg-[#F9F7F1] border-[#1A1814] border' : 'bg-[#0a0a0a]/95 backdrop-blur-xl border-white/10 border'}`}
+                    style={{ 
+                        top: hoveredPortal.pos.top, 
+                        left: hoveredPortal.pos.left
+                    }}
+                >
+                    <div className={`text-sm font-black uppercase tracking-[0.15em] mb-2 border-b pb-2 flex items-center gap-2 ${theme === 'retro' ? 'text-zinc-500 border-black/10' : 'text-zinc-400 border-white/10'}`}>
+                        <span className={labelColor}>{lang === 'EN' && blockDef?.enName ? blockDef.enName : blockDef?.name}</span>
+                        {libCount > 0 && <span className={`${theme === 'retro' ? 'text-black' : 'text-white'} ml-1`}>({libCount})</span>}
+                    </div>
+                    <div className={`text-xs md:text-sm font-bold mb-3 leading-relaxed whitespace-pre-line ${theme === 'retro' ? 'text-black' : 'text-zinc-100'}`}>
+                        {lang === 'EN' && hoveredPortal.details.defEn ? hoveredPortal.details.defEn : hoveredPortal.details.def}
+                        {hoveredPortal.details.core && (
+                            <span className={`block text-[10px] italic mt-2 ${theme === 'retro' ? 'text-[#8B261D]/80' : 'text-zinc-300'}`}>
+                                {lang === 'EN' && hoveredPortal.details.coreEn ? hoveredPortal.details.coreEn : hoveredPortal.details.core}
+                            </span>
+                        )}
+                    </div>
+                </div>,
+                document.body
             )}
         </div>
     );

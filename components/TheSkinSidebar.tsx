@@ -48,6 +48,8 @@ interface TheSkinSidebarProps {
 const getBlockLibInfo = (blockId: string) => {
   let count = 0;
   let name = "";
+  let description = "";
+  let descriptionEn = "";
 
   // Combine all potential blocks for lookup
   const allBlocks = [
@@ -59,7 +61,9 @@ const getBlockLibInfo = (blockId: string) => {
 
   const blockDef = allBlocks.find(b => b.id === blockId);
   if (blockDef) {
-    name = blockDef.name.replace(/^[0-9A-Z]+\.\s*/, '').split('(')[0].trim();
+    name = blockDef.name.split('(')[0].trim();
+    description = blockDef.description || "";
+    descriptionEn = blockDef.descriptionEn || "";
   }
 
   if (blockId === 'skin_genre') {
@@ -79,7 +83,7 @@ const getBlockLibInfo = (blockId: string) => {
     if (cat) count = cat.items.length;
   }
 
-  return { name, count };
+  return { name, count, description, descriptionEn };
 };
 
 const SkinSlot: React.FC<{
@@ -119,10 +123,12 @@ const SkinSlot: React.FC<{
     const [hoveredPortal, setHoveredPortal] = useState<{
       pos: { top: number; left: number };
       details: any;
+      header?: string;
+      count?: number;
       showAbove?: boolean;
     } | null>(null);
 
-    const handleMouseEnter = (e: React.MouseEvent, details: any) => {
+    const handleMouseEnter = (e: React.MouseEvent, details: any, header?: string) => {
       const rect = e.currentTarget.getBoundingClientRect();
       const showAbove = rect.bottom > window.innerHeight * 0.65;
       setHoveredPortal({
@@ -131,6 +137,8 @@ const SkinSlot: React.FC<{
           left: Math.min(rect.left, window.innerWidth - 320)
         },
         details,
+        header,
+        count: details?.count || libInfo.count,
         showAbove
       });
     };
@@ -305,29 +313,6 @@ const SkinSlot: React.FC<{
                     <Trash2 size={10} />
                   </button>
                 </div>
-
-                {hoveredPortal && createPortal(
-                  <div 
-                    className={`fixed z-[9999] w-max max-w-[320px] text-left p-5 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] pointer-events-none animate-in fade-in zoom-in-95 duration-100
-                      ${hoveredPortal.showAbove ? '-translate-y-full' : ''}
-                      ${theme === 'retro' ? 'bg-[#F9F7F1] border-[#1A1814] border' : 'bg-[#0a0a0a]/95 backdrop-blur-xl border-zinc-800 border'}`}
-                    style={{ 
-                      top: hoveredPortal.pos.top, 
-                      left: hoveredPortal.pos.left
-                    }}
-                  >
-                    <div className={`text-[10px] font-black uppercase tracking-[0.2em] mb-2 border-b pb-2 flex items-center gap-2 ${theme === 'retro' ? 'text-zinc-500 border-black/10' : 'text-zinc-500 border-white/10'}`}>
-                      <span className={theme === 'retro' ? 'text-[#8B261D]' : accentTextColor}>{libInfo.name || "DETAILS"}</span>
-                    </div>
-                    <div className={`text-xs md:text-sm font-bold mb-3 leading-relaxed whitespace-pre-line ${theme === 'retro' ? 'text-black' : 'text-zinc-100'}`}>
-                      {lang === 'EN' && hoveredPortal.details.defEn ? hoveredPortal.details.defEn : hoveredPortal.details.def}
-                      <span className={`block text-[10px] italic mt-2 ${theme === 'retro' ? 'text-[#8B261D]/80' : 'text-zinc-400'}`}>
-                        {lang === 'EN' && hoveredPortal.details.coreEn ? hoveredPortal.details.coreEn : hoveredPortal.details.core}
-                      </span>
-                    </div>
-                  </div>,
-                  document.body
-                )}
               </span>
             );
           })
@@ -335,44 +320,52 @@ const SkinSlot: React.FC<{
           <span className="group/tag relative inline-flex flex-col items-center align-top">
             <span
               onClick={() => !isBlockLocked && onOpen(blockId)}
+              onMouseEnter={(e) => handleMouseEnter(e, { 
+                def: libInfo.description, 
+                defEn: libInfo.descriptionEn,
+                core: lang === 'EN' ? "[Config Protocol] Click to enter the library." : "【配置协议】点击进入库选择具体参数。",
+              }, libInfo.name)}
+              onMouseLeave={handleMouseLeave}
               className={`cursor-pointer font-serif font-medium border-b border-dashed transition-all duration-300 hover:scale-110 hover:z-50 text-base ${isBlockLocked ? (theme === 'retro' ? 'opacity-50 cursor-not-allowed text-[var(--text-muted)]/50' : 'opacity-50 cursor-not-allowed text-zinc-600') : (theme === 'retro' ? 'border-[var(--text-main)] text-zinc-500 hover:text-black' : 'border-zinc-800 text-zinc-500 hover:text-white hover:border-zinc-500')}`}
             >
               {lang === 'EN' ? '[' : '【'}{placeholder}{lang === 'EN' ? ']' : '】'}
             </span>
             <div className={`flex items-center gap-1 mt-1 z-10 ${theme === 'retro' ? 'bg-[var(--bg-panel)]' : 'bg-black/80'} rounded p-1 border ${theme === 'retro' ? 'border-[var(--border-main)]/40' : 'border-zinc-800'} shadow-md opacity-0 group-hover/tag:opacity-100 transition-opacity duration-300`}>
-              <button
-                onClick={(e) => { e.stopPropagation(); onRandomizeBlock?.(blockId); }}
-                disabled={isBlockLocked}
-                className={`flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--border-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isBlockLocked ? 'opacity-30 cursor-not-allowed' : ''}`}
-              >
-                <Dice5 size={10} />
-              </button>
-              <button
-                onClick={(e) => { e.stopPropagation(); onToggleLockBlock?.(blockId); }}
-                className={`flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isBlockLocked ? (theme === 'retro' ? 'border-[var(--text-accent)] text-black bg-[var(--text-accent)]/10' : lockedClass) : ''}`}
-              >
-                {isBlockLocked ? <Lock size={10} /> : <Unlock size={10} />}
-              </button>
-
-              {/* Edit Button for Empty State */}
-              <button
-                onClick={handleCreateClick}
-                disabled={isBlockLocked}
-                className={`flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-500 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isBlockLocked ? 'opacity-30 cursor-not-allowed' : ''}`}
-                title={lang === 'EN' ? "Create Custom Item" : "创建自定义词条"}
-              >
-                <Edit2 size={10} />
-              </button>
-
-              <button
-                onClick={(e) => { e.stopPropagation(); onClearBlock?.(blockId); }}
-                disabled={isBlockLocked}
-                className={`flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-red-700' : 'bg-zinc-900 border-zinc-700 text-zinc-500 hover:border-red-500/50 hover:bg-red-950/20 hover:text-red-400'} border rounded transition-colors ${isBlockLocked ? 'opacity-30 cursor-not-allowed' : ''}`}
-              >
-                <Trash2 size={10} />
-              </button>
+              <button onClick={(e) => { e.stopPropagation(); onRandomizeBlock?.(blockId); }} disabled={isBlockLocked} className={`flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-white' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-white'} border rounded transition-colors`}><Dice5 size={10} /></button>
+              <button onClick={(e) => { e.stopPropagation(); onToggleLockBlock?.(blockId); }} className={`flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-white' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-white'} border rounded transition-colors ${isBlockLocked ? lockedClass : ''}`}>{isBlockLocked ? <Lock size={10} /> : <Unlock size={10} />}</button>
+              <button onClick={handleCreateClick} disabled={isBlockLocked} className={`flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-white' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-white'} border rounded transition-colors`}><Edit2 size={10} /></button>
+              <button onClick={(e) => { e.stopPropagation(); onClearBlock?.(blockId); }} disabled={isBlockLocked} className={`flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-red-700' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-red-400'} border rounded transition-colors`}><Trash2 size={10} /></button>
             </div>
           </span>
+        )}
+
+        {/* TOOLTIP PORTAL - Moved outside to work for both tags and placeholder */}
+        {hoveredPortal && createPortal(
+          <div 
+            className={`fixed z-[9999] w-max max-w-[320px] text-left p-5 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] pointer-events-none animate-in fade-in zoom-in-95 duration-100
+              ${hoveredPortal.showAbove ? '-translate-y-full' : ''}
+              ${theme === 'retro' ? 'bg-[#F9F7F1] border-[#1A1814] border' : 'bg-[#0a0a0a]/95 backdrop-blur-xl border-zinc-800 border'}`}
+            style={{ 
+              top: hoveredPortal.pos.top, 
+              left: hoveredPortal.pos.left
+            }}
+          >
+            <div className={`text-sm font-black uppercase tracking-[0.2em] mb-2 border-b pb-2 flex items-center gap-2 ${theme === 'retro' ? 'text-zinc-500 border-black/10' : 'text-zinc-500 border-white/10'}`}>
+              <span className={theme === 'retro' ? 'text-[#8B261D]' : accentTextColor}>
+                {hoveredPortal.header || libInfo.name || "DETAILS"}
+                {hoveredPortal.count !== undefined && hoveredPortal.count > 0 && (
+                  <span className={`ml-2 font-bold ${theme === 'retro' ? 'text-black' : 'text-white'}`}>({hoveredPortal.count})</span>
+                )}
+              </span>
+            </div>
+            <div className={`text-xs md:text-sm font-bold mb-3 leading-relaxed whitespace-pre-line ${theme === 'retro' ? 'text-black' : 'text-zinc-100'}`}>
+              {lang === 'EN' && hoveredPortal.details.defEn ? hoveredPortal.details.defEn : hoveredPortal.details.def}
+              <span className={`block text-[10px] italic mt-2 ${theme === 'retro' ? 'text-[#8B261D]/80' : 'text-zinc-400'}`}>
+                {lang === 'EN' && hoveredPortal.details.coreEn ? hoveredPortal.details.coreEn : hoveredPortal.details.core}
+              </span>
+            </div>
+          </div>,
+          document.body
         )}
 
         {/* COMMON EDIT MODAL */}
@@ -434,7 +427,7 @@ const SkinSlot: React.FC<{
         )}
       </span>
     );
-  };
+};
 
 export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
   fieldState,
@@ -481,6 +474,33 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
 
   // New state for modal in Narrative mode
   const [isTimeModalOpen, setIsTimeModalOpen] = useState(false);
+
+  // PORTAL TOOLTIP STATE (for Spacetime Anchor)
+  const [hoveredPortal, setHoveredPortal] = useState<{
+    pos: { top: number; left: number };
+    details: any;
+    showAbove?: boolean;
+    header?: string;
+    count?: number;
+  } | null>(null);
+
+  const handleMouseEnter = (e: React.MouseEvent, details: any, header?: string) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const showAbove = rect.bottom > window.innerHeight * 0.65;
+    setHoveredPortal({
+      pos: {
+        top: showAbove ? rect.top - 8 : rect.bottom + 8,
+        left: Math.min(rect.left, window.innerWidth - 320)
+      },
+      details,
+      showAbove,
+      header
+    });
+  };
+
+  const handleMouseLeave = () => {
+    setHoveredPortal(null);
+  };
 
   // Use lockedModules prop for checking lock state
   const isCountryLocked = lockedModules?.['skin_country_exact'] || false;
@@ -650,6 +670,10 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
 
   // Global Controls for the Modal
   const handleGlobalRandomizeCoordinates = () => {
+    // SUR3 XOR Logic: If randomizing coordinates (Dice), clear era
+    if (!lockedModules?.['skin_era'] && (fieldState['skin_era'] || []).length > 0) {
+      onUpdateState({ ...fieldState, skin_era: [] });
+    }
     if (!isCountryLocked) handleRandomCountry();
     if (!isYearLocked) handleRandomYear();
   };
@@ -671,15 +695,17 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
   const renderTimeLocationSlot = () => {
     const hasTimeOrLoc = selectedYear !== null || selectedCountry !== "";
     const displayText = selectedYear !== null
-      ? `${selectedCountry ? selectedCountry + " " : ""}(${selectedYear})`
-      : (selectedCountry ? `${selectedCountry} (AUTO)` : (lang === 'EN' ? "Spacetime Anchor" : "时空锚点"));
+      ? (lang === 'EN'
+        ? `${selectedYear}${selectedCountry ? ' ' + selectedCountry : ''}`
+        : `${selectedYear}年${selectedCountry}`)
+      : (selectedCountry ? `${selectedCountry} (AUTO)` : (lang === 'EN' ? "Country/Year" : "国家/年份"));
 
     const isLocked = isCountryLocked && isYearLocked;
 
     // BRIGHTER TEXT STYLE FOR PLACEHOLDERS
     const baseTextClass = "cursor-pointer transition-transform duration-300";
     const filledTextClass = `font-serif font-bold ${theme === 'retro' ? 'text-black border-b-2 border-[var(--text-accent)] hover:bg-black/5' : 'text-white border-b-2 border-gold-primary hover:bg-white/10'} px-0.5 hover:scale-110 hover:z-50 inline-block text-lg md:text-xl tracking-tight`;
-    const emptyTextClass = `font-serif font-medium border-b border-dashed hover:scale-110 hover:z-50 inline-block ${theme === 'retro' ? 'border-[var(--text-muted)] text-zinc-500 hover:text-black hover:bg-black/5' : 'border-zinc-800 text-zinc-500 hover:text-white hover:bg-white/10'} hover:border-zinc-500 text-sm`;
+    const emptyTextClass = `font-serif font-medium border-b border-dashed hover:scale-110 hover:z-50 inline-block ${theme === 'retro' ? 'border-[var(--text-muted)] text-zinc-500 hover:text-black hover:bg-black/5' : 'border-zinc-800 text-zinc-500 hover:text-white hover:bg-white/10'} hover:border-zinc-500 text-base`;
     const lockedTextClass = `border ${theme === 'retro' ? 'border-[var(--text-accent)] text-black bg-[var(--text-accent)]/10' : 'border-gold-primary text-gold-primary bg-amber-900/20'} px-2 rounded font-serif font-bold text-lg md:text-xl tracking-tight`;
 
     const wrapperAlign = "items-center";
@@ -689,12 +715,22 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
         <span className={`group/tag relative inline-flex flex-col ${wrapperAlign} align-top`}>
           <span
             onClick={() => setIsTimeModalOpen(true)}
+            onMouseEnter={(e) => {
+              const lib = getBlockLibInfo('skin_era');
+              handleMouseEnter(e, {
+                def: lib.description,
+                defEn: lib.descriptionEn,
+                core: lang === 'EN' ? "[Config Protocol] Click for spacetime coordinates." : "【配置协议】点击进入时空坐标映射面板。",
+                count: lib.count
+              }, lang === 'EN' ? "SUR3A.Coordinates" : "SUR3A.国家/年份");
+            }}
+            onMouseLeave={handleMouseLeave}
             className={`${baseTextClass} ${isLocked ? lockedTextClass : (hasTimeOrLoc ? filledTextClass : emptyTextClass)}`}
           >
             {hasTimeOrLoc ? displayText : (lang === 'EN' ? `[${displayText}]` : `【${displayText}】`)}
           </span>
 
-          <div className={`flex items-center gap-1 mt-1 z-10 ${theme === 'retro' ? 'bg-[var(--bg-panel)]' : 'bg-black/80'} rounded p-1 border shadow-md ${theme === 'retro' ? 'border-[var(--border-main)]/40' : 'border-zinc-800'}`}>
+          <div className={`flex items-center gap-1 mt-1 z-10 ${theme === 'retro' ? 'bg-[var(--bg-panel)]' : 'bg-black/80'} rounded p-1 border shadow-md ${theme === 'retro' ? 'border-[var(--border-main)]/40' : 'border-zinc-800'} opacity-0 group-hover/tag:opacity-100 transition-opacity duration-300`}>
             <button
               onClick={(e) => { e.stopPropagation(); handleGlobalRandomizeCoordinates(); }}
               disabled={isLocked}
@@ -733,134 +769,136 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
   };
 
   const renderTimeLocationUI = () => (
-    <div className="space-y-6">
-      {/* Global Controls */}
-      <div className={`flex justify-end gap-2 mb-4 border-b ${theme === 'retro' ? 'border-[var(--border-main)]/30' : 'border-zinc-800'} pb-4`}>
-        <span className={`text-[10px] ${theme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-500'} font-bold uppercase tracking-wider mr-auto self-center`}>
-          {lang === 'EN' ? "Global Controls" : "全局控制"}
-        </span>
-        <button onClick={handleGlobalRandomizeCoordinates} className={`p-1.5 rounded ${theme === 'retro' ? 'bg-[var(--bg-main)] border-[var(--border-main)]/50 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border border-zinc-800 hover:border-zinc-600 text-zinc-500 hover:text-white'} transition-all`}><Dice5 size={14} /></button>
-        <button onClick={handleGlobalToggleLockCoordinates} className={`p-1.5 rounded ${theme === 'retro' ? 'bg-[var(--bg-main)] border-[var(--border-main)]/50 transition-all ' + (isCountryLocked && isYearLocked ? 'text-[var(--text-accent)] border-[var(--text-accent)]/30' : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--border-main)]') : 'bg-zinc-900 border border-zinc-800 transition-all ' + (isCountryLocked && isYearLocked ? 'text-amber-500 border-amber-500/30' : 'text-zinc-500 hover:text-white hover:border-zinc-600')}`}>{isCountryLocked && isYearLocked ? <Lock size={14} /> : <Unlock size={14} />}</button>
-        <button onClick={handleGlobalResetCoordinates} className={`p-1.5 rounded ${theme === 'retro' ? 'bg-[var(--bg-main)] border-[var(--border-main)]/50 text-[var(--text-muted)] hover:text-red-700' : 'bg-zinc-900 border border-zinc-800 hover:border-red-500/50 text-zinc-500 hover:text-red-400'} transition-all`}><Trash2 size={14} /></button>
-      </div>
-
-      {/* Country Selector */}
-      <div className="space-y-1">
-        <div className="flex justify-between items-center mb-1">
-          <label className={`text-[10px] ${theme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-500'} font-bold uppercase tracking-wider flex items-center gap-2`}>
-            <MapPin size={12} /> {lang === 'EN' ? "Country / Region" : "国家/地区"}
-          </label>
-          <div className="flex gap-1">
-            <button onClick={handleRandomCountry} disabled={isCountryLocked} className={`p-1 rounded ${theme === 'retro' ? 'bg-[var(--bg-main)] border-[var(--border-main)]/50 text-[var(--text-muted)]' : 'bg-zinc-900 border border-zinc-800 text-zinc-500'} hover:${theme === 'retro' ? 'text-[var(--text-main)]' : 'border-zinc-600 text-white'} transition-all ${isCountryLocked ? 'opacity-30 cursor-not-allowed' : ''}`}><Dice5 size={10} /></button>
-            <button onClick={handleToggleLockCountry} className={`p-1 rounded ${theme === 'retro' ? 'bg-[var(--bg-main)] border-[var(--border-main)]/50' : 'bg-zinc-900 border border-zinc-800'} ${isCountryLocked ? (theme === 'retro' ? 'text-[var(--text-accent)] border-[var(--text-accent)]/30' : 'text-amber-500 border-amber-500/30') : (theme === 'retro' ? 'text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'text-zinc-500 hover:text-white hover:border-zinc-600')} transition-all`}>{isCountryLocked ? <Lock size={10} /> : <Unlock size={10} />}</button>
-            <button onClick={handleResetCountry} disabled={isCountryLocked} className={`p-1 rounded ${theme === 'retro' ? 'bg-[var(--bg-main)] border-[var(--border-main)]/50 text-[var(--text-muted)] hover:text-red-700' : 'bg-zinc-900 border border-zinc-800 text-zinc-500 hover:border-red-500/50 hover:text-red-400'} transition-all ${isCountryLocked ? 'opacity-30 cursor-not-allowed' : ''}`}><Trash2 size={10} /></button>
-          </div>
+    <div className="space-y-8 pb-2">
+      {/* SECTION 1: Exact Coordinates (SUR3A) */}
+      <section>
+        <div className={`flex items-center gap-2 mb-4 pb-2 border-b ${theme === 'retro' ? 'border-[var(--border-main)]/30' : 'border-zinc-700'}`}>
+          <MapPin size={14} className={theme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-400'} />
+          <span className={`text-xs font-black uppercase tracking-widest ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}`}>
+            {lang === 'EN' ? "Coordinates (SUR3A)" : "国家/年份 (SUR3A)"}
+          </span>
         </div>
 
-        <div className={`flex flex-row gap-0 rounded-lg border ${theme === 'retro' ? 'border-[var(--border-main)]/30' : 'border-zinc-800'} ${isCountryLocked ? 'bg-black/40 grayscale opacity-80' : (theme === 'retro' ? 'bg-[var(--bg-main)]' : 'bg-zinc-900/30')} h-9 overflow-hidden`}>
-          {/* Selected Side */}
-          <div className={`flex items-center justify-center border-r ${theme === 'retro' ? 'border-[var(--border-main)]/30 bg-[var(--bg-panel)]' : 'border-zinc-800 bg-zinc-900/50'} w-24 shrink-0 ${selectedCountry ? iconColor : (theme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-600')}`}>
+        <div className="space-y-6">
+          {/* Country Selector */}
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <span className={`text-[10px] ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-400'} font-bold uppercase tracking-wider`}>
+                {lang === 'EN' ? "Country / Region" : "国家与地区"}
+              </span>
+              <div className="flex gap-1">
+                <button onClick={handleRandomCountry} disabled={isCountryLocked} className={`p-1 rounded text-zinc-500 hover:text-white transition-all ${isCountryLocked ? 'opacity-30 cursor-not-allowed' : ''}`}><Dice5 size={10} /></button>
+                <button onClick={handleToggleLockCountry} className={`p-1 rounded transition-all ${isCountryLocked ? (theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-amber-500') : 'text-zinc-500 hover:text-white'}`}>{isCountryLocked ? <Lock size={10} /> : <Unlock size={10} />}</button>
+                <button onClick={handleResetCountry} disabled={isCountryLocked} className={`p-1 rounded text-zinc-500 hover:text-red-400 transition-all ${isCountryLocked ? 'opacity-30 cursor-not-allowed' : ''}`}><Trash2 size={10} /></button>
+              </div>
+            </div>
+
+            <div className={`flex flex-row gap-0 rounded-lg border ${theme === 'retro' ? 'border-[var(--border-main)]/30' : 'border-zinc-800'} ${isCountryLocked ? 'bg-black/40 grayscale opacity-80' : (theme === 'retro' ? 'bg-[var(--bg-main)]' : 'bg-zinc-900/30')} h-10 overflow-hidden`}>
+              {/* Selected Side */}
+              <div className={`flex items-center justify-center border-r ${theme === 'retro' ? 'border-[var(--border-main)]/30 bg-[var(--bg-panel)]' : 'border-zinc-800 bg-zinc-900/50'} w-28 shrink-0 ${selectedCountry ? iconColor : (theme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-600')}`}>
+                <input
+                  type="text"
+                  value={selectedCountry}
+                  onChange={(e) => !isCountryLocked && setSelectedCountry(e.target.value)}
+                  disabled={isCountryLocked}
+                  placeholder={lang === 'EN' ? "SELECT" : "自定义"}
+                  className={`w-full bg-transparent text-xs font-bold text-center truncate px-2 focus:outline-none placeholder-${theme === 'retro' ? '[var(--text-muted)]/50' : 'zinc-700'} ${theme === 'retro' ? 'text-[var(--text-main)]' : ''}`}
+                />
+              </div>
+
+              {/* List Side */}
+              <div className="flex-1 overflow-x-auto overflow-y-hidden custom-scrollbar p-1.5 flex items-center gap-1.5">
+                {COUNTRY_PRESETS.map(c => (
+                  <button
+                    key={c.cn}
+                    onClick={() => !isCountryLocked && setSelectedCountry(lang === 'EN' ? c.en : c.cn)}
+                    className={`shrink-0 px-2 py-1 text-[10px] rounded transition-all ${selectedCountry === (lang === 'EN' ? c.en : c.cn) ? (theme === 'retro' ? 'bg-[var(--text-accent)] text-white' : `bg-white text-black font-bold`) : (theme === 'retro' ? 'bg-[var(--bg-panel)] text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-800/50 text-zinc-400 hover:bg-zinc-700 hover:text-white')}`}
+                  >
+                    {lang === 'EN' ? c.en : c.cn}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Year Wheel / Slider */}
+          <div className={`space-y-4 ${isYearLocked ? 'grayscale opacity-50 pointer-events-none' : ''}`}>
+            <div className="flex justify-between items-center">
+              <span className={`text-[10px] ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-400'} font-bold uppercase tracking-wider`}>
+                {lang === 'EN' ? "Timeline" : "时间轴"}
+              </span>
+
+              <div className="flex gap-2 items-center">
+                <span className={`text-xl font-serif font-black ${isYearLocked ? (theme === 'retro' ? 'text-[var(--text-muted)]/50' : 'text-zinc-500') : iconColor}`}>
+                  {selectedYear === null ? (lang === 'EN' ? "AUTO" : "自动") : selectedYear}
+                </span>
+                <div className="flex gap-1 ml-2">
+                  <button onClick={handleRandomYear} disabled={isYearLocked} className={`p-1 rounded text-zinc-500 hover:text-white transition-all ${isYearLocked ? 'opacity-30 cursor-not-allowed' : ''}`}><Dice5 size={10} /></button>
+                  <button onClick={handleToggleLockYear} className={`p-1 rounded transition-all ${isYearLocked ? (theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-amber-500') : 'text-zinc-500 hover:text-white'}`}>{isYearLocked ? <Lock size={10} /> : <Unlock size={10} />}</button>
+                  <button onClick={handleResetYear} disabled={isYearLocked} className={`p-1 rounded text-zinc-500 hover:text-red-400 transition-all ${isYearLocked ? 'opacity-30 cursor-not-allowed' : ''}`}><Trash2 size={10} /></button>
+                </div>
+              </div>
+            </div>
+
             <input
-              type="text"
-              value={selectedCountry}
-              onChange={(e) => !isCountryLocked && setSelectedCountry(e.target.value)}
-              disabled={isCountryLocked}
-              placeholder={lang === 'EN' ? "SELECT" : "未选择"}
-              className={`w-full bg-transparent text-xs font-bold text-center truncate px-1 focus:outline-none placeholder-${theme === 'retro' ? '[var(--text-muted)]/50' : 'zinc-700'} ${theme === 'retro' ? 'text-[var(--text-main)]' : ''}`}
+              type="range"
+              min="-2000"
+              max="2050"
+              step="1"
+              value={selectedYear ?? 2026}
+              disabled={isYearLocked}
+              onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+              className={`w-full h-1.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)]' : 'bg-zinc-800'} rounded-lg appearance-none cursor-pointer ${isYearLocked ? 'cursor-not-allowed accent-zinc-600' : (theme === 'retro' ? 'accent-[var(--text-accent)] hover:accent-[var(--text-main)]' : 'accent-white hover:accent-gold-primary')}`}
             />
-          </div>
 
-          {/* List Side */}
-          <div className="flex-1 overflow-y-auto custom-scrollbar p-1">
-            <div className="grid grid-cols-4 gap-1">
-              {COUNTRY_PRESETS.map(c => (
-                <button
-                  key={c.cn}
-                  onClick={() => !isCountryLocked && setSelectedCountry(lang === 'EN' ? c.en : c.cn)}
-                  className={`px-1 py-0.5 text-[10px] rounded text-center truncate transition-all ${selectedCountry === (lang === 'EN' ? c.en : c.cn) ? (theme === 'retro' ? 'bg-[var(--text-accent)] text-white' : `bg-white text-black font-bold`) : (theme === 'retro' ? 'bg-[var(--bg-panel)] text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-800/50 text-zinc-400 hover:bg-zinc-700 hover:text-white')}`}
-                >
-                  {lang === 'EN' ? c.en : c.cn}
-                </button>
-              ))}
+            <div className={`flex justify-between items-center text-[9px] ${theme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-600'} font-mono`}>
+              <span>-2000</span>
+              <div className="flex gap-1">
+                <button onClick={() => !isYearLocked && setSelectedYear((prev) => (prev ?? 2026) - 10)} className={`px-2 py-1 ${theme === 'retro' ? 'bg-[var(--bg-panel)] text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'} rounded`}>-10</button>
+                <button onClick={() => !isYearLocked && setSelectedYear((prev) => (prev ?? 2026) - 1)} className={`px-2 py-1 ${theme === 'retro' ? 'bg-[var(--bg-panel)] text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'} rounded`}>-1</button>
+                <button onClick={handleSetNow} className={`px-2 py-1 ${theme === 'retro' ? 'bg-[var(--text-accent)]/10 text-[var(--text-accent)] font-bold' : 'bg-zinc-800 text-gold-primary hover:bg-zinc-700 font-bold'} rounded`}>Now</button>
+                <button onClick={() => !isYearLocked && setSelectedYear((prev) => (prev ?? 2026) + 1)} className={`px-2 py-1 ${theme === 'retro' ? 'bg-[var(--bg-panel)] text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'} rounded`}>+1</button>
+                <button onClick={() => !isYearLocked && setSelectedYear((prev) => (prev ?? 2026) + 10)} className={`px-2 py-1 ${theme === 'retro' ? 'bg-[var(--bg-panel)] text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'} rounded`}>+10</button>
+              </div>
+              <span>2050</span>
             </div>
+
+            {/* Context Display */}
+            {contextData ? (
+              <div className={`p-3 mt-2 rounded-lg border ${theme === 'retro' ? 'border-[var(--border-main)]/20 bg-[var(--bg-panel)]/50' : 'border-zinc-800/50 bg-zinc-900/30'}`}>
+                <div className="text-[10px] leading-relaxed mb-1">
+                  <span className={`${theme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-500'} font-bold`}>CN: </span>
+                  <span className={theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}>{lang === 'EN' ? contextData.cnEn : contextData.cn}</span>
+                </div>
+                <div className="text-[10px] leading-relaxed">
+                  <span className={`${theme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-500'} font-bold`}>WORLD: </span>
+                  <span className={theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}>{lang === 'EN' ? contextData.worldEn : contextData.world}</span>
+                </div>
+              </div>
+            ) : (
+              <div className={`text-[10px] ${theme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-600'} italic text-center mt-2 p-3 border border-transparent`}>
+                {lang === 'EN' ? "No historical data for this year." : "该年份暂无历史数据。"}
+              </div>
+            )}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Year Wheel / Slider */}
-      <div className={`space-y-4 ${isYearLocked ? 'grayscale opacity-50 pointer-events-none' : ''}`}>
-        <div className="flex justify-between items-center">
-          <label className={`text-[10px] ${theme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-500'} font-bold uppercase tracking-wider flex items-center gap-2`}>
-            <Calendar size={12} /> {lang === 'EN' ? "Timeline" : "时间轴"}
-          </label>
-
-          <div className="flex gap-2 items-center">
-            <span className={`text-2xl font-serif font-black ${isYearLocked ? (theme === 'retro' ? 'text-[var(--text-muted)]/50' : 'text-zinc-500') : iconColor}`}>
-              {selectedYear === null ? (lang === 'EN' ? "AUTO" : "自动") : selectedYear}
-            </span>
-            <div className="flex gap-1 ml-2">
-              <button onClick={handleRandomYear} disabled={isYearLocked} className={`p-1 rounded ${theme === 'retro' ? 'bg-[var(--bg-main)] border-[var(--border-main)]/50 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border border-zinc-800 text-zinc-500 hover:text-white'} transition-all ${isYearLocked ? 'opacity-30 cursor-not-allowed' : ''}`}><Dice5 size={10} /></button>
-              <button onClick={handleToggleLockYear} className={`p-1 rounded ${theme === 'retro' ? 'bg-[var(--bg-main)] border-[var(--border-main)]/50' : 'bg-zinc-900 border border-zinc-800'} ${isYearLocked ? (theme === 'retro' ? 'text-[var(--text-accent)] border-[var(--text-accent)]/30' : 'text-amber-500 border-amber-500/30') : (theme === 'retro' ? 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--border-main)]' : 'text-zinc-500 hover:text-white hover:border-zinc-600')} transition-all`}>{isYearLocked ? <Lock size={10} /> : <Unlock size={10} />}</button>
-              <button onClick={handleResetYear} disabled={isYearLocked} className={`p-1 rounded ${theme === 'retro' ? 'bg-[var(--bg-main)] border-[var(--border-main)]/50 text-[var(--text-muted)] hover:text-red-700' : 'bg-zinc-900 border border-zinc-800 text-zinc-500 hover:border-red-500/50 hover:text-red-400'} transition-all ${isYearLocked ? 'opacity-30            cursor-not-allowed' : ''}`}><Trash2 size={10} /></button>
-            </div>
-          </div>
+      {/* SECTION 2: Spacetime Field (SUR3B) */}
+      <section>
+        <div className={`flex items-center gap-2 mb-4 pb-2 border-b ${theme === 'retro' ? 'border-[var(--border-main)]/30' : 'border-zinc-700'}`}>
+          <Anchor size={14} className={theme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-400'} />
+          <span className={`text-xs font-black uppercase tracking-widest ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}`}>
+            {lang === 'EN' ? "Spacetime Field (SUR3B)" : "时空场域 (SUR3B)"}
+          </span>
         </div>
-
-        <input
-          type="range"
-          min="-2000"
-          max="2050"
-          step="1" // Default step
-          value={selectedYear ?? 2026}
-          disabled={isYearLocked}
-          onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-          className={`w-full h-1 ${theme === 'retro' ? 'bg-[var(--bg-panel)]' : 'bg-zinc-800'} rounded-lg appearance-none cursor-pointer ${isYearLocked ? 'cursor-not-allowed accent-zinc-600' : (theme === 'retro' ? 'accent-[var(--text-accent)] hover:accent-[var(--text-main)]' : 'accent-white hover:accent-gold-primary')}`}
-        />
-
-        <div className={`flex justify-between text-[9px] ${theme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-600'} font-mono`}>
-          <span>-2000</span>
-          <span>0</span>
-          <span>2050</span>
+        <div className={`p-4 rounded-lg border flex items-center justify-center font-serif text-lg ${theme === 'retro' ? 'border-[var(--border-main)]/30 bg-[var(--bg-panel)]' : 'border-zinc-800 bg-zinc-900/40 hover:bg-zinc-900'} transition-all min-h-[80px]`}>
+           <SkinSlot blockId="skin_era" placeholder={lang === 'EN' ? "Attach Field (Preset)" : "接入宏观时空场域"} isBlockLocked={lockedModules["skin_era"]} {...slotProps} />
         </div>
-
-        {/* Context Display */}
-        {contextData ? (
-          <div className={`grid grid-cols-1 gap-2 mt-2 pt-2 border-t ${theme === 'retro' ? 'border-[var(--border-main)]/20' : 'border-zinc-800/50'}`}>
-            <div className="text-[10px] leading-relaxed">
-              <span className={`${theme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-500'} font-bold`}>CN: </span>
-              <span className={theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}>{lang === 'EN' ? contextData.cnEn : contextData.cn}</span>
-            </div>
-            <div className="text-[10px] leading-relaxed">
-              <span className={`${theme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-500'} font-bold`}>WORLD: </span>
-              <span className={theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}>{lang === 'EN' ? contextData.worldEn : contextData.world}</span>
-            </div>
-          </div>
-        ) : (
-          <div className={`text-[10px] ${theme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-600'} italic text-center mt-2`}>
-            {lang === 'EN' ? "No historical data for this year." : "该年份暂无历史数据。"}
-          </div>
-        )}
-
-        <div className={`flex justify-center gap-2 mt-2 ${isYearLocked ? 'opacity-50 pointer-events-none' : ''}`}>
-          <button onClick={() => !isYearLocked && setSelectedYear((prev) => (prev ?? 2026) - 10)} className={`px-2 py-1 ${theme === 'retro' ? 'bg-[var(--bg-panel)] text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'} rounded text-[9px]`}>-10</button>
-          <button onClick={() => !isYearLocked && setSelectedYear((prev) => (prev ?? 2026) - 1)} className={`px-2 py-1 ${theme === 'retro' ? 'bg-[var(--bg-panel)] text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'} rounded text-[9px]`}>-1</button>
-          <button onClick={handleSetNow} className={`px-2 py-1 ${theme === 'retro' ? 'bg-[var(--bg-panel)] hover:bg-[var(--text-accent)]/10 text-[var(--text-accent)]' : 'bg-zinc-800 text-gold-primary hover:bg-zinc-700'} rounded text-[9px]`}>Now</button>
-          <button onClick={() => !isYearLocked && setSelectedYear((prev) => (prev ?? 2026) + 1)} className={`px-2 py-1 ${theme === 'retro' ? 'bg-[var(--bg-panel)] text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'} rounded text-[9px]`}>+1</button>
-          <button onClick={() => !isYearLocked && setSelectedYear((prev) => (prev ?? 2026) + 10)} className={`px-2 py-1 ${theme === 'retro' ? 'bg-[var(--bg-panel)] text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'} rounded text-[9px]`}>+10</button>
+        <div className={`text-[10px] mt-4 text-left leading-relaxed ${theme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-400'}`}>
+          {lang === 'EN' ? "Note: Specific coordinates and presets operate independently for precision control." : "注：微观坐标与宏观场域各自独立，双选时共同定义表层。全局随机时仅保留一项。"}
         </div>
-      </div>
-
-      {/* NEW: Spacetime Anchor Preset Group underneath Timeline */}
-      <div className={`space-y-4 pt-5 mt-4 border-t ${theme === 'retro' ? 'border-[var(--border-main)]/30' : 'border-zinc-800'}`}>
-        <div className="flex justify-between items-center mb-1">
-          <label className={`text-[10px] ${theme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-500'} font-bold uppercase tracking-wider flex items-center gap-2`}>
-            <Anchor size={12} /> {lang === 'EN' ? "Spacetime Anchor (Preset Group)" : "时空锚点 (预设组)"}
-          </label>
-        </div>
-        <div className={`font-serif text-[15px] ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}`}>
-           <SkinSlot blockId="skin_era" placeholder={lang === 'EN' ? "Anchor" : "时空锚点"} isBlockLocked={lockedModules["skin_era"]} {...slotProps} />
-        </div>
-      </div>
+      </section>
     </div>
   );
 
@@ -927,7 +965,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
           <div className="space-y-8">
             <section>
               <div className={`flex items-center gap-2 text-xs font-black uppercase tracking-widest border-b border-zinc-800 pb-1 mb-3 ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}`}>
-                <Anchor size={12} className={iconColor} /> {lang === 'EN' ? "01. STRATEGY BASE" : "01. 策略基石"}
+                <Anchor size={12} className={iconColor} /> {lang === 'EN' ? "STRATEGY BASE" : "策略基石"}
               </div>
               <div className={`leading-relaxed font-serif text-sm md:text-base ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}`}>
                 <span>{lang === 'EN' ? "Brand Status:" : "品牌现状处于"}</span>
@@ -940,7 +978,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
 
             <section>
               <div className={`flex items-center gap-2 text-xs font-black uppercase tracking-widest border-b border-zinc-800 pb-1 mb-3 ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}`}>
-                <Palette size={12} className={iconColor} /> {lang === 'EN' ? "02. VISUAL AESTHETICS" : "02. 视觉美学"}
+                <Palette size={12} className={iconColor} /> {lang === 'EN' ? "VISUAL AESTHETICS" : "视觉美学"}
               </div>
               <div className={`leading-relaxed font-serif text-sm md:text-base ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}`}>
                 <span>{lang === 'EN' ? "Style Ref:" : "参考"}</span> <SkinSlot blockId="comm_skin_auteur" placeholder={lang === 'EN' ? "Director" : "导演风格"} isBlockLocked={lockedModules["comm_skin_auteur"]} {...slotProps} /> <span>{lang === 'EN' ? ", " : "的语言，"}</span>
@@ -952,7 +990,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
 
             <section>
               <div className={`flex items-center gap-2 text-xs font-black uppercase tracking-widest border-b border-zinc-800 pb-1 mb-3 ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}`}>
-                <Box size={12} className={iconColor} /> {lang === 'EN' ? "03. PRODUCT CONTEXT" : "03. 产品场域"}
+                <Box size={12} className={iconColor} /> {lang === 'EN' ? "PRODUCT CONTEXT" : "产品场域"}
               </div>
               <div className={`leading-relaxed font-serif text-sm md:text-base ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}`}>
                 <span>{lang === 'EN' ? "Anchor:" : "产品锚定为"}</span> <SkinSlot blockId="comm_skin_anchor" placeholder={lang === 'EN' ? "Anchor" : "产品锚点"} isBlockLocked={lockedModules["comm_skin_anchor"]} {...slotProps} />
@@ -993,15 +1031,39 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
           <div className="space-y-6">
             <section className="group">
               <div className={`flex items-center gap-2 text-xs font-black uppercase tracking-widest border-b border-zinc-800 pb-1 mb-3 ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-500 group-hover:text-zinc-300'} transition-colors`}>
-                <Globe size={12} className={iconColor} /> {lang === 'EN' ? "1. NARRATIVE PANORAMA" : "1. 叙事全景摘要"}
+                <Globe size={12} className={iconColor} /> {lang === 'EN' ? "NARRATIVE PANORAMA" : "叙事全景摘要"}
               </div>
               <div className={`leading-loose font-serif text-[15px] ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-400'}`}>
                 <span>{lang === 'EN' ? "“In the " : "“在 "}</span>
-                {renderTimeLocationSlot()}
-                <span>{lang === 'EN' ? " era, a " : " 的 "}</span>
+                
+                {(() => {
+                  const hasA = selectedYear !== null || selectedCountry !== "";
+                  const hasB = (fieldState['skin_era'] || []).length > 0;
+                  
+                  if (!hasA && !hasB) {
+                    return (
+                      <span 
+                        onClick={() => setIsTimeModalOpen(true)}
+                        className={`cursor-pointer border-b border-dashed ${theme === 'retro' ? 'border-zinc-400 text-zinc-500' : 'border-zinc-800 text-zinc-500 hover:text-white'} transition-colors mx-1`}
+                      >
+                        {lang === 'EN' ? "Spacetime Anchor" : "时空锚点"}
+                      </span>
+                    );
+                  }
+                  
+                  return (
+                    <>
+                      {hasA && renderTimeLocationSlot()}
+                      {hasA && hasB && <span className="mx-1">{" "}</span>}
+                      {hasB && <SkinSlot blockId="skin_era" placeholder={lang === 'EN' ? "Anchor" : "时空锚点"} isBlockLocked={lockedModules["skin_era"]} {...slotProps} />}
+                    </>
+                  );
+                })()}
+
+                <span>{lang === 'EN' ? " world of " : " 的 "}</span>
                 <SkinSlot blockId="skin_animation_genre" placeholder={lang === 'EN' ? "World Motif" : "世界模体"} isBlockLocked={lockedModules["skin_animation_genre"]} {...slotProps} />
-                <span>{lang === 'EN' ? " world operating under " : " 世界中，运行于"}</span>
-                <SkinSlot blockId="sur4x" placeholder={lang === 'EN' ? "Social Resistance" : "物理阶层阻力"} isBlockLocked={lockedModules["sur4x"]} {...slotProps} />
+                <span>{lang === 'EN' ? " world, operating under " : " 世界中，运行于"}</span>
+                <SkinSlot blockId="sur4x" placeholder={lang === 'EN' ? "Resistance" : "物理阶层阻力"} isBlockLocked={lockedModules["sur4x"]} {...slotProps} />
                 <span>{lang === 'EN' ? " within a " : "下的"}</span>
                 <SkinSlot blockId="skin_society" placeholder={lang === 'EN' ? "Social Order" : "社会形态"} isBlockLocked={lockedModules["skin_society"]} {...slotProps} />
                 <span>{lang === 'EN' ? " society. A " : "之下 。 一个 "}</span>
@@ -1012,11 +1074,11 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
                 <span>{lang === 'EN' ? " (" : " ("}</span>
                 <SkinSlot blockId="skin_origin" placeholder={lang === 'EN' ? "Background" : "主体背景"} isBlockLocked={lockedModules["skin_origin"]} {...slotProps} />
                 <span>{lang === 'EN' ? "), holding a " : ")，抱着"}</span>
-                <SkinSlot blockId="sur11x" placeholder={lang === 'EN' ? "Symbolic Suture" : "象征界缝合度"} isBlockLocked={lockedModules["sur11x"]} {...slotProps} />
+                <SkinSlot blockId="sur11x" placeholder={lang === 'EN' ? "Suture" : "象征界缝合度"} isBlockLocked={lockedModules["sur11x"]} {...slotProps} />
                 <span>{lang === 'EN' ? " stance towards " : "的 "}</span>
                 <SkinSlot blockId="skin_ideology" placeholder={lang === 'EN' ? "Philosophy" : "哲学信念"} isBlockLocked={lockedModules["skin_ideology"]} {...slotProps} />
                 <span>{lang === 'EN' ? " ideas, and entangled with " : " 想法，并在与 "}</span>
-                <SkinSlot blockId="skin_everything" placeholder={lang === 'EN' ? "Everything" : "欲望锚点"} isBlockLocked={lockedModules["skin_everything"]} {...slotProps} />
+                <SkinSlot blockId="skin_everything" placeholder={lang === 'EN' ? "Anchor" : "欲望锚点"} isBlockLocked={lockedModules["skin_everything"]} {...slotProps} />
                 <span>{lang === 'EN' ? ", erupts into this " : " 的纠缠中，于 "}</span>
                 <SkinSlot blockId="skin_location" placeholder={lang === 'EN' ? "Scenes" : "空间场景"} isBlockLocked={lockedModules["skin_location"]} {...slotProps} />
                 <span>{lang === 'EN' ? " " : " 爆发了这场 "}</span>
@@ -1027,7 +1089,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
 
             <section className="group">
               <div className={`flex items-center gap-2 text-xs font-black uppercase tracking-widest border-b border-zinc-800 pb-1 mb-3 ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-500 group-hover:text-zinc-300'} transition-colors`}>
-                <Settings2 size={12} className={iconColor} /> {lang === 'EN' ? "2. NARRATIVE BOUNDARIES" : "2. 叙事物理边界"}
+                <Settings2 size={12} className={iconColor} /> {lang === 'EN' ? "NARRATIVE BOUNDARIES" : "叙事物理边界"}
               </div>
               <div className={`leading-loose font-serif text-[15px] ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-400'}`}>
                 <div className="mb-3 text-xs italic opacity-70">
@@ -1057,32 +1119,84 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
       {/* TIME LOCATION MODAL */}
       {isTimeModalOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/95 backdrop-blur-xl animate-in fade-in duration-300 p-4">
-          <div className={`w-full max-w-lg ${theme === 'retro' ? 'bg-[var(--bg-panel)]' : 'bg-[#0c0c0c]'} border border-[var(--border-main)] rounded-2xl shadow-2xl p-6 relative`}>
-            <button onClick={() => setIsTimeModalOpen(false)} className="absolute top-4 right-4 text-zinc-400 hover:text-white transition-colors">
+          <div className={`w-full max-w-lg ${theme === 'retro' ? 'bg-[var(--bg-panel)]' : 'bg-[#0c0c0c]'} border border-[var(--border-main)] rounded-2xl shadow-2xl p-6 relative flex flex-col max-h-[95vh]`}>
+            <button onClick={() => setIsTimeModalOpen(false)} className="absolute top-4 right-4 text-zinc-400 hover:text-white transition-colors z-10">
               <X size={20} />
             </button>
-            <div className={`flex items-center gap-3 mb-6 border-b ${theme === 'retro' ? 'border-[var(--border-main)]/30' : 'border-zinc-800'} pb-4`}>
-              <Globe size={20} className="text-gold-primary" />
-              <h2 className={`text-lg font-serif font-bold ${theme === 'retro' ? 'text-gold-primary' : 'text-white'} tracking-wider`}>{lang === 'EN' ? "SUR3.Coordinates" : "SUR3.国家/年份"}</h2>
+            <div className={`flex items-center gap-3 mb-6 border-b ${theme === 'retro' ? 'border-[var(--border-main)]/30' : 'border-zinc-800'} pb-4 shrink-0`}>
+              <Globe size={20} className={iconColor} />
+              <h2 className={`text-lg font-serif font-bold ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-white'} tracking-wider`}>{lang === 'EN' ? "SUR3.Spacetime Coordinate System" : "SUR3.时空坐标系"}</h2>
             </div>
 
-            {renderTimeLocationUI()}
+            <div className="overflow-y-auto custom-scrollbar flex-1 pr-1">
+              {renderTimeLocationUI()}
+            </div>
 
-            <div className="mt-8 flex justify-between">
-              <div className="flex gap-2">
-                <button onClick={handleGlobalToggleLockCoordinates} className={`px-3 py-2 rounded ${theme === 'retro' ? 'bg-[var(--bg-main)] border-[var(--border-main)]/40' : 'bg-zinc-900 border border-zinc-800'} transition-all ${isCountryLocked && isYearLocked ? (theme === 'retro' ? 'text-[var(--text-accent)] border-[var(--text-accent)]/30' : 'text-amber-500 border-amber-500/30') : (theme === 'retro' ? 'text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'text-zinc-500 hover:text-white hover:border-zinc-600')}`}>{isCountryLocked && isYearLocked ? <Lock size={14} /> : <Unlock size={14} />}</button>
-                <button onClick={handleGlobalResetCoordinates} className={`px-3 py-2 rounded ${theme === 'retro' ? 'bg-[var(--bg-main)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-red-700' : 'bg-zinc-900 border border-zinc-800 hover:border-red-500/50 text-zinc-500 hover:text-red-400'} transition-all`}><Trash2 size={14} /></button>
+            <div className={`mt-6 pt-5 border-t flex justify-between shrink-0 ${theme === 'retro' ? 'border-[var(--border-main)]/30' : 'border-zinc-800'}`}>
+              <div className="flex gap-2 items-center">
+                <button 
+                  onClick={handleGlobalRandomizeCoordinates} 
+                  className={`px-3 py-2 h-9 rounded flex items-center gap-2 ${theme === 'retro' ? 'bg-[var(--bg-main)] border border-[var(--border-main)]/40 hover:text-[var(--text-main)] text-[var(--text-muted)]' : 'bg-zinc-900 border border-zinc-800 hover:border-zinc-600 text-zinc-500 hover:text-white'} transition-all`} 
+                  title={lang === 'EN' ? 'Global Randomize' : '全局随机'}
+                >
+                  <Dice5 size={14} />
+                  <span className="text-[10px] font-bold uppercase hidden sm:inline">{lang === 'EN' ? "Random" : "全随机"}</span>
+                </button>
+                <button 
+                  onClick={handleGlobalToggleLockCoordinates} 
+                  className={`px-3 py-2 h-9 rounded flex items-center gap-2 ${theme === 'retro' ? 'bg-[var(--bg-main)] border border-[var(--border-main)]/40' : 'bg-zinc-900 border border-zinc-800'} transition-all ${isCountryLocked && isYearLocked ? (theme === 'retro' ? 'text-[var(--text-accent)] border-[var(--text-accent)]/30' : 'text-amber-500 border-amber-500/30') : (theme === 'retro' ? 'text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'text-zinc-500 hover:text-white hover:border-zinc-600')}`} 
+                  title={lang === 'EN' ? 'Global Lock' : '全局锁定'}
+                >
+                  {isCountryLocked && isYearLocked ? <Lock size={14} /> : <Unlock size={14} />}
+                </button>
+                <button 
+                  onClick={handleGlobalResetCoordinates} 
+                  className={`px-3 py-2 h-9 rounded flex items-center gap-2 ${theme === 'retro' ? 'bg-[var(--bg-main)] border border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-red-700' : 'bg-zinc-900 border border-zinc-800 hover:border-red-500/50 text-zinc-500 hover:text-red-400'} transition-all`} 
+                  title={lang === 'EN' ? 'Global Clear' : '全局清空'}
+                >
+                  <Trash2 size={14} />
+                </button>
               </div>
+              
               <button
                 onClick={() => setIsTimeModalOpen(false)}
-                className={`px-8 py-3 ${theme === 'retro' ? 'bg-[var(--text-accent)] text-white hover:bg-opacity-90 shadow-[0_0_20px_rgba(139,38,29,0.15)] underline decoration-white/30 underline-offset-4' : 'bg-white hover:bg-zinc-200 text-black shadow-lg shadow-white/5'} font-bold uppercase tracking-widest rounded transition-colors text-xs flex items-center gap-2`}
+                className={`px-8 h-9 ${theme === 'retro' ? 'bg-[var(--text-accent)] text-white hover:bg-opacity-90 shadow-[0_0_20px_rgba(139,38,29,0.15)] underline decoration-white/30 underline-offset-4' : 'bg-white hover:bg-zinc-200 text-black shadow-lg shadow-white/5'} font-bold uppercase tracking-widest rounded transition-colors text-xs flex items-center gap-2`}
               >
                 <Check size={14} />
-                {lang === 'EN' ? "CONFIRM" : "确认坐标"}
+                {lang === 'EN' ? "CONFIRM" : "确认设定"}
               </button>
             </div>
           </div>
         </div>
+      )}
+
+      {/* PORTAL TOOLTIP FOR SPACETIME ANCHOR */}
+      {hoveredPortal && createPortal(
+        <div 
+          className={`fixed z-[9999] w-max max-w-[320px] text-left p-5 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] pointer-events-none animate-in fade-in zoom-in-95 duration-100
+            ${hoveredPortal.showAbove ? '-translate-y-full' : ''}
+            ${theme === 'retro' ? 'bg-[#F9F7F1] border-[#1A1814] border' : 'bg-[#0a0a0a]/95 backdrop-blur-xl border-zinc-800 border'}`}
+          style={{ 
+            top: hoveredPortal.pos.top, 
+            left: hoveredPortal.pos.left
+          }}
+        >
+          <div className={`text-sm font-black uppercase tracking-[0.2em] mb-2 border-b pb-2 flex items-center gap-2 ${theme === 'retro' ? 'text-zinc-500 border-black/10' : 'text-zinc-500 border-white/10'}`}>
+            <span className={theme === 'retro' ? 'text-[#8B261D]' : iconColor}>
+              {hoveredPortal.header || "DETAILS"}
+              {hoveredPortal.count !== undefined && hoveredPortal.count > 0 && (
+                <span className={`ml-2 font-bold ${theme === 'retro' ? 'text-black' : 'text-white'}`}>({hoveredPortal.count})</span>
+              )}
+            </span>
+          </div>
+          <div className={`text-xs md:text-sm font-bold mb-3 leading-relaxed whitespace-pre-line ${theme === 'retro' ? 'text-black' : 'text-zinc-100'}`}>
+            {lang === 'EN' && hoveredPortal.details.defEn ? hoveredPortal.details.defEn : hoveredPortal.details.def}
+            <span className={`block text-[10px] italic mt-2 ${theme === 'retro' ? 'text-[#8B261D]/80' : 'text-zinc-400'}`}>
+              {lang === 'EN' && hoveredPortal.details.coreEn ? hoveredPortal.details.coreEn : hoveredPortal.details.core}
+            </span>
+          </div>
+        </div>,
+        document.body
       )}
     </div>
   );

@@ -36,6 +36,50 @@ interface School {
 
 const PHILOSOPHY_SCHOOLS: School[] = [
   {
+    id: 'german-idealism',
+    name: '德国古典哲学',
+    nameEn: 'German Idealism',
+    period: '1780-1840',
+    color: '#D4AF37',
+    description: '强调思维与存在、主体与客体的辩证同一，通过精神的自我运作达到绝对真理。',
+    descriptionEn: 'Emphasizes the dialectical identity of thought and being, subject and object, reaching absolute truth through the operation of spirit.',
+    keyIdeas: ['绝对精神', '扬弃(Aufhebung)', '主奴辩证法', '实体即主体'],
+    keyIdeasEn: ['Absolute Spirit', 'Aufhebung', 'Master-Slave Dialectic', 'Substance as Subject'],
+    philosophers: [
+      { id: 'hegel', name: '黑格尔', nameEn: 'G.W.F. Hegel', years: '1770-1831', school: 'german-idealism', color: '#D4AF37' },
+      { id: 'kant', name: '康德', nameEn: 'Immanuel Kant', years: '1724-1804', school: 'german-idealism', color: '#D4AF37' }
+    ],
+    works: [
+      { title: '精神现象学', titleEn: 'Phenomenology of Spirit', year: 1807 },
+      { title: '逻辑学', titleEn: 'Science of Logic', year: 1812 },
+      { title: '法哲学原理', titleEn: 'Elements of the Philosophy of Right', year: 1820 }
+    ],
+    influences: [],
+    conflicts: ['logical-positivism']
+  },
+  {
+    id: 'marxism',
+    name: '马克思主义',
+    nameEn: 'Marxism',
+    period: '1840-present',
+    color: '#E63946',
+    description: '通过唯物辩证法批判资本主义生产关系，揭示阶级斗争作为历史发展的动力。',
+    descriptionEn: 'Critiques capitalist production relations through materialist dialectics, revealing class struggle as the engine of history.',
+    keyIdeas: ['历史唯物主义', '剥削', '异化劳动', '阶级斗争'],
+    keyIdeasEn: ['Historical Materialism', 'Exploitation', 'Alienated Labor', 'Class Struggle'],
+    philosophers: [
+      { id: 'marx', name: '马克思', nameEn: 'Karl Marx', years: '1818-1883', school: 'marxism', color: '#E63946' },
+      { id: 'engels', name: '恩格斯', nameEn: 'Friedrich Engels', years: '1820-1895', school: 'marxism', color: '#E63946' }
+    ],
+    works: [
+      { title: '1844年经济学哲学手稿', titleEn: 'Economic and Philosophic Manuscripts of 1844', year: 1844 },
+      { title: '共产党宣言', titleEn: 'The Communist Manifesto', year: 1848 },
+      { title: '资本论', titleEn: 'Das Kapital', year: 1867 }
+    ],
+    influences: ['german-idealism'],
+    conflicts: ['structuralism']
+  },
+  {
     id: 'phenomenology',
     name: '现象学',
     nameEn: 'Phenomenology',
@@ -55,7 +99,7 @@ const PHILOSOPHY_SCHOOLS: School[] = [
       { title: '存在与时间', titleEn: 'Being and Time', year: 1927 },
       { title: '知觉现象学', titleEn: 'Phenomenology of Perception', year: 1945 }
     ],
-    influences: [],
+    influences: ['german-idealism'],
     conflicts: ['logical-positivism']
   },
   {
@@ -147,7 +191,7 @@ const PHILOSOPHY_SCHOOLS: School[] = [
       { title: '文集', titleEn: 'Écrits', year: 1966 },
       { title: '意识形态的崇高客体', titleEn: 'The Sublime Object of Ideology', year: 1989 }
     ],
-    influences: ['phenomenology'],
+    influences: ['phenomenology', 'german-idealism'],
     conflicts: []
   },
   {
@@ -170,7 +214,7 @@ const PHILOSOPHY_SCHOOLS: School[] = [
       { title: '否定辩证法', titleEn: 'Negative Dialectics', year: 1966 },
       { title: '交往行动理论', titleEn: 'Theory of Communicative Action', year: 1981 }
     ],
-    influences: [],
+    influences: ['marxism', 'german-idealism'],
     conflicts: ['logical-positivism']
   },
   {

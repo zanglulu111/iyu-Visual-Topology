@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ArrowLeft, Settings2, PenTool, Anchor, Undo2, Redo2, User as UserIcon, Ghost, Box, Sparkles, Check, Terminal, Activity, ListTodo, RotateCcw, RotateCw, ChevronRight, Zap, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Settings2, PenTool, Anchor, Scale, Undo2, Redo2, User as UserIcon, Ghost, Box, Sparkles, Check, Terminal, Activity, ListTodo, RotateCcw, RotateCw, ChevronRight, Zap, MessageSquare } from 'lucide-react';
 import { DriverType, WorldLawConfig } from '../types';
 import { FooterActions } from './FooterActions';
 import { ProcessingTimer } from './SharedBlueprintComponents';
@@ -42,6 +42,7 @@ interface EngineBottomBarProps {
     isTaskManagerOpen: boolean;
     setIsTaskManagerOpen: (v: boolean) => void;
     isWorldLawOpen: boolean;
+    setWorldLawConfig: (config: WorldLawConfig) => void;
 }
 
 export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
@@ -77,10 +78,12 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
     onRandomizeBlock,
     onClearBlock,
     isTaskManagerOpen,
-    setIsTaskManagerOpen
+    setIsTaskManagerOpen,
+    setWorldLawConfig
 }) => {
     const { theme } = useTheme();
     const [activeTaskCount, setActiveTaskCount] = React.useState(0);
+    const [hoveredGravity, setHoveredGravity] = React.useState<number | null>(null);
 
     React.useEffect(() => {
         const unsubscribe = globalTaskManager.subscribe(tasks => {
@@ -132,7 +135,7 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
                     <span className="hidden md:inline">{lang === 'CN' ? "返回首页" : "Home"}</span>
                 </button>
             </div>
-            <div className="flex-1 flex justify-center items-center gap-4 md:gap-6 mx-4 overflow-x-auto no-scrollbar">
+            <div className="flex-1 flex justify-center items-center gap-4 md:gap-6 mx-4">
 
                 {selectedDriver !== DriverType.AESTHETIC && (
                     <button onClick={() => setIsSkinOpen(!isSkinOpen)} className="flex flex-col items-center gap-1.5 shrink-0 min-w-[60px] group transition-all duration-300 hover:scale-105 active:scale-95" >
@@ -149,10 +152,97 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
                     </span>
                 </button>
 
-                <button onClick={() => setIsWorldLawOpen(true)} className="flex flex-col items-center gap-1.5 shrink-0 min-w-[60px] group transition-all duration-300 hover:scale-105 active:scale-95" >
-                    <Anchor size={18} className={isWorldLawOpen || worldLawConfig.physics === 'UNBOUND' ? getThemeTextColor() : (theme === 'retro' ? "text-zinc-600 group-hover:text-black transition-colors" : "text-zinc-400 group-hover:text-white transition-colors")} />
-                    <span className={`text-[9px] font-bold uppercase tracking-wider transition-colors ${isWorldLawOpen || worldLawConfig.physics === 'UNBOUND' ? getThemeTextColor() : (theme === 'retro' ? "text-zinc-600 group-hover:text-black" : "text-zinc-400 group-hover:text-white")}`}>{lang === 'CN' ? "世界法则" : "Law"}</span>
-                </button>
+                <div className="relative flex flex-col items-center">
+                    {/* Inline Expander - Horizontal Row above */}
+                    {isWorldLawOpen && (
+                        <div className="absolute bottom-[calc(100%+16px)] flex flex-col items-center gap-2 animate-in slide-in-from-bottom-4 fade-in duration-300 z-[100]">
+                            {/* Description Box - Matched with NarrativeEngineField Tooltip style */}
+                            <div className={`p-5 rounded-xl min-w-[300px] max-w-[320px] text-left shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-hidden backdrop-blur-xl border
+                                ${theme === 'retro' ? 'bg-[#F9F7F1] border-[#1A1814]' : 'bg-[#0a0a0a]/95 border-zinc-800'}`}>
+                                <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none"></div>
+                                {(() => {
+                                    const levels = [
+                                        { val: 1, cn: '写实', desc: '物理重力闭锁。严禁任何违法时代背景的物理常数。没有任何奇迹，死亡是绝对的，重力是必然的。' },
+                                        { val: 2, cn: '合理', desc: '逻辑补完路径。超现实元素必须被赋予一个“科学或机械”的合理解释。' },
+                                        { val: 3, cn: '缝合', desc: '魔幻现实主义。以现实为底，允许局部“缝合”超现实能指（即症状）。' },
+                                        { val: 4, cn: '奇观', desc: '高概念幻想。科幻/魔幻逻辑公开运行，但需要基本的内部一致性。' },
+                                        { val: 5, cn: '狂想', desc: '绝对无重力。允许所有标签无视物理常数进行疯狂拼贴、大杂烩。' }
+                                    ];
+                                    const activeVal = hoveredGravity || worldLawConfig.gravity;
+                                    const current = levels.find(l => l.val === activeVal);
+                                    return (
+                                        <div className="flex flex-col relative z-10">
+                                            <div className={`text-sm font-black uppercase tracking-[0.2em] mb-2 border-b pb-2 ${theme === 'retro' ? 'text-zinc-500 border-black/10' : 'text-zinc-500 border-white/10'}`}>
+                                                <span className={theme === 'retro' ? 'text-[#8B261D]' : 'text-gold-primary'}>
+                                                    LV.{current?.val} {current?.cn}
+                                                </span>
+                                            </div>
+                                            <div className={`text-[13px] font-bold leading-relaxed ${theme === 'retro' ? 'text-black' : 'text-zinc-100'}`}>
+                                                {current?.desc}
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
+                            </div>
+
+                            {/* 5-Button Row */}
+                            <div className="flex items-center gap-2 bg-black/80 backdrop-blur-xl border border-white/10 rounded-full px-4 py-3 shadow-2xl">
+                                {[1, 2, 3, 4, 5].map((val) => {
+                                    const level = [
+                                        { val: 1, cn: '写实' },
+                                        { val: 2, cn: '合理' },
+                                        { val: 3, cn: '缝合' },
+                                        { val: 4, cn: '奇观' },
+                                        { val: 5, cn: '狂想' }
+                                    ].find(l => l.val === val);
+                                    
+                                    return (
+                                        <button
+                                            key={val}
+                                            onMouseEnter={() => setHoveredGravity(val)}
+                                            onMouseLeave={() => setHoveredGravity(null)}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setWorldLawConfig({ gravity: val as any });
+                                                setIsWorldLawOpen(false);
+                                            }}
+                                            className={`w-12 h-12 rounded-full text-[10px] font-black transition-all flex flex-col items-center justify-center border-2 ${
+                                                worldLawConfig.gravity === val 
+                                                    ? (theme === 'retro' ? 'bg-[#8B261D] border-[#8B261D] text-white scale-110 shadow-[0_0_15px_rgba(139,38,29,0.5)]' : 'bg-gold-primary border-gold-primary text-black scale-110 shadow-[0_0_15px_rgba(212,175,55,0.5)]') 
+                                                    : 'bg-white/5 border-white/10 text-zinc-500 hover:text-white hover:border-white/30 hover:bg-white/10'
+                                            }`}
+                                        >
+                                            <span className="opacity-50 text-[8px] mb-0.5">LV{val}</span>
+                                            <span>{level?.cn}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+
+                    <button 
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setIsWorldLawOpen(!isWorldLawOpen);
+                        }} 
+                        className="flex flex-col items-center gap-1.5 shrink-0 min-w-[70px] group transition-all duration-300 hover:scale-105 active:scale-95" 
+                    >
+                        <Scale size={18} className={getThemeTextColor()} />
+                        <span className={`text-[10px] font-black uppercase tracking-widest transition-colors ${getThemeTextColor()}`}>
+                            {(() => {
+                                const level = [
+                                    { val: 1, cn: '写实' },
+                                    { val: 2, cn: '合理' },
+                                    { val: 3, cn: '缝合' },
+                                    { val: 4, cn: '奇观' },
+                                    { val: 5, cn: '狂想' }
+                                ].find(l => l.val === worldLawConfig.gravity);
+                                return level?.cn || (lang === 'CN' ? "世界法则" : "LAW");
+                            })()}
+                        </span>
+                    </button>
+                </div>
 
                 <div className="w-px h-8 bg-[var(--border-main)] shrink-0"></div>
                 {selectedDriver === DriverType.AESTHETIC && (

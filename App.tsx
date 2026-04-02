@@ -8,7 +8,6 @@ import { AnalysisView } from './components/blueprint/AnalysisView';
 import { HistoryModal } from './components/HistoryModal';
 import { NarrativePathsView } from './components/NarrativePathsView';
 import { ProductManualModal } from './components/ProductManualModal';
-import { WorldLawModal } from './components/WorldLawModal';
 import { SutureModal } from './components/SutureModal';
 import { NarrativeLibraryModal } from './components/NarrativeLibraryModal';
 import { MetonymyView } from './components/blueprint/MetonymyView';
@@ -54,13 +53,13 @@ import * as randomizerService from './services/randomizer';
 
 // 创建 React Query 客户端
 const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: Infinity, // 哲学内容不会变化，永久缓存
-      gcTime: 1000 * 60 * 60 * 24, // 24小时后清理
-      retry: 1,
+    defaultOptions: {
+        queries: {
+            staleTime: Infinity, // 哲学内容不会变化，永久缓存
+            gcTime: 1000 * 60 * 60 * 24, // 24小时后清理
+            retry: 1,
+        },
     },
-  },
 });
 import { supabase } from './services/supabaseAuth';
 import { generateGlobalDump } from './utils/exportUtils';
@@ -105,7 +104,7 @@ const App: React.FC = () => {
     const [lockedTags, setLockedTags] = useState<Record<string, string[]>>({});
     const [narrativeFieldState, setNarrativeFieldState] = useState<NarrativeFieldState>({});
     const [savedFieldStates, setSavedFieldStates] = useState<Record<string, NarrativeFieldState>>({});
-    const [worldLawConfig, setWorldLawConfig] = useState<WorldLawConfig>({ physics: 'STRICT', context: 'PURE' });
+    const [worldLawConfig, setWorldLawConfig] = useState<WorldLawConfig>({ gravity: 4 });
     const [showRings, setShowRings] = useState(true);
 
     // FIXED: Always maintain 7 slots
@@ -447,7 +446,7 @@ const App: React.FC = () => {
         setGeneratedTreatments([]);
         setActiveBlueprint(null);
         setCachedBlueprints({});
-        setWorldLawConfig({ physics: 'STRICT', context: 'PURE' });
+        setWorldLawConfig({ gravity: 3 });
 
         // All modes: close sidebars by default as per user request
         setIsSkinOpen(false);
@@ -787,6 +786,12 @@ const App: React.FC = () => {
         }
 
         if (category && category.items.length > 0) {
+            // XOR Logic: If randomizing era (SUR3B), clear coordinates (SUR3A).
+            if (blockId === 'skin_era') {
+                if (!lockedModules['skin_year_exact']) newState['skin_year_exact'] = [];
+                if (!lockedModules['skin_country_exact']) newState['skin_country_exact'] = [];
+            }
+
             // Apply Archetype Filtering
             const currentEraTags = newState['skin_era'] || [];
             const currentEra = currentEraTags.length > 0 ? currentEraTags[0] : "";
@@ -794,7 +799,6 @@ const App: React.FC = () => {
 
             let availableItems = category.items;
             if (blockId === 'skin_location' || blockId === 'skin_profession' || blockId === 'skin_society' || blockId === 'skin_ideology' || blockId === 'comm_skin_scenario' || blockId === 'engine_m1' || blockId === 'skin_origin') {
-                // Note: filterItemsByArchetype needs to be imported or duplicated. Using the service one.
                 availableItems = randomizerService.filterItemsByArchetype(category.items, archetype, blockId);
                 if (availableItems.length === 0) availableItems = category.items;
             }
@@ -892,7 +896,8 @@ const App: React.FC = () => {
         }
 
         if (limit === 1) {
-            newState[blockId] = current.includes(tag) ? [] : [tag];
+            const isTogglingOn = !current.includes(tag);
+            newState[blockId] = isTogglingOn ? [tag] : [];
             updateNarrativeState(newState);
             return;
         }
@@ -1170,234 +1175,99 @@ const App: React.FC = () => {
     return (
         <QueryClientProvider client={queryClient}>
             <div className="min-h-screen bg-[var(--bg-main)] text-zinc-300 font-sans selection:bg-gold-primary/30 selection:text-white overflow-hidden transition-colors duration-1000">
-            {page === -1 ? (
-                <UniversePortal
-                    lang={lang}
-                    setLang={setLang}
-                    setPage={setPage}
-                    setViewMode={handleViewChange}
-                    setInitialProtocol={setInitialProtocol}
-                    currentUser={currentUser}
-                    openAuth={openAuth}
-                    openSettings={openSettings}
-                    openProfile={() => setIsProfileOpen(true)}
-                    openManual={openManual}
-                />
-            ) : page === 2 ? (
-                <GlobalHomePage
-                    lang={lang}
-                    setLang={setLang}
-                    setPage={setPage}
-                    setViewMode={handleViewChange}
-                    setInitialProtocol={setInitialProtocol}
-                    currentUser={currentUser}
-                    openAuth={openAuth}
-                    openProfile={() => setIsProfileOpen(true)}
-                    showRings={showRings}
-                    setShowRings={setShowRings}
-                />
-            ) : page === 0 ? (
-                <LandingView
-                    lang={lang}
-                    setLang={setLang}
-                    setPage={setPage}
-                    setViewMode={handleViewChange}
-                    selectedDriver={selectedDriver}
-                    onDriverSelect={handleDriverSelect}
-                    hoveredDriver={hoveredDriver}
-                    setHoveredDriver={setHoveredDriver}
-                    handleOpenMetonymyPage={() => {
-                        setPage(1);
-                        handleOpenMetonymyPage();
-                    }}
-                    openManual={openManual}
-                    isManualOpen={isManualOpen}
-                    closeManual={() => setIsManualOpen(false)}
-                    openHistory={openHistory}
-                    isHistoryOpen={isHistoryOpen}
-                    openAuth={openAuth}
-                    openProfile={() => setIsProfileOpen(true)}
-                    onLogout={() => supabaseAuthService.signOut()}
-                    currentUser={currentUser}
-                    closeHistory={closeHistory}
-                    isSutureOpen={isSutureOpen}
-                    closeSuture={() => setIsSutureOpen(false)}
-                    onSutureGenerate={handleSutureGenerate}
-                    isSutureGenerating={isSutureGenerating}
-                    history={history}
-                    onHistoryRestore={onHistoryRestore}
-                    onHistoryClear={onHistoryClear}
-                    openSettings={openSettings}
-                    showRings={showRings}
-                    setShowRings={setShowRings}
-                    initialProtocol={initialProtocol}
-                />
-            ) : viewMode === 'DICTIONARY' ? (
-                        <div className="h-screen w-screen overflow-hidden animate-page-dissolve">
-                            <PhilosophyCodexPage
-                                onClose={() => setPage(-1)}
-                                driverType={selectedDriver}
-                                lang={lang}
-                                currentUser={currentUser}
-                                setLang={setLang}
-                                openHistory={openHistory}
-                                openSettings={openSettings}
-                                openAuth={openAuth}
-                                openProfile={() => setIsProfileOpen(true)}
-                                showRings={showRings}
-                                setShowRings={setShowRings}
-                                setViewMode={handleViewChange}
-                                renderInPlace={false}
-                                initialDictionary={codexDictionary}
-                                initialSection={codexSection as any}
-                                initialDetailTab={codexDetailTab}
-                                onDictionaryChange={setCodexDictionary}
-                                onSectionChange={setCodexSection}
-                                onDetailTabChange={setCodexDetailTab}
-                            />
-                        </div>
-            ) : viewMode === 'TOPOLOGY' ? (
-                <div className="h-screen w-screen overflow-hidden animate-page-dissolve">
-                    <LacanGraphView
+                {page === -1 ? (
+                    <UniversePortal
                         lang={lang}
                         setLang={setLang}
-                        onClose={() => {
-                            setViewMode('DICTIONARY');
+                        setPage={setPage}
+                        setViewMode={handleViewChange}
+                        setInitialProtocol={setInitialProtocol}
+                        currentUser={currentUser}
+                        openAuth={openAuth}
+                        openSettings={openSettings}
+                        openProfile={() => setIsProfileOpen(true)}
+                        openManual={openManual}
+                    />
+                ) : page === 2 ? (
+                    <GlobalHomePage
+                        lang={lang}
+                        setLang={setLang}
+                        setPage={setPage}
+                        setViewMode={handleViewChange}
+                        setInitialProtocol={setInitialProtocol}
+                        currentUser={currentUser}
+                        openAuth={openAuth}
+                        openProfile={() => setIsProfileOpen(true)}
+                        showRings={showRings}
+                        setShowRings={setShowRings}
+                    />
+                ) : page === 0 ? (
+                    <LandingView
+                        lang={lang}
+                        setLang={setLang}
+                        setPage={setPage}
+                        setViewMode={handleViewChange}
+                        selectedDriver={selectedDriver}
+                        onDriverSelect={handleDriverSelect}
+                        hoveredDriver={hoveredDriver}
+                        setHoveredDriver={setHoveredDriver}
+                        handleOpenMetonymyPage={() => {
+                            setPage(1);
+                            handleOpenMetonymyPage();
                         }}
                         openManual={openManual}
-                        openHistory={openHistory}
-                        openSettings={openSettings}
-                        openProfile={() => setIsProfileOpen(true)}
-                        currentUser={currentUser}
-                        showRings={showRings}
-                        setShowRings={setShowRings}
-                    />
-                </div>
-            ) : viewMode === 'ARCHIVE' ? (
-                <div className="h-screen w-screen overflow-hidden animate-page-dissolve flex flex-col">
-                    <AppHeader
-                        page={page}
-                        lang={lang}
-                        setLang={setLang}
-                        setPage={setPage}
-                        selectedDriver={selectedDriver}
-                        driverName={lang === 'CN' ? '迷雾学派：主体档案' : 'MIST: SUBJECT ARCHIVE'}
-                        viewMode={viewMode}
-                        setViewMode={handleViewChange}
-                        handleOpenMetonymyPage={handleOpenMetonymyPage}
-                        openManual={openManual}
                         isManualOpen={isManualOpen}
+                        closeManual={() => setIsManualOpen(false)}
                         openHistory={openHistory}
                         isHistoryOpen={isHistoryOpen}
-                        openSettings={openSettings}
                         openAuth={openAuth}
                         openProfile={() => setIsProfileOpen(true)}
                         onLogout={() => supabaseAuthService.signOut()}
                         currentUser={currentUser}
+                        closeHistory={closeHistory}
+                        isSutureOpen={isSutureOpen}
+                        closeSuture={() => setIsSutureOpen(false)}
+                        onSutureGenerate={handleSutureGenerate}
+                        isSutureGenerating={isSutureGenerating}
+                        history={history}
+                        onHistoryRestore={onHistoryRestore}
+                        onHistoryClear={onHistoryClear}
+                        openSettings={openSettings}
                         showRings={showRings}
                         setShowRings={setShowRings}
+                        initialProtocol={initialProtocol}
                     />
-                    <div className="flex-1 overflow-hidden relative">
-                        <ArchiveDirectoryModal 
-                            isOpen={true} 
-                            onClose={() => {
-                                setPage(0);
-                                setViewMode('ENGINE');
-                            }} 
+                ) : viewMode === 'DICTIONARY' ? (
+                    <div className="h-screen w-screen overflow-hidden animate-page-dissolve">
+                        <PhilosophyCodexPage
+                            onClose={() => setPage(-1)}
+                            driverType={selectedDriver}
                             lang={lang}
-                            isFullScreen={true}
+                            currentUser={currentUser}
+                            setLang={setLang}
+                            openHistory={openHistory}
+                            openSettings={openSettings}
+                            openAuth={openAuth}
+                            openProfile={() => setIsProfileOpen(true)}
+                            showRings={showRings}
+                            setShowRings={setShowRings}
+                            setViewMode={handleViewChange}
+                            renderInPlace={false}
+                            initialDictionary={codexDictionary}
+                            initialSection={codexSection as any}
+                            initialDetailTab={codexDetailTab}
+                            onDictionaryChange={setCodexDictionary}
+                            onSectionChange={setCodexSection}
+                            onDetailTabChange={setCodexDetailTab}
                         />
                     </div>
-                </div>
-            ) : viewMode === 'VIDEO' ? (
-                <div className="h-screen w-screen overflow-hidden animate-page-dissolve flex flex-col">
-                    <AppHeader
-                        page={page}
-                        lang={lang}
-                        setLang={setLang}
-                        setPage={setPage}
-                        selectedDriver={selectedDriver}
-                        driverName={lang === 'CN' ? '迷雾学派：邪典影像' : 'MIST: CULT VIDEO'}
-                        viewMode={viewMode}
-                        setViewMode={handleViewChange}
-                        handleOpenMetonymyPage={handleOpenMetonymyPage}
-                        openManual={openManual}
-                        isManualOpen={isManualOpen}
-                        openHistory={openHistory}
-                        isHistoryOpen={isHistoryOpen}
-                        openSettings={openSettings}
-                        openAuth={openAuth}
-                        openProfile={() => setIsProfileOpen(true)}
-                        onLogout={() => supabaseAuthService.signOut()}
-                        currentUser={currentUser}
-                        showRings={showRings}
-                        setShowRings={setShowRings}
-                    />
-                    <div className="flex-1 overflow-hidden relative">
-                        <VideoLibrary 
-                            isOpen={true} 
-                            onClose={() => {
-                                setPage(0);
-                                setViewMode('ENGINE');
-                            }} 
-                            lang={lang}
-                            isAdmin={currentUser?.membershipTier === 'admin' || (currentUser as any)?.membership_tier === 'admin'}
-                            isFullScreen={true}
-                        />
-                    </div>
-                </div>
-            ) : viewMode === 'RSI' ? (
-                <div className="h-screen w-screen overflow-hidden animate-page-dissolve">
-                    <LacanTopologyView
-                        lang={lang}
-                        setLang={setLang}
-                        onClose={() => {
-                            setViewMode('DICTIONARY');
-                            setHideSidebar(false);
-                        }}
-                        openManual={openManual}
-                        openHistory={openHistory}
-                        openSettings={openSettings}
-                        openProfile={() => setIsProfileOpen(true)}
-                        currentUser={currentUser}
-                        showRings={showRings}
-                        setShowRings={setShowRings}
-                        hideSidebar={initialProtocol === 'DICTIONARY'}
-                    />
-                </div>
-            ) : viewMode === 'RORSCHACH' ? (
-                <div className="h-screen w-screen overflow-hidden flex flex-col animate-page-dissolve">
-                    <AppHeader
-                        page={page}
-                        lang={lang}
-                        setLang={setLang}
-                        setPage={setPage}
-                        selectedDriver={selectedDriver}
-                        driverName={lang === 'CN' ? '迷雾学派：精神分析' : 'MIST: PSYCHOANALYSIS'}
-                        viewMode={viewMode}
-                        setViewMode={handleViewChange}
-                        handleOpenMetonymyPage={handleOpenMetonymyPage}
-                        openManual={openManual}
-                        isManualOpen={isManualOpen}
-                        openHistory={openHistory}
-                        isHistoryOpen={isHistoryOpen}
-                        openSettings={openSettings}
-                        openAuth={openAuth}
-                        openProfile={() => setIsProfileOpen(true)}
-                        onLogout={() => supabaseAuthService.signOut()}
-                        currentUser={currentUser}
-                        showRings={showRings}
-                        setShowRings={setShowRings}
-                    />
-                    <div className="flex-1 overflow-hidden relative">
-                        <RorschachView
+                ) : viewMode === 'TOPOLOGY' ? (
+                    <div className="h-screen w-screen overflow-hidden animate-page-dissolve">
+                        <LacanGraphView
                             lang={lang}
                             setLang={setLang}
-                            setPage={setPage}
-                            setViewMode={setViewMode}
                             onClose={() => {
-                                setPage(0);
-                                setViewMode('ENGINE');
+                                setViewMode('DICTIONARY');
                             }}
                             openManual={openManual}
                             openHistory={openHistory}
@@ -1408,57 +1278,15 @@ const App: React.FC = () => {
                             setShowRings={setShowRings}
                         />
                     </div>
-                </div>
-            ) : viewMode === 'ANALYSIS' ? (
-                <div className="h-screen w-screen overflow-hidden animate-page-dissolve">
-                    <AnalysisView
-                        blueprint={activeBlueprint || {
-                            treatmentId: Date.now().toString(),
-                            driverType: DriverType.NARRATIVE,
-                            narrative: {
-                                title: '',
-                                logline: '',
-                                synopsis: '',
-                                psychoanalysis: ''
-                            },
-                            context: {
-                                world: '',
-                                tone: '',
-                                colorPalette: [],
-                                moodboard: {
-                                    prompt: null,
-                                    images: [],
-                                    selectedImageId: null
-                                }
-                            },
-                            assets: { characters: [], locations: [], props: [] }
-                        }}
-                        language={lang === 'CN' ? 'CN' : 'EN'}
-                        isAesthetic={false}
-                        onAnalyzePsycho={async (fieldState, synopsis) => {
-                            const result = await geminiService.analyzePsychoStructure(fieldState, synopsis);
-                            return result || '';
-                        }}
-                        onUpdateBlueprint={(bp) => setActiveBlueprint(bp)}
-                        fieldState={narrativeFieldState}
-                        themeAccent="text-rose-400"
-                        theme={theme}
-                        onBack={() => {
-                            setPage(0);
-                            setViewMode('ENGINE');
-                        }}
-                    />
-                </div>
-            ) : (
-                <div className="flex flex-col h-screen overflow-hidden relative">
-                    {!isSutureOpen && (
+                ) : viewMode === 'ARCHIVE' ? (
+                    <div className="h-screen w-screen overflow-hidden animate-page-dissolve flex flex-col">
                         <AppHeader
                             page={page}
                             lang={lang}
                             setLang={setLang}
                             setPage={setPage}
                             selectedDriver={selectedDriver}
-                            driverName={getDriverName()}
+                            driverName={lang === 'CN' ? '迷雾学派：主体档案' : 'MIST: SUBJECT ARCHIVE'}
                             viewMode={viewMode}
                             setViewMode={handleViewChange}
                             handleOpenMetonymyPage={handleOpenMetonymyPage}
@@ -1473,309 +1301,478 @@ const App: React.FC = () => {
                             currentUser={currentUser}
                             showRings={showRings}
                             setShowRings={setShowRings}
-                            setInitialProtocol={setInitialProtocol}
                         />
-                    )}
-
-                    <main 
-                        className="flex-1 overflow-hidden relative bg-[var(--bg-main)] transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)"
-                    >
-                        {viewMode === 'ENGINE' && selectedDriver && (
-                            <div className="w-full h-full animate-page-dissolve">
-                                <NarrativeEngineField
-                                key={selectedDriver}
-                                fieldState={narrativeFieldState}
-                                onChange={handleNarrativeChange}
-                                onAutoFill={handleAutoFill}
-                                isAutoFilling={isAutoFilling}
-                                lang={lang}
-                                isSkinOpen={isSkinOpen}
-                                onToggleSkin={() => setIsSkinOpen(!isSkinOpen)}
-                                driverType={selectedDriver}
-                                onRandomizeFormula={handleGlobalRandomize}
-                                onResetFormula={handleGlobalReset}
-                                subjectType={subjectType}
-                                lockedModules={lockedModules}
-                                onToggleLock={handleToggleLock}
-                                lockedTags={lockedTags}
-                                onToggleTagLock={handleToggleTagLock}
-                                onRandomizeTag={handleRandomizeTag}
-                                isHistoryMode={!!activeHistoryItem}
-                                customLibraryDefs={customLibraryDefs}
-                                onAddCustomDef={handleAddCustomDef}
-                                aestheticMode={aestheticMode}
-                                onAestheticModeChange={setAestheticMode}
-                                colorPalette={colorPalette}
-                                onPaletteChange={setColorPalette}
-                                onApplyPreset={handleApplyPreset}
-                                onEditCustomDef={handleEditCustomDef}
-                                showRings={showRings}
-                            />
-                            </div>
-                        )}
-
-                        {/* Safety fallback for lost driver selection */}
-                        {viewMode === 'ENGINE' && !selectedDriver && (
-                            <div className="w-full h-full flex flex-col items-center justify-center animate-page-dissolve p-10 text-center">
-                                <div className="w-20 h-20 rounded-full border border-gold-primary/20 flex items-center justify-center mb-8 animate-pulse">
-                                    <Cpu size={32} className="text-gold-primary/40" />
-                                </div>
-                                <h2 className="text-2xl font-serif tracking-[0.3em] uppercase text-gold-primary/60 mb-4">引擎未激活 // ENGINE INACTIVE</h2>
-                                <p className="max-w-md text-sm text-zinc-500 font-medium leading-relaxed mb-10">
-                                    {lang === 'EN' 
-                                        ? "No desire structure detected. Please select a core driver to initiate production."
-                                        : "未检测到任务欲望结构。请选择一个核心驱动器以开始生产。"}
-                                </p>
-                                <button
-                                    onClick={() => setPage(0)}
-                                    className="px-10 py-3 bg-gold-primary/10 hover:bg-gold-primary/20 border border-gold-primary/30 text-gold-primary text-xs font-black tracking-[0.4em] uppercase transition-all"
-                                >
-                                    {lang === 'EN' ? "SELECT DRIVER" : "选择驱动器"}
-                                </button>
-                            </div>
-                        )}
-                        {viewMode === 'DIVERGENCE' && (
-                            <div className="w-full h-full animate-page-entrance">
-                                <NarrativePathsView
-                                    treatments={generatedTreatments}
-                                onSelect={handleBibleGenerate}
-                                isProcessing={isGenerating}
-                                bibleStartTime={bibleStartTime}
-                                isHistoryMode={!!activeHistoryItem}
-                                onRegenerate={() => handleTraverseFantasy(true)}
-                                onBack={handleBackStep}
-                                onOpenHistory={openHistory}
-                                lang={lang}
-                                activeDriver={selectedDriver}
-                                cachedBlueprints={cachedBlueprints}
-                                fieldState={activeHistoryItem?.fieldState || narrativeFieldState}
-                                visionInput={activeHistoryItem?.visionInput || visionInput}
-                                visionAnalysis={activeHistoryItem?.visionAnalysis || visionAnalysis}
-                                />
-                            </div>
-                        )}
-                        {viewMode === 'BIBLE' && (
-                            <div className="w-full h-full animate-page-entrance">
-                                <BlueprintEditor
-                                    blueprint={activeBlueprint}
-                                theme={theme}
-                                onClose={() => handleViewChange('DIVERGENCE')}
-                                onGoHome={() => { handleViewChange('ENGINE'); setActiveHistoryItem(null); closeAllModals(); }}
-                                onSave={(bp) => {
-                                    handleAddToHistory(bp);
+                        <div className="flex-1 overflow-hidden relative">
+                            <ArchiveDirectoryModal
+                                isOpen={true}
+                                onClose={() => {
+                                    setPage(0);
+                                    setViewMode('ENGINE');
                                 }}
-                                language={lang}
-                                onToggleLanguage={() => setLang(prev => prev === 'CN' ? 'EN' : 'CN')}
-                                onUpdateWithAI={geminiService.updateBlueprint}
-                                onGenerateAssetPrompt={geminiService.generateAssetPrompts}
-                                onGenerateAssetImage={handleVisionImageGenerate}
-                                onGenerateAssets={undefined}
-                                onAnalyzePsycho={geminiService.analyzePsychoStructure}
-                                fieldState={activeHistoryItem?.fieldState || narrativeFieldState}
-                                treatments={generatedTreatments}
-                                onUpdateBlueprint={handleUpdateBlueprintCache}
-                                driverName={getDriverName()}
-                                isHistoryMode={!!activeHistoryItem}
-                                onOpenHistory={openHistory}
-                                onOpenManual={openManual}
-                                onOpenSuture={() => setIsSutureOpen(true)}
-                                onSaveToHistory={handleAddToHistory}
-                                onSaveToCollection={handleAddToHistory}
-                                onGlobalCopy={handleGlobalCopy}
-                                selectedDriver={selectedDriver || DriverType.NARRATIVE}
-                                worldLaw={activeHistoryItem?.worldLaw || worldLawConfig}
-                                visionInput={activeHistoryItem?.visionInput || visionInput}
-                                visionAnalysis={activeHistoryItem?.visionAnalysis || visionAnalysis}
-                                subjectType={activeHistoryItem?.subjectType || subjectType}
-                                aestheticMode={activeHistoryItem?.aestheticMode || aestheticMode}
-                                customLibraryDefs={customLibraryDefs}
-                                isSutureOpen={isSutureOpen}
-                                onSutureOpenChange={setIsSutureOpen}
+                                lang={lang}
+                                isFullScreen={true}
                             />
-                            </div>
-                        )}
-                        {/* MetonymyView integrated into main layout to share EngineBottomBar */}
-                        {viewMode === 'METONYMY' && metonymyBlueprint && (
-                            <div className="w-full h-full animate-page-entrance">
-                                <MetonymyView
-                                    blueprint={metonymyBlueprint}
-                                language={lang}
-                                onUpdateBlueprint={handleUpdateBlueprintCache}
-                                themeAccent={getMetonymyThemeAccent()}
-                                themeBorder={getMetonymyThemeBorder()}
-                                isFullScreen={false}
-                                onToggleFullScreen={() => handleViewChange('ENGINE')}
-                                fieldState={narrativeFieldState}
-                                onSaveToHistory={handleAddToHistory}
-                                onGenerateAssetImage={handleVisionImageGenerate}
-                                onSutureOpenChange={setIsSutureOpen}
-                            />
-                            </div>
-                        )}
-                    </main>
-
-                    {/* Show EngineBottomBar for ENGINE and METONYMY modes */}
-                    {(viewMode === 'ENGINE' || viewMode === 'METONYMY') && !isSutureOpen && (
-                        <EngineBottomBar
+                        </div>
+                    </div>
+                ) : viewMode === 'VIDEO' ? (
+                    <div className="h-screen w-screen overflow-hidden animate-page-dissolve flex flex-col">
+                        <AppHeader
+                            page={page}
                             lang={lang}
+                            setLang={setLang}
+                            setPage={setPage}
                             selectedDriver={selectedDriver}
-                            isSkinOpen={isSkinOpen}
-                            setIsSkinOpen={setIsSkinOpen}
-                            isVisionOpen={isVisionOpen}
-                            setIsVisionOpen={setIsVisionOpen}
-                            isAestheticInputOpen={isAestheticInputOpen}
-                            setIsAestheticInputOpen={setIsAestheticInputOpen}
-                            worldLawConfig={worldLawConfig}
-                            isWorldLawOpen={isWorldLawOpen}
-                            setIsWorldLawOpen={setIsWorldLawOpen}
-                            handleBackStep={handleBackStep}
-                            handleUndo={handleUndo}
-                            handleRedo={handleRedo}
-                            pastStatesLength={pastStates.length}
-                            futureStatesLength={futureStates.length}
-                            subjectType={subjectType}
-                            setSubjectType={setSubjectType}
-                            handleAestheticSmartRandom={handleAestheticSmartRandom}
-                            handleCopyAestheticPrompt={handleCopyAestheticPrompt}
-                            handleGlobalReset={handleGlobalReset}
-                            handleGlobalRandomize={handleGlobalRandomize}
-                            handleRandomizeFormulaOnly={handleRandomizeFormulaOnly}
-                            handleResetFormulaOnly={handleResetFormulaOnly}
-                            promptCopied={promptCopied}
-                            isGenerating={isGenerating}
-                            traverseStartTime={traverseStartTime}
-                            handleTraverseFantasy={handleTraverseFantasy}
-                            hasFieldState={Object.keys(narrativeFieldState).length > 0}
+                            driverName={lang === 'CN' ? '迷雾学派：邪典影像' : 'MIST: CULT VIDEO'}
+                            viewMode={viewMode}
+                            setViewMode={handleViewChange}
+                            handleOpenMetonymyPage={handleOpenMetonymyPage}
+                            openManual={openManual}
+                            isManualOpen={isManualOpen}
+                            openHistory={openHistory}
+                            isHistoryOpen={isHistoryOpen}
+                            openSettings={openSettings}
+                            openAuth={openAuth}
+                            openProfile={() => setIsProfileOpen(true)}
+                            onLogout={() => supabaseAuthService.signOut()}
+                            currentUser={currentUser}
+                            showRings={showRings}
+                            setShowRings={setShowRings}
+                        />
+                        <div className="flex-1 overflow-hidden relative">
+                            <VideoLibrary
+                                isOpen={true}
+                                onClose={() => {
+                                    setPage(0);
+                                    setViewMode('ENGINE');
+                                }}
+                                lang={lang}
+                                isAdmin={currentUser?.membershipTier === 'admin' || (currentUser as any)?.membership_tier === 'admin'}
+                                isFullScreen={true}
+                            />
+                        </div>
+                    </div>
+                ) : viewMode === 'RSI' ? (
+                    <div className="h-screen w-screen overflow-hidden animate-page-dissolve">
+                        <LacanTopologyView
+                            lang={lang}
+                            setLang={setLang}
+                            onClose={() => {
+                                setViewMode('DICTIONARY');
+                                setHideSidebar(false);
+                            }}
+                            openManual={openManual}
+                            openHistory={openHistory}
+                            openSettings={openSettings}
+                            openProfile={() => setIsProfileOpen(true)}
+                            currentUser={currentUser}
+                            showRings={showRings}
+                            setShowRings={setShowRings}
+                            hideSidebar={initialProtocol === 'DICTIONARY'}
+                        />
+                    </div>
+                ) : viewMode === 'RORSCHACH' ? (
+                    <div className="h-screen w-screen overflow-hidden flex flex-col animate-page-dissolve">
+                        <AppHeader
+                            page={page}
+                            lang={lang}
+                            setLang={setLang}
+                            setPage={setPage}
+                            selectedDriver={selectedDriver}
+                            driverName={lang === 'CN' ? '迷雾学派：精神分析' : 'MIST: PSYCHOANALYSIS'}
+                            viewMode={viewMode}
+                            setViewMode={handleViewChange}
+                            handleOpenMetonymyPage={handleOpenMetonymyPage}
+                            openManual={openManual}
+                            isManualOpen={isManualOpen}
+                            openHistory={openHistory}
+                            isHistoryOpen={isHistoryOpen}
+                            openSettings={openSettings}
+                            openAuth={openAuth}
+                            openProfile={() => setIsProfileOpen(true)}
+                            onLogout={() => supabaseAuthService.signOut()}
+                            currentUser={currentUser}
+                            showRings={showRings}
+                            setShowRings={setShowRings}
+                        />
+                        <div className="flex-1 overflow-hidden relative">
+                            <RorschachView
+                                lang={lang}
+                                setLang={setLang}
+                                setPage={setPage}
+                                setViewMode={setViewMode}
+                                onClose={() => {
+                                    setPage(0);
+                                    setViewMode('ENGINE');
+                                }}
+                                openManual={openManual}
+                                openHistory={openHistory}
+                                openSettings={openSettings}
+                                openProfile={() => setIsProfileOpen(true)}
+                                currentUser={currentUser}
+                                showRings={showRings}
+                                setShowRings={setShowRings}
+                            />
+                        </div>
+                    </div>
+                ) : viewMode === 'ANALYSIS' ? (
+                    <div className="h-screen w-screen overflow-hidden animate-page-dissolve">
+                        <AnalysisView
+                            blueprint={activeBlueprint || {
+                                treatmentId: Date.now().toString(),
+                                driverType: DriverType.NARRATIVE,
+                                narrative: {
+                                    title: '',
+                                    logline: '',
+                                    synopsis: '',
+                                    psychoanalysis: ''
+                                },
+                                context: {
+                                    world: '',
+                                    tone: '',
+                                    colorPalette: [],
+                                    moodboard: {
+                                        prompt: null,
+                                        images: [],
+                                        selectedImageId: null
+                                    }
+                                },
+                                assets: { characters: [], locations: [], props: [] }
+                            }}
+                            language={lang === 'CN' ? 'CN' : 'EN'}
+                            isAesthetic={false}
+                            onAnalyzePsycho={async (fieldState, synopsis) => {
+                                const result = await geminiService.analyzePsychoStructure(fieldState, synopsis);
+                                return result || '';
+                            }}
+                            onUpdateBlueprint={(bp) => setActiveBlueprint(bp)}
+                            fieldState={narrativeFieldState}
+                            themeAccent="text-rose-400"
+                            theme={theme}
+                            onBack={() => {
+                                setPage(0);
+                                setViewMode('ENGINE');
+                            }}
+                        />
+                    </div>
+                ) : (
+                    <div className="flex flex-col h-screen overflow-hidden relative">
+                        {!isSutureOpen && (
+                            <AppHeader
+                                page={page}
+                                lang={lang}
+                                setLang={setLang}
+                                setPage={setPage}
+                                selectedDriver={selectedDriver}
+                                driverName={getDriverName()}
+                                viewMode={viewMode}
+                                setViewMode={handleViewChange}
+                                handleOpenMetonymyPage={handleOpenMetonymyPage}
+                                openManual={openManual}
+                                isManualOpen={isManualOpen}
+                                openHistory={openHistory}
+                                isHistoryOpen={isHistoryOpen}
+                                openSettings={openSettings}
+                                openAuth={openAuth}
+                                openProfile={() => setIsProfileOpen(true)}
+                                onLogout={() => supabaseAuthService.signOut()}
+                                currentUser={currentUser}
+                                showRings={showRings}
+                                setShowRings={setShowRings}
+                                setInitialProtocol={setInitialProtocol}
+                            />
+                        )}
+
+                        <main
+                            className="flex-1 overflow-hidden relative bg-[var(--bg-main)] transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)"
+                        >
+                            {viewMode === 'ENGINE' && selectedDriver && (
+                                <div className="w-full h-full animate-page-dissolve">
+                                    <NarrativeEngineField
+                                        key={selectedDriver}
+                                        fieldState={narrativeFieldState}
+                                        onChange={handleNarrativeChange}
+                                        onAutoFill={handleAutoFill}
+                                        isAutoFilling={isAutoFilling}
+                                        lang={lang}
+                                        isSkinOpen={isSkinOpen}
+                                        onToggleSkin={() => setIsSkinOpen(!isSkinOpen)}
+                                        driverType={selectedDriver}
+                                        onRandomizeFormula={handleRandomizeFormulaOnly}
+                                        onResetFormula={handleGlobalReset}
+                                        subjectType={subjectType}
+                                        lockedModules={lockedModules}
+                                        onToggleLock={handleToggleLock}
+                                        lockedTags={lockedTags}
+                                        onToggleTagLock={handleToggleTagLock}
+                                        onRandomizeTag={handleRandomizeTag}
+                                        isHistoryMode={!!activeHistoryItem}
+                                        customLibraryDefs={customLibraryDefs}
+                                        onAddCustomDef={handleAddCustomDef}
+                                        aestheticMode={aestheticMode}
+                                        onAestheticModeChange={setAestheticMode}
+                                        colorPalette={colorPalette}
+                                        onPaletteChange={setColorPalette}
+                                        onApplyPreset={handleApplyPreset}
+                                        onEditCustomDef={handleEditCustomDef}
+                                        showRings={showRings}
+                                    />
+                                </div>
+                            )}
+
+                            {/* Safety fallback for lost driver selection */}
+                            {viewMode === 'ENGINE' && !selectedDriver && (
+                                <div className="w-full h-full flex flex-col items-center justify-center animate-page-dissolve p-10 text-center">
+                                    <div className="w-20 h-20 rounded-full border border-gold-primary/20 flex items-center justify-center mb-8 animate-pulse">
+                                        <Cpu size={32} className="text-gold-primary/40" />
+                                    </div>
+                                    <h2 className="text-2xl font-serif tracking-[0.3em] uppercase text-gold-primary/60 mb-4">引擎未激活 // ENGINE INACTIVE</h2>
+                                    <p className="max-w-md text-sm text-zinc-500 font-medium leading-relaxed mb-10">
+                                        {lang === 'EN'
+                                            ? "No desire structure detected. Please select a core driver to initiate production."
+                                            : "未检测到任务欲望结构。请选择一个核心驱动器以开始生产。"}
+                                    </p>
+                                    <button
+                                        onClick={() => setPage(0)}
+                                        className="px-10 py-3 bg-gold-primary/10 hover:bg-gold-primary/20 border border-gold-primary/30 text-gold-primary text-xs font-black tracking-[0.4em] uppercase transition-all"
+                                    >
+                                        {lang === 'EN' ? "SELECT DRIVER" : "选择驱动器"}
+                                    </button>
+                                </div>
+                            )}
+                            {viewMode === 'DIVERGENCE' && (
+                                <div className="w-full h-full animate-page-entrance">
+                                    <NarrativePathsView
+                                        treatments={generatedTreatments}
+                                        onSelect={handleBibleGenerate}
+                                        isProcessing={isGenerating}
+                                        bibleStartTime={bibleStartTime}
+                                        isHistoryMode={!!activeHistoryItem}
+                                        onRegenerate={() => handleTraverseFantasy(true)}
+                                        onBack={handleBackStep}
+                                        onOpenHistory={openHistory}
+                                        lang={lang}
+                                        activeDriver={selectedDriver}
+                                        cachedBlueprints={cachedBlueprints}
+                                        fieldState={activeHistoryItem?.fieldState || narrativeFieldState}
+                                        visionInput={activeHistoryItem?.visionInput || visionInput}
+                                        visionAnalysis={activeHistoryItem?.visionAnalysis || visionAnalysis}
+                                    />
+                                </div>
+                            )}
+                            {viewMode === 'BIBLE' && (
+                                <div className="w-full h-full animate-page-entrance">
+                                    <BlueprintEditor
+                                        blueprint={activeBlueprint}
+                                        theme={theme}
+                                        onClose={() => handleViewChange('DIVERGENCE')}
+                                        onGoHome={() => { handleViewChange('ENGINE'); setActiveHistoryItem(null); closeAllModals(); }}
+                                        onSave={(bp) => {
+                                            handleAddToHistory(bp);
+                                        }}
+                                        language={lang}
+                                        onToggleLanguage={() => setLang(prev => prev === 'CN' ? 'EN' : 'CN')}
+                                        onUpdateWithAI={geminiService.updateBlueprint}
+                                        onGenerateAssetPrompt={geminiService.generateAssetPrompts}
+                                        onGenerateAssetImage={handleVisionImageGenerate}
+                                        onGenerateAssets={undefined}
+                                        onAnalyzePsycho={geminiService.analyzePsychoStructure}
+                                        fieldState={activeHistoryItem?.fieldState || narrativeFieldState}
+                                        treatments={generatedTreatments}
+                                        onUpdateBlueprint={handleUpdateBlueprintCache}
+                                        driverName={getDriverName()}
+                                        isHistoryMode={!!activeHistoryItem}
+                                        onOpenHistory={openHistory}
+                                        onOpenManual={openManual}
+                                        onOpenSuture={() => setIsSutureOpen(true)}
+                                        onSaveToHistory={handleAddToHistory}
+                                        onSaveToCollection={handleAddToHistory}
+                                        onGlobalCopy={handleGlobalCopy}
+                                        selectedDriver={selectedDriver || DriverType.NARRATIVE}
+                                        worldLaw={activeHistoryItem?.worldLaw || worldLawConfig}
+                                        visionInput={activeHistoryItem?.visionInput || visionInput}
+                                        visionAnalysis={activeHistoryItem?.visionAnalysis || visionAnalysis}
+                                        subjectType={activeHistoryItem?.subjectType || subjectType}
+                                        aestheticMode={activeHistoryItem?.aestheticMode || aestheticMode}
+                                        customLibraryDefs={customLibraryDefs}
+                                        isSutureOpen={isSutureOpen}
+                                        onSutureOpenChange={setIsSutureOpen}
+                                    />
+                                </div>
+                            )}
+                            {/* MetonymyView integrated into main layout to share EngineBottomBar */}
+                            {viewMode === 'METONYMY' && metonymyBlueprint && (
+                                <div className="w-full h-full animate-page-entrance">
+                                    <MetonymyView
+                                        blueprint={metonymyBlueprint}
+                                        language={lang}
+                                        onUpdateBlueprint={handleUpdateBlueprintCache}
+                                        themeAccent={getMetonymyThemeAccent()}
+                                        themeBorder={getMetonymyThemeBorder()}
+                                        isFullScreen={false}
+                                        onToggleFullScreen={() => handleViewChange('ENGINE')}
+                                        fieldState={narrativeFieldState}
+                                        onSaveToHistory={handleAddToHistory}
+                                        onGenerateAssetImage={handleVisionImageGenerate}
+                                        onSutureOpenChange={setIsSutureOpen}
+                                    />
+                                </div>
+                            )}
+                        </main>
+
+                        {/* Show EngineBottomBar for ENGINE and METONYMY modes */}
+                        {(viewMode === 'ENGINE' || viewMode === 'METONYMY') && !isSutureOpen && (
+                            <EngineBottomBar
+                                lang={lang}
+                                selectedDriver={selectedDriver}
+                                isSkinOpen={isSkinOpen}
+                                setIsSkinOpen={setIsSkinOpen}
+                                isVisionOpen={isVisionOpen}
+                                setIsVisionOpen={setIsVisionOpen}
+                                isAestheticInputOpen={isAestheticInputOpen}
+                                setIsAestheticInputOpen={setIsAestheticInputOpen}
+                                worldLawConfig={worldLawConfig}
+                                setWorldLawConfig={setWorldLawConfig}
+                                isWorldLawOpen={isWorldLawOpen}
+                                setIsWorldLawOpen={setIsWorldLawOpen}
+                                handleBackStep={handleBackStep}
+                                handleUndo={handleUndo}
+                                handleRedo={handleRedo}
+                                pastStatesLength={pastStates.length}
+                                futureStatesLength={futureStates.length}
+                                subjectType={subjectType}
+                                setSubjectType={setSubjectType}
+                                handleAestheticSmartRandom={handleAestheticSmartRandom}
+                                handleCopyAestheticPrompt={handleCopyAestheticPrompt}
+                                handleGlobalReset={handleGlobalReset}
+                                handleGlobalRandomize={handleGlobalRandomize}
+                                handleRandomizeFormulaOnly={handleRandomizeFormulaOnly}
+                                handleResetFormulaOnly={handleResetFormulaOnly}
+                                promptCopied={promptCopied}
+                                isGenerating={isGenerating}
+                                traverseStartTime={traverseStartTime}
+                                handleTraverseFantasy={handleTraverseFantasy}
+                                hasFieldState={Object.keys(narrativeFieldState).length > 0}
+                                onRandomizeBlock={handleRandomizeBlock}
+                                onClearBlock={handleClearBlock}
+                                isTaskManagerOpen={isTaskManagerOpen}
+                                setIsTaskManagerOpen={setIsTaskManagerOpen}
+                            />
+                        )}
+
+                        <TheSkinSidebar
+                            fieldState={narrativeFieldState}
+                            onOpenLibrary={openLibrary}
+                            onRemoveTag={removeTag}
+                            isOpen={isSkinOpen}
+                            onClose={() => setIsSkinOpen(false)}
+                            onRandomize={handleRandomizeSkinOnly}
+                            onReset={handleResetSkinOnly}
+                            lang={lang}
+                            driverType={selectedDriver || DriverType.NARRATIVE}
+                            lockedModules={lockedModules}
+                            onToggleLock={handleToggleLock}
+                            lockedTags={lockedTags}
+                            onToggleTagLock={handleToggleTagLock}
+                            onRandomizeTag={handleRandomizeTag}
+                            getItemDetails={getItemDetails}
                             onRandomizeBlock={handleRandomizeBlock}
                             onClearBlock={handleClearBlock}
-                            isTaskManagerOpen={isTaskManagerOpen}
-                            setIsTaskManagerOpen={setIsTaskManagerOpen}
+                            onUpdateState={updateNarrativeState}
+                            onAddCustomDef={handleAddCustomDef}
+                            onEditCustomDef={handleEditCustomDef}
+                            zIndex={topSidebar === 'skin' ? 70 : 60}
                         />
-                    )}
 
-                    <TheSkinSidebar
-                        fieldState={narrativeFieldState}
-                        onOpenLibrary={openLibrary}
-                        onRemoveTag={removeTag}
-                        isOpen={isSkinOpen}
-                        onClose={() => setIsSkinOpen(false)}
-                        onRandomize={handleRandomizeSkinOnly}
-                        onReset={handleResetSkinOnly}
+                        <VisionSidebar
+                            isOpen={isVisionOpen}
+                            onClose={() => setIsVisionOpen(false)}
+                            visionInput={visionInput}
+                            onVisionInputChange={setVisionInput}
+                            visionImage={visionImage}
+                            onVisionImageChange={setVisionImage}
+                            onAutoFill={handleVisionAutoFill}
+                            onGenerateImage={handleVisionImageGenerate}
+                            isAutoFilling={isAutoFilling}
+                            visionStartTime={visionStartTime}
+                            lang={lang}
+                            driverType={selectedDriver || DriverType.NARRATIVE}
+                            visionAnalysis={visionAnalysis}
+                            onVisionAnalysisChange={setVisionAnalysis}
+                            onAnalyzeImage={handleAnalyzeImage}
+                            isAnalyzingImage={isAnalyzingImage}
+                            zIndex={topSidebar === 'vision' ? 70 : 60}
+                        />
+
+                        <AestheticInputSidebar
+                            isOpen={isAestheticInputOpen}
+                            onClose={() => setIsAestheticInputOpen(false)}
+                            onAnalyzeAndMap={handleAestheticInputMap}
+                            isProcessing={isMappingInput}
+                            lang={lang}
+                        />
+                    </div>
+                )}
+
+
+
+                {/* Modal removed in favor of full page in the Routes flow above, but we keep the logic tethered to isManualOpen for now to minimize ripple effects */}
+                {isHistoryOpen && <HistoryModal history={history} onRestore={onHistoryRestore} onClear={onHistoryClear} onClose={closeHistory} lang={lang} />}
+
+                {activeBlockId && (
+                    <NarrativeLibraryModal
+                        isOpen={libraryModalOpen}
+                        onClose={() => setLibraryModalOpen(false)}
+                        blockId={activeBlockId}
+                        blockName={getBlockName(activeBlockId, lang)}
+                        selectedTags={narrativeFieldState[activeBlockId] || []}
+                        onToggleTag={(tag) => handleToggleTag(activeBlockId, tag)}
+                        onClear={() => {
+                            const newState = { ...narrativeFieldState, [activeBlockId]: [] };
+                            updateNarrativeState(newState);
+                        }}
                         lang={lang}
                         driverType={selectedDriver || DriverType.NARRATIVE}
-                        lockedModules={lockedModules}
-                        onToggleLock={handleToggleLock}
-                        lockedTags={lockedTags}
-                        onToggleTagLock={handleToggleTagLock}
-                        onRandomizeTag={handleRandomizeTag}
-                        getItemDetails={getItemDetails}
-                        onRandomizeBlock={handleRandomizeBlock}
-                        onClearBlock={handleClearBlock}
-                        onUpdateState={updateNarrativeState}
                         onAddCustomDef={handleAddCustomDef}
-                        onEditCustomDef={handleEditCustomDef}
-                        zIndex={topSidebar === 'skin' ? 70 : 60}
+                        customLibraryData={
+                            activeBlockId === 'aes_palette_preset'
+                                ? [{ id: 'lib_master', name: '视觉大师预设 (Master Presets)', desc: 'Pre-configured Cinematic Styles', items: MASTER_PRESETS }]
+                                : (activeBlockId === 'aes_color_palette'
+                                    ? [{ id: 'lib_color', name: '经典色板库 (Color Palettes)', desc: 'Classic Color Schemes', items: AES_COLOR_PRESETS }]
+                                    : undefined)
+                        }
                     />
+                )}
 
-                    <VisionSidebar
-                        isOpen={isVisionOpen}
-                        onClose={() => setIsVisionOpen(false)}
-                        visionInput={visionInput}
-                        onVisionInputChange={setVisionInput}
-                        visionImage={visionImage}
-                        onVisionImageChange={setVisionImage}
-                        onAutoFill={handleVisionAutoFill}
-                        onGenerateImage={handleVisionImageGenerate}
-                        isAutoFilling={isAutoFilling}
-                        visionStartTime={visionStartTime}
-                        lang={lang}
-                        driverType={selectedDriver || DriverType.NARRATIVE}
-                        visionAnalysis={visionAnalysis}
-                        onVisionAnalysisChange={setVisionAnalysis}
-                        onAnalyzeImage={handleAnalyzeImage}
-                        isAnalyzingImage={isAnalyzingImage}
-                        zIndex={topSidebar === 'vision' ? 70 : 60}
-                    />
+                {/* WorldLawModal integrated into EngineBottomBar */}
+                {isSettingsOpen && (
+                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200] p-4">
+                        <SimpleConfigPanel lang={lang} onClose={closeSettings} />
+                    </div>
+                )}
 
-                    <AestheticInputSidebar
-                        isOpen={isAestheticInputOpen}
-                        onClose={() => setIsAestheticInputOpen(false)}
-                        onAnalyzeAndMap={handleAestheticInputMap}
-                        isProcessing={isMappingInput}
-                        lang={lang}
-                    />
-                </div>
-            )}
-
-
-            
-            {/* Modal removed in favor of full page in the Routes flow above, but we keep the logic tethered to isManualOpen for now to minimize ripple effects */}
-            {isHistoryOpen && <HistoryModal history={history} onRestore={onHistoryRestore} onClear={onHistoryClear} onClose={closeHistory} lang={lang} />}
-
-            {activeBlockId && (
-                <NarrativeLibraryModal
-                    isOpen={libraryModalOpen}
-                    onClose={() => setLibraryModalOpen(false)}
-                    blockId={activeBlockId}
-                    blockName={getBlockName(activeBlockId, lang)}
-                    selectedTags={narrativeFieldState[activeBlockId] || []}
-                    onToggleTag={(tag) => handleToggleTag(activeBlockId, tag)}
-                    onClear={() => {
-                        const newState = { ...narrativeFieldState, [activeBlockId]: [] };
-                        updateNarrativeState(newState);
+                <AuthModal
+                    isOpen={isAuthOpen}
+                    onClose={() => setIsAuthOpen(false)}
+                    onLogin={(user) => setCurrentUser(user)}
+                    lang={lang}
+                />
+                <UserProfileModal
+                    isOpen={isProfileOpen}
+                    onClose={() => setIsProfileOpen(false)}
+                    currentUser={currentUser}
+                    onProfileUpdate={(updates) => setCurrentUser(prev => ({ ...prev, ...updates }))}
+                    onLogout={async () => {
+                        await supabaseAuthService.signOut();
+                        setIsProfileOpen(false);
                     }}
                     lang={lang}
-                    driverType={selectedDriver || DriverType.NARRATIVE}
-                    onAddCustomDef={handleAddCustomDef}
-                    customLibraryData={
-                        activeBlockId === 'aes_palette_preset'
-                            ? [{ id: 'lib_master', name: '视觉大师预设 (Master Presets)', desc: 'Pre-configured Cinematic Styles', items: MASTER_PRESETS }]
-                            : (activeBlockId === 'aes_color_palette'
-                                ? [{ id: 'lib_color', name: '经典色板库 (Color Palettes)', desc: 'Classic Color Schemes', items: AES_COLOR_PRESETS }]
-                                : undefined)
-                    }
                 />
-            )}
-
-            <WorldLawModal
-                isOpen={isWorldLawOpen}
-                onClose={() => setIsWorldLawOpen(false)}
-                config={worldLawConfig}
-                onChange={setWorldLawConfig}
-                lang={lang}
-                driverType={selectedDriver || DriverType.NARRATIVE}
-                fieldState={narrativeFieldState}
-                getItemDetails={getItemDetails}
-            />
-            {isSettingsOpen && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200] p-4">
-                    <SimpleConfigPanel lang={lang} onClose={closeSettings} />
-                </div>
-            )}
-
-            <AuthModal
-                isOpen={isAuthOpen}
-                onClose={() => setIsAuthOpen(false)}
-                onLogin={(user) => setCurrentUser(user)}
-                lang={lang}
-            />
-            <UserProfileModal
-                isOpen={isProfileOpen}
-                onClose={() => setIsProfileOpen(false)}
-                currentUser={currentUser}
-                onProfileUpdate={(updates) => setCurrentUser(prev => ({ ...prev, ...updates }))}
-                onLogout={async () => {
-                    await supabaseAuthService.signOut();
-                    setIsProfileOpen(false);
-                }}
-                lang={lang}
-            />
-            <TaskManagerPanel
-                isOpen={isTaskManagerOpen}
-                onClose={() => setIsTaskManagerOpen(false)}
-                lang={lang}
-                driverType={selectedDriver}
-            />
+                <TaskManagerPanel
+                    isOpen={isTaskManagerOpen}
+                    onClose={() => setIsTaskManagerOpen(false)}
+                    lang={lang}
+                    driverType={selectedDriver}
+                />
             </div>
         </QueryClientProvider>
     );

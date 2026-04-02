@@ -78,11 +78,14 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
         return found ? [found] : [];
     }, [blockId, customLibraryData, driverType]);
 
+    // Super group functionality removed to simplify genre selection
+    /*
     useEffect(() => {
         if (blockId === 'skin_genre' && !activeSuperGroup) {
             setActiveSuperGroup(GENRE_SUPER_GROUPS[0].id);
         }
     }, [blockId, activeSuperGroup]);
+    */
 
     const processedGroups = useMemo(() => {
         const formatName = (name: string, en?: string) => {
@@ -96,12 +99,15 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
 
         let filteredLibraryData = libraryData;
 
+        // Filter by super group removed for simplicity
+        /*
         if (blockId === 'skin_genre' && activeSuperGroup) {
             const superGroup = GENRE_SUPER_GROUPS.find(g => g.id === activeSuperGroup);
             if (superGroup) {
                 filteredLibraryData = libraryData.filter(cat => superGroup.includes.includes(cat.id));
             }
         }
+        */
 
         if (filteredLibraryData.length > 1) {
             return filteredLibraryData.map(cat => ({
@@ -331,16 +337,7 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                 </div>
                 <div className="flex-1 flex overflow-hidden flex-col md:flex-row">
                     <div className={`w-full md:w-64 border-r border-dashed ${globalTheme === 'retro' ? 'border-[#8B261D]/10 bg-[#FAF8F4]' : `bg-black/60`} flex flex-col shrink-0 overflow-y-auto custom-scrollbar`} style={globalTheme !== 'retro' ? { borderColor: `${themeHex}1a` } : {}}>
-                        {blockId === 'skin_genre' && !searchQuery && (
-                            <div className={`p-2 border-b ${globalTheme === 'retro' ? 'border-[#8B261D]/10 bg-[#8B261D]/5' : `bg-zinc-900/30`}`} style={globalTheme !== 'retro' ? { borderColor: `${themeHex}33` } : {}}>
-                                {GENRE_SUPER_GROUPS.map(sg => {
-                                    const Icon = iconMap[sg.iconName || 'Zap'];
-                                    return (
-                                        <button key={sg.id} onClick={() => setActiveSuperGroup(sg.id)} className={`w-full text-left px-3 py-2 rounded mb-1 text-xs font-bold uppercase tracking-wider transition-colors flex items-center gap-2 ${activeSuperGroup === sg.id ? (globalTheme === 'retro' ? 'bg-[#8B261D] text-white' : `bg-white ${themeText.replace('text-', 'text-black')} font-black shadow-lg shadow-black/40`) : (globalTheme === 'retro' ? 'text-[#8B261D]/60 hover:text-[#8B261D] hover:bg-[#8B261D]/10' : `${themeText} opacity-50 hover:opacity-100 hover:bg-zinc-800/50`)}`}><Icon size={14} />{currentLang === 'EN' ? sg.name.split('(')[1].replace(')', '') : sg.name.split('(')[0]}</button>
-                                    );
-                                })}
-                            </div>
-                        )}
+                        {/* GENRE_SUPER_GROUPS section removed for simplicity */}
                         <div className="p-2 space-y-1">
                             {processedGroups.map(group => {
                                 const groupItemNames = new Set((group.items || []).map(i => i.name));

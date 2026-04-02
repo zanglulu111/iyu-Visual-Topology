@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { NarrativeFieldState, BlueprintLanguage, DriverType, NarrativeBlockDef, LibraryCategoryDef, SubjectType, AestheticMode, AestheticPreset } from '../types';
 import { Ghost, ScanEye, BrainCircuit, Zap, ChevronRight } from 'lucide-react';
@@ -119,7 +120,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
         if (isCommercial) return lang === 'EN' ? "THE SUTURE" : "欲望缝合";
         if (isExperimental) return lang === 'EN' ? "PHENOMENOLOGY" : "现象学还原";
         if (isTrailer) return lang === 'EN' ? "VIRTUAL ILLUSION" : "虚拟幻象";
-        return lang === 'EN' ? "LABYRINTH OF EROS" : "爱欲迷宫";
+        return lang === 'EN' ? "AUTONOMOUS CORE: NARRATIVE DYNAMICS" : "自治核心：欲望动力学";
     };
 
     const getEngineSubtitle = () => {
@@ -224,18 +225,72 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
     const removeTag = (blockId: string, tag: string) => { if (lockedModules[blockId]) return; const rawCurrent = fieldState[blockId]; const current = Array.isArray(rawCurrent) ? rawCurrent : (rawCurrent ? [String(rawCurrent)] : []); onChange({ ...fieldState, [blockId]: current.filter(t => t !== tag) }); }
     const openLibrary = (blockId: string) => { if (lockedModules[blockId]) return; setActiveBlockId(blockId); setLibraryModalOpen(true); };
 
+    const [hoveredPortal, setHoveredPortal] = useState<{
+        pos: { top: number; left: number };
+        details: any;
+        header?: string;
+        count?: number;
+        showAbove?: boolean;
+    } | null>(null);
+
+    const handleMouseEnter = (e: React.MouseEvent, details: any, header?: string, count?: number) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const showAbove = rect.bottom > window.innerHeight * 0.65;
+        setHoveredPortal({
+            pos: {
+                top: showAbove ? rect.top - 8 : rect.bottom + 8,
+                left: Math.min(rect.left, window.innerWidth - 320)
+            },
+            details,
+            header,
+            count,
+            showAbove
+        });
+    };
+
+    const handleMouseLeave = () => {
+        setHoveredPortal(null);
+    };
+
     const renderLevelButton = (baseBlockId: string) => {
         const xBlockId = baseBlockId + 'x';
         const rawTags = fieldState[xBlockId];
         const tags = Array.isArray(rawTags) ? rawTags : (rawTags ? [String(rawTags)] : []);
         const currentTag = tags[0] || "";
-        const match = currentTag.match(/\[M[245]X\.(\d)\]/);
-        const levelText = match ? `L${match[1]}` : "L3";
+        const match = currentTag.match(/^L(\d)/);
+        const levelText = match ? `L${match[1]}` : "L-";
+
+        // Find current tag info for detailed tooltip
+        const libId = `${xBlockId}_lib`;
+        const category = NARRATIVE_ENGINE_LIBRARY.find(c => c.id === libId);
+        const currentItem = category?.items.find(i => i.name === currentTag);
         
+        let displayTitle = category ? (lang === 'EN' ? category.nameEn : category.name) : baseBlockId.toUpperCase();
+        displayTitle = displayTitle.replace(/\s*\(.*?\)/, "");
+
+        // Determine tooltop content: selected item or category default
+        const tooltipHeader = currentItem 
+            ? (lang === 'EN' ? currentItem.nameEn : currentItem.name) 
+            : displayTitle;
+            
+        const tooltipDetails = {
+            def: lang === 'EN' 
+                ? (currentItem?.defEn || category?.descEn || "Narrative Coefficient")
+                : (currentItem?.def || category?.desc || "叙事系数控制指标。"),
+            core: lang === 'EN'
+                ? (currentItem?.coreEn || category?.descEn || "Drive/Intrusion power adjustment.")
+                : (currentItem?.core || category?.desc || "调节该模块的叙事当量与强度阈值。"),
+        };
+
         return (
             <button
                 onClick={(e) => { e.stopPropagation(); openLibrary(xBlockId); }}
-                className={`w-10 h-10 flex items-center justify-center border font-mono text-sm font-bold transition-all self-center shrink-0 mx-1 ${theme === 'retro' ? 'border-[#8B261D] text-[#8B261D] bg-[#F9F7F1]/50 hover:bg-[#8B261D] hover:text-white' : 'border-zinc-700 text-zinc-400 bg-zinc-900/20 hover:border-zinc-500 hover:text-white'} rounded active:scale-90`}
+                onMouseEnter={(e) => {
+                    const count = getLibraryCount(xBlockId);
+                    handleMouseEnter(e, tooltipDetails, tooltipHeader, count);
+                }}
+                onMouseLeave={handleMouseLeave}
+                className={`w-10 h-10 flex items-center justify-center border font-mono text-sm font-bold transition-all self-center shrink-0 mx-1 ${theme === 'retro' ? 'border-[#8B261D] text-[#8B261D] bg-[#F9F7F1]/50 hover:bg-[#8B261D] hover:text-white' : 'border-zinc-700 text-zinc-400 bg-zinc-900/20 hover:border-zinc-500 hover:text-white'} rounded active:scale-90 shadow-sm`}
             >
                 {levelText}
             </button>
@@ -465,7 +520,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                                 {renderLevelButton("engine_m4")}
                                 {renderProphecySlot({ blockId: "engine_m4", placeholderCN: "M4. 大他者阻断", placeholderEN: "M4. The Other", hideAffixes: true })}
                                 <span className="font-serif text-xl md:text-3xl font-light select-none text-[var(--text-main)]">
-                                    {lang === 'EN' ? ", he must pay" : "的重重阻击，由此面临"}
+                                    {lang === 'EN' ? ", he must pay" : "的重重阻击，面临"}
                                 </span>
                                 {renderProphecySlot({ blockId: "engine_m6", placeholderCN: "M6. 终极代价", placeholderEN: "M6. Stakes", hideAffixes: true })}
                                 <span className="font-serif text-xl md:text-3xl font-light select-none text-[var(--text-main)]">
@@ -513,6 +568,35 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                                 : undefined)
                     }
                 />
+            )}
+
+            {/* PORTAL TOOLTIP FOR COEFFICIENTS */}
+            {hoveredPortal && createPortal(
+                <div 
+                    className={`fixed z-[9999] w-max max-w-[320px] text-left p-5 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] pointer-events-none animate-in fade-in zoom-in-95 duration-100
+                        ${hoveredPortal.showAbove ? '-translate-y-full' : ''}
+                        ${theme === 'retro' ? 'bg-[#F9F7F1] border-[#1A1814] border' : 'bg-[#0a0a0a]/95 backdrop-blur-xl border-zinc-800 border'}`}
+                    style={{ 
+                        top: hoveredPortal.pos.top, 
+                        left: hoveredPortal.pos.left
+                    }}
+                >
+                    <div className={`text-sm font-black uppercase tracking-[0.2em] mb-2 border-b pb-2 flex items-center gap-2 ${theme === 'retro' ? 'text-zinc-500 border-black/10' : 'text-zinc-500 border-white/10'}`}>
+                        <span className={theme === 'retro' ? 'text-[#8B261D]' : 'text-gold-primary'}>
+                            {hoveredPortal.header || "DETAILS"}
+                            {hoveredPortal.count !== undefined && hoveredPortal.count > 0 && (
+                                <span className={`ml-2 font-bold ${theme === 'retro' ? 'text-black' : 'text-white'}`}>({hoveredPortal.count})</span>
+                            )}
+                        </span>
+                    </div>
+                    <div className={`text-xs md:text-sm font-bold mb-3 leading-relaxed whitespace-pre-line ${theme === 'retro' ? 'text-black' : 'text-zinc-100'}`}>
+                        {lang === 'EN' && hoveredPortal.details.defEn ? hoveredPortal.details.defEn : hoveredPortal.details.def}
+                        <span className={`block text-[10px] italic mt-2 ${theme === 'retro' ? 'text-[#8B261D]/80' : 'text-zinc-400'}`}>
+                            {lang === 'EN' && hoveredPortal.details.coreEn ? hoveredPortal.details.coreEn : hoveredPortal.details.core}
+                        </span>
+                    </div>
+                </div>,
+                document.body
             )}
         </div>
     );

@@ -102,43 +102,7 @@ export const AESTHETIC_LOGIC_TEMPLATES: LogicTemplateDef[] = [
   }
 ];
 
-export const GENRE_SUPER_GROUPS = [
-  {
-    id: "super_adrenaline",
-    name: "肾上腺素 (Adrenaline)",
-    desc: "动作、武侠、战争。身体的律动与冲突。",
-    includes: ["type_a", "type_d"],
-    iconName: "Zap"
-  },
-  {
-    id: "super_imagination",
-    name: "脑洞幻想 (Imagination)",
-    desc: "科幻、奇幻、超自然。超越现实的规则。",
-    includes: ["type_b", "type_c"],
-    iconName: "Sparkles"
-  },
-  {
-    id: "super_tension",
-    name: "惊悚悬疑 (Tension)",
-    desc: "恐怖、怪谈、推理。未知的恐惧与智力博弈。",
-    includes: ["type_e", "type_f"],
-    iconName: "Eye"
-  },
-  {
-    id: "super_emotion",
-    name: "情感共鸣 (Resonance)",
-    desc: "剧情、爱情、社会。人与人的羁绊与眼泪。",
-    includes: ["type_g", "type_h", "type_j"],
-    iconName: "Heart"
-  },
-  {
-    id: "super_style",
-    name: "风格解构 (Expression)",
-    desc: "喜剧、艺术、音乐。打破常规的视听语言。",
-    includes: ["type_i", "type_k", "type_l"],
-    iconName: "Music"
-  }
-];
+export const GENRE_SUPER_GROUPS = [];
 
 export const LIGHTING_SKELETONS = [
   {
@@ -335,6 +299,7 @@ export const BLOCK_LIMITS: Record<string, number> = {
   'aes_render_art': 1,
   'aes_render': 1,
   'engine_m0': 1, 'engine_m1': 3, 'engine_m2': 1, 'engine_m3': 3, 'engine_m4': 3, 'engine_m5': 3, 'engine_m6': 3, 'engine_m7': 1,
+  'engine_m2x': 1, 'engine_m4x': 1, 'engine_m5x': 1,
   'comm_c0': 1, 'comm_c1': 1, 'comm_c2': 3, 'comm_c3': 1, 'comm_c4': 3, 'comm_c5': 3, 'comm_c6': 3, 'comm_c7': 3,
   'skin_genre': 1, 'skin_animation_genre': 1, 'skin_location': 3, 'skin_society': 1, 'skin_ideology': 1,
   'poe_p0': 1, 'poe_p1': 1, 'poe_p2': 1, 'poe_p3': 1, 'poe_p4': 1

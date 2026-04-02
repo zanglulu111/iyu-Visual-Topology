@@ -251,6 +251,8 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
   };
 
   const personnelData = [
+    { id: 'heg', name: 'G.W.F. 黑格尔', title: 'G.W.F. Hegel', role: '德国古典哲学集大成者 / 精神现象学作者', status: 'ARCHIVED', fileId: 'SUB-1770', summary: '辩证法与绝对精神的织造者。揭示了精神在矛盾与扬弃中自我实现的动力机制。', color: 'text-mist-gold' },
+    { id: 'marx', name: '卡尔·马克思', title: 'Karl Marx', role: '科学唯物主义奠基人 / 资本论作者', status: 'ARCHIVED', fileId: 'SUB-1818', summary: '将辩证法立于大地。揭示了资本逻辑对主体的异化以及阶级斗争的必然性。', color: 'text-mist-red' },
     { id: 'lac', name: '雅克·拉康', title: 'Jacques Lacan', role: '迷雾学派奠基人 / 精神分析学家', status: 'DECEASED / ARCHIVED', fileId: 'SUB-1901', summary: '拓扑学与精神分析的缝合者。提出了“想象界、象征界、实在界”的三位一体结构。', color: 'text-mist-cyan' },
     { id: 'ziz', name: '斯拉沃热·齐泽克', title: 'Slavoj Žižek', role: '潜意识观测员 / 哲学家', status: 'ACTIVE', fileId: 'SUB-1949', summary: '意识形态缝隙的捕捉者。擅长通过通俗文化揭示欲望的悖论。', color: 'text-mist-purple' },
     { id: 'del', name: '吉尔·德勒兹', title: 'Gilles Deleuze', role: '生成之主体 / 块茎研究者', status: 'DECEASED', fileId: 'SUB-1925', summary: '拒绝中心化的树状逻辑，提倡平滑空间与生成-动物。', color: 'text-mist-rose' },
@@ -966,13 +968,30 @@ const renderDetailView = () => {
                         <div className="flex flex-col gap-1">
                           <span className={`text-[9px] font-bold uppercase tracking-[0.2em] ${theme === 'retro' ? 'text-black/40' : 'text-zinc-600'}`}>AUTHOR / SCHOLAR</span>
                           <span className={`text-sm font-serif ${theme === 'retro' ? 'text-black/80 font-bold' : 'text-[var(--philosopher-accent)]/80 font-medium'}`}>
-                            {data.author || (activeDictionary === 'MIST' ? '迷雾学派 (Mist School)' : activeDictionary === 'HEGEL' ? 'G.W.F. Hegel' : activeDictionary === 'MARX' ? 'Karl Marx' : activeDictionary === 'LACAN' ? 'Jacques Lacan' : activeDictionary === 'ZIZEK' ? 'Slavoj Žižek' : 'Unknown')}
+                            {data.author || (
+                              data.id?.startsWith('h_') ? 'G.W.F. 黑格尔 (Hegel)' :
+                              data.id?.startsWith('m_') ? '卡尔·马克思 (Karl Marx)' :
+                              data.id?.startsWith('l_') ? '雅克·拉康 (Jacques Lacan)' :
+                              data.id?.startsWith('z_') ? '斯拉沃热·齐泽克 (Slavoj Žižek)' :
+                              activeDictionary === 'MIST' ? '迷雾学派 (Mist School)' :
+                              activeDictionary === 'HEGEL' ? 'G.W.F. Hegel' :
+                              activeDictionary === 'MARX' ? 'Karl Marx' :
+                              activeDictionary === 'LACAN' ? 'Jacques Lacan' :
+                              activeDictionary === 'ZIZEK' ? 'Slavoj Žižek' : 'Unknown'
+                            )}
                           </span>
                         </div>
                         <div className="flex flex-col gap-1">
                           <span className={`text-[9px] font-bold uppercase tracking-[0.2em] ${theme === 'retro' ? 'text-black/40' : 'text-zinc-600'}`}>SOURCE TEXT / ORIGIN</span>
                           <span className={`text-xs font-serif italic ${theme === 'retro' ? 'text-black/70' : 'text-zinc-400'}`}>
-                            {data.source || (activeDictionary === 'MIST' ? '《迷雾学派辞典》(Mist School Lexicon)' : activeDictionary === 'HEGEL' ? '《精神现象学》(Phenomenology of Spirit)' : 'Archived Text')}
+                            {data.source || (
+                              data.id?.startsWith('h_') ? '《精神现象学》/《法哲学原理》' :
+                              data.id?.startsWith('m_') ? '《资本论》/《1844年手稿》' :
+                              data.id?.startsWith('l_') ? '《文集》(Écrits) / 研讨班' :
+                              data.id?.startsWith('z_') ? '《意识形态的崇高客体》' :
+                              activeDictionary === 'MIST' ? '《迷雾学派辞典》(Mist Lexicon)' :
+                              activeDictionary === 'HEGEL' ? '《精神现象学》(Phenomenology of Spirit)' : 'Archived Text'
+                            )}
                           </span>
                         </div>
                         {/* Related Concepts */}

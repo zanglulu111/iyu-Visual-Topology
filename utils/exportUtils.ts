@@ -53,7 +53,7 @@ export const generateGlobalDump = (options: GlobalDumpOptions): string => {
     lines.push(`\n## 1. 核心引擎 DNA (ENGINE PARAMETERS)`);
     lines.push(`**驱动模式:** ${drName}`);
     if (driverId === DriverType.AESTHETIC) lines.push(`**本体选择:** ${subjectType}`);
-    lines.push(`**世界法则:** 物理 [${worldLaw.physics}] / 语境 [${worldLaw.context}]`);
+    lines.push(`**世界法则:** 重力等级 LV${worldLaw.gravity || 3}`);
 
     const allBlocks = [
         ...NARRATIVE_ENGINE_BLOCKS, ...COMMERCIAL_ENGINE_BLOCKS,
