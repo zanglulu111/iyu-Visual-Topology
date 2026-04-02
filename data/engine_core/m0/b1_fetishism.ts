@@ -9,8 +9,8 @@ export const ENGINE_M0_FETISHISM: LibraryItemDef[] = [
     defEn: "Using silk, leather, or a gaze to fill the Other's lack.", 
     core: "我知道她缺少了什么，但我假装这个东西（恋物）就是那个缺失的全部。", 
     coreEn: "I know what she lacks, but I pretend this object is that missing part.",
-    logic: "主体的 M0（身份）是通过‘物’（Slot4）来锚定的。只要‘物’在场，M1（焦虑）就被完全取消。",
-    logicEn: "The subject's M0 is anchored via the 'object' (Slot4). As long as the object is present, M1 (Anxiety) is cancelled.",
+    logic: "主体的 M0（身份）是通过‘物’（M3 客体/SUR5 视域）来锚定的。只要‘物’在场，M1（焦虑）就被完全取消。",
+    logicEn: "The subject's M0 is anchored via the 'object' (M3/SUR5). As long as the object is present, M1 (Anxiety) is cancelled.",
     patch: {
       mechanics: "基础恋物协议 + [对象a强度 = 最大; 焦虑抑制权重 = 1.0]",
       mechanicsEn: "Base_FETISHISM + [Object_a_Intensity = Max; Anxiety_Suppression = 1.0]",
@@ -66,8 +66,8 @@ export const ENGINE_M0_FETISHISM: LibraryItemDef[] = [
     defEn: "Living in exquisite illusions, refusing the wasteland behind the wall.", 
     core: "只要天鹅绒还没褪色，世界就是安全的。", 
     coreEn: "As long as the velvet hasn't faded, the world is safe.",
-    logic: "审美作为最后一层防御（Aesthetic as Defense）。主体的 M1（虚无）被厚实的、华丽的视觉层（Slot4）完全覆盖。 ",
-    logicEn: "Aesthetic as final defense. M1 is entirely covered by thick, ornate visual layers (Slot4).",
+    logic: "审美作为最后一层防御（Aesthetic as Defense）。主体的 M1（虚无）被厚实的、华丽的视觉层（SUR5）完全覆盖。 ",
+    logicEn: "Aesthetic as final defense. M1 is entirely covered by thick, ornate visual layers (SUR5).",
     patch: {
       mechanics: "基础恋物协议 + [掩盖深度 = 最大; 外部表现系数 = 1.0]",
       mechanicsEn: "Base_FETISHISM + [Cloaking_Depth = Max; External_Performance = 1.0]",
@@ -85,8 +85,8 @@ export const ENGINE_M0_FETISHISM: LibraryItemDef[] = [
     defEn: "Capturing and solidifying the moment of decay.", 
     core: "死掉的东西最安全，因为它们不会再背叛我。", 
     coreEn: "Dead things are safest; they can't betray me again.",
-    logic: "主体的 M0（身份）被重定义为‘标本制作者’。通过将生命客体化（Slot4化），主体消除了对自己 M1（缺失认知）的恐惧。 ",
-    logicEn: "M0 redefined as 'taxidermist'. Eliminating M1 (Lack) fear by objectifying life (Slot4-izing).",
+    logic: "主体的 M0（身份）被重定义为‘标本制作者’。通过将生命客体化（SUR5化），主体消除了对自己 M1（缺失认知）的恐惧。 ",
+    logicEn: "M0 redefined as 'taxidermist'. Eliminating M1 (Lack) fear by objectifying life (SUR5-izing).",
     patch: {
       mechanics: "基础恋物协议 + [客体化函数 = 全局; 生命/标本转换率 = 1.0]",
       mechanicsEn: "Base_FETISHISM + [Objectification_Function = Global; Life-to-Specimen_Rate = 1.0]",
@@ -104,8 +104,8 @@ export const ENGINE_M0_FETISHISM: LibraryItemDef[] = [
     defEn: "Compulsive pursuit of logical rigor to hide core irrationality.", 
     core: "如果我在数学上证明了它是存在的，那么它背后的虚无就不值得害怕。", 
     coreEn: "If I prove it mathematically, the void behind it is not worth fearing.",
-    logic: "逻辑系统（Slot3）被作为一种‘物’来崇拜。主体在形式化的证明中逃避实在界（The Real）的撞击。 ",
-    logicEn: "Logic system (Slot3) worshipped as a 'thing'. Subject escapes the impact of the Real through formal proofs.",
+    logic: "逻辑系统（M4 律令）被作为一种‘物’来崇拜。主体在形式化的证明中逃避实在界（The Real）的撞击。 ",
+    logicEn: "Logic system (M4 Law) worshipped as a 'thing'. Subject escapes the impact of the Real through formal proofs.",
     patch: {
       mechanics: "基础恋物协议 + [证明回路强度 = 最大; 虚无抵消率 = 1.0]",
       mechanicsEn: "Base_FETISHISM + [Proof_Loop_Strength = Max; Void_Offset = 1.0]",

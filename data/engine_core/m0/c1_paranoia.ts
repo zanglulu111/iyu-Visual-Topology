@@ -28,8 +28,8 @@ export const ENGINE_M0_PARANOIA: LibraryItemDef[] = [
     defEn: "Rebuilding a private, mad logic atop the ruins.", 
     core: "我是宇宙的中心，每一个星星的跳动都在对我发信号。", 
     coreEn: "I am the universe's center; every star's pulse is a signal for me.",
-    logic: "自创符号界（Slot3_Private）。主体通过过度关联（Hyper-association）来强行解释所有的 M2 遭遇。",
-    logicEn: "Self-created symbolic system (Slot3_Private). Subject over-interprets (Hyper-association) all M2 encounters.",
+    logic: "自创符号界（M4_Private）。主体通过过度关联（Hyper-association）来强行解释所有的 M2 遭遇。",
+    logicEn: "Self-created symbolic system (M4_Private). Subject over-interprets (Hyper-association) all M2 encounters.",
     patch: {
       mechanics: "偏执狂协议 + [联觉增强 = 最大; 外部信号重映射 = 自定义]",
       mechanicsEn: "Base_PARANOIA + [Synesthesia_Boost = Max; External_Signal_Remapping = Custom]",
@@ -66,8 +66,8 @@ export const ENGINE_M0_PARANOIA: LibraryItemDef[] = [
     defEn: "Believing all sounds are one's own thoughts echoing in the air.", 
     core: "我还没开口，这个世界就开始抢答了。 ", 
     coreEn: "Before I speak, the world starts answering.",
-    logic: "内外边界（M1 vs Environment）的彻底消解。主体通过将外部信号（Slot8）认同为自己的 M5（动作）来消除大他者（M4）的威胁。 ",
-    logicEn: "Inner-outer boundary dissolution. Subject identifies external Slot8 as own M5 to eliminate M4 threat.",
+    logic: "内外边界（M1 vs Environment）的彻底消解。主体通过将外部信号（SUR5）认同为自己的 M5（动作）来消除大他者（M4）的威胁。 ",
+    logicEn: "Inner-outer boundary dissolution. Subject identifies external SUR5 as own M5 to eliminate M4 threat.",
     patch: {
       mechanics: "偏执狂协议 + [内外边界连通度 = 1.0; 归因重心 = 内部]",
       mechanicsEn: "Base_PARANOIA + [Boundary_Connectivity = 1.0; Attribution_Center = Internal]",
@@ -85,8 +85,8 @@ export const ENGINE_M0_PARANOIA: LibraryItemDef[] = [
     defEn: "Clipping tragedy from the logic grid as if it never existed.", 
     core: "哪有什么死亡？这里只有满园的春色。你看错了。 ", 
     coreEn: "Death? No, here is only spring. You saw it wrong.",
-    logic: "前排定（Foreclosure）机制的由于强制性补丁激活。任何破坏系统自洽（Slot3）的 M2（遭遇）都被瞬间移除，并投射为外部的物理幻觉。 ",
-    logicEn: "Foreclosure mechanism activated via mandatory patch. Any M2 (Encounter) disrupting consistency (Slot3) is instantly removed and projected as external hallucination.",
+    logic: "前排定（Foreclosure）机制的由于强制性补丁激活。任何破坏系统自洽（M4 私人法则）的 M2（遭遇）都被瞬间移除，并投射为外部的物理幻觉。 ",
+    logicEn: "Foreclosure mechanism activated via mandatory patch. Any M2 (Encounter) disrupting consistency (M4 Private Law) is instantly removed and projected as external hallucination.",
     patch: {
       mechanics: "偏执狂协议 + [前排定机制 = 1.0; 幻觉生成优先度 = 最大]",
       mechanicsEn: "Base_PARANOIA + [Foreclosure_Mechanism = 1.0; Hallucination_Priority = Max]",

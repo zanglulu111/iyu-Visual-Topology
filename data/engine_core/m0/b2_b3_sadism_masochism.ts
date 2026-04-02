@@ -48,8 +48,8 @@ export const ENGINE_M0_SADISM_MASOCHISM: LibraryItemDef[] = [
     defEn: "Complicating violations into a self-solvable art.", 
     core: "简单的犯罪没有乐趣。我需要一个充满逻辑美感的背叛过程。", 
     coreEn: "Simple crime is no fun; I need a betrayal process with logical beauty.",
-    logic: "主体的 M5（行动）将破坏行为（Not Slot3）仪式化和高度复杂化。叙事展现出一种怪异的‘破坏工匠精神’。 ",
-    logicEn: "M5 (Action) ritualizes and complicates acts of destruction (Not Slot3). Narrative displays a weird 'handicraft of destruction'.",
+    logic: "主体的 M5（行动）将破坏行为（反抗 M4 秩序）仪式化和高度复杂化。叙事展现出一种怪异的‘破坏工匠精神’。 ",
+    logicEn: "M5 (Action) ritualizes and complicates acts of destruction (Against M4 Order). Narrative displays a weird 'handicraft of destruction'.",
     patch: {
       mechanics: "基础 S&M 协议 + [复杂度常量 = 100; 审美与破坏耦合 = 1.0]",
       mechanicsEn: "Base_SM + [Complexity_Constant = 100; Aesthetic_Destruction_Coupling = 1.0]",
@@ -68,8 +68,8 @@ export const ENGINE_M0_SADISM_MASOCHISM: LibraryItemDef[] = [
     defEn: "Voluntarily becoming a tool for the Other's desire.", 
     core: "我是你快感的奴隶，而这恰恰使我成为了你的主人。", 
     coreEn: "I am the slave of your pleasure, which precisely makes me your master.",
-    logic: "主体的主体性（M0）被置换为工具（Slot4）。叙事公式：I = Tool(Other_Desire)。",
-    logicEn: "Subjectivity (M0) is displaced as a tool (Slot4). Formula: I = Tool(Other_Desire).",
+    logic: "主体的主体性（M0）被置换为工具（充当 M3 / SUR5 客体）。叙事公式：I = Tool(Other_Desire)。",
+    logicEn: "Subjectivity (M0) is displaced as a tool (M3/SUR5). Formula: I = Tool(Other_Desire).",
     patch: {
       mechanics: "基础 S&M 协议 + [客体化程度 = 最大; 服从收益权重 = 1.0]",
       mechanicsEn: "Base_SM + [Objectification_Degree = Max; Obedience_Gain = 1.0]",
@@ -87,8 +87,8 @@ export const ENGINE_M0_SADISM_MASOCHISM: LibraryItemDef[] = [
     defEn: "Pleasure defined by contracts; rules as the background for joy.", 
     core: "白纸黑字写清楚了，你现在可以对我做任何事。", 
     coreEn: "It's all in black and white now; you can do anything to me.",
-    logic: "形式逻辑对享乐的全面接管。M5（行为）和 M7（闭环）必须遵循严格的契约（Slot3）条款。 ",
-    logicEn: "Formal logic takes over enjoyment. M5 and M7 must follow strict contractual terms (Slot3).",
+    logic: "形式逻辑对享乐的全面接管。M5（行为）和 M7（闭环）必须遵循严格的契约（M4 律令）条款。 ",
+    logicEn: "Formal logic takes over enjoyment. M5 and M7 must follow strict contractual terms (M4 Law).",
     patch: {
       mechanics: "基础 S&M 协议 + [法律性权重 = 最大; 快感边界 = 明确]",
       mechanicsEn: "Base_SM + [Legalistic_Weight = Max; Enjoyment_Boundary = Explicit]",

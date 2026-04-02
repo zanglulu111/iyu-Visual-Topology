@@ -10,8 +10,8 @@ export const ENGINE_M0_VOYEURISM_EXHIBITIONISM: LibraryItemDef[] = [
     defEn: "Peering through cracks; denying lack via non-participation.", 
     core: "我是全知的观察者，只要我不入局，你就永远无法夺走我。", 
     coreEn: "I am the omniscient observer; if I don't enter the game, you can't take me.",
-    logic: "主体的 M0（存在）被缩减为‘凝视’（Slot8）。通过保持距离（Isolation），主体成功地将 M1（虚无）隔离在视线之外。",
-    logicEn: "M0 (Existence) is reduced to 'the gaze' (Slot8). By maintaining distance (Isolation), M1 is kept out of sight.",
+    logic: "主体的 M0（存在）被缩减为‘凝视’（SUR5）。通过保持距离（Isolation），主体成功地将 M1（虚无）隔离在视线之外。",
+    logicEn: "M0 (Existence) is reduced to 'the gaze' (SUR5). By maintaining distance (Isolation), M1 is kept out of sight.",
     patch: {
       mechanics: "基础窥淫/暴露协议 + [隔离指数 = 最大; 观察者权限 = 激活]",
       mechanicsEn: "Base_VOYEURISM + [Isolation_Index = Max; Observer_Privilege = Active]",
@@ -29,8 +29,8 @@ export const ENGINE_M0_VOYEURISM_EXHIBITIONISM: LibraryItemDef[] = [
     defEn: "Stopping time at a moment; if it doesn't flow, lack never happens.", 
     core: "时钟停了。这才是永恒。", 
     coreEn: "The clock stopped. This is eternity.",
-    logic: "时间轴（Slot1）的局部锁定. 主体的 M0（身份）被凝固在那个‘原初恋物’被确立的亚秒级时刻。 ",
-    logicEn: "Local locking of the timeline (Slot1). Subject identity (M0) is frozen at the sub-second moment the 'primal fetish' was set.",
+    logic: "时间轴（SUR1/M5 动力）的局部锁定. 主体的 M0（身份）被凝固在那个‘原初恋物’被确立的亚秒级时刻。 ",
+    logicEn: "Local locking of the timeline (SUR1/M5). Subject identity (M0) is frozen at the sub-second moment the 'primal fetish' was set.",
     patch: {
       mechanics: "基础窥淫/暴露协议 + [时流系数 = 0.001; 场景锁定 = 激活]",
       mechanicsEn: "Base_VOYEURISM + [Time-flow_Coefficient = 0.001; Scene_Lock = Active]",
@@ -48,8 +48,8 @@ export const ENGINE_M0_VOYEURISM_EXHIBITIONISM: LibraryItemDef[] = [
     defEn: "Invisible suturing in the void when the fetish is destroyed.", 
     core: "没了。但只要我继续做这个手势，它就还在。", 
     coreEn: "Gone. But as long as I keep making this gesture, it stays.",
-    logic: "主体的 M0 在客体丧失后进入的‘虚空模拟’状态. M5 继续按原来的轨迹运行，但目标（Slot4）已经变为空白。 ",
-    logicEn: "Void-simulation state of M0 after object loss. M5 continues on the original trajectory, but target (Slot4) is blank.",
+    logic: "主体的 M0 在客体丧失后进入的‘虚空模拟’状态. M5 继续按原来的轨迹运行，但目标（M3 客体）已经变为空白。 ",
+    logicEn: "Void-simulation state of M0 after object loss. M5 continues on the original trajectory, but target (M3 Object) is blank.",
     patch: {
       mechanics: "基础窥淫/暴露协议 + [模拟锚点 = 虚构; 认知惯性 = 最大]",
       mechanicsEn: "Base_VOYEURISM + [Simulated_Anchor = Fictional; Cognitive_Inertia = Max]",
@@ -106,8 +106,8 @@ export const ENGINE_M0_VOYEURISM_EXHIBITIONISM: LibraryItemDef[] = [
     defEn: "Turning reality into a strictly scripted drama.", 
     core: "在这个剧本里，我不是受害者，我是编剧和导演。", 
     coreEn: "In this script, I am not the victim; I am the writer and director.",
-    logic: "主体的 M5（行动）必须被‘剧本’（Slot3）严格限定. 任何偏离剧本的意外（M2）都会导致系统重启。",
-    logicEn: "M5 must be strictly limited by the 'script' (Slot3). Any deviation (M2) leads to a system restart.",
+    logic: "主体的 M5（行动）必须被‘已定剧本’（M4 象征秩序）严格限定. 任何偏离剧本的意外（M2）都会导致系统重启。",
+    logicEn: "M5 must be strictly limited by the 'script' (M4 Symbolic Order). Any deviation (M2) leads to a system restart.",
     patch: {
       mechanics: "基础窥淫/暴露协议 + [剧本刚性 = 1.0; 意外容忍度 = 0]",
       mechanicsEn: "Base_VOYEURISM + [Script_Rigidity = 1.0; Accident_Tolerance = 0]",

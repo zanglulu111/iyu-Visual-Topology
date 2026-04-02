@@ -4,18 +4,18 @@
  */
 
 export const M1_BASE_GROUP_PROTOCOLS = {
-  // A. 结构性异化 (Functional Alienation) - 主体简化为功能零件
+  // A. 结构性异化 (Structural Alienation) - 主体简化为功能零件
   GROUP_A: {
     mechanics: "Autonomy = 0.1; Friction = 0.8; Inertia = High; M1->M5 Efficiency = 0.2.",
     aesthetic: "Depth = Shallow; Texture = Metallic; Tone = Bureaucratic.",
     runtime: "IF (Detection(Will)) THEN Trigger(System_Panic); ELSE (Maintain_Stagnation)."
   },
 
-  // B. 符号性错位 (Symbolic Displacement) - 镜像/面具/真伪迷宫
+  // B. 无限欲望者 (Infinite Desire) - 成瘾/驱力/快感的病理性循环
   GROUP_B: {
-    mechanics: "Stability = Volatile; Identity_Cost = High; Observation_Delta = Max.",
-    aesthetic: "Filter = Mirrored; Rendering = Multi-Layered; Perspective = Parallax.",
-    runtime: "IF (Comparison(M1_Actual, M3_Fantasy) < 0.1) THEN Trigger(System_Desync)."
+    mechanics: "Drive_Persistence = Max; Satiety_Decay = Fast; Compulsion_Loop = Active; M1->M5 Overdrive = 0.8.",
+    aesthetic: "Filter = Overexposed; Rendering = Visceral; Texture = Feverish_Tremor.",
+    runtime: "IF (Satisfaction_Achieved) THEN Trigger(Immediate_Void_Return); ELSE (Escalate_Demand)."
   },
 
   // C. 本体论排除 (Ontological Exclusion) - 系统的弃民/不可读余数

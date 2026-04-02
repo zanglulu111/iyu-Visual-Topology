@@ -28,8 +28,8 @@ export const ENGINE_M0_SCHIZOPHRENIA: LibraryItemDef[] = [
     defEn: "Language pointing nowhere; letters binding via collision.", 
     core: "苹果、重力、上帝、红色、爆裂。不要问为什么，它们就在这里。", 
     coreEn: "Apple, gravity, god, red, burst. Don't ask why; they are just here.",
-    logic: "符号界（Slot7/Slot3）的机械化退化。语言回归到语音或字形的原始堆叠，彻底切断了与符号价值（M4）的联系。 ",
-    logicEn: "Mechanical regression of the symbolic (Slot7/Slot3). Language returns to primal vocal/graphic stacks, severing connection with values (M4).",
+    logic: "大他者（M4）律令的机械化退化。语言回归到语音或字形的原始堆叠，彻底切断了与符号价值（M4）的联系。 ",
+    logicEn: "Mechanical regression of the symbolic (M4 Law). Language returns to primal vocal/graphic stacks, severing connection with values (M4).",
     patch: {
       mechanics: "精分协议 + [符号关联率 = 0; 语词碰撞概率 = 最大]",
       mechanicsEn: "Base_SCHIZOPHRENIA + [Symbolic_Association = 0; Collision_Probability = Max]",
@@ -47,8 +47,8 @@ export const ENGINE_M0_SCHIZOPHRENIA: LibraryItemDef[] = [
     defEn: "When barriers vanish, 'The Thing' directly consumes the subject.", 
     core: "没有隐喻，火就是火，痛就是痛。无法逃离。", 
     coreEn: "No metaphors. Fire is fire; pain is pain. No escape.",
-    logic: "Slot7（隐喻层）彻底失效. M1（缺失）不再是缺失，而是某种过度的、令人窒息的实体填充。",
-    logicEn: "Slot7 (Metaphor) fails completely. M1 (Lack) is no longer missing, but a stifling, excessive entity.",
+    logic: "M4（大他者隐喻层）彻底失效. M1（缺失）不再是缺失，而是某种过度的、令人窒息的实体填充。",
+    logicEn: "M4 (Metaphor) fails completely. M1 (Lack) is no longer missing, but a stifling, excessive entity.",
     patch: {
       mechanics: "精分协议 + [隐喻转化率 = 0; 物理性伤害系数 = 最大]",
       mechanicsEn: "Base_SCHIZOPHRENIA + [Metaphor_Efficiency = 0; Physical_Damage_Factor = Max]",
@@ -66,8 +66,8 @@ export const ENGINE_M0_SCHIZOPHRENIA: LibraryItemDef[] = [
     defEn: "Language collapse due to the absence of the Name-of-the-Father.", 
     core: "没有法律，只有直接撞击肉体的原始命令。", 
     coreEn: "No law, only primal commands directly impacting the flesh.",
-    logic: "主体的 M4（法律/名之父）被设为 NULL. 主体的 M0（身份）无法被任何 Slot3（标签）固定。 ",
-    logicEn: "M4 (Law) is set to NULL. M0 (Identity) cannot be fixed by any Slot3 (Label).",
+    logic: "主体的 M4（法律/名之父）被设为 NULL. 主体的 M0（身份）无法被任何 SUR9/SUR10（社会标签）固定。 ",
+    logicEn: "M4 (Law) is set to NULL. M0 (Identity) cannot be fixed by any SUR9/SUR10 (Label).",
     patch: {
       mechanics: "精分协议 + [名之父缺失 = 激活; 符号界稳定性 = 0]",
       mechanicsEn: "Base_SCHIZOPHRENIA + [Name-of-the-Father_Absence = True; Symbolic_Stability = 0]",

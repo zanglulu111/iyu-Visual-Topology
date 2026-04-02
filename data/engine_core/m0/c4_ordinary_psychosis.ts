@@ -47,8 +47,8 @@ export const ENGINE_M0_ORDINARY_PSYCHOSIS: LibraryItemDef[] = [
     defEn: "attempting normalcy but failing due to the missing key suture.", 
     core: "我像正常人一样穿衣服。我学习他们的笑容。但为什么镜子里的人还是怪物？", 
     coreEn: "I dress like humans. I learn their smiles. Why is the mirror person still a monster?",
-    logic: "主体的 M0 试图通过模仿（Mimicry）来回归 Slot3（社会秩序）。但由于没有名之父（M4）的内在授权，这种模仿呈现出一种恐怖谷效应。 ",
-    logicEn: "M0 attempts mimicry of Slot3. Lacking M4 authorization, the result is the Uncanny Valley.",
+    logic: "主体的 M0 试图通过模仿（Mimicry）来回归 M4（大他者秩序）。但由于没有名之父（M4）的内在授权，这种模仿呈现出一种恐怖谷效应。 ",
+    logicEn: "M0 attempts mimicry of M4 Order. Lacking M4 authorization, the result is the Uncanny Valley.",
     patch: {
       mechanics: "普通精神病协议 + [模仿成功率 = 0.8; 恐怖谷系数 = 1.0]",
       mechanicsEn: "Base_ORDINARY_PSYCHOSIS + [Mimicry_Success = 0.8; Uncanny_Valley_Factor = 1.0]",
@@ -161,8 +161,8 @@ export const ENGINE_M0_ORDINARY_PSYCHOSIS: LibraryItemDef[] = [
     defEn: "Enclosing yourself in a visualized, perfect castle of illusion.", 
     core: "这里没有缺失，这里充满了光。你们在外面，我在里面。", 
     coreEn: "No lack here; only light. You are out; I am in.",
-    logic: "想象界（The Imaginary）对整个系统的全面占领。通过极致的视觉细节（Slot4）来彻底屏蔽实在界（The Real）的噪音。 ",
-    logicEn: "Imaginary takeover. Extreme visual detail (Slot4) shields against the Real's noise.",
+    logic: "想象界（The Imaginary）对整个系统的全面占领。通过极致的视觉细节（SUR5 防御）来彻底屏蔽实在界（The Real）的噪音。 ",
+    logicEn: "Imaginary takeover. Extreme visual detail (SUR5 Defense) shields against the Real's noise.",
     patch: {
       mechanics: "普通精神病协议 + [镜像完整度 = 1.0; 外部输入过滤 = 100%]",
       mechanicsEn: "Base_ORDINARY_PSYCHOSIS + [Mirror_Integrity = 1.0; External_Input_Filtering = 100%]",

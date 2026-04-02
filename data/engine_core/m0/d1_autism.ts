@@ -52,8 +52,8 @@ export const ENGINE_M0_AUTISM: LibraryItemDef[] = [
         defEn: "Treating a tiny object as a body extension to fill the void.",
         core: "捏住这枚硬币时，我才是完整的；松开它，世界就塌了。",
         coreEn: "With this coin, I am whole; without it, the world collapses.",
-        logic: "主体的身体图式（Body Schema）高度依赖外部节点（Slot4）。缺失（M1）被这个‘物’完全占据。 ",
-        logicEn: "Body Schema depends on external nodes (Slot4). Lack (M1) is occupied by the Object.",
+        logic: "主体的身体图式（Body Schema）高度依赖外部节点（SUR5）。缺失（M1）被这个‘物’完全占据。 ",
+        logicEn: "Body Schema depends on external nodes (SUR5). Lack (M1) is occupied by the Object.",
         patch: {
             mechanics: "孤独症基础协议 + [身体节点外化 = 1.0; 锚点敏感度 = 最大]",
             mechanicsEn: "Base_AUTISM + [Nodes_Externalization = 1.0; Anchor_Sensitivity = Max]",
@@ -109,8 +109,8 @@ export const ENGINE_M0_AUTISM: LibraryItemDef[] = [
         defEn: "Human relations downgraded to data points. No emotional links.",
         core: "你不是我的母亲，你只是那个在下午三点提供食物的行为节点。",
         coreEn: "You're not Mother; you're the node that provides food at 3 PM.",
-        logic: "主体的 M1（爱/欲望）被逻辑运算（Slot2）取代。世界是一个由无机物和‘满足需求的节点’构成的巨大的 Excel 表。",
-        logicEn: "Love/Desire (M1) replaced by Logic (Slot2). The world is a giant spreadsheet.",
+        logic: "主体的 M1（爱/欲望）被逻辑运算（M4 机械律）取代。世界是一个由无机物和‘满足需求的节点’构成的巨大的 Excel 表。",
+        logicEn: "Love/Desire (M1) replaced by Logic (M4 Law). The world is a giant spreadsheet.",
         patch: {
             mechanics: "孤独症基础协议 + [情感评估值 = 0; 需求匹配算法 = 全力运行]",
             mechanicsEn: "Base_AUTISM + [Emotional_Eval = 0; Need_Match_Algorithm = Max]",
@@ -185,8 +185,8 @@ export const ENGINE_M0_AUTISM: LibraryItemDef[] = [
         defEn: "Finding peace only in cold rationality and prime number patterns.",
         core: "质数不会背叛我，它们就在那里，永恒且静止。那才是真实的。",
         coreEn: "Primes won't betray me. They are eternal and static. That is real.",
-        logic: "象征界（Slot3）被数学逻辑链彻底置换。主体只在规律的完美闭环中获得安宁感（而非欲望）。",
-        logicEn: "Symbolic system (Slot3) replaced by math chains. Peace found in closed-loop patterns.",
+        logic: "象征界（M4）被数学逻辑链彻底置换。主体只在规律的完美闭环中获得安宁感（而非欲望）。",
+        logicEn: "Symbolic system (M4) replaced by math chains. Peace found in closed-loop patterns.",
         patch: {
             mechanics: "孤独症基础协议 + [抽象推理权重 = 最大; 情感冗余 = 0]",
             mechanicsEn: "Base_AUTISM + [Logic_Weight = Max; Emotional_Redundancy = 0]",
