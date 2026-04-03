@@ -81,6 +81,20 @@ export const MIST_INDEX: LacanCategory[] = [
         ]
     },
     {
+        id: "mist_volume_3_m4",
+        name: "第三卷（特殊文件）：M4大他者阻断原型",
+        enName: "Volume III (Appendix): M4 Archetypes",
+        desc: "大他者（The Big Other）作为压迫机制与结构性困境的具体化身，系统包含以下6组绝对阻断模块：",
+        concepts: [
+            { id: "m4_01_boss", name: "01. 位极者/绝对主权", enName: "01. The Sovereign Boss", category: "Engine: M4", shortDef: "大他者的拟人化终局。具备绝对意志的实体，将个体纯粹视作公式变量或可轻易抹杀的耗材。" },
+            { id: "m4_02_rival", name: "02. 竞争镜像/死敌", enName: "02. The Rival Enemy", category: "Engine: M4", shortDef: "另一重欲望镜像。与主体结构同构、能力对等，通过对同一崇高客体的无限争夺来彼此劫持。" },
+            { id: "m4_03_bureaucracy", name: "03. 无尽科层/微法西斯", enName: "03. The Bureaucracy", category: "Engine: M4", shortDef: "卡夫卡式的无情网格。没有具体的恶人，只有冰冷的程序流程将反抗者的肉身化为尘粉。" },
+            { id: "m4_04_crowd", name: "04. 平庸庸众/全景视场", enName: "04. The Silent Crowd", category: "Engine: M4", shortDef: "大他者凝视代理人。依靠集体沉默、盲目狂热与无意识的互相倾轧，在微观层面瓦解例外者。" },
+            { id: "m4_05_limits", name: "05. 人造边界/绝对禁忌", enName: "05. The Constructed Limits", category: "Engine: M4", shortDef: "被强制神圣化的界限（如阶层锁死、时间尽头或律法铁壁），实质是意识形态伪装成自然法则。" },
+            { id: "m4_06_absent", name: "06. 大他者的缺席", enName: "06. The Absent Other", category: "Engine: M4", shortDef: "实在界的荒谬重压。期待惩罚或救赎，揭开帷幕却发现后面空无一人，只剩冷漠的虚无本质。" }
+        ]
+    },
+    {
         id: "mist_volume_4",
         name: "第四卷：图像与视觉体系",
         enName: "Volume IV: Image & Visuals",
