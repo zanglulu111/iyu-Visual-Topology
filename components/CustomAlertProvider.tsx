@@ -41,7 +41,7 @@ export const CustomAlertProvider: React.FC<{ children: React.ReactNode }> = ({ c
         <>
             {children}
             {/* Global Alert Container */}
-            <div className={`fixed inset-0 z-[9999] flex flex-col pointer-events-none items-center justify-center p-4 transition-all duration-300 ${alerts.length > 0 ? (theme === 'retro' ? 'bg-[#3D1A16]/20 backdrop-blur-[2px] pointer-events-auto' : 'bg-black/60 backdrop-blur-sm pointer-events-auto') : ''}`}>
+            <div className={`fixed inset-0 z-[99999] flex flex-col pointer-events-none items-center justify-center p-4 transition-all duration-300 ${alerts.length > 0 ? (theme === 'retro' ? 'bg-[#3D1A16]/20 backdrop-blur-[2px] pointer-events-auto' : 'bg-black/60 backdrop-blur-sm pointer-events-auto') : ''}`}>
 
                 {/* Click outside to close */}
                 {alerts.length > 0 && (

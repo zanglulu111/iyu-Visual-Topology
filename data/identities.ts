@@ -1,4 +1,3 @@
-
 import { LibraryCategoryDef } from '../types';
 
 // =============================================================================
@@ -180,16 +179,11 @@ export const PROFESSION_CATEGORIES: LibraryCategoryDef[] = [
       { id: "diver", name: "深潜者 (Deep Diver)", def: "进入深海或高压环境工作。", core: "张力：深海幽闭恐惧。异界的压迫感。 | 视觉：重型潜水服、气泡、头灯光束、沉船、海底生物。" },
       { id: "vigilante", name: "义警 (Vigilante)", def: "在法律之外执行正义（蝙蝠侠/罗夏）。", core: "张力：谁来监督守望者？私刑的道德困境。 | 视觉：面具、黑夜、屋顶、雨、受伤的拳头。" }
     ]
-  }
-];
-
-// =============================================================================
-// PART 2: 阶级与出身 (CLASS / ORIGIN) - Birthright & Burden
-// =============================================================================
-export const ORIGIN_CATEGORIES: LibraryCategoryDef[] = [
+  },
+  // === ORIGINS ===
   {
     id: "orig_nobility",
-    name: "1. 权贵与血统 (Nobility & Bloodline)",
+    name: "9. 权贵与血统 (Nobility & Bloodline)",
     desc: "拥有古老的姓氏、土地和特权。背负家族的荣耀与诅咒。",
     items: [
       { id: "monarch_heir", name: "王储/皇族 (The Heir)", def: "皇位继承人，生而为王。", core: "张力：欲戴皇冠必承其重。个人自由 vs 国家责任。 | 视觉：权杖、城堡、复杂的礼仪、刺杀。" },
@@ -211,7 +205,7 @@ export const ORIGIN_CATEGORIES: LibraryCategoryDef[] = [
   },
   {
     id: "orig_elite",
-    name: "2. 财富与新贵 (Wealth & Elite)",
+    name: "10. 财富与新贵 (Wealth & Elite)",
     desc: "掌握资本、技术或资源。向上爬升的野心。",
     items: [
       { id: "tech_mogul", name: "科技新贵 (Tech Mogul)", def: "硅谷精英，相信技术能解决一切。", core: "张力：理性的傲慢。用代码重塑世界，忽视人性。 | 视觉：高领毛衣、极简办公室、发布会、私人飞机。" },
@@ -233,7 +227,7 @@ export const ORIGIN_CATEGORIES: LibraryCategoryDef[] = [
   },
   {
     id: "orig_middle",
-    name: "3. 中产与市民 (Middle Class & Civil)",
+    name: "11. 中产与市民 (Middle Class & Civil)",
     desc: "追求稳定、秩序和体面。社会的夹心层。",
     items: [
       { id: "suburban_family", name: "郊区中产 (Suburbanite)", def: "有房有车有狗，看似完美的生活。", core: "张力：平静表面下的绝望（美国丽人）。对混乱的恐惧。 | 视觉：修剪整齐的草坪、栅栏、SUV、烧烤架、抗抑郁药。" },
@@ -255,7 +249,7 @@ export const ORIGIN_CATEGORIES: LibraryCategoryDef[] = [
   },
   {
     id: "orig_labor",
-    name: "4. 劳工与底层 (Working Class & Poor)",
+    name: "12. 劳工与底层 (Working Class & Poor)",
     desc: "出卖体力，处于生存线边缘。粗砺的生命力。",
     items: [
       { id: "factory_hand", name: "蓝领工人 (Blue Collar)", def: "流水线上的操作工，依靠体力。", core: "张力：身体的磨损。阶级兄弟的情义。 | 视觉：工装、安全帽、油污、机器轰鸣、午餐盒。" },
@@ -277,7 +271,7 @@ export const ORIGIN_CATEGORIES: LibraryCategoryDef[] = [
   },
   {
     id: "orig_outcast",
-    name: "5. 边缘与弃民 (Outcast & Pariah)",
+    name: "13. 边缘与弃民 (Outcast & Pariah)",
     desc: "被主流社会排斥、遗忘或主动放逐的人。",
     items: [
       { id: "homeless", name: "流浪汉 (Homeless)", def: "没有家，睡在街头。", core: "张力：被社会抛弃的透明人。一无所有也无所畏惧。 | 视觉：购物车、纸板箱、多层衣服、胡须、桥洞。" },
@@ -299,7 +293,7 @@ export const ORIGIN_CATEGORIES: LibraryCategoryDef[] = [
   },
   {
     id: "orig_artificial",
-    name: "6. 特殊与人造 (Artificial & Special)",
+    name: "14. 特殊与人造 (Artificial & Special)",
     desc: "非自然出生，或者是被制造/改造的存在。",
     items: [
       { id: "clone", name: "克隆人 (Clone)", def: "基因复制品，没有父母，有编号。", core: "张力：我是否拥有灵魂？作为备用零件的命运。 | 视觉：培养罐、条形码、一模一样的脸、白色制服。" },
@@ -321,7 +315,7 @@ export const ORIGIN_CATEGORIES: LibraryCategoryDef[] = [
   },
   {
     id: "orig_crime_fam",
-    name: "7. 罪恶世家 (Criminal Family)",
+    name: "15. 罪恶世家 (Criminal Family)",
     desc: "生在犯罪家族，血液里流淌着罪恶。",
     items: [
       { id: "mafia_prince", name: "黑帮继承人 (Mafia Prince)", def: "教父的儿子，不想接班但被迫接班。", core: "张力：想要洗白 vs 家族责任。血浓于水。 | 视觉：西装、葬礼、枪、家族聚餐、吻手礼。" },
@@ -343,7 +337,7 @@ export const ORIGIN_CATEGORIES: LibraryCategoryDef[] = [
   },
   {
     id: "orig_exile",
-    name: "8. 异乡与流亡 (Exile & Foreigner)",
+    name: "16. 异乡与流亡 (Exile & Foreigner)",
     desc: "身体在此时此地，灵魂在别处。",
     items: [
       { id: "political_exile", name: "政治流亡者 (Political Exile)", def: "因政见不同被迫离开祖国。", core: "张力：回不去的故乡。在异国他乡的失落感。 | 视觉：旧报纸、收音机、行李箱、孤独的公寓、信件。" },

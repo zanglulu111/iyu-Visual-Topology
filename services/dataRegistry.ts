@@ -8,7 +8,7 @@ import { NARRATIVE_ENGINE_LIBRARY } from '../data/engine_core/narrative_engine';
 // 皮肤与商业/实验/预告片库
 import { SKIN_LIBRARY } from '../data/skin_libraries';
 import { GENRE_CATEGORIES } from '../data/genres';
-import { ANIMATION_GENRE_CATEGORIES } from '../data/animation_genres';
+import { WORLD_MOTIF_CATEGORIES } from '../data/world_motifs';
 
 // Commercial
 import { COMM_SKIN_LIBRARY } from '../data/commercial_skin';
@@ -31,7 +31,7 @@ const ALL_LIBRARIES_COLLECTION: LibraryCategoryDef[][] = [
     NARRATIVE_ENGINE_LIBRARY,
     SKIN_LIBRARY,
     GENRE_CATEGORIES,
-    ANIMATION_GENRE_CATEGORIES,
+    WORLD_MOTIF_CATEGORIES,
     COMMERCIAL_ENGINE_LIBRARY,
     COMM_SKIN_LIBRARY,
     EXPERIMENTAL_SKIN_LIBRARY,
@@ -60,7 +60,7 @@ const getItemsForBlockId = (blockId: string): LibraryItemDef[] | null => {
         return items;
     }
     if (blockId === 'skin_animation_genre') {
-        const items = ANIMATION_GENRE_CATEGORIES.flatMap(c => c.items);
+        const items = WORLD_MOTIF_CATEGORIES.flatMap(c => c.items);
         _specificLibCache[blockId] = items;
         return items;
     }
@@ -83,7 +83,7 @@ let _libMap: Record<string, LibraryCategoryDef[]> | null = null;
 const buildLibMap = () => {
     if (_libMap) return _libMap;
     _libMap = {
-        'NARRATIVE': [...NARRATIVE_ENGINE_LIBRARY, ...SKIN_LIBRARY, ...GENRE_CATEGORIES, ...ANIMATION_GENRE_CATEGORIES],
+        'NARRATIVE': [...NARRATIVE_ENGINE_LIBRARY, ...SKIN_LIBRARY, ...GENRE_CATEGORIES, ...WORLD_MOTIF_CATEGORIES],
         'COMMERCIAL': [...COMMERCIAL_ENGINE_LIBRARY, ...COMM_SKIN_LIBRARY],
         'EXPERIMENTAL': [...POETIC_ENGINE_LIBRARY, ...EXPERIMENTAL_SKIN_LIBRARY],
         'TRAILER': [...TRAILER_ENGINE_LIBRARY, ...TRAILER_SKIN_LIBRARY],

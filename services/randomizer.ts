@@ -23,7 +23,7 @@ import {
 } from '../constants';
 import { ALL_SKIN_BLOCKS, SKIN_LIBRARY } from '../data/skin_libraries';
 import { GENRE_CATEGORIES } from '../data/genres';
-import { ANIMATION_GENRE_CATEGORIES } from '../data/animation_genres';
+import { WORLD_MOTIF_CATEGORIES } from '../data/world_motifs';
 import { MASTER_PRESETS, MASTER_PRESETS_REALISM, MASTER_PRESETS_STYLIZED } from '../data/master_presets';
 
 // Constants for Aesthetic Mode Logic
@@ -159,7 +159,7 @@ export const getSingleRandomTag = (
     } else if (driverType === DriverType.TRAILER) {
         fullLibrary = [...TRAILER_ENGINE_LIBRARY, ...TRAILER_SKIN_LIBRARY];
     } else {
-        fullLibrary = [...NARRATIVE_ENGINE_LIBRARY, ...SKIN_LIBRARY, ...GENRE_CATEGORIES, ...ANIMATION_GENRE_CATEGORIES]; 
+        fullLibrary = [...NARRATIVE_ENGINE_LIBRARY, ...SKIN_LIBRARY, ...GENRE_CATEGORIES, ...WORLD_MOTIF_CATEGORIES]; 
     }
 
     const libId = blockId === 'skin_era' ? 'skin_era_lib' : `${blockId}_lib`;
@@ -517,7 +517,7 @@ export const generateGlobalRandomState = (
         library = [...TRAILER_ENGINE_LIBRARY, ...TRAILER_SKIN_LIBRARY];
     } else {
         blocks = [...NARRATIVE_ENGINE_BLOCKS, ...ALL_SKIN_BLOCKS];
-        library = [...NARRATIVE_ENGINE_LIBRARY, ...SKIN_LIBRARY, ...GENRE_CATEGORIES, ...ANIMATION_GENRE_CATEGORIES]; 
+        library = [...NARRATIVE_ENGINE_LIBRARY, ...SKIN_LIBRARY, ...GENRE_CATEGORIES, ...WORLD_MOTIF_CATEGORIES]; 
     }
     const newState = { ...currentFieldState };
     if (activeEraTag && !lockedModules[eraBlockId] && !isSkinMasterLocked && blocks.some(b => b.id === eraBlockId)) newState[eraBlockId] = [activeEraTag];
@@ -535,7 +535,7 @@ export const generateGlobalRandomState = (
             const totalGenreCount = Math.random() < 0.5 ? 1 : 2; 
             
             const genreLib = GENRE_CATEGORIES.flatMap(c => c.items).map(i => ({...i, blockId: genreId}));
-            const animLib = ANIMATION_GENRE_CATEGORIES.flatMap(c => c.items).map(i => ({...i, blockId: animId}));
+            const animLib = WORLD_MOTIF_CATEGORIES.flatMap(c => c.items).map(i => ({...i, blockId: animId}));
             const combinedPool = [...genreLib, ...animLib];
             
             const lockedGenre = lockedTags[genreId] || [];

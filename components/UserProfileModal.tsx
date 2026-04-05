@@ -26,10 +26,11 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
 
     if (!isOpen) return null;
 
-    const isActiveMember = currentUser.isPro || ['annual', 'lifetime'].includes(currentUser.membershipTier || '');
+    const isActiveMember = currentUser.isPro || ['annual', 'lifetime', 'admin'].includes(currentUser.membershipTier || '');
 
     const getMembershipLabel = () => {
         const tier = currentUser.membershipTier;
+        if (tier === 'admin') return lang === 'CN' ? '系统管理员 (System Admin)' : 'System Admin';
         if (tier === 'lifetime') return lang === 'CN' ? '终身造物主 (Lifetime Creator)' : 'Lifetime Creator';
         if (tier === 'annual') return lang === 'CN' ? '年度架构师 (Annual Architect)' : 'Annual Architect';
         return lang === 'CN' ? '未激活 (Not Activated)' : 'Not Activated';

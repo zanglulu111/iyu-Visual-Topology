@@ -107,11 +107,11 @@ export const GENRE_CATEGORIES: LibraryCategoryDef[] = [
         topology: "Weights: M4 (Physics/Reality) is Absolute. Logic: Competence porn. M1 survives by understanding the rules of M4. Emotion is secondary to logic."
       },
       { 
-        id: "cyberpunk", 
-        name: "赛博朋克 (Cyberpunk)", 
-        def: "高科技低生活、义体改造、黑客、企业极权、霓虹雨夜。", 
-        core: "叙事张力：肉体的异化 vs 灵魂（Ghost）的存续。底层个体在庞大企业系统前的无力挣扎。 | 视觉参考：永恒的雨夜、高饱和度的霓虹灯（粉/紫/青）、全息广告巨幕、肮脏的街道与拉面摊、义肢接口。",
-        topology: "Weights: M4 (Corporation/System) >>> M1 (Subject). Logic: The body is commodified. M3 is usually escape or connection, which is impossible. 'High Tech, Low Life'."
+        id: "mecha", 
+        name: "机甲/巨型兵器 (Mecha / Giant Robot)", 
+        def: "巨大机器人、驾驶员的热血与创伤、武器崇拜、战争隐喻。", 
+        core: "叙事张力：人类脆弱肉体 vs 钢铁巨兽的支配力量。机器是身体的延伸，也是心灵的牢笼。 | 视觉参考：厚重的装甲划痕、液压引擎的轰鸣、驾驶舱内闪烁的警报红光、机甲与怪兽/其他机甲的庞大碰撞。",
+        topology: "Weights: M5 (Machine) > M1 (Pilot). Logic: The pilot must synchronize with the weapon. The machine amplifies both power and trauma."
       },
       { 
         id: "space_opera", 
@@ -149,11 +149,11 @@ export const GENRE_CATEGORIES: LibraryCategoryDef[] = [
         topology: "Weights: M4 (The Other) is Unknowable. Logic: Communication breakdown. M1 confronts the limits of human understanding. Terror or Awe."
       },
       { 
-        id: "steampunk", 
-        name: "蒸汽朋克 (Steampunk)", 
-        def: "维多利亚美学、齿轮机械、飞艇、复古未来主义。", 
-        core: "叙事张力：工业革命的乐观主义 vs 维多利亚时代的阶级僵化。机械作为一种浪漫的魔法。 | 视觉参考：黄铜齿轮、蒸汽烟雾、护目镜、巨大的飞艇、维多利亚式礼服、发条装置。",
-        topology: "Weights: M5 (Invention) > M4 (Tradition). Logic: The romance of the machine. Technology is visible, tactile, and wondrous."
+        id: "virtual_reality", 
+        name: "虚拟现实/意识空间 (Virtual Reality / Matrix)", 
+        def: "潜入层级世界、庄周梦蝶、缸中之脑、数字乌托邦/地狱。", 
+        core: "叙事张力：虚拟的完美幻象 vs 残酷的真实世界。对现实定义的根本性质疑。 | 视觉参考：数据的瀑布流、极其纯净或几何化的物理空间、物理法则的突然失效、连接脑部的缆线、虚假的蓝天。",
+        topology: "Weights: M2 (Reality) vs M0 (Illusion). Logic: The awakening. M1 must break through layers of deception to find the 'True' reality."
       },
       { 
         id: "biopunk", 

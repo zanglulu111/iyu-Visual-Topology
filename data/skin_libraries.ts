@@ -1,21 +1,21 @@
 
 import { LibraryCategoryDef, NarrativeBlockDef, LibraryItemDef } from '../types';
 import { GENRE_CATEGORIES } from './genres';
-import { ANIMATION_GENRE_CATEGORIES } from './animation_genres';
+import { WORLD_MOTIF_CATEGORIES } from './world_motifs';
 import { NARRATIVE_STRUCTURES } from './narrative_structures';
 import { STORY_VOLUMES } from './story_volumes';
 import { NARRATIVE_ERA_CATEGORIES } from './narrative_spacetime_anchors'; 
 import { LOCATION_CATEGORIES } from './locations'; 
 import { SOCIETY_CATEGORIES, IDEOLOGY_CATEGORIES } from './societies_ideologies';
-import { PROFESSION_CATEGORIES, ORIGIN_CATEGORIES } from './identities';
+import { PROFESSION_CATEGORIES } from './identities';
 import { SYNTHESIZER_SUR4X } from './engine_core/synthesizer/sur4x';
-import { SYNTHESIZER_SUR11X } from './engine_core/synthesizer/sur11x';
+import { SYNTHESIZER_SUR10X } from './engine_core/synthesizer/sur10x';
 
 export const SKIN_BLOCKS: NarrativeBlockDef[] = [
   { 
     id: "skin_era", 
-    name: "SUR3.时空锚点", 
-    enName: "sur3.Spacetime Anchor", 
+    name: "SUR2.背景场域", 
+    enName: "sur2.Background Field", 
     description: "决定叙事发生的时代背景、历史张力或神话坐标。它是社会矛盾与因果逻辑发生的原始“温床”。", 
     descriptionEn: "Determines the historical tension, mythic coordinates, or temporal setting where social conflicts and causal logic brew.", 
     tags: [] 
@@ -62,24 +62,16 @@ export const SKIN_BLOCKS: NarrativeBlockDef[] = [
   },
   { 
     id: "skin_profession", 
-    name: "SUR9.主体职业", 
-    enName: "sur9.Subject Occupation", 
-    description: "主体的社会角色或生存手段，即“出厂负债”与社会外壳。", 
-    descriptionEn: "The subject's social role or means of survival.", 
-    tags: [] 
-  },
-  { 
-    id: "skin_origin", 
-    name: "SUR10.主体背景", 
-    enName: "sur10.Class / Background", 
-    description: "社会经济背景与出身权利。定义主角在权力结构中的原始坐标。", 
-    descriptionEn: "Socioeconomic background and birthright coordinates.", 
+    name: "SUR9.职业身份", 
+    enName: "sur9.Subject Identity/Class", 
+    description: "主体的社会角色、生存手段、社会经济背景与出身权利。定义角色在权力结构中的位置。", 
+    descriptionEn: "The subject's social role, means of survival, socioeconomic background and birthright.", 
     tags: [] 
   },
   { 
     id: "skin_ideology", 
-    name: "SUR11.哲学信念", 
-    enName: "sur11.Philosophy / Ism", 
+    name: "SUR10.哲学信念", 
+    enName: "sur10.Philosophy / Ism", 
     description: "主体自认为用以填补内心缺失的意识形态（如：虚无主义、英雄主义）。", 
     descriptionEn: "The ideology used to fill the subject's inner void (e.g., Nihilism).", 
     tags: [] 
@@ -114,8 +106,8 @@ export const ALL_SKIN_BLOCKS = [
     },
     { 
       id: "skin_animation_genre", 
-      name: "SUR2.世界模体", 
-      enName: "sur2.World Motif", 
+      name: "SURx.废弃世界模体", 
+      enName: "surx.Deprecated Motif", 
       description: "提供世界的视觉与感官滤镜，如：赛博、武侠、废土等。", 
       descriptionEn: "Visual and sensory filter for the world (e.g., Cyberpunk).", 
       tags: [] 
@@ -130,9 +122,9 @@ export const ALL_SKIN_BLOCKS = [
       tags: [] 
     },
     { 
-      id: "sur11x", 
-      name: "SUR11X.象征界缝合度", 
-      enName: "sur11x.Symbolic Suture", 
+      id: "sur10x", 
+      name: "SUR10X.象征界缝合度", 
+      enName: "sur10x.Symbolic Suture", 
       description: "主体对于外在秩序的认同与屈从深度。", 
       descriptionEn: "Subject's depth of submission to the Symbolic Order.", 
       tags: [] 
@@ -166,17 +158,17 @@ export const SKIN_LIBRARY: LibraryCategoryDef[] = [
     },
     {
         id: "skin_animation_genre_lib",
-        name: "世界模体 (World Motif / Animation)",
+        name: "废弃世界模体 (Deprecated)",
         desc: "决定故事的美学风格与感官滤镜。",
-        items: ANIMATION_GENRE_CATEGORIES.flatMap(cat => cat.items.map(item => ({
+        items: WORLD_MOTIF_CATEGORIES.flatMap(cat => cat.items.map(item => ({
             ...item,
             group: cat.name
         })))
     },
     {
         id: "skin_era_lib", 
-        name: "时空锚点 (Spacetime Anchor)", 
-        desc: "决定叙事发生的时代背景。它是社会矛盾发生的原始“温床”。",
+        name: "背景场域 (Background Field)", 
+        desc: "决定叙事发生的生存法则与视觉符号集合。它是社会矛盾发生的原始温床。",
         items: NARRATIVE_ERA_CATEGORIES.flatMap(cat => cat.items.map(item => ({
             ...item,
             group: cat.name
@@ -233,18 +225,9 @@ export const SKIN_LIBRARY: LibraryCategoryDef[] = [
     },
     {
         id: "skin_profession_lib", 
-        name: "主体职业 (Profession)", 
-        desc: "Survival Means / Social Mask",
+        name: "主体身份与阶层 (Identity & Class)", 
+        desc: "Survival Means, Social Mask, Socioeconomic background and birthright.",
         items: PROFESSION_CATEGORIES.flatMap(cat => cat.items.map(item => ({
-            ...item,
-            group: cat.name
-        })))
-    },
-    {
-        id: "skin_origin_lib", 
-        name: "主体背景 (Background)", 
-        desc: "Socioeconomic background and birthright.",
-        items: ORIGIN_CATEGORIES.flatMap(cat => cat.items.map(item => ({
             ...item,
             group: cat.name
         })))
@@ -278,9 +261,9 @@ export const SKIN_LIBRARY: LibraryCategoryDef[] = [
         items: SYNTHESIZER_SUR4X.map(item => ({...item, group: "物理阶层阻力"}))
     },
     {
-        id: "sur11x_lib",
+        id: "sur10x_lib",
         name: "象征界缝合度 (Symbolic Suture)",
         desc: "对待信仰的‘当真程度’滑块。",
-        items: SYNTHESIZER_SUR11X.map(item => ({...item, group: "象征界缝合度"}))
+        items: SYNTHESIZER_SUR10X.map(item => ({...item, group: "象征界缝合度"}))
     }
 ];

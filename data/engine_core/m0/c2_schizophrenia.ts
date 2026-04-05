@@ -66,8 +66,8 @@ export const ENGINE_M0_SCHIZOPHRENIA: LibraryItemDef[] = [
     defEn: "Language collapse due to the absence of the Name-of-the-Father.", 
     core: "没有法律，只有直接撞击肉体的原始命令。", 
     coreEn: "No law, only primal commands directly impacting the flesh.",
-    logic: "主体的 M4（法律/名之父）被设为 NULL. 主体的 M0（身份）无法被任何 SUR9/SUR10（社会标签）固定。 ",
-    logicEn: "M4 (Law) is set to NULL. M0 (Identity) cannot be fixed by any SUR9/SUR10 (Label).",
+    logic: "主体的 M4（法律/名之父）被设为 NULL. 主体的 M0（身份）无法被任何 SUR9（职业身份）固定。 ",
+    logicEn: "M4 (Law) is set to NULL. M0 (Identity) cannot be fixed by any SUR9 (Label).",
     patch: {
       mechanics: "精分协议 + [名之父缺失 = 激活; 符号界稳定性 = 0]",
       mechanicsEn: "Base_SCHIZOPHRENIA + [Name-of-the-Father_Absence = True; Symbolic_Stability = 0]",

@@ -120,7 +120,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
         if (isCommercial) return lang === 'EN' ? "THE SUTURE" : "欲望缝合";
         if (isExperimental) return lang === 'EN' ? "PHENOMENOLOGY" : "现象学还原";
         if (isTrailer) return lang === 'EN' ? "VIRTUAL ILLUSION" : "虚拟幻象";
-        return lang === 'EN' ? "AUTONOMOUS CORE: NARRATIVE DYNAMICS" : "自治核心：欲望动力学";
+        return lang === 'EN' ? "EROS LABYRINTH" : "爱欲迷宫";
     };
 
     const getEngineSubtitle = () => {

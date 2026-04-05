@@ -103,7 +103,7 @@ export const NARRATIVE_ENGINE_FORMULA = `
 **S0. 类型基因 (Genre) [skin_genre]**
 *   **Logic:** 决定视觉风格。是[Noir]的阴影，还是[Sci-Fi]的霓虹？
 
-**S1. 时空锚点 (Era) [skin_era]**
+**S1. 背景场域 (Era) [skin_era]**
 *   **Logic:** 决定道具库。是[剑与魔法]，还是[左轮手枪]？
 
 **S2. 空间场景 (Location) [skin_location]**
@@ -291,7 +291,7 @@ export const NARRATIVE_ALGEBRAIC_PROTOCOL = `
 ---
 
 ## 5. 时代降维协议 (THE CHRONO-LOGIC PROTOCOL)
-**关键: 你必须将所有概念与 [S1. 时空锚点] 严格对齐，并使用独特的时代词汇。**
+**关键: 你必须将所有概念与 [S1. 背景场域] 严格对齐，并使用独特的时代词汇。**
 
 如果用户在古代背景下选择了 **现代/科幻关键词**（如“算法”、“黑客”、“故障”），你必须执行 **概念降维 (Concept Transcoding)**：
 

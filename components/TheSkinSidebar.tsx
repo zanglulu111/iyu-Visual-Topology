@@ -18,7 +18,7 @@ import {
 import { useTheme } from '../contexts/ThemeContext';
 import { SKIN_LIBRARY, ALL_SKIN_BLOCKS } from '../data/skin_libraries';
 import { GENRE_CATEGORIES } from '../data/genres';
-import { ANIMATION_GENRE_CATEGORIES } from '../data/animation_genres';
+import { WORLD_MOTIF_CATEGORIES } from '../data/world_motifs';
 import { getHistoricalContext } from '../data/historical_timeline';
 
 interface TheSkinSidebarProps {
@@ -69,7 +69,7 @@ const getBlockLibInfo = (blockId: string) => {
   if (blockId === 'skin_genre') {
     count = GENRE_CATEGORIES.reduce((acc, cat) => acc + cat.items.length, 0);
   } else if (blockId === 'skin_animation_genre') {
-    count = ANIMATION_GENRE_CATEGORIES.reduce((acc, cat) => acc + cat.items.length, 0);
+    count = WORLD_MOTIF_CATEGORIES.reduce((acc, cat) => acc + cat.items.length, 0);
   } else {
     const libId = blockId === 'skin_era' ? 'skin_era_lib' : `${blockId}_lib`;
     // Combine all potential libraries for lookup
@@ -107,11 +107,13 @@ const SkinSlot: React.FC<{
   onAddCustomDef?: (name: string, def: string, core: string) => void;
   onEditCustomDef?: (oldName: string, newName: string, def: string, core: string) => void;
   onManualUpdate?: (blockId: string, tags: string[]) => void;
+  alwaysShowButtons?: boolean;
+  onClickOverride?: () => void;
 }> = ({
   blockId, placeholder, fieldState, accentColor, onOpen, onRemove, lang,
   lockedTags, onToggleTagLock, onRandomizeTag, accentTextColor, driverType,
   onRandomizeBlock, onClearBlock, isBlockLocked, onToggleLockBlock, getItemDetails,
-  onAddCustomDef, onEditCustomDef, onManualUpdate
+  onAddCustomDef, onEditCustomDef, onManualUpdate, alwaysShowButtons, onClickOverride
 }) => {
     const { theme } = useTheme();
     const isCommercial = driverType === DriverType.COMMERCIAL;
@@ -261,7 +263,7 @@ const SkinSlot: React.FC<{
               <span key={`${blockId}-${idx}`} className="inline-flex flex-col items-center group/tag relative align-top">
                 <span className="flex items-baseline relative z-10">
                   <span
-                    onClick={() => onOpen(blockId)}
+                    onClick={() => onClickOverride ? onClickOverride() : onOpen(blockId)}
                     onMouseEnter={(e) => safeDetails && handleMouseEnter(e, safeDetails)}
                     onMouseLeave={handleMouseLeave}
                     className={`
@@ -278,7 +280,7 @@ const SkinSlot: React.FC<{
                   {idx < tags.length - 1 && <span className={`font-bold mx-0.5 text-lg ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}`}>、</span>}
                 </span>
 
-                <div className={`flex items-center gap-1 mt-1 z-10 ${theme === 'retro' ? 'bg-[var(--bg-panel)]' : 'bg-black/80'} rounded p-1 shadow-md border ${theme === 'retro' ? 'border-[var(--border-main)]/40' : 'border-zinc-800'} opacity-0 group-hover/tag:opacity-100 transition-opacity duration-300`}>
+                <div className={`flex items-center gap-1 mt-1 z-10 ${theme === 'retro' ? 'bg-[var(--bg-panel)]' : 'bg-black/80'} rounded p-1 shadow-md border ${theme === 'retro' ? 'border-[var(--border-main)]/40' : 'border-zinc-800'} ${alwaysShowButtons ? 'opacity-100' : 'opacity-0 group-hover/tag:opacity-100'} transition-opacity duration-300`}>
                   <button
                     onClick={(e) => { e.stopPropagation(); onRandomizeTag?.(blockId, tag); }}
                     disabled={isTagLocked}
@@ -319,7 +321,7 @@ const SkinSlot: React.FC<{
         ) : (
           <span className="group/tag relative inline-flex flex-col items-center align-top">
             <span
-              onClick={() => !isBlockLocked && onOpen(blockId)}
+              onClick={() => !isBlockLocked && (onClickOverride ? onClickOverride() : onOpen(blockId))}
               onMouseEnter={(e) => handleMouseEnter(e, { 
                 def: libInfo.description, 
                 defEn: libInfo.descriptionEn,
@@ -330,7 +332,7 @@ const SkinSlot: React.FC<{
             >
               {lang === 'EN' ? '[' : '【'}{placeholder}{lang === 'EN' ? ']' : '】'}
             </span>
-            <div className={`flex items-center gap-1 mt-1 z-10 ${theme === 'retro' ? 'bg-[var(--bg-panel)]' : 'bg-black/80'} rounded p-1 border ${theme === 'retro' ? 'border-[var(--border-main)]/40' : 'border-zinc-800'} shadow-md opacity-0 group-hover/tag:opacity-100 transition-opacity duration-300`}>
+            <div className={`flex items-center gap-1 mt-1 z-10 ${theme === 'retro' ? 'bg-[var(--bg-panel)]' : 'bg-black/80'} rounded p-1 border ${theme === 'retro' ? 'border-[var(--border-main)]/40' : 'border-zinc-800'} shadow-md ${alwaysShowButtons ? 'opacity-100' : 'opacity-0 group-hover/tag:opacity-100'} transition-opacity duration-300`}>
               <button onClick={(e) => { e.stopPropagation(); onRandomizeBlock?.(blockId); }} disabled={isBlockLocked} className={`flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-white' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-white'} border rounded transition-colors`}><Dice5 size={10} /></button>
               <button onClick={(e) => { e.stopPropagation(); onToggleLockBlock?.(blockId); }} className={`flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-white' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-white'} border rounded transition-colors ${isBlockLocked ? lockedClass : ''}`}>{isBlockLocked ? <Lock size={10} /> : <Unlock size={10} />}</button>
               <button onClick={handleCreateClick} disabled={isBlockLocked} className={`flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-white' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-white'} border rounded transition-colors`}><Edit2 size={10} /></button>
@@ -698,7 +700,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
       ? (lang === 'EN'
         ? `${selectedYear}${selectedCountry ? ' ' + selectedCountry : ''}`
         : `${selectedYear}年${selectedCountry}`)
-      : (selectedCountry ? `${selectedCountry} (AUTO)` : (lang === 'EN' ? "Country/Year" : "国家/年份"));
+      : (selectedCountry ? `${selectedCountry} (AUTO)` : (lang === 'EN' ? "Spacetime Coordinates" : "时空坐标"));
 
     const isLocked = isCountryLocked && isYearLocked;
 
@@ -722,7 +724,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
                 defEn: lib.descriptionEn,
                 core: lang === 'EN' ? "[Config Protocol] Click for spacetime coordinates." : "【配置协议】点击进入时空坐标映射面板。",
                 count: lib.count
-              }, lang === 'EN' ? "SUR3A.Coordinates" : "SUR3A.国家/年份");
+              }, lang === 'EN' ? "Coordinates" : "国家/年份");
             }}
             onMouseLeave={handleMouseLeave}
             className={`${baseTextClass} ${isLocked ? lockedTextClass : (hasTimeOrLoc ? filledTextClass : emptyTextClass)}`}
@@ -770,12 +772,12 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
 
   const renderTimeLocationUI = () => (
     <div className="space-y-8 pb-2">
-      {/* SECTION 1: Exact Coordinates (SUR3A) */}
+      {/* SECTION 1: Exact Coordinates */}
       <section>
         <div className={`flex items-center gap-2 mb-4 pb-2 border-b ${theme === 'retro' ? 'border-[var(--border-main)]/30' : 'border-zinc-700'}`}>
           <MapPin size={14} className={theme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-400'} />
           <span className={`text-xs font-black uppercase tracking-widest ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}`}>
-            {lang === 'EN' ? "Coordinates (SUR3A)" : "国家/年份 (SUR3A)"}
+            {lang === 'EN' ? "Coordinates" : "国家/年份"}
           </span>
         </div>
 
@@ -893,7 +895,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
           </span>
         </div>
         <div className={`p-4 rounded-lg border flex items-center justify-center font-serif text-lg ${theme === 'retro' ? 'border-[var(--border-main)]/30 bg-[var(--bg-panel)]' : 'border-zinc-800 bg-zinc-900/40 hover:bg-zinc-900'} transition-all min-h-[80px]`}>
-           <SkinSlot blockId="skin_era" placeholder={lang === 'EN' ? "Attach Field (Preset)" : "接入宏观时空场域"} isBlockLocked={lockedModules["skin_era"]} {...slotProps} />
+           <SkinSlot blockId="skin_era" placeholder={lang === 'EN' ? "Attach Field (Preset)" : "接入宏观时空场域"} isBlockLocked={lockedModules["skin_era"]} alwaysShowButtons={true} {...slotProps} />
         </div>
         <div className={`text-[10px] mt-4 text-left leading-relaxed ${theme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-400'}`}>
           {lang === 'EN' ? "Note: Specific coordinates and presets operate independently for precision control." : "注：微观坐标与宏观场域各自独立，双选时共同定义表层。全局随机时仅保留一项。"}
@@ -1036,32 +1038,10 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
               <div className={`leading-loose font-serif text-[15px] ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-400'}`}>
                 <span>{lang === 'EN' ? "“In the " : "“在 "}</span>
                 
-                {(() => {
-                  const hasA = selectedYear !== null || selectedCountry !== "";
-                  const hasB = (fieldState['skin_era'] || []).length > 0;
-                  
-                  if (!hasA && !hasB) {
-                    return (
-                      <span 
-                        onClick={() => setIsTimeModalOpen(true)}
-                        className={`cursor-pointer border-b border-dashed ${theme === 'retro' ? 'border-zinc-400 text-zinc-500' : 'border-zinc-800 text-zinc-500 hover:text-white'} transition-colors mx-1`}
-                      >
-                        {lang === 'EN' ? "Spacetime Anchor" : "时空锚点"}
-                      </span>
-                    );
-                  }
-                  
-                  return (
-                    <>
-                      {hasA && renderTimeLocationSlot()}
-                      {hasA && hasB && <span className="mx-1">{" "}</span>}
-                      {hasB && <SkinSlot blockId="skin_era" placeholder={lang === 'EN' ? "Anchor" : "时空锚点"} isBlockLocked={lockedModules["skin_era"]} {...slotProps} />}
-                    </>
-                  );
-                })()}
+                {renderTimeLocationSlot()}
 
                 <span>{lang === 'EN' ? " world of " : " 的 "}</span>
-                <SkinSlot blockId="skin_animation_genre" placeholder={lang === 'EN' ? "World Motif" : "世界模体"} isBlockLocked={lockedModules["skin_animation_genre"]} {...slotProps} />
+                <SkinSlot blockId="skin_era" placeholder={lang === 'EN' ? "Background Field" : "背景场域"} isBlockLocked={lockedModules["skin_era"]} {...slotProps} />
                 <span>{lang === 'EN' ? " world, operating under " : " 世界中，运行于"}</span>
                 <SkinSlot blockId="sur4x" placeholder={lang === 'EN' ? "Resistance" : "物理阶层阻力"} isBlockLocked={lockedModules["sur4x"]} {...slotProps} />
                 <span>{lang === 'EN' ? " within a " : "下的"}</span>
@@ -1070,11 +1050,9 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
                 <SkinSlot blockId="skin_age" placeholder={lang === 'EN' ? "Age" : "主体年龄"} isBlockLocked={lockedModules["skin_age"]} {...slotProps} />
                 <span>{lang === 'EN' ? " " : " 的 "}</span>
                 <SkinSlot blockId="skin_gender" placeholder={lang === 'EN' ? "Gender" : "主体性别"} isBlockLocked={lockedModules["skin_gender"]} {...slotProps} />
-                <SkinSlot blockId="skin_profession" placeholder={lang === 'EN' ? "Profession" : "主体职业"} isBlockLocked={lockedModules["skin_profession"]} {...slotProps} />
-                <span>{lang === 'EN' ? " (" : " ("}</span>
-                <SkinSlot blockId="skin_origin" placeholder={lang === 'EN' ? "Background" : "主体背景"} isBlockLocked={lockedModules["skin_origin"]} {...slotProps} />
-                <span>{lang === 'EN' ? "), holding a " : ")，抱着"}</span>
-                <SkinSlot blockId="sur11x" placeholder={lang === 'EN' ? "Suture" : "象征界缝合度"} isBlockLocked={lockedModules["sur11x"]} {...slotProps} />
+                <SkinSlot blockId="skin_profession" placeholder={lang === 'EN' ? "Profession" : "职业身份"} isBlockLocked={lockedModules["skin_profession"]} {...slotProps} />
+                <span>{lang === 'EN' ? ", holding a " : "，抱着"}</span>
+                <SkinSlot blockId="sur10x" placeholder={lang === 'EN' ? "Suture" : "象征界缝合度"} isBlockLocked={lockedModules["sur10x"]} {...slotProps} />
                 <span>{lang === 'EN' ? " stance towards " : "的 "}</span>
                 <SkinSlot blockId="skin_ideology" placeholder={lang === 'EN' ? "Philosophy" : "哲学信念"} isBlockLocked={lockedModules["skin_ideology"]} {...slotProps} />
                 <span>{lang === 'EN' ? " ideas, and entangled with " : " 想法，并在与 "}</span>

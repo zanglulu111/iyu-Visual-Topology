@@ -118,8 +118,9 @@ export interface NarrativeBlockDef {
 export type NarrativeFieldState = Record<string, string[]>;
 
 export interface WorldLawConfig {
-  physics: 'STRICT' | 'UNBOUND';
-  context: 'PURE' | 'FUSION';
+  physics?: 'STRICT' | 'UNBOUND';
+  context?: 'PURE' | 'FUSION';
+  gravity?: 1 | 2 | 3 | 4 | 5;
 }
 
 export interface CreativeBrief {
@@ -505,6 +506,7 @@ export interface LibraryCategoryDef {
   id: string;
   name: string;
   nameEn?: string;
+  defEn?: string;
   desc: string;
   descEn?: string;
   items: LibraryItemDef[];

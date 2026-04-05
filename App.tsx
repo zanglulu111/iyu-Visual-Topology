@@ -175,8 +175,8 @@ const App: React.FC = () => {
             if (authUser) {
                 const profile = await supabaseDatabase.getUserProfile();
                 const tier = profile?.membership_tier || 'free';
-                const isProTierActive = ['pro', 'annual', 'lifetime'].includes(tier);
-                const levelLabel = tier === 'lifetime' ? '终身造物主 (Lifetime Creator)' : tier === 'annual' ? '年度架构师 (Annual Architect)' : '未激活 (Not Activated)';
+                const isProTierActive = ['pro', 'annual', 'lifetime', 'admin'].includes(tier);
+                const levelLabel = tier === 'admin' ? '系统管理员 (System Admin)' : tier === 'lifetime' ? '终身造物主 (Lifetime Creator)' : tier === 'annual' ? '年度架构师 (Annual Architect)' : '未激活 (Not Activated)';
                 setCurrentUser({
                     id: authUser.id,
                     username: profile?.username || authUser.username || 'User',
@@ -275,7 +275,7 @@ const App: React.FC = () => {
 
         // Membership activation check
         const activeTier = currentUser.membershipTier;
-        const isMembershipActive = ['pro', 'annual', 'lifetime'].includes(activeTier || '');
+        const isMembershipActive = ['pro', 'annual', 'lifetime', 'admin'].includes(activeTier || '');
 
         if (!isMembershipActive) {
             alert(lang === 'EN'
@@ -786,11 +786,6 @@ const App: React.FC = () => {
         }
 
         if (category && category.items.length > 0) {
-            // XOR Logic: If randomizing era (SUR3B), clear coordinates (SUR3A).
-            if (blockId === 'skin_era') {
-                if (!lockedModules['skin_year_exact']) newState['skin_year_exact'] = [];
-                if (!lockedModules['skin_country_exact']) newState['skin_country_exact'] = [];
-            }
 
             // Apply Archetype Filtering
             const currentEraTags = newState['skin_era'] || [];

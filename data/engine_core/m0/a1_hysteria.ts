@@ -48,8 +48,8 @@ export const ENGINE_M0_NEUROSIS_HYSTERIA: LibraryItemDef[] = [
     defEn: "frequently switching IDs to test which one the Other wants.", 
     core: "我不是这一个，也不是那一个。我是一场永恒的逃离。", 
     coreEn: "I am neither this nor that. I am an eternal escape.",
-    logic: "主体的 M0（身份）是不稳定的。叙事轨迹表现为在不同社会标签（SUR9/SUR10）之间的快速滑移。",
-    logicEn: "The subject's M0 (Identity) is unstable. The narrative trajectory manifests as rapid sliding between different social labels (SUR9/SUR10).",
+    logic: "主体的 M0（身份）是不稳定的。叙事轨迹表现为在不同职业身份（SUR9）之间的快速滑移。",
+    logicEn: "The subject's M0 (Identity) is unstable. The narrative trajectory manifests as rapid sliding between different social labels (SUR9).",
     patch: {
       mechanics: "基础神经症协议 + [主词漂移率 = 高; 标签粘性 = 极低]",
       mechanicsEn: "Base_NEUROSIS + [Master_Signifier_Drift = High; Label_Stickiness = Minimum]",

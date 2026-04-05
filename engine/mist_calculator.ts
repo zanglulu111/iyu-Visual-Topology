@@ -37,7 +37,7 @@ import type { NarrativeFieldState, LibraryItemDef, WorldLawConfig } from '../typ
 
 // ============================================
 // 0. 词库查找器（运行时 load）
-//    加载 M0-M7 引擎词条 + SUR1-SUR11 皮层词条
+//    加载 M0-M7 引擎词条 + SUR1-SUR10 皮层词条
 // ============================================
 
 let _libraryCache: Record<string, LibraryItemDef> | null = null;
@@ -55,7 +55,7 @@ function getLibraryCache(): Record<string, LibraryItemDef> {
     const { ENGINE_STAKES } = require('../data/engine_core/engine_stakes');
     const { ENGINE_RESOLUTIONS } = require('../data/engine_core/engine_resolutions');
 
-    // === 皮层：SUR1-SUR11 + SV1/SV2 词条 ===
+    // === 皮层：SUR1-SUR10 + SV1/SV2 词条 ===
     const { SKIN_LIBRARY } = require('../data/skin_libraries');
     
     const cache: Record<string, LibraryItemDef> = {};
@@ -112,7 +112,7 @@ function extractAll(fieldState: NarrativeFieldState, key: string): string[] {
 
 // ============================================
 // 1. 结构化输入提取
-//    骨层 (M0-M7) + 皮层 (SUR1-SUR11) + 工程轴 (SV1-SV2)
+//    骨层 (M0-M7) + 皮层 (SUR1-SUR10) + 工程轴 (SV1-SV2)
 // ============================================
 
 export interface MistEngineInput {
@@ -129,7 +129,7 @@ export interface MistEngineInput {
   m4x?: string;
   m5x?: string;
 
-  // === 皮层：SUR1-SUR11 ===
+  // === 皮层：SUR1-SUR10 ===
   sur1?: string;       // 叙事动力 (Genre)
   sur2?: string;       // 世界模体 (World Motif)
   sur3?: string;       // 时空场域 (Spacetime Field)
@@ -139,12 +139,12 @@ export interface MistEngineInput {
   sur7?: string;       // 主体性别 (Gender)
   sur8?: string;       // 主体年龄 (Age)
   sur9?: string;       // 主体职业 (Occupation)
-  sur10?: string;      // 主体背景 (Class)
-  sur11?: string;      // 哲学信念 (Philosophy)
+
+  sur10?: string;      // 哲学信念 (Philosophy)
 
   // === 皮层旋钮：X参数 ===
   sur4x?: string;      // 物理阶层阻力
-  sur11x?: string;     // 象征界缝合度
+  sur10x?: string;     // 象征界缝合度
 
   // === 工程轴：SV1-SV2 ===
   sv1?: string;        // 叙事结构
@@ -169,7 +169,7 @@ export function extractEngineInput(fieldState: NarrativeFieldState): MistEngineI
     m4x: extractFirst(fieldState, 'engine_m4x'),
     m5x: extractFirst(fieldState, 'engine_m5x'),
 
-    // 皮层 SUR1-SUR11
+    // 皮层 SUR1-SUR10
     sur1: extractFirst(fieldState, 'skin_genre'),
     sur2: extractFirst(fieldState, 'skin_animation_genre'),
     sur3: extractFirst(fieldState, 'skin_era'),
@@ -179,12 +179,12 @@ export function extractEngineInput(fieldState: NarrativeFieldState): MistEngineI
     sur7: extractFirst(fieldState, 'skin_gender'),
     sur8: extractFirst(fieldState, 'skin_age'),
     sur9: extractFirst(fieldState, 'skin_profession'),
-    sur10: extractFirst(fieldState, 'skin_origin'),
-    sur11: extractFirst(fieldState, 'skin_ideology'),
+
+    sur10: extractFirst(fieldState, 'skin_ideology'),
 
     // 皮层旋钮
     sur4x: extractFirst(fieldState, 'sur4x'),
-    sur11x: extractFirst(fieldState, 'sur11x'),
+    sur10x: extractFirst(fieldState, 'sur10x'),
 
     // 工程轴
     sv1: extractFirst(fieldState, 'skin_structure'),
@@ -210,7 +210,7 @@ function resolveM0Topology(m0Id?: string): M0TopologyProfile | undefined {
 // ============================================
 // 3. 张力计算 (Tension Calculation)
 //    完整公式（v2.2 含 SUR 皮层注入）：
-//    分子 = (G_M1 + G_M2 + G_M3 × m3Opacity × sur11xFactor)
+//    分子 = (G_M1 + G_M2 + G_M3 × m3Opacity × sur10xFactor)
 //    分母 = G_M4 × m4Divisor × (1 + G_M4X) × sur4xFactor
 //    张力比 = 分子 / max(分母, 0.1)
 //    最终张力 = 张力比 × G_M5 × m5Multiplier × (1 + G_M5X)
@@ -240,21 +240,21 @@ function resolveSUR4XFactor(sur4xId?: string): number {
 }
 
 /**
- * SUR11X 象征界缝合度 → M3 幻象粘度系数
+ * SUR10X 象征界缝合度 → M3 幻象粘度系数
  * L1=1.3(全自动缝合→幻象极度真实), L2=1.15, L3=1.0, L4=0.7, L5=0.4
  * 理论依据：越深度缝合，主体越"当真"自己的幻象，M3势能越高
  *          越炸裂，主体越看穿幻象，M3势能越低
  */
-function resolveSUR11XFactor(sur11xId?: string): number {
-  if (!sur11xId) return 1.0;
+function resolveSUR10XFactor(sur10xId?: string): number {
+  if (!sur10xId) return 1.0;
   const map: Record<string, number> = {
-    'sur11x_level_1': 1.3,  // 全自动缝合 → 幻象极度真实
-    'sur11x_level_2': 1.15, // 半渗透 → 幻象略有松动
-    'sur11x_level_3': 1.0,  // 反讽缝合 → 中性（看穿但在演）
-    'sur11x_level_4': 0.7,  // 脱线 → 幻象大幅弱化
-    'sur11x_level_5': 0.4,  // 炸裂 → 幻象几乎无效
+    'sur10x_level_1': 1.3,  // 全自动缝合 → 幻象极度真实
+    'sur10x_level_2': 1.15, // 半渗透 → 幻象略有松动
+    'sur10x_level_3': 1.0,  // 反讽缝合 → 中性（看穿但在演）
+    'sur10x_level_4': 0.7,  // 脱线 → 幻象大幅弱化
+    'sur10x_level_5': 0.4,  // 炸裂 → 幻象几乎无效
   };
-  return map[sur11xId] ?? 1.0;
+  return map[sur10xId] ?? 1.0;
 }
 
 function calculateTension(input: MistEngineInput, m0Topo: M0TopologyProfile | undefined): TensionReport {
@@ -278,13 +278,13 @@ function calculateTension(input: MistEngineInput, m0Topo: M0TopologyProfile | un
 
   // SUR 皮层修饰系数
   const sur4xFactor = resolveSUR4XFactor(input.sur4x);
-  const sur11xFactor = resolveSUR11XFactor(input.sur11x);
+  const sur10xFactor = resolveSUR10XFactor(input.sur10x);
 
   // ====== 分子：欲望势能 ======
   // M3 的重力受三重调制：
   //   1. M0.m3Opacity（精神拓扑：忧郁=0.1）
-  //   2. SUR11X（缝合度：全自动缝合=1.3 → 幻象更"真"）
-  const effective_m3 = g_m3 * mods.m3Opacity * sur11xFactor;
+  //   2. SUR10X（缝合度：全自动缝合=1.3 → 幻象更"真"）
+  const effective_m3 = g_m3 * mods.m3Opacity * sur10xFactor;
   const numerator = g_m1 + g_m2 + effective_m3;
 
   // ====== 分母：大他者阻断 ======
@@ -616,10 +616,10 @@ function compileDirectives(
     }
   }
 
-  // ====== SUR4X / SUR11X 皮层指令 ======
+  // ====== SUR4X / SUR10X 皮层指令 ======
   const surItems: Array<{ target: string; id?: string }> = [
     { target: 'SUR4X_CLASS_RESISTANCE', id: input.sur4x },
-    { target: 'SUR11X_SYMBOLIC_SUTURE', id: input.sur11x },
+    { target: 'SUR10X_SYMBOLIC_SUTURE', id: input.sur10x },
   ];
   for (const sur of surItems) {
     if (!sur.id) continue;
@@ -657,7 +657,7 @@ function compileDirectives(
     }
   }
 
-  // ====== SUR1-SUR11 皮层语义指令 ======
+  // ====== SUR1-SUR10 皮层语义指令 ======
   // 这些不参与公式计算，但要告诉 AI "穿什么皮"
   const skinSlots: Array<{ target: string; id?: string; label: string }> = [
     { target: 'SUR1_GENRE', id: input.sur1, label: '叙事动力' },
@@ -667,9 +667,9 @@ function compileDirectives(
     { target: 'SUR5_EVERYTHING', id: input.sur5, label: '欲望锚点' },
     { target: 'SUR7_GENDER', id: input.sur7, label: '主体性别' },
     { target: 'SUR8_AGE', id: input.sur8, label: '主体年龄' },
-    { target: 'SUR9_PROFESSION', id: input.sur9, label: '主体职业' },
-    { target: 'SUR10_ORIGIN', id: input.sur10, label: '主体背景' },
-    { target: 'SUR11_PHILOSOPHY', id: input.sur11, label: '哲学信念' },
+    { target: 'SUR9_PROFESSION', id: input.sur9, label: '职业身份' },
+
+    { target: 'SUR10_PHILOSOPHY', id: input.sur10, label: '哲学信念' },
   ];
 
   for (const slot of skinSlots) {
@@ -865,16 +865,16 @@ ${m0Section}
 |:---|:---|:---|
 | M1 缺失主体 | ${getName(input.m1)} | ${resolveGravity('M1', input.m1).toFixed(2)} |
 | M2 真实遭遇 | ${getName(input.m2)} | ${resolveGravity('M2', input.m2).toFixed(2)} |
-| M3 欲望幻象 | ${getName(input.m3)} | ${resolveGravity('M3', input.m3).toFixed(2)} (有效值: ${(resolveGravity('M3', input.m3) * (m0Topo?.formulaMods.m3Opacity ?? 1.0) * resolveSUR11XFactor(input.sur11x)).toFixed(2)}) |
+| M3 欲望幻象 | ${getName(input.m3)} | ${resolveGravity('M3', input.m3).toFixed(2)} (有效值: ${(resolveGravity('M3', input.m3) * (m0Topo?.formulaMods.m3Opacity ?? 1.0) * resolveSUR10XFactor(input.sur10x)).toFixed(2)}) |
 | M4 大他者 | ${getName(input.m4)} | ${resolveGravity('M4', input.m4).toFixed(2)} (有效值: ${(resolveGravity('M4', input.m4) * (m0Topo?.formulaMods.m4Divisor ?? 1.0)).toFixed(2)}) |
 | M5 行动驱力 | ${getName(input.m5)} | ${resolveGravity('M5', input.m5).toFixed(2)} (有效值: ${(resolveGravity('M5', input.m5) * (m0Topo?.formulaMods.m5Multiplier ?? 1.0)).toFixed(2)}) |
 | SUR4X 阶层阻力 | ${getName(input.sur4x)} | ×${resolveSUR4XFactor(input.sur4x).toFixed(2)} → M4分母 |
-| SUR11X 缝合度 | ${getName(input.sur11x)} | x${resolveSUR11XFactor(input.sur11x).toFixed(2)} -> M3幻象 |
+| SUR10X 缝合度 | ${getName(input.sur10x)} | x${resolveSUR10XFactor(input.sur10x).toFixed(2)} -> M3幻象 |
 
 ### 🌍 世界法则 (World Law)
 **重力等级:** LV${input.worldLawGravity || 3} ${input.worldLawGravity === 1 ? '(写实/Realism)' : input.worldLawGravity === 2 ? '(合理/Rational)' : input.worldLawGravity === 4 ? '(奇观/Spectacle)' : input.worldLawGravity === 5 ? '(狂想/Rhapsody)' : '(缝合/Suture)'}
 
-### 🎭 表层设定 (SUR1-SUR11 + SV)
+### 🎭 表层设定 (SUR1-SUR10 + SV)
 | 参数 | 选择 |
 |:---|:---|
 | SUR1 叙事动力 | ${getName(input.sur1)} |
@@ -885,14 +885,14 @@ ${m0Section}
 | SUR6 空间场景 | ${input.sur6 && input.sur6.length > 0 ? input.sur6.map(id => getName(id)).join(' + ') : '未选择'} |
 | SUR7 主体性别 | ${getName(input.sur7)} |
 | SUR8 主体年龄 | ${getName(input.sur8)} |
-| SUR9 主体职业 | ${getName(input.sur9)} |
-| SUR10 主体背景 | ${getName(input.sur10)} |
-| SUR11 哲学信念 | ${getName(input.sur11)} |
+| SUR9 职业身份 | ${getName(input.sur9)} |
+
+| SUR10 哲学信念 | ${getName(input.sur10)} |
 | SV1 叙事结构 | ${getName(input.sv1)} |
 | SV2 故事体量 | ${getName(input.sv2)} |
 
 ### 📊 张力报告
-- **分子势能** (M1+M2+M3×opacity×sur11x): ${tension.numerator.toFixed(2)}
+- **分子势能** (M1+M2+M3×opacity×sur10x): ${tension.numerator.toFixed(2)}
 - **分母压强** (M4×m4Div×M4X×sur4x): ${tension.denominator.toFixed(2)}
 - **张力比**: ${tension.ratio.toFixed(2)}
 - **最终张力**: ${tension.finalTension.toFixed(2)}
