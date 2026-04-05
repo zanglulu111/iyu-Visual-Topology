@@ -129,7 +129,7 @@ export const IDEO_DESIRE: LibraryCategoryDef = {
         defEn: "Bakhtinian crazy festival. Subverting existing hierarchies, gaining brief rebirth through collective chaos and transgression.",
         core: "充满面具与火把的短暂释放，旨在遮罩那无法打破的永恒制裁压抑。",
         coreEn: "Brief release filled with masks and torches, aiming to mask the unbreakable eternal sanctioning repression.",
-        logic: "这是一种对 M4 (大他者律令) 的周期化、合法化颠覆体制。在庆典的特定时空锚点内，高低贱贵倒转，但它本质上是从属于 M4 阀门调节的隐性确认。狂欢一旦结束，M1 缺失感将以报复性加倍袭来。",
+        logic: "这是一种对 M4 (大他者律令) 的周期化、合法化颠覆体制。在庆典的特定时空坐标系内，高低贱贵倒转，但它本质上是从属于 M4 阀门调节的隐性确认。狂欢一旦结束，M1 缺失感将以报复性加倍袭来。",
         logicEn: "A periodic, legalized subversion of M4. Within specific spacetime anchors, hierarchies invert, but mathematically it remains implicitly sanctioned by M4's safety valves. Upon ending, M1 lack returns with a vengeance.",
         patch: {
           mechanics: "基础设定协议 + [阶级/等级倒置 = 强制开启; 禁忌压抑阀门 = 暂时性彻底解除]",

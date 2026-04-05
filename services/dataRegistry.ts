@@ -5,10 +5,11 @@ import { LibraryCategoryDef, LibraryItemDef } from '../types';
 import { NARRATIVE_ENGINE_LIBRARY } from '../data/engine_core/narrative_engine';
 
 
-// 皮肤与商业/实验/预告片库
+// 皮肤词库 (已升级为 engine_surface 新版 patch 数据源)
 import { SKIN_LIBRARY } from '../data/skin_libraries';
-import { GENRE_CATEGORIES } from '../data/genres';
-import { WORLD_MOTIF_CATEGORIES } from '../data/world_motifs';
+
+// 保留旧版独立引用以兼容 GENRE/MOTIF 的 blockId 特殊处理
+import { SUR1_DATA } from '../data/engine_surface/SUR1';
 
 // Commercial
 import { COMM_SKIN_LIBRARY } from '../data/commercial_skin';
@@ -30,8 +31,6 @@ import { AESTHETIC_ENGINE_LIBRARY } from '../data/aesthetic_data';
 const ALL_LIBRARIES_COLLECTION: LibraryCategoryDef[][] = [
     NARRATIVE_ENGINE_LIBRARY,
     SKIN_LIBRARY,
-    GENRE_CATEGORIES,
-    WORLD_MOTIF_CATEGORIES,
     COMMERCIAL_ENGINE_LIBRARY,
     COMM_SKIN_LIBRARY,
     EXPERIMENTAL_SKIN_LIBRARY,
@@ -53,14 +52,15 @@ const getItemsForBlockId = (blockId: string): LibraryItemDef[] | null => {
     // Handle Known Exceptions/Aliases
     if (blockId === 'skin_era') targetLibId = 'skin_era_lib';
     
-    // Special Case: Genre implies multiple categories, we treat them as a combined list
+    // Special Case: Genre (SUR1) — now loaded from engine_surface
     if (blockId === 'skin_genre') {
-        const items = GENRE_CATEGORIES.flatMap(c => c.items);
+        const items = SUR1_DATA.flatMap(c => c.items);
         _specificLibCache[blockId] = items;
         return items;
     }
     if (blockId === 'skin_animation_genre') {
-        const items = WORLD_MOTIF_CATEGORIES.flatMap(c => c.items);
+        // Deprecated motif block — fallback to SUR1 data as well
+        const items = SUR1_DATA.flatMap(c => c.items);
         _specificLibCache[blockId] = items;
         return items;
     }
@@ -83,7 +83,7 @@ let _libMap: Record<string, LibraryCategoryDef[]> | null = null;
 const buildLibMap = () => {
     if (_libMap) return _libMap;
     _libMap = {
-        'NARRATIVE': [...NARRATIVE_ENGINE_LIBRARY, ...SKIN_LIBRARY, ...GENRE_CATEGORIES, ...WORLD_MOTIF_CATEGORIES],
+        'NARRATIVE': [...NARRATIVE_ENGINE_LIBRARY, ...SKIN_LIBRARY],
         'COMMERCIAL': [...COMMERCIAL_ENGINE_LIBRARY, ...COMM_SKIN_LIBRARY],
         'EXPERIMENTAL': [...POETIC_ENGINE_LIBRARY, ...EXPERIMENTAL_SKIN_LIBRARY],
         'TRAILER': [...TRAILER_ENGINE_LIBRARY, ...TRAILER_SKIN_LIBRARY],
@@ -107,9 +107,35 @@ export const findItemDetails = (tagName: string, blockId?: string): string => {
         if (item.core) details += ` | Core: ${item.core}`;
         if (item.flaw) details += ` | Symptom: ${item.flaw}`;
         if (item.logic) details += ` | Logical Constraint: ${item.logic}`;
+        // ★ PATCH 注入：将指令性补丁信息注入上下文
+        if (item.patch) {
+            if (item.patch.mechanics) details += ` | ⚙️ Mechanics: ${item.patch.mechanics}`;
+            if (item.patch.aesthetic) details += ` | 🎨 Aesthetic: ${item.patch.aesthetic}`;
+            if (item.patch.runtime) details += ` | 🔴 Runtime: ${item.patch.runtime}`;
+        }
         return details;
     }
     return "";
+};
+
+/**
+ * 提取指定词条的 patch.runtime 硬约束指令。
+ * 供 narrativeGenerator 注入到 System Prompt 中作为 AI 必须遵守的红线。
+ */
+export const extractPatchConstraints = (tagName: string, blockId?: string): {
+    mechanics: string | null;
+    aesthetic: string | null;
+    runtime: string | null;
+} => {
+    const item = findItemFull(tagName, blockId);
+    if (item?.patch) {
+        return {
+            mechanics: item.patch.mechanics || null,
+            aesthetic: item.patch.aesthetic || null,
+            runtime: item.patch.runtime || null
+        };
+    }
+    return { mechanics: null, aesthetic: null, runtime: null };
 };
 
 export const findItemFull = (tagName: string, blockId?: string) => {

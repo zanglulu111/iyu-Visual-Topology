@@ -15,10 +15,9 @@ import {
 } from '../data/engine_core/narrative_engine';
 import { ALL_SKIN_BLOCKS } from '../data/skin_libraries';
 import { STORY_VOLUMES } from '../data/story_volumes';
-import { GENRE_CATEGORIES } from '../data/genres';
+import { SUR1_DATA } from '../data/engine_surface/SUR1';
 import { PERSPECTIVES, SENSORY_MODES, STYLE_MATRIX } from '../data/style_matrix';
 import { DIRECTOR_STYLES } from '../data/director_styles';
-import { ANIMATION_GENRE_CATEGORIES } from '../data/animation_genres';
 
 // Import Protocols
 import { 
@@ -33,8 +32,8 @@ import {
     THE_MASK_PROTOCOL
 } from '../data/engine_core/narrative_protocols';
 
-// Import Registry instead of raw data
-import { findItemDetails, findItemFull } from './dataRegistry';
+// Import Registry with patch extraction
+import { findItemDetails, findItemFull, extractPatchConstraints } from './dataRegistry';
 
 const buildContext = (fieldState: NarrativeFieldState) => {
     return Object.entries(fieldState).map(([key, tags]) => {
@@ -54,6 +53,33 @@ const buildContext = (fieldState: NarrativeFieldState) => {
 
       return `* **${name} (${key})**: ${tags.join(' + ')} \n      (${definitions})`;
   }).filter(Boolean).join('\n');
+};
+
+/**
+ * ★ PATCH RUNTIME BLOCK ★
+ * 遍历所有已选中的词条，提取其 patch.runtime 硬约束，
+ * 组装为 System Prompt 中的强制执行区块。
+ */
+const buildPatchRuntimeBlock = (fieldState: NarrativeFieldState): string => {
+    const constraints: string[] = [];
+    
+    for (const [blockId, tags] of Object.entries(fieldState)) {
+        if (!tags || tags.length === 0) continue;
+        for (const tag of tags) {
+            const patch = extractPatchConstraints(tag, blockId);
+            if (patch.runtime) {
+                constraints.push(`► [${tag}] ${patch.runtime}`);
+            }
+        }
+    }
+    
+    if (constraints.length === 0) return '';
+    
+    return `
+## 🔴 PATCH RUNTIME CONSTRAINTS (硬约束指令 — 不可违反)
+**以下是当前叙事配置中每个装载词条的核心约束。AI 必须严格执行这些规则，任何违反均视为生成失败。**
+${constraints.join('\n')}
+`;
 };
 
 const getBannedWords = (fieldState: NarrativeFieldState): string => {
@@ -311,6 +337,8 @@ ${customCoordinates}
 ${NAMING_PROTOCOL}
 
 ${THE_IRON_LAWS}
+
+${buildPatchRuntimeBlock(fieldState)}
 
 ${THE_MASK_PROTOCOL}
 
@@ -583,6 +611,9 @@ ${worldLawInstruction}
 ${defaultAnchorInstruction}
 ${customCoordinates}
 ${THE_IRON_LAWS}
+
+${fieldState ? buildPatchRuntimeBlock(fieldState) : ''}
+
 ${THE_MASK_PROTOCOL}
 ${NARRATIVE_ALGEBRAIC_PROTOCOL}
 ${NARRATIVE_ENGINE_FORMULA}
