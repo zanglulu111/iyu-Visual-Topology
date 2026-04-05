@@ -11,6 +11,7 @@ interface PreviewContentModalProps {
     title: string;
     themeAccent: string;
     lang: BlueprintLanguage;
+    theme?: string;
 }
 
 export const PreviewContentModal: React.FC<PreviewContentModalProps> = ({ isOpen, onClose, content, title, themeAccent, lang, theme = "dark" }) => {

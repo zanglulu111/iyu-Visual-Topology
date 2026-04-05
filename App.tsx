@@ -10,6 +10,7 @@ import { NarrativePathsView } from './components/NarrativePathsView';
 import { ProductManualModal } from './components/ProductManualModal';
 import { SutureModal } from './components/SutureModal';
 import { NarrativeLibraryModal } from './components/NarrativeLibraryModal';
+import { TensionMonitorModal } from './components/TensionMonitorModal';
 import { MetonymyView } from './components/blueprint/MetonymyView';
 import { AuthModal } from './components/AuthModal';
 import { UserProfileModal } from './components/UserProfileModal';
@@ -44,9 +45,8 @@ import {
     BLOCK_LIMITS,
     AES_COLOR_PRESETS,
     NARRATIVE_ENGINE_LIBRARY, COMMERCIAL_ENGINE_LIBRARY, EXPERIMENTAL_ENGINE_LIBRARY, AESTHETIC_ENGINE_LIBRARY, TRAILER_ENGINE_LIBRARY,
-    COMM_SKIN_LIBRARY, EXPERIMENTAL_SKIN_LIBRARY, TRAILER_SKIN_LIBRARY, SKIN_LIBRARY, GENRE_CATEGORIES
+    COMM_SKIN_LIBRARY, EXPERIMENTAL_SKIN_LIBRARY, TRAILER_SKIN_LIBRARY, SKIN_LIBRARY, GENRE_CATEGORIES, WORLD_MOTIF_CATEGORIES
 } from './constants';
-import { ANIMATION_GENRE_CATEGORIES } from './data/animation_genres';
 import { MASTER_PRESETS } from './data/master_presets';
 import * as geminiService from './services/geminiService';
 import * as randomizerService from './services/randomizer';
@@ -163,6 +163,7 @@ const App: React.FC = () => {
     const [promptCopied, setPromptCopied] = useState(false);
     const [globalCopied, setGlobalCopied] = useState(false);
     const [isTaskManagerOpen, setIsTaskManagerOpen] = useState(false);
+    const [isTensionOpen, setIsTensionOpen] = useState(false);
 
     // DB Initialization and Loading
     useEffect(() => {
@@ -764,15 +765,16 @@ const App: React.FC = () => {
         else if (selectedDriver === DriverType.AESTHETIC) fullLibrary = [...AESTHETIC_ENGINE_LIBRARY, ...SKIN_LIBRARY];
         else if (selectedDriver === DriverType.EXPERIMENTAL) fullLibrary = [...EXPERIMENTAL_ENGINE_BLOCKS, ...EXPERIMENTAL_SKIN_BLOCKS];
         else if (selectedDriver === DriverType.TRAILER) fullLibrary = [...TRAILER_ENGINE_BLOCKS, ...TRAILER_SKIN_BLOCKS];
-        else fullLibrary = [...NARRATIVE_ENGINE_BLOCKS, ...SKIN_LIBRARY, ...GENRE_CATEGORIES, ...ANIMATION_GENRE_CATEGORIES];
+        else fullLibrary = [...NARRATIVE_ENGINE_BLOCKS, ...SKIN_LIBRARY, ...GENRE_CATEGORIES, ...WORLD_MOTIF_CATEGORIES];
 
-        const libId = blockId === 'skin_era' ? 'skin_era_lib' : `${blockId}_lib`;
+        const libId = `${blockId}_lib`;
         const category = fullLibrary.find(c => c.id === libId);
 
-        // Handle Special Cases for Genre/Animation
-        if (!category && blockId === 'skin_genre') {
-            const allGenres = GENRE_CATEGORIES.flatMap(c => c.items);
-            const available = allGenres.filter(i => !currentTags.includes(i.name));
+        // Handle Special Cases for Genre/Animation/Era
+        if (!category && (blockId === 'skin_genre' || blockId === 'skin_animation_genre' || blockId === 'skin_era')) {
+            const sourceCats = blockId === 'skin_genre' ? GENRE_CATEGORIES : WORLD_MOTIF_CATEGORIES;
+            const allItems = sourceCats.flatMap(c => c.items);
+            const available = allItems.filter(i => !currentTags.includes(i.name));
             const selected: string[] = [];
             for (let i = 0; i < count; i++) {
                 if (available.length === 0) break;
@@ -1629,6 +1631,8 @@ const App: React.FC = () => {
                                 setWorldLawConfig={setWorldLawConfig}
                                 isWorldLawOpen={isWorldLawOpen}
                                 setIsWorldLawOpen={setIsWorldLawOpen}
+                                isTensionOpen={isTensionOpen}
+                                setIsTensionOpen={setIsTensionOpen}
                                 handleBackStep={handleBackStep}
                                 handleUndo={handleUndo}
                                 handleRedo={handleRedo}
@@ -1737,6 +1741,15 @@ const App: React.FC = () => {
                         }
                     />
                 )}
+
+                <TensionMonitorModal
+                    isOpen={isTensionOpen}
+                    onClose={() => setIsTensionOpen(false)}
+                    fieldState={narrativeFieldState}
+                    worldLaw={worldLawConfig}
+                    lang={lang}
+                    selectedDriver={selectedDriver}
+                />
 
                 {/* WorldLawModal integrated into EngineBottomBar */}
                 {isSettingsOpen && (

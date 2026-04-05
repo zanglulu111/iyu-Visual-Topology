@@ -15,8 +15,10 @@ import { COMM_SKIN_BLOCKS, COMM_SKIN_LIBRARY } from './data/commercial_skin';
 import { EXPERIMENTAL_SKIN_BLOCKS, EXPERIMENTAL_SKIN_LIBRARY } from './data/experimental_skin';
 import { TRAILER_SKIN_BLOCKS, TRAILER_SKIN_LIBRARY } from './data/trailer_skin';
 import { ALL_SKIN_BLOCKS, SKIN_LIBRARY } from './data/skin_libraries';
-import { GENRE_CATEGORIES } from './data/genres';
+import { SUR1_DATA as GENRE_CATEGORIES } from './data/engine_surface/SUR1';
+import { SUR2_DATA as WORLD_MOTIF_CATEGORIES } from './data/engine_surface/SUR2';
 import { AES_COLOR_PRESETS } from './data/aesthetic_libraries/color_presets';
+import { MASTER_PRESETS, MASTER_PRESETS_REALISM, MASTER_PRESETS_STYLIZED } from './data/master_presets';
 
 export const COUNTRY_PRESETS = [
   { cn: "中国", en: "China" },
@@ -329,5 +331,9 @@ export {
   ALL_SKIN_BLOCKS,
   SKIN_LIBRARY,
   GENRE_CATEGORIES,
-  AES_COLOR_PRESETS
+  WORLD_MOTIF_CATEGORIES,
+  AES_COLOR_PRESETS,
+  MASTER_PRESETS,
+  MASTER_PRESETS_REALISM,
+  MASTER_PRESETS_STYLIZED
 };

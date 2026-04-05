@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ArrowLeft, Settings2, PenTool, Anchor, Scale, Undo2, Redo2, User as UserIcon, Ghost, Box, Sparkles, Check, Terminal, Activity, ListTodo, RotateCcw, RotateCw, ChevronRight, Zap, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Settings2, PenTool, Anchor, Scale, Undo2, Redo2, User as UserIcon, Ghost, Box, Sparkles, Check, Terminal, Activity, ListTodo, RotateCcw, RotateCw, ChevronRight, Zap, MessageSquare, Cpu } from 'lucide-react';
 import { DriverType, WorldLawConfig } from '../types';
 import { FooterActions } from './FooterActions';
 import { ProcessingTimer } from './SharedBlueprintComponents';
@@ -43,6 +43,8 @@ interface EngineBottomBarProps {
     setIsTaskManagerOpen: (v: boolean) => void;
     isWorldLawOpen: boolean;
     setWorldLawConfig: (config: WorldLawConfig) => void;
+    isTensionOpen?: boolean;
+    setIsTensionOpen?: (v: boolean) => void;
 }
 
 export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
@@ -79,7 +81,9 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
     onClearBlock,
     isTaskManagerOpen,
     setIsTaskManagerOpen,
-    setWorldLawConfig
+    setWorldLawConfig,
+    isTensionOpen,
+    setIsTensionOpen
 }) => {
     const { theme } = useTheme();
     const [activeTaskCount, setActiveTaskCount] = React.useState(0);
@@ -243,6 +247,21 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
                         </span>
                     </button>
                 </div>
+                
+                {setIsTensionOpen && (
+                    <button 
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setIsTensionOpen(!isTensionOpen);
+                        }} 
+                        className="flex flex-col items-center gap-1.5 shrink-0 min-w-[70px] group transition-all duration-300 hover:scale-105 active:scale-95" 
+                    >
+                        <Cpu size={18} className={isTensionOpen ? getThemeTextColor() : (theme === 'retro' ? "text-zinc-600 group-hover:text-black transition-colors" : "text-zinc-400 group-hover:text-white transition-colors")} />
+                        <span className={`text-[10px] font-black uppercase tracking-widest transition-colors ${isTensionOpen ? getThemeTextColor() : (theme === 'retro' ? "text-zinc-600 group-hover:text-black" : "text-zinc-400 group-hover:text-white")}`}>
+                            {lang === 'CN' ? "张力诊断" : "DIAGNOSTICS"}
+                        </span>
+                    </button>
+                )}
 
                 <div className="w-px h-8 bg-[var(--border-main)] shrink-0"></div>
                 {selectedDriver === DriverType.AESTHETIC && (

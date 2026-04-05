@@ -19,12 +19,15 @@ import {
   TRAILER_SKIN_LIBRARY,
   BLOCK_LIMITS,
   AES_COLOR_PRESETS,
-  COUNTRY_PRESETS
+  COUNTRY_PRESETS,
+  GENRE_CATEGORIES,
+  WORLD_MOTIF_CATEGORIES,
+  ALL_SKIN_BLOCKS,
+  SKIN_LIBRARY,
+  MASTER_PRESETS,
+  MASTER_PRESETS_REALISM,
+  MASTER_PRESETS_STYLIZED
 } from '../constants';
-import { ALL_SKIN_BLOCKS, SKIN_LIBRARY } from '../data/skin_libraries';
-import { GENRE_CATEGORIES } from '../data/genres';
-import { WORLD_MOTIF_CATEGORIES } from '../data/world_motifs';
-import { MASTER_PRESETS, MASTER_PRESETS_REALISM, MASTER_PRESETS_STYLIZED } from '../data/master_presets';
 
 // Constants for Aesthetic Mode Logic
 export const HUMAN_BLOCKS = [

@@ -11,10 +11,11 @@ import {
     POETIC_ENGINE_LIBRARY,
     BLOCK_LIMITS,
     GENRE_SUPER_GROUPS,
-    AES_COLOR_PRESETS
+    AES_COLOR_PRESETS,
+    SKIN_LIBRARY,
+    GENRE_CATEGORIES,
+    WORLD_MOTIF_CATEGORIES
 } from '../constants';
-import { SKIN_LIBRARY } from '../data/skin_libraries';
-import { GENRE_CATEGORIES } from '../data/genres';
 import { BlueprintLanguage, DriverType, LibraryCategoryDef } from '../types';
 
 interface NarrativeLibraryModalProps {
@@ -73,7 +74,11 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
             return GENRE_CATEGORIES;
         }
 
-        const libId = blockId === 'skin_era' ? 'skin_era_lib' : `${blockId}_lib`;
+        if (blockId === 'skin_animation_genre' || blockId === 'skin_era') {
+            return WORLD_MOTIF_CATEGORIES;
+        }
+
+        const libId = `${blockId}_lib`;
         const found = allLibs.find(c => c.id === libId);
         return found ? [found] : [];
     }, [blockId, customLibraryData, driverType]);

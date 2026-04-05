@@ -13,12 +13,13 @@ import {
   EXPERIMENTAL_SKIN_LIBRARY,
   TRAILER_SKIN_BLOCKS,
   TRAILER_SKIN_LIBRARY,
-  COUNTRY_PRESETS
+  COUNTRY_PRESETS,
+  SKIN_LIBRARY,
+  ALL_SKIN_BLOCKS,
+  GENRE_CATEGORIES,
+  WORLD_MOTIF_CATEGORIES
 } from '../constants';
 import { useTheme } from '../contexts/ThemeContext';
-import { SKIN_LIBRARY, ALL_SKIN_BLOCKS } from '../data/skin_libraries';
-import { GENRE_CATEGORIES } from '../data/genres';
-import { WORLD_MOTIF_CATEGORIES } from '../data/world_motifs';
 import { getHistoricalContext } from '../data/historical_timeline';
 
 interface TheSkinSidebarProps {

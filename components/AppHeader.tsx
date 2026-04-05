@@ -254,6 +254,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           <div className={`flex items-center p-1 rounded-full transition-all duration-300 border border-transparent hover:border-white/5
             ${theme === 'retro' ? 'hover:bg-[#FDFCF8]/90 hover:border-[#8B261D]/15' : 'hover:bg-black/30'}`}>
             {[
+              { icon: Settings, label: lang === 'CN' ? '系统配置' : 'SETTINGS', labelCn: '系统配置', labelEn: 'SETTINGS', onClick: openSettings, isActive: false },
               { icon: HistoryIcon, label: lang === 'CN' ? '欲望档案' : 'ARCHIVE', labelCn: '欲望档案', labelEn: 'ARCHIVE', onClick: openHistory, isActive: isHistoryOpen },
             ].map((item, idx) => (
               <button

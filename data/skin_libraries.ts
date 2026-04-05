@@ -15,9 +15,8 @@ import { SUR8_DATA } from './engine_surface/SUR8';
 import { SUR9_DATA } from './engine_surface/SUR9';
 import { IDEOLOGY_CATEGORIES as SUR10_DATA } from './engine_surface/SUR10';
 
-// SV1/SV2 (Structural/Volume - 保留旧源，非 patch 数据)
-import { NARRATIVE_STRUCTURES } from './narrative_structures';
-import { STORY_VOLUMES } from './story_volumes';
+import { SV1_DATA } from './engine_sv/SV1';
+import { SV2_DATA } from './engine_sv/SV2';
 
 // Synthesizer 调音台参数
 import { SYNTHESIZER_SUR4X } from './engine_core/synthesizer/sur4x';
@@ -149,51 +148,83 @@ export const ALL_SKIN_BLOCKS = [
 // ============================================================
 // SV1/SV2 FLAT MAPPINGS (结构与体量保留旧逻辑)
 // ============================================================
-const FLAT_STRUCTURE_ITEMS: LibraryItemDef[] = NARRATIVE_STRUCTURES.map(item => ({
-    id: item.id,
-    name: `${item.name} (${item.enName})`,
-    def: item.description,
-    core: `${item.lacanian} | Masterpiece: ${item.masterpiece}`,
-    group: item.family
-}));
-
-const FLAT_VOLUME_ITEMS: LibraryItemDef[] = STORY_VOLUMES.map(item => ({
-    id: item.id,
-    name: item.name,
-    def: `【${item.duration_label}】 ${item.description}`,
-    core: `目标字数: ~${item.word_count}字 | 结构: ${item.structure_density.split('.')[0]}`,
-}));
+const FLAT_STRUCTURE_ITEMS: LibraryItemDef[] = SV1_DATA.flatMap(cat => cat.items.map(item => ({ ...item, group: cat.name })));
 
 // ============================================================
 // SKIN_LIBRARY: 全量词库（新版 engine_surface 数据源）
 // ============================================================
 export const SKIN_LIBRARY: LibraryCategoryDef[] = [
-    // SUR1: 叙事动力 — 从 engine_surface/SUR1 加载
-    ...SUR1_DATA,
+    // SUR1: 叙事动力 — 从 engine_surface/SUR1 加载 (也供其他调用后备)
+    {
+        id: "skin_genre_lib",
+        name: "叙事动力 (Drive - SUR1)",
+        desc: "决定能量喷发的物理形式",
+        items: SUR1_DATA.flatMap(cat => (cat.items || []).map(item => ({ ...item, group: cat.name, groupEn: cat.nameEn })))
+    },
 
-    // SUR2: 背景场域 — 从 engine_surface/SUR2 加载
-    ...SUR2_DATA,
+    // SUR2: 背景场域 — 从 engine_surface/SUR2 加载 (也供其他调用后备)
+    {
+        id: "skin_era_lib",
+        name: "背景场域/废弃世界 (Field/Motif - SUR2/SURx)",
+        desc: "决定叙事发生的时代背景",
+        items: SUR2_DATA.flatMap(cat => (cat.items || []).map(item => ({ ...item, group: cat.name, groupEn: cat.nameEn })))
+    },
 
     // SUR4: 社会形态 — 从 engine_surface/SUR4 加载
-    ...SUR4_DATA,
+    {
+        id: "skin_society_lib",
+        name: "社会形态 (Society - SUR4)",
+        desc: "界定压盖在人物头顶的终极秩序",
+        items: SUR4_DATA.flatMap(cat => (cat.items || []).map(item => ({ ...item, group: cat.name, groupEn: cat.nameEn })))
+    },
 
     // SUR5: 欲望锚点 — 从 engine_surface/SUR5 加载
-    ...SUR5_DATA,
+    {
+        id: "skin_everything_lib",
+        name: "欲望锚点 (Everything - SUR5)",
+        desc: "这就是无所不包的 Everything",
+        items: SUR5_DATA.flatMap(cat => (cat.items || []).map(item => ({ ...item, group: cat.name, groupEn: cat.nameEn })))
+    },
 
     // SUR6: 空间场景 — 从 engine_surface/SUR6 加载
-    ...SUR6_DATA,
+    {
+        id: "skin_location_lib",
+        name: "空间场景 (Location - SUR6)",
+        desc: "提供事件发生的具体物理容器",
+        items: SUR6_DATA.flatMap(cat => (cat.items || []).map(item => ({ ...item, group: cat.name, groupEn: cat.nameEn })))
+    },
 
     // SUR7: 主体性别 — 从 engine_surface/SUR7 加载
-    ...SUR7_DATA,
+    {
+        id: "skin_gender_lib",
+        name: "主体性别 (Gender - SUR7)",
+        desc: "主体的生理性别或外观呈现",
+        items: SUR7_DATA.flatMap(cat => (cat.items || []).map(item => ({ ...item, group: cat.name, groupEn: cat.nameEn })))
+    },
 
     // SUR8: 主体年龄 — 从 engine_surface/SUR8 加载
-    ...SUR8_DATA,
+    {
+        id: "skin_age_lib",
+        name: "主体年龄 (Age - SUR8)",
+        desc: "主体的生理年龄与身体机能",
+        items: SUR8_DATA.flatMap(cat => (cat.items || []).map(item => ({ ...item, group: cat.name, groupEn: cat.nameEn })))
+    },
 
     // SUR9: 职业身份 — 从 engine_surface/SUR9 加载
-    ...SUR9_DATA,
+    {
+        id: "skin_profession_lib",
+        name: "职业身份 (Profession - SUR9)",
+        desc: "主体的社会角色与生存手段",
+        items: SUR9_DATA.flatMap(cat => (cat.items || []).map(item => ({ ...item, group: cat.name, groupEn: cat.nameEn })))
+    },
 
     // SUR10: 哲学信念 — 从 engine_surface/SUR10 加载
-    ...SUR10_DATA,
+    {
+        id: "skin_ideology_lib",
+        name: "哲学信念 (Ideology - SUR10)",
+        desc: "主体自认为用以填补内心缺失的意识形态",
+        items: SUR10_DATA.flatMap(cat => (cat.items || []).map(item => ({ ...item, group: cat.name, groupEn: cat.nameEn })))
+    },
 
     // SV1: 叙事结构
     {
@@ -207,7 +238,7 @@ export const SKIN_LIBRARY: LibraryCategoryDef[] = [
         id: "skin_volume_lib", 
         name: "故事体量 (Volume - SV2)", 
         desc: "Target scope and rhythm density.",
-        items: FLAT_VOLUME_ITEMS
+        items: SV2_DATA.flatMap(cat => cat.items.map(item => ({ ...item, group: cat.name })))
     },
     // Synthesizer 调音台
     {

@@ -4,54 +4,54 @@
 
 
 
-import { 
-  NarrativeFieldState, 
+import {
+  NarrativeFieldState,
   CreativeTreatment,
   WorldLawConfig,
   StyleConfig
 } from '../types';
-import { 
-  NARRATIVE_ENGINE_BLOCKS 
+import {
+  NARRATIVE_ENGINE_BLOCKS
 } from '../data/engine_core/narrative_engine';
 import { ALL_SKIN_BLOCKS } from '../data/skin_libraries';
-import { STORY_VOLUMES } from '../data/story_volumes';
+import { SV2_DATA } from '../data/engine_sv/SV2';
 import { SUR1_DATA } from '../data/engine_surface/SUR1';
 import { PERSPECTIVES, SENSORY_MODES, STYLE_MATRIX } from '../data/style_matrix';
 import { DIRECTOR_STYLES } from '../data/director_styles';
 
 // Import Protocols
-import { 
-    NAMING_PROTOCOL, 
-    LITERARY_AESTHETIC_PROTOCOL, 
-    NARRATIVE_ENGINE_FORMULA, 
-    THE_IRON_LAWS,
-    FALLBACK_TOPOLOGY_TEMPLATE,
-    NARRATIVE_ALGEBRAIC_PROTOCOL,
-    STYLE_LOGIC_PROTOCOL,
-    getVisionAnchorProtocol,
-    THE_MASK_PROTOCOL
+import {
+  NAMING_PROTOCOL,
+  LITERARY_AESTHETIC_PROTOCOL,
+  NARRATIVE_ENGINE_FORMULA,
+  THE_IRON_LAWS,
+  FALLBACK_TOPOLOGY_TEMPLATE,
+  NARRATIVE_ALGEBRAIC_PROTOCOL,
+  STYLE_LOGIC_PROTOCOL,
+  getVisionAnchorProtocol,
+  THE_MASK_PROTOCOL
 } from '../data/engine_core/narrative_protocols';
 
 // Import Registry with patch extraction
 import { findItemDetails, findItemFull, extractPatchConstraints } from './dataRegistry';
 
 const buildContext = (fieldState: NarrativeFieldState) => {
-    return Object.entries(fieldState).map(([key, tags]) => {
-      if (!tags || tags.length === 0 || key.startsWith('comm_')) return null;
-      // Map to correct name
-      let name = key;
-      const engineBlock = NARRATIVE_ENGINE_BLOCKS.find(b => b.id === key);
-      const skinBlock = ALL_SKIN_BLOCKS.find(b => b.id === key);
-      
-      if (engineBlock) name = engineBlock.enName;
-      else if (skinBlock) name = skinBlock.enName;
-      
-      const definitions = tags.map(t => {
-          const detail = findItemDetails(t);
-          return detail ? `[${t}]: ${detail}` : null;
-      }).filter(Boolean).join('; ');
+  return Object.entries(fieldState).map(([key, tags]) => {
+    if (!tags || tags.length === 0 || key.startsWith('comm_')) return null;
+    // Map to correct name
+    let name = key;
+    const engineBlock = NARRATIVE_ENGINE_BLOCKS.find(b => b.id === key);
+    const skinBlock = ALL_SKIN_BLOCKS.find(b => b.id === key);
 
-      return `* **${name} (${key})**: ${tags.join(' + ')} \n      (${definitions})`;
+    if (engineBlock) name = engineBlock.enName;
+    else if (skinBlock) name = skinBlock.enName;
+
+    const definitions = tags.map(t => {
+      const detail = findItemDetails(t);
+      return detail ? `[${t}]: ${detail}` : null;
+    }).filter(Boolean).join('; ');
+
+    return `* **${name} (${key})**: ${tags.join(' + ')} \n      (${definitions})`;
   }).filter(Boolean).join('\n');
 };
 
@@ -61,21 +61,21 @@ const buildContext = (fieldState: NarrativeFieldState) => {
  * 组装为 System Prompt 中的强制执行区块。
  */
 const buildPatchRuntimeBlock = (fieldState: NarrativeFieldState): string => {
-    const constraints: string[] = [];
-    
-    for (const [blockId, tags] of Object.entries(fieldState)) {
-        if (!tags || tags.length === 0) continue;
-        for (const tag of tags) {
-            const patch = extractPatchConstraints(tag, blockId);
-            if (patch.runtime) {
-                constraints.push(`► [${tag}] ${patch.runtime}`);
-            }
-        }
+  const constraints: string[] = [];
+
+  for (const [blockId, tags] of Object.entries(fieldState)) {
+    if (!tags || tags.length === 0) continue;
+    for (const tag of tags) {
+      const patch = extractPatchConstraints(tag, blockId);
+      if (patch.runtime) {
+        constraints.push(`► [${tag}] ${patch.runtime}`);
+      }
     }
-    
-    if (constraints.length === 0) return '';
-    
-    return `
+  }
+
+  if (constraints.length === 0) return '';
+
+  return `
 ## 🔴 PATCH RUNTIME CONSTRAINTS (硬约束指令 — 不可违反)
 **以下是当前叙事配置中每个装载词条的核心约束。AI 必须严格执行这些规则，任何违反均视为生成失败。**
 ${constraints.join('\n')}
@@ -83,56 +83,56 @@ ${constraints.join('\n')}
 };
 
 const getBannedWords = (fieldState: NarrativeFieldState): string => {
-    const tags = Object.values(fieldState).flat();
-    if (tags.length === 0) return "";
-    
-    // Extract the main name part (before parenthesis)
-    const words = tags.map(t => t.split('(')[0].trim()).filter(w => w.length > 1);
-    // Also add full tags
-    const fullTags = tags.filter(t => t.length > 1);
-    
-    // Add common philosophical terms to ban list to force concretization
-    const philosophicalTerms = [
-      "大他者", "Big Other", "Object a", "对象a", "Symbolic Order", "符号界", 
-      "Real", "实在界", "Imaginary", "想象界", "Alienation", "异化", 
-      "Castration", "阉割", "Sinthome", "圣状", "Phallus", "菲勒斯"
-    ];
-    
-    return [...new Set([...words, ...fullTags, ...philosophicalTerms])].join(', ');
+  const tags = Object.values(fieldState).flat();
+  if (tags.length === 0) return "";
+
+  // Extract the main name part (before parenthesis)
+  const words = tags.map(t => t.split('(')[0].trim()).filter(w => w.length > 1);
+  // Also add full tags
+  const fullTags = tags.filter(t => t.length > 1);
+
+  // Add common philosophical terms to ban list to force concretization
+  const philosophicalTerms = [
+    "大他者", "Big Other", "Object a", "对象a", "Symbolic Order", "符号界",
+    "Real", "实在界", "Imaginary", "想象界", "Alienation", "异化",
+    "Castration", "阉割", "Sinthome", "圣状", "Phallus", "菲勒斯"
+  ];
+
+  return [...new Set([...words, ...fullTags, ...philosophicalTerms])].join(', ');
 };
 
 // --- UPDATED FUNCTION: Determine Topology based on Specific Sub-Genre in Library ---
 const getNarrativeTopology = (fieldState: NarrativeFieldState): string => {
-    const genreTags = fieldState['skin_genre'] || [];
-    const animTags = fieldState['skin_animation_genre'] || [];
-    
-    // Combine both pools for topology consideration
-    const allTags = [...genreTags, ...animTags];
-    
-    if (allTags.length === 0) return FALLBACK_TOPOLOGY_TEMPLATE;
-    
-    // Try to find the selected genre item and return its specific topology
-    for (const tag of allTags) {
-        // We use the registry full item lookup to check for topology property
-        const item = findItemFull(tag);
-        
-        if (item && item.topology) {
-            return `
+  const genreTags = fieldState['skin_genre'] || [];
+  const animTags = fieldState['skin_animation_genre'] || [];
+
+  // Combine both pools for topology consideration
+  const allTags = [...genreTags, ...animTags];
+
+  if (allTags.length === 0) return FALLBACK_TOPOLOGY_TEMPLATE;
+
+  // Try to find the selected genre item and return its specific topology
+  for (const tag of allTags) {
+    // We use the registry full item lookup to check for topology property
+    const item = findItemFull(tag);
+
+    if (item && item.topology) {
+      return `
 ### 📐 TOPOLOGY: [${item.name}]
 ${item.topology}
 `;
-        }
     }
+  }
 
-    // Fallback if no specific topology field is found
-    const genreDefs = allTags.map(t => findItemDetails(t)).join('\n');
-    
-    let topologyHeader = "### 📐 TOPOLOGY: [DYNAMIC CONSTRUCTION]";
-    if (animTags.length > 0) {
-        topologyHeader = "### 📐 TOPOLOGY: [ANIMATION MODE]";
-    }
-    
-    return `
+  // Fallback if no specific topology field is found
+  const genreDefs = allTags.map(t => findItemDetails(t)).join('\n');
+
+  let topologyHeader = "### 📐 TOPOLOGY: [DYNAMIC CONSTRUCTION]";
+  if (animTags.length > 0) {
+    topologyHeader = "### 📐 TOPOLOGY: [ANIMATION MODE]";
+  }
+
+  return `
 ${topologyHeader}
 *   **Active Genre(s):** ${allTags.join(', ')}
 *   **CORE LOGIC EXTRACTION:** 
@@ -153,7 +153,7 @@ export const buildNarrativePrompt = (
   visionImage: string | null = null,
   worldLaw: WorldLawConfig
 ): { text: string, images: string[] } => {
-    
+
   const engineContext = buildContext(fieldState);
   const bannedWords = getBannedWords(fieldState);
   const topologyInstruction = getNarrativeTopology(fieldState);
@@ -169,10 +169,10 @@ export const buildNarrativePrompt = (
   const m0Tags = fieldState['engine_m0'];
   let psychoProtocol = "";
   if (m0Tags && m0Tags.length > 0) {
-      const tag = m0Tags[0];
-      const item = findItemFull(tag) as any;
-      const details = findItemDetails(tag);
-      psychoProtocol = `
+    const tag = m0Tags[0];
+    const item = findItemFull(tag) as any;
+    const details = findItemDetails(tag);
+    psychoProtocol = `
 ## 🧠 PSYCHIC STRUCTURE PROTOCOL (M0: CRITICAL PRIORITY)
 **You must structure the narrative logic based on the specific clinical mechanism of [${tag}].**
 
@@ -194,16 +194,17 @@ export const buildNarrativePrompt = (
 
   // --- STAGE 1: DURATION STRATEGY (CRITICAL UPDATE) ---
   const volumeTagRaw = fieldState['skin_volume']?.[0] || "";
-  const volumeDef = STORY_VOLUMES.find(v => volumeTagRaw.includes(v.name) || volumeTagRaw === v.id);
+  const volumeDef = SV2_DATA.flatMap(c => c.items).find(v => volumeTagRaw.includes(v.name) || volumeTagRaw === v.id);
   const structureTagRaw = fieldState['skin_structure']?.[0] || "Unknown Structure";
-  
+
   let volumeInstruction = "";
-  
+
   if (volumeDef) {
     volumeInstruction = `
     ## ⏱️ VOLUME PROTOCOL: ${volumeDef.name}
     **CRITICAL INSTRUCTION FOR AI:**
-    ${volumeDef.structure_density}
+    ${volumeDef.patch?.mechanics || volumeDef.def}
+    ${volumeDef.patch?.aesthetic ? `\n    **AESTHETIC REQUIREMENT:**\n    ${volumeDef.patch.aesthetic}` : ""}
     
     ## 🧩 STRUCTURE RECONCILIATION (Volume vs Structure)
     **Selected Structure:** ${structureTagRaw}
@@ -229,21 +230,21 @@ export const buildNarrativePrompt = (
   let instructions = "";
   let physicsConstraint = "";
   if (worldLaw.physics === 'STRICT') {
-      instructions += "PHYSICS: STRICT REALISM. Strictly adhere to the laws of physics. Gravity and causality are absolute.";
-      physicsConstraint = "STRICT REALISM (NO MAGIC, NO SUPERNATURAL, STRICT PHYSICS)";
-      if (isAnime) {
-          instructions += " (REALISTIC ANIMATION). The medium is animation, but the logic is grounded (e.g. 'Slam Dunk', 'Jin-Roh', 'Perfect Blue'). Do NOT use exaggerated physics or cartoon logic.";
-      } else {
-          instructions += " No magic. No super-science unless implied by the Genre.";
-      }
-      instructions += "\n";
+    instructions += "PHYSICS: STRICT REALISM. Strictly adhere to the laws of physics. Gravity and causality are absolute.";
+    physicsConstraint = "STRICT REALISM (NO MAGIC, NO SUPERNATURAL, STRICT PHYSICS)";
+    if (isAnime) {
+      instructions += " (REALISTIC ANIMATION). The medium is animation, but the logic is grounded (e.g. 'Slam Dunk', 'Jin-Roh', 'Perfect Blue'). Do NOT use exaggerated physics or cartoon logic.";
+    } else {
+      instructions += " No magic. No super-science unless implied by the Genre.";
+    }
+    instructions += "\n";
   } else {
-      instructions += "PHYSICS: UNBOUND / DREAM LOGIC. Metaphors can be literalized. Physics serves the dynamic tension.";
-      physicsConstraint = "UNBOUND FANTASY (MAGIC, DREAM LOGIC, & SURREALISM ALLOWED)";
-      if (isAnime) {
-          instructions += " (ANIME LOGIC / SAKUGA). Allow exaggerated physics, visual spectacles, and stylized action.";
-      }
-      instructions += "\n";
+    instructions += "PHYSICS: UNBOUND / DREAM LOGIC. Metaphors can be literalized. Physics serves the dynamic tension.";
+    physicsConstraint = "UNBOUND FANTASY (MAGIC, DREAM LOGIC, & SURREALISM ALLOWED)";
+    if (isAnime) {
+      instructions += " (ANIME LOGIC / SAKUGA). Allow exaggerated physics, visual spectacles, and stylized action.";
+    }
+    instructions += "\n";
   }
 
   // 2. Context Layer (Updated for Pure/Fusion)
@@ -255,20 +256,20 @@ export const buildNarrativePrompt = (
     instructions += "CONTEXT: GENRE FUSION. Encourage creative mixing of styles and tropes. Deconstruct the genre conventions. Mashup is encouraged.\n";
     contextConstraint = "GENRE FUSION (CREATIVE MASHUP ALLOWED)";
   }
-  
+
   // --- ⚠️ CRITICAL FIX: DEFAULT ANCHOR INJECTION FOR 3 CARDS ---
   // If user has NOT selected an Era/Location, force a deduction based on M-Engine.
   let defaultAnchorInstruction = "";
   const hasEra = fieldState['skin_era'] && fieldState['skin_era'].length > 0;
   const hasLoc = fieldState['skin_location'] && fieldState['skin_location'].length > 0;
-  
+
   // Custom Exact Year/Country Logic
   const exactYear = fieldState['skin_year_exact']?.[0];
   const exactCountry = fieldState['skin_country_exact']?.[0];
   let customCoordinates = "";
-  
+
   if (exactYear || exactCountry) {
-      customCoordinates = `
+    customCoordinates = `
       ## 📍 PRECISE SPACETIME COORDINATES (HIGHEST PRIORITY)
       **You MUST set the story strictly within these coordinates:**
       *   **Year:** ${exactYear || "Any"}
@@ -280,11 +281,11 @@ export const buildNarrativePrompt = (
       This OVERRIDES any generic Era tag (e.g. if tag says "Ancient" but year is "2024", use 2024).
       `;
   }
-  
+
   if (!hasEra && !hasLoc && !exactYear && !exactCountry) {
-      if (worldLaw.physics === 'STRICT') {
-          // STRICT MODE: International Scope, Realistic Logic
-          defaultAnchorInstruction = `
+    if (worldLaw.physics === 'STRICT') {
+      // STRICT MODE: International Scope, Realistic Logic
+      defaultAnchorInstruction = `
           ## ⚓ DEFAULT REALITY ANCHOR (STRICT REALISM - INTERNATIONAL)
           **CRITICAL:** The user has NOT defined an Era or Location, and World Law is set to **STRICT**.
           **INSTRUCTION:**
@@ -292,9 +293,9 @@ export const buildNarrativePrompt = (
           2.  **INTERNATIONAL SCOPE:** The story should be **World-Class / International** (Hollywood, Cannes, European Cinema style). Do NOT default to a Chinese setting unless the tags specifically imply it (e.g., Wuxia, Xianxia).
           3.  **PHYSICS:** Adhere strictly to the physical laws of the deduced era.
           `;
-      } else {
-          // UNBOUND MODE: Allow creativity based on M-Tags
-          defaultAnchorInstruction = `
+    } else {
+      // UNBOUND MODE: Allow creativity based on M-Tags
+      defaultAnchorInstruction = `
           ## ⚓ DEFAULT REALITY ANCHOR (UNBOUND FANTASY - GLOBAL)
           **CRITICAL:** The user has NOT defined an Era or Location, BUT World Law is set to **UNBOUND**.
           **INSTRUCTION:**
@@ -302,13 +303,13 @@ export const buildNarrativePrompt = (
           2.  **SCOPE:** Aim for a universal or mythic appeal.
           3.  **INTERPRETATION:** You MAY interpret M-Tags explicitly (e.g., "M1 Cyborg" = Literal Robot) if it serves the story.
           `;
-      }
+    }
   }
-  
+
   // VISION ANCHOR LOGIC (NEW - IMPORTED)
   let visionAnchorInstruction = "";
   if (visionInput) {
-      visionAnchorInstruction = getVisionAnchorProtocol(visionInput);
+    visionAnchorInstruction = getVisionAnchorProtocol(visionInput);
   }
 
   const promptText = `
@@ -428,101 +429,108 @@ ${LITERARY_AESTHETIC_PROTOCOL}
 };
 
 export const buildNarrativeBiblePrompt = (
-    treatment: CreativeTreatment,
-    styleConfig: StyleConfig,
-    fieldState?: NarrativeFieldState,
-    visionInput?: string,
-    worldLaw?: WorldLawConfig
+  treatment: CreativeTreatment,
+  styleConfig: StyleConfig,
+  fieldState?: NarrativeFieldState,
+  visionInput?: string,
+  worldLaw?: WorldLawConfig
 ): string => {
-    // 1. Get Volume Definition to enforce Pacing
-    const volumeTagRaw = fieldState ? (fieldState['skin_volume']?.[0] || "") : "";
-    const volumeDef = STORY_VOLUMES.find(v => volumeTagRaw.includes(v.name) || volumeTagRaw === v.id);
-    
-    // 2. Define Bible Strategy based on Volume
-    let bibleStrategy = "";
-    let targetWordCount = "1500"; 
-    let literatureType = "Short Story";
+  // 1. Get Volume Definition to enforce Pacing
+  const volumeTagRaw = fieldState ? (fieldState['skin_volume']?.[0] || "") : "";
+  const volumeDef = SV2_DATA.flatMap(c => c.items).find(v => volumeTagRaw.includes(v.name) || volumeTagRaw === v.id);
 
-    if (volumeDef) {
-        targetWordCount = volumeDef.word_count;
-        if (volumeDef.id.includes('15S') || volumeDef.id.includes('30S')) {
-            literatureType = "Flash Fiction / Cinematic Prose Poem";
-            bibleStrategy = `**模式：瞬间冲击 (MODE: INSTANT IMPACT)**\n聚焦于单瞬间的无限细节爆发。不要写冗长的背景故事。`;
-        } else if (volumeDef.id.includes('60S') || volumeDef.id.includes('90S') || volumeDef.id.includes('3M')) {
-            literatureType = "Compact Short Story";
-            bibleStrategy = `**模式：紧凑叙事 (MODE: COMPACT NARRATIVE)**\n一个包含紧凑弧光的完整故事：激励事件 -> 高潮 -> 结局。保持快节奏。`;
-        } else if (volumeDef.id.includes('5M') || volumeDef.id.includes('15M')) {
-            literatureType = "Narrative Short Story";
-            bibleStrategy = `**模式：丰富短篇 (MODE: RICH SHORT STORY)**\n具有强烈角色发展的标准三幕结构。给场景留出呼吸空间。`;
-        } else {
-            literatureType = "Novella Chapter / Treatment";
-            bibleStrategy = `**模式：宏大叙事 (MODE: EXPANSIVE NARRATIVE)**\n一个丰富、宏大的叙事篇章，包含详细的世界构建。`;
-        }
+  // 2. Define Bible Strategy based on Volume
+  let bibleStrategy = "";
+  let targetWordCount = "1500";
+  let literatureType = "Short Story";
+
+  if (volumeDef) {
+    if (volumeDef.id.includes('15s') || volumeDef.id.includes('30s')) {
+      targetWordCount = "250";
+      literatureType = "Flash Fiction / Cinematic Prose Poem";
+      bibleStrategy = `**模式：瞬间冲击 (MODE: INSTANT IMPACT)**\n聚焦于单瞬间的无限细节爆发。不要写冗长的背景故事。`;
+    } else if (volumeDef.id.includes('60s') || volumeDef.id.includes('90s') || volumeDef.id.includes('3m')) {
+      targetWordCount = volumeDef.id.includes('60s') ? "500" : "800";
+      literatureType = "Compact Short Story";
+      bibleStrategy = `**模式：紧凑叙事 (MODE: COMPACT NARRATIVE)**\n一个包含紧凑弧光的完整故事：激励事件 -> 高潮 -> 结局。保持快节奏。`;
+    } else if (volumeDef.id.includes('5m') || volumeDef.id.includes('15m')) {
+      targetWordCount = volumeDef.id.includes('5m') ? "1500" : "3000";
+      literatureType = "Narrative Short Story";
+      bibleStrategy = `**模式：丰富短篇 (MODE: RICH SHORT STORY)**\n具有强烈角色发展的标准三幕结构。给场景留出呼吸空间。`;
     } else {
-        bibleStrategy = "**模式：标准短篇 (MODE: STANDARD SHORT STORY)**";
+      targetWordCount = "8000";
+      literatureType = "Novella Chapter / Treatment";
+      bibleStrategy = `**模式：宏大叙事 (MODE: EXPANSIVE NARRATIVE)**\n一个丰富、宏大的叙事篇章，包含详细的世界构建。`;
+    }
+  } else {
+    bibleStrategy = "**模式：标准短篇 (MODE: STANDARD SHORT STORY)**";
+  }
+
+  if (volumeDef?.patch?.aesthetic) {
+    bibleStrategy += `\n**体量美学约束 (Volume Aesthetic):** ${volumeDef.patch.aesthetic}`;
+  }
+
+  const bannedWords = fieldState ? getBannedWords(fieldState) : "";
+  const topologyInstruction = fieldState ? getNarrativeTopology(fieldState) : "";
+
+  // M0 PROTOCOL
+  let psychoProtocol = "";
+  if (fieldState) {
+    const m0Tags = fieldState['engine_m0'];
+    if (m0Tags && m0Tags.length > 0) {
+      const tag = m0Tags[0];
+      const item = findItemFull(tag) as any;
+      const details = findItemDetails(tag);
+      psychoProtocol = `## 🧠 PSYCHIC STRUCTURE PROTOCOL\n**Mechanism:** ${details}\n**Logical Constraint:** ${item?.logic || "Standard OS"}`;
+    }
+  }
+
+  // WORLD LAW INJECTION
+  let worldLawInstruction = "";
+  if (worldLaw) {
+    const isAnime = fieldState ? (fieldState['skin_animation_genre']?.length > 0) : false;
+
+    // 1. PHYSICS LOGIC
+    let physicsContent = "";
+    if (worldLaw.physics === 'STRICT') {
+      physicsContent = `**STRICT REALISM (严守现实)**\n   *   **Rule:** 严格遵循现实世界的物理法则。严禁出现魔法、超能力或不符合时代背景的黑科技。\n   *   **Constraint:** 即使在描写心理活动时，也不要将其具象化为物理现象。重力、因果律是绝对的。`;
+      if (isAnime) {
+        physicsContent = `**GROUNDED ANIMATION (写实动画逻辑)**\n   *   **Reference:** 类似于《灌篮高手》或《人狼》，虽然是动画，但物理法则严谨。`;
+      }
+    } else {
+      physicsContent = `**UNBOUND FANTASY (幻想开放)**\n   *   **Rule:** 允许梦境逻辑、超自然现象或物理法则的扭局。隐喻可以变为现实。\n   *   **Constraint:** 这种自由必须服务于戏剧张力，而非随意的混乱。`;
+      if (isAnime) {
+        physicsContent = `**ANIME LOGIC (动画逻辑)**\n   *   **Rule:** 允许夸张的物理表现 (Sakuga logic)、视觉隐喻实体化。`;
+      }
     }
 
-    const bannedWords = fieldState ? getBannedWords(fieldState) : "";
-    const topologyInstruction = fieldState ? getNarrativeTopology(fieldState) : "";
-
-    // M0 PROTOCOL
-    let psychoProtocol = "";
-    if (fieldState) {
-        const m0Tags = fieldState['engine_m0'];
-        if (m0Tags && m0Tags.length > 0) {
-            const tag = m0Tags[0];
-            const item = findItemFull(tag) as any;
-            const details = findItemDetails(tag);
-            psychoProtocol = `## 🧠 PSYCHIC STRUCTURE PROTOCOL\n**Mechanism:** ${details}\n**Logical Constraint:** ${item?.logic || "Standard OS"}`;
-        }
+    // 2. CONTEXT LOGIC
+    let contextContent = "";
+    if (worldLaw.context === 'PURE') {
+      contextContent = `**GENRE PURITY (类型纯化)**\n   *   **Rule:** 保持类型的一致性。如果设定是[古代]，就严禁出现[现代/科幻]元素。如果设定是[武侠]，就不要混入[西幻]。\n   *   **Constraint:** 清洗任何不属于该核心时空/类型的异质元素。`;
+    } else {
+      contextContent = `**GENRE FUSION (混搭融合)**\n   *   **Rule:** 鼓励类型的碰撞。将不相容的元素（如[古代]与[赛博]）进行创造性融合。\n   *   **Constraint:** 寻找缝合点，创造独特的混合美学。`;
     }
-    
-    // WORLD LAW INJECTION
-    let worldLawInstruction = "";
-    if (worldLaw) {
-         const isAnime = fieldState ? (fieldState['skin_animation_genre']?.length > 0) : false;
-         
-         // 1. PHYSICS LOGIC
-         let physicsContent = "";
-         if (worldLaw.physics === 'STRICT') {
-             physicsContent = `**STRICT REALISM (严守现实)**\n   *   **Rule:** 严格遵循现实世界的物理法则。严禁出现魔法、超能力或不符合时代背景的黑科技。\n   *   **Constraint:** 即使在描写心理活动时，也不要将其具象化为物理现象。重力、因果律是绝对的。`;
-             if (isAnime) {
-                 physicsContent = `**GROUNDED ANIMATION (写实动画逻辑)**\n   *   **Reference:** 类似于《灌篮高手》或《人狼》，虽然是动画，但物理法则严谨。`;
-             }
-         } else {
-             physicsContent = `**UNBOUND FANTASY (幻想开放)**\n   *   **Rule:** 允许梦境逻辑、超自然现象或物理法则的扭局。隐喻可以变为现实。\n   *   **Constraint:** 这种自由必须服务于戏剧张力，而非随意的混乱。`;
-             if (isAnime) {
-                 physicsContent = `**ANIME LOGIC (动画逻辑)**\n   *   **Rule:** 允许夸张的物理表现 (Sakuga logic)、视觉隐喻实体化。`;
-             }
-         }
 
-         // 2. CONTEXT LOGIC
-         let contextContent = "";
-         if (worldLaw.context === 'PURE') {
-             contextContent = `**GENRE PURITY (类型纯化)**\n   *   **Rule:** 保持类型的一致性。如果设定是[古代]，就严禁出现[现代/科幻]元素。如果设定是[武侠]，就不要混入[西幻]。\n   *   **Constraint:** 清洗任何不属于该核心时空/类型的异质元素。`;
-         } else {
-             contextContent = `**GENRE FUSION (混搭融合)**\n   *   **Rule:** 鼓励类型的碰撞。将不相容的元素（如[古代]与[赛博]）进行创造性融合。\n   *   **Constraint:** 寻找缝合点，创造独特的混合美学。`;
-         }
-
-         worldLawInstruction = `
+    worldLawInstruction = `
          ## ⚖️ WORLD LAW (世界法则 - 最高优先级)
          *   **PHYSICS:** ${physicsContent}
          *   **CONTEXT:** ${contextContent}
          `;
-    }
-    
-    // SMART ANCHOR LOGIC
-    let defaultAnchorInstruction = "";
-    const hasEra = fieldState && fieldState['skin_era'] && fieldState['skin_era'].length > 0;
-    const hasLoc = fieldState && fieldState['skin_location'] && fieldState['skin_location'].length > 0;
-    
-    // Custom Exact Year/Country Logic
-    const exactYear = fieldState ? fieldState['skin_year_exact']?.[0] : null;
-    const exactCountry = fieldState ? fieldState['skin_country_exact']?.[0] : null;
-    let customCoordinates = "";
-    
-    if (exactYear || exactCountry) {
-          customCoordinates = `
+  }
+
+  // SMART ANCHOR LOGIC
+  let defaultAnchorInstruction = "";
+  const hasEra = fieldState && fieldState['skin_era'] && fieldState['skin_era'].length > 0;
+  const hasLoc = fieldState && fieldState['skin_location'] && fieldState['skin_location'].length > 0;
+
+  // Custom Exact Year/Country Logic
+  const exactYear = fieldState ? fieldState['skin_year_exact']?.[0] : null;
+  const exactCountry = fieldState ? fieldState['skin_country_exact']?.[0] : null;
+  let customCoordinates = "";
+
+  if (exactYear || exactCountry) {
+    customCoordinates = `
           ## 📍 PRECISE SPACETIME COORDINATES (HIGHEST PRIORITY)
           **You MUST set the story strictly within these coordinates:**
           *   **Year:** ${exactYear || "Any"}
@@ -533,15 +541,15 @@ export const buildNarrativeBiblePrompt = (
           Reflect the technology, fashion, politics, and social atmosphere of that specific time and place in the narrative.
           This OVERRIDES any generic Era tag.
           `;
-    }
+  }
 
-    if (!hasEra || !hasLoc) {
-         const missingParts = [];
-         if (!hasEra) missingParts.push("ERA/TIME PERIOD");
-         if (!hasLoc) missingParts.push("LOCATION/SETTING");
-         
-         if (worldLaw?.physics === 'STRICT') {
-             defaultAnchorInstruction = `
+  if (!hasEra || !hasLoc) {
+    const missingParts = [];
+    if (!hasEra) missingParts.push("ERA/TIME PERIOD");
+    if (!hasLoc) missingParts.push("LOCATION/SETTING");
+
+    if (worldLaw?.physics === 'STRICT') {
+      defaultAnchorInstruction = `
             ## ⚓ 锚点推演 (ANCHOR DEDUCTION - STRICT REALISM)
             **关键：用户未定义：${missingParts.join(' & ')}。**
             **指令:**
@@ -549,8 +557,8 @@ export const buildNarrativeBiblePrompt = (
             2.  **范围:** 如果模棱两克，默认为**世界级/国际化**设定 (例如：如果是黑色电影，假设是洛杉矶或香港；如果是史诗奇幻，假设是中土世界原型)。
             3.  **一致性:** 确保推演出的设定严格遵循物理法则。
             `;
-        } else {
-             defaultAnchorInstruction = `
+    } else {
+      defaultAnchorInstruction = `
             ## ⚓ 锚点推演 (ANCHOR DEDUCTION - UNBOUND FANTASY)
             **关键：用户未定义：${missingParts.join(' & ')}。**
             **指令:**
@@ -558,37 +566,37 @@ export const buildNarrativeBiblePrompt = (
             2.  **范围:** 追求普世或神话般的吸引力。
             3.  **自由:** 你可以将隐喻具象化（例如：如果 M1 是“幽灵”，设定可以是字面意义上的炼狱）。
             `;
-        }
     }
+  }
 
-    const dnaContext = fieldState ? `## B. ENGINE DNA (Structure)\n${buildContext(fieldState)}` : "";
-    
-    let visionContext = "";
-    if (visionInput) {
-        visionContext = getVisionAnchorProtocol(visionInput);
-    }
+  const dnaContext = fieldState ? `## B. ENGINE DNA (Structure)\n${buildContext(fieldState)}` : "";
 
-    // Construct Style Instructions
-    const styleItem = STYLE_MATRIX.flatMap(c => c.items).find(i => i.id === styleConfig.styleId);
-    const perspective = PERSPECTIVES.find(p => p.id === styleConfig.perspectiveId);
-    const sensory = SENSORY_MODES.find(s => s.id === styleConfig.sensoryId);
-    const directorStyle = DIRECTOR_STYLES.find(d => d.id === styleConfig.styleId); 
-    
-    let styleName = "Standard Literary";
-    let styleDNA = "";
+  let visionContext = "";
+  if (visionInput) {
+    visionContext = getVisionAnchorProtocol(visionInput);
+  }
 
-    if (directorStyle) {
-        styleName = directorStyle.name;
-        styleDNA = `Cinematic style of ${directorStyle.name}. Core traits: ${directorStyle.core}. Definition: ${directorStyle.def}`;
-    } else if (styleItem) {
-        styleName = styleItem.name;
-        styleDNA = `Literary style of ${styleItem.name}. DNA: ${styleItem.dna}. ${styleItem.description || ''} ${styleItem.example ? `(e.g. ${styleItem.example})` : ''}`;
-    }
+  // Construct Style Instructions
+  const styleItem = STYLE_MATRIX.flatMap(c => c.items).find(i => i.id === styleConfig.styleId);
+  const perspective = PERSPECTIVES.find(p => p.id === styleConfig.perspectiveId);
+  const sensory = SENSORY_MODES.find(s => s.id === styleConfig.sensoryId);
+  const directorStyle = DIRECTOR_STYLES.find(d => d.id === styleConfig.styleId);
 
-    const povInstruction = perspective ? `**Point of View:** ${perspective.name}\n   *   **Directive:** ${perspective.prompt}` : "";
-    const sensoryInstruction = sensory ? `**Sensory Priority:** ${sensory.name}\n   *   **Directive:** ${sensory.prompt}` : "";
+  let styleName = "Standard Literary";
+  let styleDNA = "";
 
-    return `
+  if (directorStyle) {
+    styleName = directorStyle.name;
+    styleDNA = `Cinematic style of ${directorStyle.name}. Core traits: ${directorStyle.core}. Definition: ${directorStyle.def}`;
+  } else if (styleItem) {
+    styleName = styleItem.name;
+    styleDNA = `Literary style of ${styleItem.name}. DNA: ${styleItem.dna}. ${styleItem.description || ''} ${styleItem.example ? `(e.g. ${styleItem.example})` : ''}`;
+  }
+
+  const povInstruction = perspective ? `**Point of View:** ${perspective.name}\n   *   **Directive:** ${perspective.prompt}` : "";
+  const sensoryInstruction = sensory ? `**Sensory Priority:** ${sensory.name}\n   *   **Directive:** ${sensory.prompt}` : "";
+
+  return `
 # 1. Role: 文学大师 & 影子写手。
 # Task: 撰写一篇 ${literatureType}。
 

@@ -1,0 +1,7 @@
+data/engine_sv/SV1/group_a.ts(1,36): error TS2307: Cannot find module '../../types' or its corresponding type declarations.
+data/engine_sv/SV1/group_b.ts(1,36): error TS2307: Cannot find module '../../types' or its corresponding type declarations.
+data/engine_sv/SV1/group_c.ts(1,36): error TS2307: Cannot find module '../../types' or its corresponding type declarations.
+data/engine_sv/SV1/group_d.ts(1,36): error TS2307: Cannot find module '../../types' or its corresponding type declarations.
+data/engine_sv/SV1/group_e.ts(1,36): error TS2307: Cannot find module '../../types' or its corresponding type declarations.
+data/engine_sv/SV1/group_f.ts(1,36): error TS2307: Cannot find module '../../types' or its corresponding type declarations.
+data/engine_sv/SV1/index.ts(1,36): error TS2307: Cannot find module '../../types' or its corresponding type declarations.

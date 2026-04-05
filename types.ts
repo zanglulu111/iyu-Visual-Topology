@@ -507,7 +507,7 @@ export interface LibraryCategoryDef {
   name: string;
   nameEn?: string;
   defEn?: string;
-  desc: string;
+  desc?: string;
   descEn?: string;
   items: LibraryItemDef[];
   isTimeline?: boolean;

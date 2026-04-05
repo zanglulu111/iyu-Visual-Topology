@@ -45,37 +45,19 @@ let _libraryCache: Record<string, LibraryItemDef> | null = null;
 function getLibraryCache(): Record<string, LibraryItemDef> {
   if (_libraryCache) return _libraryCache;
   try {
-    // === 骨层：M0-M7 引擎词条 ===
-    const { ENGINE_M0_OS } = require('../data/engine_core/m0/index');
-    const { ENGINE_SUBJECTS } = require('../data/engine_core/engine_subjects');
-    const { ENGINE_ENCOUNTERS } = require('../data/engine_core/engine_encounters');
-    const { ENGINE_FANTASIES } = require('../data/engine_core/engine_fantasies');
-    const { ENGINE_BIG_OTHER } = require('../data/engine_core/engine_big_other');
-    const { ENGINE_DRIVES } = require('../data/engine_core/engine_drives');
-    const { ENGINE_STAKES } = require('../data/engine_core/engine_stakes');
-    const { ENGINE_RESOLUTIONS } = require('../data/engine_core/engine_resolutions');
-
-    // === 皮层：SUR1-SUR10 + SV1/SV2 词条 ===
+    const { NARRATIVE_ENGINE_LIBRARY } = require('../data/engine_core/narrative_engine');
     const { SKIN_LIBRARY } = require('../data/skin_libraries');
     
     const cache: Record<string, LibraryItemDef> = {};
 
-    // 加载骨层
-    const engineItems: LibraryItemDef[] = [
-      ...ENGINE_M0_OS,
-      ...ENGINE_SUBJECTS,
-      ...ENGINE_ENCOUNTERS,
-      ...ENGINE_FANTASIES,
-      ...ENGINE_BIG_OTHER,
-      ...ENGINE_DRIVES,
-      ...ENGINE_STAKES,
-      ...ENGINE_RESOLUTIONS
-    ];
-    for (const item of engineItems) {
-      cache[item.id] = item;
+    for (const category of NARRATIVE_ENGINE_LIBRARY) {
+      if (category.items) {
+        for (const item of category.items) {
+          cache[item.id] = item;
+        }
+      }
     }
 
-    // 加载皮层（SKIN_LIBRARY 是 LibraryCategoryDef[]，需展开 items）
     for (const category of SKIN_LIBRARY) {
       if (category.items) {
         for (const item of category.items) {
@@ -86,7 +68,8 @@ function getLibraryCache(): Record<string, LibraryItemDef> {
 
     _libraryCache = cache;
     return cache;
-  } catch {
+  } catch (err) {
+    console.error("Failed to load library cache", err);
     return {};
   }
 }
@@ -94,6 +77,19 @@ function getLibraryCache(): Record<string, LibraryItemDef> {
 /** 从词库中查找词条 */
 function lookupItem(id: string): LibraryItemDef | undefined {
   return getLibraryCache()[id];
+}
+
+/** Name to ID */
+function nameToId(nameOrId: string | undefined): string | undefined {
+  if (!nameOrId) return undefined;
+  const cache = getLibraryCache();
+  if (cache[nameOrId]) return nameOrId;
+  for (const key in cache) {
+    if (cache[key].name === nameOrId || cache[key].nameEn === nameOrId) {
+      return key;
+    }
+  }
+  return nameOrId;
 }
 
 /** 从 fieldState 中提取第一个有效标签 */
@@ -157,38 +153,38 @@ export interface MistEngineInput {
 export function extractEngineInput(fieldState: NarrativeFieldState): MistEngineInput {
   return {
     // 骨层
-    m0: extractFirst(fieldState, 'engine_m0'),
-    m1: extractFirst(fieldState, 'engine_m1'),
-    m2: extractFirst(fieldState, 'engine_m2'),
-    m3: extractFirst(fieldState, 'engine_m3'),
-    m4: extractFirst(fieldState, 'engine_m4'),
-    m5: extractFirst(fieldState, 'engine_m5'),
-    m6: extractFirst(fieldState, 'engine_m6'),
-    m7: extractFirst(fieldState, 'engine_m7'),
-    m2x: extractFirst(fieldState, 'engine_m2x'),
-    m4x: extractFirst(fieldState, 'engine_m4x'),
-    m5x: extractFirst(fieldState, 'engine_m5x'),
+    m0: nameToId(extractFirst(fieldState, 'engine_m0')),
+    m1: nameToId(extractFirst(fieldState, 'engine_m1')),
+    m2: nameToId(extractFirst(fieldState, 'engine_m2')),
+    m3: nameToId(extractFirst(fieldState, 'engine_m3')),
+    m4: nameToId(extractFirst(fieldState, 'engine_m4')),
+    m5: nameToId(extractFirst(fieldState, 'engine_m5')),
+    m6: nameToId(extractFirst(fieldState, 'engine_m6')),
+    m7: nameToId(extractFirst(fieldState, 'engine_m7')),
+    m2x: nameToId(extractFirst(fieldState, 'engine_m2x')),
+    m4x: nameToId(extractFirst(fieldState, 'engine_m4x')),
+    m5x: nameToId(extractFirst(fieldState, 'engine_m5x')),
 
     // 皮层 SUR1-SUR10
-    sur1: extractFirst(fieldState, 'skin_genre'),
-    sur2: extractFirst(fieldState, 'skin_animation_genre'),
-    sur3: extractFirst(fieldState, 'skin_era'),
-    sur4: extractFirst(fieldState, 'skin_society'),
-    sur5: extractFirst(fieldState, 'skin_everything'),
-    sur6: extractAll(fieldState, 'skin_location'),
-    sur7: extractFirst(fieldState, 'skin_gender'),
-    sur8: extractFirst(fieldState, 'skin_age'),
-    sur9: extractFirst(fieldState, 'skin_profession'),
+    sur1: nameToId(extractFirst(fieldState, 'skin_genre')),
+    sur2: nameToId(extractFirst(fieldState, 'skin_animation_genre')),
+    sur3: nameToId(extractFirst(fieldState, 'skin_era')),
+    sur4: nameToId(extractFirst(fieldState, 'skin_society')),
+    sur5: nameToId(extractFirst(fieldState, 'skin_everything')),
+    sur6: extractAll(fieldState, 'skin_location').map(t => nameToId(t) || t),
+    sur7: nameToId(extractFirst(fieldState, 'skin_gender')),
+    sur8: nameToId(extractFirst(fieldState, 'skin_age')),
+    sur9: nameToId(extractFirst(fieldState, 'skin_profession')),
 
-    sur10: extractFirst(fieldState, 'skin_ideology'),
+    sur10: nameToId(extractFirst(fieldState, 'skin_ideology')),
 
     // 皮层旋钮
-    sur4x: extractFirst(fieldState, 'sur4x'),
-    sur10x: extractFirst(fieldState, 'sur10x'),
+    sur4x: nameToId(extractFirst(fieldState, 'sur4x')),
+    sur10x: nameToId(extractFirst(fieldState, 'sur10x')),
 
     // 工程轴
-    sv1: extractFirst(fieldState, 'skin_structure'),
-    sv2: extractFirst(fieldState, 'skin_volume'),
+    sv1: nameToId(extractFirst(fieldState, 'skin_structure')),
+    sv2: nameToId(extractFirst(fieldState, 'skin_volume')),
   };
 }
 
@@ -737,28 +733,50 @@ function compileDirectives(
   }
 
   // ====== SV1/SV2 工程轴指令 ======
-  // SV1 叙事结构 → 结构模板约束
-  if (input.sv1) {
-    const sv1Item = lookupItem(input.sv1);
-    if (sv1Item) {
+  const svItems: Array<{ target: string; id?: string }> = [
+    { target: 'SV1_STRUCTURE', id: input.sv1 },
+    { target: 'SV2_VOLUME', id: input.sv2 },
+  ];
+  for (const sv of svItems) {
+    if (!sv.id) continue;
+    const svItem = lookupItem(sv.id);
+    if (!svItem) continue;
+
+    // 基础语义指令
+    directives.push({
+      target: sv.target,
+      command: [svItem.defEn, svItem.coreEn].filter(Boolean).join(' | ') || [svItem.def, svItem.core].filter(Boolean).join(' | '),
+      commandCn: [svItem.def, svItem.core].filter(Boolean).join(' | '),
+      priority: 'HIGH'
+    });
+
+    // 叙事运行机制指令
+    if (svItem.patch?.mechanics) {
       directives.push({
-        target: 'SV1_STRUCTURE',
-        command: [sv1Item.defEn, sv1Item.coreEn].filter(Boolean).join(' | ') || [sv1Item.def, sv1Item.core].filter(Boolean).join(' | '),
-        commandCn: [sv1Item.def, sv1Item.core].filter(Boolean).join(' | '),
+        target: `${sv.target}_MECHANICS`,
+        command: svItem.patch.mechanicsEn || svItem.patch.mechanics,
+        commandCn: svItem.patch.mechanics,
         priority: 'HIGH'
       });
     }
-  }
 
-  // SV2 故事体量 → 输出长度/节奏约束
-  if (input.sv2) {
-    const sv2Item = lookupItem(input.sv2);
-    if (sv2Item) {
+    // 运行时红线指令
+    if (svItem.patch?.runtime) {
       directives.push({
-        target: 'SV2_VOLUME',
-        command: [sv2Item.defEn, sv2Item.coreEn].filter(Boolean).join(' | ') || [sv2Item.def, sv2Item.core].filter(Boolean).join(' | '),
-        commandCn: [sv2Item.def, sv2Item.core].filter(Boolean).join(' | '),
-        priority: 'HIGH'
+        target: `${sv.target}_RUNTIME`,
+        command: svItem.patch.runtimeEn || svItem.patch.runtime,
+        commandCn: svItem.patch.runtime,
+        priority: 'CRITICAL'
+      });
+    }
+
+    // 美学质感指令
+    if (svItem.patch?.aesthetic) {
+      directives.push({
+        target: `${sv.target}_AESTHETIC`,
+        command: svItem.patch.aestheticEn || svItem.patch.aesthetic,
+        commandCn: svItem.patch.aesthetic,
+        priority: 'NORMAL'
       });
     }
   }
