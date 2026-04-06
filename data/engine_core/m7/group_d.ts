@@ -14,8 +14,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
             mechanicsEn: "Stripping all quest objectives; the UI crawls with gibberish or overlapping meaningless text. The protagonist begins shooting at walls or trying to hug a chainsaw.",
             aesthetic: "视觉滤镜的高频抽搐。刺耳的高频噪音混杂着主角听不懂的絮语。世界在主角眼中变得极其滑稽、扭曲却充满致命的逻辑感。",
             aestheticEn: "High-frequency spasming of visual filters. Piercing high-pitch noise mixed with babble the protagonist doesn't understand. The world appears extremely comical, distorted, yet fatally logical to the subject.",
-            runtime: "将主体的【认知渲染管线】强制从 `World Space` 断开，转而载入一个充满随机变量且 `z-index` 异常的非法矩阵。",
-            runtimeEn: "Forcibly disconnecting the subject's [Cognitive Rendering Pipeline] from `World Space`, loading instead an illegal matrix riddled with random variables and abnormal `z-index`es."
+            runtime: "IF (主体面对绝对不可理喻的真相，符号界防火墙被彻底烧穿) THEN (将主体的认知渲染管线强制从World Space断开，转而载入一个充满随机变量且z-index异常的非法矩阵，UI爬满乱码)。",
+            runtimeEn: "IF (Subject_Faces_Incomprehensible_Truth_And_Symbolic_Firewall_Burns_Through) THEN (Forcibly disconnect subject Cognitive Rendering Pipeline from World Space, load an illegal matrix riddled with random variables and abnormal z-indexes, UI crawls with gibberish)."
         }
     },
     {
@@ -31,8 +31,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
             mechanicsEn: "All laws of physics cease functioning. Gravity inverts, seawater flows skyward, map borders collapse; former enemies and friends turn to ash in this all-crushing cataclysm.",
             aesthetic: "全屏幕的毁灭奇观，但不是好莱坞式的爆炸，而是带有肉质寄生和几何扭曲的异化崩解。红黑相间的低音轰鸣，犹如极光坠落。",
             aestheticEn: "Full-screen destruction spectacle, but not Hollywood explosions—rather an alienating disintegration with fleshy parasitism and geometric distortion. Red/black bass roaring, like dropping auroras.",
-            runtime: "引擎主进程 `Crash` 之前的蓄意内存泄漏。强制载入所有超出 VRAM 限界的高模素材，令显卡渲染溢出直至黑屏。",
-            runtimeEn: "A deliberate memory leak prior to the engine master process `Crash`. Forcibly loading all high-poly assets exceeding VRAM limits, rendering overflow until black screen."
+            runtime: "IF (所有物理定律停止运作，重力反转海水倒流地图边界崩塌) THEN (引擎主进程Crash之前蓄意内存泄漏，强制载入所有超出VRAM限界的高模素材，令显卡渲染溢出直至黑屏)。",
+            runtimeEn: "IF (All_Physics_Laws_Cease_Gravity_Inverts_Map_Borders_Collapse) THEN (Deliberate memory leak prior to engine master process Crash, forcibly load all high-poly assets exceeding VRAM limits, rendering overflow until black screen)."
         }
     },
     {
@@ -48,8 +48,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
             mechanicsEn: "Before HP is verified as zero, the protagonist triggers a forbidden command, locking the villain's escape mechanism with their own flesh, followed by a nuke-level full-screen damage clear.",
             aesthetic: "极致的高亮度致盲闪光，随后是绝对静音，没有音乐，连背景的火光都没有声音。画面呈现X光般的透视骨骼燃尽效果。",
             aestheticEn: "Ultimate blinding high-brightness flash, followed by absolute silence—no music, not even the sound of background flames. The screen shows an X-ray-like skeletal burnout effect.",
-            runtime: "强制捕获两个最高级 `Entity` 的指针，调用未授权的 `FreeMemory()`，让两段内存同时触发致命访问保护异常（Access Violation）。",
-            runtimeEn: "Forcibly locking pointers of two top-tier `Entity`s, calling unauthorized `FreeMemory()`, causing both memory blocks to simultaneously trigger fatal Access Violations."
+            runtime: "IF (主角发动禁忌指令，用肉体锁死反派的脱逃空间机制) THEN (强制捕获两个最高级Entity的指针，调用未授权的FreeMemory()，让两段内存同时触发致命访问保护异常Access Violation)。",
+            runtimeEn: "IF (Protagonist_Triggers_Forbidden_Command_Locking_Villain_Escape_With_Own_Flesh) THEN (Forcibly lock pointers of two top-tier Entities, call unauthorized FreeMemory(), causing both memory blocks to simultaneously trigger fatal Access Violations)."
         }
     },
     {
@@ -65,8 +65,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
             mechanicsEn: "All faction reputations, currency units, and trade systems become totally invalid junk code. Safe Zone status canceled; originally neutral/friendly NPCs start tearing into each other.",
             aesthetic: "极度混乱但没有任何“主角光环”保护的大远景。惨叫、火焰与毫无理由的屠杀交织，犹如地狱绘图般令人作呕且毫无意义的拥挤。",
             aestheticEn: "Extremely chaotic wide shot with zero 'plot armor' protection. Screams, fire, and reasonless slaughter intertwine, like an infernal painting—nauseating and meaninglessly crowded.",
-            runtime: "在状态机中执行 `DeleteAllRules()`，擦除所有【敌我识别（IFF）】，将所有NPC的寻路逻辑切换为就近仇恨计算。",
-            runtimeEn: "Executing `DeleteAllRules()` in the state machine, wiping all [Identify Friend or Foe (IFF)], switching all NPC pathfinding logic to nearest-neighbor aggro calculus."
+            runtime: "IF (所有势力声望、金钱单位和交易系统彻底变成无效烂代码，安全区判定取消) THEN (在状态机中执行DeleteAllRules()，擦除所有敌我识别IFF，将所有NPC的寻路逻辑切换为就近仇恨计算)。",
+            runtimeEn: "IF (All_Faction_Reputations_Currency_Trade_Systems_Become_Invalid_Safe_Zones_Canceled) THEN (Execute DeleteAllRules() in state machine, wipe all IFF, switch all NPC pathfinding logic to nearest-neighbor aggro calculus)."
         }
     },
     {
@@ -82,8 +82,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
             mechanicsEn: "The UI frantically highlights incredibly ordinary objects (a cup, a crack) and pops up a string of terrifying, absurd deductions. Any character previously helping the protagonist is tagged with extreme red-name aggro.",
             aesthetic: "眼球布满血丝的主观视角特写（FPS式颤抖）。快速剪辑。所有声音都变得像是带有恶意的窃窃私语。光线呈幽闭的惨绿色。",
             aestheticEn: "Bloodshot subjective POV close-ups (FPS-style jitter). Rapid editing. All sounds resemble malicious whispers. Lighting takes on a claustrophobic sickening green.",
-            runtime: "过度激活【寻找线索（Clue Finding）】的算法，将随机噪点全部强转为【致命威胁（Fatal Threat）】矢量进行强制计算。",
-            runtimeEn: "Over-activating the [Clue Finding] algorithm, forcefully converting all random noise points into [Fatal Threat] vectors for mandatory calculation."
+            runtime: "IF (主体陷入系统性极度怀疑，认为大他者藏身于一切细节之中) THEN (过度激活寻找线索Clue Finding的算法，将随机噪点全部强转为致命威胁Fatal Threat矢量进行强制计算，所有帮助者被打上红名仇恨标签)。",
+            runtimeEn: "IF (Subject_Falls_Into_Systemic_Extreme_Suspicion_Big_Other_Hides_In_All_Details) THEN (Over-activate Clue Finding algorithm, forcefully convert all random noise points into Fatal Threat vectors for mandatory calculation, all helpers tagged with red-name aggro)."
         }
     },
     {
@@ -99,8 +99,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
             mechanicsEn: "Zero warning. Mid-dialogue, or in a cutscene just after defeating a normal grunt, the protagonist suddenly points the weapon at themselves and, leaving no room to react, hits execute.",
             aesthetic: "没有慢动作，没有悲壮配乐，正如现实中车祸般短促和暴烈。尸体沉闷落地的声音，镜头立刻变成了冰冷的旁观者机位。",
             aestheticEn: "No slow motion, no tragic score, just as brief and violent as a real-life car crash. The dull thud of the body landing; the camera immediately switches to a cold bystander angle.",
-            runtime: "抛出未捕获的 `InterruptException`。不是走正常的血量为0判定，而是直接调用底层的 `TerminateThread` 掐断运行环境。",
-            runtimeEn: "Throwing an uncaught `InterruptException`. Instead of normal HP zero evaluations, directly calling the base `TerminateThread` to slice the runtime environment."
+            runtime: "IF (对话说到一半或普通过场中，主角毫无预兆地将凶器对准自己并点击处决) THEN (抛出未捕获的InterruptException，不走正常血量为0判定，而是直接调用底层TerminateThread掐断运行环境)。",
+            runtimeEn: "IF (Mid_Dialogue_Or_Cutscene_Protagonist_Suddenly_Points_Weapon_At_Self_And_Executes) THEN (Throw uncaught InterruptException, bypassing normal HP zero evaluation, directly calling base TerminateThread to slice the runtime environment)."
         }
     },
     {
@@ -116,8 +116,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
             mechanicsEn: "Weapons overheat without cooling down. All NPCs, regardless of faction, are forced into triggering their most painful hit-stun and execution VFX. No dialogue, only button-triggered hacking animations.",
             aesthetic: "极度血腥的喷溅与镜头上擦不干的血污。重金属狂躁配乐覆盖一切。主角的笑声由于混音被扭曲得像电锯般撕裂神经。",
             aestheticEn: "Extremely bloody splatters and un-wipeable blood smears on the lens. Manic heavy metal drowns out everything. The protagonist's laughter is mixed to sound like a chainsaw tearing at nerves.",
-            runtime: "将角色的【火力倍率（Damage Multiplier）】锁定最大值，并挂载一个强制遍历全图实体的 `DestroyObjects` 无限循环脚本。",
-            runtimeEn: "Locking the character's [Damage Multiplier] to max value, and attaching an infinite loop script to `DestroyObjects` via a forced full-map entity traversal."
+            runtime: "IF (死本能Thanatos彻底冲断爱本能Eros的束缚，武器过载发热不退) THEN (将角色的火力倍率Damage Multiplier锁定最大值，并挂载一个强制遍历全图实体的DestroyObjects无限循环脚本)。",
+            runtimeEn: "IF (Thanatos_Completely_Breaks_Eros_Bindings_Weapons_Overheat_Without_Cooling) THEN (Lock character Damage Multiplier to max value, attach an infinite loop script to DestroyObjects via forced full-map entity traversal)."
         }
     },
     {
@@ -133,8 +133,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
             mechanicsEn: "After over-absorbing abyssal energy (e.g., taking too many forbidden drugs, contacting unspeakable artifacts), the protagonist violently spasms center-screen, clothes ripping, their model forcibly swapped for an unrecognizable Boss-level monster.",
             aesthetic: "骨骼变形开裂的嘎吱恶心音效。角色最后的一声人声从痛苦转为了沉闷、粘稠的巨大非人咆哮。冷血与恶心交织，大片浓稠粘液。",
             aestheticEn: "Sickening crunching sound effects of bones deforming and cracking. The character's last human vocal inflection twists from agony into a dull, viscous, massive non-human roar. Cold-blooded horror mixed with thick slime.",
-            runtime: "调用 `MeshDeformation` 函数，向角色的骨骼（BindPose）中注入过量的随机矩阵变换，引发剧烈的坐标穿模爆炸。",
-            runtimeEn: "Calling the `MeshDeformation` function, injecting excessive random matrix transforms into the character's bones (BindPose), inciting massive coordinate clipping explosions."
+            runtime: "IF (过度汲取深渊能量后主角剧烈抽搐，衣服破裂模型被强替换) THEN (调用MeshDeformation函数，向角色骨骼BindPose中注入过量的随机矩阵变换，引发剧烈的坐标穿模爆炸)。",
+            runtimeEn: "IF (Protagonist_Violently_Spasms_After_Over_Absorbing_Abyssal_Energy_Model_Force_Swapped) THEN (Call MeshDeformation function, inject excessive random matrix transforms into character bones BindPose, inciting massive coordinate clipping explosions)."
         }
     },
     {
@@ -150,8 +150,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
             mechanicsEn: "The protagonist is sucked into a black hole or falls down an endless abyss. No bottom, no landing point. Oxygen or Sanity on the UI panel drains second by second.",
             aesthetic: "全宇宙只剩下极致的黑色与极其缓慢微小的主角剪影。连呼吸声都被压缩成了某种耳鸣频率。一种漫长到仿佛永恒窒息的极度恐慌。",
             aestheticEn: "The entire universe is reduced to supreme black and an extremely slow, tiny silhouette of the protagonist. Even breath is compressed to a certain tinnitus frequency. A profound panic of an endlessly long, eternal suffocation.",
-            runtime: "由于摄像机进入了没有任何反射射线的 `Null Space`，渲染管线停止工作。玩家除了看进度条见底别无他法。",
-            runtimeEn: "Because the camera enters a `Null Space` devoid of bounce rays, the render pipeline stops. The player has no option but watch the progress bar bottom out."
+            runtime: "IF (主角被吸入黑洞或跌下无止尽的深渊，UI面板上的氧气或理智一秒一秒漏空) THEN (由于摄像机进入了没有任何反射射线的Null Space，渲染管线停止工作，玩家除了看进度条见底别无他法)。",
+            runtimeEn: "IF (Protagonist_Sucked_Into_Black_Hole_Or_Falls_Endless_Abyss_Oxygen_Sanity_Drains) THEN (Camera enters Null Space devoid of bounce rays, render pipeline stops, player has no option but watch the progress bar bottom out)."
         }
     },
     {
@@ -167,8 +167,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
             mechanicsEn: "Character suddenly stutters backward and forward between two frames while walking, or a body part stretches infinitely into the sky. Dialog boxes display hex memory addresses.",
             aesthetic: "电子干扰的刺耳蜂鸣（Beep）。高反差的绿紫像素块割裂整个视野，人物脸部模型在瞬间错位，五官犹如毕加索立体派般被打乱。",
             aestheticEn: "Ear-piercing electronic interference beep. High-contrast green/purple pixel blocks shred the FOV; character face models dislocate instantly, features scrambled like Picasso's cubism.",
-            runtime: "强行写入大量内存错误（Dirty Words）干扰显存分配器，并在渲染层面上叠加具有撕裂算法的 Glitch Shader。",
-            runtimeEn: "Forcibly writing vast memory errors (Dirty Words) to interfere with the VRAM allocator, superimposing a Glitch Shader armed with tearing algorithms over the render layer."
+            runtime: "IF (人物在走路时突然卡在某两帧之间反复倒带，或身体部分无限拉长插入天空) THEN (强行写入大量内存错误Dirty Words干扰显存分配器，并在渲染层面上叠加具有撕裂算法的Glitch Shader)。",
+            runtimeEn: "IF (Character_Stutters_Between_Two_Frames_Or_Body_Part_Stretches_Infinitely_Into_Sky) THEN (Forcibly write vast memory errors Dirty Words to interfere with VRAM allocator, superimpose a Glitch Shader armed with tearing algorithms over the render layer)."
         }
     },
     {
@@ -184,8 +184,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
             mechanicsEn: "Protagonist loses control. In a short span, input feedback is constantly tampered with. Pressing left might attack, pressing jump might crouch, whilst screaming back and forth between different voice types.",
             aesthetic: "多重幻影或碎屏式的分割镜头。耳边环绕着极度喧闹的争吵声、婴儿哭声与老人的咒骂。主角抓着自己的头在地上打滚，犹如被群鬼附身。",
             aestheticEn: "Multiple phantoms or shattered-screen split-screen shots. Surround ears with extremely raucous arguments, baby cries and old man's curses. The protagonist grasps his head rolling on the floor like possessed by a horde of ghosts.",
-            runtime: "重塑角色的【输入映射表（Input Mapping）网格】，并发量挂载数个互相矛盾冲突的 AI 行动逻辑来劫持角色躯体。",
-            runtimeEn: "Reforming the character's [Input Mapping Grid], concurrently attaching multiple contradictory AI action logics to hijack the character's body."
+            runtime: "IF (主角丧失控制权，按键操作被不断篡改反馈，按左变攻击按跳变下蹲) THEN (重塑角色的输入映射表Input Mapping网格，并发量挂载数个互相矛盾冲突的AI行动逻辑来劫持角色躯体)。",
+            runtimeEn: "IF (Protagonist_Loses_Control_Input_Feedback_Constantly_Tampered_Left_Is_Attack_Jump_Is_Crouch) THEN (Reform character Input Mapping Grid, concurrently attach multiple contradictory AI action logics to hijack the character body)."
         }
     },
     {
@@ -201,8 +201,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
             mechanicsEn: "Character uncontrollably hyperventilates, Field of View (FOV) contracts extremely into tunnel vision. Heartbeat masks all sounds except their own terrified shrieks, eventually going directly into shock from stress reaction.",
             aesthetic: "鱼眼镜头加上剧烈的摄像机震动。冷汗般的蓝绿底色，画面周边严重发黑发抖。压抑感大到需要玩家自身摘下耳机的程度。",
             aestheticEn: "Fisheye lens plus violent camera shake. Cold-sweat blue-green base, severe vignetting and shivering around the edges. Oppressiveness so massive it requires the player to take off their headphones.",
-            runtime: "引爆【CameraShake】事件池至过载，并在后处理单元写入强行挤压【可视裁剪面】的恐怖算法参数。",
-            runtimeEn: "Detonating the [CameraShake] event pool into overload, writing terrifying algorithm parameters into the post-processing unit that forcibly crushes the [Visible Clipping Plane]."
+            runtime: "IF (人物不受控制地大口喘气，FOV极度收缩为隧道式视野，心跳声掩盖一切) THEN (引爆CameraShake事件池至过载，并在后处理单元写入强行挤压可视裁剪面的恐怖算法参数)。",
+            runtimeEn: "IF (Character_Uncontrollably_Hyperventilates_FOV_Contracts_To_Tunnel_Vision_Heartbeat_Masks_All) THEN (Detonate CameraShake event pool into overload, write terrifying algorithm parameters into post-processing unit that forcibly crush the Visible Clipping Plane)."
         }
     },
     {
@@ -218,8 +218,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
             mechanicsEn: "The protagonist fighting furiously halts their sword mid-air upon seeing a certain tape; body uncontrollably fixating, thereafter no matter how much they are hit, they make no sound nor move an inch.",
             aesthetic: "惊恐大张的双眼定住了。镜头极其安静地绕着他做 360 度的特写平移，展现大理石化般紧绷扭曲的肌肉和被汗水浸透停止流动的画面。",
             aestheticEn: "Terrified wide-open eyes frozen. Camera exceedingly quietly does a 360-degree close-up pan around them, showing tension-warped muscles like marble and the sweat-soaked static frame.",
-            runtime: "将实体的所有 `Animation Nodes` 状态机的 `PlayRate` 直接设为 0。不处理死亡，只是把存在的时间流锁死不进帧。",
-            runtimeEn: "Directly setting the `PlayRate` of all entity `Animation Nodes` state machines to 0. Not processing death, just deadlocking the temporal flow of existence, advancing no frames."
+            runtime: "IF (主角看到某个录像后剑停在半空，身躯不受控制地逐渐固定) THEN (将实体的所有Animation Nodes状态机的PlayRate直接设为0，不处理死亡，只是把存在的时间流锁死不进帧)。",
+            runtimeEn: "IF (Protagonist_Sees_Certain_Tape_Sword_Halts_Midair_Body_Uncontrollably_Fixates) THEN (Directly set PlayRate of all entity Animation Nodes state machines to 0, not processing death, just deadlocking the temporal flow of existence advancing no frames)."
         }
     },
     {
@@ -235,8 +235,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
             mechanicsEn: "Severing all attack actions against the outside, the protagonist begins using skills and weapons to fanatically generate damage numbers on their own model; the system emits continuous 'Critical hit' prompts.",
             aesthetic: "极度令人不适的反差。一边疯狂咬噬自己拉出带血的肠子或皮肉，一边面露极乐的癫笑。大滩的番茄酱红占据视觉中心。",
             aestheticEn: "Profoundly uncomfortable dissonance. While frenziedly gnawing themselves, pulling out bloody intestines or flesh, displaying a blissful maniacal laughter. Pools of excessive ketchup-red dominate the center of vision.",
-            runtime: "反转角色的【伤害判定计算公式】，令所有向外的碰撞检测向量 100% 折返刺入自己的源对象根部（Root Point）。",
-            runtimeEn: "Inverting the character's [Damage Calculation Formula], making all outward collision detection vectors ricochet 100% back to stab their own source Root Point."
+            runtime: "IF (主角断绝对外界的所有攻击动作，开始使用技能与武器狂热地对自身模型产出伤害数字) THEN (反转角色的伤害判定计算公式，令所有向外的碰撞检测向量100%折返刺入自己的源对象根部Root Point)。",
+            runtimeEn: "IF (Protagonist_Severs_All_External_Attacks_Fanatically_Generates_Damage_Numbers_On_Own_Model) THEN (Invert character Damage Calculation Formula, making all outward collision detection vectors ricochet 100% back to stab their own source Root Point)."
         }
     },
     {
@@ -252,8 +252,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
             mechanicsEn: "First unplug ambient music, then all SFX. The lit range on the screen contracts extremely rapidly to black. The player can only sense the protagonist is still alive and struggling through indescribable, faint gamepad vibrations.",
             aesthetic: "从极致的血腥残酷过场直接剪辑至“物理级别的纯黑加纯静音”，这种视觉上的落差造成了恐怖的真空晕眩感。",
             aestheticEn: "Direct cut from extremely bloody and cruel cinematic to 'physical-level pure pitch black plus pure silence'; this visual drop causes a terrifying vacuum-like dizziness.",
-            runtime: "调用引擎最底层的机制挂起（Suspend）：关闭 `AudioListener` 和全局的 `Rendering Layers`。仅留最微弱的循环输入作为主机的生存证明。",
-            runtimeEn: "Invoking engine base-level Suspend: killing the `AudioListener` and global `Rendering Layers`. Leaving only the faintest input loop as proof of host survival."
+            runtime: "IF (先拔掉环境音乐，再拔掉所有音效，屏幕光亮范围极速缩小直到黑屏) THEN (调用引擎最底层的机制挂起Suspend：关闭AudioListener和全局Rendering Layers，仅留最微弱的循环输入作为主机的生存证明)。",
+            runtimeEn: "IF (Ambient_Music_Pulled_Then_All_SFX_Pulled_Screen_Lit_Range_Contracts_To_Black) THEN (Invoke engine base-level Suspend: kill AudioListener and global Rendering Layers, leaving only the faintest input loop as proof of host survival)."
         }
     },
     {
@@ -269,8 +269,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
             mechanicsEn: "The protagonist hits the detonate button at the oil depot or core reactor, or walks indiscriminately spraying a flamethrower in the center of the city they once tried to protect. Fire does not stop at building edges.",
             aesthetic: "占据绝大画面的高温橘红色和升腾的黑色浓烟，空气在火焰的折射下极度扭曲。配乐使用某种令人毛骨悚然的优美古典咏叹调。",
             aestheticEn: "High-temperature orange-red dominating the huge frame and ascending thick black smoke; air highly distorted by heat refraction. Soundtrack utilizes a creepy, beautiful classical aria.",
-            runtime: "在地形系统（Terrain）与建筑组件上全局触发 `Ignite` 方法，将全图所有的【文化产物参数】与【繁荣变量】在几分钟内烧结成 0。",
-            runtimeEn: "Globally triggering the `Ignite` method on the Terrain system and architectural components, sintering all [Cultural Output Parameters] and [Prosperity Variables] map-wide to 0 within minutes."
+            runtime: "IF (主角在油库或核心反应堆按下引爆键，或者提着喷火器在城市中心无差别喷射) THEN (在地形系统Terrain与建筑组件上全局触发Ignite方法，将全图所有文化产物参数与繁荣变量在几分钟内烧结成0)。",
+            runtimeEn: "IF (Protagonist_Hits_Detonate_At_Oil_Depot_Or_Reactor_Or_Sprays_Flamethrower_In_City_Center) THEN (Globally trigger Ignite method on Terrain system and architectural components, sinter all Cultural Output Parameters and Prosperity Variables map-wide to 0 within minutes)."
         }
     },
     {
@@ -286,8 +286,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
             mechanicsEn: "With zero warning, striking at the most crucial celebration or rebel meeting. Executing from the dark a hit-list, indiscriminately slaughtering the supporting cast who previously backed the protagonist with blood.",
             aesthetic: "极度冷血的手法和几乎像算账单一样木然的表情。配角们脸上的错愕、震惊和泪水甚至来不及定格。冰冷的枪栓声。",
             aestheticEn: "Supremely cold-blooded execution and a numb expression like tabulating a bill. The astonishment, shock, and tears on the supporting casts' faces haven't even time to solidify. Icy sound of a gun bolt.",
-            runtime: "强行翻转数组。将系统内长期积累的所有【信赖增益（Trust Buff）】转化为致残级别的【弱点暴击伤害附加（Backstab Multiplier）】。",
-            runtimeEn: "Forcibly flipping arrays. Converting all accumulated [Trust Buffs] over the long term into crippling [Backstab Multipliers]."
+            runtime: "IF (在毫无预警的情况下于最重要的庆功宴或反抗会议上发难，调出处刑名单) THEN (强行翻转数组，将系统内长期积累的所有信赖增益Trust Buff转化为致残级别的弱点暴击伤害附加Backstab Multiplier)。",
+            runtimeEn: "IF (Zero_Warning_Strike_At_Crucial_Celebration_Or_Rebel_Meeting_Executing_Hit_List) THEN (Forcibly flip arrays, convert all accumulated Trust Buffs into crippling Backstab Multipliers)."
         }
     },
     {
@@ -303,8 +303,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
             mechanicsEn: "Character loses the original concept of limbs and torso. Trapped in first-person (with only blurry peripheral vision) deep inside a petri dish or living organ filled with extremely nauseating audio feedback.",
             aesthetic: "暗红与肉色的黏稠画风。心跳的重低音扑面而来，周围是无尽的血管蠕动，且不时伴随不可名状的酸液腐蚀痛觉音效。",
             aestheticEn: "Thick dark red and flesh tones. Pounding sub-bass heartbeat; surrounded by endless squirming blood vessels, intermittently accompanied by unspeakable audio of acid corrosion burning pain.",
-            runtime: "废除 `Humanoid` 所有骨骼结构集与移动指令集，把控制对象强转为一个只能输出【痛绝回廊】反馈日志的只读【脏器（Organ Node）】。",
-            runtimeEn: "Defuncting all `Humanoid` skeletal structure sets and locomotion commands, forcibly typecasting the control object into a read-only [Organ Node] that only outputs [Corridor of Agony] feedback logs."
+            runtime: "IF (角色丧失原有四肢躯干概念，以第一人称被困在培养皿或活体器官深处) THEN (废除Humanoid所有骨骼结构集与移动指令集，把控制对象强转为一个只能输出痛绝回廊反馈日志的只读脏器Organ Node)。",
+            runtimeEn: "IF (Character_Loses_Limb_Concept_Trapped_First_Person_Inside_Petri_Dish_Or_Living_Organ) THEN (Defunct all Humanoid skeletal structure sets and locomotion commands, forcibly typecast control object into read-only Organ Node that only outputs Corridor of Agony feedback logs)."
         }
     },
     {
@@ -320,8 +320,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
             mechanicsEn: "All character attributes zero out except [Suffering Capacity]. Showing a cyclic process in the unending hell of flesh torn, pulverized, and reconstituted, and the POV cannot close its eyes.",
             aesthetic: "极端恐怖的体感传递。惨白的极权机器或者满墙生齿渊火交融。惨叫声通过声码器处理出神性回音的诡异残响，令人精神极度震颤失常。",
             aestheticEn: "Extremely terrifying somatosensory transmission. Pallid totalitarian machinery or walls of gnashing teeth and abyssal fire. Screams vocation-processed with a divine yet eerie echo, causing intense mental tremor and derangement.",
-            runtime: "系统的核心帧循环被 `while(true)` 的死亡函数接管，在抛出内存溢出崩溃（Crash）之前无穷无尽地渲染出重度的血红色粒子特效。",
-            runtimeEn: "The system's core frame loop is hijacked by a `while(true)` death function, endlessly rendering heavy blood-red particle effects before throwing an out-of-memory Crash."
+            runtime: "IF (所有角色属性归零只保留痛苦承载量，主视角无法闭眼地循环展现肉身被撕裂粉碎重组) THEN (系统的核心帧循环被while(true)的死亡函数接管，在抛出内存溢出崩溃Crash之前无穷无尽地渲染出重度的血红色粒子特效)。",
+            runtimeEn: "IF (All_Attributes_Zero_Except_Suffering_Capacity_POV_Cannot_Close_Eyes_Cyclic_Flesh_Torn_Reconstituted) THEN (System core frame loop hijacked by while(true) death function, endlessly rendering heavy blood-red particle effects before throwing out-of-memory Crash)."
         }
     },
     {
@@ -337,8 +337,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
             mechanicsEn: "Subtitles and UI prompt system gradually warp; normal dialogue turns to overlaid letter combinations. NPC interactions turn to panic and bloody conflict due to unrecognizable speech.",
             aesthetic: "高频嘈杂毫无旋律的人声切片混音（Glitch vocal）。原本繁荣的大都会大街上，人类像丧尸一样陷入因恐惧而爆发的群体斗殴。强烈的迷乱感。",
             aestheticEn: "High-frequency noisy melody-less vocal slices (Glitch vocal). On the once prosperous metropolis streets, humans like zombies fall into mass brawls erupting from linguistic terror. Intense disorientation.",
-            runtime: "劫持引擎原生的【Localization/String 字典库】进行乱序打乱。强迫游戏引擎从最底层的逻辑层阻断所有【会话驱动（Dialogue Trigger）】。",
-            runtimeEn: "Hijacking and scrambing the engine's native [Localization/String Dictionary Library]. Forcing the game engine to block all [Dialogue Triggers] from the very bottom logic layer."
+            runtime: "IF (字幕与UI提示系统渐渐扭曲，对白变成字母重叠组合，NPC交流变成恐慌流血冲突) THEN (劫持引擎原生的Localization/String字典库进行乱序打乱，强迫游戏引擎从最底层的逻辑层阻断所有会话驱动Dialogue Trigger)。",
+            runtimeEn: "IF (Subtitles_UI_Prompts_Gradually_Warp_Dialogue_Becomes_Overlaid_Letters_NPC_Interactions_Turn_Bloody) THEN (Hijack engine native Localization/String Dictionary Library for scrambling, force game engine to block all Dialogue Triggers from the very bottom logic layer)."
         }
     },
     {
@@ -354,8 +354,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
             mechanicsEn: "The protagonist infinitely loads and replays within a tiny slice just long enough to walk to the door before a headshot. Attempts to change routes all result in dying to the same thing at the exact same second mark.",
             aesthetic: "极其快速且枯燥的重置闪屏。视觉疲劳与极端的幽闭感。没有哪怕一秒的空白帧让主体在死亡间隙得以喘息。绝望如同窒息般密不透风。",
             aestheticEn: "Extremely fast and boring reset flashes. Visual fatigue and utter claustrophobia. Not a single blank frame allows the subject to breathe between deaths. Despair is airtight like suffocation.",
-            runtime: "强行打断主轴任务进度。将 `Update` 函数封死在一小段固定常数数组指针上，系统主频因此极速升高导致画面卡顿撕裂。",
-            runtimeEn: "Forcibly interrupting main axis quest progress. Dead-locking the `Update` function onto a tiny fixed constant array pointer; the system clock subsequently redlines causing extreme stutter/tearing."
+            runtime: "IF (主角在微小时空切片中无限载入重演，试图更改路线的结果都是在同样秒数死于同样事件) THEN (强行打断主轴任务进度，将Update函数封死在一小段固定常数数组指针上，系统主频因此极速升高导致画面卡顿撕裂)。",
+            runtimeEn: "IF (Protagonist_Infinitely_Loads_Replays_In_Tiny_Temporal_Slice_All_Route_Changes_Die_Same_Second_Same_Event) THEN (Forcibly interrupt main axis quest progress, deadlock Update function onto tiny fixed constant array pointer, system clock redlines causing extreme stutter/tearing)."
         }
     },
     {
@@ -371,8 +371,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
             mechanicsEn: "The protagonist majestically charging the throne, instantly upon entering the room, is comically and horrifyingly 'splattered' flat onto the expensive floor material with a sharp snap.",
             aesthetic: "骨骼和液体以千倍音速同时破碎炸裂的干瘪低频爆破音。没有悲歌。随后镜头从上方如俯视爬虫般冷冷地打量那滩粘糊糊的痕迹。",
             aestheticEn: "A dry low-frequency blast of bones and fluids shattering simultaneously at a thousand times the speed of sound. No elegy. Then the camera coldly observes that sticky smear from above like regarding a bug.",
-            runtime: "将主角所在骨架物理组件里的的 `Gravity Multiplier` 或者 `Collider Z-Scale` 瞬间写为 1000 以及 `Scale(x, y, 0.01)`。",
-            runtimeEn: "Instantly overwriting the `Gravity Multiplier` or `Collider Z-Scale` in the protagonist's skeletal physics component to 1000 and `Scale(x,y,0.01)`."
+            runtime: "IF (主角刚踏入房间的一瞬间，以滑稽而恐怖的速度被拍扁在地板上，无任何前置铺垫) THEN (将主角所在骨架物理组件里的Gravity Multiplier或Collider Z-Scale瞬间写为1000以及Scale(x,y,0.01))。",
+            runtimeEn: "IF (Protagonist_Instantly_Splattered_Flat_On_Floor_Upon_Entering_Room_Zero_Buildup) THEN (Instantly overwrite Gravity Multiplier or Collider Z-Scale in protagonist skeletal physics component to 1000 and Scale(x,y,0.01))."
         }
     },
     {
@@ -388,8 +388,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
             mechanicsEn: "Facing an unbearable choice or truth, the protagonist's body starts warping intensely (sans external force), shrinking toward the heart or skull, finally vanishing like a zipped-up spatial rift.",
             aesthetic: "没有外在的震耳欲聋。而是一声“休——”的极具真空感的锐利声效。原本的人物占据空间猛缩，周围空气产生肉眼可见的光学扭曲变形。",
             aestheticEn: "No external deafening sound. Rather a sharp 'sshuuuuk' effect of absolute vacuum. The character's volume suddenly retracts; surrounding air undergoes visually perceptible optical distortion.",
-            runtime: "将实体Mesh模型的顶点着色器（Vertex Shader）锚点全部指向自身的原点，赋予极短插值曲线在0点1秒内 `Scale` 收缩为负值。",
-            runtimeEn: "Pointing all Vertex Shader anchors of the entity Mesh model to its own origin, assigning a minuscule interpolation curve contracting `Scale` into negative values within 0.1s."
+            runtime: "IF (面对难以承受的选择或真相，主角身体开始产生非外力造成的强烈形变向心脏或头颅坍缩) THEN (将实体Mesh模型的顶点着色器Vertex Shader锚点全部指向自身原点，赋予极短插值曲线在0.1秒内Scale收缩为负值)。",
+            runtimeEn: "IF (Facing_Unbearable_Choice_Or_Truth_Protagonist_Body_Warps_Intensely_Sans_External_Force_Collapsing_Toward_Heart_Or_Skull) THEN (Point all Vertex Shader anchors of entity Mesh model to own origin, assign minuscule interpolation curve contracting Scale into negative values within 0.1s)."
         }
     },
     {
@@ -405,8 +405,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
             mechanicsEn: "All combats, buildings, even system dialog boxes melt into viscous orange-red juice, accompanied by sky-filling indescribable giant goddess phantoms or hymnals. No combat, only irresistible blissful annihilation.",
             aesthetic: "极其怪异神圣但令人深深作呕的甜腻色彩。所有物体的边界光照变得羽化（Feathering）。人类的惨叫声化作令人发指的一声绵软的“啵”气泡破裂音。",
             aestheticEn: "Grossly bizarre, holy, Yet deeply nauseating, sweetish colors. Boundary lighting of all objects becomes feathered. Human screams transmute into a terrifyingly soft 'pop' sound of a bubble bursting.",
-            runtime: "删除所有碰撞网格（Colliders），覆盖全局【屏幕空间材质（Screen Space Material）】，强制系统所有变量平推入 `Float Pooling` 并抛弃标识名。",
-            runtimeEn: "Deleting all Colliders, covering global [Screen Space Material], forcing all system variables to be shoved linearly into a `Float Pooling` discarding identifier names."
+            runtime: "IF (一切战斗建筑甚至系统对话框融化为橙红色黏稠汁液，伴随漫天巨大女神幻影或圣歌) THEN (删除所有碰撞网格Colliders，覆盖全局屏幕空间材质Screen Space Material，强制系统所有变量平推入Float Pooling并抛弃标识名)。",
+            runtimeEn: "IF (All_Combats_Buildings_Even_System_Dialogs_Melt_Into_Viscous_Orange_Red_Juice_Giant_Goddess_Phantoms) THEN (Delete all Colliders, cover global Screen Space Material, force all system variables into Float Pooling discarding identifier names)."
         }
     }
 ];

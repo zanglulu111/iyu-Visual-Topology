@@ -15,8 +15,8 @@ export const SYNTHESIZER_M4X: LibraryItemDef[] = [
             mechanicsEn: "No physical aggressive patrol guards exist in the environment, but the 'Stealth Mode' UI indicator is forcibly lit, making players self-induce the illusion of being watched.",
             aesthetic: "极其宽广却又空洞的环境氛围。深深的长阴影与克制的室内环境底噪，共同堆砌出一种令人窒息的“透明审查感”。",
             aestheticEn: "Extremely expansive yet hollow ambient atmospheres. Deep long shadows and restrained indoor room-tones collaboratively construct a suffocating sense of 'transparent censorship'.",
-            runtime: "植入一个无声运行的 `Gaze_Tracker` 单例对象，持续计算玩家的视线死角，并在其未能察觉的背面轻微调整光照亮度曲线。",
-            runtimeEn: "Implanting a silently running `Gaze_Tracker` singleton, continuously calculating the player's blind spots and slightly tweaking lighting brightness curves behind their back."
+            runtime: "IF (环境中不存在实体化巡逻守卫，但潜行模式的UI指示灯被强行点亮) THEN (植入一个无声运行的Gaze_Tracker单例对象，持续计算玩家的视线死角，并在其未能察觉的背面轻微调整光照亮度曲线)。",
+            runtimeEn: "IF (No_Physical_Patrol_Guards_Exist_But_Stealth_Mode_UI_Indicator_Forcibly_Lit) THEN (Implant a silently running Gaze_Tracker singleton, continuously calculating player blind spots and slightly tweaking lighting brightness curves behind their back)."
         }
     },
     {
@@ -33,8 +33,8 @@ export const SYNTHESIZER_M4X: LibraryItemDef[] = [
             mechanicsEn: "The game doesn't heavily force you to stop exploration quests, but continuously pushes dull, repetitive maintenance tasks, demanding you max out so-called 'Social Credit' slots.",
             aesthetic: "极度无菌、充满秩序崇拜的极简科幻风格。苍白到病态的色阶配以让人放松却极其洗脑的商场背景音环境音响。",
             aestheticEn: "Extremely sterile, order-worshipping minimalist sci-fi style. Sickly pale color gradings paired with relaxing yet extremely brainwashing mall background Muzak.",
-            runtime: "当玩家未能够按时触碰“合规（Compliance）”检查点时，向其角色的冲刺速度和跳跃高度持续增加微小的减衰乘数（Dampening Factor）。",
-            runtimeEn: "When the player fails to periodically hit 'Compliance' checkpoints, continuously adding a minuscule dampening factor multiplier to the character's sprint speed and jump height."
+            runtime: "IF (玩家未能够按时触碰合规Compliance检查点) THEN (向其角色的冲刺速度和跳跃高度持续增加微小的减衰乘数Dampening Factor)。",
+            runtimeEn: "IF (Player_Fails_To_Periodically_Hit_Compliance_Checkpoints) THEN (Continuously add minuscule Dampening Factor multiplier to character sprint speed and jump height)."
         }
     },
     {
@@ -51,8 +51,8 @@ export const SYNTHESIZER_M4X: LibraryItemDef[] = [
             mechanicsEn: "Specific target routes are directly and brutally welded shut by system protocols. Encountering hard barriers, 'Access Denied' red zones, and mandatory armed skirmish repulsions.",
             aesthetic: "充满敌意的建筑学粗野主义（Brutalism）。刺目的红色警示霓虹灯光，极具攻击性的自动安保机甲持续扫描所有细微异常。",
             aestheticEn: "Hostile architectural Brutalism. Glaring red warning neon lights, highly aggressive automated security mechs constantly scanning for micro-anomalies.",
-            runtime: "在运行时动态插入重度 `Physics Blockers` 碰撞体，并大刀阔斧地修改寻路网格（Navmesh），通过硬代码剥夺主管意图空间的通路。",
-            runtimeEn: "Dynamically injecting heavy `Physics Blockers` colliders at runtime, and radically modifying the Navmesh, depriving access to the subjective intention space via hardcode."
+            runtime: "IF (特定目标路径被系统协议直接粗暴焊死，遇到访问拒绝红区与强制武装冲突阻击) THEN (在运行时动态插入重度Physics Blockers碰撞体，并大刀阔斧地修改寻路网格Navmesh，通过硬代码剥夺主管意图空间的通路)。",
+            runtimeEn: "IF (Specific_Target_Routes_Brutally_Welded_Shut_By_System_Protocols_Access_Denied_Red_Zones) THEN (Dynamically inject heavy Physics Blockers colliders at runtime, radically modify Navmesh, depriving access to subjective intention space via hardcode)."
         }
     },
     {
@@ -69,8 +69,8 @@ export const SYNTHESIZER_M4X: LibraryItemDef[] = [
             mechanicsEn: "The protagonist is tagged globally with an active 'Shoot on Sight' aggro label. Merchants refuse trades, safe zones turn into slaughterhouses, and resource acquisition is subjected to ultimate deprivation sanctions.",
             aesthetic: "残忍且无孔不入的被猎杀感。高瓦数探照灯扫过泥泞的地面，远方尖利的防空警报声撕裂夜空，整体色调陷入肮脏且绝望的深灰。",
             aestheticEn: "Cruel, pervasive hunted sensation. High-wattage searchlights sweep muddy grounds; distant screeching air raid sirens tear the night; overall palette plunges into dirty, desperate deep grey.",
-            runtime: "强制遍历并将所有关联NPC的阵营枚举值翻转为 `Hostile`。在底层循环中将任何体力恢复（Regeneration）变量的增益倍率阉割进趋近于零的区间。",
-            runtimeEn: "Forcibly traversing and flipping the faction enum arrays of all linked NPCs to `Hostile`. In the base loop, castrating the buff multipliers of any health/stamina regeneration variables into near-zero intervals."
+            runtime: "IF (主角在全地图被打上Shoot on Sight主动仇恨标签，商人拒绝交易，安全区变为屠宰场) THEN (强制遍历并将所有关联NPC的阵营枚举值翻转为Hostile，在底层循环中将任何体力恢复Regeneration变量的增益倍率阌割进趋近于零的区间)。",
+            runtimeEn: "IF (Protagonist_Tagged_Globally_Shoot_On_Sight_Merchants_Refuse_Trades_Safe_Zones_Become_Slaughterhouses) THEN (Forcibly traverse and flip faction enum arrays of all linked NPCs to Hostile, in base loop castrate buff multipliers of any regeneration variables into near-zero intervals)."
         }
     },
     {
@@ -87,8 +87,8 @@ export const SYNTHESIZER_M4X: LibraryItemDef[] = [
             mechanicsEn: "Forcing the player into mathematical 'absolutely impossible to survive' asymmetric checkmates. The system releases multiple executioner bosses in one breath, ensuring an extremely bloody and savage 'physical death penalty'.",
             aesthetic: "武装暴力或神之怒火发出的震耳欲聋的神罚交响曲。满屏幕连续不断的致盲爆炸点与剧烈的镜头抽搐，根本不给感官留下喘息余地。",
             aestheticEn: "Deafening symphony of divine punishment emitted by armed violence or God's wrath. Full-screen non-stop blinding explosions and violent camera spasms leaving absolutely no breathing room for the senses.",
-            runtime: "强行激活一个无法被中止和消灭的死神事件生成器（Sovereign Entity Spawner），所实例化出的杀伤碰撞体全面无视并穿透主角所有的“无敌帧（I-frames）”。",
-            runtimeEn: "Forcibly activating an un-abortable, un-killable Sovereign Entity Spawner; its instantiated lethal colliders entirely ignore and pierce all of the protagonist's 'Invincibility frames (I-frames)'."
+            runtime: "IF (玩家面临数学上绝对不可能生还的不对等死局，系统释放复数级别行刑头目) THEN (强行激活一个无法被中止和消灭的死神事件生成器Sovereign Entity Spawner，所实例化出的杀伤碰撞体全面无视并穿透主角所有的无敌帧I-frames)。",
+            runtimeEn: "IF (Player_Faces_Mathematically_Impossible_Asymmetric_Checkmate_System_Releases_Multiple_Executioner_Bosses) THEN (Forcibly activate un-abortable un-killable Sovereign Entity Spawner, its instantiated lethal colliders entirely ignore and pierce all protagonist Invincibility frames I-frames)."
         }
     }
 ];

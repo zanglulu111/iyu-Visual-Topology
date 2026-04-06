@@ -36,6 +36,10 @@ export const TensionMonitorModal: React.FC<TensionMonitorModalProps> = ({
     const barColor = tension.narrativeArc === 'TRAGEDY' ? 'bg-red-500' 
                    : tension.narrativeArc === 'DEADLOCK' ? 'bg-amber-500' 
                    : 'bg-emerald-500';
+    
+    // Pre-process redlines into a safe dense array
+    const safeRedlines = redlines ? [...redlines].filter((r): r is typeof redlines[number] => r != null) : [];
+    console.log('[MIST_DEBUG] redlines:', redlines, 'safeRedlines:', safeRedlines, 'length:', redlines?.length);
                    
     // Prevent close when clicking inside
     const stopPropagation = (e: React.MouseEvent) => e.stopPropagation();
@@ -68,7 +72,7 @@ export const TensionMonitorModal: React.FC<TensionMonitorModalProps> = ({
                 </div>
                 
                 {/* Body */}
-                <div className="relative p-6 overflow-y-auto custom-scrollbar flex flex-col gap-6">
+                <div className="relative p-6 overflow-y-auto custom-scrollbar flex flex-col gap-6" style={{ position: 'relative', zIndex: 10 }}>
                     
                     {/* TOP SUMMARY GRID */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -121,23 +125,32 @@ export const TensionMonitorModal: React.FC<TensionMonitorModalProps> = ({
                         </div>
                     </div>
 
-                    {/* REDLINE VIOLATIONS */}
-                    {redlines.length > 0 && (
-                        <div className={`p-5 rounded-lg border bg-red-900/10 border-red-500/30 relative overflow-hidden`}>
-                            <div className="absolute top-0 left-0 w-1 h-full bg-red-500"></div>
-                            <div className="flex items-center gap-2 mb-3">
-                                <ShieldAlert size={16} className="text-red-500" />
-                                <h3 className="text-sm font-bold tracking-widest text-red-500 uppercase">
-                                    {lang === 'CN' ? '不可扭转的冲突 (Redline Violations) [' + redlines.length + ']' : 'REDLINE VIOLATIONS [' + redlines.length + ']'}
-                                </h3>
+                    {/* REDLINE VIOLATIONS — flat rendering, no overflow hidden, no absolute positioning */}
+                    {safeRedlines.length > 0 && (
+                        <div style={{ borderLeft: '4px solid #ef4444', padding: '16px 16px 16px 20px', borderRadius: '8px', backgroundColor: 'rgba(127, 29, 29, 0.2)', border: '1px solid rgba(239, 68, 68, 0.4)', borderLeftWidth: '4px', borderLeftColor: '#ef4444' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                                <ShieldAlert size={16} style={{ color: '#ef4444', flexShrink: 0 }} />
+                                <span style={{ fontSize: '13px', fontWeight: 800, letterSpacing: '0.15em', color: '#ef4444', textTransform: 'uppercase' }}>
+                                    {lang === 'CN' ? '不可扭转的冲突 (Redline Violations) [' + safeRedlines.length + ']' : 'REDLINE VIOLATIONS [' + safeRedlines.length + ']'}
+                                </span>
                             </div>
-                            <div className="flex flex-col gap-2">
-                                {redlines.map((violation, idx) => (
-                                    <div key={idx} className={`p-3 text-xs rounded ${theme === 'retro' ? 'bg-red-50 text-red-900' : 'bg-red-950/30 text-rose-200'}`}>
-                                        <p className="font-bold mb-1">[{violation.code.replace('REDLINE_', '').replace('WARNING_', '')}]</p>
-                                        <p>{lang === 'CN' ? violation.messageCn : violation.message}</p>
+                            {safeRedlines.map((v, i) => (
+                                <div key={i} style={{ padding: '12px', marginTop: i > 0 ? '8px' : '0', borderRadius: '6px', border: '1px solid #ef4444', backgroundColor: 'rgba(153, 27, 27, 0.5)' }}>
+                                    <div style={{ fontWeight: 700, fontSize: '11px', color: '#fca5a5', marginBottom: '4px' }}>
+                                        [{v.code}] — {v.severity === 'ERROR' ? '🔴 红线冲突' : '🟡 结构警告'}
                                     </div>
-                                ))}
+                                    <div style={{ fontWeight: 500, fontSize: '13px', lineHeight: 1.5, color: '#ffffff' }}>
+                                        {lang === 'CN' ? (v.messageCn || v.message) : (v.message || v.messageCn)}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    {/* Fallback: show header even if redlines exist but safeRedlines is empty (debug) */}
+                    {redlines.length > 0 && safeRedlines.length === 0 && (
+                        <div style={{ padding: '16px', borderRadius: '8px', border: '1px solid #ef4444', backgroundColor: 'rgba(127, 29, 29, 0.2)' }}>
+                            <div style={{ color: '#fca5a5', fontSize: '12px' }}>
+                                ⚠️ 引擎检测到 {redlines.length} 个冲突，但数据为空。原始数据: {JSON.stringify(redlines)}
                             </div>
                         </div>
                     )}
@@ -150,7 +163,7 @@ export const TensionMonitorModal: React.FC<TensionMonitorModalProps> = ({
                         </div>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                             {Object.entries({
-                                'M0 视觉拓扑': 0, // Placeholder for M0 logic, if implemented
+                                'M0 视觉拓扑': input.m0 ? 1 : 0,
                                 'M1 凝视向量': input.m1 ? 1 : 0,
                                 'M2 大他者场域': input.m2 ? 1 : 0,
                                 'M3 创伤内核': input.m3 ? 1 : 0,

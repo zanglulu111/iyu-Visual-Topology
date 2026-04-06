@@ -14,8 +14,8 @@ export const OUTCOMES_GROUP_B: LibraryItemDef[] = [
             mechanicsEn: "Uses the enemy's core weapon or mechanics to achieve the counter-kill, but in the resolution, the protagonist's behavior, permissions, or even appearance are completely overwritten by the enemy's traits.",
             aesthetic: "主角穿上了死神的黑色制服，熟练地发出了同样的命令。光轴完全对称，强调权力的冰冷传承。",
             aestheticEn: "The protagonist dons the black uniform of the grim reaper, skillfully issuing the identical command. Perfectly symmetrical lighting, emphasizing the frigid succession of power.",
-            runtime: "若主角的【暴戾值】高于【理念值】，系统将平滑激活【大他者权限转移（Master Transfer）】协议。",
-            runtimeEn: "If the protagonist's [Violence] exceeds [Ideology], the system smoothly activates the [Master Transfer] protocol."
+            runtime: "IF (主体使用了敌人的核心武器完成了最终反杀) THEN (结算画面中主体的行走姿态、命令口吻和面部阴影与死去的暴君逐帧重合，曾经的战友后退一步露出恐惧)。",
+            runtimeEn: "IF (Subject_Uses_Enemy_Core_Weapon_To_Achieve_Final_Counter_Kill) THEN (In the resolution the subject's gait, command tone, and facial shadow overlap frame-by-frame with the dead tyrant; former comrades step back in fear)."
         }
     },
     {
@@ -31,8 +31,8 @@ export const OUTCOMES_GROUP_B: LibraryItemDef[] = [
             mechanicsEn: "Abandons all hidden sub-quests and extraordinary skills, reverting to the lowest baseline form of the main quest, punching the clock for work.",
             aesthetic: "色温下降至极其平庸的日光灯白。主角换上统一的制服，混入下班人潮，动作机械。没有配乐，只有沉闷的脚步声。",
             aestheticEn: "Color temperature drops to a profoundly mediocre fluorescent white. The protagonist dons a uniform, blending into the commuter crowd with mechanical motions. No score, only dull footsteps.",
-            runtime: "检测到【行动抗印（Drive Resistance）】清零时触发，将角色的控制权部分收归系统AI。",
-            runtimeEn: "Triggered when [Drive Resistance] zeros out, partially reverting character control to the system AI."
+            runtime: "IF (主体在反复的溃败后彻底放弃了所有隐藏支线与特殊技能) THEN (主体换上统一制服混入下班人潮，动作机械如提线木偶，面部保持功能性微笑但瞳孔完全失焦)。",
+            runtimeEn: "IF (Subject_Gives_Up_All_Hidden_Quests_And_Special_Skills_After_Repeated_Defeats) THEN (Subject dons a uniform, merges into the commuter crowd with puppet-like mechanical motions, maintaining a functional smile but pupils completely defocused)."
         }
     },
     {
@@ -48,8 +48,8 @@ export const OUTCOMES_GROUP_B: LibraryItemDef[] = [
             mechanicsEn: "At the final link to solve the puzzle, the protagonist turns the gun to shatter the truth generator, then plunges the VR headset (or hallucinogen) deep into their own nerves.",
             aesthetic: "色彩饱和度被人为拉至失真的霓虹极值。笑容伴随着眼角的泪水，呈现出一种病态的甜美感。",
             aestheticEn: "Color saturation is artificially cranked to distorted neon extremes. A smile accompanied by a tear at the corner of the eye, conveying a pathological sweetness.",
-            runtime: "执行此落点后，视界的【真实滤镜】永久解除，系统开始无限制推送廉价的【虚假奖励多巴胺】。",
-            runtimeEn: "After executing this resolution, the [Real Filter] of the FOV is permanently disabled, and the system begins limitlessly pushing cheap [False Reward Dopamine]."
+            runtime: "IF (主体在破解迷局的最后一环亲眼看到了真相的全貌) THEN (主体调转枪头射碎了真相发生器，主动将VR眼镜推入自己的神经接口，色彩饱和度被人为拉至失真的霓虹极值)。",
+            runtimeEn: "IF (Subject_Sees_Full_Truth_At_Final_Puzzle_Link) THEN (Subject turns gun to shatter the truth generator, voluntarily pushes VR headset into own neural port; color saturation is cranked to distorted neon extremes)."
         }
     },
     {
@@ -65,8 +65,8 @@ export const OUTCOMES_GROUP_B: LibraryItemDef[] = [
             mechanicsEn: "The old ruling mechanics are kept entirely intact but labeled with the protagonist's name; the exploitative system they swore to break is now overseen by the protagonist themselves.",
             aesthetic: "冷酷的低照度室内。主角在黑暗中坐在王座上，原本热血的面部逐渐被权力的阴影掩盖。镜头隐没在深渊感中。",
             aestheticEn: "Cold, low-illumination interior. The protagonist sits on the throne in the dark; their once fiery face gradually obscured by the shadow of power. The camera vanishes into an abyssal sensation.",
-            runtime: "触发条件：主体的【规则掌控力（Rule Mastery）】越过安全阈值，直接触发系统的【父位继承（Paternal Succession）】方法。",
-            runtimeEn: "Trigger condition: The subject's [Rule Mastery] crosses the safe threshold, directly triggering the system's [Paternal Succession] method."
+            runtime: "IF (主体斩杀了旧王并坐上了那把象征绝对权力的椅子) THEN (旧的统治机制原封不动地保留并打上了主体的名字，原本发誓要打破的剥削系统现在由主体亲自签发运行)。",
+            runtimeEn: "IF (Subject_Slays_The_Old_King_And_Sits_On_The_Throne) THEN (The old ruling mechanics are kept entirely intact but labeled with the subject's name; the exploitative system they swore to break is now signed and operated by the subject themselves)."
         }
     },
     {
@@ -82,8 +82,8 @@ export const OUTCOMES_GROUP_B: LibraryItemDef[] = [
             mechanicsEn: "When the protagonist's account is deleted, a newly palette-swapped character with a similar name walks into the office, continuing to process the protagonist's remaining tasks.",
             aesthetic: "极其流畅、毫无违和感的蒙太奇拼接。时间无缝流转，悲伤没有哪怕一秒的停留空间。",
             aestheticEn: "An extremely fluid, frictionless montage splice. Time flows seamlessly; grief is not afforded even a single second of lingering space.",
-            runtime: "调用 `CloneNode` 覆写并替代所有指针，系统的【整体效率】不仅未降，可能还由于失去了变量而略有提升。",
-            runtimeEn: "Calls `CloneNode` to overwrite and replace all pointers; the system's [Overall Efficiency] not only doesn't drop, but may slightly boost due to the loss of a variable."
+            runtime: "IF (主体的账户被注销或肉体死亡) THEN (一个名字相似、模型换色的新角色在三秒内走入办公室继续处理主体遗留的待办事项，没有任何人表现出一秒钟的悲伤)。",
+            runtimeEn: "IF (Subject_Account_Deleted_Or_Body_Dies) THEN (A palette-swapped character with a similar name walks into the office within three seconds to continue the subject's remaining tasks; no one exhibits even one second of grief)."
         }
     },
     {
@@ -99,8 +99,8 @@ export const OUTCOMES_GROUP_B: LibraryItemDef[] = [
             mechanicsEn: "When all exits are open or the system has lifted restrictions, the protagonist chooses to lock the door behind them, continuing to execute penal routines that no longer hold meaning.",
             aesthetic: "阳光投射在脚下的一寸地，主角警惕而恐惧地避开了光束，退回了阴暗且熟悉的狭小床铺缩作一团。",
             aestheticEn: "Sunlight projects onto an inch of floor at their feet; the protagonist cautiously, fearfully evades the beam, retreating to curl up on the dark, familiar small bed.",
-            runtime: "当发现外部【不确定性（Entropy）】超过心理承载极限时，触发主体主动撤回安全边界的防卫程序。",
-            runtimeEn: "When external [Entropy] is detected exceeding the psychological bearing limit, it triggers the subject's defense routine to actively withdraw to safe boundaries."
+            runtime: "IF (所有出口都已打开且系统解除了全部限制) THEN (主体却恐惧地退回牢房，亲手锁上身后的门，继续执行不再有意义的服刑动作，阳光投在脚下一寸地但主体避开了光束)。",
+            runtimeEn: "IF (All_Exits_Open_And_System_Lifts_All_Restrictions) THEN (Subject fearfully retreats to the cell, personally locks the door behind them, continues executing meaningless penal routines; sunlight hits an inch of floor but the subject avoids the beam)."
         }
     },
     {
@@ -116,8 +116,8 @@ export const OUTCOMES_GROUP_B: LibraryItemDef[] = [
             mechanicsEn: "All active interaction interfaces (Talk, Attack, Move) are locked. Only the bare minimum feedback of sustenance intake is retained.",
             aesthetic: "空洞、温和且流着口水的微笑。洁白的病房带有一丝消毒水味。阳光温暖但没有任何希望。",
             aestheticEn: "A hollow, mild, drooling smile. A pristine white ward carrying the faint scent of disinfectant. Sunlight is warm but entirely devoid of hope.",
-            runtime: "由极端的【物理过载（M6.代价）】转化而来，引擎剥夺实体的控制权，将其转换为场景静态装饰物。",
-            runtimeEn: "Transiting from extreme [Physical Overload (M6.Cost)], the engine strips the entity's control, converting it into a static scenery decoration."
+            runtime: "IF (M6代价的物理过载导致主体的精神被彻底烧毁) THEN (所有主动交互界面被锁定，主体在洁白的病房中流着口水露出空洞温和的微笑，只保留最低限度的进食和呼吸反馈)。",
+            runtimeEn: "IF (M6_Cost_Physical_Overload_Completely_Burns_Out_Subject_Mind) THEN (All active interaction interfaces locked; the subject drools with a hollow mild smile in a pristine white ward, retaining only bare minimum feeding and breathing feedback)."
         }
     },
     {
@@ -133,8 +133,8 @@ export const OUTCOMES_GROUP_B: LibraryItemDef[] = [
             mechanicsEn: "After undergoing ultimate brainwashing or torture, the protagonist proactively surrenders all secrets and bullets, shedding tears of utter gratitude for the Supreme Leader.",
             aesthetic: "充满巨大投影或旗帜的广场。主角的面孔在这庞大叙事的阴影下变得虔诚和扭曲。极其煽情的赞美诗音乐。",
             aestheticEn: "A plaza filled with massive projections or flags. The protagonist's face becomes devout and distorted in the shadow of this grand narrative. Overwhelmingly maudlin hymnal music.",
-            runtime: "当主角无法通过物理手段反抗【威权矩阵（Authoritarian Matrix）】时，AI为了保护神经不被烧毁而反转极性，将痛觉标识为快感。",
-            runtimeEn: "When the protagonist cannot physically resist the [Authoritarian Matrix], the AI reverses polarity to protect nerves from burning out, labeling pain as pleasure."
+            runtime: "IF (主体在接受了终极洗脑或刑罚后神经极性发生反转) THEN (主体流下对最高领袖极致感激的泪水，主动交出所有秘密和子弹，并在巨大投影的广场上用颤抖的声音高喊我爱老大哥)。",
+            runtimeEn: "IF (Subject_Neural_Polarity_Reverses_After_Ultimate_Brainwashing_Or_Torture) THEN (Subject sheds tears of utter gratitude for the Supreme Leader, proactively surrenders all secrets and bullets, shouting 'I love Big Brother' in a trembling voice on the plaza of massive projections)."
         }
     },
     {
@@ -150,8 +150,8 @@ export const OUTCOMES_GROUP_B: LibraryItemDef[] = [
             mechanicsEn: "Perspective locked on the protagonist. Innumerable tubes pierce the spine and eyeballs. Running data scrolls on the screen instead of internal monologues.",
             aesthetic: "冷血的赛博朋克工业风。深红色的营养液冒泡，伴随规律的电子脉冲声和沉重的机械抽水声。",
             aestheticEn: "Cold-blooded cyberpunk industrial style. Deep red nutrient fluid bubbling, accompanied by rhythmic electronic pulsing and heavy mechanical pumping sounds.",
-            runtime: "实体的状态数组从 `characters` 列表强制被拖拽进 `system_resources` 面板，永久丧失主动调用能力。",
-            runtimeEn: "The entity's state array is forcibly dragged from the `characters` list into the `system_resources` panel, permanently losing active invocation capabilities."
+            runtime: "IF (无数管线刺入主体的脊椎和眼球完成物理嵌合) THEN (屏幕上原本的个人独白被替换为滚动的运行数据，主体的心跳变为与机器节拍同步的电子脉冲，永久丧失主动调用能力)。",
+            runtimeEn: "IF (Innumerable_Tubes_Pierce_Subject_Spine_And_Eyeballs_Completing_Physical_Splice) THEN (Internal monologue on screen is replaced by scrolling operational data; the subject's heartbeat syncs to the machine's electronic pulse, permanently losing active invocation capabilities)."
         }
     },
     {
@@ -167,8 +167,8 @@ export const OUTCOMES_GROUP_B: LibraryItemDef[] = [
             mechanicsEn: "Executing daily operations (e.g., typing, killing, packaging products) becomes near-lightspeed with zero recoil deviation. No superfluous motion animations whatsoever.",
             aesthetic: "犹如上了发条的微距镜头。节拍器般的精准律动。人物眼神彻底失去焦距，像镜头一样的反光玻璃。",
             aestheticEn: "Like a wound-up clockwork macro shot. Metronome-like precision rhythm. The character's eyes lose all focus, resembling reflective glass lenses.",
-            runtime: "角色的【疲劳值】和【情绪波动（Mood Swing）】变量被永久锁死在 0。效率标量 `efficiency` 设为 `Infinity`。",
-            runtimeEn: "The character's [Fatigue] and [Mood Swing] variables are permanently locked at 0. The efficiency scalar `efficiency` is set to `Infinity`."
+            runtime: "IF (主体的情绪模块与疲劳模块被彻底移除) THEN (日常动作变为近乎光速且没有后坐力误差，眼神彻底失去焦距变成反光玻璃，节拍器般精准地执行每一条指令直到硬件报废)。",
+            runtimeEn: "IF (Subject_Emotion_Module_And_Fatigue_Module_Completely_Removed) THEN (Daily operations become near-lightspeed with zero recoil deviation; eyes lose all focus resembling reflective glass; metronome-precise execution of every directive until hardware failure)."
         }
     },
     {
@@ -184,8 +184,8 @@ export const OUTCOMES_GROUP_B: LibraryItemDef[] = [
             mechanicsEn: "The player character drops their defensive stance, allowing the lethal mechanism or captor to take them away, no longer pressing QTE to resist.",
             aesthetic: "一切都慢了下来。剑落地的清脆响声。深呼吸的空寂感，周遭的敌意瞬间蜕变为一种公事公办的冰冷。",
             aestheticEn: "Everything slows down. The crisp sound of a sword dropping. The empty silence of a deep breath, the surrounding hostility instantly molting into businesslike coldness.",
-            runtime: "检测到必然输局的 `checkmate` 时，强行接管主控台，播放妥协被同化的结算CG。",
-            runtimeEn: "Upon detecting an inevitable `checkmate`, forcibly taking over the master console to play the assimilated compromise resolution CG."
+            runtime: "IF (主体在长期角力后认识到了绝对的实力差距) THEN (主体解除防守架势，剑落地发出清脆响声，任由致命机制带走自己，周遭的敌意瞬间从咆哮降格为公事公办的冰冷)。",
+            runtimeEn: "IF (Subject_Recognizes_Absolute_Power_Differential_After_Long_Struggle) THEN (Subject drops defensive stance; the sword clatters to the ground; they allow the lethal mechanism to take them; surrounding hostility instantly downgrades from roaring to businesslike coldness)."
         }
     },
     {
@@ -201,8 +201,8 @@ export const OUTCOMES_GROUP_B: LibraryItemDef[] = [
             mechanicsEn: "The character ceases all forward intent. When facing a dialogue box, they don't answer, even closing it to return to a corner and lie down.",
             aesthetic: "沉重的呼吸声、脏乱的头发、毫无光泽的眼神。时间像污水一样停滞不前。阴暗潮湿。",
             aestheticEn: "Heavy breathing, unkempt hair, utterly lusterless eyes. Time stagnates like sewage water. Dark and damp.",
-            runtime: "当 M5（驱力）积分低于系统的最低运行阈值，引发主体内核的休眠（Hibernation）态。",
-            runtimeEn: "When the M5 (Drive) score drops below the system's minimum operational threshold, it induces a Hibernation state in the subject's core."
+            runtime: "IF (主体在无处不在的微小摩擦力中耗尽了全部力比多燃料) THEN (面对任何选项对话框主体关闭窗口回到角落里躺下，沉重的呼吸声和毫无光泽的眼神是仅存的生命信号)。",
+            runtimeEn: "IF (Subject_Burns_Out_All_Libidinal_Fuel_Through_Omnipresent_Microscopic_Friction) THEN (Subject closes every dialogue box and returns to lie in a corner; heavy breathing and utterly lusterless eyes are the only remaining signs of life)."
         }
     },
     {
@@ -218,8 +218,8 @@ export const OUTCOMES_GROUP_B: LibraryItemDef[] = [
             mechanicsEn: "Press confirm. The protagonist sells key intel; screams follow from outside the door. The protagonist's UI panel instantly refreshes with a massive deposit or crisis alert cleared.",
             aesthetic: "洗手间里不断搓洗沾满血腥味的双手。镜子里的面孔开始扭曲，灯光昏黄且压抑。手纸永远不够。",
             aestheticEn: "Constantly scrubbing bloody-smelling hands in the restroom. The face in the mirror begins to warp, lighting is dim and oppressive. Never enough paper towels.",
-            runtime: "在判定出现巨大的【利益反差诱惑】且角色的【抗诱惑力】数值破防时生成。玩家成为他们最初讨厌的 NPC 反面角色。",
-            runtimeEn: "Generated when judged to have a massive [Interest Contrast Temptation] and the character's [Temptation Resistance] breaks. The player becomes the villainous NPC they initially hated."
+            runtime: "IF (系统推送巨额利益且主体的道德抗性低于临界值) THEN (主体按下确认键出卖了关键情报，门外传来惨叫，UI面板瞬间刷新巨额存款，随后主体在洗手间里不断搓洗沾满血腥味的双手直到皮肤破裂)。",
+            runtimeEn: "IF (System_Pushes_Massive_Profit_And_Subject_Moral_Resistance_Below_Critical) THEN (Subject presses confirm to sell key intel; screams follow outside; UI panel instantly refreshes with massive deposit; subject then scrubs bloody-smelling hands in the restroom until skin breaks)."
         }
     },
     {
@@ -235,8 +235,8 @@ export const OUTCOMES_GROUP_B: LibraryItemDef[] = [
             mechanicsEn: "The protagonist actively increases frequency and depth during abusive or exploitative phases, maliciously cursing and repelling those who try to save them.",
             aesthetic: "病态的高反差色彩，带有强烈的BDSM暗示。主角的脸上混杂着极度的痛苦与生理级别的极度欢愉。血与蜜混杂。",
             aestheticEn: "Pathological high-contrast colors with strong BDSM undertones. The protagonist's face mixes extreme agony with physiological euphoria. Blood and honey mixed.",
-            runtime: "如果伤害系统与奖励系统发生引脚交叉短路（Cross-Wiring），原先的【痛苦扣减】反转为【变态增长点数】。",
-            runtimeEn: "If the damage system and reward system suffer pin cross-wiring, the original [Pain Deduction] inverts into [Perverse Growth Points]."
+            runtime: "IF (伤害回路与快感回路发生引脚交叉短路) THEN (每次受虐产生的痛觉信号在主体神经系统中被自动标记为奖励，主体主动增加被剥削的频率并诅咒任何试图拯救他的人)。",
+            runtimeEn: "IF (Damage_Circuit_And_Pleasure_Circuit_Suffer_Pin_Cross_Wiring) THEN (Each masochistic pain signal is auto-tagged as reward in the subject's nervous system; subject actively increases exploitation frequency and curses anyone who tries to save them)."
         }
     },
     {
@@ -252,8 +252,8 @@ export const OUTCOMES_GROUP_B: LibraryItemDef[] = [
             mechanicsEn: "The protagonist plugs into an unending line of code ascension or hallucinogenic tubing. The external world rots and collapses, but a UI halo in their view blinks 'You are happy.'",
             aesthetic: "甜腻虚假的粉蓝色调。眼神涣散如同玻璃珠。嘴角极其牵强的高高挂起。缓慢失重的空灵电子乐。",
             aestheticEn: "Sickly sweet, fake pink-blue tones. Glassy, unfocused eyes. Corners of the mouth forced unnaturally high. Slow, weightless ethereal electronic music.",
-            runtime: "系统通过【强效快感覆盖器】持续高频压制一切【怀疑与痛苦变量】，实现进程的彻底锁定无扰态。",
-            runtimeEn: "The system utilizes a [Potent Pleasure Overrider] to continuously and high-frequently suppress all [Doubt and Pain Variables], achieving thorough process lock-in undisturbed state."
+            runtime: "IF (主体自愿接入永不终止的多巴胺注入管线) THEN (一切怀疑与痛苦变量被甜腻的化学信号持续覆写为零，主体在过曝的粉蓝色调中嘴角极其牵强地高高挂起，认知能力在甜腻的昏睡中彻底瘫痪)。",
+            runtimeEn: "IF (Subject_Voluntarily_Plugs_Into_Non_Terminating_Dopamine_Pipeline) THEN (All doubt and pain variables are continuously overwritten to zero by saccharine chemical signals; subject's mouth is forced unnaturally high in overexposed pink-blue tones; cognitive capacity totally paralyzed in sickly-sweet lethargy)."
         }
     },
     {
@@ -269,8 +269,8 @@ export const OUTCOMES_GROUP_B: LibraryItemDef[] = [
             mechanicsEn: "In the memory surgery archive, the protagonist clicks 'Select All - Delete'. Waking up, they return to a flawless and mediocre morning, staring blankly at a gap in a photograph.",
             aesthetic: "过曝的白色。一切棱角都被打磨圆滑。主角眼神中少了一份原本迷人的深邃感，变得像个轻浅的盘子。音乐空洞平滑。",
             aestheticEn: "Overexposed white. All sharp edges sanded smooth. The protagonist's eyes lose an originally fascinating depth, becoming like a shallow plate. Smooth, hollow music.",
-            runtime: "永久注销了 M2（创伤核心）事件的缓存链接，导致整个叙事结构为了防止崩溃而自动【降级运算】到零级冲突。",
-            runtimeEn: "Permanently deregisters the cache links of M2 (Trauma Core) events, causing the entire narrative structure to automatically [Downgrade Compute] to zero-level conflict to prevent crash."
+            runtime: "IF (主体在记忆手术库中点击了全选删除) THEN (M2创伤核心事件的全部缓存链接被永久注销，醒来后主体回到一个无瑕且平庸的早晨，眼神中少了那份原本迷人的深邃感，变成一个空洞浅薄的盘子)。",
+            runtimeEn: "IF (Subject_Clicks_Select_All_Delete_In_Memory_Surgery_Archive) THEN (All cache links of M2 Trauma Core events are permanently deregistered; upon waking, subject returns to a flawless mediocre morning, eyes losing their fascinating depth, becoming a shallow empty plate)."
         }
     },
     {
@@ -286,8 +286,8 @@ export const OUTCOMES_GROUP_B: LibraryItemDef[] = [
             mechanicsEn: "The protagonist brands their arm with the code-name bestowed by the Big Other, walking toward the abyss with a twisted sense of pride. Names are revoked.",
             aesthetic: "类似极权主义集会上的固定特写。冷硬的大理石质感光影。所有的柔软与人情味被僵硬的符号语言剥夺。",
             aestheticEn: "Like a fixed close-up at a totalitarian rally. Cold marble-textured lighting. All softness and humanity stripped away by rigid symbolic language.",
-            runtime: "系统将【性格动态（Personality Dynamism）】的方差硬编码为0。角色永远被限制在一个极其狭窄的标签枚举类型内。",
-            runtimeEn: "The system hardcodes the variance of [Personality Dynamism] to 0. The character is forever confined within an extremely narrow label enum."
+            runtime: "IF (主体完全认领了社会机器打上的固定标签并在手臂上烙下大他者赐予的代号) THEN (性格动态方差被硬编码为零，所有流动性被锁死，主体带着扭曲的自豪感向深渊走去，名字被永久剥夺只剩编号)。",
+            runtimeEn: "IF (Subject_Fully_Claims_Fixed_Label_And_Brands_Arm_With_Big_Other_Code) THEN (Personality Dynamism variance is hardcoded to zero; all fluidity locked; subject walks toward the abyss with twisted pride; name permanently revoked, only number remains)."
         }
     },
     {
@@ -303,8 +303,8 @@ export const OUTCOMES_GROUP_B: LibraryItemDef[] = [
             mechanicsEn: "Signing the new apartment contract with blood-stained money. Subordinates report plans to suppress the lower-city rebellion; he pours expensive whiskey expressionlessly.",
             aesthetic: "极度奢华却冷如冰窖的夜景。高楼玻璃反光倒映出他与过去截然不同、精致但令人作呕的面孔。优雅的爵士乐混杂着无人在意的尖叫。",
             aestheticEn: "Extremely luxurious yet ice-cold night view. The high-rise glass reflection shows a face entirely different from the past—exquisite but nauseating. Elegant jazz mixed with unheeded screams.",
-            runtime: "在底层完成的【贫民窟资源模块】全部被高价值但空洞的【精英资产模块】替换，产生巨大的割裂沉浸感反馈。",
-            runtimeEn: "All [Slum Resource Modules] completed at the bottom tier are replaced by high-value yet hollow [Elite Asset Modules], producing massive dissonant immersion feedback."
+            runtime: "IF (主体踩着尸体完成阶级跃升站上顶层公寓的落地窗前) THEN (全部贫民窟资源模块被高价值但空洞的精英资产模块替换，反叛精神被舒适的高级羊绒彻底吸干，主角面无表情地倒了一杯高档威士忌听着窗外传来的镇压尖叫)。",
+            runtimeEn: "IF (Subject_Steps_On_Corpses_To_Complete_Class_Ascension_At_Penthouse) THEN (All slum resource modules replaced by high-value but hollow elite asset modules; rebel spirit sucked dry by comfortable cashmere; subject pours expensive whiskey expressionlessly while suppression screams echo outside)."
         }
     },
     {
@@ -320,8 +320,8 @@ export const OUTCOMES_GROUP_B: LibraryItemDef[] = [
             mechanicsEn: "The protagonist is forced to hold a perfect pose under countless camera flashes, mouth stitched into a perfect smile, while in the invisible dressing room, the original body rots and stinks.",
             aesthetic: "失真的闪光灯白光铺满整个屏幕，致盲。伴随着如海啸般病态狂热的粉丝尖叫。画面逐渐过度曝光直至丢失所有细节。",
             aestheticEn: "Distorted flashbulb white floods the entire screen, blinding. Accompanied by tsunami-like, morbidly zealous fan screams. The image gradually overexposes until losing all detail.",
-            runtime: "角色的【自控权限】被全部转移至庞大的【外部受众数据池（The Gaze Array）】中接管。",
-            runtimeEn: "The character's [Self-Control Permission] is entirely transferred and taken over by the massive [External Audience Data Pool (The Gaze Array)]."
+            runtime: "IF (主体被提纯为纯粹的符号和景观以供大众消费) THEN (主体的全部自控权限被转移至庞大的外部受众数据池接管，嘴巴被缝出完美笑容，而在不可见的更衣室里本体已经腐烂发臭)。",
+            runtimeEn: "IF (Subject_Is_Purified_Into_Pure_Symbol_And_Spectacle_For_Mass_Consumption) THEN (Subject's entire self-control permission is transferred to the massive External Audience Data Pool; mouth stitched into perfect smile; while in the invisible dressing room the original body rots and stinks)."
         }
     },
     {
@@ -337,8 +337,8 @@ export const OUTCOMES_GROUP_B: LibraryItemDef[] = [
             mechanicsEn: "The system forces the protagonist to execute an unskippable QTE button press. Skip it and be soft-locked forever; press it and the lover falls in a pool of blood.",
             aesthetic: "极度近距的特写。枪口、颤抖的手指以及对面倒下时充满悲意与理解的眼神。血花溅在光洁如新的制服上。",
             aestheticEn: "Extremely close up. Gun barrel, trembling fingers, and the fallen's eye full of sorrow and understanding. Blood spatters on a pristine new uniform.",
-            runtime: "这是【驯化程序（Domestication Protocol）】的最后校验。通过这次点击回调，证明系统完成了彻底越权操作。",
-            runtimeEn: "This is the final check of the [Domestication Protocol]. Passing this click callback proves the system has completed utter overriding operation."
+            runtime: "IF (系统强迫主体执行无法跳过的QTE令其亲手处决最初指引他寻找真相的导师或爱人) THEN (不按下就永远卡死，按下则爱人倒在血泊中，主体的艰涅彻底爆盲，血花溅在光洁如新的制服上完成驯化程序的最终校验)。",
+            runtimeEn: "IF (System_Forces_Unskippable_QTE_To_Personally_Execute_Mentor_Or_Lover) THEN (Skip it and be soft-locked forever; press it and the lover falls in a pool of blood; subject's conscience flash-blinds completely; blood spatters on pristine uniform completing the final check of the Domestication Protocol)."
         }
     },
     {
@@ -354,8 +354,8 @@ export const OUTCOMES_GROUP_B: LibraryItemDef[] = [
             mechanicsEn: "A financial skyscraper piercing the clouds. A suited lawyer slides over a thick document; the protagonist picks up a fountain pen. No dark magic VFX, just the crisp sound of signing and a handshake.",
             aesthetic: "干净到令人发指的现代化办公环境。极其精准的构图线。灵魂离去的瞬间并没有任何超自然现象，只是玻璃的反光更冷硬了些。",
             aestheticEn: "A horrifyingly clean modern office environment. Exceedingly precise compositional lines. The moment the soul departs has no supernatural phenomena, just a harder, colder reflection on the glass.",
-            runtime: "后台引擎调换了所有的【情感变量】，变更为一串经过精密计算且永远无法再波动的通货膨胀【数字财产】。",
-            runtimeEn: "The backend engine swaps all [Emotional Variables], mutating them into a string of precisely calculated, never-fluctuating inflationary [Digital Assets]."
+            runtime: "IF (主体在极其理智而冰冷的早晨拿起钢笔签下出卖灵魂的合同) THEN (后台引擎将所有情感变量置换为精密计算且永不波动的数字财产，灵魂离去的瞬间没有任何超自然现象，只是玻璃的反光更冷硬了些)。",
+            runtimeEn: "IF (Subject_Picks_Up_Fountain_Pen_And_Signs_Soul_Sale_Contract_On_Ice_Cold_Morning) THEN (Backend engine swaps all emotional variables into precisely calculated never-fluctuating digital assets; the moment the soul departs has no supernatural phenomena, just a harder colder reflection on the glass)."
         }
     },
     {
@@ -371,8 +371,8 @@ export const OUTCOMES_GROUP_B: LibraryItemDef[] = [
             mechanicsEn: "Enjoying top-tier food, clothing, and entertainment interaction daily, but walking to the courtyard border reveals an unbreakable invisible air wall or electric grid.",
             aesthetic: "堆砌到极度繁复、充满颓废美的洛可可式房间或者全息乌托邦。主角穿戴华丽，像一个瓷娃娃般无聊地看向窗外。",
             aestheticEn: "A Rococo room packed to extreme complexity and decadent beauty, or a holographic utopia. The protagonist is gorgeously dressed, looking out the window bored as a porcelain doll.",
-            runtime: "将实体的【移动域（NavMesh Boundary）】缩减到最小。所有与危险、探索相关的指令集被系统彻底屏蔽。",
-            runtimeEn: "Shrinks the entity's [NavMesh Boundary] to the absolute minimum. All instruction sets related to danger and exploration are thoroughly blocked by the system."
+            runtime: "IF (主体因惧怕实在界的不可预测性而同意被关进镶金的笼子) THEN (实体的移动域被缩减到最小，所有与危险和探索相关的指令集被彻底屏蔽，主角穿戴华丽地像一个瓷娃娃般无聊地看向窗外那堵永远无法打破的隐形空气墙)。",
+            runtimeEn: "IF (Subject_Consents_To_Gilded_Cage_Out_Of_Fear_Of_The_Real) THEN (Entity's NavMesh Boundary shrinks to absolute minimum; all danger and exploration instruction sets are thoroughly blocked; subject is gorgeously dressed, looking out the window bored as a porcelain doll at the unbreakable invisible wall)."
         }
     },
     {
@@ -388,8 +388,8 @@ export const OUTCOMES_GROUP_B: LibraryItemDef[] = [
             mechanicsEn: "The physically large adult protagonist hugs an old toy or security blanket in a safe corner, whining in a toddler's voice to an all-powerful villain in exchange for shelter.",
             aesthetic: "极其怪异的视角与灯光比例。场景布置得五颜六色但带有恐怖谷效应。大尺度的成人躯体做着婴儿般的扭捏动作，令人不适。",
             aestheticEn: "Bizarre perspective and lighting ratios. The scene is brightly colored but carries an Uncanny Valley effect. Large-scale adult bodies making squirmy, baby-like movements, deeply uncomfortable.",
-            runtime: "切断所有的【成年升级网格（Adult Skill Tree）】，属性回滚，并强行绑定一个【寄生/庇护变量】在宿主NPC身上。",
-            runtimeEn: "Severs all [Adult Skill Tree] paths, rolls back attributes, and forcibly binds a [Parasitic/Shelter Variable] onto the host NPC."
+            runtime: "IF (主体遭遇真相的恐吓后发生严重的心理倒退退行回巨婴状态) THEN (所有成年升级网格被切断，属性回滚，并强行绑定一个寄生庇护变量在嬿主NPC身上，体型庞大的成年主角在安全角落里抱着旧玩具用幼童的声音向反派撞娇)。",
+            runtimeEn: "IF (Subject_Suffers_Severe_Psychological_Regression_After_Encountering_Truth) THEN (All Adult Skill Tree paths severed; attributes roll back; a Parasitic/Shelter Variable is forcibly bound to the host NPC; the physically large adult protagonist hugs old toys in a safe corner whining in a toddler's voice to the villain)."
         }
     },
     {
@@ -405,8 +405,8 @@ export const OUTCOMES_GROUP_B: LibraryItemDef[] = [
             mechanicsEn: "Whenever the Big Other (superior/system/master) issues a command, the protagonist exhibits not a trace of psychological struggle, but executes even the most absurd directives with ecstatic fervor.",
             aesthetic: "主体的脸上褪去了所有人类该有的复杂表情，只留下机械狗听到哨声时那种令人毛骨悚然的专注与癫狂服从态。",
             aestheticEn: "The subject's face fades of all complex human expressions, leaving only the creepy focus and manic obedience of a mechanical dog hearing a whistle.",
-            runtime: "角色的【独立意图网络（Autonomy Mesh）】被直接拔除并连线到【主人控制终端】。主机的每一次信号都是对其神经末梢的直接电击刺激。",
-            runtimeEn: "The character's [Autonomy Mesh] is directly uprooted and wired to the [Master Control Terminal]. Every signal from the host is a direct electroshock to their nerve endings."
+            runtime: "IF (主体彻底清空了自己的内核以便大他者指令毫无阻力地回荡) THEN (角色的独立意图网络被直接拔除并连线到主人控制终端，主机的每一次信号都是对主体神经末梢的直接电击，脸上只剩机械狗听到哨声时那种癖狂服从态)。",
+            runtimeEn: "IF (Subject_Completely_Empties_Core_So_Big_Other_Directives_Echo_With_Zero_Resistance) THEN (Character's Autonomy Mesh is directly uprooted and wired to Master Control Terminal; every signal from the host is a direct electroshock to nerve endings; face retains only the manic obedience of a mechanical dog hearing a whistle)."
         }
     }
 ];

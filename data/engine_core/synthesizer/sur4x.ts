@@ -15,8 +15,8 @@ export const SYNTHESIZER_SUR4X: LibraryItemDef[] = [
             mechanicsEn: "Allowing zero-decay, zero-cost Fast Travel anywhere instantly. The character's base sprint/roll deducts no Stamina; all progression key items are easily obtainable on economic routes.",
             aesthetic: "宏大的天空、没有顶棚的开阔平原视觉大区体系。明亮畅快、没有任何空气污染滤镜的清透体积光（Volumetric Lighting）布满整个渲染环境。",
             aestheticEn: "Grandiose skies, open plains visual zone system without ceilings. Bright, exhilarating, crystal-clear Volumetric Lighting devoid of any air-pollution filters floods the entire rendered environment.",
-            runtime: "将附着在角色物理控制器（Character Controller）上的 `Gravity`（重力乘数）和 `Stamina_Cost` （耐力损耗系数）全部重置为系统内部设定的最低阈值极小量。",
-            runtimeEn: "Resetting the `Gravity` multiplier and `Stamina_Cost` coefficient attached to the Character Controller down to the absolute minimum thresholds defined inside the system."
+            runtime: "IF (阶层体系呈现水晶般透明态，主角感觉不到社会结构强加在物理位移上的任何重量束缚) THEN (将附着在角色物理控制器Character Controller上的Gravity重力乘数和Stamina_Cost耐力损耗系数全部重置为系统内部设定的最低阈值极小量)。",
+            runtimeEn: "IF (Class_Hierarchy_Exhibits_Crystal_Transparency_No_Weight_Constraints_On_Physical_Displacement) THEN (Reset Gravity multiplier and Stamina_Cost coefficient attached to Character Controller to absolute minimum system thresholds)."
         }
     },
     {
@@ -33,8 +33,8 @@ export const SYNTHESIZER_SUR4X: LibraryItemDef[] = [
             mechanicsEn: "Specific shortcut areas or critical terrain exits demand specific 'Visas' or toll payments. Physical sprinting realistically initiates minor resource penalty deductions.",
             aesthetic: "关卡的纵深变得相对局促紧实，大量增加带有拥挤人群或路障隔离带的密集市井地貌外观设计。中景空间（Mid-ground）被大量繁琐无关的内容塞满。",
             aestheticEn: "Level depth becomes relatively cramped; heavily populating appearances with dense bazaar topographies featuring crowded mobs or barricades. Mid-ground spaces are stuffed with tedious irrelevant clutter.",
-            runtime: "在特定地块内布设并调用 `Nav_Modifier_Volume` 阻尼网格，该计算模块会根据附着在此地的区域声望（Prestige Tags）强行为玩家的每步位移推算并扣除行走消耗参数。",
-            runtimeEn: "Deploying and calling `Nav_Modifier_Volume` damping grids within specific chunks; this calc module forcibly deducts movement consumption parameters based on regional Prestige Tags attached there."
+            runtime: "IF (主体开始感知到环境网格的暗中摩擦，非强制性社会身份证明增添物理负重感) THEN (在特定地块内布设并调用Nav_Modifier_Volume阻尼网格，根据附着在此地的区域声望Prestige Tags强行为玩家每步位移推算并扣除行走消耗参数)。",
+            runtimeEn: "IF (Subject_Perceives_Covert_Environmental_Mesh_Friction_Social_IDs_Add_Physical_Weight) THEN (Deploy Nav_Modifier_Volume damping grids within specific chunks, forcibly deducting movement consumption parameters based on regional Prestige Tags)."
         }
     },
     {
@@ -51,8 +51,8 @@ export const SYNTHESIZER_SUR4X: LibraryItemDef[] = [
             mechanicsEn: "Over-encumbrance and penalty evaluations. The player must endlessly bribe, pay endless taxes, or endure immensely long queuing puzzle mechanics just to push the mainline forward one step.",
             aesthetic: "极度幽闭恐惧症的狭长压抑甬道、满地工业泥浆与遮天蔽日散发恶臭的毒性酸雾。极其肮脏斑驳、几乎发霉的次世代材质纹理。",
             aestheticEn: "Extremely claustrophobic tight oppressive corridors, floors covered in industrial mud, and toxic smog blocking the sky emitting stench. Exceedingly dirty, mottled, almost moldy next-gen material textures.",
-            runtime: "指令物理引擎全局强效改写主角对象的 `Mass`（质量基数）；同时任务交互逻辑栈内被恶意植入一种永远会有10%随机概率导致“权限不足报错（Interaction Failure）”的伪劣代码逻辑核。",
-            runtimeEn: "Commanding the physics engine to globally severely overwrite the protagonist's `Mass`; whilst maliciously implanting a shoddy code-logic core into the interaction stack yielding a constant 10% random chance of 'Interaction Failure' (Access Denied)."
+            runtime: "IF (阶级物理壁垒肉眼清晰可见，主角陷在错综复杂的泥沼中，挣扎只导致更深下沉) THEN (指令物理引擎全局强效改写主角对象的Mass质量基数，同时在任务交互逻辑栈内恶意植入永远有10%随机概率导致权限不足报错Interaction Failure的伪劣代码逻辑核)。",
+            runtimeEn: "IF (Class_Physical_Barriers_Starkly_Visible_Protagonist_Trapped_In_Quagmire_Struggling_Only_Sinks_Deeper) THEN (Command physics engine to globally overwrite protagonist Mass, maliciously implant shoddy code-logic core into interaction stack yielding constant 10% random Interaction Failure)."
         }
     },
     {
@@ -69,8 +69,8 @@ export const SYNTHESIZER_SUR4X: LibraryItemDef[] = [
             mechanicsEn: "The player is physically hard-locked out of the vast majority of sectors in the entire city. Rigid ID screening nets ensure any cross-class trespassing instantly invites a forced one-hit-kill from 'High Guards'.",
             aesthetic: "雄伟到反人类、体量夸张到让人绝望的实体粗野混凝土高墙。极度吝啬的环境背光设计导致天空宛若不可达的传说，绝大部分游玩视野深陷于伸手不见五指的高对比度阴沟色调。",
             aestheticEn: "Anti-humanly majestic, desperately exaggerated scaled brutalist concrete walls. Extremely stingy backlighting making the sky an unreachable myth; most gameplay FOV plunges into pitch-black high-contrast gutter tones.",
-            runtime: "在底层引擎的空间树划段中强制加载大面积完全透明且无懈可击摧毁免疫的 `Kill_Z` （即死碰撞裁切面）板列，通过纯硬核物理代码逻辑一刀切断社群阶级的交汇可能。",
-            runtimeEn: "Forcibly loading massive arrays of completely transparent, invulnerably indestructible `Kill_Z` clipping planes throughout the base engine's spatial tree divisions, utilizing raw hardcore physics code to cleanly sever all intersection possibilities of social classes."
+            runtime: "IF (社会拓扑发生绝对残忍的永久地质固化，出身即终局，不存在任何上升逃逸坐标切线) THEN (在底层引擎空间树划段中强制加载大面积完全透明且摧毁免疫的Kill_Z即死碰撞裁切面板列，通过纯硬核物理代码逻辑一刀切断社群阶级的交汇可能)。",
+            runtimeEn: "IF (Social_Topology_Undergoes_Absolute_Cruel_Permanent_Geological_Fossilization_Birth_Is_Endgame) THEN (Forcibly load massive arrays of transparent indestructible Kill_Z clipping planes throughout base engine spatial tree, utilizing raw hardcore physics code to sever all class intersection possibilities)."
         }
     },
     {
@@ -87,8 +87,8 @@ export const SYNTHESIZER_SUR4X: LibraryItemDef[] = [
             mechanicsEn: "Merely breathing the air in this lowest slum abyss invokes non-stop per-second deductions from a highly toxic survival health bar. Amid extreme absolute scarcity, one is still forced into Sisyphus-like, high-intensity manual labor mini-games draining the last drops of sanity just to barely persist.",
             aesthetic: "仿佛置身于地心高温高压层与重工业废料焚化炉揉捏在一起的生化极恶炼狱中。所有的景深画面仿佛都被极高的重力狠狠往下压迫倾倒。满眼的暗炽红与生锈败血斑块占据了绝对的高级视觉通道。",
             aestheticEn: "As if placed in an ultra-evil biochemical purgatory where the earth's extreme pressure core kneads with heavy industrial waste incinerators. All depth-of-field frames appear ruthlessly driven down by infinite gravity. A skyful of dark glowing reds and rusty septic patches seize absolute primary visual channels.",
-            runtime: "死寂地于主控端循环挂载实例化出的 `Environmental_Damage_Tick` 持续扣血执行域帧，并且这一极具恶意的伤害计算参数基数，其惩罚倍率永远呈现出与主角“当前资源贫困指数（Poverty Index变量）”高度精确且恶毒的倒数指数级几何放大对标。",
-            runtimeEn: "Deadly iterating and instantiating an `Environmental_Damage_Tick` drain execution frame in the master loop; this highly malicious damage base permanently scales via punitive multipliers geometrically tracking exactly inversely with the protagonist's 'Current Poverty Index variable'."
+            runtime: "IF (存在本身即为对法则矩阵原罪的亵渎，角色每一次微末呼吸都在承受整个宇宙构架无情坭缩倾轧的可怖重量) THEN (死寂地于主控端循环挂载实例化出的Environmental_Damage_Tick持续扣血执行域帧，其惩罚倍率永远与主角当前资源贫困指数Poverty Index变量呈恶毒的倒数指数级几何放大对标)。",
+            runtimeEn: "IF (Existence_Itself_Blasphemes_Law_Matrix_Every_Breath_Endures_Entire_Universe_Crushing_Weight) THEN (Deadly iterate and instantiate Environmental_Damage_Tick drain execution frame in master loop, punitive multipliers permanently scale geometrically inverse to protagonist Current Poverty Index variable)."
         }
     }
 ];

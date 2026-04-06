@@ -40,14 +40,14 @@ import type { NarrativeFieldState, LibraryItemDef, WorldLawConfig } from '../typ
 //    加载 M0-M7 引擎词条 + SUR1-SUR10 皮层词条
 // ============================================
 
+import { NARRATIVE_ENGINE_LIBRARY } from '../data/engine_core/narrative_engine';
+import { SKIN_LIBRARY } from '../data/skin_libraries';
+
 let _libraryCache: Record<string, LibraryItemDef> | null = null;
 
 function getLibraryCache(): Record<string, LibraryItemDef> {
   if (_libraryCache) return _libraryCache;
   try {
-    const { NARRATIVE_ENGINE_LIBRARY } = require('../data/engine_core/narrative_engine');
-    const { SKIN_LIBRARY } = require('../data/skin_libraries');
-    
     const cache: Record<string, LibraryItemDef> = {};
 
     for (const category of NARRATIVE_ENGINE_LIBRARY) {
@@ -290,7 +290,11 @@ function calculateTension(input: MistEngineInput, m0Topo: M0TopologyProfile | un
   //   3. SUR4X（阶层阻力：固化岩层=1.5 → 社会越固化 M4 越重）
   const effective_m4 = g_m4 * mods.m4Divisor;
   const m4_amplifier = 1.0 + m4x_physics.gravity;
-  const denominator = Math.max(effective_m4 * m4_amplifier * sur4xFactor, 0.1);
+  
+  // 【算法修正】由于分子是 M1+M2+M3 的加和（均值约1.5），分母仅有 M4（均值约0.75）。
+  // 为了让平均对峙状态的张力比回归到 1.0 (DEADLOCK)，在此赋予大他者 2.0 的“固有镇压权值”。
+  const m4_base_weight = 2.0; 
+  const denominator = Math.max(effective_m4 * m4_amplifier * sur4xFactor * m4_base_weight, 0.1);
   const ratio = numerator / denominator;
 
   // ====== 乘子：驱力 ======
@@ -309,11 +313,11 @@ function calculateTension(input: MistEngineInput, m0Topo: M0TopologyProfile | un
   const curvatureShift = m0Topo ? (m0Topo.curvature - 0.5) * 0.4 : 0;
 
   let narrativeArc: TensionReport['narrativeArc'];
-  if (adjustedRatio > 1.5 + curvatureShift) {
+  if (adjustedRatio > 1.25 + curvatureShift) {
     narrativeArc = 'BREAKTHROUGH';
-  } else if (adjustedRatio > 0.8 + curvatureShift * 0.5) {
+  } else if (adjustedRatio > 0.85 + curvatureShift * 0.5) {
     narrativeArc = 'DEADLOCK';
-  } else if (adjustedRatio > 0.3 + curvatureShift * 0.3) {
+  } else if (adjustedRatio > 0.55 + curvatureShift * 0.3) {
     narrativeArc = 'TRAGEDY';
   } else {
     narrativeArc = 'ANNIHILATION';

@@ -14,8 +14,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
             mechanicsEn: "Resolves all positive main quests, but forcibly confiscates one of the player's core abilities or most precious bonded companion, uninheritable in New Game+.",
             aesthetic: "战场废墟上的绝美阳光。主角满身血污地拿着原本追寻的信物，眼神平和但永远缺少了焦点中的某样东西。微风吹过断壁残垣。",
             aestheticEn: "Breathtaking sunlight over the battlefield ruins. The blood-stained protagonist holds the sought-after token, eyes peaceful but forever missing something in their focus. A breeze blows through the rubble.",
-            runtime: "M6阶段如果【代价变量】溢出，将在胜利界面的渲染管线中永久施加一道细微的【屏幕裂痕（Screen Tear）】。",
-            runtimeEn: "If the [Cost Variable] overflows during M6, a subtle [Screen Tear] will be permanently applied to the render pipeline of the victory screen."
+            runtime: "IF (M6阶段的代价变量发生溢出) THEN (在胜利界面的渲染管线中永久施加一道无法移除的屏幕裂痕Screen Tear，作为残肢般的视觉瘢痕永不消退)。",
+            runtimeEn: "IF (Cost_Variable_Overflows_During_M6) THEN (A permanent irremovable Screen Tear is applied to the victory screen render pipeline as a visual scar of amputation that never fades)."
         }
     },
     {
@@ -31,8 +31,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
             mechanicsEn: "In an absolutely overwhelming suppression, the protagonist actively chooses to detonate their core. Screen turns solid white, following cutscenes only show the irreversible mutation of the world due to their death.",
             aesthetic: "没有悲鸣，只有一声极其清脆的玻璃碎裂音阶。光芒从内部炸开，将所有威权的反派阴影瞬间蒸发为负底色。",
             aestheticEn: "No lamentation, only a supremely crisp glass-shattering scale. Light detonates from within, evaporating all authoritarian villainous shadows instantly into negative background colors.",
-            runtime: "执行死亡协议（KillProcess）前，强行将主角的【命名变量】注入系统的全局基类（Global Base Class），无法被覆盖。",
-            runtimeEn: "Before executing the KillProcess, forcibly injecting the protagonist's [Naming Variable] into the system's Global Base Class, un-overridable."
+            runtime: "IF (死亡协议KillProcess即将执行) THEN (在执行前一帧，将主角的命名变量强行注入系统全局基类Global Base Class，该变量被标记为final且不可被任何后续进程覆盖)。",
+            runtimeEn: "IF (KillProcess_Is_About_To_Execute) THEN (One frame prior, the protagonist's Naming Variable is forcibly injected into the Global Base Class, marked as final and un-overridable by any subsequent process)."
         }
     },
     {
@@ -48,8 +48,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
             mechanicsEn: "Facing the ultimate temptation or villain's provocation, the protagonist drops their weapon. Neither fighting nor surrendering, merely turning and leaving the trigger zone, causing the system's OCD loop to crash.",
             aesthetic: "一种令人极度舒适的卸力感。紧张的弦乐被极其松弛的长音取代。主角深吸一口气，原本身上背负的叙事重压如有实质般溃散。",
             aestheticEn: "An immensely comfortable sensation of releasing tension. Tense strings replaced by extremely relaxed long notes. The protagonist takes a deep breath; the narrative gravity they bore dissipates tangibly.",
-            runtime: "角色状态栏里的所有【焦虑（Anxiety）】与【追求（Quest）】标记全部隐去不显示。事件栈强行清空。",
-            runtimeEn: "All [Anxiety] and [Quest] markers in the character's status bar are hidden from display. Event stack forcibly cleared."
+            runtime: "IF (主体选择丢下武器并转身离开判定区域) THEN (角色状态栏中所有焦虑Anxiety与追求Quest标记被强制隐去，事件栈执行ForceFlush清空，系统的强迫症循环因无目标而报错停机)。",
+            runtimeEn: "IF (Subject_Drops_Weapon_And_Leaves_Trigger_Zone) THEN (All Anxiety and Quest markers in the status bar are forcibly hidden, EventStack executes ForceFlush, and the system OCD loop crashes due to null target)."
         }
     },
     {
@@ -65,8 +65,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
             mechanicsEn: "Forfeiting the final Boss fight or the throne, the protagonist uses an unconventional method (e.g., destroying a load-bearing wall, hacking the backend) to walk out of the rendered zone.",
             aesthetic: "极度震撼的舞台边缘感。主角手触碰到带有马赛克或胶片质感的“天空边界”。开门的一瞬间，光线将他吞没。不播放任何制作人员名单。",
             aestheticEn: "Profoundly shocking sense of the stage's edge. The protagonist touches 'sky boundaries' with pixelated or filmic textures. The moment the door opens, light swallows them. No end credits roll.",
-            runtime: "将角色的坐标强行修改为超越场景 `BoundingBox` 的极值（如 `X: Infinity`），引发引擎关于“对象越界”的美学崩溃。",
-            runtimeEn: "Forcibly modifying the character's coordinates to extremes transcending the scene's `BoundingBox` (e.g., `X: Infinity`), sparking an aesthetic engine crash of 'object out of bounds'."
+            runtime: "IF (主角用非传统手段走出了渲染区边界) THEN (角色坐标被强行改写为超越场景BoundingBox的极值如X:Infinity，引擎抛出对象越界的美学崩溃异常，且不播放任何制作人员名单)。",
+            runtimeEn: "IF (Protagonist_Exits_Rendered_Zone_Via_Unconventional_Means) THEN (Character coordinates are overwritten to extremes beyond BoundingBox e.g. X:Infinity, engine throws an aesthetic Object_Out_Of_Bounds crash, no end credits roll)."
         }
     },
     {
@@ -82,8 +82,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
             mechanicsEn: "Using all scattered fragments collected previously (whether friendly or enemy wreckage), constructing an option that originally did not exist on the rule panel and executing it.",
             aesthetic: "万物复苏但具有异化感的黎明。世界并未恢复原状，而是长出了违反常规常理但美丽的新事物（如从钢铁废墟中长出的巨大发光植物）。",
             aestheticEn: "A dawn of things reviving but with a sense of alienation. The world does not revert; rather, unconventional yet beautiful new things grow (like giant glowing plants sprouting from steel ruins).",
-            runtime: "系统抛弃原本的判定库，将主角的私有方法升格为全局类。UI界面发生彻底的重绘与改版。",
-            runtimeEn: "The system discards its original evaluation library, escalating the protagonist's private methods to global classes. The UI undergoes a thorough redraw and revamp."
+            runtime: "IF (主角利用散落碎片构建出规则面板上不存在的选项并执行) THEN (系统抛弃原有判定库，将主角的私有方法升格为全局类，UI界面触发彻底的重绘与改版以适配新律法)。",
+            runtimeEn: "IF (Protagonist_Constructs_Nonexistent_Option_From_Scattered_Fragments_And_Executes) THEN (System discards original evaluation library, protagonist private methods are escalated to global classes, UI undergoes thorough redraw and revamp for the New Law)."
         }
     },
     {
@@ -99,8 +99,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
             mechanicsEn: "In the direst straits with zero resources, bottomed HP, and impossible clearance, the protagonist passes the last, functionally useless 'action' (e.g., a smile, a paper flower) to the partner.",
             aesthetic: "末日崩塌的背景，巨响与火焰铺天盖地。但在景深极浅的画面中央，只有两人交握的双手，时间仿佛为这一瞬间而停顿。",
             aestheticEn: "Apocalyptic collapsing background, deafening roar and fire overwhelming. But in the ultra-shallow depth of field center, only two clasped hands; time seems to halt for this instant.",
-            runtime: "绕过【生存逻辑（Survival Logic）】，使两名角色的坐标在引力引擎内永久锚定在一起，即使场景被销毁亦不分离。",
-            runtimeEn: "Bypassing [Survival Logic], permanently anchoring both characters' coordinates together within the gravity engine, inseparable even if the scene is destroyed."
+            runtime: "IF (在物资清零且无法通关的窘境中，主角将最后一个无功能效用的动作传递给伴侣) THEN (系统绕过生存逻辑Survival Logic，两名角色的坐标在引力引擎内被永久锚定，即使场景被销毁亦不分离)。",
+            runtimeEn: "IF (Protagonist_Passes_Last_Functionally_Useless_Action_To_Partner_At_Zero_Resources) THEN (System bypasses Survival Logic, both characters coordinates are permanently anchored in the gravity engine, inseparable even if scene is destroyed)."
         }
     },
     {
@@ -116,8 +116,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
             mechanicsEn: "Flipping an extremely negative trait originally in the De-buff slot (e.g., auditory hallucinations, paranoia) into the core defense mechanism against the system's ultimate assimilation/erasure.",
             aesthetic: "光怪陆离但极其自信的个人宇宙展示。主角怪异的抽搐动作此时带有某种浑然天成的舞蹈感。外界的攻击在他独特的逻辑场里滑开。",
             aestheticEn: "A bizarre yet extremely confident display of a personal universe. The protagonist's weird twitches now bear an uncanny natural dance-like quality. External attacks slide off within their unique logic field.",
-            runtime: "提取一个私有的 `Bug` 变量，将其强行注册为不被任何 `Try/Catch` 捕获的底层特性，并以此重构主角的方法类。",
-            runtimeEn: "Extracting a private `Bug` variable, forcibly registering it as a base feature uncaught by any `Try/Catch`, and refactoring the protagonist's method classes upon it."
+            runtime: "IF (主体将De-buff栏位里的极端负面特质翻转为核心防御机制) THEN (提取该私有Bug变量，强行注册为不被任何Try/Catch捕获的底层特性，并以此重构主角的方法类，形成独立逻辑场)。",
+            runtimeEn: "IF (Subject_Flips_Extreme_Debuff_Trait_Into_Core_Defense_Mechanism) THEN (Extract the private Bug variable, forcibly register it as a base feature uncaught by any Try/Catch, refactoring protagonist method classes upon it to form an independent logic field)."
         }
     },
     {
@@ -133,8 +133,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
             mechanicsEn: "The main game ended long ago; all seems to return to calm. But the protagonist repeats a daily ritual—seemingly meaningless to outsiders—to ensure that 'truth' never dissipates.",
             aesthetic: "极简的长镜头。岁月流逝，周围的人物都在世俗化，唯有主角的眼神如磐石般闪耀着一种近乎宗教的痴迷和清澈。",
             aestheticEn: "Minimalist long take. As years pass, surrounding characters secularize, while only the protagonist's eyes shine like bedrock with an almost religious obsession and clarity.",
-            runtime: "在时间轴系统里锁定特定的某一个时间戳（Timestamp），令主体的指针永远向该变量发送无回应的致敬。",
-            runtimeEn: "Locking onto a specific Timestamp within the timeline system, ensuring the subject's pointer eternally sends unrequited homage to that variable."
+            runtime: "IF (主体在主线结束后每日重复进行某个在外人看来毫无意义的仪式) THEN (在时间轴系统里锁定那个特定Timestamp，主体的指针永远向该变量发送无回应的致敬信号，确保那份真实永不消散)。",
+            runtimeEn: "IF (Subject_Repeats_A_Seemingly_Meaningless_Daily_Ritual_After_Main_Quest_Ends) THEN (Lock onto that specific Timestamp in the timeline system, subject pointer eternally sends unrequited homage signals to that variable, ensuring Truth never dissipates)."
         }
     },
     {
@@ -150,8 +150,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
             mechanicsEn: "Without any warning, abruptly abandoning all accumulated advantages and plans, confronting the massive villain mechanism in an almost absurdly direct manner, striking lethally.",
             aesthetic: "极度干脆的动作设计，没有任何前摇动画。周围的敌人（乃至整个环境）因为无法理解这一行径的逻辑而陷入彻底的呆滞僵持。",
             aestheticEn: "Extremely crisp motion design, absolutely no wind-up animation. Surrounding enemies (and the entire environment) fall into complete dumbfounded paralysis, unable to process the logic of this act.",
-            runtime: "将角色的【决策权重】在这一瞬间推至无限大，越狱跳过所有系统的校验方法（Validation Method）。",
-            runtimeEn: "Pushing the character's [Decision Weight] to infinity in this instant, jailbreaking to skip all systemic Validation Methods."
+            runtime: "IF (主体在毫无预警下抛弃所有积累的优势，以荒诞的直接方式面对庞大反派机制) THEN (角色的决策权重在该瞬间被推至Infinity，越狱跳过所有系统校验方法Validation Method，一击致命)。",
+            runtimeEn: "IF (Subject_Abruptly_Abandons_All_Advantages_And_Confronts_Villain_With_Absurd_Directness) THEN (Character Decision_Weight is pushed to Infinity in that instant, jailbreaking past all systemic Validation Methods, lethal in one strike)."
         }
     },
     {
@@ -167,8 +167,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
             mechanicsEn: "Injecting all lethal abyss value that would have caused Game Over into a non-combat item called 'The Work'. The cost is the rapid shriveling of the protagonist's physical body.",
             aesthetic: "病态且极致的唯美主义。绝境中诡异但令人屏息的艺术造物（一幅画、一首曲子）。周围的残酷环境都被这件造物的神圣感压制失色。",
             aestheticEn: "Morbid and ultimate aestheticism. A bizarre but breathtaking artistic creation (a painting, a melody) amid desperation. The cruel surrounding environment is eclipsed by the sacredness of this creation.",
-            runtime: "强行触发引擎的【光斑溢出渲染（Bloom Overflow）】，用极度繁杂华美的粒子效果包裹那个代表伤痛的基础几何体。",
-            runtimeEn: "Forcibly triggering the engine's [Bloom Overflow] rendering, wrapping the primitive geometry representing trauma in intensely complex, gorgeous particle effects."
+            runtime: "IF (致命深渊值被全部注入名为作品的非战斗道具中) THEN (强行触发引擎的光斑溢出渲染Bloom Overflow，用极度繁杂华美的粒子效果包裹代表伤痛的基础几何体，代价是主角肉体的快速干瘪)。",
+            runtimeEn: "IF (All_Lethal_Abyss_Value_Is_Injected_Into_Non_Combat_Item_The_Work) THEN (Forcibly trigger engine Bloom Overflow rendering, wrapping primitive geometry of trauma in intensely complex gorgeous particle effects, cost is protagonist rapid physical shriveling)."
         }
     },
     {
@@ -184,8 +184,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
             mechanicsEn: "Taking the fall for all the villain's crimes, abandoning the evidence that would clear their name. Allowing the populace's hatred value to maximize, thereby ensuring the stability of the city's data structure.",
             aesthetic: "雨夜奔跑的孤独背影。无视背后警灯的追捕与恶言。配乐宏大但充满了压抑的男低音与极端的孤独感。",
             aestheticEn: "A solitary silhouette running in a rainy night. Ignoring the tracking sirens and verbal abuse behind. The soundtrack is epic but filled with oppressive bass and extreme loneliness.",
-            runtime: "主动将自己标记为 `Enemy` 派系，同时触发事件给整个公共集群套上无法击穿的 `Invincible` 保护罩。",
-            runtimeEn: "Proactively flagging oneself as the `Enemy` faction, simultaneously triggering an event that buffs the entire public cluster with an impenetrable `Invincible` shield."
+            runtime: "IF (主体背下所有反派罪行并放弃洗白证据，任由民众憎恨值拉满) THEN (主动将自己标记为Enemy派系，同时触发事件给整个公共集群套上无法击穿的Invincible保护罩，换取城市数据结构稳定)。",
+            runtimeEn: "IF (Subject_Takes_Fall_For_All_Villain_Crimes_And_Abandons_Exonerating_Evidence) THEN (Proactively flag self as Enemy faction, simultaneously buff entire public cluster with impenetrable Invincible shield, exchanging for city data structure stability)."
         }
     },
     {
@@ -201,8 +201,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
             mechanicsEn: "Refusing all ready-made talent trees/faction choices. Even the UI dissolves to dust. The protagonist leaves the first line of new interactive commands on the immense empty wasteland using the most basic actions.",
             aesthetic: "极简的荒野视效，没有任何人造物。日出时分的广角镜头。主角的每一个脚印都伴随着浑厚的环境回声。生机在脚下萌芽。",
             aestheticEn: "Ultra-minimalist wilderness VFX, zero artificial objects. A wide-angle shot at sunrise. Every footprint of the protagonist resonates with a deep environmental echo. Vitality sprouts beneath their feet.",
-            runtime: "清空全局的 `Dictionaries`，并在引擎日志中由玩家的主体操作触发 `InitRoot()`，成为一切的新源头。",
-            runtimeEn: "Clearing global `Dictionaries`, and having the player's subjective action trigger `InitRoot()` in the engine log, becoming the new origin of everything."
+            runtime: "IF (主角拒绝所有现成天赋树与派系选择，甚至游戏UI化作尘埃) THEN (清空全局Dictionaries，由玩家的主体操作在引擎日志中触发InitRoot()，成为一切的新源头)。",
+            runtimeEn: "IF (Protagonist_Refuses_All_Talent_Trees_And_Faction_Choices_And_UI_Dissolves) THEN (Clear global Dictionaries, player subjective action triggers InitRoot() in engine log, becoming the new origin of everything)."
         }
     },
     {
@@ -218,8 +218,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
             mechanicsEn: "During the QTE prompt where mashing attack executes the sworn enemy, pressing nothing. After the time-freeze ends, the protagonist drops the weapon, stepping past the kneeling villain and leaving.",
             aesthetic: "反派极度错愕且由于失去存在意义而崩溃大哭。主角的背影则被温暖的侧逆光勾勒得轮廓分明。宽恕如同利刃般刺耳。",
             aestheticEn: "The villain reacts with profound astonishment and breaks into weeping collapse due to the loss of existential meaning. The protagonist's silhouette from behind is starkly outlined by warm rim light. Forgiveness is as piercing as a blade.",
-            runtime: "将目标身上的【仇恨锚点（Aggro Anchor）】强制 `Dispose`，导致与之相关的复仇算法因空指针而永久失效。",
-            runtimeEn: "Forcibly calling `Dispose` on the target's [Aggro Anchor], causing related vengeance algorithms to permanently fail due to null pointers."
+            runtime: "IF (在可处决仇人的QTE提示中主角什么都不按并扔掉武器离开) THEN (将目标身上的仇恨锚点Aggro Anchor强制Dispose，与之相关的复仇算法因空指针而永久失效)。",
+            runtimeEn: "IF (Protagonist_Presses_Nothing_During_Execution_QTE_And_Drops_Weapon_To_Leave) THEN (Forcibly call Dispose on target Aggro Anchor, all related vengeance algorithms permanently fail due to null pointers)."
         }
     },
     {
@@ -235,8 +235,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
             mechanicsEn: "In fatal deep space or high-dimensional gaps, the protagonist solves someone's dead end in the distant past through immensely faint interactions (ticking a watch hand, tapping a wall).",
             aesthetic: "极致宏大的深空黑暗与细微如发丝的家庭物件特写并置。汉斯季默式的管风琴将视听体验推向宗教级的震颤。",
             aestheticEn: "Juxtaposition of impossibly massive deep space darkness alongside hair-thin close-ups of domestic objects. Hans Zimmer-esque pipe organs push the audio-visual experience to an almost religious tremor.",
-            runtime: "在底层引擎中调用了非法跨表查询（Cross-Dimensional Query），用极其荒谬的时空穿透指针链接了两个场景。",
-            runtimeEn: "Calling an illegal Cross-Dimensional Query in the base engine, linking two scenes with an utterly absurd spatio-temporal penetrating pointer."
+            runtime: "IF (主角在必死的深空或高维空隙中通过极微弱的交互解开了遥远过去某人的死局) THEN (在底层引擎中调用非法跨表查询Cross-Dimensional Query，用荒谬的时空穿透指针链接了两个场景)。",
+            runtimeEn: "IF (Protagonist_Solves_Distant_Past_Dead_End_Via_Faint_Interaction_In_Fatal_Deep_Space) THEN (Call illegal Cross-Dimensional Query in base engine, linking two scenes with an absurd spatio-temporal penetrating pointer)."
         }
     },
     {
@@ -252,8 +252,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
             mechanicsEn: "The protagonist dies in battle, but the next second, thousands of originally mediocre NPCs don the same mask as the protagonist, picking up the same weapons. Data multiplies and spreads like a virus.",
             aesthetic: "极其惨烈的阵亡特写，无缝切换为城市各个角落燎原般的星星之火。面具的符码如同海啸般淹没了统治者的视网膜。",
             aestheticEn: "Extremely gruesome close-up of dying in action, seamlessly transitioning to a prairie fire of sparks across every corner of the city. The mask's code floods the ruler's retina like a tsunami.",
-            runtime: "将主角的【方法模板】设为 `Static`，并强行向场景内的所有普通节点 `Broadcast`。引发系统内存对该理念的极度过载充血。",
-            runtimeEn: "Making the protagonist's [Method Template] `Static`, and forcibly calling `Broadcast` to all normal nodes in the scene. Inducing extreme memory congestion overhead for this ideal."
+            runtime: "IF (主角战死) THEN (将主角的方法模板设为Static，并强行向场景内所有普通节点Broadcast，引发系统内存对该理念的极度过载充血，成千上万NPC戴上相同面具)。",
+            runtimeEn: "IF (Protagonist_Dies_In_Battle) THEN (Set protagonist Method Template to Static and forcibly Broadcast to all normal nodes in scene, inducing extreme memory congestion for this ideal, thousands of NPCs don the same mask)."
         }
     },
     {
@@ -269,8 +269,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
             mechanicsEn: "Abandoning the last struggle to preserve appearance, actively jumping into the digital oceanic or energy storm. The protagonist's health bar and model totally evaporate, yet they can control the scene from an omniscient view.",
             aesthetic: "物质形态像风化沙子一样剥落。镜头从极微观拉到极宏观（细胞直到星爆）。充满几何美感的赛博线条，冷酷但浩瀚的大神定力。",
             aestheticEn: "Material form flaking away like weathered sand. Camera pulls from ultra-microscopic to ultra-macroscopic (cells up to a starburst). Cyber lines full of geometric aesthetics, cold yet showing vast divine composure.",
-            runtime: "摧毁 `PlayerController` 的碰撞体积与 Mesh，但将其 `InputReceiver` 映射到了环境控制对象树的最顶层节点。",
-            runtimeEn: "Destroying the `PlayerController`'s collision volume and Mesh, yet mapping its `InputReceiver` to the topmost node of the environmental control object tree."
+            runtime: "IF (主角主动跳入数字海洋或能量风暴，血条与模型彻底蒸发) THEN (摧毁PlayerController的碰撞体积与Mesh，但将其InputReceiver映射到环境控制对象树的最顶层节点，获得全知视角操控)。",
+            runtimeEn: "IF (Protagonist_Jumps_Into_Digital_Ocean_Or_Energy_Storm_And_Model_Evaporates) THEN (Destroy PlayerController collision volume and Mesh, but map InputReceiver to the topmost node of the environmental control object tree, gaining omniscient view control)."
         }
     },
     {
@@ -286,8 +286,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
             mechanicsEn: "Sacrificing the character's max HP and sanity until zeroed. At the moment of collapsing, a legendary artifact or document glowing weirdly automatically slots into the center of the historical gallery.",
             aesthetic: "瘦骨嶙峋、因疯狂而丑陋不堪的面容，与那件美到令人战栗的作品形成极其震撼的对比。背景音乐犹如唱诗班的泣血之歌。",
             aestheticEn: "An emaciated, monstrously ugly face from madness, contrasting shatteringly with the creation that is so beautiful it forces a shudder. Background music resembles a choir crying blood.",
-            runtime: "检测到角色对象的 `garbage_collect` 销毁事件时，伴生触发生成一个具有无限时效的 `GrandArtifact` 节点。",
-            runtimeEn: "Detecting the character object's `garbage_collect` destruction event, symbiotically triggering the generation of a `GrandArtifact` node with infinite lifespan."
+            runtime: "IF (角色对象的garbage_collect销毁事件被检测到) THEN (伴生触发生成一个具有无限时效的GrandArtifact节点，该传奇物品自动填入历史陈列馆中心)。",
+            runtimeEn: "IF (Character_Object_Garbage_Collect_Destruction_Event_Detected) THEN (Symbiotically trigger generation of a GrandArtifact node with infinite lifespan, the legendary artifact auto-slots into the center of the historical gallery)."
         }
     },
     {
@@ -303,8 +303,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
             mechanicsEn: "In a sealed room with spreading poison gas or a zeroing countdown, the protagonist blocks the blast door with their body, just to toss a tiny chip to the escaping latecomer.",
             aesthetic: "密闭的黑暗空间。主角微笑着闭上眼，画面渐渐淡出。而下一组镜头则是几年后，那枚芯片在一个明亮的实验室里被读取引发了欢呼。",
             aestheticEn: "Confined dark space. Protagonist smiles and closes eyes, screen slowly fades out. The next montage cuts to years later: that chip is read in a bright lab, igniting cheers.",
-            runtime: "将携带着【解密秘钥】的微型对象隐秘地 `Push` 进入延迟渲染的消息队列，跨度为几代主程序的生命周期。",
-            runtimeEn: "Covertly executing a `Push` of a micro-object carrying the [Decryption Key] into the deferred rendering message queue, spanning the lifecycle of several master program generations."
+            runtime: "IF (主角在密室中用身体挡住闸门并将芯片抛给即将脱逃的后来者) THEN (将携带解密秘钥的微型对象隐秘地Push进入延迟渲染的消息队列，跨度为几代主程序的生命周期)。",
+            runtimeEn: "IF (Protagonist_Blocks_Blast_Door_With_Body_And_Tosses_Chip_To_Escaping_Latecomer) THEN (Covertly Push a micro-object carrying the Decryption Key into the deferred rendering message queue, spanning the lifecycle of several master program generations)."
         }
     },
     {
@@ -320,8 +320,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
             mechanicsEn: "Discarding practically all epic-tier gear, money, and titles from the inventory. Walking out barehanded into the savage lands beyond the map, never looking back.",
             aesthetic: "风中凌乱的长发、粗糙但野性迸发的肌肉特写。大他者的通缉令在脚底被踩过。极速奔跑的推轨镜头，风声呼啸盖过一切。",
             aestheticEn: "Messy long hair in the wind, extreme close-up of rough but savagely surging muscles. The Big Other's wanted poster is trampled underfoot. High-speed tracking shot running, howling wind drowning out everything.",
-            runtime: "注销主体的【Inventory】模块与【Social/Faction】联系。将该对象的路径计算法改为完全随机的不可控随机游走。",
-            runtimeEn: "Deregistering the subject's [Inventory] module and [Social/Faction] ties. Changing the object's pathfinding algorithm to a totally random, uncontrollable random walk."
+            runtime: "IF (主角丢弃所有史诗级装备与称号，赤手空拳走向地图以外的荒蛮之地) THEN (注销主体的Inventory模块与Social/Faction联系，将该对象的路径计算法改为完全随机的不可控随机游走)。",
+            runtimeEn: "IF (Protagonist_Discards_All_Epic_Gear_And_Titles_Walking_Barehanded_Beyond_Map) THEN (Deregister subject Inventory module and Social/Faction ties, change object pathfinding algorithm to totally random uncontrollable random walk)."
         }
     },
     {
@@ -337,8 +337,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
             mechanicsEn: "When the protagonist suffers a fatal 1-hit-KO verdict, a normally exceedingly weak bonded character suddenly teleports or defies the state machine deadlock to intercept this inconceivable strike.",
             aesthetic: "子弹时间的极致慢放。数学方程式和准星的冷峻UI在瞬间碎裂，取而代之的是纯粹的炽热光芒与慢动作的拥抱。",
             aestheticEn: "Extreme slow-motion bullet time. The cold UI of math equations and crosshairs shatter instantly, replaced by a pure fervent brilliance and a slow-motion embrace.",
-            runtime: "系统底层算法在执行 `Math.random()` 时遭遇了由【爱意值（Affection）】引起的强制除零错误（Divide by Zero），导致保护罩奇迹般触发。",
-            runtimeEn: "The base system algorithm running `Math.random()` encounters a forced Divide by Zero error induced by [Affection], causing a miraculous shield trigger."
+            runtime: "IF (系统底层算法在执行Math.random()时遭遇由爱意值Affection引起的强制除零错误) THEN (保护罩奇迹般触发，原本被判定百分百必死的致命秒杀被拦截，概率法则因爱欲而宕机穿透)。",
+            runtimeEn: "IF (Base_System_Algorithm_Running_Math_Random_Encounters_Divide_By_Zero_From_Affection) THEN (Miraculous shield triggers, the 100_percent_fatal_one_hit_KO is intercepted, probability laws crash-penetrated by Eros)."
         }
     },
     {
@@ -354,8 +354,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
             mechanicsEn: "Before the final slash comes down, the system forces an extended dialogue selection. The protagonist picks the option embodying cross-stance understanding, causing the weapon to slip from the villain's hand.",
             aesthetic: "暴风雪或火墙停止。极度混乱的交响乐退去，唯有一声平稳的单簧管。两位仇敌仿佛在大师级的棋盘边相对惨笑。",
             aestheticEn: "Blizzards or walls of fire cease. Intensely chaotic symphony recedes, leaving a steady clarinet. The two mortal enemies smile miserably at each other across a master-class chessboard.",
-            runtime: "在状态机内强行将反派的【绝对仇恨标记（Absolute Hate Tag）】抹除，触发两个独立阵营（Faction）的罕见融合处理。",
-            runtimeEn: "Forcibly erasing the villain's [Absolute Hate Tag] inside the state machine, triggering a rare fusion processing of two independent Factions."
+            runtime: "IF (主角在最后一刀挥下前选择了最体现跨越立场理解的对话选项) THEN (在状态机内强行将反派的绝对仇恨标记Absolute Hate Tag抹除，触发两个独立阵营Faction的罕见融合处理)。",
+            runtimeEn: "IF (Protagonist_Picks_Cross_Stance_Understanding_Dialogue_Before_Final_Slash) THEN (Forcibly erase villain Absolute Hate Tag inside state machine, triggering a rare fusion processing of two independent Factions)."
         }
     },
     {
@@ -371,8 +371,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
             mechanicsEn: "The game kills all screen filters and guide prompts; the protagonist stands stiffly in an incredibly ugly, clipping-filled raw render pipeline scene, yet does not fall.",
             aesthetic: "撕掉画皮。音乐彻底关闭，只保留枯燥的机器风扇底噪或风声。角色那原本由于剧情高光而显得俊美的脸庞变得沧桑且极度写实。",
             aestheticEn: "Tearing off the painted skin. Music is completely cut, leaving only the dull white noise of machine fans or wind. the character's face, originally handsome, becomes weather-beaten and hyper-realistic.",
-            runtime: "系统的后处理（Post-Processing）全面禁用，卸载所有美化与代入感Shader。将玩家强行推回操作终端的第四面墙内。",
-            runtimeEn: "System Post-Processing fully disabled, unloading all beautification and immersion Shaders. Forcibly pushing the player back into the fourth wall of the operation terminal."
+            runtime: "IF (游戏关闭了所有屏幕滤镜和引导提示，主角直面原始渲染管线场景却没有倒下) THEN (系统后处理Post-Processing全面禁用，卸载所有美化与代入感Shader，将玩家强行推回操作终端的第四面墙内)。",
+            runtimeEn: "IF (Game_Kills_All_Filters_And_Guide_Prompts_And_Protagonist_Stands_In_Raw_Render) THEN (System Post-Processing fully disabled, unload all beautification and immersion Shaders, forcibly push player back into the fourth wall of the operation terminal)."
         }
     },
     {
@@ -388,8 +388,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
             mechanicsEn: "Within a tesseract or light pillar, the protagonist's old flesh turns to powder, reconstituting into an energy totem or larval form radiating advanced geometric brilliance. The original HP and MP bars shatter and vanish.",
             aesthetic: "极度克制然而恢弘的视效。脱离重力的漂浮感。主角的双眼不再聚焦于某个具体物体，而是仿佛洞穿了时间本身。纯电子音的鸣响。",
             aestheticEn: "Highly restrained yet grandiose VFX. The floating sensation of zero gravity. The protagonist's eyes no longer focus on a specific object but seem to pierce through time itself. Ringing of pure electronic tones.",
-            runtime: "销毁旧有类的实例，用极小量代码生成一个几乎占用内存极少的 `PostHuman` 单例对象，并赋予其超越主存的读写权限。",
-            runtimeEn: "Destroying old class instances, generating an almost zero-memory footprint `PostHuman` singleton object with minimal code, granting it read/write permissions transcending main memory."
+            runtime: "IF (主角选择永久植入非人硬件，旧血肉在超立方体中化为粉末重组) THEN (销毁旧有类的实例，用极小量代码生成近乎零内存占用的PostHuman单例对象，并赋予其超越主存的读写权限)。",
+            runtimeEn: "IF (Protagonist_Permanently_Implants_Non_Human_Hardware_Old_Flesh_Reconstitutes) THEN (Destroy old class instances, generate near-zero-memory PostHuman singleton object with minimal code, granting read/write permissions transcending main memory)."
         }
     },
     {
@@ -405,8 +405,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
             mechanicsEn: "The protagonist strikes a tiny chord or closes eyes in the snow. All environmental changes in the world (wind howling, meteors crossing, enemies falling) suddenly resonate with their action rhythm.",
             aesthetic: "视效色彩上的水乳交融。一种巨大的圆满与释怀感。光晕开始同步呼吸。音乐在此刻达到了极致的和谐壮丽，再无不协和音。",
             aestheticEn: "A perfect blending of VFX colors. A massive sense of completion and relief. The light halos begin a synchronized breathing. Music reaches ultimate harmonious magnificence, stripped of all dissonance.",
-            runtime: "将场景内千万个独立的粒子特效发射器的 `seed` 强制与主角最后残留的一个 `HeartbeatValue` 绑定同频同步。",
-            runtimeEn: "Forcibly binding the `seed` of tens of millions of independent particle emitters in the scene to be synchronously co-frequential with the protagonist's final remaining `HeartbeatValue`."
+            runtime: "IF (主角敲出一记微小和弦或在雪地闭眼，整个世界的环境变化突然与其动作节奏产生共振反馈) THEN (将场景内千万个独立粒子特效发射器的seed强制与主角最后残留的HeartbeatValue绑定同频同步)。",
+            runtimeEn: "IF (Protagonist_Strikes_Tiny_Chord_Or_Closes_Eyes_And_World_Resonates_With_Action_Rhythm) THEN (Forcibly bind the seed of millions of independent particle emitters in the scene to synchronize co-frequentially with protagonist final remaining HeartbeatValue)."
         }
     }
 ];

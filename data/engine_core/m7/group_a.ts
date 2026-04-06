@@ -14,8 +14,8 @@ export const OUTCOMES_GROUP_A: LibraryItemDef[] = [
             mechanicsEn: "Resets all previous narrative gains; the subject is forced to begin the next cycle with broken (or wiped) memories.",
             aesthetic: "相同场景但带有微不可察的腐烂感。镜子里的钟慢了一秒。镜头无情地拉远。",
             aestheticEn: "The identical scene but with an imperceptible sense of decay. The clock in the mirror is one second slower. A ruthless wide-angle pull out.",
-            runtime: "如果前置模块积累了极高的【反叛值】，则循环的悲剧性与讽刺感达到峰值。",
-            runtimeEn: "If previous modules accumulated high [Rebellion Value], the tragedy and irony of the loop reach maximum saturation."
+            runtime: "IF (主体以为自己终于打碎了牢笼并站在了全新的地平线上) THEN (镜头缓慢拉远，揭示这条地平线与故事开场第一帧完全重合，主体的脚印踩在自己最初的足迹上)。",
+            runtimeEn: "IF (Subject_Believes_The_Cage_Is_Finally_Shattered) THEN (Camera slowly pulls back, revealing this horizon is pixel-identical to the opening frame; the subject's footprints overlap their own original tracks)."
         }
     },
     {
@@ -31,8 +31,8 @@ export const OUTCOMES_GROUP_A: LibraryItemDef[] = [
             mechanicsEn: "When the subject uncovers the final answer, it is revealed to be incredibly mundane, even ugly and useless garbage.",
             aesthetic: "极度宏大的史诗配乐突然被拔断电源。主角盯着手中的物品，眼神从狂热变为彻底的痴呆。光差极大。",
             aestheticEn: "Epic grand soundtrack suddenly unplugged. The protagonist stares at the item in hand, eyes shifting from fanaticism to absolute idiocy. Extreme high-contrast lighting.",
-            runtime: "前置付出的【代价（M6）】越血腥，最终获得物越平庸，此落点的效能越高。",
-            runtimeEn: "The bloodier the [Cost (M6)] paid prior, the more banal the final acquisition, the higher the efficacy of this resolution."
+            runtime: "IF (主体在付出了断臂割肉级的M6代价后终于撬开了圣杯) THEN (圣杯内装着的是一只干瘪的塑料袋或一张过期优惠券，主体的面部表情从狂喜硬切为石化)。",
+            runtimeEn: "IF (Subject_Pries_Open_The_Grail_After_Limb_Severing_M6_Cost) THEN (The Grail contains a deflated plastic bag or an expired coupon; the subject's expression hard-cuts from ecstasy to petrification)."
         }
     },
     {
@@ -48,8 +48,8 @@ export const OUTCOMES_GROUP_A: LibraryItemDef[] = [
             mechanicsEn: "At the momentous instant of a life-and-death action or descending revelation (e.g., about to shoot, about to kiss), the visual output is directly severed.",
             aesthetic: "突如其来的黑屏或静帧，伴随着最后一个音符的硬性截断（没有混响和淡出）。",
             aestheticEn: "A sudden black screen or freeze-frame, accompanied by a hard cut of the last note (no reverb or fade-out).",
-            runtime: "主要用于悬疑或心理惊悚线，将观众自身的强迫症卷入空洞之中。",
-            runtimeEn: "Primarily used in suspense or psychological thriller lines, dragging the audience's own obsessive-compulsive disorder into the void."
+            runtime: "IF (叙事即将揭晓那个所有人屏息等待的终极答案) THEN (系统在答案出口的前一个音节执行硬性截断，画面永久冻结在嘴唇张开的瞬间，不给任何后续)。",
+            runtimeEn: "IF (Narrative_About_To_Reveal_The_Ultimate_Answer) THEN (System executes hard truncation one syllable before the answer exits; the frame permanently freezes on parted lips, no continuation granted)."
         }
     },
     {
@@ -65,8 +65,8 @@ export const OUTCOMES_GROUP_A: LibraryItemDef[] = [
             mechanicsEn: "All relevant NPCs lose memories of the protagonist; all diaries, files, or traces left by the protagonist are replaced or vanish into thin air.",
             aesthetic: "熙熙攘攘的街头，曾经深爱的人与主角擦肩而过但毫无反应。冷色调，充满白噪音。",
             aestheticEn: "A bustling street where a once beloved person brushes past the protagonist without reaction. Cold tones, filled with white noise.",
-            runtime: "当主角的【执念】是寻找“存在感”或“被爱”时，此结局提供最大反差伤害。",
-            runtimeEn: "When the protagonist's [Obsession] is seeking 'sense of existence' or 'being loved', this ending deals maximum contrasting damage."
+            runtime: "IF (主体冲到曾为之赴死的爱人面前声嘶力竭地喊出名字) THEN (爱人的瞳孔没有任何聚焦，像扫过一根路灯柱一样扫过主体的脸，继续和身边的陌生人说笑)。",
+            runtimeEn: "IF (Subject_Screams_The_Lovers_Name_To_Their_Face) THEN (Lover's pupils show zero focus, scanning past the subject's face like a lamppost, continuing to chat with a stranger beside them)."
         }
     },
     {
@@ -82,8 +82,8 @@ export const OUTCOMES_GROUP_A: LibraryItemDef[] = [
             mechanicsEn: "Revealing the villain's plot was merely for an utterly absurd selfish desire, or the protagonist thought they were saving the world but was actually just delivering takeout.",
             aesthetic: "在一片血泊中，角色读到一封不起眼的信件，随后发出介于哭泣和疯狂大笑之间的杂音。",
             aestheticEn: "Amidst a pool of blood, the character reads an inconspicuous letter, then emits a noise oscillating between crying and maniacal laughter.",
-            runtime: "强制引爆玩家/观众的【认知失调】，必须在悲剧最沉重时插入此节点功能。",
-            runtimeEn: "Forcibly detonates the [Cognitive Dissonance] of the player/audience; this node function must be inserted when the tragedy is at its heaviest."
+            runtime: "IF (主体在尸横遍野的战场上终于找到了那份改变一切的密函) THEN (密函内容显示整场战争的起因是两个官员打赌谁能先凑够高尔夫球杆，主体发出介于大笑与呕吐之间的噪音)。",
+            runtimeEn: "IF (Subject_Finds_The_War_Changing_Document_On_Corpse_Strewn_Battlefield) THEN (Document reveals the war started as a bet between two officials over golf clubs; subject emits a noise oscillating between laughter and vomiting)."
         }
     },
     {
@@ -99,8 +99,8 @@ export const OUTCOMES_GROUP_A: LibraryItemDef[] = [
             mechanicsEn: "The character walks into the mist, an alley, or behind a door, and their perspective is never cut back to; the story shifts to describing the emptiness of the scene.",
             aesthetic: "极度缓慢且无聊的固定机位空镜头。环境音响被放大（风声、水滴声），凸显人影散去后的建筑几何。",
             aestheticEn: "Extremely slow and boring fixed-camera empty shot. Environmental sounds are amplified (wind, dripping water) to highlight architectural geometry after the human figure dissipates.",
-            runtime: "适用于解决【无解困境】，因为解不开，所以那个试图解题的人像水汽一样蒸发了。",
-            runtimeEn: "Suitable for resolving an [Unsolvable Dilemma]; because it cannot be solved, the person attempting to solve it evaporates like water vapor."
+            runtime: "IF (主体在某个长镜头中转过街角或走入晨雾) THEN (镜头不追随，持续拍摄空荡的街角三十秒以上，主体再也没有回来，叙事也不再提及此人)。",
+            runtimeEn: "IF (Subject_Turns_A_Corner_Or_Walks_Into_Morning_Fog) THEN (Camera does not follow; it holds the empty corner for 30 plus seconds; the subject never returns and the narrative never mentions them again)."
         }
     },
     {
@@ -116,8 +116,8 @@ export const OUTCOMES_GROUP_A: LibraryItemDef[] = [
             mechanicsEn: "Shows the protagonist discovering their previous 'struggles' and 'choices' have strict predetermined scripts, or they crash into the 'boundary wall' of the physical world.",
             aesthetic: "楚门的世界。原本拟真的环境材质发生轻微的像素撕裂或穿模。主角的眼神变得空洞如人偶。",
             aestheticEn: "The Truman Show. Pervasive realistic environmental textures exhibit slight pixel tearing or clipping. The protagonist's eyes become hollow like a puppet.",
-            runtime: "颠覆此前的【真实感】，将之前的热血与挣扎转化为彻头彻尾的喜剧绝望。",
-            runtimeEn: "Subverts all previous [Sense of Reality], converting the former passion and struggle into unadulterated comedic despair."
+            runtime: "IF (主体回忆起之前所有慷慨激昂的抉择) THEN (每一次抉择的画面都被叠加上预设脚本已批准的水印戳，主体的瞳孔从震怒塌陷为人偶般的空洞)。",
+            runtimeEn: "IF (Subject_Recalls_All_Previous_Heroic_Decisions) THEN (Each decision's visual is overlaid with a Pre_Approved_Script watermark; the subject's pupils collapse from rage into puppet-like hollowness)."
         }
     },
     {
@@ -133,8 +133,8 @@ export const OUTCOMES_GROUP_A: LibraryItemDef[] = [
             mechanicsEn: "When the subject is about to touch the ultimate answer or attain salvation in the dream, the cruel alarm clock of reality roughly yanks them back.",
             aesthetic: "冷冽的清晨日光刺破眼睑。肮脏的床铺、头痛以及必须去挤地铁的嗡嗡声。色彩亮度极速下降。",
             aestheticEn: "Cold morning sunlight pierces the eyelids. A filthy bed, a headache, and the buzzing sound of having to squeeze into the subway. Extreme drop in color luminance.",
-            runtime: "如果梦中的经历足够伟大，那么【醒来后】的环境必须设计得极尽可能地压抑狭小。",
-            runtimeEn: "If the experience in the dream was grand enough, the [post-waking] environment must be designed to be as oppressive and cramped as physically possible."
+            runtime: "IF (主体在梦中即将触及那个能拯救一切的终极钥匙) THEN (闹钟蜂鸣将其粗暴拉回充满馊味外卖盒的出租屋，梦中的史诗配乐被替换为楼上邻居的拖鞋声)。",
+            runtimeEn: "IF (Subject_About_To_Touch_The_Ultimate_Key_In_Dream) THEN (Alarm buzzer brutally yanks them back to a rental flat reeking of stale takeout; the dream's epic score is replaced by upstairs neighbor's slipper shuffling)."
         }
     },
     {
@@ -150,8 +150,8 @@ export const OUTCOMES_GROUP_A: LibraryItemDef[] = [
             mechanicsEn: "The protagonist successfully triggers a reset, world peace is restored, but no one except the protagonist (or not even themselves) knows what had happened.",
             aesthetic: "阳光明媚的日子里，那些曾经死去的亲友在有说有笑，而主角隔着一条马路看着他们，形同陌路。",
             aestheticEn: "On a brilliant sunny day, friends and family who had died are chatting and laughing, while the protagonist watches them across a street, like a total stranger.",
-            runtime: "要求极高的【时间线管理】，此落点结算后，先前所有的好感度或资源数值全部溢出失效。",
-            runtimeEn: "Requires extremely high [Timeline Management]. After this resolution settles, all previous affection or resource numbers overflow and become invalid."
+            runtime: "IF (主体成功触发了时间重置使世界恢复和平) THEN (曾死去的爱人在阳光下有说有笑，但主体隔着马路看过去，爱人的眼里没有任何认识他的痕迹)。",
+            runtimeEn: "IF (Subject_Triggers_Time_Reset_Restoring_World_Peace) THEN (The lover who died is laughing in sunlight, but the lover's eyes hold zero trace of recognition when the subject looks across the street)."
         }
     },
     {
@@ -167,8 +167,8 @@ export const OUTCOMES_GROUP_A: LibraryItemDef[] = [
             mechanicsEn: "After unleashing every trump card, even sacrificing key persons, the villain or the system merely lightly brushes the dust off their clothes.",
             aesthetic: "远景。主角犹如蚍蜉般瘫软在地，巨大的阴影将其完全笼罩。静音，没有音乐渲染无力感，只有风声。",
             aestheticEn: "Wide shot. The protagonist sits paralyzed on the ground like a mayfly, completely engulfed by a massive shadow. Muted, no music to dramatize the powerlessness, only the sound of wind.",
-            runtime: "判定条件为：主体的【输出数值】虽然极高，但击打在【大他者护甲】（无穷大）上的反馈判定为0。",
-            runtimeEn: "Resolution logic: Although the subject's [Damage Output] is extremely high, the feedback from hitting the [Armor of the Big Other] (infinity) resolves to 0."
+            runtime: "IF (主体燃尽最后一滴血甚至献祭了最珍贵的人来发动终极一击) THEN (大他者只是轻轻掸了掸衣袖上的灰，连抬眼看一下的兴趣都没有)。",
+            runtimeEn: "IF (Subject_Burns_Last_Drop_of_Blood_And_Sacrifices_Most_Precious_Person) THEN (The Big Other merely flicks dust off its sleeve, not even bothering to glance up)."
         }
     },
     {
@@ -184,8 +184,8 @@ export const OUTCOMES_GROUP_A: LibraryItemDef[] = [
             mechanicsEn: "After a decisive trial or battle victory, revealing the true face of the spoils (e.g., a chest holding a lover's head, or the signed contract is an indenture).",
             aesthetic: "彩带与欢呼声作为极其讽刺的背景音效。主角的手在颤抖，瞳孔急剧缩小。",
             aestheticEn: "Confetti and cheering serve as extremely ironic background sound effects. The protagonist's hands tremble, pupils shrinking sharply.",
-            runtime: "必须利用游戏或叙事在前期的【机制误导】，让玩家/主角自以为是在做正确的事。",
-            runtimeEn: "Must perfectly utilize early [Mechanical Misdirection] in the game/narrative, making the player/protagonist falsely believe they are doing the right thing."
+            runtime: "IF (主体在欢呼声中撬开了最终战利品的封印) THEN (封印内装的是爱人的头颅或一份宣告他自己是奴隶的卖身契，周围的欢呼声变成主体耳中的白噪音)。",
+            runtimeEn: "IF (Subject_Opens_Final_Trophy_Seal_Amid_Cheers) THEN (The seal contains the lover's severed head or an indenture declaring the subject a slave; surrounding cheers devolve into white noise in the subject's ears)."
         }
     },
     {
@@ -201,8 +201,8 @@ export const OUTCOMES_GROUP_A: LibraryItemDef[] = [
             mechanicsEn: "Away from the main storyline battlefield, dying silently due to an extremely accidental, non-heroic mishap (e.g., stray bullet, infection, misstep).",
             aesthetic: "冷漠的固定机位，如同街头监控摄像头。尸体慢慢变得冰冷，苍蝇开始聚集。几条野狗跑过。",
             aestheticEn: "Apathy of a fixed camera, like a street surveillance camera. The corpse slowly grows cold, flies begin to gather. A few stray dogs trot past.",
-            runtime: "如果主角一直渴求【荣耀】或【被铭记】，这种死亡将彻底碾碎此一幻觉。",
-            runtimeEn: "If the protagonist constantly craved [Glory] or [Being Remembered], this death absolutely crushes that illusion."
+            runtime: "IF (主体脱离主线战场因流弹或感染在无人的排水沟中默默咽气) THEN (没有任何角色为此停下脚步，苍蝇在四十秒内到达，三天后尸体旁长出了杂草)。",
+            runtimeEn: "IF (Subject_Dies_Silently_In_A_Deserted_Gutter_From_Stray_Bullet_Or_Infection) THEN (No character pauses for this; flies arrive within forty seconds; weeds grow beside the corpse in three days)."
         }
     },
     {
@@ -218,8 +218,8 @@ export const OUTCOMES_GROUP_A: LibraryItemDef[] = [
             mechanicsEn: "Mouth opens, but only the gurgling of blood bubbles comes from the throat, or discovering the listener is totally deaf, or pen and paper suddenly reduce to ash.",
             aesthetic: "面部特写，极端的肌肉抽搐与痛苦。周遭的世界在喧哗，唯独真理陷入死寂的核心。",
             aestheticEn: "Extreme facial close-up, extreme muscle spasms and agony. The surrounding world clamors, while truth alone falls into a core of dead silence.",
-            runtime: "用于处理那些【过于危险的情报】，系统通过物理摧毁发声器官来完成防火墙拦截。",
-            runtimeEn: "Used to handle [Overly Dangerous Intel]; the system acts as a firewall by physically destroying the vocal organs."
+            runtime: "IF (主体终于得知了能颠覆一切的真相并张嘴准备说出) THEN (喉咙里涌出的只有血沫的咕噜声，或者对面的听者恰好全聋，或者纸笔在指尖自燃为灰)。",
+            runtimeEn: "IF (Subject_Learns_The_World_Overturning_Truth_And_Opens_Mouth) THEN (Only blood-foam gurgling pours from the throat, or the listener turns out totally deaf, or pen and paper spontaneously combust to ash in their fingers)."
         }
     },
     {
@@ -235,8 +235,8 @@ export const OUTCOMES_GROUP_A: LibraryItemDef[] = [
             mechanicsEn: "After the protagonist hands over the quest item, the camera follows the item into the depths of a massive warehouse filled with millions of identical crates.",
             aesthetic: "极度规整、向地平线无限延伸的工业几何。咔哒落锁的干涩声音。强烈的压迫和冷漠感。",
             aestheticEn: "Extremely ordered industrial geometry stretching infinitely toward the horizon. The dry click of a padlock. Intense sense of oppression and apathy.",
-            runtime: "无论物品的【神圣值】多高，一旦被贴上封条编号，其引擎属性瞬间刷新为0。",
-            runtimeEn: "No matter how high the item's [Sacred Value], once stickered with an archive code, its engine attributes instantly refresh to 0."
+            runtime: "IF (主体用鲜血和年华换来的神器被交接给上级机构) THEN (神器被贴上一个六位数编号塞进拥有五百万个同款木箱的仓库深处，锁芯咔哒一声，再无人过问)。",
+            runtimeEn: "IF (Subject_Hands_Over_Artifact_Won_With_Blood_And_Years_To_Authority) THEN (Artifact is given a six-digit serial number and shoved into a warehouse holding five million identical crates; the lock clicks once and no one ever inquires again)."
         }
     },
     {
@@ -252,8 +252,8 @@ export const OUTCOMES_GROUP_A: LibraryItemDef[] = [
             mechanicsEn: "The protagonist sits on a bench, in a cell, or on an isolated island, looking into the distance once every day. Day after day, growing old.",
             aesthetic: "黄昏时分的固定构图。一年四季在这个构图里快速交替，只有主角佝偻的背影一动不动。",
             aestheticEn: "A fixed composition at dusk. The four seasons alternate rapidly within this frame; only the hunched silhouette of the protagonist remains motionless.",
-            runtime: "适用于主角拒绝接受【丧失（Loss）】的判定，系统便将惩罚转化为无限期的【延迟（Delay）】。",
-            runtimeEn: "Applies when the protagonist refuses to accept the verdict of [Loss]; the system converts the punishment into indefinite [Delay]."
+            runtime: "IF (主体拒绝接受丧失的判定而选择在原地等待那个永远不会来的人) THEN (四季在固定机位中快速交替，主体的头发从黑变白，但注视远方的姿势纹丝不动)。",
+            runtimeEn: "IF (Subject_Refuses_Loss_And_Waits_For_The_One_Who_Will_Never_Come) THEN (Seasons alternate rapidly in a fixed frame; the subject's hair shifts from black to white, but the posture gazing into the distance does not move a millimeter)."
         }
     },
     {
@@ -269,8 +269,8 @@ export const OUTCOMES_GROUP_A: LibraryItemDef[] = [
             mechanicsEn: "The protagonist returns to their early peaceful living space, showing a shadowless, stranger-like standard smile to friends and former lovers.",
             aesthetic: "阳光过度明媚，甚至有些刺眼。主角的笑容过分灿烂以至于显得惊悚。背景音乐是轻快的广告曲。",
             aestheticEn: "Sunlight is overly bright, even glaring. The protagonist's smile is so radiant it feels creepy. The background music is a jaunty advertising jingle.",
-            runtime: "主体的【认知面板】被强制清空，系统底层通过覆盖假数据来维持其苟活状态。",
-            runtimeEn: "The subject's [Cognitive Panel] is forcibly wiped; the engine backend overwrites with fake data to maintain their mere survival."
+            runtime: "IF (系统判定主体的痛苦已超过神经承载极限) THEN (强行切除所有关于苦难与反抗的记忆，主体醒来后对着曾经的战友露出毫无阴影的塑料微笑，背景响起轻快的广告曲)。",
+            runtimeEn: "IF (System_Determines_Pain_Exceeds_Neural_Bearing_Limit) THEN (Forcibly excises all memories of suffering and rebellion; the subject wakes and flashes a shadowless plastic smile at former comrades while a jaunty ad jingle plays)."
         }
     },
     {
@@ -286,8 +286,8 @@ export const OUTCOMES_GROUP_A: LibraryItemDef[] = [
             mechanicsEn: "Abandoning signature weapons or clothing, wearing the same drab professional attire as everyone around them, walking into a homogenized sea of people.",
             aesthetic: "远俯视镜头。人潮汹涌的十字路口，主角混入人群，随着红绿灯的切换移动，直到再也无法从画面中分辨出他。",
             aestheticEn: "High-angle wide shot. A crowded crosswalk; the protagonist blends into the crowd, moving with the traffic lights until they can no longer be distinguished in the frame.",
-            runtime: "主角的【自我标识码（ID）】被系统强制同化为一个通用类的随机数。",
-            runtimeEn: "The protagonist's [Ego Identifier (ID)] is forcibly assimilated by the system into a general-class random number."
+            runtime: "IF (主体放弃了标志性的武器与服装换上了和所有人一样的灰色制服) THEN (镜头切至十字路口俯拍，主体混入人流随红绿灯移动，直到画面中再也找不到他)。",
+            runtimeEn: "IF (Subject_Abandons_Signature_Weapons_Donning_Identical_Grey_Uniform) THEN (Camera cuts to overhead crosswalk shot; the subject merges into the crowd moving with traffic lights until they can no longer be distinguished in the frame)."
         }
     },
     {
@@ -303,8 +303,8 @@ export const OUTCOMES_GROUP_A: LibraryItemDef[] = [
             mechanicsEn: "As the protagonist performs their final heroic duel or speech, the camera focus slowly drifts to capture a passing fly, while background noise gradually rises to drown out their voice.",
             aesthetic: "焦点的涣散。画面边缘的解构。灯光师关掉了聚光灯，保洁人员开始打扫四周。",
             aestheticEn: "Dissipation of focus. Deconstruction of the frame edge. The lighting crew turns off the spotlight, and cleaners begin sweeping the surroundings.",
-            runtime: "通过解除镜头的【玩家锁定（Player Lock）】，暗示游戏引擎本身对该角色失去了兴趣。",
-            runtimeEn: "By releasing the camera's [Player Lock], it implies that the game engine itself has lost interest in this character."
+            runtime: "IF (主体正在进行最后的壮烈演讲或决斗) THEN (镜头焦点缓缓飘移去追踪一只经过的苍蝇，背景噪音逐渐盖过了主体的声音，保洁员开始打扫舞台四周)。",
+            runtimeEn: "IF (Subject_Delivering_Final_Heroic_Speech_Or_Duel) THEN (Camera focus slowly drifts to track a passing fly; background noise gradually drowns out the subject's voice; janitors begin sweeping around the stage)."
         }
     },
     {
@@ -320,8 +320,8 @@ export const OUTCOMES_GROUP_A: LibraryItemDef[] = [
             mechanicsEn: "The doorbell rings, the protagonist looks up at the door, their eyes just begin to react—the screen cuts to black and silence within a single frame.",
             aesthetic: "极致的粗暴。切断了所有酝酿好的情绪宣泄弧光，让玩家的神经悬在半空中。",
             aestheticEn: "Ultimate brutality. Severing all the brewed emotional catharsis arcs, leaving the player's nerves dangling in mid-air.",
-            runtime: "代码层面的 `process.exit(1)`。不需要剧情动画，直接拉闸。",
-            runtimeEn: "Code-level `process.exit(1)`. No cutscene required; literally pulling the plug."
+            runtime: "IF (主体在门铃响起后抬头看向门口且眼神刚刚发生变化的瞬间) THEN (画面在一帧之内硬切为绝对黑屏与绝对静音，不给任何尾声或混响)。",
+            runtimeEn: "IF (Subject_Looks_Up_At_Door_After_Doorbell_And_Eyes_Begin_To_React) THEN (Screen hard-cuts to absolute black and absolute silence within a single frame, no epilogue or reverb granted)."
         }
     },
     {
@@ -337,8 +337,8 @@ export const OUTCOMES_GROUP_A: LibraryItemDef[] = [
             mechanicsEn: "Screen flashes code countdown, the subject's voice begins to distort and pitch-shift, gradually turning into the cold default female system voice: 'System Ready'.",
             aesthetic: "UI界面的一块块剥落，代表记忆的文件被一个个丢入粉碎机。光芒收缩为屏幕中央的一个亮点进而消失。",
             aestheticEn: "Pieces of the UI peel away, files representing memories are dragged one by one into the shredder. The glow shrinks to a single dot in the center of the screen, then disappears.",
-            runtime: "检测主体的【存在权重（Entity Weight）】，在极短时间内线性扣减至完全的`null`。",
-            runtimeEn: "Monitors the subject's [Entity Weight], linearly reducing it to a complete `null` within an extremely short time."
+            runtime: "IF (格式化指令被执行) THEN (主体的声音开始变调失真并逐渐退化为冰冷的系统初始女声，代表记忆的UI文件被逐个拖入粉碎机，光芒收缩为屏幕中央一个亮点后消失)。",
+            runtimeEn: "IF (Format_Command_Is_Executed) THEN (Subject's voice pitch-shifts and distorts, degrading into a cold default system voice; UI files representing memories are dragged one by one into a shredder; the glow shrinks to a single dot center-screen then vanishes)."
         }
     },
     {
@@ -354,8 +354,8 @@ export const OUTCOMES_GROUP_A: LibraryItemDef[] = [
             mechanicsEn: "The character stops, suddenly staring directly at the player outside the screen, speaking a sigh that does not belong to the era or setting, or begging the player not to press the next key.",
             aesthetic: "打破第四面墙的眩晕感。角色面对着无边无尽的代码瀑布或正在被打字的页面。",
             aestheticEn: "Vertigo of breaking the fourth wall. The character faces an endless waterfall of code or a page being actively typed.",
-            runtime: "强制使角色的 AI 逻辑树发生【递归溢出】，将对象从游戏世界直接指向用户的显示器。",
-            runtimeEn: "Forcibly induces a [Recursive Overflow] in the character's AI logic tree, redirecting the object from the game world straight to the user's monitor."
+            runtime: "IF (主体突然意识到自己的一切反抗都是作者写好的桥段) THEN (角色停下脚步直视屏幕外的玩家，说出一句不属于这个世界观的话，或者恳求玩家不要按下下一个键)。",
+            runtimeEn: "IF (Subject_Realizes_All_Rebellion_Was_Pre_Written_Script) THEN (Character stops, stares directly at the player outside the screen, utters a line that does not belong to this world's setting, or begs the player not to press the next key)."
         }
     },
     {
@@ -371,8 +371,8 @@ export const OUTCOMES_GROUP_A: LibraryItemDef[] = [
             mechanicsEn: "No matter how many corridors crossed or enemies defeated, that glowing door remains exactly the same distance ahead.",
             aesthetic: "梦魇般的空间延展。主角疲惫不堪，伸出的手在空气中盲目抓取。周围参照物发生形变。",
             aestheticEn: "Nightmarish spatial stretching. Expectedly exhausted, the protagonist's outstretched hand blindly grasps at the air. Surrounding reference objects morph.",
-            runtime: "在坐标系统中，将目标地点与主角之间的距离设定为【动态抛物线反向渐进线】，永远无法归零。",
-            runtimeEn: "In the coordinate system, configuring the distance between the target location and the protagonist as a [Dynamic Reverse Asymptote], which can never reach zero."
+            runtime: "IF (主体无论走过多少长廊打败多少敌人) THEN (那扇透着光的门始终保持在完全相同的距离之外，伸出的手永远差最后一厘米，周围参照物开始发生梦魇般的形变)。",
+            runtimeEn: "IF (Subject_Crosses_Endless_Corridors_And_Defeats_Countless_Enemies) THEN (That glowing door remains at exactly the same distance; the outstretched hand is forever one centimeter short; surrounding reference objects begin nightmarish deformation)."
         }
     },
     {
@@ -388,8 +388,8 @@ export const OUTCOMES_GROUP_A: LibraryItemDef[] = [
             mechanicsEn: "The protagonist screams, grovels, or shoots into the abyss; after the echo fades, no oracle or thunder descends, only a couple of cold raindrops on the face.",
             aesthetic: "广角仰拍阴沉的天空。天空犹如巨大的盲人眼球。没有任何戏剧性的光线。",
             aestheticEn: "Wide-angle low shot aimed at a dreary sky. The sky resembles a colossal blind eyeball. Absolutely no dramatic lighting.",
-            runtime: "系统的【回馈机制】全面关闭。无论投入多大的【祈祷值】或【咒骂值】，系统返回值恒为`undefined`。",
-            runtimeEn: "The system's [Feedback Mechanism] completely shuts down. Regardless of input [Prayer Value] or [Curse Value], the system return is constantly `undefined`."
+            runtime: "IF (主体在承受了终极苦难后向天空嘶吼质问或跪地叩拜) THEN (回音消失后没有任何神谕降临，只有一两滴冷雨打在脸上，天空像一颗巨大的盲人眼球般沉默)。",
+            runtimeEn: "IF (Subject_Screams_At_Sky_Or_Kneels_Groveling_After_Ultimate_Suffering) THEN (After the echo fades, no oracle descends; only cold raindrops hit the face; the sky is silent like a colossal blind eyeball)."
         }
     },
     {
@@ -405,8 +405,8 @@ export const OUTCOMES_GROUP_A: LibraryItemDef[] = [
             mechanicsEn: "Characters wither and age, the villain is unbroken but loses the capacity to do evil, the world is enshrouded in a uniform layer of grey ash.",
             aesthetic: "没有高潮的枯竭。缓慢的平移镜头（Pan Shot）扫过锈迹斑斑的机器与不再反光的双眼。极其缓慢的节奏。",
             aestheticEn: "Exhaustion without climax. A slow pan shot sweeps over rusted machines and unresponsive eyes. An agonizingly slow tempo.",
-            runtime: "强行将场景内所有的【动力差】与【欲望差】对齐，使得系统进入【最低能耗待机态】。",
-            runtimeEn: "Forcibly aligning all [Kinetic Differentials] and [Desire Differentials] in the scene, placing the system into the [Lowest Energy Standby State]."
+            runtime: "IF (所有角色的驱力与欲望差全部被漫长的消耗抹平至零) THEN (反派没有被消灭但也失去了作恶的能力，世界蒙上一层均匀的灰色灰烬，再也没有任何变化能够发生)。",
+            runtimeEn: "IF (All_Characters_Drive_And_Desire_Differentials_Ground_To_Zero) THEN (The villain is unbroken but loses capacity for evil; the world is enshrouded in a uniform layer of grey ash; no change can ever occur again)."
         }
     }
 ];

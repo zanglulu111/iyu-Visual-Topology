@@ -15,8 +15,8 @@ export const SYNTHESIZER_M2X: LibraryItemDef[] = [
             mechanicsEn: "UI occasionally exhibits extremely brief sub-pixel dislocations, or the minimap blinks garbled directional prompts for a split second.",
             aesthetic: "极短暂的色差剥离（Chromatic Aberration）；当主角看向特定死角时，出现不易察觉的高频音频尖刺。",
             aestheticEn: "Ultra-brief chromatic aberration; subtle high-frequency audio spikes when the protagonist looks at specific blind corners.",
-            runtime: "每隔30秒向摄像机的后处理噪点种子（Noise Seed）中注入一段脱离主算法的微弱随机扰动矢量。",
-            runtimeEn: "Injecting a faint random perturbation vector, detached from the main algorithm, into the camera's post-processing Noise Seed every 30 seconds."
+            runtime: "IF (表层现实出现极其微弱的拓扑扰动，莫名既视感或电子设备极度微弱闪烁) THEN (每隔30秒向摄像机的后处理噪点种子Noise Seed中注入一段脱离主算法的微弱随机扰动矢量)。",
+            runtimeEn: "IF (Surface_Reality_Exhibits_Extremely_Subtle_Topological_Perturbations_Deja_Vu_Or_Faint_Electronic_Flicker) THEN (Inject a faint random perturbation vector detached from main algorithm into camera post-processing Noise Seed every 30 seconds)."
         }
     },
     {
@@ -33,8 +33,8 @@ export const SYNTHESIZER_M2X: LibraryItemDef[] = [
             mechanicsEn: "Environmental interactive props cast shadows pointing to the wrong light source. Doors open into non-Euclidean dead loops on the first try, requiring a re-open to fix.",
             aesthetic: "全局光照微妙地背离了真实物理渲染（PBR），向一种令人极其不安、病态的黄绿色调偏移。",
             aestheticEn: "Global Illumination subtly deviates from true physical rendering (PBR), shifting toward a highly unsettling, sickly yellow-green tint.",
-            runtime: "刻意覆写特定实体的 `Transform` 指针，使其短暂绕过游戏引擎原生的物理 Tick 同步机制。",
-            runtimeEn: "Deliberately overriding specific entities' `Transform` pointers, making them briefly bypass the game engine's native physics Tick synchronization."
+            runtime: "IF (物理法则与社会逻辑发生局部偏转，镜子里的影子移动与本体出现时间差) THEN (刻意覆写特定实体的Transform指针，使其短暂绕过游戏引擎原生的物理Tick同步机制)。",
+            runtimeEn: "IF (Local_Deviations_Of_Physical_Laws_Mirror_Shadow_Lags_Body_By_Time_Delta) THEN (Deliberately override specific entities Transform pointers, making them briefly bypass game engine native physics Tick synchronization)."
         }
     },
     {
@@ -51,8 +51,8 @@ export const SYNTHESIZER_M2X: LibraryItemDef[] = [
             mechanicsEn: "NPCs start reciting voicelines meant for entirely different characters; quest markers point to void coordinates absolutely outside the NavMesh.",
             aesthetic: "对话语音与人物唇声发生令人作呕的明显错轨。天空盒（Skybox）边缘出现微型裂口，直接裸露出报错底图。",
             aestheticEn: "Nauseatingly obvious desync between dialogue audio and lip-sync. Micro-tears appear at the edge of the Skybox, directly exposing error base textures.",
-            runtime: "强制引发事件调度器（EventDispatcher）的串线短路，导致玩家的输入随机触发完全不相关的回调事件列。",
-            runtimeEn: "Forcing a cross-wiring short circuit in the EventDispatcher, causing player inputs to randomly trigger completely unrelated callback event queues."
+            runtime: "IF (NPC开始念出其他角色的台词库，任务引导指向寻路网格NavMesh之外的虚无坐标) THEN (强制引发事件调度器EventDispatcher的串线短路，导致玩家的输入随机触发完全不相关的回调事件列)。",
+            runtimeEn: "IF (NPCs_Recite_Voicelines_Of_Other_Characters_Quest_Markers_Point_Outside_NavMesh) THEN (Force cross-wiring short circuit in EventDispatcher, causing player inputs to randomly trigger completely unrelated callback event queues)."
         }
     },
     {
@@ -69,8 +69,8 @@ export const SYNTHESIZER_M2X: LibraryItemDef[] = [
             mechanicsEn: "The entire geometry of the level begins to disintegrate or vanish. Hostile entities lose collision bounding constraints, frantically and uncontrollably clipping/spasming through walls.",
             aesthetic: "巨大且毫无纹理的原始几何体占据天空。音轨被拉入了如同在深水下窒息般极度压抑的低频混响沉溺感之中。",
             aestheticEn: "Giant, textureless primitive geometries dominate the sky. The audio track is dragged into a deeply oppressive, low-frequency reverberation resembling suffocation underwater.",
-            runtime: "故意丢弃渲染管线中对特定静态网格对象（Static Mesh）的 `Z-Buffer` 深度检测，造成视觉上惊悚的穿模撕裂。",
-            runtimeEn: "Intentionally dropping the `Z-Buffer` depth checks for specific Static Mesh objects in the render pipeline, causing horrific visual clipping tears."
+            runtime: "IF (关卡整体几何学开始解体或消失，敌对实体失去碰撞体积约束疯狂穿模) THEN (故意丢弃渲染管线中对特定静态网格对象Static Mesh的Z-Buffer深度检测，造成视觉上惊悚的穿模撕裂)。",
+            runtimeEn: "IF (Level_Geometry_Begins_Disintegrating_Hostile_Entities_Lose_Collision_Bounds_Clipping_Through_Walls) THEN (Intentionally drop Z-Buffer depth checks for specific Static Mesh objects in render pipeline, causing horrific visual clipping tears)."
         }
     },
     {
@@ -87,8 +87,8 @@ export const SYNTHESIZER_M2X: LibraryItemDef[] = [
             mechanicsEn: "All gameplay loops forcibly cleared and deregistered. Movement inputs are scrambled, UI panels turn to ash, the world physics engine slides into a swamp of pure data chaos.",
             aesthetic: "屏幕空间呈现出足以引发光敏性癫痫的极端过载。整个世界的结构跌入一种递归的、无限自噬的视觉黑洞。",
             aestheticEn: "Screen space presents extreme overload sufficient to cause photosensitive seizures. The entire world structure falls into a recursive, infinitely autophagic visual black hole.",
-            runtime: "将应用程序的核心系统时钟积分 `DeltaTime` 灌入随机负数或是无理无穷大，导致底层物理引擎呈现数学定律上的核爆。",
-            runtimeEn: "Feeding the application's core system clock integral `DeltaTime` with random negative numbers or irrational infinities, ensuring the baseline physics engine exhibits a mathematical nuclear explosion."
+            runtime: "IF (所有游玩回路被强制清空注销，移动控制键被全部打乱，UI面板灰飞烟灭) THEN (将应用程序的核心系统时钟积分DeltaTime灌入随机负数或无理无穷大，导致底层物理引擎呈现数学定律上的核爆)。",
+            runtimeEn: "IF (All_Gameplay_Loops_Forcibly_Cleared_Movement_Inputs_Scrambled_UI_Panels_Turn_To_Ash) THEN (Feed application core system clock integral DeltaTime with random negative numbers or irrational infinities, ensuring baseline physics engine exhibits a mathematical nuclear explosion)."
         }
     }
 ];
