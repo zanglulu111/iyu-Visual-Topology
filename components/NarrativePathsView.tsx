@@ -364,7 +364,7 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
 
     return (
         <div className={`w-full h-full flex flex-col relative overflow-hidden ${theme === 'retro' ? 'bg-[var(--bg-main)]' : 'bg-[#0a0a0a]'}`}>
-            <div className={`shrink-0 h-14 ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20' : 'bg-[#0a0a0a] border-zinc-800'} border-b flex items-center justify-between px-6 shadow-xl z-20`}>
+            <div className={`shrink-0 h-14 ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20 shadow-xl' : 'bg-[#0a0a0a] border-zinc-800 shadow-[0_15px_45px_rgba(0,0,0,1)]'} border-b flex items-center justify-between px-6 z-20`}>
                 <div className="flex items-center gap-4">
                     <div className={`flex items-center gap-2 ${getThemeColor()}`}>
                         <Settings2 size={16} />
@@ -538,9 +538,9 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                 </div>
 
                 {/* CARDS CONTAINER */}
-                <div className="flex-1 w-full h-full overflow-hidden p-4 md:p-8 overflow-y-auto custom-scrollbar">
+                <div className="flex-1 w-full h-full p-4 md:p-8 overflow-x-hidden overflow-y-auto lg:overflow-hidden flex flex-col min-h-0">
                     {treatments.length === 0 ? (
-                        <div className="h-full flex flex-col items-center justify-center text-zinc-600 gap-6">
+                        <div className="flex-1 flex flex-col items-center justify-center text-zinc-600 gap-6">
                             <div className="p-6 bg-zinc-900/30 rounded-full border border-zinc-800">
                                 <GitFork size={48} className={getEmptyStateIconColor()} />
                             </div>
@@ -556,7 +556,7 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                             </div>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full pb-20">
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0 pb-20 lg:pb-0">
                             {treatments.map((item, index) => {
                                 const isSelected = selectedPathId === item.id;
                                 const isCached = !!cachedBlueprints[item.id];
@@ -591,9 +591,9 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                                         key={item.id || index}
                                         onClick={() => setSelectedPathId(item.id)}
                                         className={`
-                                            group relative flex flex-col rounded-xl overflow-hidden text-left h-full transition-all duration-300 border min-h-[500px]
+                                            group relative flex flex-col rounded-xl overflow-hidden text-left transition-all duration-300 border h-[400px] lg:h-full lg:max-h-none min-h-0
                                             ${isSelected
-                                                ? (theme === 'retro' ? `bg-white border-[#8B261D] shadow-[0_10px_30px_rgba(139,38,29,0.1)] scale-[1.01] z-10` : `bg-zinc-900/80 ${borderColor} shadow-[0_0_50px_rgba(0,0,0,0.5)] scale-[1.01] z-10`)
+                                                ? (theme === 'retro' ? 'bg-white border-[#8B261D] shadow-[0_10px_30px_rgba(139,38,29,0.1)] scale-[1.01] z-10' : `bg-zinc-900/80 ${borderColor} shadow-[0_0_50px_rgba(0,0,0,0.5)] scale-[1.01] z-10`)
                                                 : (theme === 'retro' ? 'bg-black/[0.03] border-black/5 hover:border-[#8B261D]/30 hover:-translate-y-1' : 'bg-[#0a0a0a] border-zinc-800 hover:border-zinc-600 hover:-translate-y-1 opacity-90 hover:opacity-100')
                                             }
                                         `}
@@ -664,7 +664,7 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                 </div>
             </div>
 
-            <div className="shrink-0 h-14 bg-[var(--bg-header)] backdrop-blur-md border-t border-[var(--border-main)] flex items-center justify-between px-6 md:px-12 z-40 transition-colors duration-500">
+            <div className={`shrink-0 h-14 bg-[var(--bg-header)] backdrop-blur-md border-t ${theme === 'retro' ? 'border-[var(--border-main)]' : 'border-zinc-800'} flex items-center justify-between px-6 md:px-12 z-40 transition-colors duration-500`}>
                 <div className="flex items-center gap-4 shrink-0 w-[180px] md:w-[240px]">
                     <button onClick={onBack} className={`flex items-center gap-3 px-6 py-3 bg-[var(--bg-panel)]/50 hover:bg-[var(--bg-panel)] border border-[var(--border-main)] rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-300 group min-w-[140px] hover:scale-105 active:scale-95 ${theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'}`}>
                         <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />

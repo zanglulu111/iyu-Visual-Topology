@@ -121,7 +121,6 @@ export interface MistEngineInput {
   m5?: string;
   m6?: string;
   m7?: string;
-  m2x?: string;
   m4x?: string;
   m5x?: string;
 
@@ -161,7 +160,6 @@ export function extractEngineInput(fieldState: NarrativeFieldState): MistEngineI
     m5: nameToId(extractFirst(fieldState, 'engine_m5')),
     m6: nameToId(extractFirst(fieldState, 'engine_m6')),
     m7: nameToId(extractFirst(fieldState, 'engine_m7')),
-    m2x: nameToId(extractFirst(fieldState, 'engine_m2x')),
     m4x: nameToId(extractFirst(fieldState, 'engine_m4x')),
     m5x: nameToId(extractFirst(fieldState, 'engine_m5x')),
 
@@ -260,7 +258,6 @@ function calculateTension(input: MistEngineInput, m0Topo: M0TopologyProfile | un
   const g_m4 = resolveGravity('M4', input.m4);
   const g_m5 = resolveGravity('M5', input.m5);
 
-  const m2x_physics = input.m2x ? getItemPhysics(input.m2x) : { gravity: 0.5, priceFloor: 2 };
   const m4x_physics = input.m4x ? getItemPhysics(input.m4x) : { gravity: 0.5, priceFloor: 2 };
   const m5x_physics = input.m5x ? getItemPhysics(input.m5x) : { gravity: 0.5, priceFloor: 2 };
 
@@ -303,7 +300,7 @@ function calculateTension(input: MistEngineInput, m0Topo: M0TopologyProfile | un
   const finalTension = ratio * (effective_m5 * m5_amplifier);
 
   // ====== 世界熵 ======
-  const worldEntropy = m2x_physics.gravity * mods.entropyRate;
+  const worldEntropy = mods.entropyRate;
 
   // M7 终局重力 → 叙事走向判定
   const m7Gravity = resolveGravity('M7', input.m7);
@@ -334,16 +331,6 @@ function detectRedlines(input: MistEngineInput, m0Topo: M0TopologyProfile | unde
   const violations: RedlineViolation[] = [];
 
   // ---- M0 专属红线 ----
-
-  // 精神病拓扑 + 低 M2X = 警告（精神病主体需要高世界崩坏度才能体现）
-  if (m0Topo?.baseProtocol === 'PSYCHOSIS' && input.m2x === 'm2x_level_1') {
-    violations.push({
-      code: 'WARNING_PSYCHOSIS_LOW_ENTROPY',
-      severity: 'WARNING',
-      message: 'Psychotic topology (M0) with minimal world collapse (M2X=1) is structurally weak.',
-      messageCn: '警告：精神病式M0拓扑 + 最低世界崩坏(M2X=1)缺乏结构张力。精神病主体的叙事空间需要更高的现实裂缝度来体现"符号系统缺如"。建议 M2X≥3。'
-    });
-  }
 
   // 忧郁症拓扑 + 高 M5X = 矛盾（忧郁主体不应有高驱力流速）
   if (m0Topo && m0Topo.formulaMods.m5Multiplier < 0.5 && input.m5x === 'm5x_level_5') {
@@ -393,16 +380,6 @@ function detectRedlines(input: MistEngineInput, m0Topo: M0TopologyProfile | unde
     }
   }
 
-  // 奇点 + 幻象维系 = 逻辑矛盾
-  if (input.m2x === 'm2x_level_5' && input.m5x === 'm5x_level_1') {
-    violations.push({
-      code: 'REDLINE_SINGULARITY_FANTASY',
-      severity: 'ERROR',
-      message: 'World Singularity (M2X=5) + Fantasy maintenance (M5X=1) is impossible.',
-      messageCn: '红线冲突：世界已达奇点（M2X=5），主体不可能还在维系幻象（M5X=1）。'
-    });
-  }
-
   // M7 超越 + M4X L5 = 矛盾
   if (input.m7 && input.m4x === 'm4x_level_5') {
     const m7Item = lookupItem(input.m7);
@@ -439,7 +416,6 @@ function verifyPriceBalance(
   fieldState: NarrativeFieldState
 ): PriceVerdict {
   const floors = [
-    input.m2x ? getItemPhysics(input.m2x).priceFloor : 1,
     input.m4x ? getItemPhysics(input.m4x).priceFloor : 1,
     input.m5x ? getItemPhysics(input.m5x).priceFloor : 1,
   ];
@@ -598,7 +574,6 @@ function compileDirectives(
 
   // ====== X 系数硬指令 ======
   const xParams = [
-    { key: 'M2X', id: input.m2x },
     { key: 'M4X', id: input.m4x },
     { key: 'M5X', id: input.m5x }
   ];
@@ -918,7 +893,7 @@ ${m0Section}
 - **分母压强** (M4×m4Div×M4X×sur4x): ${tension.denominator.toFixed(2)}
 - **张力比**: ${tension.ratio.toFixed(2)}
 - **最终张力**: ${tension.finalTension.toFixed(2)}
-- **世界熵值** (M2X×entropyRate): ${tension.worldEntropy.toFixed(2)}
+- **世界熵值** (entropyRate): ${tension.worldEntropy.toFixed(2)}
 - **叙事走向判定**: \`[${tension.narrativeArc}]\`
 
 ### 🚨 CRITICAL — 强制执行（违反即判定失败）

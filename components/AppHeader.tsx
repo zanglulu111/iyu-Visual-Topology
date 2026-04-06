@@ -113,7 +113,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
 
   const getThemeBorderColor = () => {
     if (theme === 'retro') return 'border-[var(--border-main)]';
-    return 'border-white/[0.06]';
+    return 'border-zinc-800';
   };
 
   const getBorderAccentColor = () => {

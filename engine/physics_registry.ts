@@ -1,11 +1,11 @@
 /**
  * 迷雾引擎 v2.1 — 物理属性注册表 (Physics Registry)
  * 
- * 全参数覆盖：M0-M7 + X系数 (M2X/M4X/M5X)
+ * 全参数覆盖：M0-M7 + X系数 (M4X/M5X)
  * 
  * 注册策略分层：
  *   Layer 0: M0 精神拓扑 — 全域操作系统，定义公式的"空间曲率"
- *   Layer 1: M2X/M4X/M5X — 硬编码（每个 5 个等级）
+ *   Layer 1: M4X/M5X — 硬编码（每个 5 个等级）
  *   Layer 2: M1-M5 — 基于 group 分组推导重力系数
  *   Layer 3: M6 — 基于 group/关键词推导代价等级
  *   Layer 4: M7 — 基于 group 推导叙事终局权重
@@ -185,36 +185,7 @@ export function getM0BaseProtocolKey(groupStr: string | undefined): string | und
 }
 
 
-// ============================================
-// M2X 世界崩坏程度 — 硬编码物理属性
-// ============================================
-const M2X_PHYSICS: Record<string, MistItemPhysics> = {
-  m2x_level_1: {
-    gravity: 0.2,
-    priceFloor: 1,
-    directive: "环境描写中加入5%的不可理解元素。主体可以自我修正。"
-  },
-  m2x_level_2: {
-    gravity: 0.4,
-    priceFloor: 1,
-    directive: "引入弗洛伊德式诡谲(Uncanny)。日常物件产生异化感。"
-  },
-  m2x_level_3: {
-    gravity: 0.6,
-    priceFloor: 2,
-    directive: "因果律崩塌。M5动作指向A但物理反馈为B。象征秩序保护壳破碎。"
-  },
-  m2x_level_4: {
-    gravity: 0.8,
-    priceFloor: 3,
-    directive: "符号系统瘫痪。所有社会属性归零。主体进入纯生物存续状态。"
-  },
-  m2x_level_5: {
-    gravity: 1.0,
-    priceFloor: 4,
-    directive: "叙事终止逻辑。语义链断裂。文字本身开始解构。"
-  }
-};
+
 
 // ============================================
 // M4X 外部压迫能级 — 硬编码物理属性
@@ -394,10 +365,9 @@ function getM6PriceFromTag(tag: string): number {
 // 统一查询接口
 // ============================================
 
-/** 获取 X 系数（M2X/M4X/M5X）的物理属性 */
+/** 获取 X 系数（M4X/M5X）的物理属性 */
 export function getItemPhysics(itemId: string): MistItemPhysics {
   const registry: Record<string, MistItemPhysics> = {
-    ...M2X_PHYSICS,
     ...M4X_PHYSICS,
     ...M5X_PHYSICS
   };
@@ -435,4 +405,4 @@ export function getM6Price(tags: string[]): number {
   return Math.max(...tags.map(t => getM6PriceFromTag(t)));
 }
 
-export { M2X_PHYSICS, M4X_PHYSICS, M5X_PHYSICS };
+export { M4X_PHYSICS, M5X_PHYSICS };

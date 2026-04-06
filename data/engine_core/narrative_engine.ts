@@ -8,7 +8,6 @@ import { ENGINE_DRIVES } from './engine_drives';
 import { ENGINE_STAKES } from './engine_stakes';
 import { ENGINE_RESOLUTIONS } from './engine_resolutions';
 import { ENGINE_M0_OS } from './m0';
-import { SYNTHESIZER_M2X } from './synthesizer/m2x';
 import { SYNTHESIZER_M4X } from './synthesizer/m4x';
 import { SYNTHESIZER_M5X } from './synthesizer/m5x';
 
@@ -64,14 +63,6 @@ export const NARRATIVE_ENGINE_BLOCKS: NarrativeBlockDef[] = [
     tags: []
   },
   // COEFFICIENTS (X-Factors)
-  {
-    id: "engine_m2x",
-    name: "M2X. 实在界入侵当量",
-    enName: "M2X. WORLD COLLAPSE (Coefficient)",
-    description: "象征界的崩坏程度，调节世界观破裂的烈度。",
-    descriptionEn: "Degree of collapse of the symbolic order.",
-    tags: []
-  },
   {
     id: "engine_m4x",
     name: "M4X. 外部压迫能级",
@@ -170,14 +161,6 @@ export const NARRATIVE_ENGINE_LIBRARY: LibraryCategoryDef[] = [
     desc: "故事的哲学结局与命运审判。欲望最终导向何处？",
     descEn: "The philosophical ending and judgment of fate. Where does desire ultimately lead?",
     items: ENGINE_RESOLUTIONS
-  },
-  {
-    id: "engine_m2x_lib",
-    name: "M2X. 实在界入侵当量 (系数)",
-    nameEn: "M2X. World Collapse",
-    desc: "象征界的崩坏程度，调节世界观破裂的烈度。",
-    descEn: "Degree of collapse of the symbolic order.",
-    items: SYNTHESIZER_M2X
   },
   {
     id: "engine_m4x_lib",

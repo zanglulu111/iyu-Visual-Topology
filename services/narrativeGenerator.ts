@@ -35,6 +35,28 @@ import {
 // Import Registry with patch extraction
 import { findItemDetails, findItemFull, extractPatchConstraints } from './dataRegistry';
 
+// ============================================================================
+// [AUTO KV CACHING SUPPORT] ABSOLUTE STATIC SYSTEM BIBLE
+// This variable MUST NOT contain any dynamic expressions (${}).
+// It serves as the static prefix for all API calls to ensure >80% Cache Hits.
+// ============================================================================
+const NARRATIVE_SYSTEM_BIBLE = `
+Role: 殿堂级电影编剧 & 叙事架构师（戛纳/奥斯卡级别）。
+# 《迷雾学派》全局宪法与底层协议 (SYSTEM BIBLE)
+以下是你作为本引擎必须无条件遵守的铁律与计算公式：
+
+${NAMING_PROTOCOL}
+${LITERARY_AESTHETIC_PROTOCOL}
+${NARRATIVE_ENGINE_FORMULA}
+${THE_IRON_LAWS}
+${NARRATIVE_ALGEBRAIC_PROTOCOL}
+${FALLBACK_TOPOLOGY_TEMPLATE}
+${STYLE_LOGIC_PROTOCOL}
+${THE_MASK_PROTOCOL}
+
+**[宪法宣读完毕，等待当前剧本参数与局部指令输入]**
+`.trim();
+
 const buildContext = (fieldState: NarrativeFieldState) => {
   return Object.entries(fieldState).map(([key, tags]) => {
     if (!tags || tags.length === 0 || key.startsWith('comm_')) return null;
@@ -158,9 +180,11 @@ export const buildNarrativePrompt = (
   const bannedWords = getBannedWords(fieldState);
   const topologyInstruction = getNarrativeTopology(fieldState);
 
-  // Extract Genre for Prompt Customization
-  const genres = [...(fieldState['skin_genre'] || []), ...(fieldState['skin_animation_genre'] || [])].join(', ');
-  const activeGenre = genres || "Cinema/Drama";
+  // Extract SUR1 (Drive) and SUR2 (Field) for Prompt Customization
+  const sur1Drive = fieldState['skin_genre']?.join('/') || 'Cinema/Drama';
+  const sur2Field = fieldState['skin_era']?.join('/') || 'Unknown Field';
+  const surxMotif = fieldState['skin_animation_genre']?.join('/') || '';
+  const activeWorldLogic = `${sur1Drive} (场域: ${sur2Field}${surxMotif ? ` / ${surxMotif}` : ''})`;
 
   // Detect Animation Mode
   const isAnime = fieldState['skin_animation_genre']?.length > 0;
@@ -312,16 +336,15 @@ export const buildNarrativePrompt = (
     visionAnchorInstruction = getVisionAnchorProtocol(visionInput);
   }
 
-  const promptText = `
-Role: 殿堂级电影编剧 & 叙事架构师（戛纳/奥斯卡级别）。
-Task: 基于提供的 DNA (M0-M7) 和语境 (S0-S7)，生成 3 个电影级的故事概念。
+  const dynamicTaskPrompt = `
+# 本次任务执行区 (TASK EXECUTION)
+Task: 基于上方提供的《迷雾学派》全局宪法 (SYSTEM BIBLE)，根据以下动态注入的 DNA (M0-M7) 和语境 (S0-S7)，生成 3 个电影级的故事概念。
 
+## 📍 时空坐标与视觉锚点
 ${visionAnchorInstruction}
 ${customCoordinates}
 
-# 🔗 结构转译指令 (STRUCTURAL TRANSLATION INSTRUCTION)
-**关键：你必须将抽象的 [结构] 转译为具象的 [电影感]。**
-
+# 🔗 动态结构转译指令
 1.  **M1 主体 (Subject) 转译:**
     *   关键词: ${fieldState['engine_m1']?.join('/') || 'Unknown'}
     *   语境 (S1/S6): ${fieldState['skin_era']?.join('/') || 'Unknown'} / ${fieldState['skin_profession']?.join('/') || 'Unknown'}
@@ -335,32 +358,21 @@ ${customCoordinates}
     *   关键词: ${fieldState['engine_m3']?.join('/') || 'Unknown'}
     *   **任务:** 将此欲望转化为具体的麦高芬 (MacGuffin) 或对象 a。
 
-${NAMING_PROTOCOL}
-
-${THE_IRON_LAWS}
-
+## 🧨 运行时硬约束 (Runtime Patch)
 ${buildPatchRuntimeBlock(fieldState)}
 
-${THE_MASK_PROTOCOL}
-
-${NARRATIVE_ALGEBRAIC_PROTOCOL}
-
-## 🚫 禁用词汇表 (BANNED VOCABULARY LIST)
-**严禁在叙事文本中使用以下抽象术语。请将其转化为具象意象。**
+## 🚫 动态禁用词表
 **黑名单:** [ ${bannedWords} ]
 
-${NARRATIVE_ENGINE_FORMULA}
-
-## 1. DNA 序列 (源头)
+## 1. 动态 DNA 序列 (源头)
 ${topologyInstruction}
 ${psychoProtocol}
 ${volumeInstruction}
 ${engineContext}
 
-## 2. 世界法则与美学
+## 2. 局部世界法则与美学约束
 ${instructions}
 ${defaultAnchorInstruction}
-${LITERARY_AESTHETIC_PROTOCOL}
 
 ## 3. ★★★ 叙事质量控制 ★★★
 **关键：别像个数据库，要像个作家。**
@@ -370,17 +382,17 @@ ${LITERARY_AESTHETIC_PROTOCOL}
 4.  **语言 (LANGUAGE):** 使用极具画面感、电影感的中文。**严格使用简体中文。**
 
 ## 4. 三重叙事镜头 (输出)
-**关键：适配类型 [${activeGenre}]。**
+**关键：适配核心逻辑 [${activeWorldLogic}]。**
 **强约束警告：所有生成的路径都必须严格遵守以下世界法则：**
 *   **物理法则:** ${physicsConstraint}
 *   **语境法则:** ${contextConstraint}
 **任何违反此法则的生成都将被视为失败。例如：如果物理法则为 STRICT REALISM，则故事中严禁出现魔法、鬼魂或超光速。**
 
 ### **OPTION 1: [STRUCTURALIST] - 结构主义 (Genre Perfection)**
-*   **Logic:** **经典类型执行。** 世界严格按照 [${activeGenre}] 的规则运行。
+*   **Logic:** **经典类型执行。** 世界严格按照 [${activeWorldLogic}] 的规则运行。
 *   **Constraint:** 严格遵守 [${physicsConstraint}] 和 [${contextConstraint}]。
 *   **Vibe:** 专业、高预算、定义类型的。
-*   **Task:** 写一个标准的 **${activeGenre}** 故事，其中 M4 是具体的外部力量。
+*   **Task:** 写一个符合 **${sur1Drive}** 动力的故事，其中 M4 是具体的外部力量。
 
 ### **OPTION 2: [POST_STRUCTURALIST] - 后结构 (Deconstruction)**
 *   **Logic:** **内在冲突。** 类型只是主角创伤的投射。
@@ -403,7 +415,7 @@ ${LITERARY_AESTHETIC_PROTOCOL}
     "type": "STRUCTURALIST", 
     "title": "电影标题 (中文)",
     "tagline": "一句有力量的 Logline。",
-    "pitch": "完整的故事梗概 (约 600 字)。必须包含激励事件、上升动作、高潮和结局。严格遵循 [${activeGenre}] 逻辑。必须遵守 [${physicsConstraint}]。",
+    "pitch": "完整的故事梗概 (约 600 字)。必须包含激励事件、上升动作、高潮和结局。严格遵循 [${activeWorldLogic}] 逻辑。必须遵守 [${physicsConstraint}]。",
     "structure": "GENRE_DRIVEN"
   },
   {
@@ -425,7 +437,7 @@ ${LITERARY_AESTHETIC_PROTOCOL}
 ]
 `;
 
-  return { text: promptText, images: visionImage ? [visionImage] : [] };
+  return { text: NARRATIVE_SYSTEM_BIBLE + '\n\n' + dynamicTaskPrompt, images: visionImage ? [visionImage] : [] };
 };
 
 export const buildNarrativeBiblePrompt = (
@@ -596,9 +608,10 @@ export const buildNarrativeBiblePrompt = (
   const povInstruction = perspective ? `**Point of View:** ${perspective.name}\n   *   **Directive:** ${perspective.prompt}` : "";
   const sensoryInstruction = sensory ? `**Sensory Priority:** ${sensory.name}\n   *   **Directive:** ${sensory.prompt}` : "";
 
-  return `
+  const dynamicTaskPrompt = `
+# 本次任务执行区 (TASK EXECUTION)
 # 1. Role: 文学大师 & 影子写手。
-# Task: 撰写一篇 ${literatureType}。
+# Task: 基于上方提供的《迷雾学派》全局宪法 (SYSTEM BIBLE)，撰写一篇 ${literatureType}。
 
 **关键指令:**
 你**不是**在写剧本大纲或摘要。你是在写一篇**完整的文学小说**。
@@ -691,4 +704,6 @@ Output ONLY valid JSON.
   }
 }
 `;
+
+  return NARRATIVE_SYSTEM_BIBLE + '\n\n' + dynamicTaskPrompt;
 };

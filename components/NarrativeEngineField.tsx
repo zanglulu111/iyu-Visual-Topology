@@ -501,7 +501,6 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                                 <span className="font-serif text-xl md:text-3xl font-light select-none text-[var(--text-main)]">
                                     {lang === 'EN' ? "Experience" : "在遭遇了"}
                                 </span>
-                                {renderLevelButton("engine_m2")}
                                 {renderProphecySlot({ blockId: "engine_m2", placeholderCN: "M2. 真实遭遇", placeholderEN: "M2. Encounter", hideAffixes: true })}
                                 <span className="font-serif text-xl md:text-3xl font-light select-none text-[var(--text-main)]">
                                     {lang === 'EN' ? ", he seeks" : "后，试图寻找"}
