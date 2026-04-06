@@ -166,14 +166,14 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
 
     const handleUpdate = (field: string, value: string) => {
         if (field.startsWith('world') || field.startsWith('tone')) {
-            const newContext = { ...blueprint.context, [field]: value };
+            const newContext = { ...(blueprint.context || {}), [field]: value };
             // Maintain backward compatibility
             if (field === 'worldCn') newContext.world = value;
             if (field === 'toneCn') newContext.tone = value;
-            onUpdateBlueprint({ ...blueprint, context: newContext });
+            onUpdateBlueprint({ ...blueprint, context: newContext as any });
         } else {
-            const newNarrative = { ...blueprint.narrative, [field]: value };
-            onUpdateBlueprint({ ...blueprint, narrative: newNarrative });
+            const newNarrative = { ...(blueprint.narrative || {}), [field]: value };
+            onUpdateBlueprint({ ...blueprint, narrative: newNarrative as any });
         }
     };
 
@@ -438,15 +438,15 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
 
     const getToneWithHexText = () => {
         const toneText = localLang === 'CN'
-            ? (blueprint.context.toneCn || blueprint.context.tone)
-            : (blueprint.context.toneEn || blueprint.context.tone);
-        const hexCodes = blueprint.context.colorPalette.join(', ');
+            ? (blueprint.context?.toneCn || blueprint.context?.tone || '')
+            : (blueprint.context?.toneEn || blueprint.context?.tone || '');
+        const hexCodes = (blueprint.context?.colorPalette || []).join(', ');
         const label = localLang === 'CN' ? '色值' : 'Hex Codes';
         return `${toneText}\n\n${label}: ${hexCodes}`;
     };
 
     const getHexOnlyText = () => {
-        return blueprint.context.colorPalette.join(', ');
+        return (blueprint.context?.colorPalette || []).join(', ');
     };
 
     const isTitleTemplate = blueprint.narrative?.title === "NEW CONCEPT" || !blueprint.narrative?.title;
@@ -465,7 +465,7 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
                 <textarea
                     value={blueprint.narrative?.logline || ""}
                     onChange={(e) => handleUpdate('logline', e.target.value)}
-                    className={`w-full bg-transparent text-xl md:text-2xl font-serif leading-relaxed italic border-none focus:ring-0 resize-none p-0 focus:outline-none ${theme === 'retro' ? 'placeholder-[#8B261D]/30' : 'placeholder-zinc-600'} ${theme === 'retro' ? 'text-[#3D1A16]' : (blueprint.narrative?.logline.includes('...') ? 'text-zinc-500' : 'text-white')}`}
+                    className={`w-full bg-transparent text-xl md:text-2xl font-serif leading-relaxed italic border-none focus:ring-0 resize-none p-0 focus:outline-none ${theme === 'retro' ? 'placeholder-[#8B261D]/30' : 'placeholder-zinc-600'} ${theme === 'retro' ? 'text-[#3D1A16]' : ((blueprint.narrative?.logline || '').includes('...') ? 'text-zinc-500' : 'text-white')}`}
                     rows={2}
                     placeholder="在此输入故事的核心钩子..."
                 />
@@ -522,7 +522,7 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
                     <textarea
                         value={blueprint.narrative?.synopsis || ""}
                         onChange={(e) => handleUpdate('synopsis', e.target.value)}
-                        className={`w-full h-full min-h-[400px] bg-transparent font-light leading-relaxed border-none focus:ring-0 resize-none p-0 focus:outline-none custom-scrollbar ${theme === 'retro' ? 'placeholder-[#8B261D]/30' : 'placeholder-zinc-400'} ${theme === 'retro' ? 'text-[#3D1A16]' : (blueprint.narrative?.synopsis.includes('...') ? 'text-zinc-500' : 'text-zinc-300')}`}
+                        className={`w-full h-full min-h-[400px] bg-transparent font-light leading-relaxed border-none focus:ring-0 resize-none p-0 focus:outline-none custom-scrollbar ${theme === 'retro' ? 'placeholder-[#8B261D]/30' : 'placeholder-zinc-400'} ${theme === 'retro' ? 'text-[#3D1A16]' : ((blueprint.narrative?.synopsis || '').includes('...') ? 'text-zinc-500' : 'text-zinc-300')}`}
                         placeholder="输入详细的故事大纲、视听节奏与叙事逻辑..."
                     />
                 </div>
@@ -552,11 +552,11 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
                         <h4 className={`${themeAccent} font-bold text-xs uppercase tracking-widest flex items-center gap-2`}>
                             <Globe size={14} /> {localLang === 'EN' ? "World Rules" : "世界法则"}
                         </h4>
-                        <CopyButton text={localLang === 'CN' ? (blueprint.context.worldCn || blueprint.context.world) : (blueprint.context.worldEn || blueprint.context.world)} theme={theme} className={theme === 'retro' ? 'text-[#8B261D]/50 hover:text-[#8B261D]' : ''} />
+                        <CopyButton text={localLang === 'CN' ? (blueprint.context?.worldCn || blueprint.context?.world || '') : (blueprint.context?.worldEn || blueprint.context?.world || '')} theme={theme} className={theme === 'retro' ? 'text-[#8B261D]/50 hover:text-[#8B261D]' : ''} />
                     </div>
                     <textarea
                         ref={worldRef}
-                        value={localLang === 'CN' ? (blueprint.context.worldCn || blueprint.context.world) : (blueprint.context.worldEn || blueprint.context.world)}
+                        value={localLang === 'CN' ? (blueprint.context?.worldCn || blueprint.context?.world || '') : (blueprint.context?.worldEn || blueprint.context?.world || '')}
                         onChange={(e) => handleUpdate(localLang === 'CN' ? 'worldCn' : 'worldEn', e.target.value)}
                         className={`w-full flex-1 bg-transparent text-sm ${theme === 'retro' ? 'text-[#3D1A16]' : 'text-zinc-300'} leading-loose border-none focus:ring-0 resize-none p-0 focus:outline-none placeholder-zinc-600 overflow-hidden min-h-[160px]`}
                         placeholder={localLang === 'EN' ? "Describe the rules of the world..." : "在此定义世界物理规律、社会秩序与背景..."}
@@ -571,7 +571,7 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
                     </div>
                     <textarea
                         ref={toneRef}
-                        value={localLang === 'CN' ? (blueprint.context.toneCn || blueprint.context.tone) : (blueprint.context.toneEn || blueprint.context.tone)}
+                        value={localLang === 'CN' ? (blueprint.context?.toneCn || blueprint.context?.tone || '') : (blueprint.context?.toneEn || blueprint.context?.tone || '')}
                         onChange={(e) => handleUpdate(localLang === 'CN' ? 'toneCn' : 'toneEn', e.target.value)}
                         className={`w-full flex-1 bg-transparent text-sm ${theme === 'retro' ? 'text-[#3D1A16]' : 'text-zinc-300'} leading-loose border-none focus:outline-none focus:ring-0 resize-none p-0 placeholder-zinc-600 mb-4 overflow-hidden min-h-[128px]`}
                         placeholder={localLang === 'EN' ? "Describe visual style and color logic..." : "在此定义视觉影调、色彩逻辑与美学风格..."}

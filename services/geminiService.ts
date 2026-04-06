@@ -669,7 +669,30 @@ export const generateFantasyTraverse = async (driver: DriverType, duration: stri
             contents: { parts: parts },
             config: { responseMimeType: 'application/json' }
         }));
-        return cleanAndParseJSON(response.text || "") || [];
+        const rawText = response.text || "";
+        const parsed = cleanAndParseJSON(rawText);
+        
+        if (parsed) {
+            if (!Array.isArray(parsed)) {
+                // E.g. model returns a single object payload or nested root wrapper
+                return parsed.treatments ? parsed.treatments : [parsed];
+            }
+            return parsed;
+        }
+
+        // Fallback if parsing totally failed
+        if (rawText.length > 50) {
+            return [{
+                id: "fallback_1",
+                type: "CLASSIC",
+                title: "Generated Concept",
+                tagline: "Extracted from raw model output",
+                pitch: rawText,
+                structure: "UNKNOWN",
+                visualAnchor: ""
+            }];
+        }
+        return [];
     } catch (e: any) {
         handleApiError("Fantasy Traverse Generate Error", e);
         return [];
@@ -694,7 +717,43 @@ export const generateBlueprint = async (driver: DriverType, treatment: CreativeT
             contents: { parts: parts },
             config: { responseMimeType: 'application/json' }
         }));
-        return cleanAndParseJSON(response.text || "");
+        const rawText = response.text || "";
+        let parsed = cleanAndParseJSON(rawText);
+
+        // Fallback for completely failed JSON string but valid raw text (e.g. DeepSeek/Claude raw strings)
+        if (!parsed && rawText.length > 50) {
+            parsed = {
+                narrative: {
+                    title: treatment.title || "Generated Draft",
+                    logline: treatment.tagline || "Raw generation",
+                    synopsis: rawText
+                }
+            };
+        }
+
+        // Deal with array wrapping
+        if (parsed && Array.isArray(parsed)) {
+            parsed = parsed.length > 0 ? parsed[0] : {};
+        }
+
+        // Deal with missing narrative/context wrappers (models returning flat JSON)
+        if (parsed && !parsed.narrative) {
+            parsed.narrative = {
+                title: parsed.title || treatment.title || "Untitled",
+                logline: parsed.logline || parsed.tagline || "",
+                synopsis: parsed.synopsis || parsed.pitch || rawText || ""
+            };
+        }
+        
+        if (parsed && !parsed.context) {
+            parsed.context = {
+                world: parsed.world || parsed.worldCn || parsed.worldEn || "",
+                tone: parsed.tone || parsed.toneCn || parsed.toneEn || "",
+                colorPalette: parsed.colorPalette || colorPalette || []
+            };
+        }
+
+        return parsed;
     } catch (e: any) {
         handleApiError("Blueprint Generate Error", e);
         return null;
