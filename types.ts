@@ -37,10 +37,16 @@ export interface LibraryItemDef {
   id: string;
   name: string;
   nameEn?: string;
-  def: string;
+  def?: string;
   defEn?: string;
   core?: string;
   coreEn?: string;
+  essence?: string;
+  essenceEn?: string;
+  reference?: string;
+  referenceEn?: string;
+  reality?: string;
+  realityEn?: string;
   group?: string;
   groupEn?: string;
   flaw?: string;
@@ -515,7 +521,7 @@ export interface LibraryCategoryDef {
   territoryGroups?: TerritoryGroup[];
 }
 
-export type HistoryType = 'NARRATIVE' | 'METONYMY';
+export type HistoryType = 'NARRATIVE' | 'METONYMY' | 'BIBLE';
 
 export interface HistoryItem {
   id: number;

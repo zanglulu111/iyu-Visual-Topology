@@ -9,14 +9,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
         defEn: "Facing an absolutely incomprehensible truth, the subject's Symbolic firewall is completely burned through. Sanity doesn't vanish; it reorganizes into a madness unparsable by the outside.",
         core: "拉康意义上的精神病（Psychosis）。拒绝承认父性隐喻（Name-of-the-Father）的结果。主体不再受语言规则束缚，坠入妄想性语言的深渊。 | Outcome: 语法的暴力失效。",
         coreEn: "Psychosis in the Lacanian sense. The consequence of foreclosing the Name-of-the-Father. The subject is no longer bound by linguistic rules, plunging into the abyss of delusional speech. | Outcome: Violent invalidation of grammar.",
-        patch: {
-            mechanics: "剥夺所有的任务指引，UI界面上爬满乱码或无意义的重叠文字。主角开始对墙壁开枪或试图拥抱电锯。",
-            mechanicsEn: "Stripping all quest objectives; the UI crawls with gibberish or overlapping meaningless text. The protagonist begins shooting at walls or trying to hug a chainsaw.",
-            aesthetic: "视觉滤镜的高频抽搐。刺耳的高频噪音混杂着主角听不懂的絮语。世界在主角眼中变得极其滑稽、扭曲却充满致命的逻辑感。",
-            aestheticEn: "High-frequency spasming of visual filters. Piercing high-pitch noise mixed with babble the protagonist doesn't understand. The world appears extremely comical, distorted, yet fatally logical to the subject.",
-            runtime: "IF (主体面对绝对不可理喻的真相，符号界防火墙被彻底烧穿) THEN (将主体的认知渲染管线强制从World Space断开，转而载入一个充满随机变量且z-index异常的非法矩阵，UI爬满乱码)。",
-            runtimeEn: "IF (Subject_Faces_Incomprehensible_Truth_And_Symbolic_Firewall_Burns_Through) THEN (Forcibly disconnect subject Cognitive Rendering Pipeline from World Space, load an illegal matrix riddled with random variables and abnormal z-indexes, UI crawls with gibberish)."
-        }
+        reference: "《闪灵》杰克受困空屋雪局终提斧裂门坠无际狂乱；《寄生虫》底层血案后彻底痴狂钻入暗无天日地下室鬼笑的爹。",
+        referenceEn: "Jack lifting axe collapsing inside snowy maze madness; dead poor father escaping to pitch black bunker."
     },
     {
         id: "res_world_destroy",
@@ -26,14 +20,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
         defEn: "Not only does the subject go mad, the entire world's physical structure and logical base go mad alongside. The sky tears open, and a terrifying Real not belonging to this dimension floods in.",
         core: "克苏鲁式的终局。原本用胶带勉强粘贴的现实幕布被彻底撕裂，“物（Das Ding）”的本来面目裸露在地平线上。 | Outcome: 现实原则的完全坍塌。",
         coreEn: "Lovecraftian endgame. The curtain of reality, barely held together by duct tape, is thoroughly ripped apart; the true face of 'Das Thing' lays bare on the horizon. | Outcome: Total collapse of the reality principle.",
-        patch: {
-            mechanics: "所有的物理定律停止运作。重力反转，海水倒流向天空，地图边界崩塌，原本的敌人和朋友在这碾碎一切的灾变中化为灰烬。",
-            mechanicsEn: "All laws of physics cease functioning. Gravity inverts, seawater flows skyward, map borders collapse; former enemies and friends turn to ash in this all-crushing cataclysm.",
-            aesthetic: "全屏幕的毁灭奇观，但不是好莱坞式的爆炸，而是带有肉质寄生和几何扭曲的异化崩解。红黑相间的低音轰鸣，犹如极光坠落。",
-            aestheticEn: "Full-screen destruction spectacle, but not Hollywood explosions—rather an alienating disintegration with fleshy parasitism and geometric distortion. Red/black bass roaring, like dropping auroras.",
-            runtime: "IF (所有物理定律停止运作，重力反转海水倒流地图边界崩塌) THEN (引擎主进程Crash之前蓄意内存泄漏，强制载入所有超出VRAM限界的高模素材，令显卡渲染溢出直至黑屏)。",
-            runtimeEn: "IF (All_Physics_Laws_Cease_Gravity_Inverts_Map_Borders_Collapse) THEN (Deliberate memory leak prior to engine master process Crash, forcibly load all high-poly assets exceeding VRAM limits, rendering overflow until black screen)."
-        }
+        reference: "《林中小屋》巨手生撕布景冲穿烂戏血覆全境；《末日危途》天崩灰没寸寸焚灭所有食物人类无边饥食地狱末世。",
+        referenceEn: "Giant god hand tearing fake cabin lab rules up; burning grey sky erasing foods birthing cannibal end."
     },
     {
         id: "res_mutual_destruction",
@@ -43,14 +31,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
         defEn: "The subject embraces the invincible villain/destiny, injecting all energy into an absolute collision. Not to win, but to ensuring 'mutual destruction' inevitably occurs.",
         core: "激进的负和游戏（Negative-sum game）。既然我无法通过你进入象征界，那我就拉着你一起坠回实在界的虚无。 | Outcome: 宿主的自杀式引爆。",
         coreEn: "Radical negative-sum game. Since I cannot enter the Symbolic through you, I will drag you with me plunging back into the void of the Real. | Outcome: Suicide detonation of the host.",
-        patch: {
-            mechanics: "在判定生命归零前，主角发动了禁忌指令，用肉体锁死反派的脱逃空间机制，随后引发核爆级别的全屏伤害清除。",
-            mechanicsEn: "Before HP is verified as zero, the protagonist triggers a forbidden command, locking the villain's escape mechanism with their own flesh, followed by a nuke-level full-screen damage clear.",
-            aesthetic: "极致的高亮度致盲闪光，随后是绝对静音，没有音乐，连背景的火光都没有声音。画面呈现X光般的透视骨骼燃尽效果。",
-            aestheticEn: "Ultimate blinding high-brightness flash, followed by absolute silence—no music, not even the sound of background flames. The screen shows an X-ray-like skeletal burnout effect.",
-            runtime: "IF (主角发动禁忌指令，用肉体锁死反派的脱逃空间机制) THEN (强制捕获两个最高级Entity的指针，调用未授权的FreeMemory()，让两段内存同时触发致命访问保护异常Access Violation)。",
-            runtimeEn: "IF (Protagonist_Triggers_Forbidden_Command_Locking_Villain_Escape_With_Own_Flesh) THEN (Forcibly lock pointers of two top-tier Entities, call unauthorized FreeMemory(), causing both memory blocks to simultaneously trigger fatal Access Violations)."
-        }
+        reference: "《终结者2》T800随液态魔一同落熔炉死毁；《暗花》被大佬黑白通吃的弃警悍匪在监房血斗对射同归于尽。",
+        referenceEn: "T800 dropping into steel melt dragging liquid demon; discarded rogue cops shooting each other dead in cells."
     },
     {
         id: "res_chaos",
@@ -60,14 +42,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
         defEn: "The system's network of meaning is unraveled. Law, currency, morality, logic instantly become completely invalid; the world regresses into the war of all against all.",
         core: "霍布斯丛林的重现。没有了“大他者”的维持，人与人之间的距离测量仪失效，剩下的只有赤裸裸的血肉倾轧。 | Outcome: 结构主义的末日。",
         coreEn: "Resurgence of the Hobbesian jungle. Without the Big Other's maintenance, the distance-measuring gauge between humans fails, leaving only naked fleshly crushing. | Outcome: Doomsday of structuralism.",
-        patch: {
-            mechanics: "所有的势力声望、金钱单位和交易系统彻底变成无效烂代码。安全区（Safe Zone）判定取消，原本中立友善的NPC开始互相撕咬。",
-            mechanicsEn: "All faction reputations, currency units, and trade systems become totally invalid junk code. Safe Zone status canceled; originally neutral/friendly NPCs start tearing into each other.",
-            aesthetic: "极度混乱但没有任何“主角光环”保护的大远景。惨叫、火焰与毫无理由的屠杀交织，犹如地狱绘图般令人作呕且毫无意义的拥挤。",
-            aestheticEn: "Extremely chaotic wide shot with zero 'plot armor' protection. Screams, fire, and reasonless slaughter intertwine, like an infernal painting—nauseating and meaninglessly crowded.",
-            runtime: "IF (所有势力声望、金钱单位和交易系统彻底变成无效烂代码，安全区判定取消) THEN (在状态机中执行DeleteAllRules()，擦除所有敌我识别IFF，将所有NPC的寻路逻辑切换为就近仇恨计算)。",
-            runtimeEn: "IF (All_Faction_Reputations_Currency_Trade_Systems_Become_Invalid_Safe_Zones_Canceled) THEN (Execute DeleteAllRules() in state machine, wipe all IFF, switch all NPC pathfinding logic to nearest-neighbor aggro calculus)."
-        }
+        reference: "《蝇王》流落孤岛少年全失教化化作血腥野兽猎族；《盲流感》突发全城眼瞎后瞬间暴降回粪尿满地原始暴政。",
+        referenceEn: "Stranded boys decaying rapid back to bloody wild hunter; blinded city instantly becoming raped shitty hell."
     },
     {
         id: "res_paranoia",
@@ -77,14 +53,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
         defEn: "The subject falls into systemic extreme suspicion, believing the Big Other (or demon) hides in every detail. All coincidences are woven into a fatal conspiracy net targeting them.",
         core: "妄想狂的至高境界：宇宙中没有任何偶然。这是一种过度防御，主体宁愿被一个万能的魔鬼迫害，也不愿承认世界的随机与无序。 | Outcome: 意义的反向过载。",
         coreEn: "The highest realm of the paranoiac: there are no accidents in the universe. An over-defense: the subject prefers persecution by an omnipotent demon over admitting the world's random disorder. | Outcome: Reverse overload of meaning.",
-        patch: {
-            mechanics: "UI疯狂高亮各种极其普通的物件（一个水杯、一条裂缝），并弹出一连串恐怖且荒谬的推论。任何原本帮助主角的角色都被打上极端的红名仇恨标签。",
-            mechanicsEn: "The UI frantically highlights incredibly ordinary objects (a cup, a crack) and pops up a string of terrifying, absurd deductions. Any character previously helping the protagonist is tagged with extreme red-name aggro.",
-            aesthetic: "眼球布满血丝的主观视角特写（FPS式颤抖）。快速剪辑。所有声音都变得像是带有恶意的窃窃私语。光线呈幽闭的惨绿色。",
-            aestheticEn: "Bloodshot subjective POV close-ups (FPS-style jitter). Rapid editing. All sounds resemble malicious whispers. Lighting takes on a claustrophobic sickening green.",
-            runtime: "IF (主体陷入系统性极度怀疑，认为大他者藏身于一切细节之中) THEN (过度激活寻找线索Clue Finding的算法，将随机噪点全部强转为致命威胁Fatal Threat矢量进行强制计算，所有帮助者被打上红名仇恨标签)。",
-            runtimeEn: "IF (Subject_Falls_Into_Systemic_Extreme_Suspicion_Big_Other_Hides_In_All_Details) THEN (Over-activate Clue Finding algorithm, forcefully convert all random noise points into Fatal Threat vectors for mandatory calculation, all helpers tagged with red-name aggro)."
-        }
+        reference: "《禁闭岛》探长坠无底深渊死信全岛皆敌极大阴谋；《风声》重压牢内生生互猎极权抓鬼刑虐狂乱死斗撕陷。",
+        referenceEn: "Detective locking self inside mental vast island plot; spys snapping tearing kin alive in bloody shadow hunt."
     },
     {
         id: "res_suicide",
@@ -94,14 +64,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
         defEn: "Facing an impenetrable dilemma, the subject ends their life with an extremely sudden, direct action devoid of any symbolic transition (drawing a gun and shoving it in their mouth).",
         core: "拉康的“诉诸行动（Passage à l'acte）”。主体不是在演一出悲剧，而是在面临符号系统死锁时，生硬地将自己当作一个物理垃圾扔出了窗外。 | Outcome: 主体的物理删除。",
         coreEn: "Lacan's 'Passage à l'acte'. The subject is not acting a tragedy, but facing a Symbolic deadlock, bluntly throwing themselves out the window like physical trash. | Outcome: Physical deletion of the subject.",
-        patch: {
-            mechanics: "毫无预兆。在对话说到一半，或刚刚打完一个普通小兵的过场中，主角突然将凶器对准自己并未留反应余地直接点击了处决。",
-            mechanicsEn: "Zero warning. Mid-dialogue, or in a cutscene just after defeating a normal grunt, the protagonist suddenly points the weapon at themselves and, leaving no room to react, hits execute.",
-            aesthetic: "没有慢动作，没有悲壮配乐，正如现实中车祸般短促和暴烈。尸体沉闷落地的声音，镜头立刻变成了冰冷的旁观者机位。",
-            aestheticEn: "No slow motion, no tragic score, just as brief and violent as a real-life car crash. The dull thud of the body landing; the camera immediately switches to a cold bystander angle.",
-            runtime: "IF (对话说到一半或普通过场中，主角毫无预兆地将凶器对准自己并点击处决) THEN (抛出未捕获的InterruptException，不走正常血量为0判定，而是直接调用底层TerminateThread掐断运行环境)。",
-            runtimeEn: "IF (Mid_Dialogue_Or_Cutscene_Protagonist_Suddenly_Points_Weapon_At_Self_And_Executes) THEN (Throw uncaught InterruptException, bypassing normal HP zero evaluation, directly calling base TerminateThread to slice the runtime environment)."
-        }
+        reference: "《全金属外壳》胖兵绝局中举枪塞烂嘴吞弹轰壁；《死亡诗社》尼尔不忍父权死锁无辞骤然对脑开枪物理终结。",
+        referenceEn: "Fat private chewing rifle in stark toilet hell end; acting teen blasting brain instantly out of cold father."
     },
     {
         id: "res_kill_all",
@@ -111,14 +75,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
         defEn: "Super-collapse of morality. The death-drive (Thanatos) thoroughly breaks the bindings of the life-drive (Eros). The subject becomes a pure killing machine.",
         core: "不再区分正义或邪恶，大他者的律法全被焚为了灰烬。只剩下纯粹发泄性的破坏欲，将视线内移动的一切实体拆解为红色的零件。 | Outcome: 血肉的机械粉碎。",
         coreEn: "No longer distinguishing justice or evil; the Big Other's laws are all burnt to ash. Leaving only pure venting destructive urge, dismantling all moving entities in sight into red components. | Outcome: Mechanical pulverization of flesh.",
-        patch: {
-            mechanics: "武器过载发热不退，所有NPC无论派系一律呈现并强行触发其最痛苦的受击硬直与处决特效。没有对话，只有按键触发的砍杀动画。",
-            mechanicsEn: "Weapons overheat without cooling down. All NPCs, regardless of faction, are forced into triggering their most painful hit-stun and execution VFX. No dialogue, only button-triggered hacking animations.",
-            aesthetic: "极度血腥的喷溅与镜头上擦不干的血污。重金属狂躁配乐覆盖一切。主角的笑声由于混音被扭曲得像电锯般撕裂神经。",
-            aestheticEn: "Extremely bloody splatters and un-wipeable blood smears on the lens. Manic heavy metal drowns out everything. The protagonist's laughter is mixed to sound like a chainsaw tearing at nerves.",
-            runtime: "IF (死本能Thanatos彻底冲断爱本能Eros的束缚，武器过载发热不退) THEN (将角色的火力倍率Damage Multiplier锁定最大值，并挂载一个强制遍历全图实体的DestroyObjects无限循环脚本)。",
-            runtimeEn: "IF (Thanatos_Completely_Breaks_Eros_Bindings_Weapons_Overheat_Without_Cooling) THEN (Lock character Damage Multiplier to max value, attach an infinite loop script to DestroyObjects via forced full-map entity traversal)."
-        }
+        reference: "《杀死比尔》新娘黄衣血洗东京冷酷杀穿百人刀阵；《大象》沉闷高中内无辜生遭暴走同窗无差别机枪屠灭。",
+        referenceEn: "Bride ripping 100 yakuza heads entirely into raw blood; silent high school sprayed bluntly by cold teen rifles."
     },
     {
         id: "res_monster_mutated",
@@ -128,14 +86,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
         defEn: "Not just an assimilation of will; the subject's physical body sprouts hyperplasias or tentacles not belonging to this dimension, degenerating thoroughly into an abyssal mutant without self-awareness.",
         core: "人类主体性在实在界面前的可悲溃烂。因为无法处理那些被禁忌的庞大驱力，这股力比多直接将血肉撑破、扭曲成无以名状的肉块。 | Outcome: 几何拓扑的畸变。",
         coreEn: "The pathetic festering of human subjectivity before the Real. Unable to process massive taboo drives, the libido directly ruptures flesh, twisting it into unspeakable chunks of meat. | Outcome: Mutation of geometric topology.",
-        patch: {
-            mechanics: "在过度汲取深渊能量（如服用过多禁药、接触不可名状文物）后，主角在屏幕中央剧烈抽搐，衣服破裂，模型被强替换为一个面目全非的Boss级怪物。",
-            mechanicsEn: "After over-absorbing abyssal energy (e.g., taking too many forbidden drugs, contacting unspeakable artifacts), the protagonist violently spasms center-screen, clothes ripping, their model forcibly swapped for an unrecognizable Boss-level monster.",
-            aesthetic: "骨骼变形开裂的嘎吱恶心音效。角色最后的一声人声从痛苦转为了沉闷、粘稠的巨大非人咆哮。冷血与恶心交织，大片浓稠粘液。",
-            aestheticEn: "Sickening crunching sound effects of bones deforming and cracking. The character's last human vocal inflection twists from agony into a dull, viscous, massive non-human roar. Cold-blooded horror mixed with thick slime.",
-            runtime: "IF (过度汲取深渊能量后主角剧烈抽搐，衣服破裂模型被强替换) THEN (调用MeshDeformation函数，向角色骨骼BindPose中注入过量的随机矩阵变换，引发剧烈的坐标穿模爆炸)。",
-            runtimeEn: "IF (Protagonist_Violently_Spasms_After_Over_Absorbing_Abyssal_Energy_Model_Force_Swapped) THEN (Call MeshDeformation function, inject excessive random matrix transforms into character bones BindPose, inciting massive coordinate clipping explosions)."
-        }
+        reference: "《阿基拉》超载异能将铁雄生生崩化为骇世大肉山；《变蝇人》狂痴科学家烂鼻落睫异化为满地拉粘液巨腐蝇。",
+        referenceEn: "Tetsuo bursting to giant ugly flesh blob over psychic limits; scientist dripping ears turning huge vile fly maggot."
     },
     {
         id: "res_void_consume",
@@ -145,14 +97,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
         defEn: "The subject plunges into a pure void with no up or down dimension, no boundary, swallowing light and sound waves. It is the absolute silence left behind after the Big Other completely disperses.",
         core: "《深渊（The Abyss）》。面对着实在界那个不具备面孔的巨大空洞，主体的意识被无限稀释，被那个巨大的“物”完全生吞。 | Outcome: 存在的强行注销。",
         coreEn: "The Abyss. Facing the faceless massive void of the Real, the subject's consciousness is infinitely diluted, swallowed entirely alive by that giant 'Thing'. | Outcome: Forcible deregistration of existence.",
-        patch: {
-            mechanics: "主角被吸入黑洞或跌下无止尽的深渊。没有尽头没有着陆点。UI面板上的氧气或理智在一分一秒漏空。",
-            mechanicsEn: "The protagonist is sucked into a black hole or falls down an endless abyss. No bottom, no landing point. Oxygen or Sanity on the UI panel drains second by second.",
-            aesthetic: "全宇宙只剩下极致的黑色与极其缓慢微小的主角剪影。连呼吸声都被压缩成了某种耳鸣频率。一种漫长到仿佛永恒窒息的极度恐慌。",
-            aestheticEn: "The entire universe is reduced to supreme black and an extremely slow, tiny silhouette of the protagonist. Even breath is compressed to a certain tinnitus frequency. A profound panic of an endlessly long, eternal suffocation.",
-            runtime: "IF (主角被吸入黑洞或跌下无止尽的深渊，UI面板上的氧气或理智一秒一秒漏空) THEN (由于摄像机进入了没有任何反射射线的Null Space，渲染管线停止工作，玩家除了看进度条见底别无他法)。",
-            runtimeEn: "IF (Protagonist_Sucked_Into_Black_Hole_Or_Falls_Endless_Abyss_Oxygen_Sanity_Drains) THEN (Camera enters Null Space devoid of bounce rays, render pipeline stops, player has no option but watch the progress bar bottom out)."
-        }
+        reference: "《湮灭》深入极光域被外星幻彩冷界拆为树形死晶；《索尔之子》茫茫灰烬毒气全吃人不吐骨大毒营里被拖没。",
+        referenceEn: "Consumed to crystal floral shards in cold shimmer light; hauled completely off in stark endless grey gas camps."
     },
     {
         id: "res_glitch",
@@ -162,14 +108,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
         defEn: "The renderer of the world itself spasms. The subject realizes that even the act of 'collapse' operates via shoddy base code, spiraling into an incurable meta-terror.",
         core: "《心跳文学部》或《赛博朋克2077》的Relic故障化验。恐怖的不是怪物，而是你脚下的地板像素突然丢失碰撞体积，将你拽入虚空底图。 | Outcome: 维度的穿模。",
         coreEn: "Doki Doki Literature Club or Cyberpunk 2077's Relic glitch exam. The terror isn't the monster, but the floor pixels beneath your feet suddenly losing collision boxes, dragging you into the void basemap. | Outcome: Clipping of dimensions.",
-        patch: {
-            mechanics: "人物在走路时突然卡在某两帧之间反复倒带，或身体的一部分无限拉长直至插入天空。对话框显示的是内存十六进制地址。",
-            mechanicsEn: "Character suddenly stutters backward and forward between two frames while walking, or a body part stretches infinitely into the sky. Dialog boxes display hex memory addresses.",
-            aesthetic: "电子干扰的刺耳蜂鸣（Beep）。高反差的绿紫像素块割裂整个视野，人物脸部模型在瞬间错位，五官犹如毕加索立体派般被打乱。",
-            aestheticEn: "Ear-piercing electronic interference beep. High-contrast green/purple pixel blocks shred the FOV; character face models dislocate instantly, features scrambled like Picasso's cubism.",
-            runtime: "IF (人物在走路时突然卡在某两帧之间反复倒带，或身体部分无限拉长插入天空) THEN (强行写入大量内存错误Dirty Words干扰显存分配器，并在渲染层面上叠加具有撕裂算法的Glitch Shader)。",
-            runtimeEn: "IF (Character_Stutters_Between_Two_Frames_Or_Body_Part_Stretches_Infinitely_Into_Sky) THEN (Forcibly write vast memory errors Dirty Words to interfere with VRAM allocator, superimpose a Glitch Shader armed with tearing algorithms over the render layer)."
-        }
+        reference: "《楚门的世界》天降片灯撕裂海景虚假穹顶全撞破；《心跳文学部》诡手挖出代码直接删除心仪女孩立绘惊烂。",
+        referenceEn: "Light dropping cracking fake sea sky Truman reality; horrid AI hand deleting 2D girls rotting script engine."
     },
     {
         id: "res_schizophrenia",
@@ -179,14 +119,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
         defEn: "The mirror stage is detonated. That once cobbled-together vain 'Ego', unable to withstand the impact of truth, shatters into countless unaffiliated, bickering fragmented personalities.",
         core: "主体结构的玻璃渣化。再也没有一个发号施令的“我”，有的只是几十个抢夺身体麦克风的驱力碎块在进行无意义的狂欢。 | Outcome: 内在中心点的核爆。",
         coreEn: "Glass-ization of subjective structure. There is no longer an 'I' giving commands, only dozens of drive fragments fighting over the body's microphone engaging in meaningless revelry. | Outcome: Nuke of the inner focal point.",
-        patch: {
-            mechanics: "主角丧失了控制权。在极短时间内，按键操作被不断篡改反馈。按左可能是攻击，按跳可能是下蹲，并在各种声线间来回切换嘶吼。",
-            mechanicsEn: "Protagonist loses control. In a short span, input feedback is constantly tampered with. Pressing left might attack, pressing jump might crouch, whilst screaming back and forth between different voice types.",
-            aesthetic: "多重幻影或碎屏式的分割镜头。耳边环绕着极度喧闹的争吵声、婴儿哭声与老人的咒骂。主角抓着自己的头在地上打滚，犹如被群鬼附身。",
-            aestheticEn: "Multiple phantoms or shattered-screen split-screen shots. Surround ears with extremely raucous arguments, baby cries and old man's curses. The protagonist grasps his head rolling on the floor like possessed by a horde of ghosts.",
-            runtime: "IF (主角丧失控制权，按键操作被不断篡改反馈，按左变攻击按跳变下蹲) THEN (重塑角色的输入映射表Input Mapping网格，并发量挂载数个互相矛盾冲突的AI行动逻辑来劫持角色躯体)。",
-            runtimeEn: "IF (Protagonist_Loses_Control_Input_Feedback_Constantly_Tampered_Left_Is_Attack_Jump_Is_Crouch) THEN (Reform character Input Mapping Grid, concurrently attach multiple contradictory AI action logics to hijack the character body)."
-        }
+        reference: "《致命ID》暴雨旅店十一重人格惊悚互杀全毁断；《美丽心灵》高智纳什难抗现实重击脑内生劈三口虚鬼伴随。",
+        referenceEn: "11 personalities slaughtering in fake dark motel loop; smart Nash busting to 3 ghosts screaming all life alongside."
     },
     {
         id: "res_panic",
@@ -196,14 +130,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
         defEn: "Fear has an object; anxiety does not. In an acutely desperate situation, the subject explodes into a frantic, utterly unfocused panic attack with no exhaust vent.",
         core: "当对象a彻底逼近时所产生的窒息。主体被实在界的阴影无距离贴脸碾压，如同突然发现气管内壁长出了虫子。 | Outcome: 理智值的极速归零。",
         coreEn: "The suffocation generated when object a approaches completely. The subject is point-blank crushed by the shadow of the Real, like suddenly finding worms growing inside the trachea windpipe. | Outcome: Supersonic zeroing of sanity.",
-        patch: {
-            mechanics: "人物不受控制地大口喘气，视线范围（FOV）极度收缩为隧道式视野。心跳声掩盖了除自己惊吼外的一切声音，最终因应激反应直接休克。",
-            mechanicsEn: "Character uncontrollably hyperventilates, Field of View (FOV) contracts extremely into tunnel vision. Heartbeat masks all sounds except their own terrified shrieks, eventually going directly into shock from stress reaction.",
-            aesthetic: "鱼眼镜头加上剧烈的摄像机震动。冷汗般的蓝绿底色，画面周边严重发黑发抖。压抑感大到需要玩家自身摘下耳机的程度。",
-            aestheticEn: "Fisheye lens plus violent camera shake. Cold-sweat blue-green base, severe vignetting and shivering around the edges. Oppressiveness so massive it requires the player to take off their headphones.",
-            runtime: "IF (人物不受控制地大口喘气，FOV极度收缩为隧道式视野，心跳声掩盖一切) THEN (引爆CameraShake事件池至过载，并在后处理单元写入强行挤压可视裁剪面的恐怖算法参数)。",
-            runtimeEn: "IF (Character_Uncontrollably_Hyperventilates_FOV_Contracts_To_Tunnel_Vision_Heartbeat_Masks_All) THEN (Detonate CameraShake event pool into overload, write terrifying algorithm parameters into post-processing unit that forcibly crush the Visible Clipping Plane)."
-        }
+        reference: "《闪灵》雪宫孤妻遇极压全崩化作狂哮女死挥寸刀；《原钻》满屏债务连环锁雷爆极乱暴恐窒息下赌徒全盘爆裂。",
+        referenceEn: "Trapped pale wife screeching blind knife in snow maze; manic jeweler gamboling massive debt up to explosive death."
     },
     {
         id: "res_catatonic",
@@ -213,14 +141,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
         defEn: "After bearing a highly destructive mental shock from the truth, the subject's consciousness doesn't scatter; instead, it rigidly deadlocks into extremely profound physical paralysis and muscle rigor.",
         core: "被美杜莎之眼石化。当遭遇实在界的核爆后，驱力系统拉闸熔断，主体变成了一具依然在呼吸但也只有呼吸的兵马俑。 | Outcome: 肉体与意向的冰封。",
         coreEn: "Petrification by Medusa's Gaze. After the nuclear explosion of the Real, the drive system's breaker trips and melts; the subject turns into a terracotta warrior that still breathes—and only breathes. | Outcome: Deep freeze of flesh and intention.",
-        patch: {
-            mechanics: "原本在狂怒战斗的主角在看到某个录像后，剑停在半空，身躯不受控制地逐渐固定，之后无论怎么挨打也不会再发出声音或者移动一寸。",
-            mechanicsEn: "The protagonist fighting furiously halts their sword mid-air upon seeing a certain tape; body uncontrollably fixating, thereafter no matter how much they are hit, they make no sound nor move an inch.",
-            aesthetic: "惊恐大张的双眼定住了。镜头极其安静地绕着他做 360 度的特写平移，展现大理石化般紧绷扭曲的肌肉和被汗水浸透停止流动的画面。",
-            aestheticEn: "Terrified wide-open eyes frozen. Camera exceedingly quietly does a 360-degree close-up pan around them, showing tension-warped muscles like marble and the sweat-soaked static frame.",
-            runtime: "IF (主角看到某个录像后剑停在半空，身躯不受控制地逐渐固定) THEN (将实体的所有Animation Nodes状态机的PlayRate直接设为0，不处理死亡，只是把存在的时间流锁死不进帧)。",
-            runtimeEn: "IF (Protagonist_Sees_Certain_Tape_Sword_Halts_Midair_Body_Uncontrollably_Fixates) THEN (Directly set PlayRate of all entity Animation Nodes state machines to 0, not processing death, just deadlocking the temporal flow of existence advancing no frames)."
-        }
+        reference: "《飞越疯人院》墨菲遭切除脑白质化作痴傻活尿死草；《禁闭岛》探长难平真创自取钢签脑刺沦僵默瘫石化死壳。",
+        referenceEn: "Rebellious Murphy lobotomized to drooling silent veggy; detective faking madness to take freezing brain spike completely."
     },
     {
         id: "res_self_cannibalize",
@@ -230,14 +152,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
         defEn: "Realizing the Big Other is also void, the subject redirects hatred and predatory desire upon themselves. Seeking release through extremely bloody self-consumption (whether mental or physical).",
         core: "死本能的最疯狂内爆。外界没有救赎甚至没有惩罚，那么唯有在撕咬自己血肉的绝对痛觉中，才能证实自己此刻活着。 | Outcome: 血肉的莫比乌斯环。",
         coreEn: "The madest implosion of the death instinct. The outside has no salvation or even punishment; thus, only in the absolute pain of tearing their own flesh can they verify they are alive in this moment. | Outcome: Möbius strip of flesh and blood.",
-        patch: {
-            mechanics: "断绝对外界的所有攻击动作，主角开始使用技能与武器狂热地产出基于自身模型的伤害数字，系统发出连续的“致命伤（Critical）”提示。",
-            mechanicsEn: "Severing all attack actions against the outside, the protagonist begins using skills and weapons to fanatically generate damage numbers on their own model; the system emits continuous 'Critical hit' prompts.",
-            aesthetic: "极度令人不适的反差。一边疯狂咬噬自己拉出带血的肠子或皮肉，一边面露极乐的癫笑。大滩的番茄酱红占据视觉中心。",
-            aestheticEn: "Profoundly uncomfortable dissonance. While frenziedly gnawing themselves, pulling out bloody intestines or flesh, displaying a blissful maniacal laughter. Pools of excessive ketchup-red dominate the center of vision.",
-            runtime: "IF (主角断绝对外界的所有攻击动作，开始使用技能与武器狂热地对自身模型产出伤害数字) THEN (反转角色的伤害判定计算公式，令所有向外的碰撞检测向量100%折返刺入自己的源对象根部Root Point)。",
-            runtimeEn: "IF (Protagonist_Severs_All_External_Attacks_Fanatically_Generates_Damage_Numbers_On_Own_Model) THEN (Invert character Damage Calculation Formula, making all outward collision detection vectors ricochet 100% back to stab their own source Root Point)."
-        }
+        reference: "《梦之安魂曲》吸毒烂臂少男死拔肉黑洞狂陷尽绝；《黑天鹅》顶峰狂舞自刺肚腹妄求残缺黑极至美终流自身血。",
+        referenceEn: "Addict popping needle black arm hole unto raw amputation; Swan stabbing own gut to dance perfect twisted bloody finale."
     },
     {
         id: "res_blind_deaf",
@@ -247,14 +163,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
         defEn: "The system uses extreme physical atrocity to gouge out the subject's eyes, destroy their hearing, and sever their tongue, locking them permanently within a lightless, soundless insulated mental purgatory.",
         core: "海伦凯勒的地狱版。《黑手党》式最毒的黑帮刑罚——由于没有了接收器（五官），主体的任何思想都在黑暗中疯狂反射至死。 | Outcome: 肉体监牢的绝对闭合。",
         coreEn: "A hellish version of Helen Keller. The most poisonous Mafia-style punishment—without receivers (senses), any thoughts of the subject reflect frantically back into the dark unto death. | Outcome: Absolute closure of the fleshly prison.",
-        patch: {
-            mechanics: "先拔掉环境音乐，然后拔掉所有音效。屏幕上的光亮范围极速缩小直到黑屏。玩家只能根据手柄不可名状但微弱的震动感知主角依然活着且在挣扎。",
-            mechanicsEn: "First unplug ambient music, then all SFX. The lit range on the screen contracts extremely rapidly to black. The player can only sense the protagonist is still alive and struggling through indescribable, faint gamepad vibrations.",
-            aesthetic: "从极致的血腥残酷过场直接剪辑至“物理级别的纯黑加纯静音”，这种视觉上的落差造成了恐怖的真空晕眩感。",
-            aestheticEn: "Direct cut from extremely bloody and cruel cinematic to 'physical-level pure pitch black plus pure silence'; this visual drop causes a terrifying vacuum-like dizziness.",
-            runtime: "IF (先拔掉环境音乐，再拔掉所有音效，屏幕光亮范围极速缩小直到黑屏) THEN (调用引擎最底层的机制挂起Suspend：关闭AudioListener和全局Rendering Layers，仅留最微弱的循环输入作为主机的生存证明)。",
-            runtimeEn: "IF (Ambient_Music_Pulled_Then_All_SFX_Pulled_Screen_Lit_Range_Contracts_To_Black) THEN (Invoke engine base-level Suspend: kill AudioListener and global Rendering Layers, leaving only the faintest input loop as proof of host survival)."
-        }
+        reference: "《无语问苍天》遭爆地雷断四肢无脸兵成悲绝幽灵；《老男孩》为护乱女求活狗跪自剪血舌终身成绝言盲吞剧痛瞎兽。",
+        referenceEn: "Mine-blown soldier no face limbs locked screaming in dark; vengeful father scissoring tongue out dead silent weeping cur."
     },
     {
         id: "res_burn_all",
@@ -264,14 +174,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
         defEn: "Stimulated by the collapse of faith or utter betrayal, sanity turns to a crazed arsonist drive. The subject drags the sacred and secular architecture, along with history, into the cleansing crimson flames.",
         core: "《权力的游戏》龙妈的君临城火舞。“既然他们得拯救是如此虚伪而且丑陋，那不如让火焰清算一切。”尼禄式的恶魔狂喜。 | Outcome: 净化为废土之灰。",
         coreEn: "Daenerys's dragonfire dance over King's Landing. 'Since their salvation is so hypocritical and ugly, better to let flame settle everything.' Nero-esque demonic ecstasy. | Outcome: Cleansed to wasteland ash.",
-        patch: {
-            mechanics: "主角在油库或核心反应堆按下了引爆键，或者提着喷火器在曾经试图保护的城市中心无差别地走动喷射。大火不会在建筑边沿停止。",
-            mechanicsEn: "The protagonist hits the detonate button at the oil depot or core reactor, or walks indiscriminately spraying a flamethrower in the center of the city they once tried to protect. Fire does not stop at building edges.",
-            aesthetic: "占据绝大画面的高温橘红色和升腾的黑色浓烟，空气在火焰的折射下极度扭曲。配乐使用某种令人毛骨悚然的优美古典咏叹调。",
-            aestheticEn: "High-temperature orange-red dominating the huge frame and ascending thick black smoke; air highly distorted by heat refraction. Soundtrack utilizes a creepy, beautiful classical aria.",
-            runtime: "IF (主角在油库或核心反应堆按下引爆键，或者提着喷火器在城市中心无差别喷射) THEN (在地形系统Terrain与建筑组件上全局触发Ignite方法，将全图所有文化产物参数与繁荣变量在几分钟内烧结成0)。",
-            runtimeEn: "IF (Protagonist_Hits_Detonate_At_Oil_Depot_Or_Reactor_Or_Sprays_Flamethrower_In_City_Center) THEN (Globally trigger Ignite method on Terrain system and architectural components, sinter all Cultural Output Parameters and Prosperity Variables map-wide to 0 within minutes)."
-        }
+        reference: "《权力的游戏》龙妈怒燃红焰火屠君临将敌民俱焚成死灰；《燃烧》空虚绝底男燃火燎尽绿棚也点毁枯心血原真境。",
+        referenceEn: "Dragon spraying inferno bleaching loud city to dead charcoal; stark youth setting green shacks and cruel rich alive totally."
     },
     {
         id: "res_betray_all",
@@ -281,14 +185,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
         defEn: "The subject suddenly sinks into the deepest Machiavellian black hole; without any coercion or bribe from the Big Other, purely and autonomously betraying all comrades, kin, and subordinates.",
         core: "这是对人伦底线的蓄意强暴。只有亲手将一切牵绊斩断，主体才能以最畸形的方式验证自己不被任何道德因果律所控制。 | Outcome: 最黑的尤达大师。",
         coreEn: "This is a deliberate rape of ethical baselines. Only by personally severing all ties can the subject verify in the most deformed way that they are un-controlled by any moral causality. | Outcome: The darkest Master Yoda.",
-        patch: {
-            mechanics: "在毫无预警的情况下，在最重要的庆功宴或反抗会议上发难。从暗处调出处刑名单，无差别屠戮之前一直用血肉支援主角的配角池。",
-            mechanicsEn: "With zero warning, striking at the most crucial celebration or rebel meeting. Executing from the dark a hit-list, indiscriminately slaughtering the supporting cast who previously backed the protagonist with blood.",
-            aesthetic: "极度冷血的手法和几乎像算账单一样木然的表情。配角们脸上的错愕、震惊和泪水甚至来不及定格。冰冷的枪栓声。",
-            aestheticEn: "Supremely cold-blooded execution and a numb expression like tabulating a bill. The astonishment, shock, and tears on the supporting casts' faces haven't even time to solidify. Icy sound of a gun bolt.",
-            runtime: "IF (在毫无预警的情况下于最重要的庆功宴或反抗会议上发难，调出处刑名单) THEN (强行翻转数组，将系统内长期积累的所有信赖增益Trust Buff转化为致残级别的弱点暴击伤害附加Backstab Multiplier)。",
-            runtimeEn: "IF (Zero_Warning_Strike_At_Crucial_Celebration_Or_Rebel_Meeting_Executing_Hit_List) THEN (Forcibly flip arrays, convert all accumulated Trust Buffs into crippling Backstab Multipliers)."
-        }
+        reference: "《教父2》迈克极黑弑兄除绝全家终坐绝空铁血冷王座；《无间道2》倪永孝冷屠四大千叔极黑算尽兄弟抛情尽杀。",
+        referenceEn: "Michael chillingly ordering brother slain seizing black void throne; triad boss mass wiping 4 uncles backstabbing friends."
     },
     {
         id: "res_flesh_prison",
@@ -298,14 +196,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
         defEn: "The soul or nervous system is forcibly extracted and claustrophobically sealed into a highly painful, ugly, yet absolutely physically indestructible chunk of meat or organ vessel; lacking even the slight coolness of moving a finger.",
         core: "《无所不能的哈兰爱丽森:我没有嘴，但我必须呐喊》。最大的酷刑不是死，而是绝对清醒地锁死在这蠕动的内脏监狱中承受无限劫难。 | Outcome: 本体降维成器官。",
         coreEn: "Harlan Ellison: I Have No Mouth, and I Must Scream. The greatest torture isn't death, but being absolutely lucid, locked inside this squirming viscera prison enduring infinite tribulation. | Outcome: Ontology reduced to an organ.",
-        patch: {
-            mechanics: "角色丧失了原有的四肢躯干概念。以第一人称（且只有部分周边模糊视野）被困在有着极度恶心音响反馈的培养皿或活体器官深处。",
-            mechanicsEn: "Character loses the original concept of limbs and torso. Trapped in first-person (with only blurry peripheral vision) deep inside a petri dish or living organ filled with extremely nauseating audio feedback.",
-            aesthetic: "暗红与肉色的黏稠画风。心跳的重低音扑面而来，周围是无尽的血管蠕动，且不时伴随不可名状的酸液腐蚀痛觉音效。",
-            aestheticEn: "Thick dark red and flesh tones. Pounding sub-bass heartbeat; surrounded by endless squirming blood vessels, intermittently accompanied by unspeakable audio of acid corrosion burning pain.",
-            runtime: "IF (角色丧失原有四肢躯干概念，以第一人称被困在培养皿或活体器官深处) THEN (废除Humanoid所有骨骼结构集与移动指令集，把控制对象强转为一个只能输出痛绝回廊反馈日志的只读脏器Organ Node)。",
-            runtimeEn: "IF (Character_Loses_Limb_Concept_Trapped_First_Person_Inside_Petri_Dish_Or_Living_Organ) THEN (Defunct all Humanoid skeletal structure sets and locomotion commands, forcibly typecast control object into read-only Organ Node that only outputs Corridor of Agony feedback logs)."
-        }
+        reference: "《黑镜》将数字罪魂封锁万年雪屋受尽百万年极幽空寂；《潜水钟与蝴蝶》极危瘫主遭全身僵锁唯余独眼狂泣绝暗壳。",
+        referenceEn: "Digital copy trapped millions years inside tiny snow terror; paralyzed man locked totally to blinking one eye meat cage."
     },
     {
         id: "res_infinite_pain",
@@ -315,14 +207,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
         defEn: "The subject plunges into heavily torturous higher-dimensional space unbound by spacetime. Every second is unraveled into ten thousand years, while the subject's sensory pain is cranked infinitely up to the snapping point and locked there.",
         core: "普罗米修斯被啄食肝脏的数字时代重构。当大他者的复仇摆脱了热力学耗尽的限制，痛觉成了横亘在宇宙真理上的不朽纪念碑。 | Outcome: 作为永恒祭品的痛觉。",
         coreEn: "Digital reconstruction of Prometheus having his liver pecked. When the Big Other's vengeance sheds thermodynamic depletion limits, pain becomes the immortal monument spanning universe's truth. | Outcome: Pain as eternal sacrifice.",
-        patch: {
-            mechanics: "所有角色属性归零只保留【痛苦承载量（Suffering Capacity）】。在无间地狱里循环展现出肉身被撕裂粉碎并重组的过程，且主视角无法闭眼。",
-            mechanicsEn: "All character attributes zero out except [Suffering Capacity]. Showing a cyclic process in the unending hell of flesh torn, pulverized, and reconstituted, and the POV cannot close its eyes.",
-            aesthetic: "极端恐怖的体感传递。惨白的极权机器或者满墙生齿渊火交融。惨叫声通过声码器处理出神性回音的诡异残响，令人精神极度震颤失常。",
-            aestheticEn: "Extremely terrifying somatosensory transmission. Pallid totalitarian machinery or walls of gnashing teeth and abyssal fire. Screams vocation-processed with a divine yet eerie echo, causing intense mental tremor and derangement.",
-            runtime: "IF (所有角色属性归零只保留痛苦承载量，主视角无法闭眼地循环展现肉身被撕裂粉碎重组) THEN (系统的核心帧循环被while(true)的死亡函数接管，在抛出内存溢出崩溃Crash之前无穷无尽地渲染出重度的血红色粒子特效)。",
-            runtimeEn: "IF (All_Attributes_Zero_Except_Suffering_Capacity_POV_Cannot_Close_Eyes_Cyclic_Flesh_Torn_Reconstituted) THEN (System core frame loop hijacked by while(true) death function, endlessly rendering heavy blood-red particle effects before throwing out-of-memory Crash)."
-        }
+        reference: "《奇异博士》时间闭环次次惨亡硬吸全痛降魔救世；《耶稣受难记》扛坚木遭血芒铁鞭凌退无极死骨剥满身大苦刑。",
+        referenceEn: "Dr looping bloody dead thousand times breaking dark lord limit; Jesus bleeding shredded strips via brutal nailed spikes entirely."
     },
     {
         id: "res_babel",
@@ -332,14 +218,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
         defEn: "Not physical ruin, but the fracturing of the 'Word' system that constructs meaning itself. Everyone speaks, but no one can understand. The world crumbles into solipsistic, invalid screams.",
         core: "巴别塔的倒塌。当能指不再滑向所指，精神系统就迎来了彻底休克。一切复杂的秩序瞬间瓦解为毫无组织的猿猴群落。 | Outcome: 所指之链的绞断。",
         coreEn: "Collapse of Babel. When signifiers no longer slide toward the signified, the mental system enters total shock. All complex structures instantly disband into unorganized ape colonies. | Outcome: Strangling of the signified chain.",
-        patch: {
-            mechanics: "字幕和UI提示系统渐渐扭曲，原本正常的对白变成了字母重叠组合。NPC之间的交流由于无法识别变成了恐慌和流血冲突。",
-            mechanicsEn: "Subtitles and UI prompt system gradually warp; normal dialogue turns to overlaid letter combinations. NPC interactions turn to panic and bloody conflict due to unrecognizable speech.",
-            aesthetic: "高频嘈杂毫无旋律的人声切片混音（Glitch vocal）。原本繁荣的大都会大街上，人类像丧尸一样陷入因恐惧而爆发的群体斗殴。强烈的迷乱感。",
-            aestheticEn: "High-frequency noisy melody-less vocal slices (Glitch vocal). On the once prosperous metropolis streets, humans like zombies fall into mass brawls erupting from linguistic terror. Intense disorientation.",
-            runtime: "IF (字幕与UI提示系统渐渐扭曲，对白变成字母重叠组合，NPC交流变成恐慌流血冲突) THEN (劫持引擎原生的Localization/String字典库进行乱序打乱，强迫游戏引擎从最底层的逻辑层阻断所有会话驱动Dialogue Trigger)。",
-            runtimeEn: "IF (Subtitles_UI_Prompts_Gradually_Warp_Dialogue_Becomes_Overlaid_Letters_NPC_Interactions_Turn_Bloody) THEN (Hijack engine native Localization/String Dictionary Library for scrambling, force game engine to block all Dialogue Triggers from the very bottom logic layer)."
-        }
+        reference: "《巴别塔》流弹误响引发跨国语结死锁横造极乱死途；《世界之战》突遭外星屠击后全人乱聚无言只有哭抢震碎寰野。",
+        referenceEn: "Random shot snapping global tongues forging blind dead blood trails; alien attack rendering crowds shrieking monkeys communication."
     },
     {
         id: "res_time_loop",
@@ -349,14 +229,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
         defEn: "Having touched a paradox point outside physics, the subject is soft-locked by the grand universe into a temporal rift of merely dozens of seconds of death and resetting—cannot exit, cannot be canceled.",
         core: "由于时间序列的断裂造成的最恐怖惩罚。主体甚至没有余地发展出应对疯狂的长篇幅独白。大他者没有折磨你，它只是发生了除零报错。 | Outcome: 纪元的鬼打墙。",
         coreEn: "The most terrifying punishment caused by chronosequence rupture. The subject doesn't even have room to develop long monologues to deal with madness. The Big Other isn't torturing you; it just encountered a divide-by-zero error. | Outcome: The Epoch's paranormal maze.",
-        patch: {
-            mechanics: "主角在这个只够刚好走道门口然后就会被一枪爆头的微小切片里无限载入、重演。试图更改路线的结果都是在同样的秒数死于同样的事情。",
-            mechanicsEn: "The protagonist infinitely loads and replays within a tiny slice just long enough to walk to the door before a headshot. Attempts to change routes all result in dying to the same thing at the exact same second mark.",
-            aesthetic: "极其快速且枯燥的重置闪屏。视觉疲劳与极端的幽闭感。没有哪怕一秒的空白帧让主体在死亡间隙得以喘息。绝望如同窒息般密不透风。",
-            aestheticEn: "Extremely fast and boring reset flashes. Visual fatigue and utter claustrophobia. Not a single blank frame allows the subject to breathe between deaths. Despair is airtight like suffocation.",
-            runtime: "IF (主角在微小时空切片中无限载入重演，试图更改路线的结果都是在同样秒数死于同样事件) THEN (强行打断主轴任务进度，将Update函数封死在一小段固定常数数组指针上，系统主频因此极速升高导致画面卡顿撕裂)。",
-            runtimeEn: "IF (Protagonist_Infinitely_Loads_Replays_In_Tiny_Temporal_Slice_All_Route_Changes_Die_Same_Second_Same_Event) THEN (Forcibly interrupt main axis quest progress, deadlock Update function onto tiny fixed constant array pointer, system clock redlines causing extreme stutter/tearing)."
-        }
+        reference: "《明日边缘》百回死碎重回绝海滩锁在暴血日抛鬼轮回；《土拨鼠之日》绝男吞枪跳楼千遭未陨仍陷冰日绝框内全退。",
+        referenceEn: "Dying splattered reset loops locked beach blood massacre constantly; jumping killing endless looping snowy days deadlocked closed."
     },
     {
         id: "res_gravity_crush",
@@ -366,14 +240,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
         defEn: "Zero buildup or dramatic engagement; the Big Other directly edits the environmental law of this local space (e.g., gravity becomes 1000x), instantly crushing all rebellion along with flesh into zero-thickness paper.",
         core: "神明对蝼蚁的降维打击。彻底剥夺了所谓“史诗Boss战”甚至让主角挥刀表现反叛的机会。它只是向系统输入了一个夸张的数字，一切戛然而止。 | Outcome: 物理主义的绝对霸权。",
         coreEn: "Dimensional reduction strike from god to ant. Completely robbing the chance for a 'epic boss fight' or even for the protagonist to swing a sword in rebellion. It just inputs a ludicrous number into the system, and it brutally halts. | Outcome: Absolute hegemony of physicalism.",
-        patch: {
-            mechanics: "原本气势磅礴冲向王座的主角，在刚踏入房间的一瞬间，以一种滑稽而恐怖的速度啪的一声被拍扁在由昂贵材质做成的地板上。",
-            mechanicsEn: "The protagonist majestically charging the throne, instantly upon entering the room, is comically and horrifyingly 'splattered' flat onto the expensive floor material with a sharp snap.",
-            aesthetic: "骨骼和液体以千倍音速同时破碎炸裂的干瘪低频爆破音。没有悲歌。随后镜头从上方如俯视爬虫般冷冷地打量那滩粘糊糊的痕迹。",
-            aestheticEn: "A dry low-frequency blast of bones and fluids shattering simultaneously at a thousand times the speed of sound. No elegy. Then the camera coldly observes that sticky smear from above like regarding a bug.",
-            runtime: "IF (主角刚踏入房间的一瞬间，以滑稽而恐怖的速度被拍扁在地板上，无任何前置铺垫) THEN (将主角所在骨架物理组件里的Gravity Multiplier或Collider Z-Scale瞬间写为1000以及Scale(x,y,0.01))。",
-            runtimeEn: "IF (Protagonist_Instantly_Splattered_Flat_On_Floor_Upon_Entering_Room_Zero_Buildup) THEN (Instantly overwrite Gravity Multiplier or Collider Z-Scale in protagonist skeletal physics component to 1000 and Scale(x,y,0.01))."
-        }
+        reference: "《三体》二向箔极降维无视大军死挣平压太阳系为死画；《切尔诺贝利》核魔直透碳身极黑融毁全无躲壁死灭极焦土。",
+        referenceEn: "Dark 2D foil squashing giant defiant solar systems into paint; atomic death melting living organs straight invisible crushing."
     },
     {
         id: "res_implosion",
@@ -383,14 +251,8 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
         defEn: "No fatal external force is applied; instead, the cognitive tension or overloaded energy loaded within the protagonist breaches criticality. Like a collapsing star, the subject sucks themselves dry into nothingness.",
         core: "被庞大的自我和创伤结构压死。当无法外部投射或升华能量时，驱力反扑回自身将存在彻底抽成真空态，只留下极小的黑矮星碎片。 | Outcome: 创伤的超载自毁。",
         coreEn: "Crushed to death by a massive ego and trauma structure. When energy cannot be projected outward or sublimated, the drive backlashes upon the self, sucking existence into a vacuum, leaving only tiny black dwarf fragments. | Outcome: Overload self-destruction of trauma.",
-        patch: {
-            mechanics: "面对难以承受的选择或真相，主角的身体开始产生强烈形变（非外力造成），向心脏或头颅坍缩，最后犹如被拉链拉上的空间缝隙一般消失不见。",
-            mechanicsEn: "Facing an unbearable choice or truth, the protagonist's body starts warping intensely (sans external force), shrinking toward the heart or skull, finally vanishing like a zipped-up spatial rift.",
-            aesthetic: "没有外在的震耳欲聋。而是一声“休——”的极具真空感的锐利声效。原本的人物占据空间猛缩，周围空气产生肉眼可见的光学扭曲变形。",
-            aestheticEn: "No external deafening sound. Rather a sharp 'sshuuuuk' effect of absolute vacuum. The character's volume suddenly retracts; surrounding air undergoes visually perceptible optical distortion.",
-            runtime: "IF (面对难以承受的选择或真相，主角身体开始产生非外力造成的强烈形变向心脏或头颅坍缩) THEN (将实体Mesh模型的顶点着色器Vertex Shader锚点全部指向自身原点，赋予极短插值曲线在0.1秒内Scale收缩为负值)。",
-            runtimeEn: "IF (Facing_Unbearable_Choice_Or_Truth_Protagonist_Body_Warps_Intensely_Sans_External_Force_Collapsing_Toward_Heart_Or_Skull) THEN (Point all Vertex Shader anchors of entity Mesh model to own origin, assign minuscule interpolation curve contracting Scale into negative values within 0.1s)."
-        }
+        reference: "《全金属外壳》新兵遭极限霸凌后脑压爆表饮弹生烈自毙；《海边的曼彻斯特》丧子巨痛无处外流咽下直将活人坍成烬。",
+        referenceEn: "Fat recruit taking bullet crushing skull absorbing mad bullying tress; father sinking inside eating raw grief totally melting star."
     },
     {
         id: "res_end_of_evangelion",
@@ -400,13 +262,7 @@ export const OUTCOMES_GROUP_D: LibraryItemDef[] = [
         defEn: "Flesh and individual boundaries (A.T. Field) totally disintegrate due to despair; humanity planet-wide liquefies collectively, regressing into the primordial maternal amniotic ocean (LCL) lacking 'you' and 'I'. A death format absolutely rejecting difference.",
         core: "《EVA》第三次冲击大结局式。最高的虚无狂欢。为了彻底逃避被大他者伤害，用一种极度退行、极度黏稠的群体性集体自杀，融掉全部社会符号区。 | Outcome: 分化系统的彻底消解融毁。",
         coreEn: "End of Evangelion Third Impact sequence. The supreme carnival of nihilism. To thoroughly escape harm from the Big Other, melting the entire social symbolic zone via profoundly regressive, viscous mass collective suicide. | Outcome: Total dissolved meltdown of the differentiation system.",
-        patch: {
-            mechanics: "一切战斗、建筑甚至系统对话框融化为橙红色的黏稠汁液，伴随漫天极难名状的巨大女神幻影或圣歌。没有战斗，只有无法抵挡的消亡极乐。",
-            mechanicsEn: "All combats, buildings, even system dialog boxes melt into viscous orange-red juice, accompanied by sky-filling indescribable giant goddess phantoms or hymnals. No combat, only irresistible blissful annihilation.",
-            aesthetic: "极其怪异神圣但令人深深作呕的甜腻色彩。所有物体的边界光照变得羽化（Feathering）。人类的惨叫声化作令人发指的一声绵软的“啵”气泡破裂音。",
-            aestheticEn: "Grossly bizarre, holy, Yet deeply nauseating, sweetish colors. Boundary lighting of all objects becomes feathered. Human screams transmute into a terrifyingly soft 'pop' sound of a bubble bursting.",
-            runtime: "IF (一切战斗建筑甚至系统对话框融化为橙红色黏稠汁液，伴随漫天巨大女神幻影或圣歌) THEN (删除所有碰撞网格Colliders，覆盖全局屏幕空间材质Screen Space Material，强制系统所有变量平推入Float Pooling并抛弃标识名)。",
-            runtimeEn: "IF (All_Combats_Buildings_Even_System_Dialogs_Melt_Into_Viscous_Orange_Red_Juice_Giant_Goddess_Phantoms) THEN (Delete all Colliders, cover global Screen Space Material, force all system variables into Float Pooling discarding identifier names)."
-        }
+        reference: "《EVA》全人类解A力场溶橙死海归母同无极死相；《香水》冷才撒神水撩爆千民狂欲被生吞活剥残肉同嚼皆作泥。",
+        referenceEn: "Earth peeling ego dropping straight pure LCL sea ending mass; scent god drawing maniac square mobs devoured alive chunkless."
     }
 ];

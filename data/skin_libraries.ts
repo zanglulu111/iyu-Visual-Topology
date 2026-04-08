@@ -14,6 +14,7 @@ import { SUR7_DATA } from './engine_surface/SUR7';
 import { SUR8_DATA } from './engine_surface/SUR8';
 import { SUR9_DATA } from './engine_surface/SUR9';
 import { IDEOLOGY_CATEGORIES as SUR10_DATA } from './engine_surface/SUR10';
+import { SUR11_DATA } from './engine_surface/SUR11';
 
 import { SV1_DATA } from './engine_sv/SV1';
 import { SV2_DATA } from './engine_sv/SV2';
@@ -88,6 +89,14 @@ export const SKIN_BLOCKS: NarrativeBlockDef[] = [
     enName: "sur10.Philosophy / Ism", 
     description: "主体自认为用以填补内心缺失的意识形态（如：虚无主义、英雄主义）。", 
     descriptionEn: "The ideology used to fill the subject's inner void (e.g., Nihilism).", 
+    tags: [] 
+  },
+  { 
+    id: "skin_ending", 
+    name: "SUR11.显性大结局", 
+    enName: "sur11.Explicit Ending", 
+    description: "好莱坞式、商业化且具有极高视觉张力的结局模板。", 
+    descriptionEn: "Hollywood-style commercial ending templates with high visual tension.", 
     tags: [] 
   },
 
@@ -224,6 +233,14 @@ export const SKIN_LIBRARY: LibraryCategoryDef[] = [
         name: "哲学信念 (Ideology - SUR10)",
         desc: "主体自认为用以填补内心缺失的意识形态",
         items: SUR10_DATA.flatMap(cat => (cat.items || []).map(item => ({ ...item, group: cat.name, groupEn: cat.nameEn })))
+    },
+
+    // SUR11: 显性大结局 — 从 engine_surface/SUR11 加载
+    {
+        id: "skin_ending_lib",
+        name: "显性大结局 (Ending - SUR11)",
+        desc: "好莱坞式、商业化且具有极高视觉张力的结局模板",
+        items: SUR11_DATA.flatMap(cat => (cat.items || []).map(item => ({ ...item, group: cat.name, groupEn: cat.nameEn })))
     },
 
     // SV1: 叙事结构

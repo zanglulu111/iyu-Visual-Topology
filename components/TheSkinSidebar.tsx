@@ -1037,7 +1037,9 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
                 <Globe size={12} className={iconColor} /> {lang === 'EN' ? "NARRATIVE PANORAMA" : "叙事全景摘要"}
               </div>
               <div className={`leading-loose font-serif text-[15px] ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-400'}`}>
-                <span>{lang === 'EN' ? "“In the " : "“在 "}</span>
+                <span>{lang === 'EN' ? "“This is a story driven by " : "“这是一场关于 "}</span>
+                <SkinSlot blockId="skin_genre" placeholder={lang === 'EN' ? "Drive" : "叙事动力"} isBlockLocked={lockedModules["skin_genre"]} {...slotProps} />
+                <span>{lang === 'EN' ? ". In the " : " 的故事。在 "}</span>
                 
                 {renderTimeLocationSlot()}
 
@@ -1047,22 +1049,22 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
                 <SkinSlot blockId="sur4x" placeholder={lang === 'EN' ? "Resistance" : "物理阶层阻力"} isBlockLocked={lockedModules["sur4x"]} {...slotProps} />
                 <span>{lang === 'EN' ? " within a " : "下的"}</span>
                 <SkinSlot blockId="skin_society" placeholder={lang === 'EN' ? "Social Order" : "社会形态"} isBlockLocked={lockedModules["skin_society"]} {...slotProps} />
-                <span>{lang === 'EN' ? " society. A " : "之下 。 一个 "}</span>
+                <span>{lang === 'EN' ? " society. A " : "之下。一个 "}</span>
                 <SkinSlot blockId="skin_age" placeholder={lang === 'EN' ? "Age" : "主体年龄"} isBlockLocked={lockedModules["skin_age"]} {...slotProps} />
-                <span>{lang === 'EN' ? " " : " 的 "}</span>
+                <span>{lang === 'EN' ? " " : "的"}</span>
                 <SkinSlot blockId="skin_gender" placeholder={lang === 'EN' ? "Gender" : "主体性别"} isBlockLocked={lockedModules["skin_gender"]} {...slotProps} />
                 <SkinSlot blockId="skin_profession" placeholder={lang === 'EN' ? "Profession" : "职业身份"} isBlockLocked={lockedModules["skin_profession"]} {...slotProps} />
                 <span>{lang === 'EN' ? ", holding a " : "，抱着"}</span>
                 <SkinSlot blockId="sur10x" placeholder={lang === 'EN' ? "Suture" : "象征界缝合度"} isBlockLocked={lockedModules["sur10x"]} {...slotProps} />
-                <span>{lang === 'EN' ? " stance towards " : "的 "}</span>
+                <span>{lang === 'EN' ? " stance towards " : "的"}</span>
                 <SkinSlot blockId="skin_ideology" placeholder={lang === 'EN' ? "Philosophy" : "哲学信念"} isBlockLocked={lockedModules["skin_ideology"]} {...slotProps} />
-                <span>{lang === 'EN' ? " ideas, and entangled with " : " 想法，并在与 "}</span>
+                <span>{lang === 'EN' ? " ideas, and entangled with " : "想法，与"}</span>
                 <SkinSlot blockId="skin_everything" placeholder={lang === 'EN' ? "Anchor" : "欲望锚点"} isBlockLocked={lockedModules["skin_everything"]} {...slotProps} />
-                <span>{lang === 'EN' ? ", erupts into this " : " 的纠缠中，于 "}</span>
+                <span>{lang === 'EN' ? ", unfolds their journey in " : "相互纠缠，于"}</span>
                 <SkinSlot blockId="skin_location" placeholder={lang === 'EN' ? "Scenes" : "空间场景"} isBlockLocked={lockedModules["skin_location"]} {...slotProps} />
-                <span>{lang === 'EN' ? " " : " 爆发了这场 "}</span>
-                <SkinSlot blockId="skin_genre" placeholder={lang === 'EN' ? "Drive" : "叙事动力"} isBlockLocked={lockedModules["skin_genre"]} {...slotProps} />
-                <span>{lang === 'EN' ? " story.”" : " 故事。”"}</span>
+                <span>{lang === 'EN' ? ", ultimately culminating in a " : "中展开角逐，最终走向"}</span>
+                <SkinSlot blockId="skin_ending" placeholder={lang === 'EN' ? "Ending" : "显性大结局"} isBlockLocked={lockedModules["skin_ending"]} {...slotProps} />
+                <span>{lang === 'EN' ? " ending.”" : "的结局。”"}</span>
               </div>
             </section>
 

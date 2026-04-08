@@ -15,16 +15,8 @@ export const IDEO_ORDER: LibraryCategoryDef = {
         defEn: "Return to scripture. Literal interpretation, rejecting modernity, black-and-white worldview.",
         core: "绝对的信仰对抗复杂的现实。异教徒与异端必须被物理净化。",
         coreEn: "Absolute faith versus complex reality. Infidels and heretics must be physically purified.",
-        logic: "将某本古老的书或教条彻底锚定为大他者（M4）的唯一正版发声。任何象征界的模糊与滑变都被视为 M2（实在界）的腐化威胁。通过物理献祭（M6）异端来反复缝补不断开裂的 M4。",
-        logicEn: "Anchoring an ancient text as the sole authentic voice of the Big Other (M4). Any symbolic ambiguity is viewed as M2 (Real) corruption. Repeatedly stitching the tearing M4 via physical sacrifice (M6) of heretics.",
-        patch: {
-          mechanics: "基础设定协议 + [容错空间 = 0; 文本解释器 = 死锁; 纯洁度扫描仪 = 最高敏感]",
-          mechanicsEn: "Base_Setting_Protocol + [Tolerance_Space = 0; Text_Interpreter = Deadlocked; Purity_Scanner = Max_Sensitivity]",
-          aesthetic: "聚焦：字迹斑驳的经书、蒙面的狂徒、单一死寂的颜色、纯净的火刑柱。文本：高频使用‘必须’、‘审判’，充满排他性的圣洁词汇。",
-          aestheticEn: "Focus: Mottled scriptures, masked zealots, single dead colors, pure stakes of fire. Text: Frequent 'must' and 'judgement', exclusive holy vocabulary.",
-          runtime: "IF (遭遇教义盲区或现代科学冲击) THEN (触发：极度暴力的防御性圣战，拒绝对话)。",
-          runtimeEn: "IF (Encounters_doctrinal_blind_spot_or_modern_science) THEN (Trigger: Extremely_violent_defensive_holy_war_refusing_dialogue)."
-        }
+        reference: "《使女的故事》根据远古经文倒行逆施剥夺女性所有基本权利只要求其生育的基列国政权；《猎魔人》永恒之火教派在广场上把所有精灵和变异者活活烧死净化城邦的狂热牧师。",
+        referenceEn: "\"The Handmaid's Tale\" Gilead enacting ancient scriptures to enslave women as breeders; \"The Witcher\" Eternal Fire priests burning elves alive to purify the city."
       },
       {
         id: "asceticism",
@@ -34,16 +26,8 @@ export const IDEO_ORDER: LibraryCategoryDef = {
         defEn: "Suffering is noble. Rejecting material pleasure, elevating the soul via fleshly pain.",
         core: "精神对肉体的暴政。越痛苦越神圣，用自我的摧残换取存在的确证。",
         coreEn: "The tyranny of spirit over flesh. The more painful, the holier; trading self-mutilation for existential proof.",
-        logic: "主动引爆 M2（肉身创伤界），剥夺所有 M3（欲望幻象）的供给。主体试图通过抢先对自己执行大他者（M4）的惩罚，以此掏空大他者的制裁权，证明自我的终极掌控（M0）。",
-        logicEn: "Proactively detonating M2 (fleshly trauma) and depriving all M3 (desire fantasy). Subject tries to preemptively execute M4's punishment on oneself, emptying M4's sanctioning power to prove ultimate self-control (M0).",
-        patch: {
-          mechanics: "基础设定协议 + [痛觉收益 = 正向转化; 物质渴望 = 强制衰减; 精神护甲 = 随痛苦提升]",
-          mechanicsEn: "Base_Setting_Protocol + [Pain_Yield = Positive_Conversion; Material_Desire = Forced_Decay; Spiritual_Armor = Scales_with_Pain]",
-          aesthetic: "聚焦：鲜血淋漓的苦行僧背部、只剩骨架的面庞、生锈的铁丝内衣。文本：剥去所有修辞，仅保留干瘪、克制的短句。",
-          aestheticEn: "Focus: Bloody ascetic backs, skeletal faces, rusty barbed lingerie. Text: Stripped of all rhetoric, keeping only dry, restrained short sentences.",
-          runtime: "IF (被强行赋予极致的快乐与丰饶) THEN (执行：强烈的精神崩溃指控，视其为最大的恶毒诅咒)。",
-          runtimeEn: "IF (Forced_with_extreme_pleasure_and_abundance) THEN (Execute: Severe_mental_breakdown_accusation_treating_it_as_the_most_vicious_curse)."
-        }
+        reference: "《达芬奇密码》用倒刺大腿带疯狂抽打自己以肉体极大痛苦换取心灵洗涤的白化病杀手；《七宗罪》变态杀手以此折磨世人宣判饕餮与贪婪之罪必须通过极度苦难以作偿还。",
+        referenceEn: "\"The Da Vinci Code\" an albino assassin flagellating himself with barbed belts for holy purity; \"Se7en\" punishing gluttony and greed through extreme fleshly agony."
       },
       {
         id: "patriarchalism",
@@ -53,16 +37,8 @@ export const IDEO_ORDER: LibraryCategoryDef = {
         defEn: "Elders are always right. Strict familial & ethical structures functioning on filial piety and absolute obedience.",
         core: "极其压抑的爱与恨。权力的代际剥削与伪善，伴随着不可言说的反抗。",
         coreEn: "Extremely repressed love and hate. Intergenerational exploitation of power and hypocrisy, accompanied by unspeakable rebellion.",
-        logic: "大他者（M4）被降神并具体化为‘长辈/族长’的凝视。主体的 M0（身份合法性）完全依赖于被嵌合在复杂的血缘网格中。越界者将面临社会性死亡之 M6 惩戒。",
-        logicEn: "The Big Other (M4) is embodied as the gaze of 'Elders/Patriarch'. Subject's M0 (identity legitimacy) relies entirely on being embedded in complex blood grids. Transgressors face social death (M6).",
-        patch: {
-          mechanics: "基础设定协议 + [辈分压制力 = 绝对破防; 伦理锁链 = 不可见但坚不可摧]",
-          mechanicsEn: "Base_Setting_Protocol + [Seniority_Suppression = Absolute_Guardbreak; Ethical_Chain = Invisible_but_Unbreakable]",
-          aesthetic: "聚焦：斑驳威严的太师椅、沉重的祠堂大门、跪在地上的长影子与无声的流泪。文本：充满了‘规矩’‘体统’等陈腐词汇，表面温和实则吃人。",
-          aestheticEn: "Focus: Mottled majestic armchairs, heavy shrine doors, kneeling long shadows, silent tears. Text: Stale vocabulary of 'rules' and 'propriety', mild on surface but man-eating inside.",
-          runtime: "IF (子一代试图建立超出家族范畴的独立主体性 M0) THEN (触发：道德绑架与全面联合绞杀机制)。",
-          runtimeEn: "IF (Younger_generation_attempts_independent_M0_outside_family) THEN (Trigger: Moral_kidnapping_and_comprehensive_joint_strangulation)."
-        }
+        reference: "《大红灯笼高高挂》死死锁定在封闭大院里老爷的面孔甚至不用出现也能压死所有偏房的礼教；《教父》长子无论多无能都必须被尊为领袖为了维系家族长序的残酷封建底色。",
+        referenceEn: "\"Raise the Red Lantern\" unseen patriarchs crushing concubines within cloistered estates; \"The Godfather\" respecting the eldest son as don strictly to maintain familial hierarchy."
       },
       {
         id: "fatalism",
@@ -72,16 +48,8 @@ export const IDEO_ORDER: LibraryCategoryDef = {
         defEn: "All things are predetermined in the cosmic script. Rebellion is maximum futility; acceptance is absolute wisdom.",
         core: "俄狄浦斯式的深邃悲剧：越是拼命挣扎，越是加速陷入早已织好的大网之中。",
         coreEn: "Oedipal deep tragedy: the more one struggles, the faster one falls into the pre-woven net.",
-        logic: "主体承认大他者（M4）并非某个教条或个体，而是一个无比巨大、不可理喻的混沌时空算法。主体的任何 M5（行动欲望）在其面前都被降维至零。M2（灾难）被剥除了恐惧感，化为麻木的景观。",
-        logicEn: "Subject admits M4 is not a dogma but an immensely huge, unreasonable chaotic spacetime algorithm. Any M5 (action desire) is reduced to zero. M2 (disaster) is stripped of fear, turning into a numb spectacle.",
-        patch: {
-          mechanics: "基础设定协议 + [命运引力场 = 无法逃逸; 抵抗意志力 = 不断遭受减益Debuff]",
-          mechanicsEn: "Base_Setting_Protocol + [Fate_Gravity_Field = Inescapable; Resistance_Willpower = Constant_Debuff]",
-          aesthetic: "聚焦：缓缓转动的星盘、落满灰尘的预言书、不断重演的悲剧残骸。文本：充满疲惫、沧桑感，多使用第三人称的上帝视角描述灾难。",
-          aestheticEn: "Focus: Slowly turning astrolabes, dusty prophecy books, repeating tragic debris. Text: Exhausted, weathered, using third-person god-view to describe disaster.",
-          runtime: "IF (获得一个看似能改变命运的最终选项) THEN (操作：微笑着放弃选择，让车轮如期碾过)。",
-          runtimeEn: "IF (Obtains_a_final_choice_seemingly_altering_fate) THEN (Action: Smile_and_abandon_choice_letting_the_wheel_crush_as_scheduled)."
-        }
+        reference: "《俄狄浦斯王》为了躲避杀父娶母的神谕拼命逃离最终却恰逢其会完成诅咒的绝对悲剧；《降临》看完了自己女儿一生必将走向病理死亡的剧本却依然微笑着拥抱这一切的平头外星人语言学。",
+        referenceEn: "\"Oedipus Rex\" fleeing a prophecy of patricide only to fulfill it perfectly; \"Arrival\" knowing her daughter's tragic doomed fate but embracing the linear timeline."
       },
       {
         id: "collectivism",
@@ -91,16 +59,8 @@ export const IDEO_ORDER: LibraryCategoryDef = {
         defEn: "Hive mind supreme. Individuals are mere cogs; sacrificing the minor self is the highest glory.",
         core: "在极具美学的整齐划一中，压抑着令人窒息的个体消亡与面目模糊的狂热。",
         coreEn: "In highly aesthetic uniformity represses suffocating individual decay and faceless fanaticism.",
-        logic: "主体的 M0（身份）被强制上缴并熔铸成一个巨大的聚合体。大他者（M4）被显化为一个神圣的‘集体’。在此，M1（个人私欲缺失）被定义为道德犯罪，必须通过不断的 M6（自我奉献）来洗刷。",
-        logicEn: "Subject's M0 (identity) is forcibly surrendered and smelted into a giant aggregate. M4 manifests as a holy 'Collective'. Here, M1 (personal desire) is defined as a moral crime, requiring constant M6 (self-dedication) to wash away.",
-        patch: {
-          mechanics: "基础设定协议 + [同频共振系数 = 最大; 离群值 = 自动剔除; 痛苦分担 = 全体均摊]",
-          mechanicsEn: "Base_Setting_Protocol + [Sync_Resonance = Max; Outliers = Auto_Culled; Pain_Sharing = Distributed]",
-          aesthetic: "聚焦：完美的几何方阵、整齐的劳动号子、密密麻麻没有名字的银色墓碑。文本：不使用‘我’，永远是‘我们’，庞大、高亢且缺少温度。",
-          aestheticEn: "Focus: Perfect geometric squares, synchronized labor chants, dense nameless silver tombstones. Text: Never use 'I', always 'We', colossal, pitched yet devoid of warmth.",
-          runtime: "IF (发现某个单体产生了脱离矩阵的自由意志) THEN (执行：以集体的名义执行雷霆般的物理与系统性格式化)。",
-          runtimeEn: "IF (Discovers_an_individual_developing_matrix-divergent_free_will) THEN (Execute: Thunderous_physical_and_systemic_formatting_in_the_name_of_the_collective)."
-        }
+        reference: "《1984》在电幕监视下每天做广播体操毫无隐私把甚至思想都全部上交老大哥的温顺螺丝钉；《星河战队》将个体的断手断脚转化为联邦光荣征兵宣传的大毒草阵列。",
+        referenceEn: "\"1984\" cogs doing calisthenics on telescreens surrendering even thoughts to Big Brother; \"Starship Troopers\" converting mangled limbs into glorious federal recruitment propaganda."
       },
       {
         id: "nationalism",
@@ -110,16 +70,8 @@ export const IDEO_ORDER: LibraryCategoryDef = {
         defEn: "Us vs. Them. Extreme fanaticism for bloodline and imagined communities; external hatred grounds internal unity.",
         core: "高度排外的激情与仇恨凝视。神圣的边境线上流淌着被妖魔化的他者的血。",
         coreEn: "Highly xenophobic passion and hateful gaze. The holy border flows with the demonized others' blood.",
-        logic: "通过划定一条不可逾越的地理和认同边界，来稳固脆弱疲惫的大他者（M4）。主体将自身的全部不安全感与 M1 投射到边界之外的‘替罪羊’身上，以此制造 M3 的高昂士气。",
-        logicEn: "Stabilizing a fragile Big Other (M4) by establishing an insurmountable geographic and identity boundary. Subject projects all M1 insecurities onto scapegoats beyond the border, crafting high M3 morale.",
-        patch: {
-          mechanics: "基础设定协议 + [敌我识别雷达 = 二极管模式; 边界张力 = 随时引爆; 仇恨算力 = 指数级]",
-          mechanicsEn: "Base_Setting_Protocol + [Friend_Foe_Radar = Binary_Mode; Border_Tension = Imminent; Hatred_Compute = Exponential]",
-          aesthetic: "聚焦：烈士纪念碑、燃烧的敌国旗帜、边境铁丝网与巡逻犬。文本：煽动性极强、充满了鲜血、泥土与历史神话的粗粝词汇。",
-          aestheticEn: "Focus: Martyr monuments, burning enemy flags, border barbed wires and patrol dogs. Text: Highly inflammatory, gritty vocabulary of blood, soil, and historical myth.",
-          runtime: "IF (边境被跨越或荣誉遭受想象性侮辱) THEN (触发：不计后果的全员玉碎冲锋或战争动员)。",
-          runtimeEn: "IF (Border_crossed_or_honor_suffers_imaginary_insult) THEN (Trigger: Reckless_all-out_banzai_charge_or_war_mobilization)."
-        }
+        reference: "《辛德勒的名单》极度迷信日耳曼纯血把其他民族像工业垃圾一样排队送进毒气室的狂热纳粹士兵；《斯巴达300勇士》哪怕战至最后一滴血也绝不允许波斯铁蹄玷污城邦半步的战前嘶吼。",
+        referenceEn: "\"Schindler's List\" Nazis obsessed with pure blood gassing minorities like industrial waste; \"300\" screaming Spartans refusing to let Persian boots taint their holy turf."
       },
       {
         id: "conformism",
@@ -129,16 +81,8 @@ export const IDEO_ORDER: LibraryCategoryDef = {
         defEn: "The nail that sticks out gets hammered. Mediocrity is the safest moat, trying hard to blend into the gray background.",
         core: "对哪怕一丝‘不同’的极度恐惧。在沉默的螺旋中亲手掐死所有的色彩与变异。",
         coreEn: "Extreme fear of even a sliver of 'difference'. Strangling all colors and mutations in the spiral of silence.",
-        logic: "这是一种消极的防御态势。主体试图在象征界（M4）的无尽监视中彻底隐身。通过消灭自己的 M3（出格欲望）与 M5（创造行动），来换取免于实在界打击（M2）的安全通行证。主体是一种迷彩颜色的空洞。",
-        logicEn: "A passive defensive posture. Subject attempts to turn completely invisible within M4's endless surveillance. Destroying own M3 (transgressive desire) and M5 (creative act) in exchange for a safe pass from M2. Subject is a camouflage-colored void.",
-        patch: {
-          mechanics: "基础设定协议 + [拟态隐身度 = 最大; 偏离均值报警 = 极高; 责任分散 = 100%生效]",
-          mechanicsEn: "Base_Setting_Protocol + [Mimicry_Invisibility = Max; Deviation_from_Mean_Alert = Extreme; Diffusion_of_Responsibility = 100%_Active]",
-          aesthetic: "聚焦：一模一样的廉价西服背影、变色龙、窃窃私语指指点点的人群、空洞的复制瞳孔。文本：使用大量的冗余、模糊、毫无主见的从句掩盖真实判断。",
-          aestheticEn: "Focus: Identical cheap suit backs, chameleons, whispering pointing crowds, empty replicated pupils. Text: Heavy use of redundant, vague, opinion-less subordinate clauses to mask true judgment.",
-          runtime: "IF (不幸被聚光灯照亮或点名) THEN (执行：立刻出卖他人转移视线或装死宕机)。",
-          runtimeEn: "IF (Unluckily_illuminated_by_spotlight_or_called_out) THEN (Execute: Immediately_sell_out_others_to_divert_attention_or_play_dead)."
-        }
+        reference: "《楚门的世界》所有邻居哪怕察觉异样也每天维持虚假早安极度害怕打破镜头秩序的群演；《黑镜: 急转直下》不敢对上级发怒只能挤出假笑卑微维持星级评分的塑料社畜。",
+        referenceEn: "\"The Truman Show\" neighbors repeating fake mornings fearing breaking the scheduled routine; \"Black Mirror\" suppressing anger with fake smiles to maintain average plastic star ratings."
       },
       {
         id: "conservatism",
@@ -148,16 +92,8 @@ export const IDEO_ORDER: LibraryCategoryDef = {
         defEn: "Convinced the past is always better. Wary of any acceleration and change, lifelessly guarding relics.",
         core: "怀旧的滤镜对抗冰冷变化的现实。在一场注定失败的抗争中试图冻结时间之河。",
         coreEn: "Nostalgic filters battling the cold changing reality. Attempting to freeze the river of time in a doomed struggle.",
-        logic: "将某一个逝去的历史切片神圣化为没有 M1 缺失的黄金时代（虚幻的大他者乐园）。一切当下的推进系统（M5）都被看作带来 M2 灾难的潘多拉魔盒。其实质是抵御熵增的悲情抵抗。",
-        logicEn: "Sanctifying a lost historical slice as a golden age without M1 lack (illusory Big Other paradise). Any present driving system (M5) is seen as Pandora's box bringing M2 trauma. Essentially a tragic resistance against entropy.",
-        patch: {
-          mechanics: "基础设定协议 + [时间流速抵抗 = 满负荷; 结构稳定性 = 僵化锁死; 新生事物防御罩 = 默认开启]",
-          mechanicsEn: "Base_Setting_Protocol + [Time_Flow_Resistance = Max_Load; Structural_Stability = Rigidly_Locked; New_Thing_Shield = Default_On]",
-          aesthetic: "聚焦：泛黄的老照片、保养完好但无法发射的老爷枪、散发着陈腐气息的羊皮纸与绅士拐杖。文本：悠长、舒缓，充满着挽歌式的哀叹与精致礼仪。",
-          aestheticEn: "Focus: Yellowing old photos, well-kept but unfirable antique guns, stale parchment and gentleman canes. Text: Long, soothing, full of elegiac sighs and exquisite etiquette.",
-          runtime: "IF (面临时代滚滚向前的暴力碾压) THEN (触发：宁可抱着旧世界的牌坊一同粉碎也绝不退让升级)。",
-          runtimeEn: "IF (Facing_violent_crushing_by_marching_era) THEN (Trigger: Rather_shatter_along_with_the_old_world_archway_than_concede_and_upgrade)."
-        }
+        reference: "《唐顿庄园》外面已经打起了一战连电灯都觉得刺眼老伯爵死抓着仆人贵族阶梯不放手的固执；《指环王》对任何外族旅行者充满怀疑唯恐打乱了一日六餐安逸和平的夏尔霍比特人。",
+        referenceEn: "\"Downton Abbey\" earls refusing electricity clinging to aristocratic staircases during WWI; \"Lord of the Rings\" Shire hobbits fearing travelers that disrupt their six-meal peace."
       },
       {
         id: "bureaucratism",
@@ -167,16 +103,8 @@ export const IDEO_ORDER: LibraryCategoryDef = {
         defEn: "Procedural justice and exoneration surpass all life value. Cropping the world into rigid shapes fitting forms and statutes.",
         core: "卡夫卡式的庞大荒谬。活生生的人被迷宫般的公文流转彻底困死、抽干。",
         coreEn: "Kafkaesque colossal absurdity. Living humans completely trapped and drained dry by labyrinthine document flows.",
-        logic: "大他者（M4）退化为一套由无穷签章和批复构成的符号永动机。主体放弃了所有实质意义上的 M3 与 M5，将避免承担责任（回避 M6 代价）作为最高指令。对 M2 灾难置若罔闻，只要流程合规。",
-        logicEn: "The Big Other (M4) degenerates into a symbolic perpetual motion machine of endless stamps and approvals. Subject abandons all substantial M3 and M5, making avoiding liability (M6 avoidance) the prime directive. Ignores M2 disasters if procedures comply.",
-        patch: {
-          mechanics: "基础设定协议 + [形式审核逻辑 = 100%遮蔽实质; 责任溯源 = 黑盒推诿; 系统冷血指数 = 最大]",
-          mechanicsEn: "Base_Setting_Protocol + [Formal_Audit_Logic = 100%_Mask_Substance; Liability_Traceability = Blackbox_Buck_Passing; System_Cold-bloodedness = Max]",
-          aesthetic: "聚焦：厚达一米的红头文件、办事窗口隔绝声音的防弹玻璃、面无表情规律敲打的键盘手。文本：全是由被动语态、长句、术语堆砌的废话迷宫。",
-          aestheticEn: "Focus: Meter-thick redheaded docs, bulletproof glass of service windows, emotionless typing hands. Text: Nonsense mazes piled with passive voice, long sentences, and jargon.",
-          runtime: "IF (面临急需要情感决断的人道灾难) THEN (执行：递上一份需要五个工作日审批的冰冷表格)。",
-          runtimeEn: "IF (Facing_humanitarian_disaster_needing_urgent_emotional_resolve) THEN (Execute: Hand_over_a_cold_form_requiring_5_business_days_to_approve)."
-        }
+        reference: "《是，大臣》用层层叠叠长达数百页无人看懂的公文直接把改革意图熬死在会议室文山上的汉弗莱；《妙想天开》因为打字机飞进去一只死苍蝇导致名字敲错直接让无辜平民被残酷逮捕的死板公仆。",
+        referenceEn: "\"Yes Minister\" burying reforms under hundreds of pages of unreadable memos; \"Brazil\" arresting an innocent man because a dead fly caused a typo on a rigid form."
       },
       {
         id: "feudal_loyalty",
@@ -186,16 +114,8 @@ export const IDEO_ORDER: LibraryCategoryDef = {
         defEn: "Scholars die for their confidants. Master-servant relation built on absolute personal attachment; unconditional flesh sacrifice for 'loyalty'.",
         core: "浪漫化了的极度不平等。一旦主君表现出轻蔑的背叛，会遭遇最深的不可愈合创伤。",
         coreEn: "Romanticized extreme inequality. Once the lord shows contemptuous betrayal, it incurs the deepest unhealable trauma.",
-        logic: "主体的心灵结构是一个缺失的半圆（M1 极大显化）。大他者（M4）被彻底具象为一个实体的主人。主体通过主动将自身物化为剑或盾牌（M6 全盘献祭），换取虚假的光荣 M3 填补。",
-        logicEn: "Subject's mental structure is a missing half-circle (massive M1). Big Other (M4) is totally embodied as a physical Lord. Subject actively objectifies self into sword/shield (total M6 sacrifice) for fake glorious M3 fill.",
-        patch: {
-          mechanics: "基础设定协议 + [人身依附阈值 = 锁死高位; 自我保全机制 = 随时可被覆盖断路; 誓言回路 = 不可篡改]",
-          mechanicsEn: "Base_Setting_Protocol + [Personal_Attachment = Locked_High; Self-Preservation = Overridable_Short-circuit; Vow_Circuit = Immutable]",
-          aesthetic: "聚焦：重重磕下的带血额头、替人挡下子弹的肉盾、背后复杂的家纹刺青与切掉的无名指。文本：充满悲壮、沉郁的大义凛然，词汇古老且血腥。",
-          aestheticEn: "Focus: Heavy bloody prostrations, meat shields taking bullets, complex back tattoos and severed fingers. Text: Tragic, gloomy righteousness, archaic and bloody vocabulary.",
-          runtime: "IF (主君下达了明显违背道德常理或送死的命令) THEN (触发：强行压抑一切怀疑流着泪微笑着去执行)。",
-          runtimeEn: "IF (Lord_issues_immoral_or_suicidal_command) THEN (Trigger: Force-repress_all_doubts_and_execute_smiling_with_tears)."
-        }
+        reference: "《极恶非道》只要黑帮组长一句话就能当场切下自己小指头奉上以彰忠诚的变态小弟；《忠臣藏》四十七浪人蛰伏多年不惜满门抄斩也要为主君切腹尽忠复仇的绝对狂热。",
+        referenceEn: "\"Outrage\" Yakuza severing their own pinkies on the spot to prove loyalty to the boss; \"47 Ronin\" waiting years to avenge a lord ending in mass seppuku."
       },
       {
         id: "purity_culture",
@@ -205,16 +125,8 @@ export const IDEO_ORDER: LibraryCategoryDef = {
         defEn: "Pathological fear of 'filth/pollution'. From virgin complexes to harsh thought policing, demanding an absolutely spotless environment.",
         core: "极度压抑的潜台词是变态的渴望。越是狂热洗刷纯洁，越容易被泥沼深处的污秽所吸引。",
         coreEn: "The extreme repressed subtext is perverse desire. The more fanatically one scrubs purity, the easier one is drawn to the filth in the deep bog.",
-        logic: "大他者（M4）在此呈现为‘无菌室’的凝视。任何本能的流露（尤其是SUR5的性或越界念头）都会引申为 M2 级别的致命系统污染。主体通过近乎自虐的排查（剥削自我 M6）来维系脆弱边界。",
-        logicEn: "M4 presents as the gaze of a 'sterile room'. Any instinctual slip (especially SUR5 sex/transgression) is scaled to M2-level fatal systemic pollution. Subject uses masochistic purges (M6 self-exploitation) to hold fragile borders.",
-        patch: {
-          mechanics: "基础设定协议 + [污染敏感警报 = 破音尖叫; 精神洁癖防御机制 = 过载; 排异反应 = 极端变态]",
-          mechanicsEn: "Base_Setting_Protocol + [Pollution_Alarm = Shrieking; Mental_Mysophobia_Defense = Overload; Rejection_Response = Extreme_Perversion]",
-          aesthetic: "聚焦：刺鼻的消毒水池、被粗暴涂黑的历史书、锁紧的贞操带、洁白床单上惊恐的带泪眼球。文本：歇斯底里，对于排泄与交媾词汇存在病态的防御与隐喻替换。",
-          aestheticEn: "Focus: Pungent chlorine pools, crudely blacked-out history books, locked chastity belts, panicked teary eyes on white sheets. Text: Hysterical, with pathological defenses and metaphors for excretion and copulation.",
-          runtime: "IF (自身不可逆转地沾染上了体制定义下的某种隐秘污点) THEN (触发：从极度圣洁瞬间堕落为狂暴贪婪的最深恶魔)。",
-          runtimeEn: "IF (Irreversibly_tainted_by_a_system-defined_hidden_stain) THEN (Trigger: Instant_fall_from_extreme_holiness_to_the_most_frenzied_greedy_demon)."
-        }
+        reference: "《红字》因为通奸被强迫在胸前绣上猩红A字在清教徒唾沫星子里忍辱偷生一辈子的海斯特；《黑天鹅》被母亲病态的处女洁癖重重保护最终在对黑暗黑天鹅的极度压抑下人格崩坏的妮娜。",
+        referenceEn: "\"The Scarlet Letter\" Hester bearing a red 'A' amid puritan spits for adultery; \"Black Swan\" Nina cracking under her mother's pathological virgin-purity protection."
       },
       {
         id: "honor_culture",
@@ -224,16 +136,8 @@ export const IDEO_ORDER: LibraryCategoryDef = {
         defEn: "Face is more vital than the right to live. Class insults must be settled and washed with blood and duels.",
         core: "建立在火药桶上的脆弱纸糊自尊。一次漫不经心的对视就能引发家族诛灭级别的血案。",
         coreEn: "Fragile paper self-esteem built on a powder keg. A careless glance triggers family-annihilation-level bloodshed.",
-        logic: "这是一种前现代的 M4 维系方式。主体的存在感（M0）100% 挂载于外部符号（“面子”与荣誉名册）。外界的一句嘲讽能直接穿透象征界引发主体的 M2 存在性崩塌。必须以 M6 级别的暴力流血反拉来重建坐标。",
-        logicEn: "Pre-modern M4 maintenance. Subject's existence (M0) is 100% mounted on external symbols ('face'/honor roll). A mocking remark pierces symbolic order causing M2 existential collapse. Demands M6-level violent bleeding to pull coordinates back.",
-        patch: {
-          mechanics: "基础设定协议 + [自尊护甲厚度 = 0; 侮辱损伤乘数 = x99; 决斗复仇引擎 = 强行切入]",
-          mechanicsEn: "Base_Setting_Protocol + [Self-Esteem_Armor_Thickness = 0; Insult_Damage_Multiplier = x99; Duel_Revenge_Engine = Force_Interrupt]",
-          aesthetic: "聚焦：被狠狠摔在脸上的白手套、决斗天明前擦拭的左轮手枪、被钉在耻辱柱上的流血刻字。文本：极度敏感、神经质地检视每一个标点符号中是否包含不敬。",
-          aestheticEn: "Focus: White glove slapped on face, revolver wiped before dawn, bleeding letters carved in pillory. Text: Extremely sensitive, neurotically inspecting every punctuation for disrespect.",
-          runtime: "IF (在公开场合被略微降维调侃或反驳) THEN (操作：将桌子掀翻并立刻发起必死其一的物理决斗挑战)。",
-          runtimeEn: "IF (Slightly_diminished_teased_or_refuted_in_public) THEN (Action: Flip_table_and_issue_duel_to_the_death_challenge_instantly)."
-        }
+        reference: "《决斗的人》为了一个微不足道的嘴炮侮辱两个法国军官在几十年间拔剑火拼到底的荒诞执念；《沙丘》哪怕明知是陷阱只要被公然叫阵就必须脱下护盾拿起匕首死战捍卫家徽的厄崔迪公爵。",
+        referenceEn: "\"The Duellists\" French officers clashing swords for decades over a petty insult; \"Dune\" Duke Atreides dropping shields for a knife duel just to defend house honor."
       }
     ]
   };

@@ -87,7 +87,7 @@ class OpenAIAdapter {
                         model: model,
                         messages: messages,
                         temperature: params.config?.temperature || 0.7,
-                        max_tokens: params.config?.maxOutputTokens || 4096,
+                        max_tokens: params.config?.maxOutputTokens || 32768,
                         stream: false,
                         ...(params.config?.responseMimeType === 'application/json' ? { response_format: { type: 'json_object' } } : {})
                     })
@@ -187,7 +187,7 @@ class AnthropicAdapter {
                 const requestBody: any = {
                     model: model,
                     messages: messages,
-                    max_tokens: params.config?.maxOutputTokens || 4096,
+                    max_tokens: params.config?.maxOutputTokens || 8192,
                     temperature: params.config?.temperature || 0.7,
                 };
 
@@ -384,6 +384,20 @@ const cleanAndParseJSON = (text: string) => {
                 }
             }
         }
+        
+        // 4. Try basic auto-closing for truncated JSON from strict proxies
+        const quoteCount = (cleanText.match(/"/g) || []).length;
+        const needsQuote = quoteCount % 2 !== 0;
+        const closures = ['}', ']', '"}', '"]', '}]', '"}]', '"} ]', '"] }'];
+        
+        for (const closure of closures) {
+            try {
+                return JSON.parse(cleanText + (needsQuote ? '"' : '') + closure);
+            } catch (fallbackErr) {
+                // Ignore and try next
+            }
+        }
+
         return null;
     }
 };

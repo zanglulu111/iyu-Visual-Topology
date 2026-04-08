@@ -15,16 +15,8 @@ export const SUR9_GROUP_J: LibraryCategoryDef = {
       defEn: "Digital monopolists who reshape the world's operating rules through algorithms or hard-core tech.",
       core: "我写的几行代码就是新的上帝定律。 | 代偿 ($): 变量控制权 (Control over Variables)",
       coreEn: "The lines of code I write are the new divine laws. | Compensation ($): Control over Variables",
-      logic: "【理性的傲慢】：将自我（M1）投射为绝对理性的造物主，试图剥除世界的一切偶然性（M2）。大他者（M4）不再是神或传统，而是“不完美的碳基人性”。",
-      logicEn: "[Arrogance of Reason]: Projects self (M1) as an absolutely rational creator, trying to strip the world of contingency (M2). The Other (M4) is not God or tradition, but 'imperfect carbon-based humanity'.",
-      patch: {
-        mechanics: "降维转译协议 + [偶然性耐受度 = 负值; 控制欲 = 极高]",
-        mechanicsEn: "Dimensional_Reduction_Protocol + [Contingency_Tolerance = Negative; Desire_for_Control = Max]",
-        aesthetic: "聚焦：极简几何线条 + 冰冷的机房蓝光。文本：充满参数、效率与去除情感杂质的冰冷逻辑修辞。",
-        aestheticEn: "Focus: Minimalist_Geometry + Cold_Server_Blue_Light. Text: Cold_Logic_Rhetoric_Full_of_Parameters_and_Efficiency.",
-        runtime: "IF (遭遇底层人性的非理性爆发/爱欲) THEN (触发：代码逻辑彻底崩溃与认知失调的系统级Panic)。",
-        runtimeEn: "IF (Encounter_Irrational_Outburst/Eros_of_Base_Humanity) THEN (Trigger: Complete_Logic_Crash_and_Cognitive_System_Panic)."
-      }
+      reference: "《社交网络》(2010, 大卫·芬奇) 马克·扎克伯格；《钢铁侠》(2008, 乔恩·费儒) 托尼·斯塔克",
+      referenceEn: "\"The Social Network\" (2010, David Fincher) Mark Zuckerberg; \"Iron Man\" (2008, Jon Favreau) Tony Stark; \"The Social Network\" Zuckerberg madly typing in chaotic dorms fueled by deep insecurity, building a data-leviathan that swallows humanity; \"Iron Man\" arrogant Stark drenched in blazing holograms stunning the military with million-dollar missile demos."
     },
     {
       id: "nouveau_riche",
@@ -34,16 +26,8 @@ export const SUR9_GROUP_J: LibraryCategoryDef = {
       defEn: "A class climber who suddenly acquired immense wealth but is not yet accepted by the old symbolic lineage.",
       core: "我已经买下了你们买不起的跑车，为什么你们依然不看我？ | 缺失 ($): 大他者的凝视 (The Other's Gaze)",
       coreEn: "I bought the sports car you can't afford, why do you still not look at me? | Lack ($): The Other's Gaze",
-      logic: "【符号过载的空洞】：试图用过量的物质能指（豪车、Logo）填补M1缺失，然而这些能指无法兑换大他者（老钱SUR4）的承认。陷入越购买越空虚的荒诞循环。",
-      logicEn: "[Empty Overload of Signifiers]: Tries to fill M1 lack with excess material signifiers (cars, logos), but these cannot buy the Other's (Old Money SUR4) recognition. Trapped in an absurd loop.",
-      patch: {
-        mechanics: "能指堆砌协议 + [承认饥渴度 = Max; 审美防御 = 破防级]",
-        mechanicsEn: "Signifier_Piling_Protocol + [Thirst_for_Recognition = Max; Aesthetic_Defense = Breached]",
-        aesthetic: "聚焦：刺目的金色与Logo堆叠 + 无法掩饰的粗糙举止。文本：浮夸、聒噪且充满歇斯底里的自我证明欲。",
-        aestheticEn: "Focus: Blinding_Gold/Logos + Poorly_Hidden_Rough_Manners. Text: Ostentatious,_Noisy,_and_Hysterically_Desperate_to_Prove_Self.",
-        runtime: "IF (遭受优雅的结构性无视) THEN (引发：失控的消费报复或极端的暴力摧毁欲)。",
-        runtimeEn: "IF (Suffer_Elegant_Structural_Ignorance) THEN (Trigger: Uncontrolled_Retaliatory_Consumption_or_Violent_Destruction)."
-      }
+      reference: "《了不起的盖茨比》(2013, 巴兹·鲁赫曼) 杰伊·盖茨比；《华尔街之狼》(2013, 马丁·斯科塞斯) 乔丹·贝尔福特",
+      referenceEn: "\"The Great Gatsby\" (2013, Baz Luhrmann) Jay Gatsby; \"The Wolf of Wall Street\" (2013, Martin Scorsese) Jordan Belfort; \"The Great Gatsby\" Gatsby frantically pouring money/fireworks in hyper-decadent parties yet unable to scrub off his bootlegger under-stain; \"The Wolf of Wall Street\" Belfort manic-throwing hundreds on yachts, hiding deep insecurities vs old-money beneath extreme vulgarity."
     },
     {
       id: "corporate_exec",
@@ -53,16 +37,8 @@ export const SUR9_GROUP_J: LibraryCategoryDef = {
       defEn: "The perfect gear in the modern capital machine, fully alienating the self into pure execution.",
       core: "如果有必要，我可以优化掉我自己。 | 代偿 ($): 绩效指标 (KPIs)",
       coreEn: "If necessary, I can optimize myself out. | Compensation ($): KPIs",
-      logic: "【效率异化】：主体（M1）从肉身蜕变为一张KPI报表。大他者（M4）即是看不见的懂事会与市场趋势，任何反抗这套系统的力量（M2）都必须被“优化”。",
-      logicEn: "[Efficiency Alienation]: Subjectivity (M1) sheds flesh to become a KPI report. The Other (M4) is the invisible board and market trends. Any resisting force (M2) must be 'optimized'.",
-      patch: {
-        mechanics: "工具理性协议 + [情感剥离度 = 极高; 疲劳阈值 = 超人级]",
-        mechanicsEn: "Instrumental_Rationality_Protocol + [Emotional_Detachment = Max; Fatigue_Threshold = Superhuman]",
-        aesthetic: "聚焦：完美的阿玛尼西装 + 凌晨三点的咖啡因眼袋。文本：满是战略术语、无缝切换的冷血商业切口。",
-        aestheticEn: "Focus: Perfect_Armani_Suits + 3AM_Caffeine_Eye_Bags. Text: Filled_with_Strategy_Jargon_and_Cold-blooded_Biz-speak.",
-        runtime: "IF (面临无法量化的纯粹情感输入) THEN (系统性宕机：试图用表格计算爱情但最终导致全盘崩溃)。",
-        runtimeEn: "IF (Face_Unquantifiable_Pure_Emotion) THEN (System_Crash: Try_to_Calculate_Love_in_Spreadsheets_but_Fail_Completely)."
-      }
+      reference: "《美国精神病人》(2000, 玛丽·哈伦) 帕特里克·贝特曼；《在云端》(2009, 杰森·雷特曼) 瑞恩·宾厄姆",
+      referenceEn: "\"American Psycho\" (2000, Mary Harron) Patrick Bateman; \"Up in the Air\" (2009, Jason Reitman) Ryan Bingham; \"American Psycho\" an alienated husk presenting perfect PPTs in crisp bespoke suits by day, manic-chainsawing whores covered in blood by night; \"Up in the Air\" Ryan flying 300 days a year replacing soul with air-miles, turning brutal firings into smooth cold logic."
     },
     {
       id: "influencer_star",
@@ -72,16 +48,8 @@ export const SUR9_GROUP_J: LibraryCategoryDef = {
       defEn: "A traffic-driven entity surviving entirely on public attention and the digital Spectacle.",
       core: "只要灯还在闪，我就是真实存在的。 | 缺失 ($): 断网的静默 (Silence Off-Grid)",
       coreEn: "As long as the lights flash, I am real. | Lack ($): Silence Off-Grid",
-      logic: "【景观寄生】：主体（M1）彻底消融在大众的凝视（The Gaze）中。大他者（M4）就是变幻莫测的算法与粉丝情绪。失去流量即面临存在论层面的“彻底死亡”。",
-      logicEn: "[Spectacle Parasitism]: Self (M1) thoroughly dissolves into the mass Gaze. The Other (M4) is the volatile algorithm/fan sentiment. Losing traffic means true ontological 'death'.",
-      patch: {
-        mechanics: "流量喂养协议 + [自我边界 = 零; 表演型人格 = 满级]",
-        mechanicsEn: "Traffic_Feeding_Protocol + [Self_Boundary = 0; Histrionic_Traits = Max]",
-        aesthetic: "聚焦：刺眼的环形美颜灯 + 手机屏幕倒影中的扭曲笑脸。文本：碎片化、带有虚假亲昵与时刻表演性质的语感。",
-        aestheticEn: "Focus: Blinding_Ring_Lights + Twisted_Smiling_Reflection_in_Screens. Text: Fragmented,_Falsely_Intimate,_Always-Performing_Tone.",
-        runtime: "IF (被迫隔绝于网络/面临无人关注的暗室) THEN (触发：存在被抽空的窒息感与极度恐慌发作)。",
-        runtimeEn: "IF (Isolated_from_Network_OR_Placed_in_Dark_Room_With_No_Audience) THEN (Trigger: Suffocating_Void_of_Existence_and_Severe_Panic_Attack)."
-      }
+      reference: "《黑镜：急转直下》(2016, 乔·赖特) 蕾西·庞德；《楚门的世界》(1998, 彼得·威尔) 楚门·伯班克",
+      referenceEn: "\"Black Mirror: Nosedive\" (2016, Joe Wright) Lacie Pound; \"The Truman Show\" (1998, Peter Weir) Truman Burbank; \"Black Mirror: Nosedive\" Lacie bleeding tears but forcing ultimate perfect smiles for ratings, finally snapping screaming in holding-cell mud; \"The Truman Show\" forcing product-placement smiles in a giant dome, nearly drowned by storm-FX when attempting escape."
     },
     {
       id: "investor",
@@ -91,16 +59,8 @@ export const SUR9_GROUP_J: LibraryCategoryDef = {
       defEn: "Predators roaming Wall Street, viewing global industries and lives as leverage games on ledgers.",
       core: "恐惧与贪婪，这是我闻得到、吃得下的唯一血肉。 | 代偿 ($): 资本流转 (Flow of Capital)",
       coreEn: "Fear and greed; the only flesh and blood I can smell and eat. | Compensation ($): Flow of Capital",
-      logic: "【嗜血数字】：对实体生产毫无兴趣，单纯以吸积和做空价值链为生。其内在欲望（M3）是无限扩张的数字黑洞，大他者（M4）是无所不能的货币神教。",
-      logicEn: "[Blood-sucking Digits]: No interest in physical production, feeds purely on accreting or shorting value chains. Desire (M3) is an infinitely expanding digital black hole.",
-      patch: {
-        mechanics: "资本吞噬协议 + [同理心 = 切除; 风险偏好 = 极限狂热]",
-        mechanicsEn: "Capital_Devouring_Protocol + [Empathy = Excised; Risk_Tolerance = Extreme_Frenzy]",
-        aesthetic: "聚焦：六屏交易终端瀑布崖 + 高级雪茄的冷灰。文本：掠夺性修辞结合金融黑话，优雅但见血封喉的对话。",
-        aestheticEn: "Focus: Six-Screen_Trading_Cascades + Cold_Ash_of_Fine_Cigars. Text: Predatory_Rhetoric_with_Fin-Jargon; Elegant_but_Lethal.",
-        runtime: "IF (遭遇数字逻辑无法覆盖的【绝对灾厄】或不可控变量) THEN (引发系统性爆仓带动的精神毁灭)。",
-        runtimeEn: "IF (Encounter_[Absolute_Disaster]_Uncoverable_by_Digit_Logic) THEN (Trigger: Systemic_Liquidation_Leading_to_Mental_Destruction)."
-      }
+      reference: "《大空头》(2015, 亚当·麦凯) 迈克尔·伯瑞；《亿万》(2016, 系列剧) 鲍比·阿克塞尔罗德",
+      referenceEn: "\"The Big Short\" (2015, Adam McKay) Michael Burry; \"Billions\" (2016, Series) Bobby Axelrod; \"The Big Short\" eccentric drummers coldly watching computer screens mint billions off millions of foreclosures amidst Wall-Street suicide-wails; \"Billions\" Axe casually crushing a state's financial bottom-line with a multi-billion hedge-fund play inside a sterile glass room."
     },
     {
       id: "celebrity_child",
@@ -110,16 +70,8 @@ export const SUR9_GROUP_J: LibraryCategoryDef = {
       defEn: "Born into superstar parental halos, possessing effortless privilege but inescapable scrutiny.",
       core: "我永远只是他们的一个基因附件。 | 缺失 ($): 原创的痛苦 (Original Pain)",
       coreEn: "I am forever just their genetic attachment. | Lack ($): Original Pain",
-      logic: "【父名压倒】：在起跑线被置于顶端，导致欲望机制（M3）出生即残废。因为所有的光环都归属于大他者（巨星父母 M4），必须通过堕落或极端的叛逆来寻找微弱的“自我实感”。",
-      logicEn: "[Name-of-the-Father Overload]: Placed at the apex from birth, crippling the desire mechanism (M3). Since all halous belong to the Other (superstar parents), must find faint 'self-reality' via depravity or extreme rebellion.",
-      patch: {
-        mechanics: "光代偿协议 + [自我厌恶 = 隐性极高; 阈值抗性 = 溃散]",
-        mechanicsEn: "Halo_Compensation_Protocol + [Self-Loathing = Latent_Max; Threshold_Resistance = Collapsed]",
-        aesthetic: "聚焦：致幻药物散落的名品沙发布 + 无处不在的长焦镜头偷拍感。文本：慵懒、犬儒、混合着被宠坏与被毁掉的双重特质。",
-        aestheticEn: "Focus: Psychedelics_on_Designer_Sofas + Omnipresent_Telephoto_Paparazzi_Vibe. Text: Lazy,_Cynic,_Spoiled_yet_Ruined_Diction.",
-        runtime: "IF (父母的光环崩塌或被彻底放弃) THEN (面临：既是解脱也是真空窒息的惨烈撕网期)。",
-        runtimeEn: "IF (Parental_Halo_Collapses_or_Abandons_Them) THEN (Face: Tragic_Web-Tearing_Period_of_Both_Relief_and_Vacuum_Suffocation)."
-      }
+      reference: "《闪灵》(1980, 斯坦利·库布里克) 丹尼·托伦斯；《好莱坞往事》(2019, 昆汀·塔伦蒂诺) 好莱坞星二代",
+      referenceEn: "\"The Shining\" (1980, Stanley Kubrick) Danny Torrance; \"Once Upon a Time in Hollywood\" (2019, Quentin Tarantino) Hollywood Nepo Babies; \"The Shining\" psychic Danny furiously pedaling his trike fleeing his manic father through halls flooded with actual seas of blood; \"Once Upon a Time in Hollywood\" neon-lit husks born by hallucinogenic pools, mercilessly targeted by cults aiming to butcher elite gloss."
     },
     {
       id: "genius_scholar",
@@ -129,16 +81,8 @@ export const SUR9_GROUP_J: LibraryCategoryDef = {
       defEn: "Piercing the world's surface via superior intellect, yet extremely clumsy in mundane orders at the ivory tower's apex.",
       core: "你们在乎谁爱谁，我只在乎原子的自旋。 | 代偿 ($): 终极定律 (The Ultimate Law)",
       coreEn: "You care who loves who; I only care about the spin of atoms. | Compensation ($): The Ultimate Law",
-      logic: "【能指脱节】：用另一套极端理性的宇宙/数学语言代替了世俗的大他者（SUR4）。所有的日常遭遇（M2）被视作干扰项，只有解开真理才是唯一的力比多发泄口。",
-      logicEn: "[Signifier Disconnect]: Replaces the mundane Other (SUR4) with an extremely rational language of cosmos/math. Daily encounters (M2) are variables to ignore; solving 'Truth' is the only libido outlet.",
-      patch: {
-        mechanics: "智性孤岛协议 + [交际回路 = 斩断; 专注力 = 走火入魔级]",
-        mechanicsEn: "Intellectual_Island_Protocol + [Social_Circuit = Severed; Focus = Demonic_Possession_Level]",
-        aesthetic: "聚焦：密布方程的黑板 + 脏兮兮的发丝。文本：前言不搭后语的跨维思考，彻底忽略对方情绪维度的对话。",
-        aestheticEn: "Focus: Blackboard_Dense_with_Equations + Dirty_Hair. Text: Incoherent_Cross-D_Thoughts,_Completely_Ignoring_Emotional_Dimensions.",
-        runtime: "IF (发现其信仰的终极理论存在一个无法缝合的裂谷) THEN (触发：世界观崩塌式的存在论危机或彻底疯癫)。",
-        runtimeEn: "IF (Discover_Unbridgeable_Chasm_in_Ultimate_Theory) THEN (Trigger: Worldview-Collapsing_Ontological_Crisis_or_Total_Madness)."
-      }
+      reference: "《美丽心灵》(2001, 朗·霍华德) 约翰·纳什；《奥本海默》(2023, 克里斯托弗·诺兰) 罗伯特·奥本海默",
+      referenceEn: "\"A Beautiful Mind\" (2001, Ron Howard) John Nash; \"Oppenheimer\" (2023, Christopher Nolan) J. Robert Oppenheimer; \"A Beautiful Mind\" Nash in a derelict black room plastered with decoded newspapers, his brain shredded by manic code-hallucinations while solving math; \"Oppenheimer\" agonizing prophets watching night turn utterly blinding white, realizing their absolute genius handed humanity the chain of its own doom."
     },
     {
       id: "merchant_prince",
@@ -148,16 +92,8 @@ export const SUR9_GROUP_J: LibraryCategoryDef = {
       defEn: "Princes of the new world controlling bulk logistics, transnational trade, or vital supplies.",
       core: "地球不过是一个物流中转站。 | 代偿 ($): 货物吞吐量 (Cargo Throughput)",
       coreEn: "Earth is merely a logistics transit hub. | Compensation ($): Cargo Throughput",
-      logic: "【物资重组】：在这个主体的拓扑结构中，万物（甚至人的生死，M2遭遇）都能被衡量和打包运输。大他者（M4）是永不停止的“供需”平衡线。",
-      logicEn: "[Material Recombination]: In their topology, everything (even life/death, M2) can be measured/packed/freighted. The Other (M4) is the endless 'Supply/Demand' balance line.",
-      patch: {
-        mechanics: "宏观物流协议 + [价值换算系数 = 绝对理性; 本土依恋 = 极低]",
-        mechanicsEn: "Macro_Logistics_Protocol + [Value_Conversion_Factor = Absolute_Rationality; Local_Attachment = Minimal]",
-        aesthetic: "聚焦：深夜无休的港口起重机 + 精密的航运时刻表。文本：将复杂的道德与人命冲突化作为极简的“沉没成本”演算。",
-        aestheticEn: "Focus: Sleepless_Port_Cranes + Precise_Shipping_Schedules. Text: Reduces_Complex_Moral_Conflicts_to_Minimalist_Sunk_Cost_Calculations.",
-        runtime: "IF (遭遇无法被金钱标价与运输的神秘物神或概念) THEN (引发系统失控，试图不择手段地进行占有)。",
-        runtimeEn: "IF (Encounter_an_Unpriceable/Unshippable_Mystic_Fetish_or_Concept) THEN (Trigger_Loss_of_Control;_Attempt_to_Possess_by_Any_Means)."
-      }
+      reference: "《战争之王》(2005, 安德鲁·尼科尔) 尤里·奥洛夫；《大都会》(1927, 弗里茨·朗) 乔·弗莱德森",
+      referenceEn: "\"Lord of War\" (2005, Andrew Niccol) Yuri Orlov; \"Metropolis\" (1927, Fritz Lang) Joh Fredersen; \"Lord of War\" Orlov in immaculate suits surveying African proxy-wars atop an endless mountain of AK-47 crates soaked in invisible blood; \"Metropolis\" the capital-god at the apex of a temple-like tower coldly sending millions of subterranean workers to die over ticker-tape dips."
     },
     {
       id: "art_patron",
@@ -167,16 +103,8 @@ export const SUR9_GROUP_J: LibraryCategoryDef = {
       defEn: "Possessing staggering wealth but longing to cross class barriers into spiritual halls; a collector buying taste.",
       core: "我买断了疯狂，只为了证明我是清醒的。 | 代偿 ($): 稀缺的崇高感 (Scarcity of the Sublime)",
       coreEn: "I bought out madness, just to prove I am sane. | Compensation ($): Scarcity of the Sublime",
-      logic: "【凝视交易】：主体（M1）由于文化资本的欠缺，必须通过包养天才（他人M3的外包）来确立存在感。大他者（M4）体现为高高在上的艺术审美圈层法典。",
-      logicEn: "[Gazing Trade]: Disadvantaged in cultural capital, the subject (M1) must sponsor genius (outsourcing M3) to establish existence. The Other (M4) is the lofty aesthetic circle's codex.",
-      patch: {
-        mechanics: "文化资本镀金协议 + [控制欲与自卑感 = 双重拉扯; 审美病态化 = 极强]",
-        mechanicsEn: "Cultural_Capital_Gilding_Protocol + [Desire_to_Control_vs_Inferiority = Dual_Pull; Aesthetic_Morbidity = Severe]",
-        aesthetic: "聚焦：空旷无菌的私人美术馆 + 玻璃罩中的畸形造物。文本：夹杂着强权占有欲与附庸风雅的虚伪修辞。",
-        aestheticEn: "Focus: Sterile_Empty_Private_Galleries + Deformed_Creations_in_Glass_Domes. Text: Faked_Elegance_Mixed_with_Tyrannical_Possessive_Rhetoric.",
-        runtime: "IF (赞助的天才彻底失控，产出亵渎资本体系的恐怖杰作) THEN (陷入：是要毁灭它还是要被它吞噬的美学恐慌)。",
-        runtimeEn: "IF (Sponsored_Genius_Loses_Control_and_Creates_Capital-Blaspheming_Horror) THEN (Fall_into_Aesthetic_Panic: Destroy_it_or_be_Devoured)."
-      }
+      reference: "《夜行动物》(2016, 汤姆·福特) 苏珊·莫罗；《天鹅绒圆锯》(2019, 丹·吉尔罗伊) 艺术收藏家",
+      referenceEn: "\"Nocturnal Animals\" (2016, Tom Ford) Susan Morrow; \"Velvet Buzzsaw\" (2019, Dan Gilroy) Art Collectors; \"Nocturnal Animals\" bored elite dames in oversized shades walking through macabre bloody installations, trying to stuff class-voids with mutilated corpses; \"Velvet Buzzsaw\" monopolists hoarding a dead madman's cursed art, only to be literally dismembered by those eerie crawling colors."
     },
     {
       id: "secret_society_member",
@@ -186,16 +114,8 @@ export const SUR9_GROUP_J: LibraryCategoryDef = {
       defEn: "Puppeteers hiding behind the light, mysterious figures at dark tables deciding the rise and fall of nations.",
       core: "世界是个舞台，而我们是拉动提线的手。 | 缺失 ($): 站在阳光下的合法性 (Legitimacy in Daylight)",
       coreEn: "The world is a stage, and we pull the strings. | Lack ($): Legitimacy in Daylight",
-      logic: "【深层结构化】：主体本身就是大他者（M4）潜意识的代理人。他们不是在应对遭遇（M2），他们是在“设计”遭遇。其自身的实在界（M6）被深深掩埋。",
-      logicEn: "[Deep Structuralization]: The subject acts as the unconscious agent of the Other (M4). They don't react to encounters (M2); they 'design' them. Their own Real (M6) is deeply buried.",
-      patch: {
-        mechanics: "影子政府协议 + [信息全知视角 = 伪高维; 个体面目 = 极度模糊]",
-        mechanicsEn: "Shadow_Gov_Protocol + [Omniscient_Info_Perspective = Pseudo-High-D; Individual_Face = Highly_Blurred]",
-        aesthetic: "聚焦：全视之眼戒指 + 被密码机加密的雪茄房。文本：省略主语和宾语，只谈及趋势、清除与棋盘布局的极简密语。",
-        aestheticEn: "Focus: All-Seeing_Eye_Rings + Encrypted_Cigar_Rooms. Text: Omits_Subjects/Objects;_Minimalist_Cipher_Discussing_Only_Trends,_Purges,_and_Chessboards.",
-        runtime: "IF (遭遇完全无法被系统吸收的混沌主体/变量) THEN (组织暴露，幕后防线瞬间土崩瓦解的狼狈应对)。",
-        runtimeEn: "IF (Encounter_Chaotic_Subject/Variable_Unabsorbable_by_System) THEN (Organization_Exposed; Embarrassing_Collapse_of_Backstage_Defenses)."
-      }
+      reference: "《大开眼戒》(1999, 斯坦利·库布里克) 秘密集会成员；《达芬奇密码》(2006, 朗·霍华德) 郇山隐修会长老",
+      referenceEn: "\"Eyes Wide Shut\" (1999, Stanley Kubrick) Secret Society Members; \"The Da Vinci Code\" (2006, Ron Howard) Priory of Sion Elders; \"Eyes Wide Shut\" ruling-class cultists in eerie Venetian masks conducting unimaginable massive flesh-sacrifices in hyper-gothic secluded mansions; \"The Da Vinci Code\" ultra-secret Priory elders bleeding out in dim gothic vaults using their last breath to draw blood-pentagrams."
     },
     {
       id: "crypto_king",
@@ -205,16 +125,8 @@ export const SUR9_GROUP_J: LibraryCategoryDef = {
       defEn: "Made wealthy overnight via decentralized faith and high-leverage gambles, living atop virtual numerical waves.",
       core: "去中心化是我们新造的主。而我们正在吸食他的血。 | 代偿 ($): 虚拟增量的狂欢 (Ecstasy of Virtual Increment)",
       coreEn: "Decentralization is our newly forged Lord, and we are drinking his blood. | Compensation ($): Ecstasy of Virtual Increment",
-      logic: "【符号的空转】：完全剥离了物理价值支撑的极端能指游戏。大他者被置换为“不可阻挡的技术共识”。其主体性（M1）处于随时因为拔网线而飞灰湮灭的悬崖边缘。",
-      logicEn: "[Idle Spin of Signifiers]: Extreme signifier game totally devoid of physical value. The Other is replaced by 'unstoppable tech consensus'. Subjectivity (M1) constantly toes the cliff of systemic deletion.",
-      patch: {
-        mechanics: "泡沫悬浮协议 + [神经紧绷度 = 爆表; 实体重心 = 彻底飘移]",
-        mechanicsEn: "Bubble_Levitation_Protocol + [Neural_Tension = Offline; Physical_Center_of_Gravity = Wholly_Drifted]",
-        aesthetic: "聚焦：满屏幕的K线血瀑布 + 超新星跑车中的恐慌发作。文本：混杂技术邪教狂热与随时跳楼绝望的躁郁症修辞。",
-        aestheticEn: "Focus: Screenful_Bleeding_Charts + Panic_Attacks_in_Hypercars. Text: Bipolar_Rhetoric_Mixing_Tech-Cult_Zeal_and_Suicidal_Despair.",
-        runtime: "IF (面临私钥丢失或终极的网络断联与系统归零) THEN (肉身与精神同时进行惨烈的超压崩盘)。",
-        runtimeEn: "IF (Face_Loss_of_Private_Keys_or_Total_Grid_Collapse) THEN (Flesh_and_Mind_Simultaneously_Undergo_Tragic_Overpressure_Crash)."
-      }
+      reference: "《硅谷》(2014, 系列剧) 创投狂徒；《华尔街之狼》(2013, 马丁·斯科塞斯) 乔丹·贝尔福特",
+      referenceEn: "\"Silicon Valley\" (2014, Series) Tech Gamblers; \"The Wolf of Wall Street\" (2013, Martin Scorsese) Jordan Belfort; \"Silicon Valley\" tech-gamblers sweating profusely watching K-lines moon while standing inside the terrifying deafening roar of 10,000 GPU fans; \"The Wolf of Wall Street\" hallucinating players tossing shitcoins in degenerate offices, their neuro-systems completely crashing under multi-millions and hyper-drugs."
     },
     {
       id: "prodigy",
@@ -224,16 +136,8 @@ export const SUR9_GROUP_J: LibraryCategoryDef = {
       defEn: "A high-purity child genius captured early by the adult world and alienated into a glass doll on display.",
       core: "我十岁时解开了黎曼猜想，但我不知道怎么系鞋带。 | 缺失 ($): 时间的回环 (Loop of Time / Childhood)",
       coreEn: "I solved the Riemann hypothesis at ten, but I don't know how to tie my shoes. | Lack ($): Loop of Time / Childhood",
-      logic: "【畸形的生长点】：部分认知维度被大他者社会机制（SUR4）极限压榨和催熟，而欲望机制（M3）和情绪系统被彻底冰封冻结，形成结构上极度不稳定的“巨头形婴儿”。",
-      logicEn: "[Deformed Growth Point]: Specific cognitive specs hyper-matured by the Other's mechanism (SUR4), while desire (M3) and emotions are deep-frozen, forming a highly unstable 'giant infant'.",
-      patch: {
-        mechanics: "剥夺性催熟协议 + [单维度超载 = 极高; 情感韧性 = 玻璃级]",
-        mechanicsEn: "Deprivational_Ripening_Protocol + [Single-Dimension_Overload = Max; Emotional_Resilience = Glass-level]",
-        aesthetic: "聚焦：巨大琴凳上悬空的小脚 + 满屋子成人的贪婪凝视。文本：成熟到可怕的运算逻辑配合极其幼稚残忍的本能行动。",
-        aestheticEn: "Focus: Dangling_Little_Feet_on_Giant_Stools + Greedy_Adult_Gaze. Text: Frighteningly_Mature_Calculations_Matched_with_Cruelly_Naïve_Instincts.",
-        runtime: "IF (突然意识到自己从未活过) THEN (引发：用绝顶聪明的头脑策划一场惊天动地的自我报复式出逃/毁灭)。",
-        runtimeEn: "IF (Suddenly_Realize_They_Never_Lived) THEN (Plan_Earth-Shattering_Retaliatory_Escape/Destruction_with_Genius_Mind)."
-      }
+      reference: "《爆裂鼓手》(2014, 达米恩·查泽雷) 安德鲁·内曼；《后翼弃兵》(2020, 系列剧) 贝丝·哈蒙",
+      referenceEn: "\"Whiplash\" (2014, Damien Chazelle) Andrew Neiman; \"The Queen's Gambit\" (2020, Series) Beth Harmon; \"Whiplash\" prodigy Andrew mentally tortured by a tyrant, crawling bloody from a car crash just to brutally smash the drum set at a competition; \"The Queen's Gambit\" Beth staring at ceilings in cold orphanage basements furiously hallucinating chess moves, a freak orphan reliant on handfuls of tranquilizers."
     },
     {
       id: "media_mogul",
@@ -243,16 +147,8 @@ export const SUR9_GROUP_J: LibraryCategoryDef = {
       defEn: "Controls public opinion mouthpieces; illusion builders weaving and manufacturing 'modern truth'.",
       core: "如果报纸说战争爆发了，那它就必须爆发。 | 代偿 ($): 话语强权 (Discourse Supremacy)",
       coreEn: "If the papers say a war broke out, then it must break out. | Compensation ($): Discourse Supremacy",
-      logic: "【实在界的涂改者】：通过海量的能指生产，遮蔽或扭曲实在界（M6）。他们是构建虚妄大他者结构（M4网络）的核心节点。",
-      logicEn: "[Eraser of the Real]: Masking or distorting the Real (M6) through massive signifier production. They are the core nodes constructing the illusory structure of the Other (M4 Network).",
-      patch: {
-        mechanics: "现实扭曲场协议 + [舆论操纵能级 = 霸主; 真实的触感 = 极寒]",
-        mechanicsEn: "Reality_Distortion_Field_Protocol + [Opinion_Manipulation_Level = Hegemon; Touch_of_Truth = Freezing_Cold]",
-        aesthetic: "聚焦：几百块新闻监视器组成的墙壁 + 切除声带的播音员。文本：掌控全盘信息的上帝视角的冷笑，用头条杀人的修辞。",
-        aestheticEn: "Focus: Wall_of_Hundreds_of_News_Monitors + Mute_Broadcasters. Text: God-perspective_Sneer_Controlling_Total_Info,_Rhetoric_of_Killing_with_Headlines.",
-        runtime: "IF (自身陷入了无法用媒体网络掩盖和解释的超自然/原始遭遇) THEN (构建的保护层崩溃，在真实重击下露出可悲的凡人肉体)。",
-        runtimeEn: "IF (Fall_into_Supernatural/Primal_Experience_Uncoverable_by_Media) THEN (Protective_Layer_Collapses; Exposing_Pitiful_Mortal_Flesh_to_the_Punch_of_the_Real)."
-      }
+      reference: "《公民凯恩》(1941, 奥逊·威尔斯) 查尔斯·福斯特·凯恩；《夜行者》(2014, 丹·吉尔罗伊) 妮娜·罗米纳",
+      referenceEn: "\"Citizen Kane\" (1941, Orson Welles) Charles Foster Kane; \"Nightcrawler\" (2014, Dan Gilroy) Nina Romina; \"Citizen Kane\" the media-emperor dying in the gargantuan tomb of Xanadu, dropping a snow-globe 'Rosebud' that held back his truth; \"Nightcrawler\" the hyper-excited female editor in a dark room lined with bloody crash-monitors, directing cameramen to literally touch smoking corpses for ratings."
     },
     {
       id: "fashion_icon",
@@ -262,16 +158,8 @@ export const SUR9_GROUP_J: LibraryCategoryDef = {
       defEn: "Visual dictators defining the era's morbid aesthetics, using bodies, fabric, and symbols as weapons.",
       core: "剥离了这件高定，我就会如一阵烟雾般消散。 | 缺失 ($): 身体的安宁 (Peace of the Body)",
       coreEn: "Stripped of this haute couture, I would dissipate like a puff of smoke. | Lack ($): Peace of the Body",
-      logic: "【拜物教之极】：大他者（M4）被缩减为一套极其严苛、转瞬即逝的流行法典。主体不断对自身肉体进行残酷的异化（如节食、整形），以符合这套能指机器的咬合。",
-      logicEn: "[Zenith of Fetishism]: The Other (M4) is reduced to a draconian, fleeting fashion codex. Continuous cruel alienation of the flesh (diet, surgery) to mesh with this signifier machine.",
-      patch: {
-        mechanics: "外壳吞噬躯体协议 + [美的独裁欲 = 极高; 肉体衰败恐惧 = 临界压]",
-        mechanicsEn: "Shell_Devouring_Flesh_Protocol + [Dictatorial_Desire_for_Beauty = Max; Fear_of_Flesh_Decay = Critical_Pressure]",
-        aesthetic: "聚焦：如同刑具般的紧身胸衣 + 镁光灯下的厌食症骨架。文本：极致的刻薄评价与对微小瑕疵的歇斯底里病态偏执。",
-        aestheticEn: "Focus: Torture-device-like_Corsets + Anorexic_Skeletons_under_Flashes. Text: Extreme_Caustic_Critiques_and_Hysterical_Paranoia_over_Minor_Flaws.",
-        runtime: "IF (察觉到无可避免的衰老或面对不可逆的毁容创伤) THEN (引发：用剪刀和鲜血强行重塑艺术品的恐怖爆发（M6重力失衡）)。",
-        runtimeEn: "IF (Detect_Unavoidable_Aging_or_Irreversible_Disfigurement) THEN (Trigger: Horrific_Outburst_of_Reshaping_Art_with_Scissors_and_Blood_(M6_Gravity_Imbalance))."
-      }
+      reference: "《穿普拉达的女王》(2006, 大卫·弗兰科尔) 米兰达·普雷斯丽；《黑白魔女库伊拉》(2021, 克雷格·吉勒斯佩) 库伊拉",
+      referenceEn: "\"The Devil Wears Prada\" (2006, David Frankel) Miranda Priestly; \"Cruella\" (2021, Craig Gillespie) Cruella de Vil; \"The Devil Wears Prada\" the demon editor using one absolute zero-K stare to freeze an assistant to death over a tiny fabric wrinkle; \"Cruella\" standing atop cars cackling madly in a hyper-rebellious gown made of 10,000 trash bags that literally bursts into astonishing flames."
     },
     {
       id: "explorer_wealthy",
@@ -281,16 +169,8 @@ export const SUR9_GROUP_J: LibraryCategoryDef = {
       defEn: "Overfilled with material desires by vast money, a world-weary class seeking thrills by conquering the boundary of death.",
       core: "我花了两千万，只是为了在珠峰顶上感受到冷。 | 代偿 ($): 对恐惧的消费 (Consumption of Fear)",
       coreEn: "I spent twenty million just to feel cold at the top of Everest. | Compensation ($): Consumption of Fear",
-      logic: "【匮乏的匮乏】：因为日常环境中缺乏任何力比多阻力，主体（M1）必须人为制造最极端的物理遭遇（M2）来唤醒僵死的快感神经。然而自然规律不可收买。",
-      logicEn: "[Lack of a Lack]: Given the absence of libidinal resistance in daily life, the subject (M1) artificially engineers extreme physical encounters (M2) to awaken deadened pleasure nerves. But nature rejects bribes.",
-      patch: {
-        mechanics: "人工劫难购买协议 + [边界作死欲 = 极高; 系统抗压 = 极脆]",
-        mechanicsEn: "Purchased_Artificial_Disaster_Protocol + [Death-seeking_Urge = Max; System_Resilience = Highly_Brittle]",
-        aesthetic: "聚焦：被丢弃的极地科考级装备 + 坐在暴风雪中崩溃的千万富翁。文本：用价格衡量大自然，最后被自然以极端的沉默吞噬的讽刺感。",
-        aestheticEn: "Focus: Discarded_Polar_Exploration_Gear + Multi-millionaire_Breaking_Down_in_a_Blizzard. Text: Measuring_Nature_with_Price_Tags,_Only_to_be_Swallowed_by_Nature's_Silent_Irony.",
-        runtime: "IF (遭遇金钱的辅助设备彻底失效，面对纯粹原始的死神) THEN (从高等阶级的傲慢秒切为痛哭流涕的婴儿般脆弱状态)。",
-        runtimeEn: "IF (Paid_Auxiliary_Equipment_Fails_Entirely_Before_Pristine_Death) THEN (Instantly_Switch_from_Elite_Arrogance_to_the_Fragility_of_a_Bawling_Infant)."
-      }
+      reference: "《侏罗纪公园》(1993, 史蒂文·斯皮尔伯格) 约翰·哈蒙德；《普罗米修斯》(2012, 雷德利·斯科特) 彼得·韦兰",
+      referenceEn: "\"Jurassic Park\" (1993, Steven Spielberg) John Hammond; \"Prometheus\" (2012, Ridley Scott) Peter Weyland; \"Jurassic Park\" arrogant old Hammond boasting with amber canes in hyper-luxe dino-labs, utterly shredded later by runaway T-Rexes in the storm; \"Prometheus\" a dying trillionaire forcing a mega-ship to land on a lethal alien rock seeking God, only to be melted alive by terrifying black bio-goo."
     }
   ]
 };

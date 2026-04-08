@@ -9,14 +9,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
         defEn: "The subject tears apart the false peace to claim victory, but their physical body, properties, or lover as a physical entity is permanently destroyed as the 'cost of the Real'.",
         core: "惨胜。在斩断大他者枷锁的同时，必定会切断自己的某条动脉。获得了绝对的真理，但永久失去了日常的生活。 | Outcome: 结构性截肢。",
         coreEn: "Pyrrhic victory. Severing the Big Other's shackles inevitably cuts one's own artery. Gaining absolute truth while permanently forfeiting daily life. | Outcome: Structural amputation.",
-        patch: {
-            mechanics: "结算所有正面主线任务，但强制没收玩家的一项核心能力或最珍贵的绑定伙伴，且无法在二周目继承。",
-            mechanicsEn: "Resolves all positive main quests, but forcibly confiscates one of the player's core abilities or most precious bonded companion, uninheritable in New Game+.",
-            aesthetic: "战场废墟上的绝美阳光。主角满身血污地拿着原本追寻的信物，眼神平和但永远缺少了焦点中的某样东西。微风吹过断壁残垣。",
-            aestheticEn: "Breathtaking sunlight over the battlefield ruins. The blood-stained protagonist holds the sought-after token, eyes peaceful but forever missing something in their focus. A breeze blows through the rubble.",
-            runtime: "IF (M6阶段的代价变量发生溢出) THEN (在胜利界面的渲染管线中永久施加一道无法移除的屏幕裂痕Screen Tear，作为残肢般的视觉瘢痕永不消退)。",
-            runtimeEn: "IF (Cost_Variable_Overflows_During_M6) THEN (A permanent irremovable Screen Tear is applied to the victory screen render pipeline as a visual scar of amputation that never fades)."
-        }
+        reference: "《药神》散尽家财妻离子散只求真理求生；《黑客帝国3》尼奥双目失明碎身死换来锡安的真实曙光。",
+        referenceEn: "Bankrupt lost family for truth in Dying to Survive; Neo dies blind shattering body to save Zion."
     },
     {
         id: "res_martyr",
@@ -26,14 +20,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
         defEn: "At the cost of physical obliteration, the subject hurls an unassimilable Real at the Big Other, using death to burn an unhealable hole into the airtight logical net.",
         core: "《安提戈涅》式的壮烈悲剧。肉体的毁灭不再是惩罚，而是主体彻底豁免于符号界凝视的最强音。 | Outcome: 精神的不朽化锚点。",
         coreEn: "An Antigone-esque sublime tragedy. The destruction of the flesh is no longer a punishment, but the subject's ultimate exemption from the Gaze of the Symbolic. | Outcome: Immortal anchor of spirit.",
-        patch: {
-            mechanics: "主角在一场绝对实力悬殊的压制中主动选择引爆内核。画面全白，随后的过场动画只展示世界因为他的死而产生的不归谬变。",
-            mechanicsEn: "In an absolutely overwhelming suppression, the protagonist actively chooses to detonate their core. Screen turns solid white, following cutscenes only show the irreversible mutation of the world due to their death.",
-            aesthetic: "没有悲鸣，只有一声极其清脆的玻璃碎裂音阶。光芒从内部炸开，将所有威权的反派阴影瞬间蒸发为负底色。",
-            aestheticEn: "No lamentation, only a supremely crisp glass-shattering scale. Light detonates from within, evaporating all authoritarian villainous shadows instantly into negative background colors.",
-            runtime: "IF (死亡协议KillProcess即将执行) THEN (在执行前一帧，将主角的命名变量强行注入系统全局基类Global Base Class，该变量被标记为final且不可被任何后续进程覆盖)。",
-            runtimeEn: "IF (KillProcess_Is_About_To_Execute) THEN (One frame prior, the protagonist's Naming Variable is forcibly injected into the Global Base Class, marked as final and un-overridable by any subsequent process)."
-        }
+        reference: "《V字仇杀队》V以血肉引爆列车炸碎极权；《熔炉》男主抱住禽兽校长卧轨同归于尽以死烧出光明。",
+        referenceEn: "V bombing totalitarian regime with flesh; teacher plunging into train with abuser in Silenced."
     },
     {
         id: "res_acceptance",
@@ -43,14 +31,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
         defEn: "The subject entirely abandons the delirium of self-completion, acknowledging the absolute necessity of Lack, thereby ceasing the neurotic chase after 'object a'.",
         core: "精神分析的终点：与自身的残缺和解。不在于填补那个洞，而在于绕着洞优雅地散步。放下的瞬间，大他者随即解体。 | Outcome: 和解的真空态。",
         coreEn: "The endpoint of psychoanalysis: reconciling with one's own incompleteness. It is not about filling the hole, but pacing elegantly around it. The moment of letting go, the Big Other immediately dissolves. | Outcome: Vacuum state of reconciliation.",
-        patch: {
-            mechanics: "面对终极诱惑或反派的挑衅，主角选择丢下武器。不战也不降，只是转身离开了判定区域，使得系统的强迫症循环报错停机。",
-            mechanicsEn: "Facing the ultimate temptation or villain's provocation, the protagonist drops their weapon. Neither fighting nor surrendering, merely turning and leaving the trigger zone, causing the system's OCD loop to crash.",
-            aesthetic: "一种令人极度舒适的卸力感。紧张的弦乐被极其松弛的长音取代。主角深吸一口气，原本身上背负的叙事重压如有实质般溃散。",
-            aestheticEn: "An immensely comfortable sensation of releasing tension. Tense strings replaced by extremely relaxed long notes. The protagonist takes a deep breath; the narrative gravity they bore dissipates tangibly.",
-            runtime: "IF (主体选择丢下武器并转身离开判定区域) THEN (角色状态栏中所有焦虑Anxiety与追求Quest标记被强制隐去，事件栈执行ForceFlush清空，系统的强迫症循环因无目标而报错停机)。",
-            runtimeEn: "IF (Subject_Drops_Weapon_And_Leaves_Trigger_Zone) THEN (All Anxiety and Quest markers in the status bar are forcibly hidden, EventStack executes ForceFlush, and the system OCD loop crashes due to null target)."
-        }
+        reference: "《神探夏洛克》接受自身残缺击败心魇；《海边的曼彻斯特》坦然承认自己永远走不出来的绝望丧子男。",
+        referenceEn: "Accepting flaws to beat nightmare in Sherlock; father bluntly admitting he can't get over ruin."
     },
     {
         id: "res_flight",
@@ -60,14 +42,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
         defEn: "Seeing through the closed loop of the game rules, the subject chooses neither compliance nor rebellion, but takes an orthogonal flight perpendicular to the existing world axis into the unknown 'outside'.",
         core: "《楚门的世界》结尾那一鞠躬。真正的自由不是在笼子里打赢监狱长，而是找到那扇不存在的门并走进去，去承受没有剧本的真实寒风。 | Outcome: 边界的僭越。",
         coreEn: "The bow at the end of The Truman Show. True freedom is not beating the warden inside the cage, but finding the door that doesn't exist and walking out to endure the unscripted real wind. | Outcome: Transgression of the boundary.",
-        patch: {
-            mechanics: "放弃了终极Boss战或王座，主角用某种非传统的方式（如摧毁承重墙、黑入底层后台）走出了渲染区。",
-            mechanicsEn: "Forfeiting the final Boss fight or the throne, the protagonist uses an unconventional method (e.g., destroying a load-bearing wall, hacking the backend) to walk out of the rendered zone.",
-            aesthetic: "极度震撼的舞台边缘感。主角手触碰到带有马赛克或胶片质感的“天空边界”。开门的一瞬间，光线将他吞没。不播放任何制作人员名单。",
-            aestheticEn: "Profoundly shocking sense of the stage's edge. The protagonist touches 'sky boundaries' with pixelated or filmic textures. The moment the door opens, light swallows them. No end credits roll.",
-            runtime: "IF (主角用非传统手段走出了渲染区边界) THEN (角色坐标被强行改写为超越场景BoundingBox的极值如X:Infinity，引擎抛出对象越界的美学崩溃异常，且不播放任何制作人员名单)。",
-            runtimeEn: "IF (Protagonist_Exits_Rendered_Zone_Via_Unconventional_Means) THEN (Character coordinates are overwritten to extremes beyond BoundingBox e.g. X:Infinity, engine throws an aesthetic Object_Out_Of_Bounds crash, no end credits roll)."
-        }
+        reference: "《楚门的世界》穿破假蓝天画布鞠躬出局；《肖申克的救赎》爬过五百码恶臭屎尿管逃往无名海岸的安迪。",
+        referenceEn: "Bowing out through fake sky wall in Truman Show; Andy crawling 500 yards of shit to blue shores."
     },
     {
         id: "res_new_order",
@@ -77,14 +53,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
         defEn: "Amidst the ruins of both the Symbolic and the Imaginary collapsing, the subject utilizes their own singularity (Sinthome) to forcibly tie a new, unprecedented knot for the world.",
         core: "极度罕见的结构重组。主体成为了那个建立新规则的“原父”，但这不是权力的重复，而是某种基于匮乏的新生态法则的确立。 | Outcome: 新律法的奠基。",
         coreEn: "Extremely rare structural reorganization. The subject becomes the 'primal father' who establishes the new rules, but this is not a repetition of power, but the establishment of a new ecological law based on lack. | Outcome: Founding of the New Law.",
-        patch: {
-            mechanics: "利用之前收集的所有散落碎片（无论是友方的还是敌方的残骸），构建出一个在规则面板上原本不存在的选项并执行。",
-            mechanicsEn: "Using all scattered fragments collected previously (whether friendly or enemy wreckage), constructing an option that originally did not exist on the rule panel and executing it.",
-            aesthetic: "万物复苏但具有异化感的黎明。世界并未恢复原状，而是长出了违反常规常理但美丽的新事物（如从钢铁废墟中长出的巨大发光植物）。",
-            aestheticEn: "A dawn of things reviving but with a sense of alienation. The world does not revert; rather, unconventional yet beautiful new things grow (like giant glowing plants sprouting from steel ruins).",
-            runtime: "IF (主角利用散落碎片构建出规则面板上不存在的选项并执行) THEN (系统抛弃原有判定库，将主角的私有方法升格为全局类，UI界面触发彻底的重绘与改版以适配新律法)。",
-            runtimeEn: "IF (Protagonist_Constructs_Nonexistent_Option_From_Scattered_Fragments_And_Executes) THEN (System discards original evaluation library, protagonist private methods are escalated to global classes, UI undergoes thorough redraw and revamp for the New Law)."
-        }
+        reference: "《疯狂的麦克斯4》怒火推翻不死老乔建水源新规；《窃听风暴》冷血特工背叛体制写下新书守卫信仰。",
+        referenceEn: "Smashing Immortan Joe for water law in Mad Max; cold Stasi agent turning writer to guard belief."
     },
     {
         id: "res_true_love",
@@ -94,14 +64,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
         defEn: "True love in the Lacanian sense: 'Giving what you don't have to someone who doesn't want it.' Two fragmented subjects who no longer try to extract completeness from each other forge a connection in the abyss.",
         core: "不是灵魂伴侣的童话，而是两个创伤内核的互相照见。因为我们都一无所有，所以我们拥有了对抗虚无的彼此。 | Outcome: 爱作为终极圣状。",
         coreEn: "Not the fairy tale of soulmates, but the mutual illumination of two traumatic cores. Because we both have absolutely nothing, we possess each other against the void. | Outcome: Love as the ultimate Sinthome.",
-        patch: {
-            mechanics: "在所有物资清零、血量见底且无法通关的窘境中，主角将最后一丝毫无功能效用的“动作”（如一个微笑、一朵纸花）传递给伴侣。",
-            mechanicsEn: "In the direst straits with zero resources, bottomed HP, and impossible clearance, the protagonist passes the last, functionally useless 'action' (e.g., a smile, a paper flower) to the partner.",
-            aesthetic: "末日崩塌的背景，巨响与火焰铺天盖地。但在景深极浅的画面中央，只有两人交握的双手，时间仿佛为这一瞬间而停顿。",
-            aestheticEn: "Apocalyptic collapsing background, deafening roar and fire overwhelming. But in the ultra-shallow depth of field center, only two clasped hands; time seems to halt for this instant.",
-            runtime: "IF (在物资清零且无法通关的窘境中，主角将最后一个无功能效用的动作传递给伴侣) THEN (系统绕过生存逻辑Survival Logic，两名角色的坐标在引力引擎内被永久锚定，即使场景被销毁亦不分离)。",
-            runtimeEn: "IF (Protagonist_Passes_Last_Functionally_Useless_Action_To_Partner_At_Zero_Resources) THEN (System bypasses Survival Logic, both characters coordinates are permanently anchored in the gravity engine, inseparable even if scene is destroyed)."
-        }
+        reference: "《银翼杀手2049》全息AI与复制人双双一无所有的雨中绝爱；《少年的你》两个泥沼废人绝境互换人生。",
+        referenceEn: "Empty hologram and replicant loving in Blade Runner; two ruined street kids swapping doomed lives."
     },
     {
         id: "res_sinthome",
@@ -111,14 +75,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
         defEn: "The subject no longer attempts to cure their obsessive/traumatic symptoms; instead, they use it as their unique existential anchor, inventing themselves with this unassimilable crazy trait.",
         core: "乔伊斯式的胜利。既然世界是荒谬的大他者残次品，那么我就用我的“病”写出一本属于我自己的天书。我是我自己的结。 | Outcome: 第四环的锁定。",
         coreEn: "The Joycean victory. Since the world is an absurd defective product of the Big Other, I will use my 'illness' to write my own incomprehensible tome. I am my own knot. | Outcome: Locking of the fourth ring.",
-        patch: {
-            mechanics: "将原本处于De-buff栏位里的一个极其负面的特质（如幻听、偏执）翻转为对抗系统终极同化抹杀的核心防御机制。",
-            mechanicsEn: "Flipping an extremely negative trait originally in the De-buff slot (e.g., auditory hallucinations, paranoia) into the core defense mechanism against the system's ultimate assimilation/erasure.",
-            aesthetic: "光怪陆离但极其自信的个人宇宙展示。主角怪异的抽搐动作此时带有某种浑然天成的舞蹈感。外界的攻击在他独特的逻辑场里滑开。",
-            aestheticEn: "A bizarre yet extremely confident display of a personal universe. The protagonist's weird twitches now bear an uncanny natural dance-like quality. External attacks slide off within their unique logic field.",
-            runtime: "IF (主体将De-buff栏位里的极端负面特质翻转为核心防御机制) THEN (提取该私有Bug变量，强行注册为不被任何Try/Catch捕获的底层特性，并以此重构主角的方法类，形成独立逻辑场)。",
-            runtimeEn: "IF (Subject_Flips_Extreme_Debuff_Trait_Into_Core_Defense_Mechanism) THEN (Extract the private Bug variable, forcibly register it as a base feature uncaught by any Try/Catch, refactoring protagonist method classes upon it to form an independent logic field)."
-        }
+        reference: "《小丑》狂舞阶梯将痛苦病症化作极致笑脸造物；《美丽心灵》纳什一生携妄想症共存并借此摘得诺奖。",
+        referenceEn: "Dancing Joker transforming pain to smiling artifact; Nash living with delusions to reach Nobel peak."
     },
     {
         id: "res_event",
@@ -128,14 +86,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
         defEn: "The 'Event' in the Badiouian sense. A miraculous rupture entirely external to common sense occurred, and the subject spends the rest of their life being faithful to and maintaining the truth of this instant.",
         core: "世界嘲笑这是疯癫，但主体曾瞥见过真理的闪光。这不再是关于结果的输赢，而是关于对那个“不可能的发生”的无尽守望。 | Outcome: 真理的主体化。",
         coreEn: "The world mocks it as madness, but the subject once glimpsed the flash of truth. It is no longer about winning or losing but about the endless vigilance over that 'impossible happening'. | Outcome: Subjectivization of truth.",
-        patch: {
-            mechanics: "游戏主线早已结束，一切看似恢复平静。但主角每日重复进行着一个在外人看来毫无意义的仪式，以确保那份“真实”永不消散。",
-            mechanicsEn: "The main game ended long ago; all seems to return to calm. But the protagonist repeats a daily ritual—seemingly meaningless to outsiders—to ensure that 'truth' never dissipates.",
-            aesthetic: "极简的长镜头。岁月流逝，周围的人物都在世俗化，唯有主角的眼神如磐石般闪耀着一种近乎宗教的痴迷和清澈。",
-            aestheticEn: "Minimalist long take. As years pass, surrounding characters secularize, while only the protagonist's eyes shine like bedrock with an almost religious obsession and clarity.",
-            runtime: "IF (主体在主线结束后每日重复进行某个在外人看来毫无意义的仪式) THEN (在时间轴系统里锁定那个特定Timestamp，主体的指针永远向该变量发送无回应的致敬信号，确保那份真实永不消散)。",
-            runtimeEn: "IF (Subject_Repeats_A_Seemingly_Meaningless_Daily_Ritual_After_Main_Quest_Ends) THEN (Lock onto that specific Timestamp in the timeline system, subject pointer eternally sends unrequited homage signals to that variable, ensuring Truth never dissipates)."
-        }
+        reference: "《降临》明知丧女结局仍忠诚拥抱奇迹瞬间；《可可西里》巡山队员为护孤羊一生坚守荒山耗尽孤血。",
+        referenceEn: "Embracing tragic daughter birth loop in Arrival; patrolman dying frozen guarding Tibetan plateau."
     },
     {
         id: "res_the_act",
@@ -145,14 +97,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
         defEn: "The subject makes a pure, unprecedented, absolute act with zero utilitarian calculations or safety nets. This act directly blows up the causal chain of the Symbolic.",
         core: "齐泽克式的革命行动。不是“计算后觉得能赢才做”，而是“正因为不可能，所以必须这么做”。主体在行动中被悬空重塑。 | Outcome: 因果律的断裂。",
         coreEn: "A Zizekian revolutionary Act. Not 'doing it because calculations show a win', but 'precisely because it is impossible, it must be done'. The subject is suspended and reshaped within the act. | Outcome: Rupture of causality.",
-        patch: {
-            mechanics: "在毫无预警的情况下，突然抛弃所有积累的优势与计划，以一种近乎荒诞的直接方式面对庞大的反派机制，一击致命。",
-            mechanicsEn: "Without any warning, abruptly abandoning all accumulated advantages and plans, confronting the massive villain mechanism in an almost absurdly direct manner, striking lethally.",
-            aesthetic: "极度干脆的动作设计，没有任何前摇动画。周围的敌人（乃至整个环境）因为无法理解这一行径的逻辑而陷入彻底的呆滞僵持。",
-            aestheticEn: "Extremely crisp motion design, absolutely no wind-up animation. Surrounding enemies (and the entire environment) fall into complete dumbfounded paralysis, unable to process the logic of this act.",
-            runtime: "IF (主体在毫无预警下抛弃所有积累的优势，以荒诞的直接方式面对庞大反派机制) THEN (角色的决策权重在该瞬间被推至Infinity，越狱跳过所有系统校验方法Validation Method，一击致命)。",
-            runtimeEn: "IF (Subject_Abruptly_Abandons_All_Advantages_And_Confronts_Villain_With_Absurd_Directness) THEN (Character Decision_Weight is pushed to Infinity in that instant, jailbreaking past all systemic Validation Methods, lethal in one strike)."
-        }
+        reference: "《黑客帝国》尼奥吞下红色药丸斩断虚假因果；《牯岭街少年杀人事件》小四刺死小明突入彻底的疯狂绝路。",
+        referenceEn: "Neo swallowing red pill breaking Matrix code; teen stabbing primary lover in Summer madness."
     },
     {
         id: "res_sublimation",
@@ -162,14 +108,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
         defEn: "Elevating that unlookable, terribly dangerous drive (trauma, incestuous desire, destructive urge) to the dignity of 'The Thing (Das Ding)', transforming it into the creation of beauty.",
         core: "《死于威尼斯》或极端的艺术狂热。不杀死恶魔，而是将恶魔用纯金与大理石雕刻。从最深的痛苦与污秽中开出不朽的崇高之花。 | Outcome: 驱力的艺术容器。",
         coreEn: "Death in Venice or extreme artistic fanaticism. Not killing the demon, but sculpting the demon with pure gold and marble. Cultivating an immortal flower of sublimity from the deepest pain and filth. | Outcome: Artistic vessel for Drive.",
-        patch: {
-            mechanics: "将原本会导致 Game Over 的致命深渊值，全部注入到一个名为“作品”的非战斗道具中。代价是主角肉体的快速干瘪。",
-            mechanicsEn: "Injecting all lethal abyss value that would have caused Game Over into a non-combat item called 'The Work'. The cost is the rapid shriveling of the protagonist's physical body.",
-            aesthetic: "病态且极致的唯美主义。绝境中诡异但令人屏息的艺术造物（一幅画、一首曲子）。周围的残酷环境都被这件造物的神圣感压制失色。",
-            aestheticEn: "Morbid and ultimate aestheticism. A bizarre but breathtaking artistic creation (a painting, a melody) amid desperation. The cruel surrounding environment is eclipsed by the sacredness of this creation.",
-            runtime: "IF (致命深渊值被全部注入名为作品的非战斗道具中) THEN (强行触发引擎的光斑溢出渲染Bloom Overflow，用极度繁杂华美的粒子效果包裹代表伤痛的基础几何体，代价是主角肉体的快速干瘪)。",
-            runtimeEn: "IF (All_Lethal_Abyss_Value_Is_Injected_Into_Non_Combat_Item_The_Work) THEN (Forcibly trigger engine Bloom Overflow rendering, wrapping primitive geometry of trauma in intensely complex gorgeous particle effects, cost is protagonist rapid physical shriveling)."
-        }
+        reference: "《黑天鹅》妮娜自毁裂变跳出绝美天鹅死局；《霸王别姬》蝶衣将疯痴绝恋化作千古绝唱一剑染红戏台。",
+        referenceEn: "Nina tearing herself for perfect Black Swan dance; Concubine turning mad love to blood on stage."
     },
     {
         id: "res_symbolic_pact",
@@ -179,14 +119,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
         defEn: "The subject has seen through the hypocrisy and emptiness of all institutional ideals, but out of love for specific others, chooses to actively don the heavy shackles, bearing the Big Other's fictional responsibility for the multitude.",
         core: "《黑暗骑士》的蝙蝠侠离场。成熟的悲观主义。我明知真理不存在，但我愿意为了保护你们在黑夜里酣睡，而成为那个背负骂名缝补谎言的工匠。 | Outcome: 虚构神话的道成肉身。",
         coreEn: "Batman's exit in The Dark Knight. Mature pessimism. Knowing truth does not exist, I am willing to become the reviled artisan patching the lies, just to protect your slumber in the dark night. | Outcome: Incarnation of the fictional myth.",
-        patch: {
-            mechanics: "背下所有反派的罪行，放弃原本属于自己的洗白证据。任由民众的憎恨值拉满，从而换取城市数据结构的稳定。",
-            mechanicsEn: "Taking the fall for all the villain's crimes, abandoning the evidence that would clear their name. Allowing the populace's hatred value to maximize, thereby ensuring the stability of the city's data structure.",
-            aesthetic: "雨夜奔跑的孤独背影。无视背后警灯的追捕与恶言。配乐宏大但充满了压抑的男低音与极端的孤独感。",
-            aestheticEn: "A solitary silhouette running in a rainy night. Ignoring the tracking sirens and verbal abuse behind. The soundtrack is epic but filled with oppressive bass and extreme loneliness.",
-            runtime: "IF (主体背下所有反派罪行并放弃洗白证据，任由民众憎恨值拉满) THEN (主动将自己标记为Enemy派系，同时触发事件给整个公共集群套上无法击穿的Invincible保护罩，换取城市数据结构稳定)。",
-            runtimeEn: "IF (Subject_Takes_Fall_For_All_Villain_Crimes_And_Abandons_Exonerating_Evidence) THEN (Proactively flag self as Enemy faction, simultaneously buff entire public cluster with impenetrable Invincible shield, exchanging for city data structure stability)."
-        }
+        reference: "《黑暗骑士》替双面人顶罪奔入黑夜的蝙蝠侠；《辛德勒名单》明知大环境不可违逆却倾其所有强塑救命名单。",
+        referenceEn: "Batman taking blame running to raw night; Schindler forging fake saving list losing all wealth."
     },
     {
         id: "res_ex_nihilo",
@@ -196,14 +130,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
         defEn: "Upon scorched earth where all pre-existing values have been destroyed, relying on no past blueprints or laws, like Nietzsche's Übermensch, establishing a brand-new vocabulary of survival purely out of nothing.",
         core: "上帝死了之后主体的绝对责任。不依靠现成的积木，自己烧土造砖。用绝对的生命肯定，踏入未被命名的大地。 | Outcome: 原初命名的权力。",
         coreEn: "The absolute responsibility of the subject after the death of God. Not relying on ready-made blocks, but baking clay to make bricks. With absolute affirmation of life, stepping into unnamed lands. | Outcome: The power of primal naming.",
-        patch: {
-            mechanics: "拒绝所有现成的天赋树/派系选择。甚至游戏界面UI化作尘埃。主角在空旷的大地上用最基础的操作留下了第一行新的互动指令。",
-            mechanicsEn: "Refusing all ready-made talent trees/faction choices. Even the UI dissolves to dust. The protagonist leaves the first line of new interactive commands on the immense empty wasteland using the most basic actions.",
-            aesthetic: "极简的荒野视效，没有任何人造物。日出时分的广角镜头。主角的每一个脚印都伴随着浑厚的环境回声。生机在脚下萌芽。",
-            aestheticEn: "Ultra-minimalist wilderness VFX, zero artificial objects. A wide-angle shot at sunrise. Every footprint of the protagonist resonates with a deep environmental echo. Vitality sprouts beneath their feet.",
-            runtime: "IF (主角拒绝所有现成天赋树与派系选择，甚至游戏UI化作尘埃) THEN (清空全局Dictionaries，由玩家的主体操作在引擎日志中触发InitRoot()，成为一切的新源头)。",
-            runtimeEn: "IF (Protagonist_Refuses_All_Talent_Trees_And_Faction_Choices_And_UI_Dissolves) THEN (Clear global Dictionaries, player subjective action triggers InitRoot() in engine log, becoming the new origin of everything)."
-        }
+        reference: "《三体》罗辑在全死黑局中凭空捏造黑暗森林威慑；《肖申克》绝狱中不假外物徒手生造出惊世图书馆。",
+        referenceEn: "Luo Ji forging cosmic deterrence ex nihilo in 3body; Andy digging incredible library in pure jail."
     },
     {
         id: "res_forgiveness",
@@ -213,14 +141,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
         defEn: "In the very second of holding absolute power for revenge, the subject loosens their grip on the blade. Not out of cowardice, but to forcibly snip causality from the endless cycle 'bound by sadism'.",
         core: "真正的宽恕是对大他者剧本的最强蔑视。你越是折磨对方，你就越受到对方的奴役。解脱就是宣告：你不配占用我余生的一丝算力。 | Outcome: 剥夺反派的绝对反击。",
         coreEn: "True forgiveness is the strongest contempt toward the Big Other's script. The more you torture them, the more you are enslaved by them. Release is declaring: you are unworthy of even a single flop of my remaining computing power. | Outcome: Absolute counter-deprivation of the villain.",
-        patch: {
-            mechanics: "在狂按攻击键即可处决仇人的QTE提示中，什么都不按。时间停滞结束后，主角扔掉武器，越过跪地的反派离开。",
-            mechanicsEn: "During the QTE prompt where mashing attack executes the sworn enemy, pressing nothing. After the time-freeze ends, the protagonist drops the weapon, stepping past the kneeling villain and leaving.",
-            aesthetic: "反派极度错愕且由于失去存在意义而崩溃大哭。主角的背影则被温暖的侧逆光勾勒得轮廓分明。宽恕如同利刃般刺耳。",
-            aestheticEn: "The villain reacts with profound astonishment and breaks into weeping collapse due to the loss of existential meaning. The protagonist's silhouette from behind is starkly outlined by warm rim light. Forgiveness is as piercing as a blade.",
-            runtime: "IF (在可处决仇人的QTE提示中主角什么都不按并扔掉武器离开) THEN (将目标身上的仇恨锚点Aggro Anchor强制Dispose，与之相关的复仇算法因空指针而永久失效)。",
-            runtimeEn: "IF (Protagonist_Presses_Nothing_During_Execution_QTE_And_Drops_Weapon_To_Leave) THEN (Forcibly call Dispose on target Aggro Anchor, all related vengeance algorithms permanently fail due to null pointers)."
-        }
+        reference: "《三块广告牌》怒极暴母终在路上放下滔天复仇火；《最后的生还者》艾莉在海水中松开掐死仇人的血手。",
+        referenceEn: "Angry mother dropping roaring revenge in Billboards; Ellie letting go of drowning enemy's throat."
     },
     {
         id: "res_connection",
@@ -230,14 +152,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
         defEn: "Breaking conventional temporal and physical barriers; through extremely pure emotion (love or will), establishing a bridge of communication between originally incommensurable dimensions or black holes.",
         core: "《星际穿越》的高维书房。物理法则被人类的终极爱欲（Eros）暂时压制弯曲。人类的脆弱成为突破冰冷宇宙法则的唯一杠杆。 | Outcome: 物理主义的溃败。",
         coreEn: "The high-dimensional library in Interstellar. Physical laws are temporarily suppressed and bent by humanity's ultimate Eros. Human fragility becomes the sole lever to breach the universe's frigid laws. | Outcome: Rout of physicalism.",
-        patch: {
-            mechanics: "主角在必死的绝境外太空或高维空隙中，通过极其微弱的交互（拨动指针、敲击墙壁）解开了遥远过去某人的死局。",
-            mechanicsEn: "In fatal deep space or high-dimensional gaps, the protagonist solves someone's dead end in the distant past through immensely faint interactions (ticking a watch hand, tapping a wall).",
-            aesthetic: "极致宏大的深空黑暗与细微如发丝的家庭物件特写并置。汉斯季默式的管风琴将视听体验推向宗教级的震颤。",
-            aestheticEn: "Juxtaposition of impossibly massive deep space darkness alongside hair-thin close-ups of domestic objects. Hans Zimmer-esque pipe organs push the audio-visual experience to an almost religious tremor.",
-            runtime: "IF (主角在必死的深空或高维空隙中通过极微弱的交互解开了遥远过去某人的死局) THEN (在底层引擎中调用非法跨表查询Cross-Dimensional Query，用荒谬的时空穿透指针链接了两个场景)。",
-            runtimeEn: "IF (Protagonist_Solves_Distant_Past_Dead_End_Via_Faint_Interaction_In_Fatal_Deep_Space) THEN (Call illegal Cross-Dimensional Query in base engine, linking two scenes with an absurd spatio-temporal penetrating pointer)."
-        }
+        reference: "《星际穿越》凭爱力越黑洞向女儿传递坐标的父亲；《漫长的季节》老王越过十年风雪大喊铁轨前旧我。",
+        referenceEn: "Father beaming data through black hole via love; Wang shouting to past self across ten years' snow."
     },
     {
         id: "res_legend",
@@ -247,14 +163,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
         defEn: "The subject's physical body is entirely shattered, but their actions and name transcend the confines of flesh, ascending dimensions into a string of pure signifiers, carved into the subconscious stone slab of the whole species.",
         core: "《V字仇杀队》。理念是刀枪不入的。当大他者杀死了那具脆弱的躯壳，它其实犯了最愚蠢的错误：它帮英雄完成了不朽的神话化过程。 | Outcome: 符号的反噬病毒。",
         coreEn: "V for Vendetta. Ideas are bulletproof. When the Big Other kills the fragile shell, it actually commits the stupidest error: it helps finalize the hero's immortal mythologization. | Outcome: The Symbolic's backlash virus.",
-        patch: {
-            mechanics: "主角战死，但下一秒，成千上万原本平庸的NPC戴上了和主角相同的面具，拿起了同样的武器，数据如病毒一样暴增蔓延。",
-            mechanicsEn: "The protagonist dies in battle, but the next second, thousands of originally mediocre NPCs don the same mask as the protagonist, picking up the same weapons. Data multiplies and spreads like a virus.",
-            aesthetic: "极其惨烈的阵亡特写，无缝切换为城市各个角落燎原般的星星之火。面具的符码如同海啸般淹没了统治者的视网膜。",
-            aestheticEn: "Extremely gruesome close-up of dying in action, seamlessly transitioning to a prairie fire of sparks across every corner of the city. The mask's code floods the ruler's retina like a tsunami.",
-            runtime: "IF (主角战死) THEN (将主角的方法模板设为Static，并强行向场景内所有普通节点Broadcast，引发系统内存对该理念的极度过载充血，成千上万NPC戴上相同面具)。",
-            runtimeEn: "IF (Protagonist_Dies_In_Battle) THEN (Set protagonist Method Template to Static and forcibly Broadcast to all normal nodes in scene, inducing extreme memory congestion for this ideal, thousands of NPCs don the same mask)."
-        }
+        reference: "《V字仇杀队》V死后化千万人头戴面具的神话抗争；《英雄》无名陨落后刺客之名化作千古不可灭符号。",
+        referenceEn: "V dying to become millions of masked rebels; Nameless assassin dying to forge eternal mythic word."
     },
     {
         id: "res_spiritual",
@@ -264,14 +174,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
         defEn: "The subject sheds the vain 'Ego' produced by the Imaginary (mirror stage); consciousness dissipates into the vast grid of the Real, achieving a depersonalized absolute clarity.",
         core: "攻壳机动队的草薙素子或者露西。不再留恋人类那具带有限制与成见的小小的躯壳模型，网络/宇宙有多辽阔，我的外延就有多广。 | Outcome: 容器的最终溶解。",
         coreEn: "Motoko Kusanagi in Ghost in the Shell or Lucy. No longer clinging to the small human shell model with its limits and prejudices; however vast the network/universe, my extension is that broad. | Outcome: Final dissolution of the vessel.",
-        patch: {
-            mechanics: "放弃最后保全面貌的挣扎，主动跳入数字海洋或能量风暴，主角的血条与模型彻底蒸发，但却能以全知视角操控场景。",
-            mechanicsEn: "Abandoning the last struggle to preserve appearance, actively jumping into the digital oceanic or energy storm. The protagonist's health bar and model totally evaporate, yet they can control the scene from an omniscient view.",
-            aesthetic: "物质形态像风化沙子一样剥落。镜头从极微观拉到极宏观（细胞直到星爆）。充满几何美感的赛博线条，冷酷但浩瀚的大神定力。",
-            aestheticEn: "Material form flaking away like weathered sand. Camera pulls from ultra-microscopic to ultra-macroscopic (cells up to a starburst). Cyber lines full of geometric aesthetics, cold yet showing vast divine composure.",
-            runtime: "IF (主角主动跳入数字海洋或能量风暴，血条与模型彻底蒸发) THEN (摧毁PlayerController的碰撞体积与Mesh，但将其InputReceiver映射到环境控制对象树的最顶层节点，获得全知视角操控)。",
-            runtimeEn: "IF (Protagonist_Jumps_Into_Digital_Ocean_Or_Energy_Storm_And_Model_Evaporates) THEN (Destroy PlayerController collision volume and Mesh, but map InputReceiver to the topmost node of the environmental control object tree, gaining omniscient view control)."
-        }
+        reference: "《攻壳机动队》素子舍弃皮囊融庞大信息网络海；《鸟人》过气演员扯碎舞台虚荣幻想跃向无相新飞升。",
+        referenceEn: "Motoko dropping shell to merge with vast net sea; Birdman dumping stage ego to leap into clear sky."
     },
     {
         id: "res_masterpiece",
@@ -281,14 +185,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
         defEn: "Under the high pressure of extreme miserly despair or burning one's lifespan, unreservedly venting a lifetime of intense Eros and Thanatos, congealing into a grandiose creation that astounds history.",
         core: "梵高的星夜。主体已经彻底燃烧成了焦炭，但那幅燃烧着疯狂与真理的画作，将永远灼伤大他者那平庸无聊的视网膜。 | Outcome: 才华的绝对变现。",
         coreEn: "Van Gogh's Starry Night. The subject is completely burnt to charcoal, but that painting ablaze with madness and truth will forever scorch the mediocre, boring retinas of the Big Other. | Outcome: Absolute monetization of talent.",
-        patch: {
-            mechanics: "牺牲角色的生命上限、理智值直至归零。在倒地的一刻，一件发着异光的传奇物品或文献自动填入历史陈列馆的中心。",
-            mechanicsEn: "Sacrificing the character's max HP and sanity until zeroed. At the moment of collapsing, a legendary artifact or document glowing weirdly automatically slots into the center of the historical gallery.",
-            aesthetic: "瘦骨嶙峋、因疯狂而丑陋不堪的面容，与那件美到令人战栗的作品形成极其震撼的对比。背景音乐犹如唱诗班的泣血之歌。",
-            aestheticEn: "An emaciated, monstrously ugly face from madness, contrasting shatteringly with the creation that is so beautiful it forces a shudder. Background music resembles a choir crying blood.",
-            runtime: "IF (角色对象的garbage_collect销毁事件被检测到) THEN (伴生触发生成一个具有无限时效的GrandArtifact节点，该传奇物品自动填入历史陈列馆中心)。",
-            runtimeEn: "IF (Character_Object_Garbage_Collect_Destruction_Event_Detected) THEN (Symbiotically trigger generation of a GrandArtifact node with infinite lifespan, the legendary artifact auto-slots into the center of the historical gallery)."
-        }
+        reference: "《爆裂鼓手》安德鲁疯压打出血光四溅骇世鼓乐；《莫扎特传》病榻上透支寿元狂写安魂曲的绝代神童。",
+        referenceEn: "Drummer bleeding limits for sick godly solo in Whiplash; Mozart draining life to pen strict Requiem."
     },
     {
         id: "res_seed",
@@ -298,14 +196,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
         defEn: "Due to physical limits or exhausted lifespan, the subject knows with absolute certainty they will never see the day the flower blooms, yet harboring an unadulterated expectation for future others, buries the crucial fire-seed.",
         core: "极其纯粹的利他主义。不在于“我”能否得救，而在于从结构内挖下一块石头充当地基，好让后来者能在洪水中有一处落脚。 | Outcome: 结构裂隙的延时炸弹。",
         coreEn: "Exceedingly pure altruism. Not about whether 'I' can be saved, but gouging a stone from the structure to act as a foundation, so latecomers have a foothold in the flood. | Outcome: Time bomb in the structural fissure.",
-        patch: {
-            mechanics: "在毒气蔓延或倒计时为零的密室里，主角用身体挡住闸门，只为把一枚小小的芯片抛给即将脱逃的后来者。",
-            mechanicsEn: "In a sealed room with spreading poison gas or a zeroing countdown, the protagonist blocks the blast door with their body, just to toss a tiny chip to the escaping latecomer.",
-            aesthetic: "密闭的黑暗空间。主角微笑着闭上眼，画面渐渐淡出。而下一组镜头则是几年后，那枚芯片在一个明亮的实验室里被读取引发了欢呼。",
-            aestheticEn: "Confined dark space. Protagonist smiles and closes eyes, screen slowly fades out. The next montage cuts to years later: that chip is read in a bright lab, igniting cheers.",
-            runtime: "IF (主角在密室中用身体挡住闸门并将芯片抛给即将脱逃的后来者) THEN (将携带解密秘钥的微型对象隐秘地Push进入延迟渲染的消息队列，跨度为几代主程序的生命周期)。",
-            runtimeEn: "IF (Protagonist_Blocks_Blast_Door_With_Body_And_Tosses_Chip_To_Escaping_Latecomer) THEN (Covertly Push a micro-object carrying the Decryption Key into the deferred rendering message queue, spanning the lifecycle of several master program generations)."
-        }
+        reference: "《沙丘》凯恩斯博士死沙中播下千秋绿洲火种；《沉默的真相》江阳献祭生命化作只求未来澄清火柴。",
+        referenceEn: "Planetologist planting green seeds dying in Dune; prosecutor sacrificing self to spark future justice."
     },
     {
         id: "res_freedom",
@@ -315,14 +207,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
         defEn: "The subject actively severs all attachments, bonds, and social ties, discarding even clothes and names like trash, entering an autonomous flying state akin to a beast yet entirely self-consistent.",
         core: "《勇敢的心》或荒野生存。自由的代价是极致的孤独与贫困，但那挣脱大他者锁链的狂飙时刻，其动能足以让整个符号界感到恐怖。 | Outcome: 属性面板的物理砸毁。",
         coreEn: "Braveheart or Into the Wild. The cost of freedom is extreme loneliness and poverty, but the kinetic roar of breaking the Big Other's chains carries enough momentum to terrify the entire Symbolic order. | Outcome: Physical smashing of the attributes panel.",
-        patch: {
-            mechanics: "丢弃背包里几乎全部的史诗级装备、金钱以及称号。仅仅赤手空拳走向地图以外的荒蛮之地，不再回头。",
-            mechanicsEn: "Discarding practically all epic-tier gear, money, and titles from the inventory. Walking out barehanded into the savage lands beyond the map, never looking back.",
-            aesthetic: "风中凌乱的长发、粗糙但野性迸发的肌肉特写。大他者的通缉令在脚底被踩过。极速奔跑的推轨镜头，风声呼啸盖过一切。",
-            aestheticEn: "Messy long hair in the wind, extreme close-up of rough but savagely surging muscles. The Big Other's wanted poster is trampled underfoot. High-speed tracking shot running, howling wind drowning out everything.",
-            runtime: "IF (主角丢弃所有史诗级装备与称号，赤手空拳走向地图以外的荒蛮之地) THEN (注销主体的Inventory模块与Social/Faction联系，将该对象的路径计算法改为完全随机的不可控随机游走)。",
-            runtimeEn: "IF (Protagonist_Discards_All_Epic_Gear_And_Titles_Walking_Barehanded_Beyond_Map) THEN (Deregister subject Inventory module and Social/Faction ties, change object pathfinding algorithm to totally random uncontrollable random walk)."
-        }
+        reference: "《荒野生存》高才生断空世俗一切金钱履冰荒死；《勇敢的心》华莱士在极刑开膛下怒吼出震天自由。",
+        referenceEn: "Top grad shredding all money freezing in Wild; Wallace roaring Freedom loud while disemboweled."
     },
     {
         id: "res_miracle_love",
@@ -332,14 +218,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
         defEn: "At the moment when cold probability laws calculate a '100% impossible' failure, an irrational energy generated by love prompts a low-probability crash penetration contrary to physical common sense.",
         core: "由于爱欲（Eros）极其反逻辑，它本质是实在界爆发出的超新星。它证明了宇宙的底层源代码中存在一行无法被大他者解析的后门。 | Outcome: 逻辑树的异常返回。",
         coreEn: "Because Eros is extremely anti-logic, it is fundamentally a supernova bursting from the Real. It proves there is a backdoor line in the universe's base source code that the Big Other cannot parse. | Outcome: Exceptional return of the logic tree.",
-        patch: {
-            mechanics: "在主角承受致命秒杀判定时，平时极其柔弱的羁绊角色突然瞬移或违背了状态机死锁，代为承担了这不可思议的一击。",
-            mechanicsEn: "When the protagonist suffers a fatal 1-hit-KO verdict, a normally exceedingly weak bonded character suddenly teleports or defies the state machine deadlock to intercept this inconceivable strike.",
-            aesthetic: "子弹时间的极致慢放。数学方程式和准星的冷峻UI在瞬间碎裂，取而代之的是纯粹的炽热光芒与慢动作的拥抱。",
-            aestheticEn: "Extreme slow-motion bullet time. The cold UI of math equations and crosshairs shatter instantly, replaced by a pure fervent brilliance and a slow-motion embrace.",
-            runtime: "IF (系统底层算法在执行Math.random()时遭遇由爱意值Affection引起的强制除零错误) THEN (保护罩奇迹般触发，原本被判定百分百必死的致命秒杀被拦截，概率法则因爱欲而宕机穿透)。",
-            runtimeEn: "IF (Base_System_Algorithm_Running_Math_Random_Encounters_Divide_By_Zero_From_Affection) THEN (Miraculous shield triggers, the 100_percent_fatal_one_hit_KO is intercepted, probability laws crash-penetrated by Eros)."
-        }
+        reference: "《真爱至上》无视诸般逻辑直闯机场的疯狂示爱；《美丽人生》屠杀局中凭狂爱硬生生为子造出奇迹乐园。",
+        referenceEn: "Smashing airport logic declaring mad love in Actually; faking fun camp out of death camp purely."
     },
     {
         id: "res_understanding",
@@ -349,14 +229,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
         defEn: "The subject does not merely annihilate the villain, but at the very apex of slaughter, suddenly completely understands the villain's trauma. Employing a bird's-eye perspective, unifying good and evil onto a higher cognitive plane.",
         core: "黑格尔式的“扬弃（Aufheben）”。不再是对立面上互相泼洒死欲，而是我看到了你心中的地狱，恰如我心中的深渊。大悲悯。 | Outcome: 二元对立的溶解。",
         coreEn: "Hegelian 'Aufheben'. No longer splashing death-drive on opposite sides, but I see the hell in your heart exactly like the abyss in mine. Grand compassion. | Outcome: Dissolution of binary opposition.",
-        patch: {
-            mechanics: "最后一刀挥下前，系统强制进入长对话选择。主角选择了最体现出跨越立场理解的选项，反派手中的武器因此滑落。",
-            mechanicsEn: "Before the final slash comes down, the system forces an extended dialogue selection. The protagonist picks the option embodying cross-stance understanding, causing the weapon to slip from the villain's hand.",
-            aesthetic: "暴风雪或火墙停止。极度混乱的交响乐退去，唯有一声平稳的单簧管。两位仇敌仿佛在大师级的棋盘边相对惨笑。",
-            aestheticEn: "Blizzards or walls of fire cease. Intensely chaotic symphony recedes, leaving a steady clarinet. The two mortal enemies smile miserably at each other across a master-class chessboard.",
-            runtime: "IF (主角在最后一刀挥下前选择了最体现跨越立场理解的对话选项) THEN (在状态机内强行将反派的绝对仇恨标记Absolute Hate Tag抹除，触发两个独立阵营Faction的罕见融合处理)。",
-            runtimeEn: "IF (Protagonist_Picks_Cross_Stance_Understanding_Dialogue_Before_Final_Slash) THEN (Forcibly erase villain Absolute Hate Tag inside state machine, triggering a rare fusion processing of two independent Factions)."
-        }
+        reference: "《火影忍者》鸣门与长门生死之战交心相互理解；《无间道》陈永仁在生与死的夹缝间真正俯瞰透悉宿敌。",
+        referenceEn: "Naruto understanding Pain's tear across war logic; cop realizing fake cop's core deep passing away."
     },
     {
         id: "res_traverse_fantasy",
@@ -366,14 +240,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
         defEn: "Not only smashing the external Big Other, the subject grinds down the very last defensive illusion used to protect themselves, facing and shouldering the void essence of life with almost terrifying lucidity.",
         core: "齐泽克常提的精神分析最高成就：学会如何在没有幻想滤镜的保护下，凝视实在界而不发疯。 | Outcome: 绝对清醒者的诞生。",
         coreEn: "The highest psychoanalytic achievement Zizek frequently mentions: learning how to gaze into the Real without the protection of fantasy filters and not go insane. | Outcome: Birth of the absolutely lucid one.",
-        patch: {
-            mechanics: "游戏关闭了所有的屏幕滤镜和引导提示，主角直愣愣地站在极其丑陋、穿模满天的原始渲染管线场景内，却没有倒下。",
-            mechanicsEn: "The game kills all screen filters and guide prompts; the protagonist stands stiffly in an incredibly ugly, clipping-filled raw render pipeline scene, yet does not fall.",
-            aesthetic: "撕掉画皮。音乐彻底关闭，只保留枯燥的机器风扇底噪或风声。角色那原本由于剧情高光而显得俊美的脸庞变得沧桑且极度写实。",
-            aestheticEn: "Tearing off the painted skin. Music is completely cut, leaving only the dull white noise of machine fans or wind. the character's face, originally handsome, becomes weather-beaten and hyper-realistic.",
-            runtime: "IF (游戏关闭了所有屏幕滤镜和引导提示，主角直面原始渲染管线场景却没有倒下) THEN (系统后处理Post-Processing全面禁用，卸载所有美化与代入感Shader，将玩家强行推回操作终端的第四面墙内)。",
-            runtimeEn: "IF (Game_Kills_All_Filters_And_Guide_Prompts_And_Protagonist_Stands_In_Raw_Render) THEN (System Post-Processing fully disabled, unload all beautification and immersion Shaders, forcibly push player back into the fourth wall of the operation terminal)."
-        }
+        reference: "《搏击俱乐部》轰穿自己下巴打碎狂人分裂幻象；《少年派》剥开奇幻虎影直面吃人海上炼狱的极至真容。",
+        referenceEn: "Shooting own jaw to shatter splitting club god illusion; peeling tiger fantasy exposing savage sea."
     },
     {
         id: "res_post_human",
@@ -383,14 +251,8 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
         defEn: "After bearing incalculable information load or evolutionary pressure, the subject transcends the miserable framework of carbon-based biology in an instant, taking a quantum leap toward a post-human or god-like new species.",
         core: "《2001太空漫游》的星童。原有的恐惧与迷惘是因为身为人类太弱小。既然局内无法解开死结，那便扯碎棋盘向下一个维度飞升。 | Outcome: 本体架构的重写。",
         coreEn: "The Star Child in 2001: A Space Odyssey. The original fear and bewilderment were because being human is too weak. Since the deadlock can't be solved within, shred the board and ascend to the next dimension. | Outcome: Rewrite of the ontological architecture.",
-        patch: {
-            mechanics: "主角在超立方体或光柱中，旧肉体化为齑粉，重组为一个散发着高等几何光辉的能量图腾或幼体形态。原有的血条和魔法条碎裂消失。",
-            mechanicsEn: "Within a tesseract or light pillar, the protagonist's old flesh turns to powder, reconstituting into an energy totem or larval form radiating advanced geometric brilliance. The original HP and MP bars shatter and vanish.",
-            aesthetic: "极度克制然而恢弘的视效。脱离重力的漂浮感。主角的双眼不再聚焦于某个具体物体，而是仿佛洞穿了时间本身。纯电子音的鸣响。",
-            aestheticEn: "Highly restrained yet grandiose VFX. The floating sensation of zero gravity. The protagonist's eyes no longer focus on a specific object but seem to pierce through time itself. Ringing of pure electronic tones.",
-            runtime: "IF (主角选择永久植入非人硬件，旧血肉在超立方体中化为粉末重组) THEN (销毁旧有类的实例，用极小量代码生成近乎零内存占用的PostHuman单例对象，并赋予其超越主存的读写权限)。",
-            runtimeEn: "IF (Protagonist_Permanently_Implants_Non_Human_Hardware_Old_Flesh_Reconstitutes) THEN (Destroy old class instances, generate near-zero-memory PostHuman singleton object with minimal code, granting read/write permissions transcending main memory)."
-        }
+        reference: "《2001太空漫游》跃迁为越限星童重临太阳系；《狗镇》格蕾丝斩碎人类软弱圣母蜕变冷酷屠灭上帝座。",
+        referenceEn: "Ascending as Star Child over weak planet limit in 2001; Grace slaughtering town transcending weak pity."
     },
     {
         id: "res_cosmic_resonance",
@@ -400,13 +262,7 @@ export const OUTCOMES_GROUP_C: LibraryItemDef[] = [
         defEn: "Under exceedingly unique serendipity, the subject's minuscule obsession achieves absolute synchronization with some base oscillatory frequency of the entire universe or ecosystem, achieving true 'Brahma-Atman unity'.",
         core: "极其罕见的道家式大圆满。主体并未消除自身，而是把自己无限放大至整个背景声场中，用微沙般的一生弹响了宏大和弦。 | Outcome: 微观与宏观的坍缩。",
         coreEn: "An immensely rare Daoist great perfection. The subject does not eliminate themselves but infinitely amplifies themselves into the entire background acoustic field, plucking a massive chord with a sand-like lifetime. | Outcome: Collapse of the micro and macro.",
-        patch: {
-            mechanics: "主角敲出一记微小的和弦或在雪地里闭上眼睛。整个世界的环境变化（风声、陨石划过、敌人倒下）突然与他的动作节奏产生共振反馈。",
-            mechanicsEn: "The protagonist strikes a tiny chord or closes eyes in the snow. All environmental changes in the world (wind howling, meteors crossing, enemies falling) suddenly resonate with their action rhythm.",
-            aesthetic: "视效色彩上的水乳交融。一种巨大的圆满与释怀感。光晕开始同步呼吸。音乐在此刻达到了极致的和谐壮丽，再无不协和音。",
-            aestheticEn: "A perfect blending of VFX colors. A massive sense of completion and relief. The light halos begin a synchronized breathing. Music reaches ultimate harmonious magnificence, stripped of all dissonance.",
-            runtime: "IF (主角敲出一记微小和弦或在雪地闭眼，整个世界的环境变化突然与其动作节奏产生共振反馈) THEN (将场景内千万个独立粒子特效发射器的seed强制与主角最后残留的HeartbeatValue绑定同频同步)。",
-            runtimeEn: "IF (Protagonist_Strikes_Tiny_Chord_Or_Closes_Eyes_And_World_Resonates_With_Action_Rhythm) THEN (Forcibly bind the seed of millions of independent particle emitters in the scene to synchronize co-frequentially with protagonist final remaining HeartbeatValue)."
-        }
+        reference: "《沙丘》保罗完全融沙虫大生态入极高梵我合一境；《一一》小男孩在众生琐碎葬礼中拍透世界背面的真理。",
+        referenceEn: "Paul merging cleanly with sandworm ecology in Dune; quiet boy photographing unheard truth of backsides."
     }
 ];

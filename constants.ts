@@ -303,7 +303,7 @@ export const BLOCK_LIMITS: Record<string, number> = {
   'engine_m0': 1, 'engine_m1': 3, 'engine_m2': 1, 'engine_m3': 3, 'engine_m4': 3, 'engine_m5': 3, 'engine_m6': 3, 'engine_m7': 1,
   'engine_m4x': 1, 'engine_m5x': 1,
   'comm_c0': 1, 'comm_c1': 1, 'comm_c2': 3, 'comm_c3': 1, 'comm_c4': 3, 'comm_c5': 3, 'comm_c6': 3, 'comm_c7': 3,
-  'skin_genre': 1, 'skin_animation_genre': 1, 'skin_location': 3, 'skin_society': 1, 'skin_ideology': 1,
+  'skin_genre': 1, 'skin_animation_genre': 1, 'skin_location': 3, 'skin_society': 1, 'skin_ideology': 1, 'skin_ending': 1,
   'poe_p0': 1, 'poe_p1': 1, 'poe_p2': 1, 'poe_p3': 1, 'poe_p4': 1
 };
 

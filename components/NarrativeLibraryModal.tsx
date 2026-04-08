@@ -179,7 +179,9 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                 (group.items || []).filter(item =>
                     item.name.toLowerCase().includes(lowerQuery) ||
                     (item.def && item.def.toLowerCase().includes(lowerQuery)) ||
-                    (item.core && item.core.toLowerCase().includes(lowerQuery))
+                    (item.core && item.core.toLowerCase().includes(lowerQuery)) ||
+                    (item.essence && item.essence.toLowerCase().includes(lowerQuery)) ||
+                    (item.reality && item.reality.toLowerCase().includes(lowerQuery))
                 ).map(item => ({ ...item, _groupName: group.name }))
             );
         }
@@ -216,22 +218,39 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
         if (driverType === DriverType.AESTHETIC) {
             if (currentLang === 'CN') {
                 const parts = [nameCn];
-                if (item.core) parts.push(item.core);
+                if (item.essence) parts.push(item.essence);
+                else {
+                    if (item.def) parts.push(item.def);
+                    if (item.core) parts.push(item.core);
+                }
                 text = parts.join('\n');
             } else {
                 const parts = [nameEn];
-                if (item.defEn) parts.push(item.defEn);
-                else if (item.def) parts.push(item.def);
-                if (item.coreEn) parts.push(item.coreEn);
+                if (item.essenceEn) parts.push(item.essenceEn);
+                else if (item.essence) parts.push(item.essence);
+                else {
+                    if (item.defEn) parts.push(item.defEn);
+                    else if (item.def) parts.push(item.def);
+                    if (item.coreEn) parts.push(item.coreEn);
+                }
                 text = parts.join('\n');
             }
         } else {
             const name = currentLang === 'EN' ? nameEn : nameCn;
+            const essence = (currentLang === 'EN' && item.essenceEn) ? item.essenceEn : item.essence;
             const def = (currentLang === 'EN' && item.defEn) ? item.defEn : item.def;
             const core = (currentLang === 'EN' && item.coreEn) ? item.coreEn : item.core;
             const parts = [name];
-            if (def) parts.push(def);
-            if (core) parts.push(core);
+            if (essence) {
+                parts.push(essence);
+            } else {
+                if (def) parts.push(def);
+                if (core) parts.push(core);
+            }
+            if (item.reality) {
+                const reality = (currentLang === 'EN' && item.realityEn) ? item.realityEn : item.reality;
+                parts.push(reality);
+            }
             text = parts.join('\n');
         }
         navigator.clipboard.writeText(text);
@@ -266,12 +285,8 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
     if (!isOpen) return null;
 
     return createPortal(
-        <div className={`fixed inset-0 z-[9999] flex items-center justify-center ${globalTheme === 'retro' ? 'bg-[#8B261D]/5 backdrop-blur-md' : 'bg-black/80 backdrop-blur-[12px]'} p-0 md:p-6 animate-in fade-in duration-500 pointer-events-auto`} onClick={onClose}>
-            <div className={`w-full max-w-[1440px] h-full md:h-[90vh] ${globalTheme === 'retro' ? 'bg-[#EBE7DF] border-[#8B261D] border-2 shadow-[20px_20px_0px_0px_rgba(139,38,29,0.1)]' : `bg-[#080808] border-zinc-800/50 shadow-[0_0_100px_rgba(0,0,0,0.8)]`} md:rounded-3xl flex flex-col overflow-hidden relative transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] transform scale-100 animate-in zoom-in-95`} onClick={(e) => e.stopPropagation()}>
-                {/* Visual Accent Glow */}
-                <div className={`absolute -top-[20%] -left-[10%] w-[60%] h-[60%] rounded-full opacity-20 blur-[120px] pointer-events-none transition-colors duration-1000
-                    ${globalTheme === 'retro' ? 'bg-[#8B261D]' : (driverType === DriverType.COMMERCIAL ? 'bg-cyan-500' : driverType === DriverType.EXPERIMENTAL ? 'bg-purple-500' : driverType === DriverType.AESTHETIC ? 'bg-rose-500' : 'bg-gold-primary')}`} 
-                />
+        <div className={`fixed inset-0 z-[9999] flex items-center justify-center ${globalTheme === 'retro' ? 'bg-[#8B261D]/5 backdrop-blur-md' : 'bg-black/80 backdrop-blur-[12px]'} p-0 md:p-2 xl:p-4 animate-in fade-in duration-500 pointer-events-auto`} onClick={onClose}>
+            <div className={`w-full xl:w-[98vw] max-w-[1800px] h-full md:h-[96vh] ${globalTheme === 'retro' ? 'bg-[#EBE7DF] border-[#8B261D] border-2 shadow-[20px_20px_0px_0px_rgba(139,38,29,0.1)]' : `bg-[#080808] border-zinc-800/50 shadow-[0_0_100px_rgba(0,0,0,0.8)]`} md:rounded-3xl flex flex-col overflow-hidden relative transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] transform scale-100 animate-in zoom-in-95`} onClick={(e) => e.stopPropagation()}>
                 <div className={`h-24 md:h-28 border-b ${globalTheme === 'retro' ? 'border-[#8B261D]/10 bg-[#F5F2EA]' : `bg-black/40 backdrop-blur-md border-white/5`} flex items-center justify-between px-8 md:px-12 shrink-0 z-20 relative`} style={globalTheme !== 'retro' ? { borderColor: `${themeHex}1a` } : {}}>
                     <div className="flex items-center gap-6">
                         <div className={`p-4 ${globalTheme === 'retro' ? 'bg-[#F9F7F1] text-[#8B261D] border-[#8B261D]/30' : `bg-zinc-900 ${themeText}`} rounded-2xl border-2 shadow-xl shadow-black/20 group-hover:scale-105 transition-transform duration-500`} style={globalTheme !== 'retro' ? { borderColor: `${themeHex}4d` } : {}}>
@@ -299,43 +314,87 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2 md:gap-5">
-                        <div className="relative hidden lg:block group">
-                            <Search size={18} className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors duration-300 ${globalTheme === 'retro' ? 'text-[#8B261D]/40' : 'text-zinc-600 group-focus-within:text-white'}`} />
+                    <div className="flex items-center gap-2 md:gap-4 flex-1 justify-end ml-4 overflow-hidden">
+                        <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar flex-1 justify-end max-w-full xl:max-w-none pr-2" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                            {selectedTags.length === 0 ? (
+                                <div className="flex items-center gap-2 text-zinc-500 whitespace-nowrap opacity-60 mr-2">
+                                     <Info size={14} className={themeText} />
+                                     <span className={`text-[11px] font-medium uppercase tracking-[0.2em] ${globalTheme === 'retro' ? 'text-[#8B261D]/70' : ''}`}>
+                                         {currentLang === 'EN' ? "Select desired parameters" : "请从下方词库中选择所需的拓扑参数"}
+                                     </span>
+                                </div>
+                            ) : (
+                                selectedTags.map(tag => {
+                                    const item = filteredItems.find(i => i.name === tag) || processedGroups.flatMap(g => g.items || []).find(i => i.name === tag);
+                                    const displayTag = item 
+                                        ? (currentLang === 'EN' ? (item.nameEn || item.name.match(/\((.*?)\)/)?.[1] || item.name) : item.name.split('(')[0])
+                                        : tag.split('(')[0];
+                                    
+                                    return (
+                                        <button 
+                                            key={tag} 
+                                            onClick={() => onToggleTag(tag)} 
+                                            className={`flex shrink-0 items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] whitespace-nowrap font-black border transition-all duration-300 transform active:scale-95 group shadow-sm
+                                                ${globalTheme === 'retro' ? 'bg-white border-[#8B261D]/30 text-[#8B261D]' : `bg-zinc-900 border-white/10 ${themeText} hover:border-white/30 hover:bg-zinc-800`}`}
+                                        >
+                                            <Hash size={10} className="opacity-40" />
+                                            {displayTag}
+                                            <X size={12} className="opacity-50 group-hover:opacity-100 group-hover:rotate-90 transition-all ml-1" />
+                                        </button>
+                                    );
+                                })
+                            )}
+                        </div>
+
+                        <div className="relative hidden lg:block group shrink-0">
+                            <Search size={14} className={`absolute left-3 top-1/2 -translate-y-1/2 transition-colors duration-300 ${globalTheme === 'retro' ? 'text-[#8B261D]/40' : 'text-zinc-600 group-focus-within:text-white'}`} />
                             <input 
                                 type="text" 
                                 value={searchQuery} 
                                 onChange={(e) => setSearchQuery(e.target.value)} 
-                                placeholder={currentLang === 'EN' ? "SEARCH CONCEPTS..." : "搜索词条或逻辑..."} 
-                                className={`w-64 xl:w-80 border-2 rounded-2xl pl-12 pr-6 py-3 text-sm focus:outline-none transition-all duration-500 ${globalTheme === 'retro' ? 'bg-white border-[#8B261D]/20 text-black placeholder-[#8B261D]/30 focus:border-[#8B261D]/50' : `bg-black/60 ${themeText} border-white/5 focus:border-white/20 placeholder-zinc-700 shadow-2xl shadow-black/50`}`} 
+                                placeholder={currentLang === 'EN' ? "SEARCH..." : "搜索词条..."} 
+                                className={`w-32 xl:w-48 border rounded-xl pl-8 pr-3 py-2 text-xs focus:outline-none transition-all duration-500 ${globalTheme === 'retro' ? 'bg-white border-[#8B261D]/20 text-black placeholder-[#8B261D]/30 focus:border-[#8B261D]/50' : `bg-black/60 ${themeText} border-white/10 focus:border-white/20 placeholder-zinc-700 shadow-xl shadow-black/50`}`} 
                             />
                         </div>
                         
-                        <div className="flex items-center p-1.5 rounded-2xl bg-white/5 border border-white/5 backdrop-blur-sm">
-                            {onClear && selectedTags.length > 0 && (
+                        <div className={`flex shrink-0 items-center p-1 rounded-xl border backdrop-blur-sm gap-0.5 ${globalTheme === 'retro' ? 'bg-white border-[#8B261D]/10 shadow-sm' : 'bg-white/5 border-white/5'}`}>
+                            <button 
+                                onClick={handleRandomize} 
+                                className={`flex items-center gap-1.5 px-3 h-8 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] transition-all hover:bg-white/10 ${globalTheme === 'retro' ? 'text-[#8B261D] hover:bg-[#8B261D]/5' : `${themeText} hover:bg-white/10`} active:scale-95`}
+                                title={currentLang === 'EN' ? "RANDOM" : "随机"}
+                            >
+                                <Dice5 size={14} /> 
+                                <span className="hidden xl:inline">{currentLang === 'EN' ? "RANDOM" : "随机"}</span>
+                            </button>
+
+                            {onClear && (
                                 <button 
                                     onClick={onClear} 
-                                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all hover:bg-red-500/10 hover:text-red-400 group h-10`}
+                                    disabled={selectedTags.length === 0}
+                                    className={`flex items-center gap-1.5 px-3 h-8 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${selectedTags.length > 0 ? 'hover:bg-red-500/10 hover:text-red-500 cursor-pointer' : 'opacity-50 cursor-not-allowed'} group ${globalTheme === 'retro' ? 'text-black/40' : 'text-zinc-400'}`}
+                                    title={currentLang === 'EN' ? "CLEAR" : "重置"}
                                 >
-                                    <Trash2 size={16} className="group-hover:rotate-12 transition-transform" />
-                                    <span className="hidden sm:inline">{currentLang === 'EN' ? "CLEAR ALL" : "重置选择"}</span>
-                                    <span className={`bg-red-500/20 px-2 py-0.5 rounded-full text-[9px] text-red-500`}>{selectedTags.length}</span>
+                                    <Trash2 size={14} className={selectedTags.length > 0 ? "group-hover:rotate-12 transition-transform" : ""} />
+                                    <span className="hidden xl:inline">{currentLang === 'EN' ? "CLEAR" : "重置"}</span>
+                                    <span className={`bg-red-500/20 px-1.5 py-0.5 rounded-full text-[9px] text-red-500`}>{selectedTags.length}</span>
                                 </button>
                             )}
                             
                             <button 
                                 onClick={() => setCurrentLang(prev => prev === 'CN' ? 'EN' : 'CN')} 
-                                className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all hover:bg-white/10 ${globalTheme === 'retro' ? 'text-[#8B261D]' : 'text-zinc-400 hover:text-white'}`}
+                                className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all ${globalTheme === 'retro' ? 'text-black/40 hover:text-[#8B261D] hover:bg-[#8B261D]/5' : 'text-zinc-400 hover:bg-white/10 hover:text-white'}`}
                                 title={currentLang === 'CN' ? "Switch to English" : "切换中文"}
                             >
-                                <Globe size={20} />
+                                <Globe size={16} />
                             </button>
+
+                            <div className={`w-[1px] h-4 mx-1 ${globalTheme === 'retro' ? 'bg-[#8B261D]/10' : 'bg-white/10'}`} />
 
                             <button 
                                 onClick={onClose} 
-                                className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all hover:bg-red-500 text-zinc-400 hover:text-white`}
+                                className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all hover:bg-red-500 hover:text-white ${globalTheme === 'retro' ? 'text-black/40' : 'text-zinc-400'}`}
                             >
-                                <X size={24} />
+                                <X size={20} />
                             </button>
                         </div>
                     </div>
@@ -355,56 +414,7 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                         </div>
                     </div>
                     <div className={`flex-1 overflow-y-auto custom-scrollbar p-4 md:p-8 ${globalTheme === 'retro' ? 'bg-white' : 'bg-[#050505]'}`}>
-                        <div className={`mb-8 flex flex-wrap gap-3 p-5 ${globalTheme === 'retro' ? 'bg-white/40 border-[#8B261D]/10 border shadow-inner' : `bg-black/60 border border-white/5 shadow-2xl animate-in slide-in-from-top-4 duration-700`} rounded-3xl min-h-[72px] max-h-[140px] overflow-y-auto custom-scrollbar items-center relative shadow-sm`} style={globalTheme !== 'retro' ? { borderColor: `${themeHex}26` } : {}}>
-                            {selectedTags.length === 0 ? (
-                                <div className="flex items-center gap-3 text-zinc-600 ml-2">
-                                    <Info size={14} className={themeText} />
-                                    <span className="text-[11px] uppercase tracking-[0.2em]">{currentLang === 'EN' ? "Select desired parameters to continue" : "请从下方词库中选择所需的拓扑参数"}</span>
-                                </div>
-                            ) : (
-                                <div className="flex flex-wrap gap-2.5">
-                                    {selectedTags.map(tag => {
-                                        const item = filteredItems.find(i => i.name === tag);
-                                        const displayTag = item 
-                                            ? (currentLang === 'EN' ? (item.nameEn || item.name.match(/\((.*?)\)/)?.[1] || item.name) : item.name.split('(')[0])
-                                            : tag.split('(')[0];
-                                        
-                                        return (
-                                            <button 
-                                                key={tag} 
-                                                onClick={() => onToggleTag(tag)} 
-                                                className={`flex items-center gap-2.5 px-4 py-2 rounded-xl text-[11px] font-black border transition-all duration-300 transform active:scale-95 group shadow-lg animate-in zoom-in-90
-                                                    ${globalTheme === 'retro' ? 'bg-white border-[#8B261D]/30 text-[#8B261D]' : `bg-zinc-900 border-white/10 ${themeText} hover:border-white/30 hover:bg-zinc-800`}`}
-                                            >
-                                                <Hash size={12} className="opacity-40" />
-                                                {displayTag}
-                                                <X size={14} className="opacity-50 group-hover:opacity-100 group-hover:rotate-90 transition-all" />
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            )}
-                            
-                            <div className="ml-auto hidden md:flex items-center gap-3 pl-6 border-l border-white/5">
-                                <button 
-                                    onClick={handleRandomize} 
-                                    className={`flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300
-                                        ${globalTheme === 'retro' ? 'bg-[#F9F7F1] text-[#8B261D] hover:bg-white border border-[#8B261D]/10' : `bg-white/5 border border-white/5 ${themeText} hover:bg-white/10 hover:border-white/20 shadow-xl active:scale-95`}`}
-                                >
-                                    <Dice5 size={16} /> 
-                                    {currentLang === 'EN' ? "AUTO MATCH" : "智能匹配"}
-                                </button>
-                                
-                                <button 
-                                    onClick={onClose} 
-                                    className={`flex items-center gap-3 px-8 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.3em] shadow-2xl transition-all duration-500 active:scale-95
-                                        ${globalTheme === 'retro' ? 'bg-[#8B261D] text-white' : `bg-white text-black hover:bg-zinc-200 shadow-white/5`}`}
-                                >
-                                    {currentLang === 'EN' ? "CONFIRM" : "确认参数"}
-                                    <ChevronRight size={16} />
-                                </button>
-                            </div>
-                        </div>
+
                         {searchQuery && (
                             <div className="mb-4 text-xs text-zinc-500 font-mono uppercase tracking-widest flex items-center gap-2">
                                 <Search size={12} /><span>{currentLang === 'EN' ? "Search Results" : "搜索结果"} ({filteredItems.length})</span>
@@ -433,9 +443,9 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                             </div>
                                         )}
 
-                                        <div className={`flex-1 flex justify-between items-center ${isPreset ? '' : 'mb-3 pr-6'}`}>
+                                        <div className={`flex justify-between ${isPreset ? 'flex-1 items-center' : 'w-full items-start mb-3 pr-6'}`}>
                                             <h4 className={`font-serif font-bold ${isPreset ? 'text-base' : 'text-lg md:text-xl'} leading-tight ${isSelected ? (globalTheme === 'retro' ? 'text-[#8B261D]' : themeText) : (globalTheme === 'retro' ? 'text-black/80' : 'text-zinc-100 group-hover:text-white')}`}>{currentLang === 'EN' ? (item.nameEn || item.name.match(/\((.*?)\)/)?.[1] || item.name) : item.name.split('(')[0]}</h4>
-                                            {isSelected && <Check size={16} className={`${globalTheme === 'retro' ? 'text-[#8B261D]' : themeText} shrink-0 ml-2`} />}
+                                            {isSelected && <Check size={16} className={`${globalTheme === 'retro' ? 'text-[#8B261D]' : themeText} shrink-0 ml-2 ${isPreset ? '' : 'mt-1'}`} />}
                                         </div>
 
                                         {!isPreset && (
@@ -444,8 +454,24 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                                     <button onClick={(e) => { e.stopPropagation(); handleCopyItem(item); }} className={`p-1.5 rounded-md ${globalTheme === 'retro' ? 'bg-white border-black/10 hover:bg-[#8B261D]/5 text-[#8B261D]' : 'bg-black/60 border-zinc-700 hover:bg-zinc-700 text-zinc-500 hover:text-white'} border transition-all shadow-sm`} title={currentLang === 'EN' ? "Copy" : "复制"}>{isCopied ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}</button>
                                                 </div>
                                                 {(item as any)._groupName && <div className={`mb-2 text-[9px] ${globalTheme === 'retro' ? 'text-[#8B261D]/50 bg-[#8B261D]/5' : 'text-zinc-500 bg-black/20'} font-mono uppercase tracking-wider px-1.5 py-0.5 rounded w-fit`}>{(item as any)._groupName}</div>}
-                                                {item.def && <p className={`text-sm md:text-base leading-relaxed opacity-90 mb-4 font-light ${globalTheme === 'retro' ? 'text-[#3D1A16]' : 'text-white'}`}>{currentLang === 'EN' && item.defEn ? item.defEn : item.def}</p>}
-                                                {item.core && <div className={`mt-auto pt-4 border-t ${globalTheme === 'retro' ? 'border-[#8B261D]/10' : ''} w-full`} style={globalTheme !== 'retro' ? { borderColor: `${themeHex}0d` } : {}}><p className={`text-xs md:text-sm font-mono uppercase tracking-tight ${isSelected ? (globalTheme === 'retro' ? 'text-[#8B261D]' : themeText) : (globalTheme === 'retro' ? 'text-[#8B261D]/40 group-hover:text-[#8B261D]/60' : 'text-zinc-200 group-hover:text-white')}`}>{currentLang === 'EN' && item.coreEn ? item.coreEn : item.core}</p></div>}
+                                                {item.essence ? (
+                                                    <div className={`mb-4 w-full`}><p className={`text-sm md:text-base leading-relaxed opacity-90 font-light ${isSelected ? (globalTheme === 'retro' ? 'text-[#8B261D]' : themeText) : (globalTheme === 'retro' ? 'text-[#3D1A16]' : 'text-white transition-colors')}`}>{currentLang === 'EN' && item.essenceEn ? item.essenceEn : item.essence}</p></div>
+                                                ) : (
+                                                    <>
+                                                        {item.def && (
+                                                            <div className={`text-sm md:text-base leading-relaxed mb-3 font-light ${isSelected ? (globalTheme === 'retro' ? 'text-[#8B261D]' : themeText) : (globalTheme === 'retro' ? 'text-[#3D1A16]' : 'text-zinc-200 group-hover:text-white transition-colors')}`}>
+                                                                {currentLang === 'EN' && item.defEn ? item.defEn : item.def}
+                                                            </div>
+                                                        )}
+                                                        {item.core && (
+                                                            <div className={`text-xs md:text-sm font-mono tracking-tight mb-4 ${isSelected ? (globalTheme === 'retro' ? 'text-[#8B261D]' : themeText) : (globalTheme === 'retro' ? 'text-[#8B261D]/80 group-hover:text-[#8B261D]' : 'text-zinc-300 group-hover:text-zinc-100 transition-colors')}`}>
+                                                                {currentLang === 'EN' && item.coreEn ? item.coreEn : item.core}
+                                                            </div>
+                                                        )}
+                                                    </>
+                                                )}
+                                                {item.reality && <div className={`mt-3 pt-3 border-t border-dashed ${globalTheme === 'retro' ? 'border-[#8B261D]/20' : 'border-white/10'} w-full`}><p className={`text-xs md:text-sm leading-relaxed ${globalTheme === 'retro' ? 'text-[#8B261D]/80' : 'text-zinc-400'}`}><span className="opacity-60 mr-1">{currentLang === 'EN' ? 'REALITY:' : '现实隐喻:'}</span>{currentLang === 'EN' && item.realityEn ? item.realityEn : item.reality}</p></div>}
+                                                {item.reference && <div className={`mt-2 pt-2 border-t border-dashed ${globalTheme === 'retro' ? 'border-[#8B261D]/20' : 'border-white/10'} w-full`}><p className={`text-[10px] md:text-xs font-mono leading-relaxed ${globalTheme === 'retro' ? 'text-[#8B261D]/70' : 'text-zinc-400 group-hover:text-zinc-300'} transition-colors`}><span className="mr-1">{currentLang === 'EN' ? 'REF:' : '参考:'}</span>{currentLang === 'EN' && item.referenceEn ? item.referenceEn : item.reference}</p></div>}
                                                 {/* DISPLAY PRESET COLORS */}
                                                 {(item as any).colors && (
                                                     <div className="mt-4 flex gap-1.5 overflow-hidden">

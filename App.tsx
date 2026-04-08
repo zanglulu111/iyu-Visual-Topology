@@ -1033,18 +1033,17 @@ const App: React.FC = () => {
 
     const handleUpdateBlueprintCache = (blueprint: CreativeBlueprint) => {
         if (viewMode === 'METONYMY') {
+            // REDESIGNED: Metonymy only updates local state, NOT history DB.
+            // History saving is manual-only via the save button in MetonymyView.
             setMetonymyBlueprint(blueprint);
-
+            // If restoring from history, keep the activeHistoryItem reference but don't auto-persist
             if (activeHistoryItem && activeHistoryItem.type === 'METONYMY') {
-                // Only update memory/DB if we are working on an archived item
-                const updatedItem = { ...activeHistoryItem, blueprint: blueprint };
-                updateHistoryItem(updatedItem);
-                setActiveHistoryItem(updatedItem);
+                setActiveHistoryItem({ ...activeHistoryItem, blueprint: blueprint });
             }
         } else {
             setActiveBlueprint(blueprint);
 
-            if (activeHistoryItem && activeHistoryItem.type === 'NARRATIVE') {
+            if (activeHistoryItem && (activeHistoryItem.type === 'NARRATIVE' || activeHistoryItem.type === 'BIBLE')) {
                 setCachedBlueprints(prev => ({
                     ...prev,
                     [blueprint.treatmentId]: blueprint
@@ -1052,6 +1051,8 @@ const App: React.FC = () => {
 
                 const updatedItem = {
                     ...activeHistoryItem,
+                    type: 'BIBLE' as const,
+                    blueprint: blueprint,
                     savedBlueprints: {
                         ...(activeHistoryItem.savedBlueprints || {}),
                         [blueprint.treatmentId]: blueprint
@@ -1064,32 +1065,63 @@ const App: React.FC = () => {
     };
 
     const handleAddToHistory = (blueprint: CreativeBlueprint) => {
-        if (activeHistoryItem) {
-            // Updating existing history item
-            const updatedItem = {
-                ...activeHistoryItem,
-                blueprint: activeHistoryItem.type === 'METONYMY' ? blueprint : activeHistoryItem.blueprint,
-                savedBlueprints: activeHistoryItem.type === 'NARRATIVE' ? { ...(activeHistoryItem.savedBlueprints || {}), [blueprint.treatmentId]: blueprint } : undefined
-            };
-            updateHistoryItem(updatedItem);
-            setActiveHistoryItem(updatedItem);
+        const isMetonymy = viewMode === 'METONYMY';
+
+        if (isMetonymy) {
+            // REDESIGNED: Metonymy always creates or updates via manual save
+            if (activeHistoryItem && activeHistoryItem.type === 'METONYMY') {
+                // Update existing metonymy record
+                const updatedItem = {
+                    ...activeHistoryItem,
+                    date: new Date().toISOString(),
+                    blueprint: blueprint
+                };
+                updateHistoryItem(updatedItem);
+                setActiveHistoryItem(updatedItem);
+            } else {
+                // Create new metonymy record
+                const newItem: HistoryItem = {
+                    id: Date.now(),
+                    date: new Date().toISOString(),
+                    type: 'METONYMY',
+                    driverId: selectedDriver || DriverType.NARRATIVE,
+                    driverName: getDriverName(),
+                    fieldState: { ...narrativeFieldState },
+                    worldLaw: { ...worldLawConfig },
+                    blueprint: blueprint,
+                    treatments: [],
+                    savedBlueprints: undefined
+                };
+                addHistoryItem(newItem);
+                setActiveHistoryItem(newItem);
+            }
         } else {
-            // Creating new history item
-            const isMetonymy = viewMode === 'METONYMY';
-            const newItem: HistoryItem = {
-                id: Date.now(),
-                date: new Date().toISOString(),
-                type: isMetonymy ? 'METONYMY' : 'NARRATIVE',
-                driverId: selectedDriver!,
-                driverName: getDriverName(),
-                fieldState: { ...narrativeFieldState },
-                worldLaw: { ...worldLawConfig },
-                blueprint: isMetonymy ? blueprint : null,
-                treatments: isMetonymy ? [] : generatedTreatments,
-                savedBlueprints: isMetonymy ? undefined : { [blueprint.treatmentId]: blueprint }
-            };
-            addHistoryItem(newItem);
-            setActiveHistoryItem(newItem);
+            // Narrative / Bible: auto-save (update existing or create new)
+            if (activeHistoryItem) {
+                const updatedItem = {
+                    ...activeHistoryItem,
+                    type: 'BIBLE' as const,
+                    blueprint: blueprint,
+                    savedBlueprints: { ...(activeHistoryItem.savedBlueprints || {}), [blueprint.treatmentId]: blueprint }
+                };
+                updateHistoryItem(updatedItem);
+                setActiveHistoryItem(updatedItem);
+            } else {
+                const newItem: HistoryItem = {
+                    id: Date.now(),
+                    date: new Date().toISOString(),
+                    type: 'BIBLE',
+                    driverId: selectedDriver!,
+                    driverName: getDriverName(),
+                    fieldState: { ...narrativeFieldState },
+                    worldLaw: { ...worldLawConfig },
+                    blueprint: blueprint,
+                    treatments: generatedTreatments,
+                    savedBlueprints: { [blueprint.treatmentId]: blueprint }
+                };
+                addHistoryItem(newItem);
+                setActiveHistoryItem(newItem);
+            }
         }
     };
 
@@ -1158,6 +1190,7 @@ const App: React.FC = () => {
             if (bp) {
                 setCachedBlueprints(prev => ({ ...prev, [treatment.id]: bp }));
                 setActiveBlueprint(bp);
+                handleAddToHistory(bp); // Automatically save the generated Creative Bible
                 handleViewChange('BIBLE');
             }
         } catch (e) {
