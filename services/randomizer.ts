@@ -18,6 +18,8 @@ import {
   TRAILER_SKIN_BLOCKS, 
   TRAILER_SKIN_LIBRARY,
   BLOCK_LIMITS,
+  RANDOM_RANGES,
+  SURFACE_WEIGHT_CONFIG,
   AES_COLOR_PRESETS,
   COUNTRY_PRESETS,
   GENRE_CATEGORIES,
@@ -121,6 +123,80 @@ export const filterItemsByArchetype = (items: any[], archetype: Archetype, block
         }
         return true;
     });
+};
+
+// ============================================================
+// RANDOMIZATION PROTOCOL v2.0 — Core Helpers
+// ============================================================
+
+/** Get random count from RANDOM_RANGES config */
+const getRandomCount = (blockId: string): number => {
+    const range = RANDOM_RANGES[blockId];
+    if (!range) return 1;
+    const [min, max] = range;
+    if (min === max) return min;
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+};
+
+/**
+ * Weighted surface filter for the 12-word story summary.
+ * Returns a Set of blockIds that should participate in this round of randomization.
+ * Implements: weight-based probability → SUR2/SUR3 mutual exclusion → cap at 6.
+ */
+export const weightedSurfaceFilter = (
+    lockedModules: Record<string, boolean>,
+    isSkinMasterLocked: boolean
+): Set<string> => {
+    if (isSkinMasterLocked) return new Set();
+
+    type Slot = { id: string; blockIds: readonly string[]; weight: number };
+
+    // Step 1: Roll each slot against its weight probability
+    let candidates: Slot[] = [];
+    for (const slot of SURFACE_WEIGHT_CONFIG.slots) {
+        // Skip if ALL block IDs in this slot are locked
+        const allLocked = slot.blockIds.every(id => lockedModules[id]);
+        if (allLocked) continue;
+
+        if (Math.random() < slot.weight) {
+            candidates.push(slot as Slot);
+        }
+    }
+
+    // Step 2: SUR2/SUR3 mutual exclusion — if both selected, keep only one
+    const isSUR2Locked = !!lockedModules['skin_era'];
+    const isSUR3Locked = !!lockedModules['skin_year_exact'] || !!lockedModules['skin_country_exact'];
+    const hasSUR2 = candidates.some(s => s.id === 'SUR2') || isSUR2Locked;
+    const hasSUR3 = candidates.some(s => s.id === 'SUR3') || isSUR3Locked;
+
+    if (hasSUR2 && hasSUR3) {
+        if (!isSUR2Locked && !isSUR3Locked) {
+            const keepSUR2 = Math.random() < 0.5;
+            candidates = candidates.filter(s => keepSUR2 ? s.id !== 'SUR3' : s.id !== 'SUR2');
+        } else if (isSUR2Locked && !isSUR3Locked) {
+            candidates = candidates.filter(s => s.id !== 'SUR3');
+        } else if (!isSUR2Locked && isSUR3Locked) {
+            candidates = candidates.filter(s => s.id !== 'SUR2');
+        }
+    }
+
+    // Step 3: Cap at max slots — trim low weight first, randomize within same tier
+    if (candidates.length > SURFACE_WEIGHT_CONFIG.cap) {
+        candidates.sort((a, b) => {
+            const diff = a.weight - b.weight; // lower weight → sorted first (trimmed first)
+            return diff !== 0 ? diff : Math.random() - 0.5;
+        });
+        candidates = candidates.slice(candidates.length - SURFACE_WEIGHT_CONFIG.cap);
+    }
+
+    // Build result set of block IDs
+    const result = new Set<string>();
+    for (const slot of candidates) {
+        for (const blockId of slot.blockIds) {
+            result.add(blockId);
+        }
+    }
+    return result;
 };
 
 export const getSingleRandomTag = (
@@ -473,131 +549,185 @@ export const generateGlobalRandomState = (
     let skinLockKey = isCommercial ? 'COMM_SKIN' : (isExperimental ? 'EXP_SKIN' : (isTrailer ? 'TRL_SKIN' : 'NARR_SKIN'));
     const isSkinMasterLocked = lockedModules[skinLockKey];
 
-    let currentArchetype: Archetype = 'MODERN'; 
-    let eraBlockId = 'skin_era'; 
+    // ── Step 0: Run weighted surface filter (12-word story summary) ──
+    const surfaceParticipants = weightedSurfaceFilter(lockedModules, !!isSkinMasterLocked);
+
+    // ── Step 1: Era / Archetype determination ──
+    let currentArchetype: Archetype = 'MODERN';
+    let eraBlockId = 'skin_era';
     const lockedEraTags = lockedTags[eraBlockId] || [];
     const currentEraTags = currentFieldState[eraBlockId] || [];
-    let activeEraTag = null;
-    if (lockedEraTags.length > 0) activeEraTag = lockedEraTags[0];
-    else if (lockedModules[eraBlockId] && currentEraTags.length > 0) activeEraTag = currentEraTags[0]; 
-    if (!activeEraTag) {
-        const eraLib = SKIN_LIBRARY.find(c => c.id === 'skin_era_lib');
-        if (eraLib && !lockedModules[eraBlockId] && !isSkinMasterLocked && !isCommercial && !isExperimental && !isTrailer) {
-             const randomEraItem = eraLib.items[Math.floor(Math.random() * eraLib.items.length)];
-             activeEraTag = randomEraItem.name;
+    let activeEraTag: string | null = null;
+
+    if (lockedEraTags.length > 0) {
+        activeEraTag = lockedEraTags[0];
+    } else if (lockedModules[eraBlockId] && currentEraTags.length > 0) {
+        activeEraTag = currentEraTags[0];
+    } else if (surfaceParticipants.has('skin_era') && !isSkinMasterLocked && !isCommercial && !isExperimental && !isTrailer) {
+        // SUR2 passed the weighted filter → randomize era
+        const allEras = WORLD_MOTIF_CATEGORIES.flatMap(c => c.items);
+        if (allEras.length > 0 && !lockedModules[eraBlockId]) {
+            const randomEraItem = allEras[Math.floor(Math.random() * allEras.length)];
+            activeEraTag = randomEraItem.name;
         }
+    } else if (currentEraTags.length > 0) {
+        activeEraTag = currentEraTags[0]; // Keep current
     }
     if (activeEraTag) currentArchetype = getArchetypeFromEra(activeEraTag);
 
-    // --- TIME/LOCATION RANDOMIZATION ---
-    // If not locked, generate random coordinates
-    let randomYear = currentFieldState['skin_year_exact']?.[0];
-    let randomCountry = currentFieldState['skin_country_exact']?.[0];
-
-    if (!lockedModules['skin_year_exact']) {
-        // Random year between -2000 and 2050
-        const year = Math.floor(Math.random() * (2050 - (-2000) + 1)) + (-2000);
-        randomYear = year.toString();
-    }
+    // ── Step 2: Time/Location (SUR3) ──
+    const newState = { ...currentFieldState };
     
-    if (!lockedModules['skin_country_exact']) {
-        const r = COUNTRY_PRESETS[Math.floor(Math.random() * COUNTRY_PRESETS.length)];
-        // Use CN as default for randomizer consistency, UI will auto-flip based on lang
-        randomCountry = r.cn;
+    if (!lockedModules['skin_year_exact']) {
+        if (surfaceParticipants.has('skin_year_exact')) {
+            const year = Math.floor(Math.random() * (2050 - (-2000) + 1)) + (-2000);
+            newState['skin_year_exact'] = [year.toString()];
+        } else {
+            newState['skin_year_exact'] = [];
+        }
     }
-    // ------------------------------------
 
+    if (!lockedModules['skin_country_exact']) {
+        if (surfaceParticipants.has('skin_country_exact')) {
+            const r = COUNTRY_PRESETS[Math.floor(Math.random() * COUNTRY_PRESETS.length)];
+            newState['skin_country_exact'] = [r.cn];
+        } else {
+            newState['skin_country_exact'] = [];
+        }
+    }
+
+    // ── Step 3: Block/Library setup ──
     let blocks: NarrativeBlockDef[] = [];
     let library: LibraryCategoryDef[] = [];
     if (isCommercial) {
         blocks = [...COMMERCIAL_ENGINE_BLOCKS, ...COMM_SKIN_BLOCKS];
         library = [...COMMERCIAL_ENGINE_LIBRARY, ...COMM_SKIN_LIBRARY];
     } else if (isExperimental) {
-        blocks = [...EXPERIMENTAL_ENGINE_BLOCKS, ...EXPERIMENTAL_SKIN_BLOCKS]; 
-        library = [...EXPERIMENTAL_ENGINE_LIBRARY, ...EXPERIMENTAL_SKIN_LIBRARY]; 
+        blocks = [...EXPERIMENTAL_ENGINE_BLOCKS, ...EXPERIMENTAL_SKIN_BLOCKS];
+        library = [...EXPERIMENTAL_ENGINE_LIBRARY, ...EXPERIMENTAL_SKIN_LIBRARY];
     } else if (isTrailer) {
         blocks = [...TRAILER_ENGINE_BLOCKS, ...TRAILER_SKIN_BLOCKS];
         library = [...TRAILER_ENGINE_LIBRARY, ...TRAILER_SKIN_LIBRARY];
     } else {
         blocks = [...NARRATIVE_ENGINE_BLOCKS, ...ALL_SKIN_BLOCKS];
-        library = [...NARRATIVE_ENGINE_LIBRARY, ...SKIN_LIBRARY, ...GENRE_CATEGORIES, ...WORLD_MOTIF_CATEGORIES]; 
+        library = [...NARRATIVE_ENGINE_LIBRARY, ...SKIN_LIBRARY, ...GENRE_CATEGORIES, ...WORLD_MOTIF_CATEGORIES];
     }
-    const newState = { ...currentFieldState };
-    if (activeEraTag && !lockedModules[eraBlockId] && !isSkinMasterLocked && blocks.some(b => b.id === eraBlockId)) newState[eraBlockId] = [activeEraTag];
-    
-    // Apply Random Time/Location
-    if (randomYear) newState['skin_year_exact'] = [randomYear];
-    if (randomCountry) newState['skin_country_exact'] = [randomCountry];
 
-    // --- Genre Mixing Logic for Narrative Driver ---
+    // Apply era + coordinates
+    if (!lockedModules[eraBlockId] && !isSkinMasterLocked) {
+        if (activeEraTag && surfaceParticipants.has('skin_era') && blocks.some(b => b.id === eraBlockId)) {
+            newState[eraBlockId] = [activeEraTag];
+        } else {
+            const locks = lockedTags[eraBlockId] || [];
+            newState[eraBlockId] = (currentFieldState[eraBlockId] || []).filter(t => locks.includes(t));
+        }
+    }
+
+    // ── Step 4: Genre / SUR1 handling ──
     if (!isCommercial && !isExperimental && !isTrailer && !isSkinMasterLocked) {
         const genreId = 'skin_genre';
-        const animId = 'skin_animation_genre';
-        
-        if (!lockedModules[genreId] && !lockedModules[animId]) {
-            const totalGenreCount = Math.random() < 0.5 ? 1 : 2; 
-            
-            const genreLib = GENRE_CATEGORIES.flatMap(c => c.items).map(i => ({...i, blockId: genreId}));
-            const animLib = WORLD_MOTIF_CATEGORIES.flatMap(c => c.items).map(i => ({...i, blockId: animId}));
-            const combinedPool = [...genreLib, ...animLib];
-            
+        if (!lockedModules[genreId] && surfaceParticipants.has(genreId)) {
+            const genreLib = GENRE_CATEGORIES.flatMap(c => c.items);
             const lockedGenre = lockedTags[genreId] || [];
-            const lockedAnim = lockedTags[animId] || [];
-            const lockedItems = [
-                ...genreLib.filter(i => lockedGenre.includes(i.name)),
-                ...animLib.filter(i => lockedAnim.includes(i.name))
-            ];
-            
-            if (lockedItems.length >= totalGenreCount) {
-                newState[genreId] = lockedGenre;
-                newState[animId] = lockedAnim;
-            } else {
-                const needed = totalGenreCount - lockedItems.length;
-                const available = combinedPool.filter(i => !lockedGenre.includes(i.name) && !lockedAnim.includes(i.name));
+            const genreCount = getRandomCount(genreId); // 1-2
+            if (lockedGenre.length < genreCount) {
+                const available = genreLib.filter(i => !lockedGenre.includes(i.name));
                 const shuffled = [...available].sort(() => 0.5 - Math.random());
-                const picked = shuffled.slice(0, needed);
-                
-                const finalGenre = [...lockedGenre, ...picked.filter(i => i.blockId === genreId).map(i => i.name)];
-                const finalAnim = [...lockedAnim, ...picked.filter(i => i.blockId === animId).map(i => i.name)];
-                
-                newState[genreId] = finalGenre;
-                newState[animId] = finalAnim;
+                const needed = genreCount - lockedGenre.length;
+                newState[genreId] = [...lockedGenre, ...shuffled.slice(0, needed).map(i => i.name)];
+            } else {
+                newState[genreId] = lockedGenre.slice(0, genreCount);
             }
         }
     }
 
+    // ── Step 5: Determine surface block IDs for filter check ──
+    const surfaceBlockIds = new Set(
+        SURFACE_WEIGHT_CONFIG.slots.flatMap(s => [...s.blockIds])
+    );
+    // Also include non-weighted surface blocks (SUR8, SV1, SV2) — these get independent 50% roll
+    const independentSurfaceBlocks = new Set(['skin_age', 'skin_structure', 'skin_volume']);
+
+    // ── Step 6: Main block loop ──
     blocks.forEach(block => {
         if (lockedModules[block.id]) return;
         let isSkinBlock = isCommercial ? COMM_SKIN_BLOCKS.some(b => b.id === block.id) : (isExperimental ? EXPERIMENTAL_SKIN_BLOCKS.some(b => b.id === block.id) : (isTrailer ? TRAILER_SKIN_BLOCKS.some(b => b.id === block.id) : ALL_SKIN_BLOCKS.some(b => b.id === block.id)));
         if (isSkinBlock && isSkinMasterLocked) return;
-        
-        if (block.id === eraBlockId) return; 
-        
-        if (!isCommercial && !isExperimental && !isTrailer && (block.id === 'skin_genre' || block.id === 'skin_animation_genre')) return;
+
+        // Skip handled blocks
+        if (block.id === eraBlockId) return;
+        if (!isCommercial && !isExperimental && !isTrailer && block.id === 'skin_genre') return;
+
+        // Surface block filtering logic
+        if (isSkinBlock) {
+            let keepOld = true;
+            if (surfaceBlockIds.has(block.id)) {
+                // 12-word weighted filter: skip if not selected
+                if (!surfaceParticipants.has(block.id)) keepOld = false;
+            } else if (independentSurfaceBlocks.has(block.id)) {
+                // Independent surface blocks: 50% chance to participate
+                if (Math.random() >= 0.5) keepOld = false;
+            }
+            if (!keepOld) {
+                const locks = lockedTags[block.id] || [];
+                newState[block.id] = (newState[block.id] || []).filter(t => locks.includes(t));
+                return;
+            }
+            
+            // skin_animation_genre: skip (deprecated)
+            if (block.id === 'skin_animation_genre') return;
+        }
 
         let libId = `${block.id}_lib`;
         let category = library.find(c => c.id === libId);
         if (category && category.items.length > 0) {
-             const limit = BLOCK_LIMITS[block.id] || 1;
-             let count = 1;
-             if (limit > 1) count = Math.floor(Math.random() * limit) + 1;
-             let availableItems = category.items;
-             if (block.id === 'skin_location' || block.id === 'skin_profession' || block.id === 'skin_society' || block.id === 'skin_ideology' || block.id === 'comm_skin_scenario' || block.id === 'engine_m1' || block.id === 'skin_origin') {
-                 availableItems = filterItemsByArchetype(category.items, currentArchetype, block.id);
-                 if (availableItems.length === 0) availableItems = category.items;
-             }
-             const locks = lockedTags[block.id] || [];
-             const keptTags = (newState[block.id] || []).filter(t => locks.includes(t));
-             const needed = Math.max(0, count - keptTags.length);
-             const available = availableItems.filter(i => !keptTags.includes(i.name));
-             const selected: string[] = [];
-             for(let i=0; i<needed; i++) {
-                 if(available.length === 0) break;
-                 const idx = Math.floor(Math.random() * available.length);
-                 selected.push(available[idx].name);
-                 available.splice(idx, 1);
-             }
-             newState[block.id] = [...keptTags, ...selected];
+            // Use RANDOM_RANGES for count determination
+            const count = getRandomCount(block.id);
+
+            // For 0-count blocks (0-1 range that rolled 0), clear them
+            if (count === 0) {
+                const locks = lockedTags[block.id] || [];
+                newState[block.id] = (newState[block.id] || []).filter(t => locks.includes(t));
+                return;
+            }
+
+            let availableItems = category.items;
+            if (['skin_location', 'skin_profession', 'skin_society', 'skin_ideology', 'comm_skin_scenario', 'engine_m1', 'skin_origin'].includes(block.id)) {
+                availableItems = filterItemsByArchetype(category.items, currentArchetype, block.id);
+                if (availableItems.length === 0) availableItems = category.items;
+            }
+
+            // SUR7 gender bias: 70% female, 30% male
+            if (block.id === 'skin_gender') {
+                const genderItems = availableItems;
+                const isFemale = Math.random() < 0.70;
+                const femaleItems = genderItems.filter(i => {
+                    const n = (i.name + ' ' + (i.group || '')).toLowerCase();
+                    return n.includes('female') || n.includes('女');
+                });
+                const maleItems = genderItems.filter(i => {
+                    const n = (i.name + ' ' + (i.group || '')).toLowerCase();
+                    return n.includes('male') || n.includes('男');
+                });
+                const targetPool = isFemale && femaleItems.length > 0 ? femaleItems : (maleItems.length > 0 ? maleItems : genderItems);
+                if (targetPool.length > 0) {
+                    newState[block.id] = [targetPool[Math.floor(Math.random() * targetPool.length)].name];
+                }
+                return;
+            }
+
+            const locks = lockedTags[block.id] || [];
+            const keptTags = (newState[block.id] || []).filter(t => locks.includes(t));
+            const needed = Math.max(0, count - keptTags.length);
+            const available = availableItems.filter(i => !keptTags.includes(i.name));
+            const selected: string[] = [];
+            for (let i = 0; i < needed; i++) {
+                if (available.length === 0) break;
+                const idx = Math.floor(Math.random() * available.length);
+                selected.push(available[idx].name);
+                available.splice(idx, 1);
+            }
+            newState[block.id] = [...keptTags, ...selected];
         }
     });
     return newState;
@@ -751,15 +881,26 @@ export const randomizeFormulaState = (
       const category = ENGINE_LIBRARY.find(c => c.id === libId);
 
       if (category && category.items.length > 0) {
-          const limit = BLOCK_LIMITS[block.id] || 1;
           let count = 1;
-          if (isAesthetic && (block.id === 'aes_skin_texture' || block.id === 'aes_body_features' || block.id === 'aes_face_features')) {
-               count = Math.floor(Math.random() * 2) + 1; 
-          } else if (limit > 1) {
-              if (block.id === 'aes_hair_color' && isAesthetic) {
-                  count = Math.random() < 0.7 ? 1 : 2;
-              } else {
-                  count = Math.floor(Math.random() * Math.min(limit, 3)) + 1;
+          if (isAesthetic) {
+              // Aesthetic mode retains its own count logic
+              const limit = BLOCK_LIMITS[block.id] || 1;
+              if (block.id === 'aes_skin_texture' || block.id === 'aes_body_features' || block.id === 'aes_face_features') {
+                   count = Math.floor(Math.random() * 2) + 1; 
+              } else if (limit > 1) {
+                  if (block.id === 'aes_hair_color') {
+                      count = Math.random() < 0.7 ? 1 : 2;
+                  } else {
+                      count = Math.floor(Math.random() * Math.min(limit, 3)) + 1;
+                  }
+              }
+          } else {
+              // Non-aesthetic: use RANDOM_RANGES protocol v2.0
+              count = getRandomCount(block.id);
+              if (count === 0) {
+                  const locks = lockedTags[block.id] || [];
+                  newState[block.id] = (newState[block.id] || []).filter(t => locks.includes(t));
+                  return;
               }
           }
           let availableItems = category.items;

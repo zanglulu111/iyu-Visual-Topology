@@ -34,8 +34,8 @@ export const NARRATIVE_ENGINE_BLOCKS: NarrativeBlockDef[] = [
     id: "engine_m2",
     name: "M2. 真实遭遇",
     enName: "M2. THE ENCOUNTER (REAL)",
-    description: "刺破日常幻象的创伤性事件. 故事从何处开始崩塌？",
-    descriptionEn: "A traumatic event that pierces through daily illusions. Where does the story collapse?",
+    description: "穿刺象征秩序的实在界事件 (Tuche)。五维穿刺拓扑: 秩序/认知/肉身/关系/边界。100条。",
+    descriptionEn: "Real encounter that punctures the symbolic order (Tuche). 5-dim puncture topology. 100 entries.",
     tags: []
   },
   {
@@ -118,8 +118,8 @@ export const NARRATIVE_ENGINE_LIBRARY: LibraryCategoryDef[] = [
     id: "engine_m2_lib",
     name: "M2. 真实遭遇",
     nameEn: "M2. The Encounter",
-    desc: "在拉康精神分析中，“真实界 (The Real)”是那些无法被符号化、无法被语言描述、突然刺破日常幻象的创伤性时刻。它不仅仅是“倒霉的事”，它是世界观崩塌的瞬间。",
-    descEn: "In Lacanian psychoanalysis, 'The Real' represents traumatic moments that cannot be symbolized or described by language, suddenly piercing through daily illusions.",
+    desc: "穿刺: 实在界对象征秩序的五维撕裂。A面(解放)/B面(创伤)/关键张力/实在界穿刺($)。",
+    descEn: "Puncture: the Real's 5-dim tearing of the symbolic order. A-side/B-side/Key Tension/Real Punctured ($).",
     items: ENGINE_ENCOUNTERS
   },
   {
@@ -150,7 +150,7 @@ export const NARRATIVE_ENGINE_LIBRARY: LibraryCategoryDef[] = [
     id: "engine_m6_lib",
     name: "M6. 终极代价",
     nameEn: "M6. The Stakes",
-    desc: "在拉康精神分析中，“阉割”指“丧失了作为主体的资格”。真正的恐惧在于“比死更可怕的命运”。",
+    desc: "在拉康精神分析中，“阑割”指“丧失了作为主体的资格”。真正的恐惧在于“比死更可怕的命运”。",
     descEn: "In Lacanian terms, 'Castration' refers to the loss of subjective status. The true fear lies in 'a fate worse than death'.",
     items: ENGINE_STAKES
   },

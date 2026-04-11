@@ -26,12 +26,6 @@ import {
 // 🔍 工具引入：在总词库中查找词条定义的函数
 import { findItemDetails, findItemFull } from './dataRegistry';
 
-// 🏗️ V1 & V2 架构引入：两套全新的 Prompt 构建器
-import { buildPromptV1, buildPromptV2 } from './promptArchitectures';
-
-/** Prompt 架构版本 */
-export type PromptArchVersion = 'legacy' | 'v1' | 'v2';
-
 // ============================================================================
 // 📜 2. 系统宪法 (最高铁律拼接区)
 // [AUTO KV CACHING SUPPORT] ABSOLUTE STATIC SYSTEM BIBLE
@@ -216,13 +210,8 @@ export const buildNarrativePrompt = (
   fieldState: NarrativeFieldState,
   visionInput: string = "",
   visionImage: string | null = null,
-  worldLaw: WorldLawConfig,
-  archVersion: PromptArchVersion = 'legacy'
+  worldLaw: WorldLawConfig
 ): { text: string, images: string[] } => {
-  // ═══ 架构分流：根据版本参数委托给不同的 Prompt 构建器 ═══
-  if (archVersion === 'v1') return buildPromptV1(fieldState, visionInput, visionImage, worldLaw);
-  if (archVersion === 'v2') return buildPromptV2(fieldState, visionInput, visionImage, worldLaw);
-  // ═══ Legacy 模式：保持原有逻辑不变 ═══
 
   const getTagsBySuffix = (suffixes: string | string[]) => {
     const sfxArray = Array.isArray(suffixes) ? suffixes : [suffixes];

@@ -1,20 +1,12 @@
 import { LibraryItemDef } from '../../types';
-import { FANTASIES_GROUP_A } from './m3/group_a';
-import { FANTASIES_GROUP_B } from './m3/group_b';
-import { FANTASIES_GROUP_C } from './m3/group_c';
-import { FANTASIES_GROUP_D } from './m3/group_d';
+import { M3_FANTASIES } from './m3';
 
 /**
  * 叙事逻辑引擎：M3 幻象 (The Fantasy)
  * 核心逻辑：主体应对缺失 ($) 的防御机制，试图填补那个不可填补的空洞。
  * 公式：$ \diamond a (主体与小客体的关系)
  */
-export const ENGINE_FANTASIES: LibraryItemDef[] = [
-    ...FANTASIES_GROUP_A,
-    ...FANTASIES_GROUP_B,
-    ...FANTASIES_GROUP_C,
-    ...FANTASIES_GROUP_D
-];
+export const ENGINE_FANTASIES: LibraryItemDef[] = M3_FANTASIES;
 
 /**
  * 幻象分组信息

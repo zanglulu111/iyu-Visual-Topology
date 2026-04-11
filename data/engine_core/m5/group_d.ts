@@ -1,268 +1,239 @@
 import { LibraryItemDef } from '../../../types';
 
 export const DRIVES_GROUP_D: LibraryItemDef[] = [
+    // ============================================================
+    // GROUP D. 凝固的驱力 (The Crystallization) — 20 Items
+    // 能量不撞击、不环绕、不穿透，而是停下来、固定、保存、定型。
+    // 凝固不等于死亡。建造是凝固，记忆是凝固，坚守也是凝固。
+    // 光谱：建设性凝固(1-7) → 防御性凝固(8-13) → 病理性凝固(14-20)
+    // ============================================================
+
+    // ---- 建设性凝固：用劳动、记忆和仪式把流动的世界固定下来 ----
+
     {
-        id: "drv_escape",
-        name: "极限逃亡", nameEn: "The Escape",
-        group: "D. 生存的挣扎", groupEn: "Survival",
-        def: "全程在跑，核心动作是“不被发现”，在夹缝中生存。",
-        defEn: "Running throughout, the core action is 'not being found,' surviving in the gaps.",
-        core: "空间上的绝对滑移。在实在界的吞噬裂口前保持纯粹的恐慌动能，拒绝任何符号学捕获。 | Drive: 逃亡/崩塌驱力。",
-        coreEn: "Absolute spatial sliding. Maintaining pure panic kinetic energy before the Real's devouring maw, rejecting symbolic capture. | Drive: Escape/Collapse.",
-        reference: "《肖申克的救赎》爬过五百码恶臭屎尿下水管道最终拥抱暴雨的安迪；《疯狂的麦克斯4》不顾一切死挂在战车上试图远遁大荒漠的种母。",
-        referenceEn: "Andy crawling 500 yards of shit pipes to hug pouring rain in Shawshank Redemption; breeders clinging to war rigs escaping into wastelands in Mad Max."
+        id: "drv_building",
+        name: "建造", nameEn: "Building",
+        group: "D. 凝固的驱力", groupEn: "The Crystallization",
+        def: "用双手在世界上留下一个不会消失的东西。房子、桥梁、堤坝、城市。",
+        defEn: "Making something with your hands that won't vanish from the world. Houses, bridges, dams, cities.",
+        core: "A面：建造是抗拒时间最古老的方式——你终将逝去，但作品会留下。每块砖都在对虚无说不。/ B面：但建造也常是逃避——精力全投入外在，因不敢直视内在空虚。你建的只是挡住虚无的墙。关键张力：为世界留下痕迹，还是因为停下来就会崩溃？ | 驱力回路 (Trieb): 砌筑——手必须忙着，空闲会发抖。",
+        coreEn: "A-side: Building defies time — you will perish, but your work remains. Every brick says 'no' to the void. / B-side: But it's also an escape — pouring energy externally to avoid inner emptiness. You are building walls against the void, not monuments. Key tension: Building to leave a trace, or because stopping means collapse? | Drive Circuit (Trieb): Laying bricks — hands must keep busy to avoid trembling.",
+        reference: "《陆上行舟》赫尔佐格拖着轮船翻越山脊只为建一座歌剧院；《天堂电影院》老放映员用一生守护和建造一间小镇电影院。",
+        referenceEn: "Herzog dragging a ship over a mountain ridge just to build an opera house in Fitzcarraldo; an old projectionist spending his life building and guarding a small-town cinema in Cinema Paradiso."
     },
     {
-        id: "drv_deep_cover",
-        name: "深度潜伏", nameEn: "Deep Cover",
-        group: "D. 生存的挣扎", groupEn: "Survival",
-        def: "彻底改变身份，作为另一个人生活，甚至骗过自己。",
-        defEn: "Complete identity change, living as another, even deceiving oneself.",
-        core: "人格的解离与重组。将自体主体性阉割殆尽，作为大他者视网膜上的盲点而苟活。 | Drive: 潜行伪装驱力。",
-        coreEn: "Dissociation and recompilation of personality. Castrating the self to survive as a blind spot on the Big Other's retina. | Drive: Stealth Camouflage.",
-        reference: "《风声》在残酷裘庄将自己极度扭曲为交际花死活不漏老鬼底牌的顾晓梦；《异形》披着无辜科考队假皮实则奉命去带回绝命怪体的无情生化机器。",
-        referenceEn: "Gu twisting into a flaky socialite to seal her spy identity amidst terror in The Message; an emotionless android wearing crew skin to fetch monsters in Alien."
+        id: "drv_recording",
+        name: "记录", nameEn: "Recording",
+        group: "D. 凝固的驱力", groupEn: "The Crystallization",
+        def: "把正在消逝的东西固定下来。写下来、拍下来、画下来、唱下来。",
+        defEn: "Fixing what's vanishing. Writing, filming, painting, singing it down.",
+        core: "A面：记录是对抗遗忘最温柔的反叛——拒绝让消逝的瞬间化为乌有。它宣告了'这曾存在过'。/ B面：但极端记录者常活在镜头后——太忙于保存生活，却忘了去真正体验。硬盘虽满，人生却空。关键张力：保留生活，还是用记录替代了真实的在场？ | 驱力回路 (Trieb): 铭刻——必须留下痕迹，遗忘比死亡更怕。",
+        coreEn: "A-side: Recording is a gentle rebellion against forgetting — declaring 'this once existed' against vanishing moments. / B-side: Yet obsessive recorders live behind the lens — documenting life but forgetting to experience it. Full hard drives, empty lives. Key tension: Preserving life, or replacing real experience with documentation? | Drive Circuit (Trieb): Inscribing — must leave traces; forgetting is worse than death.",
+        reference: "《辛德勒的名单》用名单把一千多条生命固定在纸上的工厂主；《安妮日记》在密室中用日记凝固了一段即将被消灭的青春。",
+        referenceEn: "A factory owner fixing over a thousand lives onto paper with a list in Schindler's List; fixing a youth about to be destroyed in a diary written in hiding in The Diary of Anne Frank."
     },
     {
-        id: "drv_parasitism",
-        name: "乞讨/寄生", nameEn: "Parasitism",
-        group: "D. 生存的挣扎", groupEn: "Survival",
-        def: "依附于强者或系统，通过示弱来获取资源。",
-        defEn: "Attaching to the strong or the system, seeking resources by showing weakness.",
-        core: "对“对象小a”的彻底交出。跪伏在统治者的欲望阴影里，以自我客体化换取生物学残喘。 | Drive: 吮吸/寄生驱力。",
-        coreEn: "Total surrender to 'objet petit a'. Kneeling in the master's shadow of desire, trading self-objectification for basic survival. | Drive: Sucking/Parasitism.",
-        reference: "《寄生虫》用精美假文凭极度低姿态一点点如蟑螂般蛀空富户地板底侧的穷鬼；《异形》藏匿死角无声附着人脸暴力吐入破胸死胎的抱脸体。",
-        referenceEn: "Poor pests crawling via fake diplomas hollowing out wealthy floors in Parasite; facehuggers secretly plunging lethal embryos down human throats in Alien."
+        id: "drv_collecting",
+        name: "收藏", nameEn: "Collecting",
+        group: "D. 凝固的驱力", groupEn: "The Crystallization",
+        def: "把分散在世界各处的碎片聚拢在一起，赋予它们秩序和意义。",
+        defEn: "Gathering fragments scattered across the world, giving them order and meaning.",
+        core: "A面：收藏是在混乱中重建秩序——按自己的逻辑拼凑碎片，在这微缩宇宙里找回可控感。/ B面：但极端收藏将人异化为囚徒——你不再拥有藏品，而是被它们拥有，为下一次占有夜不能寐。关键张力：你出于热爱，还是对失控的深深恐惧？ | 驱力回路 (Trieb): 聚拢——世界太乱，至少此处的碎片各归其位。",
+        coreEn: "A-side: Collecting builds order from chaos — arranging fragments to form a controllable micro-universe. / B-side: But extreme collecting makes you a prisoner — possessed by your possessions, anxious for the next acquisition. Key tension: Do you collect out of pure love, or a deep fear of losing control? | Drive Circuit (Trieb): Gathering — the world is chaotic; at least here things have their place.",
+        reference: "《公民凯恩》在巨大的仓库里堆满了一生的收藏却始终找不到'玫瑰花蕾'的报业大亨；《头号玩家》在虚拟世界中收藏流行文化碎片以对抗遗忘的玩家。",
+        referenceEn: "A press magnate filling vast warehouses with a lifetime's collection yet never finding 'Rosebud' in Citizen Kane; players collecting pop culture fragments in virtual worlds to fight forgetting in Ready Player One."
     },
     {
-        id: "drv_mutation",
-        name: "身体变异", nameEn: "Mutation",
-        group: "D. 生存的挣扎", groupEn: "Survival",
-        def: "主动或被迫改造自己的身体，以适应极端的环境。",
-        defEn: "Actively or forcibly altering the physical body to adapt to extreme environments.",
-        core: "对抗实在界环境的本体论投降。主动摧毁人类符号外壳，与怪异的致命周遭达成血肉妥协。 | Drive: 畸变适应驱力。",
-        coreEn: "Ontological surrender to the environment of the Real. Destroying the human shell to achieve flesh compromise with lethal surroundings. | Drive: Aberrant Adaptation.",
-        reference: "《切尔诺贝利》在辐射地心救火后全身基因直接崩解溶化为一摊毒水的消防员；《变蝇人》为实验作茧自缚眼睁睁看着毛发脱落异化成巨型黏蝇的科学鬼。",
-        referenceEn: "Firefighters dissolving into toxic mush after hitting raw radiation grids in Chernobyl; a doc watching his nails peel melting into a giant gooey fly in The Fly."
+        id: "drv_inheritance",
+        name: "传承", nameEn: "Inheritance",
+        group: "D. 凝固的驱力", groupEn: "The Crystallization",
+        def: "把你知道的、拥有的、相信的传给下一代。让它在你死后继续活着。",
+        defEn: "Passing what you know, own, and believe to the next generation. Keeping it alive after you die.",
+        core: "A面：传承是最深远的凝固——化作桥梁接通过去与未来，使知识跨越个体死亡。/ B面：但它也常是结构性绑架——让下一代背负你的期望与未竟野心，衣钵成了枷锁。关键张力：你传下的是自由，还是未竟之梦的沉重锁链？ | 驱力回路 (Trieb): 延续——我终将消失，但'这'绝不能消失。",
+        coreEn: "A-side: Inheritance is profound crystallization — becoming a bridge connecting past and future, letting knowledge outlive the individual. / B-side: It can also be structural bonding — forcing the next generation to bear your unfulfilled expectations. The mantle becomes a shackle. Key tension: Passing down freedom, or the heavy chains of unfinished dreams? | Drive Circuit (Trieb): Continuing — I will vanish, but 'this' must remain.",
+        reference: "《教父》维托把整个家族的权力和罪恶一起传给了迈克尔；《星球大战》绝地武士通过师徒制把原力信仰一代代传下去。",
+        referenceEn: "Vito passing the family's entire power and sin to Michael in The Godfather; Jedi transmitting Force-faith through generations of master-apprentice bonds in Star Wars."
     },
     {
-        id: "drv_feign_death",
-        name: "假死", nameEn: "Feign Death",
-        group: "D. 生存的挣扎", groupEn: "Survival",
-        def: "伪造自己的死亡，以此来逃避大他者的追捕。",
-        defEn: "Faking death to evade the Big Other's pursuit.",
-        core: "拓扑学层面的强制归零。通过在符号界伪造主体的缺席，使大他者的捕猎逻辑寻找不到着力点。 | Drive: 假死/抹消驱力。",
-        coreEn: "Forced zeroing on a topological level. Forging the subject's absence in the Symbolic to nullify the Big Other's hunting logic. | Drive: Feigned Death/Erasure.",
-        reference: "《兵临城下》喷着死血硬是在满场苏军断肢堆底僵直不出混过扫射阵的苏军狙击手；《神探夏洛克》在医院楼顶飞身一坠只为逃避仇家死局的天才侦探。",
-        referenceEn: "A sniper freezing under bloody severed limbs escaping sweeping fire in Enemy at the Gates; a genius plunging off a roof to fake out assassins in Sherlock."
+        id: "drv_memorial",
+        name: "纪念", nameEn: "Memorial",
+        group: "D. 凝固的驱力", groupEn: "The Crystallization",
+        def: "为已经消失的人或事建一座不会被遗忘的标记。",
+        defEn: "Building an unforgettable marker for people or things that have vanished.",
+        core: "A面：纪念是对遗忘最决绝的反抗——坚决不让失去的人和事被虚无抹杀。墓碑是时空中抗拒潮流的锚。/ B面：但这可化为无法前行的执念——建起纪念碑，自己却被永远钉死在原地。关键张力：是为了让逝者存续，还是因为你根本无法接受失去现实？ | 驱力回路 (Trieb): 立碑——哪怕被全世界遗忘，此石仍会铭记。",
+        coreEn: "A-side: Memorializing is the most stubborn denial of forgetting — refusing to let lost ones be erased by the void. Tombstones are anchors against time's flow. / B-side: But it can become a paralyzing obsession — erecting a monument that nails you permanently to the spot. Key tension: Ensuring the dead persist in the future, or an inability to accept loss? | Drive Circuit (Trieb): Erecting a stone — even if the world forgets, this stone remembers.",
+        reference: "《寻梦环游记》在亡灵节用万寿菊桥把逝者的记忆凝固在花瓣上；《钢琴家》在战后废墟中弹奏的那首肖邦——用音乐纪念一切被摧毁的东西。",
+        referenceEn: "Fixing the dead's memory onto marigold petals on the Day of the Dead in Coco; a Chopin piece played in postwar ruins — music memorializing everything destroyed in The Pianist."
+    },
+    {
+        id: "drv_ritual",
+        name: "仪式", nameEn: "Ritual",
+        group: "D. 凝固的驱力", groupEn: "The Crystallization",
+        def: "用重复的动作和固定的程序给混乱的世界施加秩序。",
+        defEn: "Imposing order on a chaotic world through repeated actions and fixed procedures.",
+        core: "A面：仪式是对混乱最原始的回应——不知所措时，至少能按步骤行事。葬礼不仅为死者，更给生者结构，把不可承受的轻化为可操作的重。/ B面：但失去内在意义的仪式只是空壳——动作正确，心已不在。不是祈祷，只是动嘴唇。关键张力：你的仪式还有灵魂，还是只剩惯性？ | 驱力回路 (Trieb): 重复——做同样的事，改变比重复更可怕。",
+        coreEn: "A-side: Ritual is the primal response to chaos — following fixed steps when lost. Funerals give the living structure, turning unbearable lightness into manageable weight. / B-side: But rituals without meaning are empty shells — right motions, absentee hearts. Merely moving lips, not praying. Key tension: Does your ritual have a soul, or just inertia? | Drive Circuit (Trieb): Repeating — doing the same, as change is terrifying.",
+        reference: "《教父》每一次家族聚餐和洗礼仪式都同时进行着谋杀的对位结构；《入殓师》为遗体整理仪容的仪式——用固定程序恢复逝者尊严。",
+        referenceEn: "Every family feast and baptism running parallel to murder in The Godfather; the ritual of preparing bodies — restoring dignity through fixed procedures in Departures."
+    },
+    {
+        id: "drv_guarding_legacy",
+        name: "守护遗产", nameEn: "Guarding Legacy",
+        group: "D. 凝固的驱力", groupEn: "The Crystallization",
+        def: "终身看守一件你没有创造但不能让它消失的东西。",
+        defEn: "Spending a lifetime guarding something you didn't create but cannot let vanish.",
+        core: "A面：守护者并非创造者——没建这座图书馆，但保证任期内一书不失。这种忠诚承认自己只是链条上一环，平淡却深沉。/ B面：但守护可变成囚禁——和守护之物一起被锁死。留下非因自由选择，离开即是背叛。关键张力：你守护的是事物本身，还是'守护者'身份给的存在感？ | 驱力回路 (Trieb): 看守——我走了，就没人看着它了。",
+        coreEn: "A-side: Guardians aren't creators — assuring no book vanishes though they didn't build the library. A deep loyalty admitting one's place as a link in the chain. / B-side: But guarding becomes imprisonment — locked in with the guarded. Staying isn't a free choice; leaving means betrayal. Key tension: Guarding the object, or the existence the 'guardian' role grants? | Drive Circuit (Trieb): Standing watch — if I leave, no one watches.",
+        reference: "《天堂电影院》阿尔弗雷多终身守护在放映室里直到失明；《指环王》阿拉贡的祖先世世代代守护着碎裂的纳西尔圣剑。",
+        referenceEn: "Alfredo guarding the projection room his entire life until going blind in Cinema Paradiso; Aragorn's ancestors guarding the shards of Narsil generation after generation in LOTR."
+    },
+
+    // ---- 防御性凝固：用坚持、原则和克制抵抗改变的力量 ----
+
+    {
+        id: "drv_holding_ground",
+        name: "固守", nameEn: "Holding Ground",
+        group: "D. 凝固的驱力", groupEn: "The Crystallization",
+        def: "所有人都在撤退，你留在原地。不是因为勇敢，而是因为这里就是你的位置。",
+        defEn: "Everyone retreats; you stay. Not from bravery, but because this is your place.",
+        core: "A面：固守是凝固最壮烈的形态——你的存在本身就是防线。不求赢，只求不退。/ B面：但固守者常分不清勇敢与固执——留下是因为阵地值得，还是太骄傲无法撤退？有时撤退更需大勇。关键张力：阵地还有价值吗？还是用'不退'证明存在？ | 驱力回路 (Trieb): 扎根——我就在这，谁也别想让我挪步。",
+        coreEn: "A-side: Holding ground is heroic crystallization — your presence is the wall. It's not about winning, but refusing to retreat. / B-side: But it blends courage with stubbornness — staying because it's worth defending, or too proud to leave? Retreat sometimes takes more courage. Key tension: Is the ground worth it, or are you proving existence by staying? | Drive Circuit (Trieb): Taking root — I am here, none shall move me.",
+        reference: "《拯救大兵瑞恩》在桥上用手枪对坦克说'你不许过去'的米勒上尉；《斯巴达三百勇士》温泉关三百人挡住百万大军的固守。",
+        referenceEn: "Captain Miller firing a pistol at a tank saying 'you shall not pass' on the bridge in Saving Private Ryan; three hundred Spartans holding Thermopylae against a million in 300."
+    },
+    {
+        id: "drv_principle",
+        name: "坚持原则", nameEn: "Principle",
+        group: "D. 凝固的驱力", groupEn: "The Crystallization",
+        def: "世界在变，你的标准不变。'我不管别人怎么做，我只知道这是不对的。'",
+        defEn: "The world changes; your standards don't. 'I don't care what others do; I know this is wrong.'",
+        core: "A面：原则是人格的骨骼——无它虽灵活但如软泥。有原则者在变幻中总有清晰的内在参照。/ B面：但原则易变僵化——拒绝适应非因坚定，而是恐惧。世界变了，原则或许该更新。关键张力：在坚守真理，还是用原则回避适应的痛苦？ | 驱力回路 (Trieb): 不动——所有人都弯了，我的脊梁不能弯。",
+        coreEn: "A-side: Principles are character's skeleton — without them you are flexible but spineless. They offer clear inner reference amid change. / B-side: But principles breed rigidity — refusing adaptation out of fear, not conviction. When the world changes, update may be needed. Key tension: Defending truth, or dodging the pain of adaptation? | Drive Circuit (Trieb): Unmoved — everyone bends, but my spine remains straight.",
+        reference: "《十二怒汉》在所有人都要快速定罪时坚持合理怀疑的陪审员；《永不妥协》不管律所和大公司怎么施压都不放弃诉讼的艾琳。",
+        referenceEn: "A juror insisting on reasonable doubt when everyone wants a quick conviction in 12 Angry Men; Erin refusing to drop the case no matter how the firm and corporations pressure in Erin Brockovich."
+    },
+    {
+        id: "drv_endurance",
+        name: "忍耐", nameEn: "Endurance",
+        group: "D. 凝固的驱力", groupEn: "The Crystallization",
+        def: "承受住痛苦、屈辱或等待，不崩溃，不反击，只是'撑下去'。",
+        defEn: "Bearing pain, humiliation, or waiting without collapsing or striking back. Simply 'enduring.'",
+        core: "A面：忍耐是最沉默的力量——不反击不逃跑，只求'还在'。有些战役不是打赢的，是熬赢的。/ B面：但忍耐与麻木边界模糊——以为在忍，实则已麻木；以为等转机，实则忘了还有别路可走。关键张力：是在选择等待，还是已不信有别的路？ | 驱力回路 (Trieb): 硬扛——咬紧牙，再撑一会儿。",
+        coreEn: "A-side: Endurance is silent strength — not fighting or fleeing, just 'remaining.' Some wars are won by outlasting, not combating. / B-side: But the line with numbness is thin — thinking you endure while truly numb; hoping for a turn, forgetting other paths exist. Key tension: Choosing to wait, or no longer believing in alternatives? | Drive Circuit (Trieb): Gritting — clenching teeth, hold on a bit longer.",
+        reference: "《为奴十二年》所罗门在十二年的奴役中保持尊严等待被解救；《肖申克的救赎》安迪用十九年的忍耐等到了那个雷雨夜。",
+        referenceEn: "Solomon maintaining dignity through twelve years of slavery waiting for rescue in 12 Years a Slave; Andy enduring nineteen years until that stormy night in Shawshank Redemption."
+    },
+    {
+        id: "drv_restraint",
+        name: "克制", nameEn: "Restraint",
+        group: "D. 凝固的驱力", groupEn: "The Crystallization",
+        def: "你完全有能力出手，但你选择不动。把冲动冻结在体内。",
+        defEn: "You are entirely capable of acting, but choose not to. Freezing the impulse inside.",
+        core: "A面：克制是力量的最高形式——不是做不到，是做得到但选择不做。每次咽下那句话、收回拳头、压下冲动，都是意志对本能的胜利。/ B面：但克制过度会变成压抑——情绪只是被压到更深的地方，早晚会以无法预料的方式爆发。关键张力：你在管理情绪，还是在制造定时炸弹？ | 驱力回路 (Trieb): 冻结——让那个冲动死在嘴边。",
+        coreEn: "A-side: Restraint is strength's highest form — not because you can't but because you can yet choose not to. Every swallowed word, retracted fist, suppressed impulse is will's victory over instinct. / B-side: But excessive restraint becomes repression — you think you've controlled those emotions, but they're just pushed deeper. Someday they'll erupt unpredictably. Key tension: Are you managing emotions, or manufacturing a time bomb? | Drive Circuit (Trieb): Freezing — letting the impulse die on the tip of your tongue.",
+        reference: "《老无所依》安东·齐格面对无辜者掷硬币——他有能力杀但给了命运选择的机会；《卧虎藏龙》李慕白对俞秀莲一生的克制——能说但始终没说出口的那句话。",
+        referenceEn: "Anton Chigurh flipping a coin for the innocent — able to kill but giving fate a chance in No Country for Old Men; Li Mu Bai's lifelong restraint toward Yu Shu Lien — the words he could but never did say in Crouching Tiger."
+    },
+    {
+        id: "drv_faith",
+        name: "信仰", nameEn: "Faith",
+        group: "D. 凝固的驱力", groupEn: "The Crystallization",
+        def: "在没有证据的情况下相信某件事是真的，并以此为基石活下去。",
+        defEn: "Believing something is true without evidence, and living upon that cornerstone.",
+        core: "A面：信仰是凝固的极致——什么都不确定的世界里，你选了一个锚然后死死抓住。不需要被证明，只需要被相信。对有信仰的人，怀疑比死亡更可怕。/ B面：但信仰也能让你对真相免疫——你相信的变成唯一滤镜，不符合的证据自动被过滤。你不是在信真理，是用信仰回避真理。关键张力：信仰是出发点还是终点？它让你更自由，还是关进了看不见墙的房间？ | 驱力回路 (Trieb): 相信——不信的话，一切都会坍塌。",
+        coreEn: "A-side: Faith is crystallization's ultimate — in a world where nothing is certain, you choose an anchor and hold fast. It needn't be proven, only believed. For the faithful, doubt is more terrifying than death. / B-side: But faith can immunize you against truth — what you believe becomes the sole filter, all contrary evidence automatically screened out. You're not believing truth; you're using belief to dodge it. Key tension: Is your faith a starting point or an endpoint? Does it make you freer, or lock you in a room with invisible walls? | Drive Circuit (Trieb): Believing — because if you don't, everything collapses.",
+        reference: "《沉默》在上帝始终沉默的困境中仍然选择相信的神父；《少年派的奇幻漂流》'你更喜欢哪个故事？'——选择相信的权利。",
+        referenceEn: "A priest choosing to believe despite God's perpetual silence in Silence; 'Which story do you prefer?' — the right to choose belief in Life of Pi."
+    },
+    {
+        id: "drv_refusal_to_change",
+        name: "拒变", nameEn: "Refusal to Change",
+        group: "D. 凝固的驱力", groupEn: "The Crystallization",
+        def: "世界已经不同了，但你拒绝承认。'我不管外面发生了什么。'",
+        defEn: "The world has changed, but you refuse to acknowledge it. 'I don't care what's happening outside.'",
+        core: "A面：拒变有时是清醒——不是所有变化都是进步。所有人随波逐流时，你站在原地本身就是判断：'这个方向是错的，我不去。'/ B面：但拒变更常见的面目是恐惧——你不是不同意新世界，是害怕无法在其中生存。'坚守'只是对适应能力缺乏的体面包装。关键张力：你拒绝改变是因为看到了别人没看到的，还是因为闭上了眼睛？ | 驱力回路 (Trieb): 拒绝——外面爱怎样怎样，我不出去。",
+        coreEn: "A-side: Refusal to change is sometimes lucidity — not all change is progress. When everyone drifts with the current, standing still is itself a judgment: 'This direction is wrong; I won't go.' / B-side: But more often, refusal is fear — you don't disagree with the new world's direction; you fear you can't survive it. Your 'holding firm' is just respectful packaging for inability to adapt. Key tension: Do you refuse to change because you see what others don't, or because you've closed your eyes? | Drive Circuit (Trieb): Refusing — let the outside be what it will; I'm not going out.",
+        reference: "《都灵之马》在风暴吞噬一切后仍然试图过日常生活的农夫；《日落大道》诺玛·德斯蒙德拒绝承认默片时代已经结束。",
+        referenceEn: "A farmer still trying to live normally after storms devour everything in The Turin Horse; Norma Desmond refusing to admit the silent film era is over in Sunset Boulevard."
+    },
+
+    // ---- 病理性凝固：当保存变成执念，固定变成囚禁 ----
+
+    {
+        id: "drv_obsession",
+        name: "执念", nameEn: "Obsession",
+        group: "D. 凝固的驱力", groupEn: "The Crystallization",
+        def: "一个想法占据了你全部的精神空间。你无法停止想它。",
+        defEn: "A single thought occupying your entire mental space. You cannot stop thinking about it.",
+        core: "A面：执念是凝固最纯粹的形式——全部能量集中在一个点上。这种极度专注有时能创造奇迹：世界上最伟大的作品往往来自执念者。/ B面：但执念的代价是除了那个点之外的一切都枯萎了——健康、关系、生活，全被那个想法吸干。不是你追它，是它追你。关键张力：执念是创造力的源泉，还是把你吃掉的怪物？ | 驱力回路 (Trieb): 定住——这个想法长在脑子里了，拔不掉。",
+        coreEn: "A-side: Obsession is crystallization's purest form — all energy concentrated on a single point. This extreme focus sometimes works miracles: the world's greatest works often come from the obsessed. / B-side: But obsession's cost is everything else withering — your health, relationships, life, all drained by that one idea. You don't chase it; it chases you. Key tension: Is your obsession the source of creativity, or a monster eating you? Can you tell the difference? | Drive Circuit (Trieb): Fixed — this thought has grown into my brain; it can't be pulled out.",
+        reference: "《鸟人》一个过气演员对百老汇成功的执念吞噬了他的家庭和理智；《爆裂鼓手》弗莱彻对完美演奏的执念摧毁了一个又一个学生。",
+        referenceEn: "A washed-up actor's obsession with Broadway success consuming his family and sanity in Birdman; Fletcher's obsession with the perfect performance destroying student after student in Whiplash."
     },
     {
         id: "drv_hoarding",
-        name: "囤积/防御", nameEn: "Hoarding",
-        group: "D. 生存的挣扎", groupEn: "Survival",
-        def: "建立堡垒，收集资源，拒绝任何人进入。",
-        defEn: "Building fortresses, gathering resources, and denying entry to all.",
-        core: "对微观实在界的强迫症圈地。建立一个隔绝大他者的无窗单子，在物神崇拜中寻求子宫般的绝对庇护。 | Drive: 强迫占有驱力。",
-        coreEn: "Obsessive enclosure of the micro-Real. Building a windowless monad against the Big Other, seeking womb-like shelter in fetishism. | Drive: Compulsive Hoarding.",
-        reference: "《一九四二》战乱枯年大肆在老旧地窖挖空重重暗室死捂万斤陈粮的地主老财；《迷雾》推倒全超市货架死封玻璃大口狂嚼罐头防备雾中巨虫的镇民。",
-        referenceEn: "Landlords digging massive cellars guarding tons of crusty grain during famines in Back to 1942; citizens barricading glass with shelves eating cans blindly against mist bugs in The Mist."
+        name: "囤积", nameEn: "Hoarding",
+        group: "D. 凝固的驱力", groupEn: "The Crystallization",
+        def: "无法丢弃任何东西。每一件物品都是一段记忆的物证，扔掉它们等于扔掉自己。",
+        defEn: "Unable to discard anything. Every object is evidence of a memory; throwing them away means throwing away yourself.",
+        core: "A面：囤积的起源是一种深层的珍惜——你觉得每样东西都有灵魂，扔掉它就是抛弃了一段关系。在物资匮乏年代长大的人囤积食物，在感情匮乏中长大的人囤积关系。这是一种对'失去'的先验恐惧。/ B面：但囤积最终会把你活埋——你被你保存的东西淹没了。房间里没有空间留给新的东西，你的人生也是。关键张力：你是在保存记忆，还是在用物品堵住你害怕面对的空虚？ | 驱力回路 (Trieb): 积攒——不能扔，扔掉了万一哪天需要呢。",
+        coreEn: "A-side: Hoarding originates in deep cherishing — you feel everything has a soul; discarding means abandoning a relationship. Those raised in material scarcity hoard food; those raised in emotional scarcity hoard relationships. A priori fear of 'loss.' / B-side: But hoarding eventually buries you alive — drowned by what you've saved. No room for anything new in your space, or your life. Key tension: Are you preserving memory, or using objects to plug the emptiness you're afraid to face? | Drive Circuit (Trieb): Stockpiling — can't throw it away; what if you need it someday.",
+        reference: "《公民凯恩》装满仓库的收藏品和那个永远找不到的'玫瑰花蕾'；《海上钢琴师》1900拒绝离开那艘船——船本身变成了他囤积的全部世界。",
+        referenceEn: "Warehouse-filling collections and the eternally elusive 'Rosebud' in Citizen Kane; 1900 refusing to leave the ship — the vessel itself becoming his entire hoarded world in The Legend of 1900."
     },
     {
-        id: "drv_scavenging",
-        name: "拾荒", nameEn: "Scavenging",
-        group: "D. 生存的挣扎", groupEn: "Survival",
-        def: "在废墟中寻找旧时代的残骸。",
-        defEn: "Searching for remnants of the old era within the ruins.",
-        core: "寄生于符号废墟的食腐生态。在文明崩溃后的能指残骸中，寻找维系基本生存的实在界卡路里。 | Drive: 拾荒/余烬驱力。",
-        coreEn: "Scavenging ecology within symbolic ruins. Searching for Real-calories to sustain survival among the shattered fragments of civilization. | Drive: Scavenging/Embers.",
-        reference: "《拾穗者》在轰鸣收割机离场后仍长久匍匐在黄土里翻扒那落遗小麦谷包的贫妇；《机器人总动员》在地球荒漠里日以继夜只知把破铜烂铁压成方砖的老旧履带皮。",
-        referenceEn: "Penniless women dragging across mud grabbing spilled grains post-harvests in The Gleaners; a rusty bot relentlessly packing toxic scraps into cubes on dying Earth in WALL-E."
+        id: "drv_rigidity",
+        name: "僵化", nameEn: "Rigidity",
+        group: "D. 凝固的驱力", groupEn: "The Crystallization",
+        def: "你的判断、习惯和方法已经固化成了不可改变的模式。",
+        defEn: "Your judgments, habits, and methods have solidified into unchangeable patterns.",
+        core: "A面：僵化是秩序的代价——你可靠、可预测、值得信任，正因为你从不改变。混乱世界里，僵化的人是可以依靠的柱子。/ B面：但柱子不能移动——环境剧变、旧规则失效时，你的可靠就变成了阻碍。你不是在坚持正确，只是没有能力改变了。关键张力：你的一致性是美德还是残疾？你选择不变，还是失去了改变的能力？ | 驱力回路 (Trieb): 硬化——做了太久同样的事，不知道还有别的方式了。",
+        coreEn: "A-side: Rigidity is the cost of order — you're reliable, predictable, trustworthy precisely because you never change. In a chaotic world, a rigid person is a dependable pillar. / B-side: But pillars can't move — when environments shift and old rules fail, your reliability becomes obstruction. You're not holding onto the right thing; you've lost the ability to change. Key tension: Is your consistency a virtue or a disability? Do you choose not to change, or have you lost the capacity? | Drive Circuit (Trieb): Hardening — done the same thing for so long, you've forgotten there are other ways.",
+        reference: "《日落大道》诺玛活在默片时代的规则里无法适应有声电影；《浮生一日》日复一日重复同样的动作直到动作本身替代了生活。",
+        referenceEn: "Norma living by silent film rules unable to adapt to talkies in Sunset Boulevard; repeating the same actions day after day until the actions replace life itself in Life in a Day."
     },
     {
-        id: "drv_migration",
-        name: "迁徙", nameEn: "Migration",
-        group: "D. 生存的挣扎", groupEn: "Survival",
-        def: "整个族群的移动，寻找应许之地。",
-        defEn: "Movement of an entire group in search of a promised land.",
-        core: "逃离必死拓扑域。将整个群体的存在悬置于移动的过程中，在空间转换中推迟终极的毁灭。 | Drive: 流亡/越境驱力。",
-        coreEn: "Fleeing the lethal topological domain. Suspending collective existence in motion, delaying ultimate destruction via spatial shifts. | Drive: Exile/Crossing.",
-        reference: "《愤怒的葡萄》被沙暴逼吃光家底开着即将爆胎破卡车死求加州幻梦的苦难流农；《流浪地球》强行造出上万超重型蓝火发动机死推整颗行星疯狂躲避木星引力爆的人类群。",
-        referenceEn: "Dust-choked farmers driving exploding clunkers blindly toward a California myth in The Grapes of Wrath; humanity brutally strapping blue throttles tracking Earth out of Jupiter's suck in The Wandering Earth."
+        id: "drv_living_in_past",
+        name: "活在过去", nameEn: "Living in the Past",
+        group: "D. 凝固的驱力", groupEn: "The Crystallization",
+        def: "你的精神停留在某个已经结束的时刻。身体在现在，心在过去。",
+        defEn: "Your spirit remains at a moment that has ended. Body in the present, heart in the past.",
+        core: "A面：活在过去有时是忠诚——你拒绝放弃一段记忆，因为它定义了你是谁。'曾经的好日子'也许是生命中唯一完整的时候，你不愿接受它结束了。/ B面：但过去是无法更新的房间——你锁在了不再存在的世界里。身边的人在老去、成长、改变，你像定格的照片，微笑着但不属于任何时间线。关键张力：你在珍惜回忆，还是用回忆逃避不想面对的现在？ | 驱力回路 (Trieb): 回放——那时候多好啊，为什么不能永远是那时候。",
+        coreEn: "A-side: Living in the past is sometimes loyalty — refusing to release a memory because it defines who you are. Those 'good old days' may be the only time you felt whole, and you won't accept it's over. / B-side: But the past is a room that can't be updated — you locked yourself in a world that no longer exists. People around you age, grow, change, while you're a frozen photograph: smiling but belonging to no timeline. Key tension: Are you cherishing memory, or using it to escape a present you don't want to face? | Drive Circuit (Trieb): Replay — those times were so good; why can't it always be then.",
+        reference: "《了不起的盖茨比》盖茨比用全部财富试图重建五年前和黛西的那个夜晚；《海边的曼彻斯特》李永远活在火灾那天，无法向前走一步。",
+        referenceEn: "Gatsby spending his entire fortune trying to recreate one night with Daisy five years ago in The Great Gatsby; Lee forever living on the day of the fire, unable to take a single step forward in Manchester by the Sea."
     },
     {
-        id: "drv_hiding_underground",
-        name: "躲入地下", nameEn: "Underground",
-        group: "D. 生存的挣扎", groupEn: "Survival",
-        def: "在下水道或地堡中建立社会。",
-        defEn: "Establishing society within sewers or bunkers.",
-        core: "垂直维度的子宫退行。钻入大他者权力视线无法穿透的地壳深缝，在绝对的幽暗闭锁里缝合安全感。 | Drive: 穴居/下潜驱力。",
-        coreEn: "Vertical womb regression. Burrowing into crust fissures impenetrable by Big Other's gaze, suturing safety in absolute dark enclosure. | Drive: Subterranean Dive.",
-        reference: "《地下》在战火后谎压防空警报硬把整整一地下室愚民闷禁造枪换天价的狂想骗徒；《黑客帝国》只配深钻地幔红岩去建超压锅炉都市对抗地表乌贼绞杀的叛匪。",
-        referenceEn: "A lying schemer hiding masses in bunkers producing fake wartime cannons decades late in Underground; crust-digging rebels building boiler cities avoiding surface squid slaughters in The Matrix."
+        id: "drv_fetishism",
+        name: "恋物", nameEn: "Fetishism",
+        group: "D. 凝固的驱力", groupEn: "The Crystallization",
+        def: "把全部的情感投射到一个特定的物品上。那个东西变得比它本身重要一万倍。",
+        defEn: "Projecting all emotion onto a specific object. That thing becomes ten thousand times more important than itself.",
+        core: "A面：恋物是爱的凝缩——你把一段关系、记忆、感觉全部压缩进一个具体的东西里。死者的戒指、旧情人的围巾、童年的玩偶——微型纪念碑，全部世界藏在里面。/ B面：但恋物的危险是你爱物品胜过爱它代表的人——你抱着围巾哭，不是想念她，是怕放下围巾就彻底忘了她。物品变成了记忆的人质。关键张力：你爱的是这个东西，还是它帮你逃避的事实——她已经走了？ | 驱力回路 (Trieb): 抓紧——只要这个东西还在，一切就都在。",
+        coreEn: "A-side: Fetishism is love condensed — you compress an entire relationship, memory, feeling into one concrete thing. A dead person's ring, an ex's scarf, a childhood doll — miniature monuments containing your whole world. / B-side: But fetishism's danger is loving the object more than what it represents — you cry into the scarf not because you miss her but because you fear releasing it means forgetting her entirely. The object becomes memory's hostage. Key tension: Do you love this thing, or the fact it helps you escape — that she's gone? | Drive Circuit (Trieb): Gripping — as long as this thing remains, everything remains.",
+        reference: "《公民凯恩》'玫瑰花蕾'——一个雪橇承载了一个帝国创始人全部的童年和失落；《星际穿越》库珀留给女儿的那块手表变成了跨越时空的爱的载体。",
+        referenceEn: "'Rosebud' — a sled bearing the entirety of a mogul's childhood and loss in Citizen Kane; Cooper's watch left for his daughter becoming a vessel of love across spacetime in Interstellar."
     },
     {
-        id: "drv_cannibalism",
-        name: "同类相食", nameEn: "Cannibalism",
-        group: "D. 生存的挣扎", groupEn: "Survival",
-        def: "为了活下去吃掉同伴。",
-        defEn: "Eating companions in order to survive.",
-        core: "伦理防线的彻底熔断。当符号界完全崩塌，欲望直接退行至最原始的口腔期实在界吞噬机制。 | Drive: 互啖/绝对吞噬驱力。",
-        coreEn: "Complete meltdown of ethical lines. When the Symbolic collapses, desire regresses to the most primal oral drive of the Real. | Drive: Cannibalistic Devouring.",
-        reference: "《天劫余生》身陷雪山为不断气将玻璃刃划向同机死难挚友大腿生肉的碎裂球员；《汉尼拔》绑好餐巾端举高脚杯面带绅笑将活人天灵盖掀开油煎脑花的绝命恶鬼。",
-        referenceEn: "Crashed players slicing frozen thigh flesh off dead friends just to keep pulsing in Alive; an elegant devil tying bibs cleanly frying raw brains pulled strictly from living skulls in Hannibal."
+        id: "drv_petrification",
+        name: "石化", nameEn: "Petrification",
+        group: "D. 凝固的驱力", groupEn: "The Crystallization",
+        def: "在极度恐惧或创伤面前完全冻住。无法思考、无法行动、无法逃跑。",
+        defEn: "Completely freezing before extreme fear or trauma. Unable to think, act, or flee.",
+        core: "A面：石化是身体对不可承受之重的保护——恐惧大到神经系统无法处理时，它选择关机而不是崩溃。不是懦弱，是生物学层面的紧急制动。/ B面：但石化成为常态就是活死人状态——身体在但你不在了。像困在石头里的雕像，看得到外面却无法互动。关键张力：石化保护了你，但如果永远不解冻——保护和毁灭有什么区别？ | 驱力回路 (Trieb): 僵死——被恐惧钉在原地，连呼吸都忘了。",
+        coreEn: "A-side: Petrification is the body's protection against the unbearable — when fear exceeds what the nervous system can process, it chooses shutdown over breakdown. Not cowardice but biological emergency braking. / B-side: But when petrification becomes permanent, it's a living death — your body is present but you are not. Like a statue trapped in stone, you can see the world outside but can't interact. Key tension: Petrification protected you, but if you never thaw — what's the difference between protection and destruction? | Drive Circuit (Trieb): Frozen stiff — pinned in place by fear, forgetting even to breathe.",
+        reference: "《钢琴家》在被发现的瞬间完全冻住、无法移动的犹太音乐家；《房间》从囚室中被解救出来后面对真实世界完全石化的母亲。",
+        referenceEn: "A Jewish pianist completely freezing upon being discovered, unable to move in The Pianist; a mother entirely petrified facing the real world after being rescued from captivity in Room."
     },
     {
-        id: "drv_betrayal_survival",
-        name: "出卖同伴", nameEn: "Betrayal",
-        group: "D. 生存的挣扎", groupEn: "Survival",
-        def: "为了自己活命而出卖朋友。",
-        defEn: "Betraying friends for personal survival.",
-        core: "囚徒困境中的自私顶峰。将同伴的主体性贬低为替罪羊祭品，以此向大他者行贿来豁免自身的死刑。 | Drive: 献祭/背刺驱力。",
-        coreEn: "Peak selfishness in the prisoner's dilemma. Reducing peers to scapegoat sacrifices, bribing the Big Other to avoid execution. | Drive: Betrayal/Sacrifice.",
-        reference: "《盲井》眼都不眨蒙骗乡下纯良老头入矿区乱锤敲死只求索赔血腥赔偿金的绝杀工；《黑客帝国》受够了猪食般的稀泥只妄想咬上一嘴虚拟多汁牛排而拔枪杀破整整一组战友的塞弗。",
-        referenceEn: "Vile workers casually tricking naive peers under shafts smashing skulls for fake compensations in Blind Shaft; Cypher blasting crew mates entirely just to chew a fake juicy steak in The Matrix."
-    },
-    {
-        id: "drv_sycophancy",
-        name: "依附权贵", nameEn: "Sycophancy",
-        group: "D. 生存的挣扎", groupEn: "Survival",
-        def: "成为权力的弄臣或走狗。",
-        defEn: "Becoming a jester or lackey of the powerful.",
-        core: "彻底的主体让渡。主动退化为大他者欲望的盛放器皿，在主宰的淫威里获取被豢养的凄惨庇护。 | Drive: 奴颜/犬儒驱力。",
-        coreEn: "Total surrender of subjectivity. Regressing into a vessel for the Big Other's desire, gaining miserable pet-like refuge under tyranny. | Drive: Sycophancy.",
-        reference: "《辛德勒的名单》拿昂贵钟表加雪茄极其狗腿地去舔纳粹军官高靴图免整厂不毙的求生商贾；《疯狂的麦克斯4》烂死前狂抹白灰只奢望能获战神主子一眼注目而献出脊椎骨的战争烂皮儿。",
-        referenceEn: "A slick merc bribing Nazi boots via watches blindly striving not to get gassed in Schindler's List; rotting war boys chrome-spraying teeth praying violently to die praised by a beast king in Mad Max."
-    },
-    {
-        id: "drv_play_corpse",
-        name: "伪装尸体", nameEn: "Playing Dead",
-        group: "D. 生存的挣扎", groupEn: "Survival",
-        def: "在尸体堆里装死。",
-        defEn: "Acting as a corpse among the dead.",
-        core: "与死亡的预先同化。交出所有的生命能指，以此骗过死神的收割逻辑（最被动但也最本质的生存苟活）。 | Drive: 拟死/静息驱力。",
-        coreEn: "Pre-assimilation with death. Surrendering all markers of life to deceive the Reaper's harvesting logic (most passive yet primal survival). | Drive: Feigned Stasis.",
-        reference: "《南京！南京！》临绝境在千人屠坑前硬接泥水装作死尸压下心跳躲避刺刀挑拨的绝境老兵；《行尸走肉》涂满一身腥臭烂肠血块只能瞪着死鱼眼拖慢僵步晃出尸海的警长。",
-        referenceEn: "A battered veteran sinking heartbeat into mud trenches pretending to be dead meat in City of Life and Death; a sheriff smearing rotted intestines shuffling stiffly out of massive hordes in The Walking Dead."
-    },
-    {
-        id: "drv_shelter",
-        name: "建立庇护所", nameEn: "Shelter",
-        group: "D. 生存的挣扎", groupEn: "Survival",
-        def: "加固房屋，封死窗户。",
-        defEn: "Strengthening houses and sealing windows.",
-        core: "恐惧具象化的防御结界。用坚硬的物质屏障生硬抵御实在界的入侵，本质是对外部无限的极度阉割焦虑。 | Drive: 筑巢/防御驱力。",
-        coreEn: "Defensive perimeter of concrete fear. Resisting the Real's invasion with hard matter, fundamentally an extreme castration anxiety of the outside. | Drive: Nesting.",
-        reference: "《安妮日记》在阿姆斯特丹逼仄暗阁密室中为了逃过搜查连喘息都痛苦压缩着的犹太苦女；《我是传奇》在废都无论冬夏一入夜就把庄园所有空窗死封千尺钢板的猎犬孤男。",
-        referenceEn: "A Jewish girl shrinking entirely suffocating every breath in a cramped Amsterdam secret room in The Diary of Anne Frank; a solo dog-man sealing every villa crack via dense steel plates in I Am Legend."
-    },
-    {
-        id: "drv_theft",
-        name: "盗窃资源", nameEn: "Theft",
-        group: "D. 生存的挣扎", groupEn: "Survival",
-        def: "偷取生存必需品。",
-        defEn: "Stealing basic necessities for survival.",
-        core: "所有权符号秩序的强行越界。当法律失去威慑，为了肉身的延续而粗暴地切断他人的物质锁链。 | Drive: 窃取/越雷驱力。",
-        coreEn: "Forcibly trespassing symbolic ownership. When law loses its grip, severing others' material chains for biological continuation. | Drive: Theft/Trespass.",
-        reference: "《偷自行车的人》痛失唯一饭碗后逼至底限只能颤抖着向街头别人新车伸出贼爪的心碎慈父；《雪国列车》狂暴敲开层层隔热门就为了强抢车头区几块满是残肢蛋白冻果腹的尾车脏汉。",
-        referenceEn: "A jobless father shakingly swiping a clean bike merely forced to feed his child in Bicycle Thieves; filthy tailers smashing heavy blast doors desperately just to steal protein jelly in Snowpiercer."
-    },
-    {
-        id: "drv_self_surgery",
-        name: "医疗自救", nameEn: "Self-Surgery",
-        group: "D. 生存的挣扎", groupEn: "Survival",
-        def: "自己给自己做手术。",
-        defEn: "Performing surgery on oneself.",
-        core: "理性对肉体痛觉的强行冷冻。在极端状态下将自身躯体视为异化的残损客体，持刀切除实在界的毒瘤。 | Drive: 自体切割驱力。",
-        coreEn: "Rationality's forced freeze on physical pain. Treating one's body as an alienated damaged object, cutting out the Real's tumor. | Drive: Auto-Surgery.",
-        reference: "《127小时》被崖石万压无法脱困最终用钝重瑞士刀一点点生拉磨断右手腕前臂血筋的攀岩客；《普罗米修斯》爬入手术舱硬挺着刀锋自己生生拉开小腹强取骇人异形黑胚的怒火女。",
-        referenceEn: "A trapped climber dragging rusty blades violently to saw through his raw arm flexors in 127 Hours; a furious woman forcibly ripping her ab open via auto-surgical pod to abort alien spawn in Prometheus."
-    },
-    {
-        id: "drv_cure_search",
-        name: "寻找解药", nameEn: "Cure Search",
-        group: "D. 生存的挣扎", groupEn: "Survival",
-        def: "身患绝症，寻找唯一的救命药。",
-        defEn: "Afflicted by terminal illness, searching for the sole cure.",
-        core: "与内部死之驱力的赛跑。身体作为正在倒计时的血肉炸弹，主体疯狂试图寻找缝合基因崩坏的代码。 | Drive: 寻药/存活驱力。",
-        coreEn: "Racing internal death drive. Body acting as a ticking biological bomb, the subject frantically seeks code to suture genetic collapse. | Drive: Cure Seeking.",
-        reference: "《我不是药神》奔离重洋疯狂走私未过批的廉价印度仿制血药只求多喘几月气的凄苦慢粒群体；《釜山行》满手飙血徒手拼穿整串满脸血肉丧尸大巴护送纯净胎童入釜山界限的染病糙汉。",
-        referenceEn: "Leukemia patients smuggling cheap unapproved pills blindly fighting for basic oxygen in Dying to Survive; an infected dad smashing thick zombie trains simply to push pure babies into Busan lines."
-    },
-    {
-        id: "drv_crossing",
-        name: "穿越封锁线", nameEn: "Crossing",
-        group: "D. 生存的挣扎", groupEn: "Survival",
-        def: "穿过布满地雷或守卫的边界。",
-        defEn: "Crossing borders filled with mines or guards.",
-        core: "对必死结界的死向冲锋。在符号界划定的绝境边缘，试图以血肉之躯撞开一条通向彼岸的拓扑缝隙。 | Drive: 突围/越线驱力。",
-        coreEn: "Death-charge against lethal perimeters. Attempting to ram open a topological crack to the other side using mere flesh at the Symbolic's edge. | Drive: Breakthrough.",
-        reference: "《逃离德黑兰》胆战借口拍戏强逼海关翻印通关章在一群重刺步枪底下冒汗突登飞机的使馆六命；《极乐空间》浑身插死烂铜核废管硬吃巨型机枪集火狂冲云端洁白高塔的外骨骼病徒。",
-        referenceEn: "Embassy six dripping sweat forcing fake film stamps through dark Iranian bayonets boarding planes in Argo; sick brutes chewing orbital auto-gunfire in shoddy exo-suits seeking clean white clouds in Elysium."
-    },
-    {
-        id: "drv_radiation_adapt",
-        name: "适应辐射", nameEn: "Adaptation",
-        group: "D. 生存的挣扎", groupEn: "Survival",
-        def: "在有毒环境中生存，身体发生改变。",
-        defEn: "Living in toxic environments, the body undergoes change.",
-        core: "与有害客体的共生契约。不再试图净化，而是将大他者的毒素彻底内化为自身新的邪异新陈代谢系统。 | Drive: 毒性同化驱力。",
-        coreEn: "Symbiotic pact with harmful objects. Ceasing to purify, instead fully internalizing the Big Other's toxins into a morbid metabolism. | Drive: Toxic Assimilation.",
-        reference: "《切尔诺贝利》徒手硬接发红核石墨块以致大表皮飞速焦糊烂溶却无一句撤退指令的敢死工魂；《辐射》强接无尽核绿毒液灌入血腔只待脊皮全毁却无敌于核爆焦土的破相尸鬼。",
-        referenceEn: "Doomed squads grabbing stark red burning graphite merely witnessing their flesh peel horribly in Chernobyl; gulping glowing mega toxins blindly watching facial bones melt off thriving as ghouls in Fallout."
-    },
-    {
-        id: "drv_cyber_survival",
-        name: "机械化续命", nameEn: "Cyber-Life",
-        group: "D. 生存的挣扎", groupEn: "Survival",
-        def: "用机器零件替换坏死的器官。",
-        defEn: "Replacing necrotic organs with machinery parts.",
-        core: "特修斯之船式的赛博续命局。将必朽的肉体重构为不死的硅基客体，试图在冰冷金属中冻结并保存主体意识。 | Drive: 硅基更替驱力。",
-        coreEn: "Ship of Theseus cyber-survival. Reconstructing mortal flesh into immortal silicon, trying to freeze consciousness within cold metal. | Drive: Silicon Replacement.",
-        reference: "《潜水钟与蝴蝶》除了转动左眼外余尽僵死全凭无情管械抽注风箱才续出一命的前刊杂志主编；《攻壳机动队》被活生生截净只余一枚灰白鲜脑装进高配冰冷装甲强活输出的少佐。",
-        referenceEn: "A rigid magazine chief paralyzed except his left eye surviving via loud mechanical pumping in The Diving Bell and the Butterfly; a raw grey brain forcefully encased in icy max-spec shells outliving flesh in Ghost in the Shell."
-    },
-    {
-        id: "drv_slave_survival",
-        name: "成为奴隶", nameEn: "Enslavement",
-        group: "D. 生存的挣扎", groupEn: "Survival",
-        def: "自愿卖身为奴以换取食物。",
-        defEn: "Voluntarily selling oneself into slavery for food.",
-        core: "以自由意志典当生物学口粮。主动签下主体性的卖身契，将欲望的支配权彻底交于施虐的主人。 | Drive: 臣服/典当驱力。",
-        coreEn: "Pawning free will for biological rations. Willingly signing away subjectivity, surrendering the reign of desire to sadistic masters. | Drive: Submission.",
-        reference: "《为奴十二年》被拐之后强咽天大委屈换衣为奴生挨暴鞭长成于采摘棉田的大号黑人良民；《疯狂的麦克斯4》穿透双唇打满横链只够倒悬在大猛车前擎放血苟喘的血包小可怜。",
-        referenceEn: "A kidnapped violinist choking mighty tears adopting chains merely to pick cotton beneath fat whips in 12 Years a Slave; a weakling sporting mouth-chains hung upside down dispensing life-blood just as a bag in Mad Max."
-    },
-    {
-        id: "drv_vent_hiding",
-        name: "通风管藏身", nameEn: "Vent Hiding",
-        group: "D. 生存的挣扎", groupEn: "Survival",
-        def: "生活在建筑的缝隙中。",
-        defEn: "Existing within the fissures and gaps of the structure.",
-        core: "作为系统代码缝隙中的乱码异物。拒绝占有正式空间，在排泄管道中滑行，成为隐形的寄居蟹。 | Drive: 缝隙/鼠辈驱力。",
-        coreEn: "Garbled anomaly in system code gaps. Refusing formal spaces, sliding through waste pipes as invisible hermit crabs. | Drive: Vermin/Crevice.",
-        reference: "《寄生虫》像惊耗子般常年死居在下水乱道底舱极怕半缕阳光的惨淡下层穷苦脏户；《异形》在黏绿铁锈腥管里缩头缩脚颤抖不已眼睁睁瞧巨怪切开舱缝拖走的无助船工。",
-        referenceEn: "Damp poor folks lurking eternally in blind stinking sub-basements fearing random sunshine blasts in Parasite; helpless crew shivering behind dripping rusty vents witnessing shadows tearing open panels in Alien."
-    },
-    {
-        id: "drv_pet_play",
-        name: "扮演宠物", nameEn: "Pet Play",
-        group: "D. 生存的挣扎", groupEn: "Survival",
-        def: "为了生存扮演高等生物的宠物。",
-        defEn: "Acting as a pet for higher beings to survive.",
-        core: "高等物种凝视下的极高耻度退行。主动放弃理性，退化入畜生的无脑状态以讨好掠食者的残羹冷炙。 | Drive: 原初驯化驱力。",
-        coreEn: "Shameful regression under higher-species gaze. Forsaking reason, reverting to mindless beast states to beg for predators' scraps. | Drive: Primal Domestication.",
-        reference: "《何以为家》里套上拴链全然如狗般就为几口丢弃烂渣屈辱跪在地板疯爬叫吠的懵幼孤童；《哈利波特》打下印记绝不敢半句怨言随时等着主子雷电鞭挞毫无自由的家养缩耳地精。",
-        referenceEn: "An ignorant street-boy fully chained behaving strictly like a dog sniffing floor crumbs loudly in Capernaum; enslaved huge-eared elves enduring brutal thrashes smilingly under master wands zeroing freedom in Harry Potter."
-    },
-    {
-        id: "drv_mute_survival",
-        name: "彻底沉默", nameEn: "Silence",
-        group: "D. 生存的挣扎", groupEn: "Survival",
-        def: "在《寂静之地》式的环境中绝对不发声。",
-        defEn: "Remaining absolutely silent in a 'Quiet Place' style environment.",
-        core: "对发声器官（语言输出阀）的绝对自我阉割。在分贝即死神的实在界声音地狱中，将主体话语强行掐灭。 | Drive: 死寂/缄默驱力。",
-        coreEn: "Absolute auto-castration of vocal organs. In a sound-hell where decibels equal death, forcefully extinguishing all subjective speech. | Drive: Dead Silence.",
-        reference: "《寂静之地》哪怕遇硬物生割也死死绞烂被子不敢外洒一丝气音以免唤出死神怪物的主母；《钢琴家》藏身在弹尽城空乱壁屋顶虚空干摁无数个无声白键指骨流酸枯竭的躲战名家。",
-        referenceEn: "A brave mother choking fierce labor-pains sinking teeth totally onto ripped blankets preventing monster clicks in A Quiet Place; a hiding maestro pressing countless dead keys strictly silently atop bombed Warsaw ruins in The Pianist."
+        id: "drv_time_capsule",
+        name: "时间胶囊", nameEn: "Time Capsule",
+        group: "D. 凝固的驱力", groupEn: "The Crystallization",
+        def: "把一个时刻完封不动地密封起来。拒绝让时间触碰它。",
+        defEn: "Sealing a moment completely intact. Refusing to let time touch it.",
+        core: "A面：时间胶囊是对完美瞬间最极端的守护——你知道美好的东西会腐朽，所以在最完美的时刻把它冻住。每件艺术品都是时间胶囊：一首诗把一个瞬间的感受永远保存下来。/ B面：但被密封的东西停止了生长——你保存的不是活物，是标本。拒绝让它改变，也就拒绝了让它活。关键张力：保存一个完美的瞬间——和杀死它——是同一个动作吗？ | 驱力回路 (Trieb): 封存——不能让这一刻永远持续，至少不让它腐烂。",
+        coreEn: "A-side: The time capsule is the most extreme guard of a perfect instant — you know all beautiful things decay, so you freeze it at its most perfect moment. In a way, every artwork is a time capsule: a poem preserving one instant's feeling forever. / B-side: But what's sealed stops growing — you've preserved not a living thing but a specimen. By refusing it change, you refused it life. Key tension: Is preserving a perfect moment and killing it the same act? | Drive Circuit (Trieb): Sealing — if I can't make this moment last forever, at least I can keep it from rotting.",
+        reference: "《盗梦空间》柯布在潜意识深处完美保存了已故妻子的影像但它已经不是她了；《了不起的盖茨比》盖茨比要求的不是黛西，而是五年前那个完美夜晚的精确复刻。",
+        referenceEn: "Cobb perfectly preserving his dead wife's image deep in his subconscious but it's no longer her in Inception; Gatsby demanding not Daisy but an exact replica of that perfect night five years ago in The Great Gatsby."
     }
 ];

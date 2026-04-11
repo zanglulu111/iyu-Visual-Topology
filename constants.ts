@@ -285,7 +285,7 @@ export const BLOCK_LIMITS: Record<string, number> = {
   'aes_creature_mood': 1,
   'aes_creature_action': 1,
   'aes_creature_texture': 3,
-  'skin_era': 1,
+  'skin_era': 2,
   'aes_scene_real': 1,
   'aes_scene_surreal': 1,
   'aes_scene_abstract': 1,
@@ -300,11 +300,62 @@ export const BLOCK_LIMITS: Record<string, number> = {
   'aes_render_real': 1,
   'aes_render_art': 1,
   'aes_render': 1,
-  'engine_m0': 1, 'engine_m1': 3, 'engine_m2': 1, 'engine_m3': 3, 'engine_m4': 3, 'engine_m5': 3, 'engine_m6': 3, 'engine_m7': 1,
+  'engine_m0': 1, 'engine_m1': 2, 'engine_m2': 2, 'engine_m3': 3, 'engine_m4': 3, 'engine_m5': 3, 'engine_m6': 3, 'engine_m7': 1,
   'engine_m4x': 1, 'engine_m5x': 1,
   'comm_c0': 1, 'comm_c1': 1, 'comm_c2': 3, 'comm_c3': 1, 'comm_c4': 3, 'comm_c5': 3, 'comm_c6': 3, 'comm_c7': 3,
-  'skin_genre': 1, 'skin_animation_genre': 1, 'skin_location': 3, 'skin_society': 1, 'skin_ideology': 1, 'skin_ending': 1,
+  'skin_genre': 2, 'skin_animation_genre': 1, 'skin_location': 3, 'skin_society': 1, 'skin_ideology': 1, 'skin_ending': 1,
+  'skin_profession': 2,
   'poe_p0': 1, 'poe_p1': 1, 'poe_p2': 1, 'poe_p3': 1, 'poe_p4': 1
+};
+
+// ============================================================
+// RANDOMIZATION PROTOCOL v2.0
+// ============================================================
+
+/** 随机可选区间：每个参数在随机时应抽取的词条数量 [min, max] */
+export const RANDOM_RANGES: Record<string, [number, number]> = {
+  // M0-M7 引擎核心
+  'engine_m0': [1, 1], 'engine_m1': [1, 2], 'engine_m2': [1, 2],
+  'engine_m3': [1, 2], 'engine_m4': [1, 2], 'engine_m5': [1, 2],
+  'engine_m6': [1, 2], 'engine_m7': [1, 1],
+  // M4X/M5X 调音台引擎推子
+  'engine_m4x': [0, 1], 'engine_m5x': [0, 1],
+  // SUR 表层设定
+  'skin_genre': [1, 2],      // SUR1 叙事动力
+  'skin_era': [1, 1],         // SUR2 背景场域
+  'skin_society': [0, 1],     // SUR4 社会形态
+  'skin_everything': [0, 1],  // SUR5 欲望锚点
+  'skin_location': [0, 1],    // SUR6 空间场景
+  'skin_gender': [0, 1],      // SUR7 主体性别
+  'skin_age': [0, 1],         // SUR8 主体年龄
+  'skin_profession': [0, 1],  // SUR9 职业身份
+  'skin_ideology': [0, 1],    // SUR10 哲学信念
+  'skin_ending': [0, 1],      // SUR11 显性大结局
+  // SUR4X/SUR10X 调音台表现推子
+  'sur4x': [0, 1],            // SUR4X 物理阶层阻力
+  'sur10x': [0, 1],           // SUR10X 象征界缝合度
+  // SV 叙事结构
+  'skin_structure': [0, 1],   // SV1 叙事结构
+  'skin_volume': [0, 1],      // SV2 故事体量
+};
+
+/** 故事摘要12词加权筛选配置 */
+export const SURFACE_WEIGHT_CONFIG = {
+  slots: [
+    { id: 'SUR1',   blockIds: ['skin_genre'],                          weight: 0.65 },
+    { id: 'SUR2',   blockIds: ['skin_era'],                            weight: 0.65 },
+    { id: 'SUR3',   blockIds: ['skin_year_exact', 'skin_country_exact'], weight: 0.65 },
+    { id: 'SUR4',   blockIds: ['skin_society'],                        weight: 0.30 },
+    { id: 'SUR5',   blockIds: ['skin_everything'],                     weight: 0.50 },
+    { id: 'SUR6',   blockIds: ['skin_location'],                       weight: 0.30 },
+    { id: 'SUR7',   blockIds: ['skin_gender'],                         weight: 0.65 },
+    { id: 'SUR9',   blockIds: ['skin_profession'],                     weight: 0.65 },
+    { id: 'SUR10',  blockIds: ['skin_ideology'],                       weight: 0.30 },
+    { id: 'SUR11',  blockIds: ['skin_ending'],                         weight: 0.30 },
+    { id: 'SUR4X',  blockIds: ['sur4x'],                               weight: 0.30 },
+    { id: 'SUR10X', blockIds: ['sur10x'],                              weight: 0.30 },
+  ] as const,
+  cap: 6,
 };
 
 export {

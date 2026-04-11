@@ -1,28 +1,23 @@
 import { LibraryItemDef } from '../../types';
-import { ENCOUNTERS_GROUP_A } from './m2/group_a';
-import { ENCOUNTERS_GROUP_B } from './m2/group_b';
-import { ENCOUNTERS_GROUP_C } from './m2/group_c';
-import { ENCOUNTERS_GROUP_D } from './m2/group_d';
+import { M2_ENCOUNTERS } from './m2';
 
 /**
  * 叙事逻辑引擎：M2 真实遭遇 (The Encounter)
- * 核心逻辑：刺破日常幻象的创伤性事件 (Tuchē)，强制主体进入实在界。
+ * 核心逻辑：穿刺日常象征秩序的实在界事件 (Tuchē)，五维穿刺拓扑。
+ * 词库规模：5 组 x 20 条 = 100 条
+ * 核心格式：张力-光谱 (A面/B面/关键张力 | 实在界穿刺$)
  */
-export const ENGINE_ENCOUNTERS: LibraryItemDef[] = [
-    ...ENCOUNTERS_GROUP_A,
-    ...ENCOUNTERS_GROUP_B,
-    ...ENCOUNTERS_GROUP_C,
-    ...ENCOUNTERS_GROUP_D
-];
+export const ENGINE_ENCOUNTERS: LibraryItemDef[] = M2_ENCOUNTERS;
 
 /**
  * 遭遇分组信息 (用于 UI 渲染与分类检索)
  */
 export const ENCOUNTER_GROUPS = [
-    { id: "group_a", name: "A. 系统的崩塌", nameEn: "Systemic" },
-    { id: "group_b", name: "B. 认知的裂痕", nameEn: "Cognitive" },
-    { id: "group_c", name: "C. 肉体的背叛", nameEn: "Corporeal" },
-    { id: "group_d", name: "D. 系统的边疆", nameEn: "Frontier" }
+    { id: "group_a", name: "A. 秩序的穿刺", nameEn: "Order Punctured" },
+    { id: "group_b", name: "B. 认知的穿刺", nameEn: "Epistemic Punctured" },
+    { id: "group_c", name: "C. 肉身的穿刺", nameEn: "Corporeal Punctured" },
+    { id: "group_d", name: "D. 关系的穿刺", nameEn: "Relational Punctured" },
+    { id: "group_e", name: "E. 边界的穿刺", nameEn: "Liminal Punctured" }
 ];
 
 export default ENGINE_ENCOUNTERS;

@@ -55,6 +55,16 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
         setCurrentLang(lang);
     }, [lang]);
 
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape' && isOpen) {
+                onClose();
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen, onClose]);
+
     const libraryData = useMemo(() => {
         if (customLibraryData) return customLibraryData;
 
@@ -397,6 +407,11 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                 <X size={20} />
                             </button>
                         </div>
+                    </div>
+                    <div className="absolute bottom-2 right-8 md:right-12 z-30 pointer-events-none">
+                        <span className={`text-[9px] font-mono whitespace-nowrap tracking-widest opacity-80 ${globalTheme === 'retro' ? 'text-[#8B261D]/60' : 'text-zinc-500'}`}>
+                            {currentLang === 'EN' ? "PRESS ESC TO CLOSE" : "点击 ESC 关闭当前面板"}
+                        </span>
                     </div>
                 </div>
                 <div className="flex-1 flex overflow-hidden flex-col md:flex-row">

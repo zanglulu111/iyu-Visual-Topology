@@ -1,9 +1,9 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { NarrativeFieldState, BlueprintLanguage, DriverType } from '../types';
 import {
-  Settings2, X, Lock, Unlock, RotateCcw, Shuffle, Trash2,
+  Settings2, X, Lock, Unlock, RotateCcw, Shuffle, Trash2, Plus,
   Anchor, Palette, Box, Info, TestTube, Zap, Dice5, Calendar, MapPin, Globe, Check, Edit2
 } from 'lucide-react';
 import {
@@ -44,6 +44,8 @@ interface TheSkinSidebarProps {
   onAddCustomDef?: (name: string, def: string, core: string) => void;
   onEditCustomDef?: (oldName: string, newName: string, def: string, core: string) => void;
   zIndex?: number;
+  onRandomizeSummaryGroup?: () => void;
+  onRandomizeStructureGroup?: () => void;
 }
 
 const getBlockLibInfo = (blockId: string) => {
@@ -285,35 +287,35 @@ const SkinSlot: React.FC<{
                   <button
                     onClick={(e) => { e.stopPropagation(); onRandomizeTag?.(blockId, tag); }}
                     disabled={isTagLocked}
-                    className={`flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--border-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isTagLocked ? 'opacity-30 cursor-not-allowed' : ''}`}
-                    title="Randomize"
+                    className={`group/btn relative flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--border-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isTagLocked ? 'opacity-30 cursor-not-allowed' : ''}`}
                   >
-                    <Shuffle size={10} />
+                    <Dice5 size={10} />
+                    <span className={`absolute top-full mt-1.5 left-1/2 -translate-x-1/2 px-2 py-1 text-[10px] font-normal whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity duration-150 pointer-events-none z-[100] rounded shadow-md ${theme === 'retro' ? 'bg-[#1A1814] text-[var(--text-main)] border border-[var(--border-main)]/50' : 'bg-zinc-800 text-zinc-300 border border-zinc-700'}`}>{lang === 'EN' ? 'Random' : '随机'}</span>
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); onToggleTagLock?.(blockId, tag); }}
-                    className={`flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isTagLocked ? (theme === 'retro' ? 'border-[var(--text-accent)] text-black bg-[var(--text-accent)]/10' : lockedClass) : ''}`}
-                    title={isTagLocked ? "Unlock" : "Lock"}
+                    className={`group/btn relative flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isTagLocked ? (theme === 'retro' ? 'border-[var(--text-accent)] text-black bg-[var(--text-accent)]/10' : lockedClass) : ''}`}
                   >
                     {isTagLocked ? <Lock size={10} /> : <Unlock size={10} />}
+                    <span className={`absolute top-full mt-1.5 left-1/2 -translate-x-1/2 px-2 py-1 text-[10px] font-normal whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity duration-150 pointer-events-none z-[100] rounded shadow-md ${theme === 'retro' ? 'bg-[#1A1814] text-[var(--text-main)] border border-[var(--border-main)]/50' : 'bg-zinc-800 text-zinc-300 border border-zinc-700'}`}>{isTagLocked ? (lang === 'EN' ? 'Unlock' : '解锁') : (lang === 'EN' ? 'Lock' : '锁定')}</span>
                   </button>
 
                   <button
                     onClick={(e) => handleEditClick(tag, e)}
                     disabled={isTagLocked}
-                    className={`flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isTagLocked ? 'opacity-30 cursor-not-allowed' : ''}`}
-                    title={lang === 'EN' ? "Customize" : "自定义"}
+                    className={`group/btn relative flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isTagLocked ? 'opacity-30 cursor-not-allowed' : ''}`}
                   >
                     <Edit2 size={10} />
+                    <span className={`absolute top-full mt-1.5 left-1/2 -translate-x-1/2 px-2 py-1 text-[10px] font-normal whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity duration-150 pointer-events-none z-[100] rounded shadow-md ${theme === 'retro' ? 'bg-[#1A1814] text-[var(--text-main)] border border-[var(--border-main)]/50' : 'bg-zinc-800 text-zinc-300 border border-zinc-700'}`}>{lang === 'EN' ? 'Customize' : '自定义'}</span>
                   </button>
 
                   <button
                     onClick={(e) => { e.stopPropagation(); onRemove(blockId, tag); }}
                     disabled={isTagLocked}
-                    className={`flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-red-700' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-red-500/50 hover:bg-red-950/20 hover:text-red-400'} border rounded transition-colors ${isTagLocked ? 'opacity-30 cursor-not-allowed' : ''}`}
-                    title="Delete"
+                    className={`group/btn relative flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-red-700' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-red-500/50 hover:bg-red-950/20 hover:text-red-400'} border rounded transition-colors ${isTagLocked ? 'opacity-30 cursor-not-allowed' : ''}`}
                   >
                     <Trash2 size={10} />
+                    <span className={`absolute top-full mt-1.5 left-1/2 -translate-x-1/2 px-2 py-1 text-[10px] font-normal whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity duration-150 pointer-events-none z-[100] rounded shadow-md ${theme === 'retro' ? 'bg-[#1A1814] text-[var(--text-main)] border border-[var(--border-main)]/50' : 'bg-zinc-800 text-zinc-300 border border-zinc-700'}`}>{lang === 'EN' ? 'Clear' : '清空'}</span>
                   </button>
                 </div>
               </span>
@@ -334,10 +336,22 @@ const SkinSlot: React.FC<{
               {lang === 'EN' ? '[' : '【'}{placeholder}{lang === 'EN' ? ']' : '】'}
             </span>
             <div className={`flex items-center gap-1 mt-1 z-10 ${theme === 'retro' ? 'bg-[var(--bg-panel)]' : 'bg-black/80'} rounded p-1 border ${theme === 'retro' ? 'border-[var(--border-main)]/40' : 'border-zinc-800'} shadow-md ${alwaysShowButtons ? 'opacity-100' : 'opacity-0 group-hover/tag:opacity-100'} transition-opacity duration-300`}>
-              <button onClick={(e) => { e.stopPropagation(); onRandomizeBlock?.(blockId); }} disabled={isBlockLocked} className={`flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-white' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-white'} border rounded transition-colors`}><Dice5 size={10} /></button>
-              <button onClick={(e) => { e.stopPropagation(); onToggleLockBlock?.(blockId); }} className={`flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-white' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-white'} border rounded transition-colors ${isBlockLocked ? lockedClass : ''}`}>{isBlockLocked ? <Lock size={10} /> : <Unlock size={10} />}</button>
-              <button onClick={handleCreateClick} disabled={isBlockLocked} className={`flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-white' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-white'} border rounded transition-colors`}><Edit2 size={10} /></button>
-              <button onClick={(e) => { e.stopPropagation(); onClearBlock?.(blockId); }} disabled={isBlockLocked} className={`flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-red-700' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-red-400'} border rounded transition-colors`}><Trash2 size={10} /></button>
+              <button onClick={(e) => { e.stopPropagation(); onRandomizeBlock?.(blockId); }} disabled={isBlockLocked} className={`group/btn relative flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-white' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-white'} border rounded transition-colors`}>
+                <Dice5 size={10} />
+                <span className={`absolute top-full mt-1.5 left-1/2 -translate-x-1/2 px-2 py-1 text-[10px] font-normal whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity duration-150 pointer-events-none z-[100] rounded shadow-md ${theme === 'retro' ? 'bg-[#1A1814] text-[var(--text-main)] border border-[var(--border-main)]/50' : 'bg-zinc-800 text-zinc-300 border border-zinc-700'}`}>{lang === 'EN' ? 'Random' : '随机'}</span>
+              </button>
+              <button onClick={(e) => { e.stopPropagation(); onToggleLockBlock?.(blockId); }} className={`group/btn relative flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-white' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-white'} border rounded transition-colors ${isBlockLocked ? lockedClass : ''}`}>
+                {isBlockLocked ? <Lock size={10} /> : <Unlock size={10} />}
+                <span className={`absolute top-full mt-1.5 left-1/2 -translate-x-1/2 px-2 py-1 text-[10px] font-normal whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity duration-150 pointer-events-none z-[100] rounded shadow-md ${theme === 'retro' ? 'bg-[#1A1814] text-[var(--text-main)] border border-[var(--border-main)]/50' : 'bg-zinc-800 text-zinc-300 border border-zinc-700'}`}>{isBlockLocked ? (lang === 'EN' ? 'Unlock' : '解锁') : (lang === 'EN' ? 'Lock' : '锁定')}</span>
+              </button>
+              <button onClick={handleCreateClick} disabled={isBlockLocked} className={`group/btn relative flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-white' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-white'} border rounded transition-colors`}>
+                <Edit2 size={10} />
+                <span className={`absolute top-full mt-1.5 left-1/2 -translate-x-1/2 px-2 py-1 text-[10px] font-normal whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity duration-150 pointer-events-none z-[100] rounded shadow-md ${theme === 'retro' ? 'bg-[#1A1814] text-[var(--text-main)] border border-[var(--border-main)]/50' : 'bg-zinc-800 text-zinc-300 border border-zinc-700'}`}>{lang === 'EN' ? 'Customize' : '自定义'}</span>
+              </button>
+              <button onClick={(e) => { e.stopPropagation(); onClearBlock?.(blockId); }} disabled={isBlockLocked} className={`group/btn relative flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-red-700' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-red-400'} border rounded transition-colors`}>
+                <Trash2 size={10} />
+                <span className={`absolute top-full mt-1.5 left-1/2 -translate-x-1/2 px-2 py-1 text-[10px] font-normal whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity duration-150 pointer-events-none z-[100] rounded shadow-md ${theme === 'retro' ? 'bg-[#1A1814] text-[var(--text-main)] border border-[var(--border-main)]/50' : 'bg-zinc-800 text-zinc-300 border border-zinc-700'}`}>{lang === 'EN' ? 'Clear' : '清空'}</span>
+              </button>
             </div>
           </span>
         )}
@@ -453,7 +467,9 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
   onUpdateState,
   onAddCustomDef,
   onEditCustomDef,
-  zIndex = 40
+  zIndex = 40,
+  onRandomizeSummaryGroup,
+  onRandomizeStructureGroup
 }) => {
   const { theme } = useTheme();
   const isCommercial = driverType === DriverType.COMMERCIAL;
@@ -471,13 +487,29 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
 
   // ... (rest of the component logic for Time/Location state and effects)
   // New State for Timeline
-  const [selectedYear, setSelectedYear] = useState<number | null>(2026);
+  const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [selectedCountry, setSelectedCountry] = useState<string>("");
   const [contextData, setContextData] = useState<any>(null);
 
   // New state for modal in Narrative mode
   const [isTimeModalOpen, setIsTimeModalOpen] = useState(false);
 
+  // Simple expand/collapse for story summary sentence
+  const [summaryExpanded, setSummaryExpanded] = useState(false);
+
+  // Helper: check if a block has user-selected values
+  const hasBlockValue = (ids: string[]) => ids.some(id => (fieldState[id] || []).length > 0);
+
+  // Pre-compute last visible fragment for sentence closing
+  const _fA = summaryExpanded || hasBlockValue(['skin_era']) || selectedYear !== null || selectedCountry !== '';
+  const _fB = summaryExpanded || hasBlockValue(['sur4x', 'skin_society']);
+  const _fC = summaryExpanded || hasBlockValue(['skin_age', 'skin_gender', 'skin_profession']);
+  const _fD = summaryExpanded || hasBlockValue(['sur10x', 'skin_ideology']);
+  const _fE = summaryExpanded || hasBlockValue(['skin_everything']);
+  const _fF = summaryExpanded || hasBlockValue(['skin_location']);
+  const _fG = summaryExpanded || hasBlockValue(['skin_ending']);
+  const lastVisibleFrag = _fG ? 'G' : _fF ? 'F' : _fE ? 'E' : _fD ? 'D' : _fC ? 'C' : _fB ? 'B' : _fA ? 'A' : null;
+  const hasAnyFragment = lastVisibleFrag !== null;
   // PORTAL TOOLTIP STATE (for Spacetime Anchor)
   const [hoveredPortal, setHoveredPortal] = useState<{
     pos: { top: number; left: number };
@@ -509,10 +541,17 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
   const isCountryLocked = lockedModules?.['skin_country_exact'] || false;
   const isYearLocked = lockedModules?.['skin_year_exact'] || false;
 
-  // Sync state with fieldState on mount or change
+  // Ref to prevent the year/country update effect from calling onUpdateState
+  // when the change originates from fieldState sync (e.g. undo/redo)
+  const syncingFromPropRef = useRef(false);
+
+  // Sync local state with fieldState on mount or change
   useEffect(() => {
     const yearTag = fieldState['skin_year_exact']?.[0];
     const countryTag = fieldState['skin_country_exact']?.[0];
+
+    // Mark that we're syncing from prop, so the update effect doesn't fire back
+    syncingFromPropRef.current = true;
 
     // Sync Year
     if (yearTag) {
@@ -528,6 +567,9 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
     else if (fieldState['skin_country_exact'] && fieldState['skin_country_exact'].length === 0) {
       setSelectedCountry("");
     }
+
+    // Reset the flag after microtask (allows setState to flush first)
+    Promise.resolve().then(() => { syncingFromPropRef.current = false; });
   }, [fieldState]);
 
   // Auto-switch country label based on language if it matches a preset
@@ -539,7 +581,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
         if (targetVal !== selectedCountry) {
           setSelectedCountry(targetVal);
           // Also update field state immediately to reflect in UI
-          if (onUpdateState) {
+          if (onUpdateState && !syncingFromPropRef.current) {
             const newState = { ...fieldState, 'skin_country_exact': [targetVal] };
             onUpdateState(newState);
           }
@@ -548,11 +590,13 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
     }
   }, [lang, selectedCountry]);
 
-  // Update context when year changes
+  // Update context when year changes (only propagate to parent on user-initiated changes)
   useEffect(() => {
-    const displayYear = selectedYear ?? 2026;
-    const ctx = getHistoricalContext(displayYear);
+    const ctx = selectedYear !== null ? getHistoricalContext(selectedYear) : null;
     setContextData(ctx);
+
+    // Don't propagate back to parent if this change came from fieldState sync (undo/redo)
+    if (syncingFromPropRef.current) return;
 
     const timer = setTimeout(() => {
       if (onUpdateState) {
@@ -573,7 +617,8 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
           }
         }
 
-        if (fieldState['skin_country_exact']?.[0] !== selectedCountry) {
+        const currentCountry = fieldState['skin_country_exact']?.[0] || "";
+        if (currentCountry !== selectedCountry) {
           if (!selectedCountry) {
             newState['skin_country_exact'] = [];
           } else {
@@ -588,7 +633,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
       }
     }, 500);
     return () => clearTimeout(timer);
-  }, [selectedYear, selectedCountry, fieldState, onUpdateState]);
+  }, [selectedYear, selectedCountry]);
 
   if (isAesthetic) return null;
 
@@ -673,10 +718,6 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
 
   // Global Controls for the Modal
   const handleGlobalRandomizeCoordinates = () => {
-    // SUR3 XOR Logic: If randomizing coordinates (Dice), clear era
-    if (!lockedModules?.['skin_era'] && (fieldState['skin_era'] || []).length > 0) {
-      onUpdateState({ ...fieldState, skin_era: [] });
-    }
     if (!isCountryLocked) handleRandomCountry();
     if (!isYearLocked) handleRandomYear();
   };
@@ -737,33 +778,33 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
             <button
               onClick={(e) => { e.stopPropagation(); handleGlobalRandomizeCoordinates(); }}
               disabled={isLocked}
-              className={`flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--border-main)]' : 'bg-zinc-900 border border-zinc-700 text-zinc-500 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isLocked ? 'opacity-30 cursor-not-allowed' : ''}`}
-              title="Randomize"
+              className={`group/btn relative flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--border-main)]' : 'bg-zinc-900 border border-zinc-700 text-zinc-500 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isLocked ? 'opacity-30 cursor-not-allowed' : ''}`}
             >
               <Dice5 size={10} />
+              <span className={`absolute top-full mt-1.5 left-1/2 -translate-x-1/2 px-2 py-1 text-[10px] font-normal whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity duration-150 pointer-events-none z-[100] rounded shadow-md ${theme === 'retro' ? 'bg-[#1A1814] text-[var(--text-main)] border border-[var(--border-main)]/50' : 'bg-zinc-800 text-zinc-300 border border-zinc-700'}`}>{lang === 'EN' ? 'Random' : '随机'}</span>
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); handleGlobalToggleLockCoordinates(); }}
-              className={`flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border border-zinc-700 text-zinc-500 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isLocked ? (theme === 'retro' ? 'border-[var(--text-accent)] text-black bg-[var(--text-accent)]/10' : 'border-gold-primary text-gold-primary bg-amber-900/20') : ''}`}
-              title={isLocked ? "Unlock" : "Lock"}
+              className={`group/btn relative flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border border-zinc-700 text-zinc-500 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isLocked ? (theme === 'retro' ? 'border-[var(--text-accent)] text-black bg-[var(--text-accent)]/10' : 'border-gold-primary text-gold-primary bg-amber-900/20') : ''}`}
             >
               {isLocked ? <Lock size={10} /> : <Unlock size={10} />}
+              <span className={`absolute top-full mt-1.5 left-1/2 -translate-x-1/2 px-2 py-1 text-[10px] font-normal whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity duration-150 pointer-events-none z-[100] rounded shadow-md ${theme === 'retro' ? 'bg-[#1A1814] text-[var(--text-main)] border border-[var(--border-main)]/50' : 'bg-zinc-800 text-zinc-300 border border-zinc-700'}`}>{isLocked ? (lang === 'EN' ? 'Unlock' : '解锁') : (lang === 'EN' ? 'Lock' : '锁定')}</span>
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); setIsTimeModalOpen(true); }}
               disabled={isLocked}
-              className={`flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border border-zinc-700 text-zinc-500 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isLocked ? 'opacity-30 cursor-not-allowed' : ''}`}
-              title={lang === 'EN' ? "Settings" : "设置"}
+              className={`group/btn relative flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border border-zinc-700 text-zinc-500 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isLocked ? 'opacity-30 cursor-not-allowed' : ''}`}
             >
               <Edit2 size={10} />
+              <span className={`absolute top-full mt-1.5 left-1/2 -translate-x-1/2 px-2 py-1 text-[10px] font-normal whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity duration-150 pointer-events-none z-[100] rounded shadow-md ${theme === 'retro' ? 'bg-[#1A1814] text-[var(--text-main)] border border-[var(--border-main)]/50' : 'bg-zinc-800 text-zinc-300 border border-zinc-700'}`}>{lang === 'EN' ? 'Customize' : '自定义'}</span>
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); handleGlobalResetCoordinates(); }}
               disabled={isLocked}
-              className={`flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-red-700' : 'bg-zinc-900 border border-zinc-700 text-zinc-500 hover:border-red-500/50 hover:bg-red-950/20 hover:text-red-400'} border rounded transition-colors ${isLocked ? 'opacity-30 cursor-not-allowed' : ''}`}
-              title="Reset"
+              className={`group/btn relative flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-red-700' : 'bg-zinc-900 border border-zinc-700 text-zinc-500 hover:border-red-500/50 hover:bg-red-950/20 hover:text-red-400'} border rounded transition-colors ${isLocked ? 'opacity-30 cursor-not-allowed' : ''}`}
             >
               <Trash2 size={10} />
+              <span className={`absolute top-full mt-1.5 left-1/2 -translate-x-1/2 px-2 py-1 text-[10px] font-normal whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity duration-150 pointer-events-none z-[100] rounded shadow-md ${theme === 'retro' ? 'bg-[#1A1814] text-[var(--text-main)] border border-[var(--border-main)]/50' : 'bg-zinc-800 text-zinc-300 border border-zinc-700'}`}>{lang === 'EN' ? 'Clear' : '清空'}</span>
             </button>
           </div>
         </span>
@@ -886,22 +927,6 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
           </div>
         </div>
       </section>
-
-      {/* SECTION 2: Spacetime Field (SUR3B) */}
-      <section>
-        <div className={`flex items-center gap-2 mb-4 pb-2 border-b ${theme === 'retro' ? 'border-[var(--border-main)]/30' : 'border-zinc-700'}`}>
-          <Anchor size={14} className={theme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-400'} />
-          <span className={`text-xs font-black uppercase tracking-widest ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}`}>
-            {lang === 'EN' ? "Spacetime Field (SUR3B)" : "时空场域 (SUR3B)"}
-          </span>
-        </div>
-        <div className={`p-4 rounded-lg border flex items-center justify-center font-serif text-lg ${theme === 'retro' ? 'border-[var(--border-main)]/30 bg-[var(--bg-panel)]' : 'border-zinc-800 bg-zinc-900/40 hover:bg-zinc-900'} transition-all min-h-[80px]`}>
-           <SkinSlot blockId="skin_era" placeholder={lang === 'EN' ? "Attach Field (Preset)" : "接入宏观时空场域"} isBlockLocked={lockedModules["skin_era"]} alwaysShowButtons={true} {...slotProps} />
-        </div>
-        <div className={`text-[10px] mt-4 text-left leading-relaxed ${theme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-400'}`}>
-          {lang === 'EN' ? "Note: Specific coordinates and presets operate independently for precision control." : "注：微观坐标与宏观场域各自独立，双选时共同定义表层。全局随机时仅保留一项。"}
-        </div>
-      </section>
     </div>
   );
 
@@ -929,31 +954,40 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
           <div className={`flex items-center gap-1.5 pr-3 border-r ${theme === 'retro' ? 'border-black/10' : 'border-zinc-800'}`}>
             <button
               onClick={onRandomize}
-              className={`p-1.5 rounded hover:bg-white/5 text-zinc-500 hover:${iconColor} transition-all`}
-              title={lang === 'EN' ? "Smart Randomize (Coherent)" : "智能级联随机"}
+              className={`group/btn relative p-1.5 rounded hover:bg-white/5 text-zinc-500 hover:${iconColor} transition-all`}
             >
               <Shuffle size={14} />
+              <span className={`absolute top-full mt-1 right-0 px-2 py-1 text-[10px] font-normal whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity duration-150 pointer-events-none z-[100] rounded shadow-md ${theme === 'retro' ? 'bg-[#1A1814] text-[var(--text-main)] border border-[var(--border-main)]/50' : 'bg-zinc-800 text-zinc-300 border border-zinc-700'}`}>
+                {lang === 'EN' ? "Global Random" : "设定全局随机"}
+              </span>
             </button>
             <button
               onClick={onReset}
-              className="p-1.5 rounded hover:bg-white/5 text-zinc-500 hover:text-red-400 transition-all"
-              title={lang === 'EN' ? "Reset" : "重置"}
+              className={`group/btn relative p-1.5 rounded hover:bg-white/5 text-zinc-500 hover:text-red-400 transition-all`}
             >
               <RotateCcw size={14} />
+              <span className={`absolute top-full mt-1 right-0 px-2 py-1 text-[10px] font-normal whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity duration-150 pointer-events-none z-[100] rounded shadow-md ${theme === 'retro' ? 'bg-[#1A1814] text-[var(--text-main)] border border-[var(--border-main)]/50' : 'bg-zinc-800 text-zinc-300 border border-zinc-700'}`}>
+                {lang === 'EN' ? "Global Reset" : "设定重置"}
+              </span>
             </button>
             <button
               onClick={() => onToggleLock?.(lockKey)}
-              className={`p-1.5 rounded transition-all ${isAllLocked ? (theme === 'retro' ? 'bg-black/5 text-[var(--text-accent)] border border-[var(--text-accent)]/30' : 'bg-zinc-800 text-amber-500 border border-amber-500/30') : 'hover:bg-white/5 text-zinc-500 hover:text-white'}`}
-              title={isAllLocked ? (lang === 'EN' ? "Unlock" : "解锁") : (lang === 'EN' ? "Lock" : "锁定")}
+              className={`group/btn relative p-1.5 rounded transition-all ${isAllLocked ? (theme === 'retro' ? 'bg-black/5 text-[var(--text-accent)] border border-[var(--text-accent)]/30' : 'bg-zinc-800 text-amber-500 border border-amber-500/30') : 'hover:bg-white/5 text-zinc-500 hover:text-white'}`}
             >
               {isAllLocked ? <Lock size={14} /> : <Unlock size={14} />}
+              <span className={`absolute top-full mt-1 right-0 px-2 py-1 text-[10px] font-normal whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity duration-150 pointer-events-none z-[100] rounded shadow-md ${theme === 'retro' ? 'bg-[#1A1814] text-[var(--text-main)] border border-[var(--border-main)]/50' : 'bg-zinc-800 text-zinc-300 border border-zinc-700'}`}>
+                {isAllLocked ? (lang === 'EN' ? "Global Unlock" : "设定解锁") : (lang === 'EN' ? "Global Lock" : "设定锁定")}
+              </span>
             </button>
           </div>
           <button
             onClick={onClose}
-            className={`p-1.5 ${theme === 'retro' ? 'hover:bg-black/5 text-black/40' : 'hover:bg-zinc-800 text-zinc-600'} hover:text-white transition-all rounded-full`}
+            className={`group/btn relative p-1.5 ${theme === 'retro' ? 'hover:bg-black/5 text-black/40' : 'hover:bg-zinc-800 text-zinc-600'} hover:text-white transition-all rounded-full`}
           >
             <X size={18} />
+            <span className={`absolute top-full mt-1 right-0 px-2 py-1 text-[10px] font-normal whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity duration-150 pointer-events-none z-[100] rounded shadow-md ${theme === 'retro' ? 'bg-[#1A1814] text-[var(--text-main)] border border-[var(--border-main)]/50' : 'bg-zinc-800 text-zinc-300 border border-zinc-700'}`}>
+              {lang === 'EN' ? "Close Panel" : "关闭"}
+            </span>
           </button>
         </div>
         
@@ -962,7 +996,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
       </div>
 
       <div className={`flex-1 overflow-y-auto custom-scrollbar ${theme === 'retro' ? 'bg-[var(--bg-panel)]' : 'bg-[#050505]'}`}>
-        <div className="min-h-full flex flex-col justify-start px-4 pt-12 pb-0 space-y-4">
+        <div className="min-h-full flex flex-col justify-start px-4 pt-4 pb-0 space-y-4">
 
         {isCommercial ? (
           <div className="space-y-8">
@@ -1032,60 +1066,248 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
           </div>
         ) : (
           <div className="space-y-6">
+            {/* ═══ Section 1: 故事结构 (STORY STRUCTURE) ═══ */}
             <section className="group">
-              <div className={`flex items-center gap-2 text-xs font-black uppercase tracking-widest border-b border-zinc-800 pb-1 mb-3 ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-500 group-hover:text-zinc-300'} transition-colors`}>
-                <Globe size={12} className={iconColor} /> {lang === 'EN' ? "NARRATIVE PANORAMA" : "叙事全景摘要"}
+              <div className={`flex items-center justify-between text-xs font-black uppercase tracking-widest border-b pb-1 mb-3 ${theme === 'retro' ? 'text-[var(--text-main)] border-[var(--border-main)]/30' : 'text-zinc-500 group-hover:text-zinc-300 border-zinc-800'} transition-colors`}>
+                <div className="flex items-center gap-2">
+                  <Settings2 size={12} className={iconColor} /> {lang === 'EN' ? "STORY STRUCTURE" : "故事结构"}
+                </div>
+                
+                <div className="flex items-center gap-1.5 opacity-50 hover:opacity-100 transition-opacity">
+                  <button 
+                    onClick={() => onRandomizeStructureGroup?.()} 
+                    className={`group/btn relative flex items-center justify-center p-1 rounded transition-all ${theme === 'retro' ? 'text-[var(--text-muted)] hover:bg-black/5 hover:text-[var(--text-main)]' : 'text-zinc-500 hover:bg-white/5 hover:text-white'}`} 
+                  >
+                    <Shuffle size={12} />
+                    <span className={`absolute top-full mt-1 right-0 px-2 py-1 text-[10px] font-normal whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity duration-150 pointer-events-none z-[100] rounded shadow-md ${theme === 'retro' ? 'bg-[#1A1814] text-[var(--text-main)] border border-[var(--border-main)]/50' : 'bg-zinc-800 text-zinc-300 border border-zinc-700'}`}>
+                      {lang === 'EN' ? 'Randomize Group' : '展开参数选项'}
+                    </span>
+                  </button>
+                  <button 
+                    onClick={() => {
+                      const blocks = ['skin_genre', 'skin_structure', 'skin_volume'];
+                      const isAllLocked = blocks.every(b => lockedModules[b]);
+                      blocks.forEach(b => {
+                        if (!!lockedModules[b] === isAllLocked) onToggleLock?.(b);
+                      });
+                    }} 
+                    className={`group/btn relative flex items-center justify-center p-1 rounded transition-all ${['skin_genre', 'skin_structure', 'skin_volume'].every(b => lockedModules[b]) ? (theme === 'retro' ? 'bg-black/5 text-[var(--text-accent)] border border-[var(--text-accent)]/30' : 'bg-zinc-800 text-amber-500 border border-amber-500/30') : (theme === 'retro' ? 'text-[var(--text-muted)] hover:bg-black/5 hover:text-[var(--text-main)] border border-transparent' : 'text-zinc-500 hover:bg-white/5 hover:text-white border border-transparent')}`}
+                  >
+                    {['skin_genre', 'skin_structure', 'skin_volume'].every(b => lockedModules[b]) ? <Lock size={12} /> : <Unlock size={12} />}
+                    <span className={`absolute top-full mt-1 right-0 px-2 py-1 text-[10px] font-normal whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity duration-150 pointer-events-none z-[100] rounded shadow-md ${theme === 'retro' ? 'bg-[#1A1814] text-[var(--text-main)] border border-[var(--border-main)]/50' : 'bg-zinc-800 text-zinc-300 border border-zinc-700'}`}>
+                      {['skin_genre', 'skin_structure', 'skin_volume'].every(b => lockedModules[b]) ? (lang === 'EN' ? 'Unlock Section' : '解锁本组') : (lang === 'EN' ? 'Lock Section' : '锁定本组')}
+                    </span>
+                  </button>
+                  <button 
+                    onClick={() => ['skin_genre', 'skin_structure', 'skin_volume'].forEach(b => onClearBlock?.(b))} 
+                    className={`group/btn relative flex items-center justify-center p-1 rounded transition-all ${theme === 'retro' ? 'text-[var(--text-muted)] hover:bg-black/5 hover:text-red-700' : 'text-zinc-500 hover:bg-white/5 hover:text-red-400'}`}
+                  >
+                    <RotateCcw size={12} />
+                    <span className={`absolute top-full mt-1 right-0 px-2 py-1 text-[10px] font-normal whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity duration-150 pointer-events-none z-[100] rounded shadow-md ${theme === 'retro' ? 'bg-[#1A1814] text-[var(--text-main)] border border-[var(--border-main)]/50' : 'bg-zinc-800 text-zinc-300 border border-zinc-700'}`}>
+                      {lang === 'EN' ? 'Clear Group' : '清空本组'}
+                    </span>
+                  </button>
+                </div>
               </div>
               <div className={`leading-loose font-serif text-[15px] ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-400'}`}>
-                <span>{lang === 'EN' ? "“This is a story driven by " : "“这是一场关于 "}</span>
-                <SkinSlot blockId="skin_genre" placeholder={lang === 'EN' ? "Drive" : "叙事动力"} isBlockLocked={lockedModules["skin_genre"]} {...slotProps} />
-                <span>{lang === 'EN' ? ". In the " : " 的故事。在 "}</span>
-                
-                {renderTimeLocationSlot()}
-
-                <span>{lang === 'EN' ? " world of " : " 的 "}</span>
-                <SkinSlot blockId="skin_era" placeholder={lang === 'EN' ? "Background Field" : "背景场域"} isBlockLocked={lockedModules["skin_era"]} {...slotProps} />
-                <span>{lang === 'EN' ? " world, operating under " : " 世界中，运行于"}</span>
-                <SkinSlot blockId="sur4x" placeholder={lang === 'EN' ? "Resistance" : "物理阶层阻力"} isBlockLocked={lockedModules["sur4x"]} {...slotProps} />
-                <span>{lang === 'EN' ? " within a " : "下的"}</span>
-                <SkinSlot blockId="skin_society" placeholder={lang === 'EN' ? "Social Order" : "社会形态"} isBlockLocked={lockedModules["skin_society"]} {...slotProps} />
-                <span>{lang === 'EN' ? " society. A " : "之下。一个 "}</span>
-                <SkinSlot blockId="skin_age" placeholder={lang === 'EN' ? "Age" : "主体年龄"} isBlockLocked={lockedModules["skin_age"]} {...slotProps} />
-                <span>{lang === 'EN' ? " " : "的"}</span>
-                <SkinSlot blockId="skin_gender" placeholder={lang === 'EN' ? "Gender" : "主体性别"} isBlockLocked={lockedModules["skin_gender"]} {...slotProps} />
-                <SkinSlot blockId="skin_profession" placeholder={lang === 'EN' ? "Profession" : "职业身份"} isBlockLocked={lockedModules["skin_profession"]} {...slotProps} />
-                <span>{lang === 'EN' ? ", holding a " : "，抱着"}</span>
-                <SkinSlot blockId="sur10x" placeholder={lang === 'EN' ? "Suture" : "象征界缝合度"} isBlockLocked={lockedModules["sur10x"]} {...slotProps} />
-                <span>{lang === 'EN' ? " stance towards " : "的"}</span>
-                <SkinSlot blockId="skin_ideology" placeholder={lang === 'EN' ? "Philosophy" : "哲学信念"} isBlockLocked={lockedModules["skin_ideology"]} {...slotProps} />
-                <span>{lang === 'EN' ? " ideas, and entangled with " : "想法，与"}</span>
-                <SkinSlot blockId="skin_everything" placeholder={lang === 'EN' ? "Anchor" : "欲望锚点"} isBlockLocked={lockedModules["skin_everything"]} {...slotProps} />
-                <span>{lang === 'EN' ? ", unfolds their journey in " : "相互纠缠，于"}</span>
-                <SkinSlot blockId="skin_location" placeholder={lang === 'EN' ? "Scenes" : "空间场景"} isBlockLocked={lockedModules["skin_location"]} {...slotProps} />
-                <span>{lang === 'EN' ? ", ultimately culminating in a " : "中展开角逐，最终走向"}</span>
-                <SkinSlot blockId="skin_ending" placeholder={lang === 'EN' ? "Ending" : "显性大结局"} isBlockLocked={lockedModules["skin_ending"]} {...slotProps} />
-                <span>{lang === 'EN' ? " ending.”" : "的结局。”"}</span>
+                <div className="flex flex-col gap-3">
+                  <div>
+                    <span>{lang === 'EN' ? "Genre: " : "类型："}</span>
+                    <SkinSlot blockId="skin_genre" placeholder={lang === 'EN' ? "Genre Drive" : "叙事动力"} isBlockLocked={lockedModules["skin_genre"]} {...slotProps} />
+                  </div>
+                  <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+                    <div>
+                      <span>{lang === 'EN' ? "Structure: " : "结构："}</span>
+                      <SkinSlot blockId="skin_structure" placeholder={lang === 'EN' ? "Structure" : "叙事结构"} isBlockLocked={lockedModules["skin_structure"]} {...slotProps} />
+                    </div>
+                    <div>
+                      <span>{lang === 'EN' ? "Volume: " : "体量："}</span>
+                      <SkinSlot blockId="skin_volume" placeholder={lang === 'EN' ? "Volume" : "故事体量"} isBlockLocked={lockedModules["skin_volume"]} {...slotProps} />
+                    </div>
+                  </div>
+                </div>
               </div>
             </section>
 
+            {/* ═══ Section 2: 故事摘要 (STORY SUMMARY) ═══ */}
             <section className="group">
-              <div className={`flex items-center gap-2 text-xs font-black uppercase tracking-widest border-b border-zinc-800 pb-1 mb-3 ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-500 group-hover:text-zinc-300'} transition-colors`}>
-                <Settings2 size={12} className={iconColor} /> {lang === 'EN' ? "NARRATIVE BOUNDARIES" : "叙事物理边界"}
+              <div className={`flex items-center justify-between text-xs font-black uppercase tracking-widest border-b pb-1 mb-3 ${theme === 'retro' ? 'text-[var(--text-main)] border-[var(--border-main)]/30' : 'text-zinc-500 group-hover:text-zinc-300 border-zinc-800'} transition-colors`}>
+                <div className="flex items-center gap-2">
+                  <Globe size={12} className={iconColor} /> {lang === 'EN' ? "STORY SUMMARY" : "故事摘要"}
+                </div>
+                
+                <div className="flex items-center gap-1.5 opacity-50 hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={() => setSummaryExpanded(!summaryExpanded)}
+                    className={`group/btn relative flex items-center justify-center p-1 rounded transition-all ${summaryExpanded ? (theme === 'retro' ? 'bg-black/5 text-[var(--text-accent)] border border-[var(--text-accent)]/30' : 'bg-zinc-800 text-gold-primary border border-gold-primary/30') : (theme === 'retro' ? 'text-[var(--text-muted)] hover:bg-black/5 hover:text-[var(--text-main)] border border-transparent' : 'text-zinc-500 hover:bg-white/5 hover:text-white border border-transparent')}`}
+                  >
+                    {summaryExpanded ? <X size={12} /> : <Plus size={12} />}
+                    <span className={`absolute top-full mt-1 right-0 px-2 py-1 text-[10px] font-normal whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity duration-150 pointer-events-none z-[100] rounded shadow-md ${theme === 'retro' ? 'bg-[#1A1814] text-[var(--text-main)] border border-[var(--border-main)]/50' : 'bg-zinc-800 text-zinc-300 border border-zinc-700'}`}>
+                      {summaryExpanded ? (lang === 'EN' ? 'Collapse' : '收起') : (lang === 'EN' ? 'Expand Sentence' : '展开完整句式')}
+                    </span>
+                  </button>
+                  <button 
+                    onClick={() => onRandomizeSummaryGroup?.()} 
+                    className={`group/btn relative flex items-center justify-center p-1 rounded transition-all ${theme === 'retro' ? 'text-[var(--text-muted)] hover:bg-black/5 hover:text-[var(--text-main)]' : 'text-zinc-500 hover:bg-white/5 hover:text-white'}`} 
+                  >
+                    <Shuffle size={12} />
+                    <span className={`absolute top-full mt-1 right-0 px-2 py-1 text-[10px] font-normal whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity duration-150 pointer-events-none z-[100] rounded shadow-md ${theme === 'retro' ? 'bg-[#1A1814] text-[var(--text-main)] border border-[var(--border-main)]/50' : 'bg-zinc-800 text-zinc-300 border border-zinc-700'}`}>
+                      {lang === 'EN' ? 'Randomize Group' : '展开参数选项'}
+                    </span>
+                  </button>
+                  <button 
+                    onClick={() => {
+                      const blocks = ['skin_era', 'sur4x', 'skin_society', 'skin_age', 'skin_gender', 'skin_profession', 'sur10x', 'skin_ideology', 'skin_everything', 'skin_location', 'skin_ending'];
+                      const isAllLocked = blocks.every(b => lockedModules[b]);
+                      blocks.forEach(b => {
+                        if (!!lockedModules[b] === isAllLocked) onToggleLock?.(b);
+                      });
+                    }} 
+                    className={`group/btn relative flex items-center justify-center p-1 rounded transition-all ${['skin_era', 'sur4x', 'skin_society', 'skin_age', 'skin_gender', 'skin_profession', 'sur10x', 'skin_ideology', 'skin_everything', 'skin_location', 'skin_ending'].every(b => lockedModules[b]) ? (theme === 'retro' ? 'bg-black/5 text-[var(--text-accent)] border border-[var(--text-accent)]/30' : 'bg-zinc-800 text-amber-500 border border-amber-500/30') : (theme === 'retro' ? 'text-[var(--text-muted)] hover:bg-black/5 hover:text-[var(--text-main)] border border-transparent' : 'text-zinc-500 hover:bg-white/5 hover:text-white border border-transparent')}`}
+                  >
+                    {['skin_era', 'sur4x', 'skin_society', 'skin_age', 'skin_gender', 'skin_profession', 'sur10x', 'skin_ideology', 'skin_everything', 'skin_location', 'skin_ending'].every(b => lockedModules[b]) ? <Lock size={12} /> : <Unlock size={12} />}
+                    <span className={`absolute top-full mt-1 right-0 px-2 py-1 text-[10px] font-normal whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity duration-150 pointer-events-none z-[100] rounded shadow-md ${theme === 'retro' ? 'bg-[#1A1814] text-[var(--text-main)] border border-[var(--border-main)]/50' : 'bg-zinc-800 text-zinc-300 border border-zinc-700'}`}>
+                      {['skin_era', 'sur4x', 'skin_society', 'skin_age', 'skin_gender', 'skin_profession', 'sur10x', 'skin_ideology', 'skin_everything', 'skin_location', 'skin_ending'].every(b => lockedModules[b]) ? (lang === 'EN' ? 'Unlock Section' : '解锁本组') : (lang === 'EN' ? 'Lock Section' : '锁定本组')}
+                    </span>
+                  </button>
+                  <button 
+                    onClick={() => ['skin_era', 'sur4x', 'skin_society', 'skin_age', 'skin_gender', 'skin_profession', 'sur10x', 'skin_ideology', 'skin_everything', 'skin_location', 'skin_ending'].forEach(b => onClearBlock?.(b))} 
+                    className={`group/btn relative flex items-center justify-center p-1 rounded transition-all ${theme === 'retro' ? 'text-[var(--text-muted)] hover:bg-black/5 hover:text-red-700' : 'text-zinc-500 hover:bg-white/5 hover:text-red-400'}`}
+                  >
+                    <RotateCcw size={12} />
+                    <span className={`absolute top-full mt-1 right-0 px-2 py-1 text-[10px] font-normal whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity duration-150 pointer-events-none z-[100] rounded shadow-md ${theme === 'retro' ? 'bg-[#1A1814] text-[var(--text-main)] border border-[var(--border-main)]/50' : 'bg-zinc-800 text-zinc-300 border border-zinc-700'}`}>
+                      {lang === 'EN' ? 'Clear Group' : '清空本组'}
+                    </span>
+                  </button>
+                </div>
               </div>
+
+              {/* Dynamic Sentence Composition */}
               <div className={`leading-loose font-serif text-[15px] ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-400'}`}>
-                <div className="mb-3 text-xs italic opacity-70">
-                  {lang === 'EN' ? "This section defines the spacetime physics boundaries of the narrative:" : "此部分定义叙事的时空物理边界："}
-                </div>
-                <div className="flex flex-col gap-2">
-                  <div>
-                    <span>{lang === 'EN' ? "Story Volume: " : "故事长度："}</span>
-                    <SkinSlot blockId="skin_volume" placeholder={lang === 'EN' ? "Volume" : "故事体量"} isBlockLocked={lockedModules["skin_volume"]} {...slotProps} />
-                  </div>
-                  <div>
-                    <span>{lang === 'EN' ? "Narrative Structure: " : "叙事结构："}</span>
-                    <SkinSlot blockId="skin_structure" placeholder={lang === 'EN' ? "Structure" : "叙事结构"} isBlockLocked={lockedModules["skin_structure"]} {...slotProps} />
-                  </div>
-                </div>
+
+                {/* Fragment A: SUR3+SUR2 — World Setting (smart grammar) */}
+                {(() => {
+                  const hasTime = selectedYear !== null || selectedCountry !== '';
+                  const hasEra = hasBlockValue(['skin_era']);
+                  const showFragment = summaryExpanded || hasTime || hasEra;
+                  if (!showFragment) return null;
+                  const showTime = hasTime || summaryExpanded;
+                  const showEra = hasEra || summaryExpanded;
+                  const isLast = lastVisibleFrag === 'A';
+                  return (
+                    <span className="animate-in fade-in duration-300">
+                      <span>{lang === 'EN' ? "In " : "在"}</span>
+                      {showTime && renderTimeLocationSlot()}
+                      {showTime && showEra && <span>{lang === 'EN' ? " " : "的"}</span>}
+                      {showEra && <SkinSlot blockId="skin_era" placeholder={lang === 'EN' ? "Background" : "背景场域"} isBlockLocked={lockedModules["skin_era"]} {...slotProps} />}
+                      {showEra && !isLast && <span>{lang === 'EN' ? " world, " : "世界中，"}</span>}
+                      {showEra && isLast && <span>{lang === 'EN' ? " world" : "世界中"}</span>}
+                      {!showEra && !isLast && <span>，</span>}
+                    </span>
+                  );
+                })()}
+
+                {/* Fragment B: SUR4X+SUR4 — Society (smart grammar) */}
+                {(() => {
+                  const has4x = hasBlockValue(['sur4x']);
+                  const has4 = hasBlockValue(['skin_society']);
+                  const showFragment = summaryExpanded || has4x || has4;
+                  if (!showFragment) return null;
+                  const show4x = has4x || summaryExpanded;
+                  const show4 = has4 || summaryExpanded;
+                  const isLast = lastVisibleFrag === 'B';
+                  return (
+                    <span className="animate-in fade-in duration-300">
+                      <span>{lang === 'EN' ? "society under " : "运行于"}</span>
+                      {show4x && <SkinSlot blockId="sur4x" placeholder={lang === 'EN' ? "Resistance" : "阶层阻力"} isBlockLocked={lockedModules["sur4x"]} {...slotProps} />}
+                      {show4x && show4 && <span>{lang === 'EN' ? " within " : "下的"}</span>}
+                      {show4 && <SkinSlot blockId="skin_society" placeholder={lang === 'EN' ? "Social Order" : "社会形态"} isBlockLocked={lockedModules["skin_society"]} {...slotProps} />}
+                      <span>{isLast ? (lang === 'EN' ? " " : "社会体系之下") : (lang === 'EN' ? ", " : "社会体系之下，")}</span>
+                    </span>
+                  );
+                })()}
+
+                {/* Fragment C: SUR8+SUR7+SUR9 — Character (smart grammar) */}
+                {(() => {
+                  const hasAge = hasBlockValue(['skin_age']);
+                  const hasGender = hasBlockValue(['skin_gender']);
+                  const hasProf = hasBlockValue(['skin_profession']);
+                  const showFragment = summaryExpanded || hasAge || hasGender || hasProf;
+                  if (!showFragment) return null;
+                  const showAge = hasAge || summaryExpanded;
+                  const showGender = hasGender || summaryExpanded;
+                  const showProf = hasProf || summaryExpanded;
+                  const isLast = lastVisibleFrag === 'C';
+                  return (
+                    <span className="animate-in fade-in duration-300">
+                      <span>{lang === 'EN' ? "A " : "一个"}</span>
+                      {showAge && <SkinSlot blockId="skin_age" placeholder={lang === 'EN' ? "Age" : "年龄"} isBlockLocked={lockedModules["skin_age"]} {...slotProps} />}
+                      {showGender && <SkinSlot blockId="skin_gender" placeholder={lang === 'EN' ? "Gender" : "性别"} isBlockLocked={lockedModules["skin_gender"]} {...slotProps} />}
+                      {showProf && <SkinSlot blockId="skin_profession" placeholder={lang === 'EN' ? "Profession" : "职业身份"} isBlockLocked={lockedModules["skin_profession"]} {...slotProps} />}
+                      {!isLast && <span>，</span>}
+                    </span>
+                  );
+                })()}
+
+                {/* Fragment D: SUR10X+SUR10 — Philosophy (smart grammar) */}
+                {(() => {
+                  const has10x = hasBlockValue(['sur10x']);
+                  const has10 = hasBlockValue(['skin_ideology']);
+                  const showFragment = summaryExpanded || has10x || has10;
+                  if (!showFragment) return null;
+                  const show10x = has10x || summaryExpanded;
+                  const show10 = has10 || summaryExpanded;
+                  const isLast = lastVisibleFrag === 'D';
+                  return (
+                    <span className="animate-in fade-in duration-300">
+                      <span>{lang === 'EN' ? "holding " : "抱着"}</span>
+                      {show10x && <SkinSlot blockId="sur10x" placeholder={lang === 'EN' ? "Suture" : "缝合度"} isBlockLocked={lockedModules["sur10x"]} {...slotProps} />}
+                      {show10x && show10 && <span>{lang === 'EN' ? " towards " : "的"}</span>}
+                      {show10 && <SkinSlot blockId="skin_ideology" placeholder={lang === 'EN' ? "Philosophy" : "哲学信念"} isBlockLocked={lockedModules["skin_ideology"]} {...slotProps} />}
+                      <span>{isLast ? (lang === 'EN' ? " ideas" : "想法") : (lang === 'EN' ? " ideas, " : "想法，")}</span>
+                    </span>
+                  );
+                })()}
+
+                {/* Fragment E: SUR5 — Desire Anchor */}
+                {(summaryExpanded || hasBlockValue(['skin_everything'])) && (
+                  <span className="animate-in fade-in duration-300">
+                    <span>{lang === 'EN' ? "entangled with " : "与"}</span>
+                    <SkinSlot blockId="skin_everything" placeholder={lang === 'EN' ? "Desire Anchor" : "欲望锚点"} isBlockLocked={lockedModules["skin_everything"]} {...slotProps} />
+                    <span>{lastVisibleFrag === 'E' ? (lang === 'EN' ? "" : "纠缠") : (lang === 'EN' ? ", " : "纠缠，")}</span>
+                  </span>
+                )}
+
+                {/* Fragment F: SUR6 — Scenes */}
+                {(summaryExpanded || hasBlockValue(['skin_location'])) && (
+                  <span className="animate-in fade-in duration-300">
+                    <span>{lang === 'EN' ? "story unfolding in " : "剧情于"}</span>
+                    <SkinSlot blockId="skin_location" placeholder={lang === 'EN' ? "Scenes" : "空间场景"} isBlockLocked={lockedModules["skin_location"]} {...slotProps} />
+                    <span>{lastVisibleFrag === 'F' ? (lang === 'EN' ? "" : "展开") : (lang === 'EN' ? ", " : "展开，")}</span>
+                  </span>
+                )}
+
+                {/* Fragment G: SUR11 — Ending */}
+                {(summaryExpanded || hasBlockValue(['skin_ending'])) && (
+                  <span className="animate-in fade-in duration-300">
+                    <span>{lang === 'EN' ? "culminating in " : "最终走向"}</span>
+                    <SkinSlot blockId="skin_ending" placeholder={lang === 'EN' ? "Ending" : "显性大结局"} isBlockLocked={lockedModules["skin_ending"]} {...slotProps} />
+                  </span>
+                )}
+
+                {/* Sentence closing: always end with "的故事。" */}
+                {hasAnyFragment && (
+                  <span className={`font-serif ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-400'}`}>
+                    {lang === 'EN' ? " story." : "的故事。"}
+                  </span>
+                )}
+
+                {/* Empty hint when collapsed and nothing selected */}
+                {!hasAnyFragment && (
+                  <span className={`text-xs italic ${theme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-600'}`}>
+                    {lang === 'EN' ? 'Click + to expand the full story sentence...' : '点击 + 展开完整故事句式...'}
+                  </span>
+                )}
               </div>
             </section>
 

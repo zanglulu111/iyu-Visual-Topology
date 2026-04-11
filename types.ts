@@ -124,9 +124,10 @@ export interface NarrativeBlockDef {
 export type NarrativeFieldState = Record<string, string[]>;
 
 export interface WorldLawConfig {
-  physics?: 'STRICT' | 'UNBOUND';
-  context?: 'PURE' | 'FUSION';
-  gravity?: 1 | 2 | 3 | 4 | 5;
+  physics?: number;
+  timeline?: number;
+  continuity?: number;
+  gravity?: number;
 }
 
 export interface CreativeBrief {

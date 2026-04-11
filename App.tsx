@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useReducer } from 'react';
 import { Cpu } from 'lucide-react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -23,6 +23,7 @@ import { GlobalHomePage } from './components/GlobalHomePage';
 import { VisionSidebar } from './components/VisionSidebar';
 import { TheSkinSidebar } from './components/TheSkinSidebar';
 import { AestheticInputSidebar } from './components/AestheticInputSidebar';
+import { PromptInspectorModal } from './components/PromptInspectorModal';
 import {
     DriverType,
     CreativeTreatment,
@@ -43,9 +44,11 @@ import {
     NARRATIVE_ENGINE_BLOCKS, COMMERCIAL_ENGINE_BLOCKS, EXPERIMENTAL_ENGINE_BLOCKS, AESTHETIC_ENGINE_BLOCKS, TRAILER_ENGINE_BLOCKS,
     ALL_SKIN_BLOCKS, COMM_SKIN_BLOCKS, EXPERIMENTAL_SKIN_BLOCKS, TRAILER_SKIN_BLOCKS,
     BLOCK_LIMITS,
+    RANDOM_RANGES,
     AES_COLOR_PRESETS,
     NARRATIVE_ENGINE_LIBRARY, COMMERCIAL_ENGINE_LIBRARY, EXPERIMENTAL_ENGINE_LIBRARY, AESTHETIC_ENGINE_LIBRARY, TRAILER_ENGINE_LIBRARY,
-    COMM_SKIN_LIBRARY, EXPERIMENTAL_SKIN_LIBRARY, TRAILER_SKIN_LIBRARY, SKIN_LIBRARY, GENRE_CATEGORIES, WORLD_MOTIF_CATEGORIES
+    COMM_SKIN_LIBRARY, EXPERIMENTAL_SKIN_LIBRARY, TRAILER_SKIN_LIBRARY, SKIN_LIBRARY, GENRE_CATEGORIES, WORLD_MOTIF_CATEGORIES,
+    COUNTRY_PRESETS
 } from './constants';
 import { MASTER_PRESETS } from './data/master_presets';
 import * as geminiService from './services/geminiService';
@@ -82,6 +85,53 @@ import { VideoLibrary } from './components/VideoLibrary';
 import { PhilosophyCodexPage } from './components/PhilosophyCodexPage';
 import { RorschachView } from './components/RorschachView';
 
+// === Undo/Redo Reducer (defined outside component — no stale closures) ===
+type UndoRedoAction =
+    | { type: 'PUSH'; state: NarrativeFieldState }
+    | { type: 'UNDO' }
+    | { type: 'REDO' }
+    | { type: 'SET'; state: NarrativeFieldState };
+
+interface UndoRedoState {
+    past: NarrativeFieldState[];
+    present: NarrativeFieldState;
+    future: NarrativeFieldState[];
+}
+
+function undoRedoReducer(state: UndoRedoState, action: UndoRedoAction): UndoRedoState {
+    switch (action.type) {
+        case 'PUSH': {
+            if (JSON.stringify(state.present) === JSON.stringify(action.state)) return state;
+            return {
+                past: [...state.past, state.present].slice(-20),
+                present: action.state,
+                future: [],
+            };
+        }
+        case 'UNDO': {
+            if (state.past.length === 0) return state;
+            return {
+                past: state.past.slice(0, -1),
+                present: state.past[state.past.length - 1],
+                future: [state.present, ...state.future].slice(0, 20),
+            };
+        }
+        case 'REDO': {
+            if (state.future.length === 0) return state;
+            return {
+                past: [...state.past, state.present].slice(-20),
+                present: state.future[0],
+                future: state.future.slice(1),
+            };
+        }
+        case 'SET': {
+            return { past: [], present: action.state, future: [] };
+        }
+        default:
+            return state;
+    }
+}
+
 const App: React.FC = () => {
     const { theme } = useTheme();
     const { isOpen: isSettingsOpen, openSettings: openSettingsContext, closeSettings } = useSettings();
@@ -102,7 +152,8 @@ const App: React.FC = () => {
     const [aestheticMode, setAestheticMode] = useState<AestheticMode>('REALISM');
     const [lockedModules, setLockedModules] = useState<Record<string, boolean>>({});
     const [lockedTags, setLockedTags] = useState<Record<string, string[]>>({});
-    const [narrativeFieldState, setNarrativeFieldState] = useState<NarrativeFieldState>({});
+    const [undoRedoState, undoRedoDispatch] = useReducer(undoRedoReducer, { past: [], present: {} as NarrativeFieldState, future: [] });
+    const narrativeFieldState = undoRedoState.present;
     const [savedFieldStates, setSavedFieldStates] = useState<Record<string, NarrativeFieldState>>({});
     const [worldLawConfig, setWorldLawConfig] = useState<WorldLawConfig>({ gravity: 4 });
     const [showRings, setShowRings] = useState(true);
@@ -121,6 +172,7 @@ const App: React.FC = () => {
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [libraryModalOpen, setLibraryModalOpen] = useState(false);
     const [topSidebar, setTopSidebar] = useState<'skin' | 'vision' | null>(null);
+    const [isPromptInspectorOpen, setIsPromptInspectorOpen] = useState(false);
 
     const [isAutoFilling, setIsAutoFilling] = useState(false);
     const [visionInput, setVisionInput] = useState("");
@@ -129,8 +181,32 @@ const App: React.FC = () => {
     const [isAnalyzingImage, setIsAnalyzingImage] = useState(false);
     const [customLibraryDefs, setCustomLibraryDefs] = useState<Record<string, { def: string; core: string }>>({});
 
-    const [pastStates, setPastStates] = useState<NarrativeFieldState[]>([]);
-    const [futureStates, setFutureStates] = useState<NarrativeFieldState[]>([]);
+    // === Undo/Redo System (useReducer — no stale closures) ===
+    const pastStatesLength = undoRedoState.past.length;
+    const futureStatesLength = undoRedoState.future.length;
+
+    // Sync savedFieldStates whenever the present state changes
+    useEffect(() => {
+        if (selectedDriver) {
+            setSavedFieldStates(prev => {
+                if (prev[selectedDriver] === undoRedoState.present) return prev;
+                return { ...prev, [selectedDriver]: undoRedoState.present };
+            });
+        }
+    }, [undoRedoState.present, selectedDriver]);
+
+    const handleUndo = () => {
+        undoRedoDispatch({ type: 'UNDO' });
+    };
+
+    const handleRedo = () => {
+        undoRedoDispatch({ type: 'REDO' });
+    };
+
+    const updateNarrativeState = (newState: NarrativeFieldState) => {
+        undoRedoDispatch({ type: 'PUSH', state: newState });
+        setActiveHistoryItem(null);
+    };
 
     const [currentUser, setCurrentUser] = useState<User>({
         id: 'guest_user',
@@ -379,45 +455,7 @@ const App: React.FC = () => {
         return findItemFull(tagName, blockId);
     }, [customLibraryDefs]);
 
-    const saveToHistory = () => {
-        setPastStates(prev => {
-            const next = [...prev, JSON.parse(JSON.stringify(narrativeFieldState))];
-            if (next.length > 20) return next.slice(1);
-            return next;
-        });
-        if (futureStates.length > 0) setFutureStates([]);
-    };
 
-    const handleUndo = () => {
-        if (pastStates.length === 0) return;
-        const previous = pastStates[pastStates.length - 1];
-        setFutureStates(prev => [JSON.parse(JSON.stringify(narrativeFieldState)), ...prev].slice(0, 20));
-        setPastStates(prev => prev.slice(0, -1));
-        setNarrativeFieldState(previous);
-        if (selectedDriver) {
-            setSavedFieldStates(prev => ({ ...prev, [selectedDriver]: previous }));
-        }
-    };
-
-    const handleRedo = () => {
-        if (futureStates.length === 0) return;
-        const next = futureStates[0];
-        setPastStates(prev => [...prev, JSON.parse(JSON.stringify(narrativeFieldState))].slice(-20));
-        setFutureStates(prev => prev.slice(1));
-        setNarrativeFieldState(next);
-        if (selectedDriver) {
-            setSavedFieldStates(prev => ({ ...prev, [selectedDriver]: next }));
-        }
-    };
-
-    const updateNarrativeState = (newState: NarrativeFieldState) => {
-        saveToHistory();
-        setNarrativeFieldState(newState);
-        setActiveHistoryItem(null);
-        if (selectedDriver) {
-            setSavedFieldStates(prev => ({ ...prev, [selectedDriver]: newState }));
-        }
-    };
 
     const handleAestheticInputMap = async (text: string) => {
         setIsMappingInput(true);
@@ -439,10 +477,8 @@ const App: React.FC = () => {
         setViewMode('ENGINE');
         setLockedModules({});
         setLockedTags({});
-        setPastStates([]);
-        setFutureStates([]);
-        if (savedFieldStates[id]) { setNarrativeFieldState(savedFieldStates[id]); }
-        else { setNarrativeFieldState({}); }
+        const newFieldState = savedFieldStates[id] || {};
+        undoRedoDispatch({ type: 'SET', state: newFieldState });
         setActiveHistoryItem(null);
         setGeneratedTreatments([]);
         setActiveBlueprint(null);
@@ -743,29 +779,44 @@ const App: React.FC = () => {
         }
     };
 
-    // Helper function to randomize a single block
+    // Helper function to randomize a single block (Level 1: Individual randomization)
     const handleRandomizeBlock = (blockId: string) => {
         if (lockedModules[blockId]) return;
 
         const newState = { ...narrativeFieldState };
         const currentTags = newState[blockId] || [];
-        const limit = BLOCK_LIMITS[blockId] || 1;
 
-        // Determine how many items to pick based on limit rules
+        // Use RANDOM_RANGES for count determination (v2.0 protocol)
         let count = 1;
         if (selectedDriver === DriverType.AESTHETIC && (blockId === 'aes_skin_texture' || blockId === 'aes_body_features' || blockId === 'aes_face_features')) {
             count = Math.floor(Math.random() * 2) + 1;
-        } else if (limit > 1) {
-            count = Math.floor(Math.random() * Math.min(limit, 3)) + 1;
+        } else {
+            const range = RANDOM_RANGES[blockId];
+            if (range) {
+                const [min, max] = range;
+                count = min === max ? min : Math.floor(Math.random() * (max - min + 1)) + min;
+            } else {
+                // Fallback for aesthetic/other blocks without RANDOM_RANGES
+                const limit = BLOCK_LIMITS[blockId] || 1;
+                if (limit > 1) count = Math.floor(Math.random() * Math.min(limit, 3)) + 1;
+            }
+        }
+
+        // For 0-count (0-1 range that rolled 0), clear the block
+        if (count === 0) {
+            const locks = lockedTags[blockId] || [];
+            newState[blockId] = (newState[blockId] || []).filter(t => locks.includes(t));
+            updateNarrativeState(newState);
+            return;
         }
 
         // Get libraries
         let fullLibrary: any[] = [];
         if (selectedDriver === DriverType.COMMERCIAL) fullLibrary = [...COMMERCIAL_ENGINE_LIBRARY, ...COMM_SKIN_LIBRARY];
         else if (selectedDriver === DriverType.AESTHETIC) fullLibrary = [...AESTHETIC_ENGINE_LIBRARY, ...SKIN_LIBRARY];
-        else if (selectedDriver === DriverType.EXPERIMENTAL) fullLibrary = [...EXPERIMENTAL_ENGINE_BLOCKS, ...EXPERIMENTAL_SKIN_BLOCKS];
-        else if (selectedDriver === DriverType.TRAILER) fullLibrary = [...TRAILER_ENGINE_BLOCKS, ...TRAILER_SKIN_BLOCKS];
-        else fullLibrary = [...NARRATIVE_ENGINE_BLOCKS, ...SKIN_LIBRARY, ...GENRE_CATEGORIES, ...WORLD_MOTIF_CATEGORIES];
+        else if (selectedDriver === DriverType.EXPERIMENTAL) fullLibrary = [...EXPERIMENTAL_ENGINE_LIBRARY, ...EXPERIMENTAL_SKIN_LIBRARY];
+        else if (selectedDriver === DriverType.TRAILER) fullLibrary = [...TRAILER_ENGINE_LIBRARY, ...TRAILER_SKIN_LIBRARY];
+        else fullLibrary = [...NARRATIVE_ENGINE_LIBRARY, ...SKIN_LIBRARY, ...GENRE_CATEGORIES, ...WORLD_MOTIF_CATEGORIES];
 
         const libId = `${blockId}_lib`;
         const category = fullLibrary.find(c => c.id === libId);
@@ -774,15 +825,18 @@ const App: React.FC = () => {
         if (!category && (blockId === 'skin_genre' || blockId === 'skin_animation_genre' || blockId === 'skin_era')) {
             const sourceCats = blockId === 'skin_genre' ? GENRE_CATEGORIES : WORLD_MOTIF_CATEGORIES;
             const allItems = sourceCats.flatMap(c => c.items);
-            const available = allItems.filter(i => !currentTags.includes(i.name));
+            const locks = lockedTags[blockId] || [];
+            const keptTags = currentTags.filter(t => locks.includes(t));
+            const available = allItems.filter(i => !keptTags.includes(i.name));
+            const needed = Math.max(0, count - keptTags.length);
             const selected: string[] = [];
-            for (let i = 0; i < count; i++) {
+            for (let i = 0; i < needed; i++) {
                 if (available.length === 0) break;
                 const idx = Math.floor(Math.random() * available.length);
                 selected.push(available[idx].name);
                 available.splice(idx, 1);
             }
-            newState[blockId] = selected;
+            newState[blockId] = [...keptTags, ...selected];
             updateNarrativeState(newState);
             return;
         }
@@ -800,6 +854,25 @@ const App: React.FC = () => {
                 if (availableItems.length === 0) availableItems = category.items;
             }
 
+            // SUR7 Gender bias: 70% female, 30% male
+            if (blockId === 'skin_gender') {
+                const isFemale = Math.random() < 0.70;
+                const femaleItems = availableItems.filter(i => {
+                    const n = (i.name + ' ' + (i.group || '')).toLowerCase();
+                    return n.includes('female') || n.includes('女');
+                });
+                const maleItems = availableItems.filter(i => {
+                    const n = (i.name + ' ' + (i.group || '')).toLowerCase();
+                    return n.includes('male') || n.includes('男');
+                });
+                const targetPool = isFemale && femaleItems.length > 0 ? femaleItems : (maleItems.length > 0 ? maleItems : availableItems);
+                if (targetPool.length > 0) {
+                    newState[blockId] = [targetPool[Math.floor(Math.random() * targetPool.length)].name];
+                }
+                updateNarrativeState(newState);
+                return;
+            }
+
             const locks = lockedTags[blockId] || [];
             const keptTags = currentTags.filter(t => locks.includes(t));
             const needed = Math.max(0, count - keptTags.length);
@@ -814,6 +887,189 @@ const App: React.FC = () => {
             newState[blockId] = [...keptTags, ...selected];
             updateNarrativeState(newState);
         }
+    };
+
+    // === Level 2a: Story Summary group randomize (weighted 12-word filter) ===
+    const handleRandomizeSummaryGroup = () => {
+        if (!selectedDriver) return;
+        // Use the weighted surface filter to determine which blocks participate
+        const participants = randomizerService.weightedSurfaceFilter(lockedModules, false);
+        // For each participating block, randomize it individually
+        const summaryBlocks = ['skin_era', 'sur4x', 'skin_society', 'skin_age', 'skin_gender', 'skin_profession', 'sur10x', 'skin_ideology', 'skin_everything', 'skin_location', 'skin_ending'];
+        const newState = { ...narrativeFieldState };
+
+        summaryBlocks.forEach(blockId => {
+            if (lockedModules[blockId]) return;
+            
+            let keepOld = true;
+            // skin_age is not in the 12-word filter, give it independent 50% chance
+            if (blockId === 'skin_age') {
+                if (Math.random() >= 0.5) keepOld = false;
+            } else {
+                // Check if this block passed the weighted filter
+                if (!participants.has(blockId)) keepOld = false;
+            }
+            if (!keepOld) {
+                const locks = lockedTags[blockId] || [];
+                newState[blockId] = (newState[blockId] || []).filter(t => locks.includes(t));
+                return;
+            }
+
+            // Delegate to the single-block randomizer logic
+            // We inline the logic here to batch all changes into one state update
+            const range = RANDOM_RANGES[blockId];
+            const count = range ? (range[0] === range[1] ? range[0] : Math.floor(Math.random() * (range[1] - range[0] + 1)) + range[0]) : 1;
+            if (count === 0) {
+                const locks = lockedTags[blockId] || [];
+                newState[blockId] = (newState[blockId] || []).filter(t => locks.includes(t));
+                return;
+            }
+
+            // Handle special case for Era
+            if (blockId === 'skin_era') {
+                const allItems = WORLD_MOTIF_CATEGORIES.flatMap(c => c.items);
+                const locks = lockedTags[blockId] || [];
+                const keptTags = (newState[blockId] || []).filter(t => locks.includes(t));
+                const needed = Math.max(0, count - keptTags.length);
+                const available = allItems.filter(i => !keptTags.includes(i.name));
+                const selected: string[] = [];
+                for (let i = 0; i < needed; i++) {
+                    if (available.length === 0) break;
+                    const idx = Math.floor(Math.random() * available.length);
+                    selected.push(available[idx].name);
+                    available.splice(idx, 1);
+                }
+                newState[blockId] = [...keptTags, ...selected];
+                return;
+            }
+
+            // Get library
+            let fullLibrary: any[] = [...NARRATIVE_ENGINE_LIBRARY, ...SKIN_LIBRARY, ...GENRE_CATEGORIES, ...WORLD_MOTIF_CATEGORIES];
+            const libId = `${blockId}_lib`;
+            const category = fullLibrary.find(c => c.id === libId);
+
+            if (category && category.items.length > 0) {
+                let availableItems = category.items;
+                const currentEraTags = newState['skin_era'] || [];
+                const currentEra = currentEraTags.length > 0 ? currentEraTags[0] : "";
+                const archetype = randomizerService.getArchetypeFromEra(currentEra);
+                if (['skin_location', 'skin_profession', 'skin_society', 'skin_ideology'].includes(blockId)) {
+                    availableItems = randomizerService.filterItemsByArchetype(category.items, archetype, blockId);
+                    if (availableItems.length === 0) availableItems = category.items;
+                }
+
+                // SUR7 gender bias
+                if (blockId === 'skin_gender') {
+                    const isFemale = Math.random() < 0.70;
+                    const femaleItems = availableItems.filter(i => (i.name + ' ' + (i.group || '')).toLowerCase().includes('female') || (i.name + ' ' + (i.group || '')).toLowerCase().includes('女'));
+                    const maleItems = availableItems.filter(i => (i.name + ' ' + (i.group || '')).toLowerCase().includes('male') || (i.name + ' ' + (i.group || '')).toLowerCase().includes('男'));
+                    const pool = isFemale && femaleItems.length > 0 ? femaleItems : (maleItems.length > 0 ? maleItems : availableItems);
+                    if (pool.length > 0) newState[blockId] = [pool[Math.floor(Math.random() * pool.length)].name];
+                    return;
+                }
+
+                const locks = lockedTags[blockId] || [];
+                const keptTags = (newState[blockId] || []).filter(t => locks.includes(t));
+                const needed = Math.max(0, count - keptTags.length);
+                const available = availableItems.filter(i => !keptTags.includes(i.name));
+                const selected: string[] = [];
+                for (let i = 0; i < needed; i++) {
+                    if (available.length === 0) break;
+                    const idx = Math.floor(Math.random() * available.length);
+                    selected.push(available[idx].name);
+                    available.splice(idx, 1);
+                }
+                newState[blockId] = [...keptTags, ...selected];
+            }
+        });
+
+        // Also handle SUR3 coordinates if they passed the filter
+        if (!lockedModules['skin_year_exact']) {
+            if (participants.has('skin_year_exact')) {
+                const year = Math.floor(Math.random() * (2050 - (-2000) + 1)) + (-2000);
+                newState['skin_year_exact'] = [year.toString()];
+            } else {
+                newState['skin_year_exact'] = [];
+            }
+        }
+        if (!lockedModules['skin_country_exact']) {
+            if (participants.has('skin_country_exact')) {
+                const r = COUNTRY_PRESETS[Math.floor(Math.random() * COUNTRY_PRESETS.length)];
+                newState['skin_country_exact'] = [r.cn];
+            } else {
+                newState['skin_country_exact'] = [];
+            }
+        }
+
+        updateNarrativeState(newState);
+    };
+
+    // === Level 2c: Story Structure group randomize ===
+    const handleRandomizeStructureGroup = () => {
+        const structureBlocks = ['skin_genre', 'skin_structure', 'skin_volume'];
+        const newState = { ...narrativeFieldState };
+
+        structureBlocks.forEach(blockId => {
+            if (lockedModules[blockId]) return;
+            
+            let keepOld = true;
+            // skin_structure and skin_volume: independent 50% chance (not in 12-word filter)
+            if (blockId === 'skin_structure' || blockId === 'skin_volume') {
+                if (Math.random() >= 0.5) keepOld = false;
+            }
+            if (!keepOld) {
+                const locks = lockedTags[blockId] || [];
+                newState[blockId] = (newState[blockId] || []).filter(t => locks.includes(t));
+                return;
+            }
+
+            const range = RANDOM_RANGES[blockId];
+            const count = range ? (range[0] === range[1] ? range[0] : Math.floor(Math.random() * (range[1] - range[0] + 1)) + range[0]) : 1;
+            if (count === 0) {
+                const locks = lockedTags[blockId] || [];
+                newState[blockId] = (newState[blockId] || []).filter(t => locks.includes(t));
+                return;
+            }
+
+            // Handle Genre separately
+            if (blockId === 'skin_genre') {
+                const genreLib = GENRE_CATEGORIES.flatMap(c => c.items);
+                const locks = lockedTags[blockId] || [];
+                const keptTags = (newState[blockId] || []).filter(t => locks.includes(t));
+                const needed = Math.max(0, count - keptTags.length);
+                const available = genreLib.filter(i => !keptTags.includes(i.name));
+                const selected: string[] = [];
+                for (let i = 0; i < needed; i++) {
+                    if (available.length === 0) break;
+                    const idx = Math.floor(Math.random() * available.length);
+                    selected.push(available[idx].name);
+                    available.splice(idx, 1);
+                }
+                newState[blockId] = [...keptTags, ...selected];
+                return;
+            }
+
+            // skin_structure, skin_volume
+            let fullLibrary: any[] = [...NARRATIVE_ENGINE_LIBRARY, ...SKIN_LIBRARY, ...GENRE_CATEGORIES, ...WORLD_MOTIF_CATEGORIES];
+            const libId = `${blockId}_lib`;
+            const category = fullLibrary.find(c => c.id === libId);
+            if (category && category.items.length > 0) {
+                const locks = lockedTags[blockId] || [];
+                const keptTags = (newState[blockId] || []).filter(t => locks.includes(t));
+                const needed = Math.max(0, count - keptTags.length);
+                const available = category.items.filter(i => !keptTags.includes(i.name));
+                const selected: string[] = [];
+                for (let i = 0; i < needed; i++) {
+                    if (available.length === 0) break;
+                    const idx = Math.floor(Math.random() * available.length);
+                    selected.push(available[idx].name);
+                    available.splice(idx, 1);
+                }
+                newState[blockId] = [...keptTags, ...selected];
+            }
+        });
+
+        updateNarrativeState(newState);
     };
 
     const handleClearBlock = (blockId: string) => {
@@ -1127,7 +1383,7 @@ const App: React.FC = () => {
 
     const onHistoryRestore = (item: HistoryItem) => {
         setActiveHistoryItem(item);
-        setNarrativeFieldState(item.fieldState);
+        undoRedoDispatch({ type: 'SET', state: item.fieldState });
         setSelectedDriver(item.driverId);
 
         if (item.type === 'METONYMY') {
@@ -1669,8 +1925,8 @@ const App: React.FC = () => {
                                 handleBackStep={handleBackStep}
                                 handleUndo={handleUndo}
                                 handleRedo={handleRedo}
-                                pastStatesLength={pastStates.length}
-                                futureStatesLength={futureStates.length}
+                                pastStatesLength={pastStatesLength}
+                                futureStatesLength={futureStatesLength}
                                 subjectType={subjectType}
                                 setSubjectType={setSubjectType}
                                 handleAestheticSmartRandom={handleAestheticSmartRandom}
@@ -1688,6 +1944,7 @@ const App: React.FC = () => {
                                 onClearBlock={handleClearBlock}
                                 isTaskManagerOpen={isTaskManagerOpen}
                                 setIsTaskManagerOpen={setIsTaskManagerOpen}
+                                setIsPromptInspectorOpen={setIsPromptInspectorOpen}
                             />
                         )}
 
@@ -1713,6 +1970,8 @@ const App: React.FC = () => {
                             onAddCustomDef={handleAddCustomDef}
                             onEditCustomDef={handleEditCustomDef}
                             zIndex={topSidebar === 'skin' ? 70 : 60}
+                            onRandomizeSummaryGroup={handleRandomizeSummaryGroup}
+                            onRandomizeStructureGroup={handleRandomizeStructureGroup}
                         />
 
                         <VisionSidebar
@@ -1812,6 +2071,17 @@ const App: React.FC = () => {
                     isOpen={isTaskManagerOpen}
                     onClose={() => setIsTaskManagerOpen(false)}
                     lang={lang}
+                    driverType={selectedDriver}
+                />
+                
+                <PromptInspectorModal
+                    isOpen={isPromptInspectorOpen}
+                    onClose={() => setIsPromptInspectorOpen(false)}
+                    lang={lang}
+                    fieldState={narrativeFieldState}
+                    visionInput={visionInput}
+                    visionImage={visionImage}
+                    worldLawConfig={worldLawConfig}
                     driverType={selectedDriver}
                 />
             </div>
