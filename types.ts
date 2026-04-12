@@ -49,6 +49,8 @@ export interface LibraryItemDef {
   realityEn?: string;
   group?: string;
   groupEn?: string;
+  altGroup?: string;
+  altGroupEn?: string;
   flaw?: string;
   flawEn?: string;
   topology?: string;

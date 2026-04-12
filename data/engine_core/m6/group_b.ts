@@ -1,268 +1,242 @@
 import { LibraryItemDef } from '../../../types';
 
 export const STAKES_GROUP_B: LibraryItemDef[] = [
+    // ============================================================
+    // GROUP B. 想象界碎裂 (Imaginary Shattering) — 20 Items
+    // 丧失维度：你的"自我画像"被震碎——镜子还在，但里面的人你不认识了。
+    // 核心感受：你不知道自己是谁了，或者你发现"你"从来不存在。
+    // 光谱：认知瓦解(1-5) → 记忆/时间丧失(6-10) → 现实感丧失(11-15) → 自我边界溶解(16-20)
+    // ============================================================
+
+    // ---- 认知瓦解：理性大厦的地基被抽走 ----
+
     {
         id: "stake_madness",
-        name: "理智崩溃", nameEn: "Total Madness",
-        group: "B. 本体论崩塌", groupEn: "Ontological",
-        def: "彻底分不清现实与幻觉，主体的认知结构被‘实在界(The Real)’的恐怖喷发完全冲垮，陷入永恒的谵妄。",
-        defEn: "Completely unable to distinguish reality from hallucination; cognitive structure overwhelmed by terrifying eruptions of The Real into eternal delirium.",
-        core: "被困在自己的大脑里。世界变成了充满怪物的地狱，且永远无法醒来。 | The Castration: 符号认知（Symbolic Recognition）的终结。",
-        coreEn: "Trapped in one's own brain. The world becomes a hell of monsters, never to awaken. | The Castration: End of Symbolic Recognition.",
-        reference: "《禁闭岛》深陷失妻极痛扭曲出血战幻岛极终永锁精神孤岛的破脑疯探；《闪灵》遭寒宫亡魂啃光理智持重斧狂劈熟睡妻儿笑的冬夜癫魔狂。",
-        referenceEn: "A detective twisting grief into wild spy-island delusions irreversibly barred in insane-asylum in Shutter Island; Torrance chopping wife's bathroom doors cackling in The Shining."
+        name: "理智崩溃", nameEn: "Madness",
+        group: "B. 想象界碎裂", groupEn: "Imaginary Shattering",
+        def: "认知结构被实在界的恐怖喷发冲垮，主体陷入永恒的谵妄，分不清现实与幻觉。",
+        defEn: "Cognitive structure overwhelmed by eruptions of the Real, plunging the subject into eternal delirium where reality and hallucination merge.",
+        core: "A面：疯子看到了'正常人'被训练忽略的东西——疯癫有时是理性无法容纳的过量真相。/ B面：但疯癫不是'另一种清醒'——是彻底丧失了区分冷热、安危、真假的能力。你被锁进了自己的大脑，钥匙被扔掉了。关键张力：如果'正常'意味着看不到真相——疯癫算不算一种代价过高的启蒙？ | 代价回路 (Castration): 符号认知的终结——语言无法再为世界编织秩序。",
+        coreEn: "A-side: The mad see what 'normal people' are trained to ignore — madness is sometimes an excess of truth reason can't contain. / B-side: But madness isn't 'another clarity' — it's losing the ability to distinguish hot from cold, safe from dangerous, true from false. Locked in your own skull, key discarded. Key tension: If 'sanity' means blindness to truth — is madness an overpriced enlightenment? | Castration Circuit: End of symbolic cognition — language can no longer weave order for the world.",
+        reference: "《禁闭岛》深陷丧妻创伤而永远困在幻想岛屿上的联邦探员；《闪灵》被旅馆亡魂吞噬理智的杰克。",
+        referenceEn: "The federal marshal forever trapped in delusion on his grief-island in Shutter Island; Jack consumed by the hotel's spirits in The Shining."
     },
     {
-        id: "stake_memory_wipe",
-        name: "记忆抹除", nameEn: "Memory Wipe",
-        group: "B. 本体论崩塌", groupEn: "Ontological",
-        def: "所有的经历、情感羁绊和痛苦挣扎被强制一键清空，变成一张毫无底色的白纸。",
-        defEn: "All experiences, emotional bonds, and painful struggles forcefully wiped blank, returning to a colorless slate.",
-        core: "“我”是由记忆的拓扑结构缠绕而成的。取消了过去，那个曾经存在的“我”就被杀死了。 | The Castration: 时间拓扑的斩断。",
-        coreEn: "The 'I' is entwined by topological memory. Erasing the past kills the 'I' that once existed. | The Castration: Severing the timeline topology.",
-        reference: "《美丽心灵永恒阳光》挨脑机重扫被拔切全线虐恋记忆空留雪白死洞的苦男；《黑衣人》被银光棒一闪瞬间抽绝悲喜往世硬化做清澈傻客的漏街凡。",
-        referenceEn: "A heartbreak man blasted by head-machines scraping all warm love-files into zero white voids in Eternal Sunshine; wiped cleanly by a silver pen-flash losing all life gravity in MIB."
+        id: "stake_cognitive_overload",
+        name: "认知过载", nameEn: "Cognitive Overload",
+        group: "B. 想象界碎裂", groupEn: "Imaginary Shattering",
+        def: "看到了超出人类神经承受极限的真相——大脑的保险丝被真理本身烧断。",
+        defEn: "Seeing truth beyond the human nervous system's capacity — the brain's fuse blown by truth itself.",
+        core: "A面：只有极少数人有资格被真相烧毁——这意味着你的认知曾触碰到绝大多数人终生无法企及的高度。/ B面：但这种'资格'不是奖赏——是一张永久残疾证。看到了不该看的东西之后，你不会'忘记'，你只会在每个安静的夜晚被它的余像反复灼烧。关键张力：如果真相必然摧毁看到它的人——真相还值得追求吗？ | 代价回路 (Castration): 认知天花板被暴力穿透——你的大脑不是为这种分辨率设计的。",
+        coreEn: "A-side: Only a rare few are 'qualified' to be burned by truth — your cognition reached heights most never approach. / B-side: But this 'qualification' isn't a reward — it's a permanent disability card. After seeing what shouldn't be seen, you don't 'forget'; its afterimage sears you every quiet night. Key tension: If truth inevitably destroys whoever sees it — is truth still worth pursuing? | Castration Circuit: Cognitive ceiling violently breached — your brain wasn't designed for this resolution.",
+        reference: "《降临》学会外星语言后被迫预见女儿死亡的语言学家；《星际穿越》穿越五维空间后认知结构被彻底改写的库珀。",
+        referenceEn: "The linguist forced to foresee her daughter's death after learning the alien language in Arrival; Cooper whose cognitive structure is rewritten after traversing five-dimensional space in Interstellar."
     },
     {
-        id: "stake_dissolution",
-        name: "意识消融", nameEn: "Ego Dissolution",
-        group: "B. 本体论崩塌", groupEn: "Ontological",
-        def: "主体意识直接融化并被吸收到集体意志（Hive Mind）或宇宙宏大虚无中，再也无法分出“你我”。",
-        defEn: "Consciousness melting and absorbing into a Hive Mind or grand cosmic void, permanent breakdown of 'you' and 'I'.",
-        core: "像一滴带有自己名字的水，被强制滴入了沸腾的大海。 | The Castration: 主体边界（Subjective Boundary）的溶解。",
-        coreEn: "Like a named drop of water forced into a boiling sea. | The Castration: Dissolving of the Subjective Boundary.",
-        reference: "《EVA》第三次冲击大潮时化光溶解跌爆为全赤红LCL汁海与全极人类绞死同源的真嗣；《湮灭》被灯塔深光硬融DNA连排绽出无主七孢异花。 ",
-        referenceEn: "Shinji dissolved physically popping into red LCL juice permanently mixing with all human pulp in EVA; bodies folding DNA violently into nameless fungal bloom fractals in Annihilation."
+        id: "stake_faith_collapse",
+        name: "信仰坍塌", nameEn: "Faith Collapse",
+        group: "B. 想象界碎裂", groupEn: "Imaginary Shattering",
+        def: "支撑你全部世界观的核心信念被证伪——不是你犯了错，而是你整个坐标系是假的。",
+        defEn: "The core belief supporting your entire worldview is falsified — not that you erred, but your entire coordinate system was false.",
+        core: "A面：信仰坍塌是重建的前提——只有当旧地基被清除，真正属于你自己的东西才有空间生长。/ B面：但失去信仰不是'升级'——是失去了起床的理由。当'意义'本身被证伪，连问'为什么活着'都变成了一个没有收件人的信。关键张力：信仰坍塌后的废墟上——你是建造新的信仰，还是学会在没有信仰的情况下活着？ | 代价回路 (Castration): 存在的操作系统被格式化——不是文件丢了，是硬盘本身坏了。",
+        coreEn: "A-side: Faith collapse is reconstruction's prerequisite — only when old foundations are cleared can something truly yours grow. / B-side: But losing faith isn't 'upgrading' — it's losing the reason to get up. When 'meaning' itself is falsified, even asking 'why live' becomes a letter with no recipient. Key tension: On faith's ruins — do you build new faith, or learn to live without any? | Castration Circuit: The existential operating system is formatted — not files lost, but the hard drive itself is broken.",
+        reference: "《沉默》在迫害中等不到上帝回应的传教士；《真探》凝视过太多深渊后彻底不信人类有救赎可能的拉斯特。",
+        referenceEn: "The missionary who receives no answer from God under persecution in Silence; Rust who, having stared into too many abysses, ceases believing redemption is possible in True Detective."
     },
     {
-        id: "stake_dehuman",
-        name: "人性退化", nameEn: "Dehumanization",
-        group: "B. 本体论崩塌", groupEn: "Ontological",
-        def: "灵魂退化为只有弱肉强食本能的野兽，或者变成唯数据是从的绝对理智机械。",
-        defEn: "Soul devolving into a beast of pure lethal instinct, or an absolute rational machine worshipping only data.",
-        core: "失去作为‘人’所特有的非理性裂纹（爱、悲悯、软弱）。 | The Castration: 人性裂缝（The Human Flaw）的焊死。",
-        coreEn: "Losing the irrational cracks typical of 'human' (love, mercy, weakness). | The Castration: Sealing the Human Flaw.",
-        reference: "《疯狂的麦克斯》痛失家女后长驱大漠只剩狂飙饮血杀人猎畜本能的废油麦片；《发条橙》被极压电击洗烂脑沟遭贝多芬唤醒只会狂呕虚胆的良尸。",
-        referenceEn: "A broken cop plunging into desert turning purely into wheel-driving blood-drinking survival beasts in Mad Max; forcibly repulsed by music vomiting zero free will in A Clockwork Orange."
-    },
-    {
-        id: "stake_eternal_prison",
-        name: "永恒囚禁", nameEn: "Eternal Imprisonment",
-        group: "B. 本体论崩塌", groupEn: "Ontological",
-        def: "被强行凝固在一个永不流动的瞬间，或被吸入如黑洞视界般无法逃离也无法物理死亡的口袋空间。",
-        defEn: "Forcibly frozen in a non-flowing instant, or sucked into an inescapable pocket space like a black hole event horizon where physical death is impossible.",
-        core: "求生不得，求死不能。面对的是无穷无尽且没有参照物的时间折磨。 | The Castration: 时间流逝与死亡权利的双重剥夺。",
-        coreEn: "Can't live, can't die. Facing endless, reference-less torment of time. | The Castration: Deprivation of both passage of time and the right to die.",
-        reference: "《黑镜：白色圣诞》被调拨时钟锁丢入孤寒深屋漫磨百万年寒冬的电子惨囚徒；《三体》滑入死线永受降维打击无法生灭永留一瞬死态图程的宇宙墓。",
-        referenceEn: "A digital clone dial-spun into millions of years of empty cabin winter isolation torture in Black Mirror; falling into a zero-light death line eternally frozen flat without end in Three Body."
+        id: "stake_glitch",
+        name: "现实崩塌", nameEn: "Reality Collapse",
+        group: "B. 想象界碎裂", groupEn: "Imaginary Shattering",
+        def: "撕开了世界幕布的一角——发现自己和整个世界不过是一场投影、一段代码或一个实验。",
+        defEn: "Tearing a corner of the world's curtain — discovering yourself and the entire world are merely a projection, a code, or an experiment.",
+        core: "A面：发现现实是被建构的，反而意味着现实可以被重新建构——如果旧世界是假的，你就有权利创造新世界。/ B面：但'一切都是假的'这个认知会感染你所有的经验——你的初恋是假的吗？你母亲的笑容是程序生成的吗？你的眼泪有没有真实的重量？关键张力：如果你的全部人生都是一场戏——你继续演下去，还是砸碎舞台？ | 代价回路 (Castration): 存在土壤的伪造被揭穿——地板下面是虚空。",
+        coreEn: "A-side: Discovering reality is constructed means it can be reconstructed — if the old world is fake, you have the right to create a new one. / B-side: But 'everything is fake' infects all experience — was your first love fake? Was your mother's smile procedurally generated? Do your tears have real weight? Key tension: If your entire life is a play — do you keep performing, or smash the stage? | Castration Circuit: The falsification of existence's soil is exposed — beneath the floor is void.",
+        reference: "《楚门的世界》发现整个人生是一场真人秀的楚门；《黑客帝国》吞下红药丸后看到人类培养皿的尼奥。",
+        referenceEn: "Truman discovering his entire life is a reality show in The Truman Show; Neo seeing human pods after swallowing the red pill in The Matrix."
     },
     {
         id: "stake_nihilism",
         name: "绝对虚无", nameEn: "Absolute Nihilism",
-        group: "B. 本体论崩塌", groupEn: "Ontological",
-        def: "在某个瞬间看透了宇宙毫无意义的本质底牌，所有驱动欲望前行的‘小客体’瞬间崩塌。",
-        defEn: "Instantly seeing through the universe's meaningless fundamental truth, collapsing all 'Objet petit a' that drove desire forward.",
-        core: "比绝望更深。绝望是某种东西得不到，而虚无是意识到“得到或得不到”都没有任何意义。 | The Castration: 欲望核心（Desire Engine）的熄火。",
-        coreEn: "Deeper than despair. Despair is not getting something; nihilism is realizing neither matters. | The Castration: Engine stall of Desire.",
-        reference: "《老无所依》直面纯粹硬币血神后深看美国枯竭扔离星徽叹息人间不配有神的颓老警长；《真探》见尽邪圈只望虚幻黑洞将碎星无尽大口呑尽的拉斯特。",
-        referenceEn: "An old sheriff retiring badges seeing raw empty coin-violence realizing God left Texas in No Country for Old Men; Cohle staring dead at black stars swallowing everything into nothing in True Detective."
+        group: "B. 想象界碎裂", groupEn: "Imaginary Shattering",
+        def: "看透了宇宙毫无意义的底牌——所有驱动欲望前行的'小客体'瞬间蒸发。",
+        defEn: "Seeing through the universe's meaningless endgame — all 'objet petit a' driving desire evaporate instantly.",
+        core: "A面：虚无是绝对自由的另一个名字——如果没有什么东西'应该'被追求，你就可以追求任何东西，包括什么都不追求。/ B面：但虚无不是平静——是一种比绝望更深的东西。绝望是'得不到'，虚无是'得到了也没有意义'。欲望引擎的熄火。关键张力：当意义本身失去意义——你是彻底躺平，还是在无意义中自行创造意义？ | 代价回路 (Castration): 欲望核心（Desire Engine）的永久熄火。",
+        coreEn: "A-side: Nihilism is another name for absolute freedom — if nothing 'should' be pursued, you can pursue anything, including nothing. / B-side: But nihilism isn't peace — it's deeper than despair. Despair is 'can't get'; nihilism is 'getting it wouldn't matter either.' The desire engine stalls. Key tension: When meaning itself loses meaning — do you lie flat forever, or forge your own meaning in the void? | Castration Circuit: The Desire Engine permanently stalls.",
+        reference: "《老无所依》直面纯粹的硬币暴力后交出警徽的老警长；《真探》凝望虚无黑洞的拉斯特·科尔。",
+        referenceEn: "The old sheriff surrendering his badge after facing pure coin-toss violence in No Country for Old Men; Rust Cohle gazing at the nihilistic void in True Detective."
     },
+
+    // ---- 记忆/时间丧失：过去或未来的维度被切断 ----
+
     {
-        id: "stake_glitch",
-        name: "认知崩塌", nameEn: "Reality Glitch",
-        group: "B. 本体论崩塌", groupEn: "Ontological",
-        def: "撕开了宇宙幕布的一角，发现自己、亲人与整个世界不过是一堆廉价的投影代码或培养皿内的标本。",
-        defEn: "Tearing the universe curtain to find oneself, family, and the whole world are just cheap projected code or petri dish specimens.",
-        core: "楚门的世界的至暗崩溃时刻。 | The Castration: 存在土壤的伪造（The Falsification of Being）。",
-        coreEn: "The darkest Truman Show collapse. | The Castration: Falsification of Being's soil.",
-        reference: "《楚门的世界》泛舟大洋却手撞天蓝铁墙刹那裂见自己这半世活在满天偷窥镜下的大戏骨；《黑客帝国》吞下赤丸在粘腥水舱爆管扯透人类插座局的救世子。",
-        referenceEn: "A man hitting his sailboat into a painted plaster sky discovering his whole life a studio joke in Truman Show; Neo unplugging pink pods realizing world logic is cheap matrix feeding cables."
-    },
-    {
-        id: "stake_possession",
-        name: "躯体夺舍", nameEn: "Possession",
-        group: "B. 本体论崩塌", groupEn: "Ontological",
-        def: "意识依然完全清醒，但身体支配权被另一个强大的异种意识（或恶灵）强制接管。",
-        defEn: "Consciousness remains fully awake, but somatic physical command is forcefully usurped by an alien or demonic consciousness.",
-        core: "沦为自己身体里的被绑架者。眼睁睁看着自己作恶。 | The Castration: 主权肉身（Physical Sovereignty）的被夺。",
-        coreEn: "Hostage in one's own body. Helplessly watching oneself commit evil. | The Castration: Usurpation of Physical Sovereignty.",
-        reference: "《黑天鹅》幻海深坠背生真长羽皮肉脱夺四肢乱抽由魔主导惊世血盘转圈舞的妮娜；《逃出绝命镇》意识猛缩水底深泪眼悲看豪族占巢脑壳割尽的克里斯。",
-        referenceEn: "Nina watching sharp black feathers pierce her own back surrendering all limbs to pure demon dances in Black Swan; Chris pushed into the sunken tear-space helplessly watching his brain sawed in Get Out."
-    },
-    {
-        id: "stake_mutation",
-        name: "躯体异变", nameEn: "Mutation",
-        group: "B. 本体论崩塌", groupEn: "Ontological",
-        def: "物理实体发生不可逆的、极度可怖的畸变，从脊椎深处长出怪物的器官，彻底颠覆人类形态。",
-        defEn: "Physical entity irreversibly and horrifyingly metamorphoses, sprouting monster organs from deep spine, completely subverting human form.",
-        core: "《变形记》式的坠毁。内部那股被压抑的‘实在界’的冲动直接打穿了皮囊。 | The Castration: 视觉拟合（Visual Identification）的破碎。",
-        coreEn: "Kafkaesque crash. Suppressed Real impulse punches through the skin. | The Castration: Shattering of Visual Identification.",
-        reference: "《第九区》从手尖崩脱人类指甲硬生爆出大虾黑甲流毒酸死烂在穷街的大维；《变蝇人》眼看板牙掉光颚口狂呕酸腐烂白黏浆只长骇脸复眼的塞斯。",
-        referenceEn: "Wikus peeling fingernails bursting grotesque hard crustacean spikes melting in alien slums in District 9; Seth throwing up acid enzymes his jaw literally dropping out mutating to insect in The Fly."
-    },
-    {
-        id: "stake_time_loop",
-        name: "无尽循环", nameEn: "Time Loop",
-        group: "B. 本体论崩塌", groupEn: "Ontological",
-        def: "无法随着时间线前进，永远在同一个悲惨的节点（死亡、失败那一刻）不断重置。",
-        defEn: "Unable to advance time; eternally resetting at the same tragic node (death, moment of failure).",
-        core: "一种西西弗斯式的本体论塌丧。没有任何向未来说话的可能，只有无解的残局盘底。 | The Castration: 未来向度（Future Dimension）的抹杀。",
-        coreEn: "Sisyphus-style ontological despair. No possibility speaking to the future, only unsolvable endgames. | The Castration: Erasure of the Future Dimension.",
-        reference: "《恐怖邮轮》百劫屠杀堆起血尸甲板却只能睁泪重回船廊提斧复刻的极悲死母；《明日边缘》怒趟沙滩百次千遍遭万枪绞肉打穿头颅仍必滴血重来的阿汤。",
-        referenceEn: "A moher piling her own duplicate bodies eternally doomed taking the same bloody axe runs in Triangle; Cage chewed through alien sands taking heavy headshots waking rigidly on the same duffel."
-    },
-    {
-        id: "stake_merging",
-        name: "肉体嵌合", nameEn: "Forced Merging",
-        group: "B. 本体论崩塌", groupEn: "Ontological",
-        def: "物理或精神层面与自己最憎恨的宿敌、恶魔结或者低级物体强行被焊死成为了两面一体的存在。",
-        defEn: "Physically or mentally welded forcefully to a despised nemesis, demon, or lower object, becoming a united entity.",
-        core: "《苍蝇人》式的悲剧。由于边界感消失导致主体独特性被玷污。 | The Castration: 存在纯洁性（Existential Purity）的极度亵渎。",
-        coreEn: "The tragedy of The Fly. Boundaries ruined, tainting Subject's uniqueness. | The Castration: Extreme sacrilege of Existential Purity.",
-        reference: "《切尔诺贝利》遭遇深层核解身躯化烂泥死焊死贴于焦毒灼网床不得断离的肉泥渣；《寂静岭》铁丝死扎将恶欲与人皮烧嵌合搅烂成恶秽无理之坨怪。",
-        referenceEn: "Irradiated firefighters melting skin into hospital sheets welding flesh to toxic fiber-beds in Chernobyl; vile barbed wire tying flesh and pure demon spite into one squirming lump monster in Silent Hill."
-    },
-    {
-        id: "stake_sensory_loss",
-        name: "感官剥夺", nameEn: "Sensory Deprivation",
-        group: "B. 本体论崩塌", groupEn: "Ontological",
-        def: "视、听、嗅、味、触全部被拉阀断电，意识完全清醒地被关在大脑这个黑暗且没有任何输入的铁笼子里。",
-        defEn: "Sight, hearing, smell, taste, touch all circuit-breakered; fully conscious mind locked in the dark iron cage of the brain with zero input.",
-        core: "外部世界被硬生生拔掉插头。比被活埋还要安静、黑暗一万倍的孤绝。 | The Castration: 交互感知（Interaction Vector）的全线切断。",
-        coreEn: "External world violently unplugged. 10,000 times quieter and darker than being buried alive. | The Castration: Total severance of Interaction Vectors.",
-        reference: "《潜水钟与蝴蝶》深锁禁绝于瞎聋麻大闭口且唯意识如蝶狂鸣死冲肉壁的法文主裁；《心慌方》遭诡方阵深割四感神经只留血肉清醒空坠虚悬的刑死囚。",
-        referenceEn: "A French editor locked perfectly mute deaf numb in his own skull desperately blinking letters in Diving Bell; nerves disconnected completely leaving brain floating totally blind zero-gravity in Cube."
-    },
-    {
-        id: "stake_puppet",
-        name: "沦为傀儡", nameEn: "Puppet",
-        group: "B. 本体论崩塌", groupEn: "Ontological",
-        def: "仍有完整的意志和清醒的伦理观，但手脚和声带全部受控于操控者的引线。",
-        defEn: "Remaining full will and clear ethical stance, but limbs and vocal cords controlled entirely by the manipulator's strings.",
-        core: "最残酷的人偶剧场。眼睁睁看着这具名为‘自己’的皮囊被大他者玩弄。 | The Castration: 意志效能（Willpower Efficacy）的无效化。",
-        coreEn: "Cruelest doll theater. Watching the sack known as 'self' toyed by the Big Other. | The Castration: Invalidation of Willpower Efficacy.",
-        reference: "《逃出绝命镇》快门爆闪深下水底眼看自身肢手微笑着狂倒名酒待贵客的深壳黑奴；《成为约翰马尔科维奇》脑被接管躯体只受滑钮扭拉去发情演戏的马尔公。",
-        referenceEn: "Chris deep inside the Sunken Place screaming while his smiling lips pour sweet tea for white buyers in Get Out; John Malkovich physically piloted like a crude meat mecha in Being John Malkovich."
+        id: "stake_memory_wipe",
+        name: "记忆抹除", nameEn: "Memory Wipe",
+        group: "B. 想象界碎裂", groupEn: "Imaginary Shattering",
+        def: "所有经历、情感羁绊和痛苦挣扎被一键清空——变成一张白纸。",
+        defEn: "All experiences, emotional bonds, and painful struggles wiped blank — returned to a colorless slate.",
+        core: "A面：被清空的人获得了最极端的'重新开始'——没有仇恨、没有创伤、没有前任的阴影，一切从零开始。/ B面：但'我'是记忆的拓扑缠绕——取消了过去，那个曾经存在的'我'就被杀死了。新的白纸上写的故事，已经不是你的故事。关键张力：如果忘掉一切意味着不再痛苦——你愿意用'你'来交换'平静'吗？ | 代价回路 (Castration): 时间拓扑的斩断——过去的你被执行了死刑。",
+        coreEn: "A-side: The wiped gain the most extreme 'fresh start' — no hatred, no trauma, no ex's shadow, all from zero. / B-side: But 'I' is memory's topological entanglement — cancel the past and the 'I' who once existed is killed. The story written on the blank page is no longer yours. Key tension: If forgetting everything means no more pain — would you trade 'you' for 'peace'? | Castration Circuit: The timeline topology is severed — past-you is executed.",
+        reference: "《美丽心灵的永恒阳光》自愿清除恋爱记忆的痛苦恋人；《黑衣人》被记忆银光笔一闪抹去全部人生的路人。",
+        referenceEn: "The anguished lovers voluntarily erasing love memories in Eternal Sunshine; passersby losing entire lives to the memory pen-flash in Men in Black."
     },
     {
         id: "stake_dementia",
         name: "认知消散", nameEn: "Dementia",
-        group: "B. 本体论崩塌", groupEn: "Ontological",
-        def: "并非一次性失忆，而是眼睁睁看着自己的心智逻辑和概念积木一块块缓慢崩溃掉落的过程。",
-        defEn: "Not one-time amnesia, but watching one's own mental logic and concept blocks slowly collapse and fall away piece by piece.",
-        core: "《困在时间里的父亲》。在缓慢的枯萎中体会‘自我正在消失’的漫长葬礼。 | The Castration: 逻辑积木（Logical Scaffolding）的粉化。",
-        coreEn: "'The Father'. Experiencing the long funeral of 'the self is disappearing' through slow withering. | The Castration: Pulverization of Logical Scaffolding.",
-        reference: "《困在时间里的父亲》眼见房门异变墙砖乱叠乃至剥落亲女是谁的时碎迷宫病耆；《我脑海的橡皮擦》连亲夫与锁码缝隙点滴忘作凄离留白的碎角盲娇。",
-        referenceEn: "An old man weeping as apartment doors shift and his daughter's face scrambles in front of him in The Father; a wife slowly erasing keys names faces into total frightening white-rot in A Moment to Remember."
+        group: "B. 想象界碎裂", groupEn: "Imaginary Shattering",
+        def: "不是一次性失忆，而是眼睁睁看着自己的心智一块块缓慢崩落的漫长葬礼。",
+        defEn: "Not one-time amnesia, but watching your own mind slowly collapse piece by piece — a prolonged funeral.",
+        core: "A面：在消散的间隙，偶尔涌现的清晰碎片比健全时更珍贵——因为你知道这是最后几次了。极限中的觉知有一种绝望的纯粹。/ B面：但大多数时间你不是在'清醒地告别'——你是在困惑中反复经历第一次的恐惧。每天醒来都是一个陌生的房间，每个面孔都是第一次见。关键张力：当你连'自己正在消失'都无法理解时——'你'还存在吗？ | 代价回路 (Castration): 逻辑积木的粉化——《困在时间里的父亲》。",
+        coreEn: "A-side: In the gaps between fading, occasional clarity fragments are more precious than in health — because you know these are the last few times. Awareness at the limit holds a desperate purity. / B-side: But mostly you're not 'consciously saying goodbye' — you're repeatedly experiencing first-time fear in confusion. Every morning a strange room, every face for the first time. Key tension: When you can't even comprehend 'you're disappearing' — do 'you' still exist? | Castration Circuit: Logical scaffolding pulverized — The Father.",
+        reference: "《困在时间里的父亲》认不出女儿、分不清房间方位的老人；《恋恋笔记本》读着日记试图唤醒妻子记忆的丈夫。",
+        referenceEn: "The old man who can't recognize his daughter or orient himself in The Father; the husband reading diaries to awaken his wife's memory in The Notebook."
     },
+    {
+        id: "stake_past_falsified",
+        name: "过去篡改", nameEn: "Past Falsified",
+        group: "B. 想象界碎裂", groupEn: "Imaginary Shattering",
+        def: "你确信无疑的记忆其实是被他人或系统植入的——你的'过去'是一件伪造品。",
+        defEn: "Memories you were certain of were actually implanted by others or systems — your 'past' is a forgery.",
+        core: "A面：发现记忆是伪造的，反而证明了当下此刻的你是唯一真实的——因为过去已经不可信，你唯一能锚定的只有'现在'。/ B面：但如果记忆可以被植入——你怎么确定'此刻的你'不也是植入的？怀疑一旦开始就无法停止，你会陷入一种永无终点的认识论螺旋。关键张力：如果你的童年是编造的——那个在编造的童年中哭泣过的'你'，他的眼泪是真的吗？ | 代价回路 (Castration): 存在的根基文件被篡改——你是一份不知道自己是赝品的赝品。",
+        coreEn: "A-side: Discovering memories are forged proves the present you is the only real thing — since the past is unreliable, the only anchor is 'now.' / B-side: But if memories can be implanted — how do you know 'the current you' isn't implanted too? Once doubt starts it can't stop; you spiral into an endless epistemological vortex. Key tension: If your childhood was fabricated — were the tears you shed in that fabricated childhood real? | Castration Circuit: Existence's root files are tampered — you're a forgery that doesn't know it's forged.",
+        reference: "《银翼杀手》发现自己的童年照片和记忆都是植入的瑞秋；《全面回忆》分不清哪段记忆是真实经历的特工。",
+        referenceEn: "Rachael discovering her childhood photos and memories are implants in Blade Runner; the agent who can't tell which memories are real in Total Recall."
+    },
+    {
+        id: "stake_eternal_prison",
+        name: "永恒囚禁", nameEn: "Eternal Imprisonment",
+        group: "B. 想象界碎裂", groupEn: "Imaginary Shattering",
+        def: "被凝固在一个永不流动的瞬间——时间对你不再前进，但意识从未关闭。",
+        defEn: "Frozen in a non-flowing instant — time no longer advances for you, yet consciousness never shuts down.",
+        core: "A面：时间停止意味着死亡不会来——在某种极端意义上，你获得了永恒。所有害怕死亡的人梦寐以求的东西，你拥有了。/ B面：但没有终结的存在比死亡更可怖——因为连'等待结束'这个希望都被取消了。你不是在'忍耐'，你是在一个没有出口的走廊里永远行走。关键张力：如果你可以永远活着但永远不能改变任何东西——这是生还是死？ | 代价回路 (Castration): 时间流逝与死亡权利的双重剥夺。",
+        coreEn: "A-side: Time stopping means death won't come — in an extreme sense, you've gained eternity. What everyone who fears death dreams of, you have. / B-side: But existence without end is more terrifying than death — even the hope of 'waiting for the end' is cancelled. You're not 'enduring'; you're walking forever in a corridor with no exit. Key tension: If you could live forever but never change anything — is this life or death? | Castration Circuit: Both the passage of time and the right to die are stripped.",
+        reference: "《黑镜·白色圣诞》被拨至百万年独处的数字意识体；《三体》滑入死线永留一瞬不可生灭的宇宙墓志铭。",
+        referenceEn: "A digital consciousness dialed to millions of years of solitary confinement in Black Mirror: White Christmas; falling into the death line, eternally frozen in one instant in The Three-Body Problem."
+    },
+    {
+        id: "stake_time_loop",
+        name: "无尽循环", nameEn: "Time Loop",
+        group: "B. 想象界碎裂", groupEn: "Imaginary Shattering",
+        def: "无法随时间线前进——永远在同一个悲惨节点重置。知道结局，却无法改变分毫。",
+        defEn: "Unable to advance along the timeline — eternally resetting at the same tragic node. Knowing the ending, yet powerless to change a thing.",
+        core: "A面：循环给了你无限次练习的机会——每一次重来都是一次修正。如果你足够耐心，你可以在循环中变成一个完美的人。/ B面：但循环的真正恐怖不在于重复——在于你渐渐发现无论怎么改变策略，结果都一样。你开始怀疑变量根本不在你手里。关键张力：如果一万次尝试都失败了——第一万零一次还值得试吗？ | 代价回路 (Castration): 未来向度的抹杀——西西弗斯式的本体论塌丧。",
+        coreEn: "A-side: The loop gives infinite practice chances — every reset is a correction. With enough patience, you could become perfect within the loop. / B-side: But the loop's real horror isn't repetition — it's gradually realizing that no matter how you change strategy, the result stays the same. You begin suspecting the variable was never in your hands. Key tension: If ten thousand attempts all fail — is the ten-thousand-and-first still worth trying? | Castration Circuit: The future dimension is erased — Sisyphean ontological despair.",
+        reference: "《恐怖游轮》无论怎么挣扎都必须回到起点重新持斧的母亲；《明日边缘》在战场上死亡-重生千次的士兵。",
+        referenceEn: "The mother who must return to the starting point and take up the axe no matter what in Triangle; the soldier dying and resurrecting thousands of times on the battlefield in Edge of Tomorrow."
+    },
+
+    // ---- 现实感丧失：真与假之间的边界标记被拔除 ----
+
     {
         id: "stake_dream_trap",
         name: "无尽幻境", nameEn: "Dream Trap",
-        group: "B. 本体论崩塌", groupEn: "Ontological",
-        def: "以为自己醒来，却只是进入了下一层梦境。现实与梦境的边境标记被强行拔除。",
-        defEn: "Thinking you awoke, only entering a deeper dream. The border markers between reality and dream forcefully removed.",
-        core: "《盗梦空间》Limbo。再也无法触碰坚硬的现实大地。 | The Castration: 真实界坐标（Anchor of the Real）的剥除。",
-        coreEn: "Inception Limbo. No longer able to touch the hard earth of reality. | The Castration: Stripping the Anchor of the Real.",
-        reference: "《穆赫兰道》爬出烂红盒以为重做丽光角星终却惨烂于幻血独居死巢的断裂女同；《盗梦空间》跌极海滩拾起定风死陀螺却永封混沌大渊再难着陆的齐图老翁。",
-        referenceEn: "Betty climbing boxes thinking she's a bright starlet only rotting back to foul bed blood in Mulholland Dr.; Saito dropping in deep edge limbo picking up non-falling tops forever old in Inception."
+        group: "B. 想象界碎裂", groupEn: "Imaginary Shattering",
+        def: "以为自己醒来，却只是进入了下一层梦境——现实与幻觉的边界标记被永久拔除。",
+        defEn: "Thinking you've awoken, only to enter a deeper dream — the border markers between reality and illusion permanently removed.",
+        core: "A面：如果每一层都足够真实，那么'哪一层是真的'可能根本不是一个好问题——也许重要的不是你处于哪一层，而是你在这一层如何活。/ B面：但当你连'我现在是不是清醒的'都无法确定时，你也无法确定你做的任何选择是否会有真正的后果。你陷入了一种永恒的行动瘫痪。关键张力：如果你无法验证现实——你还敢做任何不可逆的决定吗？ | 代价回路 (Castration): 真实界锚点的剥除——你再也无法触碰坚硬的地面。",
+        coreEn: "A-side: If every layer feels real enough, 'which layer is real' may not be the right question — perhaps what matters isn't which layer, but how you live in this one. / B-side: But when you can't even confirm 'am I awake now,' you can't be sure any choice carries real consequences. You fall into permanent action paralysis. Key tension: If you can't verify reality — do you dare make any irreversible decision? | Castration Circuit: The Real's anchor is stripped — you can never touch solid ground again.",
+        reference: "《穆赫兰道》分不清哪段人生是梦境哪段是现实的女演员；《盗梦空间》困在深层Limbo中老去、失去现实坐标的筑梦者。",
+        referenceEn: "The actress unable to distinguish which life is dream in Mulholland Drive; the dreamers aging in deep Limbo, losing all real-world coordinates in Inception."
+    },
+    {
+        id: "stake_recurrence",
+        name: "注定重蹈", nameEn: "Eternal Recurrence",
+        group: "B. 想象界碎裂", groupEn: "Imaginary Shattering",
+        def: "不仅在重新经历——而是清楚地知道自己一定会在相同的节点犯下相同的错，因为那个错误就是'你'的一部分。",
+        defEn: "Not merely reliving — but knowing clearly you'll commit the same fatal error at the same junction, because that error is part of 'you.'",
+        core: "A面：尼采说'如果你能对永恒回归说是'——你就真正爱上了你的命运。接受重蹈覆辙本身就是对自由意志最极限的测试。/ B面：但大多数人无法对自己的苦难说'是'——知道自己必然犯同样的错，却无法修改自己的源代码，这种无力感比任何外部暴力都更令人绝望。关键张力：如果你被给予了预见的能力但没有被给予修改的能力——先知与囚徒有什么区别？ | 代价回路 (Castration): 命运自由度的缴械——尼采的锤炼或诅咒。",
+        coreEn: "A-side: Nietzsche said 'if you can say yes to eternal return' — you've truly embraced amor fati. Accepting recurrence is the ultimate test of free will. / B-side: But most can't say 'yes' to their own suffering — knowing you'll inevitably make the same mistake yet unable to rewrite your source code, this helplessness is more devastating than any external violence. Key tension: If given the power to foresee but not to modify — what separates prophet from prisoner? | Castration Circuit: Freedom of destiny disarmed — Nietzsche's forging or curse.",
+        reference: "《降临》明知女儿将夭折仍选择迎接那场受孕的语言学家；《十二猴子》无论跳转几次都必须在幼年自己面前死去的布鲁斯。",
+        referenceEn: "The linguist who chooses to conceive knowing her daughter will die young in Arrival; Bruce who must die before his childhood self no matter how many times he jumps in Twelve Monkeys."
+    },
+    {
+        id: "stake_sensory_loss",
+        name: "感官剥夺", nameEn: "Sensory Void",
+        group: "B. 想象界碎裂", groupEn: "Imaginary Shattering",
+        def: "全部感知通道被切断——意识完全清醒地被关在颅骨内部，与外部世界的一切信号断开。",
+        defEn: "All sensory channels severed — consciousness perfectly awake yet locked inside the skull, disconnected from every signal of the external world.",
+        core: "A面：外部噪音全部消失后，内部的声音会变得无比清晰——很多冥想传统追求的就是这种感官隔绝中的极限内省。/ B面：但非自愿的感官剥夺不是冥想——是活埋。当你的意识完全清醒但没有任何外部输入时，大脑会开始自己制造输入——幻听、幻视、身体变形感。你的牢房会长出自己的怪物。关键张力：当外部世界被完全关闭——留在里面的那个东西，还是'你'吗？ | 代价回路 (Castration): 交互感知的全线切断——比活埋更安静一万倍的孤绝。",
+        coreEn: "A-side: With all external noise silenced, the inner voice becomes incredibly clear — many meditative traditions pursue this exact sensory isolation for extreme introspection. / B-side: But involuntary sensory deprivation isn't meditation — it's burial alive. When consciousness is fully awake with zero input, the brain starts manufacturing its own — auditory hallucinations, visual phantoms, body distortion. Your cell grows its own monsters. Key tension: When the external world is completely shut off — is the thing left inside still 'you'? | Castration Circuit: All interaction vectors severed — solitude ten thousand times quieter than burial.",
+        reference: "《潜水钟与蝴蝶》全身瘫痪仅剩左眼眨动的主编；《活埋》在棺材中只有黑暗和电话信号的人质。",
+        referenceEn: "The editor paralyzed entirely except for his left eye's blink in The Diving Bell and the Butterfly; the hostage in a coffin with nothing but darkness and a phone signal in Buried."
+    },
+    {
+        id: "stake_mirror_shatter",
+        name: "镜像破碎", nameEn: "Mirror Shatter",
+        group: "B. 想象界碎裂", groupEn: "Imaginary Shattering",
+        def: "再也无法在镜中认出自己——无论是因为外貌的剧变，还是因为内在的彻底异变。",
+        defEn: "No longer able to recognize yourself in the mirror — whether from dramatic external change or thorough internal transformation.",
+        core: "A面：不再认出镜中的人，有时恰好证明你已经成长到了旧容器装不下的程度——蝴蝶不会认出毛毛虫的脸。/ B面：但大多数镜像破碎不是蜕变——是创伤。你看到的不是'一个新的我'，而是'我不知道那是谁'。你和你自己之间出现了一道裂缝，而这道裂缝无法被任何外在的安慰填平。关键张力：镜子里那个你不认识的人——是你的未来，还是你被替换掉了？ | 代价回路 (Castration): 镜像阶段的二次创伤——拉康意义上的'自我'的碎裂。",
+        coreEn: "A-side: Not recognizing the person in the mirror sometimes proves you've outgrown the old container — butterflies don't recognize caterpillar faces. / B-side: But most mirror shattering isn't metamorphosis — it's trauma. What you see isn't 'a new me' but 'I don't know who that is.' A crack appears between you and yourself, unfillable by any external comfort. Key tension: The stranger in the mirror — your future, or proof you've been replaced? | Castration Circuit: The mirror stage's secondary trauma — the Lacanian 'self' fractures.",
+        reference: "《歌剧魅影》终生不敢面对镜中毁容面孔的魅影；《黑天鹅》在镜中看到另一个自己的妮娜。",
+        referenceEn: "The Phantom who can never face his disfigured reflection in Phantom of the Opera; Nina seeing another self in the mirror in Black Swan."
+    },
+    {
+        id: "stake_identity_collapse",
+        name: "身份坍缩", nameEn: "Identity Collapse",
+        group: "B. 想象界碎裂", groupEn: "Imaginary Shattering",
+        def: "发现'你'从来不是你以为的那个人——你的出身、你的血统、你的根本身份都是一场被精心维护的谎言。",
+        defEn: "Discovering 'you' were never the person you thought — your origin, lineage, and fundamental identity were a carefully maintained lie.",
+        core: "A面：旧身份的坍塌同时打开了一个全新的可能空间——如果你不是你以为的那个人，你就可以成为任何人。你获得了一次极其罕见的'身份自决权'。/ B面：但身份坍缩不是'重新选择'——是脚下的地板消失了。你所有的骄傲、你所有的归属感、你讲给自己听的那个关于'我是谁'的故事，全都是空中楼阁。关键张力：如果你的来历是假的——你用假的来历培养出来的感情和人格，是真的吗？ | 代价回路 (Castration): '我是谁'这个问题的答案被撤回——你成了一个没有出处的引用。",
+        coreEn: "A-side: The old identity's collapse opens a wholly new possibility space — if you're not who you thought, you can become anyone. You gain an extremely rare 'right to self-determination.' / B-side: But identity collapse isn't 'choosing again' — it's the floor disappearing. All your pride, all your belonging, the story you told yourself about 'who I am' — all castles in the air. Key tension: If your origin is fake — are the feelings and personality cultivated from that fake origin real? | Castration Circuit: The answer to 'who am I' is withdrawn — you become a citation with no source.",
+        reference: "《星球大战》发现自己的父亲是宇宙最大暴君的卢克；《俄狄浦斯王》发现自己弑父娶母的忒拜国王。",
+        referenceEn: "Luke discovering his father is the galaxy's greatest tyrant in Star Wars; Oedipus discovering he killed his father and married his mother in Oedipus Rex."
+    },
+
+    // ---- 自我边界溶解：主体与非主体之间的围栏被拆除 ----
+
+    {
+        id: "stake_dissolution",
+        name: "意识消融", nameEn: "Ego Dissolution",
+        group: "B. 想象界碎裂", groupEn: "Imaginary Shattering",
+        def: "主体意识融化并被吸收到集体意志或宇宙的宏大虚无中——再也无法分出'你'和'我'。",
+        defEn: "Subject's consciousness melts and is absorbed into collective will or cosmic void — 'you' and 'I' can no longer be separated.",
+        core: "A面：消融在某些神秘主义传统中是最高的合一体验——'小我'让位于'大我'，一滴水融入大海获得了海洋的全部。/ B面：但那不是'合一'——是被吞噬。一滴带着自己名字的水，被强制滴入了沸腾的大海。你没有'升华'，你是消失了。关键张力：放弃自我边界——是觉悟的顶点，还是主体性的死亡？ | 代价回路 (Castration): 主体边界的溶解——你获得了一切，但'你'不再存在来享用它。",
+        coreEn: "A-side: Dissolution in certain mystical traditions is the highest unity — 'small self' yields to 'great self,' a drop entering the ocean gains all the ocean holds. / B-side: But that's not 'unity' — it's being devoured. A named drop of water forced into a boiling sea. You didn't 'transcend'; you vanished. Key tension: Surrendering the self's boundary — pinnacle of awakening, or death of subjectivity? | Castration Circuit: The subjective boundary dissolves — you gain everything, but 'you' no longer exists to enjoy it.",
+        reference: "《2001太空漫游》穿越星门后意识与宇宙融合的宇航员；宗教修行中'无我'状态的极端形态——你到底是开悟了还是不存在了？",
+        referenceEn: "The astronaut merging with the cosmos after traversing the star gate in 2001; the extreme form of 'anatta/no-self' in religious practice — are you enlightened, or do you simply not exist?"
+    },
+    {
+        id: "stake_dehuman",
+        name: "人性退化", nameEn: "Dehumanization",
+        group: "B. 想象界碎裂", groupEn: "Imaginary Shattering",
+        def: "失去了作为'人'所特有的非理性裂缝——爱、悲悯、犹豫、软弱——变成纯粹的机能或纯粹的本能。",
+        defEn: "Losing the irrational cracks unique to being 'human' — love, mercy, hesitation, weakness — becoming pure function or pure instinct.",
+        core: "A面：去人性化有时是生存的唯一方式——在极端环境中，感情是负担，效率是生存。变'冷'是一种自我保护。/ B面：但当你发现自己可以毫无感觉地做出曾经让你流泪的事，你失去的不是'脆弱'——是'活着'的最核心证据。机器不会犯错，但机器也不会心碎。关键张力：如果变得更强意味着变得更少'人'——你还要继续变强吗？ | 代价回路 (Castration): 人性裂缝的焊死——成为了完美但空洞的运转体。",
+        coreEn: "A-side: Dehumanization is sometimes the only way to survive — in extremes, emotion is burden, efficiency is survival. Going 'cold' is self-protection. / B-side: But when you find yourself doing without feeling what once made you weep, what you've lost isn't 'fragility' — it's the core evidence of being alive. Machines don't err, but machines don't heartbreak. Key tension: If getting stronger means becoming less 'human' — do you keep getting stronger? | Castration Circuit: The human flaw is welded shut — becoming a perfect but hollow operating body.",
+        reference: "《发条橙》被暴力矫正成无法犯罪但也无法爱的亚历克斯；《现代启示录》在丛林深处彻底脱离文明道德的库尔兹上校。",
+        referenceEn: "Alex, violently corrected into inability to sin but also to love in A Clockwork Orange; Colonel Kurtz, fully detached from civilized morality deep in the jungle in Apocalypse Now."
     },
     {
         id: "stake_soul_loss",
         name: "灵魂抽离", nameEn: "Soul Loss",
-        group: "B. 本体论崩塌", groupEn: "Ontological",
-        def: "被类似于摄魂怪之吻一般的手法，直接抽去了构成内驱能量的‘欲望客体’，变成一具空壳。",
-        defEn: "Inner energetic 'objet petit a' forcibly extracted by a Dementor's Kiss-like method, resulting in an empty shell.",
-        core: "还有呼吸，还有心跳，但失去了‘想要什么’的能力。 | The Castration: 欲望主体（Subject of Desire）的阉割。",
-        coreEn: "Breathing and heartbeat remain, but lost the capacity to 'want'. | The Castration: Castration of the Subject of Desire.",
-        reference: "《哈利波特》冰湖边遭魔布裹死硬吸绝面庞金光只剩凉温呆皮的小天狼星；《狗镇》遭全村接力狂轮且套上死狗颈圈终断灭极善亮心拔除恩欲只剩屠魔皮躯的格蕾丝。",
-        referenceEn: "Sirius taking Dementor hits golden life-lights sucked cold dropping simply as empty cooling hide in Harry Potter; Grace dog-collared raped by all town shedding total mercy turning sheer null inside Dogville."
+        group: "B. 想象界碎裂", groupEn: "Imaginary Shattering",
+        def: "还有呼吸，还有心跳，但失去了'想要什么'的能力——欲望引擎永久熄火的空壳。",
+        defEn: "Still breathing, still heartbeating, but lost the capacity to 'want' anything — an empty shell whose desire engine has permanently stalled.",
+        core: "A面：不再想要任何东西意味着不再被任何东西操控——你获得了一种佛陀式的平静，只是这种平静不是你选择的，而是被施加的。/ B面：但没有欲望的生命不是平静——是行尸走肉。你吃饭不是因为饿，呼吸不是因为想活，只是因为身体还没有接到停止的信号。你是一具还在运转但已经没有乘客的车。关键张力：如果你失去了'想要'的能力——还有什么理由证明你和一具尸体的区别？ | 代价回路 (Castration): 欲望主体的阉割——摄魂怪之吻。",
+        coreEn: "A-side: No longer wanting anything means no longer being manipulated by anything — you've gained a Buddha-like peace, only this peace wasn't chosen, it was imposed. / B-side: But desire-less life isn't peace — it's the walking dead. You eat not from hunger, breathe not from wanting to live, only because the body hasn't received a stop signal. You're a car still running but with no passenger. Key tension: If you've lost the ability to 'want' — what proves you're different from a corpse? | Castration Circuit: The Subject of Desire is castrated — the Dementor's Kiss.",
+        reference: "《海边的曼彻斯特》失去孩子后再也无法对任何事产生感情的父亲；《狗镇》被碾碎善意后变成中空执行体的格蕾丝。",
+        referenceEn: "The father who can no longer feel anything after losing his children in Manchester by the Sea; Grace becoming hollow after all goodness is crushed out of her in Dogville."
+    },
+    {
+        id: "stake_puppet",
+        name: "意志篡夺", nameEn: "Will Hijacking",
+        group: "B. 想象界碎裂", groupEn: "Imaginary Shattering",
+        def: "意识依然清醒，但身体和行为的支配权被另一个更强大的意志完全接管。",
+        defEn: "Consciousness remains fully awake, but control over body and behavior is completely commandeered by a stronger will.",
+        core: "A面：被接管意味着你不再需要为自己的行为负责——一种极其扭曲的解脱。有些人甚至在被操控中找到了一种放弃自由意志的安慰。/ B面：但这不是'解脱'——是成为自己身体里的人质。你清醒地看着自己的手在做你不愿做的事，你的嘴在说你不想说的话，而你发不出任何声音来尖叫。关键张力：如果你的身体在做的事是你的意识不同意的——那'做事的人'到底是谁？ | 代价回路 (Castration): 意志效能的无效化——最残酷的木偶剧场。",
+        coreEn: "A-side: Being commandeered means you no longer bear responsibility for your actions — a deeply twisted relief. Some even find comfort in surrendering free will. / B-side: But this isn't 'relief' — it's being hostage inside your own body. You watch your hands do what you refuse, your mouth speak what you'd never say, unable to scream. Key tension: If your body does what your consciousness opposes — who exactly is 'doing'? | Castration Circuit: Willpower efficacy invalidated — the cruelest puppet theater.",
+        reference: "《逃出绝命镇》意识被压入'沉沦之地'、眼睁睁看着身体为他人服务的克里斯；《甄嬛传》被幕后权力线牵动从而违心行事的后宫女子们。",
+        referenceEn: "Chris pushed into the Sunken Place, helplessly watching his body serve others in Get Out; the harem women pulled by invisible power strings into actions against their will in Empresses in the Palace."
     },
     {
         id: "stake_objectification",
-        name: "沦为死物", nameEn: "Total Objectification",
-        group: "B. 本体论崩塌", groupEn: "Ontological",
-        def: "物理或精神上被强行制作成一个供大他者陈列或赏玩的静态工艺品或家具。",
-        defEn: "Physically/mentally converted forcefully into static craftwork or furniture for the Big Other's exhibit or play.",
-        core: "《恐怖蜡像馆》。活人被降级为客体，存在变成了纯粹的景观。 | The Castration: 主观能动性（Agentic Subjectivity）的标本化。",
-        coreEn: "House of Wax. Alive human regressed to object, existence turned pure spectacle. | The Castration: Taxidermy of Agentic Subjectivity.",
-        reference: "《切肤之爱》长针穿瞳生断钢线直接被活生剁平肢节只供布袋装赏的惨号男爹；《恐怖蜡像馆》喉管未冷即被倒悬浇满滚蜡烫塑为永久笑迎买办摆件的活剥友。",
-        referenceEn: "A man steel-wired severed limbs placed breathing in soft bags simply as bloody toy decorations in Audition; skin scorched live in boiling wax forced smiling hard posing as eternal art-pieces in House of Wax."
+        name: "沦为标本", nameEn: "Total Objectification",
+        group: "B. 想象界碎裂", groupEn: "Imaginary Shattering",
+        def: "活人被降级为供大他者陈列、赏玩或使用的静态客体——存在变成了纯粹的景观或工具。",
+        defEn: "A living person regressed into a static object for the Big Other's display, amusement, or use — existence becomes pure spectacle or tool.",
+        core: "A面：被客体化有时反而暴露了'主体'的虚妄——也许我们太执着于'我是一个主体'这件事了。一块石头不会焦虑，不会失眠，不会害怕被遗忘。/ B面：但石头也不会爱。被降为客体的人失去的不是舒适——是'做选择'的资格。你不再是故事的参与者，你是道具间里的一件器材。关键张力：一个不被允许做选择的人——还能被称为'人'吗？ | 代价回路 (Castration): 主观能动性的标本化——活体被制作成永恒的静物。",
+        coreEn: "A-side: Being objectified sometimes exposes the illusion of 'subject-hood' — perhaps we're too attached to 'I am a subject.' A stone doesn't have anxiety, insomnia, or fear of being forgotten. / B-side: But a stone can't love either. What the objectified person loses isn't comfort — it's the qualification to 'make choices.' You are no longer a participant in the story; you are a prop in the storeroom. Key tension: A person not permitted to make choices — can they still be called 'a person'? | Castration Circuit: Agentic subjectivity taxidermied — a living specimen preserved as eternal still life.",
+        reference: "《使女的故事》被降格为'行走的子宫'的女性；《红楼梦》被当作家族装饰品的贾府千金们。",
+        referenceEn: "Women reduced to 'walking wombs' in The Handmaid's Tale; the Jia family's daughters treated as decorative ornaments in Dream of the Red Chamber."
     },
-    {
-        id: "stake_recurrence",
-        name: "注定重蹈覆辙", nameEn: "Eternal Recurrence",
-        group: "B. 本体论崩塌", groupEn: "Ontological",
-        def: "不仅是重新经历，而是知道自己每一次都会在相同的节点犯下相同的致命错误，并且注定被无形法则推着再次走完全程的无力感。",
-        defEn: "Not merely reliving, but knowing they will commit the same fatal error at the same junction, inevitably pushed by unseen laws to walk the path again.",
-        core: "《降临》式痛苦的加深版。没有改变的自由裁量权。 | The Castration: 命运自由度（Freedom of Destiny）的缴械。",
-        coreEn: "Deepened 'Arrival' agony. No discretion for change. | The Castration: Disarmament of the Freedom of Destiny.",
-        reference: "《降临》眼睁深见爱女注定绝症夭折却顺从环光外语坦迎那受孕之恸痛星陨的路易斯；《十二猴子》无论跳几转皆死锁自己幼年眼见长身在安检闸口遭千枪贯胸血圆环的布鲁斯。",
-        referenceEn: "Louise deeply knowing her child's dark cancer pre-death still embracing the exact agonizing mating in Arrival; Bruce skipping time eternally bleeding out exactly in front of his child-eyes in Twelve Monkeys."
-    },
-    {
-        id: "stake_shrink",
-        name: "极度微缩", nameEn: "Shrinking",
-        group: "B. 本体论崩塌", groupEn: "Ontological",
-        def: "变得极其微小，曾经熟悉的世界瞬间变成了由遮天蔽日的怪物和深不见底的沟壑组成的绝望迷宫。",
-        defEn: "Becoming extremely sub-microscopic; the familiar world suddenly turned into an abyssal maze of sky-blotting monsters.",
-        core: "《不可思议的收缩人》。失去常规维度的主导权。 | The Castration: 空间主权（Spatial Sovereignty）剥夺与尺度霸凌。",
-        coreEn: "Losing mandate over normal dimensions. | The Castration: Spatial Sovereignty deprivation and dimensional bullying.",
-        reference: "《缩小人生》全幅剥掉常规防卫仅成指头渣粒落对通天皮鞋砸灭星极危的贫缩缩男；《蚁人》误入亚原子死境周遭微光狂旋无底只靠浮沙求一生的空点量子极尘人。",
-        referenceEn: "A man zipped to fingernail scale gazing up at catastrophic giant rubber shoes hitting poverty in Downsizing; tumbling sub-atomic floating amid wild swirling silent fractal terrors lost forever in Ant-Man."
-    },
-    {
-        id: "stake_shadow",
-        name: "二维投影", nameEn: "Becoming Shadow",
-        group: "B. 本体论崩塌", groupEn: "Ontological",
-        def: "失去了三维的体积，被压平成只能依附于强光和他人实体而存在的二维投影。",
-        defEn: "Losing 3D volume, flattened into a 2D projection that relies on strong light and another entity to exist.",
-        core: "失去本体，沦为背景和附庸。 | The Castration: 实体丰度（Dimensional Richness）的降维裁切。",
-        coreEn: "Losing ontology, regress to background appendage. | The Castration: Dimensional Richness shearing.",
-        reference: "《神隐少女》在诡夜铁轨深处仅能依旁灯光投留灰寂无语的极扁纸魅千黑影；《三体》死见银河系狂折深跌为薄如名片大画卷惨压于二向箔无厚度地狱的太阳帆族。",
-        referenceEn: "A paper-thin black silent cut-out riding ghostly midnight trains completely volume-less in Spirited Away; entire solar fleets sheared flat crashing into hyper-thin picture cards under dual-vector foils."
-    },
-    {
-        id: "stake_parasite",
-        name: "异形温床", nameEn: "Parasitized",
-        group: "B. 本体论崩塌", groupEn: "Ontological",
-        def: "自己的肉体被异形、孢子或降临派模因侵占，被扭曲改造成哺育怪物的营养温床。",
-        defEn: "Flesh usurped by alien, spore, or meme, twisted into a nutrient nursery to feed monsters.",
-        core: "存在结构的地基被凿空当作公厕。 | The Castration: 内在领域（Internal Domain）的强行殖民。",
-        coreEn: "Foundation of existence hollowed out for public bathroom. | The Castration: Forced colonization of Internal Domain.",
-        reference: "《切尔诺贝利》遭遇强核摧融身体深遭火源占穴绽出一窝窝毒红囊浆烂坑的液人渣；《异形》白餐桌猛抽翻眼看骨爆胸裂血溅飙飞让惨白妖嘴钻肠穿出的死惊船卫。",
-        referenceEn: "Firefighters colonized by raw graphite atoms bursting internal rot-cysts puking fluid in Chernobyl; Kane dining merrily violently seizing as alien teeth smash outwards splitting his ribs in Alien."
-    },
-    {
-        id: "stake_data_upload",
-        name: "意识上传", nameEn: "Upload / Virtual Deletion",
-        group: "B. 本体论崩塌", groupEn: "Ontological",
-        def: "肉身被完全销毁，意识被剪切或复制成0和1存储在大他者的云端服务器中。",
-        defEn: "Flesh thoroughly destroyed; consciousness cut or copied into 0s and 1s stored in the Big Other's cloud server.",
-        core: "碳基的终结。那个云端的数据包，到底还是不是曾经那个在雨中哭泣的我？ | The Castration: 肉身本体（Substantial Flesh）的绝育。",
-        coreEn: "End of carbon-base. Is that data packet still the 'I' weeping in the rain? | The Castration: Sterilization of Substantial Flesh.",
-        reference: "《超验骇客》抛绝肺血炭肉全缩成发光游丝悬接万座云基狂插乱入冰芯的疯超电神；《黑镜：圣朱尼佩洛》拔除死床吊针管全灵送去极幻夜厅万代光年赛博跳摇亡舞的女郎。",
-        referenceEn: "Will abandoning carbon lung-breaths compressing to pure code flowing through cold fiber optics in Transcendence; dead women unplugging IV tubes forever dancing pixelated logic inside giant server racks in San Junipero."
-    },
-    {
-        id: "stake_silence_voice",
-        name: "失去发声", nameEn: "Stolen Voice",
-        group: "B. 本体论崩塌", groupEn: "Ontological",
-        def: "代表着个人特质与灵魂共鸣的‘声音’作为献祭的筹码被强行摘取，留下永存生理性虚空的嗓子。",
-        defEn: "The 'voice', representing personal traits and soul resonance, forcibly extracted as a sacrificial chip.",
-        core: "小美人鱼的沉默。割去了灵魂直接发声的羽翼。 | The Castration: 特有音色（Unique Timbre/Voice）的物理截肢。",
-        coreEn: "The silence of the Little Mermaid. Amputation of unique timbre. | The Castration: Physical Amputation of Voice.",
-        reference: "《国王的演讲》顶撞重台惨被自卡喉门死死截断王者声阶逼得汗流极冷无响的哑喘君主；《水形物语》全喉被生割血孔死不漏出一句抗词凭满屏狂敲墙壁发振反叛的寂海聋女。",
-        referenceEn: "A stammering George VI choking silently at microphones bleeding sweaty panic at absolute blank pauses in King's Speech; a mute cleaner tapping fierce anger zero vocal cords left to curse in Shape of Water."
-    },
-    {
-        id: "stake_invisibility",
-        name: "沦为无形幽灵", nameEn: "Unseen / Quantum Ghost",
-        group: "B. 本体论崩塌", groupEn: "Ontological",
-        def: "因为相位的偏差或法则的惩戒，在一切物理探测手段和人类的视网膜上绝对不可见、不可触摸。",
-        defEn: "Absolutely unseen/untouchable to all physical detection or retinas due to phase deviation or legal penalty.",
-        core: "存在，但因为没有力学摩擦，变得毫无意义的终极孤寂。 | The Castration: 交互物理当量（Interactive Physicality）的归零。",
-        coreEn: "Existing but meaningless due to zero friction. Ultimate isolation. | The Castration: Zeroing of Interactive Physicality.",
-        reference: "《星际穿越》悬卧五维大渊狂震满壁经书唯看绝女掉泪却偏偏抓不着丝缕死空气的黑洞爹；《人鬼情未了》命绝长街仅能握拳抓空铁杯硬撞却不沾半丝物理凡灰的无量游魂。",
-        referenceEn: "Cooper floating in 5D black holes desperately pounding bookshelf walls grabbing raw dead air as his girl weeps in Interstellar; Patrick Swayze grabbing zero subway cans punching through living humans cleanly in Ghost."
-    }
 ];
