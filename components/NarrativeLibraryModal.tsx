@@ -271,6 +271,36 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
         setTimeout(() => setCopiedItemId(null), 1000);
     };
 
+    const handleScrollToCard = (tagName: string) => {
+        const item = processedGroups.flatMap(g => g.items || []).find(i => i.name === tagName);
+        if (!item) return;
+
+        const groupContainingTag = processedGroups.find(g => (g.items || []).some(i => i.name === tagName));
+        
+        if (groupContainingTag && activeTab !== groupContainingTag.id) {
+            setActiveTab(groupContainingTag.id);
+            setSearchQuery("");
+        }
+        
+        setTimeout(() => {
+            const elId = `card-${(item.id || item.name).replace(/\s+/g, '_')}`;
+            const el = document.getElementById(elId);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                el.style.transition = 'all 0.3s ease';
+                el.classList.add('ring-2', 'ring-opacity-50', 'scale-[1.01]');
+                if (globalTheme === 'retro') {
+                    el.classList.add('ring-[#8B261D]');
+                } else {
+                    el.classList.add('ring-white/50');
+                }
+                setTimeout(() => {
+                    el.classList.remove('ring-2', 'ring-opacity-50', 'scale-[1.01]', 'ring-[#8B261D]', 'ring-white/50');
+                }, 1000);
+            }
+        }, 100);
+    };
+
     const getThemeColor = () => {
         if (globalTheme === 'retro') return { text: "text-[#8B261D]", border: "border-[#8B261D]/50", hex: "#8B261D" };
         if (driverType === DriverType.COMMERCIAL) return { text: "text-cyan-400", border: "border-cyan-500/50", hex: "#22d3ee" };
@@ -346,13 +376,18 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                     return (
                                         <button 
                                             key={tag} 
-                                            onClick={() => onToggleTag(tag)} 
+                                            onClick={() => handleScrollToCard(tag)} 
                                             className={`flex shrink-0 items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] whitespace-nowrap font-black border transition-all duration-300 transform active:scale-95 group shadow-sm
                                                 ${globalTheme === 'retro' ? 'bg-white border-[#8B261D]/30 text-[#8B261D]' : `bg-zinc-900 border-white/10 ${themeText} hover:border-white/30 hover:bg-zinc-800`}`}
                                         >
                                             <Hash size={10} className="opacity-40" />
                                             {displayTag}
-                                            <X size={12} className="opacity-50 group-hover:opacity-100 group-hover:rotate-90 transition-all ml-1" />
+                                            <div 
+                                                onClick={(e) => { e.stopPropagation(); onToggleTag(tag); }}
+                                                className="opacity-50 hover:opacity-100 group-hover:rotate-90 transition-all ml-1 cursor-pointer p-0.5 rounded-full hover:bg-black/10"
+                                            >
+                                                <X size={12} />
+                                            </div>
                                         </button>
                                     );
                                 })
@@ -466,7 +501,9 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                 const isPreset = blockId === 'aes_palette_preset';
                                 
                                 return (
-                                    <div key={item.id || item.name} onClick={() => onToggleTag(item.name)} 
+                                    <div key={item.id || item.name} 
+                                        id={`card-${(item.id || item.name).replace(/\s+/g, '_')}`}
+                                        onClick={() => onToggleTag(item.name)} 
                                         className={`relative flex ${isPreset ? 'flex-row items-center py-2 px-4' : 'flex-col p-5 md:p-6'} text-left rounded-xl border transition-all duration-200 group h-full cursor-pointer ${isSelected ? (globalTheme === 'retro' ? `bg-white border-[#8B261D] border-2 shadow-sm` : `${themeText} bg-zinc-900 ${themeBorder.replace('/50', '')} border-2 shadow-lg`) : (globalTheme === 'retro' ? 'bg-white/60 border-black/5 text-black hover:border-[#8B261D]/40' : 'bg-zinc-900/40 border-zinc-800 text-zinc-300 hover:bg-zinc-900 hover:border-zinc-500 hover:text-zinc-100')}`}>
                                         
                                         {isPreset && (item as any).colors && (
@@ -498,7 +535,7 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                                 ) : (
                                                     <>
                                                         {item.def && (
-                                                            <div className={`text-sm md:text-base leading-relaxed mb-3 font-light ${isSelected ? (globalTheme === 'retro' ? 'text-[#8B261D]' : themeText) : (globalTheme === 'retro' ? 'text-[#3D1A16]' : 'text-zinc-200 group-hover:text-white transition-colors')}`}>
+                                                            <div className={`text-sm md:text-base leading-relaxed mb-3 font-light ${isSelected ? (globalTheme === 'retro' ? 'text-[#8B261D]' : 'text-white') : (globalTheme === 'retro' ? 'text-[#3D1A16]' : 'text-zinc-200 group-hover:text-white transition-colors')}`}>
                                                                 {currentLang === 'EN' && item.defEn ? item.defEn : item.def}
                                                             </div>
                                                         )}

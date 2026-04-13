@@ -2,7 +2,7 @@ import { LibraryItemDef } from '../../../types';
 
 export const STAKES_GROUP_A: LibraryItemDef[] = [
     // ============================================================
-    // GROUP A. 符号界截肢 (Symbolic Severance) — 20 Items
+    // GROUP A. 意义的放逐 (Symbolic Severance) — 20 Items
     // 丧失维度：你在"大他者的档案簿"中的坐标被删除。
     // 核心感受：你物理上还活着，但社会学意义上你已经死了。
     // 光谱：名字丧失(1-5) → 信誉丧失(6-10) → 地位丧失(11-15) → 连接丧失(16-20)
@@ -13,7 +13,7 @@ export const STAKES_GROUP_A: LibraryItemDef[] = [
     {
         id: "stake_erasure",
         name: "社会抹杀", nameEn: "Social Erasure",
-        group: "A. 符号界截肢", groupEn: "Symbolic Severance",
+        group: "A. 意义的放逐", groupEn: "Symbolic Severance",
         def: "从社会登记簿中被彻底删除——物理存在被保留，但在大他者的档案中，你不再是一个'人'。",
         defEn: "Thoroughly deleted from the social registry — physical existence preserved, but in the Big Other's filing system, you cease to be a 'person'.",
         core: "A面：从名册上消失反而获得了诡异的自由——不被追踪、不被定义。'不存在的人'是最危险的人。/ B面：但这种自由的代价是永恒的孤独——没有人会来找你，没有人在你死后提起你的名字。你从世界上完整地蒸发了。关键张力：被社会抹杀之后——是终极自由，还是终极孤独？ | 代价回路 (Castration): 存在的坐标系被拔除。",
@@ -24,7 +24,7 @@ export const STAKES_GROUP_A: LibraryItemDef[] = [
     {
         id: "stake_name_loss",
         name: "剥夺姓名", nameEn: "Loss of Name",
-        group: "A. 符号界截肢", groupEn: "Symbolic Severance",
+        group: "A. 意义的放逐", groupEn: "Symbolic Severance",
         def: "名字被没收，从此以编号、代称或蔑称替代——灵魂的最简句法被格式化。",
         defEn: "Name confiscated, permanently replaced by a number, alias, or slur — the simplest syntax of the soul is formatted.",
         core: "A面：名字是大他者给你的第一副镣铐——剥夺了它，'无名者'可以成为任何人。/ B面：但名字也是你与世界最基本的纽带。连'叫什么'都被收走，你就失去了被辨认、被思念的资格，变成了代号背后的空洞。关键张力：失去名字——是被剥夺了自我，还是卸下了别人赋予的身份？ | 代价回路 (Castration): 灵魂的第一能指被没收。",
@@ -35,7 +35,7 @@ export const STAKES_GROUP_A: LibraryItemDef[] = [
     {
         id: "stake_replace",
         name: "身份顶替", nameEn: "Replacement",
-        group: "A. 符号界截肢", groupEn: "Symbolic Severance",
+        group: "A. 意义的放逐", groupEn: "Symbolic Severance",
         def: "另一个人合法继承了你的全部能指——你的名字、你的位置、你的面孔。你变成了自己生命的冗余副本。",
         defEn: "Another person legally inherits all your signifiers — your name, your position, your face. You become the redundant copy of your own life.",
         core: "A面：被无缝顶替让你看清真相——系统从来不需要'你'，只需要一个填满位置的人。清醒本身是一种解放。/ B面：但你发现你全部的独特性其实可以被批量复制。你不是不可替代的，你只是碰巧先到。关键张力：发现自己可以被替代——摧毁你，还是让你停止从'被需要'中汲取存在感？ | 代价回路 (Castration): 独特性的幻象被戳破。",
@@ -46,7 +46,7 @@ export const STAKES_GROUP_A: LibraryItemDef[] = [
     {
         id: "stake_forgotten",
         name: "世界遗忘", nameEn: "Being Forgotten",
-        group: "A. 符号界截肢", groupEn: "Symbolic Severance",
+        group: "A. 意义的放逐", groupEn: "Symbolic Severance",
         def: "你的存在没有留下任何痕迹——全世界关于你的记忆被强行抽取，仿佛你从未出生。",
         defEn: "Your existence leaves zero trace — the entire world's memory of you is forcibly extracted, as if you were never born.",
         core: "A面：被遗忘意味着你不再欠世界任何债——没有期待、没有角色。最彻底的'清零'。/ B面：但人类最深的恐惧不是死亡——是死后没人记得你活过。被遗忘比被杀更残酷，因为杀你的人至少承认你存在过。关键张力：如果全世界都忘了你——'你'和'从未存在过'有什么区别？ | 代价回路 (Castration): 比死亡更深的终极死亡。",
@@ -57,7 +57,7 @@ export const STAKES_GROUP_A: LibraryItemDef[] = [
     {
         id: "stake_language_loss",
         name: "母语剥夺", nameEn: "Language Loss",
-        group: "A. 符号界截肢", groupEn: "Symbolic Severance",
+        group: "A. 意义的放逐", groupEn: "Symbolic Severance",
         def: "母语被强行斩断——被迫终生使用压迫者的语言来思考、发音和做梦。",
         defEn: "Mother tongue forcibly severed — compelled for life to think, pronounce, and dream in the oppressor's language.",
         core: "A面：失去母语有时反而获得局外人的洞察力——每一种语言都是一种看世界的方式。/ B面：但语言不是工具——语言是'存在的家'（海德格尔）。失去用母语骂人、祈祷和说梦话的能力，你失去的是灵魂深处那个不需要翻译的自己。关键张力：用敌人的语言思考——是被征服了，还是在敌人的语法里埋下了反叛的种子？ | 代价回路 (Castration): 文化潜意识的根基被拔除。",
@@ -71,7 +71,7 @@ export const STAKES_GROUP_A: LibraryItemDef[] = [
     {
         id: "stake_stigma",
         name: "背负恶名", nameEn: "Stigmatization",
-        group: "A. 符号界截肢", groupEn: "Symbolic Severance",
+        group: "A. 意义的放逐", groupEn: "Symbolic Severance",
         def: "不仅失去荣誉，还被迫替系统承担了最肮脏的罪名——永远被钉在耻辱柱上。",
         defEn: "Not merely losing honor, but forced to bear the system's dirtiest sins — nailed forever to the pillar of shame.",
         core: "A面：既然全世界认定你是最坏的那个，你反而不需要再讨好任何人了。最黑暗的自由藏在最深的耻辱里。/ B面：但恶名会像辐射一样污染靠近你的每一个人——孩子会被指着说'他爸是那个人'。关键张力：当全世界认定你是怪物——你是证明他们错了，还是索性活成他们害怕的样子？ | 代价回路 (Castration): 道德倒影被永久涂黑。",
@@ -82,7 +82,7 @@ export const STAKES_GROUP_A: LibraryItemDef[] = [
     {
         id: "stake_misunderstood",
         name: "千古误读", nameEn: "Eternal Misreading",
-        group: "A. 符号界截肢", groupEn: "Symbolic Severance",
+        group: "A. 意义的放逐", groupEn: "Symbolic Severance",
         def: "明明是拯救一切的人，却背负着制造灾难的罪名——且永远无法公开辩解。",
         defEn: "The one who saved everything bears the stigma of causing the disaster — and can never publicly defend themselves.",
         core: "A面：沉默的英雄比喧哗的英雄更接近真相——解释会破坏你保护的东西。被误解本身就是正确代价的一部分。/ B面：但人类不是为独自承受真相而设计的。'我救了所有人，但所有人都恨我'——这种不可言说的孤独会从内部把你蛀空。关键张力：如果为你正名会毁掉你保护的一切——你选择真相还是继续被误解？ | 代价回路 (Castration): 正当性与功勋被永久剥夺。",
@@ -93,7 +93,7 @@ export const STAKES_GROUP_A: LibraryItemDef[] = [
     {
         id: "stake_discredited",
         name: "信用破产", nameEn: "Discredited",
-        group: "A. 符号界截肢", groupEn: "Symbolic Severance",
+        group: "A. 意义的放逐", groupEn: "Symbolic Severance",
         def: "你是真相的预言家——但被系统永久打上了'妄想症骗子'的标签。没有人再信你说的任何一句话。",
         defEn: "A prophet of truth — but permanently labeled 'delusional liar' by the system. No one believes a single word you say.",
         core: "A面：不被相信反而验证了你的洞察——卡桑德拉的诅咒恰恰证明她看到的比所有人都真实。/ B面：但'看到真相却说不出来'比失明更深。你眼睁睁看着灾难降临，手里握着解决方案，但连最亲的人都望向别处。关键张力：如果你知道一切但没人信你——你还有义务继续预警吗？ | 代价回路 (Castration): 预言能力与信誉被双重废除。",
@@ -104,7 +104,7 @@ export const STAKES_GROUP_A: LibraryItemDef[] = [
     {
         id: "stake_mockery",
         name: "沦为笑柄", nameEn: "Public Mockery",
-        group: "A. 符号界截肢", groupEn: "Symbolic Severance",
+        group: "A. 意义的放逐", groupEn: "Symbolic Severance",
         def: "毕生的追求和极致的痛苦，在大他者眼里被降格为一档滑稽喜剧供人消费。",
         defEn: "A lifetime of pursuit and extreme suffering downgraded into slapstick comedy for public consumption.",
         core: "A面：被嘲笑的人拥有小丑式的自由——尊严没了，你反而能说出体面人不敢说的真话。/ B面：但被嘲笑比被忽视更残酷——被忽视至少你的痛苦是私人的。被嘲笑意味着你的痛苦成了公共娱乐产品，你连悲剧的资格都没有。关键张力：当你的痛苦变成笑话——加入笑声自保，还是坚持痛苦是真实的？ | 代价回路 (Castration): 崇高性被褫夺——连悲剧的资格都没有。",
@@ -115,7 +115,7 @@ export const STAKES_GROUP_A: LibraryItemDef[] = [
     {
         id: "stake_scandal",
         name: "身败名裂", nameEn: "Scandal",
-        group: "A. 符号界截肢", groupEn: "Symbolic Severance",
+        group: "A. 意义的放逐", groupEn: "Symbolic Severance",
         def: "用极其难堪且不可辩驳的丑闻，全方位摧毁一个人建立了一辈子的公众信誉结构。",
         defEn: "Utterly destroying a lifetime of public credibility through an undeniable, devastating scandal.",
         core: "A面：丑闻是最暴力的诚实——把抛光的公共表面砸碎，露出下面不完美的血肉。被扒光有时比穿着皇帝的新衣更健康。/ B面：但丑闻不是手术刀是炸弹——不区分该揭露的真相和该保护的隐私，连同你脆弱的私人世界一起炸碎。关键张力：被丑闻摧毁——是终于面对真实自己，还是被远超比例的惩罚碾碎？ | 代价回路 (Castration): 名誉殿堂的爆破——比死亡更漫长的媒体凌迟。",
@@ -129,7 +129,7 @@ export const STAKES_GROUP_A: LibraryItemDef[] = [
     {
         id: "stake_rank_loss",
         name: "阶层坠落", nameEn: "Loss of Rank",
-        group: "A. 符号界截肢", groupEn: "Symbolic Severance",
+        group: "A. 意义的放逐", groupEn: "Symbolic Severance",
         def: "从云端的位置瞬间跌入最底层——且保留着所有'曾经在上面'的记忆。",
         defEn: "Falling instantly from the pinnacle to the lowest layer — while retaining every memory of having been on top.",
         core: "A面：从底层看世界有顶层永远看不到的清晰——很多伟大的作品都是在坠落之后写出的。/ B面：但坠落最残酷的不是贫穷本身，而是'记得自己阔过'。身体还记得真丝触感，味蕾还记得那种酒，但口袋已经不允许你回去了。关键张力：记得曾经拥有的一切——是永恒折磨，还是证明你确实活过那样的人生？ | 代价回路 (Castration): 俯视的支点被抽走——被自己曾制定的法则反噬。",
@@ -140,7 +140,7 @@ export const STAKES_GROUP_A: LibraryItemDef[] = [
     {
         id: "stake_uniform_strip",
         name: "权力褫夺", nameEn: "Stripped of Power",
-        group: "A. 符号界截肢", groupEn: "Symbolic Severance",
+        group: "A. 意义的放逐", groupEn: "Symbolic Severance",
         def: "在公共仪式上被强制剥夺象征权力的制服、勋章、头衔或法器——你的铠甲被当众撕碎。",
         defEn: "Forcibly stripped of uniforms, medals, titles, or instruments of power in a public ceremony — your armor is torn apart before all.",
         core: "A面：权力外壳剥除后，你终于看到没有头衔、制服、权杖的自己是谁。赤裸的人如果还能站立，他的站立比任何制服都有力量。/ B面：但大多数人失去外壳后无法站立——那个'赤裸的自己'从来没有被锻炼过。铠甲穿太久，下面的肌肉已经萎缩了。关键张力：脱下制服后——是终于获得人的形态，还是发现你早就忘了人的形态？ | 代价回路 (Castration): 权力幻象的收缴——铠甲撕碎后暴露的虚弱。",
@@ -152,7 +152,7 @@ export const STAKES_GROUP_A: LibraryItemDef[] = [
     {
         id: "stake_legacy_ruin",
         name: "基业毁灭", nameEn: "Legacy Ruin",
-        group: "A. 符号界截肢", groupEn: "Symbolic Severance",
+        group: "A. 意义的放逐", groupEn: "Symbolic Severance",
         def: "眼睁睁看着自己亲手建立的庞大基业——公司、国家或组织——分崩离析，化为废墟。",
         defEn: "Watching helplessly as the massive foundation you built with your own hands — company, nation, or organization — crumbles into ruins.",
         core: "A面：废墟也是纪念碑——它证明这里曾矗立过伟大的东西。/ B面：但基业毁灭不仅是你的失败——是所有信任你、追随你的人的失败。关键张力：毕生心血化为灰烬——这是历史的必然，还是你个人的罪责？ | 代价回路 (Castration): '看我的丰功伟绩'化为荒漠碑文。",
@@ -163,7 +163,7 @@ export const STAKES_GROUP_A: LibraryItemDef[] = [
     {
         id: "stake_contract_void",
         name: "契约撕毁", nameEn: "Void Contract",
-        group: "A. 符号界截肢", groupEn: "Symbolic Severance",
+        group: "A. 意义的放逐", groupEn: "Symbolic Severance",
         def: "毕生奋斗换来的一项终极承诺或契约，在大他者变脸的一刻被宣告为废纸。",
         defEn: "A sworn ultimate promise or contract, fought for lifelong, is declared invalid the moment the Big Other turns its face.",
         core: "A面：契约撕毁让你看清真相——规则制定权从来不在你手里，觉醒比虚假的公平更接近自由。/ B面：但努力不被承认比从未努力更崩溃，你拿到了那张纸，却被当面撕碎。关键张力：当规则本身不守规则——你接受游戏不公平，还是推翻整张牌桌？ | 代价回路 (Castration): 奋斗逻辑链条被彻底切断。",
@@ -174,7 +174,7 @@ export const STAKES_GROUP_A: LibraryItemDef[] = [
     {
         id: "stake_last_one",
         name: "绝唱传承", nameEn: "The Last One",
-        group: "A. 符号界截肢", groupEn: "Symbolic Severance",
+        group: "A. 意义的放逐", groupEn: "Symbolic Severance",
         def: "你所守护的流派、家族、信仰或技艺，在你这里成为物理与精神意义上的绝唱。",
         defEn: "The lineage, family, faith, or craft you guarded becomes an absolute terminal point — physically and spiritually — with you.",
         core: "A面：成为最后一人意味你是最纯粹的结晶，不再被后来者稀释。/ B面：但此重量是绝对孤独，一旦倒下，你守护之物将以“从未存在过”的方式从宇宙蒸发。关键张力：你为传承而活，还是传承以你为最后燃料？ | 代价回路 (Castration): 未来历史被提前注销，成为活着的绝唱。",
@@ -185,7 +185,7 @@ export const STAKES_GROUP_A: LibraryItemDef[] = [
     {
         id: "stake_secret_exposed",
         name: "秘密曝光", nameEn: "Secret Exposed",
-        group: "A. 符号界截肢", groupEn: "Symbolic Severance",
+        group: "A. 意义的放逐", groupEn: "Symbolic Severance",
         def: "用来维持社会面具的最痛、最不齿的潜意识秘密，被大他者全屏广播。",
         defEn: "The deepest, most shameful subconscious secret that maintained the social mask is broadcast globally.",
         core: "A面：秘密曝光换来诡异的轻松，终结了维系谎言的无穷内耗。/ B面：但这并非坦白，是被剥夺展示自我的控制权，犹如扒光丢入广场。关键张力：秘密揭穿后，是喜迎解脱的自由，还是失去最后防线的彻底崩溃？ | 代价回路 (Castration): 心理防线被强行爆破的终极赤裸。",
@@ -196,7 +196,7 @@ export const STAKES_GROUP_A: LibraryItemDef[] = [
     {
         id: "stake_ghosted",
         name: "联系切断", nameEn: "Disconnected",
-        group: "A. 符号界截肢", groupEn: "Symbolic Severance",
+        group: "A. 意义的放逐", groupEn: "Symbolic Severance",
         def: "原本亲密的所有社会连接——亲人、爱人、朋友——如同被集体格式化般，同时对你关闭了大门。",
         defEn: "All formerly intimate social connections — family, lovers, friends — simultaneously shut their doors as if collectively formatted.",
         core: "A面：社会关系清零让你免于表演，获得无观众的旷野自由。/ B面：但人类非为独居进化，当最后的连接断绝，孤独便化作如饥饿般真实的物理剧痛。关键张力：全员离去，是因为你本身有毒，还是所有的爱都带有前提条件？ | 代价回路 (Castration): 被抛出社会重力场，沦为脱轨游星。",
@@ -207,7 +207,7 @@ export const STAKES_GROUP_A: LibraryItemDef[] = [
     {
         id: "stake_censored",
         name: "永久封杀", nameEn: "Censored",
-        group: "A. 符号界截肢", groupEn: "Symbolic Severance",
+        group: "A. 意义的放逐", groupEn: "Symbolic Severance",
         def: "你的思想、作品，甚至提到你的关键词，都被系统的底层算法永久屏蔽。",
         defEn: "Your thoughts, works, even keywords mentioning you are permanently banned by the system's core algorithms.",
         core: "A面：禁令赋予作品神秘光环，封杀成为最顶级的反向广告。/ B面：但现实绝非浪漫抵抗，而是漫长无声的窒息，你如无人林的倒树般悄无声息。关键张力：被封杀是证明你具威胁性的勋章，还是将你的声音彻底降维为无人可闻的死寂？ | 代价回路 (Castration): 话语权遭强行阉割，存在痕迹被404抹除。",
@@ -218,7 +218,7 @@ export const STAKES_GROUP_A: LibraryItemDef[] = [
     {
         id: "stake_exile",
         name: "永久流放", nameEn: "Eternal Exile",
-        group: "A. 符号界截肢", groupEn: "Symbolic Severance",
+        group: "A. 意义的放逐", groupEn: "Symbolic Severance",
         def: "被剥夺一切社会坐标，永远驱逐至边缘不毛之地——失去'故乡'的概念。",
         defEn: "Stripped of all social coordinates, forever banished to the barren edges — losing the very concept of 'home'.",
         core: "A面：流放者因不属于任何地方而拥有拥抱所有地方的视野。/ B面：但流放并不浪漫，它是永远找不到家乡味道的残酷剥夺，是永远等不到那句方言问候的失根之痛。关键张力：永远在路上的人生，是自由的游牧，还是找不到停靠点的无根漂流？ | 代价回路 (Castration): 空间归属感彻底阉割，故乡坐标永恒丢失。",
@@ -229,7 +229,7 @@ export const STAKES_GROUP_A: LibraryItemDef[] = [
     {
         id: "stake_unseen",
         name: "沦为透明", nameEn: "Invisibility",
-        group: "A. 符号界截肢", groupEn: "Symbolic Severance",
+        group: "A. 意义的放逐", groupEn: "Symbolic Severance",
         def: "大他者撤回了对你的凝视——无论你做什么、说什么，都无法在任何人身上引起哪怕最微小的反馈。",
         defEn: "The Big Other withdraws its gaze — no matter what you do or say, you cannot elicit even the smallest reaction from anyone.",
         core: "A面：彻底透明让你免于被凝视与审判，获得过载社会中最奢侈的隐私。/ B面：但人需借由他者目光确认存在，完全不被注视会让你怀疑自己是否已是幽灵。关键张力：消失却无人察觉，是你确实不可见，还是你已从本体论层面上不存在？ | 代价回路 (Castration): 大他者凝视被彻底撤回，沦为本体论上的透明人。",

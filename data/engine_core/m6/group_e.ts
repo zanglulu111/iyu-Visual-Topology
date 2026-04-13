@@ -2,7 +2,7 @@ import { LibraryItemDef } from '../../../types';
 
 export const STAKES_GROUP_E: LibraryItemDef[] = [
     // ============================================================
-    // GROUP E. 客体小a剥离 (Objet petit a Extraction) — 20 Items
+    // GROUP E. 欲望的抽离 (Objet petit a Extraction) — 20 Items
     // 丧失维度：肉体完好、地位完好、理智完好——但给你活下去理由的那个东西不在了。
     // 核心感受：一切都还在，但一切都没有意义了。
     // 光谱：爱的丧失(1-5) → 使命/意义的丧失(6-10) → 可能性的丧失(11-15) → 欲望本身的丧失(16-20)
@@ -13,7 +13,7 @@ export const STAKES_GROUP_E: LibraryItemDef[] = [
     {
         id: "stake_lost_love",
         name: "永失所爱", nameEn: "Lost Love",
-        group: "E. 客体小a剥离", groupEn: "Objet a Extraction",
+        group: "E. 欲望的抽离", groupEn: "Objet a Extraction",
         def: "那个让你'想要活着'的人永久性地离开了你的世界——不是死亡，是选择离开。",
         defEn: "The person who made you 'want to live' permanently left your world — not death, but choosing to leave.",
         core: "A面：被离开反而证明了对方有自己的意志——你爱的不是一个附属品，而是一个完整的人。真正的爱包含被拒绝的可能。/ B面：但选择离开比死亡更残忍——死亡是命运的暴力，离开是意志的暴力。他活着，但他选择了一个没有你的世界。关键张力：对方活着但不要你了——这比死亡更难接受。 | 代价回路 (Castration): 欲望的锚点被拔除——你不知道该朝哪个方向走了。",
@@ -24,7 +24,7 @@ export const STAKES_GROUP_E: LibraryItemDef[] = [
     {
         id: "stake_child_loss",
         name: "丧子", nameEn: "Loss of a Child",
-        group: "E. 客体小a剥离", groupEn: "Objet a Extraction",
+        group: "E. 欲望的抽离", groupEn: "Objet a Extraction",
         def: "你投射了全部未来的那个存在——被永久性地从时间线上删除。",
         defEn: "The existence onto which you projected your entire future — permanently deleted from the timeline.",
         core: "A面：没有人能从丧子中'学到教训'——这不是一个可以提取意义的事件。它就是纯粹的、没有A面的毁灭。/ B面：孩子不仅是一个人——是你对未来的全部赌注。他死了，你的未来也死了。你的身体还在向前走，但你的时间轴已经停在了那个电话响起的瞬间。关键张力：这里没有张力——只有重量。 | 代价回路 (Castration): 时间拓扑的永久凝固——未来被从根部切断。",
@@ -35,7 +35,7 @@ export const STAKES_GROUP_E: LibraryItemDef[] = [
     {
         id: "stake_unrequited",
         name: "单向之爱", nameEn: "Unrequited Love",
-        group: "E. 客体小a剥离", groupEn: "Objet a Extraction",
+        group: "E. 欲望的抽离", groupEn: "Objet a Extraction",
         def: "你的全部欲望锁定在一个永远不会爱你的人身上——且你无法切换目标。",
         defEn: "Your entire desire locked onto someone who will never love you back — and you cannot switch targets.",
         core: "A面：单恋的人拥有世上最纯粹的情感——因为不被回应，它永远保持在'欲望'的最高纯度，不会被日常琐碎稀释。/ B面：但纯度不是快乐——是一种慢性的酸。你每天醒来做的第一件事是想到一个不想你的人。关键张力：你坚持的到底是爱——还是爱的幻象？ | 代价回路 (Castration): 欲望的单行道——你投喂的那个黑洞永远不会喂你回来。",
@@ -46,7 +46,7 @@ export const STAKES_GROUP_E: LibraryItemDef[] = [
     {
         id: "stake_bond_severed",
         name: "亲缘断裂", nameEn: "Bond Severed",
-        group: "E. 客体小a剥离", groupEn: "Objet a Extraction",
+        group: "E. 欲望的抽离", groupEn: "Objet a Extraction",
         def: "血缘或精神上最亲的人与你公开决裂——不是渐行渐远，是面对面的永久否定。",
         defEn: "Your closest by blood or spirit publicly ruptures with you — not gradual drifting, but face-to-face permanent negation.",
         core: "A面：断裂有时是双方都被困在了有毒关系中——切断它对两个人都是解脱。/ B面：但当那个你以为'无条件爱你'的人说出'我不再爱你了'——你失去的不只是一个人，是'无条件的爱存在'这个信念本身。关键张力：被最亲的人否定——你的价值体系还能站得住吗？ | 代价回路 (Castration): '至少还有家人'这最后一张安全网被抽走。",
@@ -57,7 +57,7 @@ export const STAKES_GROUP_E: LibraryItemDef[] = [
     {
         id: "stake_betrayed_trust",
         name: "信任坍塌", nameEn: "Trust Destroyed",
-        group: "E. 客体小a剥离", groupEn: "Objet a Extraction",
+        group: "E. 欲望的抽离", groupEn: "Objet a Extraction",
         def: "发现你最信任的人从一开始就在欺骗你——关系的全部地基被证明是假的。",
         defEn: "Discovering the person you trusted most was deceiving you from the start — the relationship's entire foundation proven false.",
         core: "A面：幻灭至少让你看清了真相——以后你的信任将建立在更坚固的基础上。/ B面：但你失去的不是这一个人——是'信任'这项能力本身。从此以后你看每个人都带着那副验毒的目光，再也无法全身心地相信任何人。关键张力：被骗之后你变得更聪明了——但那种'聪明'让你快乐了吗？ | 代价回路 (Castration): 信任能力的永久损伤——怀疑变成了你的默认设置。",
@@ -71,7 +71,7 @@ export const STAKES_GROUP_E: LibraryItemDef[] = [
     {
         id: "stake_purpose_void",
         name: "使命蒸发", nameEn: "Purpose Void",
-        group: "E. 客体小a剥离", groupEn: "Objet a Extraction",
+        group: "E. 欲望的抽离", groupEn: "Objet a Extraction",
         def: "你为之奋斗了半生的事业——被证明毫无价值，或被你自己完成后发现不值得。",
         defEn: "The cause you spent half your life fighting for — proven worthless, or completed only to discover it wasn't worth it.",
         core: "A面：旧使命蒸发意味着你终于可以自由地选择一个新的——不再被沉没成本绑架。/ B面：但你不是'在寻找新目标'——你是站在一片你亲手建造的废墟中间，发现蓝图本身就是错的。关键张力：如果你最好的年华都给了一个错误——剩下的年华你打算怎么花？ | 代价回路 (Castration): '为什么活着'这个问题的答案被撤回。",
@@ -82,7 +82,7 @@ export const STAKES_GROUP_E: LibraryItemDef[] = [
     {
         id: "stake_legacy_erased",
         name: "遗产抹杀", nameEn: "Legacy Erased",
-        group: "E. 客体小a剥离", groupEn: "Objet a Extraction",
+        group: "E. 欲望的抽离", groupEn: "Objet a Extraction",
         def: "你留给世界的一切痕迹——作品、成就、名字——被系统地清除得一干二净。",
         defEn: "Every trace you left for the world — works, achievements, name — systematically erased without remainder.",
         core: "A面：如果你的遗产本身不重要——那也许你活着时的体验才是唯一真实的。过程大于结果。/ B面：但人类为什么创作、为什么建设？不就是为了在死后留下什么吗？当连这个'什么'都被清除时——你活过的证据在哪？关键张力：如果没人记得你做过的事——你做没做过有区别吗？ | 代价回路 (Castration): 象征界注册的强制注销——你从未来的文本中被擦除。",
@@ -93,7 +93,7 @@ export const STAKES_GROUP_E: LibraryItemDef[] = [
     {
         id: "stake_talent_loss",
         name: "才华丧失", nameEn: "Talent Lost",
-        group: "E. 客体小a剥离", groupEn: "Objet a Extraction",
+        group: "E. 欲望的抽离", groupEn: "Objet a Extraction",
         def: "你最引以为傲的能力——手艺、天赋、绝技——某天醒来发现它不见了。",
         defEn: "Your proudest ability — craft, gift, special skill — one morning you wake to find it gone.",
         core: "A面：失去才华迫使你面对'除了才华，你还是谁'。也许你的价值不只是你能做什么。/ B面：但当你的手记得所有的指法，大脑却无法再连接到那条通路——你会经历一种特殊的幻肢痛。你还像音乐家一样听，却不能再像音乐家一样弹。关键张力：如果你不再是'那个天才'——你还是谁？ | 代价回路 (Castration): 欲望-能力通路的物理截断。",
@@ -104,7 +104,7 @@ export const STAKES_GROUP_E: LibraryItemDef[] = [
     {
         id: "stake_faith_void",
         name: "信仰空洞", nameEn: "Faith Void",
-        group: "E. 客体小a剥离", groupEn: "Objet a Extraction",
+        group: "E. 欲望的抽离", groupEn: "Objet a Extraction",
         def: "不是信仰被击碎（那在Group B）——而是你发现那个位置从来就是空的。你崇拜了一辈子的神坛上什么都没有。",
         defEn: "Not faith shattered (that's Group B) — but discovering the altar was always empty. You worshipped nothing for a lifetime.",
         core: "A面：发现'那里什么都没有'至少让你停止了对虚无的投喂——你终于可以用那些精力做真实的事。/ B面：但你面对的不是'一个被拆穿的谎言'——是'一个从未存在的支撑'。你后退一步，发现脚下一直就是悬崖——你只是之前不往下看。关键张力：你是从谎言中醒来了——还是从幻觉中跌出来了？ | 代价回路 (Castration): 大他者的缺席暴露——位子本身就是空的。",
@@ -115,7 +115,7 @@ export const STAKES_GROUP_E: LibraryItemDef[] = [
     {
         id: "stake_home_lost",
         name: "失去原乡", nameEn: "Homeland Lost",
-        group: "E. 客体小a剥离", groupEn: "Objet a Extraction",
+        group: "E. 欲望的抽离", groupEn: "Objet a Extraction",
         def: "你所有记忆的根系所在的那片土地——被摧毁了，或者永远不允许你回去。",
         defEn: "The land where all your memory's roots grew — destroyed, or you're forever barred from returning.",
         core: "A面：失去原乡的人可以在任何地方生根——因为你知道家不是一个地点，是一种你随身携带的能力。/ B面：但'故乡'不是GPS坐标——是你在某棵树下第一次被父亲扛上肩膀的记忆。那棵树被砍了，那片土地变了，你不是'回不去'——是'回去也找不到了'。关键张力：当故乡不在了——漂泊是一种自由还是一种永恒的无家可归？ | 代价回路 (Castration): 根系被拔除——你在地图上没有'回去'这个选项了。",
@@ -129,7 +129,7 @@ export const STAKES_GROUP_E: LibraryItemDef[] = [
     {
         id: "stake_road_not_taken",
         name: "未走的路", nameEn: "Road Not Taken",
-        group: "E. 客体小a剥离", groupEn: "Objet a Extraction",
+        group: "E. 欲望的抽离", groupEn: "Objet a Extraction",
         def: "你在某个分岔口做了选择——然后永久地失去了另一条路上所有可能发生的事。",
         defEn: "You chose at a fork — and permanently lost everything that could have happened on the other path.",
         core: "A面：选择就是拿起一把剪刀修剪可能性的枝条——正是因为你剪掉了其余的，这条路才获得了全部的养分。/ B面：但你在深夜会想：如果当时走了另一条……你不是后悔——你是在哀悼一个永远不会存在的版本的你。关键张力：一条被选中的路和一百条被放弃的路——哪一边更重？ | 代价回路 (Castration): 可能性空间的不可逆折叠。",
@@ -140,7 +140,7 @@ export const STAKES_GROUP_E: LibraryItemDef[] = [
     {
         id: "stake_youth_gone",
         name: "青春消逝", nameEn: "Youth Gone",
-        group: "E. 客体小a剥离", groupEn: "Objet a Extraction",
+        group: "E. 欲望的抽离", groupEn: "Objet a Extraction",
         def: "不是衰老（那在Group C）——而是突然意识到你人生中某些事只能在年轻时做，而那个窗口已经关了。",
         defEn: "Not aging (that's Group C) — but suddenly realizing some things could only be done in youth, and that window is shut.",
         core: "A面：意识到窗口关闭反而让你更珍惜剩余的窗口——至少你看清了什么还来得及。/ B面：但有些窗口关得无声无息——你不是在关上的那一刻知道的，你是在很久很久以后才意识到你早就错过了。关键张力：你错过的不是机会——是那个'有无限可能'的自己。 | 代价回路 (Castration): '一切皆有可能'这个青春幻觉的过期。",
@@ -151,7 +151,7 @@ export const STAKES_GROUP_E: LibraryItemDef[] = [
     {
         id: "stake_creative_block",
         name: "创造力枯竭", nameEn: "Creative Death",
-        group: "E. 客体小a剥离", groupEn: "Objet a Extraction",
+        group: "E. 欲望的抽离", groupEn: "Objet a Extraction",
         def: "灵感的泉眼干了——你还有技术但失去了那种'看到别人看不到的东西'的能力。",
         defEn: "The spring of inspiration has dried — you still have technique but lost the ability to 'see what others cannot.'",
         core: "A面：枯竭迫使你从'天才的灵感'转向'匠人的纪律'——也许深度比灵感更可靠。/ B面：但你记得它在的时候是什么感觉——那种不需要努力、画面自己涌来的状态。现在你面对空白画布，只有你和沉默在对峙。关键张力：没有灵感的艺术家——还是艺术家吗？ | 代价回路 (Castration): 创作欲望与创作能力之间的通道阻塞。",
@@ -162,7 +162,7 @@ export const STAKES_GROUP_E: LibraryItemDef[] = [
     {
         id: "stake_dream_denied",
         name: "梦想被禁", nameEn: "Dream Denied",
-        group: "E. 客体小a剥离", groupEn: "Objet a Extraction",
+        group: "E. 欲望的抽离", groupEn: "Objet a Extraction",
         def: "不是你放弃了梦想——是系统、命运或物理法则明确告诉你：不，你不可以。",
         defEn: "Not you abandoning the dream — but system, fate, or physical law explicitly telling you: no, you may not.",
         core: "A面：被禁止的梦想获得了一种额外的光环——正因为不可能，它在你心里永远保持完美。/ B面：但这种'完美'是残酷的安慰。你用'如果当初环境允许'来保护自己免于面对'也许即使允许我也做不到'。关键张力：你坚持说'是他们不让我'——你确定不是'你不敢'吗？ | 代价回路 (Castration): 欲望对象的禁止令——你只被允许远远看着它。",
@@ -173,7 +173,7 @@ export const STAKES_GROUP_E: LibraryItemDef[] = [
     {
         id: "stake_missed_moment",
         name: "错过的瞬间", nameEn: "Missed Moment",
-        group: "E. 客体小a剥离", groupEn: "Objet a Extraction",
+        group: "E. 欲望的抽离", groupEn: "Objet a Extraction",
         def: "一个本可以改变一切的瞬间——你迟到了、犹豫了、或者根本不知道它曾经存在过。",
         defEn: "A moment that could have changed everything — you were late, hesitated, or never even knew it existed.",
         core: "A面：错过本身就是筛选——如果你当时没有抓住它，也许它本来就不是你的。/ B面：但这不是安慰——这是事后的自我催眠。你知道你当时如果再早一步、再勇敢一点、再清醒一点……那个瞬间就是你的。关键张力：你错过的是那个瞬间——还是那个版本的你？ | 代价回路 (Castration): 时间的不可回头性——没有存档读取。",
@@ -187,7 +187,7 @@ export const STAKES_GROUP_E: LibraryItemDef[] = [
     {
         id: "stake_desire_death",
         name: "欲望熄灭", nameEn: "Desire Extinguished",
-        group: "E. 客体小a剥离", groupEn: "Objet a Extraction",
+        group: "E. 欲望的抽离", groupEn: "Objet a Extraction",
         def: "不是'得不到'——是连'想要'的能力都消失了。你的欲望引擎永久熄火。",
         defEn: "Not 'can't get' — the ability to 'want' itself vanished. Your desire engine permanently stalled.",
         core: "A面：不再想要意味着不再被操控——欲望是大他者拴住你的绳索，绳子断了你就自由了。/ B面：但没有绳索的自由不是自由——是漂浮。你不再被拉向任何方向，也不再向任何方向行走。你只是停下来了。关键张力：没有欲望的人——是解脱了还是已经死了？ | 代价回路 (Castration): 拉康的终极公式——$◇a的a被拔除，$独留。",
@@ -198,7 +198,7 @@ export const STAKES_GROUP_E: LibraryItemDef[] = [
     {
         id: "stake_meaning_collapse",
         name: "意义坍塌", nameEn: "Meaning Collapse",
-        group: "E. 客体小a剥离", groupEn: "Objet a Extraction",
+        group: "E. 欲望的抽离", groupEn: "Objet a Extraction",
         def: "不是某一件事失去了意义——是'意义'这个概念本身对你而言不再成立了。",
         defEn: "Not one thing losing meaning — the concept of 'meaning' itself no longer holds for you.",
         core: "A面：意义坍塌是虚无主义的起点——但尼采说，只有穿越虚无主义才能到达另一边的价值重估。/ B面：但大多数人不是'穿越'——是被卡在了虚无里面。你看不到另一边，因为你甚至不再相信'另一边'存在。关键张力：如果连'追求意义'本身都没有意义——你还剩什么？ | 代价回路 (Castration): 元叙事的总破产——不是一个故事失败了，是'讲故事'这件事失败了。",
@@ -209,7 +209,7 @@ export const STAKES_GROUP_E: LibraryItemDef[] = [
     {
         id: "stake_hollow_victory",
         name: "空洞胜利", nameEn: "Hollow Victory",
-        group: "E. 客体小a剥离", groupEn: "Objet a Extraction",
+        group: "E. 欲望的抽离", groupEn: "Objet a Extraction",
         def: "你赢了——你得到了你拼命追求的一切。站在山顶环顾四周，发现什么都不在了。",
         defEn: "You won — got everything you fought for. Standing on the summit looking around, you find nothing is there.",
         core: "A面：空洞的胜利至少证明了你有能力赢——这本身就是一种不可否认的成就。/ B面：但你爬上山顶不是为了'证明我能爬上来'——你以为上面有什么东西在等你。什么都没有。山只是山。关键张力：如果得到之后你才发现你不想要——那你这一路的攀爬算什么？ | 代价回路 (Castration): 客体小a的终极秘密——它只在追逐中存在，一旦被捕获就消失。",
@@ -220,7 +220,7 @@ export const STAKES_GROUP_E: LibraryItemDef[] = [
     {
         id: "stake_survivor_guilt",
         name: "幸存者之罪", nameEn: "Survivor's Guilt",
-        group: "E. 客体小a剥离", groupEn: "Objet a Extraction",
+        group: "E. 欲望的抽离", groupEn: "Objet a Extraction",
         def: "应该死的是你——但死的是别人。你活着本身变成了一种你无法偿还的债。",
         defEn: "It should have been you — but it was someone else. Being alive itself has become an unpayable debt.",
         core: "A面：活着至少意味着你可以替死者完成他们未竟的事——你的生命继承了双份的使命。/ B面：但你活着的每一天都在累积利息。你不是'带着使命活'——你是'带着欠条活'。你享受的每一个快乐都有一个声音在说：凭什么是你？关键张力：如果你的生命是用别人的死换来的——你有义务活得'值得'吗？ | 代价回路 (Castration): 存在本身变成了负债——呼吸即欠款。",
@@ -231,7 +231,7 @@ export const STAKES_GROUP_E: LibraryItemDef[] = [
     {
         id: "stake_absolute_solitude",
         name: "绝对孤独", nameEn: "Absolute Solitude",
-        group: "E. 客体小a剥离", groupEn: "Objet a Extraction",
+        group: "E. 欲望的抽离", groupEn: "Objet a Extraction",
         def: "不是一个人待着——是确认了世界上没有任何一个存在能真正理解你内在发生的事。",
         defEn: "Not being alone — but confirming that no existence in the world can ever truly understand what is happening inside you.",
         core: "A面：绝对孤独也是绝对自主——没有人理解你，也就没有人有资格评判你。你成为了你自己的唯一裁判。/ B面：但人是关系性的存在——没有他者的回应，你连'我到底是谁'都无法确认。你不是在独处——你是在存在论的真空里漂浮。关键张力：如果永远没有人能理解你——'你是谁'这个问题还有答案吗？ | 代价回路 (Castration): 关系维度的归零——你和宇宙之间再也没有中介了。",

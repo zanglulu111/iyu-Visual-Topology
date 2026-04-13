@@ -2,7 +2,7 @@ import { LibraryItemDef } from '../../../types';
 
 export const STAKES_GROUP_D: LibraryItemDef[] = [
     // ============================================================
-    // GROUP D. 超我献祭 (Superego Sacrifice) — 20 Items
+    // GROUP D. 灵魂的绞刑 (Superego Sacrifice) — 20 Items
     // 丧失维度：你的道德底线被踩碎——你变成了你曾发誓永远不会成为的那种人。
     // 核心感受："我怎么变成了这样的人？"
     // 光谱：底线突破(1-5) → 背叛/出卖(6-10) → 共谋/沉默(11-15) → 道德异化(16-20)
@@ -13,7 +13,7 @@ export const STAKES_GROUP_D: LibraryItemDef[] = [
     {
         id: "stake_kill",
         name: "亲手夺命", nameEn: "Taking a Life",
-        group: "D. 超我献祭", groupEn: "Superego Sacrifice",
+        group: "D. 灵魂的绞刑", groupEn: "Superego Sacrifice",
         def: "跨过'不可杀人'这条最古老的底线——且发现跨过之后自己还能继续活着。",
         defEn: "Crossing the oldest line — 'thou shalt not kill' — and discovering you can keep living afterward.",
         core: "A面：杀人有时是唯一能阻止更大杀戮的手段。/ B面：但真正的代价不是法律后果——是你发现自己'能做到'。曾经不可想象的事变成了你的履历。关键张力：如果杀了一个人能救一百个——你变成了英雄还是凶手？ | 代价回路 (Castration): '不可杀人'底线被物理性踩碎——且无法复原。",
@@ -24,7 +24,7 @@ export const STAKES_GROUP_D: LibraryItemDef[] = [
     {
         id: "stake_torture",
         name: "施加痛苦", nameEn: "Inflicting Pain",
-        group: "D. 超我献祭", groupEn: "Superego Sacrifice",
+        group: "D. 灵魂的绞刑", groupEn: "Superego Sacrifice",
         def: "为了'正确的目的'亲手对另一个人实施你曾经最鄙视的暴行。",
         defEn: "For the 'right purpose,' personally inflicting on another the very atrocity you once most despised.",
         core: "A面：有时只有暴力能从暴力手中救回受害者——干净的手不能从泥里拉人。/ B面：但你在施加痛苦时听到了自己心里某个东西断裂的声音。你曾经是受害者的同盟，现在你和施暴者使用着同一套工具。关键张力：用敌人的方法打败敌人——你赢了，但你还是你吗？ | 代价回路 (Castration): 道德洁癖的自我爆破。",
@@ -35,7 +35,7 @@ export const STAKES_GROUP_D: LibraryItemDef[] = [
     {
         id: "stake_child_harm",
         name: "伤害无辜", nameEn: "Harming the Innocent",
-        group: "D. 超我献祭", groupEn: "Superego Sacrifice",
+        group: "D. 灵魂的绞刑", groupEn: "Superego Sacrifice",
         def: "你的行动直接导致了一个绝对无辜的人的苦难——尤其是孩子、老人或者信任你的人。",
         defEn: "Your actions directly caused suffering to an absolutely innocent person — especially a child, elder, or someone who trusted you.",
         core: "A面：有时保护多数人必须牺牲少数无辜——这是所有决策者的终极困境。/ B面：但被牺牲的无辜者不是'统计数字'——是一个有名字的、曾经对你微笑的人。你的'正确决策'在他的眼泪面前毫无说服力。关键张力：如果你的'正确'建立在某个无辜者的废墟上——它还正确吗？ | 代价回路 (Castration): 守护者身份的内爆——你成了你发誓保护的人的加害者。",
@@ -46,7 +46,7 @@ export const STAKES_GROUP_D: LibraryItemDef[] = [
     {
         id: "stake_oath_break",
         name: "誓言背弃", nameEn: "Oath Breaking",
-        group: "D. 超我献祭", groupEn: "Superego Sacrifice",
+        group: "D. 灵魂的绞刑", groupEn: "Superego Sacrifice",
         def: "用全部灵魂起过的誓言——在极端压力下被你自己亲手撕碎。",
         defEn: "An oath sworn with your entire soul — torn apart by your own hands under extreme pressure.",
         core: "A面：打破一个不再合理的誓言有时恰恰是道德勇气——盲目守约可以和盲目残忍一样有害。/ B面：但你不是在'理性评估后取消'——你是在恐惧中食言。你知道那个对你说'我相信你'的人此刻正在某处等你兑现。关键张力：一个在绝境中背弃誓言的人——是懦夫还是幸存者？ | 代价回路 (Castration): 人格信用的核心破产。",
@@ -57,7 +57,7 @@ export const STAKES_GROUP_D: LibraryItemDef[] = [
     {
         id: "stake_mercy_kill",
         name: "慈悲杀戮", nameEn: "Mercy Kill",
-        group: "D. 超我献祭", groupEn: "Superego Sacrifice",
+        group: "D. 灵魂的绞刑", groupEn: "Superego Sacrifice",
         def: "出于爱，亲手终结你最爱的人的痛苦——且知道世界不会理解这是'爱'。",
         defEn: "Out of love, personally ending the suffering of the one you love most — knowing the world will never understand this as 'love.'",
         core: "A面：如果放手就是爱，慈悲杀戮就是爱的最高形态——你用自己的灵魂换取了对方的解脱。/ B面：但你活下来了。你要带着'我亲手杀了我最爱的人'这个事实度过余生。没有人会替你承担这个重量。关键张力：如果你的爱只能以这种方式表达——你还敢称它为'爱'吗？ | 代价回路 (Castration): 爱与杀之间的不可能等式。",
@@ -71,7 +71,7 @@ export const STAKES_GROUP_D: LibraryItemDef[] = [
     {
         id: "stake_betray_ally",
         name: "出卖同伴", nameEn: "Betraying an Ally",
-        group: "D. 超我献祭", groupEn: "Superego Sacrifice",
+        group: "D. 灵魂的绞刑", groupEn: "Superego Sacrifice",
         def: "在极端压力下将信任你的人的秘密、位置或生命交给了对方。",
         defEn: "Under extreme pressure, handing over the secret, location, or life of someone who trusted you to the other side.",
         core: "A面：出卖有时是唯一能让更多人活下来的选择——一个人的信任 vs. 十个人的性命。/ B面：但被你出卖的人在被带走时回头看了你一眼。那个眼神会住在你的余生里。关键张力：你出卖他是因为别无选择——还是因为你害怕轮到自己？ | 代价回路 (Castration): 信义结构的不可逆爆破。",
@@ -82,7 +82,7 @@ export const STAKES_GROUP_D: LibraryItemDef[] = [
     {
         id: "stake_sell_soul",
         name: "灵魂交易", nameEn: "Selling the Soul",
-        group: "D. 超我献祭", groupEn: "Superego Sacrifice",
+        group: "D. 灵魂的绞刑", groupEn: "Superego Sacrifice",
         def: "用你最珍视的道德信条去交换一样你迫切需要的东西——且交易不可撤销。",
         defEn: "Trading your most cherished moral code for something you desperately need — and the deal is irreversible.",
         core: "A面：灵魂交易至少意味着你的灵魂有人愿意出价——你的道德尊严被当作了具有交换价值的东西。/ B面：但交易完成后你会发现：你得到了你想要的，但你已经不是那个'想要它'的人了。欲望在交易中被实现的同时也被取消了。关键张力：如果得到之后你已经不是原来的你——那是谁在享用这份收获？ | 代价回路 (Castration): 浮士德契约——得到了一切，失去了'值得拥有一切'的资格。",
@@ -93,7 +93,7 @@ export const STAKES_GROUP_D: LibraryItemDef[] = [
     {
         id: "stake_abandon",
         name: "见死不救", nameEn: "Abandonment",
-        group: "D. 超我献祭", groupEn: "Superego Sacrifice",
+        group: "D. 灵魂的绞刑", groupEn: "Superego Sacrifice",
         def: "你有能力伸出手——但你选择了不伸。你让一个本可以被你救活的人沉了下去。",
         defEn: "You had the ability to reach out — but chose not to. You let someone who could have been saved sink.",
         core: "A面：有时放弃一个人是为了不让更多人陪葬——残忍的作战优先级不是冷血，是数学。/ B面：但你'选择不救'的那一刻，你和那些你鄙视的冷漠旁观者之间的界线消失了。你曾经以为自己'不一样'——现在你知道了，你一样。关键张力：你没有害他——但你也没救他。不作为和作恶之间的距离有多远？ | 代价回路 (Castration): '我和他们不一样'这个信念的崩塌。",
@@ -104,7 +104,7 @@ export const STAKES_GROUP_D: LibraryItemDef[] = [
     {
         id: "stake_deceive_loved",
         name: "欺骗至亲", nameEn: "Deceiving Loved Ones",
-        group: "D. 超我献祭", groupEn: "Superego Sacrifice",
+        group: "D. 灵魂的绞刑", groupEn: "Superego Sacrifice",
         def: "对你最信任你的人编织一个精密的谎言——且必须每天维护这个谎言直到它变成你的第二层皮肤。",
         defEn: "Weaving an elaborate lie for the person who trusts you most — maintaining it daily until it becomes your second skin.",
         core: "A面：有些谎言是保护——对方知道真相只会更痛苦。善意的谎言是你替对方承受了真实的重量。/ B面：但你每次看着对方信任的眼神时，你知道那份信任建立在你的谎言之上。你不是在保护他——你是在用谎言控制他对世界的认知。关键张力：善意的欺骗和恶意的操控之间的界限在哪——由你来画吗？ | 代价回路 (Castration): 亲密关系的地基被你亲手掺了假。",
@@ -115,7 +115,7 @@ export const STAKES_GROUP_D: LibraryItemDef[] = [
     {
         id: "stake_use_love",
         name: "利用情感", nameEn: "Weaponizing Love",
-        group: "D. 超我献祭", groupEn: "Superego Sacrifice",
+        group: "D. 灵魂的绞刑", groupEn: "Superego Sacrifice",
         def: "把别人对你的真心爱慕变成你达到目的的工具——爱被你改装成了武器。",
         defEn: "Turning someone's genuine love for you into a tool for your ends — love retrofitted into a weapon.",
         core: "A面：利用感情有时是弱者唯一的杠杆——当你没有权力、没有金钱、没有暴力时，爱是最后一张牌。/ B面：但你在打出这张牌的时候，你同时污染了'爱'这个概念本身。从此以后，你不确定自己是否还有能力真心爱一个人——因为你已经知道爱可以被工具化。关键张力：一个曾经把爱当武器用的人——还有资格渴望被爱吗？ | 代价回路 (Castration): 爱的纯粹性被永久污染。",
@@ -129,7 +129,7 @@ export const STAKES_GROUP_D: LibraryItemDef[] = [
     {
         id: "stake_complicity",
         name: "沉默共谋", nameEn: "Silent Complicity",
-        group: "D. 超我献祭", groupEn: "Superego Sacrifice",
+        group: "D. 灵魂的绞刑", groupEn: "Superego Sacrifice",
         def: "你看到了不义——但你选择闭嘴。你的沉默让暴行得以继续。",
         defEn: "You saw injustice — but chose to shut your mouth. Your silence allowed atrocity to continue.",
         core: "A面：沉默有时是保护自己和家人唯一的选择——在恐怖面前要求每个人都做英雄是道德绑架。/ B面：但你的沉默不是'中立'——它是一票投给了施害者。关键张力：不是每个人都有义务做英雄——但如果所有人都这么想，英雄就永远不会出现。 | 代价回路 (Castration): '我至少没做坏事'这块遮羞布被撕掉。",
@@ -140,7 +140,7 @@ export const STAKES_GROUP_D: LibraryItemDef[] = [
     {
         id: "stake_enforce",
         name: "执行恶令", nameEn: "Enforcing Evil Orders",
-        group: "D. 超我献祭", groupEn: "Superego Sacrifice",
+        group: "D. 灵魂的绞刑", groupEn: "Superego Sacrifice",
         def: "你知道命令是错的——但你执行了它。你的手是干净的，因为脏活是你替别人干的。",
         defEn: "You knew the order was wrong — but you executed it. Your hands are clean because the dirty work was done on another's behalf.",
         core: "A面：一个不执行命令的体系会立刻瓦解——服从是文明运转的螺丝钉。/ B面：但当命令本身是罪行时，'我只是执行者'恰恰是罪行的运转条件。阿伦特的'平庸之恶'——恶的真正面孔不是恶魔，是文员。关键张力：你违抗就会被替换——但'可替换'不能免除你的责任。 | 代价回路 (Castration): 道德能动性被让渡给系统——你自愿变成了齿轮。",
@@ -151,7 +151,7 @@ export const STAKES_GROUP_D: LibraryItemDef[] = [
     {
         id: "stake_profit_from_evil",
         name: "从恶获利", nameEn: "Profiting from Evil",
-        group: "D. 超我献祭", groupEn: "Superego Sacrifice",
+        group: "D. 灵魂的绞刑", groupEn: "Superego Sacrifice",
         def: "你没有制造苦难——但你从别人的苦难中获取了好处，且你选择继续获取。",
         defEn: "You didn't create suffering — but you profited from others' suffering, and you chose to keep profiting.",
         core: "A面：不从系统中获利意味着你和你的家人也会变成受害者——你只是在做每个人都在做的事。/ B面：但'每个人都在做'不是辩护——它恰恰是系统稳定运转的核心秘密。你的舒适建立在某个你看不到的人的痛苦之上。关键张力：如果退出这个系统意味着你的孩子挨饿——你有权利做那个道德上'干净'的人吗？ | 代价回路 (Castration): 道德洁净的不可能性——手早就脏了。",
@@ -162,7 +162,7 @@ export const STAKES_GROUP_D: LibraryItemDef[] = [
     {
         id: "stake_become_oppressor",
         name: "变成压迫者", nameEn: "Becoming the Oppressor",
-        group: "D. 超我献祭", groupEn: "Superego Sacrifice",
+        group: "D. 灵魂的绞刑", groupEn: "Superego Sacrifice",
         def: "为了推翻旧的压迫体系，你建立了一个新的——然后发现你坐在了和旧暴君同一把椅子上。",
         defEn: "To overthrow the old oppression, you built a new one — then found yourself sitting in the old tyrant's chair.",
         core: "A面：革命需要权力集中——没有铁腕就没有变革。历史上所有成功的解放运动都需要一个'暂时的'独裁者。/ B面：但'暂时'从来不是暂时的。权力改变了你——不是突然地，而是一点一点地。直到有一天你发现'我做的和他做的有什么区别'。关键张力：你推翻了暴君——但你还能推翻你自己吗？ | 代价回路 (Castration): 革命的自噬——屠龙者反坐龙椅。",
@@ -173,7 +173,7 @@ export const STAKES_GROUP_D: LibraryItemDef[] = [
     {
         id: "stake_sacrifice_other",
         name: "牺牲他人", nameEn: "Sacrificing Others",
-        group: "D. 超我献祭", groupEn: "Superego Sacrifice",
+        group: "D. 灵魂的绞刑", groupEn: "Superego Sacrifice",
         def: "你做出了'正确的决定'——但那个决定的代价不是你付的，是一个没有被问过意见的人替你付的。",
         defEn: "You made the 'right decision' — but the cost wasn't paid by you; it was paid by someone who was never consulted.",
         core: "A面：领导者的职责就是做别人做不了的决定——如果你不决定谁牺牲，所有人都会牺牲。/ B面：但你活着，而他死了。你做了'正确的决定'——可你永远无法确定如果你和他互换位置，你还会做出同样的'正确决定'。关键张力：如果'正确'的代价总是由别人来付——那是正义还是特权？ | 代价回路 (Castration): 决策者的幸存者愧疚——你的正确建立在别人的坟墓上。",
@@ -187,7 +187,7 @@ export const STAKES_GROUP_D: LibraryItemDef[] = [
     {
         id: "stake_moral_numb",
         name: "道德麻木", nameEn: "Moral Numbness",
-        group: "D. 超我献祭", groupEn: "Superego Sacrifice",
+        group: "D. 灵魂的绞刑", groupEn: "Superego Sacrifice",
         def: "不再对不义感到愤怒，不再对痛苦感到同情——你的道德神经被磨断了。",
         defEn: "No longer angered by injustice, no longer moved by suffering — your moral nerves have been ground away.",
         core: "A面：麻木是过度暴露的自我保护——你的大脑通过关闭情感来阻止崩溃。/ B面：但保护和退化之间只有一线之隔。你已经分不清自己是'选择不感受'还是'丧失了感受的能力'。关键张力：如果你对一切都无所谓了——你是变强了还是坏掉了？ | 代价回路 (Castration): 道德感知的钝化——你的良心不是被杀死了，是被磨成了茧。",
@@ -198,7 +198,7 @@ export const STAKES_GROUP_D: LibraryItemDef[] = [
     {
         id: "stake_enjoy_power",
         name: "享受权力", nameEn: "Enjoying Power",
-        group: "D. 超我献祭", groupEn: "Superego Sacrifice",
+        group: "D. 灵魂的绞刑", groupEn: "Superego Sacrifice",
         def: "比变成压迫者更可怕的一步——你发现你享受它。你喜欢别人怕你。",
         defEn: "A step worse than becoming the oppressor — you discover you enjoy it. You like being feared.",
         core: "A面：权力本身不是恶的——享受权力意味着你终于不再假装自己不想要它了。诚实比伪善更接近自我认知。/ B面：但你在享受的瞬间听到了超我最后的声音在说：'你曾经恨的就是这个。'然后那个声音消失了。关键张力：承认自己享受权力——是致命的诚实，还是致命的堕落？ | 代价回路 (Castration): 超我守卫的永久撤离——道德预警系统的静默。",
@@ -209,7 +209,7 @@ export const STAKES_GROUP_D: LibraryItemDef[] = [
     {
         id: "stake_hypocrisy",
         name: "成为伪善者", nameEn: "Becoming a Hypocrite",
-        group: "D. 超我献祭", groupEn: "Superego Sacrifice",
+        group: "D. 灵魂的绞刑", groupEn: "Superego Sacrifice",
         def: "你嘴上说的和手上做的完全相反——且你已经说服自己这种分裂是'必要的成熟'。",
         defEn: "What you say and what you do are complete opposites — and you've convinced yourself this split is 'necessary maturity.'",
         core: "A面：没有一个在复杂世界运作的人能做到言行完全一致——某种程度的策略性偏差是生存所需。/ B面：但当你连自己都分不清你到底信哪一套时——你不是在'策略性调整'，你是在人格分裂的路上狂奔。关键张力：你说的那些话——你自己还信吗？ | 代价回路 (Castration): 内在一致性的碎裂——你变成了两个互相矛盾的人。",
@@ -220,7 +220,7 @@ export const STAKES_GROUP_D: LibraryItemDef[] = [
     {
         id: "stake_addiction",
         name: "堕入沉溺", nameEn: "Addiction",
-        group: "D. 超我献祭", groupEn: "Superego Sacrifice",
+        group: "D. 灵魂的绞刑", groupEn: "Superego Sacrifice",
         def: "你毕生视为不可触碰的东西——毒品、赌博、暴力或某种更隐秘的快感——终于俘获了你。",
         defEn: "The thing you spent your life swearing was untouchable — drugs, gambling, violence, or a more hidden pleasure — has finally captured you.",
         core: "A面：沉溺至少证明了你是一个有欲望的活物——只有真正在活的人才会被什么东西勾住。/ B面：但你知道你正在下沉，而下沉的速度正在加快，而你已经失去了'想要停下来'的那个部件。关键张力：当你知道自己在自毁但停不下来——那个'知道'还有什么用？ | 代价回路 (Castration): 意志主权的让渡——你知道牢笼的门是开的，但你不想出去。",
@@ -231,7 +231,7 @@ export const STAKES_GROUP_D: LibraryItemDef[] = [
     {
         id: "stake_forgive_unforgivable",
         name: "饶恕不可饶恕", nameEn: "Forgiving the Unforgivable",
-        group: "D. 超我献祭", groupEn: "Superego Sacrifice",
+        group: "D. 灵魂的绞刑", groupEn: "Superego Sacrifice",
         def: "你选择原谅了那个毁了你一切的人——不是因为他值得被原谅，而是因为恨已经在从内部杀死你了。",
         defEn: "You chose to forgive the one who destroyed everything — not because they deserve it, but because hatred was killing you from within.",
         core: "A面：原谅是最终极的权力行为——是你单方面宣布：'你对我没有权力了。'你从受害者变成了裁判。/ B面：但有些东西是否真的可以被原谅？你在说'我原谅你'的时候，那些被毁掉的、永远无法复原的东西是否同意了？关键张力：饶恕不可饶恕——是终极的自由，还是对受害者记忆的背叛？ | 代价回路 (Castration): 复仇权利的自我缴械——最后的代价是放弃追究代价。",

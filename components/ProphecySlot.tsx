@@ -338,11 +338,6 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
                     </div>
                     <div className={`text-xs md:text-sm font-bold mb-3 leading-relaxed whitespace-pre-line ${theme === 'retro' ? 'text-black' : 'text-zinc-100'}`}>
                         {lang === 'EN' && hoveredPortal.details.defEn ? hoveredPortal.details.defEn : hoveredPortal.details.def}
-                        {hoveredPortal.details.core && (
-                            <span className={`block text-[10px] italic mt-2 ${theme === 'retro' ? 'text-[#8B261D]/80' : 'text-zinc-300'}`}>
-                                {lang === 'EN' && hoveredPortal.details.coreEn ? hoveredPortal.details.coreEn : hoveredPortal.details.core}
-                            </span>
-                        )}
                     </div>
                 </div>,
                 document.body
