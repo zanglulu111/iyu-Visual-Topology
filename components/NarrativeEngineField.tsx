@@ -252,50 +252,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
         setHoveredPortal(null);
     };
 
-    const renderLevelButton = (baseBlockId: string) => {
-        const xBlockId = baseBlockId + 'x';
-        const rawTags = fieldState[xBlockId];
-        const tags = Array.isArray(rawTags) ? rawTags : (rawTags ? [String(rawTags)] : []);
-        const currentTag = tags[0] || "";
-        const match = currentTag.match(/^L(\d)/);
-        const levelText = match ? `L${match[1]}` : "L-";
 
-        // Find current tag info for detailed tooltip
-        const libId = `${xBlockId}_lib`;
-        const category = NARRATIVE_ENGINE_LIBRARY.find(c => c.id === libId);
-        const currentItem = category?.items.find(i => i.name === currentTag);
-        
-        let displayTitle = category ? (lang === 'EN' ? category.nameEn : category.name) : baseBlockId.toUpperCase();
-        displayTitle = displayTitle.replace(/\s*\(.*?\)/, "");
-
-        // Determine tooltop content: selected item or category default
-        const tooltipHeader = currentItem 
-            ? (lang === 'EN' ? currentItem.nameEn : currentItem.name) 
-            : displayTitle;
-            
-        const tooltipDetails = {
-            def: lang === 'EN' 
-                ? (currentItem?.defEn || category?.descEn || "Narrative Coefficient")
-                : (currentItem?.def || category?.desc || "叙事系数控制指标。"),
-            core: lang === 'EN'
-                ? (currentItem?.coreEn || category?.descEn || "Drive/Intrusion power adjustment.")
-                : (currentItem?.core || category?.desc || "调节该模块的叙事当量与强度阈值。"),
-        };
-
-        return (
-            <button
-                onClick={(e) => { e.stopPropagation(); openLibrary(xBlockId); }}
-                onMouseEnter={(e) => {
-                    const count = getLibraryCount(xBlockId);
-                    handleMouseEnter(e, tooltipDetails, tooltipHeader, count);
-                }}
-                onMouseLeave={handleMouseLeave}
-                className={`w-10 h-10 flex items-center justify-center border font-mono text-sm font-bold transition-all self-center shrink-0 mx-1 ${theme === 'retro' ? 'border-[#8B261D] text-[#8B261D] bg-[#F9F7F1]/50 hover:bg-[#8B261D] hover:text-white' : 'border-zinc-700 text-zinc-400 bg-zinc-900/20 hover:border-zinc-500 hover:text-white'} rounded active:scale-90 shadow-sm`}
-            >
-                {levelText}
-            </button>
-        );
-    };
 
     const handleRandomizeSingleBlock = (blockId: string) => {
         if (lockedModules[blockId]) return;
@@ -400,9 +357,8 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                             <div className="flex items-center gap-3 mb-4">{osTheme.icon}<span className={`text-base uppercase tracking-[0.3em] font-black text-zinc-400 transition-colors ${osTheme.label}`}>{lang === 'EN' ? osLabel.split('/')[1] : osLabel.split('/')[0]}</span></div>
                             <div onClick={() => openLibrary(currentOSKey)} className={`text-3xl md:text-6xl font-serif font-bold tracking-[0.1em] mb-3 transition duration-300 cursor-pointer hover:scale-110 hover:z-50 inline-block ${currentPsychicOS ? (theme === 'retro' ? 'text-black' : 'text-white') : (theme === 'retro' ? 'text-zinc-500 hover:text-black' : 'text-zinc-500 hover:text-white')}`}>{osDisplay}</div>
                             {osDetails && (
-                                <div className={`text-sm md:text-lg font-normal w-full px-4 text-center leading-relaxed whitespace-pre-line ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}`}>
+                                <div className={`text-sm md:text-lg font-normal w-full max-w-xl mx-auto px-4 text-center leading-relaxed whitespace-pre-line ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}`}>
                                     {lang === 'EN' && osDetails.defEn ? osDetails.defEn : osDetails.def}
-                                    <span className={`block text-xs md:text-sm italic mt-1 ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}`}>{lang === 'EN' && osDetails.coreEn ? osDetails.coreEn : osDetails.core}</span>
                                 </div>
                             )}
                             <div className={`absolute right-4 top-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity ${osTheme.accent}`}><ChevronRight size={24} /></div>
@@ -516,7 +472,6 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                                 <span className="font-serif text-xl md:text-3xl font-light select-none text-[var(--text-main)]">
                                     {lang === 'EN' ? "But blocked by" : "却遭到"}
                                 </span>
-                                {renderLevelButton("engine_m4")}
                                 {renderProphecySlot({ blockId: "engine_m4", placeholderCN: "M4. 大他者阻断", placeholderEN: "M4. The Other", hideAffixes: true })}
                                 <span className="font-serif text-xl md:text-3xl font-light select-none text-[var(--text-main)]">
                                     {lang === 'EN' ? ", he must pay" : "的重重阻击，面临"}
@@ -532,7 +487,6 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                                 <span className="font-serif text-xl md:text-3xl font-light select-none text-[var(--text-main)]">
                                     {lang === 'EN' ? "He chooses" : "他决定通过"}
                                 </span>
-                                {renderLevelButton("engine_m5")}
                                 {renderProphecySlot({ blockId: "engine_m5", placeholderCN: "M5. 行动驱力", placeholderEN: "M5. Drive", hideAffixes: true })}
                                 <span className="font-serif text-xl md:text-3xl font-light select-none text-[var(--text-main)]">
                                     {lang === 'EN' ? "to struggle, leading to" : "抵抗，最终导向"}

@@ -410,8 +410,7 @@ export const buildPromptV2 = (
   const m5Info = getMParamInfo(fieldState, '_m5');
   const m6Info = getMParamInfo(fieldState, '_m6');
   const m7Info = getMParamInfo(fieldState, '_m7');
-  const m4xInfo = getMParamInfo(fieldState, 'engine_m4x');
-  const m5xInfo = getMParamInfo(fieldState, 'engine_m5x');
+  // m4xInfo/m5xInfo removed in v3.0
 
   const sur1Tags = getTagsBySuffix(fieldState, '_genre');
   const sur2Tags = getTagsBySuffix(fieldState, '_era');
@@ -506,13 +505,7 @@ Task: 基于以下迷雾学派引擎参数，生成 3 个电影级故事概念�
   };
   BLOCK_1B += `${arcDescriptions[tension.narrativeArc] || ''}\n\n`;
 
-  // 压迫与驱力视差
-  if (m4xInfo || m5xInfo) {
-    BLOCK_1B += `### 压迫与驱力视差\n`;
-    if (m4xInfo) BLOCK_1B += `* **M4X 压迫烈度**: [${m4xInfo.tags.join('/')}] → ${m4xInfo.def}\n`;
-    if (m5xInfo) BLOCK_1B += `* **M5X 驱力流速**: [${m5xInfo.tags.join('/')}] → ${m5xInfo.def}\n`;
-    BLOCK_1B += '\n';
-  }
+  // M4X/M5X parallax section removed in v3.0
 
   // 红线
   if (errors.length > 0) {

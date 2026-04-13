@@ -32,8 +32,8 @@
 
 **【示例】:**
 ```typescript
-logic: "每当获得 M3（欲望）的进展，必须在 M6（代价）中立即支付等额的‘功德’或‘痛苦’以保持平衡。",
-logicEn: "Whenever progress is made toward M3 (Desire), an equivalent 'merit' or 'pain' must be paid in M6 (Stakes) to maintain equilibrium."
+logic: "每当获得 M3 幻象破绽(◇) 的进展，必须在 M6 代价切口(−Φ) 中立即支付等额的'功德'或'痛苦'以保持平衡。",
+logicEn: "Whenever progress is made toward M3 Phantom-Flaw(◇), an equivalent 'merit' or 'pain' must be paid in M6 Price-Cut(−Φ) to maintain equilibrium."
 ```
 
 ### 2) patch.mechanics / mechanicsEn (协议算法 / 核心机制)

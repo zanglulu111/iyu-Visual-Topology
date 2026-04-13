@@ -12,9 +12,9 @@ interface ArchiveDirectoryModalProps {
     isFullScreen?: boolean;
 }
 
-export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({ 
-    isOpen, 
-    onClose, 
+export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
+    isOpen,
+    onClose,
     lang
 }) => {
     const { theme } = useTheme();
@@ -51,13 +51,8 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
         }
     }, [isOpen]);
 
-    // Dismiss expanded card on scroll/swipe
-    const handleScrollDismiss = useCallback((e: WheelEvent) => {
-        if (openingId && (Math.abs(e.deltaX) > 10 || Math.abs(e.deltaY) > 10)) {
-            setOpeningId(null);
-            setIsTransitioning(false);
-        }
-    }, [openingId]);
+    // Scroll dismiss removed to prevent unstable feeling
+    const handleScrollDismiss = useCallback((e: WheelEvent) => { }, [openingId]);
 
     useEffect(() => {
         const container = scrollContainerRef.current;
@@ -71,22 +66,20 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
 
         // Remove scroll event listener as we'll handle sync in the animation loop
         // to avoid conflicts with our custom momentum logic.
-        
+
         const handleWheel = (e: WheelEvent) => {
             // Prevent interference if user is reading a selected case
             if (selectedCaseId) return;
 
             if (openingId) {
-                if (Math.abs(e.deltaX) > 10 || Math.abs(e.deltaY) > 10) {
-                    setOpeningId(null);
-                    setIsTransitioning(false);
-                }
+                // Pin the expanded card to the right and prevent scrolling to ensure stability
+                e.preventDefault();
                 return;
             }
 
             // Determine the dominant scroll direction (some users scroll vertically, trackpads horizontally)
             const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-            
+
             // Apply delta directly to targetScrollRef for consistent momentum,
             // regardless of whether it's a discrete mouse wheel or continuous trackpad
             targetScrollRef.current += delta;
@@ -140,32 +133,32 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
 
         let rafId: number;
         const container = scrollContainerRef.current;
-        
+
         const updateWave = () => {
             if (!container) return;
 
             // 1. Smooth Scroll Interpolation (Momentum)
             const maxScroll = container.scrollWidth - container.offsetWidth;
             targetScrollRef.current = Math.max(0, Math.min(maxScroll, targetScrollRef.current));
-            
+
             const scrollDiff = targetScrollRef.current - container.scrollLeft;
-            if (Math.abs(scrollDiff) > 0.05 && !openingId) {
+            if (Math.abs(scrollDiff) > 0.05) {
                 container.scrollLeft += scrollDiff * 0.18; // Smoother but faster target following
                 lastInternalScrollPos.current = container.scrollLeft;
-            } else if (Math.abs(scrollDiff) <= 0.05 && !openingId) {
+            } else if (Math.abs(scrollDiff) <= 0.05) {
                 container.scrollLeft = targetScrollRef.current;
                 lastInternalScrollPos.current = container.scrollLeft;
             }
-            
+
             if (openingId) {
-                activityRef.current *= 0.8; 
+                activityRef.current *= 0.8;
             } else {
                 const currentScroll = container.scrollLeft;
                 const diff = Math.abs(currentScroll - lastScrollPos.current);
                 lastScrollPos.current = currentScroll;
-                
+
                 // Sensitivity: faster reaction to movement
-                const targetActivity = Math.min(1.8, diff * 0.2); 
+                const targetActivity = Math.min(1.8, diff * 0.2);
                 activityRef.current = activityRef.current * 0.8 + targetActivity * 0.2;
             }
 
@@ -179,17 +172,17 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
                         scrollPlayingRef.current = true;
                     }
                 }
-                
+
                 // Sensitivity: modulate volume based on activity
-                const volThreshold = 0.002; 
+                const volThreshold = 0.002;
                 if (scrollPlayingRef.current) {
                     // Reduce pitch modulation range to avoid deformation
                     // Volume: 0 to 0.65 based on movement
                     // Rate: 0.95 (slowest) to 1.10 (fastest) for subtler feel
                     const targetVolume = activityRef.current > volThreshold ? Math.min(0.65, activityRef.current * 0.6) : 0;
-                    const targetRate = 0.95 + Math.min(0.15, activityRef.current * 0.1); 
-                    
-                    soundManager.setVolume('archiveScroll', targetVolume, true); 
+                    const targetRate = 0.95 + Math.min(0.15, activityRef.current * 0.1);
+
+                    soundManager.setVolume('archiveScroll', targetVolume, true);
                     soundManager.setPlaybackRate('archiveScroll', targetRate, true);
                 }
             } else if (scrollPlayingRef.current) {
@@ -201,7 +194,7 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
 
             const viewportCenter = viewportWidthRef.current / 2;
             const scrollLeft = container.scrollLeft;
-            
+
             // --- Center Alignment Detection for Tick Sound ---
             let closestIndex = -1;
             let minDistance = 9999;
@@ -211,39 +204,39 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
             if (cardsRef.current.length === 0) {
                 cardsRef.current = Array.from(container.querySelectorAll('.archive-card-wrapper'));
             }
-            
+
             cardsRef.current.forEach((card: any, i: number) => {
                 const cardId = card.getAttribute('data-id');
                 if (cardId === openingId) return;
 
                 const cardWidth = 110;
-                const gap = 24; 
+                const gap = 24;
                 const cardPosInContent = centerPadding + i * (cardWidth + gap) + cardWidth / 2;
                 const cardCenter = cardPosInContent - scrollLeft;
-                
+
                 const distFromCenter = Math.abs(cardCenter - viewportCenter);
-                
-                const horizon = 700; 
-                const proximity = Math.pow(Math.max(0, 1 - distFromCenter / horizon), 1.3); 
+
+                const horizon = 700;
+                const proximity = Math.pow(Math.max(0, 1 - distFromCenter / horizon), 1.3);
                 const intensity = proximity * activityRef.current;
-                
-                const zTranslate = intensity * 480; 
-                const scale = 1 + (intensity * 0.18); 
-                const rotateY = (cardCenter - viewportCenter) * -0.15 * intensity; 
-                
+
+                const zTranslate = intensity * 480;
+                const scale = 1 + (intensity * 0.18);
+                const rotateY = (cardCenter - viewportCenter) * -0.15 * intensity;
+
                 const inner = card.querySelector('.archive-card-inner');
                 if (inner) {
                     inner.style.transition = activityRef.current > 0.01 ? 'none' : 'all 0.8s cubic-bezier(0.16, 1, 0.3, 1)';
                     inner.style.transform = `translate3d(0, 0, ${zTranslate}px) scale(${scale}) rotateY(${rotateY}deg)`;
-                    
+
                     const img = inner.querySelector('img');
                     if (img) {
-                        const activeFactor = Math.min(1.0, activityRef.current * 4.0); 
+                        const activeFactor = Math.min(1.0, activityRef.current * 4.0);
                         const colorIntensity = Math.pow(proximity, 1.5) * activeFactor;
-                        
+
                         const grayscale = Math.max(0, 100 - (colorIntensity * 105));
                         const brightness = 35 + (colorIntensity * 65);
-                        
+
                         img.style.filter = `grayscale(${grayscale}%) brightness(${brightness}%) contrast(105%)`;
                     }
                 }
@@ -263,6 +256,21 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
         // Play confirmation sound
         soundManager.play('confirm', { volume: 0.5 });
 
+        // Center the selected card to ensure perfectly fixed positioning on the right
+        const container = scrollContainerRef.current;
+        if (container) {
+            const index = items.findIndex(item => item.id === id);
+            const gap = 24;
+            // The items before this keep their 110px width and 24px gap
+            const cardLeftPos = centerPadding + index * (cardWidth + gap);
+            
+            const viewportWidth = container.offsetWidth;
+            const expandedWidth = Math.min(viewportWidth * 0.8, 800);
+            
+            const expectedCenter = cardLeftPos + expandedWidth / 2;
+            targetScrollRef.current = expectedCenter - viewportWidth / 2;
+        }
+
         setOpeningId(id);
         setIsTransitioning(true);
     };
@@ -281,7 +289,7 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
     const selectedCase = items.find(item => item.id === (openingId || selectedCaseId));
 
     return (
-        <div 
+        <div
             onClick={() => {
                 if (openingId) {
                     setOpeningId(null);
@@ -289,7 +297,7 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
                 }
             }}
             className={`relative w-full h-full font-sans overflow-hidden ${theme === 'retro' ? 'bg-[#EFE9E0] text-[#2D2D2D]' : 'bg-black text-white'} perspective-2000 transition-colors duration-1000 ${openingId ? 'cursor-zoom-out' : ''}`}>
-            
+
             {theme === 'retro' && (
                 <div className="absolute inset-0 pointer-events-none opacity-20 texture-paper animate-in fade-in duration-1000 z-0"></div>
             )}
@@ -297,12 +305,12 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
             {/* Cinematic Background Typography (Split Letters) */}
             {(openingId || selectedCaseId) && selectedCase && (
                 <div className={`absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden z-0 transition-all duration-1000 ease-out ${openingId ? 'opacity-30 scale-100' : 'opacity-5 scale-95 blur-md'}`}>
-                   <h1 className={`text-[35vw] font-black uppercase tracking-[-0.08em] mountain-title flex select-none ${theme === 'retro' ? 'text-[#8B261D]' : ''}`}>
+                    <h1 className={`text-[35vw] font-black uppercase tracking-[-0.08em] mountain-title flex select-none ${theme === 'retro' ? 'text-[#8B261D]' : ''}`}>
                         {selectedCase.titleEn.split(' ')[0].split('').map((char, i) => (
-                            <span 
-                                key={i} 
+                            <span
+                                key={i}
                                 className="inline-block transition-all duration-[1200ms] cubic-bezier(0.16, 1, 0.3, 1)"
-                                style={{ 
+                                style={{
                                     transform: openingId ? 'translateZ(0) scale(1.1)' : 'translateZ(-500px) scale(0.5)',
                                     opacity: openingId ? 0.3 : 0,
                                     transitionDelay: `${i * 60}ms`
@@ -311,7 +319,7 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
                                 {char}
                             </span>
                         ))}
-                   </h1>
+                    </h1>
                 </div>
             )}
 
@@ -329,19 +337,18 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
 
 
             {/* Main Scene: Native scroll with wave listener */}
-            <div 
+            <div
                 ref={scrollContainerRef}
                 className={`absolute inset-0 flex items-center overflow-x-auto overflow-y-hidden scrollbar-hide overscroll-contain perspective-2000 transition-opacity duration-1000 ${selectedCaseId ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
-                style={{ 
+                style={{
                     scrollPaddingLeft: `${centerPadding}px`,
                 }}
             >
-                <div 
+                <div
                     ref={contentRef}
                     className="flex items-center gap-6 h-[500px] preserve-3d"
                     style={{
                         paddingLeft: `${centerPadding}px`,
-                        paddingRight: `${centerPadding}px`,
                     }}
                 >
                     {items.map((item, i) => {
@@ -352,28 +359,27 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
                             <div
                                 key={`${item.id}-${i}`}
                                 data-id={item.id}
-                                className={`archive-card-wrapper relative shrink-0 preserve-3d transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                                    isOpening 
-                                        ? 'z-[1000] w-[80vw] max-w-[800px] h-[45vw] max-h-[450px]' 
-                                        : (isOtherOpening ? 'opacity-0 scale-75 blur-md w-[0px] h-[480px] gap-0 mx-[-20px]' : 'z-10 w-[110px] h-[480px]')
-                                }`}
+                                className={`archive-card-wrapper relative shrink-0 preserve-3d transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] ${isOpening
+                                        ? 'z-[1000] w-[80vw] max-w-[800px] h-[45vw] max-h-[450px]'
+                                        : (isOtherOpening ? 'opacity-0 scale-75 blur-md z-0 w-[110px] h-[480px] pointer-events-none' : 'z-10 w-[110px] h-[480px]')
+                                    }`}
                                 style={{
-                                    transform: isOpening 
-                                        ? `translate3d(18vw, -60px, 200px)` 
+                                    transform: isOpening
+                                        ? `translate3d(12vw, -60px, 200px)`
                                         : (hasEntered ? 'translate3d(0, 0, 0)' : `translate3d(${1000 + i * 200}px, 0, 0)`),
                                     transitionDelay: isOpening ? '0s' : (hasEntered ? '0s' : `${0.2 + i * 0.05}s`)
                                 }}
                             >
-                                     <div 
-                                        className={`archive-card-inner w-full h-full relative cursor-pointer group preserve-3d transition-all duration-300 will-change-transform active:scale-95 ${isOpening ? 'cursor-default' : ''}`}
-                                        onClick={(e) => handleCardClick(e, item.id)}
-                                        onMouseEnter={() => {
-                                            if (!openingId) {
-                                                soundManager.play('archiveHover', { volume: 0.25, stopExisting: true });
-                                            }
-                                        }}
-                                    >
-                                        <style>{`
+                                <div
+                                    className={`archive-card-inner w-full h-full relative cursor-pointer group preserve-3d transition-all duration-300 will-change-transform active:scale-95 ${isOpening ? 'cursor-default' : ''}`}
+                                    onClick={(e) => handleCardClick(e, item.id)}
+                                    onMouseEnter={() => {
+                                        if (!openingId) {
+                                            soundManager.play('archiveHover', { volume: 0.25, stopExisting: true });
+                                        }
+                                    }}
+                                >
+                                    <style>{`
                                             @keyframes scanline {
                                                 0% { transform: translateY(-100%); }
                                                 100% { transform: translateY(100%); }
@@ -412,54 +418,60 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
                                                 transition: filter 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
                                             }
                                         `}</style>
-                                        
-                                        {/* Image Container */}
-                                        <div className={`w-full h-full relative overflow-hidden border ${theme === 'retro' ? 'border-[#8B261D]/10 bg-[#D8D2C5]/30' : 'border-white/5 bg-zinc-900'} shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] backface-hidden transition-all duration-1000 ${isOpening ? 'rounded-lg' : 'rounded-sm'}`}>
-                                            <div className="absolute inset-0 z-0">
-                                                <img
-                                                    src={item.imageUrl}
-                                                    className={`w-full h-full object-cover transition-all duration-1000 ${isOpening ? 'scale-100 !grayscale-0 !brightness-100' : 'grayscale'}`}
-                                                    style={{ filter: isOpening ? 'none' : 'grayscale(100%) brightness(35%) contrast(110%)' }}
-                                                    alt={item.titleEn}
-                                                />
+
+                                    {/* Image Container */}
+                                    <div className={`w-full h-full relative overflow-hidden border ${theme === 'retro' ? 'border-[#8B261D]/10 bg-[#D8D2C5]/30' : 'border-white/5 bg-zinc-900'} shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] backface-hidden transition-all duration-1000 ${isOpening ? 'rounded-lg' : 'rounded-sm'}`}>
+                                        <div className="absolute inset-0 z-0">
+                                            <img
+                                                src={item.imageUrl}
+                                                className={`w-full h-full object-cover transition-all duration-1000 ${isOpening ? 'scale-100 !grayscale-0 !brightness-100' : 'grayscale'}`}
+                                                style={{ filter: isOpening ? 'none' : 'grayscale(100%) brightness(35%) contrast(110%)' }}
+                                                alt={item.titleEn}
+                                            />
+                                        </div>
+
+                                        {/* CRT & Scanner Effects - Only when opening/opened */}
+                                        {isOpening && (
+                                            <>
+                                                <div className={`absolute inset-0 z-[15] crt-overlay ${theme === 'retro' ? 'opacity-20 mix-blend-multiply' : 'opacity-40'}`}></div>
+                                                <div className={`absolute inset-0 z-[16] ${theme === 'retro' ? 'bg-[#8B261D]/10' : 'bg-black'} animate-[crtFlicker_0.15s_infinite] pointer-events-none`}></div>
+                                                <div className={`scanline-beam ${theme === 'retro' ? 'opacity-50' : 'opacity-100'}`}></div>
+                                                {/* Vignette */}
+                                                <div className={`absolute inset-x-0 inset-y-0 z-[22] pointer-events-none shadow-[inset_0_0_120px_rgba(0,0,0,0.8)] ${theme === 'retro' ? 'opacity-0' : 'opacity-100'}`}></div>
+                                            </>
+                                        )}
+
+                                        <div className={`absolute inset-0 bg-gradient-to-t ${theme === 'retro' ? 'from-[#EFE9E0]/90 via-transparent' : 'from-black/80 via-transparent'} to-transparent z-10 pointer-events-none transition-opacity duration-1000 ${isOpening ? 'opacity-20' : 'opacity-100'}`}></div>
+
+                                        {/* Card Info - Hidden when expanded */}
+                                        <div className={`absolute inset-0 p-4 flex flex-col justify-between z-20 pointer-events-none ${theme === 'retro' ? 'text-[#8B261D]' : 'text-white'} transition-opacity duration-500 ${isOpening ? 'opacity-0' : 'opacity-100'}`}>
+                                            <div className="text-[8px] font-mono tracking-[0.2em] font-bold opacity-30">
+                                                SERIAL_{1001 + i}
                                             </div>
-
-                                            {/* CRT & Scanner Effects - Only when opening/opened */}
-                                            {isOpening && (
-                                                <>
-                                                    <div className={`absolute inset-0 z-[15] crt-overlay ${theme === 'retro' ? 'opacity-20 mix-blend-multiply' : 'opacity-40'}`}></div>
-                                                    <div className={`absolute inset-0 z-[16] ${theme === 'retro' ? 'bg-[#8B261D]/10' : 'bg-black'} animate-[crtFlicker_0.15s_infinite] pointer-events-none`}></div>
-                                                    <div className={`scanline-beam ${theme === 'retro' ? 'opacity-50' : 'opacity-100'}`}></div>
-                                                    {/* Vignette */}
-                                                    <div className={`absolute inset-x-0 inset-y-0 z-[22] pointer-events-none shadow-[inset_0_0_120px_rgba(0,0,0,0.8)] ${theme === 'retro' ? 'opacity-0' : 'opacity-100'}`}></div>
-                                                </>
-                                            )}
-
-                                            <div className={`absolute inset-0 bg-gradient-to-t ${theme === 'retro' ? 'from-[#EFE9E0]/90 via-transparent' : 'from-black/80 via-transparent'} to-transparent z-10 pointer-events-none transition-opacity duration-1000 ${isOpening ? 'opacity-20' : 'opacity-100'}`}></div>
-
-                                            {/* Card Info - Hidden when expanded */}
-                                            <div className={`absolute inset-0 p-4 flex flex-col justify-between z-20 pointer-events-none ${theme === 'retro' ? 'text-[#8B261D]' : 'text-white'} transition-opacity duration-500 ${isOpening ? 'opacity-0' : 'opacity-100'}`}>
-                                                <div className="text-[8px] font-mono tracking-[0.2em] font-bold opacity-30">
-                                                    SERIAL_{1001 + i}
-                                                </div>
-                                                <div>
-                                                    <h2 className="text-xs font-black uppercase tracking-tight leading-tight [writing-mode:vertical-lr] mb-2 group-hover:tracking-widest transition-all duration-500">
-                                                        {lang === 'CN' ? item.titleCn : item.titleEn}
-                                                    </h2>
-                                                </div>
+                                            <div>
+                                                <h2 className="text-xs font-black uppercase tracking-tight leading-tight [writing-mode:vertical-lr] mb-2 group-hover:tracking-widest transition-all duration-500">
+                                                    {lang === 'CN' ? item.titleCn : item.titleEn}
+                                                </h2>
                                             </div>
                                         </div>
                                     </div>
+                                </div>
                             </div>
                         );
                     })}
+                    
+                    {/* Dynamic Spacer to ensure the last few cards can always glide precisely to the center without hitting scroll boundaries */}
+                    <div 
+                        className="shrink-0 pointer-events-none transition-all duration-1000"
+                        style={{ width: openingId ? '100vw' : `${centerPadding}px`, height: '1px' }} 
+                    />
                 </div>
             </div>
 
             {/* Manual Navigation Arrows (For mouse users) */}
             {!openingId && !selectedCaseId && (
                 <>
-                    <button 
+                    <button
                         onClick={(e) => {
                             e.stopPropagation();
                             targetScrollRef.current = Math.max(0, targetScrollRef.current - 600);
@@ -469,7 +481,7 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
                     >
                         <ChevronLeft size={24} className="group-hover:-translate-x-0.5 transition-transform" />
                     </button>
-                    <button 
+                    <button
                         onClick={(e) => {
                             e.stopPropagation();
                             const container = scrollContainerRef.current;
@@ -508,7 +520,7 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
                     </div>
 
                     <div className="flex flex-col items-center gap-6">
-                        <button 
+                        <button
                             onClick={(e) => {
                                 e.stopPropagation();
                                 handleExplore(selectedCase.id);
@@ -531,15 +543,17 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
                 </div>
             )}
 
-            {/* Archive Detail Modal */}
+            {/* Archive Detail Modal with Transition */}
             {selectedCaseId && (
-                <ArchiveDetailModal
-                    isOpen={!!selectedCaseId}
-                    onClose={() => setSelectedCaseId(null)}
-                    caseData={ARCHIVE_CASES.find(c => c.id === selectedCaseId) || null}
-                    lang={lang}
-                    renderInPlace={true}
-                />
+                <div className="absolute inset-0 z-[3000] animate-in fade-in slide-in-from-right-32 duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)]">
+                    <ArchiveDetailModal
+                        isOpen={!!selectedCaseId}
+                        onClose={() => setSelectedCaseId(null)}
+                        caseData={ARCHIVE_CASES.find(c => c.id === selectedCaseId) || null}
+                        lang={lang}
+                        renderInPlace={true}
+                    />
+                </div>
             )}
         </div>
     );

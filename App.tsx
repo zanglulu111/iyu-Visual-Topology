@@ -1826,7 +1826,7 @@ const App: React.FC = () => {
                                 </div>
                             )}
                             {viewMode === 'DIVERGENCE' && (
-                                <div className="w-full h-full animate-page-entrance">
+                                <div className="w-full h-full animate-page-dissolve">
                                     <NarrativePathsView
                                         treatments={generatedTreatments}
                                         onSelect={handleBibleGenerate}
@@ -1846,7 +1846,7 @@ const App: React.FC = () => {
                                 </div>
                             )}
                             {viewMode === 'BIBLE' && (
-                                <div className="w-full h-full animate-page-entrance">
+                                <div className="w-full h-full animate-page-dissolve">
                                     <BlueprintEditor
                                         blueprint={activeBlueprint}
                                         theme={theme}
@@ -1887,7 +1887,7 @@ const App: React.FC = () => {
                             )}
                             {/* MetonymyView integrated into main layout to share EngineBottomBar */}
                             {viewMode === 'METONYMY' && metonymyBlueprint && (
-                                <div className="w-full h-full animate-page-entrance">
+                                <div className="w-full h-full animate-page-dissolve">
                                     <MetonymyView
                                         blueprint={metonymyBlueprint}
                                         language={lang}

@@ -8,8 +8,7 @@ import { ENGINE_DRIVES } from './engine_drives';
 import { ENGINE_STAKES } from './engine_stakes';
 import { ENGINE_RESOLUTIONS } from './engine_resolutions';
 import { ENGINE_M0_OS } from './m0';
-import { SYNTHESIZER_M4X } from './synthesizer/m4x';
-import { SYNTHESIZER_M5X } from './synthesizer/m5x';
+// M4X/M5X synthesizer imports removed (v3.0 正交性优化)
 
 export const NARRATIVE_ENGINE_BLOCKS: NarrativeBlockDef[] = [
   // MODULE 0: GLOBAL CONTROLLER
@@ -62,23 +61,7 @@ export const NARRATIVE_ENGINE_BLOCKS: NarrativeBlockDef[] = [
     descriptionEn: "The specific stance of resistance or survival method adopted by the protagonist.",
     tags: []
   },
-  // COEFFICIENTS (X-Factors)
-  {
-    id: "engine_m4x",
-    name: "M4X. 外部压迫能级",
-    enName: "M4X. BLOCKAGE INTENSITY (Coefficient)",
-    description: "大他者施加阻力的形式。从隐性剥削到直接抹杀。",
-    descriptionEn: "Form of resistance applied by the Big Other.",
-    tags: []
-  },
-  {
-    id: "engine_m5x",
-    name: "M5X. 死亡驱力流速",
-    enName: "M5X. DRIVE VELOCITY (Coefficient)",
-    description: "主体采取行动的破坏性程度。从顺从到自我毁灭。",
-    descriptionEn: "Destructiveness of the subject's action.",
-    tags: []
-  },
+  // COEFFICIENTS removed in v3.0 (M4X/M5X — 正交性优化：M4/M5词库本身已含强度谱系)
   {
     id: "engine_m6",
     name: "M6. 终极代价",
@@ -162,20 +145,5 @@ export const NARRATIVE_ENGINE_LIBRARY: LibraryCategoryDef[] = [
     descEn: "The philosophical ending and judgment of fate. Where does desire ultimately lead?",
     items: ENGINE_RESOLUTIONS
   },
-  {
-    id: "engine_m4x_lib",
-    name: "M4X. 外部压迫能级 (系数)",
-    nameEn: "M4X. Blockage Intensity",
-    desc: "大他者施加阻力的形式。从隐性剥削到直接抹杀。",
-    descEn: "Form of resistance applied by the Big Other.",
-    items: SYNTHESIZER_M4X
-  },
-  {
-    id: "engine_m5x_lib",
-    name: "M5X. 死亡驱力流速 (系数)",
-    nameEn: "M5X. Drive Velocity",
-    desc: "主体采取行动的破坏性程度。从顺从到自我毁灭。",
-    descEn: "Destructiveness of the subject's action.",
-    items: SYNTHESIZER_M5X
-  }
+  // M4X/M5X library entries removed in v3.0
 ];

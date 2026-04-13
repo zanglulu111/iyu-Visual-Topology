@@ -504,7 +504,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
             
             {/* 1. CORE DRIVERS VIEW */}
             {selectedProtocol === ProtocolType.CORE_DRIVERS && (
-              <div className="flex-1 flex flex-col animate-focus-blur overflow-hidden min-h-0">
+              <div className="flex-1 flex flex-col animate-page-dissolve overflow-hidden min-h-0">
                 <div className={`mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4 border-b pb-6 shrink-0 transition-colors ${theme === 'retro' ? 'border-black/5' : 'border-white/15'}`}>
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-3">

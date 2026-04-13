@@ -1,14 +1,14 @@
 /**
- * 迷雾引擎 v2.1 — 物理属性注册表 (Physics Registry)
+ * 迷雾引擎 v3.0 — 物理属性注册表 (Physics Registry)
  * 
- * 全参数覆盖：M0-M7 + X系数 (M4X/M5X)
+ * 全参数覆盖：M0-M7
  * 
  * 注册策略分层：
  *   Layer 0: M0 精神拓扑 — 全域操作系统，定义公式的"空间曲率"
- *   Layer 1: M4X/M5X — 硬编码（每个 5 个等级）
- *   Layer 2: M1-M5 — 基于 group 分组推导重力系数
- *   Layer 3: M6 — 基于 group/关键词推导代价等级
- *   Layer 4: M7 — 基于 group 推导叙事终局权重
+ *   Layer 1: M1-M5 — 基于 group 分组推导重力系数
+ *   Layer 2: M6 — 基于 group/关键词推导代价等级
+ *   Layer 3: M7 — 基于 group 推导叙事终局权重
+ *   [REMOVED] M4X/M5X — v3.0 正交性优化已移除
  */
 
 import { MistItemPhysics } from './mist_types';
@@ -187,71 +187,7 @@ export function getM0BaseProtocolKey(groupStr: string | undefined): string | und
 
 
 
-// ============================================
-// M4X 外部压迫能级 — 硬编码物理属性
-// ============================================
-const M4X_PHYSICS: Record<string, MistItemPhysics> = {
-  m4x_level_1: {
-    gravity: 0.2,
-    priceFloor: 1,
-    directive: "阻断来自内部恐惧。所有对话呈现潜台词过载的压抑。"
-  },
-  m4x_level_2: {
-    gravity: 0.4,
-    priceFloor: 1,
-    directive: "环境中出现大量引导性能指。叙事聚焦微小规则冲突导致的社会磨损。"
-  },
-  m4x_level_3: {
-    gravity: 0.6,
-    priceFloor: 2,
-    directive: "主体行动动词被逻辑禁止。叙事进入寻找替代方案或正面博弈。",
-    exclusions: ["m5x_level_1"]
-  },
-  m4x_level_4: {
-    gravity: 0.8,
-    priceFloor: 3,
-    directive: "所有外部交互接口强制重置为敌对。叙事转向逃命与极端求生。",
-    exclusions: ["m5x_level_1", "m5x_level_2"]
-  },
-  m4x_level_5: {
-    gravity: 1.0,
-    priceFloor: 4,
-    directive: "FORCE: M5动作必须导向物理伤残或死亡。禁止温情结局。",
-    exclusions: ["m5x_level_1", "m5x_level_2"]
-  }
-};
-
-// ============================================
-// M5X 死亡驱力流速 — 硬编码物理属性
-// ============================================
-const M5X_PHYSICS: Record<string, MistItemPhysics> = {
-  m5x_level_1: {
-    gravity: 0.2,
-    priceFloor: 1,
-    directive: "M0保持睡眠状态。所有对白强化正常性幻觉。最低动力输出。"
-  },
-  m5x_level_2: {
-    gravity: 0.4,
-    priceFloor: 1,
-    directive: "动作附带阻尼/犹豫修饰语。环境呈灰蓝色粘稠质感。"
-  },
-  m5x_level_3: {
-    gravity: 0.6,
-    priceFloor: 2,
-    directive: "M1被欲望对象高频唤醒。所有动作带'孤注一掷'感。",
-    exclusions: ["m4x_level_1"]
-  },
-  m5x_level_4: {
-    gravity: 0.8,
-    priceFloor: 3,
-    directive: "M1覆写所有M0报警。出现大量不可逆行为。精神自杀或狂化。"
-  },
-  m5x_level_5: {
-    gravity: 1.0,
-    priceFloor: 5,
-    directive: "取消所有心理描写。文本表现为非人的机械动力学。不可观测的烈度。"
-  }
-};
+// M4X/M5X physics blocks removed in v3.0 (正交性优化)
 
 // ============================================
 // M1 缺失主体 — 按 group 推导重力
@@ -365,13 +301,9 @@ function getM6PriceFromTag(tag: string): number {
 // 统一查询接口
 // ============================================
 
-/** 获取 X 系数（M4X/M5X）的物理属性 */
+/** 获取物理属性 (v3.0: M4X/M5X 已移除, 此函数仅作兼容性保留) */
 export function getItemPhysics(itemId: string): MistItemPhysics {
-  const registry: Record<string, MistItemPhysics> = {
-    ...M4X_PHYSICS,
-    ...M5X_PHYSICS
-  };
-  return registry[itemId] || { gravity: 0.5, priceFloor: 2 };
+  return { gravity: 0.5, priceFloor: 2 };
 }
 
 /**
@@ -405,4 +337,4 @@ export function getM6Price(tags: string[]): number {
   return Math.max(...tags.map(t => getM6PriceFromTag(t)));
 }
 
-export { M4X_PHYSICS, M5X_PHYSICS };
+// M4X_PHYSICS, M5X_PHYSICS exports removed in v3.0

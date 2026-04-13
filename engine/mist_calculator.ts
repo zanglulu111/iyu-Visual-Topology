@@ -112,7 +112,7 @@ function extractAll(fieldState: NarrativeFieldState, key: string): string[] {
 // ============================================
 
 export interface MistEngineInput {
-  // === 骨层：M0-M7 + X系数 ===
+  // === 骨层：M0-M7 ===
   m0?: string;
   m1?: string;
   m2?: string;
@@ -121,8 +121,7 @@ export interface MistEngineInput {
   m5?: string;
   m6?: string;
   m7?: string;
-  m4x?: string;
-  m5x?: string;
+  // m4x/m5x removed in v3.0 (正交性优化)
 
   // === 皮层：SUR1-SUR10 ===
   sur1?: string;       // 叙事动力 (Genre)
@@ -160,8 +159,7 @@ export function extractEngineInput(fieldState: NarrativeFieldState): MistEngineI
     m5: nameToId(extractFirst(fieldState, 'engine_m5')),
     m6: nameToId(extractFirst(fieldState, 'engine_m6')),
     m7: nameToId(extractFirst(fieldState, 'engine_m7')),
-    m4x: nameToId(extractFirst(fieldState, 'engine_m4x')),
-    m5x: nameToId(extractFirst(fieldState, 'engine_m5x')),
+    // m4x/m5x removed in v3.0
 
     // 皮层 SUR1-SUR10
     sur1: nameToId(extractFirst(fieldState, 'skin_genre')),
@@ -258,8 +256,9 @@ function calculateTension(input: MistEngineInput, m0Topo: M0TopologyProfile | un
   const g_m4 = resolveGravity('M4', input.m4);
   const g_m5 = resolveGravity('M5', input.m5);
 
-  const m4x_physics = input.m4x ? getItemPhysics(input.m4x) : { gravity: 0.5, priceFloor: 2 };
-  const m5x_physics = input.m5x ? getItemPhysics(input.m5x) : { gravity: 0.5, priceFloor: 2 };
+  // M4X/M5X amplifiers removed in v3.0 — neutral defaults
+  const m4x_gravity = 0.5;
+  const m5x_gravity = 0.5;
 
   // M0 修饰系数（无 M0 时全部为 1.0）
   const mods = m0Topo?.formulaMods ?? {
@@ -283,10 +282,7 @@ function calculateTension(input: MistEngineInput, m0Topo: M0TopologyProfile | un
   // ====== 分母：大他者阻断 ======
   // M4 受三重调制：
   //   1. M0.m4Divisor（精神拓扑：精神病=0.1）
-  //   2. M4X（外部压迫等级 1-5）
-  //   3. SUR4X（阶层阻力：固化岩层=1.5 → 社会越固化 M4 越重）
-  const effective_m4 = g_m4 * mods.m4Divisor;
-  const m4_amplifier = 1.0 + m4x_physics.gravity;
+  const m4_amplifier = 1.0 + m4x_gravity;
   
   // 【算法修正】由于分子是 M1+M2+M3 的加和（均值约1.5），分母仅有 M4（均值约0.75）。
   // 为了让平均对峙状态的张力比回归到 1.0 (DEADLOCK)，在此赋予大他者 2.0 的“固有镇压权值”。
@@ -296,7 +292,7 @@ function calculateTension(input: MistEngineInput, m0Topo: M0TopologyProfile | un
 
   // ====== 乘子：驱力 ======
   const effective_m5 = g_m5 * mods.m5Multiplier;
-  const m5_amplifier = 1.0 + m5x_physics.gravity;
+  const m5_amplifier = 1.0 + m5x_gravity;
   const finalTension = ratio * (effective_m5 * m5_amplifier);
 
   // ====== 世界熵 ======
@@ -332,76 +328,7 @@ function detectRedlines(input: MistEngineInput, m0Topo: M0TopologyProfile | unde
 
   // ---- M0 专属红线 ----
 
-  // 忧郁症拓扑 + 高 M5X = 矛盾（忧郁主体不应有高驱力流速）
-  if (m0Topo && m0Topo.formulaMods.m5Multiplier < 0.5 && input.m5x === 'm5x_level_5') {
-    violations.push({
-      code: 'REDLINE_MELANCHOLIA_HIGH_DRIVE',
-      severity: 'ERROR',
-      message: 'Melancholic/low-drive M0 topology is incompatible with M5X Level 5 (maximum drive flow).',
-      messageCn: '红线冲突：忧郁/低驱力M0拓扑与极端驱力流速(M5X=5)不可共存——主体的精神结构不支持这种动力输出。如需极端行动，请先将M0切换为神经症或倒错拓扑。'
-    });
-  }
-
-  // 自闭拓扑 + BREAKTHROUGH 走向 = 极难
-  if (m0Topo?.baseProtocol === 'AUTISM' && input.m5x && ['m5x_level_4', 'm5x_level_5'].includes(input.m5x)) {
-    violations.push({
-      code: 'WARNING_AUTISM_HIGH_DRIVE',
-      severity: 'WARNING',
-      message: 'Autistic topology with high drive output is extremely rare.',
-      messageCn: '警告：自闭拓扑(M0) + 高驱力流速(M5X≥4)极为罕见。自闭主体的驱力通常表现为重复性自体刺激，而非外向爆发。如确需此组合，必须提供独特的叙事逻辑。'
-    });
-  }
-
-  // ---- 原有红线 ----
-
-  // M4X vs M5X 互斥
-  if (input.m4x && input.m5x) {
-    const m4x_phys = getItemPhysics(input.m4x);
-    if (m4x_phys.exclusions?.includes(input.m5x)) {
-      violations.push({
-        code: 'REDLINE_M4X_M5X_CONFLICT',
-        severity: 'ERROR',
-        message: `M4X [${input.m4x}] excludes M5X [${input.m5x}].`,
-        messageCn: `红线冲突：[${input.m4x}] 与 [${input.m5x}] 不可共存——在该压迫等级下，主体不可能采取该行动姿态。`
-      });
-    }
-  }
-
-  // M5X vs M4X 反向互斥
-  if (input.m5x && input.m4x) {
-    const m5x_phys = getItemPhysics(input.m5x);
-    if (m5x_phys.exclusions?.includes(input.m4x)) {
-      violations.push({
-        code: 'REDLINE_M5X_M4X_CONFLICT',
-        severity: 'ERROR',
-        message: `M5X [${input.m5x}] excludes M4X [${input.m4x}].`,
-        messageCn: `红线冲突：[${input.m5x}] 与 [${input.m4x}] 不可共存——该驱力等级与该压迫条件矛盾。`
-      });
-    }
-  }
-
-  // M7 超越 + M4X L5 = 矛盾
-  if (input.m7 && input.m4x === 'm4x_level_5') {
-    const m7Item = lookupItem(input.m7);
-    if (m7Item?.groupEn === 'Transcendence') {
-      violations.push({
-        code: 'REDLINE_TRANSCENDENCE_UNDER_ANNIHILATION',
-        severity: 'WARNING',
-        message: `M7 [${input.m7}] (Transcendence) under M4X Level 5 (Total Violence) is extremely rare.`,
-        messageCn: `警告：在绝对暴力（M4X=5）下选择超越升华结局极其罕见。如确需此组合，必须提供逻辑自洽的代价路径。`
-      });
-    }
-  }
-
-  // 极端 X 系数预检
-  if (input.m4x === 'm4x_level_5' || input.m5x === 'm5x_level_5') {
-    violations.push({
-      code: 'WARNING_EXTREME_PARAMS',
-      severity: 'WARNING',
-      message: 'Extreme X-coefficients detected. M6 stakes must be Level 4+.',
-      messageCn: '警告：检测到极端 X 系数。M6 终极代价必须 ≥ 4 级（物理毁灭或本体论崩塌）。'
-    });
-  }
+  // M4X/M5X redline checks removed in v3.0
 
   return violations;
 }
@@ -416,8 +343,9 @@ function verifyPriceBalance(
   fieldState: NarrativeFieldState
 ): PriceVerdict {
   const floors = [
-    input.m4x ? getItemPhysics(input.m4x).priceFloor : 1,
-    input.m5x ? getItemPhysics(input.m5x).priceFloor : 1,
+    // priceFloor from M4X/M5X removed in v3.0
+    1,
+    1,
   ];
   
   const tensionBonus = tension.finalTension > 2.0 ? 1 : 0;
@@ -572,24 +500,7 @@ function compileDirectives(
     }
   }
 
-  // ====== X 系数硬指令 ======
-  const xParams = [
-    { key: 'M4X', id: input.m4x },
-    { key: 'M5X', id: input.m5x }
-  ];
-  for (const param of xParams) {
-    if (param.id) {
-      const physics = getItemPhysics(param.id);
-      if (physics.directive) {
-        directives.push({
-          target: param.key,
-          command: physics.directive,
-          commandCn: physics.directive,
-          priority: physics.gravity >= 0.8 ? 'CRITICAL' : physics.gravity >= 0.5 ? 'HIGH' : 'NORMAL'
-        });
-      }
-    }
-  }
+  // M4X/M5X directive compilation removed in v3.0
 
   // ====== SUR4X / SUR10X 皮层指令 ======
   const surItems: Array<{ target: string; id?: string }> = [
@@ -890,7 +801,7 @@ ${m0Section}
 
 ### 📊 张力报告
 - **分子势能** (M1+M2+M3×opacity×sur10x): ${tension.numerator.toFixed(2)}
-- **分母压强** (M4×m4Div×M4X×sur4x): ${tension.denominator.toFixed(2)}
+- **分母压强** (M4×m4Div×sur4x): ${tension.denominator.toFixed(2)}
 - **张力比**: ${tension.ratio.toFixed(2)}
 - **最终张力**: ${tension.finalTension.toFixed(2)}
 - **世界熵值** (entropyRate): ${tension.worldEntropy.toFixed(2)}

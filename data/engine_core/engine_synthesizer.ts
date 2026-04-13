@@ -1,23 +1,18 @@
 import { LibraryItemDef } from '../../types';
-import { SYNTHESIZER_M4X } from './synthesizer/m4x';
-import { SYNTHESIZER_M5X } from './synthesizer/m5x';
 import { SYNTHESIZER_SUR4X } from './synthesizer/sur4x';
 import { SYNTHESIZER_SUR10X } from './synthesizer/sur10x';
 
 /**
  * 叙事调音台 - 刻度词库总入口
- * 包含 5 个核心推子的 25 个层级定义
+ * v3.0: M4X/M5X 已移除（正交性优化——M4/M5 词库本身已含强度谱系）
+ * 仅保留 SUR 层推子：表层阶层阻力 + 象征界缝合度
  */
 export const SYNTHESIZER_LIBRARY: LibraryItemDef[] = [
-    ...SYNTHESIZER_M4X,
-    ...SYNTHESIZER_M5X,
     ...SYNTHESIZER_SUR4X,
     ...SYNTHESIZER_SUR10X
 ];
 
 export const SYNTHESIZER_GROUPS = [
-    { id: "m4x", name: "M4X. 外部压迫能级 (大他者阻断烈度)", nameEn: "Blockage Intensity" },
-    { id: "m5x", name: "M5X. 死亡驱力流速 (主体行动烈度)", nameEn: "Drive Velocity" },
     { id: "sur4x", name: "SUR4X. 物理阶层阻力 (社会形态粘滞度)", nameEn: "Social Resistance" },
     { id: "sur10x", name: "SUR10X. 象征界缝合度 (认同模式)", nameEn: "Symbolic Suture" }
 ];
