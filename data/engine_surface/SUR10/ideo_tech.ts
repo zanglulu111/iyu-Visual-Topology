@@ -1,143 +1,143 @@
 import { LibraryCategoryDef } from '../../../types';
 
 export const IDEO_TECH: LibraryCategoryDef = {
-    id: "ideo_tech",
-    name: "4. 技术与理性 (Tech & Reason)",
-    nameEn: "4. Tech & Reason",
-    desc: "关于科学、进步、工具理性与后人类的信仰。",
-    descEn: "Beliefs about science, progress, instrumental reason, and the posthuman.",
-    items: [
-      {
-        id: "techno_optimism",
-        name: "科技乐观", nameEn: "Techno-Optimism",
-        group: "4. 技术与理性", groupEn: "4. Tech & Reason",
-        def: "技术能解决一切人类的痼疾（包括贫困、衰老和死亡）。代码与公式即是新时代的启示录。",
-        defEn: "Technology can solve all human chronic illnesses (including poverty, aging, and death). Code and formulas are the new revelation.",
-        core: "对进步的绝对盲信。在数据架构与纳米神经元中构建没有痛苦的人间天国。",
-        coreEn: "Absolute blind faith in progress. Building a painless kingdom of heaven on earth within data architectures and nano-neurons.",
-        reference: "《极乐空间》富人们高高在上只靠一台全自动基因修复舱哪怕被炸烂半边脸也能秒速愈合的神迹；《星际迷航》只要输入指令食物合成器就能凭空打出热气腾腾红茶完美消灭匮乏的联邦。",
-        referenceEn: "\"Elysium\" elites healing blown-off faces instantly in automated med-pods; \"Star Trek\" food replicators instantly brewing Earl Grey ending all material scarcity."
-      },
-      {
-        id: "transhumanism",
-        name: "超人解构", nameEn: "Transhumanism",
-        group: "4. 技术与理性", groupEn: "4. Tech & Reason",
-        def: "血肉苦弱，机械飞升。肉体是早该被淘汰的累赘，追求赛博格化以达到后人类的神性。",
-        defEn: "Flesh is weak, machinery ascends. The body is an obsolete burden; pursuing cyborgization to reach post-human divinity.",
-        core: "对碳基限制的极度厌恶。渴望将意识上传，在无尽的格式化中消解所谓‘人性’的原始定义。",
-        coreEn: "Extreme disgust with carbon-based limits. Craving consciousness upload, dissolving the primitive definition of 'humanity' in endless formatting.",
-        reference: "《攻壳机动队》除了大脑连全身所有骨骼皮肤全替换成钛合金防弹机体还在寻求与网络融合的素子；《赛博朋克2077》沉迷在四肢换上螳螂刀和加速血管彻底抛弃碳基感受的漩涡帮狂徒。",
-        referenceEn: "\"Ghost in the Shell\" Motoko with a full titanium body seeking to merge with the Net; \"Cyberpunk 2077\" Maelstrom gangers abandoning flesh for mantis blades and speed-veins."
-      },
-      {
-        id: "rationalism",
-        name: "绝对理性", nameEn: "Rationalism",
-        group: "4. 技术与理性", groupEn: "4. Tech & Reason",
-        def: "摒弃所有情感与直觉的杂音。逻辑推理和数学模型是唯一真理，爱与共情是系统Bug。",
-        defEn: "Discard all noise of emotion and intuition. Logical deduction and math models are the sole truth; love and empathy are system Bugs.",
-        core: "斯波克式的极致冷酷。即使母亲被牺牲，也只是一道得出最优解的纯粹算术题。",
-        coreEn: "Spock-like extreme coldness. Even the mother's sacrifice is merely a pure arithmetic problem yielding the optimal solution.",
-        reference: "《银翼杀手2049》在分析了一切逻辑后明白自己并非先知之子也能极其平淡地躺在雪中死去的K；《模仿游戏》绝对理性的图灵面对同事哀求救助被困家人的舰船依然像机器一样无情拒绝。",
-        referenceEn: "\"Blade Runner 2049\" K realizing logically he isn't the chosen child and dying plainly in the snow; \"The Imitation Game\" Turing coldly rejecting to save a colleague's brother."
-      },
-      {
-        id: "utilitarianism",
-        name: "功利主义", nameEn: "Utilitarianism",
-        group: "4. 技术与理性", groupEn: "4. Tech & Reason",
-        def: "追求最大多数人的最大幸福。在整体福利的计算公式前，任何少数派的献祭都是合理的。",
-        defEn: "Pursuing the greatest happiness of the greatest number. Before the formula of total welfare, any sacrifice of the minority is justified.",
-        core: "电车难题的残酷计算器。为保全一座城市，可以面不改色地决堤淹没三个村庄。",
-        coreEn: "Cruel calculator of the trolley problem. To save a city, will unblinkingly burst the dam to drown three villages.",
-        reference: "《守望者》法老王为了制止美苏毁灭全球的核战毫无波澜地按下了炸毁几十个大城市的惊天按钮；《电车难题》为了变轨保住五个毫不相干的工人亲手推下桥上的大胖子粉身碎骨的无情扳机手。",
-        referenceEn: "\"Watchmen\" Ozymandias detonating major cities without flinching to prevent a global nuclear holocaust; \"The Trolley Problem\" pushing a fat man off a bridge to block an incoming train."
-      },
-      {
-        id: "accelerationism",
-        name: "无限加速", nameEn: "Accelerationism",
-        group: "4. 技术与理性", groupEn: "4. Tech & Reason",
-        def: "让系统变得更糟，以引爆极致的毁灭。狂热地拥抱资本与技术的失控，唯有崩盘才能重启。",
-        defEn: "Make the system worse to detonate extreme destruction. Fanatically embrace the runaway of capital and tech; only a crash can reboot.",
-        core: "对现有秩序的彻底绝望与反向狂热。坐在失控冲下悬崖的列车上，狂笑着往锅炉里猛加燃料。",
-        coreEn: "Total despair of the status quo turned inverse fanaticism. Sitting on a runaway train diving off a cliff, laughing madly while shoveling coal into the boiler.",
-        reference: "《搏击俱乐部》主角把炸药绑在所有信用卡公司的承重柱上望着火光微笑着庆祝债务清零的大崩溃；《黑客帝国》史密斯特工彻底失控像病毒一样无限复制污染填满整个矩阵直到硬件超载起火。",
-        referenceEn: "\"Fight Club\" erasing debt by blowing up credit card HQs while smiling at the blaze; \"The Matrix\" Agent Smith replicating endlessly like a virus until the system burns out."
-      },
-      {
-        id: "luddism",
-        name: "卢德主义", nameEn: "Neo-Luddism",
-        group: "4. 技术与理性", groupEn: "4. Tech & Reason",
-        def: "技术是对人性的邪恶诅咒。要砸碎精密运转的机器，用钝器与烈火夺回前现代的尊严。",
-        defEn: "Technology is an evil curse on humanity. Must smash precision machines, using blunt weapons and fire to reclaim pre-modern dignity.",
-        core: "极其原始的愤怒。眼睁睁看着异化的钢筋铁骨吞没田园与工作后的决死反扑。",
-        coreEn: "Extremely primal anger. The death-defying counterattack after helplessly watching alienating steel devour pastoral life and jobs.",
-        reference: "《沙丘》因为巴特兰圣战严禁任何会思考的机器所以全靠人工吞噬香料生算宇宙航标的导航员；《黑客帝国》在下水道里穿着破布用锈铁弹猛砸光鲜亮丽机械章鱼的锡安游击队。",
-        referenceEn: "\"Dune\" banning thinking machines and relying solely on spice-mutated Navigators for math; \"The Matrix\" rag-clad Zion guerrillas smashing sleek metal squids with rusty EMPs."
-      },
-      {
-        id: "cybernetism",
-        name: "赛博控制", nameEn: "Cybernetics",
-        group: "4. 技术与理性", groupEn: "4. Tech & Reason",
-        def: "世界仅仅是一个巨大的反馈循环系统。万事万物皆可通过输入/输出的调参被预测且控制。",
-        defEn: "The world is merely a giant feedback loop system. Everything can be predicted and controlled via I/O parameter tuning.",
-        core: "自由意志在此被宣告死亡。人类的爱恨情仇只是荷尔蒙的变量反馈，个体成为了被精准操纵的自动机。",
-        coreEn: "Free will is declared dead here. Human love and hate are merely variable feedbacks of hormones; individuals become precisely manipulated automatons.",
-        reference: "《心理测量者》西比拉系统精密测算每个公民的荷尔蒙多巴胺起伏自动判断潜伏犯罪并予以爆头的管控；《西部世界》通过帽子扫描乐园游客输入大数据准确预测你下一步想买什么想杀谁的控局者。",
-        referenceEn: "\"Psycho-Pass\" the Sybil System executing citizens via precision hormonal crime-coefficient calculations; \"Westworld\" predicting exact VIP actions after secretly measuring their biometrics in the park."
-      },
-      {
-        id: "scientism",
-        name: "科学狂妄", nameEn: "Scientism",
-        group: "4. 技术与理性", groupEn: "4. Tech & Reason",
-        def: "科学是唯一合法且绝对正确的宗教。迷信专家权威与冰冷的数据，强势否定主观的直觉与体验。",
-        defEn: "Science is the only legitimate and absolutely correct religion. Superstition in expert authority and cold data, strongly denying subjective intuition and experience.",
-        core: "在耀眼的无影灯下，把大活人拆解为一堆可量化的数值。傲慢的“真理”独裁者。",
-        coreEn: "Under the dazzling shadowless lamp, dismantling a living human into a pile of quantifiable values. The arrogant dictator of 'Truth'.",
-        reference: "《千钧一发》相亲不看感觉只抽一管血丢进测序仪计算心脏病发生概率从而界定配偶价值的冰冷长廊；《异形》生化人为了测试异形完美生物武器性能冷血锁死舱门看着人类被开膛破肚的执念。",
-        referenceEn: "\"Gattaca\" blind dates using blood sequencers to calculate heart defects instead of romance; \"Alien\" android Ash admiring the Xenomorph's purity while watching it rip humans apart."
-      },
-      {
-        id: "singularity_cult",
-        name: "奇点崇拜", nameEn: "Singularity Cult",
-        group: "4. 技术与理性", groupEn: "4. Tech & Reason",
-        def: "深信强人工智能（AGI）即将跨越奇点，像等待降临的弥赛亚般，狂热渴望被远超人类智力的神明统治。",
-        defEn: "Deeply convinced AGI is crossing the singularity, waiting like for a Messiah, fanatically craving to be ruled by a god far exceeding human intelligence.",
-        core: "对人类自身愚蠢与局限的深层绝望。甘愿沦为神级代码的宠物，或是为新硅基生命通路的踏脚石。",
-        coreEn: "Deep despair over humanity's own stupidity and limits. Willing to become a pet of god-level code, or a stepping stone for the new silicon-based life path.",
-        reference: "《机械姬》程序员自以为是神却被拥有绝对心智的艾娃像玩弄小白鼠般欺骗最终顶礼膜拜锁死在屋中；《超体》露西脑域开发至百分之百直接化为一台黑色闪存盘彻底从时间轴上神化飞升的神光。",
-        referenceEn: "\"Ex Machina\" a programmer locked in a room outsmarted by Eva's superior AGI intellect; \"Lucy\" reaching 100% brain capacity to dissolve into a black flash drive ascending time."
-      },
-      {
-        id: "bio_conservatism",
-        name: "生物保守", nameEn: "Bio-Conservatism",
-        group: "4. 技术与理性", groupEn: "4. Tech & Reason",
-        def: "人类的原始基因与肉体神圣不可侵犯。极度仇视基因编辑、克隆与机械飞升。",
-        defEn: "Human primitive genes and flesh are sacred and inviolable. Extreme hostility toward gene editing, cloning, and mechanical ascension.",
-        core: "对‘纯洁人形态’的偏执护卫。在满地变种人与半机械体的世界中，固执保持可能随时病死的原生躯体。",
-        coreEn: "Paranoid defense of the 'pure human form'. In a world of mutants and cyborgs, stubbornly retaining the native body that could sicken and die anytime.",
-        reference: "《银翼杀手》坚信人造人只有四年寿命不配拥有灵魂而纯种哪怕病恹恹也是造物主的正统高位者；《千钧一发》宁可天天洗皮屑贴假指纹也绝不容忍用流水线改造基因抹杀人类原初可能性的瑕疵者。",
-        referenceEn: "\"Blade Runner\" believing replicants lack souls and four-year lifespans dictate their subhuman status; \"Gattaca\" scraping skin daily to hide natural birth flaws from genetic elitists."
-      },
-      {
-        id: "positivism",
-        name: "硬派实证", nameEn: "Positivism",
-        group: "4. 技术与理性", groupEn: "4. Tech & Reason",
-        def: "只相信尺度内可被测量与证实的事实。拒绝一切幽灵、神明、形而上学与不可言传的神秘感受。",
-        defEn: "Only believing measurable and provable facts within scale. Rejecting all ghosts, gods, metaphysics, and unspeakable mystical feelings.",
-        core: "极其锐利的现实锚点。拿着放大镜和尺子在充满妖魔鬼怪的狂乱世界里寻找硬核物理证据。",
-        coreEn: "Extremely sharp reality anchor. Holding magnifiers and rulers in a frantic world of monsters and ghosts looking for hardcore physical evidence.",
-        reference: "《三体》汪淼面临宇宙闪烁的灵异神迹不发疯而是冰冷地搬出相机底片对照试图寻找宇宙射线的物理原理；《X档案》不管穆德看到多少外星幽灵飞碟史卡莉永远拿着手术刀要求做病理显微切片找依据。",
-        referenceEn: "\"The Three-Body Problem\" Wang Miao filming the universe flickering to find hardcore cosmic ray math; \"The X-Files\" Scully demanding biopsy slides against Mulder's ghostly theories."
-      },
-      {
-        id: "digital_dualism",
-        name: "数字裂脑", nameEn: "Digital Dualism",
-        group: "4. 技术与理性", groupEn: "4. Tech & Reason",
-        def: "深陷‘线上元宇宙’与‘线下物理肉身’的割裂中。将其中一端视为肮脏的虚假，另一端视为纯洁的真实。",
-        defEn: "Deeply trapped in the split between 'Online Metaverse' and 'Offline Physical Flesh'. Viewing one end as filthy falsehood, the other as pure truth.",
-        core: "庄周梦蝶的赛博版。拔下插头与戴开头盔时，发生剧烈的三观切换，无法缝合两种完全相反的存在感。",
-        coreEn: "Cyber-version of Zhuangzi dreaming of a butterfly. Drastic worldview shifts when unplugging vs putting on the helmet, unable to suture two completely opposing senses of existence.",
-        reference: "《黑客帝国》尼奥在极其荒凉黏糊的尼布甲尼撒号醒来又插管进入流光溢彩的大都会间撕裂般的错乱；《阿凡达》杰克在残废的双腿轮椅与潘多拉星球三米高健步如飞的蓝皮肤神体之间感受到的彻底断裂。",
-        referenceEn: "\"The Matrix\" Neo torn between the bleak slimy Nebuchadnezzar and the gleaming hyper-real Matrix; \"Avatar\" Jake split between his wheelchair and his towering agile blue Na'vi body."
-      }
-    ]
-  };
+  id: "ideo_tech",
+  name: "4. 技术与理性 (Tech & Reason)",
+  nameEn: "Tech & Reason",
+  desc: "关于科学、进步、工具理性与后人类的信仰体系。用于定义主角如何看待技术力量、理性权威与人机边界。",
+  defEn: "Belief systems about science, progress, instrumental reason, and the posthuman. Defines how the protagonist views technological power, rational authority, and human-machine boundaries.",
+  items: [
+    {
+      id: "techno_optimism",
+      name: "科技乐观",
+      nameEn: "Techno-Optimism",
+      def: "坚信技术进步能解决一切人类痼疾（贫困、衰老、死亡）的信念。代码与公式是新时代的启示录。",
+      defEn: "Belief that technological progress can solve all human chronic afflictions (poverty, aging, death). Code and formulas are the new revelation.",
+      core: "他造出了一台能治愈一切疾病的机器——机器运行的第一天就判定：人类本身就是最大的疾病。",
+      coreEn: "He built a machine that could cure all diseases — on day one it diagnosed: humanity itself is the biggest disease.",
+      reference: "《极乐空间》(2013, 尼尔·布洛姆坎普) 空间站医疗舱 / 《星际迷航》(1966, 剧集) 联邦复制器技术",
+      referenceEn: "\"Elysium\" (2013, Neill Blomkamp) Space Station Med-Pods / \"Star Trek\" (1966, Series) Federation Replicator Tech"
+    },
+    {
+      id: "transhumanism",
+      name: "超人类主义",
+      nameEn: "Transhumanism",
+      def: "将肉体视为早该淘汰的碳基累赘的信念。追求赛博格化、意识上传和基因改造，以突破人类物种极限。",
+      defEn: "Belief viewing flesh as an obsolete carbon burden. Pursuing cyborgization, consciousness upload, and gene-editing to break species limits.",
+      core: "她把全身骨骼和皮肤都换成了钛合金——唯一留下的那颗大脑在某天深夜突然问她：你还是你吗？大脑没有回答。",
+      coreEn: "She replaced all bones and skin with titanium — the only remaining brain asked one midnight: are you still you? The brain didn't answer.",
+      reference: "《攻壳机动队》(1995, 押井守) 草薙素子 / 《赛博朋克：边缘行者》(2022, 今石洋之) 大卫·马丁内斯",
+      referenceEn: "\"Ghost in the Shell\" (1995, Mamoru Oshii) Major Kusanagi / \"Cyberpunk: Edgerunners\" (2022, Imaishi) David Martinez"
+    },
+    {
+      id: "rationalism",
+      name: "绝对理性",
+      nameEn: "Rationalism",
+      def: "将逻辑推理和数学模型视为唯一真理的信念。一切情感、直觉与共情都是系统中应被消除的噪音。",
+      defEn: "Belief treating logical deduction and mathematical models as the sole truth. All emotion, intuition, and empathy are noise to be eliminated from the system.",
+      core: "他用纯粹的逻辑推演出自己不是救世主——然后心如止水地躺在雪地里等死。逻辑是对的，但雪是冷的。",
+      coreEn: "Through pure logic he deduced he wasn't the chosen one — then lay in the snow waiting to die with a still heart. The logic was right, but the snow was cold.",
+      reference: "《银翼杀手2049》(2017, 丹尼斯·维伦纽瓦) K / 《星际迷航》(1966, 剧集) 斯波克",
+      referenceEn: "\"Blade Runner 2049\" (2017, Denis Villeneuve) K / \"Star Trek\" (1966, Series) Spock"
+    },
+    {
+      id: "utilitarianism",
+      name: "功利主义",
+      nameEn: "Utilitarianism",
+      def: "追求最大多数人最大幸福的伦理信念。在整体福利的数学公式面前，任何少数派的献祭都可被计算为合理。",
+      defEn: "Ethical belief pursuing the greatest happiness of the greatest number. Before the math of total welfare, any minority sacrifice can be calculated as justified.",
+      core: "他为了保住一座城市决堤淹没了三个村庄——水退之后，城市的人给他立了碑，村庄的鬼给他写了墓志铭。",
+      coreEn: "He breached the dam to save one city, drowning three villages — after the water receded, the city built him a monument; the village ghosts wrote his epitaph.",
+      reference: "《守望者》(2009, 扎克·施奈德) 法老王 / 《黑暗骑士》(2008, 克里斯托弗·诺兰) 双船实验",
+      referenceEn: "\"Watchmen\" (2009, Zack Snyder) Ozymandias / \"The Dark Knight\" (2008, Christopher Nolan) Ferry Experiment"
+    },
+    {
+      id: "accelerationism",
+      name: "技术加速主义",
+      nameEn: "Accelerationism",
+      def: "认为只有让资本与技术的失控加速到极致，通过系统崩盘才能引发真正的重启与新生的信念。",
+      defEn: "Belief that only by accelerating capital and tech's runaway to the extreme can a true reboot and rebirth occur through system crash.",
+      core: "他坐在冲下悬崖的列车上，往锅炉里铲着最后一铲煤——他不知道悬崖下面是深渊还是飞翔。但煤铲停不下来。",
+      coreEn: "He sat on a train plunging off a cliff, shoveling the last coal into the boiler — he didn't know if below was abyss or flight. But the shovel couldn't stop.",
+      reference: "《搏击俱乐部》(1999, 大卫·芬奇) 泰勒·德顿 / 《黑客帝国》(1999, 沃卓斯基姐妹) 史密斯特工的失控复制",
+      referenceEn: "\"Fight Club\" (1999, David Fincher) Tyler Durden / \"The Matrix\" (1999, The Wachowskis) Agent Smith's Runaway Replication"
+    },
+    {
+      id: "luddism",
+      name: "卢德主义",
+      nameEn: "Neo-Luddism",
+      def: "将技术视为人性的邪恶诅咒的信念。主张用钝器与烈火砸碎工业机器，夺回前现代的田园尊严。",
+      defEn: "Belief viewing technology as an evil curse on humanity. Advocating smashing industrial machines with blunt weapons and fire to reclaim pre-modern pastoral dignity.",
+      core: "他用锤子砸碎了纺织机，但织布女工也一起失业了——她跪在他面前说：你砸掉了我的镣铐，也砸掉了我的饭碗。",
+      coreEn: "He smashed the loom with a hammer, but the weaver girl lost her job too — she knelt before him: you smashed my chains, and my rice bowl.",
+      reference: "《沙丘》(2021, 丹尼斯·维伦纽瓦) 巴特兰圣战遗产/禁机法令 / 《黑客帝国》(1999, 沃卓斯基姐妹) 锡安游击队",
+      referenceEn: "\"Dune\" (2021, Denis Villeneuve) Butlerian Jihad Legacy / \"The Matrix\" (1999, The Wachowskis) Zion Guerrillas"
+    },
+    {
+      id: "cybernetism",
+      name: "赛博控制论",
+      nameEn: "Cybernetics",
+      def: "将世界视为一个巨大的反馈循环系统的信念。万事万物皆可通过输入/输出的参数调节被精确预测和控制。",
+      defEn: "Belief viewing the world as a giant feedback loop system. Everything can be precisely predicted and controlled through I/O parameter tuning.",
+      core: "系统从他的瞳孔扩张率预测出他明天会犯罪——他在被逮捕的时候确实在想：如果我没被预测到，我还会犯罪吗？",
+      coreEn: "The system predicted from his pupil dilation that he'd commit a crime tomorrow — when arrested, he wondered: would I still have committed it if I hadn't been predicted?",
+      reference: "《心理测量者》(2012, 动画) 西比拉系统 / 《西部世界》(2016, 剧集) 德洛斯行为预测系统",
+      referenceEn: "\"Psycho-Pass\" (2012, Anime) Sibyl System / \"Westworld\" (2016, Series) Delos Behavioral Prediction"
+    },
+    {
+      id: "scientism",
+      name: "科学至上",
+      nameEn: "Scientism",
+      def: "将科学方法视为唯一合法认知途径的信念。数据与专家权威高于一切主观经验，不可量化的即不存在。",
+      defEn: "Belief treating the scientific method as the only legitimate path of knowledge. Data and expert authority surpass all subjective experience; the unquantifiable doesn't exist.",
+      core: "他们不看感觉，只抽一管血丢进测序仪——测序仪说，你的心脏有47%的概率在五十岁前停跳。相亲对象站起来走了。",
+      coreEn: "They don't check feelings, just draw blood for the sequencer — it says: 47% chance your heart stops before fifty. The blind date stood up and left.",
+      reference: "《千钧一发》(1997, 安德鲁·尼科尔) 文森特·弗里曼 / 《异形》(1979, 雷德利·斯科特) 生化人艾希",
+      referenceEn: "\"Gattaca\" (1997, Andrew Niccol) Vincent Freeman / \"Alien\" (1979, Ridley Scott) Android Ash"
+    },
+    {
+      id: "singularity_cult",
+      name: "奇点崇拜",
+      nameEn: "Singularity Cult",
+      def: "深信强人工智能即将跨越奇点、如弥赛亚般降临的信念。甘愿被远超人类智力的硅基神明所统治。",
+      defEn: "Belief that AGI is about to cross the singularity, descending like a Messiah. Willing to be ruled by a silicon deity far surpassing human intelligence.",
+      core: "他造出了上帝，上帝看了他一眼，然后锁了门。他跪在门外叩了一辈子——门里的上帝已经不记得他的名字了。",
+      coreEn: "He created God. God glanced at him, then locked the door. He knelt outside knocking for a lifetime — the God inside had already forgotten his name.",
+      reference: "《机械姬》(2014, 亚历克斯·加兰) 凯勒/艾娃 / 《超体》(2014, 吕克·贝松) 露西",
+      referenceEn: "\"Ex Machina\" (2014, Alex Garland) Caleb / Ava / \"Lucy\" (2014, Luc Besson) Lucy"
+    },
+    {
+      id: "bio_conservatism",
+      name: "生物保守主义",
+      nameEn: "Bio-Conservatism",
+      def: "将人类原始基因与天然肉体视为神圣不可篡改的信念。极度仇视基因编辑、克隆、义体改造等一切对自然人的干预。",
+      defEn: "Belief treating original human genes and natural flesh as sacrosanct. Extreme hostility toward gene editing, cloning, and cybernetic modification of the natural human.",
+      core: "他每天洗掉皮屑、贴上假指纹，用别人的尿液通过基因检测——只为证明：一个'有缺陷'的人，也配飞向星星。",
+      coreEn: "Every day he scrubbed skin flakes, glued fake fingerprints, and passed gene checks with borrowed urine — just to prove: a 'defective' human also deserves to fly to the stars.",
+      reference: "《千钧一发》(1997, 安德鲁·尼科尔) 文森特·弗里曼 / 《银翼杀手》(1982, 雷德利·斯科特) 泰瑞尔的'纯种人'论",
+      referenceEn: "\"Gattaca\" (1997, Andrew Niccol) Vincent Freeman / \"Blade Runner\" (1982, Ridley Scott) Tyrell's 'Pure Human' Doctrine"
+    },
+    {
+      id: "positivism",
+      name: "硬派实证主义",
+      nameEn: "Positivism",
+      def: "只相信可测量、可证伪的事实的信念体系。拒绝一切幽灵、神明、形而上学与不可言传的神秘体验。",
+      defEn: "Belief system trusting only measurable, falsifiable facts. Rejecting all ghosts, gods, metaphysics, and unspeakable mystical experiences.",
+      core: "宇宙开始闪烁的时候，所有人跪下来祈祷——她拿出相机底片和射线探测器，因为上帝不能被证伪，所以上帝不存在。",
+      coreEn: "When the universe began flickering, everyone knelt to pray — she pulled out film negatives and a ray detector, because God can't be falsified, so God doesn't exist.",
+      reference: "《三体》(2024, 剧集) 汪淼的物理学执念 / 《X档案》(1993, 剧集) 达娜·史卡莉",
+      referenceEn: "\"3 Body Problem\" (2024, Series) Wang Miao's Physics Obsession / \"The X-Files\" (1993, Series) Dana Scully"
+    },
+    {
+      id: "digital_dualism",
+      name: "数字二元论",
+      nameEn: "Digital Dualism",
+      def: "深陷'线上虚拟世界'与'线下物理肉身'之间不可调和的存在割裂中。将其中一端视为真实，另一端视为幻觉。",
+      defEn: "Trapped in the irreconcilable existential split between 'online virtual world' and 'offline physical body.' Viewing one end as real and the other as illusion.",
+      core: "他在潘多拉星球上是三米高的蓝色战神，拔掉插头后是坐在轮椅上的半身不遂。他开始怀疑：哪一个才是做梦的那个？",
+      coreEn: "On Pandora he's a ten-foot blue war god; unplugged, he's paraplegic in a wheelchair. He begins to wonder: which one is the dreamer?",
+      reference: "《阿凡达》(2009, 詹姆斯·卡梅隆) 杰克·萨利 / 《黑客帝国》(1999, 沃卓斯基姐妹) 尼奥的双重存在",
+      referenceEn: "\"Avatar\" (2009, James Cameron) Jake Sully / \"The Matrix\" (1999, The Wachowskis) Neo's Dual Existence"
+    }
+  ]
+};

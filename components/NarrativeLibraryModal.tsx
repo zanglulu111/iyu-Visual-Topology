@@ -536,12 +536,18 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                                     <>
                                                         {item.def && (
                                                             <div className={`text-sm md:text-base leading-relaxed mb-3 font-light ${isSelected ? (globalTheme === 'retro' ? 'text-[#8B261D]' : 'text-white') : (globalTheme === 'retro' ? 'text-[#3D1A16]' : 'text-zinc-200 group-hover:text-white transition-colors')}`}>
-                                                                {currentLang === 'EN' && item.defEn ? item.defEn : item.def}
+                                                                <span className="mr-1">
+                                                                    {blockId === 'skin_era' ? (currentLang === 'EN' ? "Background:" : "时空背景:") : blockId === 'skin_society' ? (currentLang === 'EN' ? "Social:" : "社会描写:") : (currentLang === 'EN' ? "Def:" : "定义:")}
+                                                                </span>
+                                                                <span>{currentLang === 'EN' && item.defEn ? item.defEn : item.def}</span>
                                                             </div>
                                                         )}
                                                         {item.core && (
-                                                            <div className={`text-xs md:text-sm font-mono tracking-tight mb-4 ${isSelected ? (globalTheme === 'retro' ? 'text-[#8B261D]' : themeText) : (globalTheme === 'retro' ? 'text-[#8B261D]/80 group-hover:text-[#8B261D]' : 'text-zinc-300 group-hover:text-zinc-100 transition-colors')}`}>
-                                                                {currentLang === 'EN' && item.coreEn ? item.coreEn : item.core}
+                                                            <div className={`text-sm md:text-base font-mono tracking-tight mb-4 ${isSelected ? (globalTheme === 'retro' ? 'text-[#8B261D]' : themeText) : (globalTheme === 'retro' ? 'text-[#8B261D]/80 group-hover:text-[#8B261D]' : 'text-zinc-300 group-hover:text-zinc-100 transition-colors')}`}>
+                                                                <span className="mr-1">
+                                                                    {blockId === 'skin_era' ? (currentLang === 'EN' ? "Core Tension:" : "核心张力:") : (currentLang === 'EN' ? "Core:" : "核心逻辑:")}
+                                                                </span>
+                                                                <span>{currentLang === 'EN' && item.coreEn ? item.coreEn : item.core}</span>
                                                             </div>
                                                         )}
                                                     </>

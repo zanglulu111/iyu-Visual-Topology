@@ -19,8 +19,7 @@ import { SUR11_DATA } from './engine_surface/SUR11';
 import { SV1_DATA } from './engine_sv/SV1';
 import { SV2_DATA } from './engine_sv/SV2';
 
-// Synthesizer 调音台参数
-import { SYNTHESIZER_SUR4X } from './engine_core/synthesizer/sur4x';
+// Synthesizer 调音台参数 (SUR4X removed in v3.1)
 import { SYNTHESIZER_SUR10X } from './engine_core/synthesizer/sur10x';
 
 // ============================================================
@@ -137,19 +136,11 @@ export const ALL_SKIN_BLOCKS = [
     },
     ...SKIN_BLOCKS,
     { 
-      id: "sur4x", 
-      name: "SUR4X.物理阶层阻力", 
-      enName: "sur4x.Social Resistance", 
-      description: "社会形态的粘滞度，影响角色在阶层间移动的难度。", 
-      descriptionEn: "Viscosity of social order affecting class mobility.", 
-      tags: [] 
-    },
-    { 
       id: "sur10x", 
-      name: "SUR10X.象征界缝合度", 
-      enName: "sur10x.Symbolic Suture", 
-      description: "主体对于外在秩序的认同与屈从深度。", 
-      descriptionEn: "Subject's depth of submission to the Symbolic Order.", 
+      name: "SUR10X.信念裂度", 
+      enName: "sur10x.Belief Fracture", 
+      description: "主体对自己所持信仰的当真程度——从虔信到决裂的连续谱。", 
+      descriptionEn: "The degree to which the subject takes their own belief seriously — a spectrum from devotion to rupture.", 
       tags: [] 
     }
 ];
@@ -257,17 +248,11 @@ export const SKIN_LIBRARY: LibraryCategoryDef[] = [
         desc: "Target scope and rhythm density.",
         items: SV2_DATA.flatMap(cat => cat.items.map(item => ({ ...item, group: cat.name })))
     },
-    // Synthesizer 调音台
-    {
-        id: "sur4x_lib",
-        name: "物理阶层阻力 (Social Resistance)",
-        desc: "界定压盖在人物头顶阶层固化的程度。",
-        items: SYNTHESIZER_SUR4X.map(item => ({...item, group: "物理阶层阻力"}))
-    },
+    // Synthesizer 调音台 (SUR4X removed in v3.1)
     {
         id: "sur10x_lib",
-        name: "象征界缝合度 (Symbolic Suture)",
-        desc: "对待信仰的'当真程度'滑块。",
-        items: SYNTHESIZER_SUR10X.map(item => ({...item, group: "象征界缝合度"}))
+        name: "信念裂度 (Belief Fracture)",
+        desc: "对信仰的'当真程度'滑块——从虔信到决裂。",
+        items: SYNTHESIZER_SUR10X.map(item => ({...item, group: "信念裂度"}))
     }
 ];

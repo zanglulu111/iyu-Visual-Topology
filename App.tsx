@@ -895,7 +895,7 @@ const App: React.FC = () => {
         // Use the weighted surface filter to determine which blocks participate
         const participants = randomizerService.weightedSurfaceFilter(lockedModules, false);
         // For each participating block, randomize it individually
-        const summaryBlocks = ['skin_era', 'sur4x', 'skin_society', 'skin_age', 'skin_gender', 'skin_profession', 'sur10x', 'skin_ideology', 'skin_everything', 'skin_location', 'skin_ending'];
+        const summaryBlocks = ['skin_era', 'skin_society', 'skin_age', 'skin_gender', 'skin_profession', 'sur10x', 'skin_ideology', 'skin_everything', 'skin_location', 'skin_ending'];
         const newState = { ...narrativeFieldState };
 
         summaryBlocks.forEach(blockId => {

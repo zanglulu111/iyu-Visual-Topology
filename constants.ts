@@ -330,9 +330,8 @@ export const RANDOM_RANGES: Record<string, [number, number]> = {
   'skin_profession': [0, 1],  // SUR9 职业身份
   'skin_ideology': [0, 1],    // SUR10 哲学信念
   'skin_ending': [0, 1],      // SUR11 显性大结局
-  // SUR4X/SUR10X 调音台表现推子
-  'sur4x': [0, 1],            // SUR4X 物理阶层阻力
-  'sur10x': [0, 1],           // SUR10X 象征界缝合度
+  // SUR10X 调音台推子 (SUR4X removed in v3.1)
+  'sur10x': [0, 1],           // SUR10X 信念裂度
   // SV 叙事结构
   'skin_structure': [0, 1],   // SV1 叙事结构
   'skin_volume': [0, 1],      // SV2 故事体量
@@ -351,7 +350,6 @@ export const SURFACE_WEIGHT_CONFIG = {
     { id: 'SUR9',   blockIds: ['skin_profession'],                     weight: 0.65 },
     { id: 'SUR10',  blockIds: ['skin_ideology'],                       weight: 0.30 },
     { id: 'SUR11',  blockIds: ['skin_ending'],                         weight: 0.30 },
-    { id: 'SUR4X',  blockIds: ['sur4x'],                               weight: 0.30 },
     { id: 'SUR10X', blockIds: ['sur10x'],                              weight: 0.30 },
   ] as const,
   cap: 6,

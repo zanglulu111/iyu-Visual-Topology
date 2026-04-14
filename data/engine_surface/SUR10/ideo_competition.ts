@@ -1,143 +1,143 @@
 import { LibraryCategoryDef } from '../../../types';
 
 export const IDEO_COMPETITION: LibraryCategoryDef = {
-    id: "ideo_competition",
-    name: "2. 竞争与生存 (Competition & Survival)",
-    nameEn: "2. Competition & Survival",
-    desc: "关于强弱、输赢与生存法则的信仰。",
-    descEn: "Beliefs about strength, winning, losing, and the laws of survival.",
-    items: [
-      {
-        id: "social_darwinism",
-        name: "社会达尔文", nameEn: "Social Darwinism",
-        group: "2. 竞争与生存", groupEn: "2. Competition & Survival",
-        def: "弱肉强食。世界是丛林，同情心是软弱。强者统治弱者是自然法则。",
-        defEn: "The law of the jungle. Empathy is weakness. The strong ruling the weak is a natural law.",
-        core: "将社会阶级的碾压合法化为生物学淘汰赛。剥夺了同情心的伦理合法性。",
-        coreEn: "Legitimizing the crushing of social classes as a biological knockout tournament. Depriving empathy of ethical legitimacy.",
-        reference: "《饥饿游戏》把穷人孩子扔进斗兽场自相残杀供富人娱乐视为自然淘汰的特权阶层；《大逃杀》坚信只有杀光全班同学活下来的那一个才有资格在丛林社会立足的政府。",
-        referenceEn: "\"The Hunger Games\" tossing poor kids into arenas for sport as natural selection; \"Battle Royale\" dictating that only the last standing student earns the right to live."
-      },
-      {
-        id: "meritocracy",
-        name: "优绩主义", nameEn: "Meritocracy",
-        group: "2. 竞争与生存", groupEn: "2. Competition & Survival",
-        def: "能者多得。只要努力就能成功。你穷是因为你懒/蠢。慕强心理。",
-        defEn: "The capable get more. You succeed if you try. You are poor because you are lazy/stupid. Admiring the strong.",
-        core: "系统性的傲慢与虚伪。成功精英的极度自恋与底层民众的深度自卑。",
-        coreEn: "Systemic arrogance and hypocrisy. Extreme narcissism of successful elites and deep inferiority of the underclass.",
-        reference: "《天空之城》凭借超高智商与古老血统傲慢俯视群氓理所当然认为应统治地球的慕斯卡；《穿普拉达的女王》坚信自己今天的时尚地位全靠极其严苛的努力与品味换来的主编。",
-        referenceEn: "\"Castle in the Sky\" Muska using IQ and lineage to claim planetary rule; \"The Devil Wears Prada\" Miranda believing her cruel grind justifies elite status."
-      },
-      {
-        id: "elitism",
-        name: "精英主义", nameEn: "Elitism",
-        group: "2. 竞争与生存", groupEn: "2. Competition & Survival",
-        def: "柏拉图式傲慢。大众是愚蠢的羊群，世界必须由少数精英引导。",
-        defEn: "Platonic arrogance. The masses are a stupid flock; the world must be guided by a few elites.",
-        core: "智商与血统的隔离墙。精英的理所当然与针对民粹愤怒的冰冷镇压。",
-        coreEn: "The isolation wall of IQ and bloodline. The elite's sense of entitlement and cold suppression of populist anger.",
-        reference: "《了不起的盖茨比》东蛋区的老钱权贵自视血统高贵把新钱和穷人看作不可触碰的低等物种；《雪国列车》头等车厢乘客每日吃着牛排认为尾车厢吃蟑螂块是理所应当的阶级隔离。",
-        referenceEn: "\"The Great Gatsby\" East Egg old money treating poor as subhumans; \"Snowpiercer\" First Class elites eating steak believing Tail section roach-eaters deserve it."
-      },
-      {
-        id: "objectivism",
-        name: "兰德主义", nameEn: "Objectivism",
-        group: "2. 竞争与生存", groupEn: "2. Competition & Survival",
-        def: "自私是最高美德。创造者（巨人）不欠世界任何东西，绝不应被寄生虫拖累。",
-        defEn: "Selfishness is the highest virtue. Creators don't owe the world anything and shouldn't be dragged down by parasites.",
-        core: "极端的理性个人英雄主义。拒绝任何形式的利他与道德捆绑。",
-        coreEn: "Extreme rational individual heroism. Rejecting any altruism and moral entrapment.",
-        reference: "《源泉》坚决不妥协修改图纸宁可炸毁建筑也不让庸人糟蹋自己杰作的极致个人主义建筑师；《阿特拉斯耸耸肩》世界上所有的精英同时罢工让寄生的平民在停摆中饿死的资本狂想。",
-        referenceEn: "\"The Fountainhead\" an architect blowing up his building rather than let mediocrity ruin it; \"Atlas Shrugged\" all creators striking to starve the parasites."
-      },
-      {
-        id: "survivalism",
-        name: "生存主义", nameEn: "Survivalism",
-        group: "2. 竞争与生存", groupEn: "2. Competition & Survival",
-        def: "活着就是一切。为了生存可以抛弃所有人性底线。信任是绝对的奢侈品。",
-        defEn: "Living is everything. Abandoning all humanity bottom lines for survival. Trust is an absolute luxury.",
-        core: "人性的底线在饥饿与死亡面前瞬间崩溃。他人即地狱的终极体现。",
-        coreEn: "Humanity's bottom line instantly collapses in the face of hunger and death. The ultimate embodiment of 'Hell is other people'.",
-        reference: "《行尸走肉》为了队伍能多一罐肉罐头毫不犹豫把外人推向丧尸群的末世求生队长；《末日之路》为了护住推车里的半箱物资在灰烬荒原里见人就杀的沧桑父亲。",
-        referenceEn: "\"The Walking Dead\" pushing strangers to zombies just for a can of meat; \"The Road\" killing on sight in the ashen wasteland to protect a cart of goods."
-      },
-      {
-        id: "machiavellianism",
-        name: "马基雅维利主义", nameEn: "Machiavellianism",
-        group: "2. 竞争与生存", groupEn: "2. Competition & Survival",
-        def: "目的正当化手段。精湛的权术与欺骗，为了权力王座可以背叛一切。",
-        defEn: "The end justifies the means. Masterful politicking and deception; betraying everything for the throne of power.",
-        core: "冷酷无情的理性算计。没有永远的朋友，更没有道义，只有永恒的利益计算。",
-        coreEn: "Ruthless rational calculation. No permanent friends or morality, only eternal interest calculation.",
-        reference: "《纸牌屋》满脸堆笑前一秒握手后一秒把女记者推下地铁轨道的极致政客下木总统；《权力的游戏》用一场血色婚礼背信弃义无情清洗史塔克全部主力的泰温·兰尼斯特。",
-        referenceEn: "\"House of Cards\" Underwood shaking hands then pushing a reporter before a train; \"Game of Thrones\" Tywin mercilessly massacring Stark forces via the Red Wedding."
-      },
-      {
-        id: "kratocracy",
-        name: "强权崇拜", nameEn: "Might is Right",
-        group: "2. 竞争与生存", groupEn: "2. Competition & Survival",
-        def: "力量即真理。谁拳头大谁就有理，鄙视一切弱者、程序、规则与繁文缛节。",
-        defEn: "Might is right. Big fists hold the truth; despising all weaklings, procedures, rules, and red tape.",
-        core: "对暴力的直接性美学展示。对文明与符号规则的粗暴践踏。",
-        coreEn: "Direct aesthetic display of violence. Brutal trampling of civilization and symbolic rules.",
-        reference: "《北斗神拳》世纪末救世主流派里只信奉肌肉和铁拳谁打死首领谁就能占领绿洲的拳王；《疯狂的麦克斯》挥着V8发动机权杖用无敌车队直接碾碎所有讲理者的不死老乔。",
-        referenceEn: "\"Fist of the North Star\" warlords seizing oases using pure muscle and dead leaders; \"Mad Max\" Immortan Joe crushing reason under V8 engine convoys."
-      },
-      {
-        id: "success_gospel",
-        name: "成功神学", nameEn: "Prosperity Gospel",
-        group: "2. 竞争与生存", groupEn: "2. Competition & Survival",
-        def: "上帝绝对保佑有钱人。贫穷是缺乏信仰的神罚。金钱是神恩的唯一证明。",
-        defEn: "God strictly protects the rich. Poverty is divine punishment for lack of faith. Money is the sole proof of grace.",
-        core: "宗教洗脑与资本贪婪的怪诞缝合。将掠夺性的贪婪披上神圣的祭袍。",
-        coreEn: "Grotesque stitching of religious brainwashing and capital greed. Cloaking predatory greed in sacred robes.",
-        reference: "《黑金企业》把开采石油包装成上帝对选民的无上恩典在教堂宣扬贪婪即是神意的狂热牧师；《华尔街之狼》把赚取佣金骗得倾家荡产包装成了神赐的黄金律条的贪婪经纪人。",
-        referenceEn: "\"There Will Be Blood\" preaching oil drilling as divine grace masking greed; \"The Wolf of Wall Street\" brokers framing robbing clients as god-given golden rules."
-      },
-      {
-        id: "thanatocracy",
-        name: "死亡崇拜", nameEn: "Cult of Death",
-        group: "2. 竞争与生存", groupEn: "2. Competition & Survival",
-        def: "只有在死亡/杀戮的瞬间才能证明生命的绝对价值。极端的狂热武士道或恐怖死士。",
-        defEn: "Only in the moment of death/killing is absolute life value proven. Extreme fanatic bushido or suicide terrorists.",
-        core: "狂热的向死而生。对世俗生存的极度轻视，追求那瞬间暴力的血腥绽放。",
-        coreEn: "Fanatic being-towards-death. Extreme disdain for secular survival, pursuing the momentary bloody bloom of violence.",
-        reference: "《圣女贞德》在火刑架上依然视死如归渴求用烈焰证明信仰最高纯度的决死冲锋者；《疯狂的麦克斯》狂喊着“见证我”往嘴里喷射银色喷漆抱着雷管扑向敌车的战争男孩。",
-        referenceEn: "\"Joan of Arc\" facing the pyre believing fire proves ultimate faith; \"Mad Max\" War Boys screaming 'Witness me!' diving with bombs covered in silver chrome."
-      },
-      {
-        id: "zero_sum",
-        name: "零和博弈", nameEn: "Zero-Sum",
-        group: "2. 竞争与生存", groupEn: "2. Competition & Survival",
-        def: "你的所得必是我的所失。宇宙资源是绝对恒定的，除了抢夺别无他法。",
-        defEn: "Your gain is strictly my loss. Universal resources are absolutely constant; plundering is the only way.",
-        core: "极度的焦虑与地狱般的防备心。永远无法合作，只能在互害中沉沦。",
-        coreEn: "Extreme anxiety and hellish defensiveness. Never cooperating, only sinking in mutual harm.",
-        reference: "《三体》宇宙是一座黑暗森林每个文明都带枪狩猎谁发声就灭掉谁的猜疑链法则；《饥饿游戏》只有一个人能活着离开为了最后一口水把盟友毒死的绝对互害博弈。",
-        referenceEn: "\"The Three-Body Problem\" Dark Forest theory shooting any civilization that speaks; \"The Hunger Games\" poisoning allies for the last drop of water to escape alive."
-      },
-      {
-        id: "pragmatism_ruthless",
-        name: "冷酷实用主义", nameEn: "Ruthless Pragmatism",
-        group: "2. 竞争与生存", groupEn: "2. Competition & Survival",
-        def: "只看结果，不问过程。有用就是真理，多余的感情和程序都是致命的累赘。",
-        defEn: "Results over process. Usefulness is truth; superfluous emotions and protocols are fatal burdens.",
-        core: "绝对理性的电车难题执行者。为了所谓的宏大算计大局，可以随时牺牲掉小我。",
-        coreEn: "Absolute rational executor of the Trolley Problem. Readily sacrificing the minority for the so-called grand calculation.",
-        reference: "《守望者》为了防止美苏核战核平几座大城市来制造共同敌人的绝对理性计算者法老王；《模仿游戏》破译了密码却眼睁睁看着民用船只被击沉坚决不暴露情报的图灵。",
-        referenceEn: "\"Watchmen\" Ozymandias nuking cities to stop US-Soviet war via pure math; \"The Imitation Game\" Turing letting ships sink to protect the broken Enigma secret."
-      },
-      {
-        id: "nepotism",
-        name: "裙带主义", nameEn: "Nepotism",
-        group: "2. 竞争与生存", groupEn: "2. Competition & Survival",
-        def: "血浓于水。只信任基于血缘和私交的家族熟人，绝对排斥外人，盛行的圈子文化。",
-        defEn: "Blood is thicker than water. Trusting only bloodlines and kin, absolutely rejecting outsiders, prevalent circle culture.",
-        core: "内部如温室般令人窒息的温馨，与对外如寒冬般残酷的排斥极度撕裂。",
-        coreEn: "Tear between suffocating greenhouse-like warmth inside and cruel winter-like rejection outside.",
-        reference: "《教父》对于外人残酷射杀毫不留情但是永远把家族坐在一起吃意大利面当成最高信条的黑帮；《权力的游戏》兰尼斯特家族只要是为了保护血脉哪怕乱伦和杀光全城的冷酷护短。",
-        referenceEn: "\"The Godfather\" killing rivals ruthlessly but treating family pasta dinners as sacred; \"Game of Thrones\" Lannisters committing incest and massacres solely to protect bloodlines."
-      }
-    ]
-  };
+  id: "ideo_competition",
+  name: "2. 竞争与生存 (Competition & Survival)",
+  nameEn: "Competition & Survival",
+  desc: "关于强弱、输赢与丛林法则的信仰体系。用于定义主角如何看待人与人之间的资源争夺和权力关系。",
+  defEn: "Belief systems about strength, winning, and the law of the jungle. Defines how the protagonist views resource competition and power relations between people.",
+  items: [
+    {
+      id: "social_darwinism",
+      name: "社会达尔文",
+      nameEn: "Social Darwinism",
+      def: "将生物进化的自然选择法则套用于人类社会的信念体系。认为弱肉强食是自然法则，同情弱者是违背天意。",
+      defEn: "Belief system applying biological natural selection to human society. The strong ruling the weak is natural law; empathy for the weak defies nature.",
+      core: "他把对穷人的碾压包装成自然规律——直到他自己滑落到食物链底端，才发现丛林里没有规律，只有牙齿。",
+      coreEn: "He packaged crushing the poor as natural law — until he slid to the bottom of the food chain and found the jungle has no laws, only teeth.",
+      reference: "《饥饿游戏》(2012, 加里·罗斯) 施惠国特权阶层 / 《大逃杀》(2000, 深作欣二) 政府计划",
+      referenceEn: "\"The Hunger Games\" (2012, Gary Ross) Panem's Elite / \"Battle Royale\" (2000, Kinji Fukasaku) Government Program"
+    },
+    {
+      id: "meritocracy",
+      name: "优绩主义",
+      nameEn: "Meritocracy",
+      def: "相信社会地位完全由个人能力和努力决定的信念。你穷是因为你蠢或懒，成功者理应享受一切特权。",
+      defEn: "Belief that social status is entirely determined by individual ability and effort. You're poor because you're lazy; the successful deserve all privileges.",
+      core: "他坚信自己的成功全靠双手——直到一场意外剥夺了他全部的特权，他才发现那双手其实一直站在别人的肩膀上。",
+      coreEn: "He believed his success was all his own — until an accident stripped all privilege, revealing those hands always stood on others' shoulders.",
+      reference: "《穿普拉达的女王》(2006, 大卫·弗兰克尔) 米兰达·普里斯特利 / 《寄生虫》(2019, 奉俊昊) 朴社长",
+      referenceEn: "\"The Devil Wears Prada\" (2006, David Frankel) Miranda Priestly / \"Parasite\" (2019, Bong Joon-ho) Mr. Park"
+    },
+    {
+      id: "elitism",
+      name: "精英主义",
+      nameEn: "Elitism",
+      def: "认为社会应由少数智识或血统上的精英阶层治理的信念。大众是无法自治的愚昧羊群。",
+      defEn: "Belief that society should be governed by an intellectual or bloodline elite. The masses are a mindless flock unable to self-govern.",
+      core: "他在象牙塔的顶端俯瞰蝼蚁，自认为是上帝选中的牧羊人——直到羊群用牙齿投票，将牧羊犬撕成了碎片。",
+      coreEn: "He looked down from the ivory tower at the ants, believing himself God's chosen shepherd — until the flock voted with teeth, tearing the sheepdog apart.",
+      reference: "《了不起的盖茨比》(2013, 巴兹·鲁赫曼) 东蛋区老钱 / 《雪国列车》(2013, 奉俊昊) 头等车厢乘客",
+      referenceEn: "\"The Great Gatsby\" (2013, Baz Luhrmann) East Egg Old Money / \"Snowpiercer\" (2013, Bong Joon-ho) First Class Passengers"
+    },
+    {
+      id: "objectivism",
+      name: "兰德主义",
+      nameEn: "Objectivism",
+      def: "安·兰德式的极端理性个人主义。自私是最高美德，创造者不欠世界任何东西，拒绝一切利他主义的道德绑架。",
+      defEn: "Ayn Rand's extreme rational individualism. Selfishness is the highest virtue; creators owe the world nothing, rejecting all altruistic moral binding.",
+      core: "他宁可炸掉自己一手建造的帝国也不许庸人插手——但帝国废墟下埋的，是唯一一个曾真心爱他的人。",
+      coreEn: "He'd rather blow up his empire than let mediocrity touch it — but buried under the ruins was the only person who ever truly loved him.",
+      reference: "《源泉》(1949, 金·维多) 霍华德·洛克 / 《生化奇兵》(2007, 游戏) 安德鲁·莱恩",
+      referenceEn: "\"The Fountainhead\" (1949, King Vidor) Howard Roark / \"BioShock\" (2007, Game) Andrew Ryan"
+    },
+    {
+      id: "survivalism",
+      name: "生存主义",
+      nameEn: "Survivalism",
+      def: "将活着视为唯一绝对价值的信念。为了生存可以抛弃一切人性底线，信任是致命的奢侈品。",
+      defEn: "Belief holding survival as the sole absolute value. Abandoning all moral baselines for life; trust is a lethal luxury.",
+      core: "他为了活下去杀了所有信任他的人——活下去之后发现，活着本身已经是一种比死更慢的刑罚。",
+      coreEn: "He killed everyone who trusted him to survive — then found that survival itself was a punishment slower than death.",
+      reference: "《行尸走肉》(2010, 剧集) 瑞克·格莱姆斯 / 《末日之路》(2009, 约翰·希尔科特) 父亲",
+      referenceEn: "\"The Walking Dead\" (2010, Series) Rick Grimes / \"The Road\" (2009, John Hillcoat) The Father"
+    },
+    {
+      id: "machiavellianism",
+      name: "马基雅维利主义",
+      nameEn: "Machiavellianism",
+      def: "目的正当化一切手段的权术信条。精通操纵、欺骗与背叛，将人际关系视为纯粹的利益博弈棋盘。",
+      defEn: "The creed that ends justify all means. Mastering manipulation, deception, and betrayal; viewing relationships as pure interest-game chessboards.",
+      core: "他用三十年的假笑换来了王座——但当他终于坐上去的那一秒，发现王座上全是前任们留下的刀痕。",
+      coreEn: "He traded thirty years of fake smiles for the throne — the second he sat down, he found it covered in scars from all predecessors.",
+      reference: "《纸牌屋》(2013, 剧集) 弗兰克·安德伍德 / 《权力的游戏》(2011, 剧集) 泰温·兰尼斯特",
+      referenceEn: "\"House of Cards\" (2013, Series) Frank Underwood / \"Game of Thrones\" (2011, Series) Tywin Lannister"
+    },
+    {
+      id: "kratocracy",
+      name: "强权崇拜",
+      nameEn: "Might is Right",
+      def: "力量即真理的原始信条。谁的拳头大谁有理，鄙视一切规则、程序与弱者的求情。",
+      defEn: "The primal creed of might equals right. Bigger fists hold truth; despising all rules, procedures, and the weak's pleas.",
+      core: "他是斗兽场里最后站着的那头野兽——但斗兽场的门从外面锁着，观众才是真正的主人。",
+      coreEn: "He's the last beast standing in the arena — but the arena door is locked from outside; the audience are the real masters.",
+      reference: "《疯狂的麦克斯4》(2015, 乔治·米勒) 不死老乔 / 《北斗神拳》(1984, 动画) 废土拳王",
+      referenceEn: "\"Mad Max: Fury Road\" (2015, George Miller) Immortan Joe / \"Fist of the North Star\" (1984, Anime) Wasteland Warlords"
+    },
+    {
+      id: "success_gospel",
+      name: "成功神学",
+      nameEn: "Prosperity Gospel",
+      def: "将财富视为神恩唯一证明的宗教化资本信仰。上帝眷顾有钱人，贫穷是信仰不够虔诚的惩罚。",
+      defEn: "Religionized capital belief treating wealth as the sole proof of divine grace. God favors the rich; poverty is punishment for insufficient faith.",
+      core: "他在镀金的教堂里感谢上帝赐予的一切——直到破产的那一天，他发现上帝的电话号码是付费的。",
+      coreEn: "He thanked God for everything in the gilded church — until bankruptcy day, when he found God's phone number was premium-rate.",
+      reference: "《黑金企业》(2007, 保罗·托马斯·安德森) 伊莱·桑迪牧师 / 《华尔街之狼》(2013, 马丁·斯科塞斯) 乔丹·贝尔福特",
+      referenceEn: "\"There Will Be Blood\" (2007, PTA) Eli Sunday / \"The Wolf of Wall Street\" (2013, Scorsese) Jordan Belfort"
+    },
+    {
+      id: "thanatocracy",
+      name: "死亡崇拜",
+      nameEn: "Cult of Death",
+      def: "将死亡或杀戮的瞬间视为生命最高价值证明的极端信念。向死而生的狂热武士道或殉教精神。",
+      defEn: "Extreme belief treating the moment of death or killing as supreme proof of life's value. Fanatic bushido or martyrdom of being-towards-death.",
+      core: "他在冲锋的时候笑得最灿烂——但他从未问过自己，冲锋结束后，笑容应该给谁看。",
+      coreEn: "He smiles brightest during the charge — but never asked who the smile is for after the charge ends.",
+      reference: "《疯狂的麦克斯4》(2015, 乔治·米勒) 战争男孩纳克斯 / 《圣女贞德》(1999, 吕克·贝松) 贞德",
+      referenceEn: "\"Mad Max: Fury Road\" (2015, George Miller) Nux / \"The Messenger\" (1999, Luc Besson) Joan of Arc"
+    },
+    {
+      id: "zero_sum",
+      name: "零和博弈",
+      nameEn: "Zero-Sum",
+      def: "坚信宇宙资源绝对恒定、你的所得必是我的所失的世界观。合作是幻觉，抢夺是唯一生存策略。",
+      defEn: "Worldview insisting universal resources are absolutely constant; your gain is strictly my loss. Cooperation is illusion; plundering is the only strategy.",
+      core: "他把每一个伸出的手都当成要偷东西的手——直到他在暴风雪中快要冻死时，再也没有手伸过来了。",
+      coreEn: "He treated every extended hand as a thieving hand — until he almost froze to death in a blizzard and no hand reached out anymore.",
+      reference: "《三体》(2024, 剧集) 黑暗森林法则 / 《饥饿游戏》(2012, 加里·罗斯) 竞技场生存赛",
+      referenceEn: "\"3 Body Problem\" (2024, Series) Dark Forest Theory / \"The Hunger Games\" (2012, Gary Ross) Arena Survival"
+    },
+    {
+      id: "pragmatism_ruthless",
+      name: "冷酷实用主义",
+      nameEn: "Ruthless Pragmatism",
+      def: "只看结果、不问过程的极端功利主义。有用即真理，感情和道德都是影响效率的致命噪音。",
+      defEn: "Extreme utilitarianism focused solely on results. Usefulness is truth; emotion and morality are lethal noise affecting efficiency.",
+      core: "他在电车难题面前毫不犹豫地拉下了操纵杆——被碾死的那一个，是他自己的女儿。数学是对的，但答案是错的。",
+      coreEn: "He pulled the trolley lever without hesitation — the one crushed was his own daughter. The math was right; the answer was wrong.",
+      reference: "《守望者》(2009, 扎克·施奈德) 法老王 / 《模仿游戏》(2014, 莫滕·泰尔杜姆) 图灵",
+      referenceEn: "\"Watchmen\" (2009, Zack Snyder) Ozymandias / \"The Imitation Game\" (2014, Morten Tyldum) Alan Turing"
+    },
+    {
+      id: "nepotism",
+      name: "裙带主义",
+      nameEn: "Nepotism",
+      def: "血浓于水的家族至上信条。只信任血缘和私交圈内的熟人，将外人视为潜在威胁而绝对排斥。",
+      defEn: "Family-first creed of blood over water. Trusting only kin and inner circle; treating outsiders as threats to be absolutely excluded.",
+      core: "他为了家族可以杀光一座城——但家族内部的刀子比外面的敌人更锋利，背后捅来的总是亲兄弟。",
+      coreEn: "He'd kill a city for his family — but knives inside the family are sharper than outside enemies; the backstab always comes from a brother.",
+      reference: "《教父》(1972, 弗朗西斯·科波拉) 柯里昂家族 / 《权力的游戏》(2011, 剧集) 兰尼斯特家族",
+      referenceEn: "\"The Godfather\" (1972, Francis Ford Coppola) Corleone Family / \"Game of Thrones\" (2011, Series) House Lannister"
+    }
+  ]
+};

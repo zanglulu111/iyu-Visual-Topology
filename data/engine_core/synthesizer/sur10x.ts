@@ -1,54 +1,75 @@
 import { LibraryItemDef } from '../../../types';
 
+/**
+ * SUR10X. 信念裂度 (Belief Fracture Degree)
+ * 
+ * 定义：主体对自己所持信仰/意识形态的"当真程度"——从完全内化到彻底决裂的连续谱。
+ * 
+ * 正交关系：
+ *   SUR10 决定"信什么" → SUR10X 决定"信到什么程度"
+ *   同一个信念 × 不同裂度 = 完全不同的叙事人物
+ * 
+ * v3.1: 更名（原"象征界缝合度"），清除 M 层术语，对齐 SUR 标准
+ */
 export const SYNTHESIZER_SUR10X: LibraryItemDef[] = [
     {
         id: "sur10x_level_1",
-        name: "L1.全自动缝合",
-        nameEn: "Automatic Suture",
-        group: "SUR10X. 象征界缝合度",
-        def: "主体与大他者（社会信仰与律法系统）达成了令人毛骨悚然的完美三维重叠。没有留下任何一丝供主体怀疑的微小缝隙，更不产生任何反讽（Irony）与距离感。",
-        defEn: "The subject and the Big Other (social belief and law system) achieve a spine-chilling perfect 3D overlap. Leaving absolutely no microscopic crack for the subject to doubt, nor generating any irony or distance.",
-        core: "完美的赛博式信仰物理屏蔽机制。主体彻底降维为一台只进不出、毫无阻抗运转着社会教条真理的扩音喇叭。",
-        coreEn: "Perfect cybernetic physical shielding mechanism of belief. The subject is completely dimensionally-reduced into a bullhorn operating without resistance, only intaking and outputting social dogma truth.",
+        name: "L1.虔信",
+        nameEn: "Total Devotion",
+        group: "SUR10X. 信念裂度",
+        def: "主体与信仰之间没有任何缝隙。教条即呼吸，规训即本能——他不是在'遵守'规则，他就是规则长出来的人形容器。任何外部质疑都会被生理性地排斥，如同身体排异移植器官。",
+        defEn: "Zero gap between subject and belief. Doctrine is breathing, discipline is instinct — he does not 'follow' the rules, he is the human-shaped container grown from the rules themselves. Any external doubt is physiologically rejected, like the body rejecting a transplant organ.",
+        core: "他从未觉得自己有过选择。信仰不是他接受的东西，而是他睁开眼就已经在里面的东西——像羊水，像重力，像母语。你不能质疑重力。",
+        coreEn: "He never felt he had a choice. Faith is not something he accepted, but something he's already inside when he opens his eyes — like amniotic fluid, like gravity, like a mother tongue. You cannot question gravity.",
+        reference: "《沉默》(2016, 马丁·斯科塞斯) 洛特里哥神父的早期狂信 / 《使女的故事》(2017, 剧集) 嬷嬷莉迪亚的教义执行",
+        referenceEn: "\"Silence\" (2016, Scorsese) Father Rodrigues' early fanaticism / \"The Handmaid's Tale\" (2017, Series) Aunt Lydia's doctrinal enforcement"
     },
     {
         id: "sur10x_level_2",
-        name: "L2.半渗透",
-        nameEn: "Semi-permeable",
-        group: "SUR10X. 象征界缝合度",
-        def: "主体依然佩戴着虚伪的面具进行沉浮，却开始敏锐地在肉体感受中感知到自我与被规训的社会角色发生错位开裂。即使戏还在演，一种骨髓深透的疲惫和焦虑已开始四溢。",
-        defEn: "The subject still wears the hypocritical mask bobbing along, but begins acutely sensing through bodily feeling a dislocation cracking between the self and the disciplined social role. Even though the play goes on, a marrow-deep exhaustion and anxiety begin to spill over.",
-        core: "严密针脚出现了结构性质的松散脱漆。“大他者的实在意义”这艘巨轮漏水了，使得主体产生了某种类似于过敏反应般的荒诞不协调晕眩。",
-        coreEn: "Structural looseness and paint peeling occur in the tight stitching. The dreadnought of 'the Big Other's real meaning' springs a leak, causing the subject to produce an absurd inharmonious dizziness akin to an allergic reaction.",
+        name: "L2.微裂",
+        nameEn: "Hairline Crack",
+        group: "SUR10X. 信念裂度",
+        def: "主体仍然戴着信徒的面具参与仪式，但身体已经开始发出不服从的信号：失眠、恶心、无法集中注意力。信仰的墙壁出现了头发丝般的裂缝——还不足以坍塌，但每次风吹过都会发出令人不安的嘎吱声。",
+        defEn: "The subject still wears the believer's mask and participates in rituals, but the body has begun sending signals of disobedience: insomnia, nausea, inability to concentrate. Hairline cracks appear in the walls of faith — not enough to collapse, but every gust of wind produces an unsettling creak.",
+        core: "他继续跪着祈祷，但膝盖上的淤青让他分心了。他开始注意到祭坛上的灰尘、布道者嘴角的唾液、捐款箱上的锈迹。这些细节以前从来不存在。",
+        coreEn: "He keeps kneeling in prayer, but the bruises on his knees distract him. He starts noticing the dust on the altar, the saliva at the corner of the preacher's mouth, the rust on the donation box. These details never existed before.",
+        reference: "《大开眼戒》(1999, 斯坦利·库布里克) 比尔对婚姻忠诚的第一次动摇 / 《冬眠》(2014, 努里·比格·锡兰) 知识分子的信念磨损",
+        referenceEn: "\"Eyes Wide Shut\" (1999, Kubrick) Bill's first shake of marital fidelity / \"Winter Sleep\" (2014, Nuri Bilge Ceylan) intellectual's faith erosion"
     },
     {
         id: "sur10x_level_3",
-        name: "L3.反讽缝合",
-        nameEn: "Ironic Suture",
-        group: "SUR10X. 象征界缝合度",
-        def: "齐泽克式的清醒装睡：主体从头到脚都清楚这只是一场欺诈的政治/资本游戏。他以最高强度的反讽与犬儒态度留在牌桌上执行动作，不当真，但也绝不真正翻桌反抗。",
-        defEn: "Zizekian lucid fake-sleep: the subject knows from head to toe that this is just a fraudulent political/capital game. They remain on the table executing actions with maximum irony and cynic attitude, not taking it seriously, but never truly flipping the table in rebellion.",
-        core: "冷酷的犬儒主义 (Cynicism)。大他者早就名存实亡成了一具被吸干血肉的尸体。主体像一只寄生虫般在这个巨大死尸的消化系统内，一边嘲笑它腐烂的臭气一边熟练地窃取养分游走。",
-        coreEn: "Cold cynicism. The Big Other is long dead in all but name, reduced to a blood-sucked corpse. The subject parasitic-ally navigates within the giant carcass's digestive system, laughing at its putrid stench while expertly stealing nutrients.",
+        name: "L3.反讽",
+        nameEn: "Ironic Distance",
+        group: "SUR10X. 信念裂度",
+        def: "主体彻底看穿了信仰的虚构性，但选择继续扮演信徒。他以一种冷静的犬儒姿态留在体制内部——不是因为相信，而是因为离开的代价太高，或者因为在废墟里寄生比在荒野里独行更舒适。",
+        defEn: "The subject has completely seen through the fictional nature of the belief, but chooses to keep playing the believer. They remain inside the system with calm cynical composure — not because they believe, but because the cost of leaving is too high, or because parasitizing in ruins is more comfortable than walking alone in the wilderness.",
+        core: "他在会议上带头鼓掌，鼓得比任何人都响。散会后他独自回到车里，在方向盘上坐了四十分钟，什么都没做。他知道这一切是假的。他也知道'知道这是假的'并不能帮他辞职。",
+        coreEn: "He leads the applause at the meeting, clapping louder than anyone. After the meeting he sits alone in his car, forty minutes at the steering wheel, doing nothing. He knows all of it is fake. He also knows that 'knowing it is fake' does not help him resign.",
+        reference: "《大佛普拉斯》(2017, 黄信尧) 肚财对底层生存的冷幽默接受 / 《局内人》(2015, 禹民镐) 在腐败体制中清醒求存的记者",
+        referenceEn: "\"The Great Buddha+\" (2017, Huang Hsin-yao) Belly Button's cold humor acceptance / \"Inside Men\" (2015, Woo Min-ho) journalist surviving lucidly inside a corrupt system"
     },
     {
         id: "sur10x_level_4",
-        name: "L4.脱线",
-        nameEn: "Unstitched",
-        group: "SUR10X. 象征界缝合度",
-        def: "主体如同切断了木偶师丝线般，将社会的荣誉或评价标准弃若敝履。主体关上了象征界的外部接收通道，将自己孤零零地埋藏进私密建立的诡异小宇宙逻辑深处。",
-        defEn: "Like cutting the puppeteer's strings, the subject discards social honors or evaluation standards like old shoes. Shutting the external reception channel of the Symbolic, burying themselves alone deep inside the bizarre logic of a privately built micro-universe.",
-        core: "主权的断开。主体不再在大他者的凝视（Gaze）下生存。这种出离并不是一种暴力反抗，而是一种冷漠的系统剥离。",
-        coreEn: "Sovereignty disconnected. The subject no longer survives under the Big Other's Gaze. This departure is not violent rebellion, but apathetic systemic divestment.",
+        name: "L4.脱落",
+        nameEn: "Detachment",
+        group: "SUR10X. 信念裂度",
+        def: "主体不再表演了。他像蛇蜕皮一样安静地从信仰的外壳中滑出来，把所有社会赋予的荣誉、头衔和意义系统留在身后。他没有愤怒，也没有宣言——只是不再回应了，像一个拔掉网线的服务器。",
+        defEn: "The subject stops performing. Like a snake shedding skin, he quietly slides out of the shell of belief, leaving behind all socially granted honors, titles, and meaning systems. No anger, no manifesto — just stops responding, like a server with the cable unplugged.",
+        core: "他的手机响了七十二次，全是同事和亲戚的。他看了一眼，放回桌上，然后继续用叉子把盘子里的意面卷成一个完美的圆柱体。没有人理解他为什么不接电话。他自己也不打算解释。",
+        coreEn: "His phone rang seventy-two times, all from colleagues and relatives. He glanced at it, put it back on the table, and continued rolling the pasta on his plate into a perfect cylinder with his fork. Nobody understands why he won't answer. He doesn't plan to explain either.",
+        reference: "《醉乡民谣》(2013, 科恩兄弟) 勒维恩·戴维斯对音乐行业的系统性退出 / 《帕特森》(2016, 贾木许) 公交司机对社会期待的沉默拒绝",
+        referenceEn: "\"Inside Llewyn Davis\" (2013, Coen Brothers) Davis's systemic withdrawal / \"Paterson\" (2016, Jarmusch) bus driver's silent refusal of social expectations"
     },
     {
         id: "sur10x_level_5",
-        name: "L5.炸裂",
-        nameEn: "Explosive Rupture",
-        group: "SUR10X. 象征界缝合度",
-        def: "主体调转枪口向外爆发了直指大他者王座的亵渎狂冲。它试图凭借肉身毁灭力量彻底粉碎社会底座，残忍扯下面具去生擒掩盖真实体系本身。",
-        defEn: "The subject rotates the gun barrel outward, detonating a blasphemous mad rush aimed straight at the Big Other's throne. Attempting to pulverize the social base with physical destruction, cruelly tearing off masks to capture the reality-covering system alive.",
-        core: "终极维度的对抗与爆破摧毁。主体的欲望（M1）与无情机械大他者法则（A）发生足以燃爆代码基址的核聚变对冲。",
-        coreEn: "Ultimate-dimensional confrontation and explosive destruction. The subject's desire (M1) and the ruthless mechanical Big Other Law (A) engage in a nuclear fusion clash capable of igniting codebase addresses.",
+        name: "L5.决裂",
+        nameEn: "Violent Rupture",
+        group: "SUR10X. 信念裂度",
+        def: "主体从信仰的尸体上站起来，调转枪口对准了曾经供奉它的神殿。这不是冷漠的退出，而是一场浸透了仇恨与背叛感的暴力清算——因为他曾经比任何人都虔诚，所以他现在比任何人都想亲手把它烧成灰。",
+        defEn: "The subject rises from the corpse of faith, turning the gun on the temple that once enshrined it. This is not cold withdrawal, but a violent reckoning soaked in hatred and betrayal — because he was once more devout than anyone, he now wants more than anyone to burn it to ashes with his own hands.",
+        core: "他把十五年前的入党申请书从抽屉底部翻出来，用打火机点着，看火焰慢慢烧到自己写的那句'我愿为组织献出一切'。他没有哭。他微笑了。比哭更可怕的那种微笑。",
+        coreEn: "He digs out his fifteen-year-old party membership application from the bottom of the drawer, lights it with a lighter, watches the flame slowly reach the line he wrote: 'I am willing to give everything for the organization.' He doesn't cry. He smiles. The kind of smile more terrifying than crying.",
+        reference: "《V字仇杀队》(2005, 詹姆斯·麦克特格) V对政权的系统性毁灭 / 《第一次归来》(2014, 张艺谋) 陆焉识对曾信仰体制的无声控诉",
+        referenceEn: "\"V for Vendetta\" (2005, McTeigue) V's systematic regime destruction / \"Coming Home\" (2014, Zhang Yimou) Lu Yanshi's silent indictment of the once-trusted system"
     }
 ];

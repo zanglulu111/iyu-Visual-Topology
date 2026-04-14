@@ -137,8 +137,8 @@ export interface MistEngineInput {
   sur10?: string;      // 哲学信念 (Philosophy)
 
   // === 皮层旋钮：X参数 ===
-  sur4x?: string;      // 物理阶层阻力
-  sur10x?: string;     // 象征界缝合度
+  // sur4x removed in v3.1 (与 SUR4 语义冗余)
+  sur10x?: string;     // 信念裂度
 
   // === 工程轴：SV1-SV2 ===
   sv1?: string;        // 叙事结构
@@ -174,8 +174,7 @@ export function extractEngineInput(fieldState: NarrativeFieldState): MistEngineI
 
     sur10: nameToId(extractFirst(fieldState, 'skin_ideology')),
 
-    // 皮层旋钮
-    sur4x: nameToId(extractFirst(fieldState, 'sur4x')),
+    // 皮层旋钮 (sur4x removed in v3.1)
     sur10x: nameToId(extractFirst(fieldState, 'sur10x')),
 
     // 工程轴
@@ -203,7 +202,7 @@ function resolveM0Topology(m0Id?: string): M0TopologyProfile | undefined {
 // 3. 张力计算 (Tension Calculation)
 //    完整公式（v2.2 含 SUR 皮层注入）：
 //    分子 = (G_M1 + G_M2 + G_M3 × m3Opacity × sur10xFactor)
-//    分母 = G_M4 × m4Divisor × (1 + G_M4X) × sur4xFactor
+//    分母 = G_M4 × m4Divisor × (1 + G_M4X)
 //    张力比 = 分子 / max(分母, 0.1)
 //    最终张力 = 张力比 × G_M5 × m5Multiplier × (1 + G_M5X)
 // ============================================
@@ -214,37 +213,22 @@ function resolveGravity(moduleKey: string, itemId?: string): number {
   return getGroupGravity(moduleKey, item?.group);
 }
 
-/**
- * SUR4X 阶层阻力 → M4 分母叠加系数
- * L1=1.0(空气), L2=1.15, L3=1.3, L4=1.5, L5=1.8
- * 理论依据：社会越固化，大他者的阻断力越强
- */
-function resolveSUR4XFactor(sur4xId?: string): number {
-  if (!sur4xId) return 1.0;
-  const map: Record<string, number> = {
-    'sur4x_level_1': 1.0,   // 空气 → 无额外阻力
-    'sur4x_level_2': 1.15,  // 粘稠液体 → 轻微阻力
-    'sur4x_level_3': 1.3,   // 泥淖 → 显著阻力
-    'sur4x_level_4': 1.5,   // 固化岩层 → 强烈阻力
-    'sur4x_level_5': 1.8,   // 超高压内核 → 极端阻力
-  };
-  return map[sur4xId] ?? 1.0;
-}
+// SUR4X factor function removed in v3.1 (与 SUR4 语义冗余)
 
 /**
- * SUR10X 象征界缝合度 → M3 幻象粘度系数
- * L1=1.3(全自动缝合→幻象极度真实), L2=1.15, L3=1.0, L4=0.7, L5=0.4
- * 理论依据：越深度缝合，主体越"当真"自己的幻象，M3势能越高
- *          越炸裂，主体越看穿幻象，M3势能越低
+ * SUR10X 信念裂度 → M3 幻象粘度系数
+ * L1=1.3(虔信→信念极度坚固), L2=1.15, L3=1.0, L4=0.7, L5=0.4
+ * 理论依据：越虔诚，主体越"当真"自己的幻象，M3势能越高
+ *          越决裂，主体越看穿幻象，M3势能越低
  */
 function resolveSUR10XFactor(sur10xId?: string): number {
   if (!sur10xId) return 1.0;
   const map: Record<string, number> = {
-    'sur10x_level_1': 1.3,  // 全自动缝合 → 幻象极度真实
-    'sur10x_level_2': 1.15, // 半渗透 → 幻象略有松动
-    'sur10x_level_3': 1.0,  // 反讽缝合 → 中性（看穿但在演）
-    'sur10x_level_4': 0.7,  // 脱线 → 幻象大幅弱化
-    'sur10x_level_5': 0.4,  // 炸裂 → 幻象几乎无效
+    'sur10x_level_1': 1.3,  // 虔信 → 信念完全坚固
+    'sur10x_level_2': 1.15, // 微裂 → 信念略有松动
+    'sur10x_level_3': 1.0,  // 反讽 → 中性（看穿但在演）
+    'sur10x_level_4': 0.7,  // 脱落 → 信念大幅弱化
+    'sur10x_level_5': 0.4,  // 决裂 → 信念几乎无效
   };
   return map[sur10xId] ?? 1.0;
 }
@@ -268,26 +252,26 @@ function calculateTension(input: MistEngineInput, m0Topo: M0TopologyProfile | un
     entropyRate: 1.0
   };
 
-  // SUR 皮层修饰系数
-  const sur4xFactor = resolveSUR4XFactor(input.sur4x);
+  // SUR 皮层修饰系数 (sur4x removed in v3.1)
   const sur10xFactor = resolveSUR10XFactor(input.sur10x);
 
   // ====== 分子：欲望势能 ======
   // M3 的重力受三重调制：
   //   1. M0.m3Opacity（精神拓扑：忧郁=0.1）
-  //   2. SUR10X（缝合度：全自动缝合=1.3 → 幻象更"真"）
+  //   2. SUR10X（信念裂度：虔信=1.3 → 幻象更"真"）
   const effective_m3 = g_m3 * mods.m3Opacity * sur10xFactor;
   const numerator = g_m1 + g_m2 + effective_m3;
 
   // ====== 分母：大他者阻断 ======
   // M4 受三重调制：
   //   1. M0.m4Divisor（精神拓扑：精神病=0.1）
+  const effective_m4 = g_m4 * mods.m4Divisor;
   const m4_amplifier = 1.0 + m4x_gravity;
   
   // 【算法修正】由于分子是 M1+M2+M3 的加和（均值约1.5），分母仅有 M4（均值约0.75）。
   // 为了让平均对峙状态的张力比回归到 1.0 (DEADLOCK)，在此赋予大他者 2.0 的“固有镇压权值”。
   const m4_base_weight = 2.0; 
-  const denominator = Math.max(effective_m4 * m4_amplifier * sur4xFactor * m4_base_weight, 0.1);
+  const denominator = Math.max(effective_m4 * m4_amplifier * m4_base_weight, 0.1);
   const ratio = numerator / denominator;
 
   // ====== 乘子：驱力 ======
@@ -502,9 +486,8 @@ function compileDirectives(
 
   // M4X/M5X directive compilation removed in v3.0
 
-  // ====== SUR4X / SUR10X 皮层指令 ======
+  // ====== SUR10X 皮层指令 (SUR4X removed in v3.1) ======
   const surItems: Array<{ target: string; id?: string }> = [
-    { target: 'SUR4X_CLASS_RESISTANCE', id: input.sur4x },
     { target: 'SUR10X_SYMBOLIC_SUTURE', id: input.sur10x },
   ];
   for (const sur of surItems) {
@@ -776,8 +759,7 @@ ${m0Section}
 | M3 欲望幻象 | ${getName(input.m3)} | ${resolveGravity('M3', input.m3).toFixed(2)} (有效值: ${(resolveGravity('M3', input.m3) * (m0Topo?.formulaMods.m3Opacity ?? 1.0) * resolveSUR10XFactor(input.sur10x)).toFixed(2)}) |
 | M4 大他者 | ${getName(input.m4)} | ${resolveGravity('M4', input.m4).toFixed(2)} (有效值: ${(resolveGravity('M4', input.m4) * (m0Topo?.formulaMods.m4Divisor ?? 1.0)).toFixed(2)}) |
 | M5 行动驱力 | ${getName(input.m5)} | ${resolveGravity('M5', input.m5).toFixed(2)} (有效值: ${(resolveGravity('M5', input.m5) * (m0Topo?.formulaMods.m5Multiplier ?? 1.0)).toFixed(2)}) |
-| SUR4X 阶层阻力 | ${getName(input.sur4x)} | ×${resolveSUR4XFactor(input.sur4x).toFixed(2)} → M4分母 |
-| SUR10X 缝合度 | ${getName(input.sur10x)} | x${resolveSUR10XFactor(input.sur10x).toFixed(2)} -> M3幻象 |
+| SUR10X 信念裂度 | ${getName(input.sur10x)} | x${resolveSUR10XFactor(input.sur10x).toFixed(2)} -> M3幻象 |
 
 ### 🌍 世界法则 (World Law)
 **重力等级:** LV${input.worldLawGravity || 3} ${input.worldLawGravity === 1 ? '(写实/Realism)' : input.worldLawGravity === 2 ? '(合理/Rational)' : input.worldLawGravity === 4 ? '(奇观/Spectacle)' : input.worldLawGravity === 5 ? '(狂想/Rhapsody)' : '(缝合/Suture)'}
@@ -801,7 +783,7 @@ ${m0Section}
 
 ### 📊 张力报告
 - **分子势能** (M1+M2+M3×opacity×sur10x): ${tension.numerator.toFixed(2)}
-- **分母压强** (M4×m4Div×sur4x): ${tension.denominator.toFixed(2)}
+- **分母压强** (M4×m4Div): ${tension.denominator.toFixed(2)}
 - **张力比**: ${tension.ratio.toFixed(2)}
 - **最终张力**: ${tension.finalTension.toFixed(2)}
 - **世界熵值** (entropyRate): ${tension.worldEntropy.toFixed(2)}
@@ -836,7 +818,7 @@ export function runMistEngine(fieldState: NarrativeFieldState, worldLaw?: WorldL
 
   // 注入世界法则
   if (worldLaw) {
-    input.worldLawGravity = worldLaw.gravity;
+    input.worldLawGravity = worldLaw.gravity as 1 | 2 | 3 | 4 | 5;
   }
   
   // 解析 M0 拓扑 — 确定"操作系统"

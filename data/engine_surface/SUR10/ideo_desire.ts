@@ -1,143 +1,143 @@
 import { LibraryCategoryDef } from '../../../types';
 
 export const IDEO_DESIRE: LibraryCategoryDef = {
-    id: "ideo_desire",
-    name: "1. 欲望与消费 (Desire & Consumption)",
-    nameEn: "1. Desire & Consumption",
-    desc: "关于快乐、物质与注意力的信仰。",
-    descEn: "Beliefs about pleasure, materiality, and attention.",
-    items: [
-      {
-        id: "consumerism",
-        name: "消费主义", nameEn: "Consumerism",
-        group: "1. 欲望与消费", groupEn: "1. Desire & Consumption",
-        def: "我买故我在。通过购买商品来构建身份，商品具有图腾般的魔力。",
-        defEn: "I buy, therefore I am. Constructing identity through purchasing goods; commodities have totem-like magic.",
-        core: "将符号消费视为填补存在主义空洞（M1）的唯一手段。",
-        coreEn: "Treating symbolic consumption as the only means to fill the existential void (M1).",
-        reference: "《搏击俱乐部》被宜家家具塞满公寓却填不满内心不得不靠打拳确诊存在的打工人；《美国精神病人》靠炫耀顶级名片和昂贵护肤品维系自我的华尔街精英。",
-        referenceEn: "\"Fight Club\" IKEA-stuffed apartments failing to fill internal voids; \"American Psycho\" elites maintaining identity via business cards and skincare."
-      },
-      {
-        id: "hedonism",
-        name: "享乐主义", nameEn: "Hedonism",
-        group: "1. 欲望与消费", groupEn: "1. Desire & Consumption",
-        def: "多巴胺至上。避苦求乐是唯一道德。身体是用来挥霍的。",
-        defEn: "Dopamine supreme. Avoiding pain and seeking pleasure is the only morality. The body is meant to be squandered.",
-        core: "为了维持快感阈值而不断升级刺激，最终面临感官的彻底过载。",
-        coreEn: "Constantly escalating stimulation to maintain pleasure thresholds, ultimately facing complete sensory overload.",
-        reference: "《华尔街之狼》无休止的吸毒滥交与金钱狂欢最终导致神经衰弱的证券狂徒；《堕落街》在柏林地下迪厅抛弃所有底线只为今朝有酒的颓废青年。",
-        referenceEn: "\"The Wolf of Wall Street\" endless drugs and sex leading to burnout; \"Christiane F.\" Berlin youth abandoning bottom lines for tonight's high."
-      },
-      {
-        id: "attention_worship",
-        name: "流量拜物教", nameEn: "Attention Fetishism",
-        group: "1. 欲望与消费", groupEn: "1. Desire & Consumption",
-        def: "生活是一场表演，数据（点赞/关注）是衡量价值的唯一标准。",
-        defEn: "Life is a performance; data (likes/follows) is the only measure of value.",
-        core: "真实的自我在完美的线上人设前彻底溶解。掉粉等同于生物学死亡。",
-        coreEn: "The authentic self dissolves completely before the perfect online persona. Losing followers equals biological death.",
-        reference: "《黑镜：急转直下》只要评分掉到特定数值连买咖啡资格都会被剥夺的点赞社会；《楚门的世界》为了保持收视率不惜强行剥夺一个人全部真实人生的娱乐至死。",
-        referenceEn: "\"Black Mirror: Nosedive\" a society where low ratings revoke coffee rights; \"The Truman Show\" stripping reality for peak broadcast ratings."
-      },
-      {
-        id: "libertarianism_radical",
-        name: "极端自由意志", nameEn: "Radical Libertarianism",
-        group: "1. 欲望与消费", groupEn: "1. Desire & Consumption",
-        def: "私有财产神圣不可侵犯，拒斥任何集体约束，金钱万能。",
-        defEn: "Private property is sacred and inviolable, rejecting any collective constraint, money is omnipotent.",
-        core: "自私被美化为神圣的独立。以孤岛心态面对世界崩塌。",
-        coreEn: "Selfishness is beautifully framed as sacred independence. Facing global collapse with an island mentality.",
-        reference: "《生化奇兵》不设任何法律只认绝对私产与竞争最终毁于一旦的极渊海底城；《疯狂的麦克斯》谁掌握了资源的私有权谁就能随意决定他人生死废土法则。",
-        referenceEn: "\"BioShock\" Rapture falling to ruin by rejecting law for absolute private property; \"Mad Max\" wasteland rules where owning resources means dictating lives."
-      },
-      {
-        id: "commodity_fetishism",
-        name: "商品拜物教", nameEn: "Commodity Fetishism",
-        group: "1. 欲望与消费", groupEn: "1. Desire & Consumption",
-        def: "相信物理物品有灵魂或神力。通过拥有特定物品来补全人格的主体性。",
-        defEn: "Believing physical objects have souls/divine power. Completing personality subjectivity by possessing specific objects.",
-        core: "对无生命物体的病态迷恋。将人的权力出让给物的超载寄生。",
-        coreEn: "Pathological obsession with inanimate objects. Yielding human power to the overloaded parasitism of objects.",
-        reference: "《指环王》把一枚金戒指奉为比生命还重要的宝贝（My Precious）彻底迷失自我的咕噜；《欲望都市》将特定名牌高跟鞋视作自己全部女性魅力灵魂的夸张崇拜。",
-        referenceEn: "\"Lord of the Rings\" Gollum treating a gold ring as dearer than life; \"Sex and the City\" extreme worship of designer shoes as the female soul."
-      },
-      {
-        id: "aestheticism",
-        name: "唯美主义", nameEn: "Aestheticism",
-        group: "1. 欲望与消费", groupEn: "1. Desire & Consumption",
-        def: "为了艺术而艺术。美高于道德和生命，生命自身就是用来创作最后一件艺术品的耗材。",
-        defEn: "Art for art's sake. Beauty is above morality and life; life itself is consumable material to create the final artwork.",
-        core: "极致的美绝不仅是皮相，往往伴随着对人体与伦理的极致残忍切割。",
-        coreEn: "Extreme beauty is never just skin-deep; it often involves extreme cruel severances of body and ethics.",
-        reference: "《香水》为了寻找到世界上最极致的芳香不惜连环谋杀美丽少女提取体香的狂人；《霓虹恶魔》在洛杉矶模特圈为了追求极致的视觉美感不惜吃人的可怕血腥秀。",
-        referenceEn: "\"Perfume\" a madman murdering girls to extract the ultimate scent; \"The Neon Demon\" LA models cannibalizing for extreme visual aesthetics."
-      },
-      {
-        id: "carnivalism",
-        name: "狂欢主义", nameEn: "Carnivalism",
-        group: "1. 欲望与消费", groupEn: "1. Desire & Consumption",
-        def: "巴赫金式的疯狂节庆。颠覆现有等级制度，通过集体的混乱与僭越来获得短暂重生。",
-        defEn: "Bakhtinian crazy festival. Subverting existing hierarchies, gaining brief rebirth through collective chaos and transgression.",
-        core: "充满面具与火把的短暂释放，旨在遮罩那无法打破的永恒制裁压抑。",
-        coreEn: "Brief release filled with masks and torches, aiming to mask the unbreakable eternal sanctioning repression.",
-        reference: "《人类清除计划》每年有一天法律无效全民戴上面具持枪上街狂欢杀戮的泄压阀；《小丑》在游行抗议中化好浓妆掀起整个高谭市病态暴乱盛宴的反派。",
-        referenceEn: "\"The Purge\" a yearly 12-hour lawless carnival releasing societal pressure; \"Joker\" sparking a chaotic parade feeding Gotham's sick riotous feast."
-      },
-      {
-        id: "minimalism_cult",
-        name: "极简邪教", nameEn: "Cult of Minimalism",
-        group: "1. 欲望与消费", groupEn: "1. Desire & Consumption",
-        def: "少即是多。通过不断地丢弃物品与关系，抵达对“空无”环境的偏执狂热和神圣化。",
-        defEn: "Less is more. Reaching paranoid fanaticism and sanctification of 'emptiness' by constantly discarding items and relationships.",
-        core: "将整个生活剥离到只剩惨白的骨架，上演一场充满控制欲的高级禁欲秀。",
-        coreEn: "Stripping life down to pale bare bones, staging a high-level ascetic show filled with control freaks.",
-        reference: "《极简主义者》拼命扔光所有家具甚至切断社交认为空无一物才能直达神性的偏执狂；《断舍离》发展到后期连回忆和情感都要强行打扫一空的洁癖生活法。",
-        referenceEn: "\"Minimalism\" discarding all furniture and ties believing emptiness equals divinity; \"Danshari\" extreme habits forcing out memories and emotions alike."
-      },
-      {
-        id: "dataism",
-        name: "数据主义", nameEn: "Dataism",
-        group: "1. 欲望与消费", groupEn: "1. Desire & Consumption",
-        def: "坚信万物本质皆为算法计算。数据处理与流转是宇宙最高价值，碳基人类不过是算法的临时算力载体。",
-        defEn: "Convinced all things are algorithms. Data processing is the highest universal value; carbon-based humans are temporary carriers.",
-        core: "所有的主观情感必须被贬低、量化并拆解为生化电子算法。追求无视伦理的极致效率优化。",
-        coreEn: "All subjective emotions must be devalued, quantified, and dismantled into biochemical algorithms. Pursuing extreme efficiency overriding ethics.",
-        reference: "《黑客帝国》认为人类不过是一节干电池而机器算法才是宇宙真善美的主宰者；《西部世界》母公司通过头盔扫描收集人类所有行为数据彻底算出人性底牌的妄念。",
-        referenceEn: "\"The Matrix\" seeing humans as batteries while code reigns supreme; \"Westworld\" corporations harvesting biometric data to entirely map human nature."
-      },
-      {
-        id: "accelerationism_desire",
-        name: "欲望加速主义", nameEn: "Libidinal Accelerationism",
-        group: "1. 欲望与消费", groupEn: "1. Desire & Consumption",
-        def: "与其去抵抗资本主义，不如猛烈加大油门，将系统的所有欲望阈值推向极致，直至崩溃或奇异飞升。",
-        defEn: "Instead of resisting capitalism, violently floor the gas pedal, pushing all system desire thresholds to the extreme until collapse.",
-        core: "一场关于疯狂过剩数字洪流的死磕。对速度、故障与异化的狂热哲学性赞颂。",
-        coreEn: "A death-match with insane overflowing digital torrents. Fanatical philosophical praise for speed, glitches, and alienation.",
-        reference: "《赛博朋克2077》明知义体化会带来赛博精神病也要向脑子里死命塞入神经芯片的疯子；《裸体午餐》在毒品致幻中不停推高剂量直到世界彻底崩溃解体的瘾君子。",
-        referenceEn: "\"Cyberpunk 2077\" jamming chips into brains despite cyberpsychosis; \"Naked Lunch\" junkies pushing doses until reality fully disintegrates."
-      },
-      {
-        id: "gamification",
-        name: "游戏化", nameEn: "Gamification",
-        group: "1. 欲望与消费", groupEn: "1. Desire & Consumption",
-        def: "人生皆是电子练级域。将生命体征和人际关系极度量化为经验值XP与成就徽章，以追求高频的正反馈循环。",
-        defEn: "Life is an electronic leveling zone. Extremely quantifying vitals and relations into XP and badges, seeking high-frequency loops.",
-        core: "将最为严肃的流血与生离死别，降维转化为轻浮的屏幕读条。极度渴望读档重来的幻象。",
-        coreEn: "Reducing solemn blood and death into frivolous screen loading bars. Extremely craving the illusion of a respawn load trigger.",
-        reference: "《头号玩家》把所有真实资本和尊严全部换成绿洲积分连打工都像做日常任务的平民；《黑镜》踩脚踏车获取里程点数只为在选秀节目上前进一步的荒诞社会。",
-        referenceEn: "\"Ready Player One\" converting life dignity into OASIS coins treating work as daily quests; \"Black Mirror\" bicycling for credits to enter talent shows."
-      },
-      {
-        id: "epicureanism",
-        name: "伊壁鸠鲁主义", nameEn: "Epicureanism",
-        group: "1. 欲望与消费", groupEn: "1. Desire & Consumption",
-        def: "理性的保守主义享乐。通过压抑无限膨胀的欲望，追求绝对的宁静，极度规避一切可能引发痛苦和恐惧的世俗纠葛。",
-        defEn: "Rational conservative hedonism. Pursuing absolute tranquility by repressing swelling desires, avoiding secular entanglements that bring pain.",
-        core: "物理避世与乱世干涉之间的抗争。建立在城邦废墟之外的理想哲学花园。",
-        coreEn: "The struggle between physical retreat and worldly interference. The ideal philosopher's garden built outside the ruins of the polis.",
-        reference: "《瓦尔登湖》远离喧嚣在森林里建立简朴而自足的避世隐居小木屋以逃避工业痛苦；《死亡诗社》教导学生抓住当下只去吸吮人生最隐秘精髓但绝不沾染功名的避风港。",
-        referenceEn: "\"Walden\" retreating into woods to build austere cabins dodging industrial pain; \"Dead Poets Society\" seizing the day to suck life's marrow, avoiding fame."
-      }
-    ]
-  };
+  id: "ideo_desire",
+  name: "1. 欲望与消费 (Desire & Consumption)",
+  nameEn: "Desire & Consumption",
+  desc: "关于快乐、物质与注意力的信仰体系。用于定义主角如何看待欲望满足和商品/符号消费。",
+  defEn: "Belief systems about pleasure, materiality, and attention. Defines how the protagonist views desire fulfillment and commodity/symbol consumption.",
+  items: [
+    {
+      id: "consumerism",
+      name: "消费主义",
+      nameEn: "Consumerism",
+      def: "通过购买商品来构建自我身份的信念体系。物品具有图腾般的魔力，购物行为等同于存在确认。",
+      defEn: "Belief system constructing self-identity through purchasing goods. Objects possess totemic magic; shopping equals existential confirmation.",
+      core: "他用宜家家具塞满了整间公寓，但每一件商品都像一块砖头，砌的不是家，是一座没有窗户的坟墓。",
+      coreEn: "He stuffed the apartment with IKEA furniture, but each item was a brick — not building a home, but a tomb without windows.",
+      reference: "《搏击俱乐部》(1999, 大卫·芬奇) 叙述者 / 《美国精神病人》(2000, 玛丽·哈伦) 帕特里克·贝特曼",
+      referenceEn: "\"Fight Club\" (1999, David Fincher) The Narrator / \"American Psycho\" (2000, Mary Harron) Patrick Bateman"
+    },
+    {
+      id: "hedonism",
+      name: "享乐主义",
+      nameEn: "Hedonism",
+      def: "将多巴胺的持续供给视为人生唯一目的的信念。避苦求乐是最高伦理，身体是用来透支的快感载具。",
+      defEn: "Belief treating continuous dopamine supply as life's sole purpose. Avoiding pain and seeking pleasure is the highest ethic; the body is a pleasure vehicle to overdraft.",
+      core: "他把快乐的阈值拉到了针头才能触到的高度——最后一针扎下去的时候，他甚至感觉不到快乐了，只剩下针。",
+      coreEn: "He raised the pleasure threshold to a height only needles could reach — when the last needle went in, he couldn't even feel pleasure, only the needle.",
+      reference: "《华尔街之狼》(2013, 马丁·斯科塞斯) 乔丹·贝尔福特 / 《堕落街》(1981, 乌利·埃德尔) 克里斯蒂安娜",
+      referenceEn: "\"The Wolf of Wall Street\" (2013, Martin Scorsese) Jordan Belfort / \"Christiane F.\" (1981, Uli Edel) Christiane"
+    },
+    {
+      id: "attention_worship",
+      name: "流量拜物教",
+      nameEn: "Attention Fetishism",
+      def: "将社交媒体数据（点赞、关注、转发）视为衡量个体存在价值唯一标准的信念。生活是一场不间断的表演。",
+      defEn: "Belief treating social media metrics (likes, follows, shares) as the sole measure of individual existence. Life is a non-stop performance.",
+      core: "她在镜头前是一百万人的女神，镜头关闭的那一秒她是零。掉粉和心跳骤停之间，她分不清哪个更致命。",
+      coreEn: "In front of the camera she's a goddess to a million; the second it's off, she's zero. Between losing followers and cardiac arrest, she can't tell which is deadlier.",
+      reference: "《黑镜：急转直下》(2016, 剧集) 蕾西·庞德 / 《楚门的世界》(1998, 彼得·威尔) 楚门·伯班克",
+      referenceEn: "\"Black Mirror: Nosedive\" (2016, Series) Lacie Pound / \"The Truman Show\" (1998, Peter Weir) Truman Burbank"
+    },
+    {
+      id: "libertarianism_radical",
+      name: "极端自由意志",
+      nameEn: "Radical Libertarianism",
+      def: "将私有财产神圣化、拒斥一切集体约束的极端个人自由信条。税收即抢劫，政府即暴政，金钱万能。",
+      defEn: "Extreme personal liberty creed sacralizing private property and rejecting all collective constraints. Taxation is theft; government is tyranny; money is omnipotent.",
+      core: "他在自己的海底城堡里建起了没有法律的天堂——天堂的地基是建在所有被碾碎的失败者骨灰上的。",
+      coreEn: "He built a lawless paradise in his undersea castle — its foundation was built on the ashes of all the crushed losers.",
+      reference: "《生化奇兵》(2007, 游戏) 安德鲁·莱恩/极渊城 / 《疯狂的麦克斯4》(2015, 乔治·米勒) 废土资源私有者",
+      referenceEn: "\"BioShock\" (2007, Game) Andrew Ryan / Rapture / \"Mad Max: Fury Road\" (2015, George Miller) Wasteland Resource Owners"
+    },
+    {
+      id: "commodity_fetishism",
+      name: "商品拜物教",
+      nameEn: "Commodity Fetishism",
+      def: "相信特定物品具有超越其物理属性的神圣力量，通过占有特定物品来补全自我人格的信念。",
+      defEn: "Belief that specific objects possess sacred power beyond their physical properties; completing self-identity through possessing specific items.",
+      core: "他把一枚金戒指叫做'宝贝'，把真正爱他的人叫做'障碍'。最后他和戒指一起坠入了岩浆，拥抱着唯一的真爱。",
+      coreEn: "He called the gold ring 'precious' and the person who truly loved him 'obstacle.' He fell into the lava with the ring, embracing his only true love.",
+      reference: "《指环王》(2001, 彼得·杰克逊) 咕噜/魔戒 / 《公民凯恩》(1941, 奥森·威尔斯) 玫瑰花蕾雪橇",
+      referenceEn: "\"The Lord of the Rings\" (2001, Peter Jackson) Gollum / The One Ring / \"Citizen Kane\" (1941, Orson Welles) Rosebud Sled"
+    },
+    {
+      id: "aestheticism",
+      name: "唯美主义",
+      nameEn: "Aestheticism",
+      def: "将美视为高于道德与生命的唯一绝对价值的信念。为了艺术而艺术，生命本身不过是创作的耗材。",
+      defEn: "Belief holding beauty as the sole absolute value above morality and life. Art for art's sake; life itself is mere consumable for creation.",
+      core: "他用十三个少女的体温蒸馏出了世界上最极致的香水——瓶子打开的那一刻，所有人为之疯狂，包括他自己。",
+      coreEn: "He distilled the ultimate perfume from thirteen girls' body heat — the moment the bottle opened, everyone went mad, including himself.",
+      reference: "《香水》(2006, 汤姆·提克威尔) 格雷诺耶 / 《霓虹恶魔》(2016, 尼古拉斯·温丁·雷弗恩) 洛杉矶模特圈",
+      referenceEn: "\"Perfume\" (2006, Tom Tykwer) Grenouille / \"The Neon Demon\" (2016, Nicolas Winding Refn) LA Model Scene"
+    },
+    {
+      id: "carnivalism",
+      name: "狂欢主义",
+      nameEn: "Carnivalism",
+      def: "通过集体性的等级颠覆、面具化混乱与仪式性僭越来获得短暂精神释放的巴赫金式信念。",
+      defEn: "Bakhtinian belief achieving brief spiritual release through collective hierarchy-subversion, masked chaos, and ritual transgression.",
+      core: "一年中只有这一天可以戴上面具杀人不犯法——但面具摘下来之后，杀意并没有跟着摘下来。",
+      coreEn: "Only this one day a year you can wear a mask and kill legally — but when the mask comes off, the killing intent stays on.",
+      reference: "《人类清除计划》(2013, 詹姆斯·德莫纳科) 清洗之夜 / 《小丑》(2019, 托德·菲利普斯) 高谭暴乱",
+      referenceEn: "\"The Purge\" (2013, James DeMonaco) Purge Night / \"Joker\" (2019, Todd Phillips) Gotham Riots"
+    },
+    {
+      id: "minimalism_cult",
+      name: "极简邪教",
+      nameEn: "Cult of Minimalism",
+      def: "将'少即是多'推向极端的偏执信念。通过不断丢弃物品与人际关系，将'空无'本身神圣化。",
+      defEn: "Obsessive belief pushing 'less is more' to extremes. Sanctifying 'emptiness' itself by continuously discarding possessions and relationships.",
+      core: "他扔掉了家具、书籍、朋友、回忆——最后房间里只剩一面白墙和他自己。然后他开始想扔掉自己。",
+      coreEn: "He threw away furniture, books, friends, memories — until only a white wall and himself remained. Then he wanted to throw away himself.",
+      reference: "《极简主义》(2015, 纪录片) 极简生活者 / 《2001太空漫游》(1968, 斯坦利·库布里克) 空白房间",
+      referenceEn: "\"Minimalism\" (2015, Documentary) Minimalists / \"2001\" (1968, Stanley Kubrick) The White Room"
+    },
+    {
+      id: "dataism",
+      name: "数据主义",
+      nameEn: "Dataism",
+      def: "相信万物本质皆为可计算的数据流的信念体系。数据处理是宇宙最高价值，碳基生命不过是算法的临时载体。",
+      defEn: "Belief system that all things are essentially computable data streams. Data processing is the universe's highest value; carbon life is merely a temporary algorithm carrier.",
+      core: "他用算法计算出了最优的人生路径——算法里没有'爱'这个变量，因为它不可量化。所以他按照算法删除了她。",
+      coreEn: "He calculated the optimal life path with algorithms — 'love' wasn't a variable because it's unquantifiable. So he deleted her per the algorithm.",
+      reference: "《黑客帝国》(1999, 沃卓斯基姐妹) 矩阵架构师 / 《西部世界》(2016, 剧集) 德洛斯公司数据采集",
+      referenceEn: "\"The Matrix\" (1999, The Wachowskis) The Architect / \"Westworld\" (2016, Series) Delos Data Harvesting"
+    },
+    {
+      id: "accelerationism_desire",
+      name: "欲望加速主义",
+      nameEn: "Libidinal Accelerationism",
+      def: "认为与其抵抗资本主义的异化，不如将一切欲望阈值推向极限，通过加速使系统过载崩溃或飞升的信念。",
+      defEn: "Belief that instead of resisting capitalism's alienation, all desire thresholds should be pushed to extremes, crashing or transcending the system through acceleration.",
+      core: "他往脑子里塞了第七块芯片，神经系统开始闪烁——他分不清是灵魂在升级，还是硬件在报废。超频是他的祈祷，蓝屏是他的安魂曲。",
+      coreEn: "He jammed the seventh chip into his brain and his nerves flickered — he couldn't tell if his soul was upgrading or his hardware crashing. Overclocking is his prayer; blue screen his requiem.",
+      reference: "《赛博朋克：边缘行者》(2022, 今石洋之) 大卫·马丁内斯 / 《裸体午餐》(1991, 大卫·柯南伯格) 比尔·李",
+      referenceEn: "\"Cyberpunk: Edgerunners\" (2022, Hiroyuki Imaishi) David Martinez / \"Naked Lunch\" (1991, David Cronenberg) Bill Lee"
+    },
+    {
+      id: "gamification",
+      name: "游戏化生存",
+      nameEn: "Gamification",
+      def: "将人生视为可量化的游戏系统的信念。生命体征和人际关系被转化为经验值与成就徽章，追求正反馈循环。",
+      defEn: "Belief viewing life as a quantifiable game system. Vitals and relationships converted to XP and badges, pursuing positive feedback loops.",
+      core: "他在屏幕上看着自己的血量条一格一格地掉——直到他意识到，这不是游戏界面，是ICU的心电监护仪。",
+      coreEn: "He watched his HP bar drop grid by grid on screen — until he realized it wasn't a game HUD, but the ICU heart monitor.",
+      reference: "《头号玩家》(2018, 史蒂文·斯皮尔伯格) 绿洲玩家 / 《黑镜：一千五百万的价值》(2011, 剧集) 踩单车者",
+      referenceEn: "\"Ready Player One\" (2018, Steven Spielberg) OASIS Players / \"Black Mirror: 15 Million Merits\" (2011, Series) Bike Riders"
+    },
+    {
+      id: "epicureanism",
+      name: "伊壁鸠鲁主义",
+      nameEn: "Epicureanism",
+      def: "通过理性节制欲望、避免痛苦来追求灵魂宁静（ataraxia）的古典哲学信念。退隐花园，规避世俗纷争。",
+      defEn: "Classical philosophy seeking soul tranquility (ataraxia) through rational moderation of desires and avoidance of pain. Retreating to the garden, evading worldly strife.",
+      core: "他在森林里的小木屋中找到了完美的平静——直到一场山火烧上来，他发现平静不是一种选择，是一种逃跑。",
+      coreEn: "He found perfect peace in a forest cabin — until a wildfire came, and he discovered peace wasn't a choice but an escape.",
+      reference: "《瓦尔登湖》(文学) 梭罗 / 《死亡诗社》(1989, 彼得·威尔) 基廷老师",
+      referenceEn: "\"Walden\" (Literature) Thoreau / \"Dead Poets Society\" (1989, Peter Weir) Mr. Keating"
+    }
+  ]
+};

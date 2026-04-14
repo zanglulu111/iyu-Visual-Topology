@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { NarrativeFieldState, BlueprintLanguage, DriverType } from '../types';
 import {
   Settings2, X, Lock, Unlock, RotateCcw, Shuffle, Trash2, Plus,
-  Anchor, Palette, Box, Info, TestTube, Zap, Dice5, Calendar, MapPin, Globe, Check, Edit2
+  Anchor, Palette, Box, Info, TestTube, Zap, Dice5, Calendar, MapPin, Globe, Check, Edit2, User
 } from 'lucide-react';
 import {
   COMM_SKIN_LIBRARY,
@@ -494,6 +494,64 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
   // New state for modal in Narrative mode
   const [isTimeModalOpen, setIsTimeModalOpen] = useState(false);
 
+  // ====== SUR7/SUR8 Identity Panel State ======
+  const [isIdentityModalOpen, setIsIdentityModalOpen] = useState(false);
+  const GENDER_PRESETS = [
+    { id: 'gen_m', cn: '男性', en: 'Male' },
+    { id: 'gen_f', cn: '女性', en: 'Female' },
+    { id: 'gen_nb', cn: '非二元', en: 'Non-Binary' },
+  ];
+  const AGE_PRESETS = [
+    { id: 'age_01', cn: '幼年', en: 'Childhood', range: '6-12' },
+    { id: 'age_02', cn: '少年', en: 'Adolescent', range: '13-17' },
+    { id: 'age_03', cn: '青年', en: 'Youth', range: '18-24' },
+    { id: 'age_04', cn: '盛年', en: 'Prime', range: '25-30' },
+    { id: 'age_05', cn: '壮年', en: 'Vigor', range: '31-40' },
+    { id: 'age_06', cn: '中年', en: 'Middle Age', range: '41-50' },
+    { id: 'age_07', cn: '知命', en: 'Knowing Fate', range: '51-60' },
+    { id: 'age_08', cn: '花甲', en: 'Sexagenarian', range: '61-70' },
+    { id: 'age_09', cn: '古稀', en: 'Septuagenarian', range: '71-80' },
+    { id: 'age_10', cn: '耄者', en: 'Venerable', range: '80-100' },
+    { id: 'age_11', cn: '永生', en: 'Immortal', range: '∞' },
+  ];
+  const [customAgeInput, setCustomAgeInput] = useState('');
+  const [customGenderInput, setCustomGenderInput] = useState('');
+  const [selectedGender, setSelectedGender] = useState<string>('');
+  const [selectedAge, setSelectedAge] = useState<string>('');
+  const isGenderLocked = lockedModules?.['skin_gender'] || false;
+  const isAgeLocked = lockedModules?.['skin_age'] || false;
+
+  // Sync identity state from fieldState
+  useEffect(() => {
+    const genderTag = fieldState['skin_gender']?.[0];
+    const ageTag = fieldState['skin_age']?.[0];
+    if (genderTag !== undefined) setSelectedGender(genderTag || '');
+    else setSelectedGender('');
+    if (ageTag !== undefined) setSelectedAge(ageTag || '');
+    else setSelectedAge('');
+  }, [fieldState['skin_gender']?.[0], fieldState['skin_age']?.[0]]);
+
+  // Sync identity state TO fieldState
+  useEffect(() => {
+    if (!onUpdateState) return;
+    const timer = setTimeout(() => {
+      const newState: NarrativeFieldState = {};
+      let hasChanges = false;
+      const currentGender = fieldState['skin_gender']?.[0] || '';
+      if (currentGender !== selectedGender) {
+        newState['skin_gender'] = selectedGender ? [selectedGender] : [];
+        hasChanges = true;
+      }
+      const currentAge = fieldState['skin_age']?.[0] || '';
+      if (currentAge !== selectedAge) {
+        newState['skin_age'] = selectedAge ? [selectedAge] : [];
+        hasChanges = true;
+      }
+      if (hasChanges) onUpdateState({...fieldState, ...newState});
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [selectedGender, selectedAge]);
+
   // Simple expand/collapse for story summary sentence
   const [summaryExpanded, setSummaryExpanded] = useState(false);
 
@@ -502,8 +560,8 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
 
   // Pre-compute last visible fragment for sentence closing
   const _fA = summaryExpanded || hasBlockValue(['skin_era']) || selectedYear !== null || selectedCountry !== '';
-  const _fB = summaryExpanded || hasBlockValue(['sur4x', 'skin_society']);
-  const _fC = summaryExpanded || hasBlockValue(['skin_age', 'skin_gender', 'skin_profession']);
+  const _fB = summaryExpanded || hasBlockValue(['skin_society']);
+  const _fC = summaryExpanded || selectedAge !== '' || selectedGender !== '' || hasBlockValue(['skin_profession']);
   const _fD = summaryExpanded || hasBlockValue(['sur10x', 'skin_ideology']);
   const _fE = summaryExpanded || hasBlockValue(['skin_everything']);
   const _fF = summaryExpanded || hasBlockValue(['skin_location']);
@@ -735,13 +793,103 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
     }
   };
 
+  // ====== Identity (Gender + Age) Handlers ======
+  const handleRandomGender = () => {
+    if (isGenderLocked) return;
+    const r = GENDER_PRESETS[Math.floor(Math.random() * GENDER_PRESETS.length)];
+    setSelectedGender(lang === 'EN' ? r.en : r.cn);
+  };
+  const handleResetGender = () => { if (!isGenderLocked) setSelectedGender(''); };
+  const handleToggleLockGender = () => { if (onToggleLock) onToggleLock('skin_gender'); };
+  const handleRandomAge = () => {
+    if (isAgeLocked) return;
+    const r = AGE_PRESETS[Math.floor(Math.random() * AGE_PRESETS.length)];
+    setSelectedAge(lang === 'EN' ? r.en : r.cn);
+  };
+  const handleResetAge = () => { if (!isAgeLocked) setSelectedAge(''); };
+  const handleToggleLockAge = () => { if (onToggleLock) onToggleLock('skin_age'); };
+  const handleGlobalRandomizeIdentity = () => {
+    if (!isGenderLocked) handleRandomGender();
+    if (!isAgeLocked) handleRandomAge();
+  };
+  const handleGlobalResetIdentity = () => {
+    if (!isGenderLocked) handleResetGender();
+    if (!isAgeLocked) handleResetAge();
+  };
+  const handleGlobalToggleLockIdentity = () => {
+    const shouldLock = !isGenderLocked || !isAgeLocked;
+    if (onToggleLock) {
+      if (isGenderLocked !== shouldLock) onToggleLock('skin_gender');
+      if (isAgeLocked !== shouldLock) onToggleLock('skin_age');
+    }
+  };
+
+  // Specialized Renderer for Identity Slot in Sidebar (like Time/Location)
+  const renderIdentitySlot = () => {
+    const hasIdentity = selectedGender !== '' || selectedAge !== '';
+    let displayText = '';
+
+    if (lang === 'EN') {
+      displayText = [selectedAge, selectedGender].filter(Boolean).join(' ');
+    } else {
+      let ageStr = selectedAge;
+      if (selectedAge) {
+        const preset = AGE_PRESETS.find(a => a.cn === selectedAge);
+        if (preset) {
+          ageStr = `${preset.cn}（${preset.range}岁）`;
+        } else {
+          ageStr = `${selectedAge}岁`;
+        }
+      }
+      displayText = `${ageStr}${selectedGender}`;
+    }
+    
+    if (!displayText) {
+      displayText = lang === 'EN' ? 'Identity' : '身份';
+    }
+
+    const isLocked = isGenderLocked && isAgeLocked;
+    const baseTextClass = 'cursor-pointer transition-transform duration-300';
+    const filledTextClass = `font-serif font-bold ${theme === 'retro' ? 'text-black border-b-2 border-[var(--text-accent)] hover:bg-black/5' : 'text-white border-b-2 border-gold-primary hover:bg-white/10'} px-0.5 hover:scale-110 hover:z-50 inline-block text-lg md:text-xl tracking-tight`;
+    const emptyTextClass = `font-serif font-medium border-b border-dashed hover:scale-110 hover:z-50 inline-block ${theme === 'retro' ? 'border-[var(--text-muted)] text-zinc-500 hover:text-black hover:bg-black/5' : 'border-zinc-800 text-zinc-500 hover:text-white hover:bg-white/10'} hover:border-zinc-500 text-base`;
+    const lockedTextClass = `border ${theme === 'retro' ? 'border-[var(--text-accent)] text-black bg-[var(--text-accent)]/10' : 'border-gold-primary text-gold-primary bg-amber-900/20'} px-2 rounded font-serif font-bold text-lg md:text-xl tracking-tight`;
+    return (
+      <span className="inline-flex flex-wrap items-baseline gap-x-1 mx-1 relative">
+        <span className="group/tag relative inline-flex flex-col items-center align-top">
+          <span
+            onClick={() => setIsIdentityModalOpen(true)}
+            onMouseEnter={(e) => handleMouseEnter(e, {
+              def: lang === 'EN' ? 'Physical casting attributes: gender and age.' : '物理选角属性：性别与年龄。',
+              core: lang === 'EN' ? '[Config] Click to open identity panel.' : '【配置协议】点击进入身份面板。',
+            }, lang === 'EN' ? 'Identity' : '性别/年龄')}
+            onMouseLeave={handleMouseLeave}
+            className={`${baseTextClass} ${isLocked ? lockedTextClass : (hasIdentity ? filledTextClass : emptyTextClass)}`}
+          >
+            {hasIdentity ? displayText : (lang === 'EN' ? `[${displayText}]` : `【${displayText}】`)}
+          </span>
+          <div className={`flex items-center gap-1 mt-1 z-10 ${theme === 'retro' ? 'bg-[var(--bg-panel)]' : 'bg-black/80'} rounded p-1 border shadow-md ${theme === 'retro' ? 'border-[var(--border-main)]/40' : 'border-zinc-800'} opacity-0 group-hover/tag:opacity-100 transition-opacity duration-300`}>
+            <button onClick={(e) => { e.stopPropagation(); handleGlobalRandomizeIdentity(); }} disabled={isLocked} className={`group/btn relative flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--border-main)]' : 'bg-zinc-900 border border-zinc-700 text-zinc-500 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isLocked ? 'opacity-30 cursor-not-allowed' : ''}`}><Dice5 size={10} /></button>
+            <button onClick={(e) => { e.stopPropagation(); handleGlobalToggleLockIdentity(); }} className={`group/btn relative flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border border-zinc-700 text-zinc-500 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isLocked ? (theme === 'retro' ? 'border-[var(--text-accent)] text-black bg-[var(--text-accent)]/10' : 'border-gold-primary text-gold-primary bg-amber-900/20') : ''}`}>{isLocked ? <Lock size={10} /> : <Unlock size={10} />}</button>
+            <button onClick={(e) => { e.stopPropagation(); setIsIdentityModalOpen(true); }} disabled={isLocked} className={`group/btn relative flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border border-zinc-700 text-zinc-500 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isLocked ? 'opacity-30 cursor-not-allowed' : ''}`}><Edit2 size={10} /></button>
+            <button onClick={(e) => { e.stopPropagation(); handleGlobalResetIdentity(); }} disabled={isLocked} className={`group/btn relative flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-red-700' : 'bg-zinc-900 border border-zinc-700 text-zinc-500 hover:border-red-500/50 hover:bg-red-950/20 hover:text-red-400'} border rounded transition-colors ${isLocked ? 'opacity-30 cursor-not-allowed' : ''}`}><Trash2 size={10} /></button>
+          </div>
+        </span>
+      </span>
+    );
+  };
+
+  const formatYear = (year: number, useSuffix = false) => {
+    if (year < 0) return lang === 'EN' ? `${Math.abs(year)} BC` : `公元前${Math.abs(year)}${useSuffix ? '年' : ''}`;
+    return lang === 'EN' ? `${year}` : `公元${year}${useSuffix ? '年' : ''}`;
+  };
+
   // Specialized Renderer for Time/Location Slot in Sidebar
   const renderTimeLocationSlot = () => {
     const hasTimeOrLoc = selectedYear !== null || selectedCountry !== "";
     const displayText = selectedYear !== null
       ? (lang === 'EN'
-        ? `${selectedYear}${selectedCountry ? ' ' + selectedCountry : ''}`
-        : `${selectedYear}年${selectedCountry}`)
+        ? `${formatYear(selectedYear)}${selectedCountry ? ' ' + selectedCountry : ''}`
+        : `${formatYear(selectedYear, true)}${selectedCountry}`)
       : (selectedCountry ? `${selectedCountry} (AUTO)` : (lang === 'EN' ? "Spacetime Coordinates" : "时空坐标"));
 
     const isLocked = isCountryLocked && isYearLocked;
@@ -874,7 +1022,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
 
               <div className="flex gap-2 items-center">
                 <span className={`text-xl font-serif font-black ${isYearLocked ? (theme === 'retro' ? 'text-[var(--text-muted)]/50' : 'text-zinc-500') : iconColor}`}>
-                  {selectedYear === null ? (lang === 'EN' ? "AUTO" : "自动") : selectedYear}
+                  {selectedYear === null ? (lang === 'EN' ? "AUTO" : "自动") : formatYear(selectedYear, true)}
                 </span>
                 <div className="flex gap-1 ml-2">
                   <button onClick={handleRandomYear} disabled={isYearLocked} className={`p-1 rounded text-zinc-500 hover:text-white transition-all ${isYearLocked ? 'opacity-30 cursor-not-allowed' : ''}`}><Dice5 size={10} /></button>
@@ -1157,21 +1305,21 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
                   </button>
                   <button 
                     onClick={() => {
-                      const blocks = ['skin_era', 'sur4x', 'skin_society', 'skin_age', 'skin_gender', 'skin_profession', 'sur10x', 'skin_ideology', 'skin_everything', 'skin_location', 'skin_ending'];
+                      const blocks = ['skin_era', 'skin_society', 'skin_age', 'skin_gender', 'skin_profession', 'sur10x', 'skin_ideology', 'skin_everything', 'skin_location', 'skin_ending'];
                       const isAllLocked = blocks.every(b => lockedModules[b]);
                       blocks.forEach(b => {
                         if (!!lockedModules[b] === isAllLocked) onToggleLock?.(b);
                       });
                     }} 
-                    className={`group/btn relative flex items-center justify-center p-1 rounded transition-all ${['skin_era', 'sur4x', 'skin_society', 'skin_age', 'skin_gender', 'skin_profession', 'sur10x', 'skin_ideology', 'skin_everything', 'skin_location', 'skin_ending'].every(b => lockedModules[b]) ? (theme === 'retro' ? 'bg-black/5 text-[var(--text-accent)] border border-[var(--text-accent)]/30' : 'bg-zinc-800 text-amber-500 border border-amber-500/30') : (theme === 'retro' ? 'text-[var(--text-muted)] hover:bg-black/5 hover:text-[var(--text-main)] border border-transparent' : 'text-zinc-500 hover:bg-white/5 hover:text-white border border-transparent')}`}
+                    className={`group/btn relative flex items-center justify-center p-1 rounded transition-all ${['skin_era', 'skin_society', 'skin_age', 'skin_gender', 'skin_profession', 'sur10x', 'skin_ideology', 'skin_everything', 'skin_location', 'skin_ending'].every(b => lockedModules[b]) ? (theme === 'retro' ? 'bg-black/5 text-[var(--text-accent)] border border-[var(--text-accent)]/30' : 'bg-zinc-800 text-amber-500 border border-amber-500/30') : (theme === 'retro' ? 'text-[var(--text-muted)] hover:bg-black/5 hover:text-[var(--text-main)] border border-transparent' : 'text-zinc-500 hover:bg-white/5 hover:text-white border border-transparent')}`}
                   >
-                    {['skin_era', 'sur4x', 'skin_society', 'skin_age', 'skin_gender', 'skin_profession', 'sur10x', 'skin_ideology', 'skin_everything', 'skin_location', 'skin_ending'].every(b => lockedModules[b]) ? <Lock size={12} /> : <Unlock size={12} />}
+                    {['skin_era', 'skin_society', 'skin_age', 'skin_gender', 'skin_profession', 'sur10x', 'skin_ideology', 'skin_everything', 'skin_location', 'skin_ending'].every(b => lockedModules[b]) ? <Lock size={12} /> : <Unlock size={12} />}
                     <span className={`absolute top-full mt-1 right-0 px-2 py-1 text-[10px] font-normal whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity duration-150 pointer-events-none z-[100] rounded shadow-md ${theme === 'retro' ? 'bg-[#1A1814] text-[var(--text-main)] border border-[var(--border-main)]/50' : 'bg-zinc-800 text-zinc-300 border border-zinc-700'}`}>
-                      {['skin_era', 'sur4x', 'skin_society', 'skin_age', 'skin_gender', 'skin_profession', 'sur10x', 'skin_ideology', 'skin_everything', 'skin_location', 'skin_ending'].every(b => lockedModules[b]) ? (lang === 'EN' ? 'Unlock Section' : '解锁本组') : (lang === 'EN' ? 'Lock Section' : '锁定本组')}
+                      {['skin_era', 'skin_society', 'skin_age', 'skin_gender', 'skin_profession', 'sur10x', 'skin_ideology', 'skin_everything', 'skin_location', 'skin_ending'].every(b => lockedModules[b]) ? (lang === 'EN' ? 'Unlock Section' : '解锁本组') : (lang === 'EN' ? 'Lock Section' : '锁定本组')}
                     </span>
                   </button>
                   <button 
-                    onClick={() => ['skin_era', 'sur4x', 'skin_society', 'skin_age', 'skin_gender', 'skin_profession', 'sur10x', 'skin_ideology', 'skin_everything', 'skin_location', 'skin_ending'].forEach(b => onClearBlock?.(b))} 
+                    onClick={() => ['skin_era', 'skin_society', 'skin_age', 'skin_gender', 'skin_profession', 'sur10x', 'skin_ideology', 'skin_everything', 'skin_location', 'skin_ending'].forEach(b => onClearBlock?.(b))} 
                     className={`group/btn relative flex items-center justify-center p-1 rounded transition-all ${theme === 'retro' ? 'text-[var(--text-muted)] hover:bg-black/5 hover:text-red-700' : 'text-zinc-500 hover:bg-white/5 hover:text-red-400'}`}
                   >
                     <RotateCcw size={12} />
@@ -1207,42 +1355,35 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
                   );
                 })()}
 
-                {/* Fragment B: SUR4X+SUR4 — Society (smart grammar) */}
+                {/* Fragment B: SUR4 — Society (SUR4X removed in v3.1) */}
                 {(() => {
-                  const has4x = hasBlockValue(['sur4x']);
                   const has4 = hasBlockValue(['skin_society']);
-                  const showFragment = summaryExpanded || has4x || has4;
+                  const showFragment = summaryExpanded || has4;
                   if (!showFragment) return null;
-                  const show4x = has4x || summaryExpanded;
                   const show4 = has4 || summaryExpanded;
                   const isLast = lastVisibleFrag === 'B';
                   return (
                     <span className="animate-in fade-in duration-300">
                       <span>{lang === 'EN' ? "society under " : "运行于"}</span>
-                      {show4x && <SkinSlot blockId="sur4x" placeholder={lang === 'EN' ? "Resistance" : "阶层阻力"} isBlockLocked={lockedModules["sur4x"]} {...slotProps} />}
-                      {show4x && show4 && <span>{lang === 'EN' ? " within " : "下的"}</span>}
                       {show4 && <SkinSlot blockId="skin_society" placeholder={lang === 'EN' ? "Social Order" : "社会形态"} isBlockLocked={lockedModules["skin_society"]} {...slotProps} />}
                       <span>{isLast ? (lang === 'EN' ? " " : "社会体系之下") : (lang === 'EN' ? ", " : "社会体系之下，")}</span>
                     </span>
                   );
                 })()}
 
-                {/* Fragment C: SUR8+SUR7+SUR9 — Character (smart grammar) */}
+                {/* Fragment C: SUR8+SUR7+SUR9 — Character (identity panel + profession) */}
                 {(() => {
-                  const hasAge = hasBlockValue(['skin_age']);
-                  const hasGender = hasBlockValue(['skin_gender']);
+                  const hasIdentity = selectedGender !== '' || selectedAge !== '';
                   const hasProf = hasBlockValue(['skin_profession']);
-                  const showFragment = summaryExpanded || hasAge || hasGender || hasProf;
+                  const showFragment = summaryExpanded || hasIdentity || hasProf;
                   if (!showFragment) return null;
-                  const showAge = hasAge || summaryExpanded;
-                  const showGender = hasGender || summaryExpanded;
+                  const showIdentity = hasIdentity || summaryExpanded;
                   const showProf = hasProf || summaryExpanded;
                   const isLast = lastVisibleFrag === 'C';
                   return (
                     <span className="animate-in fade-in duration-300">
                       <span>{lang === 'EN' ? "A " : "一个"}</span>
-                      {showAge && <SkinSlot blockId="skin_age" placeholder={lang === 'EN' ? "Age" : "年龄"} isBlockLocked={lockedModules["skin_age"]} {...slotProps} />}
-                      {showGender && <SkinSlot blockId="skin_gender" placeholder={lang === 'EN' ? "Gender" : "性别"} isBlockLocked={lockedModules["skin_gender"]} {...slotProps} />}
+                      {showIdentity && renderIdentitySlot()}
                       {showProf && <SkinSlot blockId="skin_profession" placeholder={lang === 'EN' ? "Profession" : "职业身份"} isBlockLocked={lockedModules["skin_profession"]} {...slotProps} />}
                       {!isLast && <span>，</span>}
                     </span>
@@ -1261,7 +1402,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
                   return (
                     <span className="animate-in fade-in duration-300">
                       <span>{lang === 'EN' ? "holding " : "抱着"}</span>
-                      {show10x && <SkinSlot blockId="sur10x" placeholder={lang === 'EN' ? "Suture" : "缝合度"} isBlockLocked={lockedModules["sur10x"]} {...slotProps} />}
+                      {show10x && <SkinSlot blockId="sur10x" placeholder={lang === 'EN' ? "Fracture" : "信念裂度"} isBlockLocked={lockedModules["sur10x"]} {...slotProps} />}
                       {show10x && show10 && <span>{lang === 'EN' ? " towards " : "的"}</span>}
                       {show10 && <SkinSlot blockId="skin_ideology" placeholder={lang === 'EN' ? "Philosophy" : "哲学信念"} isBlockLocked={lockedModules["skin_ideology"]} {...slotProps} />}
                       <span>{isLast ? (lang === 'EN' ? " ideas" : "想法") : (lang === 'EN' ? " ideas, " : "想法，")}</span>
@@ -1363,6 +1504,175 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
               
               <button
                 onClick={() => setIsTimeModalOpen(false)}
+                className={`px-8 h-9 ${theme === 'retro' ? 'bg-[var(--text-accent)] text-white hover:bg-opacity-90 shadow-[0_0_20px_rgba(139,38,29,0.15)] underline decoration-white/30 underline-offset-4' : 'bg-white hover:bg-zinc-200 text-black shadow-lg shadow-white/5'} font-bold uppercase tracking-widest rounded transition-colors text-xs flex items-center gap-2`}
+              >
+                <Check size={14} />
+                {lang === 'EN' ? "CONFIRM" : "确认设定"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* IDENTITY MODAL (SUR7+SUR8) */}
+      {isIdentityModalOpen && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/95 backdrop-blur-xl animate-in fade-in duration-300 p-4">
+          <div className={`w-full max-w-lg ${theme === 'retro' ? 'bg-[var(--bg-panel)]' : 'bg-[#0c0c0c]'} border border-[var(--border-main)] rounded-2xl shadow-2xl p-6 relative flex flex-col max-h-[95vh]`}>
+            <button onClick={() => setIsIdentityModalOpen(false)} className="absolute top-4 right-4 text-zinc-400 hover:text-white transition-colors z-10">
+              <X size={20} />
+            </button>
+            <div className={`flex items-center gap-3 mb-6 border-b ${theme === 'retro' ? 'border-[var(--border-main)]/30' : 'border-zinc-800'} pb-4 shrink-0`}>
+              <User size={20} className={iconColor} />
+              <h2 className={`text-lg font-serif font-bold ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-white'} tracking-wider`}>{lang === 'EN' ? "SUR7/8. Physical Identity" : "SUR7/8.主体身份"}</h2>
+            </div>
+
+            <div className="overflow-y-auto custom-scrollbar flex-1 pr-1 space-y-6">
+              {/* Gender Section */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className={`text-sm font-bold uppercase tracking-widest ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-400'}`}>
+                    {lang === 'EN' ? 'Gender' : '性别'}
+                  </h3>
+                  <div className="flex items-center gap-1">
+                    <button onClick={handleRandomGender} disabled={isGenderLocked} className={`p-1.5 rounded ${theme === 'retro' ? 'text-[var(--text-muted)] hover:text-[var(--text-main)] border border-[var(--border-main)]/30' : 'text-zinc-600 hover:text-white border border-zinc-800 hover:border-zinc-600'} transition-all ${isGenderLocked ? 'opacity-30 cursor-not-allowed' : ''}`}><Dice5 size={12} /></button>
+                    <button onClick={handleToggleLockGender} className={`p-1.5 rounded border transition-all ${isGenderLocked ? (theme === 'retro' ? 'text-[var(--text-accent)] border-[var(--text-accent)]/30 bg-[var(--text-accent)]/5' : 'text-amber-500 border-amber-500/30 bg-amber-900/20') : (theme === 'retro' ? 'text-[var(--text-muted)] hover:text-[var(--text-main)] border-[var(--border-main)]/30' : 'text-zinc-600 hover:text-white border-zinc-800 hover:border-zinc-600')}`}>{isGenderLocked ? <Lock size={12} /> : <Unlock size={12} />}</button>
+                    <button onClick={handleResetGender} disabled={isGenderLocked} className={`p-1.5 rounded ${theme === 'retro' ? 'text-[var(--text-muted)] hover:text-red-700 border border-[var(--border-main)]/30' : 'text-zinc-600 hover:text-red-400 border border-zinc-800 hover:border-red-500/50'} transition-all ${isGenderLocked ? 'opacity-30 cursor-not-allowed' : ''}`}><Trash2 size={12} /></button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-4 gap-2">
+                  {/* Custom Gender Cell */}
+                  <div className={`rounded transition-all flex items-center justify-center h-[52px] border ${
+                    selectedGender && !GENDER_PRESETS.some(g => selectedGender === (lang === 'EN' ? g.en : g.cn))
+                      ? (theme === 'retro' ? `bg-[var(--text-accent)]/10 border-[var(--text-accent)]/50` : `bg-zinc-800/80 border-zinc-500 shadow-sm shadow-black`)
+                      : (theme === 'retro' ? `bg-[var(--bg-panel)] border-[var(--border-main)]/30` : `bg-zinc-900/50 border-zinc-800`)
+                  } ${isGenderLocked ? 'opacity-40 cursor-not-allowed' : ''}`}>
+                    <input
+                      type="text"
+                      placeholder={lang === 'EN' ? 'Custom' : '自定义'}
+                      value={selectedGender && !GENDER_PRESETS.some(g => selectedGender === (lang === 'EN' ? g.en : g.cn)) ? selectedGender : customGenderInput}
+                      onChange={(e) => {
+                        if (isGenderLocked) return;
+                        setCustomGenderInput(e.target.value);
+                        setSelectedGender(e.target.value);
+                      }}
+                      disabled={isGenderLocked}
+                      className={`w-full h-full bg-transparent text-sm font-bold text-center px-1 border-none focus:outline-none ${
+                        selectedGender && !GENDER_PRESETS.some(g => selectedGender === (lang === 'EN' ? g.en : g.cn))
+                          ? iconColor
+                          : (theme === 'retro' ? 'text-[var(--text-main)] placeholder-[var(--text-muted)]/50' : 'text-white placeholder-zinc-700')
+                      }`}
+                    />
+                  </div>
+                  {/* Preset Gender Cells */}
+                  {GENDER_PRESETS.map(g => {
+                    const label = lang === 'EN' ? g.en : g.cn;
+                    const isActive = selectedGender === label;
+                    return (
+                      <button
+                        key={g.id}
+                        onClick={() => { if (!isGenderLocked) { setSelectedGender(isActive ? '' : label); setCustomGenderInput(''); } }}
+                        disabled={isGenderLocked}
+                        className={`rounded text-center transition-all border flex flex-col items-center justify-center p-2 min-h-[52px] ${
+                          isActive
+                            ? (theme === 'retro' ? `bg-[var(--text-accent)]/10 border-[var(--text-accent)]/50 ${iconColor}` : `bg-zinc-800/80 border-zinc-500 shadow-sm shadow-black ${iconColor}`)
+                            : (theme === 'retro' ? `bg-[var(--bg-panel)] border-[var(--border-main)]/30 text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--border-main)]/60` : `bg-zinc-900/50 border-zinc-800 text-zinc-500 hover:text-white hover:bg-zinc-800 hover:border-zinc-700`)
+                        } ${isGenderLocked ? 'opacity-40 cursor-not-allowed' : ''}`}
+                      >
+                        <span className="text-sm font-bold leading-tight uppercase tracking-wider">{label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Age Section */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className={`text-sm font-bold uppercase tracking-widest ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-400'}`}>
+                    {lang === 'EN' ? 'Age' : '年龄'}
+                  </h3>
+                  <div className="flex items-center gap-1">
+                    <button onClick={handleRandomAge} disabled={isAgeLocked} className={`p-1.5 rounded ${theme === 'retro' ? 'text-[var(--text-muted)] hover:text-[var(--text-main)] border border-[var(--border-main)]/30' : 'text-zinc-600 hover:text-white border border-zinc-800 hover:border-zinc-600'} transition-all ${isAgeLocked ? 'opacity-30 cursor-not-allowed' : ''}`}><Dice5 size={12} /></button>
+                    <button onClick={handleToggleLockAge} className={`p-1.5 rounded border transition-all ${isAgeLocked ? (theme === 'retro' ? 'text-[var(--text-accent)] border-[var(--text-accent)]/30 bg-[var(--text-accent)]/5' : 'text-amber-500 border-amber-500/30 bg-amber-900/20') : (theme === 'retro' ? 'text-[var(--text-muted)] hover:text-[var(--text-main)] border-[var(--border-main)]/30' : 'text-zinc-600 hover:text-white border-zinc-800 hover:border-zinc-600')}`}>{isAgeLocked ? <Lock size={12} /> : <Unlock size={12} />}</button>
+                    <button onClick={handleResetAge} disabled={isAgeLocked} className={`p-1.5 rounded ${theme === 'retro' ? 'text-[var(--text-muted)] hover:text-red-700 border border-[var(--border-main)]/30' : 'text-zinc-600 hover:text-red-400 border border-zinc-800 hover:border-red-500/50'} transition-all ${isAgeLocked ? 'opacity-30 cursor-not-allowed' : ''}`}><Trash2 size={12} /></button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  {/* Custom Age Cell */}
+                  <div className={`rounded transition-all flex items-center justify-center h-[52px] border ${
+                    selectedAge && !AGE_PRESETS.some(a => selectedAge === (lang === 'EN' ? a.en : a.cn))
+                      ? (theme === 'retro' ? `bg-[var(--text-accent)]/10 border-[var(--text-accent)]/50` : `bg-zinc-800/80 border-zinc-500 shadow-sm shadow-black`)
+                      : (theme === 'retro' ? `bg-[var(--bg-panel)] border-[var(--border-main)]/30` : `bg-zinc-900/50 border-zinc-800`)
+                  } ${isAgeLocked ? 'opacity-40 cursor-not-allowed' : ''}`}>
+                    <input
+                      type="text"
+                      placeholder={lang === 'EN' ? 'Custom' : '自定义'}
+                      value={selectedAge && !AGE_PRESETS.some(a => selectedAge === (lang === 'EN' ? a.en : a.cn)) ? selectedAge : customAgeInput}
+                      onChange={(e) => {
+                        if (isAgeLocked) return;
+                        setCustomAgeInput(e.target.value);
+                        setSelectedAge(e.target.value);
+                      }}
+                      disabled={isAgeLocked}
+                      className={`w-full h-full bg-transparent text-sm font-bold text-center px-1 border-none focus:outline-none ${
+                        selectedAge && !AGE_PRESETS.some(a => selectedAge === (lang === 'EN' ? a.en : a.cn))
+                          ? iconColor
+                          : (theme === 'retro' ? 'text-[var(--text-main)] placeholder-[var(--text-muted)]/50' : 'text-white placeholder-zinc-700')
+                      }`}
+                    />
+                  </div>
+                  {/* Preset Age Cells */}
+                  {AGE_PRESETS.map(a => {
+                    const label = lang === 'EN' ? a.en : a.cn;
+                    const isActive = selectedAge === label;
+                    return (
+                      <button
+                        key={a.id}
+                        onClick={() => { if (!isAgeLocked) { setSelectedAge(isActive ? '' : label); setCustomAgeInput(''); } }}
+                        disabled={isAgeLocked}
+                        className={`rounded text-center transition-all border flex flex-col items-center justify-center p-2 min-h-[52px] ${
+                          isActive
+                            ? (theme === 'retro' ? `bg-[var(--text-accent)]/10 border-[var(--text-accent)]/50 ${iconColor}` : `bg-zinc-800/80 border-zinc-500 shadow-sm shadow-black ${iconColor}`)
+                            : (theme === 'retro' ? `bg-[var(--bg-panel)] border-[var(--border-main)]/30 text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--border-main)]/60` : `bg-zinc-900/50 border-zinc-800 text-zinc-500 hover:text-white hover:bg-zinc-800 hover:border-zinc-700`)
+                        } ${isAgeLocked ? 'opacity-40 cursor-not-allowed' : ''}`}
+                      >
+                        <span className="text-sm font-bold leading-tight uppercase tracking-wider">{label}</span>
+                        <span className={`text-[10px] mt-0.5 ${isActive ? 'opacity-80' : (theme === 'retro' ? 'text-[var(--text-muted)]/50' : 'text-zinc-600')}`}>{a.range}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            <div className={`mt-6 pt-5 border-t flex justify-between shrink-0 ${theme === 'retro' ? 'border-[var(--border-main)]/30' : 'border-zinc-800'}`}>
+              <div className="flex gap-2 items-center">
+                <button 
+                  onClick={handleGlobalRandomizeIdentity} 
+                  className={`px-3 py-2 h-9 rounded flex items-center gap-2 ${theme === 'retro' ? 'bg-[var(--bg-main)] border border-[var(--border-main)]/40 hover:text-[var(--text-main)] text-[var(--text-muted)]' : 'bg-zinc-900 border border-zinc-800 hover:border-zinc-600 text-zinc-500 hover:text-white'} transition-all`} 
+                  title={lang === 'EN' ? 'Global Randomize' : '全局随机'}
+                >
+                  <Dice5 size={14} />
+                  <span className="text-[10px] font-bold uppercase hidden sm:inline">{lang === 'EN' ? "Random" : "全随机"}</span>
+                </button>
+                <button 
+                  onClick={handleGlobalToggleLockIdentity} 
+                  className={`px-3 py-2 h-9 rounded flex items-center gap-2 ${theme === 'retro' ? 'bg-[var(--bg-main)] border border-[var(--border-main)]/40' : 'bg-zinc-900 border border-zinc-800'} transition-all ${isGenderLocked && isAgeLocked ? (theme === 'retro' ? 'text-[var(--text-accent)] border-[var(--text-accent)]/30' : 'text-amber-500 border-amber-500/30') : (theme === 'retro' ? 'text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'text-zinc-500 hover:text-white hover:border-zinc-600')}`} 
+                  title={lang === 'EN' ? 'Global Lock' : '全局锁定'}
+                >
+                  {isGenderLocked && isAgeLocked ? <Lock size={14} /> : <Unlock size={14} />}
+                </button>
+                <button 
+                  onClick={handleGlobalResetIdentity} 
+                  className={`px-3 py-2 h-9 rounded flex items-center gap-2 ${theme === 'retro' ? 'bg-[var(--bg-main)] border border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-red-700' : 'bg-zinc-900 border border-zinc-800 hover:border-red-500/50 text-zinc-500 hover:text-red-400'} transition-all`} 
+                  title={lang === 'EN' ? 'Global Clear' : '全局清空'}
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+              
+              <button
+                onClick={() => setIsIdentityModalOpen(false)}
                 className={`px-8 h-9 ${theme === 'retro' ? 'bg-[var(--text-accent)] text-white hover:bg-opacity-90 shadow-[0_0_20px_rgba(139,38,29,0.15)] underline decoration-white/30 underline-offset-4' : 'bg-white hover:bg-zinc-200 text-black shadow-lg shadow-white/5'} font-bold uppercase tracking-widest rounded transition-colors text-xs flex items-center gap-2`}
               >
                 <Check size={14} />

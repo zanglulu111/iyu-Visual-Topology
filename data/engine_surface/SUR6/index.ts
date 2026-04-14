@@ -24,5 +24,5 @@ export const SUR6_DATA: LibraryCategoryDef[] = [
   SUR6_GROUP_I,
   SUR6_GROUP_J,
   SUR6_GROUP_K,
-  SUR6_GROUP_L
+  SUR6_GROUP_L,
 ];
