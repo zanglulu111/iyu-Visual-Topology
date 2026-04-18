@@ -482,18 +482,29 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                                 </span>
                             </div>
 
-                            {/* 第四行：行动与终局 */}
+                            {/* 第四行：行动 */}
                             <div className="flex flex-wrap justify-center items-center gap-x-2 gap-y-4 w-full">
                                 <span className="font-serif text-xl md:text-3xl font-light select-none text-[var(--text-main)]">
                                     {lang === 'EN' ? "He chooses" : "他决定通过"}
                                 </span>
                                 {renderProphecySlot({ blockId: "engine_m5", placeholderCN: "M5. 行动驱力", placeholderEN: "M5. Drive", hideAffixes: true })}
                                 <span className="font-serif text-xl md:text-3xl font-light select-none text-[var(--text-main)]">
-                                    {lang === 'EN' ? "to struggle, leading to" : "抵抗，最终导向"}
+                                    {lang === 'EN' ? "to struggle," : "抵抗，"}
                                 </span>
-                                {renderProphecySlot({ blockId: "engine_m7", placeholderCN: "M7. 存在落点", placeholderEN: "M7. Resolution", hideAffixes: true })}
+                            </div>
+
+                            {/* 第五行：裁决与余痕 */}
+                            <div className="flex flex-wrap justify-center items-center gap-x-2 gap-y-4 w-full">
                                 <span className="font-serif text-xl md:text-3xl font-light select-none text-[var(--text-main)]">
-                                    {lang === 'EN' ? "." : "。"}
+                                    {lang === 'EN' ? "ultimately receiving" : "最终迎来了"}
+                                </span>
+                                {renderProphecySlot({ blockId: "engine_m7a", placeholderCN: "M7A. 象征裁决", placeholderEN: "M7A. Verdict", hideAffixes: true })}
+                                <span className="font-serif text-xl md:text-3xl font-light select-none text-[var(--text-main)]">
+                                    {lang === 'EN' ? ", and forever lives on with" : "，并在此后永远带着"}
+                                </span>
+                                {renderProphecySlot({ blockId: "engine_m7b", placeholderCN: "M7B. 实在余痕", placeholderEN: "M7B. Residue", hideAffixes: true })}
+                                <span className="font-serif text-xl md:text-3xl font-light select-none text-[var(--text-main)]">
+                                    {lang === 'EN' ? "." : "活下去。"}
                                 </span>
                             </div>
                         </div>

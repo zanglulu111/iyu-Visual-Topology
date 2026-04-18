@@ -29,8 +29,11 @@ import { findItemDetails, findItemFull } from './dataRegistry';
 // 🏗️ V1 & V2 架构引入：两套全新的 Prompt 构建器
 import { buildPromptV1, buildPromptV2 } from './promptArchitectures';
 
+// 🏗️ V3 架构：导演笔记模式 (Director's Brief)
+import { buildPromptV3 } from './promptV3';
+
 /** Prompt 架构版本 */
-export type PromptArchVersion = 'legacy' | 'v1' | 'v2';
+export type PromptArchVersion = 'legacy' | 'v1' | 'v2' | 'v3';
 
 // ============================================================================
 // 📜 2. 系统宪法 (最高铁律拼接区)
@@ -217,9 +220,10 @@ export const buildNarrativePrompt = (
   visionInput: string = "",
   visionImage: string | null = null,
   worldLaw: WorldLawConfig,
-  archVersion: PromptArchVersion = 'legacy'
+  archVersion: PromptArchVersion = 'v3'
 ): { text: string, images: string[] } => {
   // ═══ 架构分流：根据版本参数委托给不同的 Prompt 构建器 ═══
+  if (archVersion === 'v3') return buildPromptV3(fieldState, visionInput, visionImage, worldLaw);
   if (archVersion === 'v1') return buildPromptV1(fieldState, visionInput, visionImage, worldLaw);
   if (archVersion === 'v2') return buildPromptV2(fieldState, visionInput, visionImage, worldLaw);
   // ═══ Legacy 模式：保持原有逻辑不变 ═══

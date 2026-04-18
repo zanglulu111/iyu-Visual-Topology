@@ -218,7 +218,7 @@ export const buildPromptV1 = (
   const sur2Tags = getTagsBySuffix(fieldState, '_era');
   const activeWorldLogic = `${sur1Tags.join('/') || 'Cinema/Drama'} (场域: ${sur2Tags.join('/') || 'Unknown'})`;
   const gravity = worldLaw.gravity || 3;
-  const m7Info = getMParamInfo(fieldState, '_m7');
+  const m7Info = getMParamInfo(fieldState, '_m7b');
   const bannedWords = getBannedWords(fieldState);
 
   // ============================================================================
@@ -239,7 +239,7 @@ Task: 基于以下迷雾学派引擎参数，生成 3 个电影级故事概念�
 
   // 额外注入 M7 宪法（如果 calculator 没有包含）
   if (m7Info && !criticals.some(d => d.target.includes('M7'))) {
-    LAYER_1 += `[LOCK_M7: ABSOLUTE] 结局 = [${m7Info.tags.join('/')}]\n→ M7 是绝对宪法。用户选了什么，你就写什么。严禁篡改。\n→ ${m7Info.def}\n\n`;
+    LAYER_1 += `[LOCK_M7: ABSOLUTE] 结局 = [${m7Info.tags.join('/')}]\n→ M7B 是绝对宪法。用户选了什么，你就写什么。严禁篡改。\n→ ${m7Info.def}\n\n`;
   }
 
   // 红线警告
@@ -308,7 +308,7 @@ Task: 基于以下迷雾学派引擎参数，生成 3 个电影级故事概念�
 Story = M0 { [(M1->M2->M3) / M4] x M5 } => (M6, M7)
 - M1 因为不完整而渴望，M2 是打破日常的不可逆瞬间（不一定是暴力），M3 是驱动力。
 - M4 是横亘在 M1 与 M3 之间的障碍（不一定是邪恶的）。M5 是行动的姿态（不一定是暴力）。
-- M6 是等价交换物（不是越恐怖越好，而是越精确越好）。M7 是余味，不是灰烬。
+- M6 是等价交换物（不是越恐怖越好，而是越精确越好）。M7B 是余味，不是灰烬。
 
 ### B. 命名协议
 - 严禁通用名（Tom/Alice/小明/李华）。严禁单字名。
@@ -371,7 +371,7 @@ ${buildJSONTemplate(activeWorldLogic)}
 再次强调——违反即判定失败：
 1. ${m0 ? `[M0] ${m0.tag} 的逻辑不可被表层类型片冲淡。` : 'M0 未选择。'}
 2. [NARRATIVE_ARC] 走向判定 = ${tension.narrativeArc} — 这是结局的物理法则。
-3. ${m7Info ? `[M7] = ${m7Info.tags.join('/')} — 绝对宪法，严禁篡改。` : 'M7 未选择。'}
+3. ${m7Info ? `[M7B] = ${m7Info.tags.join('/')} — 绝对宪法，严禁篡改。` : 'M7 未选择。'}
 `;
 
   // ============================================================================
@@ -409,7 +409,7 @@ export const buildPromptV2 = (
   const m4Info = getMParamInfo(fieldState, '_m4');
   const m5Info = getMParamInfo(fieldState, '_m5');
   const m6Info = getMParamInfo(fieldState, '_m6');
-  const m7Info = getMParamInfo(fieldState, '_m7');
+  const m7Info = getMParamInfo(fieldState, '_m7b');
   // m4xInfo/m5xInfo removed in v3.0
 
   const sur1Tags = getTagsBySuffix(fieldState, '_genre');
@@ -462,10 +462,10 @@ Task: 基于以下迷雾学派引擎参数，生成 3 个电影级故事概念�
 → 为了让公式闭合，主体必须放弃的等价交换物。它可以是一段关系、一个身份、一种曾经让自己安心的幻觉，甚至是旧的自己。
 → 代价的重量由公式的张力决定——不是越恐怖越好，而是越精确越好。一根羽毛的丧失，有时比断臂更致命。
 
-**M7. 存在落点（余数/沉淀）**
+**M7B. 存在落点（余数/沉淀）**
 → 公式运算后留下的余数。它不是"答案"，是"余味"——可以是嘴角的苦涩，也可以是意想不到的释然，也可以是一个永远无法回答的问题。
 → 它是观众走出影院后，在雨中站了一会儿才想起要撑伞的那个瞬间。
-→ **M7 是绝对宪法。用户选了什么，你就写什么。严禁篡改。**`;
+→ **M7B 是绝对宪法。用户选了什么，你就写什么。严禁篡改。**`;
 
   // 1B. 本次具体值 + 走向判定 (动态)
   let BLOCK_1B = `## 🧬 本次 DNA 序列\n\n`;
@@ -485,13 +485,13 @@ Task: 基于以下迷雾学派引擎参数，生成 3 个电影级故事概念�
     { label: 'M4. 大他者阻断', info: m4Info },
     { label: 'M5. 行动驱力', info: m5Info },
     { label: 'M6. 终极代价', info: m6Info },
-    { label: 'M7. 存在落点', info: m7Info },
+    { label: 'M7B. 存在落点', info: m7Info },
   ];
 
   for (const mp of mParams) {
     if (mp.info) {
-      const isM7 = mp.label.includes('M7');
-      BLOCK_1B += `* **${mp.label}**: [${mp.info.tags.join(' + ')}]${isM7 ? '  🚨 绝对宪法' : ''}\n  Def: ${mp.info.def}\n${mp.info.core ? `  Core: ${mp.info.core}\n` : ''}\n`;
+      const isM7B = mp.label.includes('M7');
+      BLOCK_1B += `* **${mp.label}**: [${mp.info.tags.join(' + ')}]${isM7B ? '  🚨 绝对宪法' : ''}\n  Def: ${mp.info.def}\n${mp.info.core ? `  Core: ${mp.info.core}\n` : ''}\n`;
     }
   }
 
@@ -622,7 +622,7 @@ ${buildJSONTemplate(activeWorldLogic)}
 ### 🚨 最终复述
 1. ${m0 ? `M0 [${m0.tag}] 的逻辑不可被冲淡。` : ''}
 2. NARRATIVE_ARC = ${tension.narrativeArc}。
-3. ${m7Info ? `M7 = [${m7Info.tags.join('/')}] 是绝对宪法，严禁篡改。` : ''}`;
+3. ${m7Info ? `M7B = [${m7Info.tags.join('/')}] 是绝对宪法，严禁篡改。` : ''}`;
 
   // ============================================================================
   // BLOCK 5: 创作铁律 (极度压缩)

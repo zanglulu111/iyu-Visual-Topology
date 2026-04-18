@@ -120,7 +120,8 @@ export interface MistEngineInput {
   m4?: string;
   m5?: string;
   m6?: string;
-  m7?: string;
+  m7a?: string;
+  m7b?: string;
   // m4x/m5x removed in v3.0 (正交性优化)
 
   // === 皮层：SUR1-SUR10 ===
@@ -158,7 +159,8 @@ export function extractEngineInput(fieldState: NarrativeFieldState): MistEngineI
     m4: nameToId(extractFirst(fieldState, 'engine_m4')),
     m5: nameToId(extractFirst(fieldState, 'engine_m5')),
     m6: nameToId(extractFirst(fieldState, 'engine_m6')),
-    m7: nameToId(extractFirst(fieldState, 'engine_m7')),
+    m7a: nameToId(extractFirst(fieldState, 'engine_m7a')),
+    m7b: nameToId(extractFirst(fieldState, 'engine_m7b')),
     // m4x/m5x removed in v3.0
 
     // 皮层 SUR1-SUR10
@@ -282,9 +284,10 @@ function calculateTension(input: MistEngineInput, m0Topo: M0TopologyProfile | un
   // ====== 世界熵 ======
   const worldEntropy = mods.entropyRate;
 
-  // M7 终局重力 → 叙事走向判定
-  const m7Gravity = resolveGravity('M7', input.m7);
-  const adjustedRatio = ratio * (1 + (m7Gravity - 0.5) * 0.3);
+  // M8/M7 终局重力 → 叙事走向判定 (M8 裁决为主，M7 余痕为辅)
+  const m8Gravity = resolveGravity('M8', input.m7a);
+  const m7Gravity = resolveGravity('M7', input.m7b);
+  const adjustedRatio = ratio * (1 + (m8Gravity - 0.5) * 0.4) * (1 + (m7Gravity - 0.5) * 0.2);
 
   // 走向判定（M0 曲率偏移）
   const curvatureShift = m0Topo ? (m0Topo.curvature - 0.5) * 0.4 : 0;
@@ -445,7 +448,8 @@ function compileDirectives(
     { target: 'M4_BIG_OTHER', id: input.m4, moduleKey: 'M4' },
     { target: 'M5_DRIVE', id: input.m5, moduleKey: 'M5' },
     { target: 'M6_PRICE', id: input.m6, moduleKey: 'M6' },
-    { target: 'M7_RESIDUAL', id: input.m7, moduleKey: 'M7' },
+    { target: 'M8_VERDICT', id: input.m7a, moduleKey: 'M8' },
+    { target: 'M7_RESIDUAL', id: input.m7b, moduleKey: 'M7' },
   ];
 
   for (const mod of moduleItems) {
@@ -759,6 +763,8 @@ ${m0Section}
 | M3 欲望幻象 | ${getName(input.m3)} | ${resolveGravity('M3', input.m3).toFixed(2)} (有效值: ${(resolveGravity('M3', input.m3) * (m0Topo?.formulaMods.m3Opacity ?? 1.0) * resolveSUR10XFactor(input.sur10x)).toFixed(2)}) |
 | M4 大他者 | ${getName(input.m4)} | ${resolveGravity('M4', input.m4).toFixed(2)} (有效值: ${(resolveGravity('M4', input.m4) * (m0Topo?.formulaMods.m4Divisor ?? 1.0)).toFixed(2)}) |
 | M5 行动驱力 | ${getName(input.m5)} | ${resolveGravity('M5', input.m5).toFixed(2)} (有效值: ${(resolveGravity('M5', input.m5) * (m0Topo?.formulaMods.m5Multiplier ?? 1.0)).toFixed(2)}) |
+| M8 象征裁决 | ${getName(input.m7a)} | ${resolveGravity('M8', input.m7a).toFixed(2)} |
+| M7 实在余痕 | ${getName(input.m7b)} | ${resolveGravity('M7', input.m7b).toFixed(2)} |
 | SUR10X 信念裂度 | ${getName(input.sur10x)} | x${resolveSUR10XFactor(input.sur10x).toFixed(2)} -> M3幻象 |
 
 ### 🌍 世界法则 (World Law)

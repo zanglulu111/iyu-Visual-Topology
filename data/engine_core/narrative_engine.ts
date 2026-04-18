@@ -7,6 +7,7 @@ import { ENGINE_BIG_OTHER } from './engine_big_other';
 import { ENGINE_DRIVES } from './engine_drives';
 import { ENGINE_STAKES } from './engine_stakes';
 import { ENGINE_RESOLUTIONS } from './engine_resolutions';
+import { M7A_VERDICTS } from './m7a/index';
 import { ENGINE_M0_OS } from './m0';
 // M4X/M5X synthesizer imports removed (v3.0 正交性优化)
 
@@ -71,11 +72,19 @@ export const NARRATIVE_ENGINE_BLOCKS: NarrativeBlockDef[] = [
     tags: []
   },
   {
-    id: "engine_m7",
-    name: "M7. 存在落点",
-    enName: "M7. THE RESOLUTION",
-    description: "故事的哲学结局与命运审判。欲望最终导向何处？",
-    descriptionEn: "The philosophical ending and judgment of fate. Where does desire ultimately lead?",
+    id: "engine_m7a",
+    name: "M7A. 象征裁决",
+    enName: "M7A. THE VERDICT",
+    description: "【回溯性缝合】对整个叙事轨迹的最终定性与审判。决定了欲望的结构性终点。",
+    descriptionEn: "The Retroactive Quilting Point. The final qualitative judgment and verdict on the entire narrative trajectory.",
+    tags: []
+  },
+  {
+    id: "engine_m7b",
+    name: "M7. 实在余痕",
+    enName: "M7. THE RESIDUE",
+    description: "故事的哲学结局与命运审判之余响。欲望最终导向何处？",
+    descriptionEn: "The philosophical remains and ripples of the fate's judgment. Where does desire ultimately lead?",
     tags: []
   }
 ];
@@ -138,9 +147,17 @@ export const NARRATIVE_ENGINE_LIBRARY: LibraryCategoryDef[] = [
     items: ENGINE_STAKES
   },
   {
-    id: "engine_m7_lib",
-    name: "M7. 存在落点",
-    nameEn: "M7. The Resolution",
+    id: "engine_m7a_lib",
+    name: "M7A. 象征裁决",
+    nameEn: "M7A. The Verdict",
+    desc: "叙事意义的回溯性缝合点。在裁决下达的瞬间，之前发生的一切（遭遇、幻想、牺牲）都被赋予了最终的逻辑定性。",
+    descEn: "Retroactive quilting point of narrative meaning. The moment the verdict is delivered, everything prior (encounter, fantasy, sacrifice) is given its final logical characterization.",
+    items: M7A_VERDICTS
+  },
+  {
+    id: "engine_m7b_lib",
+    name: "M7. 实在余痕",
+    nameEn: "M7. The Residue",
     desc: "故事的哲学结局与命运审判。欲望最终导向何处？",
     descEn: "The philosophical ending and judgment of fate. Where does desire ultimately lead?",
     items: ENGINE_RESOLUTIONS

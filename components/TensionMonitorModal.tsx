@@ -170,7 +170,7 @@ export const TensionMonitorModal: React.FC<TensionMonitorModalProps> = ({
                                 'M4 欲望诡计': input.m4 ? 1 : 0,
                                 'M5 实在界碎片': input.m5 ? 1 : 0,
                                 'M6 升华与死亡': input.m6 ? 1 : 0,
-                                'M7 圣状残余': input.m7 ? 1 : 0,
+                                'M7B 实在余痕': input.m7b ? 1 : 0,
                             }).map(([key, active], idx) => (
                                 <div key={idx} className={`p-2 rounded text-[10px] font-mono border ${
                                     active ? (theme === 'retro' ? 'border-[#8B261D]/30 bg-[#8B261D]/5 text-[#8B261D]' : 'border-gold-primary/30 bg-gold-primary/10 text-gold-primary') : 

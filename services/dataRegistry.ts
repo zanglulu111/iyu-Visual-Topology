@@ -104,7 +104,15 @@ export const findItemDetails = (tagName: string, blockId?: string): string => {
     const item = findItemFull(tagName, blockId);
     if (item) {
         let details = `Definition: ${item.def}`;
-        if (item.core) details += ` | Core: ${item.core}`;
+        if (item.directive) {
+            if (typeof item.directive === 'string') {
+                details += ` | ${item.directive}`;
+            } else {
+                details += ` | ${item.directive.tension}`;
+            }
+        } else if (item.core) {
+            details += ` | Core: ${item.core}`;
+        }
         if (item.flaw) details += ` | Symptom: ${item.flaw}`;
         if (item.logic) details += ` | Logical Constraint: ${item.logic}`;
         // ★ PATCH 注入：将指令性补丁信息注入上下文
@@ -136,6 +144,48 @@ export const extractPatchConstraints = (tagName: string, blockId?: string): {
         };
     }
     return { mechanics: null, aesthetic: null, runtime: null };
+};
+
+/**
+ * 提取词条的导演笔记（directive 优先，回退到 def）。
+ * 供 V3 prompt builder 使用——以导演语言注入 AI，而非理论语言。
+ *
+ * 支持三面 directive：{ bright, dark, tension }。
+ * 当 face 参数指定时，返回 topology + 对应面的 directive。
+ * 未指定 face 时，返回 topology + tension 面（默认）。
+ * 旧版 string 格式的 directive 不受影响。
+ */
+export const getDirective = (tagName: string, blockId?: string, face?: 'bright' | 'dark' | 'tension'): {
+    name: string;
+    def: string;
+    directive: string | null;
+    topology: string | null;
+    core: string | null;
+} | null => {
+    const item = findItemFull(tagName, blockId);
+    if (!item) return null;
+
+    let directiveText: string | null = null;
+    const topology = item.topology || null;
+
+    if (item.directive) {
+        if (typeof item.directive === 'string') {
+            // 旧版 string 格式：直接返回
+            directiveText = item.directive;
+        } else {
+            // 新版三面格式：返回指定面（默认 tension）
+            const selectedFace = face || 'tension';
+            directiveText = item.directive[selectedFace] || null;
+        }
+    }
+
+    return {
+        name: item.name,
+        def: item.def || '',
+        directive: directiveText,
+        topology,
+        core: item.core || null,
+    };
 };
 
 export const findItemFull = (tagName: string, blockId?: string) => {

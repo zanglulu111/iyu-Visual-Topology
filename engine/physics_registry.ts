@@ -261,6 +261,17 @@ const M7_GROUP_GRAVITY: Record<string, number> = {
 };
 
 // ============================================
+// M8 象征裁决 — 按 group 推导叙事质量
+// ============================================
+const M8_GROUP_GRAVITY: Record<string, number> = {
+  "A": 0.15, "A. 幻灭的裁决": 0.15, "Verdict of Void": 0.15,
+  "B": 0.35, "B. 异化的裁决": 0.35, "Verdict of Alienation": 0.35,
+  "C": 0.65, "C. 升华的裁决": 0.65, "Verdict of Sinthome": 0.65,
+  "D": 0.85, "D. 毁灭的裁决": 0.85, "Verdict of Collapse": 0.85,
+  "E": 0.50, "E. 回归的裁决": 0.50, "Verdict of Return": 0.50,
+};
+
+// ============================================
 // 查询辅助函数
 // ============================================
 
@@ -319,6 +330,7 @@ export function getGroupGravity(moduleKey: string, groupStr: string | undefined)
     'M4': M4_GROUP_GRAVITY,
     'M5': M5_GROUP_GRAVITY,
     'M7': M7_GROUP_GRAVITY,
+    'M8': M8_GROUP_GRAVITY,
   };
   const table = tables[moduleKey];
   if (!table) return 0.5;

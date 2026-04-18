@@ -15,7 +15,8 @@ export const SUBJECTS_GROUP_A: LibraryItemDef[] = [
         core: "A面：重复可以是安稳的节拍——有人在这节拍里找到归属，找到'我被需要'的安慰。/ B面：但当停下来比继续转动更可怕时，你已经不是齿轮的操纵者，你就是齿轮本身。关键张力：如果机器突然停了——迎来的是自由，还是坠入虚空？ | 缺失 ($): 主体性——你是一个人，还是一个功能？",
         coreEn: "A-side: Repetition can be a steady rhythm — some find belonging in it, a comfort of 'I am needed.' / B-side: But when stopping feels more terrifying than continuing, you're no longer operating the gear; you ARE the gear. Key tension: If the machine suddenly halts — freedom, or freefall into the void? | Lacks ($): Subjectivity — are you a person, or a function?",
         reference: "《摩登时代》查理（被流水线吞噬的工人）；《审判》K（在庞大官僚机器中被消耗的个体）；《黑客帝国》母体外的培养皿沉睡者。",
-        referenceEn: "Charlie in Modern Times (a worker swallowed by the assembly line); K in The Trial (an individual consumed within a massive bureaucracy); sleepers in the pods outside The Matrix."
+        referenceEn: "Charlie in Modern Times (a worker swallowed by the assembly line); K in The Trial (an individual consumed within a massive bureaucracy); sleepers in the pods outside The Matrix.",
+        directive: "这个人嵌在一台庞大的机器里，日复一日地转动。他的日程表、路线、对话都是固定的。关键在于：他可能在这种重复里找到了一种安稳——「我被需要」本身就是一种归属感。但也可能他已经分不清自己是在操纵机器还是被机器消磨。写他的时候，核心问题不是「他想不想出去」，而是「如果机器突然停了，他的脸上会是什么表情？」——解脱，还是茫然？这个问题的答案由故事的走向决定，不要提前替他回答。"
     },
     {
         id: "subj_cleaner",
@@ -27,7 +28,8 @@ export const SUBJECTS_GROUP_A: LibraryItemDef[] = [
         core: "A面：知道黑暗的全貌而选择缄默，是一种深沉的力量——你替所有人背负了他们不敢面对的东西。/ B面：但沉默太久会变质。你替主人吞下的秽物在你胃里发酵，分不清自己是在守护什么，还是已经成了黑暗的一部分。关键张力：当沉默本身成为共谋，开口是救赎还是同归于尽？ | 缺失 ($): 洁净——你替体制打扫了一切，谁来打扫你？",
         coreEn: "A-side: Knowing the full scope of darkness yet choosing silence is a profound strength — you bear for everyone what they dare not face. / B-side: But prolonged silence curdles. The filth you swallowed for your master ferments inside you; you can no longer tell whether you're guarding something or have become part of the darkness. Key tension: When silence becomes complicity, is speaking up salvation or mutual destruction? | Lacks ($): Innocence — you cleaned everything for the system; who cleans you?",
         reference: "《教父》卢卡·布拉西（替家族包揽最肮脏暴力的清道夫）；《甄嬛传》苏培盛（负责处理后宫腌臜的执行者）；《银翼杀手》中专门清理复制人的同类退役警察。",
-        referenceEn: "Luca Brasi in The Godfather (a scavenger handling the family's dirtiest violence); Su Peisheng in Empresses in the Palace (executing the harem's sordid affairs); the retired cop hunting his own kind in Blade Runner."
+        referenceEn: "Luca Brasi in The Godfather (a scavenger handling the family's dirtiest violence); Su Peisheng in Empresses in the Palace (executing the harem's sordid affairs); the retired cop hunting his own kind in Blade Runner.",
+        directive: "他知道所有不该知道的事。他替别人埋过尸体、烧过证据、堵过嘴。他的手永远是脏的——但脏是他活着的条件。核心矛盾：他可能有一种深沉的力量——替所有人背负了他们不敢面对的东西，这本身是一种选择。但也可能沉默已经开始变质，他自己也分不清是在守护什么人，还是已经成了黑暗的一部分。写他的时候，留下这个悬念：当有一天他必须开口——是救赎，还是同归于尽？答案取决于故事走向。"
     },
     {
         id: "subj_battery",
@@ -63,7 +65,8 @@ export const SUBJECTS_GROUP_A: LibraryItemDef[] = [
         core: "A面：被凝视可以是光芒万丈的舞台——万众目光汇聚之处，你成为美与欲望的化身。被看见本身就是确认：我存在，我值得。/ B面：但玻璃罩里的凝视不是爱——是占有。你被精心摆放，笑容被设计，姿态被规定。观众散去，橱窗里只剩你面对空洞的倒影。关键张力：你渴望的是被看见，还是被看见时那短暂的'我有价值'的幻觉？ | 缺失 ($): 内核——剥掉所有目光之后，你还剩下什么？",
         coreEn: "A-side: Being gazed upon can be a radiant stage — where eyes converge, you become the incarnation of beauty and desire. Being seen is confirmation: I exist, I am worthy. / B-side: But the gaze through the glass case is not love — it is possession. You are meticulously arranged; your smile designed, your posture prescribed. When the audience departs, only you remain, facing your hollow reflection. Key tension: Do you crave being seen, or the fleeting illusion of 'I am valuable' that being seen provides? | Lacks ($): Depth — strip away every gaze, and what remains of you?",
         reference: "《了不起的盖茨比》黛西（被当作阶级跨越的完美战利品）；中国古代待价而沽的'扬州瘦马'；《银翼杀手2049》中的虚拟全息女友乔伊（被定制的凝视客体）。",
-        referenceEn: "Daisy in The Great Gatsby (the perfect trophy of class mobility); ancient Chinese 'Yangzhou skinny horses' sold to the highest bidder; Joi, the customizable holographic girlfriend in Blade Runner 2049."
+        referenceEn: "Daisy in The Great Gatsby (the perfect trophy of class mobility); ancient Chinese 'Yangzhou skinny horses' sold to the highest bidder; Joi, the customizable holographic girlfriend in Blade Runner 2049.",
+        directive: "这个人活在别人的目光里。她的笑容、姿态、穿着都经过精心安排——她是一件展品。核心矛盾：被凝视可以是光芒万丈的——万众目光汇聚之处，她成为美与欲望的化身，「被看见」本身就是确认「我存在」。但这种确认也可能是一种牢笼——观众散去后，橱窗里只剩她面对自己的倒影。写她的时候，核心问题是：她渴望的到底是「被看见」，还是「被看见时那短暂的我有价值的感觉」？这两者的区别决定了故事的走向。"
     },
     {
         id: "subj_number",

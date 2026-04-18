@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Terminal, Copy, Check, Layers, Boxes, FileText } from 'lucide-react';
+import { X, Terminal, Copy, Check, Layers, Boxes, FileText, Sparkles } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { NarrativeFieldState, WorldLawConfig, DriverType } from '../types';
 import { buildNarrativePrompt, PromptArchVersion } from '../services/narrativeGenerator';
@@ -18,7 +18,8 @@ interface PromptInspectorModalProps {
 
 // 版本选项卡配置
 const VERSION_TABS: { id: PromptArchVersion; label: string; labelEn: string; icon: React.ReactNode; desc: string }[] = [
-    { id: 'legacy', label: 'Legacy 原版', labelEn: 'Legacy', icon: <FileText size={13} />, desc: '当前生产版本' },
+    { id: 'v3', label: 'V3 导演笔记', labelEn: 'V3 Director', icon: <Sparkles size={13} />, desc: '导演语言 + M8 缝合点 (当前默认)' },
+    { id: 'legacy', label: 'Legacy 原版', labelEn: 'Legacy', icon: <FileText size={13} />, desc: '旧版宪法模式' },
     { id: 'v1', label: 'V1 六层注意力', labelEn: 'V1 Attention', icon: <Layers size={13} />, desc: '注意力金字塔 + 计算器注入' },
     { id: 'v2', label: 'V2 五区块融合', labelEn: 'V2 Fusion', icon: <Boxes size={13} />, desc: '核心公式 + 表层 + 法则 + 结构 + 铁律' },
 ];
@@ -35,7 +36,7 @@ export const PromptInspectorModal: React.FC<PromptInspectorModalProps> = ({
 }) => {
     const { theme } = useTheme();
     const [copied, setCopied] = useState(false);
-    const [activeVersion, setActiveVersion] = useState<PromptArchVersion>('legacy');
+    const [activeVersion, setActiveVersion] = useState<PromptArchVersion>('v3');
 
     // 计算实时生成的提示词（响应版本切换）
     const livePrompt = useMemo(() => {

@@ -41,6 +41,8 @@ export interface LibraryItemDef {
   defEn?: string;
   core?: string;
   coreEn?: string;
+  directive?: string | { bright: string; dark: string; tension: string };
+  directiveEn?: string | { bright: string; dark: string; tension: string };
   essence?: string;
   essenceEn?: string;
   reference?: string;

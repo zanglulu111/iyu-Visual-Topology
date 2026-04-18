@@ -300,7 +300,7 @@ export const BLOCK_LIMITS: Record<string, number> = {
   'aes_render_real': 1,
   'aes_render_art': 1,
   'aes_render': 1,
-  'engine_m0': 1, 'engine_m1': 2, 'engine_m2': 2, 'engine_m3': 3, 'engine_m4': 3, 'engine_m5': 3, 'engine_m6': 3, 'engine_m7': 1,
+  'engine_m0': 1, 'engine_m1': 2, 'engine_m2': 2, 'engine_m3': 3, 'engine_m4': 3, 'engine_m5': 3, 'engine_m6': 3, 'engine_m7b': 1, 'engine_m7a': 1,
   // engine_m4x/engine_m5x removed in v3.0
   'comm_c0': 1, 'comm_c1': 1, 'comm_c2': 3, 'comm_c3': 1, 'comm_c4': 3, 'comm_c5': 3, 'comm_c6': 3, 'comm_c7': 3,
   'skin_genre': 2, 'skin_animation_genre': 1, 'skin_location': 3, 'skin_society': 1, 'skin_ideology': 1, 'skin_ending': 1,
@@ -317,7 +317,7 @@ export const RANDOM_RANGES: Record<string, [number, number]> = {
   // M0-M7 引擎核心
   'engine_m0': [1, 1], 'engine_m1': [1, 2], 'engine_m2': [1, 2],
   'engine_m3': [1, 2], 'engine_m4': [1, 2], 'engine_m5': [1, 2],
-  'engine_m6': [1, 2], 'engine_m7': [1, 1],
+  'engine_m6': [1, 2], 'engine_m7b': [1, 1], 'engine_m7a': [1, 1],
   // engine_m4x/engine_m5x removed in v3.0
   // SUR 表层设定
   'skin_genre': [1, 2],      // SUR1 叙事动力
