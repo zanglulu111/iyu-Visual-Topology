@@ -75,7 +75,9 @@
       "Bash(sed -i '' \"s/~700-1000 chars each\\\\. Full 3 acts/~700-1200 chars each. Full 3 acts/\" data/engine_sv/SV2/group_c.ts)",
       "Bash(sed -i '' \"s/每卡 ≈ 600-800字。写清：核心命题/每卡 ≈ 600-1000字。写清：核心命题/\" data/engine_sv/SV2/group_c.ts)",
       "Bash(sed -i '' \"s/~600-800 chars each\\\\. Core thesis/~600-1000 chars each. Core thesis/\" data/engine_sv/SV2/group_c.ts)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git commit *)"
     ]
   }
 }
