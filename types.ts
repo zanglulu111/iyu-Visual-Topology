@@ -127,6 +127,9 @@ export interface NarrativeBlockDef {
 
 export type NarrativeFieldState = Record<string, string[]>;
 
+export type DirectiveFace = 'bright' | 'dark' | 'tension';
+export type FaceState = Record<string, DirectiveFace>;
+
 export interface WorldLawConfig {
   physics?: number;
   timeline?: number;

@@ -11,7 +11,27 @@
 
 import { APIConfig, DEFAULT_CONFIG, EngineModelConfig, ProviderConfig, getProviderForModel } from '../types/config';
 
+function proxyFetch(url: string, options: RequestInit): Promise<Response> {
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+        const parsed = new URL(url);
+        const localPath = '/__api_proxy' + parsed.pathname + parsed.search;
+        const headers = new Headers(options.headers);
+        headers.set('X-Proxy-Target', parsed.origin);
+        return fetch(localPath, { ...options, headers });
+    }
+    return fetch(url, options);
+}
+
 const CONFIG_STORAGE_KEY = 'visionary_api_config';
+const PRESETS_STORAGE_KEY = 'visionary_api_presets';
+
+export interface ApiPreset {
+  id: string;
+  name: string;
+  apiKey: string;
+  baseUrl: string;
+  apiFormat: 'anthropic';
+}
 
 class ConfigService {
 
@@ -232,10 +252,10 @@ class ConfigService {
         // 代理 API 测试
         const cleanUrl = providerConfig.baseUrl.trim().replace(/\/+$/, '');
 
-        // Claude + Anthropic 原生格式
-        if (provider === 'claude' && (providerConfig.apiFormat || 'anthropic') === 'anthropic') {
+        // Claude: 始终使用 Anthropic 原生格式
+        if (provider === 'claude') {
           const fetchUrl = `${cleanUrl}/v1/messages`;
-          const response = await fetch(fetchUrl, {
+          const response = await proxyFetch(fetchUrl, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -250,34 +270,32 @@ class ConfigService {
           });
 
           if (response.ok) {
-            return { success: true, message: 'Claude 代理连接成功 (Anthropic 格式) ✓' };
+            return { success: true, message: 'Claude 代理连接成功 ✓' };
           }
           const errText = await response.text().catch(() => '');
-          // 检测 HTML 响应
           if (errText.trim().startsWith('<') || errText.includes('<!DOCTYPE')) {
             return { success: false, message: `代理地址错误：返回了 HTML 网页。请检查 Base URL 是否正确。\n当前测试地址: ${fetchUrl}` };
           }
           return { success: false, message: `错误 ${response.status}: ${errText.substring(0, 100)}` };
         } else {
-          // OpenAI-compatible 格式 (用于 Gemini 代理或 Claude OpenAI 模式)
-          const testModel = provider === 'gemini' ? 'gemini-3.1-flash-lite-preview' : 'claude-sonnet-4-6';
+          // Gemini 代理: OpenAI-compatible 格式
           const fetchUrl = `${cleanUrl}/chat/completions`;
 
-          const response = await fetch(fetchUrl, {
+          const response = await proxyFetch(fetchUrl, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${providerConfig.apiKey}`,
             },
             body: JSON.stringify({
-              model: testModel,
+              model: 'gemini-3.1-flash-lite-preview',
               messages: [{ role: 'user', content: 'Hi' }],
               max_tokens: 5,
             })
           });
 
           if (response.ok) {
-            return { success: true, message: `${provider === 'gemini' ? 'Gemini' : 'Claude'} 代理连接成功 (OpenAI 格式) ✓` };
+            return { success: true, message: 'Gemini 代理连接成功 ✓' };
           }
           const errText = await response.text().catch(() => '');
           if (errText.trim().startsWith('<') || errText.includes('<!DOCTYPE')) {
@@ -322,6 +340,43 @@ class ConfigService {
       console.error('Failed to import config:', error);
       return false;
     }
+  }
+
+  // ============================================================
+  // 预设管理
+  // ============================================================
+
+  getPresets(): ApiPreset[] {
+    try {
+      const raw = localStorage.getItem(PRESETS_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  savePreset(preset: ApiPreset): void {
+    const presets = this.getPresets();
+    const idx = presets.findIndex(p => p.id === preset.id);
+    if (idx >= 0) {
+      presets[idx] = preset;
+    } else {
+      presets.push(preset);
+    }
+    localStorage.setItem(PRESETS_STORAGE_KEY, JSON.stringify(presets));
+  }
+
+  deletePreset(id: string): void {
+    const presets = this.getPresets().filter(p => p.id !== id);
+    localStorage.setItem(PRESETS_STORAGE_KEY, JSON.stringify(presets));
+  }
+
+  applyPreset(preset: ApiPreset): void {
+    this.updateProviderConfig('claude', {
+      apiKey: preset.apiKey,
+      baseUrl: preset.baseUrl,
+      apiFormat: preset.apiFormat,
+    });
   }
 }
 

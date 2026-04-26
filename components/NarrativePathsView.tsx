@@ -1,12 +1,14 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { CreativeTreatment, StyleConfig, LibraryCategoryDef, BlueprintLanguage, DriverType, CreativeBlueprint, NarrativeFieldState } from '../types';
+import { CreativeTreatment, StyleConfig, LibraryCategoryDef, BlueprintLanguage, DriverType, CreativeBlueprint, NarrativeFieldState, WorldLawConfig } from '../types';
 import { STYLE_MATRIX, PERSPECTIVES, SENSORY_MODES } from '../data/style_matrix';
 import { DIRECTOR_STYLES } from '../data/director_styles';
-import { Sparkles, Film, Zap, BrainCircuit, BookOpen, ArrowRight, RotateCw, Check, Palette, Settings2, ArrowLeft, Copy, Layers, History as HistoryIcon, ClipboardList, GitFork, Gem, Eye, Anchor, Flower, Music, Wind, Globe, Lightbulb, Ghost, User, Fingerprint, List, X, ChevronUp, Database, FileText, ScanLine, Terminal, Activity, FileJson } from 'lucide-react';
+import { SV1_DATA } from '../data/engine_sv/SV1';
+import { Sparkles, Film, Zap, BrainCircuit, BookOpen, ArrowRight, RotateCw, Check, Palette, Settings2, ArrowLeft, Copy, Layers, History as HistoryIcon, ClipboardList, GitFork, Gem, Eye, Anchor, Flower, Music, Wind, Globe, Lightbulb, Ghost, User, Fingerprint, List, X, ChevronUp, Database, FileText, ScanLine, Terminal, Activity, FileJson, Brain } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { NarrativeLibraryModal } from './NarrativeLibraryModal';
 import { TaskManagerPanel } from './TaskManagerPanel';
+import { BiblePromptInspectorModal } from './BiblePromptInspectorModal';
 import { globalTaskManager } from '../services/taskManager';
 import {
     NARRATIVE_ENGINE_BLOCKS,
@@ -36,6 +38,9 @@ interface NarrativePathsViewProps {
     fieldState?: NarrativeFieldState;
     visionInput?: string;
     visionAnalysis?: string;
+    thinkingXml?: string;
+    worldLawConfig?: WorldLawConfig;
+    onToggleTag?: (blockId: string, tag: string) => void;
 }
 
 export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
@@ -52,21 +57,27 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
     cachedBlueprints = {},
     fieldState,
     visionInput,
-    visionAnalysis
+    visionAnalysis,
+    thinkingXml,
+    worldLawConfig,
+    onToggleTag
 }) => {
     const { theme } = useTheme();
     const [selectedPathId, setSelectedPathId] = useState<string | null>(null);
+    const [isThinkingPanelOpen, setIsThinkingPanelOpen] = useState(false);
     const [styleConfig, setStyleConfig] = useState<StyleConfig>({
         styleId: null,
         perspectiveId: 'SCREENPLAY',
         sensoryId: 'VISUAL'
     });
     const [isStyleModalOpen, setIsStyleModalOpen] = useState(false);
+    const [isStructureModalOpen, setIsStructureModalOpen] = useState(false);
     const [isParamsPanelOpen, setIsParamsPanelOpen] = useState(false);
     const [copiedId, setCopiedId] = useState<string | null>(null);
     const [copiedAll, setCopiedAll] = useState(false);
     const [isTaskManagerOpen, setIsTaskManagerOpen] = useState(false);
     const [activeTaskCount, setActiveTaskCount] = useState(0);
+    const [isBibleInspectorOpen, setIsBibleInspectorOpen] = useState(false);
 
     const [promptLang, setPromptLang] = useState<'CN' | 'EN' | 'UVD'>('CN');
 
@@ -257,6 +268,24 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
         }
     };
 
+    const structureLibraryData: LibraryCategoryDef[] = useMemo(() => {
+        return SV1_DATA.map(cat => ({
+            id: cat.id,
+            name: cat.name,
+            desc: cat.desc || '',
+            items: cat.items.map(item => ({ ...item, group: cat.name }))
+        }));
+    }, []);
+
+    const currentStructureName = useMemo(() => {
+        const tags = fieldState?.['skin_structure'];
+        return Array.isArray(tags) && tags.length > 0 ? tags[0] : null;
+    }, [fieldState]);
+
+    const handleStructureToggle = (tagName: string) => {
+        onToggleTag?.('skin_structure', tagName);
+    };
+
     const getThemeColor = () => {
         if (theme === 'retro') return 'text-[#8B261D]';
         if (isCommercialResults) return 'text-cyan-400';
@@ -396,6 +425,20 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                 </div>
 
                 <div className="flex flex-wrap gap-4 items-center justify-center flex-1">
+                    {/* Narrative Structure Button */}
+                    <button
+                        onClick={() => setIsStructureModalOpen(true)}
+                        className={`${controlClass} text-left gap-2`}
+                        title={lang === 'EN' ? "Select Narrative Structure" : "选择叙事结构"}
+                    >
+                        <Layers size={14} className="shrink-0" />
+                        <span className="text-xs font-bold truncate">
+                            {currentStructureName
+                                ? formatName(currentStructureName)
+                                : (lang === 'EN' ? "STRUCTURE" : "叙事结构")}
+                        </span>
+                    </button>
+
                     {/* Visual Tone Button - Hidden for Aesthetic driver */}
                     {!isAestheticResults && (
                         <button
@@ -709,9 +752,24 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                         </>
                     )}
 
+                    {thinkingXml && (
+                        <>
+                            <button
+                                onClick={() => setIsThinkingPanelOpen(!isThinkingPanelOpen)}
+                                className="flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]"
+                            >
+                                <Brain size={18} className={`transition-colors ${isThinkingPanelOpen ? getThemeColor() : (theme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white')}`} />
+                                <span className={`text-[9px] font-bold uppercase tracking-wider transition-colors ${isThinkingPanelOpen ? getThemeColor() : (theme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white')}`}>
+                                    {lang === 'EN' ? "Thinking" : "思考过程"}
+                                </span>
+                            </button>
+                            <div className={`w-px h-8 ${theme === 'retro' ? 'bg-[#8B261D]/20' : 'bg-zinc-800'} shrink-0`}></div>
+                        </>
+                    )}
+
                     <button
-                        onClick={() => setIsTaskManagerOpen(!isTaskManagerOpen)}
                         className="flex flex-col items-center gap-1.5 shrink-0 min-w-[60px] relative"
+                        onClick={() => setIsTaskManagerOpen(!isTaskManagerOpen)}
                     >
                         <div className="relative">
                             {/* Breathing Light */}
@@ -733,9 +791,18 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                         </span>
                     </button>
                 </div>
-                <button
-                    onClick={handleGenerate}
-                    disabled={isProcessing || !selectedPathId || treatments.length === 0}
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => setIsBibleInspectorOpen(true)}
+                        className={`flex items-center justify-center w-10 h-10 rounded-lg border transition-all
+                        ${theme === 'retro' ? 'border-[#8B261D]/20 text-[#8B261D]/60 hover:text-[#8B261D] hover:bg-[#8B261D]/5' : 'border-zinc-800 text-zinc-500 hover:text-gold-primary hover:border-zinc-600 hover:bg-zinc-900'}`}
+                        title={lang === 'CN' ? 'X-RAY 圣经指令透视' : 'Bible Prompt Inspector'}
+                    >
+                        <Terminal size={16} />
+                    </button>
+                    <button
+                        onClick={handleGenerate}
+                        disabled={isProcessing || !selectedPathId || treatments.length === 0}
                     className={`flex items-center justify-center gap-3 px-8 py-3 rounded-lg text-xs font-bold uppercase tracking-widest transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed group min-w-[200px] border 
                 ${selectedPathId
                             ? (theme === 'retro' ? 'bg-[#8B261D] hover:bg-[#631B15] border-[#8B261D] text-white shadow-none' : getGenerateButtonClass(hasExistingBlueprint))
@@ -759,6 +826,7 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                         </>
                     )}
                 </button>
+                </div>
             </div>
 
             <NarrativeLibraryModal
@@ -773,11 +841,61 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                 driverType={currentDriverType}
             />
 
+            <NarrativeLibraryModal
+                isOpen={isStructureModalOpen}
+                onClose={() => setIsStructureModalOpen(false)}
+                blockId="skin_structure"
+                blockName={lang === 'EN' ? "NARRATIVE STRUCTURE" : "叙事结构"}
+                selectedTags={currentStructureName ? [currentStructureName] : []}
+                onToggleTag={handleStructureToggle}
+                customLibraryData={structureLibraryData}
+                lang={lang}
+                driverType={currentDriverType}
+            />
+
             <TaskManagerPanel
                 isOpen={isTaskManagerOpen}
                 onClose={() => setIsTaskManagerOpen(false)}
                 lang={lang}
             />
+
+            <BiblePromptInspectorModal
+                isOpen={isBibleInspectorOpen}
+                onClose={() => setIsBibleInspectorOpen(false)}
+                lang={lang}
+                treatment={selectedPathId ? treatments.find(t => t.id === selectedPathId) || null : null}
+                styleConfig={styleConfig}
+                fieldState={fieldState}
+                visionInput={visionInput}
+                worldLawConfig={worldLawConfig}
+                driverType={currentDriverType}
+            />
+
+            {isThinkingPanelOpen && thinkingXml && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setIsThinkingPanelOpen(false)}>
+                    <div
+                        className={`relative w-[90vw] max-w-3xl max-h-[80vh] rounded-xl border overflow-hidden flex flex-col ${theme === 'retro' ? 'bg-white border-[#8B261D]/20' : 'bg-[#0a0a0a] border-zinc-800'}`}
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <div className={`flex items-center justify-between px-6 py-4 border-b shrink-0 ${theme === 'retro' ? 'border-[#8B261D]/10 bg-[#faf5ee]' : 'border-zinc-800 bg-zinc-900/50'}`}>
+                            <div className="flex items-center gap-3">
+                                <Brain size={18} className={theme === 'retro' ? 'text-[#8B261D]' : 'text-amber-400'} />
+                                <span className={`text-sm font-bold uppercase tracking-widest ${theme === 'retro' ? 'text-[#8B261D]' : 'text-zinc-300'}`}>
+                                    {lang === 'EN' ? "AI Thinking Process" : "AI 思考过程"}
+                                </span>
+                            </div>
+                            <button onClick={() => setIsThinkingPanelOpen(false)} className={`p-2 rounded-lg transition-colors ${theme === 'retro' ? 'hover:bg-black/5 text-zinc-500' : 'hover:bg-zinc-800 text-zinc-400 hover:text-white'}`}>
+                                <X size={18} />
+                            </button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-6">
+                            <pre className={`text-xs leading-relaxed whitespace-pre-wrap font-mono ${theme === 'retro' ? 'text-zinc-700' : 'text-zinc-400'}`}>
+                                {thinkingXml}
+                            </pre>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

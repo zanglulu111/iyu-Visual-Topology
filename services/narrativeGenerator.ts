@@ -3,10 +3,11 @@
 // ============================================================================
 
 // 📦 1. 进口原料仓库：从外部文件借用"图纸"和"词典"
-import { NarrativeFieldState, CreativeTreatment, WorldLawConfig, StyleConfig } from '../types';
+import { NarrativeFieldState, CreativeTreatment, WorldLawConfig, StyleConfig, FaceState } from '../types';
 import { NARRATIVE_ENGINE_BLOCKS } from '../data/engine_core/narrative_engine';
 import { ALL_SKIN_BLOCKS } from '../data/skin_libraries';
 import { SV2_DATA } from '../data/engine_sv/SV2'; // 特权词库：决定字数的 SV2 (体量)
+import { SV1_DATA } from '../data/engine_sv/SV1'; // 叙事结构词库
 import { PERSPECTIVES, SENSORY_MODES, STYLE_MATRIX } from '../data/style_matrix';
 import { DIRECTOR_STYLES } from '../data/director_styles';
 
@@ -20,7 +21,7 @@ import {
   NARRATIVE_ALGEBRAIC_PROTOCOL,
   STYLE_LOGIC_PROTOCOL,
   getVisionAnchorProtocol,
-  THE_MASK_PROTOCOL
+  THE_MASK_PROTOCOL,
 } from '../data/engine_core/narrative_protocols';
 
 // 🔍 工具引入：在总词库中查找词条定义的函数
@@ -30,7 +31,18 @@ import { findItemDetails, findItemFull } from './dataRegistry';
 import { buildPromptV1, buildPromptV2 } from './promptArchitectures';
 
 // 🏗️ V3 架构：导演笔记模式 (Director's Brief)
-import { buildPromptV3 } from './promptV3';
+import {
+  buildPromptV3,
+  getTagsBySuffix as v3GetTagsBySuffix,
+  buildMDirective,
+  buildTaskSentence,
+  buildSurNotes,
+  buildBannedWords as v3BuildBannedWords,
+  formatYear,
+  V3_FORMULA,
+  V3_LAWS,
+  GRAVITY_RULES,
+} from './promptV3';
 
 /** Prompt 架构版本 */
 export type PromptArchVersion = 'legacy' | 'v1' | 'v2' | 'v3';
@@ -60,7 +72,7 @@ ${THE_MASK_PROTOCOL}
 
 // ============================================================================
 // 🏢 二楼：工具车间 (数据预处理与转换流水线)
-// 这里全是各种小型的“翻译官”和“计算器”，负责把冷冰冰的系统数据
+// 这里全是各种小型的"翻译官"和"计算器"，负责把冷冰冰的系统数据
 // 变成 AI 能够读懂的格式和律法。
 // ============================================================================
 
@@ -101,10 +113,11 @@ const buildFormalLawEngine = (
   target: 'PITCH' | 'BIBLE',
   wordCount: string,
   styleName: string,
-  structureTag?: string
+  structureTag?: string,
+  pitchWordCount?: string
 ): string => {
   const wordCountRule = target === 'PITCH'
-    ? '每个故事概念 (Pitch) ≈ 500-700 字。三个方案必须各自独立、完整且风格互不雷同。'
+    ? `每个故事概念 (Pitch) ≈ ${pitchWordCount || '500-700'} 字。三个方案必须各自独立、完整且风格互不雷同。`
     : `正文总量 ≈ ${wordCount} 个中文字符。这是硬性目标，严禁大幅偏离。`;
 
   const structureRule = structureTag && structureTag !== 'Unknown Structure' && structureTag.length > 0
@@ -129,7 +142,7 @@ const buildFormalLawEngine = (
 
 [LAW_3] VOICE & MEDIUM:
     REQUIRE: 极精致的电影化小说 (Exquisite Cinematic Novel/Short Story)。必须像顶尖小说家一样行文，兼具极强的视听画面感 (Show, Don't Tell)。
-    DENY:   [ 剧本格式 (绝对严禁出现“内景/外景”、“日/夜”、剧本对话体), 学术论文腔, 理工科说明书语法, 教科书式旁白, 鸡汤散文, 网络小说腔 ]${styleRule}
+    DENY:   [ 剧本格式 (绝对严禁出现"内景/外景"、"日/夜"、剧本对话体), 学术论文腔, 理工科说明书语法, 教科书式旁白, 鸡汤散文, 网络小说腔 ]${styleRule}
 
 [LAW_4] ONTOLOGICAL_HYGIENE:
     DENY.META: 严禁在正文中出现任何引擎参数名 (M0-M7, SUR1-SUR11)
@@ -141,8 +154,8 @@ const buildFormalLawEngine = (
 
 // ----------------------------------------------------------------------------
 // 🛠️ 机器 3：动态黑名单提取机 (getBannedWords)
-// 作用：生成一串高压违禁字符串。不仅封杀“大他者”、“实在界”等学术术语，
-//      更绝的是，连用户选中面板标签的“原词”也一同拉黑。通过这种物理阻断，
+// 作用：生成一串高压违禁字符串。不仅封杀"大他者"、"实在界"等学术术语，
+//      更绝的是，连用户选中面板标签的"原词"也一同拉黑。通过这种物理阻断，
 //      逼迫 AI 使用细腻的文学侧面描写（Show, Don't Tell）来绕过原词。
 // ----------------------------------------------------------------------------
 const getBannedWords = (fieldState: NarrativeFieldState): string => {
@@ -166,7 +179,7 @@ const getBannedWords = (fieldState: NarrativeFieldState): string => {
 
 // ----------------------------------------------------------------------------
 // 🛠️ 机器 4：叙事拓扑雷达与重心分配器 (getNarrativeTopology)
-// 作用：识别发给 AI 的“剧本镜头重心”。
+// 作用：识别发给 AI 的"剧本镜头重心"。
 //      它会根据用户选的类型标签，告诉 AI 这场戏到底应该把重点押在
 //      动作(M5) 或是 恐惧(M4) 或是 情感(M3) 上。全自动推演，无需硬编码判断。
 // ----------------------------------------------------------------------------
@@ -201,7 +214,7 @@ ${topologyHeader}
 *   **Active Genre(s):** ${allTags.join(', ')}
 *   **CORE LOGIC EXTRACTION (核心逻辑提取):** 
     ${genreDefs}
-*   **DIRECTIVE (重心分配指令):** 请利用上段提取的“核心逻辑”来决定当前应该倾斜多少结构权重给 M1 到 M7。 
+*   **DIRECTIVE (重心分配指令):** 请利用上段提取的"核心逻辑"来决定当前应该倾斜多少结构权重给 M1 到 M7。 
     *   如果逻辑强调高能动作与暴力 -> 将聚光灯和笔墨砸向 M5 (行动驱力)。
     *   如果逻辑强调恐惧与未知压迫 -> 让 M4 (大他者) 的阴影笼罩一切。
     *   如果逻辑强调情感与执念羁绊 -> 让 M3 (欲望锚点) 承担最痛的张力。
@@ -212,7 +225,7 @@ ${topologyHeader}
 // ============================================================================
 // 🏢 三楼 A区：分歧点造梦机 (buildNarrativePrompt)
 // 核心功能：接收你在界面的所有选择，打包成一封发给 AI 的信。
-// 最终产出：3 个方向完全不同的“故事草案 (Pitch)”。
+// 最终产出：3 个方向完全不同的"故事草案 (Pitch)"。
 // ============================================================================
 export const buildNarrativePrompt = (
   duration: string,
@@ -220,10 +233,11 @@ export const buildNarrativePrompt = (
   visionInput: string = "",
   visionImage: string | null = null,
   worldLaw: WorldLawConfig,
-  archVersion: PromptArchVersion = 'v3'
+  archVersion: PromptArchVersion = 'v3',
+  faceState?: FaceState
 ): { text: string, images: string[] } => {
   // ═══ 架构分流：根据版本参数委托给不同的 Prompt 构建器 ═══
-  if (archVersion === 'v3') return buildPromptV3(fieldState, visionInput, visionImage, worldLaw);
+  if (archVersion === 'v3') return buildPromptV3(fieldState, visionInput, visionImage, worldLaw, faceState);
   if (archVersion === 'v1') return buildPromptV1(fieldState, visionInput, visionImage, worldLaw);
   if (archVersion === 'v2') return buildPromptV2(fieldState, visionInput, visionImage, worldLaw);
   // ═══ Legacy 模式：保持原有逻辑不变 ═══
@@ -273,12 +287,12 @@ export const buildNarrativePrompt = (
 **INSTRUCTION (执行指令):**
 - **STRICT ADHERENCE (绝对遵守):** 你必须将上方的 'Logical Constraint' 视为冷酷的数学铁律，以此来推演计算故事中所有的叙事动能 (M1-M7)。
 - **SURVIVAL VS COLLAPSE (生存或坍缩):** M0 决定了主体的宇宙在遭遇 M2 (真实界撞击) 后，是能够苟延残喘，还是彻底坍缩为某种特定的症状结晶。
-- **IF [Ordinary Psychosis / 普通精神病]:** 绝对不要写一个刻版的“疯子”故事。主体表面上看起来完全正常，但他极度依赖某块特定的“补丁 (Patch)”（比如具体的工作、怪癖或仪式效仿）来勉力维持现实的缝合。故事必须聚焦于这个“补丁”将要被撕裂的致命威胁。
-- **IF [Autism / 自闭症]:** 逻辑必须围绕对大他者强行入侵的“绝对闭环 (Closure)”与“防御 (Defense)”展开。这是一个竭力剥离大他者的世界。
-- **IF [Perversion / 倒错]:** 逻辑必须围绕“否认 (Disavowal)”与“工具化 (Instrumentality)”展开。主体深知法律和底线，但他享受且致力于去横穿它，或者把自己变成完美执行大他者享乐仪式的工具。
-- **IF [Hysteria / 癔症]:** 逻辑是一种永无止境的“结构性质询 (Questioning)”与“永远无法满足的欲望 (Unsatisfied Desire)”。
-- **IF [Obsession / 强迫症]:** 逻辑是绝对的“控制 (Control)”与永不停歇的“拖延 (Procrastination)”，只为了让大他者保持永远存活，但又必须与之保持绝对的安全距离。
-- **IF [Paranoia / 妄想狂]:** 逻辑是“意义过载 (Meaning Overload)”。万事万物皆是致命的征兆。大他者被体验为是充满绝对恶意的凝视者。
+- **IF [Ordinary Psychosis / 普通精神病]:** 绝对不要写一个刻版的"疯子"故事。主体表面上看起来完全正常，但他极度依赖某块特定的"补丁 (Patch)"（比如具体的工作、怪癖或仪式效仿）来勉力维持现实的缝合。故事必须聚焦于这个"补丁"将要被撕裂的致命威胁。
+- **IF [Autism / 自闭症]:** 逻辑必须围绕对大他者强行入侵的"绝对闭环 (Closure)"与"防御 (Defense)"展开。这是一个竭力剥离大他者的世界。
+- **IF [Perversion / 倒错]:** 逻辑必须围绕"否认 (Disavowal)"与"工具化 (Instrumentality)"展开。主体深知法律和底线，但他享受且致力于去横穿它，或者把自己变成完美执行大他者享乐仪式的工具。
+- **IF [Hysteria / 癔症]:** 逻辑是一种永无止境的"结构性质询 (Questioning)"与"永远无法满足的欲望 (Unsatisfied Desire)"。
+- **IF [Obsession / 强迫症]:** 逻辑是绝对的"控制 (Control)"与永不停歇的"拖延 (Procrastination)"，只为了让大他者保持永远存活，但又必须与之保持绝对的安全距离。
+- **IF [Paranoia / 妄想狂]:** 逻辑是"意义过载 (Meaning Overload)"。万事万物皆是致命的征兆。大他者被体验为是充满绝对恶意的凝视者。
 `;
   }
 
@@ -295,10 +309,11 @@ export const buildNarrativePrompt = (
   let volumeInstruction = "";
 
   if (volumeDef) {
+    const pitchMechanics = volumeDef.patch?.mechanics?.split('\n').find(l => l.includes('三卡大纲')) || volumeDef.def || '';
     volumeInstruction = `
     ## ⏱️ VOLUME PROTOCOL: ${volumeDef.name}
     **CRITICAL INSTRUCTION FOR AI (核心指令):**
-    ${volumeDef.patch?.mechanics || volumeDef.def}
+    ${pitchMechanics}
     ${volumeDef.patch?.aesthetic ? `\n    **AESTHETIC REQUIREMENT (美学要求):**\n    ${volumeDef.patch.aesthetic}` : ""}
     
     ## 🧩 STRUCTURE RECONCILIATION (体量与结构的调和约束)
@@ -316,8 +331,40 @@ export const buildNarrativePrompt = (
     volumeInstruction = `
     ## ⏱️ VOLUME PROTOCOL: STANDARD SHORT
     **CRITICAL INSTRUCTION FOR AI (核心指令):**
-    编写一个兼具视听感的三幕剧标准草案。要求在“具体惊艳的高光画面描写”与“整体故事弧线”之间保持微妙平衡。
+    编写一个兼具视听感的三幕剧标准草案。要求在"具体惊艳的高光画面描写"与"整体故事弧线"之间保持微妙平衡。
     `;
+  }
+
+  // 提取三卡大纲字数
+  let pitchWordCount = '500-700';
+  if (volumeDef?.patch?.mechanics) {
+    const pitchMatch = volumeDef.patch.mechanics.match(/每卡\s*≈\s*([\d]+-[\d]+)/);
+    if (pitchMatch) pitchWordCount = pitchMatch[1];
+  }
+
+  // SV1/SV2 协议注入
+  const structureItem = SV1_DATA.flatMap(c => c.items).find(s => structureTagRaw.includes(s.name) || structureTagRaw === s.id);
+
+  // 动态叙事骨架
+  const DEFAULT_SKELETONS = [
+    'inciting_incident_激励事件',
+    'rising_action_上升动作',
+    'climax_高潮',
+    'resolution_存在落点',
+  ];
+  const pitchSkeletons = structureItem?.skeletons?.length ? structureItem.skeletons : DEFAULT_SKELETONS;
+  const pitchSkeletonLabels = pitchSkeletons.map(s => {
+    const parts = s.split('_');
+    return parts[parts.length - 1];
+  });
+  const pitchSkeletonArrow = pitchSkeletonLabels.join(' → ');
+
+  let svProtocol = '';
+  if (volumeDef) {
+    svProtocol += `\n### SV2 体量协议: ${volumeDef.name}\n**定义:** ${volumeDef.def || ''}\n**核心约束:**\n${volumeDef.core || ''}`;
+  }
+  if (structureItem) {
+    svProtocol += `\n\n### SV1 结构协议: ${structureItem.name}\n**定义:** ${structureItem.def || ''}\n**核心规则:**\n${structureItem.core || ''}`;
   }
 
   // ============================================================================
@@ -327,7 +374,7 @@ export const buildNarrativePrompt = (
   let instructions = "";
   let physicsConstraint = "";
   let contextConstraint = "";
-  const gravity = worldLaw.gravity || 3;
+  const gravity = worldLaw.gravity || 1;
 
   switch (gravity) {
     case 1:
@@ -336,12 +383,12 @@ export const buildNarrativePrompt = (
       contextConstraint = "GENRE PURITY (STRICTLY GROUNDED)";
       break;
     case 2:
-      instructions += "WORLD LAW LV.2 [合理 RATIONALIZED]: 逻辑补完路径。超现实元素必须被赋予一个“科学、心理学或机械”的实体合理解释。\n";
+      instructions += "WORLD LAW LV.2 [合理 RATIONALIZED]: 逻辑补完路径。超现实元素必须被赋予一个[科学、心理学或机械]的实体合理解释。\n";
       physicsConstraint = "RATIONALIZED (SUPERNATURAL MUST BE EXPLAINED VIA SCI-FI OR PSYCHOLOGY)";
       contextConstraint = "GENRE SEMI-PURITY (LOGICAL EXPLANATIONS REQUIRED)";
       break;
     case 3:
-      instructions += "WORLD LAW LV.3 [缝合 MAGICAL REALISM]: 魔幻现实主义。以残酷现实为底，允许局部“缝合”超现实的符号与症状。\n";
+      instructions += "WORLD LAW LV.3 [缝合 MAGICAL REALISM]: 魔幻现实主义。以残酷现实为底，允许局部[缝合]超现实的符号与症状。\n";
       physicsConstraint = "MAGICAL REALISM (REALITY MIXED WITH SUBTLE SURREAL SIGNS)";
       contextConstraint = "GENRE FUSION (CONTROLLED MASHUP)";
       break;
@@ -397,7 +444,7 @@ export const buildNarrativePrompt = (
           ## ⚓ DEFAULT REALITY ANCHOR (STRICT REALISM - INTERNATIONAL)
           **CRITICAL (严重警告):** 用户未明确指定具体的年代 (Era) 或发生地 (Location)，且当前物理防崩坏法则被设定为 **STRICT (写实原教旨)**。
           **INSTRUCTION (执行指令):**
-          1.  **NO DEFAULT ERA (无默认年代):** 绝对禁止盲目默认为“现代当代 (Present Day)”。你必须基于本场域的 M-Engine 人物主标签等来反向演绎出最符合结构逻辑的客观时代坐标（例如：只要有皇帝，那就不可能存在手机）。
+          1.  **NO DEFAULT ERA (无默认年代):** 绝对禁止盲目默认为"现代当代 (Present Day)"。你必须基于本场域的 M-Engine 人物主标签等来反向演绎出最符合结构逻辑的客观时代坐标（例如：只要有皇帝，那就不可能存在手机）。
           2.  **INTERNATIONAL SCOPE (国际化场域):** 故事背景默认必须是非常高度国际化、具有普世影史高度的重金属视听场域 (好莱坞/欧洲纯粹电影质感)。除非标签矩阵产生出强制性的东方逻辑 (如武侠、修仙)，否则 **一律禁止** 强行套用土味刻板的东亚小镇或熟人社会框架。
           3.  **PHYSICS (物理重力):** 绝对恪守推演出的主轴年代的物理现实铁律。
           `;
@@ -407,9 +454,9 @@ export const buildNarrativePrompt = (
           ## ⚓ DEFAULT REALITY ANCHOR (UNBOUND FANTASY - GLOBAL)
           **CRITICAL (最高警戒):** 用户未指定纪元或环境废墟锚点，但！当前物理系统已被完全解绑设定为 **UNBOUND (狂想无重力倒错)**。
           **INSTRUCTION (执行指令):**
-          1.  **CREATIVE FREEDOM (创世权自由):** 放手去凭空“建造”一个疯狂的奇观异世界。唯一的前提是：这个世界完全是为了榨干当前 M-Engine 标签组的结构张力而存在。
+          1.  **CREATIVE FREEDOM (创世权自由):** 放手去凭空"建造"一个疯狂的奇观异世界。唯一的前提是：这个世界完全是为了榨干当前 M-Engine 标签组的结构张力而存在。
           2.  **SCOPE (气宇视野):** 抛弃现实羁绊，将维度拔升至某种浩瀚的神话、超验或是赛博邪神般的终极史诗质感。
-          3.  **INTERPRETATION (直率降维投射):** 你获得了特权去极其干脆地物理化一切比喻。如果在标签组中你看到“M1被掏空了”，你可以让他字面意义上被开膛破肚还活着；看到义体，就允许钢铁直接与血肉物理融合焊接。让隐喻在此刻变成硬邦邦的现实伤疤。
+          3.  **INTERPRETATION (直率降维投射):** 你获得了特权去极其干脆地物理化一切比喻。如果在标签组中你看到"M1被掏空了"，你可以让他字面意义上被开膛破肚还活着；看到义体，就允许钢铁直接与血肉物理融合焊接。让隐喻在此刻变成硬邦邦的现实伤疤。
           `;
     }
   }
@@ -449,7 +496,8 @@ ${customCoordinates}
     *   关键词: ${getTagsBySuffix(['_m3', '_c3']).join('/') || 'Unknown'}
     *   **任务:** 将此欲望转化为具体的麦高芬 (MacGuffin) 或对象 a。
 
-${buildFormalLawEngine('PITCH', '600', '', structureTagRaw)}
+${buildFormalLawEngine('PITCH', '600', '', structureTagRaw, pitchWordCount)}
+${svProtocol}
 
 ## 🚫 动态禁用词表
 **黑名单:** [ ${bannedWords.replace(/1855, |日本, /g, '')} ]
@@ -466,9 +514,9 @@ ${defaultAnchorInstruction}
 
 ## 3. ★★★ 叙事质量控制 ★★★
 **关键：别像个数据库，要像个作家。**
-1.  **拒绝抽象 (NO ABSTRACTIONS):** 不要说“他感到异化”，要写“他盯着玻璃幕墙，手指触碰不到对面的世界”。
+1.  **拒绝抽象 (NO ABSTRACTIONS):** 不要说"他感到异化"，要写"他盯着玻璃幕墙，手指触碰不到对面的世界"。
 2.  **具体性 (SPECIFICITY):** 给角色一道伤疤、一个习惯、一种气味。给房间一个温度。
-3.  **戏剧性 (DRAMA):** 每个 Pitch 必须包含 **激励事件 (Inciting Incident)**，**反转 (Twist)** 和 **结局 (Ending)**。
+3.  **戏剧性 (DRAMA):** 每个 Pitch 必须包含叙事骨架 **${pitchSkeletonArrow}**。
 4.  **语言 (LANGUAGE):** 使用极具画面感、电影感的中文。**严格使用简体中文。**
 
 ## 4. 三重叙事镜头 (输出)
@@ -500,7 +548,7 @@ ${defaultAnchorInstruction}
 
 **步骤 1：深度转译思考 (Thought Process)**
 在输出 JSON 前，你必须首先输出 \`<thought_process>\` 标签进行时代与环境的降维分析：
-例如：若背景为 1855 日本，但标签包含“基因诊所”，你必须在思考中写明如何将其转译为“通过妖术缝合血肉的神社药铺”。
+例如：若背景为 1855 日本，但标签包含"基因诊所"，你必须在思考中写明如何将其转译为"通过妖术缝合血肉的神社药铺"。
 \`\`\`xml
 <thought_process>
 1. 时空提取：[此处分析客观时间和地点限制]
@@ -519,36 +567,27 @@ ${defaultAnchorInstruction}
     "title": "电影标题 (中文)",
     "tagline": "一句有力量的 Logline。",
     "pitch_structure": {
-      "inciting_incident_激励事件": "如何打破日常（结合 M2 遭遇）...",
-      "rising_action_上升动作": "遭遇怎样的阻绝（结合 M4 与 SUR 环境）...",
-      "climax_高潮": "付出何种代价，发起最后的对抗（结合 M5/M6）...",
-      "resolution_存在落点": "最终的哲学状态（结合 M7）..."
+${pitchSkeletons.map(s => `      "${s}": "按此结构阶段展开（结合 M 参数与 SUR 环境）..."`).join(',\n')}
     },
     "structure": "GENRE_DRIVEN"
   },
   {
     "id": "2",
-    "type": "POST_STRUCTURALIST", 
+    "type": "POST_STRUCTURALIST",
     "title": "电影标题 (中文)",
     "tagline": "一句有力量的 Logline。",
     "pitch_structure": {
-      "inciting_incident_激励事件": "如何打破日常...",
-      "rising_action_上升动作": "围绕内心创伤的展开...",
-      "climax_高潮": "直面内在或关系性冲突的高潮...",
-      "resolution_存在落点": "解构式的结局..."
+${pitchSkeletons.map(s => `      "${s}": "围绕内心创伤展开此阶段..."`).join(',\n')}
     },
     "structure": "CHARACTER_DRIVEN"
   },
   {
     "id": "3",
-    "type": "THE_REAL", 
+    "type": "THE_REAL",
     "title": "电影标题 (中文)",
     "tagline": "一句有力量的 Logline。",
     "pitch_structure": {
-      "inciting_incident_激励事件": "环境的异样变异或压倒性介入...",
-      "rising_action_上升动作": "主体逐渐被氛围与物理空间吞噬...",
-      "climax_高潮": "彻底的哲学或氛围性高潮事件...",
-      "resolution_存在落点": "被环境同化或剥离的结局..."
+${pitchSkeletons.map(s => `      "${s}": "以氛围与环境压迫展开此阶段..."`).join(',\n')}
     },
     "structure": "ATMOSPHERE_DRIVEN"
   }
@@ -563,9 +602,10 @@ ${defaultAnchorInstruction}
 };
 
 // ============================================================================
-// 🏢 三楼 B区：全景创世碑 (buildNarrativeBiblePrompt)
+// 🏢 三楼 B区：全景创世碑 (buildNarrativeBiblePrompt) — V3 架构
 // 核心功能：当你选中了 3 个草案中的 1 个后，这里接手工作。
 // 最终产出：1 篇完整的具备字数要求的文学正文 + 角色、场景等画面资产。
+// 架构：复用 promptV3 的导演笔记 + 物理法则 + SUR 冲突裁决体系
 // ============================================================================
 export const buildNarrativeBiblePrompt = (
   treatment: CreativeTreatment,
@@ -574,164 +614,137 @@ export const buildNarrativeBiblePrompt = (
   visionInput?: string,
   worldLaw?: WorldLawConfig
 ): string => {
-  // 1. Get Volume Definition to enforce Pacing
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // ① 身份声明 (SECTION_ROLE)
+  // ════════════════════════════════════════════════════════════════════════════
   const volumeTagRaw = fieldState ? (fieldState['skin_volume']?.[0] || "") : "";
   const volumeDef = SV2_DATA.flatMap(c => c.items).find(v => volumeTagRaw.includes(v.name) || volumeTagRaw === v.id);
   const structureTagRaw = fieldState ? (fieldState['skin_structure']?.[0] || "") : "";
 
-  // 2. Define Bible Strategy based on Volume
   let bibleStrategy = "";
   let targetWordCount = "1500";
   let literatureType = "Short Story";
 
   if (volumeDef) {
-    if (volumeDef.id.includes('15s') || volumeDef.id.includes('30s')) {
+    const vid = volumeDef.id;
+    if (vid.includes('15s')) {
       targetWordCount = "250";
       literatureType = "Flash Fiction / Cinematic Prose Poem";
-      bibleStrategy = `**模式：瞬间冲击 (MODE: INSTANT IMPACT)**\n聚焦于单瞬间的无限细节爆发。不要写冗长的背景故事。`;
-    } else if (volumeDef.id.includes('60s') || volumeDef.id.includes('90s') || volumeDef.id.includes('3m')) {
-      targetWordCount = volumeDef.id.includes('60s') ? "500" : "800";
+      bibleStrategy = "**MODE: INSTANT IMPACT** — 聚焦单瞬间的无限细节爆发。不写冗长背景。";
+    } else if (vid.includes('30s')) {
+      targetWordCount = "400";
+      literatureType = "Flash Fiction / Micro Scene";
+      bibleStrategy = "**MODE: MICRO SCENE** — 极短篇幅内完成一次认知/情绪翻转。";
+    } else if (vid.includes('60s')) {
+      targetWordCount = "500";
       literatureType = "Compact Short Story";
-      bibleStrategy = `**模式：紧凑叙事 (MODE: COMPACT NARRATIVE)**\n一个包含紧凑弧光的完整故事：激励事件 -> 高潮 -> 结局。保持快节奏。`;
-    } else if (volumeDef.id.includes('5m') || volumeDef.id.includes('15m')) {
-      targetWordCount = volumeDef.id.includes('5m') ? "1500" : "3000";
+      bibleStrategy = "**MODE: COMPACT NARRATIVE** — 单场景微弧光或循环情绪体。";
+    } else if (vid.includes('90s')) {
+      targetWordCount = "700";
+      literatureType = "Compact Short Story";
+      bibleStrategy = "**MODE: COMPACT NARRATIVE** — 紧凑弧光或氛围渐变。";
+    } else if (vid.includes('3m')) {
+      targetWordCount = "1000";
+      literatureType = "Short Film / MV";
+      bibleStrategy = "**MODE: SHORT FILM** — 完整短片或概念循环，节奏紧密。";
+    } else if (vid.includes('5m')) {
+      targetWordCount = "1500";
       literatureType = "Narrative Short Story";
-      bibleStrategy = `**模式：丰富短篇 (MODE: RICH SHORT STORY)**\n具有强烈角色发展的标准三幕结构。给场景留出呼吸空间。`;
-    } else {
+      bibleStrategy = "**MODE: RICH SHORT** — 对话驱动或散文独白，给人物留呼吸空间。";
+    } else if (vid.includes('10m')) {
+      targetWordCount = "2500";
+      literatureType = "Short Film Script";
+      bibleStrategy = "**MODE: CHARACTER STUDY** — 完整人物弧光，首次允许人物「改变」。";
+    } else if (vid.includes('15m')) {
+      targetWordCount = "3500";
+      literatureType = "Drama Short";
+      bibleStrategy = "**MODE: MULTI-LAYER** — 信息驱动或群像交织，允许多层叙事。";
+    } else if (vid.includes('30m')) {
+      targetWordCount = "6000";
+      literatureType = "Novella / Mini-Movie";
+      bibleStrategy = "**MODE: MINI MOVIE** — 完整三幕+中点+B线。迷你电影级展开。";
+    } else if (vid.includes('45m')) {
       targetWordCount = "8000";
-      literatureType = "Novella Chapter / Treatment";
-      bibleStrategy = `**模式：宏大叙事 (MODE: EXPANSIVE NARRATIVE)**\n一个丰富、宏大的叙事篇章，包含详细的世界构建。`;
+      literatureType = "TV Episode Script";
+      bibleStrategy = "**MODE: EPISODE** — 多线叙事生态：A线闭环+B线悬置+C暗线。";
+    } else if (vid.includes('90m') || vid.includes('epic')) {
+      targetWordCount = "12000";
+      literatureType = "Feature Film / Epic Treatment";
+      bibleStrategy = "**MODE: FEATURE FILM** — 全参数工业标准展开，章节式宏大叙事。";
+    } else {
+      targetWordCount = "1500";
+      literatureType = "Short Story";
+      bibleStrategy = "**MODE: STANDARD SHORT STORY**";
     }
   } else {
-    bibleStrategy = "**模式：标准短篇 (MODE: STANDARD SHORT STORY)**";
+    bibleStrategy = "**MODE: STANDARD SHORT STORY**";
   }
 
-  if (volumeDef?.patch?.aesthetic) {
-    bibleStrategy += `\n**体量美学约束 (Volume Aesthetic):** ${volumeDef.patch.aesthetic}`;
+  if (volumeDef?.patch?.mechanics) {
+    const bibleMechanics = volumeDef.patch.mechanics.split('\n').find(l => l.includes('创意圣经')) || '';
+    if (bibleMechanics) bibleStrategy += `\n**Volume Mechanics:** ${bibleMechanics}`;
   }
 
-  const bannedWords = fieldState ? getBannedWords(fieldState) : "";
-  const topologyInstruction = fieldState ? getNarrativeTopology(fieldState) : "";
+  // SV1/SV2 协议注入 (Bible)
+  const bibleStructureItem = SV1_DATA.flatMap(c => c.items).find(s => structureTagRaw.includes(s.name) || structureTagRaw === s.id);
 
-  // M0 PROTOCOL
-  let psychoProtocol = "";
-  if (fieldState) {
-    const m0Tags = Object.keys(fieldState)
-      .filter(k => k.endsWith('_m0') || k.endsWith('_c0'))
-      .flatMap(k => fieldState[k]);
-    if (m0Tags.length > 0) {
-      const tag = m0Tags[0];
-      const item = findItemFull(tag) as any;
-      const details = findItemDetails(tag);
-      psychoProtocol = `## 🧠 PSYCHIC STRUCTURE PROTOCOL\n**Mechanism:** ${details}\n**Logical Constraint:** ${item?.logic || "Standard OS"}`;
-    }
+  // Bible 动态叙事骨架
+  const BIBLE_DEFAULT_SKELETONS = [
+    'inciting_incident_激励事件',
+    'rising_action_上升动作',
+    'climax_高潮',
+    'resolution_存在落点',
+  ];
+  const bibleSkeletons = bibleStructureItem?.skeletons?.length ? bibleStructureItem.skeletons : BIBLE_DEFAULT_SKELETONS;
+  const bibleSkeletonLabels = bibleSkeletons.map(s => {
+    const parts = s.split('_');
+    return parts[parts.length - 1];
+  });
+  const bibleSkeletonArrow = bibleSkeletonLabels.join(' → ');
+
+  let bibleSvProtocol = '';
+  if (volumeDef) {
+    bibleSvProtocol += `\n### SV2 体量协议: ${volumeDef.name}\n**定义:** ${volumeDef.def || ''}\n**核心约束:**\n${volumeDef.core || ''}`;
+  }
+  if (bibleStructureItem) {
+    bibleSvProtocol += `\n\n### SV1 结构协议: ${bibleStructureItem.name}\n**定义:** ${bibleStructureItem.def || ''}\n**核心规则:**\n${bibleStructureItem.core || ''}`;
   }
 
-  // WORLD LAW INJECTION
-  let worldLawInstruction = "";
-  if (worldLaw) {
+  const taskSentence = fieldState ? buildTaskSentence(fieldState) : "";
 
+  const SECTION_ROLE = `Role: 殿堂级电影编剧 & 叙事架构师。
 
-    // 1. GRAVITY LOGIC
-    let physicsContent = "";
-    let contextContent = "";
-    const gravity = worldLaw.gravity || 3;
+## 任务 (TASK)
+你将收到一份已完成的**故事大纲（素材）**。该大纲已经基于拉康精神分析学派电影叙事创作公式、导演笔记与世界物理法则生成。
 
-    switch (gravity) {
-      case 1:
-        physicsContent = `**STRICT REALISM (写实重力)**\n   *   **Rule:** 严格遵循现实世界的物理法则。严禁出现任何违背常理的魔法、奇迹。\n   *   **Constraint:** 即使是心理意象，也必须有扎实的物理载体。`;
-        contextContent = `**GENRE PURITY (绝对纪实)**\n   *   **Rule:** 所有现代/科幻标签必须严格降维和转化为符合时代背景的真实事物。\n   *   **Constraint:** 不允许突兀的类型融合。`;
-        break;
-      case 2:
-        physicsContent = `**RATIONALIZED (合理论证)**\n   *   **Rule:** 允许超现实感，但必须有坚实的科幻、心理学或技术解释。\n   *   **Constraint:** 幻象必须是“大脑受损”或“高级科技干预”等合理结果。`;
-        contextContent = `**LOGICAL ADAPTATION (逻辑补完)**\n   *   **Rule:** 时代错位标签可以出现，但需要极强的存在理由。\n   *   **Constraint:** 维持表面的物理秩序一致性。`;
-        break;
-      case 3:
-        physicsContent = `**MAGICAL REALISM (魔幻现实 - 缝合)**\n   *   **Rule:** 现实是底色，但偶尔会渗透出无法解释的超自然症状（如下雨是血，机械长出内脏）。\n   *   **Constraint:** 不要泛滥，奇迹必须服务于心理隐喻。`;
-        contextContent = `**CONTROLLED FUSION (受控融合)**\n   *   **Rule:** 鼓励经典类型与突变元素的融合。\n   *   **Constraint:** 用严肃的笔调写荒诞的事物。`;
-        break;
-      case 4:
-        physicsContent = `**HIGH CONCEPT (奇幻高概念)**\n   *   **Rule:** 允许世界被设定在某种极端的魔法、科幻或架空法则下运行。\n   *   **Constraint:** 物理法则可以离奇，但世界必须有自圆其说的一致性。`;
-        contextContent = `**GENRE MASHUP (大融合)**\n   *   **Rule:** 欢迎强烈的类型碰撞与奇观展示。`;
-        break;
-      case 5:
-        physicsContent = `**ABSOLUTE UNBOUND (狂想无重力)**\n   *   **Rule:** 彻底的梦境逻辑。隐喻可以直接等同于物理现实。\n   *   **Constraint:** 放弃因果律。重力、生死、空间都可以随着人物的情绪任意坍塌。`;
-        contextContent = `**ABSOLUTE CHAOS (极致解构)**\n   *   **Rule:** 尽情地将最不相干的标签进行后现代拼贴。`;
-        break;
-    }
+你的任务是：**基于这份大纲，进行风格化重写**。
 
+**重写规则：**
+1. **故事骨架**不变——大纲中的人物、事件、M0-M7 的精神弧线、结局走向必须保留。
+2. **风格是绝对重心**——你必须完全模仿所选作者的底层句法逻辑、节奏、语感与叙事策略。不是"像"某个作者，而是"成为"那个作者重新写这个故事。
+3. 重写同样遵守以下创作铁律、世界物理法则与表层设定约束。
+4. 输出一篇 ${literatureType}，目标 ~${targetWordCount} 中文字符。
+5. 输出格式：完整的文学小说正文 + 视觉资产 JSON。不是剧本大纲或摘要。
+6. 语言：简体中文。角色名/地名/物品名格式：**中文名 (英文名)**。
 
+${bibleStrategy}
+${bibleSvProtocol}`;
 
-    worldLawInstruction = `
-         ## ⚖️ WORLD LAW (世界法则 - 物理与时空重力引擎 LV.${gravity})
-         *   **PHYSICS ENGINE:** ${physicsContent}
-         *   **CONTEXT ENGINE:** ${contextContent}
-         `;
-  }
+  // ════════════════════════════════════════════════════════════════════════════
+  // ② 核心公式 (SECTION_FORMULA) — 复用 V3
+  // ════════════════════════════════════════════════════════════════════════════
+  const SECTION_FORMULA = V3_FORMULA;
 
-  // SMART ANCHOR LOGIC
-  let defaultAnchorInstruction = "";
-  const hasEra = fieldState && fieldState['skin_era'] && fieldState['skin_era'].length > 0;
-  const hasLoc = fieldState && fieldState['skin_location'] && fieldState['skin_location'].length > 0;
+  // ════════════════════════════════════════════════════════════════════════════
+  // ③ 创作铁律 (SECTION_LAWS) — 复用 V3 + Bible 专属补充
+  // ════════════════════════════════════════════════════════════════════════════
+  const structureRule = structureTagRaw && structureTagRaw !== 'Unknown Structure' && structureTagRaw.length > 0
+    ? `\nStructure: "${structureTagRaw}" — 将此叙事结构标签作为骨架融入故事。`
+    : '';
 
-  // Custom Exact Year/Country Logic
-  const exactYear = fieldState ? fieldState['skin_year_exact']?.[0] : null;
-  const exactCountry = fieldState ? fieldState['skin_country_exact']?.[0] : null;
-  let customCoordinates = "";
-
-  if (exactYear || exactCountry) {
-    customCoordinates = `
-          ## 📍 PRECISE SPACETIME COORDINATES (HIGHEST PRIORITY)
-          **你必须极其严苛地将故事锚定在以下被锁死的时空坐标内：**
-          *   **Year (时代纪元):** ${exactYear || "未明确"}
-          *   **Location/Country (发生国度):** ${exactCountry || "未明确"}
-          
-          **Instruction (执行指令):** 
-          尽你所能去深度检索还原 ${exactCountry || "The World"} 在纪元 ${exactYear || "This Era"} 时的真实客观历史与物理状貌。 
-          在叙事中极具质感地折射出那个特定时空的特殊时代产物、服饰纤维、残酷的政治面貌或是其独有的时代症候。
-          这条具体时空指令具有【绝对最高覆盖权】(OVERRIDES)，直接碾压任何被随意选中的模糊时代标签。
-          `;
-  }
-
-  if (!hasEra || !hasLoc) {
-    const missingParts = [];
-    if (!hasEra) missingParts.push("ERA/TIME PERIOD");
-    if (!hasLoc) missingParts.push("LOCATION/SETTING");
-
-    if (worldLaw?.physics === 'STRICT') {
-      defaultAnchorInstruction = `
-            ## ⚓ 锚点推演 (ANCHOR DEDUCTION - STRICT REALISM)
-            **关键：用户未定义：${missingParts.join(' & ')}。**
-            **指令:**
-            1.  **推演:** 你必须基于角色 (M1) 和类型推演出最合乎逻辑的 ${missingParts.join(' 和 ')}。
-            2.  **范围:** 如果模棱两克，默认为**世界级/国际化**设定 (例如：如果是黑色电影，假设是洛杉矶或香港；如果是史诗奇幻，假设是中土世界原型)。
-            3.  **一致性:** 确保推演出的设定严格遵循物理法则。
-            `;
-    } else {
-      defaultAnchorInstruction = `
-            ## ⚓ 锚点推演 (ANCHOR DEDUCTION - UNBOUND FANTASY)
-            **关键：用户未定义：${missingParts.join(' & ')}。**
-            **指令:**
-            1.  **创造:** 发明一个能最大化 M-Engine 标签戏剧张力的 ${missingParts.join(' 和 ')}。
-            2.  **范围:** 追求普世或神话般的吸引力。
-            3.  **自由:** 你可以将隐喻具象化（例如：如果 M1 是“幽灵”，设定可以是字面意义上的炼狱）。
-            `;
-    }
-  }
-
-  const dnaContext = fieldState ? `## B. ENGINE DNA (Structure)\n${buildContext(fieldState)}` : "";
-
-  let visionContext = "";
-  if (visionInput) {
-    visionContext = getVisionAnchorProtocol(visionInput);
-  }
-
-  // Construct Style Instructions
   const styleItem = STYLE_MATRIX.flatMap(c => c.items).find(i => i.id === styleConfig.styleId);
-  const perspective = PERSPECTIVES.find(p => p.id === styleConfig.perspectiveId);
-  const sensory = SENSORY_MODES.find(s => s.id === styleConfig.sensoryId);
   const directorStyle = DIRECTOR_STYLES.find(d => d.id === styleConfig.styleId);
-
   let styleName = "Standard Literary";
   let styleDNA = "";
 
@@ -743,63 +756,145 @@ export const buildNarrativeBiblePrompt = (
     styleDNA = `Literary style of ${styleItem.name}. DNA: ${styleItem.dna}. ${styleItem.description || ''} ${styleItem.example ? `(e.g. ${styleItem.example})` : ''}`;
   }
 
-  const povInstruction = perspective ? `**Point of View:** ${perspective.name}\n   *   **Directive:** ${perspective.prompt}` : "";
-  const sensoryInstruction = sensory ? `**Sensory Priority:** ${sensory.name}\n   *   **Directive:** ${sensory.prompt}` : "";
+  const styleRule = styleName && styleName !== 'Standard Literary' && styleName.length > 0
+    ? `\nStyle: 模仿 [${styleName}] 的底层句法逻辑与节奏，严禁复制其经典台词或表层符号。`
+    : '';
 
-  const dynamicTaskPrompt = `
-# 本次任务执行区 (TASK EXECUTION)
-# 1. Role: 文学大师 & 影子写手。
-# Task: 基于上方提供的《迷雾学派》全局宪法 (SYSTEM BIBLE)，撰写一篇 ${literatureType}。
+  const bannedWords = fieldState ? v3BuildBannedWords(fieldState) : "";
 
-**关键指令:**
-你**不是**在写剧本大纲或摘要。你是在写一篇**完整的文学小说**。
-**目标长度：大约 ${targetWordCount} 个中文字符。**
+  const SECTION_LAWS = `${V3_LAWS}
 
-**命名协议:**
-以简体中文输出创意圣经。
-但是，对于所有**角色名**、**地名**、**物品名**和**专有名词**，必须使用格式：**中文名 (英文名)**。
+**Bible 专属形式律法**:
+\`\`\`
+[LAW_1] WORD_COUNT: 正文 ~${targetWordCount} 中文字符，硬性目标。
+[LAW_2] STRUCTURE: REQUIRE [${bibleSkeletonArrow}] DENY [机械降神, 无冲突流水账, 虎头蛇尾]${structureRule}
+[LAW_3] VOICE: 极精致的电影化小说 (Show, Don't Tell)。
+    DENY [剧本格式(内景/外景/日/夜), 学术论文腔, 鸡汤散文, 网络小说腔]${styleRule}
+\`\`\`
 
-# 2. 动态约束与法则
+**禁用词**: [ ${bannedWords} ]`;
 
-${bibleStrategy}
-${worldLawInstruction}
-${defaultAnchorInstruction}
-${customCoordinates}
+  // ════════════════════════════════════════════════════════════════════════════
+  // ④ 导演笔记 (SECTION_DIRECTOR) — 复用 V3 的 buildMDirective
+  // ════════════════════════════════════════════════════════════════════════════
+  let SECTION_DIRECTOR = "";
+  if (fieldState) {
+    const mEntries: (string | null)[] = [
+      buildMDirective(fieldState, ['_m0', '_c0'], 'M0. 精神拓扑', 'engine_m0'),
+      buildMDirective(fieldState, ['_m1', '_c1'], 'M1. 缺失主体', 'engine_m1'),
+      buildMDirective(fieldState, '_m2',           'M2. 真实遭遇', 'engine_m2'),
+      buildMDirective(fieldState, ['_m3', '_c3'],  'M3. 欲望幻想', 'engine_m3'),
+      buildMDirective(fieldState, ['_m4', '_c4'],  'M4. 大他者阻断', 'engine_m4'),
+      buildMDirective(fieldState, '_m5',           'M5. 行动驱力', 'engine_m5'),
+      buildMDirective(fieldState, '_m6',           'M6. 终极代价', 'engine_m6'),
+      buildMDirective(fieldState, '_m7a',           'M7A. 象征裁决', 'engine_m7a'),
+      buildMDirective(fieldState, '_m7b',           'M7B. 实在余痕', 'engine_m7b'),
+    ];
 
-${buildFormalLawEngine('BIBLE', targetWordCount, styleName, structureTagRaw)}
+    const directorBrief = mEntries.filter(Boolean).join('\n\n');
 
-## 🧬 视觉资产美学标准 (VISUAL ASSET STANDARDS)
-1. **人物 (Characters):** 必须遵循【美型 (Aesthetic Perfection)】原则。即使角色有残缺或伤痕，其整体形象必须具有高审美、高阶感。提示词应强调精致的面部比例、考究的质感。
-2. **场景与物品 (Locations & Props):** 必须具有【极强电影感 (Cinematic)】与【深邃意境 (Atmospheric)】。侧重光影的艺术化表达（如 Chiaroscuro）、材质的真实感以及环境的叙事深度。
-3. **提示词格式:** 每个资产的 \`view\` 对象中必须同时包含 \`promptCn\` (中文提示词) 和 \`promptEn\` (英文提示词)。
+    const m0Tags = fieldState ? v3GetTagsBySuffix(fieldState, ['_m0', '_c0']) : [];
+    let m0Logic = '';
+    if (m0Tags.length > 0) {
+      const item = findItemFull(m0Tags[0]) as any;
+      if (item?.logic) {
+        m0Logic = `\n\n**M0 逻辑约束（铁律）**: ${item.logic}`;
+      }
+    }
 
-## 🚫 词汇黑名单
-**不要使用抽象的引擎术语，如 "大他者", "对象 a"。请转译它们。**
-**禁用标签:** [ ${bannedWords} ]
+    SECTION_DIRECTOR = `## 导演笔记 (DIRECTOR'S BRIEF)
 
-# 3. 原始素材
-## A. 概念草案 (The Draft)
-*   **标题:** ${treatment.title}
-*   **基调:** ${treatment.tagline}
-*   **核心创意:** ${treatment.pitch}
+以下是这部电影的创作核心。每一条都是导演对你说的话——不是定义，是指令。
+导演笔记中的具体场景是情感运动的示例载体——提取其拓扑结构（节奏、温度、运动方式），用你自己发明且适配世界物理法则与表层设定的全新场景承载它。严禁复现示例中的具体意象。
 
-${visionContext}
-${topologyInstruction}
-${psychoProtocol}
-${dnaContext}
+**M0 渗透法则**：M0 不是一个独立参数——它是整个故事的操作系统。M1-M7B 的每一条导演笔记都必须经过 M0 的逻辑改写。
 
-# 4. ★★★ 风格执行 (关键) ★★★
-**你必须完全采用以下人格面具和写作风格：**
-*   **作者声音:** ${styleName}
-*   **风格基因:** ${styleDNA}
-*   **风格指令:** 模仿这位作者/导演的句式结构、节奏和词汇。
+${directorBrief}${m0Logic}`;
+  }
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // ⑤ 世界法则 + SUR 表层设定 (SECTION_SKIN) — 复用 V3 体系
+  // ════════════════════════════════════════════════════════════════════════════
+  const gravity = worldLaw?.gravity || 1;
+  const gravityRule = GRAVITY_RULES[gravity] || GRAVITY_RULES[3];
+
+  const skinParts: string[] = [gravityRule];
+
+  if (fieldState) {
+    const exactYear = v3GetTagsBySuffix(fieldState, '_year_exact')[0] || null;
+    const exactCountry = v3GetTagsBySuffix(fieldState, '_country_exact')[0] || null;
+    if (exactYear || exactCountry) {
+      skinParts.push(`**SUR3. 精确时空坐标约束**: 严格还原${exactYear ? formatYear(exactYear) : '?'}${exactCountry || '?'}的物理状貌、服饰与政治面貌。覆盖一切模糊标签。`);
+    }
+  }
+
+  if (visionInput) {
+    skinParts.push(getVisionAnchorProtocol(visionInput));
+  }
+
+  if (fieldState) {
+    const surNotes = buildSurNotes(fieldState);
+    if (surNotes) skinParts.push(surNotes);
+  }
+
+  const SECTION_SKIN = `## 世界物理法则与表层设定\n\n${skinParts.join('\n')}`;
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // ⑥ 风格 (SECTION_STYLE)
+  // ════════════════════════════════════════════════════════════════════════════
+  const perspective = PERSPECTIVES.find(p => p.id === styleConfig.perspectiveId);
+  const sensory = SENSORY_MODES.find(s => s.id === styleConfig.sensoryId);
+
+  const povInstruction = perspective ? `**叙事视点:** ${perspective.name}\n${perspective.prompt}` : "";
+  const sensoryInstruction = sensory ? `**感官侧重:** ${sensory.name}\n${sensory.prompt}` : "";
+
+  const SECTION_STYLE = `## 风格重写指令 (STYLE — 本次任务的绝对重心)
+
+**核心指令：你必须完全成为这位作者。不是「像」他/她，而是「是」他/她在重写这个故事。**
+
+**作者声音:** ${styleName}
+**风格基因:** ${styleDNA}
+
+**执行要求：**
+1. **句法层面**——模仿该作者的句子结构、长度节奏、标点使用习惯。如果该作者用长句，你就用长句；如果该作者用碎片句，你就用碎片句。
+2. **叙事策略层面**——模仿该作者处理时间、空间、视角切换的方式。不是模仿他写过什么，而是模仿他怎么思考故事。
+3. **语感层面**——模仿该作者的修辞偏好、意象选择逻辑、词汇温度。
+4. **严禁表层模仿**——不要复制该作者的经典台词、标志性意象或已有作品的具体细节。用他的大脑写新故事，不用他的词汇表。
+
 ${povInstruction}
-${sensoryInstruction}
+${sensoryInstruction}`;
 
-# 5. 输出格式 (STRICT JSON)
-Output ONLY valid JSON. 
-**CRITICAL:** The 'synopsis' field MUST contain the **FULL STORY TEXT** (The actual prose/fiction), NOT a summary.
-**CRITICAL:** All asset descriptions ("desc") MUST be in **Simplified Chinese**.
+  // ════════════════════════════════════════════════════════════════════════════
+  // ⑦ 素材 + 输出格式 (SECTION_OUTPUT)
+  // ════════════════════════════════════════════════════════════════════════════
+  const m7aTags = fieldState ? v3GetTagsBySuffix(fieldState, '_m7a') : [];
+  const m7bTags = fieldState ? v3GetTagsBySuffix(fieldState, '_m7b') : [];
+
+  const SECTION_OUTPUT = `## 素材 (SOURCE)
+*   **Title:** ${treatment.title}
+*   **Tagline:** ${treatment.tagline}
+*   **Pitch:** ${treatment.pitch}
+
+## 思考过程（必须先输出）
+\`\`\`xml
+<thought_process>
+1. 情绪曲线：逐一确认每个 M 参数的导演笔记面向，绘制完整情绪曲线
+2. M7A 回溯：从 M7A 缝合点反向审视，哪些 M 参数的含义被重写了？
+3. M7B 前兆：M7B 的终态是什么？前兆编织在故事哪个阶段？使用什么感官通道？终态使用不同的感官通道
+4. 物理校验：逐一检查每个 SUR 标签是否超出当前物理法则边界，超出的如何降维
+5. M0 渗透检查：逐一检查 M1-M7B，每个参数的叙事实现是否被 M0 的逻辑改写过
+</thought_process>
+\`\`\`
+
+## 视觉资产标准
+- **人物:** 美型原则，精致面部比例，考究质感
+- **场景/物品:** 极强电影感，光影艺术化(Chiaroscuro)，材质真实
+- **格式:** 每个资产 view 必须含 promptCn + promptEn
+
+## 输出 (STRICT JSON)
+Output ONLY valid JSON. synopsis = 完整小说正文 (NOT summary). desc = 中文.
+${m7aTags.length > 0 ? `M7A [${m7aTags.join('/')}] 回溯性决定整个故事的意义。严禁篡改。` : ''}
+${m7bTags.length > 0 ? `M7B [${m7bTags.join('/')}] 是绝对宪法。严禁篡改。` : ''}
 
 {
   "treatmentId": "${treatment.id}",
@@ -808,31 +903,43 @@ Output ONLY valid JSON.
   "narrative": {
     "title": "Story Title (CN + EN)",
     "logline": "A one-sentence hook (CN).",
-    "synopsis": "深度扩展后的【完整电影化小说正文】(中文)。这是核心部分。\\n\\n**核心指令 1 (转译):** 严禁在正文中出现任何引擎参数名称以及哲学等理论学术名词（如 'M1', 'S2', '大他者', '对象a' 等）。你必须将这些参数和专业名词进行【文学性转译】(Literary Transcoding)，使其彻底消融在具体的故事描写、人物动作和环境氛围中。例如：不要写'M1感到了异化'，要写'他看着玻璃幕墙里的倒影，觉得那张脸比自己更像主人'。\\n\\n**核心指令 2 (纯正小说手笔):** 绝对严禁使用任何剧本格式（如内景/外景、日/夜、中心对齐文本、粗体人名等）！你是在写一篇具备极致画面感与文学性的【小说】正文实体，而不是提纲或剧本。\\n\\n**核心指令 3 (文风):** 拒绝理工科式的枯燥陈述或说明书式的语言。追求极强的【电影感】(Cinematic)、【画面感】与【文艺感】。严格模仿 [${styleName}] 的笔触，注重光影、质感、气味与潜台词的描写。\\n\\n字数要求：${targetWordCount}字左右。"
+    "synopsis": "complete novel text (${targetWordCount} chars)"
   },
   "context": {
     "world": "Fallback text",
-    "worldCn": "世界观与物理规律 (CN)",
-    "worldEn": "World Building & Physics Rules (EN)",
+    "worldCn": "world building (CN)",
+    "worldEn": "world building (EN)",
     "tone": "Fallback text",
-    "toneCn": "视觉影调与色彩 (CN)",
-    "toneEn": "Visual & Atmospheric Tone (EN)",
+    "toneCn": "visual tone (CN)",
+    "toneEn": "visual tone (EN)",
     "colorPalette": ["#Hex1", "#Hex2", "#Hex3", "#Hex4", "#Hex5", "#Hex6", "#Hex7"],
-    "moodboard": { "prompt": "Midjourney Prompt for Key Visual", "promptCn": "中文提示词", "promptEn": "English Prompt" }
+    "moodboard": { "prompt": "MJ Prompt", "promptCn": "CN prompt", "promptEn": "EN prompt" }
   },
   "assets": {
     "characters": [
-      { "id": "char_1", "name": "Name (English Name)", "tag": "Archetype", "desc": "外观与心理描述 (必须使用中文)", "view": { "promptCn": "中文提示词 (美型、高审美)", "promptEn": "English Prompt (Aesthetic, high-end beauty)" } }
+      { "id": "char_1", "name": "Name (EN)", "tag": "Archetype", "desc": "desc (CN)", "view": { "promptCn": "CN", "promptEn": "EN" } }
     ],
     "locations": [
-      { "id": "loc_1", "name": "Name (English Name)", "tag": "Type", "desc": "氛围与细节描述 (必须使用中文)", "view": { "promptCn": "中文提示词 (电影感、意境)", "promptEn": "English Prompt (Cinematic, atmospheric)" } }
+      { "id": "loc_1", "name": "Name (EN)", "tag": "Type", "desc": "desc (CN)", "view": { "promptCn": "CN", "promptEn": "EN" } }
     ],
     "props": [
-      { "id": "prop_1", "name": "Name (English Name)", "tag": "Type", "desc": "象征与材质描述 (必须使用中文)", "view": { "promptCn": "中文提示词 (质感、电影感)", "promptEn": "English Prompt (Textured, cinematic)" } }
+      { "id": "prop_1", "name": "Name (EN)", "tag": "Type", "desc": "desc (CN)", "view": { "promptCn": "CN", "promptEn": "EN" } }
     ]
   }
-}
-`;
+}`;
 
-  return NARRATIVE_SYSTEM_BIBLE + '\n\n' + dynamicTaskPrompt;
+  // ════════════════════════════════════════════════════════════════════════════
+  // 最终拼接
+  // ════════════════════════════════════════════════════════════════════════════
+  const sections = [
+    SECTION_ROLE,
+    SECTION_FORMULA,
+    SECTION_LAWS,
+    SECTION_DIRECTOR,
+    SECTION_SKIN,
+    SECTION_STYLE,
+    SECTION_OUTPUT,
+  ].filter(s => s.length > 0);
+
+  return sections.join('\n\n');
 };

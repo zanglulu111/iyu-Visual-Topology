@@ -13,6 +13,8 @@ export const ENGINE_M0_NEUROSIS_HYSTERIA: LibraryItemDef[] = [
     coreEn: "In the protagonist's world, every relationship is an interrogation — not of others, but forcing them to declare 'what do I mean to you.' They live in an echo chamber where all sounds refract into the same question. No answer satisfies, because once answered, the question vanishes — and the question itself is their entire reason for existing. Silence is the most unbearable sound: it means they may not be worth answering at all.",
     reference: "陀思妥耶夫斯基《白痴》中娜斯塔霞——她的每一段关系都是对'你到底想从我这里得到什么'的审讯；伍迪·艾伦《安妮·霍尔》——整部电影是一场对'你为什么爱我/不爱我'的无尽质询。",
     referenceEn: "Nastasya in Dostoevsky's The Idiot — every relationship is an interrogation of 'what do you really want from me'; Woody Allen's Annie Hall — the entire film is an endless inquiry into 'why do you love me / not love me.'",
+    topology: "朝大他者发出永不闭合的问题 → 回答将杀死问题本身 → 沉默比任何错误答案更致命",
+    directive: "这个人物的每一段关系都是一次审讯——不是在聊天，是在逼对方交出一个回答：'我对你来说到底是什么？'但回答到手的瞬间他就不信了，因为问题一旦关闭，他就没有理由继续留在这段关系里。他制造冲突不是因为愤怒，是因为平静让他窒息。沉默是他世界里最危险的声音——它意味着对方可能根本懒得回答他。所有情节经过这个过滤器：事件本身不重要，重要的是事件是否回应了他的问题。",
   },
   { 
     id: "os_symbolic_seduction", 
@@ -24,6 +26,8 @@ export const ENGINE_M0_NEUROSIS_HYSTERIA: LibraryItemDef[] = [
     coreEn: "In the protagonist's topology, being seen through equals death. They fold themselves into layer upon layer of labyrinth — whenever someone thinks they've reached the end, a new door opens deeper in. This isn't deceit; it's the only way to exist: they must forever remain a question mark, because becoming a period means no one will ever walk in again. Their greatest fear isn't rejection, but hearing 'I completely understand you' — that sentence would unlock their last hiding place, revealing nothing inside.",
     reference: "大卫·林奇《穆赫兰道》——整部电影就是一个拒绝被解读的迷宫结构；王家卫《花样年华》中苏丽珍——她的魅力完全建立在永不说破之上。",
     referenceEn: "David Lynch's Mulholland Drive — the entire film is a labyrinth that refuses interpretation; Su Li-zhen in Wong Kar-wai's In the Mood for Love — her allure is built entirely on never being spoken.",
+    topology: "被完全理解 = 存在性死亡 → 自我折叠为无限层迷宫 → 谜底必须永远缺席",
+    directive: "这个人物的生存策略是不可解。写他的每一次自我展示都是一次新的遮蔽——给你看一层，是为了让你忘记还有下一层。他的魅力完全建立在'你永远不会完全知道我'之上。当有人试图给他下定义（'你就是那种人'），写他的反应像被剥了皮——他会立刻变成另一个人来证明你错了。所有情节经过这个过滤器：任何试图固定他的力量都会触发逃逸。",
   },
   { 
     id: "os_identification_slide", 
@@ -35,6 +39,8 @@ export const ENGINE_M0_NEUROSIS_HYSTERIA: LibraryItemDef[] = [
     coreEn: "In the protagonist's world, identity is quicksand — you think you've hit solid ground, but it gives way instantly. They can be anyone, therefore they are no one. They search for their own outline in the eyes of the person across from them: you want tenderness? They become tender. Rebellion? Rebellious. But every face starts itching after three days — because it's not their skin. The true terror isn't 'I don't know who I am,' but 'maybe there is no bottom-layer me at all.' Beneath the mask is not a face, but another mask.",
     reference: "伍迪·艾伦《变色龙》(Zelig)——一个会自动变成周围人样子的人；派翠西亚·海史密斯《天才雷普利》——雷普利不断成为他所杀害的人，身份像流沙般无底。",
     referenceEn: "Woody Allen's Zelig — a man who automatically becomes whoever surrounds him; Patricia Highsmith's The Talented Mr. Ripley — Ripley endlessly becomes the people he kills, identity as bottomless quicksand.",
+    topology: "身份无地基 → 从他者眼中借取轮廓 → 每副面孔都是临时容器",
+    directive: "这个人物没有默认状态。写他在不同人面前的微妙变形——和老板在一起时的脊柱角度，和恋人在一起时的说话节奏，和陌生人在一起时的表情模板，全是不同的人。这不是伪装，他真诚地成为每一个版本。但当他独处时，写那种失重——镜子前他看到的不是一个人，是一个等待被填充的轮廓。所有情节经过这个过滤器：他的每一个选择都在问'你需要我是谁'。",
   },
   { 
     id: "os_body_as_theater", 
@@ -46,6 +52,8 @@ export const ENGINE_M0_NEUROSIS_HYSTERIA: LibraryItemDef[] = [
     coreEn: "In the protagonist's topology, a short-circuit runs between language and body. When the question aimed at the world is too heavy, too dangerous — words blow out like a fuse, and the current surges straight into flesh. Legs go limp for no reason, hands tremble beyond control, the voice fails at the moment speech is most needed. Doctors find no organic cause — because the illness isn't in the body; the body merely took over the work language couldn't finish. Every spasm is an unspoken sentence; every pain is a swallowed question.",
     reference: "拉斯·冯·提尔《破浪》中贝丝——身体成为信仰与欲望的全部战场；弗洛伊德早期案例中安娜·O的癔症转换——词语熔断后躯体接管的经典文本。",
     referenceEn: "Bess in Lars von Trier's Breaking the Waves — the body becomes the entire battlefield of faith and desire; Anna O in Freud's early case studies — the classic text of hysterical conversion when words blow out.",
+    topology: "语言通道熔断 → 未说出的句子短路入身体 → 症状是问题的肉身翻译",
+    directive: "这个人物的身体比嘴更诚实。写他在关键对话中突然出现的生理反应——手抖、胃痉挛、声音消失、腿发软——不是装的，是真的。语言够不到的地方，身体替他说。医学上他没有任何问题，但他的痛是真实的。所有情节经过这个过滤器：当叙事到达语言无法承载的临界点时，身体接管叙事——每一次痉挛都是一个没说出口的句子。",
   },
   { 
     id: "os_master_interrogator", 
@@ -57,6 +65,8 @@ export const ENGINE_M0_NEUROSIS_HYSTERIA: LibraryItemDef[] = [
     coreEn: "In the protagonist's world, anyone radiating authority is automatically flagged as 'pending verification.' They approach the most powerful person with an almost tender stubbornness, searching for cracks in the armor. This isn't malice — it's the only way to breathe: if you are perfect, then my imperfection is unforgivable. Only by pulling you down to stand on the same ground can they survive. Each proof that 'you too are merely mortal' brings a brief exhale — but soon they need the next authority to verify.",
     reference: "陀思妥耶夫斯基《卡拉马佐夫兄弟》中伊万对上帝的审判——'如果你全能，为什么允许儿童受苦'；英格玛·伯格曼《第七封印》中骑士对死神的每一步棋都是对权威的验证。",
     referenceEn: "Ivan's trial of God in Dostoevsky's The Brothers Karamazov — 'if you are omnipotent, why allow children to suffer'; every chess move against Death in Ingmar Bergman's The Seventh Seal as verification of authority.",
+    topology: "标记所有权威为'待验证' → 寻找盔甲上的裂缝 → 证明对方也残缺才能呼吸",
+    directive: "这个人物会自动走向房间里最有权力的人，然后开始找碴。写法不是攻击性的，而是带着一种近乎温柔的执拗——他不是要摧毁权威，他是需要确认权威也是人。当他成功证明老板也会犯错、导师也有盲区、偶像也有污点时，他能短暂地松一口气。所有情节经过这个过滤器：他与强者的每一次互动都是一次隐秘的验证——'你也和我一样不完整吗？'",
   },
   { 
     id: "os_incomplete_sacrifice", 

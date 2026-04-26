@@ -57,6 +57,8 @@ export interface NarrativeEngineFieldProps {
     onPaletteChange?: (colors: string[]) => void;
     onApplyPreset?: (preset: AestheticPreset) => void;
     showRings?: boolean;
+    faceState?: Record<string, 'bright' | 'dark' | 'tension'>;
+    onFaceStateChange?: (locks: Record<string, 'bright' | 'dark' | 'tension'>) => void;
 }
 
 export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props) => {
@@ -68,11 +70,13 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
     const {
         fieldState, onChange, lang, driverType,
         lockedModules, onToggleLock, lockedTags, onToggleTagLock, onRandomizeTag,
-        customLibraryDefs, onAddCustomDef, onEditCustomDef, showRings = true
+        customLibraryDefs, onAddCustomDef, onEditCustomDef, showRings = true,
+        faceState, onFaceStateChange
     } = props;
 
     const [libraryModalOpen, setLibraryModalOpen] = useState(false);
     const [activeBlockId, setActiveBlockId] = useState<string | null>(null);
+    const [scrollToTag, setScrollToTag] = useState<string | undefined>(undefined);
 
     const isCommercial = driverType === DriverType.COMMERCIAL;
     const isExperimental = driverType === DriverType.EXPERIMENTAL;
@@ -223,7 +227,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
 
     const clearBlock = (blockId: string) => { if (lockedModules[blockId]) return; onChange({ ...fieldState, [blockId]: [] }); }
     const removeTag = (blockId: string, tag: string) => { if (lockedModules[blockId]) return; const rawCurrent = fieldState[blockId]; const current = Array.isArray(rawCurrent) ? rawCurrent : (rawCurrent ? [String(rawCurrent)] : []); onChange({ ...fieldState, [blockId]: current.filter(t => t !== tag) }); }
-    const openLibrary = (blockId: string) => { if (lockedModules[blockId]) return; setActiveBlockId(blockId); setLibraryModalOpen(true); };
+    const openLibrary = (blockId: string, scrollToTag?: string) => { if (lockedModules[blockId]) return; setActiveBlockId(blockId); setScrollToTag(scrollToTag); setLibraryModalOpen(true); };
 
     const [hoveredPortal, setHoveredPortal] = useState<{
         pos: { top: number; left: number };
@@ -337,36 +341,22 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                 </div>
             )}
 
-            <div className={`flex-shrink-0 px-6 pt-6 pb-2 flex items-center justify-center z-20 bg-transparent relative`}>
+            <div className={`flex-shrink-0 px-6 pt-16 pb-4 flex items-center justify-center z-20 bg-transparent relative`}>
                 <div className="max-w-5xl mx-auto w-full flex flex-col items-center justify-center relative">
                     <div className="flex-1 flex flex-col items-center justify-center pointer-events-none">
-                        <h2 className="text-4xl md:text-5xl font-serif font-bold tracking-[0.05em] -mr-[0.05em] text-center mb-4 transition-all duration-300">
-                            <span className={theme === 'retro' ? 'text-[#8B261D]' : osTheme.accent}>
-                                {getEngineTitle()}
-                            </span>
+                        <h2 className={`text-5xl md:text-7xl font-serif font-bold tracking-[0.1em] mb-6 text-center ${theme === 'retro' ? 'text-[#8B261D]' : osTheme.accent}`}>
+                            {getEngineTitle()}
                         </h2>
-                        <p className={`text-[10px] md:text-base font-medium md:font-light uppercase tracking-[0.2em] -mr-[0.2em] text-center w-full whitespace-nowrap overflow-hidden text-ellipsis ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}`}>{getEngineSubtitle()}</p>
+                        <div className={`text-sm md:text-lg font-normal w-full max-w-xl mx-auto px-4 text-center leading-relaxed whitespace-pre-line ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}`}>
+                            {getEngineSubtitle()}
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div className="flex-1 flex flex-col overflow-y-auto custom-scrollbar relative z-10 transition-all duration-300">
-                <div className="flex-shrink-0 py-0 px-4 flex justify-center z-10">
-                    <div className="relative w-full max-w-5xl">
-                        <div className={`relative flex flex-col items-center justify-center w-full p-6 transition-colors duration-300 rounded-xl ${osTheme.hover}`}>
-                            <div className="flex items-center gap-3 mb-4">{osTheme.icon}<span className={`text-base uppercase tracking-[0.3em] font-black text-zinc-400 transition-colors ${osTheme.label}`}>{lang === 'EN' ? osLabel.split('/')[1] : osLabel.split('/')[0]}</span></div>
-                            <div onClick={() => openLibrary(currentOSKey)} className={`text-3xl md:text-6xl font-serif font-bold tracking-[0.1em] mb-3 transition duration-300 cursor-pointer hover:scale-110 hover:z-50 inline-block ${currentPsychicOS ? (theme === 'retro' ? 'text-black' : 'text-white') : (theme === 'retro' ? 'text-zinc-500 hover:text-black' : 'text-zinc-500 hover:text-white')}`}>{osDisplay}</div>
-                            {osDetails && (
-                                <div className={`text-sm md:text-lg font-normal w-full max-w-xl mx-auto px-4 text-center leading-relaxed whitespace-pre-line ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}`}>
-                                    {lang === 'EN' && osDetails.defEn ? osDetails.defEn : osDetails.def}
-                                </div>
-                            )}
-                            <div className={`absolute right-4 top-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity ${osTheme.accent}`}><ChevronRight size={24} /></div>
-                        </div>
-                    </div>
-                </div>
                 <div className="flex-1 overflow-y-auto custom-scrollbar">
-                    <div className="min-h-full flex flex-col items-center justify-start p-4 md:px-8 pt-0 md:pt-2 md:pb-60 space-y-24 md:space-y-36">
+                    <div className="min-h-full flex flex-col items-center justify-start p-4 md:px-8 pt-8 md:pb-60 space-y-2 md:space-y-2">
                     {isCommercial ? (
                         <div className="flex flex-col gap-8 md:gap-12 min-w-0">
                             <div className="flex flex-wrap justify-center items-center gap-x-2 gap-y-4 w-full">
@@ -436,7 +426,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                             </div>
                         </div>
                     ) : (
-                        <div className="flex flex-col gap-6 md:gap-14 min-w-0">
+                        <div className="flex flex-col space-y-8 min-w-0">
                             {/* 第一行：主体定位 */}
                             <div className="flex flex-wrap justify-center items-center gap-x-2 gap-y-4 w-full">
                                 <span className="font-serif text-xl md:text-3xl font-light select-none text-[var(--text-main)]">
@@ -515,7 +505,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
             {activeBlockId && (
                 <NarrativeLibraryModal
                     isOpen={libraryModalOpen}
-                    onClose={() => setLibraryModalOpen(false)}
+                    onClose={() => { setLibraryModalOpen(false); setScrollToTag(undefined); }}
                     blockId={activeBlockId}
                     blockName={getBlockName(activeBlockId, lang)}
                     selectedTags={fieldState[activeBlockId] || []}
@@ -524,6 +514,11 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                     lang={lang}
                     driverType={driverType}
                     onAddCustomDef={onAddCustomDef}
+                    scrollToTag={scrollToTag}
+                    onTempLockChange={(locks) => {
+                        onFaceStateChange?.(locks);
+                    }}
+                    initialFaceState={faceState}
                     customLibraryData={
                         activeBlockId === 'aes_palette_preset'
                             ? [{ id: 'lib_master', name: '视觉大师预设 (Master Presets)', desc: 'Pre-configured Cinematic Styles', items: MASTER_PRESETS }]

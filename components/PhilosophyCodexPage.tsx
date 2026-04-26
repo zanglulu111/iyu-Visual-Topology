@@ -526,9 +526,9 @@ const renderMarkdown = (text: string = "") => {
   const flushList = () => {
     if (listItems.length > 0) {
       if (listType === 'ol') {
-        elements.push(<ol key={`ol-${elements.length}`} className="list-decimal pl-6 my-6 space-y-3">{[...listItems]}</ol>);
+        elements.push(<ol key={`ol-${elements.length}`} className="list-decimal pl-6 my-4 space-y-2">{[...listItems]}</ol>);
       } else {
-        elements.push(<ul key={`ul-${elements.length}`} className="list-disc pl-6 my-6 space-y-3">{[...listItems]}</ul>);
+        elements.push(<ul key={`ul-${elements.length}`} className="list-disc pl-6 my-4 space-y-2">{[...listItems]}</ul>);
       }
       listItems = [];
       listType = null;
@@ -538,7 +538,7 @@ const renderMarkdown = (text: string = "") => {
   const flushCode = () => {
     if (codeBlock.length > 0) {
       elements.push(
-        <div key={`code-${elements.length}`} className={`my-6 rounded-xl overflow-hidden border ${isRetro ? 'border-black/10 bg-black/5' : 'border-white/10 bg-black/50'}`}>
+        <div key={`code-${elements.length}`} className={`my-4 rounded-xl overflow-hidden border ${isRetro ? 'border-black/10 bg-black/5' : 'border-white/10 bg-black/50'}`}>
           <div className={`px-4 py-2 border-b text-[9px] font-mono tracking-widest uppercase flex justify-between items-center ${isRetro ? 'border-black/5 bg-black/5 text-[#8B261D]/60' : 'border-white/5 bg-white/5 text-zinc-500'}`}>
             <span>{codeLang || 'CODE'}</span>
             <span className="opacity-50">SCANNED_SOURCE</span>
@@ -575,7 +575,7 @@ const renderMarkdown = (text: string = "") => {
         if (typeof (window as any).katex !== 'undefined') {
           try {
             const html = (window as any).katex.renderToString(math, { throwOnError: false, displayMode: true });
-            return <div className="my-6 overflow-x-auto custom-scrollbar" dangerouslySetInnerHTML={{ __html: html }} />;
+            return <div className="my-4 overflow-x-auto custom-scrollbar" dangerouslySetInnerHTML={{ __html: html }} />;
           } catch (e) { return <code>{tag}</code>; }
         }
         return <code>{tag}</code>;
@@ -593,7 +593,24 @@ const renderMarkdown = (text: string = "") => {
       }
 
       if (tag.startsWith('**')) {
-        return <strong className={`font-bold ${isRetro ? 'text-black' : 'text-[var(--philosopher-accent)]'}`}>{processInline(tag.slice(2, -2), absoluteStart + 2)}</strong>;
+        const content = tag.slice(2, -2);
+        // 检查是否是行首的数字标题（如 **1.** **2.**）或小圆点（**·**）
+        const isLineStart = before.trim() === '';
+        const isNumberTitle = /^\d+\./.test(content);
+        const isDot = content.trim() === '·';
+        const isHeadingMarker = isLineStart && (isNumberTitle || isDot);
+
+        // 如果是 **·**，使用更大的圆点
+        if (isDot) {
+          return <strong className={`font-bold text-xl ${isRetro ? 'text-[#8B261D]' : 'text-[var(--philosopher-accent)]'}`}>●</strong>;
+        }
+
+        // 标题标记用红色，普通加粗用黑色
+        const colorClass = isHeadingMarker
+          ? (isRetro ? 'text-[#8B261D]' : 'text-[var(--philosopher-accent)]')
+          : (isRetro ? 'text-black/90' : 'text-[var(--philosopher-accent)]');
+
+        return <strong className={`font-bold ${colorClass}`}>{processInline(content, absoluteStart + 2)}</strong>;
       }
 
       if (tag.startsWith('*') || tag.startsWith('_')) {
@@ -632,7 +649,7 @@ const renderMarkdown = (text: string = "") => {
         if (line.includes('【定义】')) return;
       }
       flushList();
-      elements.push(<h1 key={index} className={`text-3xl font-serif mt-12 mb-8 font-black tracking-widest ${headerColor}`}>{processInline(line.slice(2), index * 1000)}</h1>);
+      elements.push(<h1 key={index} className={`text-3xl font-serif mt-8 mb-5 font-black tracking-widest ${headerColor}`}>{processInline(line.slice(2), index * 1000)}</h1>);
       return;
     }
 
@@ -641,27 +658,27 @@ const renderMarkdown = (text: string = "") => {
       const formula = trimmedLine.match(/^\$\$(.*)\$\$$/)![1];
       if (typeof (window as any).katex !== 'undefined') {
         const html = (window as any).katex.renderToString(formula, { displayMode: true, throwOnError: false });
-        elements.push(<div key={index} className="my-8 py-4 overflow-x-auto text-center" dangerouslySetInnerHTML={{ __html: html }} />);
+        elements.push(<div key={index} className="my-5 py-3 overflow-x-auto text-center" dangerouslySetInnerHTML={{ __html: html }} />);
       }
       return;
     }
 
     if (line.startsWith('## ')) {
       flushList();
-      elements.push(<h2 key={index} className={`text-2xl font-serif mt-12 mb-6 font-extrabold tracking-widest ${headerColor}`}>{processInline(line.slice(3), index * 1000)}</h2>);
+      elements.push(<h2 key={index} className={`text-2xl font-serif mt-8 mb-4 font-extrabold tracking-widest ${headerColor}`}>{processInline(line.slice(3), index * 1000)}</h2>);
     }
     else if (line.startsWith('### ')) {
       flushList();
-      elements.push(<h3 key={index} className={`text-xl font-serif mt-10 mb-6 font-bold tracking-wider ${headerColor}`}>{processInline(line.slice(4), index * 1000)}</h3>);
+      elements.push(<h3 key={index} className={`text-xl font-serif mt-6 mb-3 font-bold tracking-wider ${headerColor}`}>{processInline(line.slice(4), index * 1000)}</h3>);
     }
     else if (line.startsWith('#### ')) {
       flushList();
-      elements.push(<h4 key={index} className={`text-lg font-serif mt-8 mb-4 font-bold tracking-wider ${isRetro ? 'text-[#8B261D]/80' : 'text-white/80'}`}>{processInline(line.slice(5), index * 1000)}</h4>);
+      elements.push(<h4 key={index} className={`text-lg font-serif mt-5 mb-2 font-bold tracking-wider ${isRetro ? 'text-[#8B261D]/80' : 'text-white/80'}`}>{processInline(line.slice(5), index * 1000)}</h4>);
     }
     else if (trimmedLine.startsWith('> ')) {
       flushList();
       elements.push(
-        <blockquote key={index} className={`border-l-4 pl-6 py-2 my-8 italic font-light tracking-widest leading-relaxed ${isRetro ? 'border-[#8B261D]/30 text-black/70' : 'border-[var(--philosopher-accent)]/30 text-white/70'}`}>
+        <blockquote key={index} className={`border-l-4 pl-6 py-2 my-5 italic font-light tracking-widest leading-relaxed ${isRetro ? 'border-[#8B261D]/30 text-black/70' : 'border-[var(--philosopher-accent)]/30 text-white/70'}`}>
           {processInline(trimmedLine.slice(2), index * 1000)}
         </blockquote>
       );
@@ -678,12 +695,12 @@ const renderMarkdown = (text: string = "") => {
     }
     else if (trimmedLine === '') {
       flushList();
-      elements.push(<div key={index} className="h-4"></div>);
+      elements.push(<div key={index} className="h-2"></div>);
     }
     else {
       flushList();
       elements.push(
-        <div key={index} className="leading-[1.8] mb-6 tracking-wide font-normal">
+        <div key={index} className="leading-[1.7] mb-3 tracking-wide font-normal">
           {processInline(line, index * 1000)}
         </div>
       );

@@ -1,7 +1,7 @@
 
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import { configService } from "../src/services/configService";
-import { SutureConfig, NarrativeFieldState, CreativeTreatment, StyleConfig, WorldLawConfig, CreativeBlueprint, DriverType, SubjectType, SutureResponse, FinalAssetsData, FinalAssetItem, GlobalVisualTone, AssetView, MetonymyStylePreset, MetonymyAssetInput, APISettings } from "../types";
+import { SutureConfig, NarrativeFieldState, CreativeTreatment, StyleConfig, WorldLawConfig, CreativeBlueprint, DriverType, SubjectType, SutureResponse, FinalAssetsData, FinalAssetItem, GlobalVisualTone, AssetView, MetonymyStylePreset, MetonymyAssetInput, APISettings, FaceState } from "../types";
 import { buildSutureStep1Prompt, buildStyleTransferPrompt } from "./suture_script_prompt";
 import { buildSutureStep2Prompt } from "./sutureGenerator";
 import { buildNarrativePrompt, buildNarrativeBiblePrompt } from "./narrativeGenerator";
@@ -35,6 +35,17 @@ const getSettings = (): APISettings | null => {
     const saved = localStorage.getItem('api_settings');
     return saved ? JSON.parse(saved) : null;
 };
+
+function proxyFetch(url: string, options: RequestInit): Promise<Response> {
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+        const parsed = new URL(url);
+        const localPath = '/__api_proxy' + parsed.pathname + parsed.search;
+        const headers = new Headers(options.headers);
+        headers.set('X-Proxy-Target', parsed.origin);
+        return fetch(localPath, { ...options, headers });
+    }
+    return fetch(url, options);
+}
 
 class OpenAIAdapter {
     constructor(private apiKey: string, private baseUrl: string) { }
@@ -72,61 +83,112 @@ class OpenAIAdapter {
 
                 const cleanBaseUrl = this.baseUrl.trim().replace(/\/+$/, "");
                 const fetchUrl = `${cleanBaseUrl}/chat/completions`;
+                const maxTokens = params.config?.maxOutputTokens || 32768;
 
-                console.log(`[ProxyRequest] Calling: ${fetchUrl} with model: ${model}`);
+                console.log(`[ProxyStream] Calling: ${fetchUrl} with model: ${model}, max_tokens: ${maxTokens}`);
+                const startTime = Date.now();
 
-                const response = await fetch(fetchUrl, {
+                const response = await proxyFetch(fetchUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${this.apiKey}`,
-                        // 一些代理需要这个头来识别请求来自浏览器
                         'X-Requested-With': 'XMLHttpRequest'
                     },
                     body: JSON.stringify({
                         model: model,
                         messages: messages,
                         temperature: params.config?.temperature || 0.7,
-                        max_tokens: params.config?.maxOutputTokens || 32768,
-                        stream: false,
+                        max_tokens: maxTokens,
+                        stream: true,
                         ...(params.config?.responseMimeType === 'application/json' ? { response_format: { type: 'json_object' } } : {})
                     })
                 });
 
+                const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+
                 if (!response.ok) {
                     const err = await response.text();
-                    let errMsg = `Proxy Error: ${response.status}`;
+                    let errMsg = `Proxy Error: ${response.status} (耗时 ${elapsed}s)`;
+                    if (response.status === 502) {
+                        errMsg = `代理返回 502 Bad Gateway (耗时 ${elapsed}s)。\n代理服务器可能超时了。\n请检查代理超时设置（建议 ≥ 120 秒）。\n\n请求地址: ${fetchUrl}\n模型: ${model}`;
+                        throw new Error(errMsg);
+                    }
                     if (response.status === 404) {
                         errMsg += ` (URL Not Found: ${fetchUrl}). 请确认您的代理地址 (Base URL) 是否正确。`;
                     }
-                    // 检测 HTML 响应（说明 URL 不对，打到了网页而非 API）
                     if (err.trim().startsWith('<') || err.includes('<!DOCTYPE') || err.includes('<!--')) {
                         errMsg = `代理地址错误：返回了 HTML 页面而非 API 响应。\n请检查您的 Base URL 是否正确。\n当前请求地址: ${fetchUrl}\n\n常见的 Base URL 格式: https://your-proxy.com/v1`;
                     }
                     throw new Error(`${errMsg}\nDetail: ${err.substring(0, 200)}`);
                 }
 
-                // 检测响应是否为 HTML（某些代理 200 状态也可能返回网页）
+                // ═══ 流式读取 SSE ═══
                 const contentType = response.headers.get('content-type') || '';
-                const responseText = await response.text();
-                
-                if (!contentType.includes('application/json') && (responseText.trim().startsWith('<') || responseText.includes('<!DOCTYPE'))) {
-                    throw new Error(`代理地址错误：返回了 HTML 页面而非 JSON。\n请检查您的 Base URL 是否正确。\n当前请求地址: ${fetchUrl}\n\n常见的 Base URL 格式: https://your-proxy.com/v1`);
+
+                // 如果代理不支持流式，fallback 到普通 JSON 解析
+                if (contentType.includes('application/json')) {
+                    const responseText = await response.text();
+                    let data;
+                    try {
+                        data = JSON.parse(responseText);
+                    } catch {
+                        throw new Error(`代理返回的数据不是有效的 JSON。\n当前请求地址: ${fetchUrl}\n\n返回内容预览: ${responseText.substring(0, 150)}`);
+                    }
+                    const text = data.choices?.[0]?.message?.content || "";
+                    const totalElapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+                    console.log(`[ProxyStream] Fallback JSON response (${totalElapsed}s), ${text.length} chars`);
+                    return {
+                        text: text,
+                        candidates: [{ content: { parts: [{ text: text }] } }]
+                    } as GenerateContentResponse;
                 }
 
-                let data;
-                try {
-                    data = JSON.parse(responseText);
-                } catch (parseErr) {
-                    throw new Error(`代理返回的数据不是有效的 JSON。\n请检查 Base URL 是否正确。\n当前请求地址: ${fetchUrl}\n\n返回内容预览: ${responseText.substring(0, 150)}`);
+                // SSE 流式读取
+                const reader = response.body?.getReader();
+                if (!reader) {
+                    throw new Error('响应不支持流式读取');
                 }
-                const text = data.choices?.[0]?.message?.content || "";
+
+                const decoder = new TextDecoder();
+                let fullText = '';
+                let buffer = '';
+
+                try {
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+
+                        buffer += decoder.decode(value, { stream: true });
+                        const lines = buffer.split('\n');
+                        buffer = lines.pop() || '';
+
+                        for (const line of lines) {
+                            if (!line.startsWith('data: ')) continue;
+                            const data = line.slice(6).trim();
+                            if (data === '[DONE]') continue;
+
+                            try {
+                                const event = JSON.parse(data);
+                                const delta = event.choices?.[0]?.delta?.content;
+                                if (delta) fullText += delta;
+                            } catch {
+                                // 跳过无法解析的 SSE 行
+                            }
+                        }
+                    }
+                } finally {
+                    reader.releaseLock();
+                }
+
+                const totalElapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+                console.log(`[ProxyStream] Complete (${totalElapsed}s), received ${fullText.length} chars`);
 
                 return {
-                    text: text,
+                    text: fullText,
                     candidates: [{
                         content: {
-                            parts: [{ text: text }]
+                            parts: [{ text: fullText }]
                         }
                     }]
                 } as GenerateContentResponse;
@@ -182,20 +244,29 @@ class AnthropicAdapter {
                 const cleanBaseUrl = this.baseUrl.trim().replace(/\/+$/, "");
                 const fetchUrl = `${cleanBaseUrl}/v1/messages`;
 
-                console.log(`[AnthropicRequest] Calling: ${fetchUrl} with model: ${model}`);
-
                 const requestBody: any = {
                     model: model,
                     messages: messages,
-                    max_tokens: params.config?.maxOutputTokens || 8192,
+                    max_tokens: params.config?.maxOutputTokens || 16384,
                     temperature: params.config?.temperature || 0.7,
+                    stream: true,
                 };
+
+                if (params.config?.responseMimeType === 'application/json') {
+                    const jsonInstruction = 'You must respond with valid JSON only. No markdown, no code blocks, no explanation — just raw JSON.';
+                    systemPrompt = systemPrompt
+                        ? `${systemPrompt}\n\n${jsonInstruction}`
+                        : jsonInstruction;
+                }
 
                 if (systemPrompt) {
                     requestBody.system = systemPrompt;
                 }
 
-                const response = await fetch(fetchUrl, {
+                console.log(`[AnthropicStream] Calling: ${fetchUrl} with model: ${model}, max_tokens: ${requestBody.max_tokens}`);
+                const startTime = Date.now();
+
+                const response = await proxyFetch(fetchUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -206,9 +277,17 @@ class AnthropicAdapter {
                     body: JSON.stringify(requestBody)
                 });
 
+                const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+
                 if (!response.ok) {
                     const err = await response.text();
-                    let errMsg = `Anthropic API Error: ${response.status}`;
+                    let errMsg = `Anthropic API Error: ${response.status} (耗时 ${elapsed}s)`;
+
+                    if (response.status === 502) {
+                        errMsg = `代理返回 502 Bad Gateway (耗时 ${elapsed}s)。\n这通常意味着代理服务器在等待 Claude 响应时超时了。\n请检查代理的超时设置（建议 ≥ 120 秒）。\n\n请求地址: ${fetchUrl}\n模型: ${model}`;
+                        console.error(`[AnthropicStream] 502 Bad Gateway after ${elapsed}s`, { fetchUrl, model, elapsed });
+                        throw new Error(errMsg);
+                    }
 
                     if (err.trim().startsWith('<') || err.includes('<!DOCTYPE') || err.includes('<!--')) {
                         errMsg = `代理地址错误：返回了 HTML 页面而非 API 响应。\n请检查您的 Base URL 是否正确。\n当前请求地址: ${fetchUrl}`;
@@ -229,28 +308,52 @@ class AnthropicAdapter {
                     throw new Error(errMsg);
                 }
 
-                const contentType = response.headers.get('content-type') || '';
-                const responseText = await response.text();
-
-                if (!contentType.includes('application/json') && (responseText.trim().startsWith('<') || responseText.includes('<!DOCTYPE'))) {
-                    throw new Error(`代理地址错误：返回了 HTML 页面而非 JSON。\n请检查 Base URL。\n当前请求地址: ${fetchUrl}`);
+                // ═══ 流式读取 SSE ═══
+                const reader = response.body?.getReader();
+                if (!reader) {
+                    throw new Error('响应不支持流式读取');
                 }
 
-                let data;
+                const decoder = new TextDecoder();
+                let fullText = '';
+                let buffer = '';
+
                 try {
-                    data = JSON.parse(responseText);
-                } catch (parseErr) {
-                    throw new Error(`代理返回的数据不是有效的 JSON。\n当前请求地址: ${fetchUrl}\n\n返回内容预览: ${responseText.substring(0, 150)}`);
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+
+                        buffer += decoder.decode(value, { stream: true });
+                        const lines = buffer.split('\n');
+                        buffer = lines.pop() || '';
+
+                        for (const line of lines) {
+                            if (!line.startsWith('data: ')) continue;
+                            const data = line.slice(6).trim();
+                            if (data === '[DONE]') continue;
+
+                            try {
+                                const event = JSON.parse(data);
+                                if (event.type === 'content_block_delta' && event.delta?.text) {
+                                    fullText += event.delta.text;
+                                }
+                            } catch {
+                                // 跳过无法解析的 SSE 行
+                            }
+                        }
+                    }
+                } finally {
+                    reader.releaseLock();
                 }
 
-                // Anthropic 响应格式: { content: [{ type: "text", text: "..." }] }
-                const text = data.content?.map((block: any) => block.text || '').join('') || "";
+                const totalElapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+                console.log(`[AnthropicStream] Complete (${totalElapsed}s), received ${fullText.length} chars`);
 
                 return {
-                    text: text,
+                    text: fullText,
                     candidates: [{
                         content: {
-                            parts: [{ text: text }]
+                            parts: [{ text: fullText }]
                         }
                     }]
                 } as GenerateContentResponse;
@@ -278,25 +381,16 @@ const getAI = () => {
                 const isClaude = modelId?.includes('claude');
                 
                 if (isClaude) {
-                    // ═══ Claude 路径：必须走代理 ═══
+                    // ═══ Claude 路径：通过代理，始终使用 Anthropic 原生格式 ═══
                     const apiKey = claudeKey;
                     const baseUrl = claudeConfig.baseUrl || settings?.llm.baseUrl || '';
-                    
+
                     if (!baseUrl) {
                         throw new Error('Claude 模型需要配置代理地址 (Base URL)。请在系统配置中设置 Claude 的代理地址。');
                     }
-                    
-                    // 根据 API 格式选择适配器
-                    const format = claudeConfig.apiFormat || 'anthropic';
-                    if (format === 'anthropic') {
-                        // Anthropic 原生格式: /v1/messages (如 luckycodecc.cn/claude)
-                        const adapter = new AnthropicAdapter(apiKey, baseUrl);
-                        return adapter.models.generateContent(params);
-                    } else {
-                        // OpenAI 兼容格式: /chat/completions
-                        const adapter = new OpenAIAdapter(apiKey, baseUrl);
-                        return adapter.models.generateContent(params);
-                    }
+
+                    const adapter = new AnthropicAdapter(apiKey, baseUrl);
+                    return adapter.models.generateContent(params);
                 }
                 
                 if (geminiConfig.mode === 'proxy' && geminiConfig.baseUrl) {
@@ -431,6 +525,10 @@ async function retryWithBackoff<T>(fn: (signal?: AbortSignal) => Promise<T>, ret
                     }
                     throw err;
                 }
+                // 502 代理超时不重试 — 重试只会继续超时，浪费用户等待时间
+                if (err?.message?.includes('502')) {
+                    throw err;
+                }
                 if (currentRetries === 0) throw err;
                 await new Promise(resolve => setTimeout(resolve, currentDelay));
                 return attempt(currentRetries - 1, currentDelay * 2);
@@ -444,7 +542,9 @@ const handleApiError = (context: string, e: any) => {
     console.error(`[GeminiServiceError] ${context}:`, e);
     const errorMsg = e?.message || e?.toString() || "Unknown error";
     if (typeof window !== 'undefined') {
-        if (errorMsg.includes("代理地址错误") || errorMsg.includes("Base URL")) {
+        if (errorMsg.includes("502")) {
+            alert(`代理服务器超时 (502 Bad Gateway)。\n\nClaude 模型生成内容较慢，代理服务器可能在等待响应时超时了。\n建议：将代理的超时时间设置为 120 秒以上。\n\n${errorMsg}`);
+        } else if (errorMsg.includes("代理地址错误") || errorMsg.includes("Base URL")) {
             alert(`代理配置错误 (Proxy Config Error)。\n\n${errorMsg}`);
         } else if (errorMsg.includes("429") || errorMsg.toLowerCase().includes("quota") || errorMsg.includes("exhausted") || errorMsg.toLowerCase().includes("rate limit")) {
             alert(`API 额度已达上限或请求过于频繁 (Quota Exceeded)。\n请检查 API Key 额度或稍后重试。\n\n${errorMsg}`);
@@ -491,7 +591,11 @@ export const generateSutureScript = async (
         const res1 = await retryWithBackoff<GenerateContentResponse>(() => getAI().models.generateContent({
             model: model,
             contents: { parts: parts },
-            config: { responseMimeType: 'application/json' }
+            config: {
+                responseMimeType: 'application/json',
+                temperature: 0.7,  // Add randomness for varied outputs
+                maxOutputTokens: 32768  // Increase token limit for longer scripts
+            }
         }));
         const data1 = cleanAndParseJSON(res1.text || "");
 
@@ -538,7 +642,11 @@ export const transformScriptStyle = async (
         const response = await retryWithBackoff<GenerateContentResponse>(() => getAI().models.generateContent({
             model: model,
             contents: { parts: [{ text: prompt }] },
-            config: { responseMimeType: 'application/json' }
+            config: {
+                responseMimeType: 'application/json',
+                temperature: 0.7,  // Add randomness for varied outputs
+                maxOutputTokens: 32768  // Increase token limit for longer scripts
+            }
         }));
         const data = cleanAndParseJSON(response.text || "");
         return data?.literaryScript || null;
@@ -664,14 +772,14 @@ export const generateNarrativeAutoFill = async (driver: DriverType, visionInput:
     }
 };
 
-export const generateFantasyTraverse = async (driver: DriverType, duration: string, fieldState: NarrativeFieldState, visionInput: string, visionImage: string | null, worldLaw: WorldLawConfig, subjectType: SubjectType, visionAnalysis: string, colorPalette: string[] = []): Promise<CreativeTreatment[]> => {
+export const generateFantasyTraverse = async (driver: DriverType, duration: string, fieldState: NarrativeFieldState, visionInput: string, visionImage: string | null, worldLaw: WorldLawConfig, subjectType: SubjectType, visionAnalysis: string, colorPalette: string[] = [], faceState?: FaceState): Promise<{ treatments: CreativeTreatment[]; thinkingXml: string }> => {
     try {
         let promptData;
         if (driver === DriverType.COMMERCIAL) promptData = buildCommercialPrompt(duration, fieldState, visionInput, visionImage, worldLaw);
         else if (driver === DriverType.EXPERIMENTAL) promptData = buildExperimentalPrompt(duration, fieldState, visionInput, visionImage);
         else if (driver === DriverType.AESTHETIC) promptData = buildAestheticPrompt(duration, fieldState, visionInput, visionImage, subjectType, worldLaw, colorPalette);
         else if (driver === DriverType.TRAILER) promptData = buildTrailerPrompt(duration, fieldState, visionInput, visionImage);
-        else promptData = buildNarrativePrompt(duration, fieldState, visionInput, visionImage, worldLaw);
+        else promptData = buildNarrativePrompt(duration, fieldState, visionInput, visionImage, worldLaw, 'v3', faceState);
 
         const parts: any[] = [{ text: promptData.text }];
         if (promptData.images && promptData.images.length > 0) parts.push({ inlineData: { mimeType: 'image/jpeg', data: promptData.images[0].split(',')[1] || promptData.images[0] } });
@@ -684,32 +792,58 @@ export const generateFantasyTraverse = async (driver: DriverType, duration: stri
             config: { responseMimeType: 'application/json' }
         }));
         const rawText = response.text || "";
-        const parsed = cleanAndParseJSON(rawText);
-        
+        console.log(`[CoreEngine] Fantasy Traverse raw response (${rawText.length} chars):`, rawText.substring(0, 500));
+
+        // Extract <thought_process> XML before parsing JSON
+        let thinkingXml = '';
+        const xmlMatch = rawText.match(/<thought_process[\s\S]*?<\/thought_process>/);
+        if (xmlMatch) {
+            thinkingXml = xmlMatch[0];
+            console.log(`[CoreEngine] Extracted thinking XML (${thinkingXml.length} chars)`);
+        }
+        const textForParsing = xmlMatch ? rawText.replace(xmlMatch[0], '').trim() : rawText;
+        const parsed = cleanAndParseJSON(textForParsing);
+
         if (parsed) {
-            if (!Array.isArray(parsed)) {
-                // E.g. model returns a single object payload or nested root wrapper
-                return parsed.treatments ? parsed.treatments : [parsed];
-            }
-            return parsed;
+            let items = Array.isArray(parsed) ? parsed : (parsed.treatments || [parsed]);
+
+            // 标准化：部分模型返回 pitch_structure (对象) 而非 pitch (字符串)
+            items = items.map((item: any) => {
+                if (!item.pitch && item.pitch_structure) {
+                    const ps = item.pitch_structure;
+                    item.pitch = Object.entries(ps)
+                        .map(([, v]) => typeof v === 'string' ? v : '')
+                        .filter(Boolean)
+                        .join('\n\n');
+                    delete item.pitch_structure;
+                }
+                if (!item.pitch && item.content) {
+                    item.pitch = typeof item.content === 'string' ? item.content : JSON.stringify(item.content);
+                }
+                if (!item.visualAnchor) item.visualAnchor = item.visual_anchor || item.visualKey || '';
+                return item;
+            });
+
+            console.log(`[CoreEngine] Parsed ${items.length} treatments. First item pitch length: ${items[0]?.pitch?.length || 0}`);
+            return { treatments: items, thinkingXml };
         }
 
         // Fallback if parsing totally failed
         if (rawText.length > 50) {
-            return [{
+            return { treatments: [{
                 id: "fallback_1",
                 type: "CLASSIC",
                 title: "Generated Concept",
                 tagline: "Extracted from raw model output",
-                pitch: rawText,
+                pitch: textForParsing,
                 structure: "UNKNOWN",
                 visualAnchor: ""
-            }];
+            }], thinkingXml };
         }
-        return [];
+        return { treatments: [], thinkingXml };
     } catch (e: any) {
         handleApiError("Fantasy Traverse Generate Error", e);
-        return [];
+        return { treatments: [], thinkingXml: '' };
     }
 };
 

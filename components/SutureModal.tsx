@@ -157,8 +157,8 @@ export const SutureModal: React.FC<SutureModalProps> = ({
         visualStyle: 'vis_wkw',
         actionPacing: 'NORMAL',
         shotDensity: 'SHOTS_25',
-        subjectFocus: 'MID',
-        emptyShot: 'NONE',
+        subjectFocus: 'AUTO',
+        emptyShot: 'AUTO',
         montageId: 'montage_none',
         targetPresetId: activePresetId || 'original',
     });

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { configService } from '../services/configService';
-import { APIConfig, ENGINE_CONFIGS, AVAILABLE_MODELS, ProviderConfig, ApiFormat } from '../types/config';
-import { RefreshCw, X, Save, Trash2, Check, AlertTriangle, Globe, Shield, Zap } from 'lucide-react';
+import { configService, ApiPreset } from '../services/configService';
+import { APIConfig, ENGINE_CONFIGS, AVAILABLE_MODELS } from '../types/config';
+import { RefreshCw, X, Save, Check, AlertTriangle, Globe, Shield, Zap, Plus, Star } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { DriverType } from '../../types';
 
@@ -31,11 +31,12 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
   // Claude Provider state
   const [claudeKey, setClaudeKey] = useState('');
   const [claudeBaseUrl, setClaudeBaseUrl] = useState('');
-  const [claudeApiFormat, setClaudeApiFormat] = useState<ApiFormat>('anthropic');
   const [claudeTest, setClaudeTest] = useState<ProviderTestResult>({ status: 'idle', message: '' });
 
   // UI state
   const [savedMessage, setSavedMessage] = useState('');
+  const [presets, setPresets] = useState<ApiPreset[]>([]);
+  const [presetName, setPresetName] = useState('');
 
   const isRetro = globalTheme === 'retro';
 
@@ -63,7 +64,7 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
     setGeminiBaseUrl(c.gemini.baseUrl);
     setClaudeKey(c.claude.apiKey);
     setClaudeBaseUrl(c.claude.baseUrl);
-    setClaudeApiFormat(c.claude.apiFormat || 'anthropic');
+    setPresets(configService.getPresets());
   }, []);
 
   if (!config) return null;
@@ -74,7 +75,7 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
   const handleSave = () => {
     const newConfig: APIConfig = {
       gemini: { apiKey: geminiKey, mode: geminiMode, baseUrl: geminiBaseUrl },
-      claude: { apiKey: claudeKey, mode: 'proxy', baseUrl: claudeBaseUrl, apiFormat: claudeApiFormat },
+      claude: { apiKey: claudeKey, mode: 'proxy', baseUrl: claudeBaseUrl },
       engines: config.engines,
     };
     configService.saveConfig(newConfig);
@@ -129,8 +130,38 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
       setGeminiBaseUrl('');
       setClaudeKey('');
       setClaudeBaseUrl('');
-      setClaudeApiFormat('anthropic');
     }
+  };
+
+  // ============================================================
+  // 预设管理
+  // ============================================================
+  const handleSavePreset = () => {
+    if (!claudeKey && !claudeBaseUrl) return;
+    const name = presetName.trim() || `配置 ${presets.length + 1}`;
+    const preset: ApiPreset = {
+      id: Date.now().toString(36),
+      name,
+      apiKey: claudeKey,
+      baseUrl: claudeBaseUrl,
+      apiFormat: 'anthropic' as const,
+    };
+    configService.savePreset(preset);
+    setPresets(configService.getPresets());
+    setPresetName('');
+    flashSaved(lang === 'CN' ? `已保存: ${name}` : `Saved: ${name}`);
+  };
+
+  const handleApplyPreset = (preset: ApiPreset) => {
+    setClaudeKey(preset.apiKey);
+    setClaudeBaseUrl(preset.baseUrl);
+    configService.applyPreset(preset);
+    flashSaved(lang === 'CN' ? `已切换: ${preset.name}` : `Applied: ${preset.name}`);
+  };
+
+  const handleDeletePreset = (id: string) => {
+    configService.deletePreset(id);
+    setPresets(configService.getPresets());
   };
 
   // ============================================================
@@ -266,8 +297,8 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
                   type="text"
                   value={baseUrl}
                   onChange={(e) => setBaseUrlFn(e.target.value)}
-                  placeholder={provider === 'claude' && claudeApiFormat === 'anthropic' 
-                    ? 'https://luckycodecc.cn/claude' 
+                  placeholder={provider === 'claude'
+                    ? 'https://luckycodecc.cn/claude'
                     : 'https://api.yourproxy.com/v1'}
                   className={inputClass}
                   style={{ borderLeftColor: isRetro ? '#8B261D' : accentColor, borderLeftWidth: '3px' }}
@@ -291,40 +322,6 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
             </div>
           )}
 
-          {/* Claude API 协议格式选择 */}
-          {provider === 'claude' && (
-            <div>
-              <label className={labelClass}>{lang === 'CN' ? 'API 协议格式' : 'API FORMAT'}</label>
-              <div className="flex gap-1 mt-1">
-                {([
-                  { value: 'anthropic' as ApiFormat, label: lang === 'CN' ? 'Anthropic 原生' : 'Anthropic Native', desc: '/v1/messages' },
-                  { value: 'openai' as ApiFormat, label: lang === 'CN' ? 'OpenAI 兼容' : 'OpenAI Compatible', desc: '/chat/completions' },
-                ] as const).map((opt) => (
-                  <button
-                    key={opt.value}
-                    onClick={() => setClaudeApiFormat(opt.value)}
-                    className={`flex-1 py-1.5 px-2 text-[10px] rounded-sm border transition-all tracking-wider flex flex-col items-center gap-0.5
-                      ${claudeApiFormat === opt.value
-                        ? isRetro
-                          ? 'bg-[#3D1A16] text-[#F4EFE0] border-[#8B261D]'
-                          : `bg-zinc-800 text-white border-zinc-600`
-                        : isRetro
-                          ? 'bg-transparent text-[#3D1A16]/40 border-[#8B261D]/15 hover:border-[#8B261D]/40'
-                          : 'bg-transparent text-zinc-500 border-zinc-800/40 hover:border-zinc-600'
-                      }`}
-                  >
-                    <span className="font-medium">{opt.label}</span>
-                    <span className="opacity-60 text-[8px]">{opt.desc}</span>
-                  </button>
-                ))}
-              </div>
-              <p className={`text-[8px] ${isRetro ? 'text-[#3D1A16]/40' : 'text-zinc-600'} mt-1`}>
-                {lang === 'CN'
-                  ? '大部分 Claude 代理使用 Anthropic 原生格式，如确认是 OpenAI 兼容格式请切换'
-                  : 'Most Claude proxies use Anthropic native format. Switch to OpenAI if your proxy requires it.'}
-              </p>
-            </div>
-          )}
         </div>
       </div>
     );
@@ -414,6 +411,80 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
               claudeTest
             )}
           </div>
+        </div>
+
+        {/* ── 预设快切 ── */}
+        <div className={sectionBorder + ' pb-4'}>
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-xs font-bold tracking-[0.2em] uppercase" style={{ color: isRetro ? '#8B261D' : accentColor }}>
+              {lang === 'CN' ? '快速切换' : 'PRESETS'}
+              <span className={`ml-3 text-[9px] ${isRetro ? 'text-[#8B261D]/40' : 'text-zinc-500'} tracking-widest normal-case font-medium`}>
+                {lang === 'CN' ? '保存多组 API 配置，一键切换' : 'Save & switch API configs'}
+              </span>
+            </h3>
+          </div>
+
+          {/* 保存当前配置为预设 */}
+          <div className="flex items-center gap-2 mb-3">
+            <input
+              type="text"
+              value={presetName}
+              onChange={(e) => setPresetName(e.target.value)}
+              placeholder={lang === 'CN' ? '输入预设名称...' : 'Preset name...'}
+              className={`flex-1 ${isRetro
+                ? 'bg-[#F4EFE0] border-[#8B261D]/20 text-black placeholder:text-[#8B261D]/30'
+                : 'bg-black/60 border-zinc-800 text-white placeholder:text-zinc-700'
+              } rounded-sm px-3 py-1.5 text-xs focus:outline-none transition-all font-mono border`}
+            />
+            <button
+              onClick={handleSavePreset}
+              disabled={!claudeKey && !claudeBaseUrl}
+              className={`flex items-center gap-1.5 px-3 py-1.5 border rounded-sm text-[10px] font-bold uppercase tracking-wider transition-all disabled:opacity-30 whitespace-nowrap`}
+              style={{
+                color: isRetro ? '#8B261D' : accentColor,
+                borderColor: isRetro ? '#8B261D44' : `${accentColor}44`,
+              }}
+            >
+              <Plus className="w-3 h-3" />
+              {lang === 'CN' ? '保存当前' : 'SAVE'}
+            </button>
+          </div>
+
+          {/* 预设列表 */}
+          {presets.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {presets.map((preset) => {
+                const isActive = preset.apiKey === claudeKey && preset.baseUrl === claudeBaseUrl;
+                return (
+                  <div
+                    key={preset.id}
+                    className={`group flex items-center gap-1.5 px-3 py-1.5 rounded-sm border text-[10px] font-mono transition-all cursor-pointer ${
+                      isActive
+                        ? isRetro
+                          ? 'bg-[#8B261D] text-white border-[#8B261D]'
+                          : 'bg-white/10 text-white border-zinc-500'
+                        : isRetro
+                          ? 'bg-[#F4EFE0] text-[#3D1A16]/70 border-[#8B261D]/15 hover:border-[#8B261D]/40'
+                          : 'bg-black/30 text-zinc-500 border-zinc-800 hover:border-zinc-600 hover:text-zinc-300'
+                    }`}
+                    onClick={() => handleApplyPreset(preset)}
+                  >
+                    <Star className={`w-3 h-3 ${isActive ? 'fill-current' : ''}`} />
+                    <span className="tracking-wider uppercase">{preset.name}</span>
+                    <span className={`text-[8px] ${isActive ? 'opacity-60' : 'opacity-40'}`}>
+                      {preset.baseUrl ? (() => { try { return new URL(preset.baseUrl).host; } catch { return preset.baseUrl; } })() : 'direct'}
+                    </span>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleDeletePreset(preset.id); }}
+                      className={`ml-1 opacity-0 group-hover:opacity-100 transition-opacity ${isRetro ? 'hover:text-red-600' : 'hover:text-red-400'}`}
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* ── Section 02: 引擎映射矩阵 ── */}

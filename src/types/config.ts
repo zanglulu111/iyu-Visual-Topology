@@ -14,13 +14,12 @@
 // ============================================================
 
 export type ProviderMode = 'official' | 'proxy';
-export type ApiFormat = 'anthropic' | 'openai';  // anthropic = /v1/messages, openai = /chat/completions
 
 export interface ProviderConfig {
   apiKey: string;
   mode: ProviderMode;    // 'official' = 官方SDK直连, 'proxy' = 第三方代理
   baseUrl: string;       // 代理模式下的基地址 (e.g. https://xxx.com/claude)
-  apiFormat?: ApiFormat; // API 协议格式：'anthropic'(默认) 或 'openai'
+  apiFormat?: 'anthropic'; // 保留字段，始终为 anthropic
 }
 
 // ============================================================

@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Terminal, Copy, Check, Layers, Boxes, FileText, Sparkles } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
-import { NarrativeFieldState, WorldLawConfig, DriverType } from '../types';
+import { NarrativeFieldState, WorldLawConfig, DriverType, FaceState } from '../types';
 import { buildNarrativePrompt, PromptArchVersion } from '../services/narrativeGenerator';
 
 interface PromptInspectorModalProps {
@@ -14,6 +14,7 @@ interface PromptInspectorModalProps {
     visionImage: string | null;
     worldLawConfig: WorldLawConfig;
     driverType: DriverType | null;
+    faceState: FaceState;
 }
 
 // 版本选项卡配置
@@ -32,7 +33,8 @@ export const PromptInspectorModal: React.FC<PromptInspectorModalProps> = ({
     visionInput,
     visionImage,
     worldLawConfig,
-    driverType
+    driverType,
+    faceState
 }) => {
     const { theme } = useTheme();
     const [copied, setCopied] = useState(false);
@@ -41,14 +43,15 @@ export const PromptInspectorModal: React.FC<PromptInspectorModalProps> = ({
     // 计算实时生成的提示词（响应版本切换）
     const livePrompt = useMemo(() => {
         if (!isOpen) return "";
+        console.log('[PromptInspectorModal] Building prompt with faceState:', faceState);
         try {
-            const result = buildNarrativePrompt("", fieldState, visionInput, visionImage, worldLawConfig, activeVersion);
+            const result = buildNarrativePrompt("", fieldState, visionInput, visionImage, worldLawConfig, activeVersion, faceState);
             return result.text;
         } catch (e) {
             console.error(e);
             return `提示词生成过程中遇到错误，请检查标签完整性。\n\n[ERROR DETAILS]\n${e instanceof Error ? e.stack : String(e)}`;
         }
-    }, [isOpen, fieldState, visionInput, visionImage, worldLawConfig, driverType, activeVersion]);
+    }, [isOpen, fieldState, visionInput, visionImage, worldLawConfig, driverType, activeVersion, faceState]);
 
     // 估算 token 数（粗略：中文约 2 token/字，英文约 1.3 token/word）
     const estimatedTokens = useMemo(() => {

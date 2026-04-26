@@ -37,7 +37,8 @@ import {
     User,
     ViewMode,
     AestheticMode,
-    AestheticPreset
+    AestheticPreset,
+    FaceState
 } from './types';
 import {
     DRIVERS,
@@ -155,7 +156,8 @@ const App: React.FC = () => {
     const [undoRedoState, undoRedoDispatch] = useReducer(undoRedoReducer, { past: [], present: {} as NarrativeFieldState, future: [] });
     const narrativeFieldState = undoRedoState.present;
     const [savedFieldStates, setSavedFieldStates] = useState<Record<string, NarrativeFieldState>>({});
-    const [worldLawConfig, setWorldLawConfig] = useState<WorldLawConfig>({ gravity: 4 });
+    const [faceState, setFaceState] = useState<FaceState>({});
+    const [worldLawConfig, setWorldLawConfig] = useState<WorldLawConfig>({ gravity: 1 });
     const [showRings, setShowRings] = useState(true);
 
     // FIXED: Always maintain 7 slots
@@ -208,6 +210,24 @@ const App: React.FC = () => {
         setActiveHistoryItem(null);
     };
 
+    const ensureFacesForTags = (tags: string[]) => {
+        setFaceState(prev => {
+            const updated = { ...prev };
+            let changed = false;
+            tags.forEach(tag => {
+                if (!updated[tag]) {
+                    updated[tag] = ['bright', 'dark', 'tension'][Math.floor(Math.random() * 3)] as 'bright' | 'dark' | 'tension';
+                    changed = true;
+                    console.log(`[ensureFacesForTags] Assigned face "${updated[tag]}" to tag "${tag}"`);
+                }
+            });
+            if (changed) {
+                console.log('[ensureFacesForTags] Updated faceState:', updated);
+            }
+            return changed ? updated : prev;
+        });
+    };
+
     const [currentUser, setCurrentUser] = useState<User>({
         id: 'guest_user',
         username: 'Guest',
@@ -228,6 +248,7 @@ const App: React.FC = () => {
     const [codexDetailTab, setCodexDetailTab] = useState<'DEFINITION' | 'ANALOGY' | 'APPLICATION'>('DEFINITION');
 
     const [generatedTreatments, setGeneratedTreatments] = useState<CreativeTreatment[]>([]);
+    const [thinkingXml, setThinkingXml] = useState<string>('');
 
     const [activeBlueprint, setActiveBlueprint] = useState<CreativeBlueprint | null>(null);
     const [metonymyBlueprint, setMetonymyBlueprint] = useState<CreativeBlueprint | null>(null);
@@ -483,7 +504,7 @@ const App: React.FC = () => {
         setGeneratedTreatments([]);
         setActiveBlueprint(null);
         setCachedBlueprints({});
-        setWorldLawConfig({ gravity: 3 });
+        setWorldLawConfig({ gravity: 1 });
 
         // All modes: close sidebars by default as per user request
         setIsSkinOpen(false);
@@ -644,6 +665,7 @@ const App: React.FC = () => {
         }
 
         updateNarrativeState(newState);
+        ensureFacesForTags(Object.values(newState).flat());
     };
 
     const handleApplyPreset = (preset: AestheticPreset) => {
@@ -681,6 +703,7 @@ const App: React.FC = () => {
         if (!selectedDriver) return;
         const newState = randomizerService.generateGlobalRandomState(selectedDriver, narrativeFieldState, lockedModules, lockedTags);
         updateNarrativeState(newState);
+        ensureFacesForTags(Object.values(newState).flat());
     };
 
     const handleGlobalReset = () => {
@@ -704,6 +727,7 @@ const App: React.FC = () => {
         if (!selectedDriver) return;
         const newState = randomizerService.randomizeSkinState(selectedDriver, narrativeFieldState, lockedModules, lockedTags);
         updateNarrativeState(newState);
+        ensureFacesForTags(Object.values(newState).flat());
     };
 
     const handleResetSkinOnly = () => {
@@ -743,6 +767,9 @@ const App: React.FC = () => {
         if (!selectedDriver) return;
         const newState = randomizerService.randomizeFormulaState(selectedDriver, narrativeFieldState, lockedModules, lockedTags, subjectType, aestheticMode);
         updateNarrativeState(newState);
+
+        const allTags = Object.values(newState).flat();
+        ensureFacesForTags(allTags);
     };
 
     const handleToggleTagLock = (blockId: string, tagName: string) => {
@@ -768,6 +795,17 @@ const App: React.FC = () => {
             updateNarrativeState({
                 ...narrativeFieldState,
                 [blockId]: updatedTags
+            });
+
+            // Clean up old tag's face and assign new face to new tag
+            setFaceState(prev => {
+                const updated = { ...prev };
+                delete updated[oldTag];
+                if (!updated[newTag]) {
+                    updated[newTag] = ['bright', 'dark', 'tension'][Math.floor(Math.random() * 3)] as 'bright' | 'dark' | 'tension';
+                    console.log(`[handleRandomizeTag] Replaced "${oldTag}" with "${newTag}", assigned face "${updated[newTag]}"`);
+                }
+                return updated;
             });
 
             if (lockedTags[blockId]) {
@@ -838,6 +876,7 @@ const App: React.FC = () => {
             }
             newState[blockId] = [...keptTags, ...selected];
             updateNarrativeState(newState);
+            ensureFacesForTags(newState[blockId] || []);
             return;
         }
 
@@ -870,6 +909,7 @@ const App: React.FC = () => {
                     newState[blockId] = [targetPool[Math.floor(Math.random() * targetPool.length)].name];
                 }
                 updateNarrativeState(newState);
+                ensureFacesForTags(newState[blockId] || []);
                 return;
             }
 
@@ -886,6 +926,7 @@ const App: React.FC = () => {
             }
             newState[blockId] = [...keptTags, ...selected];
             updateNarrativeState(newState);
+            ensureFacesForTags(newState[blockId] || []);
         }
     };
 
@@ -1002,6 +1043,7 @@ const App: React.FC = () => {
         }
 
         updateNarrativeState(newState);
+        ensureFacesForTags(Object.values(newState).flat());
     };
 
     // === Level 2c: Story Structure group randomize ===
@@ -1070,6 +1112,7 @@ const App: React.FC = () => {
         });
 
         updateNarrativeState(newState);
+        ensureFacesForTags(Object.values(newState).flat());
     };
 
     const handleClearBlock = (blockId: string) => {
@@ -1152,17 +1195,43 @@ const App: React.FC = () => {
             const isTogglingOn = !current.includes(tag);
             newState[blockId] = isTogglingOn ? [tag] : [];
             updateNarrativeState(newState);
+
+            if (isTogglingOn && !faceState[tag]) {
+                const faces: ('bright' | 'dark' | 'tension')[] = ['bright', 'dark', 'tension'];
+                const randomFace = faces[Math.floor(Math.random() * faces.length)];
+                setFaceState(prev => ({ ...prev, [tag]: randomFace }));
+            } else if (!isTogglingOn) {
+                setFaceState(prev => {
+                    const next = { ...prev };
+                    delete next[tag];
+                    return next;
+                });
+            }
             return;
         }
 
         if (current.includes(tag)) {
             newState[blockId] = current.filter(t => t !== tag);
+            // Remove face state when deselecting
+            setFaceState(prev => {
+                const next = { ...prev };
+                delete next[tag];
+                return next;
+            });
         } else {
             if (current.length >= limit) {
                 alert(lang === 'EN' ? `Max ${limit} items for this module.` : `该模块最多选择 ${limit} 个。`);
                 return;
             }
             newState[blockId] = [...current, tag];
+
+            // Auto-assign random face if no face exists
+            if (!faceState[tag]) {
+                const faces: ('bright' | 'dark' | 'tension')[] = ['bright', 'dark', 'tension'];
+                const randomFace = faces[Math.floor(Math.random() * faces.length)];
+                setFaceState(prev => ({ ...prev, [tag]: randomFace }));
+                console.log(`[App] Auto-assigned random face "${randomFace}" to tag "${tag}"`);
+            }
         }
         updateNarrativeState(newState);
     };
@@ -1202,7 +1271,7 @@ const App: React.FC = () => {
         setIsGenerating(true);
         setTraverseStartTime(Date.now());
         try {
-            const treatments = await geminiService.generateFantasyTraverse(
+            const result = await geminiService.generateFantasyTraverse(
                 selectedDriver,
                 "SHORT",
                 narrativeFieldState,
@@ -1211,8 +1280,11 @@ const App: React.FC = () => {
                 worldLawConfig,
                 subjectType,
                 visionAnalysis,
-                colorPalette.filter(c => c !== "")
+                colorPalette.filter(c => c !== ""),
+                faceState
             );
+            const treatments = result.treatments;
+            if (result.thinkingXml) setThinkingXml(result.thinkingXml);
             if (treatments?.length) {
                 // Fix: Ensure all treatments have IDs
                 const treatmentsWithIds = treatments.map((t, i) => ({
@@ -1801,6 +1873,10 @@ const App: React.FC = () => {
                                         onApplyPreset={handleApplyPreset}
                                         onEditCustomDef={handleEditCustomDef}
                                         showRings={showRings}
+                                        faceState={faceState}
+                                        onFaceStateChange={(locks) => {
+                                            setFaceState(prev => ({ ...prev, ...locks }));
+                                        }}
                                     />
                                 </div>
                             )}
@@ -1842,6 +1918,9 @@ const App: React.FC = () => {
                                         fieldState={activeHistoryItem?.fieldState || narrativeFieldState}
                                         visionInput={activeHistoryItem?.visionInput || visionInput}
                                         visionAnalysis={activeHistoryItem?.visionAnalysis || visionAnalysis}
+                                        thinkingXml={thinkingXml}
+                                        worldLawConfig={activeHistoryItem?.worldLaw || worldLawConfig}
+                                        onToggleTag={handleToggleTag}
                                     />
                                 </div>
                             )}
@@ -2024,6 +2103,10 @@ const App: React.FC = () => {
                         lang={lang}
                         driverType={selectedDriver || DriverType.NARRATIVE}
                         onAddCustomDef={handleAddCustomDef}
+                        onTempLockChange={(locks) => {
+                            setFaceState(prev => ({ ...prev, ...locks }));
+                        }}
+                        initialFaceState={faceState}
                         customLibraryData={
                             activeBlockId === 'aes_palette_preset'
                                 ? [{ id: 'lib_master', name: '视觉大师预设 (Master Presets)', desc: 'Pre-configured Cinematic Styles', items: MASTER_PRESETS }]
@@ -2083,6 +2166,7 @@ const App: React.FC = () => {
                     visionImage={visionImage}
                     worldLawConfig={worldLawConfig}
                     driverType={selectedDriver}
+                    faceState={faceState}
                 />
             </div>
         </QueryClientProvider>

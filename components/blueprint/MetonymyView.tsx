@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import {
     Maximize2,
     Minimize2,
@@ -68,6 +68,12 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
     blueprint, language, onUpdateBlueprint, themeAccent, themeBorder, isFullScreen, onToggleFullScreen, fieldState, onSaveToHistory, onGenerateAssetImage, onSutureOpenChange, theme
 }) => {
     const rawMetonymyData = blueprint.metonymyData || { screenplay: [], staticStoryboard: [], dynamicScript: [], stylePresets: [] };
+
+    // Use ref to track latest blueprint for async operations
+    const blueprintRef = useRef(blueprint);
+    useEffect(() => {
+        blueprintRef.current = blueprint;
+    }, [blueprint]);
 
     const defaultPreset: MetonymyStylePreset = {
         id: 'original',
@@ -793,9 +799,13 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
     const handleSutureGenerate = async (text: string, config: SutureConfig) => {
         if (!activeSectionId) return null;
 
+        console.log('[Metonymy] handleSutureGenerate called for section:', activeSectionId);
+
         const currentIndex = currentSections.findIndex(s => s.id === activeSectionId);
         const section = currentSections[currentIndex];
         const presetToUseId = config.targetPresetId || section.mountedPresetId || currentActivePresetId || 'original';
+
+        console.log('[Metonymy] Using preset:', presetToUseId, 'for section index:', currentIndex);
 
         setIsGenerating(true);
         setGenerationStartTime(Date.now());
@@ -819,11 +829,20 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
                     // NEW LOGIC: Also initialize dynamic storyboard to ensure structure exists
                     const initialDynamicShots = syncDynamicWithStatic(parsedStaticShots, []);
 
-                    const newSections = currentSections.map(s => {
+                    // FIX: Use ref to get latest blueprint state to avoid stale closure
+                    const latestBlueprint = blueprintRef.current;
+                    const latestMetonymyData = latestBlueprint.metonymyData || { screenplay: [], staticStoryboard: [], dynamicScript: [], stylePresets: [] };
+                    const latestSections = Array.isArray(latestMetonymyData.screenplay) ? latestMetonymyData.screenplay : [];
+
+                    console.log('[Metonymy] New script generated:', response.literaryScript.substring(0, 100) + '...');
+                    console.log('[Metonymy] Updating section:', activeSectionId, 'in', latestSections.length, 'sections');
+
+                    const newSections = latestSections.map((s: ScreenplaySection) => {
                         if (s.id === activeSectionId) {
+                            console.log('[Metonymy] Found target section, updating with new script');
                             return {
                                 ...s,
-                                mountedPresetId: 'original', // Force mount original style per user request
+                                mountedPresetId: 'original',
                                 sutureDataMap: {
                                     ...s.sutureDataMap,
                                     'original': {
@@ -837,7 +856,18 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
                         }
                         return s;
                     });
-                    updateMetonymyData({ screenplay: newSections });
+
+                    console.log('[Metonymy] Calling onUpdateBlueprint with', newSections.length, 'sections');
+                    onUpdateBlueprint({
+                        ...latestBlueprint,
+                        metonymyData: {
+                            screenplay: newSections,
+                            staticStoryboard: latestMetonymyData.staticStoryboard,
+                            dynamicScript: latestMetonymyData.dynamicScript,
+                            stylePresets: latestMetonymyData.stylePresets || currentPresets,
+                            activePresetId: latestMetonymyData.activePresetId || 'original'
+                        }
+                    });
                     return response.literaryScript;
                 }
             } else {
@@ -1151,13 +1181,13 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
                         {!focusedSceneId && (
                             <VisualStyleManager
                                 presets={currentPresets}
-                                activePresetId={currentActivePresetId}
+                                activePresetId={currentActivePresetId || 'original'}
                                 onUpdatePresets={handleUpdatePresets}
                                 onSetActivePreset={handleSetActivePreset}
                                 onUpdatePresetsAndActive={handleUpdatePresetsAndActive}
                                 lang={language}
                                 themeAccent={themeAccent}
-                                theme={theme}
+                                theme={theme || 'default'}
                                 isExpanded={isStyleExpanded}
                                 onToggleExpand={setIsStyleExpanded}
                                 sourceText={sourceText}
@@ -1267,7 +1297,7 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
                                                 onToggleDynamicLang={() => setDynamicDisplayLang(prev => prev === 'CN' ? 'EN' : 'CN')}
                                                 themeAccent={themeAccent}
                                                 themeColorBase={themeColorBase}
-                                                theme={theme}
+                                                theme={theme || 'default'}
                                                 language={language}
                                                 onDragStart={(e) => setDraggedSceneId(section.id)}
                                                 onDragOver={(e) => e.preventDefault()}
@@ -1276,7 +1306,7 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
                                                 isDragged={draggedSceneId === section.id}
                                                 onToggleGlobalSync={() => handleToggleGlobalSync(section.id)}
                                                 presets={currentPresets}
-                                                activePresetId={currentActivePresetId}
+                                                activePresetId={currentActivePresetId || 'original'}
                                                 onMountPreset={(pid) => handleMountPreset(section.id, pid)}
                                                 onGenerateAssetImage={onGenerateAssetImage}
                                                 onUpdateSection={handleUpdateSection}
