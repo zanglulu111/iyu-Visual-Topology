@@ -30,3 +30,7 @@ dist-ssr
 .vercel
 .env*.local
 philosophy-kb/
+
+# Local agent resources and generated media
+.agents/resources/
+outputs/

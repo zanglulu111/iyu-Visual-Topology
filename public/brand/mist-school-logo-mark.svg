@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">迷雾学派标志</title>
+  <desc id="desc">A vector mark for Mist School: three topological orbits around a barred empty center, with restrained mist bands.</desc>
+  <defs>
+    <linearGradient id="mistStroke" x1="92" y1="80" x2="420" y2="432" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F2EBD8"/>
+      <stop offset="0.48" stop-color="#72D8C7"/>
+      <stop offset="1" stop-color="#B96E42"/>
+    </linearGradient>
+    <linearGradient id="voidGlow" x1="212" y1="205" x2="300" y2="308" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#151820"/>
+      <stop offset="1" stop-color="#050609"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="72" fill="#0B0D11"/>
+
+  <g opacity="0.2" stroke="#F2EBD8" stroke-width="1.4" fill="none">
+    <path d="M92 168C144 149 188 151 236 169C286 188 340 190 420 162"/>
+    <path d="M78 256C145 228 202 230 258 256C310 280 363 279 434 249"/>
+    <path d="M96 347C151 330 209 327 270 349C319 367 367 365 416 342"/>
+  </g>
+
+  <g transform="translate(256 256)" fill="none" stroke-linecap="round">
+    <circle r="178" stroke="#F2EBD8" stroke-width="8" opacity="0.92"/>
+    <path d="M-126 -126A178 178 0 0 1 143 -105" stroke="#72D8C7" stroke-width="8"/>
+    <path d="M128 123A178 178 0 0 1 -145 104" stroke="#B96E42" stroke-width="8"/>
+
+    <ellipse rx="164" ry="58" transform="rotate(0)" stroke="url(#mistStroke)" stroke-width="7" opacity="0.94"/>
+    <ellipse rx="164" ry="58" transform="rotate(58)" stroke="#F2EBD8" stroke-width="5" opacity="0.54"/>
+    <ellipse rx="164" ry="58" transform="rotate(-58)" stroke="#72D8C7" stroke-width="5" opacity="0.56"/>
+
+    <circle r="43" fill="url(#voidGlow)" stroke="#F2EBD8" stroke-width="7"/>
+    <circle r="18" fill="#050609"/>
+    <path d="M-54 30L54 -30" stroke="#B83B4A" stroke-width="10"/>
+    <path d="M-72 41L-44 25M44 -25L72 -41" stroke="#F2EBD8" stroke-width="5" opacity="0.85"/>
+  </g>
+</svg>

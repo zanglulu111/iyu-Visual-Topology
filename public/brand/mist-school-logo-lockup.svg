@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 360" role="img" aria-labelledby="title desc">
+  <title id="title">迷雾学派横版 Logo</title>
+  <desc id="desc">Horizontal logo lockup for Mist School, pairing the topological void mark with Chinese and English wordmark text.</desc>
+  <defs>
+    <linearGradient id="markStroke" x1="52" y1="40" x2="268" y2="280" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F2EBD8"/>
+      <stop offset="0.52" stop-color="#72D8C7"/>
+      <stop offset="1" stop-color="#B96E42"/>
+    </linearGradient>
+    <linearGradient id="wordGlow" x1="382" y1="86" x2="952" y2="226" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F8F1DD"/>
+      <stop offset="1" stop-color="#CDBB95"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1280" height="360" fill="#0B0D11"/>
+
+  <g transform="translate(180 180)" fill="none" stroke-linecap="round">
+    <circle r="118" stroke="#F2EBD8" stroke-width="6" opacity="0.94"/>
+    <path d="M-83 -84A118 118 0 0 1 96 -71" stroke="#72D8C7" stroke-width="6"/>
+    <path d="M85 82A118 118 0 0 1 -96 69" stroke="#B96E42" stroke-width="6"/>
+    <ellipse rx="109" ry="38" stroke="url(#markStroke)" stroke-width="5.5"/>
+    <ellipse rx="109" ry="38" transform="rotate(58)" stroke="#F2EBD8" stroke-width="4" opacity="0.55"/>
+    <ellipse rx="109" ry="38" transform="rotate(-58)" stroke="#72D8C7" stroke-width="4" opacity="0.58"/>
+    <circle r="31" fill="#050609" stroke="#F2EBD8" stroke-width="5"/>
+    <path d="M-38 22L38 -22" stroke="#B83B4A" stroke-width="7"/>
+  </g>
+
+  <g opacity="0.18" fill="none" stroke="#F2EBD8" stroke-width="1.2">
+    <path d="M352 114C448 90 530 90 624 115C710 138 797 136 914 105"/>
+    <path d="M352 247C448 223 530 223 624 248C710 271 797 269 914 238"/>
+  </g>
+
+  <text x="360" y="170"
+        fill="url(#wordGlow)"
+        font-family="Songti SC, STSong, Noto Serif CJK SC, Noto Serif SC, serif"
+        font-size="84"
+        font-weight="700">迷雾学派</text>
+  <text x="366" y="230"
+        fill="#72D8C7"
+        font-family="Avenir Next, Inter, Helvetica Neue, Arial, sans-serif"
+        font-size="29"
+        font-weight="500">MIST SCHOOL · VISIONARY EROS TOPOLOGY</text>
+  <path d="M360 258H984" stroke="#B96E42" stroke-width="3" opacity="0.76"/>
+</svg>
