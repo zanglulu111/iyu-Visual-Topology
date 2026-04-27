@@ -31,7 +31,7 @@ export const SV1_GROUP_B: LibraryCategoryDef = {
         'inciting_incident_激励事件',
         'rising_action_上升动作',
         'climax_高潮',
-        'resolution_存在落点',
+        'resolution_余痕收束',
       ],
       reference: '《肖申克的救赎》(The Shawshank Redemption)；《阿甘正传》(Forrest Gump)；《老人与海》(The Old Man and the Sea)',
       referenceEn: 'The Shawshank Redemption; Forrest Gump; The Old Man and the Sea',

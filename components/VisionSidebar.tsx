@@ -6,6 +6,7 @@ import { supabaseDatabase } from '../services/supabaseDatabase';
 import { generateAestheticReverse } from '../services/aestheticReverseService';
 import { ProcessingTimer } from './SharedBlueprintComponents';
 import { useTheme } from '../contexts/ThemeContext';
+import { AdminXRayButton } from './XRayInspector';
 
 interface VisionSidebarProps {
     isOpen: boolean;
@@ -24,6 +25,7 @@ interface VisionSidebarProps {
     onVisionAnalysisChange?: (val: string) => void;
     onAnalyzeImage?: () => void;
     isAnalyzingImage?: boolean;
+    isAdmin?: boolean;
     zIndex?: number;
 }
 
@@ -44,6 +46,7 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
     onVisionAnalysisChange,
     onAnalyzeImage,
     isAnalyzingImage,
+    isAdmin,
     zIndex = 60
 }) => {
     const { theme: currentTheme } = useTheme();
@@ -274,23 +277,49 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
                             <img src={visionImage} alt="Reference" className="w-full h-full object-cover" />
                             <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3 backdrop-blur-sm">
                                 {onGenerateImage && (
-                                    <button
-                                        onClick={handleGenerateImageClick}
-                                        className="p-3 bg-zinc-800 text-white rounded-full hover:bg-zinc-700 transition-all transform hover:scale-110 border border-zinc-600"
-                                        title={lang === 'EN' ? "Regenerate" : "重新生成"}
-                                    >
-                                        {isGeneratingImg ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
-                                    </button>
+                                    <>
+                                        <button
+                                            onClick={handleGenerateImageClick}
+                                            className="p-3 bg-zinc-800 text-white rounded-full hover:bg-zinc-700 transition-all transform hover:scale-110 border border-zinc-600"
+                                            title={lang === 'EN' ? "Regenerate" : "重新生成"}
+                                        >
+                                            {isGeneratingImg ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
+                                        </button>
+                                        <AdminXRayButton
+                                            isAdmin={isAdmin}
+                                            lang={lang === 'EN' ? 'EN' : 'CN'}
+                                            title={lang === 'EN' ? 'X-Ray Image Generation Prompt' : 'X-Ray 图片生成指令'}
+                                            payload={visionInput}
+                                            disabled={!visionInput.trim()}
+                                            className="p-3 rounded-full bg-zinc-800 text-white hover:bg-zinc-700 border border-zinc-600"
+                                            iconSize={18}
+                                        />
+                                    </>
                                 )}
                                 <button onClick={() => onVisionImageChange(null)} className="p-3 bg-zinc-800 text-white rounded-full hover:bg-red-900/80 hover:text-red-200 hover:border-red-500/50 transition-all transform hover:scale-110 border border-zinc-600"><Trash2 size={18} /></button>
                                 {onAnalyzeImage && (
-                                    <button
-                                        onClick={onAnalyzeImage}
-                                        className={`p-3 bg-zinc-800 text-white rounded-full hover:bg-zinc-700 transition-all transform hover:scale-110 border border-zinc-600 ${isAnalyzingImage ? 'opacity-50 cursor-wait' : ''}`}
-                                        title={lang === 'EN' ? "Analyze" : "深度解析"}
-                                    >
-                                        {isAnalyzingImage ? <Loader2 size={18} className="animate-spin" /> : <ScanEye size={18} />}
-                                    </button>
+                                    <>
+                                        <button
+                                            onClick={onAnalyzeImage}
+                                            className={`p-3 bg-zinc-800 text-white rounded-full hover:bg-zinc-700 transition-all transform hover:scale-110 border border-zinc-600 ${isAnalyzingImage ? 'opacity-50 cursor-wait' : ''}`}
+                                            title={lang === 'EN' ? "Analyze" : "深度解析"}
+                                        >
+                                            {isAnalyzingImage ? <Loader2 size={18} className="animate-spin" /> : <ScanEye size={18} />}
+                                        </button>
+                                        <AdminXRayButton
+                                            isAdmin={isAdmin}
+                                            lang={lang === 'EN' ? 'EN' : 'CN'}
+                                            title={lang === 'EN' ? 'X-Ray Image Analysis Prompt' : 'X-Ray 图像解析指令'}
+                                            payload={{
+                                                task: isAesthetic ? 'Aesthetic reverse analysis' : 'Narrative image analysis',
+                                                visionInput,
+                                                hasImage: Boolean(visionImage)
+                                            }}
+                                            disabled={!visionImage}
+                                            className="p-3 rounded-full bg-zinc-800 text-white hover:bg-zinc-700 border border-zinc-600"
+                                            iconSize={18}
+                                        />
+                                    </>
                                 )}
                             </div>
                         </div>
@@ -351,10 +380,11 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
 
                 {/* 4. Action Button (Engine Mapping) */}
                 <div className="mt-8">
+                    <div className="flex items-center gap-2">
                     <button
                         onClick={onAutoFill}
                         disabled={isProcessing || (!visionInput && !visionImage && !visionAnalysis)}
-                        className={`w-full py-4 border rounded-xl flex items-center justify-center gap-3 transition-all disabled:opacity-50 disabled:cursor-not-allowed group relative overflow-hidden ${currentTheme === 'retro' ? 'bg-[#8B261D] hover:bg-[#631B15] border-[#8B261D] text-white shadow-none' : (isCommercial ? 'bg-cyan-500 hover:bg-cyan-400 border-cyan-500 text-black shadow-[0_0_20px_rgba(6,182,212,0.3)]' : isExperimental ? 'bg-purple-500 hover:bg-purple-400 border-purple-500 text-black shadow-[0_0_20px_rgba(168,85,247,0.3)]' : isAesthetic ? 'bg-rose-500 hover:bg-rose-400 border-rose-500 text-black shadow-[0_0_20px_rgba(244,63,94,0.3)]' : isTrailer ? 'bg-orange-500 hover:bg-orange-400 border-orange-500 text-black shadow-[0_0_20px_rgba(251,146,60,0.3)]' : 'bg-gold-primary hover:bg-amber-400 border-gold-primary text-black shadow-[0_0_20px_rgba(212,175,55,0.2)]')}`}
+                        className={`flex-1 py-4 border rounded-xl flex items-center justify-center gap-3 transition-all disabled:opacity-50 disabled:cursor-not-allowed group relative overflow-hidden ${currentTheme === 'retro' ? 'bg-[#8B261D] hover:bg-[#631B15] border-[#8B261D] text-white shadow-none' : (isCommercial ? 'bg-cyan-500 hover:bg-cyan-400 border-cyan-500 text-black shadow-[0_0_20px_rgba(6,182,212,0.3)]' : isExperimental ? 'bg-purple-500 hover:bg-purple-400 border-purple-500 text-black shadow-[0_0_20px_rgba(168,85,247,0.3)]' : isAesthetic ? 'bg-rose-500 hover:bg-rose-400 border-rose-500 text-black shadow-[0_0_20px_rgba(244,63,94,0.3)]' : isTrailer ? 'bg-orange-500 hover:bg-orange-400 border-orange-500 text-black shadow-[0_0_20px_rgba(251,146,60,0.3)]' : 'bg-gold-primary hover:bg-amber-400 border-gold-primary text-black shadow-[0_0_20px_rgba(212,175,55,0.2)]')}`}
                     >
                         {isAutoFilling ? (
                             <>
@@ -376,6 +406,22 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
                             </>
                         )}
                     </button>
+                    <AdminXRayButton
+                        isAdmin={isAdmin}
+                        lang={lang === 'EN' ? 'EN' : 'CN'}
+                        title={lang === 'EN' ? 'X-Ray Vision Mapping Prompt' : 'X-Ray 视觉映射指令'}
+                        payload={{
+                            driverType,
+                            action: isCommercial ? 'Decode desire and map engine parameters' : 'Decode visual narrative and map engine parameters',
+                            visionInput,
+                            visionAnalysis,
+                            hasImage: Boolean(visionImage)
+                        }}
+                        disabled={!visionInput && !visionImage && !visionAnalysis}
+                        className={`h-14 w-14 shrink-0 ${currentTheme === 'retro' ? 'bg-white border-[#8B261D]/25 text-[#8B261D] hover:bg-[#8B261D]/10' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-500'}`}
+                        iconSize={18}
+                    />
+                    </div>
                     <div className="text-[9px] text-zinc-400 text-center mt-3 leading-relaxed font-mono flex items-center justify-center gap-2">
                         {isCommercial && <span className={`w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse`}></span>}
                         {isCommercial

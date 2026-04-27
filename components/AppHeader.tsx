@@ -151,7 +151,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
     if (selectedDriver === DriverType.COMMERCIAL) return lang === 'EN' ? "SUTURE ENGINE" : "欲望缝合";
     if (selectedDriver === DriverType.EXPERIMENTAL) return lang === 'EN' ? "REDUCTION ENGINE" : "现象学还原";
     if (selectedDriver === DriverType.AESTHETIC) return lang === 'EN' ? "AESTHETIC" : "情绪美学";
-    if (selectedDriver === DriverType.TRAILER) return lang === 'EN' ? "TRAILER ENGINE" : "虚拟幻象";
+    if (selectedDriver === DriverType.TRAILER) return lang === 'EN' ? "CANVAS ENGINE" : "迷雾画布";
     return lang === 'EN' ? "NARRATIVE ENGINE" : "爱欲迷宫";
   };
 
@@ -215,7 +215,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           {children}
         </div>
       ) : (
-        !(viewMode === 'ARCHIVE' || viewMode === 'VIDEO' || viewMode === 'TOPOLOGY' || viewMode === 'RSI' || viewMode === 'RORSCHACH' || viewMode === 'ANALYSIS' || viewMode === 'DICTIONARY') && (
+        !(viewMode === 'ARCHIVE' || viewMode === 'VIDEO' || viewMode === 'TOPOLOGY' || viewMode === 'RSI' || viewMode === 'RORSCHACH' || viewMode === 'ANALYSIS' || viewMode === 'DICTIONARY' || viewMode === 'CANVAS') && (
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden md:flex items-center gap-4 text-[10px] font-bold uppercase tracking-[0.2em]">
             <button
               onClick={() => setViewMode('ENGINE')}

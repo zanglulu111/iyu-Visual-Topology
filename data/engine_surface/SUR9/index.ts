@@ -16,6 +16,12 @@ import { SUR9_GROUP_N } from './group_n';
 import { SUR9_GROUP_O } from './group_o';
 import { SUR9_GROUP_P } from './group_p';
 
+/**
+ * SUR9 / SUR-ROLE 职业身份库。
+ *
+ * 只回答“人物以什么社会身份或岗位进入故事世界”。
+ * 它不解释人物动机，不预写事件链，不替终局追加判词。
+ */
 export const SUR9_DATA: LibraryCategoryDef[] = [
   SUR9_GROUP_A,
   SUR9_GROUP_B,
@@ -34,3 +40,8 @@ export const SUR9_DATA: LibraryCategoryDef[] = [
   SUR9_GROUP_O,
   SUR9_GROUP_P
 ];
+
+export const SUR_ROLE_DATA = SUR9_DATA;
+export const SUR_IDENTITY_DATA = SUR9_DATA;
+
+export default SUR9_DATA;

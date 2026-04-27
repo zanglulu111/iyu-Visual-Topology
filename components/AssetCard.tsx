@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Trash2, Upload, Sparkles, Loader2, Edit3, Globe, ScanEye } from 'lucide-react';
 import { CopyButton } from './SharedBlueprintComponents';
 import { supabaseDatabase } from '../services/supabaseDatabase';
+import { AdminXRayButton } from './XRayInspector';
 
 interface AssetCardProps {
     item: any;
@@ -15,9 +16,10 @@ interface AssetCardProps {
     onZoom: (url: string) => void;
     onReverseEngineer?: (url: string) => Promise<{ anchors: string, description: string } | null>;
     theme?: string;
+    isAdmin?: boolean;
 }
 
-export const AssetCard: React.FC<AssetCardProps> = ({ item, type, language, contentLanguage, onUpdate, onDelete, onGenerateImage, onZoom, onReverseEngineer, theme }) => {
+export const AssetCard: React.FC<AssetCardProps> = ({ item, type, language, contentLanguage, onUpdate, onDelete, onGenerateImage, onZoom, onReverseEngineer, theme, isAdmin }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const descRef = useRef<HTMLTextAreaElement>(null);
     const [isGeneratingImg, setIsGeneratingImg] = useState(false);
@@ -212,14 +214,29 @@ export const AssetCard: React.FC<AssetCardProps> = ({ item, type, language, cont
 
                         <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover/img:opacity-100 transition-opacity z-20">
                             {onReverseEngineer && (
-                                <button
-                                    onClick={handleReverse}
-                                    disabled={isAnalyzing}
-                                    className={`p-2 bg-black/60 rounded-full text-white backdrop-blur-sm transition-colors border border-white/10 shadow-lg ${isAnalyzing ? 'cursor-not-allowed opacity-50' : 'hover:bg-cyan-600/80'}`}
-                                    title="Reverse Engineer"
-                                >
-                                    {isAnalyzing ? <Loader2 size={14} className="animate-spin" /> : <ScanEye size={14} />}
-                                </button>
+                                <>
+                                    <button
+                                        onClick={handleReverse}
+                                        disabled={isAnalyzing}
+                                        className={`p-2 bg-black/60 rounded-full text-white backdrop-blur-sm transition-colors border border-white/10 shadow-lg ${isAnalyzing ? 'cursor-not-allowed opacity-50' : 'hover:bg-cyan-600/80'}`}
+                                        title="Reverse Engineer"
+                                    >
+                                        {isAnalyzing ? <Loader2 size={14} className="animate-spin" /> : <ScanEye size={14} />}
+                                    </button>
+                                    <AdminXRayButton
+                                        isAdmin={isAdmin}
+                                        lang={language === 'EN' ? 'EN' : 'CN'}
+                                        title={language === 'EN' ? 'X-Ray Asset Reverse Prompt' : 'X-Ray 资产反推指令'}
+                                        payload={{
+                                            task: 'Reverse engineer uploaded asset image',
+                                            assetName: isEnContent ? (item.nameEn || item.name) : item.name,
+                                            assetType: type,
+                                            hasImage: Boolean(activeImage?.url)
+                                        }}
+                                        disabled={!activeImage?.url}
+                                        className="p-2 rounded-full bg-black/60 text-white border border-white/10 hover:bg-cyan-600/80"
+                                    />
+                                </>
                             )}
                             <button
                                 onClick={() => fileInputRef.current?.click()}
@@ -264,6 +281,14 @@ export const AssetCard: React.FC<AssetCardProps> = ({ item, type, language, cont
                                 {isGeneratingImg ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} className={theme === 'retro' ? "text-[#8B261D]" : "text-purple-400"} />}
                                 {language === 'EN' ? "Generate" : "AI 生成"}
                             </button>
+                            <AdminXRayButton
+                                isAdmin={isAdmin}
+                                lang={language === 'EN' ? 'EN' : 'CN'}
+                                title={language === 'EN' ? 'X-Ray Asset Image Prompt' : 'X-Ray 资产图片生成指令'}
+                                payload={currentPrompt}
+                                disabled={!currentPrompt}
+                                className={theme === 'retro' ? 'px-3 py-2.5 bg-[var(--bg-header)] border-[#8B261D]/20 text-[#8B261D] hover:bg-[#F9F7F1]' : 'px-3 py-2.5 bg-zinc-800 border-zinc-700 text-zinc-400 hover:border-gold-primary'}
+                            />
                             <button
                                 onClick={() => fileInputRef.current?.click()}
                                 disabled={isUploading}

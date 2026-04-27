@@ -59,6 +59,7 @@ export const getSceneColor = (index: number) => SCENE_COLORS[index % SCENE_COLOR
 
 export const getStaticColumns = (lang: BlueprintLanguage, contentLang: 'CN' | 'EN') => [
     { key: 'id', label: lang === 'EN' ? 'ID' : '镜号', width: 'w-[4%] min-w-[3rem] max-w-[4rem] font-mono font-bold text-center align-top break-all truncate' },
+    { key: contentLang === 'CN' ? 'shotFunction' : 'shotFunctionEn', label: lang === 'EN' ? 'Role' : '功能', width: 'w-[6%] min-w-[4rem] align-top whitespace-pre-wrap leading-relaxed' },
     { key: contentLang === 'CN' ? 'shotSize' : 'shotSizeEn', label: lang === 'EN' ? 'Size' : '景别', width: 'w-[4%] min-w-[3rem] max-w-[4rem] font-mono font-bold text-center align-top whitespace-normal' },
     { key: contentLang === 'CN' ? 'composition' : 'compositionEn', label: lang === 'EN' ? 'Comp' : '构图', width: 'w-[4%] min-w-[3rem] max-w-[4rem] font-mono font-bold text-center align-top whitespace-normal' },
     { key: contentLang === 'CN' ? 'angle' : 'angleEn', label: lang === 'EN' ? 'Angle' : '角度', width: 'w-[4%] min-w-[3rem] max-w-[4rem] font-mono font-bold text-center align-top whitespace-normal' },
@@ -131,6 +132,7 @@ export const formatStaticList = (shots: StaticShot[], lang: 'CN' | 'EN', protoco
         };
         
         const desc = clean(rawDesc);
+        const shotFunction = clean(lang === 'CN' ? s.shotFunction : (s.shotFunctionEn || s.shotFunction));
         const env = clean(lang === 'CN' ? s.environment : (s.environmentEn || s.environment));
         const light = clean(lang === 'CN' ? s.lighting : (s.lightingEn || s.lighting), true);
         const style = clean(artStyle);
@@ -138,6 +140,7 @@ export const formatStaticList = (shots: StaticShot[], lang: 'CN' | 'EN', protoco
         // Format: #2大全景/三分法/固定镜头；画面：...。环境：...。光影：...。艺术风格：...
         let line = `#${shotNum}${tags}；`;
         
+        if (shotFunction) line += `镜头功能：${shotFunction}。`;
         if (desc) line += `画面：${desc}。`;
         if (env) line += `环境：${env}。`;
         if (light) line += `光影：${light}。`;
@@ -295,6 +298,12 @@ export const parseLiteraryScriptToStaticShots = (script: string): StaticShot[] =
              // We'll wrap it in a special span for styling later if needed.
              // But wait, visualDesc might come later. We store it in lightMood first.
         } 
+        else if (trimmed.startsWith('**镜头功能：**') || trimmed.startsWith('**Shot Function:**')) {
+             currentShot.shotFunction = trimmed.replace(/\*\*.*?\*\*:/, '').replace('**镜头功能：**', '').trim();
+        }
+        else if (trimmed.startsWith('**节拍：**') || trimmed.startsWith('**Beat:**')) {
+             currentShot.sceneBeat = trimmed.replace(/\*\*.*?\*\*:/, '').replace('**节拍：**', '').trim();
+        }
         else if (trimmed.startsWith('**画面：**') || trimmed.startsWith('**Visual:**')) {
             let desc = trimmed.replace(/\*\*.*?\*\*:/, '').replace('**画面：**', '').trim();
             // Prepend Atmosphere if captured

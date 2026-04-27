@@ -16,10 +16,11 @@ interface AssetsViewProps {
     themeAccent: string;
     themeBorder: string;
     theme?: string;
+    isAdmin?: boolean;
 }
 
 export const AssetsView: React.FC<AssetsViewProps> = ({
-    blueprint, language, isCommercial, isAesthetic, onUpdateBlueprint, onGenerateAssetImage, onZoom, themeAccent, themeBorder, theme
+    blueprint, language, isCommercial, isAesthetic, onUpdateBlueprint, onGenerateAssetImage, onZoom, themeAccent, themeBorder, theme, isAdmin
 }) => {
 
     // Derived hover background from accent
@@ -104,6 +105,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({
                                 onZoom={onZoom}
                                 onReverseEngineer={(url) => handleReverseAsset(url, 'CHARACTER')}
                                 theme={theme}
+                                isAdmin={isAdmin}
                             />
                         ))}
                     </div>
@@ -137,6 +139,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({
                             onZoom={onZoom}
                             onReverseEngineer={(url) => handleReverseAsset(url, 'SCENE')}
                             theme={theme}
+                            isAdmin={isAdmin}
                         />
                     ))}
                 </div>
@@ -169,6 +172,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({
                             onZoom={onZoom}
                             onReverseEngineer={(url) => handleReverseAsset(url, 'PROP')}
                             theme={theme}
+                            isAdmin={isAdmin}
                         />
                     ))}
                 </div>

@@ -73,6 +73,7 @@ interface BlueprintEditorProps {
     theme?: string;
     isSutureOpen?: boolean;
     onSutureOpenChange?: (open: boolean) => void;
+    isAdmin?: boolean;
 }
 
 // ... (Create Empty Blueprint Functions remain the same)
@@ -200,7 +201,8 @@ export const BlueprintEditor: React.FC<BlueprintEditorProps> = ({
     customLibraryDefs,
     isSutureOpen,
     onSutureOpenChange,
-    theme
+    theme,
+    isAdmin
 }) => {
     const { theme: contextTheme } = useTheme(); // Renamed to avoid conflict, though `theme` prop will override
     const effectiveTheme = theme || contextTheme;
@@ -625,6 +627,7 @@ ${psychoHtml}
                     themeAccent={uiConfig.themeAccent}
                     themeBorder={uiConfig.themeBorder}
                     theme={effectiveTheme}
+                    isAdmin={isAdmin}
                 />
             );
         }
@@ -645,6 +648,7 @@ ${psychoHtml}
                             fieldState={fieldState}
                             onSaveToHistory={onSaveToHistory}
                             theme={effectiveTheme}
+                            isAdmin={isAdmin}
                         />
                     );
                 }
@@ -659,6 +663,7 @@ ${psychoHtml}
                         themeAccent={uiConfig.themeAccent}
                         themeBorder={uiConfig.themeBorder}
                         theme={effectiveTheme}
+                        isAdmin={isAdmin}
                     />
                 );
             case DriverType.EXPERIMENTAL:
@@ -706,6 +711,7 @@ ${psychoHtml}
                             fieldState={fieldState}
                             onSaveToHistory={onSaveToHistory}
                             theme={effectiveTheme}
+                            isAdmin={isAdmin}
                         />
                     );
                 }
@@ -732,6 +738,7 @@ ${psychoHtml}
                             fieldState={fieldState}
                             themeAccent={uiConfig.themeAccent}
                             theme={effectiveTheme}
+                            isAdmin={isAdmin}
                             onBack={() => setActiveTab('NARRATIVE')}
                         />
                     );
@@ -750,6 +757,7 @@ ${psychoHtml}
                             fieldState={fieldState}
                             onSaveToHistory={onSaveToHistory}
                             theme={effectiveTheme}
+                            isAdmin={isAdmin}
                         />
                     );
                 }
@@ -764,6 +772,7 @@ ${psychoHtml}
                         themeBgActive={uiConfig.themeBgActive}
                         onUpdateBlueprint={updateCurrentBlueprint}
                         theme={effectiveTheme}
+                        isAdmin={isAdmin}
                     />
                 );
         }

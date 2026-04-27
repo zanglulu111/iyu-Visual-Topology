@@ -2,7 +2,7 @@
 // V3: Director's Brief Architecture
 // 设计原理：以 directive（导演语言）为第一公民，替代 core（理论语言）。
 // 每个 M 参数以「导演笔记」的形式注入 AI，而非学术定义卡片。
-// 公式升级为 M0-M7A（含象征裁决 / 缝合点）。
+// 公式升级为 M0-M7A/M7B 双结项。
 // ============================================================================
 
 import { NarrativeFieldState, WorldLawConfig, FaceState, DirectiveFace } from '../types';
@@ -157,7 +157,7 @@ export const buildTaskSentence = (fieldState: NarrativeFieldState): string => {
   // Fragment B: SUR4 — 运行于【社会形态】社会体系之下
   if (society.length > 0) fragments.push(`运行于${bracket(society.join('、'))}社会体系之下`);
 
-  // Fragment C: SUR8+SUR7+SUR9 — 一个【年龄性别】的【职业】
+  // Fragment C: SUR8+SUR7+SUR9 — 一个【年龄阶段/选角呈现】的【职业身份】
   const idParts = [...age, ...gender];
   if (idParts.length > 0 || profession.length > 0) {
     let id = '一个';
@@ -169,7 +169,7 @@ export const buildTaskSentence = (fieldState: NarrativeFieldState): string => {
     fragments.push(id);
   }
 
-  // Fragment D: SUR10X+SUR10 — 抱着【信念裂度】的【哲学信念】想法
+  // Fragment D: SUR10X+SUR10 — 带着【信念裂度】的【信念预设】语言
   if (fracture.length > 0 || ideology.length > 0) {
     let belief = '抱着';
     if (fracture.length > 0) belief += bracket(fracture.join('、'));
@@ -179,20 +179,20 @@ export const buildTaskSentence = (fieldState: NarrativeFieldState): string => {
     fragments.push(belief);
   }
 
-  // Fragment E: SUR5 — 与【欲望锚点】纠缠
-  if (everything.length > 0) fragments.push(`与${bracket(everything.join('、'))}纠缠`);
+  // Fragment E: SUR5 — 围绕【对象预设】展开
+  if (everything.length > 0) fragments.push(`围绕${bracket(everything.join('、'))}展开争夺`);
 
-  // Fragment F: SUR6 — 剧情于【空间场景】展开
-  if (location.length > 0) fragments.push(`剧情于${bracket(location.join('、'))}展开`);
+  // Fragment F: SUR6 — 事件发生于【空间容器】
+  if (location.length > 0) fragments.push(`事件发生于${bracket(location.join('、'))}`);
 
-  // Fragment G: SUR11 — 最终走向【大结局】
+  // Fragment G: SUR-END — 最终走向【显性收场】
   if (ending.length > 0) fragments.push(`最终走向${bracket(ending.join('、'))}`);
 
   // Genre 后缀：的【叙事动力】故事
   const genreSuffix = genreNames.length > 0 ? `的${bracket(genreNames.join('、'))}故事。` : '的故事。';
 
   // 组装：前半句指向导演笔记，后半句为 SUR 场景句式
-  const PREFIX = '根据以下拉康精神分析派的叙事创作公式以及「导演笔记」中的主角精神弧线（M0-M7）结合故事表层设定参数';
+  const PREFIX = '根据以下拉康精神分析派的叙事创作公式以及「导演笔记」中的主角精神弧线（M0-M7A/M7B 双结项）结合故事表层设定参数';
 
   if (fragments.length === 0 && genreNames.length === 0) {
     return `${PREFIX}，讲一个故事。`;
@@ -233,7 +233,7 @@ export const buildSurNotes = (fieldState: NarrativeFieldState, faceState?: FaceS
   const categories: { label: string; desc: string; tags: string[] }[] = [
     {
       label: 'SUR1. 叙事动力·全局色调',
-      desc: '故事的类型节奏。M0-M7 的每一步都在此类型语法内运作。',
+      desc: '故事的类型节奏。M0-M7A/M7B 双结项的每一步都在此类型语法内运作。',
       tags: getTagsBySuffix(fieldState, '_genre'),
     },
     {
@@ -242,38 +242,38 @@ export const buildSurNotes = (fieldState: NarrativeFieldState, faceState?: FaceS
       tags: getTagsBySuffix(fieldState, '_era'),
     },
     {
-      label: 'SUR4. 社会形态 → M4 制度化面向',
-      desc: '主角所处的宏观制度——常常是 M4（大他者阻断）的制度化身。',
+      label: 'SUR4. 社会形态 → 可见秩序外壳',
+      desc: '只提供人物所处的制度、组织、共同体或秩序外壳；不替 M4 解释阻断原因。',
       tags: getTagsBySuffix(fieldState, '_society'),
     },
     {
-      label: 'SUR7/8. 主体身份',
-      desc: '主角的性别与年龄——身体的基础磨损度与社会位置。',
+      label: 'SUR7/8. 选角呈现与年龄阶段',
+      desc: '人物在画面、称谓和互动中如何被呈现，以及进入故事时处在什么年岁区间；不解释动机，不决定精神结构。',
       tags: [...getTagsBySuffix(fieldState, '_gender'), ...getTagsBySuffix(fieldState, '_age')],
     },
     {
-      label: 'SUR9. 职业身份 → M1 具象化载体',
-      desc: '主角的社会角色——缺失(M1)与欲望(M3)通过此身份显影。',
+      label: 'SUR9. 职业身份 → 表层身份预设',
+      desc: '只回答人物以什么社会身份、职业岗位或登记状态进入故事世界；不解释动机，不决定精神结构。',
       tags: getTagsBySuffix(fieldState, '_profession'),
     },
     {
-      label: 'SUR10/10X. 信念系统 → M0 表层信条 / M4 隐性机制',
-      desc: 'SUR10（信念）= 角色信什么（内容）。SUR10X（裂度）= 角色与这个信念的粘合程度（L1虔信→L5决裂）。裂度决定角色如何回应M2冲击——L1会用信念语言消化一切，L3会冷眼旁观自己的崩塌，L5会把冲击转化为对旧信念的清算。同一个信念内容 × 不同裂度 = 完全不同的叙事行为模式。',
+      label: 'SUR10/10X. 信念预设 → 开场信念语言',
+      desc: 'SUR10 = 人物开场时用什么信念语言解释世界。SUR10X = 人物与该信念的粘合强度。它们可以影响话语、理由和姿态，但不解释缺口，不规定终点。',
       tags: [...(fieldState['sur10x'] || []), ...getTagsBySuffix(fieldState, '_ideology')],
     },
     {
-      label: 'SUR5. 欲望锚点 → M3 具象化对象',
-      desc: '主角纠缠的事物——M3（欲望幻想）的具象载体。',
+      label: 'SUR5. 对象预设 → 表层对象锚点',
+      desc: '故事追逐的对象——只提供可被追寻、争夺、交换或保护的表层锚点。',
       tags: getTagsBySuffix(fieldState, '_everything'),
     },
     {
-      label: 'SUR6. 空间场景 → M2/高潮 感官容器',
-      desc: '戏剧发生的物理舞台——空间本身是情绪的载体。',
+      label: 'SUR6. 空间容器 → 表层地点预设',
+      desc: '只回答事件发生在什么可见空间里；不解释冲突来源，不预写结局。',
       tags: getTagsBySuffix(fieldState, '_location'),
     },
     {
-      label: 'SUR11. 显性大结局 → M6→M7 可见终态',
-      desc: '故事表层的终点图案——M6(代价)兑现后的视觉终态。',
+      label: 'SUR-END. 显性收场 → 可见终端事件',
+      desc: '故事表层的最后一帧——只描述 M6 代价兑现后的可见事件与画面停点；意义裁决交给 M7A，身体余味交给 M7B。',
       tags: getTagsBySuffix(fieldState, '_ending'),
     },
   ];
@@ -304,7 +304,7 @@ export const buildSurNotes = (fieldState: NarrativeFieldState, faceState?: FaceS
   }
 
   if (genreTags.length >= 1 && eraTags.length >= 1) {
-    conflictRules.push('- [SUR1×SUR2 类型与场域分工] SUR1（叙事动力）管「怎么讲」——节奏、张力释放方式、类型期待。SUR2（背景场域）管「世界长什么样」——物理常数、视觉质感、能指频率。当两者暗示不同世界时（如 SUR1=科幻 但 SUR2=古代），以 SUR2 的世界外观为准，SUR1 仅控制叙事节奏和类型语法。两者叠加后向下染色一切具体参数——身份、信念、欲望锚点、空间场景都必须穿上这层染色后的衣壳。');
+    conflictRules.push('- [SUR1×SUR2 类型与场域分工] SUR1（叙事动力）管「怎么讲」——节奏、张力释放方式、类型期待。SUR2（背景场域）管「世界长什么样」——物理常数、视觉质感、能指频率。当两者暗示不同世界时（如 SUR1=科幻 但 SUR2=古代），以 SUR2 的世界外观为准，SUR1 仅控制叙事节奏和类型语法。两者叠加后向下染色一切具体参数——身份、信念、对象预设、空间容器都必须穿上这层染色后的衣壳。');
   }
 
   if (eraTags.length >= 1 && hasSpacetime) {
@@ -324,12 +324,12 @@ export const buildSurNotes = (fieldState: NarrativeFieldState, faceState?: FaceS
 
 export const V3_FORMULA = `## 拉康精神分析学派电影叙事创作公式
 
-本公式基于拉康精神分析理论，将主角的精神运动拆解为 M0-M7 八个结构性位置。每个位置不是剧情事件，而是主体在欲望、缺失与创伤中必然经过的精神拓扑节点。公式定义了这些节点之间的运算关系——故事就是这个运算的展开。
+本公式基于拉康精神分析理论，将主角的精神运动拆解为 M0-M7A/M7B 的结构性位置，其中 M7A（象征裁决）与 M7B（实在余痕）构成最终双结项。每个位置不是剧情事件，而是主体在欲望、缺失与创伤中必然经过的精神拓扑节点。公式定义了这些节点之间的运算关系——故事就是这个运算的展开。
 
-**Story = M0 { [(M1 → M2 → M3) / M4] × M5 } ⇒ (M6, M7A ‖ M7B)**
+**Story = M0 {[(M1↔M2↔M3)/M4]×M5} ⇒Act M6 → (M7A◇M7B) ↺ M1'**
 
 M0 = 精神拓扑：主角的操作系统，决定公式内一切运算的法则。
-M1 = 缺失主体：结构性不完整的主体——缺口本身就是欲望的发动机。结合职业/身份具象化。
+M1 = 缺失主体：结构性不完整的主体——缺口本身就是欲望的发动机。它可以穿过职业/身份外壳显现，但不由职业本身决定。
 M2 = 真实遭遇：主角现有框架无法消化的不可逆事件——不只是「坏事发生」，而是「现有语言和逻辑处理不了的事」。
 M3 = 欲望幻想：主体以为能填补缺失的那个东西。
 M4 = 大他者阻断：不是某个敌人，而是制度/秩序/规则层面的拒绝——整个系统宣布「你的欲望不合法」。不一定是邪恶的。
@@ -344,8 +344,8 @@ M7B = 实在余痕：故事结束后，主体身上留下了什么不可消化�
 - M7B 和 M7A 是同一枚硬币的两面：M7A 在象征界（这个故事变成了什么），M7B 在实在界（身体上留下了什么）。M7B 是终态，但它必须有前兆：从终态反推前兆，将前兆编织进故事前半段（inciting_incident 或 rising_action），终态出现在 resolution。前兆与终态使用不同的感官通道。严禁在结尾突然冒出无铺垫的身体残留。
 
 **M轴与SUR轴的关系**:
-- M0-M7 是结构——主角精神运动的必然位置，任何故事都会填充这些槽位。未指定的 M 参数由你自行填充。
-- SUR1-SUR11 是表层设定参数（叙事动力、背景场域、时空、社会形态、身份、信念等）——创作者主动选择的现象层元素。被指定的是这个故事的重心，未指定的由你自由发挥。
+- M0-M7A/M7B 是结构——主角精神运动的必然位置，任何故事都会填充这些槽位。未指定的 M 参数由你自行填充。
+- SUR1-SUR10 + SUR-END 是表层设定参数（叙事动力、背景场域、时空、社会形态、身份、信念与显性收场等）——创作者主动选择的现象层元素。被指定的是这个故事的重心，未指定的由你自由发挥。SUR-END 只能规定最后可见的外部收场，不能裁决故事意义；意义归 M7A，余味归 M7B。
 - SUR 对 M 的操作是「提供物理载体」：M 定义精神运动的逻辑（如 M4="秩序拒绝你的欲望"），SUR 决定这个逻辑在故事世界中的物质形态（如 M4 在赛博朋克中是信用评分归零，在武侠中是被逐出师门）。换一层皮肤，逻辑的形状变了，但逻辑本身不能变。
 
 **同一槽位双词条法则**:
@@ -358,7 +358,7 @@ M7B = 实在余痕：故事结束后，主体身上留下了什么不可消化�
 export const V3_LAWS = `## 创作铁律
 
 命名：严禁通用名（Tom/Alice/小明）。严禁网文中二词。默认国际化，无中国风标签则严禁中文名。基于时空设定构思独特真名。
-禁令：严禁正文出现 M0-M7B 标签原词。严禁学术腔（拉康/大他者/异化/阉割/符号界/对象a）。严禁理工说明书语法。严禁使用「读者会/读者在此刻/观众会」等元叙事句式，严禁叙述者替读者总结故事的意义。
+禁令：严禁正文出现 M0-M7A/M7B 标签原词。严禁学术腔（拉康/大他者/异化/阉割/符号界/对象a）。严禁理工说明书语法。严禁使用「读者会/读者在此刻/观众会」等元叙事句式，严禁叙述者替读者总结故事的意义。
 面具：故事首先作为合格类型片运作。99%完美类型片，1%视差裂痕。模仿底层逻辑，严禁堆砌表层符号。`;
 
 // ============================================================================
@@ -425,7 +425,7 @@ Task: ${taskSentence}`;
 以下是这部电影的创作核心。每一条都是导演对你说的话——不是定义，是指令。
 导演笔记中的具体场景是情感运动的示例载体——提取其拓扑结构（节奏、温度、运动方式），用你自己发明且适配M参数以及世界物理法则以及表层设定的全新场景承载它。严禁复现示例中的具体意象。
 
-**M0 渗透法则**：M0 不是一个独立参数——它是整个故事的操作系统。M1-M7B 的每一条导演笔记都必须经过 M0 的逻辑改写。测试方法：如果某个 M 参数的处理方式在「替换成任何其他 M0」之后依然成立，说明 M0 没有生效，必须重写。
+**M0 渗透法则**：M0 不是一个独立参数——它是整个故事的操作系统。M1-M7A/M7B 的每一条导演笔记都必须经过 M0 的逻辑改写。测试方法：如果某个 M 参数的处理方式在「替换成任何其他 M0」之后依然成立，说明 M0 没有生效，必须重写。
 
 ${directorBrief}${m0Logic}`;
 
@@ -495,7 +495,7 @@ ${directorBrief}${m0Logic}`;
     'inciting_incident_激励事件',
     'rising_action_上升动作',
     'climax_高潮',
-    'resolution_存在落点',
+    'resolution_余痕收束',
   ];
   const pitchSkeletons = structureDef?.skeletons?.length ? structureDef.skeletons : DEFAULT_SKELETONS;
   const skeletonLabels = pitchSkeletons.map(s => {
@@ -508,8 +508,8 @@ ${directorBrief}${m0Logic}`;
 
   const bannedWords = buildBannedWords(fieldState);
 
-  const m7Tags = getTagsBySuffix(fieldState, '_m7b');
-  const m8Tags = getTagsBySuffix(fieldState, '_m7a');
+  const m7bTags = getTagsBySuffix(fieldState, '_m7b');
+  const m7aTags = getTagsBySuffix(fieldState, '_m7a');
 
   const SECTION_OUTPUT = `## 输出格式
 
@@ -540,7 +540,7 @@ OPTION 3 [ATMOSPHERE]: 氛围导演。侧重感官体验、空间质感与环境
 3. M7B 前兆：M7B 的终态是什么？它的前兆是什么？三个故事的前兆必须使用三种不同的铺垫策略（从以下六种中选三种：①身体微动作 ②空间异常 ③他人的反常反应 ④物件错位 ⑤声音/气味的侵入 ⑥时间感知的变形）。前兆出现在故事哪个阶段？用什么感官通道？终态用什么不同的感官通道？
 4. 物理校验：逐一检查每个 SUR 标签是否超出当前物理法则边界。超出的如何降维？降维后的等价物是什么？
 5. 三重语法：三位导演（情节/人物/氛围）各自如何翻译同一条曲线？侧重点差异在哪里？
-6. M0 渗透检查：逐一检查 M1-M7B，每个参数的叙事实现是否被 M0 的逻辑改写过？如果某个 M 的处理方式在任意 M0 下都成立，则 M0 渗透失败，必须重新设计该段。
+6. M0 渗透检查：逐一检查 M1-M7A/M7B，每个参数的叙事实现是否被 M0 的逻辑改写过？如果某个 M 的处理方式在任意 M0 下都成立，则 M0 渗透失败，必须重新设计该段。
 7. M7B 回检：写完三个故事后，逐一确认每个故事的 pitch_structure 各阶段中是否已植入 M7B 前兆。如果缺失，必须在对应段落补入。
 </thought_process>
 \`\`\`
@@ -555,8 +555,8 @@ OPTION 3 [ATMOSPHERE]: 氛围导演。侧重感官体验、空间质感与环境
 \`\`\`
 
 **最终复述**:
-${m8Tags.length > 0 ? `- M7A [${m8Tags.join('/')}] 回溯性地决定整个故事的意义。严禁篡改。` : ''}
-${m7Tags.length > 0 ? `- M7B [${m7Tags.join('/')}] 是绝对宪法。严禁篡改。` : ''}`;
+${m7aTags.length > 0 ? `- M7A [${m7aTags.join('/')}] 回溯性地决定整个故事的意义。严禁篡改。` : ''}
+${m7bTags.length > 0 ? `- M7B [${m7bTags.join('/')}] 是绝对宪法。严禁篡改。` : ''}`;
 
   // ============================================================================
   // 最终拼接

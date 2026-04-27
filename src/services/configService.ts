@@ -1,25 +1,35 @@
 // services/configService.ts
 /**
- * 配置管理服务 V2
- * 
+ * 配置管理服务 V3
+ *
  * 功能：
  * - 存储/读取 API 配置（localStorage）
  * - 旧配置自动迁移
- * - 连接测试（分 Provider 独立测试）
- * - 导入/导出配置
+ * - Provider 独立连接测试
+ * - 模型到 Provider 的自动路由
+ * - Provider 级别预设保存与切换
  */
 
-import { APIConfig, DEFAULT_CONFIG, EngineModelConfig, ProviderConfig, getProviderForModel } from '../types/config';
+import {
+  APIConfig,
+  DEFAULT_CONFIG,
+  EngineModelConfig,
+  ProviderConfig,
+  ProviderId,
+  getEffectiveBaseUrl,
+  getOpenAIChatCompletionsUrl,
+  getProviderForModel,
+} from '../types/config';
 
 function proxyFetch(url: string, options: RequestInit): Promise<Response> {
-    if (url.startsWith('http://') || url.startsWith('https://')) {
-        const parsed = new URL(url);
-        const localPath = '/__api_proxy' + parsed.pathname + parsed.search;
-        const headers = new Headers(options.headers);
-        headers.set('X-Proxy-Target', parsed.origin);
-        return fetch(localPath, { ...options, headers });
-    }
-    return fetch(url, options);
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    const parsed = new URL(url);
+    const localPath = '/__api_proxy' + parsed.pathname + parsed.search;
+    const headers = new Headers(options.headers);
+    headers.set('X-Proxy-Target', parsed.origin);
+    return fetch(localPath, { ...options, headers });
+  }
+  return fetch(url, options);
 }
 
 const CONFIG_STORAGE_KEY = 'visionary_api_config';
@@ -28,84 +38,97 @@ const PRESETS_STORAGE_KEY = 'visionary_api_presets';
 export interface ApiPreset {
   id: string;
   name: string;
+  provider: ProviderId;
   apiKey: string;
   baseUrl: string;
-  apiFormat: 'anthropic';
+  mode: ProviderConfig['mode'];
+  apiFormat: ProviderConfig['apiFormat'];
 }
 
 class ConfigService {
-
   // ============================================================
   // 核心读写
   // ============================================================
 
-  /**
-   * 获取完整配置，自动处理旧格式迁移
-   */
   getConfig(): APIConfig {
     try {
       const stored = localStorage.getItem(CONFIG_STORAGE_KEY);
       if (!stored) {
         return DEFAULT_CONFIG;
       }
+
       const parsed = JSON.parse(stored);
 
-      // 检测是否是旧格式（V1: 有 geminiApiKey 字段而没有 gemini 对象）
+      // V1: 旧字段
       if (parsed.geminiApiKey !== undefined && !parsed.gemini) {
         const migrated = this.migrateV1Config(parsed);
         this.saveConfig(migrated);
         return migrated;
       }
 
-      // V2 格式：merge with defaults
-      return {
-        gemini: {
-          ...DEFAULT_CONFIG.gemini,
-          ...(parsed.gemini || {}),
-        },
-        claude: {
-          ...DEFAULT_CONFIG.claude,
-          ...(parsed.claude || {}),
-        },
-        engines: {
-          ...DEFAULT_CONFIG.engines,
-          ...(parsed.engines || {}),
-        },
-      };
+      return this.normalizeConfig(parsed);
     } catch (error) {
       console.error('Failed to load config:', error);
       return DEFAULT_CONFIG;
     }
   }
 
-  /**
-   * 保存完整配置
-   */
   saveConfig(config: APIConfig): void {
     try {
-      localStorage.setItem(CONFIG_STORAGE_KEY, JSON.stringify(config));
+      localStorage.setItem(CONFIG_STORAGE_KEY, JSON.stringify(this.normalizeConfig(config)));
     } catch (error) {
       console.error('Failed to save config:', error);
       throw error;
     }
   }
 
+  private normalizeConfig(config: Partial<APIConfig>): APIConfig {
+    return {
+      gemini: {
+        ...DEFAULT_CONFIG.gemini,
+        ...(config.gemini || {}),
+        apiFormat: 'google',
+      },
+      claude: {
+        ...DEFAULT_CONFIG.claude,
+        ...(config.claude || {}),
+        apiFormat: 'anthropic',
+      },
+      openai: {
+        ...DEFAULT_CONFIG.openai,
+        ...(config.openai || {}),
+        apiFormat: 'openai',
+      },
+      engines: {
+        ...DEFAULT_CONFIG.engines,
+        ...(config.engines || {}),
+      },
+    };
+  }
+
   // ============================================================
-  // V1 → V2 迁移
+  // V1 → V3 迁移
   // ============================================================
 
   private migrateV1Config(v1: any): APIConfig {
-    console.log('[ConfigService] Migrating V1 config to V2...');
+    console.log('[ConfigService] Migrating legacy config to V3...');
     return {
       gemini: {
+        ...DEFAULT_CONFIG.gemini,
         apiKey: v1.geminiApiKey || v1.apiKey || '',
         mode: v1.baseUrl ? 'proxy' : 'official',
         baseUrl: v1.baseUrl || '',
       },
       claude: {
+        ...DEFAULT_CONFIG.claude,
         apiKey: v1.claudeApiKey || '',
         mode: 'proxy',
-        baseUrl: v1.baseUrl || '',
+        baseUrl: v1.claudeBaseUrl || v1.baseUrl || '',
+      },
+      openai: {
+        ...DEFAULT_CONFIG.openai,
+        apiKey: v1.openaiApiKey || '',
+        baseUrl: v1.openaiBaseUrl || DEFAULT_CONFIG.openai.baseUrl,
       },
       engines: {
         ...DEFAULT_CONFIG.engines,
@@ -118,17 +141,11 @@ class ConfigService {
   // Provider 级别的便捷方法
   // ============================================================
 
-  /**
-   * 获取指定 Provider 的配置
-   */
-  getProviderConfig(provider: 'gemini' | 'claude'): ProviderConfig {
+  getProviderConfig(provider: ProviderId): ProviderConfig {
     return this.getConfig()[provider];
   }
 
-  /**
-   * 更新指定 Provider 的配置
-   */
-  updateProviderConfig(provider: 'gemini' | 'claude', updates: Partial<ProviderConfig>): void {
+  updateProviderConfig(provider: ProviderId, updates: Partial<ProviderConfig>): void {
     const config = this.getConfig();
     config[provider] = { ...config[provider], ...updates };
     this.saveConfig(config);
@@ -138,34 +155,40 @@ class ConfigService {
   // 兼容旧代码的快捷方法
   // ============================================================
 
-  /** 获取 Gemini API Key */
   getApiKey(): string {
     return this.getConfig().gemini.apiKey;
   }
 
-  /** 设置 Gemini API Key */
   setApiKey(apiKey: string): void {
     this.updateProviderConfig('gemini', { apiKey });
   }
 
-  /** 获取 Claude API Key */
   getClaudeApiKey(): string {
     return this.getConfig().claude.apiKey;
   }
 
-  /** 设置 Claude API Key */
   setClaudeApiKey(apiKey: string): void {
     this.updateProviderConfig('claude', { apiKey });
   }
 
-  /** 获取 Gemini 的 Base URL */
+  getOpenAIApiKey(): string {
+    return this.getConfig().openai.apiKey;
+  }
+
+  setOpenAIApiKey(apiKey: string): void {
+    this.updateProviderConfig('openai', { apiKey });
+  }
+
   getBaseUrl(): string {
     return this.getConfig().gemini.baseUrl;
   }
 
-  /** 获取 Claude 的 Base URL */
   getClaudeBaseUrl(): string {
     return this.getConfig().claude.baseUrl;
+  }
+
+  getOpenAIBaseUrl(): string {
+    return this.getConfig().openai.baseUrl;
   }
 
   // ============================================================
@@ -187,16 +210,20 @@ class ConfigService {
     return this.getConfig().engines;
   }
 
-  /**
-   * 获取某个引擎所用模型对应的 Provider 配置
-   * 这是路由的核心：根据模型名找到正确的 API Key 和 Base URL
-   */
-  getProviderConfigForEngine(engineId: string): { provider: 'gemini' | 'claude'; config: ProviderConfig } {
+  getProviderConfigForEngine(engineId: string): {
+    provider: ProviderId;
+    config: ProviderConfig;
+    model: string;
+    baseUrl: string;
+  } {
     const model = this.getEngineModel(engineId);
     const provider = getProviderForModel(model);
+    const config = this.getProviderConfig(provider);
     return {
       provider,
-      config: this.getProviderConfig(provider),
+      config,
+      model,
+      baseUrl: getEffectiveBaseUrl(provider, config),
     };
   }
 
@@ -204,109 +231,152 @@ class ConfigService {
   // 连接测试
   // ============================================================
 
-  /**
-   * 测试指定 Provider 的连接
-   */
-  async testProviderConnection(provider: 'gemini' | 'claude'): Promise<{
+  async testProviderConnection(provider: ProviderId): Promise<{
     success: boolean;
     message: string;
   }> {
     const config = this.getConfig();
     const providerConfig = config[provider];
 
-    // 检查必填项
     if (!providerConfig.apiKey) {
       return { success: false, message: 'API Key 未填写' };
     }
 
-    if (provider === 'claude' && !providerConfig.baseUrl) {
-      return { success: false, message: 'Claude 必须配置代理地址才能使用' };
+    const baseUrl = getEffectiveBaseUrl(provider, providerConfig);
+
+    if (provider !== 'gemini' && !baseUrl) {
+      return { success: false, message: '该 Provider 需要 Base URL' };
     }
 
     if (providerConfig.mode === 'proxy' && !providerConfig.baseUrl) {
-      return { success: false, message: '代理模式下必须填写代理地址' };
+      return { success: false, message: '代理模式下必须填写 Base URL' };
     }
 
     try {
       if (provider === 'gemini' && providerConfig.mode === 'official') {
-        // Gemini 官方 API 测试
-        const response = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${providerConfig.apiKey}`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: 'Hi' }] }]
-            })
-          }
-        );
-        if (response.ok) {
-          return { success: true, message: 'Gemini 官方 API 连接成功 ✓' };
-        }
-        const errText = await response.text().catch(() => '');
-        if (response.status === 400) {
-          return { success: true, message: 'API Key 有效（模型可能需确认）✓' };
-        }
-        return { success: false, message: `错误 ${response.status}: ${errText.substring(0, 100)}` };
-      } else {
-        // 代理 API 测试
-        const cleanUrl = providerConfig.baseUrl.trim().replace(/\/+$/, '');
-
-        // Claude: 始终使用 Anthropic 原生格式
-        if (provider === 'claude') {
-          const fetchUrl = `${cleanUrl}/v1/messages`;
-          const response = await proxyFetch(fetchUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-api-key': providerConfig.apiKey,
-              'anthropic-version': '2023-06-01',
-            },
-            body: JSON.stringify({
-              model: 'claude-sonnet-4-6',
-              messages: [{ role: 'user', content: 'Hi' }],
-              max_tokens: 5,
-            })
-          });
-
-          if (response.ok) {
-            return { success: true, message: 'Claude 代理连接成功 ✓' };
-          }
-          const errText = await response.text().catch(() => '');
-          if (errText.trim().startsWith('<') || errText.includes('<!DOCTYPE')) {
-            return { success: false, message: `代理地址错误：返回了 HTML 网页。请检查 Base URL 是否正确。\n当前测试地址: ${fetchUrl}` };
-          }
-          return { success: false, message: `错误 ${response.status}: ${errText.substring(0, 100)}` };
-        } else {
-          // Gemini 代理: OpenAI-compatible 格式
-          const fetchUrl = `${cleanUrl}/chat/completions`;
-
-          const response = await proxyFetch(fetchUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${providerConfig.apiKey}`,
-            },
-            body: JSON.stringify({
-              model: 'gemini-3.1-flash-lite-preview',
-              messages: [{ role: 'user', content: 'Hi' }],
-              max_tokens: 5,
-            })
-          });
-
-          if (response.ok) {
-            return { success: true, message: 'Gemini 代理连接成功 ✓' };
-          }
-          const errText = await response.text().catch(() => '');
-          if (errText.trim().startsWith('<') || errText.includes('<!DOCTYPE')) {
-            return { success: false, message: `代理地址错误：返回了 HTML 网页。请检查 Base URL 是否正确。\n当前测试地址: ${fetchUrl}` };
-          }
-          return { success: false, message: `错误 ${response.status}: ${errText.substring(0, 100)}` };
-        }
+        return await this.testGeminiOfficial(providerConfig.apiKey);
       }
+
+      if (provider === 'claude') {
+        return await this.testClaude(providerConfig.apiKey, baseUrl);
+      }
+
+      if (provider === 'openai') {
+        return await this.testOpenAI(providerConfig.apiKey, baseUrl);
+      }
+
+      return await this.testOpenAICompatible(provider, providerConfig.apiKey, baseUrl);
     } catch (error: any) {
       return { success: false, message: `网络错误: ${error?.message || '无法连接'}` };
     }
+  }
+
+  private async testGeminiOfficial(apiKey: string): Promise<{ success: boolean; message: string }> {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: 'Hi' }] }],
+        }),
+      }
+    );
+
+    if (response.ok) {
+      return { success: true, message: 'Gemini 官方 API 连接成功' };
+    }
+
+    const errText = await response.text().catch(() => '');
+    if (response.status === 400) {
+      return { success: true, message: 'API Key 有效，测试模型可能需确认' };
+    }
+    return { success: false, message: `错误 ${response.status}: ${errText.substring(0, 120)}` };
+  }
+
+  private async testClaude(apiKey: string, baseUrl: string): Promise<{ success: boolean; message: string }> {
+    const cleanUrl = baseUrl.trim().replace(/\/+$/, '');
+    const fetchUrl = `${cleanUrl}/v1/messages`;
+    const response = await proxyFetch(fetchUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        messages: [{ role: 'user', content: 'Hi' }],
+        max_tokens: 5,
+      }),
+    });
+
+    if (response.ok) {
+      return { success: true, message: 'Claude API 连接成功' };
+    }
+    return this.formatConnectionError(response, fetchUrl);
+  }
+
+  private async testOpenAI(apiKey: string, baseUrl: string): Promise<{ success: boolean; message: string }> {
+    const fetchUrl = getOpenAIChatCompletionsUrl(baseUrl);
+    const response = await proxyFetch(fetchUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'gpt-5.5',
+        messages: [{ role: 'user', content: 'Hi' }],
+        max_tokens: 5,
+        stream: false,
+      }),
+    });
+
+    if (response.ok) {
+      return { success: true, message: 'OpenAI API 连接成功' };
+    }
+    return this.formatConnectionError(response, fetchUrl);
+  }
+
+  private async testOpenAICompatible(
+    provider: ProviderId,
+    apiKey: string,
+    baseUrl: string
+  ): Promise<{ success: boolean; message: string }> {
+    const fetchUrl = getOpenAIChatCompletionsUrl(baseUrl);
+    const response = await proxyFetch(fetchUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: provider === 'gemini' ? 'gemini-3.1-flash-lite-preview' : 'gpt-5.5',
+        messages: [{ role: 'user', content: 'Hi' }],
+        max_tokens: 5,
+        stream: false,
+      }),
+    });
+
+    if (response.ok) {
+      return { success: true, message: `${provider} 代理连接成功` };
+    }
+    return this.formatConnectionError(response, fetchUrl);
+  }
+
+  private async formatConnectionError(
+    response: Response,
+    fetchUrl: string
+  ): Promise<{ success: boolean; message: string }> {
+    const errText = await response.text().catch(() => '');
+    if (errText.trim().startsWith('<') || errText.includes('<!DOCTYPE')) {
+      return {
+        success: false,
+        message: `Base URL 返回了网页而非 API 响应，请检查地址。\n测试地址: ${fetchUrl}`,
+      };
+    }
+    return { success: false, message: `错误 ${response.status}: ${errText.substring(0, 120)}` };
   }
 
   // ============================================================
@@ -324,17 +394,18 @@ class ConfigService {
   importConfig(jsonString: string): boolean {
     try {
       const config = JSON.parse(jsonString);
-      // V2 格式验证
+
       if (config.gemini && config.claude && config.engines) {
-        this.saveConfig(config);
+        this.saveConfig(this.normalizeConfig(config));
         return true;
       }
-      // 尝试 V1 格式
+
       if (config.geminiApiKey || config.apiKey) {
         const migrated = this.migrateV1Config(config);
         this.saveConfig(migrated);
         return true;
       }
+
       throw new Error('Invalid config structure');
     } catch (error) {
       console.error('Failed to import config:', error);
@@ -349,7 +420,16 @@ class ConfigService {
   getPresets(): ApiPreset[] {
     try {
       const raw = localStorage.getItem(PRESETS_STORAGE_KEY);
-      return raw ? JSON.parse(raw) : [];
+      const parsed = raw ? JSON.parse(raw) : [];
+      return parsed.map((preset: any) => ({
+        id: preset.id,
+        name: preset.name,
+        provider: preset.provider || 'claude',
+        apiKey: preset.apiKey || '',
+        baseUrl: preset.baseUrl || '',
+        mode: preset.mode || (preset.provider === 'openai' ? 'official' : 'proxy'),
+        apiFormat: preset.apiFormat || (preset.provider === 'openai' ? 'openai' : 'anthropic'),
+      }));
     } catch {
       return [];
     }
@@ -372,9 +452,10 @@ class ConfigService {
   }
 
   applyPreset(preset: ApiPreset): void {
-    this.updateProviderConfig('claude', {
+    this.updateProviderConfig(preset.provider, {
       apiKey: preset.apiKey,
       baseUrl: preset.baseUrl,
+      mode: preset.mode,
       apiFormat: preset.apiFormat,
     });
   }

@@ -68,7 +68,7 @@ const getTopologyInstruction = (fieldState: NarrativeFieldState): string => {
     }
   }
   const genreDefs = genreTags.map(t => findItemDetails(t)).join('\n');
-  return `### 📐 TOPOLOGY: [DYNAMIC]\n* **Active Genre(s):** ${genreTags.join(', ')}\n* **CORE LOGIC:** ${genreDefs}\n* **DIRECTIVE:** 根据以上核心逻辑决定 M1-M7 的结构权重分配。`;
+  return `### 📐 TOPOLOGY: [DYNAMIC]\n* **Active Genre(s):** ${genreTags.join(', ')}\n* **CORE LOGIC:** ${genreDefs}\n* **DIRECTIVE:** 根据以上核心逻辑决定 M1-M7A/M7B 的结构权重分配。`;
 };
 
 /** 获取 M0 标签的精准信息 */
@@ -160,20 +160,20 @@ const buildJSONTemplate = (activeWorldLogic: string): string => {
 [
   {
     "id": "1",
-    "type": "STRUCTURALIST", 
+    "type": "STRUCTURALIST",
     "title": "电影标题 (中文)",
     "tagline": "一句有力量的 Logline。",
     "pitch_structure": {
       "inciting_incident_激励事件": "如何打破日常（结合 M2 遭遇）...",
       "rising_action_上升动作": "遭遇怎样的阻绝（结合 M4 与 SUR 环境）...",
       "climax_高潮": "付出何种代价，发起最后的对抗（结合 M5/M6）...",
-      "resolution_存在落点": "最终的哲学状态（结合 M7）..."
+      "resolution_余痕收束": "最后可见的收场、回溯性意义裁决与实在余味（结合 M7A/M7B）..."
     },
     "structure": "GENRE_DRIVEN"
   },
   {
     "id": "2",
-    "type": "POST_STRUCTURALIST", 
+    "type": "POST_STRUCTURALIST",
     "title": "电影标题 (中文)",
     "tagline": "一句有力量的 Logline。",
     "pitch_structure": { ... },
@@ -181,7 +181,7 @@ const buildJSONTemplate = (activeWorldLogic: string): string => {
   },
   {
     "id": "3",
-    "type": "THE_REAL", 
+    "type": "THE_REAL",
     "title": "电影标题 (中文)",
     "tagline": "一句有力量的 Logline。",
     "pitch_structure": { ... },
@@ -218,7 +218,8 @@ export const buildPromptV1 = (
   const sur2Tags = getTagsBySuffix(fieldState, '_era');
   const activeWorldLogic = `${sur1Tags.join('/') || 'Cinema/Drama'} (场域: ${sur2Tags.join('/') || 'Unknown'})`;
   const gravity = worldLaw.gravity || 3;
-  const m7Info = getMParamInfo(fieldState, '_m7b');
+  const m7aInfo = getMParamInfo(fieldState, '_m7a');
+  const m7bInfo = getMParamInfo(fieldState, '_m7b');
   const bannedWords = getBannedWords(fieldState);
 
   // ============================================================================
@@ -231,15 +232,18 @@ Task: 基于以下迷雾学派引擎参数，生成 3 个电影级故事概念�
   // LAYER 1: 🚨 致命锁 (CRITICAL LOCKS) — 首因区黄金位置
   // ============================================================================
   let LAYER_1 = `## 🚨 CRITICAL LOCKS — 违反任何一条即判定生成失败\n\n`;
-  
+
   // 从 calculator 的 CRITICAL directives 注入
   criticals.forEach((d, i) => {
     LAYER_1 += `[LOCK_${i + 1}: ${d.target}]\n→ ${d.commandCn}\n\n`;
   });
 
-  // 额外注入 M7 宪法（如果 calculator 没有包含）
-  if (m7Info && !criticals.some(d => d.target.includes('M7'))) {
-    LAYER_1 += `[LOCK_M7: ABSOLUTE] 结局 = [${m7Info.tags.join('/')}]\n→ M7B 是绝对宪法。用户选了什么，你就写什么。严禁篡改。\n→ ${m7Info.def}\n\n`;
+  // 额外注入 M7A/M7B 宪法（如果 calculator 没有包含）
+  if (m7aInfo && !criticals.some(d => d.target.includes('M7A'))) {
+    LAYER_1 += `[LOCK_M7A: VERDICT] 象征裁决 = [${m7aInfo.tags.join('/')}]\n→ M7A 回溯性决定整个故事的意义归属，严禁篡改，且不得由角色口头总结。\n→ ${m7aInfo.def}\n\n`;
+  }
+  if (m7bInfo && !criticals.some(d => d.target.includes('M7B'))) {
+    LAYER_1 += `[LOCK_M7B: RESIDUE] 实在余痕 = [${m7bInfo.tags.join('/')}]\n→ M7B 是身体和实在界余味的绝对宪法。用户选了什么，你就写什么。严禁篡改。\n→ ${m7bInfo.def}\n\n`;
   }
 
   // 红线警告
@@ -271,7 +275,7 @@ Task: 基于以下迷雾学派引擎参数，生成 3 个电影级故事概念�
   const m1Info = getMParamInfo(fieldState, '_m1');
   const m4Info = getMParamInfo(fieldState, '_m4');
   const m3Info = getMParamInfo(fieldState, '_m3');
-  
+
   LAYER_2 += `### 动态转译指令\n`;
   LAYER_2 += `1. **M1 主体转译:** [${m1Info?.tags.join('/') || 'Unknown'}] → 在 [${sur2Tags.join('/') || 'Unknown'}] 场域中，此人具体是谁？\n`;
   LAYER_2 += `2. **M4 阻断转译:** [${m4Info?.tags.join('/') || 'Unknown'}] → 转化为具体的反派/机构/自然力量。必须精准攻击 M1 弱点。\n`;
@@ -305,10 +309,10 @@ Task: 基于以下迷雾学派引擎参数，生成 3 个电影级故事概念�
   const LAYER_4 = `## 📖 STATIC BIBLE — 永恒宪法
 
 ### A. 核心公式
-Story = M0 { [(M1->M2->M3) / M4] x M5 } => (M6, M7)
+Story = M0 {[(M1↔M2↔M3)/M4]×M5} =>Act M6 -> (M7A◇M7B) ↺ M1'
 - M1 因为不完整而渴望，M2 是打破日常的不可逆瞬间（不一定是暴力），M3 是驱动力。
 - M4 是横亘在 M1 与 M3 之间的障碍（不一定是邪恶的）。M5 是行动的姿态（不一定是暴力）。
-- M6 是等价交换物（不是越恐怖越好，而是越精确越好）。M7B 是余味，不是灰烬。
+- M6 是等价交换物（不是越恐怖越好，而是越精确越好）。M7A 是回溯性意义裁决，M7B 是实在余味，不是灰烬。
 
 ### B. 命名协议
 - 严禁通用名（Tom/Alice/小明/李华）。严禁单字名。
@@ -322,7 +326,7 @@ Story = M0 { [(M1->M2->M3) / M4] x M5 } => (M6, M7)
 - 隐喻实体化：痛苦必须转为物理环境变异。陌生化：描述质感/光泽/异样感。
 
 ### D. 绝对禁令
-- 严禁正文出现 M0-M7 标签原词。消融在感官描写中。
+- 严禁正文出现 M0-M7A/M7B 标签原词。消融在感官描写中。
 - 严禁学术腔（拉康/大他者/异化/阉割/符号界/对象a）。严禁理工腔。
 - 古代背景下现代词必须概念降维（算法→天道/宿命）。
 - 情节必须经历否定→否定之否定→扬弃。暴力须有仪式感/雕塑感。
@@ -344,7 +348,7 @@ ${volumeInst}
 
 ### 形式律法
 [LAW_1] 每个 Pitch ≈ 500-700 字。三个方案风格互不雷同。
-[LAW_2] REQUIRE: 激励事件→上升动作→高潮→存在落点。DENY: 机械降神、无冲突流水账。
+[LAW_2] REQUIRE: 激励事件→上升动作→高潮→余痕收束。DENY: 机械降神、无冲突流水账。
 [LAW_3] 极精致电影化小说。DENY: 剧本格式、学术论文腔、网络小说腔。
 
 ### 🚫 动态禁用词
@@ -371,7 +375,8 @@ ${buildJSONTemplate(activeWorldLogic)}
 再次强调——违反即判定失败：
 1. ${m0 ? `[M0] ${m0.tag} 的逻辑不可被表层类型片冲淡。` : 'M0 未选择。'}
 2. [NARRATIVE_ARC] 走向判定 = ${tension.narrativeArc} — 这是结局的物理法则。
-3. ${m7Info ? `[M7B] = ${m7Info.tags.join('/')} — 绝对宪法，严禁篡改。` : 'M7 未选择。'}
+3. ${m7aInfo ? `[M7A] = ${m7aInfo.tags.join('/')} — 意义裁决，严禁篡改。` : 'M7A 未选择。'}
+4. ${m7bInfo ? `[M7B] = ${m7bInfo.tags.join('/')} — 实在余痕，严禁篡改。` : 'M7B 未选择。'}
 `;
 
   // ============================================================================
@@ -409,7 +414,8 @@ export const buildPromptV2 = (
   const m4Info = getMParamInfo(fieldState, '_m4');
   const m5Info = getMParamInfo(fieldState, '_m5');
   const m6Info = getMParamInfo(fieldState, '_m6');
-  const m7Info = getMParamInfo(fieldState, '_m7b');
+  const m7aInfo = getMParamInfo(fieldState, '_m7a');
+  const m7bInfo = getMParamInfo(fieldState, '_m7b');
   // m4xInfo/m5xInfo removed in v3.0
 
   const sur1Tags = getTagsBySuffix(fieldState, '_genre');
@@ -425,13 +431,13 @@ export const buildPromptV2 = (
 Task: 基于以下迷雾学派引擎参数，生成 3 个电影级故事概念。`;
 
   // ============================================================================
-  // BLOCK 1: 核心公式 (M0-M7)
+  // BLOCK 1: 核心公式 (M0-M7A/M7B)
   // ============================================================================
 
   // 1A. 公式位置关系说明 (静态)
   const BLOCK_1A = `## ⚙️ 核心公式：欲望的代数
 
-**Story = M0 { [(M1 → M2 → M3) / M4] × M5 } ⇒ (M6, M7)**
+**Story = M0 {[(M1↔M2↔M3)/M4]×M5} ⇒Act M6 → (M7A◇M7B) ↺ M1'**
 
 你不是在写作文，你是在**解这个方程**。每个参数是一个拓扑位置，不是词汇：
 
@@ -440,7 +446,7 @@ Task: 基于以下迷雾学派引擎参数，生成 3 个电影级故事概念�
 
 **M1. 缺失主体（分子/被除数）**
 → 主体因为不完整而渴望。这个不完整不是伤口——它是窗口。正因为有缺口，风才能吹进来。
-→ 它是故事的起点：一个人想要什么，因为他缺少什么。必须结合 SUR9(职业) 具象化。
+→ 它是故事的起点：一个人想要什么，因为他缺少什么。SUR9 只提供职业身份外壳，不能替 M1 解释缺口。
 
 **M2. 真实遭遇（分子/撞击）**
 → 打破日常的那个不可逆瞬间。它可以是一声枪响，也可以是一个吻；可以是一封来自死者的信，也可以是窗外突然下起的雪。
@@ -462,10 +468,14 @@ Task: 基于以下迷雾学派引擎参数，生成 3 个电影级故事概念�
 → 为了让公式闭合，主体必须放弃的等价交换物。它可以是一段关系、一个身份、一种曾经让自己安心的幻觉，甚至是旧的自己。
 → 代价的重量由公式的张力决定——不是越恐怖越好，而是越精确越好。一根羽毛的丧失，有时比断臂更致命。
 
-**M7B. 存在落点（余数/沉淀）**
-→ 公式运算后留下的余数。它不是"答案"，是"余味"——可以是嘴角的苦涩，也可以是意想不到的释然，也可以是一个永远无法回答的问题。
+**M7A. 象征裁决（回溯性缝合点）**
+→ 公式闭合后，对此前所有情节进行回溯性定性的意义裁决。它不是角色顿悟，也不是旁白总结，而是由最后的情节排列让之前的一切突然改写含义。
+→ **M7A 严禁被角色口头说出。它只能通过行动、沉默、结构反转或画面关系显影。**
+
+**M7B. 实在余痕（余数/沉淀）**
+→ 公式运算后留下的余数。它不是"答案"，是身体和实在界上的"余味"——可以是嘴角的苦涩，也可以是一个永远无法回答的问题。
 → 它是观众走出影院后，在雨中站了一会儿才想起要撑伞的那个瞬间。
-→ **M7B 是绝对宪法。用户选了什么，你就写什么。严禁篡改。**`;
+→ **M7B 是实在余痕的绝对宪法。用户选了什么，你就写什么。严禁篡改。**`;
 
   // 1B. 本次具体值 + 走向判定 (动态)
   let BLOCK_1B = `## 🧬 本次 DNA 序列\n\n`;
@@ -477,7 +487,7 @@ Task: 基于以下迷雾学派引擎参数，生成 3 个电影级故事概念�
     BLOCK_1B += `* **M0. 精神拓扑**: 未选择（默认中性拓扑）\n\n`;
   }
 
-  // M1-M7 各参数
+  // M1-M7A/M7B 各参数
   const mParams = [
     { label: 'M1. 缺失主体', info: m1Info },
     { label: 'M2. 真实遭遇', info: m2Info },
@@ -485,7 +495,8 @@ Task: 基于以下迷雾学派引擎参数，生成 3 个电影级故事概念�
     { label: 'M4. 大他者阻断', info: m4Info },
     { label: 'M5. 行动驱力', info: m5Info },
     { label: 'M6. 终极代价', info: m6Info },
-    { label: 'M7B. 存在落点', info: m7Info },
+    { label: 'M7A. 象征裁决', info: m7aInfo },
+    { label: 'M7B. 实在余痕', info: m7bInfo },
   ];
 
   for (const mp of mParams) {
@@ -526,7 +537,7 @@ Task: 基于以下迷雾学派引擎参数，生成 3 个电影级故事概念�
   BLOCK_1B += `暴力的正确用法：如同交响乐中的定音鼓——稀少，精准，一击致命。通篇残肢与窒息只会让暴力彻底失去重量。\n\n`;
 
   // ============================================================================
-  // BLOCK 2: 表层设定 (SUR1-11)
+  // BLOCK 2: 表层设定 (SUR1-SUR10 + SUR-END)
   // ============================================================================
   let BLOCK_2 = `## 🎨 表层设定 — 灵魂穿的皮
 
@@ -539,13 +550,13 @@ Task: 基于以下迷雾学派引擎参数，生成 3 个电影级故事概念�
     { label: 'SUR2. 背景场域', suffix: '_era' },
     { label: 'SUR3. 时空坐标', suffix: '_spacetime' },
     { label: 'SUR4. 社会形态', suffix: '_society' },
-    { label: 'SUR5. 欲望锚点', suffix: '_everything' },
-    { label: 'SUR6. 空间场景', suffix: '_location' },
-    { label: 'SUR7. 性别', suffix: '_gender' },
-    { label: 'SUR8. 年龄', suffix: '_age' },
+    { label: 'SUR5. 对象预设', suffix: '_everything' },
+    { label: 'SUR6. 空间容器', suffix: '_location' },
+    { label: 'SUR7. 选角呈现', suffix: '_gender' },
+    { label: 'SUR8. 年龄阶段', suffix: '_age' },
     { label: 'SUR9. 职业身份', suffix: '_profession' },
-    { label: 'SUR10. 哲学信念', suffix: '_ideology' },
-    { label: 'SUR11. 结局', suffix: '_explicit_ending' },
+    { label: 'SUR10. 信念预设', suffix: '_ideology' },
+    { label: 'SUR-END. 显性收场', suffix: '_ending' },
   ];
 
   for (const sur of surParams) {
@@ -598,7 +609,7 @@ ${volumeInst}
 
 ### 形式约束
 - 每个 Pitch ≈ 500-700 字。三个方案风格互不雷同。
-- 必须包含：激励事件 → 上升动作 → 高潮 → 存在落点。
+- 必须包含：激励事件 → 上升动作 → 高潮 → 余痕收束。
 - 严禁：机械降神、无冲突流水账、剧本格式、学术论文腔。
 - 语言：极具画面感的简体中文。
 
@@ -622,7 +633,8 @@ ${buildJSONTemplate(activeWorldLogic)}
 ### 🚨 最终复述
 1. ${m0 ? `M0 [${m0.tag}] 的逻辑不可被冲淡。` : ''}
 2. NARRATIVE_ARC = ${tension.narrativeArc}。
-3. ${m7Info ? `M7B = [${m7Info.tags.join('/')}] 是绝对宪法，严禁篡改。` : ''}`;
+3. ${m7aInfo ? `M7A = [${m7aInfo.tags.join('/')}] 是意义裁决，严禁篡改。` : ''}
+4. ${m7bInfo ? `M7B = [${m7bInfo.tags.join('/')}] 是实在余痕，严禁篡改。` : ''}`;
 
   // ============================================================================
   // BLOCK 5: 创作铁律 (极度压缩)
@@ -642,7 +654,7 @@ ${buildJSONTemplate(activeWorldLogic)}
 - 陌生化：描述质感/光泽/异样感，不直呼物名。
 
 ### 绝对禁令
-- 严禁正文出现 M0-M7 标签原词。消融在感官描写中。
+- 严禁正文出现 M0-M7A/M7B 标签原词。消融在感官描写中。
 - 严禁学术腔（拉康/大他者/异化/阉割/符号界/对象a）。严禁理工腔。
 - 古代背景下现代词必须概念降维（算法→天道/宿命）。
 - 情节必须经历否定→否定之否定→扬弃。暴力须有仪式感/雕塑感。

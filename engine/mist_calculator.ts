@@ -1,15 +1,15 @@
 /**
  * 迷雾引擎 v2.1 — 核心计算器 (MistCalculator)
- * 
+ *
  * 核心升级：M0 精神拓扑作为"全域操作系统"正式接入公式
- * 
+ *
  * 职责：
- * 1. 执行公式 Story = M0 { [(M1→M2→M3)/M4] × M5 } ⇒ (M6, M7)
+ * 1. 执行公式 Story = M0 {[(M1↔M2↔M3)/M4]×M5} ⇒Act M6 → (M7A◇M7B) ↺ M1'
  *    其中 M0 作为全域修饰器，改变括号内运算的规则本身
  * 2. M0 拓扑修饰（曲率偏移 + 公式形变）
  * 3. 红线互斥检测（含 M0 相关红线）
  * 4. 代价守恒校验（缺失质量守恒定律）
- * 5. M7 叙事走向反馈
+ * 5. M7A/M7B 叙事走向反馈
  * 6. 生成 ForceDirective 硬指令列表（含 M0 运行时覆写）
  * 7. 词条级 logic/patch 指令提取
  * 8. 编译 Prompt payload
@@ -37,7 +37,7 @@ import type { NarrativeFieldState, LibraryItemDef, WorldLawConfig } from '../typ
 
 // ============================================
 // 0. 词库查找器（运行时 load）
-//    加载 M0-M7 引擎词条 + SUR1-SUR10 皮层词条
+//    加载 M0-M7A/M7B 引擎词条 + SUR1-SUR10 皮层词条
 // ============================================
 
 import { NARRATIVE_ENGINE_LIBRARY } from '../data/engine_core/narrative_engine';
@@ -108,11 +108,11 @@ function extractAll(fieldState: NarrativeFieldState, key: string): string[] {
 
 // ============================================
 // 1. 结构化输入提取
-//    骨层 (M0-M7) + 皮层 (SUR1-SUR10) + 工程轴 (SV1-SV2)
+//    骨层 (M0-M7A/M7B) + 皮层 (SUR1-SUR10) + 工程轴 (SV1-SV2)
 // ============================================
 
 export interface MistEngineInput {
-  // === 骨层：M0-M7 ===
+  // === 骨层：M0-M7A/M7B 双结项 ===
   m0?: string;
   m1?: string;
   m2?: string;
@@ -129,13 +129,13 @@ export interface MistEngineInput {
   sur2?: string;       // 世界模体 (World Motif)
   sur3?: string;       // 时空场域 (Spacetime Field)
   sur4?: string;       // 社会形态 (Social Order)
-  sur5?: string;       // 欲望锚点 (Everything)
-  sur6?: string[];     // 空间场景 (Scenes) — 可多选
-  sur7?: string;       // 主体性别 (Gender)
-  sur8?: string;       // 主体年龄 (Age)
-  sur9?: string;       // 主体职业 (Occupation)
+  sur5?: string;       // 对象预设 / SUR-OBJ (Object Anchor)
+  sur6?: string[];     // 空间容器 / SUR-LOC (Space Container) — 可多选
+  sur7?: string;       // 选角呈现 / SUR-CAST (Casting Presentation)
+  sur8?: string;       // 年龄阶段 / SUR-AGE (Age Stage)
+  sur9?: string;       // 职业身份 / SUR-ROLE (Role Preset)
 
-  sur10?: string;      // 哲学信念 (Philosophy)
+  sur10?: string;      // 信念预设 / SUR-BELIEF (Belief Preset)
 
   // === 皮层旋钮：X参数 ===
   // sur4x removed in v3.1 (与 SUR4 语义冗余)
@@ -269,10 +269,10 @@ function calculateTension(input: MistEngineInput, m0Topo: M0TopologyProfile | un
   //   1. M0.m4Divisor（精神拓扑：精神病=0.1）
   const effective_m4 = g_m4 * mods.m4Divisor;
   const m4_amplifier = 1.0 + m4x_gravity;
-  
+
   // 【算法修正】由于分子是 M1+M2+M3 的加和（均值约1.5），分母仅有 M4（均值约0.75）。
   // 为了让平均对峙状态的张力比回归到 1.0 (DEADLOCK)，在此赋予大他者 2.0 的“固有镇压权值”。
-  const m4_base_weight = 2.0; 
+  const m4_base_weight = 2.0;
   const denominator = Math.max(effective_m4 * m4_amplifier * m4_base_weight, 0.1);
   const ratio = numerator / denominator;
 
@@ -284,10 +284,10 @@ function calculateTension(input: MistEngineInput, m0Topo: M0TopologyProfile | un
   // ====== 世界熵 ======
   const worldEntropy = mods.entropyRate;
 
-  // M8/M7 终局重力 → 叙事走向判定 (M8 裁决为主，M7 余痕为辅)
-  const m8Gravity = resolveGravity('M8', input.m7a);
-  const m7Gravity = resolveGravity('M7', input.m7b);
-  const adjustedRatio = ratio * (1 + (m8Gravity - 0.5) * 0.4) * (1 + (m7Gravity - 0.5) * 0.2);
+  // M7A/M7B 终局重力 → 叙事走向判定 (M7A 裁决为主，M7B 余痕为辅)
+  const m7aGravity = resolveGravity('M7A', input.m7a);
+  const m7bGravity = resolveGravity('M7B', input.m7b);
+  const adjustedRatio = ratio * (1 + (m7aGravity - 0.5) * 0.4) * (1 + (m7bGravity - 0.5) * 0.2);
 
   // 走向判定（M0 曲率偏移）
   const curvatureShift = m0Topo ? (m0Topo.curvature - 0.5) * 0.4 : 0;
@@ -334,7 +334,7 @@ function verifyPriceBalance(
     1,
     1,
   ];
-  
+
   const tensionBonus = tension.finalTension > 2.0 ? 1 : 0;
   const requiredLevel = Math.min(Math.max(...floors) + tensionBonus, 5);
 
@@ -448,8 +448,8 @@ function compileDirectives(
     { target: 'M4_BIG_OTHER', id: input.m4, moduleKey: 'M4' },
     { target: 'M5_DRIVE', id: input.m5, moduleKey: 'M5' },
     { target: 'M6_PRICE', id: input.m6, moduleKey: 'M6' },
-    { target: 'M8_VERDICT', id: input.m7a, moduleKey: 'M8' },
-    { target: 'M7_RESIDUAL', id: input.m7b, moduleKey: 'M7' },
+    { target: 'M7A_VERDICT', id: input.m7a, moduleKey: 'M7A' },
+    { target: 'M7B_RESIDUE', id: input.m7b, moduleKey: 'M7B' },
   ];
 
   for (const mod of moduleItems) {
@@ -537,12 +537,12 @@ function compileDirectives(
     { target: 'SUR2_MOTIF', id: input.sur2, label: '世界模体' },
     { target: 'SUR3_SPACETIME', id: input.sur3, label: '时空场域' },
     { target: 'SUR4_SOCIETY', id: input.sur4, label: '社会形态' },
-    { target: 'SUR5_EVERYTHING', id: input.sur5, label: '欲望锚点' },
-    { target: 'SUR7_GENDER', id: input.sur7, label: '主体性别' },
-    { target: 'SUR8_AGE', id: input.sur8, label: '主体年龄' },
+    { target: 'SUR5_OBJECT', id: input.sur5, label: '对象预设' },
+    { target: 'SUR7_CASTING', id: input.sur7, label: '选角呈现' },
+    { target: 'SUR8_AGE_STAGE', id: input.sur8, label: '年龄阶段' },
     { target: 'SUR9_PROFESSION', id: input.sur9, label: '职业身份' },
 
-    { target: 'SUR10_PHILOSOPHY', id: input.sur10, label: '哲学信念' },
+    { target: 'SUR10_BELIEF', id: input.sur10, label: '信念预设' },
   ];
 
   for (const slot of skinSlots) {
@@ -592,7 +592,7 @@ function compileDirectives(
     }
   }
 
-  // SUR6 空间场景（多值）
+  // SUR6 空间容器（多值）
   if (input.sur6 && input.sur6.length > 0) {
     for (const locId of input.sur6) {
       const item = lookupItem(locId);
@@ -600,7 +600,7 @@ function compileDirectives(
       const semantic = [item.def, item.core].filter(Boolean).join(' | ');
       if (semantic) {
         directives.push({
-          target: 'SUR6_SCENE',
+          target: 'SUR6_LOCATION',
           command: [item.defEn, item.coreEn].filter(Boolean).join(' | ') || semantic,
           commandCn: semantic,
           priority: 'NORMAL'
@@ -763,8 +763,8 @@ ${m0Section}
 | M3 欲望幻象 | ${getName(input.m3)} | ${resolveGravity('M3', input.m3).toFixed(2)} (有效值: ${(resolveGravity('M3', input.m3) * (m0Topo?.formulaMods.m3Opacity ?? 1.0) * resolveSUR10XFactor(input.sur10x)).toFixed(2)}) |
 | M4 大他者 | ${getName(input.m4)} | ${resolveGravity('M4', input.m4).toFixed(2)} (有效值: ${(resolveGravity('M4', input.m4) * (m0Topo?.formulaMods.m4Divisor ?? 1.0)).toFixed(2)}) |
 | M5 行动驱力 | ${getName(input.m5)} | ${resolveGravity('M5', input.m5).toFixed(2)} (有效值: ${(resolveGravity('M5', input.m5) * (m0Topo?.formulaMods.m5Multiplier ?? 1.0)).toFixed(2)}) |
-| M8 象征裁决 | ${getName(input.m7a)} | ${resolveGravity('M8', input.m7a).toFixed(2)} |
-| M7 实在余痕 | ${getName(input.m7b)} | ${resolveGravity('M7', input.m7b).toFixed(2)} |
+| M7A 象征裁决 | ${getName(input.m7a)} | ${resolveGravity('M7A', input.m7a).toFixed(2)} |
+| M7B 实在余痕 | ${getName(input.m7b)} | ${resolveGravity('M7B', input.m7b).toFixed(2)} |
 | SUR10X 信念裂度 | ${getName(input.sur10x)} | x${resolveSUR10XFactor(input.sur10x).toFixed(2)} -> M3幻象 |
 
 ### 🌍 世界法则 (World Law)
@@ -777,13 +777,13 @@ ${m0Section}
 | SUR2 世界模体 | ${getName(input.sur2)} |
 | SUR3 时空场域 | ${getName(input.sur3)} |
 | SUR4 社会形态 | ${getName(input.sur4)} |
-| SUR5 欲望锚点 | ${getName(input.sur5)} |
-| SUR6 空间场景 | ${input.sur6 && input.sur6.length > 0 ? input.sur6.map(id => getName(id)).join(' + ') : '未选择'} |
-| SUR7 主体性别 | ${getName(input.sur7)} |
-| SUR8 主体年龄 | ${getName(input.sur8)} |
+| SUR5 对象预设 | ${getName(input.sur5)} |
+| SUR6 空间容器 | ${input.sur6 && input.sur6.length > 0 ? input.sur6.map(id => getName(id)).join(' + ') : '未选择'} |
+| SUR7 选角呈现 | ${getName(input.sur7)} |
+| SUR8 年龄阶段 | ${getName(input.sur8)} |
 | SUR9 职业身份 | ${getName(input.sur9)} |
 
-| SUR10 哲学信念 | ${getName(input.sur10)} |
+| SUR10 信念预设 | ${getName(input.sur10)} |
 | SV1 叙事结构 | ${getName(input.sv1)} |
 | SV2 故事体量 | ${getName(input.sv2)} |
 
@@ -826,22 +826,22 @@ export function runMistEngine(fieldState: NarrativeFieldState, worldLaw?: WorldL
   if (worldLaw) {
     input.worldLawGravity = worldLaw.gravity as 1 | 2 | 3 | 4 | 5;
   }
-  
+
   // 解析 M0 拓扑 — 确定"操作系统"
   const m0Topo = resolveM0Topology(input.m0);
-  
+
   // 公式计算（M0 参与修饰）
   const tension = calculateTension(input, m0Topo);
-  
+
   // 红线检测（含 M0 专属红线）
   const redlines = detectRedlines(input, m0Topo);
-  
+
   // 代价配平
   const priceVerdict = verifyPriceBalance(input, tension, fieldState);
-  
+
   // 指令编译（M0 作为最高优先级覆写）
   const directives = compileDirectives(input, tension, m0Topo);
-  
+
   // Prompt 编译
   const compiledPayload = compilePayload(input, tension, redlines, priceVerdict, directives, m0Topo);
 

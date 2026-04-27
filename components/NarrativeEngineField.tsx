@@ -156,27 +156,27 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
     let osLabel = "结构基底/STRUCTURAL BASE";
 
     if (isCommercial) {
-        osTheme = { 
-            accent: theme === 'retro' ? 'text-[#8B261D]' : 'text-mist-cyan', 
-            hover: theme === 'retro' ? 'hover:bg-transparent' : 'hover:bg-cyan-900/10', 
-            label: theme === 'retro' ? 'text-[#8B261D]' : 'text-mist-cyan', 
-            icon: <ScanEye size={24} className={theme === 'retro' ? "text-[#8B261D]" : "text-mist-cyan"} /> 
+        osTheme = {
+            accent: theme === 'retro' ? 'text-[#8B261D]' : 'text-mist-cyan',
+            hover: theme === 'retro' ? 'hover:bg-transparent' : 'hover:bg-cyan-900/10',
+            label: theme === 'retro' ? 'text-[#8B261D]' : 'text-mist-cyan',
+            icon: <ScanEye size={24} className={theme === 'retro' ? "text-[#8B261D]" : "text-mist-cyan"} />
         };
-        osLabel = "欲望锚点/DESIRE ANCHOR";
+        osLabel = "对象预设/OBJECT ANCHOR";
     } else if (isExperimental) {
-        osTheme = { 
-            accent: theme === 'retro' ? 'text-[#8B261D]' : 'text-mist-purple', 
-            hover: theme === 'retro' ? 'hover:bg-transparent' : 'hover:bg-purple-900/10', 
-            label: theme === 'retro' ? 'text-[#8B261D]' : 'text-mist-purple', 
-            icon: <BrainCircuit size={24} className={theme === 'retro' ? "text-[#8B261D]" : "text-mist-purple"} /> 
+        osTheme = {
+            accent: theme === 'retro' ? 'text-[#8B261D]' : 'text-mist-purple',
+            hover: theme === 'retro' ? 'hover:bg-transparent' : 'hover:bg-purple-900/10',
+            label: theme === 'retro' ? 'text-[#8B261D]' : 'text-mist-purple',
+            icon: <BrainCircuit size={24} className={theme === 'retro' ? "text-[#8B261D]" : "text-mist-purple"} />
         };
         osLabel = "核心观念/CORE CONCEPT";
     } else if (isTrailer) {
-        osTheme = { 
-            accent: theme === 'retro' ? 'text-[#8B261D]' : 'text-mist-orange', 
-            hover: theme === 'retro' ? 'hover:bg-transparent' : 'hover:bg-orange-900/10', 
-            label: theme === 'retro' ? 'text-[#8B261D]' : 'text-mist-orange', 
-            icon: <Zap size={24} className={theme === 'retro' ? "text-[#8B261D]" : "text-mist-orange"} /> 
+        osTheme = {
+            accent: theme === 'retro' ? 'text-[#8B261D]' : 'text-mist-orange',
+            hover: theme === 'retro' ? 'hover:bg-transparent' : 'hover:bg-orange-900/10',
+            label: theme === 'retro' ? 'text-[#8B261D]' : 'text-mist-orange',
+            icon: <Zap size={24} className={theme === 'retro' ? "text-[#8B261D]" : "text-mist-orange"} />
         };
         osLabel = "诱饵钩子/THE LURE";
     }
@@ -330,11 +330,11 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
 
             {showRings && (
                 <div className="absolute inset-0 z-0 pointer-events-none transition-all duration-1000" style={{ filter: 'blur(1px)' }}>
-                    <BorromeanRings 
-                        fieldState={fieldState} 
-                        lang={lang} 
-                        driverType={driverType} 
-                        opacity={0.8} 
+                    <BorromeanRings
+                        fieldState={fieldState}
+                        lang={lang}
+                        driverType={driverType}
+                        opacity={0.8}
                         centered={true}
                         vivid={true}
                     />
@@ -531,12 +531,12 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
 
             {/* PORTAL TOOLTIP FOR COEFFICIENTS */}
             {hoveredPortal && createPortal(
-                <div 
+                <div
                     className={`fixed z-[9999] w-max max-w-[320px] text-left p-5 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] pointer-events-none animate-in fade-in zoom-in-95 duration-100
                         ${hoveredPortal.showAbove ? '-translate-y-full' : ''}
                         ${theme === 'retro' ? 'bg-[#F9F7F1] border-[#1A1814] border' : 'bg-[#0a0a0a]/95 backdrop-blur-xl border-zinc-800 border'}`}
-                    style={{ 
-                        top: hoveredPortal.pos.top, 
+                    style={{
+                        top: hoveredPortal.pos.top,
                         left: hoveredPortal.pos.left
                     }}
                 >

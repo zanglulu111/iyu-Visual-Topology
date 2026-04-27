@@ -19,6 +19,7 @@ import {
 import { AssetCard } from '../../AssetCard';
 import { SceneCollapseState, SceneTabState } from '../MetonymyView';
 import { transformScriptStyle } from '../../../services/geminiService'; // Ensure import
+import { AdminXRayButton } from '../../XRayInspector';
 
 interface MetonymySceneCardProps {
     section: ScreenplaySection;
@@ -111,6 +112,7 @@ interface MetonymySceneCardProps {
     // NEW: Focus Props
     isFocused?: boolean;
     onToggleFocus?: () => void;
+    isAdmin?: boolean;
 }
 
 const AssetChip: React.FC<{
@@ -168,11 +170,13 @@ export const MetonymySceneCard: React.FC<MetonymySceneCardProps> = (props) => {
         isGenerating, generationStartTime, onGenerateStatic, onGenerateDynamic,
         anchorImage, isAnchorUploading, onUploadAnchor, onRemoveAnchor, // Updated props
         storyboardDisplayLang, onToggleStoryboardLang, dynamicDisplayLang, onToggleDynamicLang,
+        globalTone,
         themeAccent, themeColorBase, language, theme,
         onDragStart, onDragOver, onDrop, onDragEnd, isDragged, onOpenPreview,
         onGenerateAssetImage, onUpdateSection,
         activeTab, onTabChange, // Use props instead of local state
-        isFocused, onToggleFocus // Focus props
+        isFocused, onToggleFocus, // Focus props
+        isAdmin
     } = props;
 
     const [isPreviewAssetsOpen, setIsPreviewAssetsOpen] = useState(false);
@@ -533,6 +537,21 @@ export const MetonymySceneCard: React.FC<MetonymySceneCardProps> = (props) => {
                                     </button>
 
                                     {/* UNIFIED GENERATION BUTTON - Forces update */}
+                                    <AdminXRayButton
+                                        isAdmin={isAdmin}
+                                        lang={language === 'EN' ? 'EN' : 'CN'}
+                                        title={language === 'EN' ? 'X-Ray Scene Script Prompt' : 'X-Ray 场次剧本指令'}
+                                        payload={{
+                                            action: (!mountedPresetId || mountedPresetId === 'original') ? 'Open base script generation console' : 'Visual bible style transfer',
+                                            sceneTitle: section.title,
+                                            mountedPreset: mountedPreset?.name,
+                                            baseScriptPreview: section.sutureDataMap?.['original']?.literaryScript?.slice(0, 4000),
+                                            targetTone: mountedPreset?.toneAnalysis,
+                                            assets: finalAssets
+                                        }}
+                                        className={theme === 'retro' ? 'h-8 w-8 bg-white border-[#8B261D]/20 text-[#8B261D] hover:bg-[#8B261D]/10' : 'h-8 w-8 bg-zinc-900/50 border-zinc-700/50 text-zinc-400 hover:text-white hover:bg-zinc-800'}
+                                        iconSize={12}
+                                    />
                                     <button
                                         onClick={() => {
                                             if (!mountedPresetId || mountedPresetId === 'original') {
@@ -698,6 +717,23 @@ export const MetonymySceneCard: React.FC<MetonymySceneCardProps> = (props) => {
                                         <Zap size={12} /> {isBibleMissing ? (language === 'EN' ? "Select Bible First" : "请先挂载圣经") : (language === 'EN' ? "Generate Dynamic" : "生成动态分镜")}
                                         {isGenerating && <ProcessingTimer startTime={generationStartTime || Date.now()} />}
                                     </button>
+                                    <AdminXRayButton
+                                        isAdmin={isAdmin}
+                                        lang={language === 'EN' ? 'EN' : 'CN'}
+                                        title={language === 'EN' ? 'X-Ray Dynamic Storyboard Prompt' : 'X-Ray 动态分镜指令'}
+                                        payload={{
+                                            action: 'Generate dynamic storyboard from literary script',
+                                            sceneTitle: section.title,
+                                            mountedPreset: mountedPreset?.name,
+                                            scriptPreview: displayContent.slice(0, 5000),
+                                            globalTone,
+                                            finalAssets,
+                                            hasAnchorImage: Boolean(anchorImage)
+                                        }}
+                                        disabled={isBibleMissing}
+                                        className={theme === 'retro' ? 'h-8 w-8 bg-white border-[#8B261D]/20 text-[#8B261D] hover:bg-[#8B261D]/10' : 'h-8 w-8 bg-zinc-900/50 border-zinc-700/50 text-zinc-400 hover:text-white hover:bg-zinc-800'}
+                                        iconSize={12}
+                                    />
                                     <button onClick={onToggleDynamicLang} className={btnGrey}>
                                         <Globe size={12} /> {dynamicDisplayLang === 'CN' ? '中' : 'EN'}
                                     </button>

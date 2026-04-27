@@ -9,6 +9,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { NarrativeLibraryModal } from './NarrativeLibraryModal';
 import { TaskManagerPanel } from './TaskManagerPanel';
 import { BiblePromptInspectorModal } from './BiblePromptInspectorModal';
+import { AdminXRayButton } from './XRayInspector';
 import { globalTaskManager } from '../services/taskManager';
 import {
     NARRATIVE_ENGINE_BLOCKS,
@@ -41,6 +42,7 @@ interface NarrativePathsViewProps {
     thinkingXml?: string;
     worldLawConfig?: WorldLawConfig;
     onToggleTag?: (blockId: string, tag: string) => void;
+    isAdmin?: boolean;
 }
 
 export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
@@ -60,7 +62,8 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
     visionAnalysis,
     thinkingXml,
     worldLawConfig,
-    onToggleTag
+    onToggleTag,
+    isAdmin = false
 }) => {
     const { theme } = useTheme();
     const [selectedPathId, setSelectedPathId] = useState<string | null>(null);
@@ -491,15 +494,32 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
 
                     <div className={`w-px h-8 ${theme === 'retro' ? 'bg-[#8B261D]/20' : 'bg-zinc-800'} mx-2 hidden lg:block`}></div>
 
-                    <button
-                        onClick={onRegenerate}
-                        disabled={isProcessing}
-                        className={`flex items-center gap-2 px-4 py-1.5 rounded-lg ${theme === 'retro' ? 'bg-white border-black/10 text-zinc-600 hover:text-[#8B261D]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-white'} border transition-all text-xs font-bold uppercase tracking-wider`}
-                        title={lang === 'EN' ? "Generate New Paths" : "重新生成路径"}
-                    >
-                        <RotateCw size={14} className={isProcessing ? "animate-spin" : ""} />
-                        <span>{lang === 'EN' ? "Regenerate" : "重刷"}</span>
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <AdminXRayButton
+                            isAdmin={isAdmin}
+                            lang={lang === 'EN' ? 'EN' : 'CN'}
+                            title={lang === 'EN' ? 'X-Ray Path Regeneration Prompt' : 'X-Ray 路径重刷指令'}
+                            payload={{
+                                task: 'Regenerate narrative paths',
+                                driverType: currentDriverType,
+                                fieldState: fieldState || {},
+                                visionInput: visionInput || '',
+                                visionAnalysis: visionAnalysis || '',
+                                worldLawConfig: worldLawConfig || { gravity: 4 }
+                            }}
+                            disabled={isProcessing}
+                            className={theme === 'retro' ? 'h-8 w-8 bg-white border-black/10 text-[#8B261D] hover:bg-[#8B261D]/10' : 'h-8 w-8 bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-gold-primary'}
+                        />
+                        <button
+                            onClick={onRegenerate}
+                            disabled={isProcessing}
+                            className={`flex items-center gap-2 px-4 py-1.5 rounded-lg ${theme === 'retro' ? 'bg-white border-black/10 text-zinc-600 hover:text-[#8B261D]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-white'} border transition-all text-xs font-bold uppercase tracking-wider`}
+                            title={lang === 'EN' ? "Generate New Paths" : "重新生成路径"}
+                        >
+                            <RotateCw size={14} className={isProcessing ? "animate-spin" : ""} />
+                            <span>{lang === 'EN' ? "Regenerate" : "重刷"}</span>
+                        </button>
+                    </div>
 
                 </div>
             </div>
@@ -792,14 +812,16 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                     </button>
                 </div>
                 <div className="flex items-center gap-2">
-                    <button
-                        onClick={() => setIsBibleInspectorOpen(true)}
-                        className={`flex items-center justify-center w-10 h-10 rounded-lg border transition-all
-                        ${theme === 'retro' ? 'border-[#8B261D]/20 text-[#8B261D]/60 hover:text-[#8B261D] hover:bg-[#8B261D]/5' : 'border-zinc-800 text-zinc-500 hover:text-gold-primary hover:border-zinc-600 hover:bg-zinc-900'}`}
-                        title={lang === 'CN' ? 'X-RAY 圣经指令透视' : 'Bible Prompt Inspector'}
-                    >
-                        <Terminal size={16} />
-                    </button>
+                    {isAdmin && (
+                        <button
+                            onClick={() => setIsBibleInspectorOpen(true)}
+                            className={`flex items-center justify-center w-10 h-10 rounded-lg border transition-all
+                            ${theme === 'retro' ? 'border-[#8B261D]/20 text-[#8B261D]/60 hover:text-[#8B261D] hover:bg-[#8B261D]/5' : 'border-zinc-800 text-zinc-500 hover:text-gold-primary hover:border-zinc-600 hover:bg-zinc-900'}`}
+                            title={lang === 'CN' ? 'X-RAY 圣经指令透视' : 'Bible Prompt Inspector'}
+                        >
+                            <Terminal size={16} />
+                        </button>
+                    )}
                     <button
                         onClick={handleGenerate}
                         disabled={isProcessing || !selectedPathId || treatments.length === 0}

@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { X, Sparkles, Paintbrush, Camera, Box, Cpu, MessageSquare } from 'lucide-react';
 import { VisualBibleAnalysisHints } from '../../../services/visualBibleGenerator';
+import { AdminXRayButton } from '../../XRayInspector';
 
 interface VisualBibleConfigModalProps {
     isOpen: boolean;
@@ -10,6 +11,10 @@ interface VisualBibleConfigModalProps {
     lang: 'CN' | 'EN';
     themeAccent: string;
     theme?: string;
+    isAdmin?: boolean;
+    hasToneImage?: boolean;
+    sourceText?: string;
+    mode?: 'GLOBAL' | 'TONE';
 }
 
 export const VisualBibleConfigModal: React.FC<VisualBibleConfigModalProps> = ({
@@ -18,7 +23,11 @@ export const VisualBibleConfigModal: React.FC<VisualBibleConfigModalProps> = ({
     onConfirm,
     lang,
     themeAccent,
-    theme
+    theme,
+    isAdmin,
+    hasToneImage,
+    sourceText = '',
+    mode = 'GLOBAL'
 }) => {
     const [medium, setMedium] = useState<'PAINTING' | 'CGI' | 'PHOTOGRAPHY' | 'tangible' | undefined>(undefined);
     const [dialogue, setDialogue] = useState('');
@@ -145,13 +154,26 @@ export const VisualBibleConfigModal: React.FC<VisualBibleConfigModalProps> = ({
                     >
                         {lang === 'CN' ? "取消" : "CANCEL"}
                     </button>
-                    <button
-                        onClick={() => onConfirm({ medium, dialogue })}
-                        className={`px-6 py-2 ${theme === 'retro' ? 'bg-[#8B261D] hover:bg-[#6D1E16] text-white overflow-hidden' : `bg-${colorBase}/20 hover:bg-${colorBase}/30 text-${colorBase} border border-current`} font-bold text-sm rounded transition-all flex items-center gap-2 shadow-[0_4px_15px_rgba(0,0,0,0.3)]`}
-                    >
-                        <Sparkles size={14} />
-                        {lang === 'CN' ? "开始全局视觉反推" : "START ANALYSIS"}
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <AdminXRayButton
+                            isAdmin={isAdmin}
+                            lang={lang}
+                            title={lang === 'CN' ? 'X-Ray 视觉反推指令' : 'X-Ray Visual Reverse Prompt'}
+                            payload={{
+                                task: mode === 'TONE' ? 'Analyze tone reference image' : 'Analyze visual bible',
+                                hints: { medium, dialogue },
+                                hasToneImage: Boolean(hasToneImage),
+                                sourceTextPreview: sourceText ? sourceText.slice(0, 4000) : undefined
+                            }}
+                        />
+                        <button
+                            onClick={() => onConfirm({ medium, dialogue })}
+                            className={`px-6 py-2 ${theme === 'retro' ? 'bg-[#8B261D] hover:bg-[#6D1E16] text-white overflow-hidden' : `bg-${colorBase}/20 hover:bg-${colorBase}/30 text-${colorBase} border border-current`} font-bold text-sm rounded transition-all flex items-center gap-2 shadow-[0_4px_15px_rgba(0,0,0,0.3)]`}
+                        >
+                            <Sparkles size={14} />
+                            {lang === 'CN' ? "开始全局视觉反推" : "START ANALYSIS"}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

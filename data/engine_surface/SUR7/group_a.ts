@@ -1,34 +1,33 @@
 import { LibraryCategoryDef } from '../../../types';
+import { castingPresetItem } from './_shared';
 
-/**
- * SUR7. 主体性别 (Subject Gender)
- * 
- * 纯物理选角层面——生理性别或外观呈现。
- * 不携带社会属性评论（那部分由 M 层负责）。
- * 与 SUR3（时空坐标）同级：轻量标签，无 def/core。
- * 
- * v3.1: 减重——移除 def/core/换喻，仅保留选角标签
- */
 export const SUR7_GROUP_A: LibraryCategoryDef = {
-  id: "gender_base",
-  name: "主体性别 (Gender)",
-  nameEn: "Subject Gender",
-  desc: "主体的生理性别或外观呈现（纯粹选角层面）。",
+  id: "casting_presentation",
+  name: "选角呈现 (Casting Presentation)",
+  nameEn: "Casting Presentation",
+  desc: "人物在画面、称谓和互动中采用的性别呈现标签。只给选角层，不解释人物。",
+  descEn: "Gender presentation labels used in image, address, and interaction. Casting layer only; not character explanation.",
   items: [
-    {
-      id: "gen_m",
-      name: "男性",
-      nameEn: "Male",
-    },
-    {
-      id: "gen_f",
-      name: "女性",
-      nameEn: "Female",
-    },
-    {
-      id: "gen_nb",
-      name: "非二元 / 雌雄同体",
-      nameEn: "Non-Binary / Androgynous",
-    }
+    castingPresetItem(
+      "gen_m",
+      "男性",
+      "Male",
+      "人物在称谓、造型和公共读取上呈现为男性。",
+      "The character is presented as male in address, styling, and public reading."
+    ),
+    castingPresetItem(
+      "gen_f",
+      "女性",
+      "Female",
+      "人物在称谓、造型和公共读取上呈现为女性。",
+      "The character is presented as female in address, styling, and public reading."
+    ),
+    castingPresetItem(
+      "gen_nb",
+      "非二元",
+      "Non-Binary",
+      "人物不被单一男女二分完全标记，可呈现中性、流动或未明示状态。",
+      "The character is not fully marked by a single male/female binary, allowing neutral, fluid, or unstated presentation."
+    )
   ]
 };

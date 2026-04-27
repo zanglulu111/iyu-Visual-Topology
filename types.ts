@@ -26,7 +26,7 @@ export enum DriverType {
   TRAILER = 'TRAILER'
 }
 
-export type ViewMode = 'ENGINE' | 'DIVERGENCE' | 'BIBLE' | 'METONYMY' | 'TOPOLOGY' | 'RSI' | 'ARCHIVE' | 'VIDEO' | 'RORSCHACH' | 'ANALYSIS' | 'DICTIONARY';
+export type ViewMode = 'ENGINE' | 'DIVERGENCE' | 'BIBLE' | 'METONYMY' | 'CANVAS' | 'TOPOLOGY' | 'RSI' | 'ARCHIVE' | 'VIDEO' | 'RORSCHACH' | 'ANALYSIS' | 'DICTIONARY';
 
 export type SubjectType = 'HUMAN' | 'CREATURE';
 export type AestheticMode = 'REALISM' | 'STYLIZED';
@@ -322,6 +322,10 @@ export interface GlobalVisualTone {
 
 export interface StaticShot {
   id: string;
+  shotFunction?: string;
+  shotFunctionEn?: string;
+  sceneBeat?: string;
+  sceneBeatEn?: string;
   reference: string;
   referenceEn?: string;
   shotSize: string;
@@ -582,7 +586,14 @@ export interface StyleConfig {
 
 export type DensityLevel = 'NONE' | 'LOW' | 'MID' | 'HIGH' | 'AUTO';
 
+export type SutureControlVersion = 'legacy' | 'v2';
+
 export interface SutureConfig {
+  controlVersion?: SutureControlVersion;
+  sceneMode?: string;
+  sceneFunction?: string;
+  shotBudget?: string;
+  soundArchitecture?: string;
   dialogueDensity: DensityLevel;
   dialogueStyle: string;
   voiceoverDensity: DensityLevel;
@@ -590,7 +601,6 @@ export interface SutureConfig {
   monologueDensity: DensityLevel;
   monologueStyle: string;
   visualStyle: string;
-  actionPacing: string;
   shotDensity: string;
   subjectFocus: DensityLevel;
   emptyShot: DensityLevel;

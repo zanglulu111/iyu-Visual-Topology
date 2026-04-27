@@ -143,7 +143,7 @@ Act3·Resolution(M5→M7): Final confrontation and landing after PP2.
         'inciting_incident_激励事件',
         'rising_action_上升动作',
         'climax_高潮',
-        'resolution_存在落点',
+        'resolution_余痕收束',
       ],
 
       reference: '《教父》(The Godfather)；《泰坦尼克号》(Titanic)；《唐人街》(Chinatown)',

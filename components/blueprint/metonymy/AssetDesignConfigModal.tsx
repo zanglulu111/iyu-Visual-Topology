@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { X, Sparkles, Paintbrush, Camera, Box, Cpu, MessageSquare, ImagePlus, Trash2, Loader2 } from 'lucide-react';
 import { VisualBibleAnalysisHints } from '../../../services/visualBibleGenerator';
 import { supabaseDatabase } from '../../../services/supabaseDatabase';
+import { AdminXRayButton } from '../../XRayInspector';
 
 interface AssetDesignConfigModalProps {
     isOpen: boolean;
@@ -13,6 +14,9 @@ interface AssetDesignConfigModalProps {
     initialHints?: VisualBibleAnalysisHints;
     assetType?: 'characters' | 'scenes' | 'props';
     theme?: string;
+    isAdmin?: boolean;
+    assetName?: string;
+    hasMainImage?: boolean;
 }
 
 export const AssetDesignConfigModal: React.FC<AssetDesignConfigModalProps> = ({
@@ -23,7 +27,10 @@ export const AssetDesignConfigModal: React.FC<AssetDesignConfigModalProps> = ({
     themeAccent,
     initialHints,
     assetType,
-    theme
+    theme,
+    isAdmin,
+    assetName,
+    hasMainImage
 }) => {
     const [medium, setMedium] = useState<'PAINTING' | 'CGI' | 'PHOTOGRAPHY' | 'tangible' | undefined>(undefined);
     const [dialogue, setDialogue] = useState('');
@@ -285,13 +292,27 @@ export const AssetDesignConfigModal: React.FC<AssetDesignConfigModalProps> = ({
                     >
                         {lang === 'CN' ? "取消" : "CANCEL"}
                     </button>
-                    <button
-                        onClick={() => onConfirm(currentHints)}
-                        className={`px-6 py-2 ${theme === 'retro' ? 'bg-[#8B261D] hover:bg-[#6D1E16] text-white overflow-hidden' : `bg-${colorBase}/20 hover:bg-${colorBase}/30 text-${colorBase} border border-current`} font-bold text-sm rounded transition-all flex items-center gap-2 shadow-[0_4px_15px_rgba(0,0,0,0.3)]`}
-                    >
-                        <Sparkles size={14} />
-                        {lang === 'CN' ? "生成资产设计" : "GENERATE DESIGN"}
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <AdminXRayButton
+                            isAdmin={isAdmin}
+                            lang={lang}
+                            title={lang === 'CN' ? 'X-Ray 资产设计指令' : 'X-Ray Asset Design Prompt'}
+                            payload={{
+                                task: 'Analyze asset image and generate design/concept prompts',
+                                assetName,
+                                assetType,
+                                hasMainImage: Boolean(hasMainImage),
+                                hints: currentHints
+                            }}
+                        />
+                        <button
+                            onClick={() => onConfirm(currentHints)}
+                            className={`px-6 py-2 ${theme === 'retro' ? 'bg-[#8B261D] hover:bg-[#6D1E16] text-white overflow-hidden' : `bg-${colorBase}/20 hover:bg-${colorBase}/30 text-${colorBase} border border-current`} font-bold text-sm rounded transition-all flex items-center gap-2 shadow-[0_4px_15px_rgba(0,0,0,0.3)]`}
+                        >
+                            <Sparkles size={14} />
+                            {lang === 'CN' ? "生成资产设计" : "GENERATE DESIGN"}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

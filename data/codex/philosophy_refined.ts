@@ -31,112 +31,126 @@ export interface LacanCategory {
 // 0. 迷雾学派 (MIST SCHOOL)
 export const MIST_INDEX: LacanCategory[] = [
     {
-        id: "mist_volume_1",
-        name: "第一卷：总纲",
-        enName: "Volume I: General Overview",
-        desc: "迷雾学派的正式理论体系与核心架构。",
+        id: "mist_canon_theory",
+        name: "00 总纲与宪法",
+        enName: "00 Constitution & Canon",
+        desc: "（一）理论总纲",
         concepts: [
-            { id: "mist_school", name: "迷雾学派", enName: "Mist School", category: "Core", shortDef: "一个以拉康、黑格尔、马克思、齐泽克等理论为内核的“生产型学派”。" },
-            { id: "erotic_structural_topology", name: "爱欲结构拓扑学", enName: "Erotic Structural Topology", category: "Theory", shortDef: "学派正式理论名。欲望如何在结构位中以拓扑形式显形。骨头始终藏在血肉之内。" },
-            { id: "generative_engine", name: "爱欲结构发生器", enName: "Erotic Structural Generator", category: "System", shortDef: "从解释世界到生产世界的转向，将结构哲学推进为欲望生成引擎。" },
-            { id: "structural_visualization_method", name: "结构可视化", enName: "Structural Visualization", category: "Methodology", shortDef: "本体论卫生学，通过锚点、污点、剩余物来显形抽象结构的方法论总纲。" },
-            { id: "exception_of_structure_goal", name: "结构的例外", enName: "Exception of Structure", category: "Core", shortDef: "先建立结构，再去看结构的例外与逃逸，是实践的更高目标。" }
+            { id: "mist_school_complete_theory", name: "迷雾学派完整理论总纲", enName: "Complete Mist School Theory", category: "Canon", shortDef: "三卷制最终理论包：爱欲结构拓扑学、M0-M7 核心叙事引擎、SUR/SV 表层生产协议。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" }
         ]
     },
     {
-        id: "mist_volume_2",
-        name: "第二卷：精神底盘与结构继承",
-        enName: "Volume II: Structural Inheritance",
-        desc: "来自拉康、黑格尔、马克思、齐泽克的哲学底盘。",
+        id: "mist_canon_engine",
+        name: "00 总纲与宪法",
+        enName: "00 Constitution & Canon",
+        desc: "（二）核心公式与叙事宪法",
         concepts: [
-            { id: "mist_lack", name: "缺失", enName: "Lack", category: "Concept", shortDef: "缺失不是缺点，而是主体成为主体的结构条件。" },
-            { id: "mist_objet_a", name: "对象 a", enName: "Objet petit a", category: "Concept", shortDef: "欲望的非对象性，作为剩余物的诱饵。" },
-            { id: "mist_fantasy", name: "幻想", enName: "Fantasy", category: "Concept", shortDef: "支撑现实的幕布，不是纯粹谎言。" },
-            { id: "mist_drive", name: "驱力", enName: "Drive", category: "Concept", shortDef: "围绕失落物循环的回返与重复。" },
-            { id: "mist_sinthome_knot", name: "结与圣状", enName: "Sinthome & Knot", category: "Concept", shortDef: "三界需要圣状来扣住；症状作为生存方式。" },
-            { id: "mist_negativity", name: "否定性", enName: "Negativity", category: "Concept", shortDef: "产生裂缝的根本驱动，内部不可融合的硬核。" },
-            { id: "mist_aufhebung", name: "扬弃", enName: "Aufhebung", category: "Concept", shortDef: "克服与保存的双重运动。" },
-            { id: "mist_retroactivity", name: "回溯性建构", enName: "Retroactive Construction", category: "Concept", shortDef: "结局重写开端，事后确立因果。" },
-            { id: "mist_alienation", name: "异化", enName: "Alienation", category: "Concept", shortDef: "主体在社会机器中的残渣化。" },
-            { id: "mist_fetishism", name: "商品拜物教", enName: "Commodity Fetishism", category: "Concept", shortDef: "欲望被商品形式捕获的结构。" },
-            { id: "mist_parallax", name: "视差之见", enName: "Parallax View", category: "Concept", shortDef: "同一对象因观看位置不同而发生的本体论裂缝。" },
-            { id: "mist_stain", name: "污点", enName: "Stain", category: "Concept", shortDef: "图像中最真实且无法去除的剩余。" },
-            { id: "mist_sublime_object", name: "崇高客体", enName: "Sublime Object", category: "Concept", shortDef: "意识形态缝合中的核心对象变体。" }
+            { id: "mist_core_narrative_engine_canonical_theory", name: "叙事宪法与核心公式", enName: "Narrative Constitution & Core Formula", category: "Canon", shortDef: "规定 M轴、SUR轴、SV轴的分权边界，并统一 M0-M7、M7A/M7B 双结项与 SUR-END 的结尾宪法。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" }
         ]
     },
     {
-        id: "mist_volume_3",
-        name: "第三卷：叙事生成引擎 (M0-M7)",
-        enName: "Volume III: Narrative Engine",
-        desc: "将哲学结构转译为角色、遭遇、阻断、行动、代价、落点的方程。",
+        id: "mist_volume_1_ontology",
+        name: "01 第一卷：迷雾学派与爱欲结构拓扑学",
+        enName: "01 Mist School & Erotic Structural Topology",
+        desc: "（一）本体论基础",
         concepts: [
-            { id: "mist_m0", name: "M0: 精神底色", enName: "M0: Ontological Base", category: "Engine", shortDef: "主体与现实裂缝间的根本关系模式。" },
-            { id: "mist_m1", name: "M1: 缺失主体", enName: "M1: Subject of Lack", category: "Engine", shortDef: "主体之伤痕处，其被结构切开的位置。" },
-            { id: "mist_m2", name: "M2: 真实遭遇", enName: "M2: Encounter with the Real", category: "Engine", shortDef: "实在界撞击日常秩序，不可预期的失效。" },
-            { id: "mist_m3", name: "M3: 欲望幻想", enName: "M3: Fantasy of Desire", category: "Engine", shortDef: "裂口发亮时的诱饵界面，对象a的叙事投影。" },
-            { id: "mist_m4", name: "M4: 大他者阻断", enName: "M4: Blockage of Big Other", category: "Engine", shortDef: "必定折损欲望的结构性阻碍、制度与法则。" },
-            { id: "mist_m5", name: "M5: 行动驱力", enName: "M5: Drive of Action", category: "Engine", shortDef: "主体被驱力推推攘攘的冲撞及重复宿命。" },
-            { id: "mist_m6", name: "M6: 终极代价", enName: "M6: Ultimate Price", category: "Engine", shortDef: "主体在符号秩序界面承担的结构性剥夺与抹除。" },
-            { id: "mist_m7", name: "M7: 存在落点", enName: "M7: Existential Drop", category: "Engine", shortDef: "主体与裂隙最终重新结环的特定方式（Knotting）。" }
+            { id: "erotic_structural_topology", name: "爱欲结构拓扑学", enName: "Erotic Structural Topology", category: "Volume I", shortDef: "迷雾学派的本体论基础：欲望不是主题，而是主体围绕缺失运动时形成的拓扑结构。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" }
         ]
     },
     {
-        id: "mist_volume_3_m4",
-        name: "第三卷（特殊文件）：M4大他者阻断原型",
-        enName: "Volume III (Appendix): M4 Archetypes",
-        desc: "大他者（The Big Other）作为压迫机制与结构性困境的具体化身，系统包含以下6组绝对阻断模块：",
+        id: "mist_volume_1_generator",
+        name: "01 第一卷：迷雾学派与爱欲结构拓扑学",
+        enName: "01 Mist School & Erotic Structural Topology",
+        desc: "（二）创作生产转向",
         concepts: [
-            { id: "m4_01_boss", name: "01. 位极者/绝对主权", enName: "01. The Sovereign Boss", category: "Engine: M4", shortDef: "大他者的拟人化终局。具备绝对意志的实体，将个体纯粹视作公式变量或可轻易抹杀的耗材。" },
-            { id: "m4_02_rival", name: "02. 竞争镜像/死敌", enName: "02. The Rival Enemy", category: "Engine: M4", shortDef: "另一重欲望镜像。与主体结构同构、能力对等，通过对同一崇高客体的无限争夺来彼此劫持。" },
-            { id: "m4_03_bureaucracy", name: "03. 无尽科层/微法西斯", enName: "03. The Bureaucracy", category: "Engine: M4", shortDef: "卡夫卡式的无情网格。没有具体的恶人，只有冰冷的程序流程将反抗者的肉身化为尘粉。" },
-            { id: "m4_04_crowd", name: "04. 平庸庸众/全景视场", enName: "04. The Silent Crowd", category: "Engine: M4", shortDef: "大他者凝视代理人。依靠集体沉默、盲目狂热与无意识的互相倾轧，在微观层面瓦解例外者。" },
-            { id: "m4_05_limits", name: "05. 人造边界/绝对禁忌", enName: "05. The Constructed Limits", category: "Engine: M4", shortDef: "被强制神圣化的界限（如阶层锁死、时间尽头或律法铁壁），实质是意识形态伪装成自然法则。" },
-            { id: "m4_06_absent", name: "06. 大他者的缺席", enName: "06. The Absent Other", category: "Engine: M4", shortDef: "实在界的荒谬重压。期待惩罚或救赎，揭开帷幕却发现后面空无一人，只剩冷漠的虚无本质。" }
+            { id: "generative_engine", name: "爱欲结构发生器", enName: "Erotic Structural Generator", category: "Volume I", shortDef: "从解释学转向生产学，把主体缺失、幻想、阻断、驱力、裁决和余痕转化为生成机制。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" }
         ]
     },
     {
-        id: "mist_volume_4",
-        name: "第四卷：图像与视觉体系",
-        enName: "Volume IV: Image & Visuals",
-        desc: "本体论卫生学与视觉转译架构。",
+        id: "mist_volume_2_core_positions",
+        name: "02 第二卷：核心叙事引擎 M0-M7",
+        enName: "02 Core Narrative Engine M0-M7",
+        desc: "（一）核心位点",
         concepts: [
-            { id: "mist_ontological_hygiene", name: "本体论卫生学", enName: "Ontological Hygiene", category: "Aesthetics", shortDef: "迷雾学派独创视觉方法，使无菌与沾染构成对位显形。" },
-            { id: "mist_sterile", name: "无菌", enName: "Sterile", category: "Aesthetics", shortDef: "象征秩序封闭的光滑表面，纯净且规训。" },
-            { id: "mist_bacterial", name: "有菌", enName: "Bacterial", category: "Aesthetics", shortDef: "实在界的生命性、腐败性溢出。" },
-            { id: "mist_contamination", name: "沾染", enName: "Contamination", category: "Aesthetics", shortDef: "裂隙的渗透性显形，秩序表面的局部故障与污迹。" },
-            { id: "mist_anchor_point", name: "锚点", enName: "Anchor Point", category: "Aesthetics", shortDef: "视觉画面中稳定结构的核心标识。" },
-            { id: "mist_image_rift", name: "图像裂口", enName: "Image Rift", category: "Aesthetics", shortDef: "不仅是伤痕，而是使内部结构可见的外翻处。" },
-            { id: "mist_tactile_vision", name: "触觉视觉", enName: "Tactile Vision", category: "Aesthetics", shortDef: "诉诸粗糙度与创伤记忆的切肤画面触感。" },
-            { id: "mist_defamiliarization", name: "陌生化", enName: "Defamiliarization", category: "Aesthetics", shortDef: "通过剥离日常属性，揭示物之实在界维度的视觉手段。" }
+            { id: "mist_m0", name: "M0：精神拓扑", enName: "M0: Psychic Topology", category: "Engine", shortDef: "公式的操作系统，决定主体如何采样现实、缺失、法则与他者。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" },
+            { id: "mist_m1", name: "M1：缺失主体", enName: "M1: Subject of Lack", category: "Engine", shortDef: "叙事真空泵。主体不是先完整后受损，而是在缺失中成为主体。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" },
+            { id: "mist_m2", name: "M2：真实遭遇", enName: "M2: Encounter with the Real", category: "Engine", shortDef: "实在界对日常秩序的不可逆穿刺，使原本被遮蔽的空洞显形。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" },
+            { id: "mist_m3", name: "M3：欲望幻想", enName: "M3: Fantasy of Desire", category: "Engine", shortDef: "主体相信某个对象或场景能够闭合缺失的幻想结构，即 $ ◇ a 的叙事投影。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" },
+            { id: "mist_m4", name: "M4：大他者阻断", enName: "M4: Blockage of the Big Other", category: "Engine", shortDef: "公式分母。阻止欲望通过的不是困难本身，而是象征秩序的合法性剪裁。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" },
+            { id: "mist_m5", name: "M5：行动驱力", enName: "M5: Drive of Action", category: "Engine", shortDef: "把失败转化为重复运动的驱力位点。策略追求成功，驱力追求回返。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" },
+            { id: "mist_m6", name: "M6：终极代价", enName: "M6: Ultimate Price", category: "Engine", shortDef: "不可逆减法。代价不是损失物品，而是拆除支撑主体的某个幻象支柱。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" },
+            { id: "mist_m7a", name: "M7A：象征裁决", enName: "M7A: Symbolic Verdict", category: "Engine", shortDef: "故事的回溯性缝合点：这一切最终被判定成什么故事。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" },
+            { id: "mist_m7b", name: "M7B：实在余痕", enName: "M7B: Real Residue", category: "Engine", shortDef: "裁决之后仍不能被意义消化的身体、物件、症状与存在性沉积。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" }
         ]
     },
     {
-        id: "mist_volume_5",
-        name: "第五卷：创作协议与隐蔽显形",
-        enName: "Volume V: Creation Protocol",
-        desc: "将哲学操作为生成工具的一系列具体创作法则。",
+        id: "mist_volume_2_formula",
+        name: "02 第二卷：核心叙事引擎 M0-M7",
+        enName: "02 Core Narrative Engine M0-M7",
+        desc: "（二）基础公式",
         concepts: [
-            { id: "mist_translation_protocol", name: "转译协议", enName: "Translation Protocol", category: "Methodology", shortDef: "将抽象结构转译为具体叙事元素的操作准则。" },
-            { id: "mist_mask_protocol", name: "面具协议", enName: "Mask Protocol", category: "Methodology", shortDef: "赋予角色象征界界面，使其真实在面具缝隙中透出。" },
-            { id: "mist_invisible_weaving", name: "隐形织造", enName: "Invisible Weaving", category: "Methodology", shortDef: "不显露哲学词汇，而在叙事骨架层面暗缝理论肌理。" },
-            { id: "mist_era_dimensionality", name: "时代降维", enName: "Era Dimensionality Reduction", category: "Methodology", shortDef: "将宏大历史矛盾降维到极度微观的个体切面中。" },
-            { id: "mist_naming_protocol", name: "命名协议", enName: "Naming Protocol", category: "Methodology", shortDef: "使用带有工业感、病理、拓扑学隐喻的黑硬词汇系统。" },
-            { id: "mist_anti_kitsch", name: "反刻奇", enName: "Anti-Kitsch", category: "Methodology", shortDef: "拒绝廉价的伤感与和解，保卫裂缝的不可愈合性。" }
+            { id: "generative_engine_formula", name: "叙事生成引擎基础公式", enName: "Narrative Engine Formula", category: "Engine Theory", shortDef: "将 M0-M7 双结项整合为可执行叙事代数的核心协议。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" }
         ]
     },
     {
-        id: "mist_volume_6",
-        name: "第六卷：例外与逃逸",
-        enName: "Volume VI: The Exception",
-        desc: "无法被符号完全收编的边缘余量。",
+        id: "mist_volume_2_circuits",
+        name: "02 第二卷：核心叙事引擎 M0-M7",
+        enName: "02 Core Narrative Engine M0-M7",
+        desc: "（三）动力回路",
         concepts: [
-            { id: "mist_the_exception", name: "结构的例外", enName: "The Exception", category: "Theory", shortDef: "系统中无法被缝合、必定滑落的存在点。" },
-            { id: "mist_symptom_survival", name: "症状作为生存方式", enName: "Symptom as Survival", category: "Theory", shortDef: "不求治愈症状，而是依托症状与结构打结共存。" },
-            { id: "mist_creation_as_knotting", name: "创作作为结", enName: "Creation as Knotting", category: "Theory", shortDef: "创作不是表达自我，而是为松散的世界打结的过程。" },
-            { id: "mist_remainder", name: "剩余物", enName: "The Remainder", category: "Theory", shortDef: "符号化过程后剩下的那个坚硬、不可消化的物质。" },
-            { id: "mist_glitch", name: "故障", enName: "Glitch", category: "Theory", shortDef: "秩序运行中的瞬间卡顿——恰是真实的闪现时刻。" },
-            { id: "mist_escape", name: "逃逸路徑", enName: "Line of Flight", category: "Theory", shortDef: "欲望在结构压迫中溢出其原有轨道的流动方向。" },
-            { id: "mist_the_impossible", name: "不可能之物", enName: "The Impossible", category: "Theory", shortDef: "实在界的核心特征，绝对抵抗符号化、不可企及之物。" }
+            { id: "mist_circuit_arc", name: "M1-M2-M3：创伤防御弧", enName: "Trauma-Defense Arc", category: "Circuit", shortDef: "缺失、真实遭遇与幻想如何构成主体最初的防御回路。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" },
+            { id: "mist_circuit_parallax", name: "M2-M4：现实冲突视差", enName: "Reality Conflict Parallax", category: "Circuit", shortDef: "实在遭遇如何被大他者剪裁成不可调和的现实冲突。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" },
+            { id: "mist_circuit_drive", name: "M5-M6-M7：驱力结项回路", enName: "Drive & Dual-Terminal Resolution", category: "Circuit", shortDef: "行动驱力如何通过代价分裂为象征裁决与实在余痕。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" }
+        ]
+    },
+    {
+        id: "mist_volume_2_potentials",
+        name: "02 第二卷：核心叙事引擎 M0-M7",
+        enName: "02 Core Narrative Engine M0-M7",
+        desc: "（四）势能与本体论辨析",
+        concepts: [
+            { id: "mist_potential_lack_conservation", name: "缺失质量守恒定律", enName: "Conservation of Lack", category: "Potential", shortDef: "缺失不会被填满，只会在叙事系统中转移、改名、变形与沉积。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" },
+            { id: "mist_potential_gravity", name: "全局势能与结构重力", enName: "Potential Gravity", category: "Potential", shortDef: "叙事强度来自缺失、遭遇、阻断与驱力之间的结构压差。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" },
+            { id: "mist_potential_entropy", name: "熵增与余数沉淀", enName: "Entropy & Remainder", category: "Potential", shortDef: "解释故事为何不能完全闭合，以及余数如何在系统终点沉积。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" },
+            { id: "mist_aufhebung_vs_suture", name: "扬弃与缝合", enName: "Aufhebung vs. Suture", category: "Ontology", shortDef: "辨析黑格尔式扬弃与拉康式缝合在引擎中的两种矛盾处理机制。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" },
+            { id: "mist_ethical_depth", name: "温度与深度", enName: "Temperature × Depth", category: "Ontology", shortDef: "把叙事情感温度与结构伦理深度分离，避免用温情替代深度。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" }
+        ]
+    },
+    {
+        id: "mist_volume_3_surface_protocols",
+        name: "03 第三卷：SUR/SV 表层设定与生产协议",
+        enName: "03 SUR/SV Surface & Production Protocols",
+        desc: "（一）表层协议",
+        concepts: [
+            { id: "mist_surface_setting_protocol", name: "表层设定协议", enName: "Surface Setting Protocol", category: "SUR/SV", shortDef: "确立 SUR1-SUR10 + SUR-END 的最终分工与越权红线。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" },
+            { id: "mist_ontological_metonymy_dictionary", name: "存在级转译字典", enName: "Ontological Metonymy", category: "SUR/SV", shortDef: "把跨文明、跨类型的表层材料按功能对齐到同一结构位置。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" },
+            { id: "mist_mask_manifestation_protocol", name: "叙事遮罩与显现协议", enName: "Mask & Manifestation Protocol", category: "SUR/SV", shortDef: "解释表层遮罩如何显现结构，而不是把结构稀释成装饰。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" },
+            { id: "mist_world_law_protocol", name: "世界法则协议", enName: "World Law Protocol", category: "SUR/SV", shortDef: "为世界物理常量、社会法则与叙事重力建立底层约束。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" },
+            { id: "mist_topology_synthesizer", name: "叙事调音台与刻度协议", enName: "Topology Synthesizer", category: "SUR/SV", shortDef: "处理信念裂度等表层强度如何进入生成前的调音与约束。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" },
+            { id: "symptomatic_planting", name: "植入症候与反向解码", enName: "Symptomatic Planting", category: "SUR/SV", shortDef: "把可见症候反向追溯到参数来源，防止表层现象失去结构归属。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" }
+        ]
+    },
+    {
+        id: "mist_volume_3_surface_clusters",
+        name: "03 第三卷：SUR/SV 表层设定与生产协议",
+        enName: "03 SUR/SV Surface & Production Protocols",
+        desc: "（二）参数簇",
+        concepts: [
+            { id: "narrative_dynamics_and_soul", name: "SUR1-SUR2：叙事动力与背景场域", enName: "Genre Mode & World Motif", category: "SUR", shortDef: "类型节奏与世界底色只提供显现频率，不解释主体为何运动。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" },
+            { id: "spacetime_and_space_container", name: "SUR3-SUR6：时空坐标与空间容器", enName: "Spacetime & Space Container", category: "SUR", shortDef: "时空锚点与空间场景提供发生容器，不承担遭遇、阻断或代价的本体原因。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" },
+            { id: "order_and_object", name: "SUR4-SUR5：社会形态与对象预设", enName: "Order Shell & Object Anchor", category: "SUR", shortDef: "社会外壳与对象锚点只提供可见材料，不替 M4 或 M3 解释结构原因。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" },
+            { id: "visible_profile_opening_belief", name: "SUR7-SUR10：人物呈现与开场话语", enName: "Visible Profile & Opening Belief", category: "SUR", shortDef: "选角、年龄、职业与信念语言是入口界面，不是人物本质。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" },
+            { id: "structure_and_volume", name: "SV1-SV2：结构与体量", enName: "Structure & Volume", category: "SV", shortDef: "工程展开协议：结构模板与体量只规定显影顺序和文本规模，不替代 M 轴。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" }
+        ]
+    },
+    {
+        id: "mist_volume_3_compilation",
+        name: "03 第三卷：SUR/SV 表层设定与生产协议",
+        enName: "03 SUR/SV Surface & Production Protocols",
+        desc: "（三）编译与正交公理",
+        concepts: [
+            { id: "mist_dynamic_suture_sentence", name: "动态缝合句式规则", enName: "Dynamic Suture Sentence", category: "Compiler", shortDef: "生成前的预览编译器：排列 M、SUR、SV，而不创造或裁决参数。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" },
+            { id: "orthogonality_axiom_cartesian_product", name: "正交公理与笛卡尔乘积", enName: "Orthogonality Axiom & Cartesian Product", category: "Axiom", shortDef: "M 轴与 SUR 轴互不侵占，所有参数组合都必须成为合法故事坐标。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" }
         ]
     }
 ];

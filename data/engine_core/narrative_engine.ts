@@ -81,10 +81,10 @@ export const NARRATIVE_ENGINE_BLOCKS: NarrativeBlockDef[] = [
   },
   {
     id: "engine_m7b",
-    name: "M7. 实在余痕",
-    enName: "M7. THE RESIDUE",
-    description: "故事的哲学结局与命运审判之余响。欲望最终导向何处？",
-    descriptionEn: "The philosophical remains and ripples of the fate's judgment. Where does desire ultimately lead?",
+    name: "M7B. 实在余痕",
+    enName: "M7B. THE RESIDUE",
+    description: "象征裁决之后仍不能被意义消化的身体余味、症状残留或存在性余数。什么还留在主体身上？",
+    descriptionEn: "The bodily aftertaste, symptomatic remainder, or existential residue that cannot be digested by the verdict. What still remains on the subject?",
     tags: []
   }
 ];
@@ -156,10 +156,10 @@ export const NARRATIVE_ENGINE_LIBRARY: LibraryCategoryDef[] = [
   },
   {
     id: "engine_m7b_lib",
-    name: "M7. 实在余痕",
-    nameEn: "M7. The Residue",
-    desc: "故事的哲学结局与命运审判。欲望最终导向何处？",
-    descEn: "The philosophical ending and judgment of fate. Where does desire ultimately lead?",
+    name: "M7B. 实在余痕",
+    nameEn: "M7B. The Residue",
+    desc: "象征裁决之后仍不能被意义消化的身体余味、症状残留或存在性余数。它不是判词，而是判词失败处留下的实在。",
+    descEn: "The bodily aftertaste, symptomatic remainder, or existential residue that cannot be digested by the verdict. Not the judgment, but the Real left where judgment fails.",
     items: ENGINE_RESOLUTIONS
   },
   // M4X/M5X library entries removed in v3.0

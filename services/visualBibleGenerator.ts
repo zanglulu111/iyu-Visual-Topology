@@ -509,31 +509,49 @@ export const analyzeImageBasedVisualBible = async (preset: MetonymyStylePreset, 
     };
 };
 
-export const generateTextBasedVisualBible = async (text: string, hints?: VisualBibleAnalysisHints): Promise<{ toneAnalysis: GlobalVisualTone, assets: any } | null> => {
+export const buildTextBasedVisualBiblePrompt = (text: string, hints?: VisualBibleAnalysisHints): string => {
     const hintText = hints ? `
         # 风格导向建议 (STYLE HINTS)
         ${hints.medium ? `*   **目标物理媒介:** ${hints.medium}` : ''}
         ${hints.dialogue ? `*   **用户补充要求:** ${hints.dialogue}` : ''}
     ` : '';
 
-    const prompt = `
-    Role: 美术指导 & 调色师 (Art Director & Colorist).
-    Task: 通过幻视所提供故事文本的完美电影改编，创建一本 **“视觉圣经 (Visual Bible)”**（含影调与资产）。
+    return `
+    Role: 影视资产统筹 & 视觉连续性编辑 (Asset Continuity Supervisor & Visual Bible Editor).
+    Task: 读取 SOURCE TEXT，生成 **“原文事实视觉圣经 (Source-Factual Visual Bible)”**。
+    核心目标：提取全文已经出现或物理必然成立的视觉资产、外貌描述、材质事实和空间事实；不得提前建立最终美术风格、调色、媒介或滤镜。
 
     ${hintText}
 
-    # 1. 视觉 DNA 提取 (VISUAL DNA EXTRACTION)
-    基于文本的情绪和流派，幻视出一套连贯的视觉风格。
-    **要求：输出极度精简 (Concise)。**
+    # 1. 全局视觉事实 (GLOBAL VISUAL FACTS)
+    只基于源文本明示内容与物理必然性，提取可供后续分镜和生图保持一致的事实层。
+    **不得写:** 导演风格、艺术流派、最终调色、滤镜、胶片颗粒、油画/动画/赛博朋克/哥特等视觉皮肤。
     
-    *   **艺术与风格 (Art & Style):** 导演风格或艺术流派。
-    *   **光影与氛围 (Light & Atmosphere):** **必须定义全局影调：光比 (Contrast), 色温 (Temp), 色调 (Tint)**。禁止描述单镜头的布光（如伦勃朗光）。
-    *   **媒介与格式 (Medium & Format):** 胶片/数字/画布/手作。
-    *   **质感与特征 (Texture & Character):** 颗粒感/笔触/绒毛感等。
+    *   **style:** 写世界视觉事实：时代、地域、建筑、服饰、自然环境、社会物质条件。
+    *   **lighting:** 只写文本出现或物理必然的光源、时间、天气、遮挡、明暗关系。
+    *   **texture:** 只写材质事实：石、木、布、金属、泥、血、雾、磨损、潮湿、灰尘等。
+    *   **camera:** 只写从文本机制推出的观察倾向：远景建立、近景身体细节、主观视线、听觉/视觉限制等；不要写镜头品牌或媒介质感。
+    *   **palette:** 只给“事实色板”，来自文本明示物体或环境固有色；不做调色方案。如果颜色未明示，用低饱和中性色占位。
 
     # 2. 资产提取 (ASSET EXTRACTION)
-    识别文本中提到或暗示的关键 **角色 (Characters)**、**场景 (Scenes)** 和 **道具 (Props)**。
-    为每一个资产发明具体的视觉细节（锚点 Anchors）。
+    识别全文中后续需要保持一致的 **角色 (Characters)**、**场景 (Scenes)** 和 **道具 (Props)**。
+    资产必须是故事中已经出现、被明确提及、反复影响叙事，或对视觉连续性重要的对象。
+
+    # 3. 外貌描述必须回来 (CHARACTER APPEARANCE REQUIRED)
+    每个角色资产的 description 必须是“外貌描述”，而不是性格、命运、主题解释。
+    必须覆盖：
+    *   年龄段/身体状态
+    *   脸部、眼睛、头发、皮肤、伤痕或可见身体特征
+    *   服装层次、材质、破损、污迹或时代性
+    *   当前源文本能确认的姿态/携带物/可见状态
+    如果源文本未明示某项，不要编造，写“未明示，需后续资产设计锁定”。
+
+    # 4. 生成提示词边界 (PROMPT BOUNDARY)
+    designPrompt / conceptPrompt 可以生成，但只能是“中性资产设定图提示词”：用于锁定外貌、结构、服装、道具和空间事实。
+    不得把它们写成最终风格提示词，不得加入导演风格、调色、媒介、滤镜或表层美术流派。
+
+    # 5. 反比喻具象化 (ANTI-LITERAL METAPHOR)
+    修辞比喻只能作为气氛、身体感或动作质感的依据，不能直译成真实道具、颜色、实体或声音来源。
 
     Source Text:
     "${text.slice(0, 3000)}"
@@ -541,36 +559,40 @@ export const generateTextBasedVisualBible = async (text: string, hints?: VisualB
     # OUTPUT FORMAT (STRICT JSON)
     {
       "toneAnalysis": {
-        "styleNameCN": "简短风格名 (CN)",
-        "styleNameEN": "Short Style Name (EN)",
+        "styleNameCN": "原文事实视觉",
+        "styleNameEN": "Source-Factual Visuals",
         
         "palette": ["#Hex1", "#Hex2", "#Hex3", "#Hex4", "#Hex5", "#Hex6", "#Hex7"],
 
-        "style": "CN summary of Art & Style",
-        "styleEn": "EN summary",
+        "style": "CN summary of world visual facts only",
+        "styleEn": "EN summary of world visual facts only",
 
-        "lighting": "CN summary (包含光比、色温、色调) (e.g. 高反差，3200K暖调，青色偏移)",
-        "lightingEn": "EN summary (e.g. High Contrast, 3200K Warm, Cyan Tint)",
+        "lighting": "CN summary of factual light/weather/time only",
+        "lightingEn": "EN summary of factual light/weather/time only",
         
-        "camera": "CN summary",
-        "cameraEn": "EN summary",
+        "camera": "CN summary of observation/camera tendency from story mechanism only",
+        "cameraEn": "EN summary of observation/camera tendency from story mechanism only",
 
-        "texture": "CN summary",
-        "textureEn": "EN summary"
+        "texture": "CN summary of factual materials and surfaces",
+        "textureEn": "EN summary of factual materials and surfaces"
       },
       "assets": {
         "characters": [
-          { "name": "Name(CN)", "nameEn": "Name(EN)", "type": "CHARACTER", "analysis": { "anchors": "CN Visual Keywords", "anchorsEn": "EN Visual Keywords", "description": "CN Detailed Visual Desc", "descriptionEn": "EN Detailed Visual Description", "designPrompt": "Generate an elaborate CN Character Design Sheet prompt", "designPromptEn": "Generate an elaborate EN Character Design Sheet prompt", "conceptPrompt": "Generate an elaborate CN Character Concept prompt", "conceptPromptEn": "Generate an elaborate EN Character Concept prompt" } }
+          { "name": "Name(CN)", "nameEn": "Name(EN)", "type": "CHARACTER", "analysis": { "anchors": "CN factual visual keywords", "anchorsEn": "EN factual visual keywords", "description": "CN generated appearance description", "descriptionEn": "EN generated appearance description", "designPrompt": "CN neutral character design prompt based on source facts", "designPromptEn": "EN neutral character design prompt based on source facts", "conceptPrompt": "CN neutral character concept prompt based on source facts", "conceptPromptEn": "EN neutral character concept prompt based on source facts" } }
         ],
         "scenes": [
-          { "name": "Name(CN)", "nameEn": "Name(EN)", "type": "SCENE", "analysis": { "anchors": "CN Visual Keywords", "anchorsEn": "EN Visual Keywords", "description": "CN Detailed Visual Desc", "descriptionEn": "EN Detailed Visual Description", "designPrompt": "Generate an elaborate CN Scene/Environment Design Sheet prompt", "designPromptEn": "Generate an elaborate EN Scene/Environment Design Sheet prompt", "conceptPrompt": "Generate an elaborate CN Scene Concept prompt", "conceptPromptEn": "Generate an elaborate EN Scene Concept prompt" } }
+          { "name": "Name(CN)", "nameEn": "Name(EN)", "type": "SCENE", "analysis": { "anchors": "CN factual visual keywords", "anchorsEn": "EN factual visual keywords", "description": "CN factual environment description", "descriptionEn": "EN factual environment description", "designPrompt": "CN neutral environment design prompt based on source facts", "designPromptEn": "EN neutral environment design prompt based on source facts", "conceptPrompt": "CN neutral environment concept prompt based on source facts", "conceptPromptEn": "EN neutral environment concept prompt based on source facts" } }
         ],
         "props": [
-          { "name": "Name(CN)", "nameEn": "Name(EN)", "type": "PROP", "analysis": { "anchors": "CN Visual Keywords", "anchorsEn": "EN Visual Keywords", "description": "CN Detailed Visual Desc", "descriptionEn": "EN Detailed Visual Description", "designPrompt": "Generate an elaborate CN Prop Design Sheet prompt", "designPromptEn": "Generate an elaborate EN Prop Design Sheet prompt", "conceptPrompt": "Generate an elaborate CN Prop Concept prompt", "conceptPromptEn": "Generate an elaborate EN Prop Concept prompt"  } }
+          { "name": "Name(CN)", "nameEn": "Name(EN)", "type": "PROP", "analysis": { "anchors": "CN factual visual keywords", "anchorsEn": "EN factual visual keywords", "description": "CN factual prop description", "descriptionEn": "EN factual prop description", "designPrompt": "CN neutral prop design prompt based on source facts", "designPromptEn": "EN neutral prop design prompt based on source facts", "conceptPrompt": "CN neutral prop concept prompt based on source facts", "conceptPromptEn": "EN neutral prop concept prompt based on source facts"  } }
         ]
       }
     }
     `;
+};
+
+export const generateTextBasedVisualBible = async (text: string, hints?: VisualBibleAnalysisHints): Promise<{ toneAnalysis: GlobalVisualTone, assets: any } | null> => {
+    const prompt = buildTextBasedVisualBiblePrompt(text, hints);
 
     try {
         const model = configService.getEngineModel('visualBible') || 'gemini-3.1-pro-preview';

@@ -1,6 +1,7 @@
 
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import { configService } from "../src/services/configService";
+import { getEffectiveBaseUrl, getOpenAIChatCompletionsUrl, getProviderForModel } from "../src/types/config";
 import { SutureConfig, NarrativeFieldState, CreativeTreatment, StyleConfig, WorldLawConfig, CreativeBlueprint, DriverType, SubjectType, SutureResponse, FinalAssetsData, FinalAssetItem, GlobalVisualTone, AssetView, MetonymyStylePreset, MetonymyAssetInput, APISettings, FaceState } from "../types";
 import { buildSutureStep1Prompt, buildStyleTransferPrompt } from "./suture_script_prompt";
 import { buildSutureStep2Prompt } from "./sutureGenerator";
@@ -81,11 +82,12 @@ class OpenAIAdapter {
                     messages.unshift({ role: 'system', content: params.config.systemInstruction });
                 }
 
-                const cleanBaseUrl = this.baseUrl.trim().replace(/\/+$/, "");
-                const fetchUrl = `${cleanBaseUrl}/chat/completions`;
+                const fetchUrl = getOpenAIChatCompletionsUrl(this.baseUrl);
                 const maxTokens = params.config?.maxOutputTokens || 32768;
+                const wantsJson = params.config?.responseMimeType === 'application/json';
+                const shouldStream = !wantsJson;
 
-                console.log(`[ProxyStream] Calling: ${fetchUrl} with model: ${model}, max_tokens: ${maxTokens}`);
+                console.log(`[ProxyStream] Calling: ${fetchUrl} with model: ${model}, max_tokens: ${maxTokens}, stream=${shouldStream}`);
                 const startTime = Date.now();
 
                 const response = await proxyFetch(fetchUrl, {
@@ -100,8 +102,7 @@ class OpenAIAdapter {
                         messages: messages,
                         temperature: params.config?.temperature || 0.7,
                         max_tokens: maxTokens,
-                        stream: true,
-                        ...(params.config?.responseMimeType === 'application/json' ? { response_format: { type: 'json_object' } } : {})
+                        stream: shouldStream
                     })
                 });
 
@@ -126,16 +127,43 @@ class OpenAIAdapter {
                 // ═══ 流式读取 SSE ═══
                 const contentType = response.headers.get('content-type') || '';
 
+                const extractOpenAIText = (data: any): string => {
+                    const content = data?.choices?.[0]?.message?.content;
+                    if (typeof content === 'string') return content;
+                    if (Array.isArray(content)) {
+                        return content.map((part: any) => {
+                            if (typeof part === 'string') return part;
+                            if (typeof part?.text === 'string') return part.text;
+                            if (typeof part?.content === 'string') return part.content;
+                            return '';
+                        }).join('');
+                    }
+                    if (typeof data?.choices?.[0]?.text === 'string') return data.choices[0].text;
+                    if (typeof data?.output_text === 'string') return data.output_text;
+                    if (Array.isArray(data?.output)) {
+                        return data.output.flatMap((item: any) => item?.content || [])
+                            .map((part: any) => part?.text || part?.content || '')
+                            .join('');
+                    }
+                    return '';
+                };
+
                 // 如果代理不支持流式，fallback 到普通 JSON 解析
-                if (contentType.includes('application/json')) {
+                if (!shouldStream || contentType.includes('application/json')) {
                     const responseText = await response.text();
+                    if (!responseText.trim()) {
+                        throw new Error(`代理返回了空响应。\n当前请求地址: ${fetchUrl}\n请检查 Base URL 是否应包含 /v1，或确认该网关支持 chat/completions。`);
+                    }
                     let data;
                     try {
                         data = JSON.parse(responseText);
                     } catch {
                         throw new Error(`代理返回的数据不是有效的 JSON。\n当前请求地址: ${fetchUrl}\n\n返回内容预览: ${responseText.substring(0, 150)}`);
                     }
-                    const text = data.choices?.[0]?.message?.content || "";
+                    const text = extractOpenAIText(data);
+                    if (!text.trim()) {
+                        throw new Error(`代理响应中没有可用文本。\n当前请求地址: ${fetchUrl}\n返回内容预览: ${responseText.substring(0, 300)}`);
+                    }
                     const totalElapsed = ((Date.now() - startTime) / 1000).toFixed(1);
                     console.log(`[ProxyStream] Fallback JSON response (${totalElapsed}s), ${text.length} chars`);
                     return {
@@ -153,13 +181,16 @@ class OpenAIAdapter {
                 const decoder = new TextDecoder();
                 let fullText = '';
                 let buffer = '';
+                let rawStream = '';
 
                 try {
                     while (true) {
                         const { done, value } = await reader.read();
                         if (done) break;
 
-                        buffer += decoder.decode(value, { stream: true });
+                        const chunk = decoder.decode(value, { stream: true });
+                        rawStream += chunk;
+                        buffer += chunk;
                         const lines = buffer.split('\n');
                         buffer = lines.pop() || '';
 
@@ -170,15 +201,34 @@ class OpenAIAdapter {
 
                             try {
                                 const event = JSON.parse(data);
-                                const delta = event.choices?.[0]?.delta?.content;
+                                const delta = event.choices?.[0]?.delta?.content || event.choices?.[0]?.message?.content || event.output_text;
                                 if (delta) fullText += delta;
                             } catch {
                                 // 跳过无法解析的 SSE 行
                             }
                         }
                     }
+                    if (buffer.trim()) rawStream += buffer;
                 } finally {
                     reader.releaseLock();
+                }
+
+                if (!fullText.trim()) {
+                    const trimmedRaw = rawStream.trim();
+                    if (!trimmedRaw) {
+                        throw new Error(`代理返回了空响应。\n当前请求地址: ${fetchUrl}\n请检查 Base URL 是否应包含 /v1，或确认该网关支持流式 chat/completions。`);
+                    }
+                    try {
+                        const maybeJson = JSON.parse(trimmedRaw);
+                        fullText = extractOpenAIText(maybeJson);
+                    } catch {
+                        // Some gateways send plain text even when the content-type is not JSON.
+                        if (!trimmedRaw.startsWith('data:')) fullText = trimmedRaw;
+                    }
+                }
+
+                if (!fullText.trim()) {
+                    throw new Error(`代理响应中没有可用文本。\n当前请求地址: ${fetchUrl}\n返回内容预览: ${rawStream.substring(0, 300)}`);
                 }
 
                 const totalElapsed = ((Date.now() - startTime) / 1000).toFixed(1);
@@ -373,23 +423,47 @@ const getAI = () => {
     // Claude Provider 配置
     const claudeConfig = fullConfig.claude;
     const claudeKey = claudeConfig.apiKey || settings?.llm.claudeApiKey || "";
+
+    // OpenAI Provider 配置
+    const openaiConfig = fullConfig.openai;
+    const legacyOpenAIKey = settings?.llm.provider === 'openai' || settings?.llm.provider === 'custom'
+        ? settings?.llm.apiKey
+        : '';
+    const openaiKey = openaiConfig.apiKey || legacyOpenAIKey || "";
     
     return {
         models: {
             generateContent: async (params: any) => {
-                const modelId = params.model;
-                const isClaude = modelId?.includes('claude');
+                const modelId = params.model || '';
+                const provider = getProviderForModel(modelId);
                 
-                if (isClaude) {
+                if (provider === 'claude') {
                     // ═══ Claude 路径：通过代理，始终使用 Anthropic 原生格式 ═══
                     const apiKey = claudeKey;
-                    const baseUrl = claudeConfig.baseUrl || settings?.llm.baseUrl || '';
+                    const baseUrl = getEffectiveBaseUrl('claude', claudeConfig) || settings?.llm.baseUrl || '';
+
+                    if (!apiKey) {
+                        throw new Error('Claude 模型需要配置 API Key。请在系统配置中填写 Claude API Key。');
+                    }
 
                     if (!baseUrl) {
                         throw new Error('Claude 模型需要配置代理地址 (Base URL)。请在系统配置中设置 Claude 的代理地址。');
                     }
 
                     const adapter = new AnthropicAdapter(apiKey, baseUrl);
+                    return adapter.models.generateContent(params);
+                }
+
+                if (provider === 'openai') {
+                    // ═══ OpenAI 路径：官方 API 或 OpenAI-compatible 网关 ═══
+                    const apiKey = openaiKey;
+                    const baseUrl = getEffectiveBaseUrl('openai', openaiConfig) || settings?.llm.baseUrl || 'https://api.openai.com/v1';
+
+                    if (!apiKey) {
+                        throw new Error('OpenAI 模型需要配置 API Key。请在系统配置中填写 OpenAI API Key。');
+                    }
+
+                    const adapter = new OpenAIAdapter(apiKey, baseUrl);
                     return adapter.models.generateContent(params);
                 }
                 
@@ -400,6 +474,9 @@ const getAI = () => {
                 }
                 
                 // ═══ Gemini 官方路径：直连 Google SDK ═══
+                if (!geminiKey) {
+                    throw new Error('Gemini 模型需要配置 API Key。请在系统配置中填写 Gemini API Key。');
+                }
                 const genAI = new GoogleGenAI({ apiKey: geminiKey });
                 return (genAI as any).models.generateContent(params);
             }
@@ -494,6 +571,199 @@ const cleanAndParseJSON = (text: string) => {
 
         return null;
     }
+};
+
+const FANTASY_TRAVERSE_TYPES: CreativeTreatment['type'][] = [
+    'STRUCTURALIST',
+    'POST_STRUCTURALIST',
+    'THE_REAL'
+];
+
+const readAliasedString = (source: any, aliases: string[]): string => {
+    if (!source || typeof source !== 'object') return '';
+    const aliasSet = new Set(aliases.map(alias => alias.toLowerCase()));
+
+    for (const [key, value] of Object.entries(source)) {
+        if (!aliasSet.has(key.toLowerCase())) continue;
+        if (typeof value === 'string' && value.trim()) return value.trim();
+        if (typeof value === 'number') return String(value);
+    }
+
+    return '';
+};
+
+const flattenStructuredText = (value: any): string => {
+    if (!value) return '';
+    if (typeof value === 'string') return value.trim();
+    if (typeof value === 'number') return String(value);
+    if (Array.isArray(value)) {
+        return value.map(flattenStructuredText).filter(Boolean).join('\n\n');
+    }
+    if (typeof value === 'object') {
+        return Object.entries(value)
+            .map(([key, nestedValue]) => {
+                const text = flattenStructuredText(nestedValue);
+                return text ? `${key}: ${text}` : '';
+            })
+            .filter(Boolean)
+            .join('\n\n');
+    }
+    return '';
+};
+
+const deriveShortLine = (text: string): string => {
+    const firstLine = text.split(/[\n。！？.!?]/).map(part => part.trim()).find(Boolean) || '';
+    return firstLine.length > 90 ? `${firstLine.slice(0, 90)}...` : firstLine;
+};
+
+const optionKeyOrder = (key: string, fallback: number): number => {
+    const normalized = key.toLowerCase();
+    const marker = normalized.match(/([abc123一二三])$/)?.[1] || '';
+    if (['a', '1', '一'].includes(marker)) return 0;
+    if (['b', '2', '二'].includes(marker)) return 1;
+    if (['c', '3', '三'].includes(marker)) return 2;
+    return fallback;
+};
+
+const isOptionKey = (key: string): boolean => {
+    const normalized = key.trim().toLowerCase();
+    return /^(方案|选项|路径)\s*([abc123一二三])?$/.test(normalized)
+        || /^option[\s_-]*([abc123])$/.test(normalized)
+        || /^path[\s_-]*([abc123])$/.test(normalized)
+        || /^[123]$/.test(normalized);
+};
+
+const normalizeTreatmentType = (rawType: string, index: number): CreativeTreatment['type'] => {
+    const normalized = rawType.trim().toUpperCase().replace(/\s+/g, '_').replace(/-/g, '_');
+    const known = new Set<CreativeTreatment['type']>([
+        'CLASSIC', 'STYLIZED', 'SUBVERSIVE',
+        'REAL', 'IMAGINARY', 'SYMBOLIC',
+        'PHENOMENOLOGICAL', 'STRUCTURALIST', 'THE SPECTACLE',
+        'ONTOLOGY', 'ATMOSPHERE', 'SEMIOTIC',
+        'THE_TEASE', 'THE_PULSE', 'THE_GLITCH',
+        'POST_STRUCTURALIST', 'THE_REAL',
+        'EXISTENTIAL', 'NIHILISTIC', 'ROMANTIC',
+        'ABSTRACT', 'NARRATIVE FLOW', 'PERFORMANCE'
+    ]);
+
+    if (known.has(normalized as CreativeTreatment['type'])) return normalized as CreativeTreatment['type'];
+    if (normalized.includes('POST')) return 'POST_STRUCTURALIST';
+    if (normalized.includes('REAL') || rawType.includes('实在')) return 'THE_REAL';
+    if (normalized.includes('STRUCT') || rawType.includes('结构')) return 'STRUCTURALIST';
+    return FANTASY_TRAVERSE_TYPES[index] || 'STRUCTURALIST';
+};
+
+const candidateToTreatment = (candidate: any, index: number, sourceKey?: string): CreativeTreatment | null => {
+    const item = candidate && typeof candidate === 'object' && !Array.isArray(candidate)
+        ? candidate
+        : { pitch: flattenStructuredText(candidate), title: sourceKey };
+
+    const pitchStructure = item.pitch_structure || item.pitchStructure || item['结构化梗概'];
+    const pitch = readAliasedString(item, [
+        'pitch',
+        'pitchCn',
+        'content',
+        'story',
+        'synopsis',
+        'description',
+        '正文',
+        '内容',
+        '方案',
+        '故事',
+        '梗概',
+        '叙事'
+    ]) || flattenStructuredText(item.pitch)
+        || flattenStructuredText(item.pitchCn)
+        || flattenStructuredText(item.content)
+        || flattenStructuredText(item.story)
+        || flattenStructuredText(pitchStructure);
+
+    const title = readAliasedString(item, ['title', 'name', '标题', '名称', '方案标题'])
+        || sourceKey
+        || `叙事方案 ${index + 1}`;
+    const tagline = readAliasedString(item, [
+        'tagline',
+        'logline',
+        'slogan',
+        'premise',
+        '一句话',
+        '一句话梗概',
+        '核心句',
+        '标语'
+    ]) || deriveShortLine(pitch);
+    const visualKey = readAliasedString(item, [
+        'visualKey',
+        'visual_key',
+        'visualAnchor',
+        'visual_anchor',
+        'visual',
+        '视觉锤',
+        '视觉关键词',
+        '视觉锚点'
+    ]);
+    const rawType = readAliasedString(item, ['type', '类型', 'optionType', 'pathType']);
+    const structure = readAliasedString(item, ['structure', '结构', 'narrativeStructure'])
+        || FANTASY_TRAVERSE_TYPES[index]
+        || 'STRUCTURALIST';
+
+    if (!pitch.trim()) return null;
+
+    return {
+        ...item,
+        id: String(item.id || item.ID || `option_${index + 1}`),
+        type: normalizeTreatmentType(rawType, index),
+        title,
+        tagline,
+        visualKey,
+        pitch,
+        visualAnchor: visualKey || readAliasedString(item, ['visualAnchor', 'visual_anchor']) || '',
+        structure
+    };
+};
+
+const normalizeFantasyTraversePayload = (parsed: any): { treatments: CreativeTreatment[]; thoughtProcess: string } => {
+    if (!parsed) return { treatments: [], thoughtProcess: '' };
+
+    const thoughtProcess = readAliasedString(parsed, [
+        'thought_process',
+        'thoughtProcess',
+        'thinking',
+        'analysis',
+        '思考过程'
+    ]);
+
+    let candidates: Array<{ value: any; sourceKey?: string }> = [];
+
+    if (Array.isArray(parsed)) {
+        candidates = parsed.map(value => ({ value }));
+    } else if (typeof parsed === 'object') {
+        const arrayContainerKey = Object.keys(parsed).find(key =>
+            ['treatments', 'options', 'paths', 'results', 'items', '方案列表', '叙事方案'].includes(key)
+            && Array.isArray(parsed[key])
+        );
+
+        if (arrayContainerKey) {
+            candidates = parsed[arrayContainerKey].map((value: any) => ({ value }));
+        } else {
+            const optionEntries = Object.entries(parsed)
+                .filter(([key]) => isOptionKey(key))
+                .sort(([keyA], [keyB]) => optionKeyOrder(keyA, 0) - optionKeyOrder(keyB, 0));
+
+            if (optionEntries.length > 0) {
+                candidates = optionEntries.map(([sourceKey, value]) => ({ sourceKey, value }));
+            } else {
+                candidates = [{ value: parsed }];
+            }
+        }
+    } else {
+        candidates = [{ value: parsed }];
+    }
+
+    const treatments = candidates
+        .map((candidate, index) => candidateToTreatment(candidate.value, index, candidate.sourceKey))
+        .filter((item): item is CreativeTreatment => Boolean(item));
+
+    return { treatments, thoughtProcess };
 };
 
 const getCallerName = (): string => {
@@ -781,7 +1051,15 @@ export const generateFantasyTraverse = async (driver: DriverType, duration: stri
         else if (driver === DriverType.TRAILER) promptData = buildTrailerPrompt(duration, fieldState, visionInput, visionImage);
         else promptData = buildNarrativePrompt(duration, fieldState, visionInput, visionImage, worldLaw, 'v3', faceState);
 
-        const parts: any[] = [{ text: promptData.text }];
+        const fantasyTraverseOutputContract = `
+
+【输出兼容性硬约束】
+最终必须返回可解析的 JSON 数组，数组内正好 3 个方案对象。
+不要把方案包在 "thought_process"、"方案A"、"方案B"、"方案C" 这类外层字段里。
+每个方案对象必须包含：id, type, title, tagline, pitch, structure。
+如果需要思考过程，只能放在 JSON 数组之前的 <thought_process>...</thought_process> XML 标签里。`;
+
+        const parts: any[] = [{ text: `${promptData.text}\n\n${fantasyTraverseOutputContract}` }];
         if (promptData.images && promptData.images.length > 0) parts.push({ inlineData: { mimeType: 'image/jpeg', data: promptData.images[0].split(',')[1] || promptData.images[0] } });
 
         const model = configService.getEngineModel('coreEngine') || 'gemini-3.1-pro-preview';
@@ -805,27 +1083,17 @@ export const generateFantasyTraverse = async (driver: DriverType, duration: stri
         const parsed = cleanAndParseJSON(textForParsing);
 
         if (parsed) {
-            let items = Array.isArray(parsed) ? parsed : (parsed.treatments || [parsed]);
+            const normalized = normalizeFantasyTraversePayload(parsed);
+            if (!thinkingXml && normalized.thoughtProcess) {
+                thinkingXml = `<thought_process>\n${normalized.thoughtProcess}\n</thought_process>`;
+            }
 
-            // 标准化：部分模型返回 pitch_structure (对象) 而非 pitch (字符串)
-            items = items.map((item: any) => {
-                if (!item.pitch && item.pitch_structure) {
-                    const ps = item.pitch_structure;
-                    item.pitch = Object.entries(ps)
-                        .map(([, v]) => typeof v === 'string' ? v : '')
-                        .filter(Boolean)
-                        .join('\n\n');
-                    delete item.pitch_structure;
-                }
-                if (!item.pitch && item.content) {
-                    item.pitch = typeof item.content === 'string' ? item.content : JSON.stringify(item.content);
-                }
-                if (!item.visualAnchor) item.visualAnchor = item.visual_anchor || item.visualKey || '';
-                return item;
-            });
+            if (normalized.treatments.length > 0) {
+                console.log(`[CoreEngine] Parsed ${normalized.treatments.length} treatments. First item pitch length: ${normalized.treatments[0]?.pitch?.length || 0}`);
+                return { treatments: normalized.treatments, thinkingXml };
+            }
 
-            console.log(`[CoreEngine] Parsed ${items.length} treatments. First item pitch length: ${items[0]?.pitch?.length || 0}`);
-            return { treatments: items, thinkingXml };
+            throw new Error('模型返回了 JSON，但没有包含可展示的叙事方案。请重新生成；系统已加强输出格式约束。');
         }
 
         // Fallback if parsing totally failed
@@ -969,13 +1237,61 @@ export const breakdownScript = async (sourceText: string, instruction?: string, 
         if (!response.text) return null;
         const rawData = cleanAndParseJSON(response.text);
         if (rawData && rawData.scenes) {
+            const normalizeVisualBibleAsset = (asset: any) => ({
+                ...asset,
+                analysis: {
+                    ...(asset.analysis || {}),
+                    anchors: asset.analysis?.anchors || asset.anchors || '',
+                    anchorsEn: asset.analysis?.anchorsEn || asset.anchorsEn || '',
+                    description: asset.analysis?.description || asset.description || '',
+                    descriptionEn: asset.analysis?.descriptionEn || asset.descriptionEn || '',
+                    designPrompt: asset.analysis?.designPrompt || asset.designPrompt || '',
+                    designPromptEn: asset.analysis?.designPromptEn || asset.designPromptEn || '',
+                    conceptPrompt: asset.analysis?.conceptPrompt || asset.conceptPrompt || '',
+                    conceptPromptEn: asset.analysis?.conceptPromptEn || asset.conceptPromptEn || ''
+                }
+            });
+
+            const normalizeVisualBibleAssets = (assets: any = {}) => ({
+                characters: (assets.characters || []).map(normalizeVisualBibleAsset),
+                scenes: (assets.scenes || []).map(normalizeVisualBibleAsset),
+                props: (assets.props || []).map(normalizeVisualBibleAsset)
+            });
+
+            const normalizeVisualBibleTone = (tone: any = {}): GlobalVisualTone => ({
+                styleNameCN: tone.styleNameCN,
+                styleNameEN: tone.styleNameEN,
+                lighting: tone.lighting || '',
+                lightingEn: tone.lightingEn,
+                texture: tone.texture || '',
+                textureEn: tone.textureEn,
+                style: tone.style || '',
+                styleEn: tone.styleEn,
+                camera: tone.camera || '',
+                cameraEn: tone.cameraEn,
+                palette: Array.isArray(tone.palette) ? tone.palette : []
+            });
+
             const mappedScenes = rawData.scenes.map((scene: any) => {
-                const sourceIndices = scene.paragraph_indices ? scene.paragraph_indices.map((i: number) => i - 1) : [];
+                const rangeStart = Number(scene.sourceRange?.paragraphStart);
+                const rangeEnd = Number(scene.sourceRange?.paragraphEnd);
+                const rangeIndices = Number.isFinite(rangeStart) && Number.isFinite(rangeEnd)
+                    ? Array.from({ length: Math.max(0, rangeEnd - rangeStart + 1) }, (_, i) => rangeStart + i)
+                    : [];
+                const rawIndices = Array.isArray(scene.paragraph_indices) && scene.paragraph_indices.length > 0
+                    ? scene.paragraph_indices
+                    : rangeIndices;
+                const sourceIndices = rawIndices
+                    .map((i: number) => Number(i) - 1)
+                    .filter((idx: number) => Number.isFinite(idx) && idx >= 0 && idx < paragraphs.length);
                 const sourceContent = sourceIndices.map((idx: number) => paragraphs[idx] || "").join('\n\n');
-                const breakdownInfo = `**Slugline:** ${scene.slugline || 'N/A'}\n**Visual Style:** [${scene.visualStyleName || 'N/A'}] (${scene.montageId || 'montage_none'})\n**Narrative Arc:** ${scene.narrativeArc || 'N/A'}\n**Key Action Beats:**\n${(scene.keyActionBeats || []).map((beat: string) => `- ${beat}`).join('\n')}`;
+                const breakdownInfo = `**Slugline:** ${scene.slugline || 'N/A'}\n**Scene Type:** ${scene.sceneType || 'N/A'}\n**Visual Style:** [${scene.visualStyleName || 'N/A'}] (${scene.montageId || 'montage_none'})\n**Narrative Arc:** ${scene.narrativeArc || 'N/A'}\n**Key Action Beats:**\n${(scene.keyActionBeats || []).map((beat: string) => `- ${beat}`).join('\n')}\n**Continuity Out:** ${scene.continuityOut || 'N/A'}`;
                 return { title: scene.title, content: sourceContent, breakdownInfo: breakdownInfo.trim(), visualStyleName: scene.visualStyleName, montageId: scene.montageId, indices: sourceIndices };
             });
-            const visualBible = rawData.visualBible ? { toneAnalysis: rawData.visualBible.toneAnalysis, assets: rawData.visualBible.assets } : undefined;
+            const visualBible = rawData.visualBible ? {
+                toneAnalysis: normalizeVisualBibleTone(rawData.visualBible.toneAnalysis),
+                assets: normalizeVisualBibleAssets(rawData.visualBible.assets)
+            } : undefined;
             return { scenes: mappedScenes, visualBible };
         }
         return null;

@@ -145,7 +145,7 @@ const buildFormalLawEngine = (
     DENY:   [ 剧本格式 (绝对严禁出现"内景/外景"、"日/夜"、剧本对话体), 学术论文腔, 理工科说明书语法, 教科书式旁白, 鸡汤散文, 网络小说腔 ]${styleRule}
 
 [LAW_4] ONTOLOGICAL_HYGIENE:
-    DENY.META: 严禁在正文中出现任何引擎参数名 (M0-M7, SUR1-SUR11)
+    DENY.META: 严禁在正文中出现任何引擎参数名 (M0-M7A/M7B, SUR1-SUR10, SUR-END)
     DENY.JARGON: 严禁出现哲学/精神分析术语 (大他者, 对象a, 符号界, 实在界, 能指, 所指, 异化, 阉割)
     RULE: 所有抽象概念必须完成【文学性转译】— 消融在感官描写、人物动作与物理环境中
 \`\`\`
@@ -214,10 +214,10 @@ ${topologyHeader}
 *   **Active Genre(s):** ${allTags.join(', ')}
 *   **CORE LOGIC EXTRACTION (核心逻辑提取):** 
     ${genreDefs}
-*   **DIRECTIVE (重心分配指令):** 请利用上段提取的"核心逻辑"来决定当前应该倾斜多少结构权重给 M1 到 M7。 
+*   **DIRECTIVE (重心分配指令):** 请利用上段提取的"核心逻辑"来决定当前应该倾斜多少结构权重给 M1-M7A/M7B。
     *   如果逻辑强调高能动作与暴力 -> 将聚光灯和笔墨砸向 M5 (行动驱力)。
     *   如果逻辑强调恐惧与未知压迫 -> 让 M4 (大他者) 的阴影笼罩一切。
-    *   如果逻辑强调情感与执念羁绊 -> 让 M3 (欲望锚点) 承担最痛的张力。
+    *   如果逻辑强调情感与执念羁绊 -> 让 M3 (欲望幻想) 承担最痛的张力。
     *   如果逻辑强调宏大世界与畸变 -> 优先去刻画 SUR 场域背景与 M4 系统。
 `;
 };
@@ -285,7 +285,7 @@ export const buildNarrativePrompt = (
 **Logical Constraint (代数规则):** ${item?.logic || "遵循标准的精神系统逻辑 (Follow the standard OS logic)"}
 
 **INSTRUCTION (执行指令):**
-- **STRICT ADHERENCE (绝对遵守):** 你必须将上方的 'Logical Constraint' 视为冷酷的数学铁律，以此来推演计算故事中所有的叙事动能 (M1-M7)。
+- **STRICT ADHERENCE (绝对遵守):** 你必须将上方的 'Logical Constraint' 视为冷酷的数学铁律，以此来推演计算故事中所有的叙事动能 (M1-M7A/M7B)。
 - **SURVIVAL VS COLLAPSE (生存或坍缩):** M0 决定了主体的宇宙在遭遇 M2 (真实界撞击) 后，是能够苟延残喘，还是彻底坍缩为某种特定的症状结晶。
 - **IF [Ordinary Psychosis / 普通精神病]:** 绝对不要写一个刻版的"疯子"故事。主体表面上看起来完全正常，但他极度依赖某块特定的"补丁 (Patch)"（比如具体的工作、怪癖或仪式效仿）来勉力维持现实的缝合。故事必须聚焦于这个"补丁"将要被撕裂的致命威胁。
 - **IF [Autism / 自闭症]:** 逻辑必须围绕对大他者强行入侵的"绝对闭环 (Closure)"与"防御 (Defense)"展开。这是一个竭力剥离大他者的世界。
@@ -350,7 +350,7 @@ export const buildNarrativePrompt = (
     'inciting_incident_激励事件',
     'rising_action_上升动作',
     'climax_高潮',
-    'resolution_存在落点',
+    'resolution_余痕收束',
   ];
   const pitchSkeletons = structureItem?.skeletons?.length ? structureItem.skeletons : DEFAULT_SKELETONS;
   const pitchSkeletonLabels = pitchSkeletons.map(s => {
@@ -438,7 +438,7 @@ export const buildNarrativePrompt = (
   }
 
   if (!hasEra && !hasLoc && !exactYear && !exactCountry) {
-    if (worldLaw.physics === 'STRICT') {
+    if (gravity === 1) {
       // STRICT MODE: International Scope, Realistic Logic
       defaultAnchorInstruction = `
           ## ⚓ DEFAULT REALITY ANCHOR (STRICT REALISM - INTERNATIONAL)
@@ -476,7 +476,7 @@ export const buildNarrativePrompt = (
   // ============================================================================
   const dynamicTaskPrompt = `
 # 本次任务执行区 (TASK EXECUTION)
-Task: 基于上方提供的《迷雾学派》全局宪法 (SYSTEM BIBLE)，根据以下动态注入的 DNA (M0-M7) 和语境 (S0-S7)，生成 3 个电影级的故事概念。
+Task: 基于上方提供的《迷雾学派》全局宪法 (SYSTEM BIBLE)，根据以下动态注入的 DNA (M0-M7A/M7B 双结项) 和语境 (SUR1-SUR10 + SUR-END)，生成 3 个电影级的故事概念。
 
 ## 📍 时空坐标与视觉锚点
 ${visionAnchorInstruction}
@@ -694,7 +694,7 @@ export const buildNarrativeBiblePrompt = (
     'inciting_incident_激励事件',
     'rising_action_上升动作',
     'climax_高潮',
-    'resolution_存在落点',
+    'resolution_余痕收束',
   ];
   const bibleSkeletons = bibleStructureItem?.skeletons?.length ? bibleStructureItem.skeletons : BIBLE_DEFAULT_SKELETONS;
   const bibleSkeletonLabels = bibleSkeletons.map(s => {
@@ -721,7 +721,7 @@ export const buildNarrativeBiblePrompt = (
 你的任务是：**基于这份大纲，进行风格化重写**。
 
 **重写规则：**
-1. **故事骨架**不变——大纲中的人物、事件、M0-M7 的精神弧线、结局走向必须保留。
+1. **故事骨架**不变——大纲中的人物、事件、M0-M7A/M7B 双结项的精神弧线、意义裁决与实在余痕必须保留。
 2. **风格是绝对重心**——你必须完全模仿所选作者的底层句法逻辑、节奏、语感与叙事策略。不是"像"某个作者，而是"成为"那个作者重新写这个故事。
 3. 重写同样遵守以下创作铁律、世界物理法则与表层设定约束。
 4. 输出一篇 ${literatureType}，目标 ~${targetWordCount} 中文字符。
@@ -807,7 +807,7 @@ ${bibleSvProtocol}`;
 以下是这部电影的创作核心。每一条都是导演对你说的话——不是定义，是指令。
 导演笔记中的具体场景是情感运动的示例载体——提取其拓扑结构（节奏、温度、运动方式），用你自己发明且适配世界物理法则与表层设定的全新场景承载它。严禁复现示例中的具体意象。
 
-**M0 渗透法则**：M0 不是一个独立参数——它是整个故事的操作系统。M1-M7B 的每一条导演笔记都必须经过 M0 的逻辑改写。
+**M0 渗透法则**：M0 不是一个独立参数——它是整个故事的操作系统。M1-M7A/M7B 的每一条导演笔记都必须经过 M0 的逻辑改写。
 
 ${directorBrief}${m0Logic}`;
   }
@@ -882,7 +882,7 @@ ${sensoryInstruction}`;
 2. M7A 回溯：从 M7A 缝合点反向审视，哪些 M 参数的含义被重写了？
 3. M7B 前兆：M7B 的终态是什么？前兆编织在故事哪个阶段？使用什么感官通道？终态使用不同的感官通道
 4. 物理校验：逐一检查每个 SUR 标签是否超出当前物理法则边界，超出的如何降维
-5. M0 渗透检查：逐一检查 M1-M7B，每个参数的叙事实现是否被 M0 的逻辑改写过
+5. M0 渗透检查：逐一检查 M1-M7A/M7B，每个参数的叙事实现是否被 M0 的逻辑改写过
 </thought_process>
 \`\`\`
 

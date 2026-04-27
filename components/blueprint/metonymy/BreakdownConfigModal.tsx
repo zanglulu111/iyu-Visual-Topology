@@ -1,6 +1,8 @@
 
 import React, { useState } from 'react';
 import { X, Sparkles, Scissors, MessageSquare, Minus, Plus } from 'lucide-react';
+import { AdminXRayButton } from '../../XRayInspector';
+import { buildScriptBreakdownPrompt } from '../../../services/scriptBreakdownGenerator';
 
 interface BreakdownConfigModalProps {
     isOpen: boolean;
@@ -9,6 +11,8 @@ interface BreakdownConfigModalProps {
     lang: 'CN' | 'EN';
     themeAccent: string;
     theme?: string;
+    sourceText?: string;
+    isAdmin?: boolean;
 }
 
 export const BreakdownConfigModal: React.FC<BreakdownConfigModalProps> = ({
@@ -17,7 +21,9 @@ export const BreakdownConfigModal: React.FC<BreakdownConfigModalProps> = ({
     onConfirm,
     lang,
     themeAccent,
-    theme
+    theme,
+    sourceText = '',
+    isAdmin
 }) => {
     const [instruction, setInstruction] = useState('');
     const [targetCount, setTargetCount] = useState<number | ''>('');
@@ -61,7 +67,7 @@ export const BreakdownConfigModal: React.FC<BreakdownConfigModalProps> = ({
                                 {[3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20].map(num => (
                                     <button
                                         key={num}
-                                        onClick={() => setTargetCount(num)}
+                                        onClick={() => setTargetCount(prev => prev === num ? '' : num)}
                                         className={`w-9 h-9 flex items-center justify-center rounded text-xs font-bold transition-all border ${targetCount === num ? (theme === 'retro' ? 'bg-[#8B261D] border-[#8B261D] text-white' : `bg-${colorBase}/20 border-${colorBase}/50 text-white`) : (theme === 'retro' ? 'bg-white border-[#8B261D]/10 text-[#8B261D]/80 hover:text-[#8B261D] hover:border-[#8B261D]/40' : 'bg-zinc-900/50 border-zinc-800 text-zinc-300 hover:text-zinc-100 hover:border-zinc-700')}`}
                                     >
                                         {num}
@@ -135,13 +141,22 @@ export const BreakdownConfigModal: React.FC<BreakdownConfigModalProps> = ({
                     >
                         {lang === 'CN' ? "取消" : "CANCEL"}
                     </button>
-                    <button
-                        onClick={() => onConfirm(instruction, targetCount === '' ? undefined : targetCount)}
-                        className={`px-6 py-2 ${theme === 'retro' ? 'bg-[#8B261D] hover:bg-[#6D1E16] text-white overflow-hidden' : `bg-${colorBase}/20 hover:bg-${colorBase}/30 text-${colorBase} border border-current`} font-bold text-sm rounded transition-all flex items-center gap-2 shadow-[0_4px_15px_rgba(0,0,0,0.3)]`}
-                    >
-                        <Sparkles size={14} />
-                        {lang === 'CN' ? "开始智能分场" : "START BREAKDOWN"}
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <AdminXRayButton
+                            isAdmin={isAdmin}
+                            lang={lang}
+                            title={lang === 'CN' ? 'X-Ray 智能分场指令' : 'X-Ray Breakdown Prompt'}
+                            getPayload={() => buildScriptBreakdownPrompt(sourceText, instruction, targetCount === '' ? undefined : targetCount)}
+                            disabled={!sourceText.trim()}
+                        />
+                        <button
+                            onClick={() => onConfirm(instruction, targetCount === '' ? undefined : targetCount)}
+                            className={`px-6 py-2 ${theme === 'retro' ? 'bg-[#8B261D] hover:bg-[#6D1E16] text-white overflow-hidden' : `bg-${colorBase}/20 hover:bg-${colorBase}/30 text-${colorBase} border border-current`} font-bold text-sm rounded transition-all flex items-center gap-2 shadow-[0_4px_15px_rgba(0,0,0,0.3)]`}
+                        >
+                            <Sparkles size={14} />
+                            {lang === 'CN' ? "开始智能分场" : "START BREAKDOWN"}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

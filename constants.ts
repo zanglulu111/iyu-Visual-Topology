@@ -198,15 +198,15 @@ export const DRIVERS: (DriverDef & { nameEn: string })[] = [
   },
   {
     id: DriverType.TRAILER,
-    name: "虚拟幻象",
-    nameEn: "TRAILER",
-    englishId: "TRAILER",
-    coreDriver: "延异",
-    coreDriverEn: "Différance",
-    description: "【诱惑与推迟】预告片美学。通过意义的碎片化与不断推迟，制造一种永恒的、无法被满足的期待感。",
-    descriptionEn: "[Seduction & Deferral] Trailer aesthetics. Through fragmentation and constant deferral of meaning, creating an eternal, unfulfillable sense of expectation.",
-    kpi: "钩子效应",
-    forbidden: "禁止给出答案",
+    name: "迷雾画布",
+    nameEn: "MIST CANVAS",
+    englishId: "CANVAS",
+    coreDriver: "生成与切割",
+    coreDriverEn: "Generate & Slice",
+    description: "【生产画布】连接 Lovart 生图、资产多视角、宫格分镜和切割回收。把提示词、参考图、成片和裁切结果集中成一个可迭代的视觉工作台。",
+    descriptionEn: "[Production Canvas] Connect Lovart generation, multi-view assets, storyboard grids, and image slicing in one iterative visual workstation.",
+    kpi: "资产一致性",
+    forbidden: "禁止散落生产",
     iconName: "Zap",
     gradient: "from-orange-900/40 to-slate-900"
   }
@@ -217,7 +217,7 @@ export const MIDDLE_LAYER_CONFIG: Record<DriverType, LayerConfig> = {
   [DriverType.COMMERCIAL]: { layerName: "营销模块 (Modules)", sectionPrefix: "Module" },
   [DriverType.EXPERIMENTAL]: { layerName: "视觉乐章 (Phases)", sectionPrefix: "Phase" },
   [DriverType.AESTHETIC]: { layerName: "情绪段落 (Moods)", sectionPrefix: "Mood" },
-  [DriverType.TRAILER]: { layerName: "剪辑节奏 (Beats)", sectionPrefix: "Cut" }
+  [DriverType.TRAILER]: { layerName: "画布节点 (Canvas Nodes)", sectionPrefix: "Node" }
 };
 
 export const BLOCK_LIMITS: Record<string, number> = {
@@ -314,7 +314,7 @@ export const BLOCK_LIMITS: Record<string, number> = {
 
 /** 随机可选区间：每个参数在随机时应抽取的词条数量 [min, max] */
 export const RANDOM_RANGES: Record<string, [number, number]> = {
-  // M0-M7 引擎核心
+  // M0-M7A/M7B 引擎核心
   'engine_m0': [1, 1], 'engine_m1': [1, 2], 'engine_m2': [1, 2],
   'engine_m3': [1, 2], 'engine_m4': [1, 2], 'engine_m5': [1, 2],
   'engine_m6': [1, 2], 'engine_m7b': [1, 1], 'engine_m7a': [1, 1],
@@ -323,13 +323,13 @@ export const RANDOM_RANGES: Record<string, [number, number]> = {
   'skin_genre': [1, 2],      // SUR1 叙事动力
   'skin_era': [1, 1],         // SUR2 背景场域
   'skin_society': [0, 1],     // SUR4 社会形态
-  'skin_everything': [0, 1],  // SUR5 欲望锚点
-  'skin_location': [0, 1],    // SUR6 空间场景
-  'skin_gender': [0, 1],      // SUR7 主体性别
-  'skin_age': [0, 1],         // SUR8 主体年龄
+  'skin_everything': [0, 1],  // SUR5 对象预设
+  'skin_location': [0, 1],    // SUR6 空间容器
+  'skin_gender': [0, 1],      // SUR7 选角呈现
+  'skin_age': [0, 1],         // SUR8 年龄阶段
   'skin_profession': [0, 1],  // SUR9 职业身份
-  'skin_ideology': [0, 1],    // SUR10 哲学信念
-  'skin_ending': [0, 1],      // SUR11 显性大结局
+  'skin_ideology': [0, 1],    // SUR10 信念预设
+  'skin_ending': [0, 1],      // SUR-END 显性收场
   // SUR10X 调音台推子 (SUR4X removed in v3.1)
   'sur10x': [0, 1],           // SUR10X 信念裂度
   // SV 叙事结构
@@ -349,7 +349,7 @@ export const SURFACE_WEIGHT_CONFIG = {
     { id: 'SUR7',   blockIds: ['skin_gender'],                         weight: 0.65 },
     { id: 'SUR9',   blockIds: ['skin_profession'],                     weight: 0.65 },
     { id: 'SUR10',  blockIds: ['skin_ideology'],                       weight: 0.30 },
-    { id: 'SUR11',  blockIds: ['skin_ending'],                         weight: 0.30 },
+    { id: 'SUR-END', blockIds: ['skin_ending'],                        weight: 0.30 },
     { id: 'SUR10X', blockIds: ['sur10x'],                              weight: 0.30 },
   ] as const,
   cap: 6,

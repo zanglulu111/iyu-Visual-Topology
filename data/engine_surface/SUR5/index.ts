@@ -12,6 +12,12 @@ import { SUR5_LIBERATION_BREAKING } from './10_sur5_liberation_breaking';
 import { SUR5_DIVINITY_TRANSCENDENCE } from './11_sur5_divinity_transcendence';
 import { SUR5_INEFFABLE_VOID } from './12_sur5_ineffable_void';
 
+/**
+ * SUR-OBJ 对象预设库。
+ *
+ * `SUR5_DATA` 是旧槽位/旧导出兼容名。当前语义只允许描述可被追寻、
+ * 争夺、交换或保护的表层对象，不承担动机解释、代价设计或终端收场。
+ */
 export const SUR5_DATA: LibraryCategoryDef[] = [
   SUR5_POWER_STATUS,
   SUR5_WEALTH_TREASURES,
@@ -26,3 +32,7 @@ export const SUR5_DATA: LibraryCategoryDef[] = [
   SUR5_DIVINITY_TRANSCENDENCE,
   SUR5_INEFFABLE_VOID
 ];
+
+export const SUR_OBJECT_DATA: LibraryCategoryDef[] = SUR5_DATA;
+
+export default SUR_OBJECT_DATA;

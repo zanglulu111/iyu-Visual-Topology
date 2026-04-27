@@ -15,6 +15,7 @@ interface CommercialViewProps {
     themeAccent: string;
     themeBorder: string;
     theme?: string;
+    isAdmin?: boolean;
 }
 
 // Added StrategyCardProps interface to handle props typing including React's reserved 'key'
@@ -61,7 +62,7 @@ const StrategyCard: React.FC<StrategyCardProps> = ({
 };
 
 export const CommercialView: React.FC<CommercialViewProps> = ({ 
-    blueprint, activeTab, language, onGenerateAssetImage, onZoom, onUpdateBlueprint, themeAccent, themeBorder 
+    blueprint, activeTab, language, onGenerateAssetImage, onZoom, onUpdateBlueprint, themeAccent, themeBorder, theme, isAdmin
 }) => {
     
     const defaultStrategy: CommercialStrategy = {
@@ -262,6 +263,8 @@ export const CommercialView: React.FC<CommercialViewProps> = ({
                                     onDelete={() => {}}
                                     onGenerateImage={onGenerateAssetImage}
                                     onZoom={onZoom}
+                                    theme={theme}
+                                    isAdmin={isAdmin}
                                />
                           </div>
                       </div>

@@ -4,9 +4,11 @@ import { CreativeBlueprint, BlueprintLanguage, DriverType, VersionHistoryItem } 
 import { Star, FileText, PenTool, Globe, Palette, Languages, Copy, Check, Wand2, X, Plus, GripVertical, AlertCircle, Loader2, ArrowDown, ArrowUp, Trash2, RotateCcw, History as HistoryIcon, GitCommit, ListChecks } from 'lucide-react';
 import { CopyButton, SimpleTextRenderer, ProcessingTimer, MarkdownRenderer } from '../SharedBlueprintComponents';
 import { modifyNarrativeWithAI, ModifySectionRequest, ModifyInsertionRequest } from '../../services/geminiService';
+import { buildRefactorPrompt } from '../../services/refactorPrompt';
 import { STYLE_MATRIX } from '../../data/style_matrix';
 import { NarrativeLibraryModal } from '../NarrativeLibraryModal';
 import { LibraryCategoryDef } from '../../types';
+import { AdminXRayButton } from '../XRayInspector';
 
 interface NarrativeViewProps {
     blueprint: CreativeBlueprint;
@@ -17,6 +19,7 @@ interface NarrativeViewProps {
     themeBgActive: string;
     onUpdateBlueprint: (blueprint: CreativeBlueprint) => void;
     theme: string;
+    isAdmin?: boolean;
 }
 
 // Helper to split text into paragraphs while preserving empty lines for structure if needed
@@ -48,7 +51,7 @@ const DiffViewer = ({ oldText, newText }: { oldText: string, newText: string }) 
 };
 
 export const NarrativeView: React.FC<NarrativeViewProps> = ({
-    blueprint, language, isAesthetic, themeAccent, themeBorder, themeBgActive, onUpdateBlueprint, theme
+    blueprint, language, isAesthetic, themeAccent, themeBorder, themeBgActive, onUpdateBlueprint, theme, isAdmin
 }) => {
     const [localLang, setLocalLang] = useState<'CN' | 'EN'>('CN');
 
@@ -299,11 +302,7 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
         setSections(newSections);
     };
 
-    const handleSubmitRefactor = async () => {
-        setIsRefactoring(true);
-        setRefactorStartTime(Date.now());
-
-        // Prepare payload
+    const getRefactorRequests = () => {
         const modifyRequests: ModifySectionRequest[] = sections.map(s => ({
             id: s.id,
             text: s.text,
@@ -315,6 +314,26 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
             index: i.index,
             instruction: i.instruction
         })).filter(i => i.instruction.trim() !== "");
+
+        return { modifyRequests, insertionRequests };
+    };
+
+    const getRefactorPrompt = () => {
+        const { modifyRequests, insertionRequests } = getRefactorRequests();
+        return buildRefactorPrompt(
+            blueprint.narrative?.synopsis || "",
+            modifyRequests,
+            insertionRequests,
+            overallInstruction,
+            selectedStyle
+        );
+    };
+
+    const handleSubmitRefactor = async () => {
+        setIsRefactoring(true);
+        setRefactorStartTime(Date.now());
+
+        const { modifyRequests, insertionRequests } = getRefactorRequests();
 
         try {
             const newSynopsis = await modifyNarrativeWithAI(
@@ -712,21 +731,31 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
                                 </button>
 
                                 {/* Execute Button */}
-                                <button
-                                    onClick={handleSubmitRefactor}
-                                    disabled={isRefactoring}
-                                    className={`h-9 px-4 ${theme === 'retro' ? 'bg-[#8B261D] hover:bg-[#6D1E16] text-white shadow-none' : 'bg-gold-primary hover:bg-amber-400 text-black shadow-[0_0_15px_rgba(212,175,55,0.3)] hover:shadow-[0_0_25px_rgba(212,175,55,0.5)]'} rounded font-bold uppercase tracking-widest text-[10px] flex items-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
-                                >
-                                    {isRefactoring ? <Loader2 size={12} className="animate-spin" /> : <Wand2 size={12} />}
-                                    {isRefactoring ? (
-                                        <span className="flex items-center gap-2">
-                                            {language === 'EN' ? "Refactoring..." : "重构中..."}
-                                            <ProcessingTimer startTime={refactorStartTime} />
-                                        </span>
-                                    ) : (
-                                        language === 'EN' ? "Execute Changes" : "执行修改"
-                                    )}
-                                </button>
+                                <div className="flex items-center gap-2">
+                                    <AdminXRayButton
+                                        isAdmin={isAdmin}
+                                        lang={language === 'EN' ? 'EN' : 'CN'}
+                                        title={language === 'EN' ? 'X-Ray Narrative Refactor Prompt' : 'X-Ray 剧本深度修改指令'}
+                                        getPayload={getRefactorPrompt}
+                                        disabled={isRefactoring}
+                                        className={theme === 'retro' ? 'h-9 w-9 bg-white border-[#8B261D]/20 text-[#8B261D] hover:bg-[#8B261D]/10' : 'h-9 w-9 bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-gold-primary hover:border-gold-primary'}
+                                    />
+                                    <button
+                                        onClick={handleSubmitRefactor}
+                                        disabled={isRefactoring}
+                                        className={`h-9 px-4 ${theme === 'retro' ? 'bg-[#8B261D] hover:bg-[#6D1E16] text-white shadow-none' : 'bg-gold-primary hover:bg-amber-400 text-black shadow-[0_0_15px_rgba(212,175,55,0.3)] hover:shadow-[0_0_25px_rgba(212,175,55,0.5)]'} rounded font-bold uppercase tracking-widest text-[10px] flex items-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
+                                    >
+                                        {isRefactoring ? <Loader2 size={12} className="animate-spin" /> : <Wand2 size={12} />}
+                                        {isRefactoring ? (
+                                            <span className="flex items-center gap-2">
+                                                {language === 'EN' ? "Refactoring..." : "重构中..."}
+                                                <ProcessingTimer startTime={refactorStartTime} />
+                                            </span>
+                                        ) : (
+                                            language === 'EN' ? "Execute Changes" : "执行修改"
+                                        )}
+                                    </button>
+                                </div>
 
                                 <div className={`h-4 w-px ${theme === 'retro' ? 'bg-[#8B261D]/20' : 'bg-zinc-800'} mx-2`}></div>
 

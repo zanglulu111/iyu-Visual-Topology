@@ -46,6 +46,7 @@ interface LandingViewProps {
   closeSuture: () => void;
   onSutureGenerate: any;
   isSutureGenerating: boolean;
+  isAdmin?: boolean;
   history: any[];
   onHistoryRestore: any;
   onHistoryClear: any;
@@ -86,6 +87,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
   closeSuture,
   onSutureGenerate,
   isSutureGenerating,
+  isAdmin,
   history,
   onHistoryRestore,
   onHistoryClear,
@@ -614,7 +616,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
       </div>
 
       <ProductManualModal isOpen={isManualOpen} onClose={closeManual} driverType={hoveredDriver} />
-      <SutureModal isOpen={isSutureOpen} onClose={closeSuture} onGenerate={onSutureGenerate} isGenerating={isSutureGenerating} lang={lang} driverType={selectedDriver || DriverType.NARRATIVE} />
+      <SutureModal isOpen={isSutureOpen} onClose={closeSuture} onGenerate={onSutureGenerate} isGenerating={isSutureGenerating} lang={lang} driverType={selectedDriver || DriverType.NARRATIVE} isAdmin={isAdmin} />
       {isHistoryOpen && <HistoryModal history={history} onRestore={onHistoryRestore} onClear={onHistoryClear} onClose={closeHistory} lang={lang} />}
     </div>
   );

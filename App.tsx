@@ -12,6 +12,7 @@ import { SutureModal } from './components/SutureModal';
 import { NarrativeLibraryModal } from './components/NarrativeLibraryModal';
 import { TensionMonitorModal } from './components/TensionMonitorModal';
 import { MetonymyView } from './components/blueprint/MetonymyView';
+import { MistCanvasEngine } from './components/canvas/MistCanvasEngine';
 import { AuthModal } from './components/AuthModal';
 import { UserProfileModal } from './components/UserProfileModal';
 import { AppHeader } from './components/AppHeader';
@@ -84,6 +85,7 @@ import { LacanTopologyView } from './components/LacanTopologyView';
 import { ArchiveDirectoryModal } from './components/ArchiveDirectoryModal';
 import { VideoLibrary } from './components/VideoLibrary';
 import { PhilosophyCodexPage } from './components/PhilosophyCodexPage';
+import { PhilosopherPosterIndexPage } from './components/PhilosopherPosterIndexPage';
 import { RorschachView } from './components/RorschachView';
 
 // === Undo/Redo Reducer (defined outside component — no stale closures) ===
@@ -236,6 +238,7 @@ const App: React.FC = () => {
         avatarColor: 'bg-zinc-500',
         tokens: 0
     });
+    const isAdmin = currentUser?.membershipTier === 'admin' || (currentUser as any)?.membership_tier === 'admin';
     const [isSutureGenerating, setIsSutureGenerating] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
     const [isMappingInput, setIsMappingInput] = useState(false);
@@ -243,7 +246,7 @@ const App: React.FC = () => {
     const [traverseStartTime, setTraverseStartTime] = useState<number | null>(null);
     const [bibleStartTime, setBibleStartTime] = useState<number | null>(null);
     const [visionStartTime, setVisionStartTime] = useState<number | null>(null);
-    const [codexDictionary, setCodexDictionary] = useState<string>('LACAN');
+    const [codexDictionary, setCodexDictionary] = useState<string>('MIST');
     const [codexSection, setCodexSection] = useState<string>('CONCEPTS');
     const [codexDetailTab, setCodexDetailTab] = useState<'DEFINITION' | 'ANALOGY' | 'APPLICATION'>('DEFINITION');
 
@@ -411,8 +414,13 @@ const App: React.FC = () => {
     };
 
     const handleViewChange = (viewMode: ViewMode) => {
+        if (viewMode === 'DICTIONARY') {
+            setCodexDictionary('MIST');
+            setCodexSection('CONCEPTS');
+            setCodexDetailTab('DEFINITION');
+        }
         setViewMode(viewMode);
-        if (viewMode === 'DIVERGENCE' || viewMode === 'BIBLE' || viewMode === 'METONYMY' || viewMode === 'TOPOLOGY') {
+        if (viewMode === 'DIVERGENCE' || viewMode === 'BIBLE' || viewMode === 'METONYMY' || viewMode === 'CANVAS' || viewMode === 'TOPOLOGY') {
             setIsVisionOpen(false);
             setIsSkinOpen(false);
             setIsAestheticInputOpen(false);
@@ -495,7 +503,7 @@ const App: React.FC = () => {
     const handleDriverSelect = (id: DriverType) => {
         setSelectedDriver(id);
         setPage(1);
-        setViewMode('ENGINE');
+        setViewMode(id === DriverType.TRAILER ? 'CANVAS' : 'ENGINE');
         setLockedModules({});
         setLockedTags({});
         const newFieldState = savedFieldStates[id] || {};
@@ -1533,7 +1541,13 @@ const App: React.FC = () => {
     return (
         <QueryClientProvider client={queryClient}>
             <div className="min-h-screen bg-[var(--bg-main)] text-zinc-300 font-sans selection:bg-gold-primary/30 selection:text-white overflow-hidden transition-colors duration-1000">
-                {page === -1 ? (
+                {location.pathname === '/philosophers' ? (
+                    <PhilosopherPosterIndexPage
+                        lang={lang}
+                        setLang={setLang}
+                        onClose={() => navigate('/')}
+                    />
+                ) : page === -1 ? (
                     <UniversePortal
                         lang={lang}
                         setLang={setLang}
@@ -1587,6 +1601,7 @@ const App: React.FC = () => {
                         closeSuture={() => setIsSutureOpen(false)}
                         onSutureGenerate={handleSutureGenerate}
                         isSutureGenerating={isSutureGenerating}
+                        isAdmin={isAdmin}
                         history={history}
                         onHistoryRestore={onHistoryRestore}
                         onHistoryClear={onHistoryClear}
@@ -1625,7 +1640,7 @@ const App: React.FC = () => {
                             lang={lang}
                             setLang={setLang}
                             onClose={() => {
-                                setViewMode('DICTIONARY');
+                                handleViewChange('DICTIONARY');
                             }}
                             openManual={openManual}
                             openHistory={openHistory}
@@ -1704,7 +1719,7 @@ const App: React.FC = () => {
                                     setViewMode('ENGINE');
                                 }}
                                 lang={lang}
-                                isAdmin={currentUser?.membershipTier === 'admin' || (currentUser as any)?.membership_tier === 'admin'}
+                                isAdmin={isAdmin}
                                 isFullScreen={true}
                             />
                         </div>
@@ -1715,7 +1730,7 @@ const App: React.FC = () => {
                             lang={lang}
                             setLang={setLang}
                             onClose={() => {
-                                setViewMode('DICTIONARY');
+                                handleViewChange('DICTIONARY');
                                 setHideSidebar(false);
                             }}
                             openManual={openManual}
@@ -1806,6 +1821,7 @@ const App: React.FC = () => {
                             fieldState={narrativeFieldState}
                             themeAccent="text-rose-400"
                             theme={theme}
+                            isAdmin={isAdmin}
                             onBack={() => {
                                 setPage(0);
                                 setViewMode('ENGINE');
@@ -1910,6 +1926,7 @@ const App: React.FC = () => {
                                         bibleStartTime={bibleStartTime}
                                         isHistoryMode={!!activeHistoryItem}
                                         onRegenerate={() => handleTraverseFantasy(true)}
+                                        isAdmin={isAdmin}
                                         onBack={handleBackStep}
                                         onOpenHistory={openHistory}
                                         lang={lang}
@@ -1961,6 +1978,7 @@ const App: React.FC = () => {
                                         customLibraryDefs={customLibraryDefs}
                                         isSutureOpen={isSutureOpen}
                                         onSutureOpenChange={setIsSutureOpen}
+                                        isAdmin={isAdmin}
                                     />
                                 </div>
                             )}
@@ -1979,6 +1997,15 @@ const App: React.FC = () => {
                                         onSaveToHistory={handleAddToHistory}
                                         onGenerateAssetImage={handleVisionImageGenerate}
                                         onSutureOpenChange={setIsSutureOpen}
+                                        isAdmin={isAdmin}
+                                    />
+                                </div>
+                            )}
+                            {viewMode === 'CANVAS' && selectedDriver === DriverType.TRAILER && (
+                                <div className="w-full h-full animate-page-dissolve">
+                                    <MistCanvasEngine
+                                        lang={lang}
+                                        isAdmin={isAdmin}
                                     />
                                 </div>
                             )}
@@ -2024,6 +2051,7 @@ const App: React.FC = () => {
                                 isTaskManagerOpen={isTaskManagerOpen}
                                 setIsTaskManagerOpen={setIsTaskManagerOpen}
                                 setIsPromptInspectorOpen={setIsPromptInspectorOpen}
+                                isAdmin={isAdmin}
                             />
                         )}
 
@@ -2070,6 +2098,7 @@ const App: React.FC = () => {
                             onVisionAnalysisChange={setVisionAnalysis}
                             onAnalyzeImage={handleAnalyzeImage}
                             isAnalyzingImage={isAnalyzingImage}
+                            isAdmin={isAdmin}
                             zIndex={topSidebar === 'vision' ? 70 : 60}
                         />
 
@@ -2079,6 +2108,7 @@ const App: React.FC = () => {
                             onAnalyzeAndMap={handleAestheticInputMap}
                             isProcessing={isMappingInput}
                             lang={lang}
+                            isAdmin={isAdmin}
                         />
                     </div>
                 )}

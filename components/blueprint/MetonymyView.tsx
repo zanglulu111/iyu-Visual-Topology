@@ -36,6 +36,7 @@ import {
     SutureConfig,
     MetonymyStylePreset,
     MetonymyAssetInput,
+    FinalAssetsData,
     StaticShot
 } from '../../types';
 import { SutureModal } from '../SutureModal';
@@ -62,10 +63,11 @@ interface MetonymyViewProps {
     onGenerateAssetImage?: (prompt: string) => Promise<string | null>;
     onSutureOpenChange?: (open: boolean) => void;
     theme?: string;
+    isAdmin?: boolean;
 }
 
 export const MetonymyView: React.FC<MetonymyViewProps> = ({
-    blueprint, language, onUpdateBlueprint, themeAccent, themeBorder, isFullScreen, onToggleFullScreen, fieldState, onSaveToHistory, onGenerateAssetImage, onSutureOpenChange, theme
+    blueprint, language, onUpdateBlueprint, themeAccent, themeBorder, isFullScreen, onToggleFullScreen, fieldState, onSaveToHistory, onGenerateAssetImage, onSutureOpenChange, theme, isAdmin
 }) => {
     const rawMetonymyData = blueprint.metonymyData || { screenplay: [], staticStoryboard: [], dynamicScript: [], stylePresets: [] };
 
@@ -185,6 +187,157 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
             activePresetId: newActiveId
         });
     };
+
+    const normalizeAssetKey = (type: 'characters' | 'scenes' | 'props', name?: string, nameEn?: string) => {
+        return `${type}:${(name || nameEn || '').trim().toLowerCase()}`;
+    };
+
+    const mapFinalAssetToPresetAsset = (asset: FinalAssetItem, type: 'characters' | 'scenes' | 'props'): MetonymyAssetInput => ({
+        id: asset.id || `asset-${type}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        name: asset.name || asset.nameEn || '',
+        nameEn: asset.nameEn,
+        type: type === 'characters' ? 'CHARACTER' : (type === 'scenes' ? 'SCENE' : 'PROP'),
+        imageUrl: asset.imageUrl,
+        analysis: {
+            description: asset.analysis?.description || asset.description || '',
+            descriptionEn: asset.analysis?.descriptionEn,
+            anchors: asset.analysis?.anchors || asset.anchors || '',
+            anchorsEn: asset.analysis?.anchorsEn,
+            designPrompt: asset.analysis?.designPrompt,
+            designPromptEn: asset.analysis?.designPromptEn,
+            conceptPrompt: asset.analysis?.conceptPrompt,
+            conceptPromptEn: asset.analysis?.conceptPromptEn
+        }
+    });
+
+    const mapVisualBibleAssetToPresetAsset = (asset: any, type: 'characters' | 'scenes' | 'props'): MetonymyAssetInput => ({
+        id: asset.id || `asset-${type}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        name: asset.name || asset.nameEn || '',
+        nameEn: asset.nameEn,
+        type: type === 'characters' ? 'CHARACTER' : (type === 'scenes' ? 'SCENE' : 'PROP'),
+        imageUrl: asset.imageUrl,
+        analysis: {
+            description: asset.analysis?.description || asset.description || '',
+            descriptionEn: asset.analysis?.descriptionEn || asset.descriptionEn,
+            anchors: asset.analysis?.anchors || asset.anchors || '',
+            anchorsEn: asset.analysis?.anchorsEn || asset.anchorsEn,
+            designPrompt: asset.analysis?.designPrompt || asset.designPrompt,
+            designPromptEn: asset.analysis?.designPromptEn || asset.designPromptEn,
+            conceptPrompt: asset.analysis?.conceptPrompt || asset.conceptPrompt,
+            conceptPromptEn: asset.analysis?.conceptPromptEn || asset.conceptPromptEn
+        }
+    });
+
+    const mergeAssetLists = (
+        existing: MetonymyAssetInput[] = [],
+        incoming: MetonymyAssetInput[] = [],
+        type: 'characters' | 'scenes' | 'props'
+    ) => {
+        const merged = [...existing];
+        const indexByKey = new Map<string, number>();
+        merged.forEach((asset, idx) => indexByKey.set(normalizeAssetKey(type, asset.name, asset.nameEn), idx));
+
+        incoming.forEach(asset => {
+            const key = normalizeAssetKey(type, asset.name, asset.nameEn);
+            if (!key || key === `${type}:`) return;
+
+            const existingIndex = indexByKey.get(key);
+            if (existingIndex === undefined) {
+                indexByKey.set(key, merged.length);
+                merged.push(asset);
+                return;
+            }
+
+            const prev = merged[existingIndex];
+            merged[existingIndex] = {
+                ...prev,
+                name: prev.name || asset.name,
+                nameEn: prev.nameEn || asset.nameEn,
+                imageUrl: prev.imageUrl || asset.imageUrl,
+                analysis: {
+                    ...(prev.analysis || { description: '', anchors: '' }),
+                    description: prev.analysis?.description || asset.analysis?.description || '',
+                    descriptionEn: prev.analysis?.descriptionEn || asset.analysis?.descriptionEn,
+                    anchors: prev.analysis?.anchors || asset.analysis?.anchors || '',
+                    anchorsEn: prev.analysis?.anchorsEn || asset.analysis?.anchorsEn,
+                    designPrompt: prev.analysis?.designPrompt || asset.analysis?.designPrompt,
+                    designPromptEn: prev.analysis?.designPromptEn || asset.analysis?.designPromptEn,
+                    conceptPrompt: prev.analysis?.conceptPrompt || asset.analysis?.conceptPrompt,
+                    conceptPromptEn: prev.analysis?.conceptPromptEn || asset.analysis?.conceptPromptEn
+                }
+            };
+        });
+
+        return merged;
+    };
+
+    const upsertOriginalPresetAssets = (
+        presets: MetonymyStylePreset[],
+        incomingAssets: Partial<FinalAssetsData | { characters: any[]; scenes: any[]; props: any[] }>,
+        toneAnalysis?: GlobalVisualTone
+    ) => {
+        const basePresets = presets.length > 0 ? [...presets] : [defaultPreset];
+        const originalIndex = basePresets.findIndex(p => p.id === 'original');
+        const originalPreset = originalIndex >= 0 ? basePresets[originalIndex] : defaultPreset;
+
+        const nextOriginal: MetonymyStylePreset = {
+            ...originalPreset,
+            toneAnalysis: toneAnalysis || originalPreset.toneAnalysis,
+            assets: {
+                characters: mergeAssetLists(
+                    originalPreset.assets?.characters || [],
+                    (incomingAssets.characters || []).map((asset: any) => asset.analysis || asset.anchors || asset.description
+                        ? mapVisualBibleAssetToPresetAsset(asset, 'characters')
+                        : mapFinalAssetToPresetAsset(asset, 'characters')),
+                    'characters'
+                ),
+                scenes: mergeAssetLists(
+                    originalPreset.assets?.scenes || [],
+                    (incomingAssets.scenes || []).map((asset: any) => asset.analysis || asset.anchors || asset.description
+                        ? mapVisualBibleAssetToPresetAsset(asset, 'scenes')
+                        : mapFinalAssetToPresetAsset(asset, 'scenes')),
+                    'scenes'
+                ),
+                props: mergeAssetLists(
+                    originalPreset.assets?.props || [],
+                    (incomingAssets.props || []).map((asset: any) => asset.analysis || asset.anchors || asset.description
+                        ? mapVisualBibleAssetToPresetAsset(asset, 'props')
+                        : mapFinalAssetToPresetAsset(asset, 'props')),
+                    'props'
+                )
+            }
+        };
+
+        if (originalIndex >= 0) {
+            basePresets[originalIndex] = nextOriginal;
+            return basePresets;
+        }
+
+        return [nextOriginal, ...basePresets];
+    };
+
+    useEffect(() => {
+        const collected: FinalAssetsData = { characters: [], scenes: [], props: [] };
+
+        currentSections.forEach(section => {
+            const assets = section.sutureDataMap?.['original']?.finalAssets || section.sutureData?.finalAssets;
+            if (!assets) return;
+            collected.characters.push(...(assets.characters || []));
+            collected.scenes.push(...(assets.scenes || []));
+            collected.props.push(...(assets.props || []));
+        });
+
+        const total = collected.characters.length + collected.scenes.length + collected.props.length;
+        if (total === 0) return;
+
+        const mergedPresets = upsertOriginalPresetAssets(currentPresets, collected);
+        const before = JSON.stringify(currentPresets.find(p => p.id === 'original')?.assets || {});
+        const after = JSON.stringify(mergedPresets.find(p => p.id === 'original')?.assets || {});
+
+        if (before !== after) {
+            updateMetonymyData({ stylePresets: mergedPresets });
+        }
+    }, [currentSections, currentPresets, updateMetonymyData]);
 
     // Function to update a single section completely (Used by SceneCard for deep updates)
     const handleUpdateSection = (updatedSection: ScreenplaySection) => {
@@ -447,53 +600,11 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
 
                 let newPresets = [...currentPresets];
                 if (result.visualBible) {
-                    newPresets = newPresets.map(p => {
-                        if (p.id === 'original') {
-                            return {
-                                ...p,
-                                toneAnalysis: result.visualBible!.toneAnalysis,
-                                assets: {
-                                    characters: result.visualBible!.assets.characters.map((c: any) => ({
-                                        id: Date.now() + Math.random().toString(),
-                                        name: c.name,
-                                        nameEn: c.nameEn,
-                                        type: 'CHARACTER',
-                                        analysis: {
-                                            description: c.description,
-                                            descriptionEn: c.descriptionEn,
-                                            anchors: c.anchors,
-                                            anchorsEn: c.anchorsEn
-                                        }
-                                    })),
-                                    scenes: result.visualBible!.assets.scenes.map((s: any) => ({
-                                        id: Date.now() + Math.random().toString(),
-                                        name: s.name,
-                                        nameEn: s.nameEn,
-                                        type: 'SCENE',
-                                        analysis: {
-                                            description: s.description,
-                                            descriptionEn: s.descriptionEn,
-                                            anchors: s.anchors,
-                                            anchorsEn: s.anchorsEn
-                                        }
-                                    })),
-                                    props: result.visualBible!.assets.props.map((p: any) => ({
-                                        id: Date.now() + Math.random().toString(),
-                                        name: p.name,
-                                        nameEn: p.nameEn,
-                                        type: 'PROP',
-                                        analysis: {
-                                            description: p.description,
-                                            descriptionEn: p.descriptionEn,
-                                            anchors: p.anchors,
-                                            anchorsEn: p.anchorsEn
-                                        }
-                                    }))
-                                }
-                            };
-                        }
-                        return p;
-                    });
+                    newPresets = upsertOriginalPresetAssets(
+                        newPresets,
+                        result.visualBible.assets || { characters: [], scenes: [], props: [] },
+                        result.visualBible.toneAnalysis
+                    );
                 }
 
                 updateMetonymyData({
@@ -857,6 +968,14 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
                         return s;
                     });
 
+                    const nextStylePresets = response.finalAssets
+                        ? upsertOriginalPresetAssets(
+                            latestMetonymyData.stylePresets || currentPresets,
+                            response.finalAssets,
+                            response.globalTone
+                        )
+                        : (latestMetonymyData.stylePresets || currentPresets);
+
                     console.log('[Metonymy] Calling onUpdateBlueprint with', newSections.length, 'sections');
                     onUpdateBlueprint({
                         ...latestBlueprint,
@@ -864,7 +983,7 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
                             screenplay: newSections,
                             staticStoryboard: latestMetonymyData.staticStoryboard,
                             dynamicScript: latestMetonymyData.dynamicScript,
-                            stylePresets: latestMetonymyData.stylePresets || currentPresets,
+                            stylePresets: nextStylePresets,
                             activePresetId: latestMetonymyData.activePresetId || 'original'
                         }
                     });
@@ -1174,6 +1293,7 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
                             isBreakingDown={isBreakingDown}
                             breakdownStartTime={breakdownStartTime}
                             theme={theme}
+                            isAdmin={isAdmin}
                         />
                     </div>
 
@@ -1191,6 +1311,7 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
                                 isExpanded={isStyleExpanded}
                                 onToggleExpand={setIsStyleExpanded}
                                 sourceText={sourceText}
+                                isAdmin={isAdmin}
                             />
                         )}
 
@@ -1311,6 +1432,7 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
                                                 onGenerateAssetImage={onGenerateAssetImage}
                                                 onUpdateSection={handleUpdateSection}
                                                 onResetAssets={() => handleResetFinalAssets(section.id)}
+                                                isAdmin={isAdmin}
 
                                                 activeTab={sceneTabMap[section.id] || 'SCRIPT'}
                                                 onTabChange={(tab) => handleSceneTabChange(section.id, tab)}
@@ -1351,6 +1473,7 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
                 totalSourceText={sourceText}
                 presets={currentPresets}
                 activePresetId={currentSections.find(s => s.id === activeSectionId)?.mountedPresetId || currentActivePresetId || 'original'}
+                isAdmin={isAdmin}
             />
             <PreviewContentModal isOpen={isPreviewOpen} onClose={() => setIsPreviewOpen(false)} content={previewContent} title={previewTitle} themeAccent={themeAccent} lang={language} theme={theme} />
 

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Lovart"
+  short_description: "Batch-generate Lovart visual assets"
+  default_prompt: "Use $lovart to submit Lovart image/video generation prompts in batch, poll results, and save a manifest."

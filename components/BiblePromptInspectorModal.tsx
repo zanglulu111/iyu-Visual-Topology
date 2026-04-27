@@ -1,12 +1,33 @@
-import React, { useMemo, useState } from 'react';
-import { createPortal } from 'react-dom';
-import { X, Terminal, Copy, Check, BookOpen } from 'lucide-react';
-import { useTheme } from '../contexts/ThemeContext';
-import { CreativeTreatment, StyleConfig, NarrativeFieldState, WorldLawConfig, DriverType } from '../types';
+import React from 'react';
+import { CreativeTreatment, StyleConfig, NarrativeFieldState, WorldLawConfig, DriverType, NarrativeBlockDef, LibraryCategoryDef } from '../types';
 import { buildNarrativeBiblePrompt } from '../services/narrativeGenerator';
 import { buildCommercialBiblePrompt } from '../services/commercialGenerator';
 import { buildExperimentalBiblePrompt } from '../services/experimentalGenerator';
 import { buildAestheticBiblePrompt } from '../services/aestheticGenerator';
+import { XRayInspectorModal, type XRaySourceGroup } from './XRayInspector';
+import { STYLE_MATRIX, PERSPECTIVES, SENSORY_MODES } from '../data/style_matrix';
+import { DIRECTOR_STYLES } from '../data/director_styles';
+import {
+    AESTHETIC_ENGINE_BLOCKS,
+    AESTHETIC_ENGINE_LIBRARY,
+    ALL_SKIN_BLOCKS,
+    BLOCK_LIMITS,
+    COMMERCIAL_ENGINE_BLOCKS,
+    COMMERCIAL_ENGINE_LIBRARY,
+    COMM_SKIN_BLOCKS,
+    COMM_SKIN_LIBRARY,
+    EXPERIMENTAL_ENGINE_BLOCKS,
+    EXPERIMENTAL_ENGINE_LIBRARY,
+    EXPERIMENTAL_SKIN_BLOCKS,
+    EXPERIMENTAL_SKIN_LIBRARY,
+    NARRATIVE_ENGINE_BLOCKS,
+    NARRATIVE_ENGINE_LIBRARY,
+    SKIN_LIBRARY,
+    TRAILER_ENGINE_BLOCKS,
+    TRAILER_ENGINE_LIBRARY,
+    TRAILER_SKIN_BLOCKS,
+    TRAILER_SKIN_LIBRARY
+} from '../constants';
 
 interface BiblePromptInspectorModalProps {
     isOpen: boolean;
@@ -20,6 +41,102 @@ interface BiblePromptInspectorModalProps {
     driverType: DriverType;
 }
 
+const WORLD_LAW_OPTIONS = [
+    { value: 1, label: '写实', description: '物理重力闭锁。' },
+    { value: 2, label: '合理', description: '超现实元素必须被合理解释。' },
+    { value: 3, label: '缝合', description: '现实为底，允许局部症状化超现实。' },
+    { value: 4, label: '奇观', description: '高概念幻想公开运行。' },
+    { value: 5, label: '狂想', description: '绝对无重力的疯狂拼贴。' }
+];
+
+const getDriverBlocksAndLibrary = (driverType: DriverType): { blocks: NarrativeBlockDef[]; library: LibraryCategoryDef[] } => {
+    switch (driverType) {
+        case DriverType.COMMERCIAL:
+            return { blocks: [...COMMERCIAL_ENGINE_BLOCKS, ...COMM_SKIN_BLOCKS], library: [...COMMERCIAL_ENGINE_LIBRARY, ...COMM_SKIN_LIBRARY] };
+        case DriverType.EXPERIMENTAL:
+            return { blocks: [...EXPERIMENTAL_ENGINE_BLOCKS, ...EXPERIMENTAL_SKIN_BLOCKS], library: [...EXPERIMENTAL_ENGINE_LIBRARY, ...EXPERIMENTAL_SKIN_LIBRARY] };
+        case DriverType.AESTHETIC:
+            return { blocks: [...AESTHETIC_ENGINE_BLOCKS, ...ALL_SKIN_BLOCKS], library: [...AESTHETIC_ENGINE_LIBRARY, ...SKIN_LIBRARY] };
+        case DriverType.TRAILER:
+            return { blocks: [...TRAILER_ENGINE_BLOCKS, ...TRAILER_SKIN_BLOCKS], library: [...TRAILER_ENGINE_LIBRARY, ...TRAILER_SKIN_LIBRARY] };
+        default:
+            return { blocks: [...NARRATIVE_ENGINE_BLOCKS, ...ALL_SKIN_BLOCKS], library: [...NARRATIVE_ENGINE_LIBRARY, ...SKIN_LIBRARY] };
+    }
+};
+
+const getLibraryForBlock = (blockId: string, library: LibraryCategoryDef[]) => {
+    if (blockId === 'skin_animation_genre') {
+        return library.find(cat => cat.id === 'skin_era_lib');
+    }
+    return library.find(cat => cat.id === `${blockId}_lib`)
+        || library.find(cat => cat.id.replace(/_lib$/, '') === blockId)
+        || library.find(cat => cat.id.includes(blockId));
+};
+
+const getBlockPlaceholder = (block: NarrativeBlockDef, lang: 'CN' | 'EN') => {
+    const label = lang === 'EN' ? (block.enName || block.name) : block.name;
+    return label.replace(/^[A-Z]*\d+[A-Z]?[.。]?\s*/i, '').trim() || label;
+};
+
+const isSurfaceBlock = (blockId: string) => {
+    return blockId.startsWith('skin_')
+        || blockId.startsWith('comm_skin_')
+        || blockId.startsWith('exp_skin_')
+        || blockId.startsWith('trl_skin_')
+        || blockId === 'sur10x';
+};
+
+const getLibraryBlockItems = (blocks: NarrativeBlockDef[], library: LibraryCategoryDef[], fieldState: NarrativeFieldState, lang: 'CN' | 'EN', driverType: DriverType) => {
+    return blocks.map(block => {
+        const cat = getLibraryForBlock(block.id, library);
+        return {
+            id: block.id,
+            label: lang === 'EN' ? (block.enName || block.name) : block.name,
+            kind: 'libraryBlock' as const,
+            value: fieldState[block.id] || [],
+            options: (cat?.items || []).map(item => ({
+                value: item.name,
+                label: lang === 'EN' ? (item.nameEn || item.name) : item.name,
+                description: lang === 'EN'
+                    ? (item.coreEn || item.defEn || item.essenceEn || item.core || item.def)
+                    : (item.core || item.def || item.essence)
+            })),
+            editable: true,
+            maxSelected: BLOCK_LIMITS[block.id] || 1,
+            placeholder: getBlockPlaceholder(block, lang),
+            driverType,
+            description: lang === 'EN' ? (block.descriptionEn || block.description) : block.description
+        };
+    });
+};
+
+const getStyleOptions = (driverType: DriverType) => {
+    if (driverType === DriverType.COMMERCIAL) {
+        return DIRECTOR_STYLES.map(item => ({
+            value: item.id,
+            label: item.name,
+            description: item.core || item.def
+        }));
+    }
+
+    return STYLE_MATRIX.flatMap(category => category.items.map(item => ({
+        value: item.id,
+        label: item.name,
+        description: `${item.description || ''}${item.example ? ` | ${item.example}` : ''}`
+    })));
+};
+
+const collectFieldState = (values: Record<string, unknown>, blocks: NarrativeBlockDef[], fallback: NarrativeFieldState) => {
+    const next: NarrativeFieldState = { ...fallback };
+    blocks.forEach(block => {
+        const raw = values[block.id];
+        next[block.id] = Array.isArray(raw)
+            ? raw.map(String)
+            : String(raw || '').split(/[,，\n]/).map(v => v.trim()).filter(Boolean);
+    });
+    return next;
+};
+
 export const BiblePromptInspectorModal: React.FC<BiblePromptInspectorModalProps> = ({
     isOpen,
     onClose,
@@ -31,45 +148,11 @@ export const BiblePromptInspectorModal: React.FC<BiblePromptInspectorModalProps>
     worldLawConfig,
     driverType
 }) => {
-    const { theme } = useTheme();
-    const [copied, setCopied] = useState(false);
-
-    const livePrompt = useMemo(() => {
-        if (!isOpen || !treatment) return "";
-        try {
-            const fs = fieldState || {} as NarrativeFieldState;
-            const vi = visionInput || "";
-            const wl = worldLawConfig || { gravity: 4 };
-
-            switch (driverType) {
-                case DriverType.COMMERCIAL:
-                    return buildCommercialBiblePrompt(treatment, styleConfig, fs, vi, wl);
-                case DriverType.EXPERIMENTAL:
-                    return buildExperimentalBiblePrompt(treatment, styleConfig, fs, vi, wl);
-                case DriverType.AESTHETIC:
-                    return buildAestheticBiblePrompt(treatment, styleConfig, fs, vi, wl);
-                default:
-                    return buildNarrativeBiblePrompt(treatment, styleConfig, fs, vi, wl);
-            }
-        } catch (e) {
-            console.error(e);
-            return `提示词生成过程中遇到错误。\n\n[ERROR]\n${e instanceof Error ? e.stack : String(e)}`;
-        }
-    }, [isOpen, treatment, styleConfig, fieldState, visionInput, worldLawConfig, driverType]);
-
-    const estimatedTokens = useMemo(() => {
-        const cnChars = (livePrompt.match(/[一-鿿]/g) || []).length;
-        const enWords = livePrompt.replace(/[一-鿿]/g, '').split(/\s+/).filter(Boolean).length;
-        return Math.round(cnChars * 2 + enWords * 1.3);
-    }, [livePrompt]);
-
-    const handleCopy = () => {
-        navigator.clipboard.writeText(livePrompt);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-    };
-
-    if (!isOpen) return null;
+    const defaultFieldState = (fieldState || {}) as NarrativeFieldState;
+    const defaultWorldLaw = (worldLawConfig || { gravity: 4 }) as WorldLawConfig;
+    const { blocks, library } = getDriverBlocksAndLibrary(driverType);
+    const engineBlocks = blocks.filter(block => !isSurfaceBlock(block.id));
+    const surfaceBlocks = blocks.filter(block => isSurfaceBlock(block.id));
 
     const driverLabel = (() => {
         switch (driverType) {
@@ -81,92 +164,164 @@ export const BiblePromptInspectorModal: React.FC<BiblePromptInspectorModalProps>
         }
     })();
 
-    return createPortal(
-        <div className={`fixed inset-0 z-[99999] flex items-center justify-center p-4 md:p-8 animate-in fade-in duration-300 ${theme === 'retro' ? 'bg-[#8B261D]/10 backdrop-blur-sm' : 'bg-black/80 backdrop-blur-md'}`} onClick={onClose}>
-            <div
-                className={`relative w-full max-w-[1200px] h-[90vh] flex flex-col rounded-2xl shadow-2xl border overflow-hidden animate-in zoom-in-95 duration-500
-                ${theme === 'retro' ? 'bg-[#F9F7F1] border-[#8B261D]/20 shadow-[0_20px_50px_rgba(139,38,29,0.1)]' : 'bg-[#050505] border-zinc-800 shadow-[0_0_100px_rgba(0,0,0,0.8)]'}
-                `}
-                onClick={e => e.stopPropagation()}
-            >
-                {/* Header */}
-                <div className={`shrink-0 flex items-center justify-between h-14 px-6 border-b ${theme === 'retro' ? 'bg-[#F2EDDE] border-[#8B261D]/10' : 'bg-[#0a0a0a] border-zinc-800/50'}`}>
-                    <div className="flex items-center gap-3">
-                        <Terminal size={18} className={theme === 'retro' ? 'text-[#8B261D]' : 'text-gold-primary'} />
-                        <h2 className={`font-serif font-black tracking-[0.15em] uppercase text-sm ${theme === 'retro' ? 'text-[#8B261D]' : 'text-white'}`}>
-                            {lang === 'CN' ? 'X-Ray 圣经指令透视' : 'Bible Prompt Inspector'}
-                        </h2>
-                        <span className={`px-2 py-0.5 text-[9px] font-mono rounded ${theme === 'retro' ? 'bg-[#8B261D]/10 text-[#8B261D]' : 'bg-zinc-800 text-zinc-400'}`}>
-                            {driverLabel}
-                        </span>
-                        <span className={`px-2 py-0.5 text-[9px] font-mono rounded ${theme === 'retro' ? 'bg-[#8B261D]/10 text-[#8B261D]' : 'bg-zinc-800 text-zinc-400'}`}>
-                            ~{estimatedTokens.toLocaleString()} tokens
-                        </span>
-                    </div>
+    const getSources = (): XRaySourceGroup[] => [
+        {
+            id: 'engine-params',
+            title: lang === 'EN' ? 'Engine Parameters' : '引擎参数',
+            items: getLibraryBlockItems(engineBlocks, library, defaultFieldState, lang, driverType)
+        },
+        {
+            id: 'surface-settings',
+            title: lang === 'EN' ? 'Surface Settings' : '表层设定',
+            items: [
+                {
+                    id: 'worldLawGravity',
+                    label: lang === 'EN' ? 'World Law' : '世界法则',
+                    kind: 'select',
+                    value: defaultWorldLaw?.gravity || '',
+                    options: WORLD_LAW_OPTIONS,
+                    editable: true,
+                    placeholder: lang === 'EN' ? 'World Law' : '世界法则',
+                    alwaysShow: true,
+                    inlineOptions: true
+                },
+                {
+                    id: 'styleId',
+                    label: lang === 'EN' ? 'Bible Style' : '圣经风格',
+                    kind: 'select',
+                    value: styleConfig.styleId || '',
+                    options: getStyleOptions(driverType),
+                    editable: true,
+                    placeholder: lang === 'EN' ? 'Bible Style' : '圣经风格'
+                },
+                {
+                    id: 'perspectiveId',
+                    label: lang === 'EN' ? 'Perspective' : '叙事视点',
+                    kind: 'select',
+                    value: styleConfig.perspectiveId || '',
+                    options: PERSPECTIVES.map(item => ({ value: item.id, label: item.name, description: item.prompt })),
+                    editable: true,
+                    placeholder: lang === 'EN' ? 'Perspective' : '叙事视点'
+                },
+                {
+                    id: 'sensoryId',
+                    label: lang === 'EN' ? 'Sensory Mode' : '感官侧重',
+                    kind: 'select',
+                    value: styleConfig.sensoryId || '',
+                    options: SENSORY_MODES.map(item => ({ value: item.id, label: item.name, description: item.prompt })),
+                    editable: true
+                },
+                ...getLibraryBlockItems(surfaceBlocks, library, defaultFieldState, lang, driverType)
+            ]
+        },
+        {
+            id: 'text',
+            title: lang === 'EN' ? 'Text & Image Sources' : '文本与图像源',
+            items: [
+                {
+                    id: 'treatmentTitle',
+                    label: lang === 'EN' ? 'Selected Path' : '已选路径',
+                    kind: 'text',
+                    value: treatment?.title || '',
+                    editable: Boolean(treatment),
+                    placeholder: lang === 'EN' ? 'Select a path first' : '请先选择路径',
+                    alwaysShow: true
+                },
+                {
+                    id: 'treatmentTagline',
+                    label: lang === 'EN' ? 'Tagline' : '一句话定位',
+                    kind: 'text',
+                    value: treatment?.tagline || '',
+                    editable: Boolean(treatment),
+                    placeholder: lang === 'EN' ? 'Tagline' : '一句话定位'
+                },
+                {
+                    id: 'treatmentPitch',
+                    label: lang === 'EN' ? 'Path Content' : '路径内容',
+                    kind: 'textarea',
+                    value: treatment?.pitch || '',
+                    editable: Boolean(treatment),
+                    placeholder: lang === 'EN' ? 'Path content' : '路径内容'
+                },
+                {
+                    id: 'treatmentVisualAnchor',
+                    label: lang === 'EN' ? 'Visual Anchor' : '视觉锚点',
+                    kind: 'text',
+                    value: treatment?.visualAnchor || '',
+                    editable: Boolean(treatment),
+                    placeholder: lang === 'EN' ? 'Visual anchor' : '视觉锚点'
+                },
+                {
+                    id: 'treatmentStructure',
+                    label: lang === 'EN' ? 'Structure' : '叙事结构',
+                    kind: 'textarea',
+                    value: treatment?.structure || '',
+                    editable: Boolean(treatment),
+                    placeholder: lang === 'EN' ? 'Structure' : '叙事结构'
+                },
+                {
+                    id: 'visionInput',
+                    label: lang === 'EN' ? 'Vision Input' : '视觉/创意输入',
+                    kind: 'textarea',
+                    value: visionInput || '',
+                    editable: true,
+                    placeholder: lang === 'EN' ? 'Vision input' : '视觉/创意输入'
+                }
+            ]
+        }
+    ];
 
-                    <div className="flex items-center gap-3">
-                        {!treatment && (
-                            <span className={`text-[11px] ${theme === 'retro' ? 'text-[#8B261D]/50' : 'text-zinc-500'}`}>
-                                {lang === 'CN' ? '请先选择一个叙事路径' : 'Select a narrative path first'}
-                            </span>
-                        )}
-                        <button
-                            onClick={handleCopy}
-                            disabled={!treatment}
-                            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all disabled:opacity-40
-                            ${theme === 'retro' ? 'bg-white border text-[#8B261D] border-[#8B261D]/20 hover:bg-[#8B261D]/5' : 'bg-zinc-900 border border-zinc-700 text-zinc-300 hover:text-white hover:bg-zinc-800'}`}
-                        >
-                            {copied ? <Check size={13} className="text-green-500" /> : <Copy size={13} />}
-                            {copied ? (lang === 'CN' ? '已复制' : 'Copied') : (lang === 'CN' ? '复制' : 'Copy')}
-                        </button>
-                        <button
-                            onClick={onClose}
-                            className={`p-1.5 rounded-lg transition-colors ${theme === 'retro' ? 'text-black/50 hover:bg-black/5 hover:text-black' : 'text-zinc-500 hover:text-white hover:bg-white/10'}`}
-                        >
-                            <X size={18} />
-                        </button>
-                    </div>
-                </div>
+    const buildPayload = (values: Record<string, unknown>) => {
+        if (!treatment) {
+            return lang === 'CN'
+                ? '请先选择一个叙事路径，然后再查看完整的创意圣经指令。'
+                : 'Select a narrative path first to inspect the full Creative Bible prompt.';
+        }
 
-                {/* Prompt display */}
-                <div className={`flex-1 overflow-y-auto custom-scrollbar p-6 md:p-8 font-mono text-sm leading-relaxed ${theme === 'retro' ? 'bg-white text-[#3D1A16]' : 'bg-black text-[var(--text-main)]'}`}>
-                    {!treatment ? (
-                        <div className="flex flex-col items-center justify-center h-full gap-4 opacity-40">
-                            <BookOpen size={48} />
-                            <p className="text-sm">{lang === 'CN' ? '选择一个叙事路径后，可在此预览完整的创意圣经指令' : 'Select a narrative path to preview the full Creative Bible prompt'}</p>
-                        </div>
-                    ) : (
-                        <div className="whitespace-pre-wrap break-words">
-                            {livePrompt.split('\n').map((line, index) => {
-                                if (line.includes('🚨') || line.startsWith('[LOCK_')) {
-                                    return <div key={index} className={`font-sans font-bold text-sm mt-2 mb-1 px-2 py-1 rounded ${theme === 'retro' ? 'bg-red-50 text-red-800 border border-red-200' : 'bg-red-950/30 text-red-400 border border-red-900/30'}`}>{line}</div>;
-                                }
-                                if (line.startsWith('### ')) {
-                                    return <div key={index} className={`font-sans font-bold text-base mt-4 mb-2 ${theme === 'retro' ? 'text-[#8B261D]' : 'text-gold-primary'}`}>{line.replace('### ', '')}</div>;
-                                }
-                                if (line.startsWith('## ')) {
-                                    return <div key={index} className={`font-sans font-black text-lg tracking-wide mt-6 mb-2 pb-1 border-b ${theme === 'retro' ? 'text-[#8B261D] border-[#8B261D]/20' : 'text-gold-primary border-zinc-800'}`}>{line.replace('## ', '')}</div>;
-                                }
-                                if (line.startsWith('# ')) {
-                                    return <div key={index} className={`font-sans font-black text-xl tracking-widest mt-8 mb-4 ${theme === 'retro' ? 'text-black' : 'text-white'}`}>{line.replace('# ', '')}</div>;
-                                }
+        try {
+            const nextTreatment: CreativeTreatment = {
+                ...treatment,
+                title: String(values.treatmentTitle || treatment.title || ''),
+                tagline: String(values.treatmentTagline || treatment.tagline || ''),
+                pitch: String(values.treatmentPitch || treatment.pitch || ''),
+                visualAnchor: String(values.treatmentVisualAnchor || treatment.visualAnchor || ''),
+                structure: String(values.treatmentStructure || treatment.structure || '')
+            };
+            const nextStyleConfig: StyleConfig = {
+                ...styleConfig,
+                styleId: typeof values.styleId === 'string' && values.styleId.trim() ? values.styleId : null,
+                perspectiveId: typeof values.perspectiveId === 'string' && values.perspectiveId.trim() ? values.perspectiveId : null,
+                sensoryId: typeof values.sensoryId === 'string' && values.sensoryId.trim() ? values.sensoryId : null
+            };
+            const nextFieldState = collectFieldState(values, blocks, defaultFieldState);
+            const gravity = Number(values.worldLawGravity || defaultWorldLaw?.gravity || 4);
+            const nextWorldLaw: WorldLawConfig = { ...defaultWorldLaw, gravity };
+            const nextVisionInput = String(values.visionInput ?? '');
+            const nextDriver = driverType;
 
-                                const parts = line.split(/(\*\*.*?\*\*)/g);
-                                return (
-                                    <div key={index} className="min-h-[1.5em]">
-                                        {parts.map((p, i) => {
-                                            if (p.startsWith('**') && p.endsWith('**')) {
-                                                return <strong key={i} className={`font-bold ${theme === 'retro' ? 'text-black' : 'text-zinc-200'}`}>{p.slice(2, -2)}</strong>;
-                                            }
-                                            return <span key={i} className={theme === 'retro' ? 'text-[#3D1A16]/80' : 'text-zinc-400'}>{p}</span>;
-                                        })}
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    )}
-                </div>
-            </div>
-        </div>
-    , document.body);
+            switch (nextDriver) {
+                case DriverType.COMMERCIAL:
+                    return buildCommercialBiblePrompt(nextTreatment, nextStyleConfig, nextFieldState, nextVisionInput, nextWorldLaw);
+                case DriverType.EXPERIMENTAL:
+                    return buildExperimentalBiblePrompt(nextTreatment, nextStyleConfig, nextFieldState, nextVisionInput, nextWorldLaw);
+                case DriverType.AESTHETIC:
+                    return buildAestheticBiblePrompt(nextTreatment, nextStyleConfig, nextFieldState, nextVisionInput, nextWorldLaw);
+                default:
+                    return buildNarrativeBiblePrompt(nextTreatment, nextStyleConfig, nextFieldState, nextVisionInput, nextWorldLaw);
+            }
+        } catch (e) {
+            return `提示词生成过程中遇到错误。\n\n[ERROR]\n${e instanceof Error ? e.stack : String(e)}`;
+        }
+    };
+
+    return (
+        <XRayInspectorModal
+            isOpen={isOpen}
+            onClose={onClose}
+            lang={lang}
+            title={lang === 'CN' ? `X-Ray 圣经指令透视 · ${driverLabel}` : `Bible Prompt Inspector · ${driverLabel}`}
+            sources={getSources}
+            buildPayload={buildPayload}
+        />
+    );
 };

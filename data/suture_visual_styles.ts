@@ -3,7 +3,7 @@ import { SutureStyleItem } from './suture_styles';
 import { WESTERN_AUTEURS } from './suture_visuals/western_auteurs';
 import { EASTERN_AUTEURS } from './suture_visuals/eastern_auteurs';
 import { ANIMATION_DIRECTORS } from './suture_visuals/animation_directors';
-import { ART_HOUSE_STYLES } from './suture_visuals/art_house';
+import { ART_HOUSE_STYLES } from './suture_visuals/art_house/index';
 import { COMMERCIAL_MV_STYLES } from './suture_visuals/commercial_mv';
 import { PHOTOGRAPHY_STYLES } from './suture_visuals/photography_styles';
 import { CLASSIC_FILMS } from './suture_visuals/classic_films';

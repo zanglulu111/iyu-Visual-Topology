@@ -14,3 +14,9 @@ export const IDEOLOGY_CATEGORIES: LibraryCategoryDef[] = [
   IDEO_VOID,
   IDEO_HUMAN
 ];
+
+// SUR10 is the surface belief preset layer: opening explanatory language only.
+export const SUR10_DATA = IDEOLOGY_CATEGORIES;
+export const SUR_BELIEF_DATA = IDEOLOGY_CATEGORIES;
+
+export default IDEOLOGY_CATEGORIES;

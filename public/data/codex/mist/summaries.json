@@ -1,378 +1,282 @@
 [
   {
-    "id": "mist_school",
-    "name": "迷雾学派",
-    "enName": "Mist School",
-    "category": "Core",
-    "shortDef": "一个以拉康、黑格尔、马克思、齐泽克等理论为内核的“生产型学派”。",
-    "summary": "（内容待补充：迷雾学派 的详细哲学解析与拓扑学展开...）"
+    "id": "mist_school_complete_theory",
+    "name": "迷雾学派完整理论总纲",
+    "enName": "Complete Mist School Theory",
+    "category": "Canon",
+    "shortDef": "三卷制最终理论包：爱欲结构拓扑学、M0-M7 核心叙事引擎、SUR/SV 表层生产协议。",
+    "summary": "核心命题：迷雾不是遮蔽事实的雾，而是事实被欲望、符号、身体与图像共同折射时产生的结构密度。作品不是把世界讲清楚，而是让世界在一个缺失主体身上留下不可撤销的形变。 迷雾学派是一套把主体缺失、爱欲运动、实在余痕与视觉裂缝转化为可计算创作结构的生产理论。 它不是黑暗风格，不是氛围美学，不是编剧模板，也不是把拉康、黑格尔、齐泽克的概念换名后搬进故事。迷雾学派的目标更具体：建立一套能够让作品从结构压力中自然发生的创作系统。 这套系统首先追问的不是“主角想要什么”，而是："
+  },
+  {
+    "id": "mist_core_narrative_engine_canonical_theory",
+    "name": "叙事宪法与核心公式",
+    "enName": "Narrative Constitution & Core Formula",
+    "category": "Canon",
+    "shortDef": "规定 M轴、SUR轴、SV轴的分权边界，并统一 M0-M7、M7A/M7B 双结项与 SUR-END 的结尾宪法。",
+    "summary": "核心命题：故事不是人物在世界里移动，而是一个缺失主体被世界的符号秩序压入不可返回的回路。当它终于付出代价，意义试图盖棺定论，实在却仍从缝隙里渗出。 叙事宪法不是第二卷的压缩版，也不是参数目录。它规定的是迷雾学派创作系统的最高分权：什么属于本体论原因，什么属于表层显现，什么属于工程展开，什么属于结尾意义，什么只属于最后一帧。 迷雾学派把故事理解为一个结构压力系统。一个事件只有在进入结构位点之后，才拥有叙事意义。贫穷不是 M1，贫穷必须被解算为主体在象征秩序中的剥夺。车祸不是 M2，车祸必须成为日常语言无法消化的实在撞击。"
   },
   {
     "id": "erotic_structural_topology",
-    "name": "爱欲视觉拓扑学",
-    "enName": "Erotic Visual Topology",
-    "category": "Theory",
-    "shortDef": "学派正式理论名。欲望如何在图像中以拓扑结构显形并成为主体的存在之结。",
-    "summary": "（内容待补充：爱欲视觉拓扑学 的详细哲学解析与拓扑学展开...）"
+    "name": "爱欲结构拓扑学",
+    "enName": "Erotic Structural Topology",
+    "category": "Volume I",
+    "shortDef": "迷雾学派的本体论基础：欲望不是主题，而是主体围绕缺失运动时形成的拓扑结构。",
+    "summary": "核心命题：欲望不是主体伸向对象的直线，而是缺失在世界表面弯曲出的轨道。图像不是轨道的插图，而是轨道被看见、被触摸、被阻断时产生的裂缝。 爱欲结构拓扑学是迷雾学派的本体论基础。它研究主体如何因缺失而成立，欲望如何围绕缺失运动，结构如何让这种运动弯曲，图像如何成为弯曲被感官接触时出现的界面。 这里的“爱欲”不是狭义恋爱、性欲或浪漫主题，而是主体围绕空洞、对象、他者、禁令、幻想和余痕形成的总体运动。只要主体把某个对象、身份、承认、空间、胜利、真相或消失误认为完整性的入口，爱欲结构就已经开始运作。 这里的“结构”不是抽象概念堆叠，而是限制运动的关系系统。"
   },
   {
     "id": "generative_engine",
-    "name": "生成引擎",
-    "enName": "Generative Engine",
-    "category": "System",
-    "shortDef": "从解释世界到生产世界的转向，将结构哲学推进为生成文法。",
-    "summary": "（内容待补充：生成引擎 的详细哲学解析与拓扑学展开...）"
-  },
-  {
-    "id": "structural_visualization_method",
-    "name": "结构可视化",
-    "enName": "Structural Visualization",
-    "category": "Methodology",
-    "shortDef": "本体论卫生学，通过锚点、污点、剩余物来显形抽象结构的方法论总纲。",
-    "summary": "（内容待补充：结构可视化 的详细哲学解析与拓扑学展开...）"
-  },
-  {
-    "id": "exception_of_structure_goal",
-    "name": "结构的例外",
-    "enName": "Exception of Structure",
-    "category": "Core",
-    "shortDef": "先建立结构，再去看结构的例外与逃逸，是实践的更高目标。",
-    "summary": "（内容待补充：结构的例外 的详细哲学解析与拓扑学展开...）"
-  },
-  {
-    "id": "mist_lack",
-    "name": "缺失",
-    "enName": "Lack",
-    "category": "Concept",
-    "shortDef": "缺失不是缺点，而是主体成为主体的结构条件。",
-    "summary": "（内容待补充：缺失 的详细哲学解析与拓扑学展开...）"
-  },
-  {
-    "id": "mist_objet_a",
-    "name": "对象 a",
-    "enName": "Objet petit a",
-    "category": "Concept",
-    "shortDef": "欲望的非对象性，作为剩余物的诱饵。",
-    "summary": "（内容待补充：对象 a 的详细哲学解析与拓扑学展开...）"
-  },
-  {
-    "id": "mist_fantasy",
-    "name": "幻想",
-    "enName": "Fantasy",
-    "category": "Concept",
-    "shortDef": "支撑现实的幕布，不是纯粹谎言。",
-    "summary": "（内容待补充：幻想 的详细哲学解析与拓扑学展开...）"
-  },
-  {
-    "id": "mist_drive",
-    "name": "驱力",
-    "enName": "Drive",
-    "category": "Concept",
-    "shortDef": "围绕失落物循环的回返与重复。",
-    "summary": "（内容待补充：驱力 的详细哲学解析与拓扑学展开...）"
-  },
-  {
-    "id": "mist_sinthome_knot",
-    "name": "结与圣状",
-    "enName": "Sinthome & Knot",
-    "category": "Concept",
-    "shortDef": "三界需要圣状来扣住；症状作为生存方式。",
-    "summary": "（内容待补充：结与圣状 的详细哲学解析与拓扑学展开...）"
-  },
-  {
-    "id": "mist_negativity",
-    "name": "否定性",
-    "enName": "Negativity",
-    "category": "Concept",
-    "shortDef": "产生裂缝的根本驱动，内部不可融合的硬核。",
-    "summary": "（内容待补充：否定性 的详细哲学解析与拓扑学展开...）"
-  },
-  {
-    "id": "mist_aufhebung",
-    "name": "扬弃",
-    "enName": "Aufhebung",
-    "category": "Concept",
-    "shortDef": "克服与保存的双重运动。",
-    "summary": "（内容待补充：扬弃 的详细哲学解析与拓扑学展开...）"
-  },
-  {
-    "id": "mist_retroactivity",
-    "name": "回溯性建构",
-    "enName": "Retroactive Construction",
-    "category": "Concept",
-    "shortDef": "结局重写开端，事后确立因果。",
-    "summary": "（内容待补充：回溯性建构 的详细哲学解析与拓扑学展开...）"
-  },
-  {
-    "id": "mist_alienation",
-    "name": "异化",
-    "enName": "Alienation",
-    "category": "Concept",
-    "shortDef": "主体在社会机器中的残渣化。",
-    "summary": "（内容待补充：异化 的详细哲学解析与拓扑学展开...）"
-  },
-  {
-    "id": "mist_fetishism",
-    "name": "商品拜物教",
-    "enName": "Commodity Fetishism",
-    "category": "Concept",
-    "shortDef": "欲望被商品形式捕获的结构。",
-    "summary": "（内容待补充：商品拜物教 的详细哲学解析与拓扑学展开...）"
-  },
-  {
-    "id": "mist_parallax",
-    "name": "视差之见",
-    "enName": "Parallax View",
-    "category": "Concept",
-    "shortDef": "同一对象因观看位置不同而发生的本体论裂缝。",
-    "summary": "（内容待补充：视差之见 的详细哲学解析与拓扑学展开...）"
-  },
-  {
-    "id": "mist_stain",
-    "name": "污点",
-    "enName": "Stain",
-    "category": "Concept",
-    "shortDef": "图像中最真实且无法去除的剩余。",
-    "summary": "（内容待补充：污点 的详细哲学解析与拓扑学展开...）"
-  },
-  {
-    "id": "mist_sublime_object",
-    "name": "崇高客体",
-    "enName": "Sublime Object",
-    "category": "Concept",
-    "shortDef": "意识形态缝合中的核心对象变体。",
-    "summary": "（内容待补充：崇高客体 的详细哲学解析与拓扑学展开...）"
+    "name": "爱欲结构发生器",
+    "enName": "Erotic Structural Generator",
+    "category": "Volume I",
+    "shortDef": "从解释学转向生产学，把主体缺失、幻想、阻断、驱力、裁决和余痕转化为生成机制。",
+    "summary": "核心命题：发生器不是把理论贴到故事上，而是让理论成为故事不得不发生的压力。真正的生成不是添加情节，而是让缺失、幻想、阻断、驱力、代价、裁决和余痕互相逼迫。 爱欲结构发生器是迷雾学派从哲学解释转向创作生产的中枢机制。它把爱欲结构拓扑学中的主体、缺失、欲望、对象、大他者、图像裂缝与余痕，转化为可配置、可推演、可检验的创作协议。 它不是单一软件，也不是固定模板，更不是自动生成剧情的捷径。它更接近一台结构编译器：创作者输入的不是“一个有趣设定”，而是结构关系；输出的也不是机械剧情，而是一组会迫使剧情、场景、动作、画面和结尾自然发生的压力。"
   },
   {
     "id": "mist_m0",
-    "name": "M0: 精神底色",
-    "enName": "M0: Ontological Base",
+    "name": "M0：精神拓扑",
+    "enName": "M0: Psychic Topology",
     "category": "Engine",
-    "shortDef": "主体与现实裂缝间的根本关系模式。",
-    "summary": "（内容待补充：M0: 精神底色 的详细哲学解析与拓扑学展开...）"
+    "shortDef": "公式的操作系统，决定主体如何采样现实、缺失、法则与他者。",
+    "summary": "“世界并不存在，存在的只有看待世界的算法。M0 不是你所处的环境，而是那个由于你的存在，而被迫在虚无中显现出来的逻辑骨架。” —— 迷雾学派 在迷雾学派的体系中，M0（精神拓扑） —— 在系统架构中又被称为心理拓扑 (Psychic Topology) —— 被定义为包裹整个叙事公式的逻辑闭包 { ... }。它不是主角的一个性格标签，而是主角与“大他者”（Symbolic Order / The Other）之间形成的那个先验的、无法逃逸的博弈场域。"
   },
   {
     "id": "mist_m1",
-    "name": "M1: 缺失主体",
+    "name": "M1：缺失主体",
     "enName": "M1: Subject of Lack",
     "category": "Engine",
-    "shortDef": "主体之伤痕处，其被结构切开的位置。",
-    "summary": "（内容待补充：M1: 缺失主体 的详细哲学解析与拓扑学展开...）"
+    "shortDef": "叙事真空泵。主体不是先完整后受损，而是在缺失中成为主体。",
+    "summary": "“缺失不是伤口，而是引擎。没有缺失的主体不会运动；没有运动的主体不会产生故事。” —— 迷雾学派 在迷雾引擎的底层逻辑中，缺失（Lack） 必须首先被去病理化。 缺失不是“创伤”、“残缺”或“需要被治愈的疾病”。在拉康的拓扑学中，缺失是一个 结构性事实，而非价值判断： 1. 缺失早于主体：当生命体进入语言（象征秩序），它必须用有限的能指来表达无限的实存。这个翻译必然产生剩余——无法被语言覆盖的部分。这层“翻译损耗”不是错误，而是语言运作的必然代价。 2. 缺失等于欲望："
   },
   {
     "id": "mist_m2",
-    "name": "M2: 真实遭遇",
+    "name": "M2：真实遭遇",
     "enName": "M2: Encounter with the Real",
     "category": "Engine",
-    "shortDef": "实在界撞击日常秩序，不可预期的失效。",
-    "summary": "（内容待补充：M2: 真实遭遇 的详细哲学解析与拓扑学展开...）"
+    "shortDef": "实在界对日常秩序的不可逆穿刺，使原本被遮蔽的空洞显形。",
+    "summary": "“遭遇不是'坏事发生了'。遭遇是你一直脚踩的那块地板突然消失——你以为它是大地，但它一直只是一块悬浮在虚空上的薄木板。M2 做的唯一一件事，就是让你看到木板下面的虚空。”——迷雾学派 在迷雾引擎的底层逻辑中，M2：真实遭遇 (The Encounter) 必须首先被严格地与所有常规叙事理论中的“冲突”概念区分开来。 M2 不是“发生了一件坏事”、“主角遇到了困难”或“情节需要一个转折点”。在拉康的拓扑学中，M2 是一个 本体论事件，而非情节装置： 1. M2 不是“冲突” (Conflict)："
   },
   {
     "id": "mist_m3",
-    "name": "M3: 欲望幻想",
+    "name": "M3：欲望幻想",
     "enName": "M3: Fantasy of Desire",
     "category": "Engine",
-    "shortDef": "裂口发亮时的诱饵界面，对象a的叙事投影。",
-    "summary": "（内容待补充：M3: 欲望幻想 的详细哲学解析与拓扑学展开...）"
+    "shortDef": "主体相信某个对象或场景能够闭合缺失的幻想结构，即 $ ◇ a 的叙事投影。",
+    "summary": "“幻象不是让你逃避现实——而是让你能够忍受现实的那部剧本。没有幻象的主体不会崩溃——它会成为一块没有方向的石头。M3 给了石头一个它永远到达不了的目的地，于是石头开始滚动。滚动就是故事。”——迷雾学派 在迷雾引擎的底层逻辑中，M3：欲望幻想 (The Fantasy) 必须首先被去简化、去道德化。 幻想不是“逃避现实的白日梦”、“需要被拆穿的谎言”或“主角自欺欺人的伪装”。在拉康的拓扑学中，幻想是一个 结构性装置，而非道德判断： 1. 幻想是欲望的语法：主体 () 因为 M1（缺失） 而产生欲望，但欲望本身是无形的——它没有方向、没有对象、没有剧本。"
   },
   {
     "id": "mist_m4",
-    "name": "M4: 大他者阻断",
-    "enName": "M4: Blockage of Big Other",
+    "name": "M4：大他者阻断",
+    "enName": "M4: Blockage of the Big Other",
     "category": "Engine",
-    "shortDef": "必定折损欲望的结构性阻碍、制度与法则。",
-    "summary": "（内容待补充：M4: 大他者阻断 的详细哲学解析与拓扑学展开...）"
+    "shortDef": "公式分母。阻止欲望通过的不是困难本身，而是象征秩序的合法性剪裁。",
+    "summary": "“大他者不是某个反派。它是你脚下那块你以为是大地的东西——由法律、常识、目光和沉默浇筑而成的一层薄壳。M4 不是在告诉你'谁在阻止你'。M4 是在标定：你以为的现实，在哪个维度上是虚构的。” —— 迷雾学派 在迷雾引擎的底层逻辑中，大他者 (The Big Other / A) 必须首先被去人格化。 大他者不是“某个具体的反派”、“某个压迫性的机构”或“某个邪恶的系统”。在拉康的拓扑学中，大他者是一个 结构性场域，而非实体： 1. 大他者是语言本身："
   },
   {
     "id": "mist_m5",
-    "name": "M5: 行动驱力",
+    "name": "M5：行动驱力",
     "enName": "M5: Drive of Action",
     "category": "Engine",
-    "shortDef": "主体被驱力推推攘攘的冲撞及重复宿命。",
-    "summary": "（内容待补充：M5: 行动驱力 的详细哲学解析与拓扑学展开...）"
+    "shortDef": "把失败转化为重复运动的驱力位点。策略追求成功，驱力追求回返。",
+    "summary": "“驱力不是做什么，而是怎么做。同一个'追回爱人'的目标，可以用冲撞去执行，用缠绕去执行，用穿透去执行，用凝固去执行，也可以用熔毁去执行——五种方式产生五种截然不同的故事。M5 标定的不是目的地，而是运动的姿态。” —— 迷雾学派 在迷雾引擎的底层逻辑中，驱力 (Drive / Trieb) 必须首先被去人格化。 驱力不是“角色的行动力”、“推动剧情的燃料”或“主角的内心冲动”。在拉康的拓扑学中，驱力是一个 结构性运动方式，而非能量输出： 1. 驱力不同于欲望：欲望（Desire）有终点——它指向一个被想象为能填补缺失（M1）的客体。"
   },
   {
     "id": "mist_m6",
-    "name": "M6: 终极代价",
+    "name": "M6：终极代价",
     "enName": "M6: Ultimate Price",
     "category": "Engine",
-    "shortDef": "主体在符号秩序界面承担的结构性剥夺与抹除。",
-    "summary": "（内容待补充：M6: 终极代价 的详细哲学解析与拓扑学展开...）"
+    "shortDef": "不可逆减法。代价不是损失物品，而是拆除支撑主体的某个幻象支柱。",
+    "summary": "“代价不是你'丢掉了什么'。代价是你发现——你以为自己拥有的那个东西，从来就不是你的。名字是大他者借给你的，美貌是镜像送给你的，身体是实在界暂存在你手里的。M6 不是抢劫——M6 是归还。而归还的瞬间，你第一次触碰到了那个'本来就空着'的位置。” —— 迷雾学派 在迷雾引擎的底层逻辑中，代价 (Price / Castration) 必须首先被去外部化。 代价不是“外部力量夺走了你的东西”。战争、背叛、时间或疾病只是代价显现的表层场景；M6 真正揭示的是一个更深的事实：主体从未完整地拥有过那些支撑自身的东西。 在拉康的拓扑学中，代价的真正结构是："
   },
   {
-    "id": "mist_m7",
-    "name": "M7: 存在落点",
-    "enName": "M7: Existential Drop",
+    "id": "mist_m7a",
+    "name": "M7A：象征裁决",
+    "enName": "M7A: Symbolic Verdict",
     "category": "Engine",
-    "shortDef": "主体与裂隙最终重新结环的特定方式（Knotting）。",
-    "summary": "（内容待补充：M7: 存在落点 的详细哲学解析与拓扑学展开...）"
+    "shortDef": "故事的回溯性缝合点：这一切最终被判定成什么故事。",
+    "summary": "M7A：象征裁决 (Symbolic Verdict) 缝合点拓扑学的四维意义矩阵 “故事不是在最后一页结束的。故事是在你合上书之后，突然意识到'哦，原来这是一个关于的故事'的那个瞬间才真正完成的。那个填入空格的词——不是作者写的，不是角色说的——是你的大脑在结局落地后，回头把所有散落的碎片缝成一条线时，自动弹出的那个词。M7A 就是那根针。它不创造碎片——它决定碎片以什么顺序被串起来。而串起来的顺序，就是意义。"
   },
   {
-    "id": "mist_ontological_hygiene",
-    "name": "本体论卫生学",
-    "enName": "Ontological Hygiene",
-    "category": "Aesthetics",
-    "shortDef": "迷雾学派独创视觉方法，使无菌与沾染构成对位显形。",
-    "summary": "（内容待补充：本体论卫生学 的详细哲学解析与拓扑学展开...）"
+    "id": "mist_m7b",
+    "name": "M7B：实在余痕",
+    "enName": "M7B: Real Residue",
+    "category": "Engine",
+    "shortDef": "裁决之后仍不能被意义消化的身体、物件、症状与存在性沉积。",
+    "summary": "M7B：实在余痕 / 存在性残余 (Real Residue) 圣状拓扑学的五维沉积矩阵 “故事不是在结局结束的。故事是在'结局之后你还在呼吸'的那一刻才真正开始的。M7B 不是终点——M7B 是你在穿越了一切之后，低头看见自己的影子还在脚下时的那种感觉。那个影子不是你——但它是你唯一带走的东西。” —— 迷雾学派 在迷雾引擎的底层逻辑中，残余 (Residue) 必须首先被去收获化。 常见误读容易将 M7B 理解为“主角从故事中得到了什么”——成长、教训、顿悟、真爱。这种理解暗含了一个致命预设：叙事是一次投资，而结局是回报。 迷雾学派明确拒绝这个预设。"
   },
   {
-    "id": "mist_sterile",
-    "name": "无菌",
-    "enName": "Sterile",
-    "category": "Aesthetics",
-    "shortDef": "象征秩序封闭的光滑表面，纯净且规训。",
-    "summary": "（内容待补充：无菌 的详细哲学解析与拓扑学展开...）"
+    "id": "generative_engine_formula",
+    "name": "叙事生成引擎基础公式",
+    "enName": "Narrative Engine Formula",
+    "category": "Engine Theory",
+    "shortDef": "将 M0-M7 双结项整合为可执行叙事代数的核心协议。",
+    "summary": "“不要向我讲述一段历史，请向我展示一个公式。如果你不能把一个人的痛苦还原为一个无法解开的拓扑之结，不能把他的命运写成一个永远带有余数的方程，那么你的叙事就只是一种廉价的抒情。 我们穷尽所有的算力去构建这套精密的引擎，并非为了成功‘计算’出人的命运，而是为了以最严酷、最科学的方式，通过逻辑的崩塌来绝对地证明：主体的真实痛苦是无法被符号界、代数或任何形式化逻辑所耗尽的。 真实界的绝对暴力，就在于这种对‘计算之必然失败’的严密确证之中。” —— 迷雾学派 叙事生成引擎 (Narrative Engine) 并非传统编剧理论中的“剧作结构”或“情节节拍表”。"
   },
   {
-    "id": "mist_bacterial",
-    "name": "有菌",
-    "enName": "Bacterial",
-    "category": "Aesthetics",
-    "shortDef": "实在界的生命性、腐败性溢出。",
-    "summary": "（内容待补充：有菌 的详细哲学解析与拓扑学展开...）"
+    "id": "mist_circuit_arc",
+    "name": "M1-M2-M3：创伤防御弧",
+    "enName": "Trauma-Defense Arc",
+    "category": "Circuit",
+    "shortDef": "缺失、真实遭遇与幻想如何构成主体最初的防御回路。",
+    "summary": "“主体不是在平稳中诞生的，而是在裂口旁分泌出来的。创伤防御弧并不是为了治愈伤口，而是旨在将伤口包裹进一套逻辑自恰的、足以抵御毁灭性真实（The Real）的‘虚构防护服’中。在迷雾引擎中，没有 M3 的及时介入，M1 将在 M2 的撞击下直接解体。” —— 迷雾学派 在迷雾叙事引擎的底层架构中，M1-M2-M3（创伤防御弧） 构成了整个系统中最基础、反应速度最快的自动化应激回路。这一回路不仅是叙事动力的源泉，更是主体建立其“现实感”的原始手术室。 M2 的致命耦合 首先必须理解 M1 缺失() 与 M2 实在界入侵(Tuche) 之间的非对称引力。"
   },
   {
-    "id": "mist_contamination",
-    "name": "沾染",
-    "enName": "Contamination",
-    "category": "Aesthetics",
-    "shortDef": "裂隙的渗透性显形，秩序表面的局部故障与污迹。",
-    "summary": "（内容待补充：沾染 的详细哲学解析与拓扑学展开...）"
+    "id": "mist_circuit_parallax",
+    "name": "M2-M4：现实冲突视差",
+    "enName": "Reality Conflict Parallax",
+    "category": "Circuit",
+    "shortDef": "实在遭遇如何被大他者剪裁成不可调和的现实冲突。",
+    "summary": "“实在界（M2）并没有发声。所有的尖叫、所有的血迹、所有的破碎，最终在大他者（M4）的办公室里，都被翻译成了一张冷冰冰的、符合格式的‘事故申请报告’。视差并不产生于你看错了，而产生于：当你想说出真相时，世界却只给了你一套名为‘常识’的词典。” —— 迷雾学派 在迷雾叙事引擎的动力链路中，如果说 M1-M2-M3（创伤防御弧） 是主体为了在崩塌中“活下去”而进行的紧急自救，那么 M2-M4（现实冲突视差） 就是象征系统为了“维持下去”而对实在界进行的本体论手术。 这一回路描述了这样一个残酷的过程："
   },
   {
-    "id": "mist_anchor_point",
-    "name": "锚点",
-    "enName": "Anchor Point",
-    "category": "Aesthetics",
-    "shortDef": "视觉画面中稳定结构的核心标识。",
-    "summary": "（内容待补充：锚点 的详细哲学解析与拓扑学展开...）"
+    "id": "mist_circuit_drive",
+    "name": "M5-M6-M7：驱力结项回路",
+    "enName": "Drive & Dual-Terminal Resolution",
+    "category": "Circuit",
+    "shortDef": "行动驱力如何通过代价分裂为象征裁决与实在余痕。",
+    "summary": "“你以为你在反抗命运，其实你只是在命运的磨盘上不断加速。直到你支付了那个名为‘自我也能完整’的最后筹码（M6），那种名为‘重复’的动能（M5）才会瞬间由于受阻而分裂：一部分被象征界缝合成‘这到底是什么故事’（M7A），另一部分则凝固成无法被系统回收的硬石（M7B）。结局从来不是奖励，它是裁决与余痕在同一个伤口上的对峙。” —— 迷雾学派 在迷雾叙事引擎的最后阶段，M5-M6-M7A/M7B（驱力脉动与双结项） 承担了“系统结项”的功能。"
   },
   {
-    "id": "mist_image_rift",
-    "name": "图像裂口",
-    "enName": "Image Rift",
-    "category": "Aesthetics",
-    "shortDef": "不仅是伤痕，而是使内部结构可见的外翻处。",
-    "summary": "（内容待补充：图像裂口 的详细哲学解析与拓扑学展开...）"
+    "id": "mist_potential_lack_conservation",
+    "name": "缺失质量守恒定律",
+    "enName": "Conservation of Lack",
+    "category": "Potential",
+    "shortDef": "缺失不会被填满，只会在叙事系统中转移、改名、变形与沉积。",
+    "summary": "“叙事中最危险的错觉就是‘填补’。每一个被填平的坑洞，都必然在另一个维度上凿开一个同样深度的深渊。缺失不是可以被消耗的燃料，而是支撑整个系统重力的永恒‘暗物质’。如果你在结尾获得了一个完整的苹果，那么请在阴影里找找那个被咬掉的灵魂位图。” —— 迷雾学派 在迷雾叙事引擎的宏观视野中，缺失（Lack / ）并非一种可以被治愈的负面状态，而是一种先验的结构定额。 在拉康派拓扑学中，主体由于进入语言（象征界）而产生了一个永久的裂口。这一裂口产生的压强推动了欲望。缺失质量守恒定律规定： 1. 不可毁灭性：系统中“结构性空虚”的总量是一个常数。"
   },
   {
-    "id": "mist_tactile_vision",
-    "name": "触觉视觉",
-    "enName": "Tactile Vision",
-    "category": "Aesthetics",
-    "shortDef": "诉诸粗糙度与创伤记忆的切肤画面触感。",
-    "summary": "（内容待补充：触觉视觉 的详细哲学解析与拓扑学展开...）"
+    "id": "mist_potential_gravity",
+    "name": "全局势能与结构重力",
+    "enName": "Potential Gravity",
+    "category": "Potential",
+    "shortDef": "叙事强度来自缺失、遭遇、阻断与驱力之间的结构压差。",
+    "summary": "“如果你的主体感到呼吸困难，那不是因为系统出了错，而是因为系统正在精准地运行。伟大的行动绝不诞生于自由意志的温床，而诞生于结构重力对主干的残酷折缝。当世界试图将你压成一个扁平的符号时，你唯一的出路就是在那道裂缝中，引发一场本体论的核聚变。” —— 迷雾学派 在迷雾叙事引擎中，全局势能 (Potential Gravity) 绝非一种存在于角色之间的“相互吸引力”，而是大他者 (M4：Big Other) 象征场域本身的非线性扭曲。 如果说重力是场域的属性，那么压强则是主体在该场域中的存在感（Subj-Presence）梯度。 负压内核 vs. 正压外壳："
   },
   {
-    "id": "mist_defamiliarization",
-    "name": "陌生化",
-    "enName": "Defamiliarization",
-    "category": "Aesthetics",
-    "shortDef": "通过剥离日常属性，揭示物之实在界维度的视觉手段。",
-    "summary": "（内容待补充：陌生化 的详细哲学解析与拓扑学展开...）"
+    "id": "mist_potential_entropy",
+    "name": "熵增与余数沉淀",
+    "enName": "Entropy & Remainder",
+    "category": "Potential",
+    "shortDef": "解释故事为何不能完全闭合，以及余数如何在系统终点沉积。",
+    "summary": "“所谓的结局，不过是驱力在反复摩擦中留下的最后一点灰烬。如果一个故事在结尾处显得完美无缺，那它便是在撒谎——因为真实的叙事总会留下一个无法被符号化消解的、带血的‘余数’。” —— 迷雾学派 在迷雾叙事引擎的全局视野中，叙事运动并非无损的逻辑推导。每当主体 M1 缺失() 在结构重力 (Gs) 的作用下发动一次M5 驱力脉动(Trieb)，每当它试图穿透M4 秩序的裂隙(∄A) 去捕捉那个M3 幻象破绽(◇)，系统都会产生不可逆的“象征损耗”。 这种损耗被定义为叙事熵 (Narrative Entropy)。"
   },
   {
-    "id": "mist_translation_protocol",
-    "name": "转译协议",
-    "enName": "Translation Protocol",
-    "category": "Methodology",
-    "shortDef": "将抽象结构转译为具体叙事元素的操作准则。",
-    "summary": "（内容待补充：转译协议 的详细哲学解析与拓扑学展开...）"
+    "id": "mist_aufhebung_vs_suture",
+    "name": "扬弃与缝合",
+    "enName": "Aufhebung vs. Suture",
+    "category": "Ontology",
+    "shortDef": "辨析黑格尔式扬弃与拉康式缝合在引擎中的两种矛盾处理机制。",
+    "summary": "“扬弃许诺终局。缝合制造幻象。M7B 是两者都搞不定的东西。” —— 迷雾学派 黑格尔） 扬弃是黑格尔辩证法的核心运动：正题 (thesis) 与反题 (antithesis) 的矛盾被保存又取消，升华为一个更高的综合体 (synthesis)。 关键特征： 扬弃的本体论假设：矛盾是可以被消化的。历史有方向，有终点。 拉康） 缝合（缝合点 / 锚定点）是拉康的操作：能指链条本身没有固定意义，是缝合点回溯性地把之前漂浮的能指钉住，赋予它们一个「好像一直就是这个意思」的效果。 关键特征： 缝合的本体论假设：矛盾是不可消化的。"
   },
   {
-    "id": "mist_mask_protocol",
-    "name": "面具协议",
-    "enName": "Mask Protocol",
-    "category": "Methodology",
-    "shortDef": "赋予角色象征界界面，使其真实在面具缝隙中透出。",
-    "summary": "（内容待补充：面具协议 的详细哲学解析与拓扑学展开...）"
+    "id": "mist_ethical_depth",
+    "name": "温度与深度",
+    "enName": "Temperature × Depth",
+    "category": "Ontology",
+    "shortDef": "把叙事情感温度与结构伦理深度分离，避免用温情替代深度。",
+    "summary": "“如果'穿越幻想'是一个按钮，那按下它本身就是一个幻想。” —— 迷雾学派 参数词条设置了三种 directive： 关键发现：tension 不是超越 bright 和 dark 的第三位置——它只是第三种缝合。 “不知道它意味着什么”本身也是一种意义锚定（意义 = 不可判定）。 三者都在回答同一个问题：“这意味着什么？” 三者都还在符号秩序内运作。 选择 如何面对留下的那个东西」。 缺失的问题不是「这意味着什么」，而是： “我知道任何意义都是缝合。然后呢？” 这是一个不同层级的问题。"
   },
   {
-    "id": "mist_invisible_weaving",
-    "name": "隐形织造",
-    "enName": "Invisible Weaving",
-    "category": "Methodology",
-    "shortDef": "不显露哲学词汇，而在叙事骨架层面暗缝理论肌理。",
-    "summary": "（内容待补充：隐形织造 的详细哲学解析与拓扑学展开...）"
+    "id": "mist_surface_setting_protocol",
+    "name": "表层设定协议",
+    "enName": "Surface Setting Protocol",
+    "category": "SUR/SV",
+    "shortDef": "确立 SUR1-SUR10 + SUR-END 的最终分工与越权红线。",
+    "summary": "“表层不是谎言，也不是真相。表层是结构得以显形的外壳：门、灯、职业、年龄、信念、物件、街道、最后一帧。骨架决定一个故事为什么必须发生；表层只决定它被世界看见时长成什么样。” —— 迷雾学派 SUR 轴的最终口径是： SUR1-SUR10 + SUR-END 它不是 M 轴的附庸，也不是独立的“第二套故事解释系统”。SUR 的身份只有一个：现象层容器。它为 M 轴提供世界里的可见材料，让精神拓扑、欲望回路、阻断结构、代价支付与终端结项能够被写成场景、人物、物件、空间和最后画面。 因此，SUR 的最高纪律是："
   },
   {
-    "id": "mist_era_dimensionality",
-    "name": "时代降维",
-    "enName": "Era Dimensionality Reduction",
-    "category": "Methodology",
-    "shortDef": "将宏大历史矛盾降维到极度微观的个体切面中。",
-    "summary": "（内容待补充：时代降维 的详细哲学解析与拓扑学展开...）"
+    "id": "mist_ontological_metonymy_dictionary",
+    "name": "存在级转译字典",
+    "enName": "Ontological Metonymy",
+    "category": "SUR/SV",
+    "shortDef": "把跨文明、跨类型的表层材料按功能对齐到同一结构位置。",
+    "summary": "“换喻（Metonymy）不是修辞，而是欲望在象征秩序中的物理足迹。转译的本质不是语义的相似，而是重力的等效（Gravity Equivalence）。” —— 迷雾学派 在迷雾引擎中，转译是通过 [本体论换喻] 进行能指的重压置换。它解决的是如何将抽象的“骨架逻辑”翻译为具备物理干预能力的“表层物象”。 S{genre} = f(M{logic}，SUR{params}，G{Metonymy}) 其中： [M4] 轴触发“主体与象征秩序的彻底决裂”时，字典通过对齐局部参数产生的物理表现如下："
   },
   {
-    "id": "mist_naming_protocol",
-    "name": "命名协议",
-    "enName": "Naming Protocol",
-    "category": "Methodology",
-    "shortDef": "使用带有工业感、病理、拓扑学隐喻的黑硬词汇系统。",
-    "summary": "（内容待补充：命名协议 的详细哲学解析与拓扑学展开...）"
+    "id": "mist_mask_manifestation_protocol",
+    "name": "叙事遮罩与显现协议",
+    "enName": "Mask & Manifestation Protocol",
+    "category": "SUR/SV",
+    "shortDef": "解释表层遮罩如何显现结构，而不是把结构稀释成装饰。",
+    "summary": "“遮罩不是谎言的装饰，而是让真实在正确时刻显影的延迟装置。它保护 M 轴不被过早说破，也保护 SUR 层不被误当成原因。” —— 迷雾学派 SV1 的结构模板与 SUR 的可见材料，暂时遮住 M 轴的底层运算，使观众先进入一个可识别的类型表面，再在关键节点遭遇结构性反转。 遮罩不创造 M 轴。它只控制 M 轴如何被看见。 SV1 不是心理结构，而是受众熟悉的叙事入口。它可以采用三幕剧、英雄之旅、故事环、多线群像、非线性拼贴或伪纪录片形式，让受众暂时相信自己正在观看某种熟悉作品。 SUR 层为遮罩提供表面材料，但每个材料都必须保持自己的权限："
   },
   {
-    "id": "mist_anti_kitsch",
-    "name": "反刻奇",
-    "enName": "Anti-Kitsch",
-    "category": "Methodology",
-    "shortDef": "拒绝廉价的伤感与和解，保卫裂缝的不可愈合性。",
-    "summary": "（内容待补充：反刻奇 的详细哲学解析与拓扑学展开...）"
+    "id": "mist_world_law_protocol",
+    "name": "世界法则协议",
+    "enName": "World Law Protocol",
+    "category": "SUR/SV",
+    "shortDef": "为世界物理常量、社会法则与叙事重力建立底层约束。",
+    "summary": "“法则不是为了让世界运行，而是为了让主体撞死在墙上。如果法则可以被绕过，那么这个世界就只是一个轻浮的游乐场。” —— 迷雾学派 [世界法则 (World Law)] 是迷雾引擎中的全局恒定约束集。它位于底层逻辑（M0-M7A/M7B）与表层参数（SUR1-10 + SUR-END）之间，充当“叙事物理引擎”的角色。 其核心功能是：定义世界的“重力感”与“因果硬度”，决定了超现实能指在此时空环境下的“生存合法性”。 当世界法则（World Law）生效时，以下机制将自动接管叙事生成： 1. 物理价格修正 (Price Correction)："
   },
   {
-    "id": "mist_the_exception",
-    "name": "结构的例外",
-    "enName": "The Exception",
-    "category": "Theory",
-    "shortDef": "系统中无法被缝合、必定滑落的存在点。",
-    "summary": "（内容待补充：结构的例外 的详细哲学解析与拓扑学展开...）"
+    "id": "mist_topology_synthesizer",
+    "name": "叙事调音台与刻度协议",
+    "enName": "Topology Synthesizer",
+    "category": "SUR/SV",
+    "shortDef": "处理信念裂度等表层强度如何进入生成前的调音与约束。",
+    "summary": "“最终版调音台只保留一个表层刻度：人物开场时到底多相信自己说出的那套话。除此之外，所有压迫、驱力、创伤与结局强度都必须回到 M 轴。” —— 迷雾学派 调音台不设置 M4X / M5X / M2X / SUR4X 等强度推子，原因很简单： 1. M 轴词库已经包含强度谱系：额外推子会与 M2/M4/M5 重叠。 2. SUR4X 与 SUR4 语义冗余：社会阻力应通过具体社会形态、流程、空间隔离与 M4 底层阻断共同呈现，而不是另设“阶层阻力等级”。 3. 强度推子容易污染生成：它会诱导模型写成理论说明、社会学摘要或数值游戏，而不是具体叙事。"
   },
   {
-    "id": "mist_symptom_survival",
-    "name": "症状作为生存方式",
-    "enName": "Symptom as Survival",
-    "category": "Theory",
-    "shortDef": "不求治愈症状，而是依托症状与结构打结共存。",
-    "summary": "（内容待补充：症状作为生存方式 的详细哲学解析与拓扑学展开...）"
+    "id": "symptomatic_planting",
+    "name": "植入症候与反向解码",
+    "enName": "Symptomatic Planting",
+    "category": "SUR/SV",
+    "shortDef": "把可见症候反向追溯到参数来源，防止表层现象失去结构归属。",
+    "summary": "“一张图像可以召唤方向，但不能替理论判案。视觉种子只提供候选路径；最终参数仍必须接受 M/SUR/SV 三轴宪法的审查。” —— 迷雾学派 视觉种子、创意种子、氛围片段、梦境意象或一句高概念，都可以作为生成入口。它们的功能是帮助系统找到一组可能的参数候选，而不是从一个画面直接锁死 M 轴。 最终权限如下： M 轴，越只能给候选，不得强行判定。 SUR1 / SUR2 候选： SUR3 / SUR5 / SUR6 / SUR-END 候选： SUR4 / SUR7 / SUR8 / SUR9 / SUR10 候选："
   },
   {
-    "id": "mist_creation_as_knotting",
-    "name": "创作作为结",
-    "enName": "Creation as Knotting",
-    "category": "Theory",
-    "shortDef": "创作不是表达自我，而是为松散的世界打结的过程。",
-    "summary": "（内容待补充：创作作为结 的详细哲学解析与拓扑学展开...）"
+    "id": "narrative_dynamics_and_soul",
+    "name": "SUR1-SUR2：叙事动力与背景场域",
+    "enName": "Genre Mode & World Motif",
+    "category": "SUR",
+    "shortDef": "类型节奏与世界底色只提供显现频率，不解释主体为何运动。",
+    "summary": "“SUR1 只决定故事怎样动，SUR2 只决定世界显出什么材质。它们可以让同一副 M 轴骨架穿上不同外衣，却不能替骨架决定为什么疼、为何断、最终如何被裁决。” —— 迷雾学派 SUR1 与 SUR2 是表层设定的最前端入口。它们负责给故事提供类型运动方式与世界材质库，但不负责解释底层发生学。 这意味着：动作片、黑色电影、文艺留白、邪典、荒诞喜剧、残酷生存，都只是动作与剪辑的语法；赛博朋克、废土、古风武侠、维多利亚怪谈、办公室、海上难民船队，也只是世界材质与可见符码库。它们可以影响故事如何被看见，却不能改写 M 轴。 SUR1 决定故事的推进形态："
   },
   {
-    "id": "mist_remainder",
-    "name": "剩余物",
-    "enName": "The Remainder",
-    "category": "Theory",
-    "shortDef": "符号化过程后剩下的那个坚硬、不可消化的物质。",
-    "summary": "（内容待补充：剩余物 的详细哲学解析与拓扑学展开...）"
+    "id": "spacetime_and_space_container",
+    "name": "SUR3-SUR6：时空坐标与空间容器",
+    "enName": "Spacetime & Space Container",
+    "category": "SUR",
+    "shortDef": "时空锚点与空间场景提供发生容器，不承担遭遇、阻断或代价的本体原因。",
+    "summary": "“年代决定世界允许什么发生，地点决定这件事被观众看见时站在哪里。SUR3 给出不可违背的历史常量，SUR6 只放下一间房、一条路、一座桥、一片野地。” —— 迷雾学派 SUR3 与 SUR6 经常被混写，因为它们都处理“在哪里”。但最终口径必须切开： SUR3 是历时性和地缘性的硬约束。一旦选定，该时空的技术上限、交通速度、媒介形态、地缘边界、服饰材质、阶层礼仪和公共制度都必须进入生成逻辑。 SUR3 不能只写“古代”“未来”“现代都市”。它应尽量给出可推导的历史常量： 可见事件地点 SUR6 的最终名称是 SUR-LOC / 空间容器。"
   },
   {
-    "id": "mist_glitch",
-    "name": "故障",
-    "enName": "Glitch",
-    "category": "Theory",
-    "shortDef": "秩序运行中的瞬间卡顿——恰是真实的闪现时刻。",
-    "summary": "（内容待补充：故障 的详细哲学解析与拓扑学展开...）"
+    "id": "order_and_object",
+    "name": "SUR4-SUR5：社会形态与对象预设",
+    "enName": "Order Shell & Object Anchor",
+    "category": "SUR",
+    "shortDef": "社会外壳与对象锚点只提供可见材料，不替 M4 或 M3 解释结构原因。",
+    "summary": "“SUR4 不是大他者下凡，SUR5 不是欲望本身。前者只让秩序有可见外壳，后者只让行动有可抓之物；真正的缺失、欲望、阻断、代价与裁决，仍由 M 轴承担。” —— 迷雾学派 SUR5 必须从混层语言中剥离出来。它们不再承担解释 M4、M3 或 M6 的任务，而只负责回答两个现象层问题： 因此，本词条的任务不是制造“深层原因”，而是为生成器提供一组稳定的表层接口。社会形态是舞台的制度外观；对象预设是事件可围绕的物件锚点。 SUR4 定义世界的显性组织方式。它可以是企业城邦、宗教教区、军阀边境、学院制度、家族庄园、黑市码头、地下诊所、灾后部落或算法平台。"
   },
   {
-    "id": "mist_escape",
-    "name": "逃逸路徑",
-    "enName": "Line of Flight",
-    "category": "Theory",
-    "shortDef": "欲望在结构压迫中溢出其原有轨道的流动方向。",
-    "summary": "（内容待补充：逃逸路徑 的详细哲学解析与拓扑学展开...）"
+    "id": "visible_profile_opening_belief",
+    "name": "SUR7-SUR10：人物呈现与开场话语",
+    "enName": "Visible Profile & Opening Belief",
+    "category": "SUR",
+    "shortDef": "选角、年龄、职业与信念语言是入口界面，不是人物本质。",
+    "summary": "“M 轴决定一个人为什么裂开；SUR7-SUR10 只决定这个裂开的人以什么外观、年龄、岗位和口头信念出现在世界里。” —— 迷雾学派 SUR7-SUR10 是人物外壳层，而不是精神结构层。它们回答的是： 这个人物看起来如何？ 处在什么年龄阶段？ 以什么职业身份、社会身份或登记状态进入故事？ 开场时抱着什么表层信念说服自己？ 它们不回答： 这个人物为什么有缺口？那是 M1。 什么事件击穿他？那是 M2。 他把什么当成可追逐对象？那是 M3 与 SUR5 的接口。 他的结局被如何裁定？那是 M7A/M7B 与 SUR-END 的分工。"
   },
   {
-    "id": "mist_the_impossible",
-    "name": "不可能之物",
-    "enName": "The Impossible",
-    "category": "Theory",
-    "shortDef": "实在界的核心特征，绝对抵抗符号化、不可企及之物。",
-    "summary": "（内容待补充：不可能之物 的详细哲学解析与拓扑学展开...）"
+    "id": "structure_and_volume",
+    "name": "SV1-SV2：结构与体量",
+    "enName": "Structure & Volume",
+    "category": "SV",
+    "shortDef": "工程展开协议：结构模板与体量只规定显影顺序和文本规模，不替代 M 轴。",
+    "summary": "“SV 不是另一套精神分析参数。它只决定同一副骨架被切成几段、以多大密度暴露、让哪一处裂缝先被看见。” —— 迷雾学派 M 定义结构原因。 SUR 定义现象显现。 SV 定义工程展开。 因此，SV1 / SV2 不再被书写为主体认同或深层心理的来源。它们是工程轴：负责叙事结构模板、信息释放顺序、体量密度和节拍布置。SV 可以决定 M 轴何时显影、SUR 轴如何被排列，但它不能生成 M1、M3、M4、M6、M7A 或 M7B。 SV1 决定故事以什么结构被展开。"
+  },
+  {
+    "id": "mist_dynamic_suture_sentence",
+    "name": "动态缝合句式规则",
+    "enName": "Dynamic Suture Sentence",
+    "category": "Compiler",
+    "shortDef": "生成前的预览编译器：排列 M、SUR、SV，而不创造或裁决参数。",
+    "summary": "“缝合句不是理论本身，而是理论进入生成器前的显影语法。它让表面排列成句，让工程形成秩序，并把 M 轴保留为不可被表面篡改的骨架。” —— 迷雾学派 动态缝合句式是生成前的预览编译器。它将 M 轴、SUR 轴与 SV 轴压缩成一段自然语言预览，使 AI 在生成前知道： 运行于 [SUR4.社会形态] 之下。"
+  },
+  {
+    "id": "orthogonality_axiom_cartesian_product",
+    "name": "正交公理与笛卡尔乘积",
+    "enName": "Orthogonality Axiom & Cartesian Product",
+    "category": "Axiom",
+    "shortDef": "M 轴与 SUR 轴互不侵占，所有参数组合都必须成为合法故事坐标。",
+    "summary": "核心宣言： M公式是纵轴，SUR是横轴。纵轴切开一个人的精神剖面，横轴铺开这个人所处的世界坐标。两条轴正交——互不干涉、互不侵占、互不冗余。它们的交叉点，就是一个故事唯一的存在论坐标。 —— 迷雾学派 M轴（纵轴）= 主体的精神拓扑剖面 M0→M7A/M7B 是一个人的欲望结构从发生到结项的完整展开。它只关心一件事：这个人的精神拓扑如何被驱动、裁决，并留下余痕。 这条轴是纯粹内在的。它不关心故事发生在太空还是古代中国，不关心主角是厨师还是杀手。一个人的欲望回路在中世纪和在赛博朋克世界里都是同一个回路——只是外壳不同。"
   }
 ]

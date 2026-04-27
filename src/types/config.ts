@@ -1,26 +1,45 @@
 // types/config.ts
 /**
- * API 配置系统 V2
- * 
+ * API 配置系统 V3
+ *
  * 核心设计：
- * - 每个 Provider（Gemini / Claude）独立配置：API Key + 接入模式 + Base URL
- * - Gemini 支持两种模式：官方直连（Google SDK）和第三方代理（OpenAI-compatible）
- * - Claude 只支持第三方代理模式（浏览器端无法直连 Anthropic API，CORS 限制）
- * - 每个引擎独立选择使用哪个模型，系统自动根据模型名路由到对应 Provider
+ * - Provider 层：Gemini / Claude / OpenAI 各自保存 API Key、接入模式、Base URL。
+ * - Model 层：每个模型声明归属 Provider，模型名决定调用路由。
+ * - Engine 层：每个业务引擎独立选择模型，因此可同时使用不同 API。
  */
 
 // ============================================================
 // Provider 配置
 // ============================================================
 
+export type ProviderId = 'gemini' | 'claude' | 'openai';
 export type ProviderMode = 'official' | 'proxy';
+export type ApiFormat = 'google' | 'anthropic' | 'openai';
 
 export interface ProviderConfig {
   apiKey: string;
-  mode: ProviderMode;    // 'official' = 官方SDK直连, 'proxy' = 第三方代理
-  baseUrl: string;       // 代理模式下的基地址 (e.g. https://xxx.com/claude)
-  apiFormat?: 'anthropic'; // 保留字段，始终为 anthropic
+  mode: ProviderMode;
+  baseUrl: string;
+  apiFormat: ApiFormat;
 }
+
+export const PROVIDER_LABELS: Record<ProviderId, string> = {
+  gemini: 'Gemini',
+  claude: 'Claude',
+  openai: 'OpenAI',
+};
+
+export const PROVIDER_COLORS: Record<ProviderId, string> = {
+  gemini: '#22d3ee',
+  claude: '#c084fc',
+  openai: '#22c55e',
+};
+
+export const OFFICIAL_BASE_URLS: Record<ProviderId, string> = {
+  gemini: '',
+  claude: 'https://api.anthropic.com',
+  openai: 'https://api.openai.com/v1',
+};
 
 // ============================================================
 // 引擎模型映射
@@ -51,11 +70,9 @@ export interface EngineModelConfig {
 // ============================================================
 
 export interface APIConfig {
-  // 两个 Provider 独立配置
   gemini: ProviderConfig;
   claude: ProviderConfig;
-
-  // 6个引擎的模型配置
+  openai: ProviderConfig;
   engines: EngineModelConfig;
 }
 
@@ -66,14 +83,21 @@ export interface APIConfig {
 export const DEFAULT_CONFIG: APIConfig = {
   gemini: {
     apiKey: '',
-    mode: 'official',  // 默认使用官方直连
+    mode: 'official',
     baseUrl: '',
+    apiFormat: 'google',
   },
   claude: {
     apiKey: '',
-    mode: 'proxy',         // Claude 必须走代理
+    mode: 'proxy',
     baseUrl: '',
-    apiFormat: 'anthropic', // 默认使用 Anthropic 原生格式
+    apiFormat: 'anthropic',
+  },
+  openai: {
+    apiKey: '',
+    mode: 'official',
+    baseUrl: OFFICIAL_BASE_URLS.openai,
+    apiFormat: 'openai',
   },
   engines: {
     coreEngine: 'gemini-3.1-pro-preview',
@@ -82,35 +106,102 @@ export const DEFAULT_CONFIG: APIConfig = {
     visualBible: 'gemini-3.1-pro-preview',
     visualSeed: 'gemini-3-pro-image-preview',
     imageGen: 'gemini-3-pro-image-preview',
-  }
+  },
 };
 
 // ============================================================
-// 可用模型列表
+// 可用模型目录
 // ============================================================
 
+export interface ModelOption {
+  id: string;
+  name: string;
+  provider: ProviderId;
+  type: 'text' | 'image';
+  canSeeImages?: boolean;
+  note?: string;
+}
+
+export const MODEL_CATALOG: ModelOption[] = [
+  {
+    id: 'gemini-3.1-pro-preview',
+    name: 'Gemini 3.1 Pro Preview',
+    provider: 'gemini',
+    type: 'text',
+    canSeeImages: true,
+  },
+  {
+    id: 'gemini-3.1-flash-lite-preview',
+    name: 'Gemini 3.1 Flash Lite Preview',
+    provider: 'gemini',
+    type: 'text',
+    canSeeImages: true,
+  },
+  {
+    id: 'claude-opus-4-7',
+    name: 'Claude Opus 4.7',
+    provider: 'claude',
+    type: 'text',
+    canSeeImages: true,
+  },
+  {
+    id: 'claude-opus-4-6',
+    name: 'Claude Opus 4.6',
+    provider: 'claude',
+    type: 'text',
+    canSeeImages: true,
+  },
+  {
+    id: 'claude-sonnet-4-6',
+    name: 'Claude Sonnet 4.6',
+    provider: 'claude',
+    type: 'text',
+    canSeeImages: true,
+  },
+  {
+    id: 'gpt-5.5',
+    name: 'GPT-5.5',
+    provider: 'openai',
+    type: 'text',
+    canSeeImages: true,
+  },
+  {
+    id: 'gpt-5.4',
+    name: 'GPT-5.4',
+    provider: 'openai',
+    type: 'text',
+    canSeeImages: true,
+  },
+  {
+    id: 'gpt-5.4-mini',
+    name: 'GPT-5.4 Mini',
+    provider: 'openai',
+    type: 'text',
+    canSeeImages: true,
+  },
+  {
+    id: 'gemini-3-pro-image-preview',
+    name: 'Gemini 3 Pro Image Preview',
+    provider: 'gemini',
+    type: 'image',
+  },
+  {
+    id: 'gemini-3-flash-image-preview',
+    name: 'Gemini 3 Flash Image Preview',
+    provider: 'gemini',
+    type: 'image',
+  },
+];
+
 export const AVAILABLE_MODELS = {
-  // 前四个文本引擎可用的模型（支持 Gemini 和 Claude）
-  core: [
-    'gemini-3.1-pro-preview',
-    'gemini-3.1-flash-lite-preview',
-    'claude-opus-4-6',
-    'claude-sonnet-4-6',
-  ],
+  // 核心文本/多模态任务：允许 Gemini、Claude、OpenAI 混用
+  core: MODEL_CATALOG.filter(model => model.type === 'text').map(model => model.id),
+
   // 所有文本模型
-  text: [
-    'gemini-3.1-pro-preview',
-    'gemini-3.1-flash-lite-preview',
-    'claude-opus-4-6',
-    'claude-sonnet-4-6',
-    'gemini-3-pro-image-preview',
-    'gemini-3-flash-image-preview',
-  ],
-  // 图像生成专用模型（仅 Gemini）
-  image: [
-    'gemini-3-pro-image-preview',
-    'gemini-3-flash-image-preview',
-  ]
+  text: MODEL_CATALOG.filter(model => model.type === 'text').map(model => model.id),
+
+  // 图像生成专用模型
+  image: MODEL_CATALOG.filter(model => model.type === 'image').map(model => model.id),
 };
 
 // ============================================================
@@ -127,7 +218,7 @@ export const ENGINE_CONFIGS = [
   {
     id: 'metonymyEngine',
     name: '换喻缝合引擎',
-    description: '剧本生成、分镜表、风格迁移等文学→视觉转换',
+    description: '剧本生成、分镜表、风格迁移等文学到视觉转换',
     type: 'text',
   },
   {
@@ -139,7 +230,7 @@ export const ENGINE_CONFIGS = [
   {
     id: 'visualBible',
     name: '核心视觉圣经',
-    description: '图片反推、全局影调解析、资产分析（需要识图）',
+    description: '图片反推、全局影调解析、资产分析，需要识图能力',
     type: 'text',
   },
   {
@@ -154,16 +245,40 @@ export const ENGINE_CONFIGS = [
     description: '直接生成视觉参考图片',
     type: 'image',
   },
-];
+] as const;
 
 // ============================================================
 // 工具函数
 // ============================================================
 
+export function getModelOption(modelId: string): ModelOption | undefined {
+  return MODEL_CATALOG.find(model => model.id === modelId);
+}
+
 /**
- * 根据模型名判断属于哪个 Provider
+ * 根据模型名判断属于哪个 Provider。
+ * 未登记模型按命名约定兜底，便于用户手动填入新模型名。
  */
-export function getProviderForModel(modelId: string): 'gemini' | 'claude' {
-  if (modelId.includes('claude')) return 'claude';
+export function getProviderForModel(modelId: string): ProviderId {
+  const model = getModelOption(modelId);
+  if (model) return model.provider;
+
+  const lower = modelId.toLowerCase();
+  if (lower.includes('claude')) return 'claude';
+  if (lower.startsWith('gpt-') || lower.startsWith('o') || lower.includes('openai')) return 'openai';
   return 'gemini';
+}
+
+export function getEffectiveBaseUrl(provider: ProviderId, config: ProviderConfig): string {
+  if (provider === 'gemini' && config.mode === 'official') return '';
+  if (config.mode === 'official') return OFFICIAL_BASE_URLS[provider];
+  return config.baseUrl.trim();
+}
+
+export function getOpenAIChatCompletionsUrl(baseUrl: string): string {
+  const cleanBaseUrl = baseUrl.trim().replace(/\/+$/, '');
+  if (!cleanBaseUrl) return '';
+  if (/\/chat\/completions$/i.test(cleanBaseUrl)) return cleanBaseUrl;
+  if (/\/v\d+$/i.test(cleanBaseUrl)) return `${cleanBaseUrl}/chat/completions`;
+  return `${cleanBaseUrl}/v1/chat/completions`;
 }

@@ -46,6 +46,7 @@ interface EngineBottomBarProps {
     isTensionOpen?: boolean;
     setIsTensionOpen?: (v: boolean) => void;
     setIsPromptInspectorOpen?: (v: boolean) => void;
+    isAdmin?: boolean;
 }
 
 export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
@@ -85,7 +86,8 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
     setWorldLawConfig,
     isTensionOpen,
     setIsTensionOpen,
-    setIsPromptInspectorOpen
+    setIsPromptInspectorOpen,
+    isAdmin = false
 }) => {
     const { theme } = useTheme();
     const [activeTaskCount, setActiveTaskCount] = React.useState(0);
@@ -356,7 +358,7 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
             </div>
 
             <div className="flex items-center gap-4 shrink-0 w-[180px] md:w-[240px] justify-end">
-                {setIsPromptInspectorOpen && (
+                {isAdmin && setIsPromptInspectorOpen && (
                     <button
                         onClick={() => setIsPromptInspectorOpen(true)}
                         className={`flex items-center justify-center w-10 h-10 rounded-lg transition-all group border shrink-0 hover:scale-105 active:scale-95 ${theme === 'retro' ? 'border-[#8B261D]/30 hover:bg-[#8B261D]/10 text-[#8B261D]' : 'bg-zinc-900 border-zinc-700 hover:bg-zinc-800 hover:border-gold-primary text-zinc-400 hover:text-gold-primary'}`}

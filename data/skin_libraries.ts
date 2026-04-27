@@ -26,122 +26,122 @@ import { SYNTHESIZER_SUR10X } from './engine_core/synthesizer/sur10x';
 // BLOCK DEFINITIONS (UI 侧边栏区块定义)
 // ============================================================
 export const SKIN_BLOCKS: NarrativeBlockDef[] = [
-  { 
-    id: "skin_era", 
-    name: "SUR2.背景场域", 
-    enName: "sur2.Background Field", 
-    description: "决定叙事发生的时代背景、历史张力或神话坐标。它是社会矛盾与因果逻辑发生的原始'温床'。", 
-    descriptionEn: "Determines the historical tension, mythic coordinates, or temporal setting where social conflicts and causal logic brew.", 
-    tags: [] 
+  {
+    id: "skin_era",
+    name: "SUR2.背景场域",
+    enName: "sur2.Background Field",
+    description: "决定叙事发生的时代背景、历史张力或神话坐标。它是社会矛盾与因果逻辑发生的原始'温床'。",
+    descriptionEn: "Determines the historical tension, mythic coordinates, or temporal setting where social conflicts and causal logic brew.",
+    tags: []
   },
-  { 
-    id: "skin_society", 
-    name: "SUR4.社会形态", 
-    enName: "sur4.Social Order", 
-    description: "界定压盖在人物头顶的终极秩序，如：算法统治、黑暗神权、宗法礼教、寡头垄断。", 
-    descriptionEn: "Defines the ultimate order that dominates the characters, such as algorithmic rule, dark autocracy, or clan laws.", 
-    tags: [] 
+  {
+    id: "skin_society",
+    name: "SUR4.社会形态",
+    enName: "sur4.Social Order",
+    description: "界定压盖在人物头顶的终极秩序，如：算法统治、黑暗神权、宗法礼教、寡头垄断。",
+    descriptionEn: "Defines the ultimate order that dominates the characters, such as algorithmic rule, dark autocracy, or clan laws.",
+    tags: []
   },
-  { 
-    id: "skin_everything", 
-    name: "SUR5.欲望锚点 (Everything)", 
-    enName: "sur5.Desire Anchor / Everything", 
-    description: "这就是无所不包的 Everything。它可以是一个麦高芬、一段代码、一本绝世秘籍，是卷动命运的风眼。", 
-    descriptionEn: "The all-encompassing Everything object. A MacGuffin, a piece of code, a secret manual—the eye of the storm.", 
-    tags: [] 
+  {
+    id: "skin_everything",
+    name: "SUR5.对象预设 (Object Anchor)",
+    enName: "sur5.Object Anchor",
+    description: "表层对象预设。它可以是麦高芬、凭证、信物、黑箱、钥匙或装置，只回答故事追逐什么物。",
+    descriptionEn: "Surface object preset. A MacGuffin, token, keepsake, black box, key, or device that answers what object the story pursues.",
+    tags: []
   },
-  { 
-    id: "skin_location", 
-    name: "SUR6.空间场景", 
-    enName: "sur6.Scenes", 
-    description: "提供事件发生的具体物理容器。包含特定场景与通用场景库。", 
-    descriptionEn: "Provides the physical container for events, including specific and generic scene libraries.", 
-    tags: [] 
+  {
+    id: "skin_location",
+    name: "SUR6.空间容器 (Space Container)",
+    enName: "sur6.Space Container",
+    description: "表层空间预设。只回答事件发生在什么可见空间里。",
+    descriptionEn: "Surface space preset. Answers only what visible space the event occurs in.",
+    tags: []
   },
-  { 
-    id: "skin_gender", 
-    name: "SUR7.主体性别", 
-    enName: "sur7.Subject Gender", 
-    description: "主体的生理性别或外观呈现（纯粹选角层面）。", 
-    descriptionEn: "The subject's biological sex or visual presentation (Casting level).", 
-    tags: [] 
+  {
+    id: "skin_gender",
+    name: "SUR7.选角呈现",
+    enName: "sur7.Casting Presentation",
+    description: "人物在画面、称谓和互动中采用的性别呈现标签；只给选角层。",
+    descriptionEn: "Gender presentation labels used in image, address, and interaction; casting layer only.",
+    tags: []
   },
-  { 
-    id: "skin_age", 
-    name: "SUR8.主体年龄", 
-    enName: "sur8.Subject Age", 
-    description: "主体的生理年龄与身体机能，定义机体的基础磨损度。", 
-    descriptionEn: "Standardized biological age and physiological state.", 
-    tags: [] 
+  {
+    id: "skin_age",
+    name: "SUR8.年龄阶段",
+    enName: "sur8.Age Stage",
+    description: "人物进入故事时的可见年岁区间与行动条件；只给年龄层。",
+    descriptionEn: "The visible age band and action conditions at story entry; age layer only.",
+    tags: []
   },
-  { 
-    id: "skin_profession", 
-    name: "SUR9.职业身份", 
-    enName: "sur9.Subject Identity/Class", 
-    description: "主体的社会角色、生存手段、社会经济背景与出身权利。定义角色在权力结构中的位置。", 
-    descriptionEn: "The subject's social role, means of survival, socioeconomic background and birthright.", 
-    tags: [] 
+  {
+    id: "skin_profession",
+    name: "SUR9.职业身份 (Role Preset)",
+    enName: "sur9.Role Preset",
+    description: "表层身份预设。只回答人物以什么社会身份、职业岗位或登记状态进入故事世界。",
+    descriptionEn: "Surface role preset. Answers only what social identity, occupation, or registered status the character enters the story world with.",
+    tags: []
   },
-  { 
-    id: "skin_ideology", 
-    name: "SUR10.哲学信念", 
-    enName: "sur10.Philosophy / Ism", 
-    description: "主体自认为用以填补内心缺失的意识形态（如：虚无主义、英雄主义）。", 
-    descriptionEn: "The ideology used to fill the subject's inner void (e.g., Nihilism).", 
-    tags: [] 
+  {
+    id: "skin_ideology",
+    name: "SUR10.信念预设",
+    enName: "sur10.Belief Preset",
+    description: "人物开场时用于解释世界的表层信念语言；不解释人物成因，不规定终点。",
+    descriptionEn: "Surface belief language used by the character at the start to explain the world; it does not explain origins or fix endpoints.",
+    tags: []
   },
-  { 
-    id: "skin_ending", 
-    name: "SUR11.显性大结局", 
-    enName: "sur11.Explicit Ending", 
-    description: "好莱坞式、商业化且具有极高视觉张力的结局模板。", 
-    descriptionEn: "Hollywood-style commercial ending templates with high visual tension.", 
-    tags: [] 
+  {
+    id: "skin_ending",
+    name: "SUR-END.显性收场",
+    enName: "sur-end.Visible Ending",
+    description: "故事表层最后可见的收场画面，只描述事件终端与画面停点，不裁决意义。",
+    descriptionEn: "The final visible closure on the surface layer: terminal event and last frame, without deciding meaning.",
+    tags: []
   },
 
-  { 
-    id: "skin_structure", 
-    name: "SV1.叙事结构", 
-    enName: "sv1.Narrative Structure", 
-    description: "负责故事本身的骨架排布模板（不仅是风格，更是工程学图纸）。", 
-    descriptionEn: "The structural template for the plot (Engineering blueprints).", 
-    tags: [] 
+  {
+    id: "skin_structure",
+    name: "SV1.叙事结构",
+    enName: "sv1.Narrative Structure",
+    description: "负责故事本身的骨架排布模板（不仅是风格，更是工程学图纸）。",
+    descriptionEn: "The structural template for the plot (Engineering blueprints).",
+    tags: []
   },
-  { 
-    id: "skin_volume", 
-    name: "SV2.故事体量", 
-    enName: "sv2.Story Volume", 
-    description: "负责数值化输出的范围：时间跨度、节奏密度与总长。", 
-    descriptionEn: "The numerical output scope: temporal span, density, and duration.", 
-    tags: [] 
+  {
+    id: "skin_volume",
+    name: "SV2.故事体量",
+    enName: "sv2.Story Volume",
+    description: "负责数值化输出的范围：时间跨度、节奏密度与总长。",
+    descriptionEn: "The numerical output scope: temporal span, density, and duration.",
+    tags: []
   },
 ];
 
 export const ALL_SKIN_BLOCKS = [
-    { 
-      id: "skin_genre", 
-      name: "SUR1.叙事动力", 
-      enName: "sur1.Drive", 
-      description: "决定能量喷发的物理形式，如：爱情、复仇、寻宝、逃杀。", 
-      descriptionEn: "The physical form of energy eruption (e.g., Revenge).", 
-      tags: [] 
+    {
+      id: "skin_genre",
+      name: "SUR1.叙事动力",
+      enName: "sur1.Drive",
+      description: "决定能量喷发的物理形式，如：爱情、复仇、寻宝、逃杀。",
+      descriptionEn: "The physical form of energy eruption (e.g., Revenge).",
+      tags: []
     },
-    { 
-      id: "skin_animation_genre", 
-      name: "SURx.废弃世界模体", 
-      enName: "surx.Deprecated Motif", 
-      description: "提供世界的视觉与感官滤镜，如：赛博、武侠、废土等。", 
-      descriptionEn: "Visual and sensory filter for the world (e.g., Cyberpunk).", 
-      tags: [] 
+    {
+      id: "skin_animation_genre",
+      name: "SURx.废弃世界模体",
+      enName: "surx.Deprecated Motif",
+      description: "提供世界的视觉与感官滤镜，如：赛博、武侠、废土等。",
+      descriptionEn: "Visual and sensory filter for the world (e.g., Cyberpunk).",
+      tags: []
     },
     ...SKIN_BLOCKS,
-    { 
-      id: "sur10x", 
-      name: "SUR10X.信念裂度", 
-      enName: "sur10x.Belief Fracture", 
-      description: "主体对自己所持信仰的当真程度——从虔信到决裂的连续谱。", 
-      descriptionEn: "The degree to which the subject takes their own belief seriously — a spectrum from devotion to rupture.", 
-      tags: [] 
+    {
+      id: "sur10x",
+      name: "SUR10X.信念裂度",
+      enName: "sur10x.Belief Fracture",
+      description: "主体对自己所持信仰的当真程度——从虔信到决裂的连续谱。",
+      descriptionEn: "The degree to which the subject takes their own belief seriously — a spectrum from devotion to rupture.",
+      tags: []
     }
 ];
 
@@ -178,73 +178,73 @@ export const SKIN_LIBRARY: LibraryCategoryDef[] = [
         items: SUR4_DATA.flatMap(cat => (cat.items || []).map(item => ({ ...item, group: cat.name, groupEn: cat.nameEn })))
     },
 
-    // SUR5: 欲望锚点 — 从 engine_surface/SUR5 加载
+    // SUR5: 对象预设 — 从 engine_surface/SUR5 加载
     {
         id: "skin_everything_lib",
-        name: "欲望锚点 (Everything - SUR5)",
-        desc: "这就是无所不包的 Everything",
+        name: "对象预设 (Object Anchor - SUR5)",
+        desc: "只提供可被追寻、争夺、交换或保护的表层对象",
         items: SUR5_DATA.flatMap(cat => (cat.items || []).map(item => ({ ...item, group: cat.name, groupEn: cat.nameEn })))
     },
 
-    // SUR6: 空间场景 — 从 engine_surface/SUR6 加载
+    // SUR6: 空间容器 — 从 engine_surface/SUR6 加载
     {
         id: "skin_location_lib",
-        name: "空间场景 (Location - SUR6)",
-        desc: "提供事件发生的具体物理容器",
+        name: "空间容器 (Space Container - SUR6)",
+        desc: "只提供事件可发生的可见空间容器",
         items: SUR6_DATA.flatMap(cat => (cat.items || []).map(item => ({ ...item, group: cat.name, groupEn: cat.nameEn })))
     },
 
-    // SUR7: 主体性别 — 从 engine_surface/SUR7 加载
+    // SUR7: 选角呈现 — 从 engine_surface/SUR7 加载
     {
         id: "skin_gender_lib",
-        name: "主体性别 (Gender - SUR7)",
-        desc: "主体的生理性别或外观呈现",
+        name: "选角呈现 (Casting Presentation - SUR7)",
+        desc: "人物在画面、称谓和互动中采用的性别呈现标签",
         items: SUR7_DATA.flatMap(cat => (cat.items || []).map(item => ({ ...item, group: cat.name, groupEn: cat.nameEn })))
     },
 
-    // SUR8: 主体年龄 — 从 engine_surface/SUR8 加载
+    // SUR8: 年龄阶段 — 从 engine_surface/SUR8 加载
     {
         id: "skin_age_lib",
-        name: "主体年龄 (Age - SUR8)",
-        desc: "主体的生理年龄与身体机能",
+        name: "年龄阶段 (Age Stage - SUR8)",
+        desc: "人物进入故事时的可见年岁区间与行动条件",
         items: SUR8_DATA.flatMap(cat => (cat.items || []).map(item => ({ ...item, group: cat.name, groupEn: cat.nameEn })))
     },
 
     // SUR9: 职业身份 — 从 engine_surface/SUR9 加载
     {
         id: "skin_profession_lib",
-        name: "职业身份 (Profession - SUR9)",
-        desc: "主体的社会角色与生存手段",
+        name: "职业身份 (Role Preset - SUR9)",
+        desc: "只提供人物可识别的社会身份、职业岗位或登记状态",
         items: SUR9_DATA.flatMap(cat => (cat.items || []).map(item => ({ ...item, group: cat.name, groupEn: cat.nameEn })))
     },
 
-    // SUR10: 哲学信念 — 从 engine_surface/SUR10 加载
+    // SUR10: 信念预设 — 从 engine_surface/SUR10 加载
     {
         id: "skin_ideology_lib",
-        name: "哲学信念 (Ideology - SUR10)",
-        desc: "主体自认为用以填补内心缺失的意识形态",
+        name: "信念预设 (Belief Preset - SUR10)",
+        desc: "人物开场时用于解释世界的表层信念语言",
         items: SUR10_DATA.flatMap(cat => (cat.items || []).map(item => ({ ...item, group: cat.name, groupEn: cat.nameEn })))
     },
 
-    // SUR11: 显性大结局 — 从 engine_surface/SUR11 加载
+    // SUR-END: 显性收场 — 兼容旧 engine_surface/SUR11 数据路径
     {
         id: "skin_ending_lib",
-        name: "显性大结局 (Ending - SUR11)",
-        desc: "好莱坞式、商业化且具有极高视觉张力的结局模板",
+        name: "显性收场 (Visible Ending - SUR-END)",
+        desc: "只规定故事表层最后可见的事件和画面停点；意义裁决交给 M7A，身体余味交给 M7B",
         items: SUR11_DATA.flatMap(cat => (cat.items || []).map(item => ({ ...item, group: cat.name, groupEn: cat.nameEn })))
     },
 
     // SV1: 叙事结构
     {
-        id: "skin_structure_lib", 
-        name: "叙事结构 (Structure - SV1)", 
+        id: "skin_structure_lib",
+        name: "叙事结构 (Structure - SV1)",
         desc: "The architectural framework of the plot.",
         items: FLAT_STRUCTURE_ITEMS
     },
     // SV2: 故事体量
     {
-        id: "skin_volume_lib", 
-        name: "故事体量 (Volume - SV2)", 
+        id: "skin_volume_lib",
+        name: "故事体量 (Volume - SV2)",
         desc: "Target scope and rhythm density.",
         items: SV2_DATA.flatMap(cat => cat.items.map(item => ({ ...item, group: cat.name })))
     },

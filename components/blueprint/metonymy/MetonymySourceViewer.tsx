@@ -23,10 +23,11 @@ interface SourceViewerProps {
     isBreakingDown: boolean;
     breakdownStartTime?: number | null;
     theme?: string;
+    isAdmin?: boolean;
 }
 
 export const SourceViewer: React.FC<SourceViewerProps> = ({
-    text, onChange, lang, themeAccent, themeColorBase, activeSceneIndex, activeSceneId, scrollSyncTrigger, sections, onSendToActive, onSendToNew, onAutoBreakdown, isBreakingDown, breakdownStartTime, theme
+    text, onChange, lang, themeAccent, themeColorBase, activeSceneIndex, activeSceneId, scrollSyncTrigger, sections, onSendToActive, onSendToNew, onAutoBreakdown, isBreakingDown, breakdownStartTime, theme, isAdmin
 }) => {
     const [isSelectionMode, setIsSelectionMode] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -534,6 +535,8 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
                 lang={lang === 'EN' ? 'EN' : 'CN'}
                 themeAccent={themeAccent}
                 theme={theme}
+                sourceText={text}
+                isAdmin={isAdmin}
             />
         </div>
     );

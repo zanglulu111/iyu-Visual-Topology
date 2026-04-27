@@ -1,0 +1,4 @@
+interface:
+  display_name: "Lovart API"
+  short_description: "Official Lovart OpenAPI skill"
+  default_prompt: "Use $lovart-api to generate Lovart images, videos, or audio and manage Lovart projects and threads."

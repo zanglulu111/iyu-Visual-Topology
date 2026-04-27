@@ -642,11 +642,11 @@ export const generateGlobalRandomState = (
     }
 
     // ── Step 5: Determine surface block IDs for filter check ──
-    const surfaceBlockIds = new Set(
+    const surfaceBlockIds = new Set<string>(
         SURFACE_WEIGHT_CONFIG.slots.flatMap(s => [...s.blockIds])
     );
     // Also include non-weighted surface blocks (SUR8, SV1, SV2) — these get independent 50% roll
-    const independentSurfaceBlocks = new Set(['skin_age', 'skin_structure', 'skin_volume']);
+    const independentSurfaceBlocks = new Set<string>(['skin_age', 'skin_structure', 'skin_volume']);
 
     // ── Step 6: Main block loop ──
     blocks.forEach(block => {
@@ -695,25 +695,6 @@ export const generateGlobalRandomState = (
             if (['skin_location', 'skin_profession', 'skin_society', 'skin_ideology', 'comm_skin_scenario', 'engine_m1', 'skin_origin'].includes(block.id)) {
                 availableItems = filterItemsByArchetype(category.items, currentArchetype, block.id);
                 if (availableItems.length === 0) availableItems = category.items;
-            }
-
-            // SUR7 gender bias: 70% female, 30% male
-            if (block.id === 'skin_gender') {
-                const genderItems = availableItems;
-                const isFemale = Math.random() < 0.70;
-                const femaleItems = genderItems.filter(i => {
-                    const n = (i.name + ' ' + (i.group || '')).toLowerCase();
-                    return n.includes('female') || n.includes('女');
-                });
-                const maleItems = genderItems.filter(i => {
-                    const n = (i.name + ' ' + (i.group || '')).toLowerCase();
-                    return n.includes('male') || n.includes('男');
-                });
-                const targetPool = isFemale && femaleItems.length > 0 ? femaleItems : (maleItems.length > 0 ? maleItems : genderItems);
-                if (targetPool.length > 0) {
-                    newState[block.id] = [targetPool[Math.floor(Math.random() * targetPool.length)].name];
-                }
-                return;
             }
 
             const locks = lockedTags[block.id] || [];

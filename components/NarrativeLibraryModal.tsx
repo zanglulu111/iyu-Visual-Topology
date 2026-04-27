@@ -372,7 +372,7 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
 
     return createPortal(
         <>
-        <div className={`fixed inset-0 z-[9999] flex items-center justify-center ${globalTheme === 'retro' ? 'bg-[#8B261D]/5 backdrop-blur-md' : 'bg-black/80 backdrop-blur-[12px]'} p-0 md:p-2 xl:p-4 animate-in fade-in duration-500 pointer-events-auto`} onClick={onClose}>
+        <div className={`fixed inset-0 z-[100000] flex items-center justify-center ${globalTheme === 'retro' ? 'bg-[#8B261D]/5 backdrop-blur-md' : 'bg-black/80 backdrop-blur-[12px]'} p-0 md:p-2 xl:p-4 animate-in fade-in duration-500 pointer-events-auto`} onClick={onClose}>
             <div className={`w-full xl:w-[98vw] max-w-[1800px] h-full md:h-[96vh] ${globalTheme === 'retro' ? 'bg-[#EBE7DF] border-[#8B261D] border-2 shadow-[20px_20px_0px_0px_rgba(139,38,29,0.1)]' : `bg-[#080808] border-zinc-800/50 shadow-[0_0_100px_rgba(0,0,0,0.8)]`} md:rounded-3xl flex flex-col overflow-hidden relative transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] transform scale-100 animate-in zoom-in-95`} onClick={(e) => e.stopPropagation()}>
                 <div className={`h-24 md:h-28 border-b ${globalTheme === 'retro' ? 'border-[#8B261D]/10 bg-[#F5F2EA]' : `bg-black/40 backdrop-blur-md border-white/5`} flex items-center justify-between px-8 md:px-12 shrink-0 z-20 relative`} style={globalTheme !== 'retro' ? { borderColor: `${themeHex}1a` } : {}}>
                     <div className="flex items-center gap-6">

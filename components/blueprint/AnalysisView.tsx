@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { CreativeBlueprint, BlueprintLanguage, NarrativeFieldState } from '../../types';
 import { Bot, Zap, Loader2, Edit3, Eye, AlertCircle, Cpu, ArrowLeft, BrainCircuit, Activity, ScanLine } from 'lucide-react';
 import { CopyButton, ProcessingTimer, MarkdownRenderer } from '../SharedBlueprintComponents';
+import { AdminXRayButton } from '../XRayInspector';
 
 interface AnalysisViewProps {
     blueprint: CreativeBlueprint;
@@ -14,6 +15,7 @@ interface AnalysisViewProps {
     themeAccent: string;
     theme?: string;
     onBack?: () => void;
+    isAdmin?: boolean;
 }
 
 const SimpleMathRenderer = ({ formula, language }: { formula: string, language: BlueprintLanguage }) => {
@@ -85,7 +87,7 @@ const SimpleMathRenderer = ({ formula, language }: { formula: string, language: 
 }
 
 export const AnalysisView: React.FC<AnalysisViewProps> = ({ 
-    blueprint, language, isAesthetic, onAnalyzePsycho, onUpdateBlueprint, fieldState, themeAccent, theme, onBack 
+    blueprint, language, isAesthetic, onAnalyzePsycho, onUpdateBlueprint, fieldState, themeAccent, theme, onBack, isAdmin 
 }) => {
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     // Track start time for the processing timer
@@ -245,19 +247,32 @@ export const AnalysisView: React.FC<AnalysisViewProps> = ({
                                     <AlertCircle size={14} /> {errorMsg}
                                 </div>
                             )}
-                            <button 
-                                onClick={handleAnalyze}
-                                disabled={isAnalyzing}
-                                className={`px-8 py-3 ${theme === 'retro' ? 'bg-[#8B261D] hover:bg-[#631B15] text-white shadow-none' : (isAesthetic ? 'bg-rose-500 hover:bg-rose-400 text-black' : 'bg-gold-primary hover:bg-amber-400 text-black')} font-bold uppercase tracking-widest rounded-lg flex items-center gap-2 transition-all disabled:opacity-50`}
-                            >
-                                {isAnalyzing ? <Loader2 size={16} className="animate-spin" /> : <Zap size={16} />}
-                                {isAnalyzing ? (
-                                    <span className="flex items-center">
-                                        {language === 'EN' ? "Diagnosing..." : "诊断中..."}
-                                        <ProcessingTimer startTime={analysisStartTime} />
-                                    </span>
-                                ) : (language === 'EN' ? "Generate Report" : "生成精神分析报告")}
-                            </button>
+                            <div className="flex items-center gap-3">
+                                <button 
+                                    onClick={handleAnalyze}
+                                    disabled={isAnalyzing}
+                                    className={`px-8 py-3 ${theme === 'retro' ? 'bg-[#8B261D] hover:bg-[#631B15] text-white shadow-none' : (isAesthetic ? 'bg-rose-500 hover:bg-rose-400 text-black' : 'bg-gold-primary hover:bg-amber-400 text-black')} font-bold uppercase tracking-widest rounded-lg flex items-center gap-2 transition-all disabled:opacity-50`}
+                                >
+                                    {isAnalyzing ? <Loader2 size={16} className="animate-spin" /> : <Zap size={16} />}
+                                    {isAnalyzing ? (
+                                        <span className="flex items-center">
+                                            {language === 'EN' ? "Diagnosing..." : "诊断中..."}
+                                            <ProcessingTimer startTime={analysisStartTime} />
+                                        </span>
+                                    ) : (language === 'EN' ? "Generate Report" : "生成精神分析报告")}
+                                </button>
+                                <AdminXRayButton
+                                    isAdmin={isAdmin}
+                                    lang={language === 'EN' ? 'EN' : 'CN'}
+                                    title={language === 'EN' ? 'X-Ray Psychoanalysis Prompt' : 'X-Ray 精神分析指令'}
+                                    payload={{
+                                        task: 'Generate psychoanalysis report',
+                                        synopsis: blueprint.narrative?.synopsis || '',
+                                        fieldState
+                                    }}
+                                    disabled={isAnalyzing}
+                                />
+                            </div>
                         </div>
                     ) : (
                         <div className={`${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20' : 'bg-zinc-900/10 border-zinc-800'} border p-6 md:p-10 rounded-2xl shadow-2xl space-y-10`}>
@@ -332,14 +347,29 @@ export const AnalysisView: React.FC<AnalysisViewProps> = ({
 
                             <div className={`mt-8 pt-6 border-t ${theme === 'retro' ? 'border-black/10' : 'border-zinc-800'} text-center flex justify-between items-center`}>
                                 <p className={`text-[10px] ${theme === 'retro' ? 'text-[#8B261D]' : 'text-zinc-600'} font-mono uppercase tracking-[0.2em]`}>End of Clinical Report</p>
-                                 <button 
-                                    onClick={handleAnalyze}
-                                    disabled={isAnalyzing}
-                                    className={`text-xs font-bold uppercase tracking-wider ${themeAccent} hover:text-white transition-colors flex items-center gap-2`}
-                                >
-                                    {isAnalyzing ? <Loader2 size={12} className="animate-spin" /> : <Zap size={12} />}
-                                    {language === 'EN' ? "Update Diagnosis" : "更新诊断报告"}
-                                </button>
+                                <div className="flex items-center gap-2">
+                                    <AdminXRayButton
+                                        isAdmin={isAdmin}
+                                        lang={language === 'EN' ? 'EN' : 'CN'}
+                                        title={language === 'EN' ? 'X-Ray Psychoanalysis Update Prompt' : 'X-Ray 精神分析更新指令'}
+                                        payload={{
+                                            task: 'Update psychoanalysis report',
+                                            synopsis: blueprint.narrative?.synopsis || '',
+                                            fieldState,
+                                            previousReport: blueprint.narrative?.psychoanalysis || ''
+                                        }}
+                                        disabled={isAnalyzing}
+                                        className={theme === 'retro' ? 'h-8 w-8 bg-white border-[#8B261D]/20 text-[#8B261D] hover:bg-[#8B261D]/10' : 'h-8 w-8 bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-gold-primary'}
+                                    />
+                                    <button 
+                                        onClick={handleAnalyze}
+                                        disabled={isAnalyzing}
+                                        className={`text-xs font-bold uppercase tracking-wider ${themeAccent} hover:text-white transition-colors flex items-center gap-2`}
+                                    >
+                                        {isAnalyzing ? <Loader2 size={12} className="animate-spin" /> : <Zap size={12} />}
+                                        {language === 'EN' ? "Update Diagnosis" : "更新诊断报告"}
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     )}

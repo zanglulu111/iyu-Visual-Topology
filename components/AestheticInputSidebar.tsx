@@ -4,6 +4,7 @@ import { X, Sparkles, Send, Loader2, Eraser, MessageSquare } from 'lucide-react'
 import { BlueprintLanguage } from '../types';
 import { ProcessingTimer } from './SharedBlueprintComponents';
 import { useTheme } from '../contexts/ThemeContext';
+import { AdminXRayButton } from './XRayInspector';
 
 interface AestheticInputSidebarProps {
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface AestheticInputSidebarProps {
   onAnalyzeAndMap: (text: string) => Promise<void>;
   isProcessing: boolean;
   lang: BlueprintLanguage;
+  isAdmin?: boolean;
 }
 
 export const AestheticInputSidebar: React.FC<AestheticInputSidebarProps> = ({
@@ -18,7 +20,8 @@ export const AestheticInputSidebar: React.FC<AestheticInputSidebarProps> = ({
   onClose,
   onAnalyzeAndMap,
   isProcessing,
-  lang
+  lang,
+  isAdmin
 }) => {
   const { theme } = useTheme();
   const [inputText, setTextInput] = useState("");
@@ -130,6 +133,18 @@ export const AestheticInputSidebar: React.FC<AestheticInputSidebarProps> = ({
                 <Eraser size={16} />
               </button>
             )}
+            <AdminXRayButton
+              isAdmin={isAdmin}
+              lang={lang === 'EN' ? 'EN' : 'CN'}
+              title={lang === 'EN' ? 'X-Ray Spec Parser Prompt' : 'X-Ray 参数解析指令'}
+              payload={{
+                task: 'AI Reverse Mapping',
+                inputText
+              }}
+              disabled={!inputText.trim()}
+              className={`${inputText.trim() ? 'bg-zinc-800 text-rose-300 border-zinc-700 hover:border-rose-500' : 'bg-zinc-800 text-zinc-600 border-zinc-800'} p-2 rounded-lg`}
+              iconSize={18}
+            />
             <button
               onClick={handleSubmit}
               disabled={isProcessing || !inputText.trim()}

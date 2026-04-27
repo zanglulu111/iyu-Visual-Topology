@@ -1,11 +1,13 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { X, Wand2, Play, Eraser, Volume2, Video, Sliders, FileText, Check, Copy, Monitor, Film, Zap, ChevronRight, ChevronDown, BookOpen, Save, FilePlus, Aperture } from 'lucide-react';
-import { SutureConfig, DensityLevel, BlueprintLanguage, DriverType, LibraryCategoryDef, MetonymyStylePreset } from '../types';
-import { DIALOGUE_STYLES, VOICEOVER_STYLES, MONOLOGUE_STYLES, VISUAL_STYLES, ACTION_PACING, SHOT_DENSITY } from '../data/suture_styles';
+import { X, Wand2, Play, Eraser, Volume2, Video, Sliders, FileText, Check, Copy, Monitor, Film, Zap, ChevronRight, ChevronDown, BookOpen, Save, FilePlus, Aperture, Clapperboard, LayoutGrid, Mic2, Crosshair } from 'lucide-react';
+import { SutureConfig, SutureControlVersion, DensityLevel, BlueprintLanguage, DriverType, LibraryCategoryDef, MetonymyStylePreset } from '../types';
+import { DIALOGUE_STYLES, VOICEOVER_STYLES, MONOLOGUE_STYLES, VISUAL_STYLES, SCENE_MODES, SCENE_FUNCTIONS, SHOT_BUDGETS, SOUND_ARCHITECTURES } from '../data/suture_styles';
 import { MONTAGE_STYLES } from '../data/suture_montage';
 import { NarrativeLibraryModal } from './NarrativeLibraryModal';
 import { ProcessingTimer } from './SharedBlueprintComponents';
 import { useTheme } from '../contexts/ThemeContext';
+import { AdminXRayButton, type XRaySourceGroup } from './XRayInspector';
+import { buildSutureStep1Prompt } from '../services/suture_script_prompt';
 
 interface SutureModalProps {
     isOpen: boolean;
@@ -24,6 +26,7 @@ interface SutureModalProps {
     generationStartTime?: number | null;
     presets?: MetonymyStylePreset[];
     activePresetId?: string;
+    isAdmin?: boolean;
 }
 
 const DENSITY_OPTS = [
@@ -142,12 +145,18 @@ export const SutureModal: React.FC<SutureModalProps> = ({
     totalSourceText = "",
     generationStartTime,
     presets,
-    activePresetId
+    activePresetId,
+    isAdmin
 }) => {
     const { theme: globalTheme } = useTheme();
     const [sourceText, setSourceText] = useState("");
     const [resultText, setResultText] = useState("");
     const [config, setConfig] = useState<SutureConfig>({
+        controlVersion: 'v2',
+        sceneMode: 'AUTO',
+        sceneFunction: 'AUTO',
+        shotBudget: 'AUTO',
+        soundArchitecture: 'AUTO',
         dialogueDensity: 'AUTO',
         dialogueStyle: 'dial_default',
         voiceoverDensity: 'AUTO',
@@ -155,8 +164,7 @@ export const SutureModal: React.FC<SutureModalProps> = ({
         monologueDensity: 'AUTO',
         monologueStyle: 'mono_default',
         visualStyle: 'vis_wkw',
-        actionPacing: 'NORMAL',
-        shotDensity: 'SHOTS_25',
+        shotDensity: 'SHOTS_12',
         subjectFocus: 'AUTO',
         emptyShot: 'AUTO',
         montageId: 'montage_none',
@@ -243,15 +251,19 @@ export const SutureModal: React.FC<SutureModalProps> = ({
         BTN_PROCESSING: lang === 'EN' ? "PROCESSING..." : "转译中...",
         H_AUDIO: lang === 'EN' ? "AUDIO LAYER" : "声音层",
         H_VISUAL: lang === 'EN' ? "VISUAL LAYER" : "画面层",
+        H_DIRECTOR_DESK: lang === 'EN' ? "DIRECTOR DESK" : "导演台",
+        H_ADVANCED_AUDIO: lang === 'EN' ? "ADVANCED SOUND" : "声音微调",
+        L_SCENE_MODE: lang === 'EN' ? "SCENE MODE" : "场景类型",
+        L_SCENE_FUNCTION: lang === 'EN' ? "SCENE FUNCTION" : "戏剧功能",
+        L_SHOT_BUDGET: lang === 'EN' ? "SHOT BUDGET" : "镜头预算",
+        L_SOUND_ARCH: lang === 'EN' ? "SOUND DESIGN" : "声音架构",
         L_DIALOGUE: lang === 'EN' ? "DIALOGUE" : "对白",
         L_VO: lang === 'EN' ? "VOICEOVER" : "旁白",
         L_MONOLOGUE: lang === 'EN' ? "MONOLOGUE" : "独白",
-        L_AESTHETIC: lang === 'EN' ? "DIRECTOR STYLE" : "导演风格",
-        L_PACING: lang === 'EN' ? "PACING" : "节奏",
-        L_SHOTS: lang === 'EN' ? "SHOT COUNT" : "分镜数量",
+        L_AESTHETIC: lang === 'EN' ? "DIRECTOR GRAMMAR" : "导演语法",
         L_SUBJECT: lang === 'EN' ? "SUBJECT FOCUS" : "主体密度",
         L_B_ROLL: lang === 'EN' ? "EMPTY SHOT" : "空镜留白",
-        L_MONTAGE: lang === 'EN' ? "MONTAGE" : "蒙太奇",
+        L_MONTAGE: lang === 'EN' ? "EDITING STRUCTURE" : "剪辑结构",
         OUT_TITLE: lang === 'EN' ? "SCRIPT OUTPUT" : "转译脚本",
         OUT_WAITING: lang === 'EN' ? "Waiting for source text..." : "等待输入源文本...",
         CONSOLE: lang === 'EN' ? "CONSOLE" : "控制台",
@@ -354,6 +366,132 @@ export const SutureModal: React.FC<SutureModalProps> = ({
     // 文字统计逻辑优化
     const currentChunkCount = sourceText.replace(/\s/g, '').length;
     const totalCount = (totalSourceText || "").replace(/\s/g, '').length;
+    const currentMontageId = MONTAGE_STYLES.some(opt => opt.id === (config.montageId || 'montage_none'))
+        ? (config.montageId || 'montage_none')
+        : 'montage_none';
+
+    const toStyleOptions = (options: any[]) => options.map(opt => ({
+        value: opt.id,
+        label: getOptionName(options, opt.id),
+        description: opt.core || opt.instruction || opt.def
+    }));
+
+    const densityOptions = DENSITY_OPTS.map(opt => ({
+        value: opt.val,
+        label: lang === 'EN' ? opt.labelEN : opt.labelCN
+    }));
+
+    const sceneModeOptions = SCENE_MODES.map(opt => ({
+        value: opt.id,
+        label: getOptionName(SCENE_MODES, opt.id),
+        description: (opt as any).core || (opt as any).instruction
+    }));
+
+    const sceneFunctionOptions = SCENE_FUNCTIONS.map(opt => ({
+        value: opt.id,
+        label: getOptionName(SCENE_FUNCTIONS, opt.id),
+        description: (opt as any).core || (opt as any).instruction
+    }));
+
+    const shotBudgetOptions = SHOT_BUDGETS.map(opt => ({
+        value: opt.id,
+        label: getOptionName(SHOT_BUDGETS, opt.id),
+        description: (opt as any).core || (opt as any).instruction
+    }));
+
+    const soundArchitectureOptions = SOUND_ARCHITECTURES.map(opt => ({
+        value: opt.id,
+        label: getOptionName(SOUND_ARCHITECTURES, opt.id),
+        description: (opt as any).core || (opt as any).instruction
+    }));
+
+    const buildSandboxConfig = (values: Record<string, unknown>): SutureConfig => ({
+        ...config,
+        controlVersion: (values.controlVersion || config.controlVersion || 'v2') as SutureControlVersion,
+        sceneMode: String(values.sceneMode || config.sceneMode || 'AUTO'),
+        sceneFunction: String(values.sceneFunction || config.sceneFunction || 'AUTO'),
+        shotBudget: String(values.shotBudget || config.shotBudget || 'AUTO'),
+        soundArchitecture: String(values.soundArchitecture || config.soundArchitecture || 'AUTO'),
+        dialogueDensity: (values.dialogueDensity || config.dialogueDensity) as DensityLevel,
+        dialogueStyle: String(values.dialogueStyle || config.dialogueStyle),
+        voiceoverDensity: (values.voiceoverDensity || config.voiceoverDensity) as DensityLevel,
+        voiceoverStyle: String(values.voiceoverStyle || config.voiceoverStyle),
+        monologueDensity: (values.monologueDensity || config.monologueDensity) as DensityLevel,
+        monologueStyle: String(values.monologueStyle || config.monologueStyle),
+        visualStyle: String(values.visualStyle || config.visualStyle),
+        montageId: String(values.montageId || currentMontageId),
+        shotDensity: String(values.shotDensity || config.shotDensity),
+        subjectFocus: (values.subjectFocus || config.subjectFocus) as DensityLevel,
+        emptyShot: (values.emptyShot || config.emptyShot) as DensityLevel,
+        directorNote: String(values.directorNote ?? config.directorNote ?? '')
+    });
+
+    const getSutureXRaySources = (): XRaySourceGroup[] => [
+        {
+            id: 'text',
+            title: lang === 'EN' ? 'Text Sources' : '文本源',
+            tone: 'text',
+            items: [
+                {
+                    id: 'sourceText',
+                    label: lang === 'EN' ? 'Current Fragment' : '当前片段',
+                    kind: 'textarea',
+                    value: sourceText,
+                    editable: true,
+                    description: `${currentChunkCount} / ${totalCount}`
+                },
+                {
+                    id: 'totalSourceText',
+                    label: lang === 'EN' ? 'Full Source Text' : '完整源文本',
+                    kind: 'textarea',
+                    value: totalSourceText || '',
+                    editable: true
+                },
+                {
+                    id: 'directorNote',
+                    label: lang === 'EN' ? "Director's Note" : '导演手记',
+                    kind: 'textarea',
+                    value: config.directorNote || '',
+                    editable: true
+                }
+            ]
+        },
+        {
+            id: 'directorDesk',
+            title: lang === 'EN' ? 'Director Desk V2' : '导演台 V2',
+            tone: 'director',
+            items: [
+                { id: 'sceneMode', label: t.L_SCENE_MODE, kind: 'select', value: config.sceneMode || 'AUTO', options: sceneModeOptions, editable: true },
+                { id: 'sceneFunction', label: t.L_SCENE_FUNCTION, kind: 'select', value: config.sceneFunction || 'AUTO', options: sceneFunctionOptions, editable: true },
+                { id: 'shotBudget', label: t.L_SHOT_BUDGET, kind: 'select', value: config.shotBudget || 'AUTO', options: shotBudgetOptions, editable: true },
+                { id: 'soundArchitecture', label: t.L_SOUND_ARCH, kind: 'select', value: config.soundArchitecture || 'AUTO', options: soundArchitectureOptions, editable: true },
+                { id: 'visualStyle', label: t.L_AESTHETIC, kind: 'select', value: config.visualStyle, options: toStyleOptions(VISUAL_STYLES), editable: true },
+                { id: 'montageId', label: t.L_MONTAGE, kind: 'select', value: currentMontageId, options: toStyleOptions(MONTAGE_STYLES), editable: true }
+            ]
+        },
+        {
+            id: 'audio',
+            title: lang === 'EN' ? 'Advanced Sound Tuning' : '声音高级微调',
+            tone: 'audio',
+            items: [
+                { id: 'dialogueDensity', label: t.L_DIALOGUE, kind: 'select', value: config.dialogueDensity, options: densityOptions, editable: true },
+                { id: 'dialogueStyle', label: `${t.L_DIALOGUE} Style`, kind: 'select', value: config.dialogueStyle, options: toStyleOptions(DIALOGUE_STYLES), editable: true },
+                { id: 'voiceoverDensity', label: t.L_VO, kind: 'select', value: config.voiceoverDensity, options: densityOptions, editable: true },
+                { id: 'voiceoverStyle', label: `${t.L_VO} Style`, kind: 'select', value: config.voiceoverStyle, options: toStyleOptions(VOICEOVER_STYLES), editable: true },
+                { id: 'monologueDensity', label: t.L_MONOLOGUE, kind: 'select', value: config.monologueDensity, options: densityOptions, editable: true },
+                { id: 'monologueStyle', label: `${t.L_MONOLOGUE} Style`, kind: 'select', value: config.monologueStyle, options: toStyleOptions(MONOLOGUE_STYLES), editable: true }
+            ]
+        },
+        {
+            id: 'visual',
+            title: lang === 'EN' ? 'Frame Tuning' : '画格微调',
+            tone: 'frame',
+            items: [
+                { id: 'subjectFocus', label: t.L_SUBJECT, kind: 'select', value: config.subjectFocus, options: densityOptions, editable: true },
+                { id: 'emptyShot', label: t.L_B_ROLL, kind: 'select', value: config.emptyShot, options: densityOptions, editable: true }
+            ]
+        }
+    ];
 
     return (
         <div className="fixed inset-0 z-[200] flex flex-col animate-in fade-in duration-200 overflow-hidden">
@@ -398,8 +536,8 @@ export const SutureModal: React.FC<SutureModalProps> = ({
 
                         {/* Middle Pane: Controls */}
                         <div className={`w-[420px] border-r ${globalTheme === 'retro' ? 'border-[#8B261D]/20' : 'border-zinc-700'} flex flex-col ${globalTheme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#0c0c0c]'} shrink-0 relative ${globalTheme === 'retro' ? 'shadow-none' : 'shadow-[10px_0_30px_rgba(0,0,0,0.3)]'} z-10`}>
-                            <div className="flex-1 flex flex-col px-10 pt-2 pb-32 overflow-hidden">
-                                <div className="flex-1 flex flex-col justify-between">
+                            <div className="flex-1 flex flex-col px-8 pt-2 pb-6 overflow-hidden">
+                                <div className="flex-1 flex flex-col min-h-0">
                                 {/* Project Info Section integrated into flow */}
                                 <div className="space-y-4 pt-6">
                                     <div className={`flex items-center gap-3 pb-2 border-b ${globalTheme === 'retro' ? 'border-[#8B261D]/30' : 'border-zinc-700'}`}>
@@ -416,63 +554,96 @@ export const SutureModal: React.FC<SutureModalProps> = ({
                                     </div>
                                 </div>
 
-                                <div className="space-y-4 mt-12">
-                                    <div className={`flex items-center gap-3 pb-2 border-b ${globalTheme === 'retro' ? 'border-[#8B261D]/30' : 'border-zinc-700'} ${theme.text}`}>
-                                        <Volume2 size={16} />
-                                        <span className="text-sm font-black uppercase tracking-widest">{t.H_AUDIO}</span>
+                                <div className="mt-8 flex-1 min-h-0 overflow-y-auto custom-scrollbar pr-1 space-y-7">
+                                    <div className="space-y-4">
+                                        <div className={`flex items-center gap-3 pb-2 border-b ${globalTheme === 'retro' ? 'border-[#8B261D]/30' : 'border-zinc-700'} ${theme.text}`}>
+                                            <Clapperboard size={16} />
+                                            <span className="text-sm font-black uppercase tracking-widest">{t.H_DIRECTOR_DESK}</span>
+                                        </div>
+                                        <div className="space-y-3">
+                                            <ControlRow label={t.L_SCENE_MODE} theme={theme}>
+                                                <StyleButton value={config.sceneMode || 'AUTO'} options={SCENE_MODES} onClick={() => handleOpenSelector('sceneMode', t.L_SCENE_MODE, SCENE_MODES)} theme={theme} getOptionName={getOptionName} />
+                                            </ControlRow>
+                                            <ControlRow label={t.L_SCENE_FUNCTION} theme={theme}>
+                                                <StyleButton value={config.sceneFunction || 'AUTO'} options={SCENE_FUNCTIONS} onClick={() => handleOpenSelector('sceneFunction', t.L_SCENE_FUNCTION, SCENE_FUNCTIONS)} theme={theme} getOptionName={getOptionName} />
+                                            </ControlRow>
+                                            <ControlRow label={t.L_SHOT_BUDGET} theme={theme}>
+                                                <StyleButton value={config.shotBudget || 'AUTO'} options={SHOT_BUDGETS} onClick={() => handleOpenSelector('shotBudget', t.L_SHOT_BUDGET, SHOT_BUDGETS)} theme={theme} getOptionName={getOptionName} />
+                                            </ControlRow>
+                                        </div>
                                     </div>
-                                    <div className="space-y-3">
-                                        <ControlRow label={t.L_DIALOGUE} theme={theme}>
-                                            <StyleButton value={config.dialogueStyle} options={DIALOGUE_STYLES} onClick={() => handleOpenSelector('dialogueStyle', t.L_DIALOGUE, DIALOGUE_STYLES)} theme={theme} getOptionName={getOptionName} />
-                                            <DensitySwitch value={config.dialogueDensity} onChange={v => setConfig({ ...config, dialogueDensity: v })} theme={theme} lang={lang} />
-                                        </ControlRow>
-                                        <ControlRow label={t.L_VO} theme={theme}>
-                                            <StyleButton value={config.voiceoverStyle} options={VOICEOVER_STYLES} onClick={() => handleOpenSelector('voiceoverStyle', t.L_VO, VOICEOVER_STYLES)} theme={theme} getOptionName={getOptionName} />
-                                            <DensitySwitch value={config.voiceoverDensity} onChange={v => setConfig({ ...config, voiceoverDensity: v })} theme={theme} lang={lang} />
-                                        </ControlRow>
-                                        <ControlRow label={t.L_MONOLOGUE} theme={theme}>
-                                            <StyleButton value={config.monologueStyle} options={MONOLOGUE_STYLES} onClick={() => handleOpenSelector('monologueStyle', t.L_MONOLOGUE, MONOLOGUE_STYLES)} theme={theme} getOptionName={getOptionName} />
-                                            <DensitySwitch value={config.monologueDensity} onChange={v => setConfig({ ...config, monologueDensity: v })} theme={theme} lang={lang} />
-                                        </ControlRow>
-                                    </div>
-                                </div>
 
-                                <div className="space-y-4 mt-8">
-                                    <div className={`flex items-center gap-3 pb-2 border-b ${globalTheme === 'retro' ? 'border-[#8B261D]/30' : 'border-zinc-700'} ${theme.text}`}>
-                                        <Video size={16} />
-                                        <span className="text-sm font-black uppercase tracking-widest">{t.H_VISUAL}</span>
+                                    <div className="space-y-4">
+                                        <div className={`flex items-center gap-3 pb-2 border-b ${globalTheme === 'retro' ? 'border-[#8B261D]/30' : 'border-zinc-700'} ${theme.text}`}>
+                                            <Crosshair size={16} />
+                                            <span className="text-sm font-black uppercase tracking-widest">{t.H_VISUAL}</span>
+                                        </div>
+                                        <div className="space-y-3">
+                                            <ControlRow label={t.L_AESTHETIC} theme={theme}>
+                                                <StyleButton value={config.visualStyle} options={VISUAL_STYLES} onClick={() => handleOpenSelector('visualStyle', t.L_AESTHETIC, VISUAL_STYLES)} theme={theme} getOptionName={getOptionName} />
+                                            </ControlRow>
+                                            <ControlRow label={t.L_MONTAGE} theme={theme}>
+                                                <StyleButton value={currentMontageId} options={MONTAGE_STYLES} onClick={() => handleOpenSelector('montageId', t.L_MONTAGE, MONTAGE_STYLES)} theme={theme} getOptionName={getOptionName} />
+                                            </ControlRow>
+                                        </div>
                                     </div>
-                                    <div className="space-y-3">
-                                        <ControlRow label={t.L_AESTHETIC} theme={theme}>
-                                            <StyleButton value={config.visualStyle} options={VISUAL_STYLES} onClick={() => handleOpenSelector('visualStyle', t.L_AESTHETIC, VISUAL_STYLES)} theme={theme} getOptionName={getOptionName} />
-                                        </ControlRow>
-                                        <ControlRow label={t.L_MONTAGE} theme={theme}>
-                                            <StyleButton value={config.montageId || 'montage_none'} options={MONTAGE_STYLES} onClick={() => handleOpenSelector('montageId', t.L_MONTAGE, MONTAGE_STYLES)} theme={theme} getOptionName={getOptionName} />
-                                        </ControlRow>
-                                        <ControlRow label={t.L_SHOTS} theme={theme}>
-                                            <StyleButton value={config.shotDensity} options={SHOT_DENSITY} onClick={() => handleOpenSelector('shotDensity', t.L_SHOTS, SHOT_DENSITY)} theme={theme} getOptionName={getOptionName} />
-                                        </ControlRow>
-                                        <ControlRow label={t.L_PACING} theme={theme}>
-                                            <StyleButton value={config.actionPacing} options={ACTION_PACING} onClick={() => handleOpenSelector('actionPacing', t.L_PACING, ACTION_PACING)} theme={theme} getOptionName={getOptionName} />
-                                        </ControlRow>
-                                        <div className={`h-px ${globalTheme === 'retro' ? 'bg-[#8B261D]/10' : 'bg-zinc-800'} my-4`}></div>
-                                        <ControlRow label={t.L_SUBJECT} theme={theme}>
-                                            <DensitySwitch value={config.subjectFocus} onChange={v => setConfig({ ...config, subjectFocus: v })} theme={theme} lang={lang} variant="expanded" />
-                                        </ControlRow>
-                                        <ControlRow label={t.L_B_ROLL} theme={theme}>
-                                            <DensitySwitch value={config.emptyShot} onChange={v => setConfig({ ...config, emptyShot: v })} theme={theme} lang={lang} variant="expanded" />
-                                        </ControlRow>
+
+                                    <div className="space-y-4">
+                                        <div className={`flex items-center gap-3 pb-2 border-b ${globalTheme === 'retro' ? 'border-[#8B261D]/30' : 'border-zinc-700'} ${theme.text}`}>
+                                            <Mic2 size={16} />
+                                            <span className="text-sm font-black uppercase tracking-widest">{t.L_SOUND_ARCH}</span>
+                                        </div>
+                                        <div className="space-y-3">
+                                            <ControlRow label={t.L_SOUND_ARCH} theme={theme}>
+                                                <StyleButton value={config.soundArchitecture || 'AUTO'} options={SOUND_ARCHITECTURES} onClick={() => handleOpenSelector('soundArchitecture', t.L_SOUND_ARCH, SOUND_ARCHITECTURES)} theme={theme} getOptionName={getOptionName} />
+                                            </ControlRow>
+                                            <details className={`group rounded-md border ${globalTheme === 'retro' ? 'border-[#8B261D]/20' : 'border-zinc-800'} ${globalTheme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-black/20'}`}>
+                                                <summary className={`flex cursor-pointer list-none items-center justify-between px-3 py-2 text-[11px] font-black uppercase tracking-widest ${theme.textSecondary || 'text-zinc-200'}`}>
+                                                    <span>{t.H_ADVANCED_AUDIO}</span>
+                                                    <ChevronDown size={14} className="transition-transform group-open:rotate-180" />
+                                                </summary>
+                                                <div className={`space-y-3 border-t px-3 py-3 ${globalTheme === 'retro' ? 'border-[#8B261D]/15' : 'border-zinc-800'}`}>
+                                                    <ControlRow label={t.L_DIALOGUE} theme={theme}>
+                                                        <StyleButton value={config.dialogueStyle} options={DIALOGUE_STYLES} onClick={() => handleOpenSelector('dialogueStyle', t.L_DIALOGUE, DIALOGUE_STYLES)} theme={theme} getOptionName={getOptionName} />
+                                                        <DensitySwitch value={config.dialogueDensity} onChange={v => setConfig({ ...config, dialogueDensity: v })} theme={theme} lang={lang} />
+                                                    </ControlRow>
+                                                    <ControlRow label={t.L_VO} theme={theme}>
+                                                        <StyleButton value={config.voiceoverStyle} options={VOICEOVER_STYLES} onClick={() => handleOpenSelector('voiceoverStyle', t.L_VO, VOICEOVER_STYLES)} theme={theme} getOptionName={getOptionName} />
+                                                        <DensitySwitch value={config.voiceoverDensity} onChange={v => setConfig({ ...config, voiceoverDensity: v })} theme={theme} lang={lang} />
+                                                    </ControlRow>
+                                                    <ControlRow label={t.L_MONOLOGUE} theme={theme}>
+                                                        <StyleButton value={config.monologueStyle} options={MONOLOGUE_STYLES} onClick={() => handleOpenSelector('monologueStyle', t.L_MONOLOGUE, MONOLOGUE_STYLES)} theme={theme} getOptionName={getOptionName} />
+                                                        <DensitySwitch value={config.monologueDensity} onChange={v => setConfig({ ...config, monologueDensity: v })} theme={theme} lang={lang} />
+                                                    </ControlRow>
+                                                </div>
+                                            </details>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-4 pb-2">
+                                        <div className={`flex items-center gap-3 pb-2 border-b ${globalTheme === 'retro' ? 'border-[#8B261D]/30' : 'border-zinc-700'} ${theme.text}`}>
+                                            <LayoutGrid size={16} />
+                                            <span className="text-sm font-black uppercase tracking-widest">{lang === 'EN' ? 'FRAME TUNING' : '画格微调'}</span>
+                                        </div>
+                                        <div className="space-y-3">
+                                            <ControlRow label={t.L_SUBJECT} theme={theme}>
+                                                <DensitySwitch value={config.subjectFocus} onChange={v => setConfig({ ...config, subjectFocus: v })} theme={theme} lang={lang} variant="expanded" />
+                                            </ControlRow>
+                                            <ControlRow label={t.L_B_ROLL} theme={theme}>
+                                                <DensitySwitch value={config.emptyShot} onChange={v => setConfig({ ...config, emptyShot: v })} theme={theme} lang={lang} variant="expanded" />
+                                            </ControlRow>
+                                        </div>
                                     </div>
                                 </div>
                                 </div>
 
                                 {/* Execute Button integrated into bottom of scroll */}
-                                <div className="pt-6 pb-2">
+                                <div className="pt-6 pb-2 flex items-center gap-2">
                                     <button
                                         type="button"
                                         onClick={handleGenerateClick}
                                         disabled={isGenerating || !sourceText}
-                                        className={`w-full flex items-center justify-center gap-3 py-3 rounded-md font-black text-sm uppercase tracking-widest transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed ${theme.bg} ${theme.hoverBg} ${globalTheme === 'retro' ? 'text-white border border-[#8B261D]' : `text-black border border-white/30`} shadow-lg`}
+                                        className={`flex-1 flex items-center justify-center gap-3 py-3 rounded-md font-black text-sm uppercase tracking-widest transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed ${theme.bg} ${theme.hoverBg} ${globalTheme === 'retro' ? 'text-white border border-[#8B261D]' : `text-black border border-white/30`} shadow-lg`}
                                     >
                                         {isGenerating ? <Zap size={18} className="animate-pulse" /> : <Play size={18} fill="currentColor" />}
                                         {isGenerating ? (
@@ -482,6 +653,21 @@ export const SutureModal: React.FC<SutureModalProps> = ({
                                             </>
                                         ) : t.BTN_GENERATE}
                                     </button>
+                                    <AdminXRayButton
+                                        isAdmin={isAdmin}
+                                        lang={lang === 'EN' ? 'EN' : 'CN'}
+                                        title={lang === 'EN' ? 'X-Ray Metonymy Execution Prompt' : 'X-Ray 换喻执行指令'}
+                                        sources={getSutureXRaySources}
+                                        buildPayload={(values) => buildSutureStep1Prompt(
+                                            String(values.sourceText || ''),
+                                            buildSandboxConfig(values),
+                                            String(values.totalSourceText || ''),
+                                            undefined,
+                                            1,
+                                            ''
+                                        )}
+                                        disabled={!sourceText}
+                                    />
                                 </div>
                             </div>
                         </div>

@@ -1,13 +1,13 @@
 /**
  * 迷雾引擎 v3.0 — 物理属性注册表 (Physics Registry)
  * 
- * 全参数覆盖：M0-M7
+ * 全参数覆盖：M0-M7（含 M7A/M7B 双结项）
  * 
  * 注册策略分层：
  *   Layer 0: M0 精神拓扑 — 全域操作系统，定义公式的"空间曲率"
  *   Layer 1: M1-M5 — 基于 group 分组推导重力系数
  *   Layer 2: M6 — 基于 group/关键词推导代价等级
- *   Layer 3: M7 — 基于 group 推导叙事终局权重
+ *   Layer 3: M7A/M7B — 基于 group 推导叙事终局权重
  *   [REMOVED] M4X/M5X — v3.0 正交性优化已移除
  */
 
@@ -251,9 +251,9 @@ const M6_GROUP_PRICE: Record<string, number> = {
 };
 
 // ============================================
-// M7 存在落点 — 按 group 推导叙事终局权重
+// M7B 实在余痕 — 按 group 推导叙事终局权重
 // ============================================
-const M7_GROUP_GRAVITY: Record<string, number> = {
+const M7B_GROUP_GRAVITY: Record<string, number> = {
   "A": 0.20, "A. 幻灭与虚无": 0.20, "Void": 0.20,
   "B": 0.30, "B. 异化与同化": 0.30, "Assimilation": 0.30,
   "C": 0.70, "C. 超越与升华": 0.70, "Transcendence": 0.70,
@@ -261,9 +261,9 @@ const M7_GROUP_GRAVITY: Record<string, number> = {
 };
 
 // ============================================
-// M8 象征裁决 — 按 group 推导叙事质量
+// M7A 象征裁决 — 按 group 推导叙事质量
 // ============================================
-const M8_GROUP_GRAVITY: Record<string, number> = {
+const M7A_GROUP_GRAVITY: Record<string, number> = {
   "A": 0.15, "A. 幻灭的裁决": 0.15, "Verdict of Void": 0.15,
   "B": 0.35, "B. 异化的裁决": 0.35, "Verdict of Alienation": 0.35,
   "C": 0.65, "C. 升华的裁决": 0.65, "Verdict of Sinthome": 0.65,
@@ -319,7 +319,7 @@ export function getItemPhysics(itemId: string): MistItemPhysics {
 
 /**
  * 从词库数据的 group 字段推导 gravity
- * @param moduleKey - 'M1'|'M2'|'M3'|'M4'|'M5'|'M7'
+ * @param moduleKey - 'M1'|'M2'|'M3'|'M4'|'M5'|'M7A'|'M7B'
  * @param groupStr  - 词条的 group 字段值，如 "A. 结构性异化"
  */
 export function getGroupGravity(moduleKey: string, groupStr: string | undefined): number {
@@ -329,8 +329,10 @@ export function getGroupGravity(moduleKey: string, groupStr: string | undefined)
     'M3': M3_GROUP_GRAVITY,
     'M4': M4_GROUP_GRAVITY,
     'M5': M5_GROUP_GRAVITY,
-    'M7': M7_GROUP_GRAVITY,
-    'M8': M8_GROUP_GRAVITY,
+    'M7A': M7A_GROUP_GRAVITY,
+    'M7B': M7B_GROUP_GRAVITY,
+    // Backward-compatible alias for the old single-M7 residue slot.
+    'M7': M7B_GROUP_GRAVITY,
   };
   const table = tables[moduleKey];
   if (!table) return 0.5;

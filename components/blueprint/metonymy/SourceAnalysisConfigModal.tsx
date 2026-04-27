@@ -1,7 +1,8 @@
 
 import React, { useState } from 'react';
 import { X, Globe, MessageSquare, Sparkles } from 'lucide-react';
-import { VisualBibleAnalysisHints } from '../../../services/visualBibleGenerator';
+import { buildTextBasedVisualBiblePrompt, VisualBibleAnalysisHints } from '../../../services/visualBibleGenerator';
+import { AdminXRayButton } from '../../XRayInspector';
 
 interface SourceAnalysisConfigModalProps {
     isOpen: boolean;
@@ -10,6 +11,8 @@ interface SourceAnalysisConfigModalProps {
     lang: 'CN' | 'EN';
     themeAccent: string;
     theme?: string;
+    isAdmin?: boolean;
+    sourceText?: string;
 }
 
 export const SourceAnalysisConfigModal: React.FC<SourceAnalysisConfigModalProps> = ({
@@ -18,7 +21,9 @@ export const SourceAnalysisConfigModal: React.FC<SourceAnalysisConfigModalProps>
     onConfirm,
     lang,
     themeAccent,
-    theme
+    theme,
+    isAdmin,
+    sourceText = ''
 }) => {
     const [dialogue, setDialogue] = useState('');
 
@@ -90,13 +95,22 @@ export const SourceAnalysisConfigModal: React.FC<SourceAnalysisConfigModalProps>
                     >
                         {lang === 'CN' ? "取消" : "CANCEL"}
                     </button>
-                    <button
-                        onClick={() => onConfirm({ dialogue })}
-                        className={`px-6 py-2 ${theme === 'retro' ? 'bg-[#8B261D] hover:bg-[#6D1E16] text-white overflow-hidden' : `bg-${colorBase}/20 hover:bg-${colorBase}/30 text-${colorBase} border border-current`} font-bold text-sm rounded transition-all flex items-center gap-2 shadow-[0_4px_15px_rgba(0,0,0,0.3)]`}
-                    >
-                        <Sparkles size={14} />
-                        {lang === 'CN' ? "开始全局原文反推" : "START GLOBAL ANALYSIS"}
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <AdminXRayButton
+                            isAdmin={isAdmin}
+                            lang={lang}
+                            title={lang === 'CN' ? 'X-Ray 全局原文反推指令' : 'X-Ray Global Source Analysis Prompt'}
+                            getPayload={() => buildTextBasedVisualBiblePrompt(sourceText, { dialogue })}
+                            disabled={!sourceText.trim()}
+                        />
+                        <button
+                            onClick={() => onConfirm({ dialogue })}
+                            className={`px-6 py-2 ${theme === 'retro' ? 'bg-[#8B261D] hover:bg-[#6D1E16] text-white overflow-hidden' : `bg-${colorBase}/20 hover:bg-${colorBase}/30 text-${colorBase} border border-current`} font-bold text-sm rounded transition-all flex items-center gap-2 shadow-[0_4px_15px_rgba(0,0,0,0.3)]`}
+                        >
+                            <Sparkles size={14} />
+                            {lang === 'CN' ? "开始全局原文反推" : "START GLOBAL ANALYSIS"}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

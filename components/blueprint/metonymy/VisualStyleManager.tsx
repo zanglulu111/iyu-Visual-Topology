@@ -8,6 +8,7 @@ import { VisualBibleConfigModal } from './VisualBibleConfigModal';
 import { SourceAnalysisConfigModal } from './SourceAnalysisConfigModal';
 import { AssetDesignConfigModal } from './AssetDesignConfigModal';
 import { ProcessingTimer } from '../../SharedBlueprintComponents';
+import { generateLovartImage } from '../../../services/lovartImageService';
 
 interface VisualStyleManagerProps {
     presets: MetonymyStylePreset[];
@@ -21,6 +22,7 @@ interface VisualStyleManagerProps {
     isExpanded: boolean;
     onToggleExpand: (isExpanded: boolean) => void;
     sourceText: string;
+    isAdmin?: boolean;
 }
 
 export const VisualStyleManager: React.FC<VisualStyleManagerProps> = ({
@@ -34,7 +36,8 @@ export const VisualStyleManager: React.FC<VisualStyleManagerProps> = ({
     theme,
     isExpanded,
     onToggleExpand,
-    sourceText
+    sourceText,
+    isAdmin
 }) => {
     const [displayLang, setDisplayLang] = useState<'CN' | 'EN'>('CN');
     const [sectionLangs, setSectionLangs] = useState<Record<'characters' | 'scenes' | 'props', 'CN' | 'EN'>>({
@@ -76,6 +79,7 @@ export const VisualStyleManager: React.FC<VisualStyleManagerProps> = ({
 
     const [isToneUploading, setIsToneUploading] = useState(false);
     const [isAssetUploadingMap, setIsAssetUploadingMap] = useState<Record<string, boolean>>({});
+    const [isAssetGeneratingMap, setIsAssetGeneratingMap] = useState<Record<string, boolean>>({});
 
     const [copiedTone, setCopiedTone] = useState(false);
     const [copiedAssetId, setCopiedAssetId] = useState<string | null>(null);
@@ -332,6 +336,62 @@ export const VisualStyleManager: React.FC<VisualStyleManagerProps> = ({
         setPendingAssetUpload({ type, id });
         if (assetFileInputRef.current) {
             assetFileInputRef.current.click();
+        }
+    };
+
+    const handleGenerateAssetWithLovart = async (type: 'characters' | 'scenes' | 'props', asset: MetonymyAssetInput) => {
+        if (!isAdmin) {
+            setAlertMessage(lang === 'EN' ? "Only administrators can use Lovart generation." : "只有管理员可以使用 Lovart 生图。");
+            setIsAlertOpen(true);
+            return;
+        }
+
+        const currentAssetLang = getAssetLang(asset.id, type);
+        const designPrompt = currentAssetLang === 'CN'
+            ? (asset.analysis?.designPrompt || asset.analysis?.designPromptEn)
+            : (asset.analysis?.designPromptEn || asset.analysis?.designPrompt);
+        const fallbackPrompt = [
+            currentAssetLang === 'CN' ? asset.name : (asset.nameEn || asset.name),
+            asset.analysis?.anchors,
+            asset.analysis?.description
+        ].filter(Boolean).join('\n');
+        const prompt = designPrompt || fallbackPrompt;
+
+        if (!prompt.trim()) {
+            setAlertMessage(lang === 'EN' ? "No asset prompt available." : "当前资产缺少可用于生成的提示词。");
+            setIsAlertOpen(true);
+            return;
+        }
+
+        setIsAssetGeneratingMap(prev => ({ ...prev, [asset.id]: true }));
+        try {
+            const result = await generateLovartImage({
+                prompt: [
+                    'Generate one high-quality core visual asset image for a visual bible.',
+                    'Keep the subject clear and inspectable. Avoid extra text, watermark, UI frame, or collage unless the prompt explicitly asks for a design sheet.',
+                    prompt
+                ].join('\n\n'),
+                timeoutMs: 55000
+            });
+
+            if (!result.imageUrl) {
+                const detail = result.finalStatus === 'timeout'
+                    ? (lang === 'EN' ? "Lovart is still generating. Please try again later or check the Lovart canvas." : "Lovart 仍在生成中。稍后可重试，或去 Lovart 画布查看。")
+                    : (lang === 'EN' ? "Lovart did not return an image." : "Lovart 没有返回图片。");
+                setAlertMessage(detail);
+                setIsAlertOpen(true);
+                return;
+            }
+
+            const assets = activePreset.assets || { characters: [], scenes: [], props: [] };
+            const next = { ...assets };
+            next[type] = (next[type] || []).map(a => a.id === asset.id ? { ...a, imageUrl: result.imageUrl } : a);
+            updateActivePreset({ assets: next });
+        } catch (error: any) {
+            setAlertMessage(error?.message || (lang === 'EN' ? "Lovart generation failed." : "Lovart 生成失败。"));
+            setIsAlertOpen(true);
+        } finally {
+            setIsAssetGeneratingMap(prev => ({ ...prev, [asset.id]: false }));
         }
     };
 
@@ -633,16 +693,12 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
                                     className={`aspect-video ${theme === 'retro' ? 'bg-[#8B261D]/5' : 'bg-black'} relative cursor-pointer overflow-hidden flex items-center justify-center group/img`}
                                     onClick={() => triggerAssetUpload(type, asset.id)}
                                 >
-                                    {isAssetUploadingMap[asset.id] ? (
+                                    {isAssetUploadingMap[asset.id] || isAssetGeneratingMap[asset.id] ? (
                                         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm z-20">
                                             <Loader2 size={24} className={`animate-spin ${themeAccent} mb-2`} />
-                                            <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">{lang === 'EN' ? "Uploading..." : "上传中..."}</span>
-                                        </div>
-                                    ) : null}
-                                    {isAssetUploadingMap[asset.id] ? (
-                                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm z-20">
-                                            <Loader2 size={24} className={`animate-spin ${themeAccent} mb-2`} />
-                                            <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">{lang === 'EN' ? "Uploading..." : "上传中..."}</span>
+                                            <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">
+                                                {isAssetGeneratingMap[asset.id] ? (lang === 'EN' ? "Generating..." : "生成中...") : (lang === 'EN' ? "Uploading..." : "上传中...")}
+                                            </span>
                                         </div>
                                     ) : null}
                                     {asset.imageUrl ? (
@@ -673,6 +729,20 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
                                             </button>
                                         )}
                                         <div className="flex-1"></div>
+
+                                        {isAdmin && (asset.analysis?.designPrompt || asset.analysis?.designPromptEn || asset.analysis?.description) && (
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleGenerateAssetWithLovart(type, asset);
+                                                }}
+                                                disabled={isAssetGeneratingMap[asset.id]}
+                                                className={`p-1 rounded border transition-all w-5 h-5 flex items-center justify-center outline-none shadow-sm disabled:opacity-50 disabled:cursor-not-allowed ${theme === 'retro' ? 'bg-white border-[#8B261D]/20 hover:border-[#8B261D]/50 text-[#8B261D]/70 hover:text-[#8B261D]' : 'bg-zinc-900 border-zinc-700/50 hover:border-zinc-500 text-zinc-100 hover:text-white'}`}
+                                                title={lang === 'EN' ? "Generate Asset Image with Lovart" : "用 Lovart 生成资产图"}
+                                            >
+                                                {isAssetGeneratingMap[asset.id] ? <Loader2 size={11} className="animate-spin" /> : <Sparkles size={11} />}
+                                            </button>
+                                        )}
 
                                         {/* Copy Design Prompt */}
                                         {asset.analysis?.designPrompt && (
@@ -738,7 +808,41 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
                                         />
                                     </div>
 
+                                    <div className="space-y-1">
+                                        <span className={`text-[11px] font-bold uppercase tracking-widest block ${theme === 'retro' ? 'text-[#8B261D]' : 'text-zinc-100'}`}>
+                                            {lang === 'EN' ? `Visual Anchors` : `视觉锚点`}
+                                        </span>
+                                        <textarea
+                                            value={currentAssetLang === 'CN' ? (asset.analysis?.anchors || "") : (asset.analysis?.anchorsEn || "")}
+                                            onChange={(e) => {
+                                                const next = { ...assets };
+                                                next[type] = next[type].map(a => a.id === asset.id ? { ...a, analysis: { ...(a.analysis || { description: "", anchors: "" }), [currentAssetLang === 'CN' ? 'anchors' : 'anchorsEn']: e.target.value } } : a);
+                                                updateActivePreset({ assets: next });
+                                            }}
+                                            className={`w-full border rounded p-1.5 text-[10px] resize-none focus:outline-none focus:border-zinc-700 leading-relaxed h-12 custom-scrollbar ${theme === 'retro' ? 'bg-[#F4EFE0] border-[#8B261D]/20 text-[#8B261D]' : 'bg-zinc-950 border-zinc-800 text-zinc-100'}`}
+                                            placeholder={lang === 'EN' ? "3-5 high-weight visual keywords..." : "3-5个高权重视觉关键词..."}
+                                        />
+                                    </div>
 
+                                    <div className="space-y-1">
+                                        <span className={`text-[11px] font-bold uppercase tracking-widest block ${theme === 'retro' ? 'text-[#8B261D]' : 'text-zinc-100'}`}>
+                                            {type === 'characters'
+                                                ? (lang === 'EN' ? `Appearance Description` : `外貌描述`)
+                                                : (lang === 'EN' ? `Factual Description` : `事实描述`)}
+                                        </span>
+                                        <textarea
+                                            value={currentAssetLang === 'CN' ? (asset.analysis?.description || "") : (asset.analysis?.descriptionEn || "")}
+                                            onChange={(e) => {
+                                                const next = { ...assets };
+                                                next[type] = next[type].map(a => a.id === asset.id ? { ...a, analysis: { ...(a.analysis || { description: "", anchors: "" }), [currentAssetLang === 'CN' ? 'description' : 'descriptionEn']: e.target.value } } : a);
+                                                updateActivePreset({ assets: next });
+                                            }}
+                                            className={`w-full border rounded p-1.5 text-[10px] resize-none focus:outline-none focus:border-zinc-700 leading-relaxed h-20 custom-scrollbar ${theme === 'retro' ? 'bg-[#F4EFE0] border-[#8B261D]/20 text-[#8B261D]' : 'bg-zinc-950 border-zinc-800 text-zinc-100'}`}
+                                            placeholder={type === 'characters'
+                                                ? (lang === 'EN' ? "Age, face, body, clothing, material, visible condition..." : "年龄、脸部、身体、服装、材质、当前可见状态...")
+                                                : (lang === 'EN' ? "Material, structure, scale, wear, factual visual state..." : "材质、结构、尺度、磨损、事实视觉状态...")}
+                                        />
+                                    </div>
 
                                     <div className="space-y-1">
                                         <div className="flex items-center justify-between gap-2">
@@ -949,7 +1053,10 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
                                 {/* Reference Image Container - Stretches to fill height */}
                                 <div
                                     className={`flex-1 rounded-lg border relative group overflow-hidden cursor-pointer flex items-center justify-center aspect-[4/3] h-full ${theme === 'retro' ? 'bg-[#8B261D]/5 border-[#8B261D]/20 shadow-sm' : 'bg-zinc-950 border-zinc-800'}`}
-                                    onClick={() => fileInputRef.current?.click()}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        fileInputRef.current?.click();
+                                    }}
                                 >
                                     {isToneUploading ? (
                                         <div className={`absolute inset-0 flex flex-col items-center justify-center backdrop-blur-sm z-20 ${theme === 'retro' ? 'bg-[var(--bg-header)]/80' : 'bg-black/60'}`}>
@@ -965,7 +1072,15 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
                                             <span className="text-xs uppercase font-bold tracking-widest">{lang === 'EN' ? "Upload Reference" : "点击上传参考图"}</span>
                                         </div>
                                     )}
-                                    <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
+                                    <input
+                                        key={activePreset.id}
+                                        type="file"
+                                        ref={fileInputRef}
+                                        className="hidden"
+                                        accept="image/*"
+                                        onClick={(e) => e.stopPropagation()}
+                                        onChange={handleImageUpload}
+                                    />
                                 </div>
                             </div>
 
@@ -1091,6 +1206,9 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
                 initialHints={assetConfigTarget?.asset?.designConfig}
                 assetType={assetConfigTarget?.type}
                 theme={theme}
+                isAdmin={isAdmin}
+                assetName={assetConfigTarget?.asset?.name}
+                hasMainImage={Boolean(assetConfigTarget?.asset?.imageUrl)}
             />
 
             <VisualBibleConfigModal
@@ -1100,6 +1218,10 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
                 lang={lang === 'EN' ? 'EN' : 'CN'}
                 themeAccent={themeAccent}
                 theme={theme}
+                isAdmin={isAdmin}
+                hasToneImage={Boolean(activePreset.toneImage)}
+                sourceText={sourceText}
+                mode={analysisMode}
             />
 
             <SourceAnalysisConfigModal
@@ -1109,6 +1231,8 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
                 lang={lang === 'EN' ? 'EN' : 'CN'}
                 themeAccent={themeAccent}
                 theme={theme}
+                isAdmin={isAdmin}
+                sourceText={sourceText}
             />
             {/* Simple Themed Alert Modal */}
             {isAlertOpen && (
