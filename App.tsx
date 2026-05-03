@@ -19,7 +19,7 @@ import { AppHeader } from './components/AppHeader';
 import { EngineBottomBar } from './components/EngineBottomBar';
 import { TaskManagerPanel } from './components/TaskManagerPanel';
 import { LandingView } from './components/LandingView';
-import { UniversePortal } from './components/UniversePortal';
+import { UniversePortal } from './components/UniversePortalReplica';
 import { GlobalHomePage } from './components/GlobalHomePage';
 import { VisionSidebar } from './components/VisionSidebar';
 import { TheSkinSidebar } from './components/TheSkinSidebar';
@@ -180,8 +180,10 @@ const App: React.FC = () => {
 
     const [isAutoFilling, setIsAutoFilling] = useState(false);
     const [visionInput, setVisionInput] = useState("");
+    const [visionImageNote, setVisionImageNote] = useState("");
     const [visionImage, setVisionImage] = useState<string | null>(null);
     const [visionAnalysis, setVisionAnalysis] = useState("");
+    const [visionCandidateState, setVisionCandidateState] = useState<NarrativeFieldState>({});
     const [isAnalyzingImage, setIsAnalyzingImage] = useState(false);
     const [customLibraryDefs, setCustomLibraryDefs] = useState<Record<string, { def: string; core: string }>>({});
 
@@ -210,6 +212,26 @@ const App: React.FC = () => {
     const updateNarrativeState = (newState: NarrativeFieldState) => {
         undoRedoDispatch({ type: 'PUSH', state: newState });
         setActiveHistoryItem(null);
+    };
+
+    const applyVisionCandidateState = (candidateState: NarrativeFieldState) => {
+        const mergedState: NarrativeFieldState = { ...narrativeFieldState };
+        Object.entries(candidateState).forEach(([blockId, tags]) => {
+            const existing = mergedState[blockId] || [];
+            const nextTags = [...existing];
+            tags.forEach(tag => {
+                if (!nextTags.includes(tag)) nextTags.push(tag);
+            });
+            if (nextTags.length > 0) mergedState[blockId] = nextTags;
+        });
+        updateNarrativeState(mergedState);
+    };
+
+    const buildVisionTextContext = () => {
+        const parts: string[] = [];
+        if (visionInput.trim()) parts.push(`【全局自定义需求 / 文本种子】\n${visionInput.trim()}`);
+        if (visionImageNote.trim()) parts.push(`【图片解析提示】\n${visionImageNote.trim()}`);
+        return parts.join('\n\n');
     };
 
     const ensureFacesForTags = (tags: string[]) => {
@@ -566,12 +588,14 @@ const App: React.FC = () => {
 
         setIsAutoFilling(true); setVisionStartTime(Date.now());
         try {
+            setVisionCandidateState({});
             let currentAnalysis = visionAnalysis;
+            const visionTextContext = buildVisionTextContext();
             if (selectedDriver === DriverType.AESTHETIC) {
-                if (visionInput || visionImage) {
+                if (visionTextContext || visionImage) {
                     setIsAnalyzingImage(true);
                     try {
-                        const directive = await generateAestheticReverse(visionInput, visionImage);
+                        const directive = await generateAestheticReverse(visionTextContext, visionImage);
                         currentAnalysis = directive;
                         setVisionAnalysis(directive);
                     } catch (e) {
@@ -580,15 +604,15 @@ const App: React.FC = () => {
                         setIsAnalyzingImage(false);
                     }
                 }
-                const result = await geminiService.generateNarrativeAutoFill(selectedDriver, visionInput, visionImage, currentAnalysis);
-                updateNarrativeState(result);
+                const result = await geminiService.generateNarrativeAutoFill(selectedDriver, visionTextContext, visionImage, currentAnalysis);
+                setVisionCandidateState(result);
                 return;
             }
 
             if (selectedDriver === DriverType.COMMERCIAL) {
                 setIsAnalyzingImage(true);
                 try {
-                    const diagnosis = await geminiService.analyzeImage(visionImage, visionInput);
+                    const diagnosis = await geminiService.analyzeImage(visionImage, visionTextContext);
                     currentAnalysis = diagnosis;
                     setVisionAnalysis(diagnosis);
                 } catch (e) { console.error("Narrative diagnosis failed", e); }
@@ -596,15 +620,15 @@ const App: React.FC = () => {
             } else if (visionImage) {
                 setIsAnalyzingImage(true);
                 try {
-                    const result = await geminiService.analyzeImage(visionImage, visionInput);
+                    const result = await geminiService.analyzeImage(visionImage, visionTextContext);
                     currentAnalysis = result;
                     setVisionAnalysis(result);
                 } catch (e) { console.error("Image analysis failed", e); }
                 finally { setIsAnalyzingImage(false); }
             }
 
-            const result = await geminiService.generateNarrativeAutoFill(selectedDriver, visionInput, visionImage, currentAnalysis);
-            updateNarrativeState(result);
+            const result = await geminiService.generateNarrativeAutoFill(selectedDriver, visionTextContext, visionImage, currentAnalysis);
+            setVisionCandidateState(result);
 
         } catch (e) {
             console.error(e);
@@ -616,20 +640,21 @@ const App: React.FC = () => {
     };
 
     const handleAnalyzeImage = async () => {
-        if (!visionImage && !visionInput && selectedDriver !== DriverType.COMMERCIAL && selectedDriver !== DriverType.NARRATIVE && selectedDriver !== DriverType.AESTHETIC) return;
+        const visionTextContext = buildVisionTextContext();
+        if (!visionImage && !visionTextContext && selectedDriver !== DriverType.COMMERCIAL && selectedDriver !== DriverType.NARRATIVE && selectedDriver !== DriverType.AESTHETIC) return;
 
         if (!(await checkAndDeductToken(1))) return;
 
         setIsAnalyzingImage(true);
         try {
             if (selectedDriver === DriverType.AESTHETIC) {
-                const result = await generateAestheticReverse(visionInput, visionImage);
+                const result = await generateAestheticReverse(visionTextContext, visionImage);
                 setVisionAnalysis(result);
             } else if (selectedDriver === DriverType.COMMERCIAL) {
-                const diagnosis = await geminiService.analyzeImage(visionImage, visionInput);
+                const diagnosis = await geminiService.analyzeImage(visionImage, visionTextContext);
                 setVisionAnalysis(diagnosis);
             } else {
-                const result = await geminiService.analyzeImage(visionImage!, visionInput);
+                const result = await geminiService.analyzeImage(visionImage!, visionTextContext);
                 setVisionAnalysis(result);
             }
         } catch (e) {
@@ -1377,21 +1402,29 @@ const App: React.FC = () => {
                 setActiveHistoryItem({ ...activeHistoryItem, blueprint: blueprint });
             }
         } else {
-            setActiveBlueprint(blueprint);
+            const blueprintWithSnapshot: CreativeBlueprint = {
+                ...blueprint,
+                generationFieldState: blueprint.generationFieldState || activeBlueprint?.generationFieldState || activeHistoryItem?.fieldState,
+                generationWorldLaw: blueprint.generationWorldLaw || activeBlueprint?.generationWorldLaw || activeHistoryItem?.worldLaw,
+                generationVisionInput: blueprint.generationVisionInput ?? activeBlueprint?.generationVisionInput ?? activeHistoryItem?.visionInput,
+                generationVisionAnalysis: blueprint.generationVisionAnalysis ?? activeBlueprint?.generationVisionAnalysis ?? activeHistoryItem?.visionAnalysis
+            };
+
+            setActiveBlueprint(blueprintWithSnapshot);
 
             if (activeHistoryItem && (activeHistoryItem.type === 'NARRATIVE' || activeHistoryItem.type === 'BIBLE')) {
                 setCachedBlueprints(prev => ({
                     ...prev,
-                    [blueprint.treatmentId]: blueprint
+                    [blueprintWithSnapshot.treatmentId]: blueprintWithSnapshot
                 }));
 
                 const updatedItem = {
                     ...activeHistoryItem,
                     type: 'BIBLE' as const,
-                    blueprint: blueprint,
+                    blueprint: blueprintWithSnapshot,
                     savedBlueprints: {
                         ...(activeHistoryItem.savedBlueprints || {}),
-                        [blueprint.treatmentId]: blueprint
+                        [blueprintWithSnapshot.treatmentId]: blueprintWithSnapshot
                     }
                 };
                 updateHistoryItem(updatedItem);
@@ -1449,8 +1482,10 @@ const App: React.FC = () => {
                     type: 'BIBLE',
                     driverId: selectedDriver!,
                     driverName: getDriverName(),
-                    fieldState: { ...narrativeFieldState },
-                    worldLaw: { ...worldLawConfig },
+                    fieldState: { ...(blueprint.generationFieldState || narrativeFieldState) },
+                    worldLaw: { ...(blueprint.generationWorldLaw || worldLawConfig) },
+                    visionInput: blueprint.generationVisionInput ?? visionInput,
+                    visionAnalysis: blueprint.generationVisionAnalysis ?? visionAnalysis,
                     blueprint: blueprint,
                     treatments: generatedTreatments,
                     savedBlueprints: { [blueprint.treatmentId]: blueprint }
@@ -1488,7 +1523,7 @@ const App: React.FC = () => {
     };
 
     const getMetonymyThemeAccent = () => {
-        if (metonymyBlueprint?.driverType === DriverType.COMMERCIAL) return "text-cyan-400";
+        if (metonymyBlueprint?.driverType === DriverType.COMMERCIAL) return "text-mist-cyan";
         if (metonymyBlueprint?.driverType === DriverType.AESTHETIC) return "text-rose-400";
         if (metonymyBlueprint?.driverType === DriverType.EXPERIMENTAL) return "text-purple-400";
         if (metonymyBlueprint?.driverType === DriverType.TRAILER) return "text-orange-400";
@@ -1496,7 +1531,7 @@ const App: React.FC = () => {
     };
 
     const getMetonymyThemeBorder = () => {
-        if (metonymyBlueprint?.driverType === DriverType.COMMERCIAL) return "border-cyan-500/30";
+        if (metonymyBlueprint?.driverType === DriverType.COMMERCIAL) return "border-mist-cyan/30";
         if (metonymyBlueprint?.driverType === DriverType.AESTHETIC) return "border-rose-500/30";
         if (metonymyBlueprint?.driverType === DriverType.EXPERIMENTAL) return "border-purple-500/30";
         if (metonymyBlueprint?.driverType === DriverType.TRAILER) return "border-orange-500/30";
@@ -1512,21 +1547,34 @@ const App: React.FC = () => {
         setIsGenerating(true);
         setBibleStartTime(Date.now());
         try {
+            const snapshotFieldState = { ...narrativeFieldState };
+            const snapshotWorldLaw = activeHistoryItem?.worldLaw || { ...worldLawConfig };
+            const snapshotVisionInput = activeHistoryItem?.visionInput ?? visionInput;
+            const snapshotVisionAnalysis = activeHistoryItem?.visionAnalysis ?? visionAnalysis;
+
             const bp = await geminiService.generateBlueprint(
                 selectedDriver!,
                 treatment,
                 style,
-                narrativeFieldState,
-                visionInput,
+                snapshotFieldState,
+                snapshotVisionInput,
                 visionImage,
-                worldLawConfig,
-                visionAnalysis,
+                snapshotWorldLaw,
+                snapshotVisionAnalysis,
                 colorPalette.filter(c => c !== "")
             );
             if (bp) {
-                setCachedBlueprints(prev => ({ ...prev, [treatment.id]: bp }));
-                setActiveBlueprint(bp);
-                handleAddToHistory(bp); // Automatically save the generated Creative Bible
+                const blueprintWithSnapshot: CreativeBlueprint = {
+                    ...bp,
+                    treatmentId: bp.treatmentId || treatment.id,
+                    generationFieldState: { ...snapshotFieldState },
+                    generationWorldLaw: { ...snapshotWorldLaw },
+                    generationVisionInput: snapshotVisionInput,
+                    generationVisionAnalysis: snapshotVisionAnalysis
+                };
+                setCachedBlueprints(prev => ({ ...prev, [treatment.id]: blueprintWithSnapshot }));
+                setActiveBlueprint(blueprintWithSnapshot);
+                handleAddToHistory(blueprintWithSnapshot); // Automatically save the generated Creative Bible
                 handleViewChange('BIBLE');
             }
         } catch (e) {
@@ -1542,11 +1590,33 @@ const App: React.FC = () => {
         <QueryClientProvider client={queryClient}>
             <div className="min-h-screen bg-[var(--bg-main)] text-zinc-300 font-sans selection:bg-gold-primary/30 selection:text-white overflow-hidden transition-colors duration-1000">
                 {location.pathname === '/philosophers' ? (
-                    <PhilosopherPosterIndexPage
-                        lang={lang}
-                        setLang={setLang}
-                        onClose={() => navigate('/')}
-                    />
+                    isAdmin ? (
+                        <PhilosopherPosterIndexPage
+                            lang={lang}
+                            setLang={setLang}
+                            onClose={() => navigate('/')}
+                        />
+                    ) : (
+                        <div className="min-h-screen bg-[var(--bg-main)] text-zinc-300 flex items-center justify-center px-6">
+                            <div className="max-w-md w-full border border-white/10 bg-black/20 p-8 text-center">
+                                <div className="text-[10px] font-mono uppercase tracking-[0.28em] text-zinc-500 mb-4">
+                                    Admin Only
+                                </div>
+                                <h1 className="font-serif text-2xl text-white mb-3">
+                                    {lang === 'CN' ? '发布工作台仅管理员可见' : 'Publishing desk is admin-only'}
+                                </h1>
+                                <p className="text-sm text-zinc-500 leading-relaxed mb-6">
+                                    {lang === 'CN' ? '请使用管理员账号进入迷雾辞典，从管理员入口打开。' : 'Use an admin account and open it from the dictionary admin entry.'}
+                                </p>
+                                <button
+                                    onClick={() => navigate('/')}
+                                    className="px-5 py-2 border border-white/10 text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-400 hover:text-white hover:border-white/30 transition-colors"
+                                >
+                                    {lang === 'CN' ? '返回入口' : 'Back to Portal'}
+                                </button>
+                            </div>
+                        </div>
+                    )
                 ) : page === -1 ? (
                     <UniversePortal
                         lang={lang}
@@ -1632,6 +1702,8 @@ const App: React.FC = () => {
                             onDictionaryChange={setCodexDictionary}
                             onSectionChange={setCodexSection}
                             onDetailTabChange={setCodexDetailTab}
+                            isAdmin={isAdmin}
+                            onOpenPosterWorkspace={() => navigate('/philosophers')}
                         />
                     </div>
                 ) : viewMode === 'TOPOLOGY' ? (
@@ -1932,9 +2004,9 @@ const App: React.FC = () => {
                                         lang={lang}
                                         activeDriver={selectedDriver}
                                         cachedBlueprints={cachedBlueprints}
-                                        fieldState={activeHistoryItem?.fieldState || narrativeFieldState}
-                                        visionInput={activeHistoryItem?.visionInput || visionInput}
-                                        visionAnalysis={activeHistoryItem?.visionAnalysis || visionAnalysis}
+                                        fieldState={generatedTreatments.length > 0 ? narrativeFieldState : {}}
+                                        visionInput={generatedTreatments.length > 0 ? (activeHistoryItem?.visionInput || '') : ''}
+                                        visionAnalysis={generatedTreatments.length > 0 ? (activeHistoryItem?.visionAnalysis || '') : ''}
                                         thinkingXml={thinkingXml}
                                         worldLawConfig={activeHistoryItem?.worldLaw || worldLawConfig}
                                         onToggleTag={handleToggleTag}
@@ -1958,7 +2030,7 @@ const App: React.FC = () => {
                                         onGenerateAssetImage={handleVisionImageGenerate}
                                         onGenerateAssets={undefined}
                                         onAnalyzePsycho={geminiService.analyzePsychoStructure}
-                                        fieldState={activeHistoryItem?.fieldState || narrativeFieldState}
+                                        fieldState={activeBlueprint?.generationFieldState || activeHistoryItem?.fieldState || {}}
                                         treatments={generatedTreatments}
                                         onUpdateBlueprint={handleUpdateBlueprintCache}
                                         driverName={getDriverName()}
@@ -1970,9 +2042,9 @@ const App: React.FC = () => {
                                         onSaveToCollection={handleAddToHistory}
                                         onGlobalCopy={handleGlobalCopy}
                                         selectedDriver={selectedDriver || DriverType.NARRATIVE}
-                                        worldLaw={activeHistoryItem?.worldLaw || worldLawConfig}
-                                        visionInput={activeHistoryItem?.visionInput || visionInput}
-                                        visionAnalysis={activeHistoryItem?.visionAnalysis || visionAnalysis}
+                                        worldLaw={activeBlueprint?.generationWorldLaw || activeHistoryItem?.worldLaw || {}}
+                                        visionInput={activeBlueprint?.generationVisionInput || activeHistoryItem?.visionInput || ''}
+                                        visionAnalysis={activeBlueprint?.generationVisionAnalysis || activeHistoryItem?.visionAnalysis || ''}
                                         subjectType={activeHistoryItem?.subjectType || subjectType}
                                         aestheticMode={activeHistoryItem?.aestheticMode || aestheticMode}
                                         customLibraryDefs={customLibraryDefs}
@@ -2079,15 +2151,27 @@ const App: React.FC = () => {
                             zIndex={topSidebar === 'skin' ? 70 : 60}
                             onRandomizeSummaryGroup={handleRandomizeSummaryGroup}
                             onRandomizeStructureGroup={handleRandomizeStructureGroup}
+                            customTextSeed={visionInput}
+                            onCustomTextSeedChange={(value) => {
+                                setVisionInput(value);
+                                setVisionCandidateState({});
+                            }}
                         />
 
                         <VisionSidebar
                             isOpen={isVisionOpen}
                             onClose={() => setIsVisionOpen(false)}
-                            visionInput={visionInput}
-                            onVisionInputChange={setVisionInput}
+                            visionInput={visionImageNote}
+                            onVisionInputChange={(value) => {
+                                setVisionImageNote(value);
+                                setVisionCandidateState({});
+                            }}
+                            analysisTextContext={buildVisionTextContext()}
                             visionImage={visionImage}
-                            onVisionImageChange={setVisionImage}
+                            onVisionImageChange={(value) => {
+                                setVisionImage(value);
+                                setVisionCandidateState({});
+                            }}
                             onAutoFill={handleVisionAutoFill}
                             onGenerateImage={handleVisionImageGenerate}
                             isAutoFilling={isAutoFilling}
@@ -2100,6 +2184,9 @@ const App: React.FC = () => {
                             isAnalyzingImage={isAnalyzingImage}
                             isAdmin={isAdmin}
                             zIndex={topSidebar === 'vision' ? 70 : 60}
+                            candidateState={visionCandidateState}
+                            onApplyCandidateState={applyVisionCandidateState}
+                            onClearCandidateState={() => setVisionCandidateState({})}
                         />
 
                         <AestheticInputSidebar

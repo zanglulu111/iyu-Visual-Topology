@@ -485,6 +485,10 @@ export interface CreativeBlueprint {
   treatmentId: string;
   driverType: DriverType;
   styleName?: string;
+  generationFieldState?: NarrativeFieldState;
+  generationWorldLaw?: WorldLawConfig;
+  generationVisionInput?: string;
+  generationVisionAnalysis?: string;
   childBlueprint?: CreativeBlueprint;
   narrative: BlueprintNarrative;
   context: BlueprintContext;
@@ -570,6 +574,23 @@ export interface StyleItem {
   description?: string;
   dna: string;
   example?: string;
+  styleTitle?: string;
+  role?: string;
+  coreRewriteLogic?: string;
+  preserve?: string[];
+  transform?: {
+    time?: string;
+    narrator?: string;
+    psychology?: string;
+    sceneExpansion?: string;
+    conflictRendering?: string;
+    syntax?: string;
+    symbolism?: string;
+    dialogue?: string;
+    visualAssets?: string;
+  };
+  mAxisLens?: Record<string, string>;
+  avoid?: string[];
 }
 
 export interface StyleCategory {
@@ -601,6 +622,7 @@ export interface SutureConfig {
   monologueDensity: DensityLevel;
   monologueStyle: string;
   visualStyle: string;
+  filmCaseId?: string;
   shotDensity: string;
   subjectFocus: DensityLevel;
   emptyShot: DensityLevel;

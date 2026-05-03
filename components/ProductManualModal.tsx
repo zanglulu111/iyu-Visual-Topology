@@ -37,23 +37,23 @@ export const ProductManualModal: React.FC<ProductManualModalProps> = ({ isOpen, 
     const [selectedWhitepaper, setSelectedWhitepaper] = useState<WhitepaperSection | null>(null);
 
     const theme = {
-        text: driverType === DriverType.COMMERCIAL ? 'text-cyan-400' :
+        text: driverType === DriverType.COMMERCIAL ? 'text-mist-cyan' :
             driverType === DriverType.EXPERIMENTAL ? 'text-purple-400' :
                 driverType === DriverType.AESTHETIC ? 'text-rose-400' :
                     driverType === DriverType.TRAILER ? 'text-orange-400' : 'text-gold-primary',
-        border: driverType === DriverType.COMMERCIAL ? 'border-cyan-500' :
+        border: driverType === DriverType.COMMERCIAL ? 'border-mist-cyan' :
             driverType === DriverType.EXPERIMENTAL ? 'border-purple-500' :
                 driverType === DriverType.AESTHETIC ? 'border-rose-500' :
                     driverType === DriverType.TRAILER ? 'border-orange-500' : 'border-gold-primary',
-        bg: driverType === DriverType.COMMERCIAL ? 'bg-cyan-500' :
+        bg: driverType === DriverType.COMMERCIAL ? 'bg-mist-cyan' :
             driverType === DriverType.EXPERIMENTAL ? 'bg-purple-500' :
                 driverType === DriverType.AESTHETIC ? 'bg-rose-500' :
                     driverType === DriverType.TRAILER ? 'bg-orange-500' : 'bg-gold-primary',
-        hoverBorder: driverType === DriverType.COMMERCIAL ? 'hover:border-cyan-500/50' :
+        hoverBorder: driverType === DriverType.COMMERCIAL ? 'hover:border-mist-cyan/50' :
             driverType === DriverType.EXPERIMENTAL ? 'hover:border-purple-500/50' :
                 driverType === DriverType.AESTHETIC ? 'hover:border-rose-500/50' :
                     driverType === DriverType.TRAILER ? 'hover:border-orange-500/50' : 'hover:border-gold-primary/50',
-        groupHoverText: driverType === DriverType.COMMERCIAL ? 'group-hover:text-cyan-400' :
+        groupHoverText: driverType === DriverType.COMMERCIAL ? 'group-hover:text-mist-cyan' :
             driverType === DriverType.EXPERIMENTAL ? 'group-hover:text-purple-400' :
                 driverType === DriverType.AESTHETIC ? 'group-hover:text-rose-400' :
                     driverType === DriverType.TRAILER ? 'group-hover:text-orange-400' : 'group-hover:text-gold-primary',
@@ -238,12 +238,12 @@ export const ProductManualModal: React.FC<ProductManualModalProps> = ({ isOpen, 
                                     </div>
                                     <div className="grid grid-cols-1 xl:grid-cols-2 gap-12">
                                         <div className="bg-zinc-900/30 border border-zinc-800 rounded-2xl p-10 space-y-4 shadow-xl">
-                                            <div className="flex items-center gap-3 text-blue-400 border-b border-zinc-800 pb-6 mb-6">
+                                            <div className="flex items-center gap-3 text-gold-primary border-b border-zinc-800 pb-6 mb-6">
                                                 <Lightbulb size={24} />
                                                 <h4 className="text-base font-bold uppercase tracking-widest">具象比喻 (Conceptual Anchor)</h4>
                                             </div>
                                             <div className="text-zinc-400 leading-relaxed text-base md:text-lg italic whitespace-pre-wrap">
-                                                <HighlightText text={selectedConcept.detailed?.analogy || "暂无比喻内容。"} themeClass="text-blue-400" />
+                                                <HighlightText text={selectedConcept.detailed?.analogy || "暂无比喻内容。"} themeClass="text-gold-primary" />
                                             </div>
                                         </div>
                                         <div className="bg-zinc-900/30 border border-zinc-800 rounded-2xl p-10 space-y-4 shadow-xl">

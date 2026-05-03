@@ -1,0 +1,4 @@
+interface:
+  display_name: "Awesome Seedance"
+  short_description: "Seedance 2.0 prompt atlas and adaptation guide"
+  default_prompt: "Use $awesome-seedance to adapt Seedance 2.0 prompts from the atlas, choosing the right style, shot structure, motion, and dialogue cues."

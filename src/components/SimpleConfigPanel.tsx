@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { configService, ApiPreset } from '../services/configService';
 import {
   APIConfig,
-  AVAILABLE_MODELS,
   ENGINE_CONFIGS,
   ProviderId,
   ProviderMode,
@@ -80,7 +79,7 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
   const getThemeColor = (id: DriverType | null | undefined) => {
     if (isRetro) return '#8B261D';
     switch (id) {
-      case DriverType.COMMERCIAL: return '#22d3ee';
+      case DriverType.COMMERCIAL: return '#22D3EE';
       case DriverType.NARRATIVE: return '#D4AF37';
       case DriverType.AESTHETIC: return '#fb7185';
       case DriverType.EXPERIMENTAL: return '#c084fc';
@@ -516,7 +515,7 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
 
           <div className="grid grid-cols-2 gap-2 overflow-y-auto no-scrollbar pr-1">
             {ENGINE_CONFIGS.map((engine) => {
-              const baseList = engine.type === 'image' ? AVAILABLE_MODELS.image : AVAILABLE_MODELS.core;
+              const baseList = engine.allowedModels;
               const currentModel = config.engines[engine.id as keyof typeof config.engines];
               const modelList = baseList.includes(currentModel) ? baseList : [currentModel, ...baseList];
               const provider = getProviderForModel(currentModel);
@@ -594,4 +593,3 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
     </div>
   );
 };
-

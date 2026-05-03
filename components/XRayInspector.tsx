@@ -14,11 +14,13 @@ import {
     LayoutGrid,
     ListChecks,
     Mic2,
+    Redo2,
     RotateCcw,
     Search,
     Terminal,
     ToggleLeft,
     Type,
+    Undo2,
     X
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
@@ -73,6 +75,10 @@ export interface XRaySourceGroup {
 }
 
 type XRayDraftValues = Record<string, unknown>;
+type XRayHistoryEntry = {
+    values: XRayDraftValues;
+    groups: XRaySourceGroup[];
+};
 
 interface AdminXRayButtonProps {
     isAdmin?: boolean;
@@ -122,6 +128,14 @@ const cloneGroups = (groups: XRaySourceGroup[]): XRaySourceGroup[] => {
             sourcePath: item.sourcePath ? [...item.sourcePath] : undefined
         }))
     }));
+};
+
+const cloneDraftValues = (values: XRayDraftValues): XRayDraftValues => {
+    try {
+        return structuredClone(values);
+    } catch {
+        return JSON.parse(JSON.stringify(values));
+    }
 };
 
 const makeValues = (groups: XRaySourceGroup[]): XRayDraftValues => {
@@ -422,12 +436,12 @@ const toneClasses = (tone: XRayTone | undefined, theme: string) => {
             };
         case 'frame':
             return {
-                selectedPill: 'bg-sky-400/10 text-sky-300 ring-1 ring-sky-400/15',
-                emptyPill: 'bg-sky-400/5 text-sky-900/70',
-                selectedOption: 'bg-zinc-900 border-sky-400/30 text-sky-300 shadow-[0_0_18px_rgba(56,189,248,0.08)]',
-                unselectedOption: 'bg-zinc-950/80 border-zinc-800 text-zinc-400 hover:border-sky-400/50 hover:text-sky-100',
-                focusBorder: 'focus:border-sky-500/60',
-                chip: 'border-zinc-700 bg-zinc-900 text-sky-300 hover:text-sky-100 hover:border-sky-400/50'
+                selectedPill: 'bg-gold-primary/10 text-gold-primary ring-1 ring-gold-primary/15',
+                emptyPill: 'bg-gold-primary/5 text-yellow-900/70',
+                selectedOption: 'bg-zinc-900 border-gold-primary/30 text-gold-primary shadow-[0_0_18px_rgba(212,175,55,0.08)]',
+                unselectedOption: 'bg-zinc-950/80 border-zinc-800 text-zinc-400 hover:border-gold-primary/50 hover:text-yellow-100',
+                focusBorder: 'focus:border-gold-primary/60',
+                chip: 'border-zinc-700 bg-zinc-900 text-gold-primary hover:text-yellow-100 hover:border-gold-primary/50'
             };
         case 'surface':
             return {
@@ -440,12 +454,12 @@ const toneClasses = (tone: XRayTone | undefined, theme: string) => {
             };
         case 'text':
             return {
-                selectedPill: 'bg-zinc-900 text-cyan-300',
-                emptyPill: 'bg-zinc-900/70 text-cyan-900/70',
-                selectedOption: 'bg-zinc-900 border-zinc-800 text-cyan-300',
-                unselectedOption: 'bg-zinc-950/80 border-zinc-800 text-zinc-400 hover:border-cyan-300/50 hover:text-cyan-100',
-                focusBorder: 'focus:border-cyan-500/60',
-                chip: 'border-zinc-700 bg-zinc-900 text-cyan-300 hover:text-cyan-100 hover:border-cyan-400/50'
+                selectedPill: 'bg-zinc-900 text-amber-300',
+                emptyPill: 'bg-zinc-900/70 text-amber-900/70',
+                selectedOption: 'bg-zinc-900 border-zinc-800 text-amber-300',
+                unselectedOption: 'bg-zinc-950/80 border-zinc-800 text-zinc-400 hover:border-amber-300/50 hover:text-amber-100',
+                focusBorder: 'focus:border-amber-500/60',
+                chip: 'border-zinc-700 bg-zinc-900 text-amber-300 hover:text-amber-100 hover:border-amber-400/50'
             };
         default:
             return {
@@ -499,10 +513,10 @@ const groupMeta = (id: string, theme: string, lang: 'CN' | 'EN', tone?: XRayTone
         return {
             index: '03',
             eyebrow: lang === 'EN' ? 'Frame Tuning' : '画格微调 / 镜头重心',
-            border: isRetro ? 'border-l-[#2E647A]' : 'border-l-sky-400',
-            icon: isRetro ? 'text-[#2E647A]' : 'text-sky-300',
-            badge: isRetro ? 'bg-[#2E647A]/10 text-[#2E647A]' : 'bg-sky-400/10 text-sky-300',
-            header: isRetro ? 'bg-[#2E647A]/5' : 'bg-sky-400/5',
+            border: isRetro ? 'border-l-[#7A5A2E]' : 'border-l-gold-primary',
+            icon: isRetro ? 'text-[#7A5A2E]' : 'text-gold-primary',
+            badge: isRetro ? 'bg-[#7A5A2E]/10 text-[#7A5A2E]' : 'bg-gold-primary/10 text-gold-primary',
+            header: isRetro ? 'bg-[#7A5A2E]/5' : 'bg-gold-primary/5',
         };
     }
     if (id.includes('surface')) {
@@ -519,10 +533,10 @@ const groupMeta = (id: string, theme: string, lang: 'CN' | 'EN', tone?: XRayTone
         return {
             index: '00',
             eyebrow: lang === 'EN' ? 'Source Material' : '文本与图像入口',
-            border: isRetro ? 'border-l-[#4E4A7D]' : 'border-l-cyan-300',
-            icon: isRetro ? 'text-[#4E4A7D]' : 'text-cyan-300',
-            badge: isRetro ? 'bg-[#4E4A7D]/10 text-[#4E4A7D]' : 'bg-cyan-300/10 text-cyan-300',
-            header: isRetro ? 'bg-[#4E4A7D]/5' : 'bg-cyan-300/5',
+            border: isRetro ? 'border-l-[#6F4F2D]' : 'border-l-amber-300',
+            icon: isRetro ? 'text-[#6F4F2D]' : 'text-amber-300',
+            badge: isRetro ? 'bg-[#6F4F2D]/10 text-[#6F4F2D]' : 'bg-amber-300/10 text-amber-300',
+            header: isRetro ? 'bg-[#6F4F2D]/5' : 'bg-amber-300/5',
         };
     }
     return {
@@ -572,6 +586,13 @@ const normalizeTagValue = (value: unknown): string[] => {
     return String(value || '').split(/[,，\n]/).map(v => v.trim()).filter(Boolean);
 };
 
+const displayCnTag = (value: unknown) => String(value || '')
+    .replace(/^\[?SUR-END[.。]\s*/i, '')
+    .replace(/^\[?SURX[.。]\s*/i, '')
+    .replace(/\s*\([A-Za-z0-9\s/.'"_-]+\)\s*/g, '')
+    .replace(/^\[|\]$/g, '')
+    .trim();
+
 const isItemEmpty = (item: XRaySourceItem, value: unknown) => {
     if (item.alwaysShow) return false;
     const kind = item.kind || inferKind(item.value);
@@ -601,6 +622,11 @@ const LibraryBlockControl: React.FC<{
     const palette = toneClasses(item.tone, theme);
 
     const removeSelected = (tag: string) => onChange(selected.filter(item => item !== tag));
+    const toggleExpanded = () => setIsExpanded(prev => !prev);
+    const openFullLibrary = (event: React.MouseEvent) => {
+        event.stopPropagation();
+        onOpenLibrary?.(item);
+    };
     const toggleSelected = (option: XRaySourceOption) => {
         const tag = String(option.value || option.label);
         if (selected.includes(tag)) {
@@ -617,36 +643,65 @@ const LibraryBlockControl: React.FC<{
 
     return (
         <div className="space-y-1.5">
-            <div className={`flex w-full items-center gap-2 rounded-lg border px-2.5 py-1.5 text-left transition-colors ${theme === 'retro' ? 'bg-white/70 border-[#8B261D]/15 text-[#3D1A16]' : 'bg-black/35 border-zinc-800 text-zinc-300'}`}>
-                <button
-                    type="button"
-                    onClick={() => setIsExpanded(prev => !prev)}
-                    className={`flex min-w-0 w-[35%] shrink-0 items-center gap-2 rounded-md transition-colors ${theme === 'retro' ? 'hover:text-[#8B261D]' : 'hover:text-white'}`}
-                    title={isExpanded ? (lang === 'EN' ? 'Collapse inline entries' : '收起行内词条') : (lang === 'EN' ? 'Expand inline entries' : '展开行内词条')}
-                >
+            <div
+                role="button"
+                tabIndex={0}
+                onClick={toggleExpanded}
+                onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        toggleExpanded();
+                    }
+                }}
+                className={`flex w-full cursor-pointer items-center gap-2 rounded-lg border px-2.5 py-1.5 text-left transition-colors ${theme === 'retro' ? 'bg-white/70 border-[#8B261D]/15 text-[#3D1A16] hover:bg-white' : 'bg-black/35 border-zinc-800 text-zinc-300 hover:border-zinc-700'}`}
+                title={isExpanded ? (lang === 'EN' ? 'Collapse inline entries' : '收起行内可选关键词') : (lang === 'EN' ? 'Expand inline entries' : '展开行内可选关键词')}
+            >
+                <div className={`flex min-w-0 w-[35%] shrink-0 items-center gap-2 rounded-md transition-colors ${theme === 'retro' ? 'hover:text-[#8B261D]' : 'hover:text-white'}`}>
                     {isExpanded ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
                     <span className={`truncate text-[11px] font-black ${theme === 'retro' ? 'text-[#3D1A16]' : 'text-zinc-200'}`}>{item.label}</span>
-                </button>
-                <button
-                    type="button"
-                    onClick={() => onOpenLibrary?.(item)}
-                    className={`min-w-0 flex-1 rounded-md px-1 py-0.5 text-left transition-colors ${theme === 'retro' ? 'hover:bg-[#8B261D]/5' : 'hover:bg-white/5'}`}
-                    title={lang === 'EN' ? 'Open full library' : '进入完整词库'}
-                >
+                </div>
+                <div className="min-w-0 flex-1 px-1 py-0.5">
                     {selected.length > 0 ? (
                         <div className="flex flex-wrap gap-1.5">
                             {selected.map(tag => (
-                                <span key={tag} className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${palette.selectedPill}`}>
-                                    【{tag}】
+                                <span
+                                    key={tag}
+                                    className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold transition-colors ${palette.selectedPill} ${theme === 'retro' ? 'hover:bg-[#8B261D]/10' : 'hover:ring-1 hover:ring-gold-primary/40'}`}
+                                >
+                                    <button
+                                        type="button"
+                                        onClick={openFullLibrary}
+                                        className="min-w-0"
+                                        title={lang === 'EN' ? 'Open full library' : '进入完整词库'}
+                                    >
+                                        【{lang === 'CN' ? displayCnTag(tag) : tag}】
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={(event) => {
+                                            event.stopPropagation();
+                                            removeSelected(tag);
+                                        }}
+                                        className={`rounded-full p-0.5 transition-colors ${theme === 'retro' ? 'hover:bg-[#8B261D]/10' : 'hover:bg-white/10'}`}
+                                        title={lang === 'EN' ? 'Remove' : '删除'}
+                                        aria-label={lang === 'EN' ? `Remove ${tag}` : `删除 ${displayCnTag(tag)}`}
+                                    >
+                                        <X size={10} />
+                                    </button>
                                 </span>
                             ))}
                         </div>
                     ) : (
-                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${palette.emptyPill}`}>
+                        <button
+                            type="button"
+                            onClick={openFullLibrary}
+                            className={`rounded-full px-2 py-0.5 text-[10px] font-bold transition-colors ${palette.emptyPill} ${theme === 'retro' ? 'hover:bg-[#8B261D]/10' : 'hover:ring-1 hover:ring-zinc-500/40'}`}
+                            title={lang === 'EN' ? 'Open full library' : '进入完整词库'}
+                        >
                             【{item.placeholder || (lang === 'EN' ? 'Unselected' : '未选择')}】
-                        </span>
+                        </button>
                     )}
-                </button>
+                </div>
                 <span className={`shrink-0 text-[9px] font-mono ${theme === 'retro' ? 'text-[#8B261D]/45' : 'text-zinc-600'}`}>
                     {selected.length}/{maxSelected}
                 </span>
@@ -684,7 +739,7 @@ const LibraryBlockControl: React.FC<{
                                                 : palette.unselectedOption
                                             }`}
                                         >
-                                            【{option.label}】
+                                            【{lang === 'CN' ? displayCnTag(option.label) : option.label}】
                                         </button>
                                     );
                                 })}
@@ -719,7 +774,7 @@ const ChoiceLineControl: React.FC<{
                 {isExpanded ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
                 <span className={`w-[35%] shrink-0 truncate text-[11px] font-black ${theme === 'retro' ? 'text-[#3D1A16]' : 'text-zinc-200'}`}>{item.label}</span>
                 <span className={`min-w-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${current ? palette.selectedPill : palette.emptyPill}`}>
-                    【{display}】
+                    【{lang === 'CN' ? displayCnTag(display) : display}】
                 </span>
             </button>
             {isExpanded && (
@@ -740,7 +795,7 @@ const ChoiceLineControl: React.FC<{
                                     : palette.unselectedOption
                                 }`}
                             >
-                                【{option.label}】
+                                【{lang === 'CN' ? displayCnTag(option.label) : option.label}】
                             </button>
                         );
                     })}
@@ -756,7 +811,7 @@ const InlineChoiceControl: React.FC<{
     lang: 'CN' | 'EN';
     theme: string;
     onChange: (value: unknown) => void;
-}> = ({ item, value, theme, onChange }) => {
+}> = ({ item, value, lang, theme, onChange }) => {
     const palette = toneClasses(item.tone, theme);
 
     return (
@@ -777,7 +832,7 @@ const InlineChoiceControl: React.FC<{
                                     : palette.unselectedOption
                                 }`}
                             >
-                                【{option.label}】
+                                【{lang === 'CN' ? displayCnTag(option.label) : option.label}】
                             </button>
                         );
                     })}
@@ -838,16 +893,16 @@ const promptToneTextClass = (tone: XRayTone, theme: string, weight: 'font-bold' 
     if (theme === 'retro') {
         if (tone === 'director' || tone === 'engine') return `${weight} text-[#8B261D]`;
         if (tone === 'audio') return `${weight} text-[#7A2E65]`;
-        if (tone === 'frame') return `${weight} text-[#2E647A]`;
+        if (tone === 'frame') return `${weight} text-[#7A5A2E]`;
         if (tone === 'surface') return `${weight} text-[#3D5A4B]`;
-        if (tone === 'text') return `${weight} text-[#4E4A7D]`;
+        if (tone === 'text') return `${weight} text-[#6F4F2D]`;
         return `${weight} text-[#3D1A16]`;
     }
     if (tone === 'director' || tone === 'engine') return `${weight} text-gold-primary`;
     if (tone === 'audio') return `${weight} text-fuchsia-300`;
-    if (tone === 'frame') return `${weight} text-sky-300`;
+    if (tone === 'frame') return `${weight} text-gold-primary`;
     if (tone === 'surface') return `${weight} text-emerald-300`;
-    if (tone === 'text') return `${weight} text-cyan-300`;
+    if (tone === 'text') return `${weight} text-amber-300`;
     return `${weight} text-zinc-200`;
 };
 
@@ -855,16 +910,16 @@ const promptToneCodeClass = (tone: XRayTone, theme: string) => {
     if (theme === 'retro') {
         if (tone === 'director' || tone === 'engine') return 'rounded bg-[#8B261D]/10 px-1 text-[#8B261D]';
         if (tone === 'audio') return 'rounded bg-[#7A2E65]/10 px-1 text-[#7A2E65]';
-        if (tone === 'frame') return 'rounded bg-[#2E647A]/10 px-1 text-[#2E647A]';
+        if (tone === 'frame') return 'rounded bg-[#7A5A2E]/10 px-1 text-[#7A5A2E]';
         if (tone === 'surface') return 'rounded bg-[#3D5A4B]/10 px-1 text-[#3D5A4B]';
-        if (tone === 'text') return 'rounded bg-[#4E4A7D]/10 px-1 text-[#4E4A7D]';
+        if (tone === 'text') return 'rounded bg-[#6F4F2D]/10 px-1 text-[#6F4F2D]';
         return 'rounded bg-[#8B261D]/10 px-1 text-[#8B261D]';
     }
     if (tone === 'director' || tone === 'engine') return 'rounded bg-zinc-900 px-1 text-gold-primary';
     if (tone === 'audio') return 'rounded bg-zinc-900 px-1 text-fuchsia-300';
-    if (tone === 'frame') return 'rounded bg-zinc-900 px-1 text-sky-300';
+    if (tone === 'frame') return 'rounded bg-zinc-900 px-1 text-gold-primary';
     if (tone === 'surface') return 'rounded bg-zinc-900 px-1 text-emerald-300';
-    if (tone === 'text') return 'rounded bg-zinc-900 px-1 text-cyan-300';
+    if (tone === 'text') return 'rounded bg-zinc-900 px-1 text-amber-300';
     return 'rounded bg-zinc-900 px-1 text-gold-primary';
 };
 
@@ -884,7 +939,7 @@ const classifyPromptTone = (token: string, line = '', fallback: XRayTone = 'dire
     const tokenUpper = cleanToken.toUpperCase();
     const lineText = line.trim();
     const engineLine = /(^|\s|\*|#|[-:：])(?:M[0-9][AB]?|C[0-9]+|T[0-9]+)[.。\s:：]|缺失主体|真实遭遇|欲望幻想|大他者阻断|行动驱力|代价|爱欲重构|实在余痕/i.test(lineText);
-    const surfaceLine = /(SUR(?:[0-9X]*|-END)|SV[0-9]+|世界法则|表层|皮肤|外壳|类型基因|叙事动力|叙事结构|故事体量|时空|社会|职业身份|信念预设|对象预设|空间容器|显性收场|圣经风格|叙事视点|感官侧重|WORLD LAW|SURFACE|SKIN|PERSPECTIVE|SENSORY|BIBLE STYLE)/i.test(lineText);
+    const surfaceLine = /(SUR(?:[0-9X]*|-END)|SV[0-9]+|世界法则|表层|皮肤|外壳|类型基因|叙事动力|叙事结构|故事体量|时空|社会|职业身份|信念预设|对象预设|空间容器|显性收场|圣经风格|作者风格|叙事视点|感官侧重|WORLD LAW|SURFACE|SKIN|PERSPECTIVE|SENSORY|BIBLE STYLE|AUTHOR STYLE)/i.test(lineText);
     const textLine = /(文本|图像|视觉|素材|输入|来源|源文本|参考图|TEXT|IMAGE|VISUAL|SOURCE|VISION|INPUT|TREATMENT|PATH CONTENT)/i.test(lineText);
 
     if (/导演笔记|导演手记|DIRECTOR'?S NOTE/i.test(cleanToken)) return 'text';
@@ -975,6 +1030,8 @@ export const XRayInspectorModal: React.FC<XRayInspectorModalProps> = ({
     const [query, setQuery] = useState('');
     const [previewMode, setPreviewMode] = useState<'preview' | 'edit'>('preview');
     const [activeLibraryItemId, setActiveLibraryItemId] = useState<string | null>(null);
+    const [historyPast, setHistoryPast] = useState<XRayHistoryEntry[]>([]);
+    const [historyFuture, setHistoryFuture] = useState<XRayHistoryEntry[]>([]);
 
     const displayTitle = title || (lang === 'EN' ? 'X-Ray Prompt Inspector' : 'X-Ray 指令透视仪');
 
@@ -1011,6 +1068,8 @@ export const XRayInspectorModal: React.FC<XRayInspectorModalProps> = ({
         setQuery('');
         setPreviewMode('preview');
         setActiveLibraryItemId(null);
+        setHistoryPast([]);
+        setHistoryFuture([]);
         setSnapshot(formatPayload(buildPayload ? buildPayload(nextValues, nextGroups) : resolvePayload(nextValues, nextGroups)));
     };
 
@@ -1029,10 +1088,36 @@ export const XRayInspectorModal: React.FC<XRayInspectorModalProps> = ({
 
     const handleReset = () => {
         const groups = cloneGroups(baseSourceGroups);
-        const values = { ...baseDraftValues };
+        const values = cloneDraftValues(baseDraftValues);
+        setHistoryPast(prev => [...prev.slice(-79), { values: cloneDraftValues(draftValues), groups: cloneGroups(sourceGroups) }]);
+        setHistoryFuture([]);
         setSourceGroups(groups);
         setDraftValues(values);
         syncSnapshot(values, groups);
+    };
+
+    const applyWorkbenchState = (entry: XRayHistoryEntry) => {
+        const groups = cloneGroups(entry.groups);
+        const values = cloneDraftValues(entry.values);
+        setSourceGroups(groups);
+        setDraftValues(values);
+        syncSnapshot(values, groups);
+    };
+
+    const handleUndo = () => {
+        if (historyPast.length === 0) return;
+        const previous = historyPast[historyPast.length - 1];
+        setHistoryPast(prev => prev.slice(0, -1));
+        setHistoryFuture(prev => [{ values: cloneDraftValues(draftValues), groups: cloneGroups(sourceGroups) }, ...prev].slice(0, 80));
+        applyWorkbenchState(previous);
+    };
+
+    const handleRedo = () => {
+        if (historyFuture.length === 0) return;
+        const next = historyFuture[0];
+        setHistoryFuture(prev => prev.slice(1));
+        setHistoryPast(prev => [...prev.slice(-79), { values: cloneDraftValues(draftValues), groups: cloneGroups(sourceGroups) }]);
+        applyWorkbenchState(next);
     };
 
     const updateValue = (itemId: string, value: unknown) => {
@@ -1041,6 +1126,8 @@ export const XRayInspectorModal: React.FC<XRayInspectorModalProps> = ({
             ...group,
             items: group.items.map(item => item.id === itemId ? { ...item, value } : item)
         }));
+        setHistoryPast(prev => [...prev.slice(-79), { values: cloneDraftValues(draftValues), groups: cloneGroups(sourceGroups) }]);
+        setHistoryFuture([]);
         setDraftValues(nextValues);
         setSourceGroups(nextGroups);
         syncSnapshot(nextValues, nextGroups);
@@ -1313,9 +1400,33 @@ export const XRayInspectorModal: React.FC<XRayInspectorModalProps> = ({
                 <div className="flex min-h-0 flex-1">
                     <aside className={`flex w-[30%] min-w-[300px] max-w-[440px] flex-col border-r ${theme === 'retro' ? 'bg-[#F2EDDE]/70 border-[#8B261D]/10' : 'bg-[#080808] border-zinc-800'}`}>
                         <div className={`shrink-0 border-b p-3 ${theme === 'retro' ? 'border-[#8B261D]/10' : 'border-zinc-800'}`}>
-                            <div className={`mb-3 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest ${theme === 'retro' ? 'text-[#8B261D]' : 'text-zinc-400'}`}>
-                                <Database size={13} />
-                                {lang === 'EN' ? 'Input Sources' : '输入源控制台'}
+                            <div className="mb-3 flex items-center justify-between gap-3">
+                                <div className={`flex min-w-0 items-center gap-2 text-[10px] font-black uppercase tracking-widest ${theme === 'retro' ? 'text-[#8B261D]' : 'text-zinc-400'}`}>
+                                    <Database size={13} />
+                                    {lang === 'EN' ? 'Input Sources' : '输入源控制台'}
+                                </div>
+                                <div className="flex shrink-0 items-center gap-1">
+                                    <button
+                                        type="button"
+                                        onClick={handleUndo}
+                                        disabled={historyPast.length === 0}
+                                        className={`flex h-7 w-7 items-center justify-center rounded-lg border transition-all disabled:cursor-not-allowed disabled:opacity-35 ${theme === 'retro' ? 'bg-white/70 border-[#8B261D]/15 text-[#8B261D] hover:bg-[#8B261D]/5' : 'bg-black/40 border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-white'}`}
+                                        title={lang === 'EN' ? 'Undo' : '撤回'}
+                                        aria-label={lang === 'EN' ? 'Undo' : '撤回'}
+                                    >
+                                        <Undo2 size={13} />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={handleRedo}
+                                        disabled={historyFuture.length === 0}
+                                        className={`flex h-7 w-7 items-center justify-center rounded-lg border transition-all disabled:cursor-not-allowed disabled:opacity-35 ${theme === 'retro' ? 'bg-white/70 border-[#8B261D]/15 text-[#8B261D] hover:bg-[#8B261D]/5' : 'bg-black/40 border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-white'}`}
+                                        title={lang === 'EN' ? 'Redo' : '前进'}
+                                        aria-label={lang === 'EN' ? 'Redo' : '前进'}
+                                    >
+                                        <Redo2 size={13} />
+                                    </button>
+                                </div>
                             </div>
                             <div className={`flex items-center gap-2 rounded-lg border px-3 py-2 ${theme === 'retro' ? 'bg-white/70 border-[#8B261D]/15' : 'bg-black/40 border-zinc-800'}`}>
                                 <Search size={13} className={theme === 'retro' ? 'text-[#8B261D]/50' : 'text-zinc-600'} />

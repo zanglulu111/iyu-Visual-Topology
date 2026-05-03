@@ -3,6 +3,7 @@ import { NarrativeFieldState, CreativeTreatment, WorldLawConfig, StyleConfig } f
 import { POETIC_ENGINE_BLOCKS as EXPERIMENTAL_ENGINE_BLOCKS } from '../data/poetic_data';
 import { EXPERIMENTAL_SKIN_BLOCKS } from '../data/experimental_skin';
 import { findItemDetails } from './dataRegistry';
+import { getVisionAnchorProtocol } from '../data/engine_core/narrative_protocols';
 
 export const buildExperimentalPrompt = (
   duration: string,
@@ -25,7 +26,7 @@ export const buildExperimentalPrompt = (
     ## 1. 实验基因
     ${engineContext}
     
-    ${visionInput ? `## 核心意象种子: "${visionInput}"` : ""}
+    ${visionInput || visionImage ? getVisionAnchorProtocol(visionInput, Boolean(visionImage)) : ""}
 
     ## 2. 现象学还原协议
     去语义化，专注于存在的原始状态。

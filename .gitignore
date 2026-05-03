@@ -33,7 +33,11 @@ philosophy-kb/
 
 # Local agent resources and generated media
 .agents/resources/
+.agents/.python-deps/
 outputs/
+
+# Local asset links
+src/assets/philosophers
 
 # Python runtime cache
 __pycache__/

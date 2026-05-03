@@ -407,7 +407,7 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
                                                 left: 0;
                                                 width: 100%;
                                                 height: 100px;
-                                                background: linear-gradient(to bottom, transparent, rgba(34, 211, 238, 0.15), transparent);
+                                                background: linear-gradient(to bottom, transparent, rgba(212, 175, 55, 0.15), transparent);
                                                 z-index: 21;
                                                 animation: scanline 4s linear infinite;
                                                 pointer-events: none;
@@ -558,5 +558,4 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
         </div>
     );
 };
-
 

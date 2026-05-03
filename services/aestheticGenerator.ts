@@ -131,8 +131,8 @@ export const buildAestheticPrompt = (
 
   // VISION ANCHOR LOGIC
   let visionAnchorInstruction = "";
-  if (visionInput) {
-      visionAnchorInstruction = getVisionAnchorProtocol(visionInput);
+  if (visionInput || visionImage) {
+      visionAnchorInstruction = getVisionAnchorProtocol(visionInput, Boolean(visionImage));
   }
 
   // PALETTE INJECTION

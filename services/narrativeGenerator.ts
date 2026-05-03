@@ -3,7 +3,7 @@
 // ============================================================================
 
 // 📦 1. 进口原料仓库：从外部文件借用"图纸"和"词典"
-import { NarrativeFieldState, CreativeTreatment, WorldLawConfig, StyleConfig, FaceState } from '../types';
+import { NarrativeFieldState, CreativeTreatment, WorldLawConfig, StyleConfig, FaceState, StyleItem } from '../types';
 import { NARRATIVE_ENGINE_BLOCKS } from '../data/engine_core/narrative_engine';
 import { ALL_SKIN_BLOCKS } from '../data/skin_libraries';
 import { SV2_DATA } from '../data/engine_sv/SV2'; // 特权词库：决定字数的 SV2 (体量)
@@ -54,7 +54,7 @@ export type PromptArchVersion = 'legacy' | 'v1' | 'v2' | 'v3';
 // 这样 AI 平台才能 100% 缓存它，省下大量算力和费用 (Cache Hits > 80%)。
 // ============================================================================
 const NARRATIVE_SYSTEM_BIBLE = `
-Role: 殿堂级电影编剧 & 叙事架构师（戛纳/奥斯卡级别）。
+Role: 电影级叙事创作大师 & 文学级文本塑造者（戛纳/奥斯卡级叙事判断力）。
 # 《迷雾学派》全局宪法与底层协议 (SYSTEM BIBLE)
 以下是你作为本引擎必须无条件遵守的铁律与计算公式：
 
@@ -125,7 +125,7 @@ const buildFormalLawEngine = (
     : '';
 
   const styleRule = styleName && styleName !== 'Standard Literary' && styleName.length > 0
-    ? `\n    STYLE_EMULATION: 模仿 [${styleName}] 的底层句法逻辑与节奏，严禁复制其经典台词或表层符号。`
+    ? `\n    STYLE_RENDERER: 调用 [${styleName}] 的底层作者性机制与节奏，严禁复制其经典台词或表层符号。`
     : '';
 
   return `
@@ -462,12 +462,12 @@ export const buildNarrativePrompt = (
   }
 
   // ============================================================================
-  // 📦 步骤 7：提取视觉参考提示 (如果你上传了参考图或者视觉锚点)
+  // 📦 步骤 7：提取图文种子锚定协议 (文本语义锁定 / 图像视觉锁定 / 空白反推)
   // ============================================================================
   // VISION ANCHOR LOGIC (NEW - IMPORTED)
   let visionAnchorInstruction = "";
-  if (visionInput) {
-    visionAnchorInstruction = getVisionAnchorProtocol(visionInput);
+  if (visionInput || visionImage) {
+    visionAnchorInstruction = getVisionAnchorProtocol(visionInput, Boolean(visionImage));
   }
 
   // ============================================================================
@@ -601,6 +601,78 @@ ${pitchSkeletons.map(s => `      "${s}": "以氛围与环境压迫展开此阶�
   return { text: NARRATIVE_SYSTEM_BIBLE + '\n\n' + dynamicTaskPrompt, images: visionImage ? [visionImage] : [] };
 };
 
+const formatInstructionList = (items: string[] = []): string => {
+  return items.filter(Boolean).map(item => `- ${item}`).join('\n');
+};
+
+const formatInstructionMap = (items: Record<string, string> = {}): string => {
+  return Object.entries(items)
+    .filter(([, value]) => Boolean(value))
+    .map(([key, value]) => `- **${key}:** ${value}`)
+    .join('\n');
+};
+
+const buildAuthorialRendererProtocol = (
+  styleName: string,
+  styleDNA: string,
+  styleItem?: StyleItem,
+  directorStyle?: { core?: string; def?: string }
+): string => {
+  const isDefault = !styleItem && !directorStyle;
+  const styleTitle = styleItem?.styleTitle || styleItem?.description || directorStyle?.core || '清晰电影化文学';
+  const coreRewriteLogic = styleItem?.coreRewriteLogic
+    || (styleDNA
+      ? `将 SOURCE 大纲通过「${styleTitle}」的作者性机制进行染色、扩写与调声；${styleDNA}`
+      : '保持电影化小说的清晰叙述，以已选大纲、M 轴精神弧线与世界法则为最高约束。');
+  const styleDNAInstruction = styleDNA ? `\n**风格 DNA（只能抽象使用）:** ${styleDNA}` : '';
+
+  const sourceFidelityPreserve = [
+    '严格保留 SOURCE 中人物的职业、社会位置、关系位置、关键场所与事件功能；不得为了贴合作者风格替换为更方便的身份或机构角色。',
+    '作者风格不得改变主角在 SOURCE 中的社会位置；例如口译员不能被改写成办事员，但可以让口译工作发生在办事窗口、档案室、听证会、等待室等作者风格空间中。'
+  ];
+
+  const basePreserve = styleItem?.preserve || [
+    '保留 SOURCE 中的人物关系、核心事件、因果方向与结局倾向。',
+    '保留 M0-M7A/M7B 的精神弧线、意义裁决与实在余痕，不得用风格重写覆盖它们。',
+    '保留世界物理法则、精确时空坐标、SUR 表层设定与已选体量/结构约束。'
+  ];
+  const preserve = [...sourceFidelityPreserve, ...basePreserve];
+
+  const transform = {
+    '叙述时间': styleItem?.transform?.time || '允许按作者风格调整回忆、延宕、压缩或并置方式，但不得改变事件事实顺序的可理解性。',
+    '叙事视角': styleItem?.transform?.narrator || '根据作者声音调整叙述者距离、可靠性与信息释放方式。',
+    '人物心理': styleItem?.transform?.psychology || '把人物心理改写为可感知的动作、迟疑、物件关系、身体反应或环境压力。',
+    '场景扩写': styleItem?.transform?.sceneExpansion || '把 SOURCE 的关键节点扩写成有温度、光影、材质和空间压迫的具体场景。',
+    '冲突显影': styleItem?.transform?.conflictRendering || '保持原冲突功能，将它翻译成该作者擅长的压力形式。',
+    '句法节奏': styleItem?.transform?.syntax || (styleDNA || '使用精致、清晰、电影感强的中文句法。'),
+    '象征系统': styleItem?.transform?.symbolism || '允许建立重复物、声音、气味、颜色或空间动作作为隐性回环，但不得直说哲学术语。',
+    '对白密度': styleItem?.transform?.dialogue || '对白服务于人物关系和压力变化，避免解释设定、总结意义。',
+    '视觉资产': styleItem?.transform?.visualAssets || '角色、场景、道具的 prompt 必须继承作者风格的材质、空间、光影与情绪机制。'
+  };
+
+  const mAxisLens = styleItem?.mAxisLens ? formatInstructionMap(styleItem.mAxisLens) : '';
+  const avoid = styleItem?.avoid || [
+    '不要生成新的三条故事方案。',
+    '不要大幅改写 SOURCE 的核心事件、人物关系或结局方向。',
+    '不要复制该作者既有作品的台词、桥段、标志性场景或专有意象。',
+    '不要把作者风格理解为表层词汇堆砌；必须作用到时间、视角、心理显影与场景组织。'
+  ];
+
+  return `**作者风格:** ${isDefault ? '标准文学渲染' : styleName}
+**作者性机制:** ${styleTitle}
+**核心重写逻辑:** ${coreRewriteLogic}
+${styleDNAInstruction}
+
+**不可改写项（PRESERVE）:**
+${formatInstructionList(preserve)}
+
+**可改写项（TRANSFORM）:**
+${formatInstructionMap(transform)}
+
+${mAxisLens ? `**M 轴显影偏向（不得替换参数）:**\n以下内容只能改变已选 M 参数的呈现方式，不能替换 M 参数本身；若与用户选择的 M 参数冲突，必须保留用户 M 参数，忽略或降级本透镜。\n${mAxisLens}\n\n` : ''}**禁止项（AVOID）:**
+${formatInstructionList(avoid)}`;
+};
+
 // ============================================================================
 // 🏢 三楼 B区：全景创世碑 (buildNarrativeBiblePrompt) — V3 架构
 // 核心功能：当你选中了 3 个草案中的 1 个后，这里接手工作。
@@ -612,7 +684,9 @@ export const buildNarrativeBiblePrompt = (
   styleConfig: StyleConfig,
   fieldState?: NarrativeFieldState,
   visionInput?: string,
-  worldLaw?: WorldLawConfig
+  visionImage?: string | null,
+  worldLaw?: WorldLawConfig,
+  visionAnalysis: string = ""
 ): string => {
 
   // ════════════════════════════════════════════════════════════════════════════
@@ -713,7 +787,7 @@ export const buildNarrativeBiblePrompt = (
 
   const taskSentence = fieldState ? buildTaskSentence(fieldState) : "";
 
-  const SECTION_ROLE = `Role: 殿堂级电影编剧 & 叙事架构师。
+  const SECTION_ROLE = `Role: 电影级叙事创作大师 & 文学级文本塑造者。
 
 ## 任务 (TASK)
 你将收到一份已完成的**故事大纲（素材）**。该大纲已经基于拉康精神分析学派电影叙事创作公式、导演笔记与世界物理法则生成。
@@ -722,11 +796,12 @@ export const buildNarrativeBiblePrompt = (
 
 **重写规则：**
 1. **故事骨架**不变——大纲中的人物、事件、M0-M7A/M7B 双结项的精神弧线、意义裁决与实在余痕必须保留。
-2. **风格是绝对重心**——你必须完全模仿所选作者的底层句法逻辑、节奏、语感与叙事策略。不是"像"某个作者，而是"成为"那个作者重新写这个故事。
-3. 重写同样遵守以下创作铁律、世界物理法则与表层设定约束。
-4. 输出一篇 ${literatureType}，目标 ~${targetWordCount} 中文字符。
-5. 输出格式：完整的文学小说正文 + 视觉资产 JSON。不是剧本大纲或摘要。
-6. 语言：简体中文。角色名/地名/物品名格式：**中文名 (英文名)**。
+2. **作者风格是渲染重心，不是改命权限**——你必须调用所选作者的抽象创作机制来重写 SOURCE，但不得推翻 SOURCE、M 轴、SUR、世界法则与体量结构。
+3. **SOURCE 保真优先**——SOURCE 中的人物职业、社会位置、关系位置、关键场所与事件功能不得被替换为更符合作者风格的替代物；只能通过作者风格重新布光、压缩、延宕或扩写。例：口译员不能被改写成办事员，但他的口译工作可以发生在窗口、档案室、听证会等风格空间中。
+4. 重写同样遵守以下创作铁律、世界物理法则与表层设定约束。
+5. 输出一篇 ${literatureType}，目标 ~${targetWordCount} 中文字符。
+6. 输出格式：完整的文学小说正文 + 视觉资产 JSON。不是剧本大纲或摘要。
+7. 语言：简体中文。角色名/地名/物品名格式：**中文名 (英文名)**。
 
 ${bibleStrategy}
 ${bibleSvProtocol}`;
@@ -757,7 +832,7 @@ ${bibleSvProtocol}`;
   }
 
   const styleRule = styleName && styleName !== 'Standard Literary' && styleName.length > 0
-    ? `\nStyle: 模仿 [${styleName}] 的底层句法逻辑与节奏，严禁复制其经典台词或表层符号。`
+    ? `\nStyle: 调用 [${styleName}] 的作者性渲染机制，只改写语言、时间组织、视角距离、场景密度、心理显影与意象系统；严禁改写 SOURCE 骨架、M7A/M7B、世界法则或结局方向。`
     : '';
 
   const bannedWords = fieldState ? v3BuildBannedWords(fieldState) : "";
@@ -828,8 +903,8 @@ ${directorBrief}${m0Logic}`;
     }
   }
 
-  if (visionInput) {
-    skinParts.push(getVisionAnchorProtocol(visionInput));
+  if (visionInput || visionImage) {
+    skinParts.push(getVisionAnchorProtocol(visionInput, Boolean(visionImage)));
   }
 
   if (fieldState) {
@@ -845,21 +920,27 @@ ${directorBrief}${m0Logic}`;
   const perspective = PERSPECTIVES.find(p => p.id === styleConfig.perspectiveId);
   const sensory = SENSORY_MODES.find(s => s.id === styleConfig.sensoryId);
 
-  const povInstruction = perspective ? `**叙事视点:** ${perspective.name}\n${perspective.prompt}` : "";
-  const sensoryInstruction = sensory ? `**感官侧重:** ${sensory.name}\n${sensory.prompt}` : "";
+  const hasAuthorialStyle = Boolean(styleItem || directorStyle);
+  const povInstruction = !hasAuthorialStyle && perspective ? `**叙事视点:** ${perspective.name}\n${perspective.prompt}` : "";
+  const sensoryInstruction = !hasAuthorialStyle && sensory ? `**感官侧重:** ${sensory.name}\n${sensory.prompt}` : "";
+  const authorialRendererProtocol = buildAuthorialRendererProtocol(styleName, styleDNA, styleItem, directorStyle);
+  const rendererWeightRule = hasAuthorialStyle
+    ? `1. SOURCE 已选故事草稿 > M0-M7A/M7B 精神弧线 > 世界法则/SUR > 作者风格。
+2. 作者风格只能改变叙述方式、句法节奏、时间组织、心理显影、场景密度、象征物件与视觉资产语气。
+3. 如果作者风格与世界法则冲突，以世界法则为准；如果作者风格与 M7A/M7B 冲突，以 M7A/M7B 为准。
+4. 已选择作者风格时，叙事视点与感官侧重不参与本次生成；作者机制自动统管视角距离、感官秩序与语言节奏。`
+    : `1. SOURCE 已选故事草稿 > M0-M7A/M7B 精神弧线 > 世界法则/SUR > 标准文学渲染 > 叙事视点/感官侧重。
+2. 未选择作者风格时，叙事视点/感官侧重作为轻量渲染器生效，只能改变讲述角度、信息距离与描写优先级。
+3. 如果叙事视点/感官侧重与世界法则或 M7A/M7B 冲突，以世界法则与 M7A/M7B 为准。`;
 
-  const SECTION_STYLE = `## 风格重写指令 (STYLE — 本次任务的绝对重心)
+  const SECTION_STYLE = `## 作者风格渲染协议 (AUTHORIAL RENDERER — 本次任务的调声中枢)
 
-**核心指令：你必须完全成为这位作者。不是「像」他/她，而是「是」他/她在重写这个故事。**
+**核心指令：你不是复制某位作者的文本，而是调用其抽象后的作者性机制，对 SOURCE 大纲进行风格化扩写。**
 
-**作者声音:** ${styleName}
-**风格基因:** ${styleDNA}
+${authorialRendererProtocol}
 
-**执行要求：**
-1. **句法层面**——模仿该作者的句子结构、长度节奏、标点使用习惯。如果该作者用长句，你就用长句；如果该作者用碎片句，你就用碎片句。
-2. **叙事策略层面**——模仿该作者处理时间、空间、视角切换的方式。不是模仿他写过什么，而是模仿他怎么思考故事。
-3. **语感层面**——模仿该作者的修辞偏好、意象选择逻辑、词汇温度。
-4. **严禁表层模仿**——不要复制该作者的经典台词、标志性意象或已有作品的具体细节。用他的大脑写新故事，不用他的词汇表。
+**执行权重：**
+${rendererWeightRule}
 
 ${povInstruction}
 ${sensoryInstruction}`;
@@ -869,11 +950,23 @@ ${sensoryInstruction}`;
   // ════════════════════════════════════════════════════════════════════════════
   const m7aTags = fieldState ? v3GetTagsBySuffix(fieldState, '_m7a') : [];
   const m7bTags = fieldState ? v3GetTagsBySuffix(fieldState, '_m7b') : [];
+  const sourceVisualAnchor = treatment.visualAnchor || treatment.visualKey || "";
+  const visionAnalysisSection = visionAnalysis?.trim()
+    ? `
+## 视觉/文本解析源 (VISION ANALYSIS SOURCE)
+以下内容来自前序图像/文本种子的解析结果。它不是新故事，只能作为世界质感、人物外观、场景物性与视觉资产 prompt 的参考：
+${visionAnalysis.trim()}
+`
+    : "";
 
   const SECTION_OUTPUT = `## 素材 (SOURCE)
 *   **Title:** ${treatment.title}
 *   **Tagline:** ${treatment.tagline}
+*   **Path Type:** ${treatment.type}
+*   **Structure:** ${treatment.structure || "Unspecified"}
+*   **Visual Anchor:** ${sourceVisualAnchor || "Unspecified"}
 *   **Pitch:** ${treatment.pitch}
+${visionAnalysisSection}
 
 ## 思考过程（必须先输出）
 \`\`\`xml
@@ -882,7 +975,9 @@ ${sensoryInstruction}`;
 2. M7A 回溯：从 M7A 缝合点反向审视，哪些 M 参数的含义被重写了？
 3. M7B 前兆：M7B 的终态是什么？前兆编织在故事哪个阶段？使用什么感官通道？终态使用不同的感官通道
 4. 物理校验：逐一检查每个 SUR 标签是否超出当前物理法则边界，超出的如何降维
-5. M0 渗透检查：逐一检查 M1-M7A/M7B，每个参数的叙事实现是否被 M0 的逻辑改写过
+5. 作者风格渲染计划：说明该作者风格将如何改写时间、视角、心理显影、场景密度与视觉资产，但不改变 SOURCE 骨架
+6. SOURCE 保真检查：逐项确认人物职业、社会位置、关系位置、关键场所、关键事件功能与结局方向是否仍与 SOURCE 一致
+7. M0 渗透检查：逐一检查 M1-M7A/M7B，每个参数的叙事实现是否被 M0 的逻辑改写过
 </thought_process>
 \`\`\`
 

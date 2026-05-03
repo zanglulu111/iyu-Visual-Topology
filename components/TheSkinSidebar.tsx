@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { NarrativeFieldState, BlueprintLanguage, DriverType } from '../types';
 import {
   Settings2, X, Lock, Unlock, RotateCcw, Shuffle, Trash2, Plus,
-  Anchor, Palette, Box, Info, TestTube, Zap, Dice5, Calendar, MapPin, Globe, Check, Edit2, User
+  Anchor, Palette, Box, Info, TestTube, Zap, Dice5, Calendar, MapPin, Globe, Check, Edit2, User, FileText
 } from 'lucide-react';
 import {
   COMM_SKIN_LIBRARY,
@@ -46,6 +46,8 @@ interface TheSkinSidebarProps {
   zIndex?: number;
   onRandomizeSummaryGroup?: () => void;
   onRandomizeStructureGroup?: () => void;
+  customTextSeed?: string;
+  onCustomTextSeedChange?: (value: string) => void;
 }
 
 const getBlockLibInfo = (blockId: string) => {
@@ -161,7 +163,7 @@ const SkinSlot: React.FC<{
     };
 
     const getLockedStyle = () => {
-      if (driverType === DriverType.COMMERCIAL) return theme === 'retro' ? 'border-[var(--text-accent)] text-black bg-[var(--text-accent)]/10' : 'border-cyan-400 text-cyan-400 bg-cyan-900/20';
+      if (driverType === DriverType.COMMERCIAL) return theme === 'retro' ? 'border-[var(--text-accent)] text-black bg-[var(--text-accent)]/10' : 'border-mist-cyan text-mist-cyan bg-mist-cyan/20';
       if (driverType === DriverType.EXPERIMENTAL) return theme === 'retro' ? 'border-[var(--text-accent)] text-black bg-[var(--text-accent)]/10' : 'border-purple-400 text-purple-400 bg-purple-900/20';
       if (driverType === DriverType.AESTHETIC) return theme === 'retro' ? 'border-[var(--text-accent)] text-black bg-[var(--text-accent)]/10' : 'border-rose-400 text-rose-400 bg-rose-900/20';
       if (driverType === DriverType.TRAILER) return theme === 'retro' ? 'border-[var(--text-accent)] text-black bg-[var(--text-accent)]/10' : 'border-orange-400 text-orange-400 bg-orange-900/20';
@@ -177,7 +179,7 @@ const SkinSlot: React.FC<{
       editAccent = 'text-[var(--text-main)] border-[var(--border-main)] focus:border-[#8B261D]';
     } else if (driverType === DriverType.COMMERCIAL) {
       labelColor = 'text-mist-cyan';
-      editAccent = 'text-cyan-400 border-cyan-400 focus:border-cyan-400';
+      editAccent = 'text-mist-cyan border-mist-cyan focus:border-mist-cyan';
     } else if (driverType === DriverType.EXPERIMENTAL) {
       labelColor = 'text-mist-purple';
       editAccent = 'text-purple-400 border-purple-400 focus:border-purple-400';
@@ -468,7 +470,9 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
   onEditCustomDef,
   zIndex = 40,
   onRandomizeSummaryGroup,
-  onRandomizeStructureGroup
+  onRandomizeStructureGroup,
+  customTextSeed = '',
+  onCustomTextSeedChange
 }) => {
   const { theme } = useTheme();
   const isCommercial = driverType === DriverType.COMMERCIAL;
@@ -702,8 +706,8 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
     accentBorder = 'border-[#8B261D]';
     iconColor = 'text-[#8B261D]';
   } else if (isCommercial) {
-    accentBorder = 'border-cyan-400';
-    iconColor = 'text-cyan-400';
+    accentBorder = 'border-mist-cyan';
+    iconColor = 'text-mist-cyan';
     lockKey = 'COMM_SKIN';
   } else if (isExperimental) {
     accentBorder = 'border-purple-400';
@@ -1140,6 +1144,37 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
 
       <div className={`flex-1 overflow-y-auto custom-scrollbar ${theme === 'retro' ? 'bg-[var(--bg-panel)]' : 'bg-[#050505]'}`}>
         <div className="min-h-full flex flex-col justify-start px-4 pt-4 pb-0 space-y-3">
+
+        <section className={`rounded-xl border p-4 ${theme === 'retro' ? 'bg-[var(--bg-card)] border-[#8B261D]/20' : 'bg-zinc-950/50 border-zinc-800'}`}>
+          <div className="flex items-center justify-between gap-3 mb-3">
+            <div className={`flex items-center gap-2 text-xs font-black uppercase tracking-widest ${iconColor}`}>
+              <FileText size={13} />
+              {lang === 'EN' ? 'Custom Brief / Text Seed' : '自定义需求 / 文本种子'}
+            </div>
+            {customTextSeed && (
+              <button
+                type="button"
+                onClick={() => onCustomTextSeedChange?.('')}
+                className={`text-[9px] uppercase ${theme === 'retro' ? 'text-[var(--text-muted)] hover:text-[#8B261D]' : 'text-zinc-500 hover:text-red-400'}`}
+              >
+                {lang === 'EN' ? 'Clear' : '清空'}
+              </button>
+            )}
+          </div>
+          <textarea
+            value={customTextSeed}
+            onChange={(e) => onCustomTextSeedChange?.(e.target.value)}
+            placeholder={lang === 'EN'
+              ? 'Write your actual creative intent here: story core, character relation, event, theme, hard constraints...'
+              : '在这里写真正的创作意图：故事核、人物关系、事件、主题、硬约束、自定义导演需求...'}
+            className={`w-full h-28 resize-none rounded-lg border px-3 py-3 text-xs leading-relaxed focus:outline-none transition-colors ${theme === 'retro' ? 'bg-white/45 border-[#8B261D]/20 text-[var(--text-main)] placeholder-black/35 focus:border-[#8B261D]/50' : 'bg-black/40 border-zinc-800 text-zinc-300 placeholder-zinc-600 focus:border-zinc-600'}`}
+          />
+          <div className={`mt-2 text-[10px] leading-relaxed ${theme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-500'}`}>
+            {lang === 'EN'
+              ? 'This text is the global semantic anchor. Image notes on the right only guide image reading.'
+              : '这里是全局语义锚点。右侧图片下方的文字只用于说明图片该如何被读取。'}
+          </div>
+        </section>
 
         {isCommercial ? (
           <div className="space-y-3">

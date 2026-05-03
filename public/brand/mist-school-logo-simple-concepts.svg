@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 820" role="img" aria-labelledby="title desc">
+  <title id="title">迷雾学派极简 Logo 候选</title>
+  <desc id="desc">Three simplified vector logo directions for Mist School.</desc>
+  <defs>
+    <style>
+      .cn {
+        font-family: Songti SC, STSong, Noto Serif CJK SC, Noto Serif SC, serif;
+        font-weight: 700;
+        fill: #F2EBD8;
+      }
+      .en {
+        font-family: Avenir Next, Inter, Helvetica Neue, Arial, sans-serif;
+        font-weight: 600;
+        letter-spacing: 0;
+        fill: #72D8C7;
+      }
+      .label {
+        font-family: Avenir Next, Inter, Helvetica Neue, Arial, sans-serif;
+        font-size: 19px;
+        font-weight: 700;
+        letter-spacing: 0;
+        fill: #8EA0A1;
+      }
+      .note {
+        font-family: Avenir Next, Inter, Helvetica Neue, Arial, sans-serif;
+        font-size: 18px;
+        letter-spacing: 0;
+        fill: #BDB49F;
+      }
+    </style>
+  </defs>
+
+  <rect width="1440" height="820" fill="#0B0D11"/>
+
+  <text x="72" y="88" class="cn" font-size="48">迷雾学派：极简 Logo 候选</text>
+  <text x="74" y="128" class="note">更少元素，更适合真正落地成图标、导航标识、封面印记。</text>
+
+  <g transform="translate(110 205)">
+    <rect width="350" height="470" rx="20" fill="#10141A" stroke="#28313A"/>
+    <text x="30" y="48" class="label">01 / 推荐：雾门</text>
+    <g transform="translate(175 210)" fill="none" stroke-linecap="round">
+      <path d="M-88 -72A116 116 0 1 1 -88 72" stroke="#F2EBD8" stroke-width="13"/>
+      <path d="M-72 -20C-34 -39 34 -39 72 -20" stroke="#72D8C7" stroke-width="11"/>
+      <path d="M-72 24C-34 43 34 43 72 24" stroke="#B96E42" stroke-width="11"/>
+      <circle r="14" fill="#0B0D11" stroke="#F2EBD8" stroke-width="7"/>
+      <path d="M-17 12L17 -12" stroke="#B83B4A" stroke-width="6"/>
+    </g>
+    <text x="72" y="350" class="cn" font-size="42">迷雾学派</text>
+    <text x="76" y="388" class="en" font-size="18">MIST SCHOOL</text>
+    <text x="30" y="438" class="note">像一个没有封死的门，也像雾中空洞。</text>
+  </g>
+
+  <g transform="translate(545 205)">
+    <rect width="350" height="470" rx="20" fill="#F2EBD8" stroke="#D4C9B0"/>
+    <text x="30" y="48" class="label" fill="#596766">02 / 学院印</text>
+    <g transform="translate(175 210)" fill="none" stroke-linecap="round">
+      <rect x="-94" y="-94" width="188" height="188" rx="18" stroke="#141922" stroke-width="12"/>
+      <path d="M-62 -28H62M-62 0H62M-62 28H62" stroke="#72D8C7" stroke-width="10"/>
+      <circle r="15" fill="#F2EBD8" stroke="#141922" stroke-width="8"/>
+      <path d="M-18 12L18 -12" stroke="#B83B4A" stroke-width="6"/>
+    </g>
+    <text x="72" y="350" fill="#141922" font-family="Songti SC, STSong, Noto Serif CJK SC, Noto Serif SC, serif" font-size="42" font-weight="700">迷雾学派</text>
+    <text x="76" y="388" fill="#B96E42" font-family="Avenir Next, Inter, Helvetica Neue, Arial, sans-serif" font-size="18" font-weight="700">MIST SCHOOL</text>
+    <text x="30" y="438" fill="#4F5B5B" font-family="Avenir Next, Inter, Helvetica Neue, Arial, sans-serif" font-size="18">更像机构章，稳定、理性、偏档案系统。</text>
+  </g>
+
+  <g transform="translate(980 205)">
+    <rect width="350" height="470" rx="20" fill="#10141A" stroke="#28313A"/>
+    <text x="30" y="48" class="label">03 / 空洞斜杠</text>
+    <g transform="translate(175 210)" fill="none" stroke-linecap="round">
+      <circle r="102" stroke="#F2EBD8" stroke-width="13"/>
+      <circle r="43" stroke="#72D8C7" stroke-width="11"/>
+      <path d="M-61 42L61 -42" stroke="#B83B4A" stroke-width="12"/>
+      <path d="M-82 -78C-38 -104 42 -104 84 -75" stroke="#B96E42" stroke-width="9"/>
+    </g>
+    <text x="72" y="350" class="cn" font-size="42">迷雾学派</text>
+    <text x="76" y="388" class="en" font-size="18">MIST SCHOOL</text>
+    <text x="30" y="438" class="note">更冷、更符号化，适合小尺寸图标。</text>
+  </g>
+</svg>

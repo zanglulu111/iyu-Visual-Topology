@@ -218,7 +218,7 @@ export const AssetCard: React.FC<AssetCardProps> = ({ item, type, language, cont
                                     <button
                                         onClick={handleReverse}
                                         disabled={isAnalyzing}
-                                        className={`p-2 bg-black/60 rounded-full text-white backdrop-blur-sm transition-colors border border-white/10 shadow-lg ${isAnalyzing ? 'cursor-not-allowed opacity-50' : 'hover:bg-cyan-600/80'}`}
+                                        className={`p-2 bg-black/60 rounded-full text-white backdrop-blur-sm transition-colors border border-white/10 shadow-lg ${isAnalyzing ? 'cursor-not-allowed opacity-50' : 'hover:bg-gold-primary/80 hover:text-black'}`}
                                         title="Reverse Engineer"
                                     >
                                         {isAnalyzing ? <Loader2 size={14} className="animate-spin" /> : <ScanEye size={14} />}
@@ -234,7 +234,7 @@ export const AssetCard: React.FC<AssetCardProps> = ({ item, type, language, cont
                                             hasImage: Boolean(activeImage?.url)
                                         }}
                                         disabled={!activeImage?.url}
-                                        className="p-2 rounded-full bg-black/60 text-white border border-white/10 hover:bg-cyan-600/80"
+                                        className="p-2 rounded-full bg-black/60 text-white border border-white/10 hover:bg-gold-primary/80 hover:text-black"
                                     />
                                 </>
                             )}

@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 320" role="img" aria-labelledby="title desc">
+  <title id="title">迷雾学派徽章式横版 Logo</title>
+  <desc id="desc">A horizontal lockup for Mist School using the refined triangular seal mark.</desc>
+
+  <rect width="1180" height="320" fill="#050505"/>
+
+  <g transform="translate(150 142)" fill="none" stroke="#F4F1E8" stroke-linecap="square" stroke-linejoin="miter">
+    <path d="M0 -91L-82 53H82Z" stroke-width="12"/>
+    <path d="M-42 18H-73M42 18H73" stroke-width="11"/>
+    <path d="M-23 18V-30H23V18" stroke-width="10"/>
+    <path d="M-12 -30V-52H20V-30" stroke-width="9"/>
+    <rect x="-19" y="18" width="38" height="44" rx="4" stroke-width="8"/>
+    <path d="M-58 65H58" stroke="#72D8C7" stroke-width="6"/>
+  </g>
+
+  <g transform="translate(59 235)" fill="none" stroke="#F4F1E8" stroke-linecap="square" stroke-linejoin="miter">
+    <g stroke-width="7">
+      <path d="M0 0V44M0 0L15 12L30 0V44"/>
+      <path d="M51 0V44"/>
+      <path d="M80 0H109L80 21H109L80 44"/>
+      <path d="M134 0H174M154 0V44"/>
+    </g>
+  </g>
+
+  <text x="295" y="142"
+        fill="#F4F1E8"
+        font-family="Songti SC, STSong, Noto Serif CJK SC, Noto Serif SC, serif"
+        font-size="70"
+        font-weight="700">迷雾学派</text>
+  <text x="300" y="196"
+        fill="#72D8C7"
+        font-family="Avenir Next, Inter, Helvetica Neue, Arial, sans-serif"
+        font-size="24"
+        font-weight="650"
+        letter-spacing="0">MIST SCHOOL</text>
+  <path d="M300 218H626" stroke="#B96E42" stroke-width="3"/>
+</svg>

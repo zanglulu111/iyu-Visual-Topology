@@ -117,7 +117,7 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({ history, onRestore, 
 
     const getDriverColorClass = (driverId: DriverType) => {
         switch (driverId) {
-            case DriverType.COMMERCIAL: return 'text-cyan-400 border-cyan-500/50';
+            case DriverType.COMMERCIAL: return 'text-mist-cyan border-mist-cyan/50';
             case DriverType.AESTHETIC: return 'text-rose-400 border-rose-500/50';
             case DriverType.EXPERIMENTAL: return 'text-purple-400 border-purple-500/50';
             case DriverType.TRAILER: return 'text-orange-400 border-orange-500/50';
@@ -134,7 +134,7 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({ history, onRestore, 
                 return { cn: '创意圣经', en: 'BIBLE', className: 'text-emerald-700 border-emerald-800/30 bg-emerald-50', icon: '📖' };
             }
             if (item.treatments && item.treatments.length > 0) {
-                return { cn: '分歧点', en: 'DIVERGENCE', className: 'text-blue-700 border-blue-800/30 bg-blue-50', icon: '🔀' };
+                return { cn: '分歧点', en: 'DIVERGENCE', className: 'text-amber-800 border-amber-800/30 bg-amber-50', icon: '🔀' };
             }
             return { cn: '引擎DNA', en: 'ENGINE DNA', className: 'text-zinc-600 border-zinc-400 bg-zinc-100', icon: '🧬' };
         }
@@ -145,7 +145,7 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({ history, onRestore, 
             return { cn: '创意圣经', en: 'BIBLE', className: 'text-emerald-400 border-emerald-500/30 bg-emerald-900/10', icon: '📖' };
         }
         if (item.treatments && item.treatments.length > 0) {
-            return { cn: '分歧点', en: 'DIVERGENCE', className: 'text-blue-400 border-blue-500/30 bg-blue-900/10', icon: '🔀' };
+            return { cn: '分歧点', en: 'DIVERGENCE', className: 'text-gold-primary border-gold-primary/30 bg-gold-primary/10', icon: '🔀' };
         }
         return { cn: '引擎DNA', en: 'ENGINE DNA', className: 'text-zinc-500 border-zinc-700 bg-zinc-900/50', icon: '🧬' };
     };

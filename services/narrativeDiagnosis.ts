@@ -2,32 +2,58 @@
 // 叙事症候诊断指令构建器
 // 用于 Narrative Driver 的 "植入症候" (Input Symptom) 环节
 
-export const buildNarrativeDiagnosisPrompt = (textInput: string): string => {
+export const buildNarrativeDiagnosisPrompt = (textInput: string = "", hasImage: boolean = true): string => {
+    const trimmedInput = textInput.trim();
+    const sourceMode = hasImage && trimmedInput
+        ? "图文双锚：图片锁定视觉物理事实，文本锁定语义/关系/动机。"
+        : hasImage
+            ? "图像锁定：图片中的可见事实是最高优先级。"
+            : trimmedInput
+                ? "文本锁定：用户文字是最高语义事实。"
+                : "空白反推：无自由种子，仅根据引擎语境进行随机反推。";
+
     return `
-Role: Visionary Storyteller & Visual Analyst.
-Task: Perform a "Visual Narrative Decoding" (视觉叙事解码) on the input.
+角色：视觉叙事导演 / 图像分析师。
+任务：对输入进行「种子叙事解码」。
 
-**INPUT CONTEXT:**
-${textInput ? `Text Context: "${textInput}"` : "No text context provided (Rely on image)."}
-[Image Context provided via attachment]
+## 输入上下文
+${trimmedInput ? `文本种子：「${trimmedInput}」` : "未提供文本种子。"}
+${hasImage ? "图像种子：已通过附件提供。" : "未提供图像种子。"}
+输入模式：${sourceMode}
 
-**MISSION:**
-You are a film director analyzing a keyframe or a concept art. Deconstruct it into narrative elements.
+## 核心任务
+你要像电影导演一样，从一句话、一张图，或一个空白种子中，反推出一个可以继续生成的完整故事雏形。
+输入不是松散灵感，而是已经锁定的「症候事实」。
 
-1.  **图片反推 (Reverse Prompt):** Describe what is in the image physically (Visuals, Style, Lighting, Composition).
-2.  **风格定位 (Style):** What is the aesthetic tone? (e.g. Cyberpunk, Noir, Ghibli, Wes Anderson, Horror, etc.)
-3.  **叙事猜想 (Story Hypothesis):** Based on the image, propose a Logline or premise. What is the story here?
-4.  **人物与事件 (Character & Event):**
-    *   **Who** is the subject? (Infer personality, class, role)
-    *   **What** is happening? (The conflict or action)
-    *   **When/Where** is this? (The era and location)
-5.  **引擎映射 (Engine Hints):** Suggest potential M-Engine parameters based on the visual evidence.
-    *   *Subject:* Who is suffering?
-    *   *Obstacle:* What is stopping them?
-    *   *Desire:* What do they want?
+## 锁定法则
+1. **文本锁定：** 用户明确写出的文字必须作为最高语义事实保留。不得改写、否定、替换，只能向外扩展。
+2. **图像锁定：** 图像中可见的一切必须作为最高视觉/物理事实保留，包括主体、空间、材质、光线、色彩、构图、时代线索、物件关系、身体状态。
+3. **图文分工：** 如果文本和图像同时存在，图像决定「世界长什么样」；文本决定「这意味着什么、关系是什么、动机是什么、事件为何发生」。
+4. **表层设定降级：** 表层设定只是辅助预设。若表层设定与种子冲突，必须把表层设定降级为风格、隐喻、社会结构或类型语法，不得覆盖种子事实。
+5. **M层独立：** M0-M7A/M7B 不是表层事实。它们只解释锁定种子背后的爱欲运动，不得改写种子本身。
 
-**OUTPUT FORMAT (Markdown in Simplified Chinese):**
-Keep it concise, professional, and inspiring. Use cinematic language.
-This text will be used to auto-fill the Narrative Engine parameters.
+## 解码内容
+请输出以下 8 个部分：
+
+1. **源事实锁定：** 列出文本和/或图像中不可改变的事实。
+2. **画面反推提示词：** 描述可见物理事实、风格、光线、构图、材质。如果没有图像，只能谨慎地从文本推断。
+3. **风格与影调：** 判断美学气质、电影质感、色彩倾向、摄影或绘画风格。
+4. **症候核：** 用一句话解释这个种子背后的隐藏欲望结构。
+5. **完整故事雏形：** 基于锁定事实，提出一个故事 logline 或剧情前提。
+6. **人物与事件：**
+    *   **人物是谁：** 推断身份、阶层、性格、角色功能。
+    *   **正在发生什么：** 推断冲突、行动或事件。
+    *   **何时何地：** 推断时代、场所、社会环境。
+7. **引擎映射提示：** 根据锁定种子，给出可能的 M 层参数方向：
+    *   **主体：** 谁在承受缺失或压力？
+    *   **阻碍：** 什么阻止了主体？
+    *   **欲望：** 主体真正想要什么？
+8. **表层融合说明：** 说明表层设定应该如何作为辅助预设被吸收，而不是覆盖种子。
+
+## 输出格式
+使用简体中文 Markdown 输出。
+保持简洁、专业、有电影感。
+必须清楚区分「锁定事实」与「推断故事」。
+这段文本将用于后续自动匹配叙事引擎参数。
 `;
 };

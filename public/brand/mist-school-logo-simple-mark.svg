@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">迷雾学派极简标志</title>
+  <desc id="desc">A simplified Mist School mark with an open ring, two mist strokes, and a small fracture.</desc>
+
+  <rect width="512" height="512" rx="80" fill="#0B0D11"/>
+
+  <g transform="translate(256 256)" fill="none" stroke-linecap="round">
+    <path d="M-124 -102A164 164 0 1 1 -124 102" stroke="#F2EBD8" stroke-width="20"/>
+    <path d="M-104 -28C-48 -56 48 -56 104 -28" stroke="#72D8C7" stroke-width="17"/>
+    <path d="M-104 34C-48 62 48 62 104 34" stroke="#B96E42" stroke-width="17"/>
+    <circle r="20" fill="#0B0D11" stroke="#F2EBD8" stroke-width="10"/>
+    <path d="M-25 17L25 -17" stroke="#B83B4A" stroke-width="8"/>
+  </g>
+</svg>

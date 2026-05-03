@@ -2,7 +2,7 @@
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import { configService } from "../src/services/configService";
 import { getEffectiveBaseUrl, getOpenAIChatCompletionsUrl, getProviderForModel } from "../src/types/config";
-import { SutureConfig, NarrativeFieldState, CreativeTreatment, StyleConfig, WorldLawConfig, CreativeBlueprint, DriverType, SubjectType, SutureResponse, FinalAssetsData, FinalAssetItem, GlobalVisualTone, AssetView, MetonymyStylePreset, MetonymyAssetInput, APISettings, FaceState } from "../types";
+import { SutureConfig, NarrativeFieldState, CreativeTreatment, StyleConfig, WorldLawConfig, CreativeBlueprint, DriverType, SubjectType, SutureResponse, FinalAssetsData, FinalAssetItem, GlobalVisualTone, AssetView, MetonymyStylePreset, MetonymyAssetInput, APISettings, FaceState, NarrativeBlockDef, LibraryCategoryDef } from "../types";
 import { buildSutureStep1Prompt, buildStyleTransferPrompt } from "./suture_script_prompt";
 import { buildSutureStep2Prompt } from "./sutureGenerator";
 import { buildNarrativePrompt, buildNarrativeBiblePrompt } from "./narrativeGenerator";
@@ -13,7 +13,26 @@ import { buildAestheticPrompt, buildAestheticBiblePrompt } from "./aestheticGene
 import { buildPsychoAnalysisPrompt } from "./psychoAnalysisGenerator";
 import { buildDesireDiagnosisPrompt } from "./sutureDiagnosis";
 import { buildNarrativeDiagnosisPrompt } from "./narrativeDiagnosis";
-import { NARRATIVE_ENGINE_LIBRARY, AESTHETIC_ENGINE_LIBRARY } from "../constants";
+import {
+    NARRATIVE_ENGINE_BLOCKS,
+    NARRATIVE_ENGINE_LIBRARY,
+    ALL_SKIN_BLOCKS,
+    SKIN_LIBRARY,
+    COMMERCIAL_ENGINE_BLOCKS,
+    COMMERCIAL_ENGINE_LIBRARY,
+    COMM_SKIN_BLOCKS,
+    COMM_SKIN_LIBRARY,
+    AESTHETIC_ENGINE_BLOCKS,
+    AESTHETIC_ENGINE_LIBRARY,
+    EXPERIMENTAL_ENGINE_BLOCKS,
+    EXPERIMENTAL_ENGINE_LIBRARY,
+    EXPERIMENTAL_SKIN_BLOCKS,
+    EXPERIMENTAL_SKIN_LIBRARY,
+    TRAILER_ENGINE_BLOCKS,
+    TRAILER_ENGINE_LIBRARY,
+    TRAILER_SKIN_BLOCKS,
+    TRAILER_SKIN_LIBRARY
+} from "../constants";
 import { buildRefactorPrompt } from "./refactorPrompt";
 import { buildScriptBreakdownPrompt } from "./scriptBreakdownGenerator";
 import { runWithTask } from "./taskManager";
@@ -579,6 +598,143 @@ const FANTASY_TRAVERSE_TYPES: CreativeTreatment['type'][] = [
     'THE_REAL'
 ];
 
+const getAutoFillBlocksAndLibraries = (driver: DriverType): { blocks: NarrativeBlockDef[]; libraries: LibraryCategoryDef[] } => {
+    switch (driver) {
+        case DriverType.COMMERCIAL:
+            return { blocks: [...COMMERCIAL_ENGINE_BLOCKS, ...COMM_SKIN_BLOCKS], libraries: [...COMMERCIAL_ENGINE_LIBRARY, ...COMM_SKIN_LIBRARY] };
+        case DriverType.AESTHETIC:
+            return { blocks: AESTHETIC_ENGINE_BLOCKS, libraries: AESTHETIC_ENGINE_LIBRARY };
+        case DriverType.EXPERIMENTAL:
+            return { blocks: [...EXPERIMENTAL_ENGINE_BLOCKS, ...EXPERIMENTAL_SKIN_BLOCKS], libraries: [...EXPERIMENTAL_ENGINE_LIBRARY, ...EXPERIMENTAL_SKIN_LIBRARY] };
+        case DriverType.TRAILER:
+            return { blocks: [...TRAILER_ENGINE_BLOCKS, ...TRAILER_SKIN_BLOCKS], libraries: [...TRAILER_ENGINE_LIBRARY, ...TRAILER_SKIN_LIBRARY] };
+        case DriverType.NARRATIVE:
+        default:
+            return { blocks: [...NARRATIVE_ENGINE_BLOCKS, ...ALL_SKIN_BLOCKS], libraries: [...NARRATIVE_ENGINE_LIBRARY, ...SKIN_LIBRARY] };
+    }
+};
+
+const libraryIdToBlockId = (libraryId: string): string => libraryId.replace(/_lib$/, "");
+
+const buildAutoFillOptionManifest = (driver: DriverType): string => {
+    const { blocks, libraries } = getAutoFillBlocksAndLibraries(driver);
+    return libraries.map(lib => {
+        const blockId = libraryIdToBlockId(lib.id);
+        const block = blocks.find(b => b.id === blockId);
+        if (!block || !lib.items?.length) return null;
+        const itemNames = lib.items.map((item: any) => item.name).filter(Boolean).join(' | ');
+        return `- ${block.id} (${block.name}): ${itemNames}`;
+    }).filter(Boolean).join('\n');
+};
+
+const buildAutoFillNameLookup = (driver: DriverType): Map<string, string> => {
+    const { libraries } = getAutoFillBlocksAndLibraries(driver);
+    const lookup = new Map<string, string>();
+    libraries.forEach(lib => {
+        lib.items?.forEach((item: any) => {
+            const canonical = item.name;
+            if (!canonical) return;
+            [item.name, item.id, item.nameEn].filter(Boolean).forEach((key: string) => {
+                lookup.set(String(key).trim().toLowerCase(), canonical);
+            });
+        });
+    });
+    return lookup;
+};
+
+const normalizeAutoFillState = (driver: DriverType, parsed: any): NarrativeFieldState => {
+    if (!parsed || typeof parsed !== 'object') return {};
+    const { blocks } = getAutoFillBlocksAndLibraries(driver);
+    const validBlockIds = new Set(blocks.map(block => block.id));
+    const lookup = buildAutoFillNameLookup(driver);
+    const normalized: NarrativeFieldState = {};
+
+    Object.entries(parsed).forEach(([blockId, rawValue]) => {
+        if (!validBlockIds.has(blockId)) return;
+        const values = Array.isArray(rawValue) ? rawValue : [rawValue];
+        const tags = values
+            .map(value => String(value ?? '').trim())
+            .filter(Boolean)
+            .map(value => lookup.get(value.toLowerCase()) || value)
+            .filter((value, index, arr) => arr.indexOf(value) === index);
+        if (tags.length > 0) normalized[blockId] = tags;
+    });
+
+    return normalized;
+};
+
+export const buildAutoFillPrompt = (driver: DriverType, visionInput: string, hasImage: boolean, analysis?: string): string => {
+    const textSeed = visionInput.trim();
+    const sourceMode = hasImage && textSeed
+        ? '图文双锚模式：图片锁定视觉物理事实，文本锁定语义/关系/动机。'
+        : hasImage
+            ? '图像锁定模式：图片中可见事实最高优先。'
+            : textSeed
+                ? '文本锁定模式：用户文字最高语义优先。'
+                : analysis?.trim()
+                    ? '解码结果模式：使用已有解码文本作为种子。'
+                    : '空白反推模式：无自由种子，直接根据该 Driver 随机反推出一组自洽参数。';
+
+    return `
+角色：迷雾引擎种子映射器。
+任务：把用户的文本/图像/解码结果，映射为 ${driver} 的参数状态。
+
+## 输入模式
+${sourceMode}
+
+## 种子
+${textSeed ? `文本种子:\n${textSeed}` : '文本种子: 未填写'}
+${hasImage ? '图像种子: 已上传，在附件中。可见人物、空间、物件、材质、光线、色彩与构图是最高视觉事实。' : '图像种子: 未上传'}
+${analysis?.trim() ? `已有解码:\n${analysis.trim()}` : ''}
+
+## 裁决宪法
+1. 文本输入是语义锁定：明确写出的事实、关系、事件、对象、欲望与禁令必须优先。
+2. 图片输入是视觉物理锁定：图片中可见的一切必须优先，不得被表层设定或随机补完覆盖。
+3. 图文并存时，图片负责“世界长什么样”，文本负责“这意味着什么/为什么发生”。
+4. 表层设定只是懒人预设；若与种子冲突，选择能服务种子的标签，或把冲突降级为风格、制度、隐喻。
+5. M/C/L/实验/预告等结构层只解释症候运动，不改写种子事实。
+6. 空白反推时允许随机性，但要选出一组内部自洽、可生成完整故事/方案的参数。
+
+## 可选参数清单
+你只能使用下列 blockId 和 item name。不要输出 item id。不要创造新标签。
+${buildAutoFillOptionManifest(driver)}
+
+## 输出
+只返回原始 JSON，不要 Markdown，不要解释文字。
+格式：{ "blockId": ["精确的 item name", "..."] }
+只输出你有把握的 block。
+`;
+};
+
+const toInlineImageData = async (image: string): Promise<{ mimeType: string; data: string }> => {
+    if (image.startsWith('data:')) {
+        const mimeMatch = image.match(/^data:([^;]+);base64,/);
+        return {
+            mimeType: mimeMatch?.[1] || 'image/jpeg',
+            data: image.split(',')[1] || image
+        };
+    }
+
+    if (/^https?:\/\//i.test(image)) {
+        const response = await fetch(image);
+        if (!response.ok) throw new Error(`Image URL fetch failed: ${response.status}`);
+        const blob = await response.blob();
+        const mimeType = blob.type || 'image/jpeg';
+        const data = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const result = String(reader.result || '');
+                resolve(result.split(',')[1] || result);
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        });
+        return { mimeType, data };
+    }
+
+    return { mimeType: 'image/jpeg', data: image };
+};
+
 const readAliasedString = (source: any, aliases: string[]): string => {
     if (!source || typeof source !== 'object') return '';
     const aliasSet = new Set(aliases.map(alias => alias.toLowerCase()));
@@ -1004,30 +1160,31 @@ export const mapAestheticInputToEngine = async (input: string): Promise<Narrativ
     }
 };
 
-export const analyzeImage = async (base64Image: string, textInput?: string): Promise<string> => {
+export const analyzeImage = async (base64Image: string | null, textInput?: string): Promise<string> => {
     try {
         const parts: any[] = [];
-        if (textInput) parts.push({ text: `Context: ${textInput}` });
-        parts.push({ inlineData: { mimeType: 'image/jpeg', data: base64Image.split(',')[1] || base64Image } });
-        parts.push({ text: "Analyze this image style..." });
+        const hasImage = Boolean(base64Image);
+        parts.push({ text: buildNarrativeDiagnosisPrompt(textInput || "", hasImage) });
+        if (base64Image) parts.push({ inlineData: await toInlineImageData(base64Image) });
         const model = configService.getEngineModel('visualBible') || 'gemini-3-flash-preview';
-        console.log(`[VisualBible] Analyzing Image with model: ${model}`);
+        console.log(`[VisualBible] Decoding Seed with model: ${model}`);
         const response = await retryWithBackoff<GenerateContentResponse>(() => getAI().models.generateContent({
             model: model,
-            contents: { parts: parts }
+            contents: { parts: parts },
+            config: { maxOutputTokens: 4096 }
         }));
-        return response.text || "Analysis failed.";
+        return response.text || "Decoding failed.";
     } catch (e: any) {
-        handleApiError("Image Analysis Error", e);
-        return "Error analyzing image.";
+        handleApiError("Seed Analysis Error", e);
+        return "Error decoding seed.";
     }
 };
 
 export const generateNarrativeAutoFill = async (driver: DriverType, visionInput: string, visionImage: string | null, analysis?: string): Promise<NarrativeFieldState> => {
     try {
-        const prompt = `Map input to ${driver} Engine. JSON Output.`;
+        const prompt = buildAutoFillPrompt(driver, visionInput, Boolean(visionImage), analysis);
         const parts: any[] = [{ text: prompt }];
-        if (visionImage) parts.push({ inlineData: { mimeType: 'image/jpeg', data: visionImage.split(',')[1] || visionImage } });
+        if (visionImage) parts.push({ inlineData: await toInlineImageData(visionImage) });
         const model = configService.getEngineModel('coreEngine') || 'gemini-3-flash-preview';
         console.log(`[CoreEngine] Generating AutoFill with model: ${model}`);
         const response = await retryWithBackoff<GenerateContentResponse>(() => getAI().models.generateContent({
@@ -1035,7 +1192,8 @@ export const generateNarrativeAutoFill = async (driver: DriverType, visionInput:
             contents: { parts: parts },
             config: { responseMimeType: 'application/json' }
         }));
-        return cleanAndParseJSON(response.text || "") || {};
+        const parsed = cleanAndParseJSON(response.text || "");
+        return normalizeAutoFillState(driver, parsed);
     } catch (e: any) {
         handleApiError("Narrative AutoFill Error", e);
         return {};
@@ -1060,7 +1218,7 @@ export const generateFantasyTraverse = async (driver: DriverType, duration: stri
 如果需要思考过程，只能放在 JSON 数组之前的 <thought_process>...</thought_process> XML 标签里。`;
 
         const parts: any[] = [{ text: `${promptData.text}\n\n${fantasyTraverseOutputContract}` }];
-        if (promptData.images && promptData.images.length > 0) parts.push({ inlineData: { mimeType: 'image/jpeg', data: promptData.images[0].split(',')[1] || promptData.images[0] } });
+        if (promptData.images && promptData.images.length > 0) parts.push({ inlineData: await toInlineImageData(promptData.images[0]) });
 
         const model = configService.getEngineModel('coreEngine') || 'gemini-3.1-pro-preview';
         console.log(`[CoreEngine] Generating Fantasy Traverse with model: ${model}`);
@@ -1121,10 +1279,10 @@ export const generateBlueprint = async (driver: DriverType, treatment: CreativeT
         if (driver === DriverType.COMMERCIAL) promptText = buildCommercialBiblePrompt(treatment, style, fieldState, visionInput, worldLaw);
         else if (driver === DriverType.EXPERIMENTAL) promptText = buildExperimentalBiblePrompt(treatment, style, fieldState, visionInput, worldLaw);
         else if (driver === DriverType.AESTHETIC) promptText = buildAestheticBiblePrompt(treatment, style, fieldState, visionInput, worldLaw, colorPalette);
-        else promptText = buildNarrativeBiblePrompt(treatment, style, fieldState, visionInput, worldLaw);
+        else promptText = buildNarrativeBiblePrompt(treatment, style, fieldState, visionInput, visionImage, worldLaw, visionAnalysis);
 
         const parts: any[] = [{ text: promptText }];
-        if (visionImage) parts.push({ inlineData: { mimeType: 'image/jpeg', data: visionImage.split(',')[1] || visionImage } });
+        if (visionImage) parts.push({ inlineData: await toInlineImageData(visionImage) });
 
         const model = configService.getEngineModel('coreEngine') || 'gemini-3.1-pro-preview';
         console.log(`[CoreEngine] Generating Blueprint with model: ${model}`);
@@ -1338,7 +1496,7 @@ export const updateBlueprint = async (blueprint: CreativeBlueprint, instruction:
 export const generateContinuation = async (blueprint: CreativeBlueprint, instruction: string, image: string | null) => {
     const prompt = `Continue story. Return CreativeBlueprint JSON.`;
     const parts: any[] = [{ text: prompt }];
-    if (image) parts.push({ inlineData: { mimeType: 'image/jpeg', data: image.split(',')[1] || image } });
+    if (image) parts.push({ inlineData: await toInlineImageData(image) });
     try {
         const model = configService.getEngineModel('coreEngine') || 'gemini-3.1-pro-preview';
         console.log(`[CoreEngine] Generating Continuation with model: ${model}`);

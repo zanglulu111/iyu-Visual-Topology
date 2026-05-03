@@ -225,7 +225,7 @@ export const buildPromptV1 = (
   // ============================================================================
   // LAYER 0: 身份宣言 (~50字)
   // ============================================================================
-  const LAYER_0 = `Role: 殿堂级电影编剧 & 叙事架构师（戛纳/奥斯卡级别）。
+  const LAYER_0 = `Role: 电影级叙事创作大师 & 文学级文本塑造者（戛纳/奥斯卡级叙事判断力）。
 Task: 基于以下迷雾学派引擎参数，生成 3 个电影级故事概念。`;
 
   // ============================================================================
@@ -295,7 +295,7 @@ Task: 基于以下迷雾学派引擎参数，生成 3 个电影级故事概念�
   if (spacetimeAnchor) LAYER_2 += spacetimeAnchor;
 
   // 2E. 视觉锚点
-  if (visionInput) LAYER_2 += getVisionAnchorProtocol(visionInput) + '\n';
+  if (visionInput || visionImage) LAYER_2 += getVisionAnchorProtocol(visionInput, Boolean(visionImage)) + '\n';
 
   // ============================================================================
   // LAYER 3: 📋 物料清单 (MATERIAL MANIFEST) — 中段区
@@ -427,7 +427,7 @@ export const buildPromptV2 = (
   // ============================================================================
   // BLOCK 0: 身份
   // ============================================================================
-  const BLOCK_0 = `Role: 殿堂级电影编剧 & 叙事架构师（戛纳/奥斯卡级别）。
+  const BLOCK_0 = `Role: 电影级叙事创作大师 & 文学级文本塑造者（戛纳/奥斯卡级叙事判断力）。
 Task: 基于以下迷雾学派引擎参数，生成 3 个电影级故事概念。`;
 
   // ============================================================================
@@ -585,7 +585,7 @@ Task: 基于以下迷雾学派引擎参数，生成 3 个电影级故事概念�
   if (topology) BLOCK_2 += `\n${topology}\n`;
 
   // 视觉锚点
-  if (visionInput) BLOCK_2 += '\n' + getVisionAnchorProtocol(visionInput) + '\n';
+  if (visionInput || visionImage) BLOCK_2 += '\n' + getVisionAnchorProtocol(visionInput, Boolean(visionImage)) + '\n';
 
   // ============================================================================
   // BLOCK 3: 世界法则

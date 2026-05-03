@@ -44,7 +44,7 @@ export const SKIN_BLOCKS: NarrativeBlockDef[] = [
   },
   {
     id: "skin_everything",
-    name: "SUR5.对象预设 (Object Anchor)",
+    name: "SUR5.对象预设",
     enName: "sur5.Object Anchor",
     description: "表层对象预设。它可以是麦高芬、凭证、信物、黑箱、钥匙或装置，只回答故事追逐什么物。",
     descriptionEn: "Surface object preset. A MacGuffin, token, keepsake, black box, key, or device that answers what object the story pursues.",
@@ -52,7 +52,7 @@ export const SKIN_BLOCKS: NarrativeBlockDef[] = [
   },
   {
     id: "skin_location",
-    name: "SUR6.空间容器 (Space Container)",
+    name: "SUR6.空间容器",
     enName: "sur6.Space Container",
     description: "表层空间预设。只回答事件发生在什么可见空间里。",
     descriptionEn: "Surface space preset. Answers only what visible space the event occurs in.",
@@ -76,7 +76,7 @@ export const SKIN_BLOCKS: NarrativeBlockDef[] = [
   },
   {
     id: "skin_profession",
-    name: "SUR9.职业身份 (Role Preset)",
+    name: "SUR9.职业身份",
     enName: "sur9.Role Preset",
     description: "表层身份预设。只回答人物以什么社会身份、职业岗位或登记状态进入故事世界。",
     descriptionEn: "Surface role preset. Answers only what social identity, occupation, or registered status the character enters the story world with.",
@@ -126,14 +126,6 @@ export const ALL_SKIN_BLOCKS = [
       descriptionEn: "The physical form of energy eruption (e.g., Revenge).",
       tags: []
     },
-    {
-      id: "skin_animation_genre",
-      name: "SURx.废弃世界模体",
-      enName: "surx.Deprecated Motif",
-      description: "提供世界的视觉与感官滤镜，如：赛博、武侠、废土等。",
-      descriptionEn: "Visual and sensory filter for the world (e.g., Cyberpunk).",
-      tags: []
-    },
     ...SKIN_BLOCKS,
     {
       id: "sur10x",
@@ -148,7 +140,7 @@ export const ALL_SKIN_BLOCKS = [
 // ============================================================
 // SV1/SV2 FLAT MAPPINGS (结构与体量保留旧逻辑)
 // ============================================================
-const FLAT_STRUCTURE_ITEMS: LibraryItemDef[] = SV1_DATA.flatMap(cat => cat.items.map(item => ({ ...item, group: cat.name })));
+const FLAT_STRUCTURE_ITEMS: LibraryItemDef[] = SV1_DATA.flatMap(cat => cat.items.map(item => ({ ...item, group: cat.name, groupEn: cat.nameEn })));
 
 // ============================================================
 // SKIN_LIBRARY: 全量词库（新版 engine_surface 数据源）
@@ -157,7 +149,8 @@ export const SKIN_LIBRARY: LibraryCategoryDef[] = [
     // SUR1: 叙事动力 — 从 engine_surface/SUR1 加载 (也供其他调用后备)
     {
         id: "skin_genre_lib",
-        name: "叙事动力 (Drive - SUR1)",
+        name: "叙事动力",
+        nameEn: "Drive",
         desc: "决定能量喷发的物理形式",
         items: SUR1_DATA.flatMap(cat => (cat.items || []).map(item => ({ ...item, group: cat.name, groupEn: cat.nameEn })))
     },
@@ -165,7 +158,8 @@ export const SKIN_LIBRARY: LibraryCategoryDef[] = [
     // SUR2: 背景场域 — 从 engine_surface/SUR2 加载 (也供其他调用后备)
     {
         id: "skin_era_lib",
-        name: "背景场域/废弃世界 (Field/Motif - SUR2/SURx)",
+        name: "背景场域/废弃世界",
+        nameEn: "Field / Motif",
         desc: "决定叙事发生的时代背景",
         items: SUR2_DATA.flatMap(cat => (cat.items || []).map(item => ({ ...item, group: cat.name, groupEn: cat.nameEn })))
     },
@@ -173,7 +167,8 @@ export const SKIN_LIBRARY: LibraryCategoryDef[] = [
     // SUR4: 社会形态 — 从 engine_surface/SUR4 加载
     {
         id: "skin_society_lib",
-        name: "社会形态 (Society - SUR4)",
+        name: "社会形态",
+        nameEn: "Social Order",
         desc: "界定压盖在人物头顶的终极秩序",
         items: SUR4_DATA.flatMap(cat => (cat.items || []).map(item => ({ ...item, group: cat.name, groupEn: cat.nameEn })))
     },
@@ -181,7 +176,8 @@ export const SKIN_LIBRARY: LibraryCategoryDef[] = [
     // SUR5: 对象预设 — 从 engine_surface/SUR5 加载
     {
         id: "skin_everything_lib",
-        name: "对象预设 (Object Anchor - SUR5)",
+        name: "对象预设",
+        nameEn: "Object Anchor",
         desc: "只提供可被追寻、争夺、交换或保护的表层对象",
         items: SUR5_DATA.flatMap(cat => (cat.items || []).map(item => ({ ...item, group: cat.name, groupEn: cat.nameEn })))
     },
@@ -189,7 +185,8 @@ export const SKIN_LIBRARY: LibraryCategoryDef[] = [
     // SUR6: 空间容器 — 从 engine_surface/SUR6 加载
     {
         id: "skin_location_lib",
-        name: "空间容器 (Space Container - SUR6)",
+        name: "空间容器",
+        nameEn: "Space Container",
         desc: "只提供事件可发生的可见空间容器",
         items: SUR6_DATA.flatMap(cat => (cat.items || []).map(item => ({ ...item, group: cat.name, groupEn: cat.nameEn })))
     },
@@ -197,7 +194,8 @@ export const SKIN_LIBRARY: LibraryCategoryDef[] = [
     // SUR7: 选角呈现 — 从 engine_surface/SUR7 加载
     {
         id: "skin_gender_lib",
-        name: "选角呈现 (Casting Presentation - SUR7)",
+        name: "选角呈现",
+        nameEn: "Casting Presentation",
         desc: "人物在画面、称谓和互动中采用的性别呈现标签",
         items: SUR7_DATA.flatMap(cat => (cat.items || []).map(item => ({ ...item, group: cat.name, groupEn: cat.nameEn })))
     },
@@ -205,7 +203,8 @@ export const SKIN_LIBRARY: LibraryCategoryDef[] = [
     // SUR8: 年龄阶段 — 从 engine_surface/SUR8 加载
     {
         id: "skin_age_lib",
-        name: "年龄阶段 (Age Stage - SUR8)",
+        name: "年龄阶段",
+        nameEn: "Age Stage",
         desc: "人物进入故事时的可见年岁区间与行动条件",
         items: SUR8_DATA.flatMap(cat => (cat.items || []).map(item => ({ ...item, group: cat.name, groupEn: cat.nameEn })))
     },
@@ -213,7 +212,8 @@ export const SKIN_LIBRARY: LibraryCategoryDef[] = [
     // SUR9: 职业身份 — 从 engine_surface/SUR9 加载
     {
         id: "skin_profession_lib",
-        name: "职业身份 (Role Preset - SUR9)",
+        name: "职业身份",
+        nameEn: "Role Preset",
         desc: "只提供人物可识别的社会身份、职业岗位或登记状态",
         items: SUR9_DATA.flatMap(cat => (cat.items || []).map(item => ({ ...item, group: cat.name, groupEn: cat.nameEn })))
     },
@@ -221,7 +221,8 @@ export const SKIN_LIBRARY: LibraryCategoryDef[] = [
     // SUR10: 信念预设 — 从 engine_surface/SUR10 加载
     {
         id: "skin_ideology_lib",
-        name: "信念预设 (Belief Preset - SUR10)",
+        name: "信念预设",
+        nameEn: "Belief Preset",
         desc: "人物开场时用于解释世界的表层信念语言",
         items: SUR10_DATA.flatMap(cat => (cat.items || []).map(item => ({ ...item, group: cat.name, groupEn: cat.nameEn })))
     },
@@ -229,7 +230,8 @@ export const SKIN_LIBRARY: LibraryCategoryDef[] = [
     // SUR-END: 显性收场 — 兼容旧 engine_surface/SUR11 数据路径
     {
         id: "skin_ending_lib",
-        name: "显性收场 (Visible Ending - SUR-END)",
+        name: "显性收场",
+        nameEn: "Visible Ending",
         desc: "只规定故事表层最后可见的事件和画面停点；意义裁决交给 M7A，身体余味交给 M7B",
         items: SUR11_DATA.flatMap(cat => (cat.items || []).map(item => ({ ...item, group: cat.name, groupEn: cat.nameEn })))
     },
@@ -237,22 +239,25 @@ export const SKIN_LIBRARY: LibraryCategoryDef[] = [
     // SV1: 叙事结构
     {
         id: "skin_structure_lib",
-        name: "叙事结构 (Structure - SV1)",
+        name: "叙事结构",
+        nameEn: "Narrative Structure",
         desc: "The architectural framework of the plot.",
         items: FLAT_STRUCTURE_ITEMS
     },
     // SV2: 故事体量
     {
         id: "skin_volume_lib",
-        name: "故事体量 (Volume - SV2)",
+        name: "故事体量",
+        nameEn: "Story Volume",
         desc: "Target scope and rhythm density.",
-        items: SV2_DATA.flatMap(cat => cat.items.map(item => ({ ...item, group: cat.name })))
+        items: SV2_DATA.flatMap(cat => cat.items.map(item => ({ ...item, group: cat.name, groupEn: cat.nameEn })))
     },
     // Synthesizer 调音台 (SUR4X removed in v3.1)
     {
         id: "sur10x_lib",
-        name: "信念裂度 (Belief Fracture)",
+        name: "信念裂度",
+        nameEn: "Belief Fracture",
         desc: "对信仰的'当真程度'滑块——从虔信到决裂。",
-        items: SYNTHESIZER_SUR10X.map(item => ({...item, group: "信念裂度"}))
+        items: SYNTHESIZER_SUR10X.map(item => ({...item, group: "信念裂度", groupEn: "Belief Fracture"}))
     }
 ];

@@ -69,7 +69,7 @@ export const ArchiveContent: React.FC<ArchiveContentProps> = ({ lang }) => {
         { id: 'NEUROSIS', labelCn: '神经症', labelEn: 'Neurosis', color: 'text-[#304B35] bg-[#304B35]/5', darkColor: 'text-green-400 bg-green-500/10' },
         { id: 'PSYCHOSIS', labelCn: '精神病', labelEn: 'Psychosis', color: 'text-[#702424] bg-[#702424]/5', darkColor: 'text-red-400 bg-red-500/10' },
         { id: 'PERVERSION', labelCn: '倒错', labelEn: 'Perversion', color: 'text-[#3B2C4F] bg-[#3B2C4F]/5', darkColor: 'text-purple-400 bg-purple-500/10' },
-        { id: 'AUTISM', labelCn: '孤独症', labelEn: 'Autism', color: 'text-[#263E5A] bg-[#263E5A]/5', darkColor: 'text-blue-400 bg-blue-500/10' }
+        { id: 'AUTISM', labelCn: '孤独症', labelEn: 'Autism', color: 'text-[#5A4326] bg-[#5A4326]/5', darkColor: 'text-gold-primary bg-gold-primary/10' }
     ];
 
     const getCategoryStyles = (catId: ArchiveCategory) => {

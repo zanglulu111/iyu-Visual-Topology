@@ -30,7 +30,7 @@ export const PROVIDER_LABELS: Record<ProviderId, string> = {
 };
 
 export const PROVIDER_COLORS: Record<ProviderId, string> = {
-  gemini: '#22d3ee',
+  gemini: '#d4af37',
   claude: '#c084fc',
   openai: '#22c55e',
 };
@@ -214,36 +214,42 @@ export const ENGINE_CONFIGS = [
     name: '核心叙事引擎',
     description: '故事幻视、圣经生成、AI续写、蓝图生成等高创意任务',
     type: 'text',
+    allowedModels: AVAILABLE_MODELS.core,
   },
   {
     id: 'metonymyEngine',
     name: '换喻缝合引擎',
     description: '剧本生成、分镜表、风格迁移等文学到视觉转换',
     type: 'text',
+    allowedModels: AVAILABLE_MODELS.core,
   },
   {
     id: 'psychoAnalysis',
     name: '精神分析引擎',
     description: '拉康精神分析报告、深度心理解读',
     type: 'text',
+    allowedModels: AVAILABLE_MODELS.core,
   },
   {
     id: 'visualBible',
     name: '核心视觉圣经',
     description: '图片反推、全局影调解析、资产分析，需要识图能力',
     type: 'text',
+    allowedModels: AVAILABLE_MODELS.core,
   },
   {
     id: 'visualSeed',
     name: '植入症候引擎',
     description: '欲望输入解码、参数映射、视觉种子处理',
     type: 'image',
+    allowedModels: [...AVAILABLE_MODELS.image, 'gpt-5.5'],
   },
   {
     id: 'imageGen',
     name: '资产生成引擎',
     description: '直接生成视觉参考图片',
     type: 'image',
+    allowedModels: [...AVAILABLE_MODELS.image, 'gpt-5.5'],
   },
 ] as const;
 

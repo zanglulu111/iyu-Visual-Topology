@@ -374,7 +374,7 @@ export const LacanTopologyView: React.FC<LacanTopologyViewProps> = ({
                             >
                                 <div className={`w-6 h-6 flex items-center justify-center rounded-sm font-black text-[10px] mb-2 text-black
                                     ${id === 'REAL' ? 'bg-amber-500' : 
-                                      id === 'SYMBOLIC' ? 'bg-cyan-500' : 
+                                      id === 'SYMBOLIC' ? 'bg-gold-primary' : 
                                       id === 'IMAGINARY' ? 'bg-rose-500' : 
                                       'bg-emerald-500'}
                                 `}>

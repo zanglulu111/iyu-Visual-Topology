@@ -6,7 +6,7 @@ import {
     X, Wand2, Loader2, ArrowLeft, ArrowRight, History as HistoryIcon,
     Globe, BookOpen, ImageIcon, BrainCircuit, Target, Film, Eye, Box,
     ClipboardCopy, Check, HelpCircle, Home, TestTube, Zap, Palette,
-    Settings2, Layers, Terminal, Feather, Bookmark, Star, FilePlus, Download, List, Database, Lightbulb, ScanLine, Heart, Activity, Upload, Flame,
+    Settings2, Layers, Terminal, Feather, Bookmark, Star, FilePlus, Download, List, Database, Heart, Activity, Upload, Flame,
     Archive, Save, Hexagon
 } from 'lucide-react';
 import * as geminiService from '../services/geminiService';
@@ -20,22 +20,12 @@ import { AestheticView } from './blueprint/AestheticView';
 import { TrailerView } from './blueprint/TrailerView';
 import { PoeticView } from './blueprint/PoeticView';
 import { MetonymyView } from './blueprint/MetonymyView';
-import {
-    NARRATIVE_ENGINE_BLOCKS,
-    COMMERCIAL_ENGINE_BLOCKS,
-    EXPERIMENTAL_ENGINE_BLOCKS,
-    AESTHETIC_ENGINE_BLOCKS,
-    TRAILER_ENGINE_BLOCKS,
-    COMM_SKIN_BLOCKS,
-    EXPERIMENTAL_SKIN_BLOCKS,
-    TRAILER_SKIN_BLOCKS
-} from '../constants';
-import { ALL_SKIN_BLOCKS } from '../data/skin_libraries';
 import { persistence } from '../services/persistence';
 import { TaskManagerPanel } from './TaskManagerPanel';
 import { globalTaskManager } from '../services/taskManager';
 import { supabaseDatabase } from '../services/supabaseDatabase';
 import { supabase } from '../services/supabaseAuth';
+import { EngineParamsOverview } from './EngineParamsOverview';
 
 interface BlueprintEditorProps {
     blueprint: CreativeBlueprint | null;
@@ -334,13 +324,13 @@ export const BlueprintEditor: React.FC<BlueprintEditorProps> = ({
             themeActiveBorder = 'border-[#8B261D]';
             themeEmptyPulse = 'bg-[#8B261D]/20';
         } else if (effectiveDriverType === DriverType.COMMERCIAL) {
-            themeAccent = 'text-cyan-400';
-            themeText = 'text-cyan-400';
-            themeHoverText = 'group-hover:text-cyan-400';
-            themeBorder = 'border-cyan-500/30';
-            themeBgActive = 'bg-cyan-900/20';
-            themeSidebarBorder = 'border-cyan-400/15';
-            themeActiveBorder = 'border-cyan-400';
+            themeAccent = 'text-mist-cyan';
+            themeText = 'text-mist-cyan';
+            themeHoverText = 'group-hover:text-mist-cyan';
+            themeBorder = 'border-mist-cyan/30';
+            themeBgActive = 'bg-mist-cyan/15';
+            themeSidebarBorder = 'border-mist-cyan/20';
+            themeActiveBorder = 'border-mist-cyan';
         } else if (effectiveDriverType === DriverType.AESTHETIC) {
             themeAccent = 'text-rose-400';
             themeText = 'text-rose-400';
@@ -588,27 +578,6 @@ ${psychoHtml}
         }
     };
 
-    const getBlockName = (id: string) => {
-        const allBlocks = [
-            ...NARRATIVE_ENGINE_BLOCKS,
-            ...COMMERCIAL_ENGINE_BLOCKS,
-            ...EXPERIMENTAL_ENGINE_BLOCKS,
-            ...AESTHETIC_ENGINE_BLOCKS,
-            ...TRAILER_ENGINE_BLOCKS,
-            ...ALL_SKIN_BLOCKS,
-            ...COMM_SKIN_BLOCKS,
-            ...EXPERIMENTAL_SKIN_BLOCKS,
-            ...TRAILER_SKIN_BLOCKS
-        ];
-        const block = allBlocks.find(b => b.id === id);
-        if (block) return language === 'EN' ? block.enName : block.name;
-        if (id === 'skin_genre') return language === 'EN' ? "GENRE" : "类型基因";
-        if (id === 'skin_animation_genre') return language === 'EN' ? "ANIMATION GENRE" : "动画基因";
-        if (id === 'skin_year_exact') return language === 'EN' ? "YEAR" : "年代";
-        if (id === 'skin_country_exact') return language === 'EN' ? "COUNTRY" : "国家";
-        return id;
-    };
-
     const isAnalysisMode = activeTab === 'ANALYSIS';
     const isMetonymyMode = activeTab === 'METONYMY';
     const mainPaddingClass = (isMetonymyMode || isAnalysisMode) ? 'p-0' : 'p-8 md:p-12';
@@ -785,7 +754,7 @@ ${psychoHtml}
             <div className="flex-1 flex overflow-hidden relative z-10">
                 {/* PARAMETERS SIDEBAR */}
                 <div className={`
-                    fixed top-0 bottom-0 left-0 z-50
+                    absolute top-0 ${isSutureOpen ? 'bottom-0' : 'bottom-14'} left-0 z-50
                     w-full max-w-lg
                     ${effectiveTheme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#0a0a0b]/95 backdrop-blur-xl'} border-r ${effectiveTheme === 'retro' ? 'border-[#8B261D]/20' : 'border-zinc-800'}
                     transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]
@@ -808,57 +777,15 @@ ${psychoHtml}
                         </button>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6">
-                        {(visionInput || visionAnalysis) && (
-                            <div className="flex flex-col gap-4 border-b border-zinc-800 pb-6 mb-6">
-                                {visionInput && (
-                                    <div className="flex flex-col gap-2 p-4 rounded-lg bg-zinc-900/30 border border-dashed border-zinc-700/50">
-                                        <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 flex items-center gap-2">
-                                            <Lightbulb size={12} className={uiConfig.themeText.replace('text-', 'text-')} />
-                                            {language === 'EN' ? "Input Concept" : "创意输入"}
-                                        </span>
-                                        <p className="text-sm text-zinc-300 font-serif leading-relaxed whitespace-pre-wrap">{visionInput}</p>
-                                    </div>
-                                )}
-                                {visionAnalysis && (
-                                    <div className="flex flex-col gap-2 p-4 rounded-lg bg-zinc-900/30 border border-dashed border-zinc-700/50">
-                                        <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 flex items-center gap-2">
-                                            <ScanLine size={12} className={uiConfig.themeText.replace('text-', 'text-')} />
-                                            {language === 'EN' ? "Visual Decoding" : "视觉解码结果"}
-                                        </span>
-                                        <p className="text-xs text-zinc-400 font-mono leading-relaxed whitespace-pre-wrap">{visionAnalysis}</p>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        {fieldState && Object.keys(fieldState).length > 0 ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {Object.entries(fieldState).map(([key, values]) => {
-                                    const safeValues = values as string[];
-                                    if (!safeValues || safeValues.length === 0) return null;
-                                    return (
-                                        <div key={key} className={`flex flex-col gap-2 p-4 rounded-lg ${effectiveTheme === 'retro' ? 'bg-[#F9F7F1] border-[#8B261D]/10' : 'bg-zinc-900/50 border-zinc-800/50'} border hover:border-zinc-700 transition-colors`}>
-                                            <span className={`text-xs font-bold uppercase tracking-widest ${uiConfig.themeText} opacity-70 truncate`}>
-                                                {getBlockName(key)}
-                                            </span>
-                                            <div className="flex flex-wrap gap-2">
-                                                {safeValues.map((v, i) => (
-                                                    <span key={i} className={`text-sm ${effectiveTheme === 'retro' ? 'text-zinc-800' : 'text-zinc-200'} font-serif leading-tight break-words border-b ${effectiveTheme === 'retro' ? 'border-black/5' : 'border-white/10'} pb-0.5`}>
-                                                        {v.split('(')[0]}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        ) : (
-                            <div className="flex flex-col items-center justify-center h-full text-zinc-600 gap-4 opacity-50">
-                                <List size={48} />
-                                <span className="text-xs uppercase tracking-widest">No parameters active</span>
-                            </div>
-                        )}
+                    <div className="flex-1 overflow-y-auto custom-scrollbar p-5 md:p-6">
+                        <EngineParamsOverview
+                            fieldState={fieldState}
+                            language={language}
+                            theme={effectiveTheme}
+                            accentClass={uiConfig.themeText}
+                            visionInput={visionInput}
+                            visionAnalysis={visionAnalysis}
+                        />
                     </div>
                 </div>
 
@@ -1009,7 +936,7 @@ ${psychoHtml}
                             <div className="relative">
                                 <Activity size={18} className={`transition-colors ${isTaskManagerOpen ? (effectiveTheme === 'retro' ? 'text-[#8B261D]' : uiConfig.themeAccent) : (effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white')}`} />
                                 {activeTaskCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-blue-500 rounded-full text-[8px] flex items-center justify-center font-bold text-white shadow-[0_0_10px_rgba(59,130,246,0.5)]">
+                                    <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-gold-primary rounded-full text-[8px] flex items-center justify-center font-bold text-black shadow-[0_0_10px_rgba(212,175,55,0.35)]">
                                         {activeTaskCount}
                                     </span>
                                 )}
@@ -1077,7 +1004,7 @@ ${psychoHtml}
                             <button 
                                 onClick={handleContinueSubmit} 
                                 disabled={!continueInput.trim() && !continueImage} 
-                                className={`w-full py-3 ${effectiveTheme === 'retro' ? 'bg-[#8B261D] hover:bg-[#6D1E16] text-white shadow-none' : (uiConfig.type === DriverType.COMMERCIAL ? 'bg-cyan-500 hover:bg-cyan-400' : (uiConfig.type === DriverType.AESTHETIC ? 'bg-rose-500 hover:bg-rose-400' : 'bg-gold-primary hover:bg-amber-400'))} font-bold uppercase tracking-widest rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2`}
+                                className={`w-full py-3 ${effectiveTheme === 'retro' ? 'bg-[#8B261D] hover:bg-[#6D1E16] text-white shadow-none' : (uiConfig.type === DriverType.COMMERCIAL ? 'bg-mist-cyan hover:brightness-110 text-black' : (uiConfig.type === DriverType.AESTHETIC ? 'bg-rose-500 hover:bg-rose-400' : 'bg-gold-primary hover:bg-amber-400'))} font-bold uppercase tracking-widest rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2`}
                             >
                                 {language === 'EN' ? "Generate Next Chapter" : "生成下一章"}
                             </button>

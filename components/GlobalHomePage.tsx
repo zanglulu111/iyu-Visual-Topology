@@ -101,7 +101,7 @@ export const GlobalHomePage: React.FC<GlobalHomePageProps> = ({
       titleEn: 'SUBJECT ARCHIVE',
       descCn: '在被压抑之物回归的迷雾中，阅读与漫游。每一个档案都是某人被遗忘的梦。',
       descEn: 'Wander through the fog where the repressed returns. Every file is a forgotten dream.',
-      color: '#22d3ee',
+      color: '#D4AF37',
       action: () => { setViewMode('ARCHIVE'); setPage(1); },
     },
     {

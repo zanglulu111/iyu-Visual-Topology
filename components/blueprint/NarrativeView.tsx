@@ -124,12 +124,12 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
         return STYLE_MATRIX.map(cat => ({
             id: cat.id,
             name: cat.name,
-            desc: "Select a narrative style tone.",
+            desc: "Select an authorial renderer.",
             items: cat.items.map(item => ({
                 id: item.id,
                 name: item.name,
-                def: item.dna,
-                core: `${item.description}${item.example ? ` | 代表作: ${item.example}` : ''}`,
+                def: item.coreRewriteLogic || item.dna,
+                core: `${item.styleTitle || item.description}${item.example ? ` | 代表作: ${item.example}` : ''}`,
                 group: cat.name
             }))
         }));
@@ -930,7 +930,7 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
                         isOpen={isStyleLibraryOpen}
                         onClose={() => setIsStyleLibraryOpen(false)}
                         blockId="style_matrix"
-                        blockName={language === 'EN' ? "VISUAL TONE LIBRARY" : "视觉调性词库"}
+                        blockName={language === 'EN' ? "AUTHOR STYLE LIBRARY" : "作者风格词库"}
                         selectedTags={selectedStyle ? [selectedStyle] : []}
                         onToggleTag={handleStyleSelect}
                         customLibraryData={styleLibraryData}

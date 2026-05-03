@@ -149,9 +149,7 @@ export const PromptInspectorModal: React.FC<PromptInspectorModalProps> = ({
                     value: worldLawConfig?.gravity || '',
                     options: WORLD_LAW_OPTIONS,
                     editable: true,
-                    placeholder: lang === 'EN' ? 'World Law' : '世界法则',
-                    alwaysShow: true,
-                    inlineOptions: true
+                    placeholder: lang === 'EN' ? 'World Law' : '世界法则'
                 },
                 ...getLibraryBlockItems(surfaceBlocks, library, fieldState, lang, activeDriver)
             ]
@@ -162,14 +160,14 @@ export const PromptInspectorModal: React.FC<PromptInspectorModalProps> = ({
             items: [
                 {
                     id: 'visionInput',
-                    label: lang === 'EN' ? 'Vision Input' : '视觉/创意输入',
+                    label: lang === 'EN' ? 'Text Seed / Semantic Lock' : '文本种子 / 语义锁定',
                     kind: 'textarea',
                     value: visionInput || '',
                     editable: true
                 },
                 {
                     id: 'visionImage',
-                    label: lang === 'EN' ? 'Vision Image' : '视觉参考图',
+                    label: lang === 'EN' ? 'Image Seed / Visual Lock' : '图像种子 / 视觉锁定',
                     kind: visionImage ? 'image' : 'text',
                     value: visionImage || '',
                     editable: true

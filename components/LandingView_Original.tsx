@@ -64,7 +64,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
     // Dynamic header theme based on hovered driver
     const getHeaderTheme = (driverId: DriverType | null) => {
         switch (driverId) {
-            case DriverType.COMMERCIAL: return 'border-cyan-500/50 bg-cyan-900/10';
+            case DriverType.COMMERCIAL: return 'border-mist-cyan/50 bg-mist-cyan/10';
             case DriverType.NARRATIVE: return 'border-yellow-500/50 bg-yellow-900/10';
             case DriverType.AESTHETIC: return 'border-rose-500/50 bg-rose-900/10';
             case DriverType.EXPERIMENTAL: return 'border-purple-500/50 bg-purple-900/10';

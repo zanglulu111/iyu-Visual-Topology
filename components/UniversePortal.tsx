@@ -64,8 +64,8 @@ const REALMS: RealmDef[] = [
     subtitleEn: 'IMMERSIVE NARRATIVE // DREAM ARCHIVE',
     descCn: '在被压抑之物回归的迷雾中，阅读与漫游。每一个档案都是某人被遗忘的梦。',
     descEn: 'Wander through the fog where the repressed returns. Every file is a forgotten dream.',
-    color: '#22d3ee',
-    glowRgba: 'rgba(34, 211, 238, 0.2)',
+    color: '#ff4fd8',
+    glowRgba: 'rgba(255, 79, 216, 0.22)',
     iconSymbol: '☁',
     target: { page: 1, viewMode: 'ARCHIVE' },
   },
@@ -77,8 +77,8 @@ const REALMS: RealmDef[] = [
     subtitleEn: 'VISUAL EXPLORATION // CULT TOPOLOGY',
     descCn: '在光影的缝隙中，直面实在界的闪烁。解析欲望在影像中的流动。',
     descEn: 'In the cracks of light and shadow, confront the flicker of the Real. Parse the flow of desire in images.',
-    color: '#fbbf24',
-    glowRgba: 'rgba(251, 191, 36, 0.2)',
+    color: '#38bdf8',
+    glowRgba: 'rgba(56, 189, 248, 0.22)',
     iconSymbol: '🎬',
     target: { page: 1, viewMode: 'VIDEO' },
   },
@@ -90,8 +90,8 @@ const REALMS: RealmDef[] = [
     subtitleEn: 'CREATIVE ENGINE // SYMBOLIC CHAIN',
     descCn: '启动核心驱动器，进入视觉生产的符号链。构建你自己的迷雾。',
     descEn: 'Activate the core driver. Enter the symbolic chain of visual production.',
-    color: '#D4AF37',
-    glowRgba: 'rgba(212, 175, 55, 0.2)',
+    color: '#ff2bd6',
+    glowRgba: 'rgba(255, 43, 214, 0.24)',
     iconSymbol: '⚙',
     target: { page: 0 },
   },
@@ -464,17 +464,17 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
         }
 
         @keyframes rgb-portal-glitch {
-          0%, 100% { text-shadow: -2px -0.5px 0.5px rgba(255, 0, 255, 0.6), 2px 0.5px 0.5px rgba(0, 255, 255, 0.6); transform: translate(0, 0); clip-path: none; }
-          25% { text-shadow: -4.5px 1.2px 1px rgba(255, 0, 255, 0.75), 4.5px -1.2px 1px rgba(0, 255, 255, 0.75); transform: translate(-1.5px, 0.8px) skewX(2deg); clip-path: inset(30% 0 65% 0); }
-          50% { text-shadow: 3.5px -2.5px 1.5px rgba(255, 0, 255, 0.65), -3.5px 2.5px 1.5px rgba(0, 255, 255, 0.65); transform: translate(1px, -1.2px); clip-path: none; }
-          75% { text-shadow: -4px 2px 1px rgba(255, 0, 255, 0.75), 4px -2px 1px rgba(0, 255, 255, 0.75); transform: translate(-1px, 1.5px) skewX(-2deg); clip-path: inset(70% 0 25% 0); }
+          0%, 100% { text-shadow: -2px -0.5px 0.5px rgba(0, 229, 255, 0.72), 2px 0.5px 0.5px rgba(255, 43, 214, 0.72), 0 0 14px rgba(255,255,255,0.22); transform: translate(0, 0); clip-path: none; }
+          25% { text-shadow: -4.5px 1.2px 1px rgba(0, 229, 255, 0.9), 4.5px -1.2px 1px rgba(255, 45, 128, 0.86), 0 0 18px rgba(255,255,255,0.3); transform: translate(-1.5px, 0.8px) skewX(2deg); clip-path: inset(30% 0 65% 0); }
+          50% { text-shadow: 3.5px -2.5px 1.5px rgba(76, 110, 255, 0.76), -3.5px 2.5px 1.5px rgba(255, 79, 216, 0.86), 0 0 12px rgba(255,255,255,0.25); transform: translate(1px, -1.2px); clip-path: none; }
+          75% { text-shadow: -4px 2px 1px rgba(0, 229, 255, 0.86), 4px -2px 1px rgba(255, 43, 214, 0.9), 0 0 20px rgba(255,255,255,0.32); transform: translate(-1px, 1.5px) skewX(-2deg); clip-path: inset(70% 0 25% 0); }
         }
 
         @keyframes rgb-pure-flow {
-          0%, 100% { text-shadow: -2px -0.5px 0.5px rgba(255, 0, 255, 0.6), 2px 0.5px 0.5px rgba(0, 255, 255, 0.6); }
-          25% { text-shadow: -4.5px 1.2px 1px rgba(255, 0, 255, 0.75), 4.5px -1.2px 1px rgba(0, 255, 255, 0.75); }
-          50% { text-shadow: 4px -2.5px 1.5px rgba(255, 0, 255, 0.65), -4px 2.5px 1.5px rgba(0, 255, 255, 0.65); }
-          75% { text-shadow: -4px 2px 1.2px rgba(255, 0, 255, 0.75), 4px -2px 1.2px rgba(0, 255, 255, 0.75); }
+          0%, 100% { text-shadow: -2px -0.5px 0.5px rgba(0, 229, 255, 0.68), 2px 0.5px 0.5px rgba(255, 43, 214, 0.68), 0 0 12px rgba(255,255,255,0.18); }
+          25% { text-shadow: -4.5px 1.2px 1px rgba(0, 229, 255, 0.82), 4.5px -1.2px 1px rgba(255, 45, 128, 0.82), 0 0 18px rgba(255,255,255,0.24); }
+          50% { text-shadow: 4px -2.5px 1.5px rgba(76, 110, 255, 0.72), -4px 2.5px 1.5px rgba(255, 79, 216, 0.82), 0 0 10px rgba(255,255,255,0.2); }
+          75% { text-shadow: -4px 2px 1.2px rgba(0, 229, 255, 0.82), 4px -2px 1.2px rgba(255, 43, 214, 0.86), 0 0 18px rgba(255,255,255,0.26); }
         }
 
         @keyframes retro-portal-glitch {
@@ -518,17 +518,17 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
         }
         @keyframes text-jitter-dispersion {
           /* Burst 1 */
-          0%, 12% { transform: translate(-1.5px, 0.5px); text-shadow: -2px -0.5px 0.5px rgba(255,0,255,0.6), 2px 0.5px 0.5px rgba(0,255,255,0.6); }
-          4%, 8% { transform: translate(2px, -1px) skewX(1deg); text-shadow: -4px 1px 1px rgba(255,0,255,0.8), 4px -1px 1px rgba(0,255,255,0.8); }
-          13%, 32% { transform: translate(0,0); text-shadow: -1.5px -0.5px 0.5px rgba(255,0,255,0.5), 1.5px 0.5px 0.5px rgba(0,255,255,0.5); }
+          0%, 12% { transform: translate(-1.5px, 0.5px); text-shadow: -2px -0.5px 0.5px rgba(0,229,255,0.68), 2px 0.5px 0.5px rgba(255,43,214,0.72), 0 0 12px rgba(255,255,255,0.18); }
+          4%, 8% { transform: translate(2px, -1px) skewX(1deg); text-shadow: -4px 1px 1px rgba(0,229,255,0.88), 4px -1px 1px rgba(255,45,128,0.88), 0 0 16px rgba(255,255,255,0.24); }
+          13%, 32% { transform: translate(0,0); text-shadow: -1.5px -0.5px 0.5px rgba(0,229,255,0.52), 1.5px 0.5px 0.5px rgba(255,43,214,0.54), 0 0 10px rgba(255,255,255,0.16); }
           /* Burst 2 */
-          33%, 45% { transform: translate(2px, -1px); text-shadow: -3px 0.8px 1px rgba(255,0,255,0.7), 3px -0.8px 1px rgba(0,255,255,0.7); }
-          37%, 41% { transform: translate(-2px, 1px); text-shadow: 2.5px -1.5px 1.5px rgba(255,0,255,0.6), -2.5px 1.5px 1.5px rgba(0,255,255,0.6); }
-          46%, 65% { transform: translate(0,0); text-shadow: -1.5px -0.5px 0.5px rgba(255,0,255,0.5), 1.5px 0.5px 0.5px rgba(0,255,255,0.5); }
+          33%, 45% { transform: translate(2px, -1px); text-shadow: -3px 0.8px 1px rgba(76,110,255,0.78), 3px -0.8px 1px rgba(255,79,216,0.82), 0 0 14px rgba(255,255,255,0.18); }
+          37%, 41% { transform: translate(-2px, 1px); text-shadow: 2.5px -1.5px 1.5px rgba(0,229,255,0.72), -2.5px 1.5px 1.5px rgba(255,45,128,0.78), 0 0 16px rgba(255,255,255,0.24); }
+          46%, 65% { transform: translate(0,0); text-shadow: -1.5px -0.5px 0.5px rgba(0,229,255,0.5), 1.5px 0.5px 0.5px rgba(255,43,214,0.54), 0 0 10px rgba(255,255,255,0.16); }
           /* Burst 3 */
-          66%, 78% { transform: translate(-1.5px, 0.8px); text-shadow: -4px 1.2px 1px rgba(255,0,255,0.8), 4px -1.2px 1px rgba(0,255,255,0.8); }
-          70%, 74% { transform: translate(1.5px, -0.8px); text-shadow: 2px -1.5px 2px rgba(255,0,255,0.7), -2px 1.5px 2px rgba(0,255,255,0.7); }
-          79%, 100% { transform: translate(0,0); text-shadow: -1.5px -0.5px 0.5px rgba(255,0,255,0.6), 1.5px 0.5px 0.5px rgba(0,255,255,0.6); }
+          66%, 78% { transform: translate(-1.5px, 0.8px); text-shadow: -4px 1.2px 1px rgba(0,229,255,0.88), 4px -1.2px 1px rgba(255,43,214,0.9), 0 0 18px rgba(255,255,255,0.28); }
+          70%, 74% { transform: translate(1.5px, -0.8px); text-shadow: 2px -1.5px 2px rgba(76,110,255,0.8), -2px 1.5px 2px rgba(255,79,216,0.86), 0 0 16px rgba(255,255,255,0.24); }
+          79%, 100% { transform: translate(0,0); text-shadow: -1.5px -0.5px 0.5px rgba(0,229,255,0.62), 1.5px 0.5px 0.5px rgba(255,43,214,0.68), 0 0 12px rgba(255,255,255,0.18); }
         }
         @keyframes retro-jitter-dispersion {
           /* Burst 1 */
@@ -822,8 +822,12 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
                     {/* Click Guidance Indicator */}
                     <div className={`mt-8 text-[9px] font-mono tracking-[0.3em] flex items-center justify-center gap-2 transition-all duration-500 absolute top-full left-1/2 -translate-x-1/2 whitespace-nowrap
                       ${isHovered ? 'opacity-100 translate-y-4' : 'opacity-0 translate-y-0'}
-                      ${isRetro ? 'text-[#8B261D]' : 'text-[#22d3ee]'}
-                    `}>
+                      ${isRetro ? 'text-[#8B261D]' : 'text-[#ff2bd6]'}
+                    `}
+                    style={isRetro ? undefined : {
+                      textShadow: '0 0 10px rgba(255,43,214,0.72), 0 0 18px rgba(0,229,255,0.32)'
+                    }}
+                    >
                       <span className="animate-bounce inline-block">▼</span> [ SYS.ACTIVATE ]
                     </div>
                   </div>

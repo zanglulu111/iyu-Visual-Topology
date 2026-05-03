@@ -1,117 +1,101 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Marx Codex | 迷雾学派爱欲望视觉拓扑学</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        /* 补充 2.0 版本的分类按钮样式 */
-        .category-tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--border-color);
-        }
-        .tab-btn {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid var(--border-color);
-            color: var(--text-dim);
-            padding: 6px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            transition: all 0.2s;
-        }
-        .tab-btn:hover { background: rgba(255,255,255,0.1); }
-        .tab-btn.active {
-            background: var(--accent-blue);
-            color: black;
-            border-color: var(--accent-blue);
-            font-weight: 600;
-        }
-        .status-badge {
-            font-size: 0.6rem;
-            padding: 2px 6px;
-            border-radius: 4px;
-            margin-left: 6px;
-            vertical-align: middle;
-        }
-        .badge-reconstructed { background: var(--accent-green); color: black; }
-        .badge-raw { background: rgba(255,255,255,0.1); color: #888; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#090806">
+  <title>Philosopher Atlas | 哲学家图鉴</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Serif+SC:wght@500;700;900&family=Roboto+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
-<body class="dark-theme">
-    <div class="app-container">
-        <!-- 侧边栏：词条列表 -->
-        <aside class="sidebar glass">
-            <div class="sidebar-header">
-                <div class="logo-icon">M</div>
-                <h1>MARX CODEX 2.0</h1>
-            </div>
-            
-            <div class="category-tabs" id="category-tabs">
-                <button class="tab-btn active" data-cat="all">ALL</button>
-                <button class="tab-btn" data-cat="marx">MARX</button>
-                <button class="tab-btn" data-cat="hegel">HEGEL</button>
-                <button class="tab-btn" data-cat="lacan">LACAN</button>
-                <button class="tab-btn" data-cat="zizek">ZIZEK</button>
-            </div>
+<body>
+  <canvas id="thought-field" aria-hidden="true"></canvas>
+  <div class="grain-layer" aria-hidden="true"></div>
+  <div class="cursor-light" id="cursor-light" aria-hidden="true"></div>
 
-            <div class="search-box">
-                <input type="text" placeholder="全局拓扑检索..." id="search-input">
-            </div>
-            <nav class="entry-list" id="entry-list">
-                <div class="loading-spinner">正在重构拓扑矩阵...</div>
-            </nav>
-        </aside>
+  <main class="atlas-shell">
+    <header class="atlas-header" data-reveal>
+      <a class="brand-lockup" href="#top" aria-label="哲学家图鉴首页">
+        <span class="brand-seal">Φ</span>
+        <span>
+          <strong>PHILOSOPHER ATLAS</strong>
+          <small>迷雾学派思想标本馆</small>
+        </span>
+      </a>
 
-        <!-- 主操作区 -->
-        <main class="main-content">
-            <header class="top-bar glass">
-                <div class="status-indicator">
-                    <span class="dot pulse"></span>
-                    <span id="active-entry-title">待定节点</span>
-                    <span id="active-entry-category" style="margin-left:10px; color:var(--text-dim); font-size:0.8rem;"></span>
-                </div>
-                <div class="user-profile">
-                    <span id="user-email">cloud-sync-active</span>
-                </div>
-            </header>
+      <nav class="school-nav" id="school-nav" aria-label="哲学流派筛选"></nav>
 
-            <!-- M-S 公式展示面板 -->
-            <section class="formula-container glass" id="formula-section">
-                <div class="formula-label">M-S 动力学解构公式</div>
-                <div class="formula-display" id="formula-display">
-                    <span class="formula-main">Story = M0 { [ (M1 → M2 → M3) / M4 ] * M5 }</span>
-                </div>
-                <div class="m-parameter-grid" id="m-params-grid">
-                    <!-- 动态加载详细 M 参数 -->
-                </div>
-            </section>
+      <label class="search-control" aria-label="检索哲学家或概念">
+        <span>⌕</span>
+        <input id="search-input" type="search" placeholder="检索人物 / 概念 / 时代">
+      </label>
+    </header>
 
-            <!-- 内容详情 -->
-            <section class="details-section" id="details-view">
-                <div class="card glass entry-resonance">
-                    <h2><span class="icon">考古</span> 核心解析 / 叙事共振</h2>
-                    <div class="content" id="resonance-content">请在左侧选择分类并点选词条。</div>
-                </div>
-                
-                <div class="card glass entry-visuals">
-                    <h2><span class="icon">显影</span> 视差之见 / 影像转译</h2>
-                    <div class="content" id="visuals-content">等待数据流接入...</div>
-                </div>
-            </section>
-        </main>
-    </div>
+    <section class="hero" id="top">
+      <div class="hero-copy" data-reveal>
+        <p class="eyebrow">Living archive 01</p>
+        <h1>哲学家图鉴</h1>
+        <p class="hero-lede">
+          不是静态名录，而是一座可进入的思想标本馆。每位哲学家是一枚节点：时代、概念、冲突和欲望结构在同一张星图里相互牵引。
+        </p>
+        <div class="hero-actions">
+          <button class="command-btn primary" id="enter-atlas" type="button">
+            <span>进入图鉴</span>
+            <i>↘</i>
+          </button>
+          <button class="command-btn" id="shuffle-btn" type="button">
+            <span>随机漫游</span>
+            <i>⟳</i>
+          </button>
+        </div>
+      </div>
 
-    <!-- Firebase SDK (v9 compat) -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="app.js"></script>
+      <div class="hero-instrument" data-reveal>
+        <div class="instrument-ring" aria-hidden="true"></div>
+        <div class="instrument-core">
+          <span id="active-era">公元前 427</span>
+          <strong id="hero-active-name">柏拉图</strong>
+          <small id="hero-active-vector">理念型谱系起点</small>
+        </div>
+        <div class="instrument-metrics">
+          <span><b id="metric-count">12</b> 人物</span>
+          <span><b>48</b> 概念</span>
+          <span><b>6</b> 谱系</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="atlas-stage" id="atlas">
+      <div class="stage-panel map-panel" data-reveal>
+        <div class="section-heading">
+          <span>Thought Graph</span>
+          <strong>思想星图</strong>
+        </div>
+        <div class="orbit-map" id="orbit-map" aria-label="哲学家思想星图"></div>
+      </div>
+
+      <aside class="stage-panel dossier-panel" id="dossier" data-reveal aria-live="polite"></aside>
+
+      <section class="gallery-panel" data-reveal>
+        <div class="section-heading gallery-heading">
+          <span>Archive Plates</span>
+          <strong>图鉴卡组</strong>
+        </div>
+        <div class="atlas-grid" id="atlas-grid"></div>
+      </section>
+    </section>
+
+    <section class="timeline-panel" data-reveal>
+      <div class="section-heading">
+        <span>Temporal Rail</span>
+        <strong>思想时间轴</strong>
+      </div>
+      <div class="timeline-rail" id="timeline-rail"></div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
 </body>
 </html>

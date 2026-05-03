@@ -187,16 +187,42 @@ export const supabaseDatabase = {
      * @returns The public URL of the uploaded image or the Base64 data URL
      */
     async uploadImage(file: File, bucket = 'visionary-assets'): Promise<string> {
+        const compressForBase64 = async (): Promise<File | Blob> => {
+            if (!file.type.startsWith('image/') || file.type === 'image/gif') return file;
+
+            const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = reject;
+                img.src = URL.createObjectURL(file);
+            });
+
+            const maxSide = 1200;
+            const scale = Math.min(1, maxSide / Math.max(image.width, image.height));
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.max(1, Math.round(image.width * scale));
+            canvas.height = Math.max(1, Math.round(image.height * scale));
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return file;
+            ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+            URL.revokeObjectURL(image.src);
+
+            return await new Promise<Blob>((resolve, reject) => {
+                canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Image compression failed')), 'image/jpeg', 0.82);
+            });
+        };
+
         // Helper to convert to Base64
         const convertToBase64 = (): Promise<string> => {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
-                reader.readAsDataURL(file);
+                compressForBase64()
+                    .then(blob => reader.readAsDataURL(blob))
+                    .catch(reject);
                 reader.onload = () => {
                     const result = reader.result as string;
-                    // REDUCED BASE64 LIMIT TO 512KB TO PREVENT DATABASE BLOAT
-                    if (result.length > 0.5 * 1024 * 1024) { 
-                        reject(new Error("Image too large for manual capture (>512KB)"));
+                    if (result.length > 2 * 1024 * 1024) {
+                        reject(new Error("Image too large after compression (>2MB)"));
                     } else {
                         resolve(result);
                     }

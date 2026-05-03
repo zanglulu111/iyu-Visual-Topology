@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { X, Wand2, Play, Eraser, Volume2, Video, Sliders, FileText, Check, Copy, Monitor, Film, Zap, ChevronRight, ChevronDown, BookOpen, Save, FilePlus, Aperture, Clapperboard, LayoutGrid, Mic2, Crosshair } from 'lucide-react';
 import { SutureConfig, SutureControlVersion, DensityLevel, BlueprintLanguage, DriverType, LibraryCategoryDef, MetonymyStylePreset } from '../types';
-import { DIALOGUE_STYLES, VOICEOVER_STYLES, MONOLOGUE_STYLES, VISUAL_STYLES, SCENE_MODES, SCENE_FUNCTIONS, SHOT_BUDGETS, SOUND_ARCHITECTURES } from '../data/suture_styles';
+import { DIALOGUE_STYLES, VOICEOVER_STYLES, MONOLOGUE_STYLES, VISUAL_STYLES, FILM_CASES, SCENE_MODES, SCENE_FUNCTIONS, SHOT_BUDGETS, SOUND_ARCHITECTURES } from '../data/suture_styles';
 import { MONTAGE_STYLES } from '../data/suture_montage';
 import { NarrativeLibraryModal } from './NarrativeLibraryModal';
 import { ProcessingTimer } from './SharedBlueprintComponents';
@@ -164,6 +164,7 @@ export const SutureModal: React.FC<SutureModalProps> = ({
         monologueDensity: 'AUTO',
         monologueStyle: 'mono_default',
         visualStyle: 'vis_wkw',
+        filmCaseId: 'filmcase_none',
         shotDensity: 'SHOTS_12',
         subjectFocus: 'AUTO',
         emptyShot: 'AUTO',
@@ -207,10 +208,10 @@ export const SutureModal: React.FC<SutureModalProps> = ({
         switch (driverType) {
             case DriverType.COMMERCIAL:
                 return {
-                    text: 'text-mist-cyan', bg: 'bg-mist-cyan', hoverBg: 'hover:bg-cyan-400',
-                    border: 'border-mist-cyan/50', borderSoft: 'border-cyan-900/30', bgSoft: 'bg-mist-cyan/20',
-                    shadow: 'shadow-[0_0_20px_rgba(34,211,238,0.2)]', hoverShadow: 'hover:shadow-[0_0_30px_rgba(34,211,238,0.4)]',
-                    spinnerBorder: 'border-t-mist-cyan', accent: 'bg-cyan-900'
+                    text: 'text-mist-cyan', bg: 'bg-mist-cyan', hoverBg: 'hover:brightness-110',
+                    border: 'border-mist-cyan/50', borderSoft: 'border-mist-cyan/30', bgSoft: 'bg-mist-cyan/20',
+                    shadow: 'shadow-[0_0_20px_rgba(34,211,238,0.2)]', hoverShadow: 'hover:shadow-[0_0_30px_rgba(34,211,238,0.35)]',
+                    spinnerBorder: 'border-t-mist-cyan', accent: 'bg-mist-cyan'
                 };
             case DriverType.EXPERIMENTAL:
                 return {
@@ -261,6 +262,7 @@ export const SutureModal: React.FC<SutureModalProps> = ({
         L_VO: lang === 'EN' ? "VOICEOVER" : "旁白",
         L_MONOLOGUE: lang === 'EN' ? "MONOLOGUE" : "独白",
         L_AESTHETIC: lang === 'EN' ? "DIRECTOR GRAMMAR" : "导演语法",
+        L_FILM_CASE: lang === 'EN' ? "FILM CASE" : "影片案例",
         L_SUBJECT: lang === 'EN' ? "SUBJECT FOCUS" : "主体密度",
         L_B_ROLL: lang === 'EN' ? "EMPTY SHOT" : "空镜留白",
         L_MONTAGE: lang === 'EN' ? "EDITING STRUCTURE" : "剪辑结构",
@@ -351,7 +353,9 @@ export const SutureModal: React.FC<SutureModalProps> = ({
         return [{
             id: `lib_${activeSelector.key}`,
             name: activeSelector.title,
-            desc: lang === 'EN' ? "Select a style parameter for the AI engine." : "为AI引擎选择一个风格参数。",
+            desc: activeSelector.key === 'filmCaseId'
+                ? (lang === 'EN' ? "Select a film-case mechanism. It will not override director grammar or visual skin." : "选择一个影片案例机制；它不覆盖导演语法，也不进入视觉皮肤。")
+                : (lang === 'EN' ? "Select a style parameter for the AI engine." : "为AI引擎选择一个风格参数。"),
             items: items
         }];
     };
@@ -419,6 +423,7 @@ export const SutureModal: React.FC<SutureModalProps> = ({
         monologueDensity: (values.monologueDensity || config.monologueDensity) as DensityLevel,
         monologueStyle: String(values.monologueStyle || config.monologueStyle),
         visualStyle: String(values.visualStyle || config.visualStyle),
+        filmCaseId: String(values.filmCaseId || config.filmCaseId || 'filmcase_none'),
         montageId: String(values.montageId || currentMontageId),
         shotDensity: String(values.shotDensity || config.shotDensity),
         subjectFocus: (values.subjectFocus || config.subjectFocus) as DensityLevel,
@@ -466,6 +471,7 @@ export const SutureModal: React.FC<SutureModalProps> = ({
                 { id: 'shotBudget', label: t.L_SHOT_BUDGET, kind: 'select', value: config.shotBudget || 'AUTO', options: shotBudgetOptions, editable: true },
                 { id: 'soundArchitecture', label: t.L_SOUND_ARCH, kind: 'select', value: config.soundArchitecture || 'AUTO', options: soundArchitectureOptions, editable: true },
                 { id: 'visualStyle', label: t.L_AESTHETIC, kind: 'select', value: config.visualStyle, options: toStyleOptions(VISUAL_STYLES), editable: true },
+                { id: 'filmCaseId', label: t.L_FILM_CASE, kind: 'select', value: config.filmCaseId || 'filmcase_none', options: toStyleOptions(FILM_CASES), editable: true },
                 { id: 'montageId', label: t.L_MONTAGE, kind: 'select', value: currentMontageId, options: toStyleOptions(MONTAGE_STYLES), editable: true }
             ]
         },
@@ -581,6 +587,9 @@ export const SutureModal: React.FC<SutureModalProps> = ({
                                         <div className="space-y-3">
                                             <ControlRow label={t.L_AESTHETIC} theme={theme}>
                                                 <StyleButton value={config.visualStyle} options={VISUAL_STYLES} onClick={() => handleOpenSelector('visualStyle', t.L_AESTHETIC, VISUAL_STYLES)} theme={theme} getOptionName={getOptionName} />
+                                            </ControlRow>
+                                            <ControlRow label={t.L_FILM_CASE} theme={theme}>
+                                                <StyleButton value={config.filmCaseId || 'filmcase_none'} options={FILM_CASES} onClick={() => handleOpenSelector('filmCaseId', t.L_FILM_CASE, FILM_CASES)} theme={theme} getOptionName={getOptionName} />
                                             </ControlRow>
                                             <ControlRow label={t.L_MONTAGE} theme={theme}>
                                                 <StyleButton value={currentMontageId} options={MONTAGE_STYLES} onClick={() => handleOpenSelector('montageId', t.L_MONTAGE, MONTAGE_STYLES)} theme={theme} getOptionName={getOptionName} />

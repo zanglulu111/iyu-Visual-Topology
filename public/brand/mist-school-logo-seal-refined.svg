@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 860" role="img" aria-labelledby="title desc">
+  <title id="title">迷雾学派徽章式 Logo 精简稿</title>
+  <desc id="desc">A simplified logo exploration based on the user's black-and-white triangular Mist School seal.</desc>
+  <defs>
+    <style>
+      .cn {
+        font-family: Songti SC, STSong, Noto Serif CJK SC, Noto Serif SC, serif;
+        font-weight: 700;
+        fill: #F4F1E8;
+      }
+      .ui {
+        font-family: Avenir Next, Inter, Helvetica Neue, Arial, sans-serif;
+        font-weight: 650;
+        fill: #8EA0A1;
+      }
+      .note {
+        font-family: Avenir Next, Inter, Helvetica Neue, Arial, sans-serif;
+        font-size: 18px;
+        fill: #A9A08E;
+      }
+      .seal-line {
+        fill: none;
+        stroke: #F4F1E8;
+        stroke-width: 12;
+        stroke-linecap: square;
+        stroke-linejoin: miter;
+      }
+      .seal-thin {
+        fill: none;
+        stroke: #F4F1E8;
+        stroke-width: 7;
+        stroke-linecap: square;
+        stroke-linejoin: miter;
+      }
+    </style>
+
+    <g id="mist-glyphs" fill="none" stroke="#F4F1E8" stroke-linecap="square" stroke-linejoin="miter">
+      <g stroke-width="9">
+        <path d="M0 0V66M0 0L22 18L44 0V66"/>
+        <path d="M72 0V66"/>
+        <path d="M114 0H156L114 31H156L114 66"/>
+        <path d="M190 0H250M220 0V66"/>
+      </g>
+      <g stroke-width="4" opacity="0.8">
+        <path d="M12 14L0 25M25 18L43 31M114 48L130 62M204 14H236"/>
+      </g>
+    </g>
+
+    <g id="triangle-seal" fill="none" stroke-linecap="square" stroke-linejoin="miter">
+      <path d="M0 -126L-116 76H116Z" stroke="#F4F1E8" stroke-width="13"/>
+      <path d="M-60 31H-103M60 31H103" stroke="#F4F1E8" stroke-width="13"/>
+      <path d="M-35 31V-37H35V31" stroke="#F4F1E8" stroke-width="11"/>
+      <path d="M-17 -39V-70H28V-39" stroke="#F4F1E8" stroke-width="10"/>
+      <rect x="-27" y="31" width="54" height="58" rx="5" stroke="#F4F1E8" stroke-width="9"/>
+      <path d="M-16 46H16M-16 60H16M-16 74H16" stroke="#F4F1E8" stroke-width="4"/>
+      <path d="M-92 76H92" stroke="#F4F1E8" stroke-width="9"/>
+    </g>
+  </defs>
+
+  <rect width="1440" height="860" fill="#050505"/>
+  <text x="70" y="84" class="cn" font-size="48">基于你这版的精简徽章方向</text>
+  <text x="72" y="126" class="note">保留原图的三角、中央器物、地下字标；减少小线条，让它更像可用的正式主标。</text>
+
+  <g transform="translate(100 190)">
+    <rect width="365" height="540" rx="18" fill="#0B0D11" stroke="#22272F"/>
+    <text x="28" y="46" class="ui" font-size="18">01 / 原始徽章精修</text>
+    <g transform="translate(182 222)">
+      <use href="#triangle-seal"/>
+      <g transform="translate(-125 142) scale(1)">
+        <use href="#mist-glyphs"/>
+      </g>
+    </g>
+    <text x="46" y="438" class="cn" font-size="38">迷雾学派</text>
+    <text x="48" y="480" class="note">最接近你原图。适合封面、章、启动页。</text>
+  </g>
+
+  <g transform="translate(537 190)">
+    <rect width="365" height="540" rx="18" fill="#0B0D11" stroke="#22272F"/>
+    <text x="28" y="46" class="ui" font-size="18">02 / UI 主图标</text>
+    <g transform="translate(182 228)" fill="none" stroke-linecap="square" stroke-linejoin="miter">
+      <path d="M0 -123L-107 66H107Z" stroke="#F4F1E8" stroke-width="16"/>
+      <path d="M-55 22H-96M55 22H96" stroke="#F4F1E8" stroke-width="15"/>
+      <path d="M-30 22V-39H30V22" stroke="#F4F1E8" stroke-width="13"/>
+      <path d="M-15 -39V-68H25V-39" stroke="#F4F1E8" stroke-width="11"/>
+      <rect x="-24" y="22" width="48" height="56" rx="6" stroke="#F4F1E8" stroke-width="11"/>
+      <path d="M-76 79H76" stroke="#72D8C7" stroke-width="8"/>
+    </g>
+    <g transform="translate(60 372)">
+      <use href="#mist-glyphs"/>
+    </g>
+    <text x="48" y="480" class="note">去掉内部细节。更适合导航栏、favicon、头像。</text>
+  </g>
+
+  <g transform="translate(974 190)">
+    <rect width="365" height="540" rx="18" fill="#F4F1E8" stroke="#CCC3B2"/>
+    <text x="28" y="46" class="ui" font-size="18" fill="#596766">03 / 反白纸面版</text>
+    <g transform="translate(182 225)" fill="none" stroke-linecap="square" stroke-linejoin="miter">
+      <path d="M0 -121L-108 68H108Z" stroke="#0B0D11" stroke-width="16"/>
+      <path d="M-54 23H-96M54 23H96" stroke="#0B0D11" stroke-width="15"/>
+      <path d="M-30 23V-39H30V23" stroke="#0B0D11" stroke-width="13"/>
+      <path d="M-15 -39V-68H25V-39" stroke="#0B0D11" stroke-width="11"/>
+      <rect x="-24" y="23" width="48" height="55" rx="6" stroke="#0B0D11" stroke-width="11"/>
+      <path d="M-20 42H20M-20 57H20" stroke="#B96E42" stroke-width="5"/>
+    </g>
+    <g transform="translate(60 372)" fill="none" stroke="#0B0D11" stroke-linecap="square" stroke-linejoin="miter">
+      <g stroke-width="9">
+        <path d="M0 0V66M0 0L22 18L44 0V66"/>
+        <path d="M72 0V66"/>
+        <path d="M114 0H156L114 31H156L114 66"/>
+        <path d="M190 0H250M220 0V66"/>
+      </g>
+    </g>
+    <text x="48" y="480" fill="#4B5351" font-family="Avenir Next, Inter, Helvetica Neue, Arial, sans-serif" font-size="18">适合文档、印刷、宣纸白背景。</text>
+  </g>
+
+  <g transform="translate(70 790)">
+    <text class="ui" font-size="20" fill="#F4F1E8">我的建议：</text>
+    <text x="100" class="note" font-size="20">用 02 做主 UI 图标，用 01 做“迷雾学派徽记/封面章”，03 留作白底印刷版本。</text>
+  </g>
+</svg>

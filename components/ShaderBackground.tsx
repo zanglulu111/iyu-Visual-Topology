@@ -9,74 +9,6 @@ const vertexShaderSource = `
   }
 `;
 
-const fragmentShaderSource = `
-  precision mediump float;
-
-  uniform float u_time;
-  uniform vec2 u_mouse;
-  uniform vec2 u_resolution;
-  varying vec2 v_uv;
-
-  float rand(vec2 n) {
-      return fract(sin(dot(n, vec2(12.9898, 4.1414))) * 43758.5453);
-  }
-
-  float noise(vec2 p) {
-      vec2 i = floor(p);
-      vec2 f = fract(p);
-      f = f * f * (3.0 - 2.0 * f);
-      return mix(mix(rand(i), rand(i + vec2(1.0, 0.0)), f.x),
-                 mix(rand(i + vec2(0.0, 1.0)), rand(i + vec2(1.0, 1.0)), f.x), f.y);
-  }
-
-  float fbm(vec2 p) {
-      float sum = 0.0;
-      float amp = 0.5;
-      float freq = 1.0;
-      for(int i = 0; i < 6; i++) {
-          sum += noise(p * freq) * amp;
-          freq *= 2.0;
-          amp *= 0.5;
-      }
-      return sum;
-  }
-
-  void main() {
-      vec2 uv = v_uv;
-      vec2 aspect = vec2(u_resolution.x/u_resolution.y, 1.0);
-      vec2 p = (uv - 0.5) * aspect;
-      
-      // Removed mouse warp distortion as requested
-      // We keep a very subtle mouse brightness influence for 'presence'
-      vec2 mousePos = (u_mouse - 0.5) * aspect;
-      float dist = distance(p, mousePos);
-      
-      // Base noise for cloud texture (blue-grey tinted)
-      float n1 = fbm(p * 2.5 + u_time * 0.12);
-      vec2 p_with_drift = p + vec2(n1 * 0.05);
-      
-      float finalNoise = fbm(p_with_drift * 1.8 - u_time * 0.08);
-      float cloud = smoothstep(0.15, 0.85, finalNoise);
-      
-      // Very subtle mouse glow without warping the texture
-      float mouseGlow = smoothstep(0.4, 0.0, dist) * 0.08;
-      
-      // Premium blue-grey mist color palette
-      vec3 colorMist = vec3(0.38, 0.4, 0.44); // Desaturated blue-grey
-      vec3 colorHigh = vec3(0.6, 0.65, 0.7);  // Bright bluish highlight
-      
-      vec3 finalColor = mix(vec3(0.012), colorMist, cloud);
-      finalColor += colorHigh * smoothstep(0.75, 0.98, finalNoise) * 0.4;
-      finalColor += mouseGlow * colorMist; // Presence without warp
-      
-      float alpha = clamp(cloud * 0.7 + mouseGlow, 0.0, 0.8);
-      
-      gl_FragColor = vec4(finalColor, alpha);
-  }
-
-
-`;
-
 function createShader(gl: WebGLRenderingContext, type: number, source: string) {
   const shader = gl.createShader(type);
   if (!shader) return null;
@@ -97,7 +29,7 @@ export const ShaderBackground: React.FC<{ theme?: string }> = ({ theme = 'dark' 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const gl = canvas.getContext('webgl');
+    const gl = canvas.getContext('webgl', { alpha: true, premultipliedAlpha: true });
     if (!gl) return;
 
     const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
@@ -107,6 +39,7 @@ export const ShaderBackground: React.FC<{ theme?: string }> = ({ theme = 'dark' 
       uniform vec2 u_mouse;
       uniform vec2 u_resolution;
       uniform float u_isRetro;
+      uniform float u_hasMouse;
       varying vec2 v_uv;
 
       float rand(vec2 n) {
@@ -136,40 +69,57 @@ export const ShaderBackground: React.FC<{ theme?: string }> = ({ theme = 'dark' 
       void main() {
           vec2 uv = v_uv;
           vec2 aspect = vec2(u_resolution.x/u_resolution.y, 1.0);
-          vec2 p = (uv - 0.5) * aspect;
+          vec2 sceneUv = (uv - 0.5) * aspect + 0.5;
+          vec2 mouseUv = (u_mouse - 0.5) * aspect + 0.5;
+          float mouseLane = smoothstep(0.2, 0.0, abs(sceneUv.y - mouseUv.y))
+              * smoothstep(0.95, 0.0, abs(sceneUv.x - mouseUv.x))
+              * u_hasMouse;
           
-          vec2 mousePos = (u_mouse - 0.5) * aspect;
-          float dist = distance(p, mousePos);
+          vec2 p = sceneUv * 2.75 + vec2(u_time * 0.052, -u_time * 0.012);
+          p += vec2(
+              mouseLane * 0.12,
+              mouseLane * sin((sceneUv.x - mouseUv.x) * 13.0 + u_time * 0.75) * 0.065
+          );
+          p += vec2(fbm(sceneUv * 0.72 + vec2(u_time * 0.014, -u_time * 0.006)) * 0.08, 0.0);
           
-          float n1 = fbm(p * 2.5 + u_time * 0.12);
-          vec2 p_with_drift = p + vec2(n1 * 0.05);
+          float noise1 = fbm(p + vec2(u_time * 0.055, -u_time * 0.034));
+          float noise2 = fbm(p * 1.18 + vec2(-u_time * 0.045, u_time * 0.03) + noise1 * 0.54);
+          float roll = fbm(p * 0.52 + vec2(-u_time * 0.032, u_time * 0.052));
+          float river = 0.49
+              + (fbm(vec2(sceneUv.x * 1.7 + u_time * 0.032, u_time * 0.018)) - 0.5) * 0.34
+              + sin(sceneUv.x * 4.8 + u_time * 0.16) * 0.055;
+          float band = smoothstep(0.32, 0.03, abs(sceneUv.y - river));
+          float plume = fbm(sceneUv * 1.08 + vec2(-u_time * 0.022, u_time * 0.009));
+          float plumePocket = smoothstep(0.42, 0.84, plume);
+          float plumeMask = band * mix(0.22, 1.0, plumePocket);
+          float pattern = noise2 * 0.5 + noise1 * 0.28 + roll * 0.22;
+          pattern += smoothstep(0.25, 0.78, noise1) * 0.08;
           
-          float finalNoise = fbm(p_with_drift * 1.8 - u_time * 0.08);
-          float cloud = smoothstep(0.15, 0.85, finalNoise);
-          
-          float mouseGlow = smoothstep(0.4, 0.0, dist) * 0.08;
+          float dither = rand(sceneUv + u_time * 0.004) * 0.014;
+          pattern += dither;
+          pattern = clamp(pattern, 0.0, 1.0);
           
           vec3 colorMist;
           vec3 colorHigh;
           float alpha;
 
           if (u_isRetro > 0.5) {
-              // Retro: Greyscale/Black clouds (Like ink fog)
-              colorMist = vec3(0.08, 0.08, 0.08); 
-              colorHigh = vec3(0.15, 0.15, 0.15);  
-              vec3 finalColor = mix(vec3(0.0), colorMist, cloud);
-              finalColor += colorHigh * smoothstep(0.75, 0.98, finalNoise) * 0.2;
-              finalColor += mouseGlow * colorMist;
-              alpha = clamp(cloud * 0.4 + mouseGlow * 0.2, 0.0, 0.5);
+              colorMist = vec3(0.22, 0.22, 0.22);
+              colorHigh = vec3(0.78, 0.78, 0.76);
+              float smoke = smoothstep(0.48, 0.68, pattern) * plumeMask;
+              float core = smoothstep(0.7, 0.9, pattern) * plumeMask;
+              float highlight = smoothstep(0.42, 0.88, noise1 + core * 0.2) * smoke;
+              vec3 finalColor = mix(colorMist, colorHigh, highlight * 0.52 + core * 0.36);
+              alpha = clamp(smoke * 0.56 + core * 0.28, 0.0, 0.86);
               gl_FragColor = vec4(finalColor, alpha);
           } else {
-              // Dark theme: Original Blue-Grey Mist
-              colorMist = vec3(0.38, 0.4, 0.44); 
-              colorHigh = vec3(0.6, 0.65, 0.7);  
-              vec3 finalColor = mix(vec3(0.012), colorMist, cloud);
-              finalColor += colorHigh * smoothstep(0.75, 0.98, finalNoise) * 0.4;
-              finalColor += mouseGlow * colorMist;
-              alpha = clamp(cloud * 0.7 + mouseGlow, 0.0, 0.8);
+              colorMist = vec3(0.62, 0.64, 0.68);
+              colorHigh = vec3(0.98, 0.99, 1.0);
+              float smoke = smoothstep(0.47, 0.67, pattern) * plumeMask;
+              float core = smoothstep(0.69, 0.89, pattern) * plumeMask;
+              float highlight = smoothstep(0.4, 0.86, noise1 + core * 0.22) * smoke;
+              vec3 finalColor = mix(colorMist, colorHigh, highlight * 0.56 + core * 0.38);
+              alpha = clamp(smoke * 0.64 + core * 0.32, 0.0, 0.92);
               gl_FragColor = vec4(finalColor, alpha);
           }
       }
@@ -206,13 +156,16 @@ export const ShaderBackground: React.FC<{ theme?: string }> = ({ theme = 'dark' 
     const resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
     const mouseLocation = gl.getUniformLocation(program, 'u_mouse');
     const isRetroLocation = gl.getUniformLocation(program, 'u_isRetro');
+    const hasMouseLocation = gl.getUniformLocation(program, 'u_hasMouse');
 
-    let mouseX = 0;
-    let mouseY = 0;
+    let mouseX = 0.5;
+    let mouseY = 0.5;
+    let hasMouse = 0;
     
     const handleMouseMove = (e: MouseEvent) => {
       mouseX = e.clientX / window.innerWidth;
       mouseY = 1.0 - (e.clientY / window.innerHeight);
+      hasMouse = 1;
     };
     window.addEventListener('mousemove', handleMouseMove);
 
@@ -229,6 +182,8 @@ export const ShaderBackground: React.FC<{ theme?: string }> = ({ theme = 'dark' 
         gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
       }
 
+      gl.clearColor(0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
       gl.useProgram(program);
       gl.enableVertexAttribArray(positionAttributeLocation);
       gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
@@ -238,6 +193,7 @@ export const ShaderBackground: React.FC<{ theme?: string }> = ({ theme = 'dark' 
       gl.uniform2f(resolutionLocation, gl.canvas.width, gl.canvas.height);
       gl.uniform2f(mouseLocation, mouseX, mouseY);
       gl.uniform1f(isRetroLocation, isRetro ? 1.0 : 0.0);
+      gl.uniform1f(hasMouseLocation, hasMouse);
 
       gl.drawArrays(gl.TRIANGLES, 0, 6);
 

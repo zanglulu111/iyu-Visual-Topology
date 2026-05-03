@@ -47,8 +47,8 @@ const StrategyCard: React.FC<StrategyCardProps> = ({
     }, [value]);
 
     return (
-        <div className="bg-zinc-900/30 border border-zinc-800 p-6 rounded-xl hover:border-cyan-500/30 transition-colors h-full flex flex-col">
-            <div className="text-cyan-400 text-[10px] font-bold uppercase mb-2">{label}</div>
+        <div className="bg-zinc-900/30 border border-zinc-800 p-6 rounded-xl hover:border-mist-cyan/30 transition-colors h-full flex flex-col">
+            <div className="text-mist-cyan text-[10px] font-bold uppercase mb-2">{label}</div>
             <textarea
                 ref={textareaRef}
                 value={value || ""}
@@ -143,8 +143,8 @@ export const CommercialView: React.FC<CommercialViewProps> = ({
              
              {activeTab === 'STRATEGY' && (
                  <>
-                     <div className="bg-cyan-900/10 border border-cyan-500/30 p-10 rounded-2xl relative overflow-hidden text-center group hover:border-cyan-500/50 transition-colors">
-                          <h3 className="text-cyan-400 font-bold text-xs uppercase tracking-[0.3em] mb-4">THE CORE MESSAGE</h3>
+                     <div className="bg-mist-cyan/10 border border-mist-cyan/30 p-10 rounded-2xl relative overflow-hidden text-center group hover:border-mist-cyan/50 transition-colors">
+                          <h3 className="text-mist-cyan font-bold text-xs uppercase tracking-[0.3em] mb-4">THE CORE MESSAGE</h3>
                           <textarea
                               value={commercialData.slogan}
                               onChange={(e) => handleUpdateSlogan(e.target.value)}
@@ -174,9 +174,9 @@ export const CommercialView: React.FC<CommercialViewProps> = ({
              {activeTab === 'SCRIPT' && (
                  <div className="space-y-12 pb-20">
                      {/* Visual Flow Section */}
-                     <div className="bg-zinc-900/30 border border-zinc-800 p-8 rounded-xl hover:border-cyan-500/30 transition-colors group">
+                     <div className="bg-zinc-900/30 border border-zinc-800 p-8 rounded-xl hover:border-mist-cyan/30 transition-colors group">
                         <div className="flex justify-between items-center mb-6 border-b border-zinc-800 pb-4">
-                            <h3 className="text-cyan-400 font-bold text-xs uppercase tracking-[0.2em] flex items-center gap-2">
+                            <h3 className="text-mist-cyan font-bold text-xs uppercase tracking-[0.2em] flex items-center gap-2">
                                 <Eye size={16} /> {language === 'EN' ? "Visual Narrative Flow" : "画面叙事流"}
                             </h3>
                             <CopyButton text={commercialData.visualFlow} />
@@ -191,9 +191,9 @@ export const CommercialView: React.FC<CommercialViewProps> = ({
                      </div>
 
                      {/* Copywriting Section */}
-                     <div className="bg-zinc-900/30 border border-zinc-800 p-8 rounded-xl hover:border-cyan-500/30 transition-colors group">
+                     <div className="bg-zinc-900/30 border border-zinc-800 p-8 rounded-xl hover:border-mist-cyan/30 transition-colors group">
                         <div className="flex justify-between items-center mb-6 border-b border-zinc-800 pb-4">
-                            <h3 className="text-cyan-400 font-bold text-xs uppercase tracking-[0.2em] flex items-center gap-2">
+                            <h3 className="text-mist-cyan font-bold text-xs uppercase tracking-[0.2em] flex items-center gap-2">
                                 <Mic size={16} /> {language === 'EN' ? "Ad Copy & Voiceover" : "核心文案 & 旁白"}
                             </h3>
                             <CopyButton text={commercialData.copywriting} />
@@ -213,7 +213,7 @@ export const CommercialView: React.FC<CommercialViewProps> = ({
                  <div className="space-y-12 pb-20">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                           <div className="bg-zinc-900/30 border border-zinc-800 p-8 rounded-xl">
-                              <h4 className="text-cyan-400 font-bold text-xs uppercase tracking-widest mb-4 flex items-center gap-2">
+                              <h4 className="text-mist-cyan font-bold text-xs uppercase tracking-widest mb-4 flex items-center gap-2">
                                   <FileText size={14} /> Director's Note
                               </h4>
                               <textarea
@@ -224,7 +224,7 @@ export const CommercialView: React.FC<CommercialViewProps> = ({
                               />
                           </div>
                           <div className="bg-zinc-900/30 border border-zinc-800 p-8 rounded-xl">
-                              <h4 className="text-cyan-400 font-bold text-xs uppercase tracking-widest mb-4 flex items-center gap-2">
+                              <h4 className="text-mist-cyan font-bold text-xs uppercase tracking-widest mb-4 flex items-center gap-2">
                                   <Palette size={14} /> Color & Tone
                               </h4>
                               <p className="text-sm text-zinc-300 leading-loose mb-6">{blueprint.context.tone || "点击“影调”模块定义视觉风格。"}</p>
@@ -242,7 +242,7 @@ export const CommercialView: React.FC<CommercialViewProps> = ({
 
                       <div className="bg-zinc-900/30 border border-zinc-800 rounded-xl overflow-hidden">
                           <div className="p-6 border-b border-zinc-800">
-                               <h4 className="text-cyan-400 font-bold text-xs uppercase tracking-widest">Key Visual / Moodboard</h4>
+                               <h4 className="text-mist-cyan font-bold text-xs uppercase tracking-widest">Key Visual / Moodboard</h4>
                           </div>
                           <div className="p-6">
                                <AssetCard 

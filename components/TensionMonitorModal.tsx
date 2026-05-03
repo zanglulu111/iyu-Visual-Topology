@@ -116,7 +116,7 @@ export const TensionMonitorModal: React.FC<TensionMonitorModalProps> = ({
                             <div className={`text-[10px] font-bold tracking-widest uppercase mb-1 ${theme === 'retro' ? 'text-zinc-500' : 'text-zinc-400'}`}>
                                 {lang === 'CN' ? '重力法则 (Gravity Law)' : 'GRAVITY LAW'}
                             </div>
-                            <div className={`text-xl font-black mt-2 tracking-wider ${theme === 'retro' ? 'text-[#8B261D]' : 'text-cyan-400'}`}>
+                            <div className={`text-xl font-black mt-2 tracking-wider ${theme === 'retro' ? 'text-[#8B261D]' : 'text-gold-primary'}`}>
                                 LV.{worldLaw.gravity}
                             </div>
                             <div className={`text-xs mt-1 opacity-70 ${theme === 'retro' ? 'text-zinc-700' : 'text-zinc-400'}`}>

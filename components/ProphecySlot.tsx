@@ -101,7 +101,7 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
     } else if (isCommercial) {
         accentColor = 'text-mist-cyan border-mist-cyan';
         labelColor = 'text-mist-cyan';
-        editAccent = 'text-cyan-400 border-cyan-400 focus:border-cyan-400';
+        editAccent = 'text-mist-cyan border-mist-cyan focus:border-mist-cyan';
     } else if (isExperimental) {
         accentColor = 'text-mist-purple border-mist-purple';
         labelColor = 'text-mist-purple';
@@ -181,7 +181,7 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
                     const isTagLocked = lockedTags?.[blockId]?.includes(tag) || isBlockLocked;
 
                     const activeAccent = isTagLocked
-                        ? (theme === 'retro' ? `text-black border-[var(--text-accent)] border bg-[var(--text-accent)]/10 rounded px-2` : (isCommercial ? 'text-cyan-400 border-cyan-400 border bg-cyan-900/20 rounded px-2' : (isExperimental ? 'text-purple-400 border-purple-400 border bg-purple-900/20 rounded px-2' : (isAesthetic ? 'text-rose-400 border-rose-400 border bg-rose-900/20 rounded px-2' : (isTrailer ? 'text-orange-400 border-orange-400 border bg-orange-900/20 rounded px-2' : 'text-gold-primary border-gold-primary border bg-amber-900/20 rounded px-2')))))
+                        ? (theme === 'retro' ? `text-black border-[var(--text-accent)] border bg-[var(--text-accent)]/10 rounded px-2` : (isCommercial ? 'text-mist-cyan border-mist-cyan border bg-mist-cyan/20 rounded px-2' : (isExperimental ? 'text-purple-400 border-purple-400 border bg-purple-900/20 rounded px-2' : (isAesthetic ? 'text-rose-400 border-rose-400 border bg-rose-900/20 rounded px-2' : (isTrailer ? 'text-orange-400 border-orange-400 border bg-orange-900/20 rounded px-2' : 'text-gold-primary border-gold-primary border bg-amber-900/20 rounded px-2')))))
                         : (isTiny ? `border ${accentColor} ${isRetro ? 'bg-[var(--bg-card)]' : 'bg-zinc-900'} px-2 py-0.5 rounded shadow-sm ${theme === 'retro' ? '' : 'hover:bg-zinc-800'}` : `border-b-2 ${accentColor} px-0.5 ${theme === 'retro' ? 'hover:bg-transparent' : 'hover:bg-white/10'} rounded-sm`);
 
                     return (
@@ -246,7 +246,7 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
                         <button onClick={(e) => { e.stopPropagation(); onRandomizeBlock(blockId); }} disabled={isBlockLocked} className={`flex items-center justify-center p-0.5 ${isRetro ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--border-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors`}>
                             <Dice5 size={10} />
                         </button>
-                        <button onClick={(e) => { e.stopPropagation(); onToggleLockBlock(blockId); }} className={`flex items-center justify-center p-0.5 ${isRetro ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isBlockLocked ? (isRetro ? 'border-[var(--text-accent)] text-black bg-[var(--text-accent)]/10' : (isCommercial ? 'text-cyan-400 border-cyan-400' : isExperimental ? 'text-purple-400 border-purple-400' : isAesthetic ? 'text-rose-400 border-rose-400' : isTrailer ? 'text-orange-400 border-orange-400' : 'text-gold-primary border-gold-primary')) : ''}`}>
+                        <button onClick={(e) => { e.stopPropagation(); onToggleLockBlock(blockId); }} className={`flex items-center justify-center p-0.5 ${isRetro ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isBlockLocked ? (isRetro ? 'border-[var(--text-accent)] text-black bg-[var(--text-accent)]/10' : (isCommercial ? 'text-mist-cyan border-mist-cyan' : isExperimental ? 'text-purple-400 border-purple-400' : isAesthetic ? 'text-rose-400 border-rose-400' : isTrailer ? 'text-orange-400 border-orange-400' : 'text-gold-primary border-gold-primary')) : ''}`}>
                             {isBlockLocked ? <Lock size={10} /> : <Unlock size={10} />}
                         </button>
                         <button onClick={handleCreateClick} disabled={isBlockLocked} className={`flex items-center justify-center p-0.5 ${isRetro ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isBlockLocked ? 'opacity-30 cursor-not-allowed' : ''}`}>

@@ -380,7 +380,7 @@ export const buildPromptV3 = (
   // ① 身份声明
   // ============================================================================
   const taskSentence = buildTaskSentence(fieldState);
-  const SECTION_ROLE = `Role: 殿堂级电影编剧 & 叙事架构师。
+  const SECTION_ROLE = `Role: 电影级叙事创作大师 & 文学级文本塑造者。
 Task: ${taskSentence}`;
 
   // ============================================================================
@@ -444,7 +444,7 @@ ${directorBrief}${m0Logic}`;
 
   // 视觉锚点
   let visionSection = '';
-  if (visionInput) visionSection = '\n' + getVisionAnchorProtocol(visionInput);
+  if (visionInput || visionImage) visionSection = '\n' + getVisionAnchorProtocol(visionInput, Boolean(visionImage));
 
   // SUR 补充说明（仅展示有 def 的已选参数）
   const surNotes = buildSurNotes(fieldState, faceState);

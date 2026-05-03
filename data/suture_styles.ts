@@ -3,8 +3,9 @@ import { DIALOGUE_STYLES } from './suture_dialogue';
 import { MONOLOGUE_STYLES } from './suture_monologue';
 import { VOICEOVER_STYLES } from './suture_voiceover';
 import { SUTURE_VISUAL_STYLES } from './suture_visual_styles';
+import { FILM_CASES } from './suture_film_cases';
 
-export { DIALOGUE_STYLES, MONOLOGUE_STYLES, VOICEOVER_STYLES };
+export { DIALOGUE_STYLES, MONOLOGUE_STYLES, VOICEOVER_STYLES, FILM_CASES };
 
 export interface SutureStyleItem {
   id: string;
@@ -38,12 +39,27 @@ export interface SutureStyleItem {
     motifs?: string[];
     contaminationRisk?: 'low' | 'medium' | 'high';
   };
+  filmCaseMechanics?: {
+    sceneMechanics?: string[];
+    cameraUse?: string[];
+    editingUse?: string[];
+    stagingUse?: string[];
+    performanceUse?: string[];
+    soundUse?: string[];
+    transferableUse?: string[];
+  };
+  filmCaseBoundaries?: {
+    extractOnly?: string[];
+    forbiddenCopies?: string[];
+    conflictPolicy?: string[];
+  };
 }
 
 // =============================================================================
 // 2. 视觉风格 (VISUAL STYLE) - 出口
 // =============================================================================
 export const VISUAL_STYLES = SUTURE_VISUAL_STYLES;
+export const FILM_CASE_STYLES = FILM_CASES;
 
 // Re-export simplified technical settings
 export const SHOT_DENSITY = [

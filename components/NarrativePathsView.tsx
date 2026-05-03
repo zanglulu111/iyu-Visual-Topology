@@ -4,25 +4,16 @@ import { CreativeTreatment, StyleConfig, LibraryCategoryDef, BlueprintLanguage, 
 import { STYLE_MATRIX, PERSPECTIVES, SENSORY_MODES } from '../data/style_matrix';
 import { DIRECTOR_STYLES } from '../data/director_styles';
 import { SV1_DATA } from '../data/engine_sv/SV1';
-import { Sparkles, Film, Zap, BrainCircuit, BookOpen, ArrowRight, RotateCw, Check, Palette, Settings2, ArrowLeft, Copy, Layers, History as HistoryIcon, ClipboardList, GitFork, Gem, Eye, Anchor, Flower, Music, Wind, Globe, Lightbulb, Ghost, User, Fingerprint, List, X, ChevronUp, Database, FileText, ScanLine, Terminal, Activity, FileJson, Brain } from 'lucide-react';
+import { SV2_DATA } from '../data/engine_sv/SV2';
+import { Sparkles, Film, Zap, BrainCircuit, BookOpen, ArrowRight, RotateCw, Check, Palette, Settings2, ArrowLeft, Copy, Layers, History as HistoryIcon, GitFork, Gem, Eye, Anchor, Wind, Globe, User, Fingerprint, List, X, Database, Terminal, Activity, Brain } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { NarrativeLibraryModal } from './NarrativeLibraryModal';
 import { TaskManagerPanel } from './TaskManagerPanel';
 import { BiblePromptInspectorModal } from './BiblePromptInspectorModal';
 import { AdminXRayButton } from './XRayInspector';
 import { globalTaskManager } from '../services/taskManager';
-import {
-    NARRATIVE_ENGINE_BLOCKS,
-    COMMERCIAL_ENGINE_BLOCKS,
-    EXPERIMENTAL_ENGINE_BLOCKS,
-    AESTHETIC_ENGINE_BLOCKS,
-    TRAILER_ENGINE_BLOCKS,
-    COMM_SKIN_BLOCKS,
-    EXPERIMENTAL_SKIN_BLOCKS,
-    TRAILER_SKIN_BLOCKS
-} from '../constants';
-import { ALL_SKIN_BLOCKS } from '../data/skin_libraries';
 import { ProcessingTimer } from './SharedBlueprintComponents';
+import { EngineParamsOverview } from './EngineParamsOverview';
 
 interface NarrativePathsViewProps {
     treatments: CreativeTreatment[];
@@ -51,7 +42,6 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
     isProcessing,
     bibleStartTime,
     isHistoryMode = false,
-    onRegenerate,
     onBack,
     onOpenHistory,
     lang = 'CN',
@@ -74,6 +64,7 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
         sensoryId: 'VISUAL'
     });
     const [isStyleModalOpen, setIsStyleModalOpen] = useState(false);
+    const [isVolumeModalOpen, setIsVolumeModalOpen] = useState(false);
     const [isStructureModalOpen, setIsStructureModalOpen] = useState(false);
     const [isParamsPanelOpen, setIsParamsPanelOpen] = useState(false);
     const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -162,27 +153,6 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
         }
     };
 
-    const getBlockName = (id: string) => {
-        const allBlocks = [
-            ...NARRATIVE_ENGINE_BLOCKS,
-            ...COMMERCIAL_ENGINE_BLOCKS,
-            ...EXPERIMENTAL_ENGINE_BLOCKS,
-            ...AESTHETIC_ENGINE_BLOCKS,
-            ...TRAILER_ENGINE_BLOCKS,
-            ...ALL_SKIN_BLOCKS,
-            ...COMM_SKIN_BLOCKS,
-            ...EXPERIMENTAL_SKIN_BLOCKS,
-            ...TRAILER_SKIN_BLOCKS
-        ];
-        const block = allBlocks.find(b => b.id === id);
-        if (block) return lang === 'EN' ? block.enName : block.name;
-        if (id === 'skin_genre') return lang === 'EN' ? "GENRE" : "类型基因";
-        if (id === 'skin_animation_genre') return lang === 'EN' ? "ANIMATION GENRE" : "动画基因";
-        if (id === 'skin_year_exact') return lang === 'EN' ? "YEAR" : "年代";
-        if (id === 'skin_country_exact') return lang === 'EN' ? "COUNTRY" : "国家";
-        return id;
-    };
-
     const handleGenerate = () => {
         const treatment = treatments.find(t => t.id === selectedPathId);
         if (treatment) {
@@ -237,12 +207,12 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
             return STYLE_MATRIX.map(cat => ({
                 id: cat.id,
                 name: cat.name,
-                desc: "Select a narrative style tone for the Creative Bible.",
+                desc: "Select an authorial renderer for the Creative Bible.",
                 items: cat.items.map(item => ({
                     id: item.id,
                     name: item.name,
-                    def: item.dna,
-                    core: `${item.description}${item.example ? ` | 代表作: ${item.example}` : ''}`,
+                    def: item.coreRewriteLogic || item.dna,
+                    core: `${item.styleTitle || item.description}${item.example ? ` | 代表作: ${item.example}` : ''}`,
                     group: cat.name
                 }))
             }));
@@ -280,10 +250,28 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
         }));
     }, []);
 
+    const volumeLibraryData: LibraryCategoryDef[] = useMemo(() => {
+        return SV2_DATA.map(cat => ({
+            id: cat.id,
+            name: cat.name,
+            desc: cat.desc || '',
+            items: cat.items.map(item => ({ ...item, group: cat.name }))
+        }));
+    }, []);
+
+    const currentVolumeName = useMemo(() => {
+        const tags = fieldState?.['skin_volume'];
+        return Array.isArray(tags) && tags.length > 0 ? tags[0] : null;
+    }, [fieldState]);
+
     const currentStructureName = useMemo(() => {
         const tags = fieldState?.['skin_structure'];
         return Array.isArray(tags) && tags.length > 0 ? tags[0] : null;
     }, [fieldState]);
+
+    const handleVolumeToggle = (tagName: string) => {
+        onToggleTag?.('skin_volume', tagName);
+    };
 
     const handleStructureToggle = (tagName: string) => {
         onToggleTag?.('skin_structure', tagName);
@@ -291,7 +279,7 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
 
     const getThemeColor = () => {
         if (theme === 'retro') return 'text-[#8B261D]';
-        if (isCommercialResults) return 'text-cyan-400';
+        if (isCommercialResults) return 'text-mist-cyan';
         if (isExperimentalResults) return 'text-purple-400';
         if (isAestheticResults) return 'text-rose-400';
         if (isTrailerResults) return 'text-orange-400';
@@ -300,7 +288,7 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
 
     const getThemeBg = () => {
         if (theme === 'retro') return 'bg-[#8B261D]';
-        if (isCommercialResults) return 'bg-cyan-400';
+        if (isCommercialResults) return 'bg-mist-cyan';
         if (isExperimentalResults) return 'bg-purple-400';
         if (isAestheticResults) return 'bg-rose-400';
         if (isTrailerResults) return 'bg-orange-400';
@@ -308,7 +296,7 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
     }
 
     const getEmptyStateIconColor = () => {
-        if (isCommercialResults) return 'text-cyan-600/30';
+        if (isCommercialResults) return 'text-mist-cyan/30';
         if (isExperimentalResults) return 'text-purple-600/30';
         if (isAestheticResults) return 'text-rose-600/30';
         if (isTrailerResults) return 'text-orange-600/30';
@@ -320,7 +308,7 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
             return `bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-500`;
         }
         if (theme === 'retro') return 'bg-[#8B261D] hover:bg-[#6D1E16] text-white border-[#8B261D]';
-        if (isCommercialResults) return 'bg-cyan-500 hover:bg-cyan-400 text-black border-cyan-500';
+        if (isCommercialResults) return 'bg-mist-cyan hover:brightness-110 text-black border-mist-cyan';
         if (isExperimentalResults) return 'bg-purple-500 hover:bg-purple-400 text-black border-purple-500';
         if (isAestheticResults) return 'bg-rose-500 hover:bg-rose-400 text-black border-rose-500';
         if (isTrailerResults) return 'bg-orange-500 hover:bg-orange-400 text-black border-orange-500';
@@ -338,7 +326,7 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
 
     const getGenerateButtonLabel = () => {
         if (styleConfig.styleId) {
-            return lang === 'EN' ? "Visual Style Replacement" : "视觉风格置换";
+            return lang === 'EN' ? "Author Style Rewrite" : "作者风格重写";
         }
         if (hasExistingBlueprint) {
             return lang === 'EN' ? "View Creative Bible" : "回看创意圣经";
@@ -357,6 +345,13 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
             const match = name.match(/\((.*?)\)/);
             return match ? match[1].toUpperCase() : name.toUpperCase();
         }
+    };
+
+    const formatVolumeName = (name: string) => {
+        if (!name) return "";
+        if (lang === 'EN') return formatName(name);
+        const duration = name.match(/\(([^)]*(?:s|m|S|M)[^)]*)\)/)?.[1];
+        return duration ? `${name.split('(')[0].trim()}（${duration}）` : formatName(name);
     };
 
     const HighlightedUVD = ({ text }: { text: string }) => {
@@ -428,6 +423,20 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                 </div>
 
                 <div className="flex flex-wrap gap-4 items-center justify-center flex-1">
+                    {/* Story Volume Button */}
+                    <button
+                        onClick={() => setIsVolumeModalOpen(true)}
+                        className={`${controlClass} text-left gap-2`}
+                        title={lang === 'EN' ? "Select Story Volume" : "选择故事体量"}
+                    >
+                        <Database size={14} className="shrink-0" />
+                        <span className="text-xs font-bold truncate">
+                            {currentVolumeName
+                                ? formatVolumeName(currentVolumeName)
+                                : (lang === 'EN' ? "VOLUME" : "故事体量")}
+                        </span>
+                    </button>
+
                     {/* Narrative Structure Button */}
                     <button
                         onClick={() => setIsStructureModalOpen(true)}
@@ -442,23 +451,23 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                         </span>
                     </button>
 
-                    {/* Visual Tone Button - Hidden for Aesthetic driver */}
+                    {/* Author Style Button - Hidden for Aesthetic driver */}
                     {!isAestheticResults && (
                         <button
                             onClick={() => setIsStyleModalOpen(true)}
                             className={`${controlClass} text-left gap-2`}
-                            title={lang === 'EN' ? "Select Visual Tone" : "选择视觉调性"}
+                            title={lang === 'EN' ? "Select Author Style" : "选择作者风格"}
                         >
                             <Palette size={14} className="shrink-0" />
                             <span className="text-xs font-bold truncate">
                                 {currentStyleName
                                     ? formatName(currentStyleName)
-                                    : (lang === 'EN' ? "VISUAL TONE" : "视觉调性")}
+                                    : (lang === 'EN' ? "AUTHOR STYLE" : "作者风格")}
                             </span>
                         </button>
                     )}
 
-                    {(!isCommercialResults && !isExperimentalResults && !isAestheticResults && !isTrailerResults) && (
+                    {(!styleConfig.styleId && !isCommercialResults && !isExperimentalResults && !isAestheticResults && !isTrailerResults) && (
                         <>
                             {/* Narrative Perspective */}
                             <div className={`${controlClass} gap-2 relative`} title={lang === 'EN' ? "Narrative Perspective" : "叙事视点：决定故事的讲述角度"}>
@@ -510,15 +519,6 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                             disabled={isProcessing}
                             className={theme === 'retro' ? 'h-8 w-8 bg-white border-black/10 text-[#8B261D] hover:bg-[#8B261D]/10' : 'h-8 w-8 bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-gold-primary'}
                         />
-                        <button
-                            onClick={onRegenerate}
-                            disabled={isProcessing}
-                            className={`flex items-center gap-2 px-4 py-1.5 rounded-lg ${theme === 'retro' ? 'bg-white border-black/10 text-zinc-600 hover:text-[#8B261D]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-white'} border transition-all text-xs font-bold uppercase tracking-wider`}
-                            title={lang === 'EN' ? "Generate New Paths" : "重新生成路径"}
-                        >
-                            <RotateCw size={14} className={isProcessing ? "animate-spin" : ""} />
-                            <span>{lang === 'EN' ? "Regenerate" : "重刷"}</span>
-                        </button>
                     </div>
 
                 </div>
@@ -527,7 +527,7 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
             <div className="flex-1 w-full relative overflow-hidden flex">
                 <div className={`
                     absolute top-0 bottom-0 left-0 z-20
-                    w-[400px]
+                    w-full max-w-lg
                     ${theme === 'retro' ? 'bg-[var(--bg-main)] border-[#8B261D]/20' : 'bg-[#0c0c0c]/95 border-zinc-800'} border-r backdrop-blur-md
                     transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]
                     ${isParamsPanelOpen ? 'translate-x-0' : '-translate-x-full'}
@@ -546,57 +546,15 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                         </span>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6">
-                        {(visionInput || visionAnalysis) && (
-                            <div className="flex flex-col gap-4 border-b border-zinc-800 pb-6 mb-6">
-                                {visionInput && (
-                                    <div className="flex flex-col gap-2 p-4 rounded-lg bg-zinc-900/30 border border-dashed border-zinc-700/50">
-                                        <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 flex items-center gap-2">
-                                            <Lightbulb size={12} className={getThemeColor()} />
-                                            {lang === 'EN' ? "Input Concept" : "创意输入"}
-                                        </span>
-                                        <p className="text-sm text-zinc-300 font-serif leading-relaxed whitespace-pre-wrap">{visionInput}</p>
-                                    </div>
-                                )}
-                                {visionAnalysis && (
-                                    <div className="flex flex-col gap-2 p-4 rounded-lg bg-zinc-900/30 border border-dashed border-zinc-700/50">
-                                        <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 flex items-center gap-2">
-                                            <ScanLine size={12} className={getThemeColor()} />
-                                            {lang === 'EN' ? "Visual Decoding" : "视觉解码结果"}
-                                        </span>
-                                        <p className="text-xs text-zinc-400 font-mono leading-relaxed whitespace-pre-wrap">{visionAnalysis}</p>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        {fieldState && Object.keys(fieldState).length > 0 ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {Object.entries(fieldState).map(([key, values]) => {
-                                    const safeValues = values as string[];
-                                    if (!safeValues || safeValues.length === 0) return null;
-                                    return (
-                                        <div key={key} className={`flex flex-col gap-2 p-4 rounded-lg ${theme === 'retro' ? 'bg-black/[0.02] border-[#8B261D]/10' : 'bg-zinc-900/50 border-zinc-800/50'} border hover:border-zinc-700 transition-colors`}>
-                                            <span className={`text-xs font-bold uppercase tracking-widest ${getThemeColor()} opacity-70 truncate`}>
-                                                {getBlockName(key)}
-                                            </span>
-                                            <div className="flex flex-wrap gap-2">
-                                                {safeValues.map((v, i) => (
-                                                    <span key={i} className={`text-sm ${theme === 'retro' ? 'text-zinc-800' : 'text-zinc-200'} font-serif leading-tight break-words border-b border-black/5 pb-0.5`}>
-                                                        {v.split('(')[0]}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        ) : (
-                            <div className="flex flex-col items-center justify-center h-full text-zinc-600 gap-4 opacity-50">
-                                <List size={48} />
-                                <span className="text-xs uppercase tracking-widest">No parameters active</span>
-                            </div>
-                        )}
+                    <div className="flex-1 overflow-y-auto custom-scrollbar p-5">
+                        <EngineParamsOverview
+                            fieldState={fieldState}
+                            language={lang}
+                            theme={theme}
+                            accentClass={getThemeColor()}
+                            visionInput={visionInput}
+                            visionAnalysis={visionAnalysis}
+                        />
                     </div>
                 </div>
 
@@ -637,7 +595,7 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                                 } else if (isTrailerResults) {
                                     accentColor = 'bg-orange-500'; borderColor = 'border-orange-500'; textColor = 'text-orange-400'; lightBg = 'bg-orange-900/10';
                                 } else if (isCommercialResults) {
-                                    accentColor = 'bg-cyan-500'; borderColor = 'border-cyan-500'; textColor = 'text-cyan-400'; lightBg = 'bg-cyan-900/10';
+                                    accentColor = 'bg-mist-cyan'; borderColor = 'border-mist-cyan'; textColor = 'text-mist-cyan'; lightBg = 'bg-mist-cyan/10';
                                 } else if (isExperimentalResults) {
                                     accentColor = 'bg-purple-500'; borderColor = 'border-purple-500'; textColor = 'text-purple-400'; lightBg = 'bg-purple-900/10';
                                 }
@@ -855,10 +813,22 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                 isOpen={isStyleModalOpen}
                 onClose={() => setIsStyleModalOpen(false)}
                 blockId="style_matrix"
-                blockName={lang === 'EN' ? (isCommercialResults ? "DIRECTOR STYLES" : (isAestheticResults ? "AESTHETIC STYLES" : (isTrailerResults ? "EDITING STYLES" : "VISUAL TONE"))) : (isCommercialResults ? "导演风格" : (isAestheticResults ? "美学风格" : (isTrailerResults ? "剪辑风格" : "视觉调性")))}
+                blockName={lang === 'EN' ? (isCommercialResults ? "DIRECTOR STYLES" : (isAestheticResults ? "AESTHETIC STYLES" : (isTrailerResults ? "EDITING STYLES" : "AUTHOR STYLE"))) : (isCommercialResults ? "导演风格" : (isAestheticResults ? "美学风格" : (isTrailerResults ? "剪辑风格" : "作者风格")))}
                 selectedTags={currentStyleName ? [currentStyleName] : []}
                 onToggleTag={handleStyleToggle}
                 customLibraryData={styleLibraryData}
+                lang={lang}
+                driverType={currentDriverType}
+            />
+
+            <NarrativeLibraryModal
+                isOpen={isVolumeModalOpen}
+                onClose={() => setIsVolumeModalOpen(false)}
+                blockId="skin_volume"
+                blockName={lang === 'EN' ? "STORY VOLUME" : "故事体量"}
+                selectedTags={currentVolumeName ? [currentVolumeName] : []}
+                onToggleTag={handleVolumeToggle}
+                customLibraryData={volumeLibraryData}
                 lang={lang}
                 driverType={currentDriverType}
             />
@@ -889,6 +859,7 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                 styleConfig={styleConfig}
                 fieldState={fieldState}
                 visionInput={visionInput}
+                visionAnalysis={visionAnalysis}
                 worldLawConfig={worldLawConfig}
                 driverType={currentDriverType}
             />

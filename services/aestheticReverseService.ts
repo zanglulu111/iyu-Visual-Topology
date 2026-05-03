@@ -26,8 +26,8 @@ const getAI = () => {
 // ============================================================================
 
 const compileMasterParameterTable = (): string => {
-    let table = "## 🧠 ENGINE PARAMETER DICTIONARY (REFERENCE ONLY)\n";
-    table += "You must map the visual/text input to these specific IDs where applicable.\n\n";
+    let table = "## 引擎参数字典（仅供映射参考）\n";
+    table += "你需要在合适时，把图像/文本输入映射到下列具体参数 ID。\n\n";
 
     // Combine all aesthetic-related libraries
     const allLibraries = [...AESTHETIC_ENGINE_LIBRARY, ...SKIN_LIBRARY];
@@ -40,15 +40,12 @@ const compileMasterParameterTable = (): string => {
         const category = allLibraries.find(c => c.id === libId);
 
         if (category && category.items) {
-            // Optimization: Only listing Names and IDs to save tokens, 
-            // but for "Core Logic" understanding, we might need definitions if the name isn't self-explanatory.
-            // Here we provide ID and Name which is usually descriptive enough.
             const itemsList = category.items.map((item: LibraryItemDef) => {
                 return `- "${item.name}" (ID: ${item.id})`;
             }).join(', ');
-            table += `   Options: ${itemsList}\n`;
+            table += `   可选项: ${itemsList}\n`;
         } else {
-            table += `   (Open Text Field)\n`;
+            table += `   （开放文本字段）\n`;
         }
         table += "\n";
     });
@@ -126,55 +123,63 @@ const handleApiError = (context: string, e: any) => {
     }
 };
 
+export const buildAestheticReversePrompt = (
+    textInput: string,
+    base64Image: string | null
+): string => {
+    // 1. 判断输入模式
+    let mode = "";
+    if (base64Image && textInput) mode = "图文混合：图像锁定视觉风格，文本锁定叙事概念";
+    else if (base64Image) mode = "图像反推：严格拆解上传图像";
+    else if (textInput) mode = "文本转公式：把概念视觉化";
+    else return "错误：没有提供输入。";
+
+    // 2. 构建系统指令
+    const masterTable = compileMasterParameterTable();
+
+    return `
+角色：视觉艺术总监 / 技术摄影指导。
+任务：分析输入内容，将其映射为 Visionary Engine 参数，并输出结构化的「Visionary Directive」。
+
+## 1. 输入模式：${mode}
+${base64Image && textInput ? "- 使用图像作为视觉风格、影调、构图、材质、光线参考。\n- 使用文本作为叙事主体、动作、关系、事件、语义概念。" : ""}
+${base64Image && !textInput ? "- 严格拆解你在图像中看到的内容，并转译为引擎参数。" : ""}
+${!base64Image && textInput ? "- 根据文本概念，推断最有电影感的视觉呈现方式。" : ""}
+
+## 2. 输出格式（严格遵守）
+你必须使用下面的紧凑模板输出结果。
+*   不要写开场白或结束语。
+*   不要添加 ":: VISIONARY STRUCTURAL DIRECTIVE ::" 之类额外标题。
+*   模板中的章节标题保持英文，例如使用 "VISION"，不要写成 "VISION / 视觉核"。
+*   章节标题不要编号，例如使用 "SUBJECT"，不要写成 "I. SUBJECT"。
+*   各段之间不要插入空行，保持紧凑。
+
+模板：
+${VISIONARY_DIRECTIVE_FORMULA}
+
+## 3. 映射逻辑（智能转译）
+*   不要直接复制标签 ID，例如不要原样输出 {aes_light_mood}。
+*   你要把花括号中的占位符，替换成来自参数字典的、具体的、可用于提示词的英文关键词。
+    *   示例：不要返回 "{aes_light_mood}"，应返回 "Chiaroscuro (High Contrast)"。
+    *   示例：不要返回 "{aes_camera_system}"，应返回 "IMAX 70mm Film"。
+*   如果某个参数不相关，例如图像中没有头发，可以留空或省略该细节；但如果同一行仍有其他有效信息，应保留行结构。
+*   输出值以英文为主，以保证后续图像提示词兼容性；如果某些文化细节必须解释，可以在括号中加入简短中文注释。
+
+${masterTable}
+
+## 4. 输入内容
+用户文本输入：「${textInput || "未提供"}」
+图像附件：${base64Image ? "已提供，请严格读取图像内容。" : "未提供。"}
+`;
+};
+
 export const generateAestheticReverse = async (
     textInput: string,
     base64Image: string | null
 ): Promise<string> => {
+    const prompt = buildAestheticReversePrompt(textInput, base64Image);
 
-    // 1. Determine Mode
-    let mode = "";
-    if (base64Image && textInput) mode = "HYBRID (Image Style + Text Concept)";
-    else if (base64Image) mode = "IMAGE REVERSE (Deconstruct Image)";
-    else if (textInput) mode = "TEXT TO FORMULA (Concept Visualization)";
-    else return "Error: No input provided.";
-
-    // 2. Build the System Prompt
-    const masterTable = compileMasterParameterTable();
-
-    const prompt = `
-Role: Visionary Art Director & Technical DOP.
-Task: Analyze the input and map it to the Visionary Engine Parameters, outputting a structured "Visionary Directive".
-
-## 1. MODE: ${mode}
-${base64Image && textInput ? "- Use the IMAGE as the visual style/tone/composition reference.\n- Use the TEXT as the narrative subject/action/context." : ""}
-${base64Image && !textInput ? "- Strictly deconstruct what you see in the image into engine parameters." : ""}
-${!base64Image && textInput ? "- Hallucinate the most cinematic visual representation of the provided text concept." : ""}
-
-## 2. OUTPUT FORMAT (STRICT)
-You MUST output the result using the **compact template** below.
-*   **NO** intro/outro text.
-*   **NO** ":: VISIONARY STRUCTURAL DIRECTIVE ::" header.
-*   **NO** Chinese in section headers (e.g. use "VISION", not "VISION / 视觉核").
-*   **NO** numbering in section headers (e.g. use "SOUL", not "I. SOUL").
-*   **NO** empty lines between sections. Keep it tight.
-
-Template:
-${VISIONARY_DIRECTIVE_FORMULA}
-
-## 3. MAPPING LOGIC (INTELLIGENT TRANSCODING)
-*   **DO NOT just copy-paste** the tag IDs (like {aes_light_mood}).
-*   **TRANSCODE & EXPAND:** Replace the {brackets} with specific, descriptive **English keywords** derived from the Master Table.
-    *   *Example:* Instead of returning "{aes_light_mood}", return "Chiaroscuro (High Contrast)".
-    *   *Example:* Instead of "{aes_camera_system}", return "IMAX 70mm Film".
-*   **Relevance:** If a parameter is not relevant (e.g. no hair), leave the value empty or omit the specific detail, but keep the line structure if other parts of the line are relevant.
-*   **Language:** The content values should be primarily in **English** for better prompting compatibility, but you may include Chinese annotations in parentheses if it clarifies a specific cultural nuance.
-
-${masterTable}
-
-## 4. INPUT PROCESSING
-User Input Text: "${textInput || "N/A"}"
-[Image Attachment Processing...]
-`;
+    if (prompt.startsWith("错误：")) return prompt;
 
     // 3. Call AI
     try {

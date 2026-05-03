@@ -1037,7 +1037,7 @@ export const MistCanvasEngine: React.FC<MistCanvasEngineProps> = ({ lang, isAdmi
                   }}
                   d={getEdgePath(fromNode, toNode)}
                   fill="none"
-                  stroke={isActive ? 'rgba(56,189,248,0.78)' : 'rgba(255,255,255,0.36)'}
+                  stroke={isActive ? 'rgba(212,175,55,0.78)' : 'rgba(255,255,255,0.36)'}
                   strokeWidth={isActive ? 2.2 : 1.6}
                   strokeLinecap="round"
                 />
@@ -1087,8 +1087,8 @@ export const MistCanvasEngine: React.FC<MistCanvasEngineProps> = ({ lang, isAdmi
                   onClick={() => handleInputPortClick(node.id)}
                   className={`absolute z-30 -left-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full border flex items-center justify-center transition-all ${
                     isConnectTarget || active
-                      ? 'opacity-100 scale-100 border-sky-300 bg-sky-400 text-black shadow-lg shadow-sky-400/40'
-                      : 'opacity-0 scale-75 border-white/45 bg-black/80 text-zinc-300 group-hover:opacity-100 group-hover:scale-100 hover:border-sky-300 hover:text-sky-300'
+                      ? 'opacity-100 scale-100 border-gold-primary bg-gold-primary text-black shadow-lg shadow-gold-primary/40'
+                      : 'opacity-0 scale-75 border-white/45 bg-black/80 text-zinc-300 group-hover:opacity-100 group-hover:scale-100 hover:border-gold-primary hover:text-gold-primary'
                   }`}
                   title={lang === 'EN' ? 'Input port' : '左节点：输入参考'}
                 >
@@ -1108,7 +1108,7 @@ export const MistCanvasEngine: React.FC<MistCanvasEngineProps> = ({ lang, isAdmi
 
                 <div
                   className={`h-full rounded-[26px] border overflow-hidden ${
-                    active ? 'border-sky-400 shadow-sky-500/20' : 'border-white/35 group-hover:border-white/60'
+                    active ? 'border-gold-primary shadow-gold-primary/20' : 'border-white/35 group-hover:border-white/60'
                   } ${node.kind === 'image' && !node.mediaUrl ? 'bg-[#1f1f20]' : 'bg-[#171717]'}`}
                 >
                   <div className="h-10 flex items-center justify-between px-3 text-zinc-300 bg-black/15">
@@ -1191,10 +1191,10 @@ export const MistCanvasEngine: React.FC<MistCanvasEngineProps> = ({ lang, isAdmi
 
                     {node.kind === 'audio' && (
                       <div className="flex-1 min-h-0 flex flex-col justify-center px-5 text-zinc-400">
-                        <Mic size={24} className="mb-4 text-sky-400" />
+                        <Mic size={24} className="mb-4 text-gold-primary" />
                         <div className="h-10 rounded-full bg-white/10 overflow-hidden flex items-center gap-1 px-4">
                           {Array.from({ length: 24 }).map((_, i) => (
-                            <span key={i} className="w-1 rounded-full bg-sky-400/70" style={{ height: `${8 + (i % 6) * 4}px` }} />
+                            <span key={i} className="w-1 rounded-full bg-gold-primary/70" style={{ height: `${8 + (i % 6) * 4}px` }} />
                           ))}
                         </div>
                       </div>

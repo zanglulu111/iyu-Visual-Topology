@@ -135,11 +135,12 @@ export async function uploadToR2(file: File, folder: string = 'user-uploads'): P
 export async function smartUploadImage(file: File, folder: string = 'user-uploads'): Promise<string> {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) {
+        const compressed = await compressImage(file);
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.onloadend = () => resolve(reader.result as string);
             reader.onerror = reject;
-            reader.readAsDataURL(file);
+            reader.readAsDataURL(compressed);
         });
     }
 
@@ -153,6 +154,18 @@ export async function smartUploadImage(file: File, folder: string = 'user-upload
         }
     }
 
-    const { supabaseDatabase } = await import('./supabaseDatabase');
-    return supabaseDatabase.uploadImage(file);
+    const compressed = await compressImage(file);
+    const fileExt = compressed.name.split('.').pop() || 'jpg';
+    const fileName = `${folder}/${user.user.id}/${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
+
+    const { error: uploadError } = await supabase.storage
+        .from('visionary-assets')
+        .upload(fileName, compressed, { cacheControl: '2592000', upsert: true });
+
+    if (uploadError) {
+        throw new Error(`Supabase Upload Error: ${uploadError.message}`);
+    }
+
+    const { data: publicUrlData } = supabase.storage.from('visionary-assets').getPublicUrl(fileName);
+    return publicUrlData.publicUrl;
 }

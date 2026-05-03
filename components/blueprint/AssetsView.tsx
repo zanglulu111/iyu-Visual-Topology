@@ -25,7 +25,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({
 
     // Derived hover background from accent
     const getHoverClass = () => {
-        if (themeAccent.includes('cyan')) return 'hover:bg-cyan-900/20';
+        if (themeAccent.includes('cyan')) return 'hover:bg-mist-cyan/10';
         if (themeAccent.includes('rose')) return 'hover:bg-rose-900/20';
         if (themeAccent.includes('purple')) return 'hover:bg-purple-900/20';
         if (themeAccent.includes('orange')) return 'hover:bg-orange-900/20';

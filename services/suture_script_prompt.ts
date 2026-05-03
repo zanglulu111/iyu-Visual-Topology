@@ -5,6 +5,7 @@ import {
     VOICEOVER_STYLES,
     MONOLOGUE_STYLES,
     VISUAL_STYLES,
+    FILM_CASES,
     SCENE_MODES,
     SCENE_FUNCTIONS,
     SHOT_BUDGETS,
@@ -236,6 +237,65 @@ ${formatDirectorList(voice.timingRules)}
 ${formatDirectorList(voice.soundMotifs)}`;
 };
 
+const isActiveFilmCase = (filmCase?: any) => Boolean(filmCase && filmCase.id && filmCase.id !== 'filmcase_none');
+
+const formatFilmCaseList = (items?: string[]) => {
+    if (!items || items.length === 0) return '* 未设定';
+    return items.map(item => `* ${item}`).join('\n');
+};
+
+const buildV2FilmCaseProtocol = (filmCase?: any) => {
+    if (!isActiveFilmCase(filmCase)) {
+        return `# 4.5 影片案例层：未启用
+* **状态:** 当前不借用任何影片案例机制。
+* **隔离:** 导演语法、剪辑结构、声音架构和视觉圣经按各自层级独立工作。`;
+    }
+
+    const mechanics = filmCase.filmCaseMechanics || {};
+    const boundaries = filmCase.filmCaseBoundaries || {};
+
+    return `# 4.5 影片案例层（Film Case Reference / 只借场面机制）
+当前影片案例：**${filmCase.name}**
+核心机制：${filmCase.core || filmCase.instruction || '未设定'}
+
+**它是什么**
+* 影片案例层不是导演语法、不是视觉皮肤、不是故事素材库。
+* 它只提供“这一类场面怎样组织”的机制参考：空间关系、信息释放、动作链、重复/延迟/并置/压缩、声音进入方式。
+* 它不授权改写 CURRENT_SCENE_SOURCE，不授权复制原片，也不授权新增原片类型元素。
+
+**可借机制**
+${formatFilmCaseList(mechanics.sceneMechanics)}
+
+**摄影/调度可借方式**
+${formatFilmCaseList([...(mechanics.cameraUse || []), ...(mechanics.stagingUse || [])])}
+
+**剪辑/时间可借方式**
+${formatFilmCaseList(mechanics.editingUse)}
+
+**表演/声音可借方式**
+${formatFilmCaseList([...(mechanics.performanceUse || []), ...(mechanics.soundUse || [])])}
+
+**只允许抽取**
+${formatFilmCaseList(boundaries.extractOnly)}
+
+**绝对禁止复制**
+${formatFilmCaseList(boundaries.forbiddenCopies)}
+
+**冲突裁决**
+${formatFilmCaseList(boundaries.conflictPolicy)}
+
+**与导演、剪辑结构、视觉皮肤的分离**
+* 导演语法决定“每个切面怎么拍”；影片案例只决定“可借哪套场面机制”。
+* 剪辑结构决定“镜头如何互相咬合”；影片案例不能改变剪辑结构的用户选择。
+* 视觉圣经/参考图决定颜色、材质、媒介和资产外观；影片案例的片名、原片色彩和美术质感不得进入画面、环境、光影字段。
+* 如果影片案例暗含源文本不存在的时代、城市、科技、服装、道具、怪物、品牌、宗教或音乐，必须抽象为剪辑/调度关系；抽象后仍不成立就不用。
+
+**发送给 AI 的隔离规则**
+* 本层只发送给“文学分镜文本生成”作为机制约束，不是图像生成词。
+* 生成每个镜头时，不得把片名、原片角色名、原片道具或原片视觉标签写进 **画面/环境/光影/声音** 字段。
+* 后续正式出图只应读取镜头块里的 **画面、环境、光影、资产锚点**；影片案例名称只作为制作端元数据，不是视觉描述。`;
+};
+
 const summarizeDensityForV2 = (value: string) => {
     const map: Record<string, string> = {
         AUTO: '自动',
@@ -430,6 +490,8 @@ export const buildSutureStep1Prompt = (
     // 1. Get Visual Director Definition (THE BEHAVIOR)
     const visDef = VISUAL_STYLES.find(s => s.id === config.visualStyle);
     const rawDirectorName = visDef?.name || "标准电影感";
+    const filmCaseDef = FILM_CASES.find(s => s.id === (config.filmCaseId || 'filmcase_none'));
+    const filmCaseName = isActiveFilmCase(filmCaseDef) ? filmCaseDef?.name : '未使用';
 
     // *** CRITICAL RESTORATION: ANTI-KITSCH WARNING IN NAME ***
     const directorName = `${rawDirectorName} (⚠️ 严禁出现该艺术风格的知名台词以及词汇/No Famous Quotes or Objects)`;
@@ -854,7 +916,7 @@ ${visualConsistencyLaw}
 `;
 
     const v2HeaderConfig = isV2
-        ? ` | 场景:${findConfigItem(SCENE_MODES, sceneModeId)?.name || sceneModeId} | 功能:${findConfigItem(SCENE_FUNCTIONS, sceneFunctionId)?.name || sceneFunctionId} | 镜头预算:${findConfigItem(SHOT_BUDGETS, shotBudgetId)?.name || shotBudgetId} | 剪辑结构:${findConfigItem(MONTAGE_STYLES, montageId)?.name || montageId} | 声音:${findConfigItem(SOUND_ARCHITECTURES, soundArchitectureId)?.name || soundArchitectureId}`
+        ? ` | 场景:${findConfigItem(SCENE_MODES, sceneModeId)?.name || sceneModeId} | 功能:${findConfigItem(SCENE_FUNCTIONS, sceneFunctionId)?.name || sceneFunctionId} | 镜头预算:${findConfigItem(SHOT_BUDGETS, shotBudgetId)?.name || shotBudgetId} | 剪辑结构:${findConfigItem(MONTAGE_STYLES, montageId)?.name || montageId} | 影片案例:${filmCaseName} | 声音:${findConfigItem(SOUND_ARCHITECTURES, soundArchitectureId)?.name || soundArchitectureId}`
         : "";
 
     if (isV2) {
@@ -863,6 +925,7 @@ ${visualConsistencyLaw}
         const shotBudgetDef = findConfigItem(SHOT_BUDGETS, shotBudgetId);
         const soundDef = findConfigItem(SOUND_ARCHITECTURES, soundArchitectureId);
         const structuredDirectorCard = buildStructuredDirectorCard(visDef, directorInstruction, config);
+        const filmCaseProtocol = buildV2FilmCaseProtocol(filmCaseDef);
         const v2VoiceControlsProtocol = buildV2VoiceControlsProtocol(rawDirectorName, config);
         const visualSkinProtocolV2 = buildV2VisualSkinProtocol(
             hasVisualBible,
@@ -907,7 +970,7 @@ literaryScript 内部必须按以下顺序书写：
 extractedAssets 必须从 CURRENT_SCENE_SOURCE 当前片段提取，不得提前使用后文资产。角色资产必须保留可用于一致性生图的外貌描述；如果源文本没有明示某项外观，不要编造，写“未明示，需后续资产设计锁定”。
 
 协议头必须包含：
-> **【换喻导演台 V2】** 场景诊断：[你的判断]｜戏剧功能：[你的判断]｜核心镜头数：[4/6/9/12/16/20/25之一]｜剪辑结构：[${findConfigItem(MONTAGE_STYLES, montageId)?.name || montageId}]｜导演语法：[${rawDirectorName}]｜声音架构：[你的判断]
+> **【换喻导演台 V2】** 场景诊断：[你的判断]｜戏剧功能：[你的判断]｜核心镜头数：[4/6/9/12/16/20/25之一]｜剪辑结构：[${findConfigItem(MONTAGE_STYLES, montageId)?.name || montageId}]｜导演语法：[${rawDirectorName}]｜影片案例：[${filmCaseName}]｜声音架构：[你的判断]
 ${visualBibleHeader}
 
 场景头必须包含：
@@ -949,6 +1012,7 @@ ${text}
 ${describeConfigItem('场景类型', sceneModeDef, sceneModeId)}
 ${describeConfigItem('戏剧功能', sceneFunctionDef, sceneFunctionId)}
 ${describeConfigItem('镜头预算', shotBudgetDef, shotBudgetId)}
+${describeConfigItem('影片案例', filmCaseDef, '不使用影片案例')}
 ${describeConfigItem('声音架构', soundDef, soundArchitectureId)}
 
 * **主体密度:** ${subjectInstruction}
@@ -974,6 +1038,8 @@ ${config.directorNote}
 * **导演视觉皮肤层**不进入基础分镜 prompt，避免污染参考图。色彩、材质、媒介、绘画风格只由视觉圣经/参考图或专门的二次染色阶段决定。
 
 ${structuredDirectorCard}
+
+${filmCaseProtocol}
 
 ${visualSkinProtocolV2}
 
@@ -1016,6 +1082,8 @@ ${v2VoiceControlsProtocol}
 * 不能添加现代物件、现代声音、现代光源。
 * 未挂载视觉圣经时，不能写“冷绿、暖黄、霓虹、胶片颗粒、油画、赛博朋克、动画、新海诚、复古写实”等最终皮肤。
 * CURRENT_SCENE_SOURCE 中已经存在的引文、文字、歌谣或仪式语言可以保留；PRODUCTION_CONTEXT 中才出现的不能提前加入。
+* 影片案例只可借场面机制，不得复制原片角色、台词、标志道具、场景、音乐、时代、美术皮肤或 IP 设定；不得把片例名称写进镜头画面层作为图像风格词。
+* 如果导演语法、剪辑结构、视觉圣经和影片案例发生冲突，裁决顺序为：CURRENT_SCENE_SOURCE > 人类导演手记 > 用户控制台参数 > 导演语法 > 剪辑结构 > 视觉圣经皮肤 > 影片案例机制。
 
 # 8. 反刻奇导演规则
 复刻导演的底层算法，不复刻表层符号。
@@ -1251,6 +1319,7 @@ Goal: 在不改动导演分镜骨架的前提下，将剧本的**“视觉皮相
 *   **绝对不可变:** 剧情逻辑、人物关系、核心动作 (Action)、声音/音轨内容、对白内容 (Dialogue)、镜头数量、镜头顺序、镜号 (#1-1-1)、镜头功能、景别、构图、角度、轴线与导演调度逻辑。
 *   **可变范围:** 只允许替换视觉皮肤：颜色词、光影参数、表面材质、媒介质感、资产外观锚点、环境美术细节。
 *   **禁止:** 不得增删镜头，不得重排镜头，不得修改景别/构图/角度，不得改变人物动作结果，不得把参考图风格改写成新的剧情设定。
+*   **影片案例隔离:** 如果协议头中出现“影片案例”，它只是分镜阶段的场面机制元数据，不是视觉风格。风格迁移时不得根据片例名称引入原片色彩、材质、时代、道具、角色或 IP 符号。
 "${originalScript}"
 
 **输入 2: 视觉圣经 (THE NEW SKIN - 皮肤)**

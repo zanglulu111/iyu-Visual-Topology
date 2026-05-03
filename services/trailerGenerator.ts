@@ -3,6 +3,7 @@ import { NarrativeFieldState } from '../types';
 import { TRAILER_ENGINE_BLOCKS } from '../data/trailer_data';
 import { TRAILER_SKIN_BLOCKS } from '../data/trailer_skin';
 import { findItemDetails } from './dataRegistry';
+import { getVisionAnchorProtocol } from '../data/engine_core/narrative_protocols';
 
 export const buildTrailerPrompt = (
   duration: string,
@@ -25,7 +26,7 @@ export const buildTrailerPrompt = (
     ## 1. 预告基因
     ${engineContext}
     
-    ${visionInput ? `## 核心意象种子: "${visionInput}"` : ""}
+    ${visionInput || visionImage ? getVisionAnchorProtocol(visionInput, Boolean(visionImage)) : ""}
 
     ## 2. 延异协议
     通过碎片的拼接制造永远无法被满足的“缺失”。

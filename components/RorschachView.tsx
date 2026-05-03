@@ -717,12 +717,12 @@ export const RorschachView: React.FC<RorschachViewProps> = ({ onClose, lang }) =
     3: '#1e3a8a',  // indigo ink  — phase 3
     4: '#78350f',  // scorched earth — phase 4
   } : {
-    1: '#94a3b8',  // slate — neutral/clinical
+    1: '#b3b3b3',  // neutral gray — clinical
     2: '#c084fc',  // purple — projection
-    3: '#22d3ee',  // cyan — temporal
+    3: '#d4af37',  // gold — temporal
     4: '#fb7185',  // rose — desire
   };
-  const phaseColor = phaseColors[phase] ?? (isRetro ? '#4b5563' : '#94a3b8');
+  const phaseColor = phaseColors[phase] ?? (isRetro ? '#4b5563' : '#b3b3b3');
 
   const completedCount = answers.length;
 

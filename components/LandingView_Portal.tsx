@@ -89,7 +89,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
 
   const getHeaderTheme = (driverId: DriverType | null) => {
     switch (driverId) {
-      case DriverType.COMMERCIAL: return 'border-cyan-500/30 text-cyan-400';
+      case DriverType.COMMERCIAL: return 'border-mist-cyan/30 text-mist-cyan';
       case DriverType.NARRATIVE: return 'border-yellow-500/30 text-yellow-400';
       case DriverType.AESTHETIC: return 'border-rose-500/30 text-rose-400';
       case DriverType.EXPERIMENTAL: return 'border-purple-500/30 text-purple-400';
@@ -255,7 +255,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
             <div className="mt-16 flex justify-center opacity-80 shrink-0 pb-12">
               <div onClick={openHistory} className="w-full max-w-md border border-zinc-900 bg-[#080808]/50 hover:bg-[#0c0c0c] p-6 rounded cursor-pointer transition-all group hover:border-zinc-700">
                 <div className="flex items-center gap-3 mb-3">
-                  <HistoryIcon size={18} className="text-zinc-500 group-hover:text-cyan-400 transition-colors" />
+                  <HistoryIcon size={18} className="text-zinc-500 group-hover:text-gold-primary transition-colors" />
                   <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-300 group-hover:text-white transition-colors">
                     {lang === 'CN' ? '检视生成档案' : 'REVIEW ARCHIVES'}
                   </h3>

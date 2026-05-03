@@ -1,0 +1,116 @@
+{
+  "syncedAt": "2026-05-01T09:24:35.753Z",
+  "syncedFrom": "PhilosopherPosterIndexPage",
+  "activeTab": "SOURCE",
+  "activeSourceId": "confucius",
+  "activePlanId": "",
+  "selectedSourceIds": [],
+  "sourceState": {
+    "slavoj-zizek": {
+      "status": "drafting",
+      "assetPath": "",
+      "publishedAt": "",
+      "platform": "小红书",
+      "publishedUrl": "",
+      "note": "",
+      "rating": "",
+      "updatedAt": "2026-04-28T12:57:17.633Z"
+    },
+    "lacan": {
+      "status": "drafting",
+      "assetPath": "",
+      "publishedAt": "",
+      "platform": "小红书",
+      "publishedUrl": "",
+      "note": "",
+      "rating": "",
+      "updatedAt": "2026-04-28T13:00:33.851Z"
+    },
+    "marx": {
+      "status": "drafting",
+      "assetPath": "",
+      "publishedAt": "",
+      "platform": "小红书",
+      "publishedUrl": "",
+      "note": "",
+      "rating": "",
+      "updatedAt": "2026-04-28T12:59:58.940Z"
+    },
+    "hegel": {
+      "status": "drafting",
+      "assetPath": "",
+      "publishedAt": "",
+      "platform": "小红书",
+      "publishedUrl": "",
+      "note": "",
+      "rating": "",
+      "updatedAt": "2026-04-28T12:59:27.080Z"
+    }
+  },
+  "plans": [
+    {
+      "id": "plan_41224369-462d-4df6-9c7b-3295051d6d21",
+      "sourceId": "hegel",
+      "status": "drafting",
+      "series": "今日哲学家",
+      "platform": "小红书",
+      "publishDate": "",
+      "topic": "黑格尔",
+      "draftTitle": "一张图认识 黑格尔",
+      "caption": "黑格尔不是一个知识点，而是一种进入思想的方式。\n一句话：把历史理解为精神通过矛盾认识自身。\n视觉母题：精神阶梯、主奴、猫头鹰\n#迷雾学派 #哲学海报 #哲学 #人文社科 #小红书运营",
+      "note": "",
+      "publishedUrl": "",
+      "createdAt": "2026-04-28T12:59:18.541Z",
+      "updatedAt": "2026-04-28T12:59:27.079Z"
+    },
+    {
+      "id": "plan_32898949-6cff-4d05-8f98-3950d7fbb7f5",
+      "sourceId": "marx",
+      "status": "drafting",
+      "series": "今日哲学家",
+      "platform": "小红书",
+      "publishDate": "",
+      "topic": "卡尔·马克思",
+      "draftTitle": "一张图认识 卡尔·马克思",
+      "caption": "卡尔·马克思不是一个知识点，而是一种进入思想的方式。\n一句话：从商品形式中读出现代社会的秘密。\n视觉母题：商品、工厂、资本流图\n#迷雾学派 #哲学海报 #哲学 #人文社科 #小红书运营",
+      "note": "",
+      "publishedUrl": "",
+      "createdAt": "2026-04-28T12:58:55.037Z",
+      "updatedAt": "2026-04-28T12:59:58.940Z"
+    },
+    {
+      "id": "plan_fcc4bc72-f4d7-4be6-bb3b-2319f56c2348",
+      "sourceId": "lacan",
+      "status": "drafting",
+      "series": "今日哲学家",
+      "platform": "小红书",
+      "publishDate": "",
+      "topic": "拉康",
+      "draftTitle": "一张图认识 拉康",
+      "caption": "拉康不是一个知识点，而是一种进入思想的方式。\n一句话：把无意识写成像语言一样结构化的拓扑机器。\n视觉母题：镜像、三界、莫比乌斯带\n#迷雾学派 #哲学海报 #哲学 #人文社科 #小红书运营",
+      "note": "",
+      "publishedUrl": "",
+      "createdAt": "2026-04-28T12:58:41.242Z",
+      "updatedAt": "2026-04-28T13:00:33.850Z"
+    },
+    {
+      "id": "plan_aab12a3a-6c59-4aed-9931-fcdb7144b62f",
+      "sourceId": "slavoj-zizek",
+      "status": "drafting",
+      "series": "今日哲学家",
+      "platform": "小红书",
+      "publishDate": "",
+      "topic": "齐泽克",
+      "draftTitle": "一张图认识 齐泽克",
+      "caption": "齐泽克不是一个知识点，而是一种进入思想的方式。\n一句话：用拉康和黑格尔重启意识形态批判。\n视觉母题：拉康图式、电影屏幕、红色断裂\n#迷雾学派 #哲学海报 #哲学 #人文社科 #小红书运营",
+      "note": "",
+      "publishedUrl": "",
+      "createdAt": "2026-04-28T12:57:01.335Z",
+      "updatedAt": "2026-04-28T12:57:17.633Z"
+    }
+  ],
+  "stats": {
+    "sourceTotal": 745,
+    "planTotal": 4
+  }
+}

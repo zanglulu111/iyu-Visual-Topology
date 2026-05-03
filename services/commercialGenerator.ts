@@ -83,8 +83,8 @@ export const buildCommercialPrompt = (
 
   // VISION ANCHOR LOGIC
   let visionAnchorInstruction = "";
-  if (visionInput) {
-      visionAnchorInstruction = getVisionAnchorProtocol(visionInput);
+  if (visionInput || visionImage) {
+      visionAnchorInstruction = getVisionAnchorProtocol(visionInput, Boolean(visionImage));
   }
 
   // WORLD LAW PROTOCOLS

@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">迷雾学派徽章式主图标</title>
+  <desc id="desc">A simplified triangular Mist School seal inspired by the user's original black-and-white logo.</desc>
+
+  <rect width="512" height="512" rx="74" fill="#050505"/>
+
+  <g transform="translate(256 215)" fill="none" stroke="#F4F1E8" stroke-linecap="square" stroke-linejoin="miter">
+    <path d="M0 -132L-119 76H119Z" stroke-width="18"/>
+    <path d="M-61 26H-106M61 26H106" stroke-width="16"/>
+    <path d="M-34 26V-44H34V26" stroke-width="15"/>
+    <path d="M-17 -44V-77H29V-44" stroke-width="13"/>
+    <rect x="-28" y="26" width="56" height="64" rx="6" stroke-width="12"/>
+    <path d="M-22 47H22M-22 63H22M-22 79H22" stroke-width="5"/>
+    <path d="M-86 94H86" stroke="#72D8C7" stroke-width="8"/>
+  </g>
+
+  <g transform="translate(131 368)" fill="none" stroke="#F4F1E8" stroke-linecap="square" stroke-linejoin="miter">
+    <g stroke-width="10">
+      <path d="M0 0V64M0 0L22 18L44 0V64"/>
+      <path d="M73 0V64"/>
+      <path d="M115 0H157L115 30H157L115 64"/>
+      <path d="M192 0H250M221 0V64"/>
+    </g>
+    <g stroke-width="4" opacity="0.8">
+      <path d="M12 14L0 25M25 18L43 31M115 47L131 61M206 14H236"/>
+    </g>
+  </g>
+</svg>

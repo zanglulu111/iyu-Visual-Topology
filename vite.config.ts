@@ -4,7 +4,7 @@ import { defineConfig, loadEnv, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import http from 'http';
 import https from 'https';
-import { URL } from 'url';
+import { pathToFileURL, URL } from 'url';
 
 const FILE_PREFERRED_ENV_KEYS = [
   'LOVART_ACCESS_KEY',
@@ -12,6 +12,8 @@ const FILE_PREFERRED_ENV_KEYS = [
   'LOVART_BASE_URL',
   'LOVART_PROJECT_ID'
 ];
+
+const PHILOSOPHER_POSTER_ASSET_DIR = '/Users/lujiaqi/Desktop/哲学海报/哲学家海报/哲学2';
 
 function readRootEnvFile(root: string): Record<string, string> {
   const envPath = path.resolve(root, '.env');
@@ -90,14 +92,12 @@ function localApiPlugin(): Plugin {
   return {
     name: 'local-api-routes',
     configureServer(server) {
-      server.middlewares.use('/api/lovart-generate', async (req, res) => {
-        if (req.method !== 'POST') {
-          res.statusCode = 405;
-          res.setHeader('Content-Type', 'application/json');
-          res.end(JSON.stringify({ error: 'Method Not Allowed' }));
-          return;
-        }
-
+      const runJsonApiRoute = async (
+        req: any,
+        res: any,
+        handlerPath: string,
+        fallbackError: string
+      ) => {
         try {
           const chunks: Buffer[] = [];
           for await (const chunk of req) {
@@ -106,7 +106,8 @@ function localApiPlugin(): Plugin {
 
           const rawBody = Buffer.concat(chunks).toString('utf8');
           const body = rawBody ? JSON.parse(rawBody) : {};
-          const { default: handler } = await import('./api/lovart-generate.js');
+          const handlerUrl = pathToFileURL(path.resolve(handlerPath)).href;
+          const { default: handler } = await import(handlerUrl);
 
           await handler(
             { method: req.method, headers: req.headers, body },
@@ -124,8 +125,63 @@ function localApiPlugin(): Plugin {
         } catch (error: any) {
           res.statusCode = 500;
           res.setHeader('Content-Type', 'application/json');
-          res.end(JSON.stringify({ error: error?.message || 'Local API route failed' }));
+          res.end(JSON.stringify({ error: error?.message || fallbackError }));
         }
+      };
+
+      server.middlewares.use('/api/publish-workspace-sync', async (req, res) => {
+        const statePath = path.resolve('.', 'codex-drafts/operations/publish_workspace_state.json');
+        res.setHeader('Content-Type', 'application/json');
+
+        try {
+          if (req.method === 'GET') {
+            if (!fs.existsSync(statePath)) {
+              res.statusCode = 200;
+              res.end(JSON.stringify({ syncedAt: null, sourceState: {}, plans: [] }));
+              return;
+            }
+            res.statusCode = 200;
+            res.end(fs.readFileSync(statePath, 'utf8'));
+            return;
+          }
+
+          if (req.method !== 'POST') {
+            res.statusCode = 405;
+            res.end(JSON.stringify({ error: 'Method Not Allowed' }));
+            return;
+          }
+
+          const chunks: Buffer[] = [];
+          for await (const chunk of req) {
+            chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+          }
+
+          const rawBody = Buffer.concat(chunks).toString('utf8');
+          const body = rawBody ? JSON.parse(rawBody) : {};
+          fs.mkdirSync(path.dirname(statePath), { recursive: true });
+          fs.writeFileSync(statePath, JSON.stringify({
+            syncedAt: new Date().toISOString(),
+            ...body,
+          }, null, 2));
+
+          res.statusCode = 200;
+          res.end(JSON.stringify({ ok: true, path: statePath }));
+        } catch (error: any) {
+          res.statusCode = 500;
+          res.end(JSON.stringify({ error: error?.message || 'Failed to sync publishing workspace' }));
+        }
+      });
+
+      server.middlewares.use('/api/lovart-generate', async (req, res) => {
+        await runJsonApiRoute(req, res, './api/lovart-generate.js', 'Local API route failed');
+      });
+
+      server.middlewares.use('/api/get-r2-upload-url', async (req, res) => {
+        await runJsonApiRoute(req, res, './api/get-r2-upload-url.js', 'Failed to generate R2 upload URL');
+      });
+
+      server.middlewares.use('/api/delete-r2-file', async (req, res) => {
+        await runJsonApiRoute(req, res, './api/delete-r2-file.js', 'Failed to delete R2 file');
       });
     }
   };
@@ -138,6 +194,12 @@ export default defineConfig(({ mode }) => {
       server: {
         port: 3000,
         host: '0.0.0.0',
+        fs: {
+          allow: [
+            path.resolve(__dirname),
+            PHILOSOPHER_POSTER_ASSET_DIR,
+          ],
+        },
       },
       plugins: [react(), apiProxyPlugin(), localApiPlugin()],
       define: {

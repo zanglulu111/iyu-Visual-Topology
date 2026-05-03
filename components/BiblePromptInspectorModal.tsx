@@ -37,6 +37,7 @@ interface BiblePromptInspectorModalProps {
     styleConfig: StyleConfig;
     fieldState?: NarrativeFieldState;
     visionInput?: string;
+    visionAnalysis?: string;
     worldLawConfig?: WorldLawConfig;
     driverType: DriverType;
 }
@@ -119,10 +120,12 @@ const getStyleOptions = (driverType: DriverType) => {
         }));
     }
 
+    const cnName = (name: string) => name.split('(')[0].trim();
+
     return STYLE_MATRIX.flatMap(category => category.items.map(item => ({
         value: item.id,
-        label: item.name,
-        description: `${item.description || ''}${item.example ? ` | ${item.example}` : ''}`
+        label: cnName(item.name),
+        description: `${item.styleTitle || item.description || ''}${item.coreRewriteLogic ? ` | ${item.coreRewriteLogic}` : ''}${item.example ? ` | ${item.example}` : ''}`
     })));
 };
 
@@ -145,6 +148,7 @@ export const BiblePromptInspectorModal: React.FC<BiblePromptInspectorModalProps>
     styleConfig,
     fieldState,
     visionInput,
+    visionAnalysis,
     worldLawConfig,
     driverType
 }) => {
@@ -153,6 +157,7 @@ export const BiblePromptInspectorModal: React.FC<BiblePromptInspectorModalProps>
     const { blocks, library } = getDriverBlocksAndLibrary(driverType);
     const engineBlocks = blocks.filter(block => !isSurfaceBlock(block.id));
     const surfaceBlocks = blocks.filter(block => isSurfaceBlock(block.id));
+    const showPerspectiveAndSensory = driverType !== DriverType.NARRATIVE || !styleConfig.styleId;
 
     const driverLabel = (() => {
         switch (driverType) {
@@ -181,36 +186,40 @@ export const BiblePromptInspectorModal: React.FC<BiblePromptInspectorModalProps>
                     value: defaultWorldLaw?.gravity || '',
                     options: WORLD_LAW_OPTIONS,
                     editable: true,
-                    placeholder: lang === 'EN' ? 'World Law' : '世界法则',
-                    alwaysShow: true,
-                    inlineOptions: true
+                    placeholder: lang === 'EN' ? 'World Law' : '世界法则'
                 },
                 {
                     id: 'styleId',
-                    label: lang === 'EN' ? 'Bible Style' : '圣经风格',
+                    label: driverType === DriverType.NARRATIVE
+                        ? (lang === 'EN' ? 'Author Style' : '作者风格')
+                        : (lang === 'EN' ? 'Bible Style' : '圣经风格'),
                     kind: 'select',
                     value: styleConfig.styleId || '',
                     options: getStyleOptions(driverType),
                     editable: true,
-                    placeholder: lang === 'EN' ? 'Bible Style' : '圣经风格'
+                    placeholder: driverType === DriverType.NARRATIVE
+                        ? (lang === 'EN' ? 'Author Style' : '作者风格')
+                        : (lang === 'EN' ? 'Bible Style' : '圣经风格')
                 },
-                {
-                    id: 'perspectiveId',
-                    label: lang === 'EN' ? 'Perspective' : '叙事视点',
-                    kind: 'select',
-                    value: styleConfig.perspectiveId || '',
-                    options: PERSPECTIVES.map(item => ({ value: item.id, label: item.name, description: item.prompt })),
-                    editable: true,
-                    placeholder: lang === 'EN' ? 'Perspective' : '叙事视点'
-                },
-                {
-                    id: 'sensoryId',
-                    label: lang === 'EN' ? 'Sensory Mode' : '感官侧重',
-                    kind: 'select',
-                    value: styleConfig.sensoryId || '',
-                    options: SENSORY_MODES.map(item => ({ value: item.id, label: item.name, description: item.prompt })),
-                    editable: true
-                },
+                ...(showPerspectiveAndSensory ? [
+                    {
+                        id: 'perspectiveId',
+                        label: lang === 'EN' ? 'Perspective' : '叙事视点',
+                        kind: 'select' as const,
+                        value: styleConfig.perspectiveId || '',
+                        options: PERSPECTIVES.map(item => ({ value: item.id, label: item.name, description: item.prompt })),
+                        editable: true,
+                        placeholder: lang === 'EN' ? 'Perspective' : '叙事视点'
+                    },
+                    {
+                        id: 'sensoryId',
+                        label: lang === 'EN' ? 'Sensory Mode' : '感官侧重',
+                        kind: 'select' as const,
+                        value: styleConfig.sensoryId || '',
+                        options: SENSORY_MODES.map(item => ({ value: item.id, label: item.name, description: item.prompt })),
+                        editable: true
+                    }
+                ] : []),
                 ...getLibraryBlockItems(surfaceBlocks, library, defaultFieldState, lang, driverType)
             ]
         },
@@ -247,7 +256,7 @@ export const BiblePromptInspectorModal: React.FC<BiblePromptInspectorModalProps>
                     id: 'treatmentVisualAnchor',
                     label: lang === 'EN' ? 'Visual Anchor' : '视觉锚点',
                     kind: 'text',
-                    value: treatment?.visualAnchor || '',
+                    value: treatment?.visualAnchor || treatment?.visualKey || '',
                     editable: Boolean(treatment),
                     placeholder: lang === 'EN' ? 'Visual anchor' : '视觉锚点'
                 },
@@ -261,11 +270,19 @@ export const BiblePromptInspectorModal: React.FC<BiblePromptInspectorModalProps>
                 },
                 {
                     id: 'visionInput',
-                    label: lang === 'EN' ? 'Vision Input' : '视觉/创意输入',
+                    label: lang === 'EN' ? 'Text Seed / Semantic Lock' : '文本种子 / 语义锁定',
                     kind: 'textarea',
                     value: visionInput || '',
                     editable: true,
-                    placeholder: lang === 'EN' ? 'Vision input' : '视觉/创意输入'
+                    placeholder: lang === 'EN' ? 'Text seed' : '文本种子'
+                },
+                {
+                    id: 'visionAnalysis',
+                    label: lang === 'EN' ? 'Vision/Text Analysis' : '图文解析结果',
+                    kind: 'textarea',
+                    value: visionAnalysis || '',
+                    editable: true,
+                    placeholder: lang === 'EN' ? 'Analysis source' : '图文解析结果'
                 }
             ]
         }
@@ -293,10 +310,15 @@ export const BiblePromptInspectorModal: React.FC<BiblePromptInspectorModalProps>
                 perspectiveId: typeof values.perspectiveId === 'string' && values.perspectiveId.trim() ? values.perspectiveId : null,
                 sensoryId: typeof values.sensoryId === 'string' && values.sensoryId.trim() ? values.sensoryId : null
             };
+            if (driverType === DriverType.NARRATIVE && nextStyleConfig.styleId) {
+                nextStyleConfig.perspectiveId = null;
+                nextStyleConfig.sensoryId = null;
+            }
             const nextFieldState = collectFieldState(values, blocks, defaultFieldState);
             const gravity = Number(values.worldLawGravity || defaultWorldLaw?.gravity || 4);
             const nextWorldLaw: WorldLawConfig = { ...defaultWorldLaw, gravity };
             const nextVisionInput = String(values.visionInput ?? '');
+            const nextVisionAnalysis = String(values.visionAnalysis ?? '');
             const nextDriver = driverType;
 
             switch (nextDriver) {
@@ -307,7 +329,7 @@ export const BiblePromptInspectorModal: React.FC<BiblePromptInspectorModalProps>
                 case DriverType.AESTHETIC:
                     return buildAestheticBiblePrompt(nextTreatment, nextStyleConfig, nextFieldState, nextVisionInput, nextWorldLaw);
                 default:
-                    return buildNarrativeBiblePrompt(nextTreatment, nextStyleConfig, nextFieldState, nextVisionInput, nextWorldLaw);
+                    return buildNarrativeBiblePrompt(nextTreatment, nextStyleConfig, nextFieldState, nextVisionInput, null, nextWorldLaw, nextVisionAnalysis);
             }
         } catch (e) {
             return `提示词生成过程中遇到错误。\n\n[ERROR]\n${e instanceof Error ? e.stack : String(e)}`;

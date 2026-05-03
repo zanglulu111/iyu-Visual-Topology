@@ -3,15 +3,18 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import {
+    NARRATIVE_ENGINE_BLOCKS,
     NARRATIVE_ENGINE_LIBRARY,
-    COMMERCIAL_ENGINE_LIBRARY, COMM_SKIN_LIBRARY,
-    EXPERIMENTAL_ENGINE_LIBRARY, EXPERIMENTAL_SKIN_LIBRARY,
+    COMMERCIAL_ENGINE_BLOCKS, COMMERCIAL_ENGINE_LIBRARY, COMM_SKIN_BLOCKS, COMM_SKIN_LIBRARY,
+    EXPERIMENTAL_ENGINE_BLOCKS, EXPERIMENTAL_ENGINE_LIBRARY, EXPERIMENTAL_SKIN_BLOCKS, EXPERIMENTAL_SKIN_LIBRARY,
+    AESTHETIC_ENGINE_BLOCKS,
     AESTHETIC_ENGINE_LIBRARY,
-    TRAILER_ENGINE_LIBRARY, TRAILER_SKIN_LIBRARY,
+    TRAILER_ENGINE_BLOCKS, TRAILER_ENGINE_LIBRARY, TRAILER_SKIN_BLOCKS, TRAILER_SKIN_LIBRARY,
     POETIC_ENGINE_LIBRARY,
     BLOCK_LIMITS,
     GENRE_SUPER_GROUPS,
     AES_COLOR_PRESETS,
+    ALL_SKIN_BLOCKS,
     SKIN_LIBRARY,
     GENRE_CATEGORIES,
     WORLD_MOTIF_CATEGORIES
@@ -38,6 +41,13 @@ interface NarrativeLibraryModalProps {
 const iconMap: Record<string, React.ElementType> = {
     Zap, Sparkles, Eye, Heart, Music, Sun, Moon, Cloud, Feather
 };
+
+const displayCnTag = (value: unknown) => String(value || '')
+    .replace(/^\[?SUR-END[.。]\s*/i, '')
+    .replace(/^\[?SURX[.。]\s*/i, '')
+    .replace(/\s*\([A-Za-z0-9\s/.'"_-]+\)\s*/g, '')
+    .replace(/^\[|\]$/g, '')
+    .trim();
 
 export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
     isOpen, onClose, blockId, blockName, selectedTags, onToggleTag, onClear, lang = 'CN', customLibraryData, driverType, onAddCustomDef, scrollToTag, onTempLockChange, initialFaceState
@@ -120,6 +130,32 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
         return found ? [found] : [];
     }, [blockId, customLibraryData, driverType]);
 
+    const blockDisplayName = useMemo(() => {
+        const skinBlocks = driverType === DriverType.COMMERCIAL
+            ? COMM_SKIN_BLOCKS
+            : driverType === DriverType.EXPERIMENTAL
+                ? EXPERIMENTAL_SKIN_BLOCKS
+                : driverType === DriverType.TRAILER
+                    ? TRAILER_SKIN_BLOCKS
+                    : ALL_SKIN_BLOCKS;
+        const engineBlocks = driverType === DriverType.COMMERCIAL
+            ? COMMERCIAL_ENGINE_BLOCKS
+            : driverType === DriverType.EXPERIMENTAL
+                ? EXPERIMENTAL_ENGINE_BLOCKS
+                : driverType === DriverType.AESTHETIC
+                    ? AESTHETIC_ENGINE_BLOCKS
+                    : driverType === DriverType.TRAILER
+                        ? TRAILER_ENGINE_BLOCKS
+                        : NARRATIVE_ENGINE_BLOCKS;
+        const block = [...engineBlocks, ...skinBlocks].find(item => item.id === blockId);
+        if (block) return currentLang === 'EN' ? block.enName : displayCnTag(block.name);
+
+        const library = libraryData.find(item => item.id === `${blockId}_lib` || item.id === blockId);
+        if (library) return currentLang === 'EN' ? (library.nameEn || library.name.match(/\((.*?)\)/)?.[1] || library.name) : displayCnTag(library.name);
+
+        return currentLang === 'EN' ? (blockName.match(/\((.*?)\)/)?.[1] || blockName) : displayCnTag(blockName);
+    }, [blockId, blockName, currentLang, driverType, libraryData]);
+
     // Super group functionality removed to simplify genre selection
     /*
     useEffect(() => {
@@ -135,7 +171,7 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
             if (currentLang === 'EN') {
                 return en || name.match(/\((.*?)\)/)?.[1] || name;
             } else {
-                return name.split('(')[0].trim();
+                return displayCnTag(name);
             }
         };
 
@@ -229,9 +265,13 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
             return searchSource.flatMap(group =>
                 (group.items || []).filter(item =>
                     item.name.toLowerCase().includes(lowerQuery) ||
+                    (item.nameEn && item.nameEn.toLowerCase().includes(lowerQuery)) ||
                     (item.def && item.def.toLowerCase().includes(lowerQuery)) ||
+                    (item.defEn && item.defEn.toLowerCase().includes(lowerQuery)) ||
                     (item.core && item.core.toLowerCase().includes(lowerQuery)) ||
+                    (item.coreEn && item.coreEn.toLowerCase().includes(lowerQuery)) ||
                     (item.essence && item.essence.toLowerCase().includes(lowerQuery)) ||
+                    (item.essenceEn && item.essenceEn.toLowerCase().includes(lowerQuery)) ||
                     (item.reality && item.reality.toLowerCase().includes(lowerQuery))
                 ).map(item => ({ ...item, _groupName: group.name }))
             );
@@ -251,6 +291,21 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
             setCustomInputCore("");
             setShowCustomInput(false);
         }
+    };
+
+    const getLocalizedItemName = (item: any) => {
+        const rawNameCn = String(item.name || '');
+        const volumeDuration = blockId === 'skin_volume' ? rawNameCn.match(/\(([^)]*(?:s|m|S|M)[^)]*)\)/)?.[1] : null;
+        const nameCn = blockId === 'skin_volume' && volumeDuration
+            ? `${rawNameCn.split('(')[0].trim()}（${volumeDuration}）`
+            : displayCnTag(item.name);
+        const nameEn = item.nameEn || String(item.name || '').match(/\((.*?)\)/)?.[1] || nameCn;
+        return currentLang === 'EN' ? nameEn : nameCn;
+    };
+
+    const getItemMechanics = (item: any) => {
+        if (currentLang === 'EN') return item.patch?.mechanicsEn || item.mechanicsEn || item.patch?.mechanics || item.mechanics;
+        return item.patch?.mechanics || item.mechanics || item.patch?.mechanicsEn || item.mechanicsEn;
     };
 
     const handleRandomize = () => {
@@ -346,7 +401,7 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
 
     const getThemeColor = () => {
         if (globalTheme === 'retro') return { text: "text-[#8B261D]", border: "border-[#8B261D]/50", hex: "#8B261D" };
-        if (driverType === DriverType.COMMERCIAL) return { text: "text-cyan-400", border: "border-cyan-500/50", hex: "#22d3ee" };
+        if (driverType === DriverType.COMMERCIAL) return { text: "text-mist-cyan", border: "border-mist-cyan/50", hex: "#22D3EE" };
         if (driverType === DriverType.EXPERIMENTAL) return { text: "text-purple-400", border: "border-purple-500/50", hex: "#c084fc" };
         if (driverType === DriverType.AESTHETIC) return { text: "text-rose-400", border: "border-rose-500/50", hex: "#fb7185" };
         if (driverType === DriverType.TRAILER) return { text: "text-orange-400", border: "border-orange-500/50", hex: "#fb923c" };
@@ -382,7 +437,7 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                         <div className="flex flex-col">
                             <div className="flex items-center gap-4 mb-1">
                                 <h3 className={`text-2xl md:text-3xl font-serif font-black tracking-wider ${globalTheme === 'retro' ? 'text-[#8B261D]' : 'text-white'}`}>
-                                    {blockName}
+                                    {blockDisplayName}
                                 </h3>
                                 <div className={`px-3 py-1 rounded-full border ${themeBorder.replace('/50', '')} ${globalTheme === 'retro' ? 'bg-[#F9F7F1]' : 'bg-white/5'} text-[10px] md:text-[11px] font-black uppercase tracking-[0.2em] ${themeText} flex items-center gap-2`}>
                                    <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${globalTheme === 'retro' ? 'bg-[#8B261D]' : themeText.replace('text-', 'bg-')}`} />
@@ -413,9 +468,7 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                             ) : (
                                 selectedTags.map(tag => {
                                     const item = filteredItems.find(i => i.name === tag) || processedGroups.flatMap(g => g.items || []).find(i => i.name === tag);
-                                    const displayTag = item
-                                        ? (currentLang === 'EN' ? (item.nameEn || item.name) : item.name)
-                                        : tag;
+                                    const displayTag = item ? getLocalizedItemName(item) : displayCnTag(tag);
 
                                     // Get temperature color for this tag (only for engine lexicons)
                                     const tagTemp = isEngineLexicon ? faceState[tag] : undefined;
@@ -436,21 +489,32 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                     }
 
                                     return (
-                                        <button
+                                        <div
                                             key={tag}
+                                            role="button"
+                                            tabIndex={0}
                                             onClick={() => handleScrollToCard(tag)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter' || e.key === ' ') {
+                                                    e.preventDefault();
+                                                    handleScrollToCard(tag);
+                                                }
+                                            }}
                                             className={`flex shrink-0 items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] whitespace-nowrap font-black border transition-all duration-300 transform active:scale-95 group shadow-sm
                                                 ${globalTheme === 'retro' ? `bg-white ${tempBorderClass} ${tempColorClass}` : `bg-zinc-900 ${tempBorderClass} ${tempColorClass} hover:border-white/30 hover:bg-zinc-800`}`}
                                         >
                                             <Hash size={10} className="opacity-40" />
                                             {displayTag}
-                                            <div
+                                            <button
+                                                type="button"
                                                 onClick={(e) => { e.stopPropagation(); onToggleTag(tag); }}
                                                 className="opacity-50 hover:opacity-100 group-hover:rotate-90 transition-all ml-1 cursor-pointer p-0.5 rounded-full hover:bg-black/10"
+                                                title={currentLang === 'EN' ? 'Remove' : '删除'}
+                                                aria-label={currentLang === 'EN' ? `Remove ${displayTag}` : `删除 ${displayTag}`}
                                             >
                                                 <X size={12} />
-                                            </div>
-                                        </button>
+                                            </button>
+                                        </div>
                                     );
                                 })
                             )}
@@ -633,6 +697,7 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                 const isSelected = selectedTags.includes(item.name);
                                 const isCopied = copiedItemId === (item.id || item.name);
                                 const isPreset = blockId === 'aes_palette_preset';
+                                const itemMechanics = getItemMechanics(item);
                                 
                                 return (
                                     <div key={item.id || item.name}
@@ -662,7 +727,7 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                         )}
 
                                         <div className={`flex justify-between ${isPreset ? 'flex-1 items-center' : 'w-full items-center mb-3'}`}>
-                                            <h4 className={`font-serif font-bold ${isPreset ? 'text-base' : 'text-lg md:text-xl'} leading-tight ${isSelected ? (globalTheme === 'retro' ? 'text-[#8B261D]' : themeText) : (globalTheme === 'retro' ? 'text-black/80' : 'text-zinc-100 group-hover:text-white')}`}>{currentLang === 'EN' ? (item.nameEn || item.name) : item.name}</h4>
+                                            <h4 className={`font-serif font-bold ${isPreset ? 'text-base' : 'text-lg md:text-xl'} leading-tight ${isSelected ? (globalTheme === 'retro' ? 'text-[#8B261D]' : themeText) : (globalTheme === 'retro' ? 'text-black/80' : 'text-zinc-100 group-hover:text-white')}`}>{getLocalizedItemName(item)}</h4>
                                             {!isPreset && (
                                                 <div className="flex items-center gap-2 shrink-0 ml-3">
                                                     {isSkinSV && item.core && (
@@ -848,6 +913,14 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                                     </>
                                                 )}
                                                 {item.reality && <div className={`mt-3 pt-3 border-t border-dashed ${globalTheme === 'retro' ? 'border-[#8B261D]/20' : 'border-white/10'} w-full`}><p className={`text-xs md:text-sm leading-relaxed ${globalTheme === 'retro' ? 'text-[#8B261D]/80' : 'text-zinc-400'}`}><span className="opacity-60 mr-1">{currentLang === 'EN' ? 'REALITY:' : '现实隐喻:'}</span>{currentLang === 'EN' && item.realityEn ? item.realityEn : item.reality}</p></div>}
+                                                {blockId === 'skin_volume' && itemMechanics && (
+                                                    <div className={`mt-3 pt-3 border-t border-dashed ${globalTheme === 'retro' ? 'border-[#8B261D]/20' : 'border-white/10'} w-full`}>
+                                                        <p className={`whitespace-pre-line text-[10px] md:text-xs font-mono leading-relaxed ${globalTheme === 'retro' ? 'text-[#8B261D]/75' : 'text-zinc-400 group-hover:text-zinc-300'} transition-colors`}>
+                                                            <span className="mr-1 font-black uppercase tracking-wider">{currentLang === 'EN' ? 'MECHANICS:' : '字数机制:'}</span>
+                                                            {itemMechanics}
+                                                        </p>
+                                                    </div>
+                                                )}
                                                 {item.reference && <div className={`mt-2 pt-2 border-t border-dashed ${globalTheme === 'retro' ? 'border-[#8B261D]/20' : 'border-white/10'} w-full`}><p className={`text-[10px] md:text-xs font-mono leading-relaxed ${globalTheme === 'retro' ? 'text-[#8B261D]/70' : 'text-zinc-400 group-hover:text-zinc-300'} transition-colors`}><span className="mr-1">{currentLang === 'EN' ? 'REF:' : '参考:'}</span>{currentLang === 'EN' && item.referenceEn ? item.referenceEn : item.reference}</p></div>}
                                                 {/* DISPLAY PRESET COLORS */}
                                                 {(item as any).colors && (

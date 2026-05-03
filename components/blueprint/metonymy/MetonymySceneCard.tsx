@@ -140,7 +140,7 @@ const AssetChip: React.FC<{
                             <img src={item.imageUrl} className="w-full h-full object-cover" />
                         </div>
                     )}
-                    <span className={`text-[10px] font-bold truncate ${theme === 'retro' ? 'text-[#3D1A16]' : (type === 'characters' ? 'text-rose-300' : type === 'scenes' ? 'text-blue-300' : 'text-amber-300')}`}>
+                    <span className={`text-[10px] font-bold truncate ${theme === 'retro' ? 'text-[#3D1A16]' : (type === 'characters' ? 'text-rose-300' : type === 'scenes' ? 'text-gold-primary' : 'text-amber-300')}`}>
                         {language === 'EN' ? (item.nameEn || item.name) : item.name}
                     </span>
                     <div className="flex-1"></div>

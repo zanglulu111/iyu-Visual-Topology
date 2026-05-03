@@ -46,9 +46,9 @@ export const generateGlobalDump = (options: GlobalDumpOptions): string => {
     lines.push(`> 日期: ${new Date().toISOString().replace('T', ' ').substring(0, 19)} UTC | 用户: ${user?.username || 'Guest'}`);
 
     lines.push(`\n## 0. 输入源与解码 (INPUT & DECODING)`);
-    lines.push(`**创意种子:** ${visionInput || '无'}`);
-    if (visionAnalysis) lines.push(`**视觉反向解析报告:**\n${visionAnalysis}`);
-    if (visionImage) lines.push(`**参考图 URL:** (Base64 数据已省略)`);
+    lines.push(`**文本种子 / 语义锁定:** ${visionInput || '无'}`);
+    if (visionAnalysis) lines.push(`**种子叙事解码报告:**\n${visionAnalysis}`);
+    if (visionImage) lines.push(`**图像种子 / 视觉锁定:** (Base64 数据已省略)`);
 
     lines.push(`\n## 1. 核心引擎 DNA (ENGINE PARAMETERS)`);
     lines.push(`**驱动模式:** ${drName}`);

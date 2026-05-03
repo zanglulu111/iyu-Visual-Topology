@@ -40,7 +40,7 @@ export const TaskManagerPanel: React.FC<TaskManagerPanelProps> = ({ isOpen, onCl
     const getModeAccent = () => {
         if (theme === 'retro') return { text: 'text-[#8B261D]', bg: 'bg-[#8B261D]', border: 'border-[#8B261D]', shadow: 'shadow-none' };
         switch (driverType) {
-            case DriverType.COMMERCIAL: return { text: 'text-cyan-400', bg: 'bg-cyan-500', border: 'border-cyan-500', shadow: 'shadow-[0_0_20px_rgba(6,182,212,0.2)]' };
+            case DriverType.COMMERCIAL: return { text: 'text-mist-cyan', bg: 'bg-mist-cyan', border: 'border-mist-cyan', shadow: 'shadow-[0_0_20px_rgba(34,211,238,0.2)]' };
             case DriverType.AESTHETIC: return { text: 'text-rose-400', bg: 'bg-rose-500', border: 'border-rose-500', shadow: 'shadow-[0_0_20px_rgba(244,63,94,0.2)]' };
             case DriverType.EXPERIMENTAL: return { text: 'text-purple-400', bg: 'bg-purple-500', border: 'border-purple-500', shadow: 'shadow-[0_0_20px_rgba(168,85,247,0.2)]' };
             case DriverType.TRAILER: return { text: 'text-orange-400', bg: 'bg-orange-500', border: 'border-orange-500', shadow: 'shadow-[0_0_20px_rgba(251,146,60,0.2)]' };

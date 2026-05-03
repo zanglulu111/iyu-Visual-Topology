@@ -66,6 +66,8 @@ interface PhilosophyCodexPageProps {
   onSectionChange?: (section: CodexSection) => void;
   initialDetailTab?: DetailTab;
   onDetailTabChange?: (tab: DetailTab) => void;
+  isAdmin?: boolean;
+  onOpenPosterWorkspace?: () => void;
 }
 
 const ConceptCard = React.memo(({ concept, onClick, activeDictionary, theme, themeColors }: any) => {
@@ -134,7 +136,9 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
   onDictionaryChange,
   onSectionChange,
   initialDetailTab,
-  onDetailTabChange
+  onDetailTabChange,
+  isAdmin = false,
+  onOpenPosterWorkspace
 }) => {
   const { theme, toggleTheme } = useTheme();
   const [activeSection, setActiveSection] = useState<CodexSection>(initialSection || 'CONCEPTS');
@@ -279,7 +283,7 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
   const themeColors = {
     accent: getThemeTextColor(),
     border: getThemeBorderColor(),
-    bg: (theme === 'retro') ? 'bg-[#8B261D]' : (activeDictionary === 'MIST' ? 'bg-[#9CA3AF]' : activeDictionary === 'MARX' ? 'bg-[#FF7675]' : activeDictionary === 'HEGEL' ? 'bg-[#D4AF37]' : activeDictionary === 'LACAN' ? 'bg-[#22D3EE]' : activeDictionary === 'ZIZEK' ? 'bg-[#C084FC]' : 'bg-white'),
+    bg: (theme === 'retro') ? 'bg-[#8B261D]' : (activeDictionary === 'MIST' ? 'bg-[#9CA3AF]' : activeDictionary === 'MARX' ? 'bg-[#FF7675]' : activeDictionary === 'HEGEL' ? 'bg-[#D4AF37]' : activeDictionary === 'LACAN' ? 'bg-[#D4AF37]' : activeDictionary === 'ZIZEK' ? 'bg-[#C084FC]' : 'bg-white'),
   };
   const dictionaries = {
     MIST: { name: '迷雾学派 (Mist)', data: MIST_INDEX, icon: <Sparkles size={16} /> },
@@ -1603,22 +1607,48 @@ const renderDetailView = () => {
         ))}
       </div>
 
-      {renderInPlace && onToggleExpand && (
-        <button
-          onClick={onToggleExpand}
-          className={`flex items-center gap-2 px-4 py-1.5 rounded-full border transition-all duration-300 group shrink-0 ${theme === 'retro'
-              ? 'border-black/10 hover:border-black/30 text-black/60 hover:text-black hover:bg-black/5'
-              : 'border-white/10 hover:border-white/30 text-zinc-400 hover:text-white bg-white/5'
-            }`}
-        >
-          <span className="text-[10px] font-bold uppercase tracking-widest">
-            {isExpanded ? (lang === 'CN' ? '收起侧边栏' : 'COLLAPSE') : (lang === 'CN' ? '展开全屏' : 'EXPAND')}
-          </span>
-          <div className={`transition-transform duration-500 ${isExpanded ? '' : 'rotate-180'}`}>
-            <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
-          </div>
-        </button>
-      )}
+      <div className="flex items-center gap-3 shrink-0">
+        {isAdmin && onOpenPosterWorkspace && (
+          <button
+            onClick={onOpenPosterWorkspace}
+            className={`flex items-center gap-2 px-4 py-1.5 h-10 rounded-md border transition-all duration-300 group shrink-0 ${theme === 'retro'
+                ? 'border-[#8B261D]/20 bg-[#8B261D]/5 text-[#8B261D] hover:border-[#8B261D]/45 hover:bg-[#8B261D]/10'
+                : 'border-[#D4AF37]/20 bg-[#D4AF37]/5 text-[#FFD700] hover:border-[#D4AF37]/45 hover:bg-[#D4AF37]/10'
+              }`}
+            title={lang === 'CN' ? '管理员：打开哲学家海报发布工作台' : 'Admin: open philosopher poster publishing desk'}
+          >
+            <Database size={14} className="shrink-0" />
+            <span className="hidden sm:inline text-[10px] font-bold uppercase tracking-[0.2em]">
+              {lang === 'CN' ? '发布工作台' : 'Publishing Desk'}
+            </span>
+            <span className={`hidden xl:flex items-center gap-1 text-[8px] font-black uppercase tracking-[0.18em] px-2 py-0.5 rounded-full border ${theme === 'retro'
+                ? 'border-[#8B261D]/20 bg-white/30 text-[#8B261D]/70'
+                : 'border-[#D4AF37]/20 bg-black/20 text-[#FFD700]/70'
+              }`}
+            >
+              <Lock size={9} />
+              Admin
+            </span>
+          </button>
+        )}
+
+        {renderInPlace && onToggleExpand && (
+          <button
+            onClick={onToggleExpand}
+            className={`flex items-center gap-2 px-4 py-1.5 rounded-full border transition-all duration-300 group shrink-0 ${theme === 'retro'
+                ? 'border-black/10 hover:border-black/30 text-black/60 hover:text-black hover:bg-black/5'
+                : 'border-white/10 hover:border-white/30 text-zinc-400 hover:text-white bg-white/5'
+              }`}
+          >
+            <span className="text-[10px] font-bold uppercase tracking-widest">
+              {isExpanded ? (lang === 'CN' ? '收起侧边栏' : 'COLLAPSE') : (lang === 'CN' ? '展开全屏' : 'EXPAND')}
+            </span>
+            <div className={`transition-transform duration-500 ${isExpanded ? '' : 'rotate-180'}`}>
+              <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+            </div>
+          </button>
+        )}
+      </div>
     </nav>
 
     {/* CONTENT AREA */}

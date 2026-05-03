@@ -11,12 +11,16 @@
       theme: {
         extend: {
           fontFamily: {
-            sans: ['Inter', '"Noto Serif SC"', '"LXGW WenKai"', '"ZCOOL XiaoWei"', 'sans-serif'],
+            sans: ['Inter', '"Noto Serif SC"', '"Noto Sans SC"', '"LXGW WenKai"', '"ZCOOL XiaoWei"', 'sans-serif'],
             serif: ['"Noto Serif SC"', '"Playfair Display"', '"LXGW WenKai"', '"Ma Shan Zheng"', 'serif'],
           },
           colors: {
-            'luxury-black': '#0a0a0a',
-            'luxury-panel': '#121212',
+            'luxury-black': 'var(--surface-0)',
+            'luxury-panel': 'var(--surface-1)',
+            'mist-surface': 'var(--surface-2)',
+            'mist-line': 'var(--border-main)',
+            'mist-ink': 'var(--text-main)',
+            'mist-muted': 'var(--text-muted)',
             'gold-primary': 'var(--gold-primary)',
             'gold-dim': 'var(--gold-dim)',
             'col-context': 'var(--mist-cyan)', 
@@ -42,7 +46,7 @@
       padding: 0;
       overflow: hidden;
       background-color: #050505;
-      color: #ffffff;
+      color: #E6E6E6;
       scrollbar-width: none;
     }
     ::-webkit-scrollbar {
@@ -55,6 +59,7 @@
   </style>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="icon" href="/brand/mist-school-logo-simple-mark.svg" type="image/svg+xml">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;500;600;700;900&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=ZCOOL+XiaoWei&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.1.0/style.css" />
   <!-- KaTeX for Lacan Mathemes -->
