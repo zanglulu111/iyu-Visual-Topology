@@ -21,25 +21,22 @@ Story = M0 {[(M1↔M2↔M3)/M4]×M5} =>Act M6 -> (M7A◇M7B) ↺ M1'
 
 ## 二、权威入口
 
-- 项目地图：`PROJECT_MAP.md`
-- 核心叙事引擎最终创作理论总纲：`codex-drafts/mist/00_迷雾学派核心叙事引擎最终创作理论总纲.md`
-- M7A/M7B 词库迁移与数据层书写规范：`codex-drafts/mist/00_迷雾学派M7A-M7B词库迁移与数据层书写规范.md`
+- 项目地图：`docs/PROJECT_MAP.md`
+- 文档索引：`docs/README.md`
+- 核心理论总纲：`codex-drafts/mist/00_总纲与宪法/00_01_理论总纲/00_01_迷雾学派完整理论总纲.md`
+- 核心叙事引擎最终总纲：`codex-drafts/mist/00_总纲与宪法/00_02_核心公式与叙事宪法/00_02_核心叙事引擎最终总纲.md`
+- M7A/M7B 词库迁移与数据层书写规范：`docs/archive/mist-history/99_归档_历史版本与迁移记录/2026-04-28_非公开理论文档归档/00_迷雾学派M7A-M7B词库迁移与数据层书写规范.md`
 - 项目简介：`README.md`
-- 理论总纲：`docs/MIST_SCHOOL_THEORY_OVERVIEW.md`
-- 词条写作指南：`docs/guides/ADD_PHILOSOPHY_CODEX_GUIDE.md`
 - 草稿格式说明：`codex-drafts/_模板说明.md`
-- 哲学数据加载说明：`docs/PHILOSOPHY_LOADER_GUIDE.md`
-- 快速命令参考：`docs/QUICK_REFERENCE.md`
 
 当文档之间出现冲突时，优先级建议如下：
 
-1. `PROJECT_MAP.md`
-2. `codex-drafts/mist/00_迷雾学派核心叙事引擎最终创作理论总纲.md`
-3. `codex-drafts/mist/00_迷雾学派M7A-M7B词库迁移与数据层书写规范.md`
-4. `docs/MIST_SCHOOL_THEORY_OVERVIEW.md`
-5. `docs/guides/ADD_PHILOSOPHY_CODEX_GUIDE.md`
-6. 具体代码与数据文件
-7. 归档文档、scratchpad、历史报告
+1. `docs/PROJECT_MAP.md`
+2. `codex-drafts/mist/00_总纲与宪法/00_01_理论总纲/00_01_迷雾学派完整理论总纲.md`
+3. `codex-drafts/mist/00_总纲与宪法/00_02_核心公式与叙事宪法/00_02_核心叙事引擎最终总纲.md`
+4. 具体代码与数据文件
+5. `.agents/skills/` 中的写作规范
+6. 归档文档、scratchpad、历史报告
 
 ## 三、主目录职责
 
@@ -54,6 +51,9 @@ Story = M0 {[(M1↔M2↔M3)/M4]×M5} =>Act M6 -> (M7A◇M7B) ↺ M1'
 | `codex-drafts/` | 哲学辞典 Markdown 草稿源。新增和编辑词条时优先改这里。 |
 | `public/data/codex/` | 前端按需读取的词条 JSON 输出。通常由转换脚本生成。 |
 | `docs/` | 理论分析、维护指南、架构说明、历史记录与工作草稿。 |
+| `docs/archive/` | 不属于当前运行主线的旧计划、旧原型、临时实验和历史材料。 |
+| `docs/database/` | 需要人工执行或迁移参考的数据库 SQL。 |
+| `docs/reports/` | 本地检查报告、历史错误输出和整理记录。 |
 | `.agents/skills/` | 本项目专用 Codex 技能，规定迷雾引擎词条和哲学词条写作格式。 |
 | `scripts/` | 数据转换、批处理、迁移和维护脚本。 |
 | `contexts/` | React Context，如主题和设置状态。 |
@@ -61,6 +61,7 @@ Story = M0 {[(M1↔M2↔M3)/M4]×M5} =>Act M6 -> (M7A◇M7B) ↺ M1'
 | `api/` | Vercel/Node 风格的辅助 API，当前主要用于 R2 文件操作。 |
 | `src/` | 新增配置系统的局部模块，目前与根目录结构并行存在。 |
 | `supabase/` | Supabase 本地配置。 |
+| `.private/` | 本机私有配置与旧工具本地设置，不进入版本库。 |
 
 ## 四、应用与生成器主线
 
@@ -123,7 +124,7 @@ Story = M0 {[(M1↔M2↔M3)/M4]×M5} =>Act M6 -> (M7A◇M7B) ↺ M1'
 | `M7A` | 象征裁决，回溯性缝合点。 |
 | `M7B` | 实在余痕，象征裁决之后仍不能被意义消化的存在性残余。 |
 
-维护 M7A/M7B 数据时，以 `codex-drafts/mist/00_迷雾学派M7A-M7B词库迁移与数据层书写规范.md` 为准：`m7a/` 只写象征裁决，`m7/` 虽保留旧导出名 `M7_OUTCOMES`，但语义上只写实在余痕。
+维护 M7A/M7B 数据时，以 `docs/archive/mist-history/99_归档_历史版本与迁移记录/2026-04-28_非公开理论文档归档/00_迷雾学派M7A-M7B词库迁移与数据层书写规范.md` 为迁移参考：`m7a/` 只写象征裁决，`m7/` 虽保留旧导出名 `M7_OUTCOMES`，但语义上只写实在余痕。
 
 ### 2. 皮层：SUR1-SUR10 + SUR-END
 
@@ -246,7 +247,8 @@ scripts/codex-convert.cjs
 - `data/engine_surface/SUR6/_archive/`
 - `docs/archive/`
 - `docs/scratchpad_*.md`
-- `.claude/plans/`
+- `docs/archive/claude-plans/`
+- `docs/archive/legacy-web/`
 
 当前代码注释中已明确：
 
@@ -260,16 +262,19 @@ scripts/codex-convert.cjs
 - 若归档 TypeScript 文件影响类型检查，应通过 `tsconfig` 排除或迁移为非编译资产，而不是重新激活旧逻辑。
 - 新增数据时优先接入新版 `engine_core/`、`engine_surface/`、`engine_sv/` 主线。
 
-## 九、当前工程健康状况
+## 九、当前整理状态
 
-最近一次检查发现：
+2026-05-03 整理后：
 
-- git 工作区包含 M7A/M7B、SUR5/SUR6/SUR9/SUR-END 与权威总纲相关改动，待统一审阅或提交。
-- `npm run lint` 当前未通过。
-- 主要类型错误来自归档目录旧引用，以及部分 generator 与 `WorldLawConfig` 的类型不一致。
-- `README.md` 曾引用多个已经不存在的文档入口，本地图谱建立后应以本文件和现存指南为准。
+- 根目录保留应用入口、配置、源码主线和必须位于根目录的工具文件。
+- `PROJECT_MAP.md` 已移入 `docs/PROJECT_MAP.md`。
+- 旧静态原型 `codex-web/` 已移入 `docs/archive/legacy-web/codex-web/`。
+- 旧 Claude 计划已移入 `docs/archive/claude-plans/`。
+- 手工 SQL 已移入 `docs/database/`。
+- 旧类型错误报告已移入 `docs/reports/`。
+- 本机私有工具配置已移入 `.private/`。
 
-这些问题不影响阅读和词条写作，但会影响正式开发、构建前验证和长期维护。
+`dist/`、`node_modules/`、`.vercel/`、`.agents/resources/`、`.agents/.python-deps/` 和 `outputs/` 是可再生或本地生成内容，默认不作为版本库主线维护。
 
 ## 十、推荐协作流程
 
@@ -284,7 +289,7 @@ scripts/codex-convert.cjs
 ### 2. 写迷雾引擎词条
 
 1. 使用 `mist-engine-lexicon`。
-2. 查阅 `docs/MIST_SCHOOL_THEORY_OVERVIEW.md`。
+2. 查阅 `codex-drafts/mist/00_总纲与宪法/00_01_理论总纲/00_01_迷雾学派完整理论总纲.md`。
 3. 对照 `data/engine_core/` 或 `data/engine_surface/` 的真实参数族群。
 4. 保持 M 轴与 SUR 轴正交，不把物质描述直接塞入骨层逻辑。
 

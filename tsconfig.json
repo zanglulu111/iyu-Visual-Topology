@@ -27,5 +27,11 @@
     "allowImportingTsExtensions": true,
     "noEmit": true,
     "forceConsistentCasingInFileNames": true
-  }
+  },
+  "exclude": [
+    "dist",
+    "node_modules",
+    "docs/archive",
+    "data/**/_archive/**"
+  ]
 }

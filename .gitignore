@@ -30,6 +30,9 @@ dist-ssr
 .vercel
 .env*.local
 philosophy-kb/
+.private/*
+!.private/README.md
+.claude/settings.local.json
 
 # Local agent resources and generated media
 .agents/resources/

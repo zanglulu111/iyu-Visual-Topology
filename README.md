@@ -8,7 +8,7 @@
 
 ## 快速开始
 
-1. **核心引导**：请首选阅读 [PROJECT_MAP.md](./PROJECT_MAP.md)。
+1. **核心引导**：请首选阅读 [docs/PROJECT_MAP.md](./docs/PROJECT_MAP.md)。
 2. **本地运行**：
    - 安装依赖：`npm install`
    - 配置环境：设置 `GEMINI_API_KEY` 于 `.env.local`
@@ -24,17 +24,18 @@
 
 ### 权威入口
 
-- [项目地图](./PROJECT_MAP.md) - 项目结构、目录职责、数据流、废弃边界与协作流程
-- [迷雾学派理论总纲](./docs/MIST_SCHOOL_THEORY_OVERVIEW.md) - 理论底盘与叙事公式
-- [词条补充与撰写指南](./docs/guides/ADD_PHILOSOPHY_CODEX_GUIDE.md) - 新词条填充必读
-- [哲学数据加载说明](./docs/PHILOSOPHY_LOADER_GUIDE.md) - 前端辞典加载与缓存机制
+- [项目地图](./docs/PROJECT_MAP.md) - 项目结构、目录职责、数据流、废弃边界与协作流程
+- [文档索引](./docs/README.md) - 文档、归档、数据库脚本与报告入口
+- [迷雾学派理论总纲](./codex-drafts/mist/00_总纲与宪法/00_01_理论总纲/00_01_迷雾学派完整理论总纲.md) - 理论底盘与叙事公式
+- [核心叙事引擎总纲](./codex-drafts/mist/00_总纲与宪法/00_02_核心公式与叙事宪法/00_02_核心叙事引擎最终总纲.md) - M0-M7 生成公式与叙事宪法
 - [草稿格式说明](./codex-drafts/_模板说明.md) - Markdown 到 JSON 的写作格式
 
 ### 快速参考
 
-- [常用命令参考](./docs/QUICK_REFERENCE.md)
-- [配置使用指南](./docs/guides/CONFIG_USAGE_GUIDE.md)
-- [哲学数据指南](./docs/guides/PHILOSOPHY_DATA_GUIDE.md)
+- 代码入口：`App.tsx`、`index.tsx`、`vite.config.ts`
+- 数据入口：`data/`、`public/data/codex/`
+- 草稿入口：`codex-drafts/`
+- 项目技能：`.agents/skills/`
 
 ### 历史记录与存档
 

@@ -89,18 +89,27 @@ const determineAestheticMode = (fieldState: NarrativeFieldState, subjectType: Su
     return 'SCENE';
 };
 
+const getWorldLawReadout = (gravity?: number) => {
+  const level = gravity ?? 3;
+  return {
+    physics: level <= 2 ? 'STRICT' : level <= 4 ? 'BALANCED' : 'DREAM',
+    context: level <= 3 ? 'PURE' : 'FUSION'
+  };
+};
+
 export const buildAestheticPrompt = (
   duration: string,
   fieldState: NarrativeFieldState,
   visionInput: string = "",
   visionImage: string | null = null,
   subjectType: SubjectType = 'HUMAN',
-  worldLaw: WorldLawConfig = { physics: 'STRICT', context: 'PURE' },
+  worldLaw: WorldLawConfig = { gravity: 1 },
   colorPalette: string[] = [] // ADDED PALETTE
 ): { text: string, images: string[] } => {
 
   const fullDNA = compileFullDNA(fieldState);
   const aestheticMode = determineAestheticMode(fieldState, subjectType);
+  const worldLawReadout = getWorldLawReadout(worldLaw.gravity);
 
   let modeInstruction = "";
 
@@ -159,8 +168,8 @@ ${paletteInstruction}
 ${fullDNA}
 
 ## ⚖️ 世界法则设定
-*   物理法则: ${worldLaw.physics === 'STRICT' ? '严守现实 (Physics Apply)' : '梦境逻辑 (Dream Logic)'}
-*   语境法则: ${worldLaw.context === 'PURE' ? '类型纯化 (Purify)' : '美学融合 (Mashup)'}
+*   物理法则: ${worldLawReadout.physics === 'STRICT' ? '严守现实 (Physics Apply)' : worldLawReadout.physics === 'BALANCED' ? '现实修补 (Logic Bridge)' : '梦境逻辑 (Dream Logic)'}
+*   语境法则: ${worldLawReadout.context === 'PURE' ? '类型纯化 (Purify)' : '美学融合 (Mashup)'}
 
 ${modeInstruction}
 
@@ -272,13 +281,14 @@ export const buildAestheticBiblePrompt = (
     colorPalette: string[] = [] // ADDED PALETTE
 ): string => {
     const dnaContext = fieldState ? compileFullDNA(fieldState) : "";
+    const worldLawReadout = getWorldLawReadout(worldLaw?.gravity);
     
     let worldLawInstruction = "";
     if (worldLaw) {
          worldLawInstruction = `
-         ## ⚖️ WORLD LAW (PHYSICS & CONTEXT)
-         *   **PHYSICS:** ${worldLaw.physics === 'STRICT' ? 'STRICT REALISM' : 'DREAM LOGIC (Surreal allowed)'}
-         *   **CONTEXT:** ${worldLaw.context === 'PURE' ? 'PURE ERA (Strict adherence)' : 'FUSION (Mix & Match)'}
+        ## ⚖️ WORLD LAW (PHYSICS & CONTEXT)
+        *   **PHYSICS:** ${worldLawReadout.physics === 'STRICT' ? 'STRICT REALISM' : worldLawReadout.physics === 'BALANCED' ? 'RATIONALIZED REALISM' : 'DREAM LOGIC (Surreal allowed)'}
+        *   **CONTEXT:** ${worldLawReadout.context === 'PURE' ? 'PURE ERA (Strict adherence)' : 'FUSION (Mix & Match)'}
          `;
     }
 

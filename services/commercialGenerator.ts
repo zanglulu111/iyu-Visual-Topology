@@ -71,6 +71,14 @@ const COMM_SUTURE_PATHS = `
 *   **Keyword:** **"POWER" (权力)**
 `;
 
+const getWorldLawReadout = (gravity?: number) => {
+  const level = gravity ?? 3;
+  return {
+    physics: level <= 2 ? 'STRICT' : level <= 4 ? 'BALANCED' : 'DREAM',
+    context: level <= 3 ? 'PURE' : 'FUSION'
+  };
+};
+
 export const buildCommercialPrompt = (
   duration: string,
   fieldState: NarrativeFieldState,
@@ -80,6 +88,7 @@ export const buildCommercialPrompt = (
 ): { text: string, images: string[] } => {
 
   const fullContext = buildContext(fieldState);
+  const worldLawReadout = getWorldLawReadout(worldLaw.gravity);
 
   // VISION ANCHOR LOGIC
   let visionAnchorInstruction = "";
@@ -89,14 +98,16 @@ export const buildCommercialPrompt = (
 
   // WORLD LAW PROTOCOLS
   let physicsInstruction = "";
-  if (worldLaw.physics === 'STRICT') {
+  if (worldLawReadout.physics === 'STRICT') {
       physicsInstruction = `**[PHYSICS: STRICT] = Literalism.** Show the product as it is. Focus on mechanics and ingredients.`;
   } else {
-      physicsInstruction = `**[PHYSICS: UNBOUND] = Metaphor.** The product can defy gravity or transform reality to show its effect.`;
+      physicsInstruction = worldLawReadout.physics === 'BALANCED'
+        ? `**[PHYSICS: BALANCED] = Rationalized Reality.** Show the product within a believable world, but allow one clear poetic bridge to its effect.`
+        : `**[PHYSICS: UNBOUND] = Metaphor.** The product can defy gravity or transform reality to show its effect.`;
   }
 
   let contextInstruction = "";
-  if (worldLaw.context === 'PURE') {
+  if (worldLawReadout.context === 'PURE') {
       contextInstruction = `**[CONTEXT: IMMERSION] = Diegetic.** The story happens inside a closed world. Cinematic.`;
   } else {
       contextInstruction = `**[CONTEXT: META] = Non-Diegetic.** Break the 4th wall. Acknowledge it is an ad.`;
@@ -165,10 +176,11 @@ export const buildCommercialBiblePrompt = (
     
     let worldLawInstruction = "";
     if (worldLaw) {
+         const worldLawReadout = getWorldLawReadout(worldLaw.gravity);
          worldLawInstruction = `
          ## ⚖️ WORLD LAW (PHYSICS & CONTEXT)
-         *   **PHYSICS:** ${worldLaw.physics === 'STRICT' ? 'LITERALISM (Focus on physical reality of product)' : 'METAPHOR (Focus on sensation/dream logic)'}
-         *   **CONTEXT:** ${worldLaw.context === 'PURE' ? 'IMMERSION (Diegetic storytelling)' : 'META-AWARE (Breaking the 4th wall)'}
+         *   **PHYSICS:** ${worldLawReadout.physics === 'STRICT' ? 'LITERALISM (Focus on physical reality of product)' : worldLawReadout.physics === 'BALANCED' ? 'BALANCED REALITY (Physical world plus one poetic bridge)' : 'METAPHOR (Focus on sensation/dream logic)'}
+         *   **CONTEXT:** ${worldLawReadout.context === 'PURE' ? 'IMMERSION (Diegetic storytelling)' : 'META-AWARE (Breaking the 4th wall)'}
          `;
     }
 
