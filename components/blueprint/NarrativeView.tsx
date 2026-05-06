@@ -5,7 +5,7 @@ import { Star, FileText, PenTool, Globe, Palette, Languages, Copy, Check, Wand2,
 import { CopyButton, SimpleTextRenderer, ProcessingTimer, MarkdownRenderer } from '../SharedBlueprintComponents';
 import { modifyNarrativeWithAI, ModifySectionRequest, ModifyInsertionRequest } from '../../services/geminiService';
 import { buildRefactorPrompt } from '../../services/refactorPrompt';
-import { STYLE_MATRIX } from '../../data/style_matrix';
+import { STYLE_MATRIX } from '../../data/narrative/style_matrix';
 import { NarrativeLibraryModal } from '../NarrativeLibraryModal';
 import { LibraryCategoryDef } from '../../types';
 import { AdminXRayButton } from '../XRayInspector';

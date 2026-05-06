@@ -8,7 +8,7 @@
 import { NarrativeFieldState, WorldLawConfig } from '../types';
 import { findItemDetails, findItemFull } from './dataRegistry';
 import { NARRATIVE_ENGINE_BLOCKS } from '../data/engine_core/narrative_engine';
-import { ALL_SKIN_BLOCKS } from '../data/skin_libraries';
+import { ALL_SKIN_BLOCKS } from '../data/narrative/skin_libraries';
 import { SV2_DATA } from '../data/engine_sv/SV2';
 import { getVisionAnchorProtocol } from '../data/engine_core/narrative_protocols';
 import { runMistEngine } from '../engine/mist_calculator';

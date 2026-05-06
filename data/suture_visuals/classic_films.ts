@@ -1,4 +1,4 @@
-import type { SutureStyleItem } from '../suture_styles';
+import type { SutureStyleItem } from '../suture/styles';
 import { CLASSIC_FILM_CASES } from '../suture_film_cases';
 
 // Deprecated compatibility export.

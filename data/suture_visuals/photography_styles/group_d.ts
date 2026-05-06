@@ -1,4 +1,4 @@
-import type { SutureStyleItem } from '../../suture_styles';
+import type { SutureStyleItem } from '../../suture/styles';
 
 const PHOTOGRAPHY_GROUP_D = '6D. 摄影风格：摆拍电影感、风景时间与社会景观';
 

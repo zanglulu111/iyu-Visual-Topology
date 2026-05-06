@@ -1,4 +1,4 @@
-import type { SutureStyleItem } from '../../suture_styles';
+import type { SutureStyleItem } from '../../suture/styles';
 
 const ANIMATION_DIRECTOR_GROUP_B = '3B. 动画导演：日本类型动画、肢体表演与机械动能';
 

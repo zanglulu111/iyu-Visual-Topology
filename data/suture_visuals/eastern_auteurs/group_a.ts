@@ -1,4 +1,4 @@
-import type { SutureStyleItem } from '../../suture_styles';
+import type { SutureStyleItem } from '../../suture/styles';
 
 const EASTERN_AUTEUR_GROUP_A = '2A. 东方电影作者：现代主义、伦理日常与时间凝视';
 

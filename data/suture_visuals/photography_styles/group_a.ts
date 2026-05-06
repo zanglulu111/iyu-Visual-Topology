@@ -1,4 +1,4 @@
-import type { SutureStyleItem } from '../../suture_styles';
+import type { SutureStyleItem } from '../../suture/styles';
 
 const PHOTOGRAPHY_GROUP_A = '6A. 摄影风格：肖像神话、时尚权力与棚拍控制';
 

@@ -1,4 +1,4 @@
-import type { SutureStyleItem } from '../../suture_styles';
+import type { SutureStyleItem } from '../../suture/styles';
 
 const EASTERN_AUTEUR_GROUP_B = '2B. 东方电影作者：类型秩序、暴力结构与青春感知';
 

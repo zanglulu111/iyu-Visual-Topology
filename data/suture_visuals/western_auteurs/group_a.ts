@@ -1,4 +1,4 @@
-import type { SutureStyleItem } from '../../suture_styles';
+import type { SutureStyleItem } from '../../suture/styles';
 
 const WESTERN_AUTEURS_GROUP_A = '1A. 西方电影作者：经典控制、时间结构与现代类型';
 

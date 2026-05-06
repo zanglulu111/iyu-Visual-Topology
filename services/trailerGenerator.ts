@@ -1,7 +1,7 @@
 
 import { NarrativeFieldState } from '../types';
-import { TRAILER_ENGINE_BLOCKS } from '../data/trailer_data';
-import { TRAILER_SKIN_BLOCKS } from '../data/trailer_skin';
+import { TRAILER_ENGINE_BLOCKS } from '../data/aesthetic/trailer_data';
+import { TRAILER_SKIN_BLOCKS } from '../data/aesthetic/trailer_skin';
 import { findItemDetails } from './dataRegistry';
 import { getVisionAnchorProtocol } from '../data/engine_core/narrative_protocols';
 

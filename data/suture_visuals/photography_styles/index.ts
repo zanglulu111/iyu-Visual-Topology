@@ -1,4 +1,4 @@
-import type { SutureStyleItem } from '../../suture_styles';
+import type { SutureStyleItem } from '../../suture/styles';
 import { PHOTOGRAPHY_GROUP_A_STYLES } from './group_a';
 import { PHOTOGRAPHY_GROUP_B_STYLES } from './group_b';
 import { PHOTOGRAPHY_GROUP_C_STYLES } from './group_c';

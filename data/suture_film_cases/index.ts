@@ -1,4 +1,4 @@
-import type { SutureStyleItem } from '../suture_styles';
+import type { SutureStyleItem } from '../suture/styles';
 import { NO_FILM_CASE } from './_helpers';
 import { FILM_CASE_FEATURE_IDENTITY } from './group_feature_identity';
 import { FILM_CASE_FEATURE_ACTION_MEMORY } from './group_feature_action_memory';

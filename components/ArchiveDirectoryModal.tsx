@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { ARCHIVE_CASES } from './archiveCasesData';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Activity, ArrowUpRight, ChevronLeft, ChevronRight, Eye, FileSearch } from 'lucide-react';
+import { ARCHIVE_CASES, ArchiveCategory } from './archiveCasesData';
 import { ArchiveDetailModal } from './ArchiveDetailModal';
 import { useTheme } from '../contexts/ThemeContext';
-import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, Globe, Instagram, Twitter, Mail } from 'lucide-react';
 import { soundManager } from '../utils/soundManager';
 
 interface ArchiveDirectoryModalProps {
@@ -12,544 +12,1465 @@ interface ArchiveDirectoryModalProps {
     isFullScreen?: boolean;
 }
 
+const MIN_WHEEL_SIDE_PADDING = 28;
+const WHEEL_GESTURE_IDLE_MS = 260;
+const WHEEL_AXIS_SWITCH_RATIO = 2.35;
+const WHEEL_SCROLL_MULTIPLIER = 1.18;
+const WHEEL_SMALL_GESTURE_HOLD_MS = 260;
+
+const categoryMeta: Record<ArchiveCategory, {
+    labelCn: string;
+    labelEn: string;
+    code: string;
+    accent: string;
+}> = {
+    ALL: {
+        labelCn: '全部',
+        labelEn: 'All',
+        code: 'ALL',
+        accent: '#f2f2ec'
+    },
+    NEUROSIS: {
+        labelCn: '神经症',
+        labelEn: 'Neurosis',
+        code: 'NEU',
+        accent: '#b73a36'
+    },
+    PSYCHOSIS: {
+        labelCn: '精神病',
+        labelEn: 'Psychosis',
+        code: 'PSY',
+        accent: '#8f2e2d'
+    },
+    PERVERSION: {
+        labelCn: '倒错',
+        labelEn: 'Perversion',
+        code: 'PER',
+        accent: '#d8d4cc'
+    },
+    AUTISM: {
+        labelCn: '孤独症',
+        labelEn: 'Autism',
+        code: 'AUT',
+        accent: '#a9a9a2'
+    }
+};
+
+const categories: ArchiveCategory[] = ['ALL', 'NEUROSIS', 'PSYCHOSIS', 'PERVERSION', 'AUTISM'];
+
 export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
     isOpen,
-    onClose,
     lang
 }) => {
     const { theme } = useTheme();
+    const [selectedCategory, setSelectedCategory] = useState<ArchiveCategory>('ALL');
+    const [activeCaseId, setActiveCaseId] = useState<string | null>(null);
     const [selectedCaseId, setSelectedCaseId] = useState<string | null>(null);
+    const [hoverArmed, setHoverArmed] = useState(false);
     const [hasEntered, setHasEntered] = useState(false);
-    const scrollContainerRef = React.useRef<HTMLDivElement>(null);
-    const contentRef = React.useRef<HTMLDivElement>(null);
-    const lastScrollPos = React.useRef(0);
-    const activityRef = React.useRef(0);
-    const [openingId, setOpeningId] = useState<string | null>(null);
-    const [isTransitioning, setIsTransitioning] = useState(false);
-    const targetScrollRef = React.useRef(0);
-    // Audio Refs
-    const lastTickIndex = React.useRef(-1);
-    const scrollPlayingRef = React.useRef(false);
-    const cardsRef = React.useRef<HTMLElement[]>([]);
-    const viewportWidthRef = React.useRef(0);
-    const lastInternalScrollPos = React.useRef(0);
+    const [trackEntered, setTrackEntered] = useState(false);
+    const [centerIndex, setCenterIndex] = useState(0);
+    const [centerPadding, setCenterPadding] = useState(MIN_WHEEL_SIDE_PADDING);
 
-    const items = ARCHIVE_CASES;
-    const cardWidth = 110;
-    const winWidth = typeof window !== 'undefined' ? window.innerWidth : 1200;
-    const centerPadding = winWidth / 2 - cardWidth / 2;
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const archiveRootRef = useRef<HTMLDivElement>(null);
+    const targetScrollRef = useRef(0);
+    const lastScrollPos = useRef(0);
+    const activityRef = useRef(0);
+    const visualActivityRef = useRef(0);
+    const viewportWidthRef = useRef(0);
+    const cardsRef = useRef<HTMLElement[]>([]);
+    const lastTickIndex = useRef(-1);
+    const activeCaseIdRef = useRef<string | null>(null);
+    const scrollPlayingRef = useRef(false);
+    const wheelGestureRef = useRef<{ axis: 'x' | 'y' | null; lastAt: number }>({ axis: null, lastAt: 0 });
+    const lastWheelInputAtRef = useRef(0);
 
-    // Initial entrance effect - Staggered
+    const filteredCases = useMemo(() => {
+        return selectedCategory === 'ALL'
+            ? ARCHIVE_CASES
+            : ARCHIVE_CASES.filter(item => item.category === selectedCategory);
+    }, [selectedCategory]);
+
+    const previewCase = filteredCases.find(item => item.id === activeCaseId) || filteredCases[centerIndex] || filteredCases[0];
+    const selectedCase = ARCHIVE_CASES.find(item => item.id === selectedCaseId) || null;
+
     useEffect(() => {
-        if (isOpen) {
-            const timer = setTimeout(() => {
-                setHasEntered(true);
-            }, 100);
-            return () => clearTimeout(timer);
-        } else {
-            setHasEntered(false);
-        }
-    }, [isOpen]);
+        activeCaseIdRef.current = activeCaseId;
+    }, [activeCaseId]);
 
-    // Scroll dismiss removed to prevent unstable feeling
-    const handleScrollDismiss = useCallback((e: WheelEvent) => { }, [openingId]);
+    function getCardStep() {
+        const cards = cardsRef.current;
+        if (cards.length >= 2) {
+            return Math.max(240, cards[1].offsetLeft - cards[0].offsetLeft);
+        }
+
+        const firstCard = scrollContainerRef.current?.querySelector('.subject-wheel-item') as HTMLElement | null;
+        return firstCard ? firstCard.offsetWidth + 24 : 340;
+    }
+
+    useEffect(() => {
+        if (!isOpen) return;
+
+        soundManager.preload('archiveScroll', '/audio/archive-scroll.mp3');
+        soundManager.preload('archiveHover', '/audio/archive-hover.mp3');
+        const enterSoundReady = soundManager.preload('archiveEnter', '/audio/confirm-01.mp3');
+
+        setTrackEntered(false);
+        let cancelled = false;
+        const entranceTimer = window.setTimeout(() => {
+            setHasEntered(true);
+            setTrackEntered(true);
+            enterSoundReady.then(() => {
+                if (!cancelled) {
+                    soundManager.play('archiveEnter', { volume: 0.34, stopExisting: true });
+                }
+            });
+        }, 160);
+
+        return () => {
+            cancelled = true;
+            window.clearTimeout(entranceTimer);
+            soundManager.stop('archiveScroll', true);
+            soundManager.stop('archiveEnter', true);
+            scrollPlayingRef.current = false;
+            setHasEntered(false);
+            setTrackEntered(false);
+        };
+    }, [isOpen]);
 
     useEffect(() => {
         const container = scrollContainerRef.current;
         if (!container) return;
 
-        const updateViewport = () => {
+        cardsRef.current = [];
+        targetScrollRef.current = 0;
+        lastScrollPos.current = 0;
+        activityRef.current = 0;
+        visualActivityRef.current = 0;
+        lastWheelInputAtRef.current = 0;
+        lastTickIndex.current = -1;
+        wheelGestureRef.current = { axis: null, lastAt: 0 };
+        setCenterIndex(0);
+        setActiveCaseId(null);
+        setHoverArmed(false);
+        container.scrollLeft = 0;
+
+        const updateSizing = () => {
             viewportWidthRef.current = container.offsetWidth;
-        };
-        updateViewport();
-        window.addEventListener('resize', updateViewport);
-
-        // Remove scroll event listener as we'll handle sync in the animation loop
-        // to avoid conflicts with our custom momentum logic.
-
-        const handleWheel = (e: WheelEvent) => {
-            // Prevent interference if user is reading a selected case
-            if (selectedCaseId) return;
-
-            if (openingId) {
-                // Pin the expanded card to the right and prevent scrolling to ensure stability
-                e.preventDefault();
-                return;
-            }
-
-            // Determine the dominant scroll direction (some users scroll vertically, trackpads horizontally)
-            const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-
-            // Apply delta directly to targetScrollRef for consistent momentum,
-            // regardless of whether it's a discrete mouse wheel or continuous trackpad
-            targetScrollRef.current += delta;
-            e.preventDefault();
+            const firstCard = container.querySelector('.subject-wheel-item') as HTMLElement | null;
+            const cardWidth = firstCard?.offsetWidth || 280;
+            setCenterPadding(Math.max(MIN_WHEEL_SIDE_PADDING, (container.offsetWidth - cardWidth) / 2));
         };
 
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (openingId) {
-                if (e.key === 'Escape') {
-                    setOpeningId(null);
-                    setIsTransitioning(false);
-                }
-                return;
-            }
+        updateSizing();
+        window.addEventListener('resize', updateSizing);
+        return () => window.removeEventListener('resize', updateSizing);
+    }, [filteredCases.length, selectedCategory]);
 
-            if (e.key === 'ArrowRight') {
-                targetScrollRef.current += 400;
-            } else if (e.key === 'ArrowLeft') {
-                targetScrollRef.current -= 400;
-            }
-        };
-
-        container.addEventListener('wheel', handleWheel, { passive: false });
-        window.addEventListener('keydown', handleKeyDown);
-
-        return () => {
-            window.removeEventListener('resize', updateViewport);
-            container.removeEventListener('wheel', handleWheel);
-            window.removeEventListener('keydown', handleKeyDown);
-        };
-    }, [openingId, handleScrollDismiss]);
-
-    // Initialize Sounds
-    // Preload Sounds on Mount
     useEffect(() => {
-        if (isOpen) {
-            soundManager.preload('archiveScroll', '/audio/archive-scroll.mp3');
-            soundManager.preload('archiveTick', '/audio/archive-tick1.mp3');
-            soundManager.preload('archiveHover', '/audio/archive-hover.mp3');
-            soundManager.preload('confirm', '/audio/confirm-05.mp3');
-        }
-        return () => {
-            soundManager.stop('archiveScroll');
-            scrollPlayingRef.current = false;
-        };
-    }, [isOpen]);
-
-    // Wave Effect Logic
-    useEffect(() => {
-        if (!isOpen || !scrollContainerRef.current) return;
-
-        let rafId: number;
         const container = scrollContainerRef.current;
+        if (!isOpen || !container || selectedCaseId) return;
 
-        const updateWave = () => {
-            if (!container) return;
+        const handleWheel = (event: WheelEvent) => {
+            const root = archiveRootRef.current;
+            if (!root || !(event.target instanceof Node) || !root.contains(event.target)) {
+                return;
+            }
 
-            // 1. Smooth Scroll Interpolation (Momentum)
-            const maxScroll = container.scrollWidth - container.offsetWidth;
+            const deltaUnit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? container.offsetWidth : 1;
+            const deltaX = event.deltaX * deltaUnit;
+            const deltaY = event.deltaY * deltaUnit;
+            const absX = Math.abs(deltaX);
+            const absY = Math.abs(deltaY);
+            const now = performance.now();
+            const gesture = wheelGestureRef.current;
+
+            if (now - gesture.lastAt > WHEEL_GESTURE_IDLE_MS) {
+                gesture.axis = null;
+            }
+
+            if (!gesture.axis) {
+                gesture.axis = absX > absY ? 'x' : 'y';
+            } else {
+                const currentAbs = gesture.axis === 'x' ? absX : absY;
+                const otherAbs = gesture.axis === 'x' ? absY : absX;
+                if (otherAbs > currentAbs * WHEEL_AXIS_SWITCH_RATIO) {
+                    gesture.axis = gesture.axis === 'x' ? 'y' : 'x';
+                }
+            }
+
+            gesture.lastAt = now;
+
+            const rawDelta = gesture.axis === 'x' ? deltaX : deltaY;
+            if (Math.abs(rawDelta) < 0.5) {
+                event.preventDefault();
+                return;
+            }
+
+            const maxScroll = Math.max(0, container.scrollWidth - container.offsetWidth);
+            const edgeEpsilon = 2;
+            const currentTarget = Math.max(0, Math.min(maxScroll, targetScrollRef.current));
+            const atStart = currentTarget <= edgeEpsilon && container.scrollLeft <= edgeEpsilon;
+            const atEnd = currentTarget >= maxScroll - edgeEpsilon && container.scrollLeft >= maxScroll - edgeEpsilon;
+            const pushingPastStart = rawDelta < 0 && atStart;
+            const pushingPastEnd = rawDelta > 0 && atEnd;
+
+            if (pushingPastStart || pushingPastEnd) {
+                targetScrollRef.current = pushingPastStart ? 0 : maxScroll;
+                event.preventDefault();
+                return;
+            }
+
+            const perEventLimit = Math.max(420, Math.min(960, getCardStep() * 1.42));
+            const normalizedDelta = Math.max(-perEventLimit, Math.min(perEventLimit, rawDelta));
+            targetScrollRef.current = Math.max(0, Math.min(maxScroll, currentTarget + normalizedDelta * WHEEL_SCROLL_MULTIPLIER));
+            lastWheelInputAtRef.current = now;
+            event.preventDefault();
+        };
+
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'ArrowRight') {
+                targetScrollRef.current += getCardStep() * 2;
+            } else if (event.key === 'ArrowLeft') {
+                targetScrollRef.current -= getCardStep() * 2;
+            }
+        };
+
+        let rafId = 0;
+
+        const updateWheel = () => {
+            const maxScroll = Math.max(0, container.scrollWidth - container.offsetWidth);
             targetScrollRef.current = Math.max(0, Math.min(maxScroll, targetScrollRef.current));
 
             const scrollDiff = targetScrollRef.current - container.scrollLeft;
             if (Math.abs(scrollDiff) > 0.05) {
-                container.scrollLeft += scrollDiff * 0.18; // Smoother but faster target following
-                lastInternalScrollPos.current = container.scrollLeft;
-            } else if (Math.abs(scrollDiff) <= 0.05) {
-                container.scrollLeft = targetScrollRef.current;
-                lastInternalScrollPos.current = container.scrollLeft;
-            }
-
-            if (openingId) {
-                activityRef.current *= 0.8;
+                container.scrollLeft += scrollDiff * 0.18;
             } else {
-                const currentScroll = container.scrollLeft;
-                const diff = Math.abs(currentScroll - lastScrollPos.current);
-                lastScrollPos.current = currentScroll;
-
-                // Sensitivity: faster reaction to movement
-                const targetActivity = Math.min(1.8, diff * 0.2);
-                activityRef.current = activityRef.current * 0.8 + targetActivity * 0.2;
+                container.scrollLeft = targetScrollRef.current;
             }
 
+            const currentScroll = container.scrollLeft;
+            const diff = Math.abs(currentScroll - lastScrollPos.current);
+            lastScrollPos.current = currentScroll;
+
+            const now = performance.now();
+            const recentSmallGesture = now - lastWheelInputAtRef.current < WHEEL_SMALL_GESTURE_HOLD_MS && activityRef.current < 0.34;
+            const targetActivity = Math.max(recentSmallGesture ? 0.095 : 0, Math.min(1.65, diff * 0.18));
+            const activityBlend = targetActivity > activityRef.current ? 0.24 : activityRef.current < 0.34 ? 0.09 : 0.22;
+            activityRef.current = activityRef.current * (1 - activityBlend) + targetActivity * activityBlend;
             if (activityRef.current < 0.001) activityRef.current = 0;
 
-            // --- Stable Scroll Audio Control ---
-            if (!openingId) {
+            const visualTarget = Math.min(0.86, activityRef.current * 2.18);
+            const visualBlend = visualTarget > visualActivityRef.current ? 0.16 : 0.07;
+            visualActivityRef.current = visualActivityRef.current * (1 - visualBlend) + visualTarget * visualBlend;
+            if (visualActivityRef.current < 0.0004) visualActivityRef.current = 0;
+
+            const targetVolume = activityRef.current > 0.003 ? Math.min(0.42, activityRef.current * 0.42) : 0;
+            if (targetVolume > 0) {
                 if (!scrollPlayingRef.current) {
                     const played = soundManager.play('archiveScroll', { loop: true, volume: 0, stopExisting: true });
-                    if (played) {
-                        scrollPlayingRef.current = true;
-                    }
+                    if (played) scrollPlayingRef.current = true;
                 }
 
-                // Sensitivity: modulate volume based on activity
-                const volThreshold = 0.002;
                 if (scrollPlayingRef.current) {
-                    // Reduce pitch modulation range to avoid deformation
-                    // Volume: 0 to 0.65 based on movement
-                    // Rate: 0.95 (slowest) to 1.10 (fastest) for subtler feel
-                    const targetVolume = activityRef.current > volThreshold ? Math.min(0.65, activityRef.current * 0.6) : 0;
-                    const targetRate = 0.95 + Math.min(0.15, activityRef.current * 0.1);
-
+                    const targetRate = 0.95 + Math.min(0.14, activityRef.current * 0.1);
                     soundManager.setVolume('archiveScroll', targetVolume, true);
                     soundManager.setPlaybackRate('archiveScroll', targetRate, true);
                 }
             } else if (scrollPlayingRef.current) {
-                // Fade out and stop when card is opened
-                soundManager.setVolume('archiveScroll', 0, true);
                 soundManager.stop('archiveScroll', true);
                 scrollPlayingRef.current = false;
             }
 
-            const viewportCenter = viewportWidthRef.current / 2;
-            const scrollLeft = container.scrollLeft;
+            const viewportCenter = viewportWidthRef.current / 2 || container.offsetWidth / 2;
+            let closestIndex = 0;
+            let minDistance = Number.POSITIVE_INFINITY;
 
-            // --- Center Alignment Detection for Tick Sound ---
-            let closestIndex = -1;
-            let minDistance = 9999;
-            const tickSenseRadius = 60; // Larger sense area for robust detection
-
-            // Re-cache cards if needed (rare)
-            if (cardsRef.current.length === 0) {
-                cardsRef.current = Array.from(container.querySelectorAll('.archive-card-wrapper'));
+            if (cardsRef.current.length !== filteredCases.length) {
+                cardsRef.current = Array.from(container.querySelectorAll('.subject-wheel-item'));
             }
 
-            cardsRef.current.forEach((card: any, i: number) => {
-                const cardId = card.getAttribute('data-id');
-                if (cardId === openingId) return;
+            cardsRef.current.forEach((card, index) => {
+                const cardCenter = card.offsetLeft + card.offsetWidth / 2 - currentScroll;
+                const distance = Math.abs(cardCenter - viewportCenter);
+                const signedOffset = (cardCenter - viewportCenter) / Math.max(420, viewportWidthRef.current * 0.34);
+                const proximity = Math.pow(Math.max(0, 1 - distance / Math.max(610, viewportWidthRef.current * 0.38)), 1.08);
+                const scrollVisual = visualActivityRef.current * (2 - visualActivityRef.current);
+                const zTranslate = proximity * 164 * scrollVisual;
+                const scale = 1 + proximity * 0.055 * scrollVisual;
+                const lift = proximity * -12 * scrollVisual;
+                const swayX = Math.max(-18, Math.min(18, signedOffset * -14 * proximity * scrollVisual));
+                const rotateY = Math.max(-10, Math.min(10, signedOffset * -9.2 * proximity * scrollVisual));
+                const opacity = 0.86 + (proximity * 0.14 * scrollVisual);
+                const scrollBrightness = 0.88 + (proximity * 0.075 * Math.min(1, scrollVisual));
+                const isHovered = activeCaseIdRef.current === filteredCases[index]?.id;
+                const brightness = isHovered ? 1.16 : scrollBrightness;
 
-                const cardWidth = 110;
-                const gap = 24;
-                const cardPosInContent = centerPadding + i * (cardWidth + gap) + cardWidth / 2;
-                const cardCenter = cardPosInContent - scrollLeft;
+                card.style.transition = 'none';
+                card.style.transform = `translate3d(${swayX}px, ${lift}px, ${zTranslate}px) scale(${scale}) rotateY(${rotateY}deg)`;
+                card.style.opacity = String(opacity);
+                card.style.filter = `brightness(${brightness})`;
+                card.style.zIndex = String(10 + Math.round(proximity * 80));
 
-                const distFromCenter = Math.abs(cardCenter - viewportCenter);
-
-                const horizon = 700;
-                const proximity = Math.pow(Math.max(0, 1 - distFromCenter / horizon), 1.3);
-                const intensity = proximity * activityRef.current;
-
-                const zTranslate = intensity * 480;
-                const scale = 1 + (intensity * 0.18);
-                const rotateY = (cardCenter - viewportCenter) * -0.15 * intensity;
-
-                const inner = card.querySelector('.archive-card-inner');
-                if (inner) {
-                    inner.style.transition = activityRef.current > 0.01 ? 'none' : 'all 0.8s cubic-bezier(0.16, 1, 0.3, 1)';
-                    inner.style.transform = `translate3d(0, 0, ${zTranslate}px) scale(${scale}) rotateY(${rotateY}deg)`;
-
-                    const img = inner.querySelector('img');
-                    if (img) {
-                        const activeFactor = Math.min(1.0, activityRef.current * 4.0);
-                        const colorIntensity = Math.pow(proximity, 1.5) * activeFactor;
-
-                        const grayscale = Math.max(0, 100 - (colorIntensity * 105));
-                        const brightness = 35 + (colorIntensity * 65);
-
-                        img.style.filter = `grayscale(${grayscale}%) brightness(${brightness}%) contrast(105%)`;
-                    }
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closestIndex = index;
                 }
             });
 
-            rafId = requestAnimationFrame(updateWave);
+            if (lastTickIndex.current !== closestIndex) {
+                lastTickIndex.current = closestIndex;
+                setCenterIndex(closestIndex);
+            }
+
+            rafId = requestAnimationFrame(updateWheel);
         };
 
-        rafId = requestAnimationFrame(updateWave);
-        return () => cancelAnimationFrame(rafId);
-    }, [isOpen, openingId]);
+        window.addEventListener('wheel', handleWheel, { passive: false, capture: true });
+        window.addEventListener('keydown', handleKeyDown);
+        rafId = requestAnimationFrame(updateWheel);
 
-    const handleCardClick = (e: React.MouseEvent, id: string) => {
-        e.stopPropagation();
-        if (openingId) return;
-
-        // Play confirmation sound
-        soundManager.play('confirm', { volume: 0.5 });
-
-        // Center the selected card to ensure perfectly fixed positioning on the right
-        const container = scrollContainerRef.current;
-        if (container) {
-            const index = items.findIndex(item => item.id === id);
-            const gap = 24;
-            // The items before this keep their 110px width and 24px gap
-            const cardLeftPos = centerPadding + index * (cardWidth + gap);
-            
-            const viewportWidth = container.offsetWidth;
-            const expandedWidth = Math.min(viewportWidth * 0.8, 800);
-            
-            const expectedCenter = cardLeftPos + expandedWidth / 2;
-            targetScrollRef.current = expectedCenter - viewportWidth / 2;
-        }
-
-        setOpeningId(id);
-        setIsTransitioning(true);
-    };
-
-    const handleExplore = (id: string) => {
-        setIsTransitioning(true);
-        setTimeout(() => {
-            setSelectedCaseId(id);
-            setIsTransitioning(false);
-            setOpeningId(null);
-        }, 800);
-    };
+        return () => {
+            window.removeEventListener('wheel', handleWheel, true);
+            window.removeEventListener('keydown', handleKeyDown);
+            cancelAnimationFrame(rafId);
+            soundManager.stop('archiveScroll', true);
+            scrollPlayingRef.current = false;
+        };
+    }, [filteredCases, isOpen, selectedCaseId]);
 
     if (!isOpen) return null;
 
-    const selectedCase = items.find(item => item.id === (openingId || selectedCaseId));
+    const handleCategoryChange = (category: ArchiveCategory) => {
+        setSelectedCategory(category);
+        setActiveCaseId(null);
+        setHoverArmed(false);
+    };
+
+    const nudgeWheel = (direction: -1 | 1) => {
+        const container = scrollContainerRef.current;
+        const maxScroll = container ? Math.max(0, container.scrollWidth - container.offsetWidth) : 0;
+        targetScrollRef.current = Math.max(0, Math.min(maxScroll, targetScrollRef.current + direction * getCardStep() * 2));
+        setActiveCaseId(null);
+        setHoverArmed(false);
+    };
+
+    const openCase = (caseId: string) => {
+        const caseItem = ARCHIVE_CASES.find(item => item.id === caseId);
+        if (!caseItem?.content) {
+            setActiveCaseId(caseId);
+            return;
+        }
+        if (archiveRootRef.current) {
+            archiveRootRef.current.scrollLeft = 0;
+            archiveRootRef.current.scrollTop = 0;
+        }
+        setSelectedCaseId(caseId);
+    };
+
+    const activateCase = (caseId: string) => {
+        if (!hoverArmed) {
+            setHoverArmed(true);
+        }
+
+        if (activeCaseId !== caseId) {
+            setActiveCaseId(caseId);
+            soundManager.play('archiveHover', { volume: 0.18, stopExisting: true });
+        }
+    };
 
     return (
-        <div
-            onClick={() => {
-                if (openingId) {
-                    setOpeningId(null);
-                    setIsTransitioning(false);
+        <div ref={archiveRootRef} className={`subject-archive-root ${theme === 'retro' ? 'is-retro' : ''}`}>
+            <style>{`
+                .subject-archive-root {
+                    --subject-serif: "Songti SC", "Noto Serif SC", "Source Han Serif SC", STSong, SimSun, serif;
+                    --subject-mono: "Avenir Next", Inter, "Noto Sans SC", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+                    --subject-paper: #fff8ee;
+                    --subject-paper-bright: #ffffff;
+                    --subject-ink: #080808;
+                    --subject-line: rgba(255,255,255,0.22);
+                    --subject-red: #ff4f3f;
+                    --subject-red-dark: #9e261f;
+                    position: relative;
+                    width: 100%;
+                    height: 100%;
+                    min-height: 0;
+                    overflow: hidden;
+                    overscroll-behavior: none;
+                    color: #fff8ee;
+                    font-family: var(--subject-mono);
+                    background:
+                        radial-gradient(circle at 72% 18%, rgba(255,79,63,0.08), transparent 28%),
+                        radial-gradient(circle at 74% 58%, rgba(255,248,238,0.024), transparent 34%),
+                        radial-gradient(circle at 26% 44%, rgba(255,248,238,0.018), transparent 30%),
+                        linear-gradient(180deg, #000 0%, #000 100%);
+                    isolation: isolate;
                 }
-            }}
-            className={`relative w-full h-full font-sans overflow-hidden ${theme === 'retro' ? 'bg-[#EFE9E0] text-[#2D2D2D]' : 'bg-black text-white'} perspective-2000 transition-colors duration-1000 ${openingId ? 'cursor-zoom-out' : ''}`}>
 
-            {theme === 'retro' && (
-                <div className="absolute inset-0 pointer-events-none opacity-20 texture-paper animate-in fade-in duration-1000 z-0"></div>
-            )}
+                .subject-archive-root::before {
+                    content: "";
+                    position: absolute;
+                    inset: 0;
+                    pointer-events: none;
+                    opacity: 0.09;
+                    background-image:
+                        linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,0.024) 1px, transparent 1px);
+                    background-size: 100% 25%, 12.5% 100%;
+                    mask-image: linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%);
+                }
 
-            {/* Cinematic Background Typography (Split Letters) */}
-            {(openingId || selectedCaseId) && selectedCase && (
-                <div className={`absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden z-0 transition-all duration-1000 ease-out ${openingId ? 'opacity-30 scale-100' : 'opacity-5 scale-95 blur-md'}`}>
-                    <h1 className={`text-[35vw] font-black uppercase tracking-[-0.08em] mountain-title flex select-none ${theme === 'retro' ? 'text-[#8B261D]' : ''}`}>
-                        {selectedCase.titleEn.split(' ')[0].split('').map((char, i) => (
-                            <span
-                                key={i}
-                                className="inline-block transition-all duration-[1200ms] cubic-bezier(0.16, 1, 0.3, 1)"
-                                style={{
-                                    transform: openingId ? 'translateZ(0) scale(1.1)' : 'translateZ(-500px) scale(0.5)',
-                                    opacity: openingId ? 0.3 : 0,
-                                    transitionDelay: `${i * 60}ms`
-                                }}
-                            >
-                                {char}
-                            </span>
-                        ))}
-                    </h1>
-                </div>
-            )}
+                .subject-archive-root::after {
+                    content: "";
+                    position: absolute;
+                    inset: -16%;
+                    pointer-events: none;
+                    opacity: 0.028;
+                    background:
+                        repeating-radial-gradient(circle at 24% 42%, rgba(255,255,255,0.42) 0 0.55px, transparent 0.7px 2.2px),
+                        repeating-linear-gradient(90deg, rgba(255,255,255,0.07) 0 1px, transparent 1px 4px);
+                    filter: blur(0.22px);
+                    animation: subjectArchiveGrain 9s steps(3) infinite;
+                }
 
-            {/* Top-left Title Overlay (Restored Version) */}
-            <div className={`absolute top-0 left-0 w-full p-8 md:p-12 flex justify-between items-start pointer-events-none z-50 ${theme === 'retro' ? 'text-[#8B261D]' : 'mix-blend-difference text-white'} transition-opacity duration-700 ${openingId ? 'opacity-0' : 'opacity-100'}`}>
-                <div className="flex flex-col">
-                    <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none m-0.5">
-                        {lang === 'CN' ? '主体观测档案' : 'SUBJECT ARCHIVE'}
-                    </h1>
-                    <div className="font-mono text-xs uppercase tracking-[0.3em] ml-1 mt-2 font-bold opacity-50">
-                        VOL.001 / DECLASSIFIED
+                .subject-archive-lower-bg {
+                    position: absolute;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    z-index: 1;
+                    height: min(70dvh, 46rem);
+                    pointer-events: none;
+                    background:
+                        radial-gradient(circle at 32% 42%, rgba(255,79,63,0.035), transparent 31%),
+                        linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.03) 18%, rgba(0,0,0,0.04) 58%, rgba(0,0,0,0.5) 100%),
+                        linear-gradient(90deg, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.02) 40%, rgba(0,0,0,0.72) 100%);
+                    opacity: 0.94;
+                }
+
+                .subject-archive-lower-bg::before,
+                .subject-archive-lower-bg::after {
+                    content: "";
+                    position: absolute;
+                    inset: 0;
+                    pointer-events: none;
+                }
+
+                .subject-archive-lower-bg::before {
+                    z-index: 0;
+                    inset: -8% -16% -4% -8%;
+                    opacity: 0.94;
+                    background: url('/portal-assets/subject-archive-lower-1777901002241.png') left bottom / min(78vw, 80rem) auto no-repeat;
+                    filter: saturate(1.04) contrast(1.08) brightness(0.98);
+                    -webkit-mask-image: radial-gradient(ellipse 68% 58% at 27% 86%, #000 0%, #000 36%, rgba(0,0,0,0.74) 50%, rgba(0,0,0,0.24) 66%, transparent 88%);
+                    mask-image: radial-gradient(ellipse 68% 58% at 27% 86%, #000 0%, #000 36%, rgba(0,0,0,0.74) 50%, rgba(0,0,0,0.24) 66%, transparent 88%);
+                }
+
+                .subject-archive-lower-bg::after {
+                    z-index: 2;
+                    background:
+                        radial-gradient(circle at 28% 42%, rgba(255,248,238,0.04), transparent 34%),
+                        radial-gradient(circle at 42% 52%, rgba(255,79,63,0.035), transparent 36%),
+                        linear-gradient(180deg, #000 0%, rgba(0,0,0,0.86) 8%, rgba(0,0,0,0.42) 24%, transparent 52%, rgba(0,0,0,0.45) 100%),
+                        linear-gradient(90deg, rgba(0,0,0,0.34), transparent 18%, transparent 58%, rgba(0,0,0,0.58) 78%, #000 100%);
+                }
+
+                @keyframes subjectArchiveGrain {
+                    0% { transform: translate3d(-1.2%, -0.8%, 0); }
+                    33% { transform: translate3d(1%, 1.1%, 0); }
+                    66% { transform: translate3d(-0.6%, 1.3%, 0); }
+                    100% { transform: translate3d(0.9%, -1%, 0); }
+                }
+
+                .subject-archive-shell {
+                    position: relative;
+                    z-index: 2;
+                    height: 100%;
+                    min-height: 0;
+                    display: grid;
+                    grid-template-rows: minmax(8.1rem, 0.52fr) minmax(23.1rem, 1.48fr) auto;
+                    gap: clamp(0.62rem, 1.1dvh, 1.02rem);
+                    padding: clamp(0.7rem, 1.38dvh, 1.14rem) clamp(1.25rem, 3vw, 4rem) clamp(0.58rem, 1.15dvh, 0.96rem);
+                }
+
+                .subject-archive-hero {
+                    min-height: 0;
+                    display: grid;
+                    grid-template-columns: minmax(25rem, 1.05fr) minmax(18rem, 0.78fr);
+                    gap: clamp(0.9rem, 1.75vw, 2.1rem);
+                    align-items: end;
+                }
+
+                .subject-kicker {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.55rem;
+                    color: rgba(255,255,255,0.62);
+                    font-size: clamp(0.48rem, 0.52vw, 0.64rem);
+                    letter-spacing: 0.24em;
+                    text-transform: uppercase;
+                    line-height: 1;
+                }
+
+                .subject-kicker-line {
+                    width: clamp(2.6rem, 5vw, 5.8rem);
+                    height: 1px;
+                    background: linear-gradient(90deg, rgba(255,255,255,0.78), transparent);
+                }
+
+                .subject-title {
+                    margin: clamp(0.44rem, 0.82dvh, 0.76rem) 0 0;
+                    font-family: var(--subject-serif);
+                    font-size: clamp(2.6rem, 4.35vw, 5.45rem);
+                    font-weight: 900;
+                    line-height: 0.95;
+                    letter-spacing: 0.08em;
+                    color: #f4f4ef;
+                    text-shadow: 0 0 34px rgba(255,255,255,0.1), 0 14px 42px rgba(0,0,0,0.78);
+                }
+
+                .subject-subtitle {
+                    display: grid;
+                    gap: clamp(0.18rem, 0.36dvh, 0.32rem);
+                    margin-top: clamp(0.78rem, 1.35dvh, 1.12rem);
+                    max-width: min(52rem, 80vw);
+                    color: rgba(255,255,255,0.76);
+                }
+
+                .subject-subtitle-cn {
+                    font-family: var(--subject-serif);
+                    font-size: clamp(0.68rem, 0.95vw, 1.12rem);
+                    line-height: 1.15;
+                    letter-spacing: 0.3em;
+                }
+
+                .subject-subtitle-en {
+                    margin-top: clamp(0.42rem, 0.85dvh, 0.68rem);
+                    color: rgba(255,255,255,0.58);
+                    font-size: clamp(0.44rem, 0.6vw, 0.72rem);
+                    line-height: 1.1;
+                    letter-spacing: 0.28em;
+                    text-transform: uppercase;
+                }
+
+                .subject-filter-row {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 0.48rem;
+                    margin-top: clamp(0.52rem, 1dvh, 0.9rem);
+                }
+
+                .subject-filter {
+                    position: relative;
+                    height: clamp(1.66rem, 2.7dvh, 2.05rem);
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 0.48rem;
+                    padding: 0 0.8rem;
+                    border: 1px solid rgba(255,255,255,0.18);
+                    border-radius: 999px;
+                    color: rgba(255,255,255,0.52);
+                    background: rgba(255,255,255,0.035);
+                    font-size: clamp(0.48rem, 0.55vw, 0.64rem);
+                    letter-spacing: 0.14em;
+                    text-transform: uppercase;
+                    transition: color 420ms ease, background 420ms ease, border-color 420ms ease, transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
+                }
+
+                .subject-filter:hover,
+                .subject-filter.is-selected {
+                    transform: translateY(-1px);
+                    color: #fff;
+                    border-color: color-mix(in srgb, var(--filter-accent, #fff) 48%, rgba(255,255,255,0.54));
+                    background:
+                        linear-gradient(90deg, color-mix(in srgb, var(--filter-accent, #fff) 16%, transparent), rgba(255,255,255,0.08));
+                }
+
+                .subject-filter-dot {
+                    width: 0.36rem;
+                    height: 0.36rem;
+                    border-radius: 999px;
+                    background: var(--filter-accent, #fff);
+                    box-shadow: 0 0 14px color-mix(in srgb, var(--filter-accent, #fff) 60%, transparent);
+                }
+
+                .subject-overview-panel {
+                    min-height: 0;
+                    align-self: stretch;
+                    display: grid;
+                    grid-template-rows: auto 1fr auto;
+                    border: 1px solid rgba(255,255,255,0.18);
+                    background:
+                        linear-gradient(135deg, rgba(255,255,255,0.09), rgba(255,255,255,0.025)),
+                        rgba(0,0,0,0.3);
+                    backdrop-filter: blur(10px);
+                    padding: clamp(0.68rem, 1.08vw, 1.05rem);
+                    overflow: hidden;
+                }
+
+                .subject-overview-head,
+                .subject-overview-foot {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 1rem;
+                    color: rgba(255,255,255,0.54);
+                    font-size: clamp(0.48rem, 0.55vw, 0.64rem);
+                    letter-spacing: 0.18em;
+                    text-transform: uppercase;
+                }
+
+                .subject-preview-title {
+                    margin: clamp(0.8rem, 1.4dvh, 1.2rem) 0 0;
+                    font-family: var(--subject-serif);
+                    font-size: clamp(1.08rem, 1.55vw, 2.05rem);
+                    line-height: 1.18;
+                    letter-spacing: 0.08em;
+                    color: #fff;
+                }
+
+                .subject-preview-summary {
+                    margin: clamp(0.58rem, 1dvh, 0.9rem) 0 0;
+                    max-width: 34rem;
+                    color: rgba(255,255,255,0.54);
+                    font-family: var(--subject-serif);
+                    font-size: clamp(0.68rem, 0.82vw, 0.98rem);
+                    line-height: 1.7;
+                    letter-spacing: 0.07em;
+                    display: -webkit-box;
+                    -webkit-line-clamp: 3;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                }
+
+                .subject-preview-meta {
+                    display: grid;
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                    gap: 0.65rem;
+                    margin-top: clamp(0.76rem, 1.35dvh, 1.1rem);
+                }
+
+                .subject-preview-meta div {
+                    min-width: 0;
+                    border-top: 1px solid rgba(255,255,255,0.16);
+                    padding-top: 0.55rem;
+                }
+
+                .subject-preview-meta span {
+                    display: block;
+                    color: rgba(255,255,255,0.36);
+                    font-size: clamp(0.42rem, 0.5vw, 0.58rem);
+                    letter-spacing: 0.18em;
+                    text-transform: uppercase;
+                }
+
+                .subject-preview-meta b {
+                    display: block;
+                    margin-top: 0.3rem;
+                    color: rgba(255,255,255,0.84);
+                    font-size: clamp(0.52rem, 0.62vw, 0.74rem);
+                    letter-spacing: 0.08em;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+
+                .subject-card-section {
+                    min-height: 0;
+                    display: grid;
+                    grid-template-rows: auto 1fr;
+                    gap: clamp(0.42rem, 0.8dvh, 0.74rem);
+                    transform: translateY(1.28rem);
+                }
+
+                .subject-section-top {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 1rem;
+                    color: rgba(255,255,255,0.48);
+                    font-size: clamp(0.48rem, 0.54vw, 0.64rem);
+                    letter-spacing: 0.2em;
+                    text-transform: uppercase;
+                }
+
+                .subject-section-top-left {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.72rem;
+                    min-width: 0;
+                }
+
+                .subject-section-top-left::after {
+                    content: "";
+                    width: clamp(4rem, 11vw, 13rem);
+                    height: 1px;
+                    background: linear-gradient(90deg, rgba(255,255,255,0.5), transparent);
+                }
+
+                .subject-pager {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.55rem;
+                }
+
+                .subject-pager button {
+                    width: clamp(1.95rem, 2.45vw, 2.45rem);
+                    height: clamp(1.95rem, 2.45vw, 2.45rem);
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    border: 1px solid rgba(255,255,255,0.18);
+                    border-radius: 999px;
+                    color: rgba(255,255,255,0.62);
+                    background: rgba(255,255,255,0.04);
+                    transition: color 350ms ease, border-color 350ms ease, background 350ms ease, transform 350ms cubic-bezier(0.16, 1, 0.3, 1);
+                }
+
+                .subject-pager button:hover:not(:disabled) {
+                    color: #fff;
+                    border-color: rgba(255,255,255,0.58);
+                    background: rgba(255,255,255,0.1);
+                    transform: translateY(-1px);
+                }
+
+                .subject-pager button:disabled {
+                    opacity: 0.25;
+                    cursor: not-allowed;
+                }
+
+                .subject-wheel-stage {
+                    position: relative;
+                    min-height: 0;
+                    height: 100%;
+                    overflow: visible;
+                }
+
+                .subject-wheel-viewport {
+                    position: absolute;
+                    inset: 0;
+                    overflow-x: hidden;
+                    overflow-y: hidden;
+                    overscroll-behavior: none;
+                    perspective: 2000px;
+                    transform-style: preserve-3d;
+                    scrollbar-width: none;
+                }
+
+                .subject-wheel-viewport::-webkit-scrollbar {
+                    display: none;
+                }
+
+                .subject-case-track {
+                    height: 100%;
+                    min-height: 0;
+                    display: flex;
+                    align-items: center;
+                    gap: clamp(0.88rem, 1.28vw, 1.5rem);
+                    transform-style: preserve-3d;
+                    padding-top: 0.24rem;
+                    padding-bottom: 0.42rem;
+                    opacity: 0;
+                    transform: translate3d(42vw, 0, 0) scale(0.985);
+                    will-change: transform, opacity;
+                    transition:
+                        transform 1450ms cubic-bezier(0.16, 1, 0.3, 1),
+                        opacity 820ms ease;
+                }
+
+                .subject-case-track.has-entered {
+                    opacity: 1;
+                    transform: translate3d(0, 0, 0) scale(1);
+                }
+
+                .subject-wheel-item {
+                    position: relative;
+                    flex: 0 0 clamp(14.8rem, 16.4vw, 19.8rem);
+                    width: clamp(14.8rem, 16.4vw, 19.8rem);
+                    height: min(100%, clamp(23rem, 49dvh, 30.5rem));
+                    min-height: 0;
+                    transform-style: preserve-3d;
+                    opacity: 0;
+                    will-change: transform, opacity, filter;
+                }
+
+                .subject-wheel-item.has-entered {
+                    opacity: 0.72;
+                }
+
+                .subject-wheel-nav {
+                    position: absolute;
+                    top: 50%;
+                    z-index: 120;
+                    width: clamp(2.2rem, 3vw, 3.05rem);
+                    height: clamp(2.2rem, 3vw, 3.05rem);
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    border: 1px solid rgba(255,255,255,0.17);
+                    border-radius: 999px;
+                    color: rgba(255,255,255,0.62);
+                    background: rgba(0,0,0,0.38);
+                    backdrop-filter: blur(10px);
+                    transform: translateY(-50%);
+                    transition: color 360ms ease, border-color 360ms ease, background 360ms ease, transform 360ms cubic-bezier(0.16, 1, 0.3, 1);
+                }
+
+                .subject-wheel-nav:hover {
+                    color: #fff;
+                    border-color: rgba(255,255,255,0.58);
+                    background: rgba(255,255,255,0.1);
+                    transform: translateY(-50%) scale(1.04);
+                }
+
+                .subject-wheel-nav-left {
+                    left: clamp(0.2rem, 0.8vw, 0.9rem);
+                }
+
+                .subject-wheel-nav-right {
+                    right: clamp(0.2rem, 0.8vw, 0.9rem);
+                }
+
+                .subject-case-card {
+                    --case-accent: #f2f2ec;
+                    position: relative;
+                    min-width: 0;
+                    min-height: 0;
+                    height: 100%;
+                    display: flex;
+                    flex-direction: column;
+                    overflow: hidden;
+                    border: 1px solid rgba(14,14,13,0.48);
+                    border-radius: 0.32rem;
+                    padding: clamp(0.58rem, 0.72vw, 0.86rem);
+                    color: var(--subject-ink);
+                    background:
+                        linear-gradient(135deg, rgba(255,255,255,0.72), rgba(255,255,255,0.16) 44%, rgba(0,0,0,0.035)),
+                        radial-gradient(circle at 22% 8%, rgba(255,255,255,0.88), transparent 28%),
+                        var(--subject-paper);
+                    box-shadow:
+                        inset 0 0 0 0.17rem rgba(255,255,255,0.66),
+                        inset 0 0 0 0.25rem rgba(0,0,0,0.14),
+                        0 1.4rem 3rem rgba(0,0,0,0.46);
+                    transform: translate3d(0, 0, 0) scale(1);
+                    transform-origin: center center;
+                    will-change: transform, filter, box-shadow;
+                    transition:
+                        transform 1080ms cubic-bezier(0.16, 1, 0.3, 1),
+                        box-shadow 1080ms cubic-bezier(0.16, 1, 0.3, 1),
+                        filter 920ms ease,
+                        border-color 760ms ease;
+                }
+
+                .subject-case-card::before {
+                    content: "";
+                    position: absolute;
+                    inset: 0;
+                    pointer-events: none;
+                    opacity: 0.11;
+                    background:
+                        repeating-linear-gradient(0deg, rgba(0,0,0,0.08) 0 1px, transparent 1px 3px),
+                        radial-gradient(circle at 16% 20%, rgba(255,255,255,0.8), transparent 27%);
+                    mix-blend-mode: multiply;
+                }
+
+                .subject-case-card.is-active {
+                    z-index: 5;
+                    transform: translate3d(0, -0.62rem, 68px) scale(1.065);
+                    filter: brightness(1.045);
+                    border-color: color-mix(in srgb, var(--case-accent) 50%, rgba(14,14,13,0.44));
+                    box-shadow:
+                        inset 0 0 0 0.17rem rgba(255,255,255,0.78),
+                        inset 0 0 0 0.25rem rgba(0,0,0,0.18),
+                        0 2.35rem 6.5rem rgba(0,0,0,0.68),
+                        0 0 0 1px rgba(255,255,255,0.22),
+                        -1px 0 0 rgba(183,58,54,0.28),
+                        1px 0 0 rgba(255,255,255,0.18);
+                }
+
+                .subject-card-corner {
+                    position: absolute;
+                    z-index: 4;
+                    width: 0.78rem;
+                    height: 0.78rem;
+                    opacity: 0.38;
+                    border-color: rgba(0,0,0,0.45);
+                    transition: opacity 520ms ease, border-color 520ms ease, transform 760ms cubic-bezier(0.16, 1, 0.3, 1);
+                }
+
+                .subject-card-corner-tl { left: 0.68rem; top: 0.68rem; border-left: 1px solid; border-top: 1px solid; }
+                .subject-card-corner-tr { right: 0.68rem; top: 0.68rem; border-right: 1px solid; border-top: 1px solid; }
+                .subject-card-corner-bl { left: 0.68rem; bottom: 0.68rem; border-left: 1px solid; border-bottom: 1px solid; }
+                .subject-card-corner-br { right: 0.68rem; bottom: 0.68rem; border-right: 1px solid; border-bottom: 1px solid; }
+
+                .subject-case-card.is-active .subject-card-corner {
+                    opacity: 0.92;
+                    border-color: color-mix(in srgb, var(--case-accent) 64%, #000);
+                }
+
+                .subject-card-meta {
+                    position: relative;
+                    z-index: 3;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 0.7rem;
+                    min-height: clamp(1.45rem, 2.45dvh, 2.05rem);
+                    padding: 0 0.3rem;
+                    border-bottom: 1px solid rgba(0,0,0,0.2);
+                    color: rgba(0,0,0,0.68);
+                    font-size: clamp(0.48rem, 0.56vw, 0.66rem);
+                    letter-spacing: 0.14em;
+                    text-transform: uppercase;
+                    transition: color 520ms ease, border-color 520ms ease;
+                }
+
+                .subject-case-card.is-active .subject-card-meta {
+                    color: color-mix(in srgb, var(--case-accent) 36%, #050505);
+                    border-bottom-color: color-mix(in srgb, var(--case-accent) 42%, rgba(0,0,0,0.22));
+                }
+
+                .subject-card-image {
+                    position: relative;
+                    z-index: 3;
+                    aspect-ratio: 16 / 9;
+                    overflow: hidden;
+                    margin-top: clamp(0.56rem, 0.9dvh, 0.78rem);
+                    border: 1px solid rgba(0,0,0,0.22);
+                    background: #0d0d0d;
+                }
+
+                .subject-card-image img {
+                    width: 100%;
+                    height: 100%;
+                    display: block;
+                    object-fit: cover;
+                    filter: grayscale(0.22) saturate(1.04) contrast(1.22) brightness(0.92);
+                    transform: scale(1.02);
+                    transition: transform 980ms cubic-bezier(0.16, 1, 0.3, 1), filter 980ms ease;
+                }
+
+                .subject-case-card.is-active .subject-card-image img {
+                    transform: scale(1.055);
+                    filter: grayscale(0.04) saturate(1.12) contrast(1.22) brightness(1.09);
+                }
+
+                .subject-card-image::after {
+                    content: "";
+                    position: absolute;
+                    inset: 0;
+                    pointer-events: none;
+                    background:
+                        linear-gradient(90deg, rgba(255,79,63,0.13), transparent 14%, transparent 86%, rgba(255,248,238,0.06)),
+                        linear-gradient(180deg, transparent, rgba(0,0,0,0.2));
+                    opacity: 0;
+                    transition: opacity 520ms ease;
+                    mix-blend-mode: screen;
+                }
+
+                .subject-case-card.is-active .subject-card-image::after {
+                    opacity: 0.7;
+                }
+
+                .subject-card-body {
+                    position: relative;
+                    z-index: 3;
+                    display: flex;
+                    flex-direction: column;
+                    min-height: 0;
+                    flex: 1;
+                    padding: clamp(0.65rem, 1dvh, 0.95rem) 0.28rem 0;
+                }
+
+                .subject-card-title-cn {
+                    font-family: var(--subject-serif);
+                    font-size: clamp(1rem, 1.16vw, 1.45rem);
+                    font-weight: 700;
+                    line-height: 1.12;
+                    letter-spacing: 0.11em;
+                    color: #10100f;
+                    display: -webkit-box;
+                    -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                    transition: font-size 860ms cubic-bezier(0.16, 1, 0.3, 1), line-height 860ms cubic-bezier(0.16, 1, 0.3, 1);
+                }
+
+                .subject-card-title-en {
+                    margin-top: 0.44rem;
+                    color: rgba(0,0,0,0.58);
+                    font-size: clamp(0.46rem, 0.55vw, 0.66rem);
+                    line-height: 1.2;
+                    letter-spacing: 0.14em;
+                    text-transform: uppercase;
+                    display: -webkit-box;
+                    -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                    transition: color 760ms ease, font-size 860ms cubic-bezier(0.16, 1, 0.3, 1), line-height 860ms cubic-bezier(0.16, 1, 0.3, 1);
+                }
+
+                .subject-case-card.is-active .subject-card-title-cn {
+                    display: block;
+                    overflow: visible;
+                    -webkit-line-clamp: unset;
+                    font-size: clamp(1.02rem, 1.2vw, 1.5rem);
+                    line-height: 1.18;
+                }
+
+                .subject-case-card.is-active .subject-card-title-en {
+                    display: block;
+                    overflow: visible;
+                    -webkit-line-clamp: unset;
+                    line-height: 1.28;
+                    color: color-mix(in srgb, var(--case-accent) 36%, #050505);
+                }
+
+                .subject-card-summary {
+                    margin: clamp(0.56rem, 0.9dvh, 0.8rem) 0 0;
+                    color: rgba(0,0,0,0.62);
+                    font-family: var(--subject-serif);
+                    font-size: clamp(0.63rem, 0.74vw, 0.9rem);
+                    line-height: 1.62;
+                    letter-spacing: 0.045em;
+                    display: -webkit-box;
+                    -webkit-line-clamp: 3;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                    transition: opacity 760ms ease, -webkit-line-clamp 760ms ease;
+                }
+
+                .subject-case-card.is-active .subject-card-summary {
+                    -webkit-line-clamp: 2;
+                    opacity: 0.78;
+                }
+
+                .subject-card-signal {
+                    position: relative;
+                    z-index: 3;
+                    margin-top: auto;
+                    padding: clamp(0.5rem, 0.8dvh, 0.72rem) 0.28rem 0.1rem;
+                    color: rgba(0,0,0,0.34);
+                    transition: color 520ms ease;
+                }
+
+                .subject-card-signal svg {
+                    display: block;
+                    width: 100%;
+                    height: clamp(1.05rem, 2.05dvh, 1.55rem);
+                    overflow: visible;
+                }
+
+                .subject-card-signal path {
+                    fill: none;
+                    stroke: currentColor;
+                    stroke-width: 0.9;
+                    stroke-linecap: round;
+                    stroke-linejoin: round;
+                    stroke-dasharray: 100;
+                    stroke-dashoffset: 62;
+                    transition: stroke 520ms ease;
+                }
+
+                .subject-case-card.is-active .subject-card-signal {
+                    color: color-mix(in srgb, var(--case-accent) 34%, #050505);
+                }
+
+                .subject-case-card.is-active .subject-card-signal path {
+                    animation: subjectArchiveSignal 1120ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                }
+
+                @keyframes subjectArchiveSignal {
+                    to { stroke-dashoffset: 0; }
+                }
+
+                .subject-card-open {
+                    position: relative;
+                    z-index: 3;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 0.8rem;
+                    margin-top: clamp(0.45rem, 0.72dvh, 0.66rem);
+                    padding-top: clamp(0.42rem, 0.72dvh, 0.62rem);
+                    border-top: 1px solid rgba(0,0,0,0.18);
+                    color: rgba(0,0,0,0.68);
+                    font-size: clamp(0.48rem, 0.56vw, 0.66rem);
+                    letter-spacing: 0.16em;
+                    text-transform: uppercase;
+                    transition: color 520ms ease, border-color 520ms ease;
+                }
+
+                .subject-case-card.is-active .subject-card-open {
+                    color: #080808;
+                    border-top-color: rgba(0,0,0,0.32);
+                }
+
+                .subject-card-open svg {
+                    transition: transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
+                }
+
+                .subject-case-card.is-active .subject-card-open svg {
+                    transform: translate3d(0.16rem, -0.16rem, 0);
+                }
+
+                .subject-archive-footer {
+                    display: grid;
+                    grid-template-columns: minmax(14rem, 1fr) minmax(14rem, 0.72fr) minmax(14rem, 1fr);
+                    align-items: center;
+                    gap: 1rem;
+                    color: rgba(255,255,255,0.52);
+                    font-size: clamp(0.46rem, 0.54vw, 0.64rem);
+                    letter-spacing: 0.18em;
+                    text-transform: uppercase;
+                }
+
+                .subject-footer-center {
+                    justify-self: center;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.72rem;
+                    white-space: nowrap;
+                }
+
+                .subject-footer-center::before,
+                .subject-footer-center::after {
+                    content: "";
+                    width: clamp(1.8rem, 4vw, 4.8rem);
+                    height: 1px;
+                    background: rgba(255,255,255,0.24);
+                }
+
+                .subject-footer-right {
+                    justify-self: end;
+                    color: rgba(255,255,255,0.35);
+                }
+
+                .subject-detail-layer {
+                    position: absolute;
+                    inset: 0;
+                    z-index: 50;
+                    background: #000;
+                    animation: subjectArchiveDetailIn 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
+                }
+
+                @keyframes subjectArchiveDetailIn {
+                    from { opacity: 0; transform: translate3d(3rem, 0, 0); }
+                    to { opacity: 1; transform: translate3d(0, 0, 0); }
+                }
+
+                .subject-archive-root.is-retro {
+                    background: #f2f0ea;
+                    color: #161512;
+                }
+
+                .subject-archive-root.is-retro::before,
+                .subject-archive-root.is-retro::after {
+                    opacity: 0.08;
+                }
+
+                .subject-archive-root.is-retro .subject-title,
+                .subject-archive-root.is-retro .subject-preview-title {
+                    color: #14120f;
+                    text-shadow: none;
+                }
+
+                .subject-archive-root.is-retro .subject-kicker,
+                .subject-archive-root.is-retro .subject-subtitle,
+                .subject-archive-root.is-retro .subject-subtitle-en,
+                .subject-archive-root.is-retro .subject-overview-head,
+                .subject-archive-root.is-retro .subject-overview-foot,
+                .subject-archive-root.is-retro .subject-section-top,
+                .subject-archive-root.is-retro .subject-archive-footer {
+                    color: rgba(20,18,15,0.62);
+                }
+
+                .subject-archive-root.is-retro .subject-subtitle-cn,
+                .subject-archive-root.is-retro .subject-preview-summary {
+                    color: rgba(20,18,15,0.68);
+                }
+
+                .subject-archive-root.is-retro .subject-overview-panel {
+                    border-color: rgba(20,18,15,0.16);
+                    background: rgba(255,255,255,0.44);
+                }
+
+                @media (max-height: 860px) {
+                    .subject-archive-shell {
+                        grid-template-rows: minmax(6rem, 0.36fr) minmax(22rem, 1.58fr) auto;
+                        gap: 0.48rem;
+                        padding-top: 0.54rem;
+                        padding-bottom: 0.54rem;
+                    }
+
+                    .subject-title {
+                        font-size: clamp(2.2rem, 4vw, 4.9rem);
+                    }
+
+                    .subject-subtitle {
+                        gap: 0.18rem;
+                        margin-top: 0.52rem;
+                    }
+
+                    .subject-filter-row {
+                        margin-top: 0.54rem;
+                    }
+
+                    .subject-preview-summary {
+                        -webkit-line-clamp: 2;
+                    }
+
+                    .subject-card-summary {
+                        -webkit-line-clamp: 2;
+                    }
+
+                    .subject-wheel-item {
+                        flex-basis: clamp(13.8rem, 15.6vw, 18.4rem);
+                        width: clamp(13.8rem, 15.6vw, 18.4rem);
+                        height: min(100%, clamp(20.8rem, 48dvh, 26.8rem));
+                    }
+                }
+
+                @media (max-width: 1180px) {
+                    .subject-archive-hero {
+                        grid-template-columns: 1fr;
+                    }
+
+                    .subject-overview-panel {
+                        display: none;
+                    }
+
+                    .subject-wheel-item {
+                        flex-basis: clamp(14.2rem, 28vw, 18rem);
+                        width: clamp(14.2rem, 28vw, 18rem);
+                    }
+                }
+            `}</style>
+
+            <div className="subject-archive-lower-bg" aria-hidden="true" />
+
+            <main className="subject-archive-shell">
+                <section className="subject-archive-hero">
+                    <div>
+                        <div className="subject-kicker">
+                            <FileSearch size={14} />
+                            <span>VOL.001 / DECLASSIFIED</span>
+                            <span className="subject-kicker-line" />
+                        </div>
+                        <h1 className="subject-title">
+                            {lang === 'CN' ? '主体观测档案' : 'Subject Archive'}
+                        </h1>
+                        <div className="subject-subtitle">
+                            <div className="subject-subtitle-cn">
+                                {lang === 'CN'
+                                    ? '把人物、症状与影像裂缝重新归档：每一份档案都不是角色介绍，而是一种主体结构的显影。'
+                                    : 'A cinematic index of subjects, symptoms, and the fissures through which images begin to name us.'}
+                            </div>
+                            <div className="subject-subtitle-en">
+                                {lang === 'CN'
+                                    ? 'Subject files are not biographies. They are clinical cuts where desire, language and cinema expose a structure.'
+                                    : 'Not biographies, but clinical cuts where desire, language, and cinema expose a structure.'}
+                            </div>
+                        </div>
+
+                        <div className="subject-filter-row" aria-label={lang === 'CN' ? '档案分类' : 'Archive categories'}>
+                            {categories.map(category => {
+                                const meta = categoryMeta[category];
+                                const count = category === 'ALL'
+                                    ? ARCHIVE_CASES.length
+                                    : ARCHIVE_CASES.filter(item => item.category === category).length;
+
+                                return (
+                                    <button
+                                        key={category}
+                                        type="button"
+                                        onClick={() => handleCategoryChange(category)}
+                                        className={`subject-filter ${selectedCategory === category ? 'is-selected' : ''}`}
+                                        style={{ '--filter-accent': meta.accent } as React.CSSProperties}
+                                    >
+                                        <span className="subject-filter-dot" />
+                                        <span>{lang === 'CN' ? meta.labelCn : meta.labelEn}</span>
+                                        <span>{String(count).padStart(2, '0')}</span>
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </div>
-                </div>
-            </div>
 
-
-            {/* Main Scene: Native scroll with wave listener */}
-            <div
-                ref={scrollContainerRef}
-                className={`absolute inset-0 flex items-center overflow-x-auto overflow-y-hidden scrollbar-hide overscroll-contain perspective-2000 transition-opacity duration-1000 ${selectedCaseId ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
-                style={{
-                    scrollPaddingLeft: `${centerPadding}px`,
-                }}
-            >
-                <div
-                    ref={contentRef}
-                    className="flex items-center gap-6 h-[500px] preserve-3d"
-                    style={{
-                        paddingLeft: `${centerPadding}px`,
-                    }}
-                >
-                    {items.map((item, i) => {
-                        const isOpening = openingId === item.id;
-                        const isOtherOpening = openingId && !isOpening;
-
-                        return (
-                            <div
-                                key={`${item.id}-${i}`}
-                                data-id={item.id}
-                                className={`archive-card-wrapper relative shrink-0 preserve-3d transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] ${isOpening
-                                        ? 'z-[1000] w-[80vw] max-w-[800px] h-[45vw] max-h-[450px]'
-                                        : (isOtherOpening ? 'opacity-0 scale-75 blur-md z-0 w-[110px] h-[480px] pointer-events-none' : 'z-10 w-[110px] h-[480px]')
-                                    }`}
-                                style={{
-                                    transform: isOpening
-                                        ? `translate3d(12vw, -60px, 200px)`
-                                        : (hasEntered ? 'translate3d(0, 0, 0)' : `translate3d(${1000 + i * 200}px, 0, 0)`),
-                                    transitionDelay: isOpening ? '0s' : (hasEntered ? '0s' : `${0.2 + i * 0.05}s`)
-                                }}
-                            >
-                                <div
-                                    className={`archive-card-inner w-full h-full relative cursor-pointer group preserve-3d transition-all duration-300 will-change-transform active:scale-95 ${isOpening ? 'cursor-default' : ''}`}
-                                    onClick={(e) => handleCardClick(e, item.id)}
-                                    onMouseEnter={() => {
-                                        if (!openingId) {
-                                            soundManager.play('archiveHover', { volume: 0.25, stopExisting: true });
-                                        }
-                                    }}
-                                >
-                                    <style>{`
-                                            @keyframes scanline {
-                                                0% { transform: translateY(-100%); }
-                                                100% { transform: translateY(100%); }
-                                            }
-                                            @keyframes crtFlicker {
-                                                0% { opacity: 0.01; }
-                                                5% { opacity: 0.05; }
-                                                10% { opacity: 0.02; }
-                                                15% { opacity: 0.06; }
-                                                20% { opacity: 0.01; }
-                                                100% { opacity: 0.02; }
-                                            }
-                                            .crt-overlay::before {
-                                                content: "";
-                                                position: absolute;
-                                                inset: 0;
-                                                background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-                                                background-size: 100% 4px, 3px 100%;
-                                                z-index: 20;
-                                                pointer-events: none;
-                                            }
-                                            .scanline-beam {
-                                                position: absolute;
-                                                top: 0;
-                                                left: 0;
-                                                width: 100%;
-                                                height: 100px;
-                                                background: linear-gradient(to bottom, transparent, rgba(212, 175, 55, 0.15), transparent);
-                                                z-index: 21;
-                                                animation: scanline 4s linear infinite;
-                                                pointer-events: none;
-                                            }
-                                            /* Mouse Hover Colorization */
-                                            .archive-card-inner:hover img {
-                                                filter: grayscale(0%) brightness(100%) !important;
-                                                transition: filter 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
-                                            }
-                                        `}</style>
-
-                                    {/* Image Container */}
-                                    <div className={`w-full h-full relative overflow-hidden border ${theme === 'retro' ? 'border-[#8B261D]/10 bg-[#D8D2C5]/30' : 'border-white/5 bg-zinc-900'} shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] backface-hidden transition-all duration-1000 ${isOpening ? 'rounded-lg' : 'rounded-sm'}`}>
-                                        <div className="absolute inset-0 z-0">
-                                            <img
-                                                src={item.imageUrl}
-                                                className={`w-full h-full object-cover transition-all duration-1000 ${isOpening ? 'scale-100 !grayscale-0 !brightness-100' : 'grayscale'}`}
-                                                style={{ filter: isOpening ? 'none' : 'grayscale(100%) brightness(35%) contrast(110%)' }}
-                                                alt={item.titleEn}
-                                            />
-                                        </div>
-
-                                        {/* CRT & Scanner Effects - Only when opening/opened */}
-                                        {isOpening && (
-                                            <>
-                                                <div className={`absolute inset-0 z-[15] crt-overlay ${theme === 'retro' ? 'opacity-20 mix-blend-multiply' : 'opacity-40'}`}></div>
-                                                <div className={`absolute inset-0 z-[16] ${theme === 'retro' ? 'bg-[#8B261D]/10' : 'bg-black'} animate-[crtFlicker_0.15s_infinite] pointer-events-none`}></div>
-                                                <div className={`scanline-beam ${theme === 'retro' ? 'opacity-50' : 'opacity-100'}`}></div>
-                                                {/* Vignette */}
-                                                <div className={`absolute inset-x-0 inset-y-0 z-[22] pointer-events-none shadow-[inset_0_0_120px_rgba(0,0,0,0.8)] ${theme === 'retro' ? 'opacity-0' : 'opacity-100'}`}></div>
-                                            </>
-                                        )}
-
-                                        <div className={`absolute inset-0 bg-gradient-to-t ${theme === 'retro' ? 'from-[#EFE9E0]/90 via-transparent' : 'from-black/80 via-transparent'} to-transparent z-10 pointer-events-none transition-opacity duration-1000 ${isOpening ? 'opacity-20' : 'opacity-100'}`}></div>
-
-                                        {/* Card Info - Hidden when expanded */}
-                                        <div className={`absolute inset-0 p-4 flex flex-col justify-between z-20 pointer-events-none ${theme === 'retro' ? 'text-[#8B261D]' : 'text-white'} transition-opacity duration-500 ${isOpening ? 'opacity-0' : 'opacity-100'}`}>
-                                            <div className="text-[8px] font-mono tracking-[0.2em] font-bold opacity-30">
-                                                SERIAL_{1001 + i}
-                                            </div>
-                                            <div>
-                                                <h2 className="text-xs font-black uppercase tracking-tight leading-tight [writing-mode:vertical-lr] mb-2 group-hover:tracking-widest transition-all duration-500">
-                                                    {lang === 'CN' ? item.titleCn : item.titleEn}
-                                                </h2>
-                                            </div>
-                                        </div>
+                    {previewCase && (
+                        <aside className="subject-overview-panel" aria-label={lang === 'CN' ? '当前档案预览' : 'Current archive preview'}>
+                            <div className="subject-overview-head">
+                                <span>Observation preview</span>
+                                <Eye size={14} />
+                            </div>
+                            <div>
+                                <h2 className="subject-preview-title">
+                                    {lang === 'CN' ? previewCase.titleCn : previewCase.titleEn}
+                                </h2>
+                                <p className="subject-preview-summary">
+                                    {lang === 'CN' ? previewCase.summaryCn : previewCase.summaryEn}
+                                </p>
+                                <div className="subject-preview-meta">
+                                    <div>
+                                        <span>Serial</span>
+                                        <b>{previewCase.id.toUpperCase()}</b>
+                                    </div>
+                                    <div>
+                                        <span>Type</span>
+                                        <b>{categoryMeta[previewCase.category].code}</b>
+                                    </div>
+                                    <div>
+                                        <span>Date</span>
+                                        <b>{previewCase.date}</b>
                                     </div>
                                 </div>
                             </div>
-                        );
-                    })}
-                    
-                    {/* Dynamic Spacer to ensure the last few cards can always glide precisely to the center without hitting scroll boundaries */}
-                    <div 
-                        className="shrink-0 pointer-events-none transition-all duration-1000"
-                        style={{ width: openingId ? '100vw' : `${centerPadding}px`, height: '1px' }} 
-                    />
-                </div>
-            </div>
+                            <div className="subject-overview-foot">
+                                <span>Hover to inspect / click to open</span>
+                                <Activity size={14} />
+                            </div>
+                        </aside>
+                    )}
+                </section>
 
-            {/* Manual Navigation Arrows (For mouse users) */}
-            {!openingId && !selectedCaseId && (
-                <>
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            targetScrollRef.current = Math.max(0, targetScrollRef.current - 600);
-                        }}
-                        className={`absolute left-8 top-1/2 -translate-y-1/2 z-[60] w-12 h-12 flex items-center justify-center rounded-full border transition-all duration-300 backdrop-blur-md group pointer-events-auto ${theme === 'retro' ? 'border-[#8B261D]/20 bg-white/40 text-[#8B261D]/40 hover:bg-white/80 hover:text-[#8B261D]' : 'border-white/10 bg-black/40 text-white/40 hover:bg-white/10 hover:text-white'}`}
-                        title="Scroll Left"
-                    >
-                        <ChevronLeft size={24} className="group-hover:-translate-x-0.5 transition-transform" />
-                    </button>
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            const container = scrollContainerRef.current;
-                            const maxScroll = container ? container.scrollWidth - container.offsetWidth : 9999;
-                            targetScrollRef.current = Math.min(maxScroll, targetScrollRef.current + 600);
-                        }}
-                        className={`absolute right-8 top-1/2 -translate-y-1/2 z-[60] w-12 h-12 flex items-center justify-center rounded-full border transition-all duration-300 backdrop-blur-sm group pointer-events-auto ${theme === 'retro' ? 'border-[#8B261D]/20 bg-white/40 text-[#8B261D]/40 hover:bg-white/80 hover:text-[#8B261D]' : 'border-white/10 bg-black/40 text-white/40 hover:bg-white/10 hover:text-white'}`}
-                        title="Scroll Right"
-                    >
-                        <ChevronRight size={24} className="group-hover:translate-x-0.5 transition-transform" />
-                    </button>
-                </>
-            )}
-
-
-            {/* Bottom UI - Expanded State Only */}
-            {openingId && selectedCase && (
-                <div className="absolute bottom-0 left-0 w-full p-10 md:p-14 flex items-end justify-between z-[2000] animate-in fade-in slide-in-from-bottom-8 duration-1000">
-                    <div className={`flex gap-16 text-[10px] font-bold uppercase tracking-[0.3em] ${theme === 'retro' ? 'text-[#8B261D]/50' : 'text-white/40'}`}>
-                        <div className="flex flex-col gap-2">
-                            <span className={`${theme === 'retro' ? 'text-[#8B261D]/30' : 'text-white/20'}`}>A — COMPLETED</span>
-                            <span className={`${theme === 'retro' ? 'text-[#8B261D]' : 'text-white'}`}>{selectedCase.date}</span>
+                <section className="subject-card-section">
+                    <div className="subject-section-top">
+                        <div className="subject-section-top-left">
+                            <span>{lang === 'CN' ? '临床索引' : 'Clinical index'}</span>
+                            <span>{String(centerIndex + 1).padStart(2, '0')} / {String(filteredCases.length).padStart(2, '0')}</span>
                         </div>
-                        <div className="flex flex-col gap-2">
-                            <span className={`${theme === 'retro' ? 'text-[#8B261D]/30' : 'text-white/20'}`}>B — TYPE</span>
-                            <span className={`${theme === 'retro' ? 'text-[#8B261D]' : 'text-white'}`}>{selectedCase.category}</span>
-                        </div>
-                        <div className="flex flex-col gap-2 hidden lg:flex">
-                            <span className={`${theme === 'retro' ? 'text-[#8B261D]/30' : 'text-white/20'}`}>C — ROLE</span>
-                            <span className={`${theme === 'retro' ? 'text-[#8B261D]' : 'text-white'}`}>SUBJECT OBSERVER</span>
-                        </div>
-                        <div className="flex flex-col gap-2 hidden lg:flex">
-                            <span className={`${theme === 'retro' ? 'text-[#8B261D]/30' : 'text-white/20'}`}>D — CLIENT</span>
-                            <span className={`${theme === 'retro' ? 'text-[#8B261D]' : 'text-white'}`}>ARCHIVE BUREAU</span>
+                        <div className="subject-pager">
+                            <span>{lang === 'CN' ? '滚轮浏览' : 'Wheel scan'}</span>
+                            <button
+                                type="button"
+                                onClick={() => nudgeWheel(-1)}
+                                aria-label={lang === 'CN' ? '上一组档案' : 'Previous archive set'}
+                            >
+                                <ChevronLeft size={16} />
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => nudgeWheel(1)}
+                                aria-label={lang === 'CN' ? '下一组档案' : 'Next archive set'}
+                            >
+                                <ChevronRight size={16} />
+                            </button>
                         </div>
                     </div>
 
-                    <div className="flex flex-col items-center gap-6">
+                    <div className="subject-wheel-stage">
                         <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                handleExplore(selectedCase.id);
-                            }}
-                            className={`group relative px-12 py-4 flex items-center gap-3 overflow-hidden ${theme === 'retro' ? 'bg-[#8B261D] text-[#EFE9E0] hover:bg-[#A83226]' : 'bg-white text-black'} font-black uppercase tracking-[0.4em] text-xs hover:px-14 transition-all duration-500`}
+                            type="button"
+                            className="subject-wheel-nav subject-wheel-nav-left"
+                            onClick={() => nudgeWheel(-1)}
+                            aria-label={lang === 'CN' ? '向左滑动档案' : 'Scroll archive left'}
                         >
-                            <span>Explore</span>
-                            <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                            <ChevronLeft size={20} />
                         </button>
-                        <div className={`text-[9px] font-mono tracking-widest ${theme === 'retro' ? 'text-[#8B261D]/30' : 'text-white/20'} uppercase`}>
-                            Swipe to return
+                        <div
+                            ref={scrollContainerRef}
+                            className="subject-wheel-viewport"
+                            onMouseLeave={() => setActiveCaseId(null)}
+                        >
+                            <div
+                                className={`subject-case-track ${trackEntered ? 'has-entered' : ''}`}
+                                style={{
+                                    paddingLeft: `${centerPadding}px`,
+                                    paddingRight: `${centerPadding}px`
+                                }}
+                            >
+                                {filteredCases.map((item, index) => {
+                                    const meta = categoryMeta[item.category];
+                                    return (
+                                        <div
+                                            key={item.id}
+                                            data-id={item.id}
+                                            className={`subject-wheel-item ${hasEntered ? 'has-entered' : ''}`}
+                                        >
+                                            <button
+                                                type="button"
+                                                className={`subject-case-card ${hoverArmed && activeCaseId === item.id ? 'is-active' : ''}`}
+                                                style={{ '--case-accent': meta.accent } as React.CSSProperties}
+                                                onMouseEnter={() => {
+                                                    if (hoverArmed) {
+                                                        activateCase(item.id);
+                                                    }
+                                                }}
+                                                onMouseMove={() => activateCase(item.id)}
+                                                onClick={() => openCase(item.id)}
+                                            >
+                                                <span className="subject-card-corner subject-card-corner-tl" />
+                                                <span className="subject-card-corner subject-card-corner-tr" />
+                                                <span className="subject-card-corner subject-card-corner-bl" />
+                                                <span className="subject-card-corner subject-card-corner-br" />
+
+                                                <div className="subject-card-meta">
+                                                    <span>SERIAL_{String(index + 1001).padStart(4, '0')}</span>
+                                                    <span>{meta.code}</span>
+                                                </div>
+
+                                                <div className="subject-card-image">
+                                                    <img
+                                                        src={item.imageUrl}
+                                                        alt={lang === 'CN' ? item.titleCn : item.titleEn}
+                                                        loading={index < 6 ? 'eager' : 'lazy'}
+                                                        onError={(event) => {
+                                                            (event.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=900';
+                                                        }}
+                                                    />
+                                                </div>
+
+                                                <div className="subject-card-body">
+                                                    <div className="subject-card-title-cn">
+                                                        {lang === 'CN' ? item.titleCn : item.titleEn}
+                                                    </div>
+                                                    <div className="subject-card-title-en">
+                                                        {lang === 'CN' ? item.titleEn : item.titleCn}
+                                                    </div>
+                                                    <p className="subject-card-summary">
+                                                        {lang === 'CN' ? item.summaryCn : item.summaryEn}
+                                                    </p>
+                                                    <div className="subject-card-signal" aria-hidden="true">
+                                                        <svg viewBox="0 0 120 24" preserveAspectRatio="none">
+                                                            <path pathLength="100" d="M0 13 H22 L26 13 L29 7 L33 18 L37 13 H56 L60 13 L64 4 L68 20 L72 13 H92 L96 13 L99 9 L103 16 L107 13 H120" />
+                                                        </svg>
+                                                    </div>
+                                                    <div className="subject-card-open">
+                                                        <span>{item.content ? (lang === 'CN' ? '打开档案' : 'Open file') : (lang === 'CN' ? '解封中' : 'Pending')}</span>
+                                                        <ArrowUpRight size={15} />
+                                                    </div>
+                                                </div>
+                                            </button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
                         </div>
+                        <button
+                            type="button"
+                            className="subject-wheel-nav subject-wheel-nav-right"
+                            onClick={() => nudgeWheel(1)}
+                            aria-label={lang === 'CN' ? '向右滑动档案' : 'Scroll archive right'}
+                        >
+                            <ChevronRight size={20} />
+                        </button>
                     </div>
+                </section>
 
-                    <div className={`hidden xl:flex gap-8 ${theme === 'retro' ? 'text-[#8B261D]/40' : 'text-white/30'}`}>
-                        <Twitter size={16} className={`cursor-pointer transition-colors ${theme === 'retro' ? 'hover:text-[#8B261D]' : 'hover:text-white'}`} />
-                        <Instagram size={16} className={`cursor-pointer transition-colors ${theme === 'retro' ? 'hover:text-[#8B261D]' : 'hover:text-white'}`} />
-                        <Mail size={16} className={`cursor-pointer transition-colors ${theme === 'retro' ? 'hover:text-[#8B261D]' : 'hover:text-white'}`} />
-                    </div>
-                </div>
-            )}
+                <footer className="subject-archive-footer">
+                    <div>{lang === 'CN' ? '主体不是被观看的人，而是观看关系留下的切口。' : 'The subject is the cut left by the act of looking.'}</div>
+                    <div className="subject-footer-center">MIST SCHOOL ARCHIVE</div>
+                    <div className="subject-footer-right">TOTAL FILES / {String(filteredCases.length).padStart(2, '0')}</div>
+                </footer>
+            </main>
 
-            {/* Archive Detail Modal with Transition */}
             {selectedCaseId && (
-                <div className="absolute inset-0 z-[3000] animate-in fade-in slide-in-from-right-32 duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)]">
+                <div className="subject-detail-layer">
                     <ArchiveDetailModal
                         isOpen={!!selectedCaseId}
                         onClose={() => setSelectedCaseId(null)}
-                        caseData={ARCHIVE_CASES.find(c => c.id === selectedCaseId) || null}
+                        caseData={selectedCase}
                         lang={lang}
                         renderInPlace={true}
                     />
@@ -558,4 +1479,3 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
         </div>
     );
 };
-

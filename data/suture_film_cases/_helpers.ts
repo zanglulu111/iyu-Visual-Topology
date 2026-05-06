@@ -1,4 +1,4 @@
-import type { SutureStyleItem } from '../suture_styles';
+import type { SutureStyleItem } from '../suture/styles';
 
 type FilmCaseInput = {
   id: string;

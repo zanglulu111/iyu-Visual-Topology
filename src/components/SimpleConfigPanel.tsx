@@ -5,7 +5,6 @@ import {
   ENGINE_CONFIGS,
   ProviderId,
   ProviderMode,
-  PROVIDER_COLORS,
   PROVIDER_LABELS,
   getEffectiveBaseUrl,
   getModelOption,
@@ -78,14 +77,7 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
 
   const getThemeColor = (id: DriverType | null | undefined) => {
     if (isRetro) return '#8B261D';
-    switch (id) {
-      case DriverType.COMMERCIAL: return '#22D3EE';
-      case DriverType.NARRATIVE: return '#D4AF37';
-      case DriverType.AESTHETIC: return '#fb7185';
-      case DriverType.EXPERIMENTAL: return '#c084fc';
-      case DriverType.TRAILER: return '#fb923c';
-      default: return '#D4AF37';
-    }
+    return id === DriverType.COMMERCIAL ? 'var(--mist-commercial-cyan)' : 'var(--mist-archive-red)';
   };
 
   const accentColor = getThemeColor(driverType);
@@ -216,10 +208,10 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
   const renderTestButton = (provider: ProviderId) => {
     const testState = tests[provider];
     const statusColor = testState.status === 'success'
-      ? '#22c55e'
+      ? 'rgba(242,242,238,0.78)'
       : testState.status === 'error'
-        ? '#ef4444'
-        : (isRetro ? '#8B261D' : PROVIDER_COLORS[provider]);
+        ? (isRetro ? '#8B261D' : 'var(--mist-archive-red)')
+        : (isRetro ? '#8B261D' : 'var(--mist-archive-red)');
     const StatusIcon = testState.status === 'success' ? Check : testState.status === 'error' ? AlertTriangle : Zap;
     const label = testState.status === 'testing'
       ? (lang === 'CN' ? '测试中...' : 'TESTING...')
@@ -244,7 +236,7 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
           {label}
         </button>
         {testState.message && testState.status !== 'idle' && (
-          <span className={`text-[9px] max-w-[200px] text-right leading-tight ${testState.status === 'success' ? 'text-green-500' : 'text-red-400'}`}>
+          <span className={`text-[9px] max-w-[200px] text-right leading-tight ${testState.status === 'success' ? 'text-zinc-300' : 'text-[var(--mist-archive-red)]'}`}>
             {testState.message}
           </span>
         )}
@@ -271,7 +263,7 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
                 ? (isRetro ? 'bg-[#8B261D] text-white border-[#8B261D]' : 'text-black border-transparent')
                 : (isRetro ? 'bg-transparent text-[#8B261D]/60 border-[#8B261D]/20 hover:border-[#8B261D]/40' : 'bg-transparent text-zinc-500 border-zinc-700 hover:border-zinc-500')
                 }`}
-              style={mode === opt.value && !isRetro ? { backgroundColor: PROVIDER_COLORS[provider] } : {}}
+              style={mode === opt.value && !isRetro ? { backgroundColor: 'var(--mist-archive-red)' } : {}}
             >
               <opt.icon size={12} />
               {opt.label}
@@ -285,7 +277,7 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
   const renderProviderCard = (provider: ProviderId) => {
     const providerConfig = config[provider];
     const ready = isProviderReady(provider);
-    const providerColor = isRetro ? '#8B261D' : PROVIDER_COLORS[provider];
+    const providerColor = isRetro ? '#8B261D' : 'var(--mist-archive-red)';
     const showBaseUrl = provider !== 'gemini' || providerConfig.mode === 'proxy';
 
     return (
@@ -293,7 +285,7 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
         <div className="flex items-start justify-between mb-3 gap-3">
           <div>
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: ready ? '#22c55e' : '#ef4444' }} />
+              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: ready ? 'rgba(242,242,238,0.72)' : (isRetro ? '#8B261D' : 'var(--mist-archive-red)') }} />
               <span className={`text-sm font-bold ${isRetro ? 'text-[#3D1A16]' : 'text-white'} uppercase tracking-widest`}>
                 {PROVIDER_LABELS[provider]}
               </span>
@@ -361,7 +353,7 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
 
   return (
     <div
-      className={`w-[1040px] max-h-[88vh] ${isRetro ? 'bg-[#F9F7F1]' : 'bg-[#0c0c0c]/90 backdrop-blur-xl'} rounded-sm flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-500 relative`}
+      className={`mist-config-panel mist-archive-modal w-[1040px] max-h-[88vh] ${isRetro ? 'bg-[#F9F7F1]' : 'bg-[#0c0c0c]/90 backdrop-blur-xl'} rounded-sm flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-500 relative`}
       style={{
         border: isRetro ? '2px solid #8B261D' : `1px solid ${accentColor}44`,
         boxShadow: isRetro
@@ -369,7 +361,7 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
           : `0 0 0 1px #1a1a1a, 0 30px 100px -20px rgba(0,0,0,0.9), 0 0 40px ${accentColor}11`,
       }}
     >
-      <div className={`flex items-center justify-between px-8 py-3 border-b ${isRetro ? 'border-[#8B261D]/20 bg-[#F9F7F1]' : 'border-zinc-900/50'} shrink-0`}>
+      <div className={`mist-archive-toolbar flex items-center justify-between px-8 py-3 border-b ${isRetro ? 'border-[#8B261D]/20 bg-[#F9F7F1]' : 'border-zinc-900/50'} shrink-0`}>
         <div className="flex flex-col">
           <h2 className={`text-xl font-serif ${isRetro ? 'text-[#8B261D]' : 'text-white'} tracking-[0.2em] leading-none uppercase`}>
             {lang === 'CN' ? '系统架构配置' : 'SYSTEM ARCHITECTURE'}
@@ -393,7 +385,7 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
           )}
           <button
             onClick={() => { handleSave(); if (onClose) onClose(); }}
-            className={`flex items-center gap-2 px-5 py-2 ${isRetro ? 'bg-[#8B261D] text-white' : 'text-black'} font-bold text-[11px] tracking-widest rounded-sm transition-all uppercase hover:brightness-110 active:scale-95`}
+            className={`mist-app-primary-action flex items-center gap-2 px-5 py-2 ${isRetro ? 'bg-[#8B261D] text-white' : 'text-black'} font-bold text-[11px] tracking-widest rounded-sm transition-all uppercase hover:brightness-110 active:scale-95`}
             style={{
               backgroundColor: isRetro ? '#8B261D' : accentColor,
               boxShadow: isRetro ? 'none' : `0 0 20px ${accentColor}33`,
@@ -457,8 +449,8 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
               disabled={!config[presetProvider].apiKey}
               className="flex items-center gap-1.5 px-3 py-1.5 border rounded-sm text-[10px] font-bold uppercase tracking-wider transition-all disabled:opacity-30 whitespace-nowrap"
               style={{
-                color: isRetro ? '#8B261D' : PROVIDER_COLORS[presetProvider],
-                borderColor: isRetro ? '#8B261D44' : `${PROVIDER_COLORS[presetProvider]}44`,
+                color: isRetro ? '#8B261D' : 'var(--mist-archive-red)',
+                borderColor: isRetro ? '#8B261D44' : 'var(--mist-archive-red-soft)',
               }}
             >
               <Plus className="w-3 h-3" />
@@ -471,7 +463,7 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
               {presets.map((preset) => {
                 const providerConfig = config[preset.provider];
                 const isActive = preset.apiKey === providerConfig.apiKey && preset.baseUrl === providerConfig.baseUrl;
-                const presetColor = isRetro ? '#8B261D' : PROVIDER_COLORS[preset.provider];
+                const presetColor = isRetro ? '#8B261D' : 'var(--mist-archive-red)';
 
                 return (
                   <div
@@ -522,7 +514,7 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
               const modelMeta = getModelOption(currentModel);
               const providerConfig = config[provider];
               const providerOk = isProviderReady(provider);
-              const providerColor = isRetro ? '#8B261D' : PROVIDER_COLORS[provider];
+              const providerColor = isRetro ? '#8B261D' : 'var(--mist-archive-red)';
 
               return (
                 <div key={engine.id} className={`${isRetro ? 'bg-[#F4EFE0] border-[#8B261D]/10 hover:border-[#8B261D]/30' : 'bg-zinc-900/10 border-zinc-800/40 hover:bg-white/[0.02]'} border rounded-sm p-3.5 transition-colors group`}>
@@ -533,7 +525,7 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
                           {lang === 'CN' ? engine.name : engine.id.replace(/([A-Z])/g, ' $1').toUpperCase()}
                         </h4>
                         <div className="flex items-center gap-1.5">
-                          <div className={`w-1.5 h-1.5 rounded-full ${providerOk ? 'bg-green-500' : 'bg-red-400'}`} />
+                          <div className={`w-1.5 h-1.5 rounded-full ${providerOk ? 'bg-white/60' : 'bg-[var(--mist-archive-red)]'}`} />
                           <span className="text-[8px] font-mono tracking-tighter" style={{ color: providerColor }}>
                             {PROVIDER_LABELS[provider]}
                           </span>

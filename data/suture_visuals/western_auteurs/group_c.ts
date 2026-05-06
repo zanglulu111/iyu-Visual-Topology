@@ -1,4 +1,4 @@
-import type { SutureStyleItem } from '../../suture_styles';
+import type { SutureStyleItem } from '../../suture/styles';
 
 const WESTERN_AUTEURS_GROUP_C = '1C. 西方电影作者：强风格表演、焦虑节奏与情节剧';
 

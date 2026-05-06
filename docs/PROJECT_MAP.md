@@ -130,7 +130,7 @@ Story = M0 {[(M1↔M2↔M3)/M4]×M5} =>Act M6 -> (M7A◇M7B) ↺ M1'
 
 核心位置：
 
-- `data/skin_libraries.ts`
+- `data/narrative/skin_libraries.ts`
 - `data/engine_surface/SUR1/`
 - `data/engine_surface/SUR2/`
 - `data/engine_surface/SUR4/`

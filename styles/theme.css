@@ -4,50 +4,50 @@
   --bg-panel: #000000;        
   --bg-card: #000000;         
   --bg-header: #000000; 
-  --surface-0: #050505;
-  --surface-1: #080808;
-  --surface-2: #0d0d0d;
-  --surface-glass: rgba(12, 12, 12, 0.72);
-  --surface-hover: rgba(255, 255, 255, 0.06);
+  --surface-0: #010101;
+  --surface-1: #030303;
+  --surface-2: #070707;
+  --surface-glass: rgba(0, 0, 0, 0.86);
+  --surface-hover: rgba(255, 255, 255, 0.08);
   
   /* --- 边界与线条：中性细线，避免冷暖偏色 --- */
-  --border-main: rgba(255, 255, 255, 0.06); 
-  --border-accent: #d4af37;
-  --border-glass: rgba(255, 255, 255, 0.03);
-  --border-strong: rgba(255, 255, 255, 0.22);
+  --border-main: rgba(255, 255, 255, 0.1);
+  --border-accent: #ff4f3f;
+  --border-glass: rgba(255, 255, 255, 0.055);
+  --border-strong: rgba(255, 255, 255, 0.32);
   
   /* --- 文字体系：中性白与中性灰 --- */
-  --text-main: #e6e6e6;
-  --text-muted: #8f8f8f;
-  --text-subtle: #5f5f5f;
-  --text-accent: #d4af37;     
-  --text-code: #b3b3b3;
+  --text-main: #f4f1ea;
+  --text-muted: rgba(244, 241, 234, 0.72);
+  --text-subtle: rgba(244, 241, 234, 0.48);
+  --text-accent: #ff4f3f;
+  --text-code: #d0cbc1;
   --text-header: #ffffff;
   
   /* --- 动态哲学家氛围色 (Glow Archetypes) --- */
-  --philosopher-glow: rgba(212, 175, 55, 0.2); /* 默认迷雾金 */
-  --philosopher-accent: #d4af37;
+  --philosopher-glow: rgba(255, 79, 63, 0.22);
+  --philosopher-accent: #ff4f3f;
 
   /* --- 交互与效果 --- */
-  --selection-bg: rgba(212, 175, 55, 0.12);
-  --accent-color: #d4af37;
-  --accent-glow: rgba(212, 175, 55, 0.15);
+  --selection-bg: rgba(255, 79, 63, 0.16);
+  --accent-color: #ff4f3f;
+  --accent-glow: rgba(255, 79, 63, 0.18);
   
   /* 材质与纹理 */
-  --texture-opacity: 0.1;
+  --texture-opacity: 0.04;
   --bg-texture: none;
   --bg-dust-texture: none;
-  --mist-gold: #D4AF37;
-  --mist-cyan: #22D3EE;
-  --mist-red: #cc0000;
-  --mist-purple: #c084fc;
-  --mist-rose: #fb7185;
-  --mist-orange: #fb923c;
+  --mist-gold: #ff4f3f;
+  --mist-cyan: #5ecfdc;
+  --mist-red: #ff4f3f;
+  --mist-purple: #8b7b92;
+  --mist-rose: #9b6c75;
+  --mist-orange: #9a734c;
   
-  --gold-primary: #D4AF37;
-  --gold-dim: rgba(212, 175, 55, 0.4);
-  --gold-bright: #FFD700;
-  --gold-soft: rgba(212, 175, 55, 0.15);
+  --gold-primary: #ff4f3f;
+  --gold-dim: rgba(255, 79, 63, 0.4);
+  --gold-bright: #ff887a;
+  --gold-soft: rgba(255, 79, 63, 0.15);
 }
 
 /* 哲学主题氛围类 */
@@ -459,4 +459,4394 @@ body::before {
 
 .cipher-char-flicker {
   animation: cipherPulse 1.5s ease-in-out infinite;
+}
+
+/* --- Mist School App Shell: high-contrast cinematic black system --- */
+:root {
+  --mist-archive-black: #000000;
+  --mist-archive-ink: #fff8ee;
+  --mist-archive-muted: rgba(255, 248, 238, 0.74);
+  --mist-archive-dim: rgba(255, 248, 238, 0.48);
+  --mist-archive-line: rgba(255, 255, 255, 0.16);
+  --mist-archive-line-strong: rgba(255, 255, 255, 0.36);
+  --mist-archive-red: #ff4f3f;
+  --mist-archive-red-soft: rgba(255, 79, 63, 0.72);
+  --mist-archive-red-faint: rgba(255, 79, 63, 0.11);
+  --mist-archive-signal-line: rgba(255, 79, 63, 0.05);
+  --mist-archive-signal-line-strong: rgba(255, 79, 63, 0.1);
+  --mist-archive-signal-wash: rgba(255, 79, 63, 0.045);
+  --mist-archive-signal-wash-faint: rgba(255, 79, 63, 0.026);
+  --mist-archive-signal-glow: rgba(255, 79, 63, 0.38);
+  --mist-archive-signal-shadow: rgba(255, 79, 63, 0.18);
+  --mist-commercial-cyan: #78c8cf;
+  --mist-commercial-cyan-soft: rgba(120, 200, 207, 0.58);
+  --mist-commercial-cyan-faint: rgba(120, 200, 207, 0.16);
+  --mist-commercial-cyan-line: rgba(120, 200, 207, 0.09);
+  --mist-commercial-cyan-line-strong: rgba(120, 200, 207, 0.15);
+  --mist-commercial-cyan-wash: rgba(120, 200, 207, 0.1);
+  --mist-commercial-cyan-wash-faint: rgba(120, 200, 207, 0.055);
+  --mist-commercial-cyan-glow: rgba(120, 200, 207, 0.42);
+  --mist-commercial-cyan-shadow: rgba(120, 200, 207, 0.16);
+  --mist-archive-panel: rgba(0, 0, 0, 0.88);
+  --mist-archive-panel-soft: rgba(255, 255, 255, 0.025);
+  --mist-archive-chromatic: 1px 0 0 rgba(255, 79, 63, 0.76), -0.55px 0 0 rgba(255, 248, 238, 0.18), 0 12px 34px rgba(0, 0, 0, 0.78);
+}
+
+.mist-commercial-mode,
+.mist-commercial-workbench,
+.mist-commercial-engine {
+  --mist-archive-red: var(--mist-commercial-cyan);
+  --mist-archive-red-soft: var(--mist-commercial-cyan-soft);
+  --mist-archive-red-faint: var(--mist-commercial-cyan-faint);
+  --text-accent: var(--mist-commercial-cyan);
+  --accent-color: var(--mist-commercial-cyan);
+  --accent-glow: rgba(94, 207, 220, 0.2);
+  --border-accent: var(--mist-commercial-cyan);
+  --mist-archive-signal-line: var(--mist-commercial-cyan-line);
+  --mist-archive-signal-line-strong: var(--mist-commercial-cyan-line-strong);
+  --mist-archive-signal-wash: var(--mist-commercial-cyan-wash);
+  --mist-archive-signal-wash-faint: var(--mist-commercial-cyan-wash-faint);
+  --mist-archive-signal-glow: var(--mist-commercial-cyan-glow);
+  --mist-archive-signal-shadow: var(--mist-commercial-cyan-shadow);
+  --mist-archive-chromatic: 1.2px 0 0 rgba(120, 200, 207, 0.82), -0.7px 0 0 rgba(255, 255, 255, 0.24), 0 12px 34px rgba(0, 0, 0, 0.72);
+}
+
+@keyframes mistArchiveGrainDrift {
+  0% { transform: translate3d(-1.2%, -0.8%, 0); }
+  33% { transform: translate3d(0.9%, 0.7%, 0); }
+  66% { transform: translate3d(-0.6%, 1.1%, 0); }
+  100% { transform: translate3d(0.7%, -1%, 0); }
+}
+
+@keyframes mistArchiveSignalPulse {
+  0%, 100% {
+    opacity: 0.52;
+    filter: brightness(0.92);
+  }
+  50% {
+    opacity: 1;
+    filter: brightness(1.16);
+  }
+}
+
+.mist-app-shell {
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 72% 18%, rgba(255,79,63,0.072), transparent 27%),
+    radial-gradient(circle at 20% 74%, rgba(255,248,238,0.026), transparent 34%),
+    linear-gradient(180deg, #000 0%, #000 100%);
+}
+
+.mist-app-shell::before,
+.mist-app-shell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.mist-app-shell::before {
+  opacity: 0.08;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.042) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.024) 1px, transparent 1px),
+    radial-gradient(circle at 17% 22%, rgba(255,255,255,0.072) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 41% 31%, rgba(255,255,255,0.052) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 72% 25%, rgba(255,255,255,0.062) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 29% 61%, rgba(255,255,255,0.046) 0 1px, transparent 1.6px),
+    linear-gradient(132deg, transparent 0 38%, rgba(255,255,255,0.042) 38.06% 38.22%, transparent 38.38% 100%),
+    linear-gradient(26deg, transparent 0 64%, rgba(255,255,255,0.036) 64.06% 64.22%, transparent 64.38% 100%),
+    linear-gradient(90deg, transparent 0 52%, var(--mist-archive-signal-line) 52.06% 52.18%, transparent 52.32% 100%);
+  background-size: 100% 21vh, 12.5% 100%;
+  mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%);
+}
+
+.mist-app-shell::after {
+  opacity: 0.045;
+  mix-blend-mode: screen;
+  background-image:
+    radial-gradient(circle at 14% 18%, rgba(255,255,255,0.36) 0 0.8px, transparent 1.45px),
+    radial-gradient(circle at 74% 46%, rgba(255,255,255,0.24) 0 0.8px, transparent 1.35px),
+    linear-gradient(90deg, transparent 0 50%, var(--mist-archive-signal-line-strong) 50.08%, transparent 50.25%);
+  background-size: 170px 136px, 260px 190px, 100% 100%;
+}
+
+.mist-app-film-grain {
+  position: absolute;
+  inset: -18%;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.028;
+  background:
+    repeating-radial-gradient(circle at 30% 50%, rgba(255,255,255,0.42) 0 0.5px, transparent 0.65px 2px),
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.08) 0 1px, transparent 1px 4px);
+  filter: blur(0.28px);
+  animation: mistArchiveGrainDrift 9s steps(3) infinite;
+}
+
+.mist-app-content-layer {
+  position: relative;
+  z-index: 10;
+}
+
+.mist-app-header {
+  height: 3.5rem;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,0.96), rgba(0,0,0,0.72)),
+    rgba(0,0,0,0.92) !important;
+  border-bottom: 1px solid var(--mist-archive-line) !important;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.04), 0 18px 54px rgba(0,0,0,0.36);
+}
+
+.mist-app-header::before,
+.mist-app-footer::before {
+  content: "";
+  position: absolute;
+  left: clamp(1rem, 2.25vw, 2.8rem);
+  right: clamp(1rem, 2.25vw, 2.8rem);
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.34), transparent);
+  opacity: 0.34;
+}
+
+.mist-app-header::before { bottom: 0; }
+.mist-app-footer::before { top: 0; }
+
+.mist-app-header-title {
+  color: var(--mist-archive-ink) !important;
+  text-shadow: none !important;
+}
+
+.mist-commercial-mode .mist-app-header-title {
+  color: var(--mist-commercial-cyan) !important;
+  text-shadow: none !important;
+}
+
+.mist-app-archive-button,
+.mist-app-toolbar-shell,
+.mist-app-footer-segment {
+  border-radius: 0.1rem !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.032), rgba(255,255,255,0.01)),
+    rgba(0,0,0,0.88) !important;
+  border: 1px solid rgba(255,255,255,0.13) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.04),
+    inset 0 -1px 0 rgba(0,0,0,0.72);
+}
+
+.mist-app-archive-button:hover,
+.mist-app-toolbar-shell:hover,
+.mist-app-footer-segment:hover {
+  border-color: var(--mist-archive-line-strong) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.014)),
+    rgba(0,0,0,0.94) !important;
+}
+
+.mist-world-law-panel,
+.mist-world-law-panel:hover {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.01)),
+    #000 !important;
+  border-color: rgba(255,248,238,0.32) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    inset 0 -1px 0 rgba(0,0,0,0.86),
+    0 24px 60px rgba(0,0,0,0.78) !important;
+  backdrop-filter: none !important;
+}
+
+.mist-app-nav-button {
+  position: relative;
+  color: var(--mist-archive-muted) !important;
+  text-shadow: none !important;
+}
+
+.mist-app-nav-button:hover,
+.mist-app-nav-button.is-active {
+  color: var(--mist-archive-ink) !important;
+}
+
+.mist-app-nav-button::after {
+  content: "";
+  position: absolute;
+  left: 0.25rem;
+  right: 0.25rem;
+  bottom: -0.42rem;
+  height: 1px;
+  transform: scaleX(0);
+  transform-origin: center;
+  background: var(--mist-archive-red);
+  opacity: 0;
+  transition: transform 280ms ease, opacity 280ms ease;
+}
+
+.mist-app-nav-button:hover::after,
+.mist-app-nav-button.is-active::after {
+  transform: scaleX(1);
+  opacity: 0.92;
+}
+
+.mist-app-footer {
+  height: 3.5rem;
+  background:
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.016) 0 1px, transparent 1px 8px),
+    linear-gradient(90deg, var(--mist-archive-signal-wash), transparent 18%, transparent 82%, var(--mist-archive-signal-wash-faint)),
+    linear-gradient(0deg, rgba(0,0,0,0.96), rgba(0,0,0,0.72)),
+    rgba(0,0,0,0.92) !important;
+  border-top: 1px solid var(--mist-archive-line) !important;
+  box-shadow: 0 -18px 54px rgba(0,0,0,0.38);
+}
+
+.mist-app-footer::after {
+  content: "";
+  position: absolute;
+  left: clamp(4.5rem, 12vw, 16rem);
+  right: clamp(4.5rem, 12vw, 16rem);
+  top: 0.34rem;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(242,242,238,0.14), transparent);
+  opacity: 0.7;
+}
+
+.mist-app-footer-control {
+  position: relative;
+  color: var(--mist-archive-muted) !important;
+  border: 1px solid transparent;
+  border-radius: 0.08rem;
+  padding: 0.28rem 0.48rem 0.26rem;
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.012));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), inset 0 -1px 0 rgba(0,0,0,0.72);
+}
+
+.mist-app-footer-control::before {
+  content: "";
+  position: absolute;
+  left: 0.32rem;
+  top: 0.25rem;
+  width: 0.44rem;
+  height: 0.44rem;
+  pointer-events: none;
+  border-left: 1px solid rgba(255,255,255,0.16);
+  border-top: 1px solid rgba(255,255,255,0.16);
+  opacity: 0;
+  transition: opacity 240ms ease, border-color 240ms ease;
+}
+
+.mist-app-footer-control:hover,
+.mist-app-footer-control.is-active {
+  color: var(--mist-archive-ink) !important;
+  border-color: rgba(255,255,255,0.12);
+  background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.016));
+}
+
+.mist-app-footer-control:hover::before,
+.mist-app-footer-control.is-active::before {
+  opacity: 1;
+  border-color: rgba(242,242,238,0.32);
+}
+
+.mist-app-footer-control.is-active::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -0.38rem;
+  width: 1.25rem;
+  height: 1px;
+  transform: translateX(-50%);
+  background: var(--mist-archive-red);
+  box-shadow: 0 0 10px var(--mist-archive-signal-glow);
+}
+
+.mist-app-footer-control svg,
+.mist-app-archive-button svg,
+.mist-app-primary-action svg {
+  stroke-width: 1.45px;
+  filter:
+    drop-shadow(0.45px 0 0 var(--mist-archive-signal-shadow));
+}
+
+.mist-app-footer-control span {
+  text-shadow:
+    0.35px 0 0 var(--mist-archive-signal-line-strong);
+}
+
+.mist-app-primary-action {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.18rem !important;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0.075), rgba(255,255,255,0.014)),
+    #000 !important;
+  border: 1px solid rgba(255,255,255,0.32) !important;
+  color: var(--mist-archive-ink) !important;
+  box-shadow: inset 0 -1px 0 var(--mist-archive-signal-glow), 0 0 0 1px rgba(0,0,0,0.8) !important;
+}
+
+.mist-app-primary-action::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, var(--mist-archive-red), rgba(242,242,238,0.42));
+  opacity: 0.76;
+  animation: mistArchiveSignalPulse 2.8s ease-in-out infinite;
+}
+
+.mist-app-primary-action::after {
+  content: "";
+  position: absolute;
+  right: 0.42rem;
+  top: 0.42rem;
+  width: 0.56rem;
+  height: 0.56rem;
+  pointer-events: none;
+  border-top: 1px solid rgba(255,255,255,0.34);
+  border-right: 1px solid rgba(255,255,255,0.34);
+  box-shadow: 0 0 10px var(--mist-archive-signal-shadow);
+}
+
+.mist-traverse-action {
+  box-shadow: none !important;
+}
+
+.mist-traverse-action::before {
+  background: linear-gradient(180deg, rgba(242,242,238,0.62), rgba(242,242,238,0.22)) !important;
+  animation: none !important;
+}
+
+.mist-traverse-action::after {
+  box-shadow: none !important;
+}
+
+.mist-traverse-action svg {
+  filter: none !important;
+}
+
+.mist-commercial-title-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: #fff !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  text-shadow:
+    1.8px 0 0 rgba(120, 200, 207, 0.82),
+    0 0 18px rgba(120, 200, 207, 0.22),
+    0 12px 32px rgba(0,0,0,0.62) !important;
+}
+
+.mist-archive-workbench {
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 66% 12%, rgba(255,79,63,0.05), transparent 30%),
+    linear-gradient(180deg, rgba(255,255,255,0.006), rgba(0,0,0,0.1)),
+    #000 !important;
+}
+
+.mist-archive-workbench:not(.absolute):not(.fixed) {
+  position: relative;
+}
+
+.mist-archive-workbench::before,
+.mist-archive-workbench::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.mist-archive-workbench::before {
+  opacity: 0.075;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.022) 1px, transparent 1px),
+    radial-gradient(circle at 18% 26%, rgba(255,255,255,0.08) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 61% 18%, rgba(255,255,255,0.055) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 84% 68%, rgba(255,255,255,0.064) 0 1px, transparent 1.6px),
+    linear-gradient(88deg, transparent 0 72%, var(--mist-archive-signal-line) 72.05% 72.2%, transparent 72.34% 100%);
+  background-size: 100% 22vh, 12.5% 100%, 210px 140px, 280px 190px, 320px 210px, 100% 100%;
+  mask-image: linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%);
+}
+
+.mist-archive-workbench::after {
+  opacity: 0.024;
+  mix-blend-mode: screen;
+  background:
+    repeating-radial-gradient(circle at 30% 50%, rgba(255,255,255,0.42) 0 0.5px, transparent 0.65px 2px),
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.08) 0 1px, transparent 1px 4px);
+  filter: blur(0.25px);
+}
+
+.mist-archive-workbench > :not(.fixed):not(.absolute) {
+  position: relative;
+  z-index: 1;
+}
+
+.mist-archive-toolbar {
+  background:
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.014) 0 1px, transparent 1px 8px),
+    linear-gradient(180deg, rgba(0,0,0,0.96), rgba(0,0,0,0.76)) !important;
+  border-color: var(--mist-archive-line) !important;
+  box-shadow: 0 16px 42px rgba(0,0,0,0.34), inset 0 -1px 0 rgba(255,255,255,0.035);
+}
+
+.mist-archive-panel {
+  border-radius: 0.16rem !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.032), rgba(255,255,255,0.008)),
+    rgba(0,0,0,0.88) !important;
+  border-color: rgba(255,255,255,0.15) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 18px 44px rgba(0,0,0,0.3);
+}
+
+.mist-archive-panel:hover {
+  border-color: rgba(255,255,255,0.2) !important;
+}
+
+.mist-archive-button {
+  border-radius: 0.14rem !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.01)),
+    #000 !important;
+  border-color: rgba(255,255,255,0.16) !important;
+  color: rgba(255,248,238,0.74) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.045), inset 0 -1px 0 rgba(0,0,0,0.72) !important;
+}
+
+.mist-archive-button:hover,
+.mist-archive-button.is-active {
+  color: var(--mist-archive-ink) !important;
+  border-color: var(--mist-archive-red-soft) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.07), var(--mist-archive-red-faint)),
+    #020202 !important;
+}
+
+.mist-archive-accent,
+.mist-archive-workbench .text-gold-primary,
+.mist-archive-workbench .text-rose-400,
+.mist-archive-workbench .text-purple-400,
+.mist-archive-workbench .text-orange-400,
+.mist-archive-workbench .text-mist-cyan {
+  color: var(--mist-archive-red) !important;
+}
+
+.mist-archive-workbench .border-gold-primary,
+.mist-archive-workbench .border-rose-500,
+.mist-archive-workbench .border-purple-500,
+.mist-archive-workbench .border-orange-500,
+.mist-archive-workbench .border-mist-cyan {
+  border-color: var(--mist-archive-red-soft) !important;
+}
+
+.mist-archive-workbench .bg-gold-primary,
+.mist-archive-workbench .bg-rose-500,
+.mist-archive-workbench .bg-purple-500,
+.mist-archive-workbench .bg-orange-500,
+.mist-archive-workbench .bg-mist-cyan {
+  background-color: var(--mist-archive-red-faint) !important;
+}
+
+.mist-archive-workbench .text-black {
+  color: var(--mist-archive-ink) !important;
+}
+
+.mist-archive-overlay {
+  background:
+    radial-gradient(circle at 72% 10%, rgba(255,79,63,0.045), transparent 34%),
+    linear-gradient(180deg, rgba(0,0,0,0.92), rgba(0,0,0,0.98)),
+    #000 !important;
+}
+
+.mist-archive-overlay::before,
+.mist-archive-modal::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  background:
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.08) 0 1px, transparent 1px 4px),
+    radial-gradient(circle at 18% 28%, rgba(255,255,255,0.12) 0 0.8px, transparent 1.6px),
+    radial-gradient(circle at 76% 66%, rgba(255,255,255,0.09) 0 0.8px, transparent 1.6px),
+    linear-gradient(88deg, transparent 0 74%, var(--mist-archive-signal-line) 74.08% 74.2%, transparent 74.34%);
+  background-size: 100% 100%, 210px 140px, 320px 210px, 100% 100%;
+}
+
+.mist-archive-overlay > * {
+  position: relative;
+  z-index: 1;
+}
+
+.mist-archive-modal {
+  border-radius: 0.16rem !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.008)),
+    rgba(0,0,0,0.95) !important;
+  border-color: rgba(255,255,255,0.2) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    inset 0 -1px 0 rgba(0,0,0,0.82),
+    0 30px 100px rgba(0,0,0,0.82) !important;
+}
+
+.mist-archive-modal > * {
+  position: relative;
+  z-index: 1;
+}
+
+.mist-archive-modal h1,
+.mist-archive-modal h2,
+.mist-archive-modal h3,
+.mist-archive-modal h4,
+.mist-archive-workbench h1,
+.mist-archive-workbench h2,
+.mist-archive-workbench h3,
+.mist-archive-workbench h4 {
+  letter-spacing: 0.08em;
+}
+
+.mist-archive-modal .rounded-xl,
+.mist-archive-modal .rounded-2xl,
+.mist-archive-modal .rounded-lg,
+.mist-archive-workbench .rounded-xl,
+.mist-archive-workbench .rounded-2xl,
+.mist-archive-workbench .rounded-lg {
+  border-radius: 0.16rem !important;
+}
+
+.mist-archive-modal .rounded-full,
+.mist-archive-workbench .rounded-full {
+  border-radius: 999px;
+}
+
+.mist-config-panel input,
+.mist-config-panel select,
+.mist-config-panel textarea,
+.mist-profile-modal input,
+.mist-history-modal input,
+.mist-archive-workbench input,
+.mist-archive-workbench select,
+.mist-archive-workbench textarea {
+  border-radius: 0.12rem !important;
+  background-color: rgba(0,0,0,0.54) !important;
+  border-color: rgba(255,255,255,0.13) !important;
+  color: var(--mist-archive-ink) !important;
+}
+
+.mist-config-panel input:focus,
+.mist-config-panel select:focus,
+.mist-config-panel textarea:focus,
+.mist-profile-modal input:focus,
+.mist-history-modal input:focus,
+.mist-archive-workbench input:focus,
+.mist-archive-workbench select:focus,
+.mist-archive-workbench textarea:focus {
+  border-color: var(--mist-archive-red-soft) !important;
+  box-shadow: inset 0 -1px 0 var(--mist-archive-signal-glow) !important;
+  outline: none !important;
+}
+
+.mist-config-panel option,
+.mist-archive-workbench option {
+  background: #070707 !important;
+  color: var(--mist-archive-ink) !important;
+}
+
+.mist-profile-modal .text-gold-primary,
+.mist-history-modal .text-gold-primary,
+.mist-task-manager-panel .text-gold-primary,
+.mist-profile-modal .text-emerald-300,
+.mist-profile-modal .text-emerald-400,
+.mist-history-modal .text-emerald-400,
+.mist-history-modal .text-indigo-300,
+.mist-history-modal .text-indigo-400,
+.mist-task-manager-panel .text-green-500,
+.mist-task-manager-panel .text-orange-400 {
+  color: var(--mist-archive-red) !important;
+}
+
+.mist-profile-modal .bg-gold-primary,
+.mist-history-modal .bg-gold-primary,
+.mist-task-manager-panel .bg-gold-primary,
+.mist-profile-modal .bg-emerald-950\/40,
+.mist-history-modal .bg-emerald-900\/20,
+.mist-history-modal .bg-indigo-900\/50,
+.mist-history-modal .bg-indigo-900\/10,
+.mist-task-manager-panel .bg-green-500,
+.mist-task-manager-panel .bg-orange-500 {
+  background-color: var(--mist-archive-red-faint) !important;
+}
+
+.mist-profile-modal .border-gold-primary\/30,
+.mist-profile-modal .border-gold-primary\/50,
+.mist-history-modal .border-gold-primary\/30,
+.mist-history-modal .border-indigo-500\/30,
+.mist-history-modal .border-emerald-500\/30,
+.mist-task-manager-panel .border-gold-primary,
+.mist-task-manager-panel .border-mist-cyan {
+  border-color: var(--mist-archive-red-soft) !important;
+}
+
+.mist-history-modal .w-80,
+.mist-history-modal .h-20,
+.mist-task-manager-panel,
+.mist-config-panel {
+  backdrop-filter: blur(18px);
+}
+
+/* Subject archive detail: align story pages with the high-contrast black system. */
+.mist-subject-detail {
+  isolation: isolate;
+  color: var(--mist-archive-ink);
+  background:
+    radial-gradient(ellipse at 68% 0%, rgba(255,79,63,0.055), transparent 31%),
+    radial-gradient(ellipse at 16% 18%, rgba(255,248,238,0.022), transparent 28%),
+    linear-gradient(180deg, rgba(255,255,255,0.006), rgba(0,0,0,0.18)),
+    #000 !important;
+}
+
+.mist-subject-detail::before,
+.mist-subject-detail::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.mist-subject-detail::before {
+  opacity: 0.07;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.038) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.022) 1px, transparent 1px),
+    radial-gradient(circle at 16% 24%, rgba(255,255,255,0.072) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 73% 18%, rgba(255,255,255,0.052) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 84% 68%, rgba(255,255,255,0.064) 0 1px, transparent 1.6px),
+    linear-gradient(90deg, transparent 0 7%, rgba(255,248,238,0.065) 7.06% 7.16%, transparent 7.28% 92.6%, rgba(255,248,238,0.065) 92.68% 92.78%, transparent 92.9% 100%),
+    linear-gradient(88deg, transparent 0 76%, var(--mist-archive-signal-line) 76.05% 76.22%, transparent 76.36% 100%);
+  background-size: 100% 22vh, 12.5% 100%, 210px 140px, 280px 190px, 330px 220px, 100% 100%, 100% 100%;
+  mask-image: linear-gradient(to bottom, transparent 0%, black 6%, black 94%, transparent 100%);
+}
+
+.mist-subject-detail::after {
+  opacity: 0.024;
+  mix-blend-mode: screen;
+  background:
+    repeating-radial-gradient(circle at 30% 50%, rgba(255,255,255,0.42) 0 0.5px, transparent 0.65px 2px),
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.08) 0 1px, transparent 1px 4px);
+  filter: blur(0.25px);
+  animation: mistArchiveGrainDrift 10s steps(3) infinite;
+}
+
+.mist-subject-detail > * {
+  position: relative;
+  z-index: 1;
+}
+
+.mist-subject-detail-modal-header {
+  background:
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.014) 0 1px, transparent 1px 8px),
+    linear-gradient(180deg, rgba(0,0,0,0.96), rgba(0,0,0,0.78)) !important;
+  border-color: var(--mist-archive-line) !important;
+  box-shadow: 0 16px 42px rgba(0,0,0,0.36), inset 0 -1px 0 rgba(255,255,255,0.035);
+}
+
+.mist-subject-detail-scroll {
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0.052) 0 1px, transparent 1px calc(100% - 1px), rgba(255,255,255,0.052) calc(100% - 1px) 100%),
+    radial-gradient(ellipse at 50% 0%, rgba(255,79,63,0.034), transparent 36%);
+}
+
+.mist-subject-detail-scroll::before {
+  content: "";
+  position: absolute;
+  left: clamp(7.2rem, 8vw, 10rem);
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  pointer-events: none;
+  background: linear-gradient(to bottom, transparent, rgba(242,242,238,0.12) 18%, rgba(242,242,238,0.08) 74%, transparent);
+  opacity: 0.58;
+}
+
+.subject-detail-back-tab {
+  border-radius: 0 0.16rem 0.16rem 0 !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)),
+    rgba(0,0,0,0.95) !important;
+  border-color: rgba(255,255,255,0.2) !important;
+  color: var(--mist-archive-muted) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    inset -1px 0 0 var(--mist-archive-signal-shadow),
+    18px 22px 54px rgba(0,0,0,0.46) !important;
+}
+
+.subject-detail-back-tab:hover {
+  color: var(--mist-archive-ink) !important;
+  border-color: var(--mist-archive-red-soft) !important;
+}
+
+.subject-detail-back-tab svg {
+  color: var(--mist-archive-red) !important;
+  filter: drop-shadow(0 0 8px var(--mist-archive-signal-shadow));
+}
+
+.subject-detail-back-tab::before {
+  content: "";
+  position: absolute;
+  top: 0.8rem;
+  right: 0.36rem;
+  width: 0.38rem;
+  height: 0.38rem;
+  border-radius: 999px;
+  background: var(--mist-archive-red);
+  box-shadow: 0 0 10px var(--mist-archive-signal-glow);
+  opacity: 0.72;
+}
+
+.mist-subject-detail-ghost {
+  top: 12rem !important;
+  height: 28rem !important;
+  opacity: 0.026 !important;
+  color: rgba(242,242,238,0.96);
+  filter: blur(0.55px);
+  mix-blend-mode: screen;
+}
+
+.mist-subject-detail-ghost h1 {
+  font-size: clamp(18rem, 24vw, 34rem) !important;
+}
+
+.mist-subject-detail-hero {
+  width: min(1180px, calc(100% - clamp(9rem, 18vw, 19rem)));
+  max-width: none;
+  margin-left: auto;
+  margin-right: auto;
+  margin-left: clamp(8.5rem, 12vw, 14rem);
+  margin-right: auto;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  padding-top: clamp(5.2rem, 8.2vh, 7.4rem) !important;
+  padding-bottom: clamp(2.6rem, 4.8vh, 4.1rem) !important;
+  background: transparent !important;
+}
+
+.mist-subject-detail-projector {
+  background:
+    radial-gradient(circle, rgba(255,248,238,0.13), rgba(255,79,63,0.035) 44%, transparent 72%) !important;
+}
+
+.mist-subject-detail-kicker {
+  width: fit-content;
+  color: var(--mist-archive-red) !important;
+  text-shadow: 0 0 14px var(--mist-archive-signal-shadow);
+}
+
+.mist-subject-detail-kicker::after,
+.mist-subject-detail-section-heading::after {
+  content: "";
+  width: clamp(2.6rem, 7vw, 7rem);
+  height: 1px;
+  margin-left: 0.5rem;
+  background: linear-gradient(90deg, var(--mist-archive-red), rgba(242,242,238,0.18), transparent);
+  opacity: 0.78;
+}
+
+.mist-subject-detail-title {
+  font-family: ui-serif, "Songti SC", "STSong", "Noto Serif CJK SC", Georgia, serif !important;
+  font-weight: 900 !important;
+  max-width: none;
+  color: var(--mist-archive-ink) !important;
+  letter-spacing: 0.025em !important;
+  font-size: clamp(3rem, 4.2vw, 5rem) !important;
+  line-height: 1.05 !important;
+  white-space: nowrap;
+  word-break: keep-all;
+  text-shadow:
+    1.1px 0 0 var(--mist-archive-red-soft),
+    -0.7px 0 0 rgba(255,255,255,0.18),
+    0 18px 48px rgba(0,0,0,0.82) !important;
+}
+
+.mist-subject-detail-meta {
+  margin-top: clamp(2.1rem, 3.3vh, 3rem) !important;
+  margin-bottom: 0 !important;
+  color: var(--mist-archive-muted);
+}
+
+.mist-subject-detail-meta span:last-child {
+  color: rgba(242,242,238,0.72) !important;
+  border-bottom-color: var(--mist-archive-red-soft) !important;
+  border-bottom-style: solid !important;
+}
+
+.mist-subject-detail-body {
+  width: min(1180px, calc(100% - clamp(9rem, 18vw, 19rem)));
+  max-width: none;
+  margin-left: clamp(8.5rem, 12vw, 14rem);
+  margin-right: auto;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 2rem;
+  gap: clamp(3.6rem, 7vh, 5.8rem) !important;
+}
+
+.mist-subject-detail-section {
+  position: relative;
+}
+
+.mist-subject-detail-section-heading {
+  color: var(--mist-archive-red) !important;
+  border-color: rgba(255,255,255,0.14) !important;
+}
+
+.mist-subject-detail-section-heading svg,
+.mist-subject-detail-section-heading h2 {
+  color: var(--mist-archive-red) !important;
+}
+
+.mist-subject-detail-section-heading h2 {
+  text-shadow: 0 0 12px var(--mist-archive-signal-shadow);
+}
+
+.mist-subject-detail-dna-panel,
+.mist-subject-detail-report-panel {
+  overflow: hidden;
+  border-radius: 0.16rem !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.008)),
+    rgba(0,0,0,0.88) !important;
+  border-color: rgba(255,255,255,0.17) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.055),
+    inset 0 -1px 0 rgba(0,0,0,0.82),
+    0 22px 54px rgba(0,0,0,0.34) !important;
+}
+
+.mist-subject-detail-dna-panel::before,
+.mist-subject-detail-report-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.055;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+.mist-subject-detail-dna-panel li {
+  color: rgba(242,242,238,0.76) !important;
+}
+
+.mist-subject-detail-dna-panel li > span {
+  color: var(--mist-archive-red) !important;
+  text-shadow: 0 0 10px var(--mist-archive-signal-shadow);
+}
+
+.mist-subject-detail-dna-panel [class*="border-t"],
+.mist-subject-detail-report-panel [class*="border-b"] {
+  border-color: rgba(255,255,255,0.14) !important;
+}
+
+.mist-subject-detail-story {
+  color: rgba(242,242,238,0.88) !important;
+  text-shadow: 0 12px 32px rgba(0,0,0,0.42);
+}
+
+.mist-subject-detail-story p {
+  line-height: 2.08 !important;
+}
+
+.mist-subject-detail-report-panel h3 {
+  color: var(--mist-archive-ink) !important;
+  text-shadow: 0 12px 34px rgba(0,0,0,0.64);
+}
+
+.mist-subject-detail-report-panel h4 {
+  color: rgba(242,242,238,0.92) !important;
+}
+
+.mist-subject-detail-report-panel h4::before {
+  content: "";
+  display: inline-block;
+  width: 0.45rem;
+  height: 0.45rem;
+  margin-right: 0.52rem;
+  border-radius: 999px;
+  background: var(--mist-archive-red);
+  box-shadow: 0 0 10px var(--mist-archive-signal-glow);
+  vertical-align: 0.08em;
+}
+
+.mist-subject-detail-verdict {
+  background:
+    linear-gradient(90deg, var(--mist-archive-red-faint), rgba(255,255,255,0.026)),
+    rgba(5,5,5,0.7) !important;
+  border-color: var(--mist-archive-red-soft) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.045);
+}
+
+.mist-subject-detail-footer {
+  border-color: rgba(255,255,255,0.14) !important;
+}
+
+.mist-subject-detail-bottom-button {
+  border-radius: 0.14rem !important;
+}
+
+.mist-subject-detail-bottom-button:not(:hover) {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.038), rgba(255,255,255,0.01)),
+    #000 !important;
+  border-color: rgba(255,255,255,0.17) !important;
+  color: var(--mist-archive-muted) !important;
+}
+
+.mist-subject-detail-bottom-button:hover {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.07), var(--mist-archive-red-faint)),
+    #020202 !important;
+  border-color: var(--mist-archive-red-soft) !important;
+  color: var(--mist-archive-ink) !important;
+}
+
+.mist-subject-detail .stamp {
+  border-color: var(--mist-archive-red) !important;
+  color: var(--mist-archive-red) !important;
+}
+
+.mist-subject-detail.is-retro {
+  color: #161512;
+}
+
+@media (max-width: 760px) {
+  .mist-subject-detail-body,
+  .mist-subject-detail-hero {
+    padding-left: 1.35rem !important;
+    padding-right: 1.35rem !important;
+  }
+
+  .mist-subject-detail-title {
+    font-size: clamp(2.3rem, 12vw, 4.4rem) !important;
+    line-height: 0.96 !important;
+    white-space: normal;
+  }
+}
+
+.mist-history-modal button,
+.mist-profile-modal button,
+.mist-config-panel button,
+.mist-task-manager-panel button,
+.mist-divergence-view button,
+.mist-bible-editor button,
+.mist-metonymy-view button {
+  border-radius: 0.14rem !important;
+}
+
+.mist-history-modal button:hover,
+.mist-profile-modal button:hover,
+.mist-config-panel button:hover,
+.mist-task-manager-panel button:hover,
+.mist-divergence-view button:hover,
+.mist-bible-editor button:hover,
+.mist-metonymy-view button:hover {
+  transform: none !important;
+}
+
+.mist-secondary-tool,
+.mist-divergence-view,
+.mist-bible-editor,
+.mist-metonymy-view {
+  color: var(--mist-archive-ink);
+}
+
+.mist-divergence-view .mist-archive-toolbar,
+.mist-bible-editor .mist-archive-toolbar,
+.mist-metonymy-view .mist-archive-toolbar {
+  min-height: 3.5rem;
+}
+
+.mist-divergence-view .mist-archive-panel,
+.mist-bible-editor .mist-archive-panel,
+.mist-metonymy-view .mist-archive-panel {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.038), rgba(255,255,255,0.012)),
+    rgba(5,5,5,0.78) !important;
+  border-color: rgba(255,255,255,0.12) !important;
+}
+
+.mist-divergence-view .mist-archive-panel:hover,
+.mist-bible-editor .mist-archive-panel:hover,
+.mist-metonymy-view .mist-archive-panel:hover {
+  border-color: rgba(255,255,255,0.22) !important;
+  transform: none !important;
+}
+
+.mist-divergence-view .text-emerald-400,
+.mist-divergence-view .text-emerald-500,
+.mist-divergence-view .text-green-500,
+.mist-divergence-view .text-amber-400,
+.mist-divergence-view .text-gold-primary,
+.mist-bible-editor .text-emerald-400,
+.mist-bible-editor .text-emerald-500,
+.mist-bible-editor .text-green-500,
+.mist-bible-editor .text-amber-300,
+.mist-bible-editor .text-amber-400,
+.mist-bible-editor .text-gold-primary,
+.mist-metonymy-view .text-rose-300,
+.mist-metonymy-view .text-amber-300,
+.mist-metonymy-view .text-purple-400,
+.mist-metonymy-view .text-purple-300,
+.mist-metonymy-view .text-indigo-400,
+.mist-metonymy-view .text-indigo-500,
+.mist-metonymy-view .text-green-500,
+.mist-metonymy-view .text-emerald-400,
+.mist-metonymy-view .text-cyan-400,
+.mist-metonymy-view .text-gold-primary {
+  color: var(--mist-archive-red) !important;
+}
+
+.mist-divergence-view .bg-emerald-900\/20,
+.mist-divergence-view .bg-green-500,
+.mist-divergence-view .bg-gold-primary,
+.mist-bible-editor .bg-emerald-900\/20,
+.mist-bible-editor .bg-green-500,
+.mist-bible-editor .bg-gold-primary,
+.mist-metonymy-view .bg-purple-500\/10,
+.mist-metonymy-view .bg-purple-600,
+.mist-metonymy-view .bg-indigo-500,
+.mist-metonymy-view .bg-indigo-900\/20,
+.mist-metonymy-view .bg-emerald-900\/20,
+.mist-metonymy-view .bg-cyan-500,
+.mist-metonymy-view .bg-green-500,
+.mist-metonymy-view .bg-gold-primary {
+  background-color: var(--mist-archive-red-faint) !important;
+}
+
+.mist-divergence-view .border-emerald-500\/30,
+.mist-divergence-view .border-gold-primary,
+.mist-bible-editor .border-emerald-500\/30,
+.mist-bible-editor .border-gold-primary,
+.mist-metonymy-view .border-purple-500\/20,
+.mist-metonymy-view .border-indigo-500,
+.mist-metonymy-view .border-indigo-500\/50,
+.mist-metonymy-view .border-emerald-500\/30,
+.mist-metonymy-view .border-cyan-500\/30,
+.mist-metonymy-view .border-gold-primary {
+  border-color: var(--mist-archive-red-soft) !important;
+}
+
+.mist-metonymy-view [class*="bg-purple-"],
+.mist-metonymy-view [class*="bg-indigo-"],
+.mist-metonymy-view [class*="bg-emerald-"],
+.mist-metonymy-view [class*="bg-green-"],
+.mist-metonymy-view [class*="bg-amber-"] {
+  background-color: var(--mist-archive-red-faint) !important;
+}
+
+.mist-metonymy-view [class*="text-purple-"],
+.mist-metonymy-view [class*="text-indigo-"],
+.mist-metonymy-view [class*="text-emerald-"],
+.mist-metonymy-view [class*="text-green-"],
+.mist-metonymy-view [class*="text-amber-"],
+.mist-metonymy-view [class*="text-rose-"] {
+  color: var(--mist-archive-red) !important;
+}
+
+.mist-metonymy-view [class*="border-purple-"],
+.mist-metonymy-view [class*="border-indigo-"],
+.mist-metonymy-view [class*="border-emerald-"],
+.mist-metonymy-view [class*="border-green-"],
+.mist-metonymy-view [class*="border-amber-"],
+.mist-metonymy-view [class*="border-rose-"] {
+  border-color: var(--mist-archive-red-soft) !important;
+}
+
+.mist-metonymy-view .fixed > .rounded-xl,
+.mist-metonymy-view .fixed > .rounded-2xl,
+.mist-bible-editor .fixed > .rounded-xl,
+.mist-divergence-view .fixed > .rounded-xl {
+  border-radius: 0.16rem !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.014)),
+    rgba(5,5,5,0.94) !important;
+  border-color: rgba(255,255,255,0.16) !important;
+  box-shadow: 0 28px 92px rgba(0,0,0,0.82), inset 0 1px 0 rgba(255,255,255,0.05) !important;
+}
+
+.mist-divergence-view .hover\:-translate-y-1:hover,
+.mist-divergence-view .scale-\[1\.01\],
+.mist-bible-editor .hover\:scale-105:hover,
+.mist-metonymy-view .group-hover\:scale-110,
+.mist-metonymy-view .scale-\[1\.01\] {
+  transform: none !important;
+}
+
+.mist-divergence-view .mist-app-primary-action,
+.mist-bible-editor .mist-app-primary-action,
+.mist-metonymy-view .mist-app-primary-action {
+  min-height: 2.25rem;
+}
+
+.mist-commercial-workbench .mist-archive-red-keep,
+.mist-commercial-workbench .text-mist-cyan,
+.mist-commercial-workbench .border-mist-cyan,
+.mist-commercial-workbench .bg-mist-cyan {
+  --mist-archive-red: var(--mist-commercial-cyan);
+}
+
+.mist-commercial-workbench .text-mist-cyan,
+.mist-commercial-workbench .text-gold-primary,
+.mist-commercial-workbench .text-rose-400,
+.mist-commercial-workbench .text-purple-400,
+.mist-commercial-workbench .text-orange-400 {
+  color: var(--mist-commercial-cyan) !important;
+}
+
+.mist-commercial-workbench .border-mist-cyan,
+.mist-commercial-workbench .border-gold-primary,
+.mist-commercial-workbench .border-rose-500,
+.mist-commercial-workbench .border-purple-500,
+.mist-commercial-workbench .border-orange-500 {
+  border-color: rgba(94,207,220,0.62) !important;
+}
+
+.mist-commercial-workbench .bg-mist-cyan,
+.mist-commercial-workbench .bg-gold-primary,
+.mist-commercial-workbench .bg-rose-500,
+.mist-commercial-workbench .bg-purple-500,
+.mist-commercial-workbench .bg-orange-500 {
+  background-color: rgba(94,207,220,0.2) !important;
+}
+
+.mist-engine-field {
+  background:
+    radial-gradient(circle at 62% 22%, rgba(255,79,63,0.042), transparent 31%),
+    linear-gradient(180deg, rgba(255,255,255,0.008), rgba(0,0,0,0.16)),
+    transparent !important;
+}
+
+.mist-engine-field::before,
+.mist-engine-field::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.mist-engine-field::before {
+  inset: clamp(1rem, 2vw, 2.25rem);
+  border: 1px solid rgba(255,255,255,0.075);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.5);
+}
+
+.mist-engine-field::after {
+  left: 0;
+  right: 0;
+  top: 21%;
+  height: 100%;
+  opacity: 0.12;
+  background:
+    radial-gradient(circle at 18% 24%, rgba(255,255,255,0.07) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 38% 17%, rgba(255,255,255,0.052) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 57% 38%, rgba(255,255,255,0.06) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 78% 27%, rgba(255,255,255,0.065) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 68% 66%, rgba(255,255,255,0.042) 0 1px, transparent 1.6px),
+    linear-gradient(21deg, transparent 0 28%, rgba(255,255,255,0.038) 28.08% 28.24%, transparent 28.42% 100%),
+    linear-gradient(66deg, transparent 0 52%, rgba(255,255,255,0.065) 52.08% 52.28%, transparent 52.45% 100%),
+    linear-gradient(88deg, transparent 0 62%, var(--mist-archive-signal-line) 62.06% 62.18%, transparent 62.32% 100%);
+}
+
+.mist-engine-title {
+  color: var(--mist-archive-ink) !important;
+  text-shadow: 2px 0.7px 0 var(--mist-archive-red-soft), -0.8px 0 0 rgba(255,255,255,0.2), 0 18px 44px rgba(0,0,0,0.78) !important;
+}
+
+.mist-commercial-engine .mist-engine-title.mist-commercial-title-pill {
+  text-shadow: 2px 0.7px 0 rgba(120, 200, 207, 0.7), -0.8px 0 0 rgba(255,255,255,0.22), 0 18px 44px rgba(0,0,0,0.78) !important;
+}
+
+.mist-engine-subtitle {
+  color: rgba(242,242,238,0.7) !important;
+}
+
+.mist-engine-canvas {
+  position: relative;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.mist-engine-canvas::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.08;
+  background: repeating-linear-gradient(0deg, rgba(255,255,255,0.2) 0 1px, transparent 1px 3px);
+  z-index: 3;
+}
+
+.mist-prophecy-slot-active {
+  color: var(--mist-archive-ink) !important;
+  border-color: rgba(255,255,255,0.78) !important;
+  text-shadow: 0.9px 0 0 var(--mist-archive-red-soft), 0 8px 24px rgba(0,0,0,0.66);
+}
+
+.mist-prophecy-slot-empty {
+  color: rgba(242,242,238,0.42) !important;
+  border-color: rgba(255,255,255,0.18) !important;
+}
+
+.mist-prophecy-slot-active:hover,
+.mist-prophecy-slot-empty:hover {
+  color: white !important;
+  border-color: var(--mist-archive-red-soft) !important;
+  background: var(--mist-archive-red-faint) !important;
+  box-shadow: inset 0 -1px 0 var(--mist-archive-signal-glow), 0 8px 24px var(--mist-archive-signal-shadow);
+}
+
+.mist-app-shell .borromean-svg-root {
+  filter: saturate(0.92) contrast(1.18) brightness(1);
+  mix-blend-mode: screen;
+  opacity: 0.7;
+}
+
+.mist-app-shell .borromean-svg-root text {
+  opacity: 0.46;
+}
+
+.mist-app-shell .borromean-svg-root rect,
+.mist-app-shell .borromean-svg-root circle {
+  vector-effect: non-scaling-stroke;
+}
+
+@media (max-width: 900px) {
+  .mist-app-header,
+  .mist-app-footer {
+    height: auto;
+    min-height: 3.5rem;
+  }
+
+  .mist-engine-field::before {
+    inset: 0.75rem;
+  }
+}
+
+/* --- Labyrinth of Eros: flat film-console prototype --- */
+.mist-labyrinth-engine {
+  --labyrinth-panel: rgba(8, 8, 8, 0.74);
+  --labyrinth-panel-light: rgba(255, 255, 255, 0.055);
+  --labyrinth-line: rgba(242, 242, 238, 0.14);
+  --labyrinth-line-soft: rgba(242, 242, 238, 0.08);
+  --labyrinth-ink: rgba(248, 248, 244, 0.96);
+  --labyrinth-muted: rgba(248, 248, 244, 0.7);
+  --labyrinth-dim: rgba(248, 248, 244, 0.56);
+  --labyrinth-red: var(--mist-archive-red);
+  --labyrinth-red-soft: var(--mist-archive-red-soft);
+  --labyrinth-red-faint: var(--mist-archive-red-faint);
+  background:
+    radial-gradient(circle at 50% 18%, rgba(255,255,255,0.09), transparent 26%),
+    radial-gradient(circle at 78% 60%, var(--mist-archive-signal-wash-faint), transparent 32%),
+    linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.22)),
+    #020202 !important;
+}
+
+.mist-labyrinth-engine::before {
+  inset: clamp(0.75rem, 1.6vw, 1.5rem);
+  border-color: rgba(255,255,255,0.06);
+}
+
+.mist-labyrinth-engine .mist-engine-canvas {
+  border-top: 0;
+}
+
+.mist-labyrinth-engine .mist-engine-canvas::before {
+  opacity: 0.045;
+}
+
+.mist-labyrinth-console {
+  --labyrinth-page-film-width: clamp(1.9rem, 3vw, 3.25rem);
+  --labyrinth-page-film-gap: clamp(0.48rem, 0.78vw, 0.82rem);
+  min-height: 0;
+  height: 100%;
+  width: min(1720px, calc(100vw - clamp(0.75rem, 1.5vw, 1.6rem)));
+  margin: 0 auto;
+  padding:
+    clamp(0.62rem, 1.2vh, 0.95rem)
+    calc(var(--labyrinth-page-film-width) + var(--labyrinth-page-film-gap))
+    clamp(3.8rem, 6vh, 4.15rem);
+  display: grid;
+  grid-template-rows: minmax(23.6rem, 49vh) minmax(0, 1fr);
+  gap: clamp(0.38rem, 0.66vh, 0.56rem);
+  position: relative;
+  z-index: 4;
+}
+
+.mist-labyrinth-page-film {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: var(--labyrinth-page-film-width);
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+  background-color: #d8d2c2;
+  background-repeat: repeat-y;
+  background-size: 116% auto;
+  opacity: 1;
+  filter: none;
+  box-shadow:
+    inset 0 0 28px rgba(0,0,0,0.22),
+    inset 0 0 0 1px rgba(0,0,0,0.58);
+}
+
+.mist-labyrinth-page-film::before,
+.mist-labyrinth-page-film::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.mist-labyrinth-page-film::before {
+  background:
+    radial-gradient(ellipse at center, rgba(255,255,255,0.08), transparent 66%),
+    repeating-linear-gradient(0deg, rgba(68,57,43,0.12) 0 1px, transparent 1px 18px),
+    linear-gradient(to bottom, rgba(255,255,255,0.18), transparent 22%, transparent 72%, rgba(97,75,55,0.16));
+  mix-blend-mode: multiply;
+  opacity: 0.34;
+}
+
+.mist-labyrinth-page-film::after {
+  background:
+    radial-gradient(circle at 52% 17%, rgba(166,64,56,0.62) 0 1.35px, transparent 2.1px),
+    radial-gradient(circle at 48% 49%, rgba(166,64,56,0.42) 0 1px, transparent 1.8px),
+    radial-gradient(circle at 56% 82%, rgba(166,64,56,0.5) 0 1.2px, transparent 2px),
+    linear-gradient(90deg, rgba(255,255,255,0.2), transparent 18%, transparent 82%, rgba(0,0,0,0.2));
+  mix-blend-mode: multiply;
+  opacity: 0.34;
+}
+
+.mist-labyrinth-page-film-left {
+  left: -0.18rem;
+  background-image: url('/portal-assets/film-side-left.png');
+  background-position: 50% top;
+}
+
+.mist-labyrinth-page-film-right {
+  right: -0.18rem;
+  background-image: url('/portal-assets/film-side-right.png');
+  background-position: 50% top;
+}
+
+.mist-labyrinth-hero,
+.mist-labyrinth-control-deck {
+  position: relative;
+  z-index: 3;
+  overflow: hidden;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.mist-labyrinth-hero {
+  display: grid;
+  grid-template-rows: 1fr;
+  padding: 0;
+}
+
+.mist-labyrinth-hero::before,
+.mist-labyrinth-hero::after,
+.mist-labyrinth-control-deck::before {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+
+.mist-labyrinth-hero::before {
+  content: none;
+  inset: 0;
+  opacity: 0.18;
+  background:
+    linear-gradient(90deg, transparent 0 18%, rgba(255,255,255,0.1) 18.08% 18.16%, transparent 18.3% 100%),
+    linear-gradient(90deg, transparent 0 82%, var(--mist-archive-signal-line-strong) 82.08% 82.22%, transparent 82.35% 100%),
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.055) 0 1px, transparent 1px 22px);
+}
+
+.mist-labyrinth-hero::after {
+  content: none;
+  left: 12%;
+  right: 12%;
+  top: 2.8rem;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.42), transparent);
+  opacity: 0.24;
+}
+
+.mist-labyrinth-hero-header {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  padding: 0 0.35rem 0.55rem;
+}
+
+.mist-labyrinth-kicker,
+.mist-labyrinth-status,
+.mist-labyrinth-deck-eyebrow {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.mist-labyrinth-kicker {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: var(--labyrinth-muted);
+}
+
+.mist-labyrinth-signal-dot {
+  width: 0.38rem;
+  height: 0.38rem;
+  display: inline-block;
+  background: var(--labyrinth-red);
+  box-shadow: 0 0 14px var(--mist-archive-signal-glow);
+}
+
+.mist-labyrinth-status {
+  color: var(--labyrinth-red);
+  padding: 0.38rem 0.58rem;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), var(--labyrinth-red-faint));
+  text-shadow: 0 0 14px var(--mist-archive-signal-glow);
+}
+
+.mist-labyrinth-film-window {
+  position: relative;
+  z-index: 3;
+  min-height: 0;
+  height: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  padding-top: 0;
+}
+
+.mist-labyrinth-perforation,
+.mist-labyrinth-side-rail {
+  pointer-events: none;
+}
+
+.mist-labyrinth-perforation {
+  opacity: 0.98;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.13);
+  background-color: #d8d2c2;
+  background-repeat: repeat-y;
+  background-size: 100% auto;
+  filter: none;
+}
+
+.mist-labyrinth-perforation-left,
+.mist-labyrinth-perforation-right {
+  background-color: #d8d2c2;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,0.26),
+    inset 0 0 24px rgba(0,0,0,0.28),
+    inset 9px 0 20px rgba(35,28,20,0.18),
+    inset -9px 0 20px rgba(35,28,20,0.18);
+}
+
+.mist-labyrinth-perforation::before,
+.mist-labyrinth-perforation::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.mist-labyrinth-perforation::before {
+  background:
+    radial-gradient(ellipse at center, rgba(255,255,255,0.2), transparent 64%),
+    repeating-linear-gradient(0deg, rgba(54,45,34,0.2) 0 1px, transparent 1px 18px),
+    linear-gradient(to bottom, rgba(255,255,255,0.18), transparent 24%, transparent 72%, rgba(105,78,53,0.18));
+  mix-blend-mode: multiply;
+  opacity: 0.48;
+}
+
+.mist-labyrinth-perforation::after {
+  background:
+    radial-gradient(circle at 52% 17%, rgba(95,24,20,0.62) 0 1.3px, transparent 2px),
+    radial-gradient(circle at 48% 49%, rgba(95,24,20,0.4) 0 1px, transparent 1.8px),
+    radial-gradient(circle at 56% 82%, rgba(95,24,20,0.52) 0 1.2px, transparent 2px),
+    linear-gradient(90deg, rgba(255,255,255,0.24), transparent 16%, transparent 84%, rgba(0,0,0,0.24));
+  opacity: 0.42;
+  mix-blend-mode: multiply;
+}
+
+.mist-labyrinth-perforation-left {
+  background-image: url('/portal-assets/film-side-left.png');
+  background-position: left top;
+}
+
+.mist-labyrinth-perforation-right {
+  background-image: url('/portal-assets/film-side-right.png');
+  background-position: right top;
+}
+
+.mist-labyrinth-screen {
+  position: relative;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 7fr);
+  align-items: center;
+  gap: clamp(1.4rem, 2.6vw, 3rem);
+  padding: clamp(1.05rem, 1.7vw, 1.65rem) clamp(2rem, 4.1vw, 4.8rem);
+  border: 1px solid rgba(255,255,255,0.12);
+  background:
+    radial-gradient(circle at 25% 50%, rgba(255,255,255,0.115), transparent 28%),
+    radial-gradient(circle at 76% 42%, rgba(255,255,255,0.06), transparent 34%),
+    linear-gradient(90deg, rgba(255,255,255,0.04), rgba(0,0,0,0.16) 44%, rgba(255,255,255,0.028)),
+    rgba(4,4,4,0.82);
+  box-shadow:
+    inset 0 0 0 1px rgba(0,0,0,0.8),
+    inset 0 0 70px rgba(255,255,255,0.035);
+}
+
+.mist-labyrinth-screen:has(.mist-labyrinth-desire-panel) {
+  grid-template-columns: minmax(0, 3fr) minmax(0, 7fr);
+}
+
+.mist-labyrinth-screen:has(.mist-labyrinth-desire-panel) .mist-labyrinth-title {
+  font-size: clamp(3.05rem, 4.9vw, 5.95rem);
+  letter-spacing: 0.08em;
+}
+
+.mist-labyrinth-screen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.08;
+  background:
+    linear-gradient(102deg, transparent 0 38%, rgba(255,255,255,0.14) 38.12% 38.34%, transparent 38.5%),
+    linear-gradient(90deg, transparent 0 56%, var(--mist-archive-signal-line-strong) 56.06% 56.18%, transparent 56.32%),
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.1) 0 1px, transparent 1px 4px);
+  mix-blend-mode: screen;
+}
+
+.mist-labyrinth-screen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 8;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow:
+    inset 0 0 0 6px rgba(0,0,0,0.22),
+    inset 0 0 42px rgba(0,0,0,0.58);
+}
+
+.mist-labyrinth-screen-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.055;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.11) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.075) 1px, transparent 1px);
+  background-size: 4.5rem 4.5rem, 4.5rem 4.5rem;
+  mask-image: radial-gradient(circle at 50% 50%, black, transparent 72%);
+}
+
+.mist-labyrinth-rings {
+  position: absolute;
+  inset: -6% 44% -12% -10%;
+  z-index: 0;
+  opacity: 0.32;
+  filter: saturate(0.75) contrast(1.2) brightness(0.72) blur(0.2px);
+  mix-blend-mode: normal;
+  transform: translateY(1rem) scale(1.04);
+}
+
+.mist-labyrinth-rings .borromean-svg-root {
+  opacity: 0.34 !important;
+  mix-blend-mode: normal !important;
+}
+
+.mist-labyrinth-title-block,
+.mist-labyrinth-formula,
+.mist-labyrinth-desire-panel,
+.mist-labyrinth-mode-toggle {
+  position: relative;
+  z-index: 6;
+  transition: none !important;
+  animation: none !important;
+}
+
+.mist-labyrinth-title-block {
+  align-self: center;
+  justify-self: end;
+  min-width: 0;
+  width: 100%;
+  padding-left: clamp(1rem, 2.2vw, 2.6rem);
+  padding-right: clamp(0.8rem, 1.65vw, 2rem);
+  max-width: none;
+}
+
+.mist-labyrinth-title {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", "Noto Serif SC", serif;
+  font-size: clamp(3.05rem, 4.9vw, 5.95rem);
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--labyrinth-ink) !important;
+  text-shadow:
+    2px 0.7px 0 var(--labyrinth-red-soft),
+    -0.8px 0 0 rgba(255,255,255,0.2),
+    0 14px 38px rgba(0,0,0,0.86),
+    0 0 22px rgba(255,255,255,0.08) !important;
+  white-space: nowrap;
+}
+
+.mist-labyrinth-subtitle {
+  margin-top: clamp(0.9rem, 1.6vh, 1.25rem);
+  max-width: none;
+  color: rgba(248,248,244,0.72);
+  font-family: Georgia, "Times New Roman", "Noto Serif SC", serif;
+  font-size: clamp(0.84rem, 0.95vw, 1rem);
+  line-height: 1.72;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.mist-labyrinth-formula {
+  justify-self: center;
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.5rem, 0.82vh, 0.72rem);
+  min-width: 0;
+  width: min(100%, 58rem);
+  height: clamp(13.8rem, 24vh, 16.4rem);
+  max-height: clamp(13.8rem, 24vh, 16.4rem);
+  justify-content: center;
+  padding: clamp(0.72rem, 1.05vw, 0.95rem) clamp(0.72rem, 1.2vw, 1rem);
+  border-left: 1px solid rgba(255,255,255,0.12);
+  background:
+    linear-gradient(90deg, rgba(0,0,0,0.42), rgba(0,0,0,0.16) 58%, transparent),
+    linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.01));
+  box-shadow: -18px 0 45px rgba(0,0,0,0.18);
+  transition: none !important;
+  animation: none !important;
+}
+
+.mist-labyrinth-screen:has(.mist-labyrinth-sentence-panel) {
+  grid-template-columns: minmax(0, 3fr) minmax(0, 7fr);
+}
+
+.mist-labyrinth-mode-toggle {
+  position: absolute;
+  top: clamp(0.72rem, 1.1vw, 1rem);
+  right: clamp(0.72rem, 1.1vw, 1rem);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.18rem;
+  padding: 0.18rem;
+  border: 1px solid rgba(255,255,255,0.1);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.014)),
+    rgba(0,0,0,0.55);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 34px rgba(0,0,0,0.38);
+  transition: none !important;
+  animation: none !important;
+}
+
+.mist-labyrinth-mode-toggle button {
+  min-width: 4.2rem;
+  height: 1.55rem;
+  padding: 0 0.58rem;
+  color: rgba(248,248,244,0.5);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.56rem;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+  background: transparent;
+  transition: none;
+}
+
+.mist-labyrinth-mode-toggle button:hover,
+.mist-labyrinth-mode-toggle button.is-active {
+  color: var(--labyrinth-ink);
+  border-color: var(--labyrinth-red-soft);
+  background: linear-gradient(180deg, rgba(255,255,255,0.045), var(--labyrinth-red-faint));
+  text-shadow: 0 0 12px var(--mist-archive-signal-glow);
+}
+
+.mist-labyrinth-formula-row {
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 0.24rem 0.38rem;
+  color: var(--labyrinth-ink);
+}
+
+.mist-labyrinth-formula-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.52rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.mist-labyrinth-formula-eyebrow {
+  margin: 0;
+  color: var(--labyrinth-red);
+  font-family: Georgia, "Times New Roman", "Noto Serif SC", serif;
+  font-size: clamp(0.94rem, 1.02vw, 1.16rem);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  text-shadow: 0 0 10px var(--mist-archive-signal-glow);
+}
+
+.mist-labyrinth-formula-caption {
+  color: var(--labyrinth-dim);
+  font-family: Georgia, "Times New Roman", "Noto Serif SC", serif;
+  font-size: clamp(0.9rem, 0.98vw, 1.08rem);
+  line-height: 1.58;
+  letter-spacing: 0.02em;
+  text-align: right;
+}
+
+.mist-labyrinth-canonical-formula {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.44rem, 0.8vh, 0.7rem);
+  min-width: 0;
+}
+
+.mist-labyrinth-formula-row-compact {
+  gap: 0.2rem 0.3rem;
+}
+
+.mist-labyrinth-formula-lead {
+  color: var(--labyrinth-red);
+  font-weight: 800;
+  text-shadow: 0 0 14px var(--mist-archive-signal-glow);
+}
+
+.mist-labyrinth-formula-token {
+  display: inline-flex;
+  min-width: 0;
+}
+
+.mist-labyrinth-formula-text {
+  font-family: Georgia, "Times New Roman", "Noto Serif SC", serif;
+  font-size: clamp(0.82rem, 1.02vw, 1.08rem);
+  line-height: 1.2;
+  color: rgba(248,248,244,0.82);
+  letter-spacing: 0.04em;
+}
+
+.mist-labyrinth-engine .mist-labyrinth-formula .mist-prophecy-slot-active,
+.mist-labyrinth-engine .mist-labyrinth-formula .mist-prophecy-slot-empty {
+  font-size: clamp(1rem, 1.08vw, 1.2rem) !important;
+  line-height: 1.12;
+  color: rgba(255,255,255,0.98) !important;
+  border-color: rgba(255,255,255,0.72) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+.mist-labyrinth-desire-panel {
+  justify-self: center;
+  align-self: center;
+  min-width: 0;
+  min-height: 0;
+  width: min(100%, 58rem);
+  height: clamp(13.8rem, 24vh, 16.4rem);
+  max-height: clamp(13.8rem, 24vh, 16.4rem);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: clamp(0.48rem, 0.82vw, 0.72rem);
+  border-left: 1px solid rgba(255,255,255,0.12);
+  background:
+    linear-gradient(90deg, rgba(0,0,0,0.46), rgba(0,0,0,0.18) 62%, transparent),
+    linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.01));
+  transition: none !important;
+  animation: none !important;
+}
+
+.mist-labyrinth-desire-sentence {
+  justify-content: center;
+  padding: clamp(0.92rem, 1.32vw, 1.28rem) clamp(0.86rem, 1.45vw, 1.45rem);
+}
+
+.mist-labyrinth-desire-sentence::before {
+  content: "";
+  position: absolute;
+  inset: 0.58rem 0.7rem;
+  pointer-events: none;
+  opacity: 0.2;
+  background:
+    linear-gradient(90deg, transparent 0 9%, rgba(255,255,255,0.22) 9.06% 9.16%, transparent 9.24%),
+    repeating-linear-gradient(0deg, transparent 0 2.18rem, rgba(255,255,255,0.16) 2.19rem 2.22rem);
+  mask-image: linear-gradient(90deg, transparent, black 16%, black 92%, transparent);
+}
+
+.mist-labyrinth-desire-sentence-body {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(0.38rem, 0.86vh, 0.58rem);
+  min-width: 0;
+  color: rgba(248,248,244,0.94);
+  font-family: Georgia, "Times New Roman", "Noto Serif SC", serif;
+  font-size: clamp(0.92rem, 1.15vw, 1.18rem);
+  line-height: 1.72;
+  letter-spacing: 0.05em;
+}
+
+.mist-labyrinth-desire-sentence-line {
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.1rem 0.34rem;
+}
+
+.mist-labyrinth-desire-sentence-line > span {
+  color: rgba(248,248,244,0.84);
+  white-space: nowrap;
+}
+
+.mist-labyrinth-desire-sentence-slot {
+  display: inline-flex;
+  min-width: 0;
+}
+
+.mist-labyrinth-desire-sentence-slot .mist-prophecy-slot-active,
+.mist-labyrinth-desire-sentence-slot .mist-prophecy-slot-empty {
+  font-size: clamp(0.86rem, 1.05vw, 1.08rem) !important;
+  line-height: 1.12 !important;
+  color: rgba(255,255,255,0.98) !important;
+  border-color: rgba(255,255,255,0.56) !important;
+}
+
+.mist-labyrinth-desire-sentence-slot .mist-prophecy-slot-empty {
+  color: rgba(248,248,244,0.7) !important;
+  border-color: rgba(248,248,244,0.28) !important;
+}
+
+.mist-labyrinth-desire-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex: 0 0 auto;
+  padding: 0 0.15rem 0.36rem;
+  color: var(--labyrinth-red);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.mist-labyrinth-side-rail {
+  position: absolute;
+  top: 0.8rem;
+  bottom: 0.8rem;
+  width: 1px;
+  background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.2), transparent);
+  opacity: 0.5;
+}
+
+.mist-labyrinth-side-rail-left { left: clamp(0.55rem, 1vw, 0.9rem); }
+.mist-labyrinth-side-rail-right { right: clamp(0.55rem, 1vw, 0.9rem); }
+
+.mist-labyrinth-control-deck {
+  padding: 0;
+}
+
+.mist-labyrinth-control-deck::before {
+  content: none;
+  inset: 0;
+  opacity: 0.08;
+  background:
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.18) 0 1px, transparent 1px 12px),
+    linear-gradient(180deg, var(--mist-archive-signal-wash-faint), transparent 28%, transparent 78%, rgba(255,255,255,0.04));
+}
+
+.mist-labyrinth-deck-header {
+  position: relative;
+  z-index: 2;
+  height: clamp(3.2rem, 6vh, 4.25rem);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding: 0 0.25rem clamp(0.75rem, 1.1vh, 1rem);
+}
+
+.mist-labyrinth-deck-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.mist-labyrinth-deck-eyebrow {
+  color: var(--labyrinth-red);
+  margin: 0 0 0.34rem;
+}
+
+.mist-labyrinth-deck-header h3 {
+  margin: 0;
+  color: var(--labyrinth-ink);
+  font-family: Georgia, "Times New Roman", "Noto Serif SC", serif;
+  font-size: clamp(1.25rem, 2vw, 2rem);
+  letter-spacing: 0.12em;
+  font-weight: 700;
+}
+
+.mist-labyrinth-deck-meter {
+  display: grid;
+  grid-template-columns: repeat(5, clamp(2rem, 4.2vw, 4.4rem));
+  gap: 0.38rem;
+  align-items: end;
+}
+
+.mist-labyrinth-deck-meter span {
+  height: 0.34rem;
+  border: 1px solid rgba(255,255,255,0.13);
+  background: linear-gradient(90deg, var(--labyrinth-red-faint), rgba(255,255,255,0.08));
+  box-shadow: inset 0 0 12px rgba(0,0,0,0.42);
+}
+
+.mist-labyrinth-deck-meter span:nth-child(2),
+.mist-labyrinth-deck-meter span:nth-child(5) {
+  background: linear-gradient(90deg, rgba(255,255,255,0.08), rgba(255,255,255,0.16));
+}
+
+.mist-labyrinth-panel-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.18rem;
+  padding: 0.18rem;
+  border: 1px solid rgba(255,255,255,0.1);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.014)),
+    rgba(0,0,0,0.55);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 34px rgba(0,0,0,0.38);
+}
+
+.mist-labyrinth-panel-switch button {
+  min-width: 4.2rem;
+  height: 1.55rem;
+  padding: 0 0.58rem;
+  color: rgba(248,248,244,0.5);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.56rem;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+  background: transparent;
+  transition: color 220ms ease, border-color 220ms ease, background 220ms ease, text-shadow 220ms ease;
+}
+
+.mist-labyrinth-panel-switch button:hover,
+.mist-labyrinth-panel-switch button.is-active {
+  color: var(--labyrinth-ink);
+  border-color: var(--labyrinth-red-soft);
+  background: linear-gradient(180deg, rgba(255,255,255,0.045), var(--labyrinth-red-faint));
+  text-shadow: 0 0 12px var(--mist-archive-signal-glow);
+}
+
+.mist-labyrinth-module-grid {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(0.65rem, 1vw, 0.95rem);
+  padding-top: clamp(0.8rem, 1.35vh, 1.2rem);
+}
+
+.mist-labyrinth-module-grid-desire {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(0.34rem, 0.58vw, 0.5rem);
+  padding-top: clamp(0.36rem, 0.68vh, 0.52rem);
+  align-content: stretch;
+}
+
+.mist-labyrinth-module {
+  min-width: 0;
+  min-height: clamp(9rem, 18vh, 13.5rem);
+  display: flex;
+  flex-direction: column;
+  gap: 0.82rem;
+  padding: clamp(0.75rem, 1vw, 1rem);
+  border: 1px solid rgba(255,255,255,0.095);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.043), rgba(255,255,255,0.014)),
+    rgba(0,0,0,0.42);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+.mist-labyrinth-module-grid-desire .mist-labyrinth-module {
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  gap: 0.34rem;
+  padding: clamp(0.36rem, 0.58vw, 0.52rem);
+}
+
+.mist-labyrinth-module-grid-desire .mist-labyrinth-module-top {
+  grid-template-columns: 1.45rem 1fr;
+  gap: 0.34rem;
+}
+
+.mist-labyrinth-module-grid-desire .mist-labyrinth-module-index {
+  height: 1.16rem;
+  font-size: 0.5rem;
+}
+
+.mist-labyrinth-module-grid-desire .mist-labyrinth-module h4 {
+  font-size: clamp(0.56rem, 0.66vw, 0.68rem);
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mist-labyrinth-module-grid-desire .mist-labyrinth-module p {
+  display: none;
+}
+
+.mist-labyrinth-module-grid-desire .mist-labyrinth-module-slots {
+  gap: 0.22rem;
+  margin-top: 0;
+  overflow: hidden;
+}
+
+.mist-labyrinth-module-grid-desire .mist-labyrinth-mini-slot {
+  min-height: 0;
+  height: clamp(1.26rem, 3.1vh, 1.48rem);
+  padding: 0.12rem 0.28rem;
+  overflow: hidden;
+}
+
+.mist-labyrinth-module:hover {
+  border-color: rgba(255,255,255,0.2);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.018)),
+    rgba(0,0,0,0.5);
+}
+
+.mist-labyrinth-module-top {
+  display: grid;
+  grid-template-columns: 2.15rem 1fr;
+  gap: 0.65rem;
+  align-items: start;
+  min-width: 0;
+}
+
+.mist-labyrinth-module-index {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 1.65rem;
+  border: 1px solid var(--labyrinth-red-soft);
+  color: var(--labyrinth-red);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  background: var(--labyrinth-red-faint);
+  box-shadow: 0 0 18px var(--mist-archive-signal-shadow);
+}
+
+.mist-labyrinth-module h4 {
+  margin: 0;
+  color: var(--labyrinth-ink);
+  font-size: clamp(0.78rem, 1vw, 0.92rem);
+  line-height: 1.25;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+}
+
+.mist-labyrinth-module p {
+  margin: 0.32rem 0 0;
+  color: var(--labyrinth-dim);
+  font-size: 0.68rem;
+  line-height: 1.45;
+  letter-spacing: 0.05em;
+}
+
+.mist-labyrinth-module-slots {
+  display: flex;
+  flex-direction: column;
+  gap: 0.54rem;
+  min-width: 0;
+  margin-top: auto;
+}
+
+.mist-labyrinth-mini-slot {
+  min-width: 0;
+  min-height: 2.05rem;
+  display: flex;
+  align-items: center;
+  padding: 0.32rem 0.48rem;
+  border: 1px solid rgba(255,255,255,0.075);
+  background: rgba(255,255,255,0.025);
+}
+
+.mist-labyrinth-mini-slot .mist-prophecy-slot-active,
+.mist-labyrinth-mini-slot .mist-prophecy-slot-empty {
+  font-size: clamp(0.76rem, 0.95vw, 0.92rem) !important;
+  white-space: normal !important;
+  line-height: 1.25;
+}
+
+.mist-labyrinth-module-grid-desire .mist-labyrinth-mini-slot .mist-prophecy-slot-active,
+.mist-labyrinth-module-grid-desire .mist-labyrinth-mini-slot .mist-prophecy-slot-empty {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap !important;
+  font-size: clamp(0.58rem, 0.7vw, 0.68rem) !important;
+  line-height: 1.05;
+}
+
+.mist-labyrinth-engine .mist-prophecy-slot-active:not(.mist-labyrinth-summary-sentence .mist-prophecy-slot-active) {
+  text-shadow: none;
+}
+
+.mist-labyrinth-sentence-panel {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.95rem;
+  padding: clamp(0.7rem, 1vw, 1rem);
+  border-left: 1px solid rgba(255,255,255,0.12);
+  background:
+    linear-gradient(90deg, rgba(0,0,0,0.46), rgba(0,0,0,0.18) 62%, transparent),
+    linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.01));
+}
+
+.mist-labyrinth-sentence-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding-bottom: 0.5rem;
+}
+
+.mist-labyrinth-sentence-eyebrow {
+  margin: 0 0 0.35rem;
+  color: var(--labyrinth-red);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.mist-labyrinth-sentence-header h4 {
+  margin: 0;
+  color: var(--labyrinth-ink);
+  font-family: Georgia, "Times New Roman", "Noto Serif SC", serif;
+  font-size: clamp(1rem, 1.5vw, 1.45rem);
+  letter-spacing: 0.12em;
+  font-weight: 700;
+}
+
+.mist-labyrinth-sentence-chip {
+  color: var(--labyrinth-red);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.56rem;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 0.35rem 0.55rem;
+  background: rgba(255,255,255,0.024);
+}
+
+.mist-labyrinth-sentence-body {
+  color: var(--labyrinth-ink);
+  font-size: clamp(0.88rem, 1.15vw, 1.08rem);
+  line-height: 1.9;
+  letter-spacing: 0.04em;
+}
+
+.mist-labyrinth-sentence-body .mist-prophecy-slot-active,
+.mist-labyrinth-sentence-body .mist-prophecy-slot-empty {
+  font-size: clamp(0.74rem, 0.9vw, 0.88rem) !important;
+  line-height: 1.15;
+}
+
+.mist-labyrinth-surface-grid {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(10.8rem, 0.52fr) minmax(0, 1.78fr) minmax(12.4rem, 0.64fr);
+  gap: clamp(0.3rem, 0.5vw, 0.46rem);
+  height: 100%;
+  min-height: 0;
+  padding-top: 0;
+}
+
+.mist-labyrinth-surface-card {
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: clamp(0.38rem, 0.58vw, 0.54rem);
+  border: 1px solid rgba(255,255,255,0.1);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.012)),
+    rgba(0,0,0,0.46);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.04),
+    inset 0 -16px 38px rgba(0,0,0,0.18);
+}
+
+.mist-labyrinth-surface-summary-card {
+  background:
+    radial-gradient(circle at 68% 20%, var(--mist-archive-signal-wash-faint), transparent 38%),
+    linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.014)),
+    rgba(0,0,0,0.48);
+}
+
+.mist-labyrinth-creative-card .mist-labyrinth-structure-custom-input {
+  margin-top: 0;
+  min-height: 0;
+}
+
+.mist-labyrinth-surface-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 1.36rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding-bottom: 0.22rem;
+}
+
+.mist-labyrinth-surface-header-tools {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.28rem;
+  min-width: 0;
+}
+
+.mist-labyrinth-surface-eyebrow {
+  margin: 0 0 0.2rem;
+  color: var(--labyrinth-red);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.54rem;
+  font-weight: 900;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.mist-labyrinth-surface-card h4 {
+  flex: 0 0 auto;
+  margin: 0;
+  color: var(--labyrinth-ink);
+  font-family: Georgia, "Times New Roman", "Noto Serif SC", serif;
+  font-size: clamp(0.72rem, 0.82vw, 0.92rem);
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  line-height: 1.18;
+  white-space: nowrap;
+}
+
+.mist-labyrinth-surface-chip,
+.mist-labyrinth-surface-clear {
+  flex: 0 0 auto;
+  color: var(--labyrinth-dim);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.5rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 0.28rem 0.46rem;
+  background: rgba(255,255,255,0.022);
+}
+
+.mist-labyrinth-surface-mode-toggle,
+.mist-labyrinth-surface-actions {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.16rem;
+  padding: 0.12rem;
+  border: 1px solid rgba(255,255,255,0.09);
+  background: rgba(255,255,255,0.018);
+}
+
+.mist-labyrinth-surface-mode-toggle button,
+.mist-labyrinth-surface-actions button {
+  height: 1.28rem;
+  min-width: 1.28rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  color: rgba(248,248,244,0.46);
+  background: transparent;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.46rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: none;
+}
+
+.mist-labyrinth-surface-mode-toggle button {
+  min-width: 2.12rem;
+  padding: 0 0.26rem;
+}
+
+.mist-labyrinth-surface-mode-toggle button:hover,
+.mist-labyrinth-surface-mode-toggle button.is-active,
+.mist-labyrinth-surface-actions button:hover,
+.mist-labyrinth-surface-actions button.is-locked {
+  color: var(--labyrinth-ink);
+  border-color: var(--labyrinth-red-soft);
+  background: var(--labyrinth-red-faint);
+  text-shadow: 0 0 10px var(--mist-archive-signal-glow);
+}
+
+.mist-labyrinth-surface-clear {
+  opacity: 0.44;
+  transition: none;
+}
+
+.mist-labyrinth-surface-clear.is-visible,
+.mist-labyrinth-surface-clear:hover {
+  opacity: 1;
+  color: var(--labyrinth-red);
+  border-color: var(--labyrinth-red-soft);
+  text-shadow: 0 0 12px var(--mist-archive-signal-glow);
+}
+
+.mist-labyrinth-surface-blocks {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.2rem;
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+  align-content: start;
+  transition: none !important;
+  animation: none !important;
+}
+
+.mist-labyrinth-structure-blocks {
+  flex: 0 0 auto;
+}
+
+.mist-labyrinth-structure-blocks .mist-labyrinth-surface-label {
+  font-family: Georgia, "Times New Roman", "Noto Serif SC", serif;
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: rgba(248,248,244,0.84);
+}
+
+.mist-labyrinth-surface-sentence {
+  min-width: 0;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: clamp(0.58rem, 0.82vw, 0.78rem) clamp(0.62rem, 0.9vw, 0.88rem);
+  border: 1px solid rgba(255,255,255,0.095);
+  background:
+    repeating-linear-gradient(0deg, transparent 0 1.78rem, rgba(255,255,255,0.055) 1.8rem 1.84rem),
+    rgba(255,255,255,0.028);
+  color: rgba(248,248,244,0.82);
+  font-family: Georgia, "Times New Roman", "Noto Serif SC", serif;
+  font-size: 15px;
+  line-height: 1.95;
+  letter-spacing: 0;
+  animation: none;
+  transition: none;
+}
+
+.mist-labyrinth-structure-sentence {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 0.42rem;
+}
+
+.mist-labyrinth-structure-sentence-row {
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.1rem 0.45rem;
+}
+
+.mist-labyrinth-structure-sentence-row > span:first-child {
+  color: rgba(248,248,244,0.84);
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.mist-labyrinth-summary-sentence {
+  min-height: 0;
+  border: 0;
+  background: rgba(255,255,255,0.028);
+  font-size: 15px;
+  line-height: 2;
+  letter-spacing: 0;
+  overflow: visible;
+}
+
+.mist-labyrinth-summary-fragment {
+  display: inline;
+  animation: none;
+  transition: none;
+}
+
+.mist-labyrinth-summary-line {
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  min-height: 1.9rem;
+  gap: 0 0;
+  color: rgba(212,212,216,0.92);
+  font-family: Georgia, "Times New Roman", "Noto Serif SC", serif;
+  font-size: 15px;
+  line-height: 2;
+  letter-spacing: 0;
+}
+
+.mist-labyrinth-summary-sentence.is-collapsed {
+  display: block;
+  overflow: visible;
+  white-space: normal;
+}
+
+.mist-labyrinth-summary-sentence.is-collapsed .mist-labyrinth-summary-line {
+  display: inline;
+  min-height: 1.9rem;
+  white-space: normal;
+  vertical-align: baseline;
+}
+
+.mist-labyrinth-summary-sentence.is-collapsed .mist-labyrinth-summary-line + .mist-labyrinth-summary-line {
+  margin-left: 0;
+}
+
+.mist-labyrinth-summary-sentence.is-collapsed .mist-labyrinth-summary-line > span,
+.mist-labyrinth-summary-sentence.is-collapsed .mist-labyrinth-inline-control-slot {
+  display: inline;
+  white-space: normal;
+}
+
+.mist-labyrinth-summary-line > span:not(.mist-labyrinth-inline-control-slot) {
+  color: rgba(212,212,216,0.92);
+  font-family: Georgia, "Times New Roman", "Noto Serif SC", serif;
+  font-size: 15px;
+  line-height: 2;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.mist-labyrinth-surface-sentence-inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.12rem 0.72rem;
+}
+
+.mist-labyrinth-surface-sentence-slot {
+  display: inline-flex;
+  min-width: 0;
+  vertical-align: baseline;
+}
+
+.mist-labyrinth-surface-sentence .mist-prophecy-slot-active,
+.mist-labyrinth-surface-sentence .mist-prophecy-slot-empty {
+  line-height: 1.12 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+.mist-labyrinth-surface-sentence .mist-prophecy-slot-active {
+  font-size: clamp(1.125rem, 1.08vw, 1.25rem) !important;
+  color: rgba(255,255,255,0.98) !important;
+  border-color: rgba(255,255,255,0.72) !important;
+  letter-spacing: 0 !important;
+}
+
+.mist-labyrinth-surface-sentence .mist-prophecy-slot-empty {
+  font-size: 1rem !important;
+  font-weight: 500 !important;
+  color: rgba(248,248,244,0.68) !important;
+  border-color: rgba(248,248,244,0.28) !important;
+  border-bottom-style: dashed !important;
+  letter-spacing: 0 !important;
+}
+
+.mist-labyrinth-structure-sentence .mist-prophecy-slot-active {
+  font-size: clamp(1.125rem, 1.08vw, 1.25rem) !important;
+}
+
+.mist-labyrinth-structure-sentence .mist-prophecy-slot-empty {
+  font-size: 1rem !important;
+}
+
+.mist-labyrinth-surface-sentence .mist-labyrinth-identity-slot {
+  width: auto;
+  max-width: 14rem;
+  margin: 0 0.18rem;
+  vertical-align: baseline;
+}
+
+.mist-labyrinth-summary-sentence .mist-labyrinth-identity-slot span {
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.mist-labyrinth-summary-sentence .mist-labyrinth-identity-slot.is-filled span {
+  font-size: clamp(1.125rem, 1.08vw, 1.25rem);
+  font-weight: 800;
+}
+
+.mist-labyrinth-surface-sentence-empty {
+  color: rgba(248,248,244,0.48);
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+.mist-labyrinth-surface-blocks-two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.mist-labyrinth-surface-summary-slots {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.mist-labyrinth-surface-block {
+  min-width: 0;
+  min-height: 1.88rem;
+  display: grid;
+  grid-template-columns: minmax(4.35rem, 0.36fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 0.38rem;
+  padding: 0.12rem 0.25rem;
+  border: 1px solid rgba(255,255,255,0.095);
+  background: rgba(255,255,255,0.035);
+}
+
+.mist-labyrinth-surface-identity-block {
+  grid-column: span 1;
+}
+
+.mist-labyrinth-module-identity-control {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.24rem;
+}
+
+.mist-labyrinth-module-identity-control .mist-labyrinth-identity-slot {
+  margin: 0 !important;
+}
+
+.mist-labyrinth-module-slot-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.1rem;
+  min-width: max-content;
+}
+
+.mist-labyrinth-module-slot-actions button {
+  width: 1.14rem;
+  height: 1.14rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: rgba(248,248,244,0.5);
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.026);
+  transition: none;
+}
+
+.mist-labyrinth-module-slot-actions button:hover:not(:disabled),
+.mist-labyrinth-module-slot-actions button.is-locked {
+  color: var(--labyrinth-ink);
+  border-color: var(--labyrinth-red-soft);
+  background: var(--labyrinth-red-faint);
+  text-shadow: 0 0 10px var(--mist-archive-signal-glow);
+}
+
+.mist-labyrinth-module-slot-actions button:disabled {
+  opacity: 0.28;
+  cursor: not-allowed;
+}
+
+.mist-labyrinth-surface-label {
+  color: rgba(248,248,244,0.66);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.mist-labyrinth-identity-slot {
+  min-width: 0;
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  border: 0;
+  border-bottom: 2px solid var(--gold-primary);
+  background: transparent;
+  color: rgba(248,248,244,0.74);
+  cursor: pointer;
+  transition: none;
+}
+
+.mist-labyrinth-identity-slot span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: Georgia, "Times New Roman", "Noto Serif SC", serif;
+  font-size: clamp(0.96rem, 1.04vw, 1.16rem);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.mist-labyrinth-identity-slot:hover,
+.mist-labyrinth-identity-slot.is-filled {
+  color: rgba(255,255,255,0.97);
+  border-color: var(--gold-primary);
+  text-shadow: none;
+}
+
+.mist-labyrinth-identity-slot.is-locked {
+  border-color: var(--gold-primary);
+  color: var(--labyrinth-ink);
+  background: var(--labyrinth-red-faint);
+}
+
+.mist-labyrinth-surface-static-value {
+  min-width: 0;
+  color: rgba(248,248,244,0.78);
+  font-family: Georgia, "Times New Roman", "Noto Serif SC", serif;
+  font-size: clamp(0.64rem, 0.75vw, 0.78rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mist-labyrinth-surface-summary-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.52rem;
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+
+.mist-labyrinth-surface-summary-input {
+  flex: 1 1 auto;
+  min-height: clamp(5.2rem, 12vh, 8.8rem);
+  resize: none;
+  color: rgba(248,248,244,0.92);
+  font-family: Georgia, "Times New Roman", "Noto Serif SC", serif;
+  font-size: clamp(0.92rem, 1vw, 1.08rem);
+  line-height: 1.62;
+  letter-spacing: 0.04em;
+  border: 1px solid rgba(255,255,255,0.1);
+  outline: none;
+  padding: 0.64rem 0.7rem;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.012)),
+    rgba(0,0,0,0.34);
+  transition: none;
+}
+
+.mist-labyrinth-structure-custom-input {
+  margin-top: auto;
+  width: 100%;
+  min-height: clamp(6.4rem, 17vh, 11.2rem);
+}
+
+.mist-labyrinth-world-law-module {
+  position: relative;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.28rem;
+  min-width: 0;
+  padding: 0.46rem 0.5rem 0.5rem;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.12);
+  background:
+    radial-gradient(circle at 88% 18%, rgba(178,34,34,0.16), transparent 42%),
+    linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.014)),
+    rgba(0,0,0,0.34);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.045),
+    inset 0 -1px 0 rgba(0,0,0,0.68);
+}
+
+.mist-labyrinth-world-law-module::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.42rem;
+  bottom: 0.42rem;
+  width: 2px;
+  background: linear-gradient(180deg, var(--labyrinth-red), rgba(248,248,244,0.28));
+  opacity: 0.72;
+}
+
+.mist-labyrinth-world-law-main {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.1rem;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.mist-labyrinth-world-law-main:disabled,
+.mist-labyrinth-world-law-pips button:disabled {
+  cursor: default;
+}
+
+.mist-labyrinth-world-law-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.22rem;
+  color: rgba(248,248,244,0.54);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.5rem;
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.mist-labyrinth-world-law-kicker svg {
+  color: var(--labyrinth-red);
+  stroke-width: 1.6px;
+}
+
+.mist-labyrinth-world-law-current {
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.45rem;
+  color: var(--labyrinth-ink);
+}
+
+.mist-labyrinth-world-law-current b {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: Georgia, "Times New Roman", "Noto Serif SC", serif;
+  font-size: 1rem;
+  line-height: 1.28;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.mist-labyrinth-world-law-current em {
+  flex: 0 0 auto;
+  color: rgba(248,248,244,0.42);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.52rem;
+  line-height: 1;
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.mist-labyrinth-world-law-description {
+  min-height: 2.38rem;
+  color: rgba(212,212,216,0.76);
+  font-family: Georgia, "Times New Roman", "Noto Serif SC", serif;
+  font-size: 0.62rem;
+  line-height: 1.48;
+  letter-spacing: 0;
+}
+
+.mist-labyrinth-world-law-pips {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.12rem;
+  min-width: 0;
+}
+
+.mist-labyrinth-world-law-pips button {
+  min-width: 0;
+  height: 1.42rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.12rem;
+  padding: 0 0.1rem;
+  color: rgba(248,248,244,0.42);
+  border: 1px solid rgba(255,255,255,0.095);
+  background: rgba(255,255,255,0.018);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  transition: none;
+}
+
+.mist-labyrinth-world-law-pips button span {
+  color: rgba(248,248,244,0.34);
+  font-size: 0.48rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.mist-labyrinth-world-law-pips button b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.5rem;
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+}
+
+.mist-labyrinth-world-law-pips button:hover:not(:disabled),
+.mist-labyrinth-world-law-pips button.is-active {
+  color: var(--labyrinth-ink);
+  border-color: var(--labyrinth-red-soft);
+  background: var(--labyrinth-red-faint);
+  text-shadow: 0 0 10px var(--mist-archive-signal-glow);
+}
+
+.mist-labyrinth-world-law-pips button.is-active span {
+  color: var(--labyrinth-red);
+}
+
+.mist-labyrinth-surface-summary-input::placeholder {
+  color: rgba(248,248,244,0.48);
+}
+
+.mist-labyrinth-surface-summary-input:focus {
+  border-color: var(--labyrinth-red-soft);
+  box-shadow: inset 0 -1px 0 var(--mist-archive-signal-glow), 0 0 0 1px rgba(0,0,0,0.6);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.045), var(--labyrinth-red-faint)),
+    rgba(0,0,0,0.38);
+}
+
+.mist-labyrinth-surface-summary-note {
+  color: rgba(248,248,244,0.52);
+  font-size: 0.58rem;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+}
+
+.mist-labyrinth-implant-card {
+  overflow: hidden;
+}
+
+.mist-labyrinth-implant-header {
+  align-items: center;
+  flex: 0 0 1.72rem;
+  min-height: 1.72rem;
+}
+
+.mist-labyrinth-implant-tabs {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.14rem;
+  padding: 0.1rem;
+  border: 1px solid rgba(255,255,255,0.09);
+  background: rgba(255,255,255,0.018);
+}
+
+.mist-labyrinth-implant-tabs button,
+.mist-labyrinth-implant-result-button {
+  height: 1.28rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  color: rgba(248,248,244,0.48);
+  background: transparent;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.48rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: none;
+}
+
+.mist-labyrinth-implant-tabs button {
+  min-width: 1.42rem;
+}
+
+.mist-labyrinth-implant-result-button {
+  gap: 0.24rem;
+  padding: 0 0.44rem;
+  border-color: rgba(255,255,255,0.09);
+  background: rgba(255,255,255,0.018);
+}
+
+.mist-labyrinth-implant-tabs button:hover,
+.mist-labyrinth-implant-tabs button.is-active,
+.mist-labyrinth-implant-result-button:hover,
+.mist-labyrinth-implant-result-button.is-ready {
+  color: var(--labyrinth-ink);
+  border-color: var(--labyrinth-red-soft);
+  background: var(--labyrinth-red-faint);
+  text-shadow: 0 0 10px var(--mist-archive-signal-glow);
+}
+
+.mist-labyrinth-implant-result-button.is-ready::before {
+  content: "";
+  width: 0.34rem;
+  height: 0.34rem;
+  border-radius: 999px;
+  background: var(--gold-primary);
+  box-shadow: 0 0 10px var(--mist-archive-signal-glow);
+}
+
+.mist-labyrinth-image-implant {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.mist-labyrinth-image-implant-page {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.34rem;
+}
+
+.mist-labyrinth-image-implant-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  flex: 0 0 auto;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed rgba(248,248,244,0.2);
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255,255,255,0.075), transparent 38%),
+    repeating-linear-gradient(0deg, transparent 0 8px, rgba(255,255,255,0.025) 8px 9px),
+    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.012)),
+    rgba(255,255,255,0.02);
+  box-shadow:
+    inset 0 0 45px rgba(0,0,0,0.34),
+    inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+.mist-labyrinth-image-implant-frame img {
+  width: auto;
+  height: 100%;
+  max-width: none;
+  object-fit: unset;
+  object-position: center center;
+  filter: saturate(0.88) contrast(1.06) brightness(0.92);
+  transition: filter 160ms ease;
+}
+
+.mist-labyrinth-image-implant-frame:hover img {
+  filter: saturate(0.92) contrast(1.08) brightness(0.98);
+}
+
+.mist-labyrinth-image-implant-frame.has-image {
+  border-style: solid;
+  border-color: rgba(248,248,244,0.2);
+}
+
+.mist-labyrinth-image-implant-upload {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.34rem;
+  color: rgba(248,248,244,0.64);
+  background: transparent;
+}
+
+.mist-labyrinth-image-implant-upload span {
+  color: rgba(248,248,244,0.78);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.22em;
+}
+
+.mist-labyrinth-image-implant-upload b {
+  color: rgba(248,248,244,0.86);
+  font-family: Georgia, "Times New Roman", "Noto Serif SC", serif;
+  font-size: clamp(0.78rem, 0.9vw, 0.96rem);
+  letter-spacing: 0.08em;
+}
+
+.mist-labyrinth-image-implant-upload:hover {
+  color: var(--labyrinth-ink);
+  text-shadow: 0 0 12px var(--mist-archive-signal-glow);
+}
+
+.mist-labyrinth-image-actions {
+  position: absolute;
+  right: 0.45rem;
+  bottom: 0.45rem;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.24rem;
+  max-width: calc(100% - 0.9rem);
+  padding: 0.22rem;
+  border: 1px solid rgba(248,248,244,0.08);
+  background: rgba(3,3,3,0.48);
+  box-shadow: 0 8px 22px rgba(0,0,0,0.35);
+}
+
+.mist-labyrinth-image-action-button {
+  min-height: 1.55rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.22rem;
+  padding: 0.24rem 0.42rem;
+  border: 1px solid rgba(248,248,244,0.18);
+  color: rgba(248,248,244,0.72);
+  background: rgba(8,8,8,0.78);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.48rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.78;
+  transition:
+    opacity 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.mist-labyrinth-image-action-button:hover:not(:disabled) {
+  opacity: 1;
+  color: var(--labyrinth-ink);
+  border-color: rgba(248,248,244,0.42);
+  background: rgba(12,12,12,0.94);
+  box-shadow: 0 0 18px rgba(255,255,255,0.1), 0 0 20px var(--mist-archive-signal-shadow);
+}
+
+.mist-labyrinth-image-action-button:disabled {
+  opacity: 0.34;
+  cursor: not-allowed;
+}
+
+.mist-labyrinth-image-implant-frame:hover .mist-labyrinth-image-actions {
+  border-color: rgba(248,248,244,0.16);
+  background: rgba(3,3,3,0.62);
+}
+
+.mist-labyrinth-image-note {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.24rem;
+}
+
+.mist-labyrinth-image-note > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  color: rgba(248,248,244,0.7);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.56rem;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.mist-labyrinth-image-note textarea {
+  flex: 1 1 0;
+  min-height: 0;
+  height: 100%;
+  width: 100%;
+  resize: none;
+  outline: none;
+  border: 1px dashed rgba(248,248,244,0.18);
+  padding: 0.62rem 0.7rem;
+  color: rgba(248,248,244,0.9);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.01)),
+    rgba(0,0,0,0.34);
+  font-size: 0.74rem;
+  line-height: 1.65;
+}
+
+.mist-labyrinth-image-note textarea::placeholder {
+  color: rgba(248,248,244,0.42);
+}
+
+.mist-labyrinth-image-note textarea:focus {
+  border-color: var(--labyrinth-red-soft);
+  box-shadow: inset 0 -1px 0 var(--mist-archive-signal-glow);
+}
+
+.mist-labyrinth-implant-mapping-page button:disabled,
+.mist-labyrinth-vision-result-foot button:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+.mist-labyrinth-implant-mapping-page {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.55rem;
+  padding: 0.7rem;
+  border: 1px dashed rgba(248,248,244,0.16);
+  background:
+    radial-gradient(circle at 50% 30%, rgba(255,255,255,0.055), transparent 42%),
+    rgba(255,255,255,0.018);
+}
+
+.mist-labyrinth-implant-mapping-page span {
+  display: block;
+  color: var(--labyrinth-red);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.52rem;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+}
+
+.mist-labyrinth-implant-mapping-page b {
+  display: block;
+  margin-top: 0.28rem;
+  color: var(--labyrinth-ink);
+  font-family: Georgia, "Times New Roman", "Noto Serif SC", serif;
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+}
+
+.mist-labyrinth-implant-mapping-page p {
+  margin: 0.38rem 0 0;
+  color: rgba(248,248,244,0.58);
+  font-size: 0.66rem;
+  line-height: 1.65;
+}
+
+.mist-labyrinth-implant-mapping-page button {
+  height: 1.9rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.34rem;
+  border: 1px solid rgba(248,248,244,0.14);
+  color: rgba(248,248,244,0.78);
+  background: rgba(255,255,255,0.025);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.54rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+}
+
+.mist-labyrinth-implant-mapping-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.32rem;
+  flex-wrap: wrap;
+}
+
+.mist-labyrinth-implant-mapping-actions .mist-labyrinth-image-action-button {
+  height: 1.9rem;
+  min-height: 1.9rem;
+  padding: 0 0.62rem;
+}
+
+.mist-labyrinth-implant-mapping-page button:hover:not(:disabled) {
+  color: var(--labyrinth-ink);
+  border-color: var(--labyrinth-red-soft);
+  background: var(--labyrinth-red-faint);
+}
+
+.mist-labyrinth-surface-card .mist-prophecy-slot-active,
+.mist-labyrinth-surface-card .mist-prophecy-slot-empty {
+  max-width: 100%;
+  font-size: clamp(0.96rem, 1.04vw, 1.16rem) !important;
+  line-height: 1.12 !important;
+}
+
+.mist-labyrinth-surface-card .mist-prophecy-slot-active {
+  color: rgba(248,248,244,0.95) !important;
+  border-color: var(--gold-primary) !important;
+  border-bottom-width: 2px !important;
+  border-bottom-style: solid !important;
+  border-radius: 0.125rem !important;
+  padding-left: 0.125rem !important;
+  padding-right: 0.125rem !important;
+}
+
+.mist-labyrinth-surface-card .mist-prophecy-slot-empty {
+  color: rgba(248,248,244,0.72) !important;
+  border-color: rgba(248,248,244,0.24) !important;
+  border-bottom-style: dashed !important;
+}
+
+.mist-labyrinth-engine .mist-labyrinth-formula .mist-prophecy-slot-active,
+.mist-labyrinth-engine .mist-labyrinth-formula .mist-prophecy-slot-empty {
+  background: transparent !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  letter-spacing: 0 !important;
+}
+
+.mist-labyrinth-engine .mist-labyrinth-formula .mist-prophecy-slot-active {
+  font-size: clamp(1.125rem, 1.08vw, 1.25rem) !important;
+  border-bottom-width: 2px !important;
+  border-bottom-style: solid !important;
+  border-color: var(--gold-primary) !important;
+  border-radius: 0.125rem !important;
+  padding-left: 0.125rem !important;
+  padding-right: 0.125rem !important;
+}
+
+.mist-labyrinth-engine .mist-labyrinth-formula .mist-prophecy-slot-empty {
+  font-size: 1rem !important;
+  font-weight: 500 !important;
+  border-bottom-style: dashed !important;
+  border-color: rgba(248,248,244,0.28) !important;
+  color: rgba(248,248,244,0.68) !important;
+}
+
+.mist-labyrinth-engine .mist-labyrinth-formula .mist-prophecy-slot-active:hover,
+.mist-labyrinth-engine .mist-labyrinth-formula .mist-prophecy-slot-empty:hover {
+  background: transparent !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  border-color: var(--gold-primary) !important;
+}
+
+.mist-labyrinth-surface-sentence .mist-prophecy-slot-active,
+.mist-labyrinth-surface-sentence .mist-prophecy-slot-empty {
+  background: transparent !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  letter-spacing: 0 !important;
+  transition: none !important;
+  animation: none !important;
+}
+
+.mist-labyrinth-surface-sentence .mist-prophecy-slot-active {
+  border-bottom-width: 2px !important;
+  border-bottom-style: solid !important;
+  border-color: var(--gold-primary) !important;
+  border-radius: 0.125rem !important;
+  padding-left: 0.125rem !important;
+  padding-right: 0.125rem !important;
+}
+
+.mist-labyrinth-surface-sentence .mist-prophecy-slot-empty {
+  font-size: 1rem !important;
+  font-weight: 500 !important;
+  border-bottom-style: dashed !important;
+  color: rgba(248,248,244,0.68) !important;
+  border-color: rgba(248,248,244,0.28) !important;
+}
+
+.mist-labyrinth-structure-sentence .mist-prophecy-slot-active {
+  font-size: clamp(0.96rem, 1.04vw, 1.16rem) !important;
+}
+
+.mist-labyrinth-summary-sentence .mist-prophecy-slot-active {
+  font-size: clamp(1.125rem, 1.08vw, 1.25rem) !important;
+  border-bottom-width: 2px !important;
+  border-bottom-style: solid !important;
+  color: rgba(255,255,255,0.98) !important;
+  border-color: var(--gold-primary) !important;
+  border-radius: 0.125rem !important;
+  padding-left: 0.125rem !important;
+  padding-right: 0.125rem !important;
+}
+
+.mist-labyrinth-summary-sentence .mist-labyrinth-identity-slot span {
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.mist-labyrinth-summary-sentence .mist-labyrinth-identity-slot.is-filled span {
+  font-size: clamp(1.125rem, 1.08vw, 1.25rem);
+  font-weight: 800;
+}
+
+.mist-labyrinth-engine .mist-prophecy-slot-active,
+.mist-labyrinth-engine .mist-prophecy-slot-empty,
+.mist-labyrinth-engine .mist-labyrinth-identity-slot,
+.mist-labyrinth-engine .mist-labyrinth-surface-card,
+.mist-labyrinth-engine .mist-labyrinth-surface-grid,
+.mist-labyrinth-engine .mist-labyrinth-surface-summary-body {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Match the left sidebar's surface-setting typography exactly. */
+.mist-labyrinth-engine .mist-labyrinth-formula-row,
+.mist-labyrinth-engine .mist-labyrinth-surface-sentence,
+.mist-labyrinth-engine .mist-labyrinth-summary-fragment,
+.mist-labyrinth-engine .mist-labyrinth-structure-sentence-row,
+.mist-labyrinth-engine .mist-labyrinth-surface-block {
+  font-family: Georgia, "Times New Roman", "Noto Serif SC", serif !important;
+  font-size: 15px !important;
+  line-height: 2 !important;
+  letter-spacing: 0 !important;
+  color: rgba(212,212,216,0.92) !important;
+}
+
+.mist-labyrinth-engine .mist-labyrinth-formula-text,
+.mist-labyrinth-engine .mist-labyrinth-structure-sentence-row > span:first-child,
+.mist-labyrinth-engine .mist-labyrinth-summary-fragment > span,
+.mist-labyrinth-engine .mist-labyrinth-surface-label {
+  font-family: Georgia, "Times New Roman", "Noto Serif SC", serif !important;
+  font-size: 15px !important;
+  line-height: 2 !important;
+  font-weight: 400 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  color: rgba(212,212,216,0.92) !important;
+  text-shadow: none !important;
+}
+
+.mist-labyrinth-engine .mist-labyrinth-formula-lead {
+  color: rgba(248,248,244,0.96) !important;
+  font-weight: 800 !important;
+}
+
+.mist-labyrinth-engine .mist-prophecy-slot-active {
+  display: inline-block !important;
+  font-family: Georgia, "Times New Roman", "Noto Serif SC", serif !important;
+  font-size: 1.25rem !important;
+  line-height: 1.75rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0 !important;
+  color: #fff !important;
+  padding: 0 0.125rem !important;
+  border: 0 !important;
+  border-bottom: 2px solid var(--gold-primary) !important;
+  border-radius: 0.125rem !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  vertical-align: baseline !important;
+}
+
+.mist-labyrinth-engine .mist-labyrinth-formula .mist-prophecy-slot-active,
+.mist-labyrinth-engine .mist-labyrinth-surface-card:not(.mist-labyrinth-surface-summary-card) .mist-prophecy-slot-active,
+.mist-labyrinth-engine .mist-labyrinth-structure-sentence .mist-prophecy-slot-active {
+  font-size: 1.25rem !important;
+  line-height: 1.75rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0 !important;
+  color: #fff !important;
+  padding: 0 0.125rem !important;
+  border: 0 !important;
+  border-bottom: 2px solid var(--gold-primary) !important;
+  border-radius: 0.125rem !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+.mist-labyrinth-engine .mist-prophecy-slot-empty:not(.mist-labyrinth-summary-sentence .mist-prophecy-slot-empty) {
+  display: inline-block !important;
+  font-family: Georgia, "Times New Roman", "Noto Serif SC", serif !important;
+  font-size: 1rem !important;
+  line-height: 1.5rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+  color: rgb(113,113,122) !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-bottom: 1px dashed rgb(39,39,42) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  vertical-align: baseline !important;
+}
+
+.mist-labyrinth-engine .mist-labyrinth-formula .mist-prophecy-slot-empty,
+.mist-labyrinth-engine .mist-labyrinth-surface-card:not(.mist-labyrinth-surface-summary-card) .mist-prophecy-slot-empty,
+.mist-labyrinth-engine .mist-labyrinth-structure-sentence .mist-prophecy-slot-empty {
+  font-size: 1rem !important;
+  line-height: 1.5rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+  color: rgb(113,113,122) !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-bottom: 1px dashed rgb(39,39,42) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+.mist-labyrinth-engine .mist-prophecy-slot-active:hover,
+.mist-labyrinth-engine .mist-prophecy-slot-empty:hover {
+  color: #fff !important;
+  border-bottom-color: var(--gold-primary) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+.mist-labyrinth-engine .mist-labyrinth-identity-slot {
+  align-items: baseline !important;
+  justify-content: flex-start !important;
+  width: auto !important;
+  max-width: 100% !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  line-height: 1 !important;
+  text-shadow: none !important;
+  vertical-align: baseline !important;
+}
+
+.mist-labyrinth-engine .mist-labyrinth-identity-slot:hover,
+.mist-labyrinth-engine .mist-labyrinth-identity-slot.is-filled,
+.mist-labyrinth-engine .mist-labyrinth-identity-slot.is-locked {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+.mist-labyrinth-engine .mist-labyrinth-identity-slot span {
+  display: inline-block !important;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: Georgia, "Times New Roman", "Noto Serif SC", serif !important;
+  font-size: 1rem !important;
+  line-height: 1.5rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+  color: rgb(113,113,122) !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-bottom: 1px dashed rgb(39,39,42) !important;
+  border-radius: 0 !important;
+  vertical-align: baseline !important;
+}
+
+.mist-labyrinth-engine .mist-labyrinth-identity-slot.is-filled span,
+.mist-labyrinth-engine .mist-labyrinth-identity-slot.is-locked span {
+  font-size: 1.25rem !important;
+  line-height: 1.75rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0 !important;
+  color: #fff !important;
+  padding: 0 0.125rem !important;
+  border-bottom: 2px solid var(--gold-primary) !important;
+  border-radius: 0.125rem !important;
+}
+
+.mist-labyrinth-engine .mist-labyrinth-surface-card .mist-prophecy-slot-active,
+.mist-labyrinth-engine .mist-labyrinth-surface-card .mist-labyrinth-identity-slot.is-filled span,
+.mist-labyrinth-engine .mist-labyrinth-surface-card .mist-labyrinth-identity-slot.is-locked span {
+  font-size: 1rem !important;
+  line-height: 1.5rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0 !important;
+  padding: 0 0.0625rem !important;
+  vertical-align: baseline !important;
+}
+
+.mist-labyrinth-engine .mist-labyrinth-surface-card .mist-prophecy-slot-empty,
+.mist-labyrinth-engine .mist-labyrinth-surface-card .mist-labyrinth-identity-slot span {
+  font-size: 1rem !important;
+  line-height: 1.5rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+  vertical-align: baseline !important;
+}
+
+.mist-labyrinth-engine .mist-labyrinth-surface-card .mist-labyrinth-identity-slot {
+  display: inline-flex !important;
+  align-items: baseline !important;
+  vertical-align: baseline !important;
+  width: auto !important;
+  max-width: 100% !important;
+  margin-left: 0.5rem !important;
+  margin-right: 0.5rem !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.mist-labyrinth-engine .mist-labyrinth-surface-card .mist-labyrinth-identity-slot span {
+  display: inline-block !important;
+  max-width: 100%;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  padding: 0 0.125rem !important;
+  border: 0 !important;
+  border-bottom: 1px dashed rgb(39,39,42) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+.mist-labyrinth-engine .mist-labyrinth-surface-card .mist-labyrinth-identity-slot.is-filled span,
+.mist-labyrinth-engine .mist-labyrinth-surface-card .mist-labyrinth-identity-slot.is-locked span {
+  border-bottom: 2px solid var(--gold-primary) !important;
+  font-weight: 700 !important;
+  color: #fff !important;
+}
+
+.mist-labyrinth-engine .mist-labyrinth-surface-card .mist-labyrinth-identity-slot span.mist-prophecy-slot-active,
+.mist-labyrinth-engine .mist-labyrinth-surface-card .mist-labyrinth-identity-slot span.mist-prophecy-slot-empty {
+  font-size: 1rem !important;
+  line-height: 1.5rem !important;
+}
+
+.mist-labyrinth-tooltip {
+  width: max-content;
+  max-width: min(20rem, calc(100vw - 2rem));
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: 1.25rem;
+  border: 1.5px solid rgba(244,244,245,0.32);
+  border-radius: 0.75rem;
+  background: rgba(8,8,8,0.97);
+  box-shadow: none;
+  backdrop-filter: blur(16px);
+  text-align: left;
+}
+
+.mist-labyrinth-tooltip-header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.mist-labyrinth-tooltip-header span {
+  color: var(--mist-archive-red);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.875rem;
+  line-height: 1.35;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.mist-labyrinth-tooltip-header b {
+  margin-left: 0.5rem;
+  color: rgba(255,255,255,0.96);
+  letter-spacing: 0.02em;
+}
+
+.mist-labyrinth-tooltip-def {
+  margin-bottom: 0.75rem;
+  color: rgba(244,244,245,0.96);
+  font-family: Georgia, "Times New Roman", "Noto Serif SC", serif;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  font-weight: 700;
+  letter-spacing: 0;
+  white-space: pre-line;
+}
+
+.mist-labyrinth-tooltip-core {
+  display: block;
+  margin-top: 0.5rem;
+  color: rgba(212,212,216,0.82);
+  font-size: 0.625rem;
+  line-height: 1.6;
+  font-style: italic;
+  font-weight: 700;
+  white-space: pre-line;
+}
+
+.mist-labyrinth-identity-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(0,0,0,0.92);
+  backdrop-filter: blur(18px);
+}
+
+.mist-labyrinth-identity-panel {
+  position: relative;
+  width: min(33rem, calc(100vw - 2rem));
+  max-height: min(44rem, calc(100vh - 2rem));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: clamp(1.05rem, 1.5vw, 1.45rem);
+  border: 1px solid rgba(248,248,244,0.14);
+  border-radius: 1rem;
+  background:
+    radial-gradient(circle at 74% 4%, var(--labyrinth-red-faint), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.012)),
+    #090909;
+  box-shadow:
+    0 28px 80px rgba(0,0,0,0.74),
+    inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+.mist-labyrinth-identity-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 2;
+  color: rgba(248,248,244,0.58);
+  transition: color 180ms ease;
+}
+
+.mist-labyrinth-identity-close:hover {
+  color: var(--labyrinth-ink);
+}
+
+.mist-labyrinth-vision-result-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 220;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(0,0,0,0.9);
+  backdrop-filter: blur(18px);
+}
+
+.mist-labyrinth-vision-result-panel {
+  position: relative;
+  width: min(48rem, calc(100vw - 2rem));
+  max-height: min(42rem, calc(100vh - 2rem));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: clamp(1rem, 1.45vw, 1.35rem);
+  border: 1px solid rgba(248,248,244,0.18);
+  background:
+    radial-gradient(circle at 72% 0%, var(--mist-archive-signal-wash-faint), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.012)),
+    #080808;
+  box-shadow:
+    0 28px 80px rgba(0,0,0,0.74),
+    inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+.mist-labyrinth-vision-result-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 2;
+  color: rgba(248,248,244,0.58);
+  transition: color 160ms ease;
+}
+
+.mist-labyrinth-vision-result-close:hover {
+  color: var(--labyrinth-ink);
+}
+
+.mist-labyrinth-vision-result-head {
+  padding: 0 2rem 0.9rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.mist-labyrinth-vision-result-head span {
+  display: block;
+  color: var(--labyrinth-red);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.22em;
+}
+
+.mist-labyrinth-vision-result-head h3 {
+  margin: 0.28rem 0 0;
+  color: var(--labyrinth-ink);
+  font-family: Georgia, "Times New Roman", "Noto Serif SC", serif;
+  font-size: clamp(1.05rem, 1.5vw, 1.42rem);
+  letter-spacing: 0.08em;
+}
+
+.mist-labyrinth-vision-result-body {
+  flex: 1 1 auto;
+  min-height: 13rem;
+  overflow: auto;
+  margin: 0.9rem 0;
+  padding: 0.9rem;
+  border: 1px solid rgba(248,248,244,0.12);
+  color: rgba(248,248,244,0.88);
+  background:
+    repeating-linear-gradient(0deg, transparent 0 9px, rgba(255,255,255,0.018) 9px 10px),
+    rgba(0,0,0,0.42);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Noto Sans SC", monospace;
+  font-size: 0.72rem;
+  line-height: 1.75;
+  white-space: pre-wrap;
+}
+
+.mist-labyrinth-vision-result-foot {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding-top: 0.76rem;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.mist-labyrinth-vision-result-foot button {
+  height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.34rem;
+  padding: 0 0.78rem;
+  border: 1px solid rgba(248,248,244,0.14);
+  color: rgba(248,248,244,0.72);
+  background: rgba(255,255,255,0.025);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.56rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.mist-labyrinth-vision-result-primary {
+  color: var(--labyrinth-ink) !important;
+  border-color: var(--labyrinth-red-soft) !important;
+  background: var(--labyrinth-red-faint) !important;
+}
+
+.mist-labyrinth-vision-result-foot button:hover:not(:disabled) {
+  color: var(--labyrinth-ink);
+  border-color: var(--labyrinth-red-soft);
+}
+
+.mist-labyrinth-identity-head {
+  display: flex;
+  align-items: center;
+  gap: 0.72rem;
+  padding: 0 2rem 0.95rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  color: var(--labyrinth-red);
+}
+
+.mist-labyrinth-identity-head h3 {
+  margin: 0;
+  color: var(--labyrinth-ink);
+  font-family: Georgia, "Times New Roman", "Noto Serif SC", serif;
+  font-size: 1.05rem;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+.mist-labyrinth-identity-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  padding: 1.1rem 0.1rem 0.2rem 0;
+}
+
+.mist-labyrinth-identity-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.6rem;
+}
+
+.mist-labyrinth-identity-section-head > span {
+  color: rgba(248,248,244,0.7);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.mist-labyrinth-identity-tools,
+.mist-labyrinth-identity-foot-tools {
+  display: flex;
+  align-items: center;
+  gap: 0.28rem;
+}
+
+.mist-labyrinth-identity-tools button,
+.mist-labyrinth-identity-foot-tools button {
+  height: 1.76rem;
+  min-width: 1.76rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.34rem;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 0.28rem;
+  color: rgba(248,248,244,0.55);
+  background: rgba(255,255,255,0.028);
+  transition: color 180ms ease, border-color 180ms ease, background 180ms ease;
+}
+
+.mist-labyrinth-identity-tools button:hover,
+.mist-labyrinth-identity-foot-tools button:hover,
+.mist-labyrinth-identity-tools button.is-locked,
+.mist-labyrinth-identity-foot-tools button.is-locked {
+  color: var(--labyrinth-ink);
+  border-color: var(--labyrinth-red-soft);
+  background: var(--labyrinth-red-faint);
+}
+
+.mist-labyrinth-identity-tools button:disabled,
+.mist-labyrinth-identity-foot-tools button:disabled,
+.mist-labyrinth-identity-option:disabled,
+.mist-labyrinth-identity-option.is-disabled {
+  cursor: not-allowed;
+  opacity: 0.38;
+}
+
+.mist-labyrinth-identity-gender-grid,
+.mist-labyrinth-identity-age-grid {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.mist-labyrinth-identity-gender-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.mist-labyrinth-identity-age-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.mist-labyrinth-identity-option {
+  min-width: 0;
+  min-height: 3.2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.16rem;
+  padding: 0.48rem 0.38rem;
+  border: 1px solid rgba(255,255,255,0.105);
+  border-radius: 0.36rem;
+  background: rgba(255,255,255,0.035);
+  color: rgba(248,248,244,0.62);
+  text-align: center;
+  transition: color 180ms ease, border-color 180ms ease, background 180ms ease, box-shadow 180ms ease;
+}
+
+.mist-labyrinth-identity-option:hover,
+.mist-labyrinth-identity-option.is-active {
+  color: var(--labyrinth-ink);
+  border-color: rgba(248,248,244,0.38);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.055), var(--labyrinth-red-faint)),
+    rgba(255,255,255,0.04);
+  box-shadow: inset 0 -1px 0 var(--mist-archive-signal-shadow);
+}
+
+.mist-labyrinth-identity-option span {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.8rem;
+  font-weight: 900;
+  line-height: 1.12;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mist-labyrinth-identity-option small {
+  color: rgba(248,248,244,0.48);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.mist-labyrinth-identity-custom input {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--labyrinth-ink);
+  text-align: center;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+}
+
+.mist-labyrinth-identity-custom input::placeholder {
+  color: rgba(248,248,244,0.46);
+}
+
+.mist-labyrinth-identity-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.15rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.mist-labyrinth-identity-foot-tools button span {
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.mist-labyrinth-identity-confirm {
+  height: 2.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.48rem;
+  padding: 0 1.55rem;
+  border-radius: 0.28rem;
+  background: rgba(248,248,244,0.92);
+  color: #090909;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  transition: background 180ms ease, transform 180ms ease;
+}
+
+.mist-labyrinth-identity-confirm:hover {
+  background: #fff;
+  transform: translateY(-1px);
+}
+
+.mist-labyrinth-time-panel {
+  width: min(36rem, calc(100vw - 2rem));
+}
+
+.mist-labyrinth-country-field {
+  height: 2.35rem;
+  display: flex;
+  align-items: center;
+  border: 1px solid rgba(255,255,255,0.105);
+  border-radius: 0.36rem;
+  background: rgba(255,255,255,0.035);
+}
+
+.mist-labyrinth-country-field input {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--labyrinth-ink);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-align: center;
+}
+
+.mist-labyrinth-country-field input::placeholder {
+  color: rgba(248,248,244,0.46);
+}
+
+.mist-labyrinth-country-list {
+  max-height: 5.6rem;
+  overflow-y: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.34rem;
+  margin-top: 0.48rem;
+  padding-right: 0.2rem;
+}
+
+.mist-labyrinth-country-list button {
+  flex: 0 0 auto;
+  min-height: 1.62rem;
+  padding: 0 0.55rem;
+  border: 1px solid rgba(255,255,255,0.085);
+  border-radius: 0.3rem;
+  color: rgba(248,248,244,0.58);
+  background: rgba(255,255,255,0.028);
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  transition: color 180ms ease, border-color 180ms ease, background 180ms ease;
+}
+
+.mist-labyrinth-country-list button:hover,
+.mist-labyrinth-country-list button.is-active {
+  color: var(--labyrinth-ink);
+  border-color: var(--labyrinth-red-soft);
+  background: var(--labyrinth-red-faint);
+}
+
+.mist-labyrinth-country-list button:disabled,
+.mist-labyrinth-year-slider:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.mist-labyrinth-year-readout {
+  margin-bottom: 0.68rem;
+  color: var(--labyrinth-ink);
+  font-family: Georgia, "Times New Roman", "Noto Serif SC", serif;
+  font-size: 1.2rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.mist-labyrinth-year-slider {
+  width: 100%;
+  height: 0.18rem;
+  appearance: none;
+  border-radius: 999px;
+  background: rgba(248,248,244,0.18);
+  accent-color: var(--labyrinth-red);
+}
+
+.mist-labyrinth-year-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.68rem;
+  color: rgba(248,248,244,0.45);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.56rem;
+  font-weight: 900;
+}
+
+.mist-labyrinth-year-tools div {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.mist-labyrinth-year-tools button {
+  min-height: 1.45rem;
+  padding: 0 0.48rem;
+  border: 1px solid rgba(255,255,255,0.085);
+  border-radius: 0.25rem;
+  color: rgba(248,248,244,0.62);
+  background: rgba(255,255,255,0.028);
+  transition: color 180ms ease, border-color 180ms ease, background 180ms ease;
+}
+
+.mist-labyrinth-year-tools button:hover {
+  color: var(--labyrinth-ink);
+  border-color: var(--labyrinth-red-soft);
+  background: var(--labyrinth-red-faint);
+}
+
+/* Final Labyrinth rhythm pass: mirror the expanded story-summary cadence in the left sidebar. */
+.mist-labyrinth-engine .mist-labyrinth-formula,
+.mist-labyrinth-engine .mist-labyrinth-desire-panel {
+  width: min(100%, 66rem);
+  height: clamp(19.6rem, 38vh, 25.8rem);
+  max-height: clamp(19.6rem, 38vh, 25.8rem);
+}
+
+.mist-labyrinth-engine .mist-labyrinth-formula {
+  gap: clamp(0.94rem, 1.43vh, 1.24rem);
+  padding: clamp(1.04rem, 1.42vw, 1.36rem) clamp(1.05rem, 1.6vw, 1.6rem);
+}
+
+.mist-labyrinth-engine .mist-labyrinth-canonical-formula,
+.mist-labyrinth-engine .mist-labyrinth-desire-sentence-body {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: clamp(1.17rem, 1.95vh, 1.56rem);
+  font-family: Georgia, "Times New Roman", "Noto Serif SC", serif !important;
+  font-size: 16px !important;
+  line-height: 2 !important;
+  letter-spacing: 0 !important;
+  color: rgba(212,212,216,0.92) !important;
+}
+
+.mist-labyrinth-engine .mist-labyrinth-formula-row,
+.mist-labyrinth-engine .mist-labyrinth-desire-sentence-line {
+  display: flex !important;
+  align-items: baseline !important;
+  flex-wrap: wrap !important;
+  min-height: 0;
+  gap: 0 0.38rem;
+  line-height: 2 !important;
+  row-gap: 1.17rem;
+}
+
+.mist-labyrinth-engine .mist-labyrinth-formula-text,
+.mist-labyrinth-engine .mist-labyrinth-desire-sentence-line > span {
+  font-family: Georgia, "Times New Roman", "Noto Serif SC", serif !important;
+  font-size: 16px !important;
+  line-height: 2 !important;
+  letter-spacing: 0 !important;
+  color: rgba(212,212,216,0.92) !important;
+}
+
+.mist-labyrinth-engine .mist-labyrinth-formula .mist-prophecy-slot-active,
+.mist-labyrinth-engine .mist-labyrinth-desire-sentence-slot .mist-prophecy-slot-active {
+  font-size: 1.25rem !important;
+  line-height: 1.75rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0 !important;
+  color: #fff !important;
+  padding: 0 0.125rem !important;
+  border: 0 !important;
+  border-bottom: 2px solid var(--gold-primary) !important;
+  border-radius: 0.125rem !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+.mist-labyrinth-engine .mist-labyrinth-formula .mist-prophecy-slot-empty,
+.mist-labyrinth-engine .mist-labyrinth-desire-sentence-slot .mist-prophecy-slot-empty {
+  font-size: 1rem !important;
+  line-height: 1.5rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+  color: rgb(113,113,122) !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-bottom: 1px dashed rgb(39,39,42) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+.mist-labyrinth-engine .mist-labyrinth-hover-token {
+  transform-origin: center bottom;
+  transition:
+    color 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease,
+    text-shadow 180ms ease,
+    transform 180ms ease !important;
+  animation: none !important;
+  will-change: transform;
+}
+
+.mist-labyrinth-engine .mist-labyrinth-hover-token:hover {
+  transform: translateY(-0.08rem) scale(1.035) !important;
+  color: #fff !important;
+  border-bottom-color: var(--gold-primary) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+.mist-labyrinth-engine .mist-labyrinth-control-deck {
+  min-height: 0;
+}
+
+.mist-labyrinth-engine .mist-labyrinth-surface-grid {
+  min-height: 0;
+}
+
+@media (max-width: 1180px) {
+  .mist-labyrinth-console {
+    --labyrinth-page-film-width: clamp(2.45rem, 5vw, 3.65rem);
+    --labyrinth-page-film-gap: clamp(0.32rem, 0.62vw, 0.5rem);
+    grid-template-rows: auto auto;
+  }
+
+  .mist-labyrinth-screen {
+    grid-template-columns: 1fr;
+    gap: 1.1rem;
+  }
+
+  .mist-labyrinth-screen:has(.mist-labyrinth-sentence-panel) {
+    grid-template-columns: 1fr;
+  }
+
+  .mist-labyrinth-title {
+    white-space: normal;
+  }
+
+  .mist-labyrinth-subtitle {
+    max-width: 46rem;
+  }
+
+  .mist-labyrinth-rings {
+    inset: -18% -10% 32% -10%;
+  }
+
+  .mist-labyrinth-module-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .mist-labyrinth-console {
+    --labyrinth-page-film-width: clamp(1.45rem, 6vw, 2.15rem);
+    --labyrinth-page-film-gap: 0.38rem;
+    width: calc(100vw - 1.25rem);
+    padding-top: 0.6rem;
+    padding-bottom: 7.2rem;
+  }
+
+  .mist-labyrinth-hero {
+    grid-template-rows: auto 1fr;
+  }
+
+  .mist-labyrinth-hero-header,
+  .mist-labyrinth-deck-header {
+    align-items: flex-start;
+    flex-direction: column;
+    height: auto;
+  }
+
+  .mist-labyrinth-film-window {
+    grid-template-columns: 1fr;
+  }
+
+  .mist-labyrinth-perforation {
+    display: none;
+  }
+
+  .mist-labyrinth-screen {
+    padding: 1rem;
+  }
+
+  .mist-labyrinth-formula {
+    border-left: 0;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .mist-labyrinth-module-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mist-labyrinth-panel-switch {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .mist-labyrinth-deck-meter {
+    width: 100%;
+    grid-template-columns: repeat(5, 1fr);
+  }
 }

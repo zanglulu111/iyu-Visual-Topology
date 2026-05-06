@@ -2,23 +2,23 @@
 import { DriverType, DriverDef, LayerConfig, LogicTemplateDef } from './types';
 import { Briefcase, Film, TestTube, Clapperboard, Music, Palette, Zap, Ghost, Feather, User, Eye, Box, Camera, Layout } from 'lucide-react';
 import { NARRATIVE_ENGINE_BLOCKS, NARRATIVE_ENGINE_LIBRARY } from './data/engine_core/narrative_engine';
-import { COMMERCIAL_ENGINE_BLOCKS, COMMERCIAL_ENGINE_LIBRARY } from './data/commercial_data';
-import { AESTHETIC_ENGINE_BLOCKS, AESTHETIC_ENGINE_LIBRARY } from './data/aesthetic_data';
-import { TRAILER_ENGINE_BLOCKS, TRAILER_ENGINE_LIBRARY } from './data/trailer_data';
-import { POETIC_ENGINE_BLOCKS, POETIC_ENGINE_LIBRARY } from './data/poetic_data';
+import { COMMERCIAL_ENGINE_BLOCKS, COMMERCIAL_ENGINE_LIBRARY } from './data/aesthetic/commercial_data';
+import { AESTHETIC_ENGINE_BLOCKS, AESTHETIC_ENGINE_LIBRARY } from './data/aesthetic/core';
+import { TRAILER_ENGINE_BLOCKS, TRAILER_ENGINE_LIBRARY } from './data/aesthetic/trailer_data';
+import { POETIC_ENGINE_BLOCKS, POETIC_ENGINE_LIBRARY } from './data/aesthetic/poetic_data';
 
 // Aliases for Experimental which uses Poetic data structures in this engine
 const EXPERIMENTAL_ENGINE_BLOCKS = POETIC_ENGINE_BLOCKS;
 const EXPERIMENTAL_ENGINE_LIBRARY = POETIC_ENGINE_LIBRARY;
 
-import { COMM_SKIN_BLOCKS, COMM_SKIN_LIBRARY } from './data/commercial_skin';
-import { EXPERIMENTAL_SKIN_BLOCKS, EXPERIMENTAL_SKIN_LIBRARY } from './data/experimental_skin';
-import { TRAILER_SKIN_BLOCKS, TRAILER_SKIN_LIBRARY } from './data/trailer_skin';
-import { ALL_SKIN_BLOCKS, SKIN_LIBRARY } from './data/skin_libraries';
+import { COMM_SKIN_BLOCKS, COMM_SKIN_LIBRARY } from './data/aesthetic/commercial_skin';
+import { EXPERIMENTAL_SKIN_BLOCKS, EXPERIMENTAL_SKIN_LIBRARY } from './data/aesthetic/experimental_skin';
+import { TRAILER_SKIN_BLOCKS, TRAILER_SKIN_LIBRARY } from './data/aesthetic/trailer_skin';
+import { ALL_SKIN_BLOCKS, SKIN_LIBRARY } from './data/narrative/skin_libraries';
 import { SUR1_DATA as GENRE_CATEGORIES } from './data/engine_surface/SUR1';
 import { SUR2_DATA as WORLD_MOTIF_CATEGORIES } from './data/engine_surface/SUR2';
 import { AES_COLOR_PRESETS } from './data/aesthetic_libraries/color_presets';
-import { MASTER_PRESETS, MASTER_PRESETS_REALISM, MASTER_PRESETS_STYLIZED } from './data/master_presets';
+import { MASTER_PRESETS, MASTER_PRESETS_REALISM, MASTER_PRESETS_STYLIZED } from './data/aesthetic/master_presets';
 
 export const COUNTRY_PRESETS = [
   { cn: "中国", en: "China" },
@@ -70,10 +70,10 @@ export const AESTHETIC_LOGIC_TEMPLATES: LogicTemplateDef[] = [
     id: 'ACTION',
     name: '动能叙事 (Action Energy)',
     nameEn: 'Action',
-    desc: '环境交互流：强调主体的动作形态、服装造型与持有物。',
-    descEn: 'Dynamic Mode: Emphasizes movement, clothing, and props interaction.',
+    desc: '环境交互流：强调主体的动作形态、体态与场景关系。',
+    descEn: 'Dynamic Mode: Emphasizes movement, body shape, and scene interaction.',
     iconName: 'Zap',
-    primaryBlocks: ['aes_action_static', 'aes_action_dynamic', 'aes_action_complex', 'aes_clothing', 'aes_prop_held', 'aes_accessories', 'aes_body_type']
+    primaryBlocks: ['aes_action_static', 'aes_action_dynamic', 'aes_action_complex', 'aes_body_type', 'aes_expression']
   },
   {
     id: 'ATMOSPHERE',
@@ -82,16 +82,16 @@ export const AESTHETIC_LOGIC_TEMPLATES: LogicTemplateDef[] = [
     desc: '解构意境流：专注于影调、气象、通感与场域空间的融合。',
     descEn: 'Vibe Mode: Focuses on lighting, weather, and environmental atmosphere.',
     iconName: 'Eye',
-    primaryBlocks: ['aes_light_mood', 'aes_weather', 'aes_atmosphere', 'aes_particles', 'aes_scene_real', 'aes_scene_abstract']
+    primaryBlocks: ['aes_light_mood', 'aes_atmosphere', 'aes_particles', 'aes_scene_real', 'aes_scene_surreal', 'aes_scene_abstract']
   },
   {
     id: 'LOOK',
     name: '妆造细节 (Fashion Look)',
     nameEn: 'Gaze',
-    desc: '先锋质感流：侧重发型、五官特征、皮肤肌理与面料细节。',
-    descEn: 'Style Mode: Prioritizes hair, makeup, skin texture, and fashion details.',
+    desc: '先锋质感流：侧重发型、五官特征、皮肤肌理与身体细节。',
+    descEn: 'Style Mode: Prioritizes hair, facial structure, skin texture, and body detail.',
     iconName: 'Palette',
-    primaryBlocks: ['aes_hair_color', 'aes_hair_style_f', 'aes_hair_style_m', 'aes_face_features', 'aes_skin_texture', 'aes_body_features', 'aes_clothing']
+    primaryBlocks: ['aes_hair_color', 'aes_hair_style_f', 'aes_hair_style_m', 'aes_face_features', 'aes_expression', 'aes_skin_texture', 'aes_body_features']
   },
   {
     id: 'TECH',
@@ -261,7 +261,6 @@ export const BLOCK_LIMITS: Record<string, number> = {
   'aes_species': 1,
   'aes_occupation': 1,
   'aes_persona': 1,
-  'aes_clothing': 1,
   'aes_hair_color': 2,
   'aes_hair_style_f': 1,
   'aes_hair_style_m': 1,
@@ -275,8 +274,6 @@ export const BLOCK_LIMITS: Record<string, number> = {
   'aes_action_static': 1,
   'aes_action_dynamic': 1,
   'aes_action_complex': 1,
-  'aes_prop_held': 1,
-  'aes_accessories': 3,
   'aes_creature_size': 1,
   'aes_creature_class': 2,
   'aes_creature_element': 1,
@@ -295,8 +292,6 @@ export const BLOCK_LIMITS: Record<string, number> = {
   'aes_light_direction': 1,
   'aes_light_shape': 1,
   'aes_atmosphere': 1, // Formerly aes_air_medium
-  'aes_weather': 2,
-  'aes_synesthesia': 3,
   'aes_render_real': 1,
   'aes_render_art': 1,
   'aes_render': 1,

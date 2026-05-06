@@ -1,4 +1,4 @@
-import type { SutureStyleItem } from '../../suture_styles';
+import type { SutureStyleItem } from '../../suture/styles';
 
 const PHOTOGRAPHY_GROUP_B = '6B. 摄影风格：私摄影、街头直觉与人文凝视';
 

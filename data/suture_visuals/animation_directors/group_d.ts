@@ -1,4 +1,4 @@
-import type { SutureStyleItem } from '../../suture_styles';
+import type { SutureStyleItem } from '../../suture/styles';
 
 const ANIMATION_DIRECTOR_GROUP_D = '3D. 动画导演：实验动画、超现实寓言与默剧结构';
 

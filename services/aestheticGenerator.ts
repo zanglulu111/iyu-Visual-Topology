@@ -1,12 +1,12 @@
 
 import { NarrativeFieldState, SubjectType, LibraryItemDef, WorldLawConfig, CreativeTreatment, StyleConfig } from '../types';
-import { AESTHETIC_ENGINE_BLOCKS } from '../data/aesthetic_data';
+import { AESTHETIC_ENGINE_BLOCKS } from '../data/aesthetic/core';
 import { getVisionAnchorProtocol } from '../data/engine_core/narrative_protocols';
 
 import { findItemDetails } from './dataRegistry';
 
 // Block Definitions for Detection
-const HUMAN_BLOCKS = ['aes_age', 'aes_gender', 'aes_body_type', 'aes_ethnicity', 'aes_occupation', 'aes_persona', 'aes_clothing', 'aes_prop_held', 'aes_accessories', 'aes_hair_color', 'aes_hair_style_f', 'aes_hair_style_m', 'aes_action_static', 'aes_action_dynamic', 'aes_action_complex', 'aes_eye_color', 'aes_eye_shape', 'aes_eye_fx', 'aes_face_features', 'aes_expression', 'aes_body_features', 'aes_skin_texture'];
+const HUMAN_BLOCKS = ['aes_age', 'aes_gender', 'aes_body_type', 'aes_ethnicity', 'aes_occupation', 'aes_persona', 'aes_hair_color', 'aes_hair_style_f', 'aes_hair_style_m', 'aes_action_static', 'aes_action_dynamic', 'aes_action_complex', 'aes_eye_color', 'aes_eye_shape', 'aes_eye_fx', 'aes_face_features', 'aes_expression', 'aes_body_features', 'aes_skin_texture'];
 const CREATURE_BLOCKS = ['aes_creature_size', 'aes_creature_class', 'aes_creature_element', 'aes_creature_head', 'aes_creature_body', 'aes_creature_mood', 'aes_creature_action', 'aes_creature_texture'];
 // OBJECT_BLOCKS removed
 
@@ -211,12 +211,12 @@ VISION
 SUBJECT
 > Identity: {aes_age} {aes_gender} {aes_ethnicity} {aes_body_type} ({aes_occupation} {aes_persona})
 > Appearance: {aes_hair_color} {aes_hair_style_f/m} {aes_eye_color} {aes_face_features}
-> Look: {aes_clothing} {aes_accessories} + Holding {aes_prop_held} + {aes_l2_custom}
+> Detail: {aes_l2_custom} + {aes_skin_texture} + {aes_body_features}
 > Action: {aes_action_static} {aes_action_dynamic} {aes_action_complex}
 SCENE
 > Anchor: {skin_era} {skin_location} {aes_scene_real/abstract}
 > Context: {skin_society} {skin_ideology}
-> Atmosphere: {aes_atmosphere} + {aes_particles} + {aes_weather}
+> Atmosphere: {aes_atmosphere} + {aes_particles}
 CINEMATOGRAPHY
 > Camera: {aes_camera_system} + {aes_optical_format}
 > Lens: {aes_lens_series} + {aes_focal_length}

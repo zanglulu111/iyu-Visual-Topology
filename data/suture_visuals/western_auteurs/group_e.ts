@@ -1,4 +1,4 @@
-import type { SutureStyleItem } from '../../suture_styles';
+import type { SutureStyleItem } from '../../suture/styles';
 
 const WESTERN_AUTEURS_GROUP_E = '1E. 西方电影作者：动能神话、社会惊悚与氛围孤独';
 

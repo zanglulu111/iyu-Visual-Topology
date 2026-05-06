@@ -5,11 +5,11 @@
 // 📦 1. 进口原料仓库：从外部文件借用"图纸"和"词典"
 import { NarrativeFieldState, CreativeTreatment, WorldLawConfig, StyleConfig, FaceState, StyleItem } from '../types';
 import { NARRATIVE_ENGINE_BLOCKS } from '../data/engine_core/narrative_engine';
-import { ALL_SKIN_BLOCKS } from '../data/skin_libraries';
+import { ALL_SKIN_BLOCKS } from '../data/narrative/skin_libraries';
 import { SV2_DATA } from '../data/engine_sv/SV2'; // 特权词库：决定字数的 SV2 (体量)
 import { SV1_DATA } from '../data/engine_sv/SV1'; // 叙事结构词库
-import { PERSPECTIVES, SENSORY_MODES, STYLE_MATRIX } from '../data/style_matrix';
-import { DIRECTOR_STYLES } from '../data/director_styles';
+import { PERSPECTIVES, SENSORY_MODES, STYLE_MATRIX } from '../data/narrative/style_matrix';
+import { DIRECTOR_STYLES } from '../data/narrative/director_styles';
 
 // 📚 源文件引入：各种规则协议 (系统宪法的内容片段)
 import {

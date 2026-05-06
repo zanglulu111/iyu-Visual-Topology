@@ -1,4 +1,4 @@
-import type { SutureStyleItem } from '../../suture_styles';
+import type { SutureStyleItem } from '../../suture/styles';
 
 const WESTERN_AUTEURS_GROUP_B = '1B. 西方电影作者：灵性漫游、家族权力与世界构建';
 

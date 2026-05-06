@@ -53,9 +53,9 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
     };
 
     const redeemMessages: Record<string, string> = {
-        ANNUAL_ACTIVATED: lang === 'CN' ? '🎉 年度架构师权限已激活！欢迎进入核心。' : '🎉 Annual Architect activated! Welcome to the core.',
-        LIFETIME_ACTIVATED: lang === 'CN' ? '🎉 终身造物主权限已激活！永恒归位。' : '🎉 Lifetime Creator activated! Eternal access granted.',
-        TOKENS_ADDED: lang === 'CN' ? '⚡ 算力锚点注入成功！' : '⚡ Compute tokens injected successfully!',
+        ANNUAL_ACTIVATED: lang === 'CN' ? '年度架构师权限已激活。欢迎进入核心。' : 'Annual Architect activated. Welcome to the core.',
+        LIFETIME_ACTIVATED: lang === 'CN' ? '终身造物主权限已激活。永恒归位。' : 'Lifetime Creator activated. Eternal access granted.',
+        TOKENS_ADDED: lang === 'CN' ? '算力锚点注入成功。' : 'Compute tokens injected successfully.',
         CODE_NOT_FOUND: lang === 'CN' ? '激活码无效。请检查输入是否正确。' : 'Invalid activation code. Please check and try again.',
         CODE_ALREADY_USED: lang === 'CN' ? '此激活码已被使用。' : 'This activation code has already been used.',
         CODE_EXPIRED: lang === 'CN' ? '此激活码已过期。' : 'This activation code has expired.',
@@ -180,10 +180,10 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
 
 
     return (
-        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/70 backdrop-blur-xl px-4 py-8 overflow-y-auto w-full animate-in fade-in duration-300">
-            <div className={`w-full max-w-lg ${theme === 'retro' ? 'bg-[#F9F7F1] border-[#8B261D]' : 'bg-[#0c0c0c] border-zinc-800'} border rounded-2xl shadow-2xl p-8 relative overflow-hidden my-auto transition-colors duration-500`}>
+        <div className="mist-archive-overlay fixed inset-0 z-[300] flex items-center justify-center bg-black/70 backdrop-blur-xl px-4 py-8 overflow-y-auto w-full animate-in fade-in duration-300">
+            <div className={`mist-profile-modal mist-archive-modal w-full max-w-lg ${theme === 'retro' ? 'bg-[#F9F7F1] border-[#8B261D]' : 'bg-[#0c0c0c] border-zinc-800'} border rounded-2xl shadow-2xl p-8 relative overflow-hidden my-auto transition-colors duration-500`}>
                 {/* Top Accent */}
-                <div className={`absolute top-0 left-0 w-full h-1 ${theme === 'retro' ? 'bg-[#8B261D]' : 'bg-gradient-to-r from-transparent via-gold-primary to-transparent'} opacity-50`}></div>
+                <div className={`absolute top-0 left-0 w-full h-px ${theme === 'retro' ? 'bg-[#8B261D]' : 'bg-[var(--mist-archive-red)]'} opacity-70`}></div>
 
                 <button onClick={onClose} className="absolute top-4 right-4 text-zinc-500 hover:text-white transition-colors">
                     <X size={20} />
@@ -192,7 +192,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
                 <div className="flex flex-col items-center mb-8 relative">
                     <div
                         onClick={handleAvatarClick}
-                        className={`w-20 h-20 rounded-full ${!currentUser.avatarUrl && (currentUser.avatarColor || 'bg-zinc-600')} border-2 border-gold-primary/30 flex items-center justify-center text-3xl font-bold text-white shadow-[0_0_30px_rgba(212,175,55,0.15)] mb-4 cursor-pointer group overflow-hidden relative`}
+                        className={`w-20 h-20 rounded-full ${!currentUser.avatarUrl && (currentUser.avatarColor || 'bg-zinc-600')} border-2 ${theme === 'retro' ? 'border-[#8B261D]/30' : 'border-white/20'} flex items-center justify-center text-3xl font-bold text-white shadow-[0_0_30px_rgba(0,0,0,0.5)] mb-4 cursor-pointer group overflow-hidden relative`}
                     >
                         {currentUser.avatarUrl ? (
                             <img src={currentUser.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
@@ -202,7 +202,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
 
                         {/* Hover Overlay */}
                         <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            {isUploading ? <Loader2 size={24} className="animate-spin text-gold-primary" /> : <Upload size={24} className="text-white" />}
+                            {isUploading ? <Loader2 size={24} className="animate-spin text-[var(--mist-archive-red)]" /> : <Upload size={24} className="text-white" />}
                         </div>
                     </div>
                     <input
@@ -222,13 +222,13 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
                                 onChange={(e) => setNewUsername(e.target.value)}
                                 onBlur={handleUsernameUpdate}
                                 onKeyDown={(e) => e.key === 'Enter' && handleUsernameUpdate()}
-                                className={`bg-transparent border ${theme === 'retro' ? 'border-[#8B261D]' : 'border-gold-primary/50'} rounded px-2 py-1 text-xl font-serif ${theme === 'retro' ? 'text-black' : 'text-zinc-100'} text-center outline-none`}
+                                className={`bg-transparent border ${theme === 'retro' ? 'border-[#8B261D]' : 'border-[var(--mist-archive-red-soft)]'} rounded px-2 py-1 text-xl font-serif ${theme === 'retro' ? 'text-black' : 'text-zinc-100'} text-center outline-none`}
                             />
                         </div>
                     ) : (
                         <h2
                             onClick={() => setIsEditingUsername(true)}
-                            className={`text-2xl font-serif ${theme === 'retro' ? 'text-black hover:text-[#8B261D]' : 'text-white hover:text-gold-primary'} tracking-tight cursor-pointer transition-colors group relative`}
+                            className={`text-2xl font-serif ${theme === 'retro' ? 'text-black hover:text-[#8B261D]' : 'text-white hover:text-[var(--mist-archive-red)]'} tracking-tight cursor-pointer transition-colors group relative`}
                         >
                             {currentUser.username}
                             <span className="absolute -right-6 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 text-[10px] text-zinc-500 font-sans uppercase">Edit</span>
@@ -242,14 +242,14 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
                     {/* Membership Status */}
                     <div className={`${theme === 'retro' ? 'bg-[#F4EFE0]/50 border-[#8B261D]/20' : 'bg-black border-zinc-800'} border rounded-xl p-4 flex items-center justify-between`}>
                         <div className="flex items-center gap-3">
-                            <Crown size={16} className={isActiveMember ? (theme === 'retro' ? 'text-[#8B261D]' : 'text-gold-primary') : (theme === 'retro' ? 'text-zinc-500' : 'text-zinc-600')} />
+                            <Crown size={16} className={isActiveMember ? (theme === 'retro' ? 'text-[#8B261D]' : 'text-[var(--mist-archive-red)]') : (theme === 'retro' ? 'text-zinc-500' : 'text-zinc-600')} />
                             <div>
                                 <span className={`text-xs font-bold ${theme === 'retro' ? 'text-zinc-500' : 'text-zinc-400'} uppercase tracking-widest`}>{t.memberStatus}</span>
                                 <p className={`text-xs font-mono ${theme === 'retro' ? 'text-black' : 'text-white'} mt-0.5`}>{getMembershipLabel()}</p>
                             </div>
                         </div>
                         {isActiveMember ? (
-                            <span className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-400 uppercase tracking-widest bg-emerald-950/40 border border-emerald-800/40 rounded px-3 py-1.5">
+                            <span className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-200 uppercase tracking-widest bg-white/[0.04] border border-white/20 rounded px-3 py-1.5">
                                 <CheckCircle2 size={12} /> {t.active}
                             </span>
                         ) : (
@@ -263,10 +263,10 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
                     {isActiveMember && (
                         <div className={`${theme === 'retro' ? 'bg-[#F4EFE0]/50 border-[#8B261D]/20' : 'bg-black border-zinc-800'} border rounded-xl p-4 flex items-center justify-between transition-colors`}>
                             <div className="flex items-center gap-3">
-                                <Coins size={16} className={theme === 'retro' ? 'text-[#8B261D]' : 'text-gold-primary'} />
+                                <Coins size={16} className={theme === 'retro' ? 'text-[#8B261D]' : 'text-[var(--mist-archive-red)]'} />
                                 <span className={`text-xs font-bold ${theme === 'retro' ? 'text-zinc-500' : 'text-zinc-400'} uppercase tracking-widest`}>{t.tokens}</span>
                             </div>
-                            <span className={`text-lg font-mono ${theme === 'retro' ? 'text-[#8B261D]' : 'text-gold-primary'} flex items-center gap-1`}>
+                            <span className={`text-lg font-mono ${theme === 'retro' ? 'text-[#8B261D]' : 'text-[var(--mist-archive-red)]'} flex items-center gap-1`}>
                                 <Sparkles size={14} /> {currentUser.tokens ?? 0} <span className={`text-[10px] ${theme === 'retro' ? 'text-zinc-500' : 'text-zinc-600'}`}>TOKENS</span>
                             </span>
                         </div>
@@ -276,7 +276,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
                 {/* Activation Code Redemption */}
                 <div className={`space-y-4 mb-8 border-t ${theme === 'retro' ? 'border-[#8B261D]/10' : 'border-zinc-800/80'} pt-6 transition-colors`}>
                     <div className="flex items-center gap-2 mb-4">
-                        <KeyRound size={14} className={theme === 'retro' ? 'text-[#8B261D]' : 'text-gold-primary'} />
+                        <KeyRound size={14} className={theme === 'retro' ? 'text-[#8B261D]' : 'text-[var(--mist-archive-red)]'} />
                         <p className={`text-[10px] ${theme === 'retro' ? 'text-zinc-500' : 'text-zinc-500'} font-bold tracking-widest uppercase`}>{t.redeemTitle}</p>
                     </div>
 
@@ -298,7 +298,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
                         <button
                             onClick={handleRedeem}
                             disabled={isRedeeming || !redeemCode.trim()}
-                            className={`${theme === 'retro' ? 'bg-[#8B261D] text-white hover:bg-[#6D1E16]' : 'bg-gold-primary text-black hover:bg-amber-400'} disabled:opacity-40 font-bold uppercase tracking-[0.15em] px-5 py-3 rounded-lg flex items-center justify-center gap-2 transition-all min-w-[100px]`}
+                            className={`mist-app-primary-action ${theme === 'retro' ? 'bg-[#8B261D] text-white hover:bg-[#6D1E16]' : 'bg-[var(--mist-archive-red)] text-white hover:bg-[var(--mist-archive-red)]'} disabled:opacity-40 font-bold uppercase tracking-[0.15em] px-5 py-3 rounded-lg flex items-center justify-center gap-2 transition-all min-w-[100px]`}
                         >
                             {isRedeeming ? (
                                 <Loader2 size={14} className="animate-spin" />
@@ -312,8 +312,8 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
                     {/* Redeem Result Feedback */}
                     {redeemResult && (
                         <div className={`mt-3 p-3 rounded-lg border text-[11px] font-mono leading-relaxed ${redeemResult.success
-                            ? (theme === 'retro' ? 'bg-emerald-100 border-emerald-300 text-emerald-800' : 'bg-emerald-950/30 border-emerald-800/40 text-emerald-300')
-                            : (theme === 'retro' ? 'bg-red-100 border-red-300 text-red-800' : 'bg-red-950/30 border-red-800/40 text-red-400')
+                            ? (theme === 'retro' ? 'bg-[#F4EFE0] border-[#8B261D]/20 text-[#3D1A16]' : 'bg-white/[0.04] border-white/20 text-zinc-200')
+                            : (theme === 'retro' ? 'bg-red-100 border-red-300 text-red-800' : 'bg-[var(--mist-archive-red-faint)] border-[var(--mist-archive-red-soft)] text-[var(--mist-archive-red)]')
                             }`}>
                             {redeemResult.message}
                         </div>

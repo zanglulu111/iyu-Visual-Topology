@@ -1,4 +1,4 @@
-import type { SutureStyleItem } from '../suture_styles';
+import type { SutureStyleItem } from '../suture/styles';
 import { makeFilmCase } from './_helpers';
 
 export const FILM_CASE_SHORT_EXPERIMENTAL: SutureStyleItem[] = [

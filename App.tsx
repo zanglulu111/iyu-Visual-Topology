@@ -52,7 +52,7 @@ import {
     COMM_SKIN_LIBRARY, EXPERIMENTAL_SKIN_LIBRARY, TRAILER_SKIN_LIBRARY, SKIN_LIBRARY, GENRE_CATEGORIES, WORLD_MOTIF_CATEGORIES,
     COUNTRY_PRESETS
 } from './constants';
-import { MASTER_PRESETS } from './data/master_presets';
+import { MASTER_PRESETS } from './data/aesthetic/master_presets';
 import * as geminiService from './services/geminiService';
 import * as randomizerService from './services/randomizer';
 
@@ -969,15 +969,15 @@ const App: React.FC = () => {
         // Use the weighted surface filter to determine which blocks participate
         const participants = randomizerService.weightedSurfaceFilter(lockedModules, false);
         // For each participating block, randomize it individually
-        const summaryBlocks = ['skin_era', 'skin_society', 'skin_age', 'skin_gender', 'skin_profession', 'sur10x', 'skin_ideology', 'skin_everything', 'skin_location', 'skin_ending'];
+        const summaryBlocks = ['skin_genre', 'skin_structure', 'skin_volume', 'skin_era', 'skin_society', 'skin_age', 'skin_gender', 'skin_profession', 'sur10x', 'skin_ideology', 'skin_everything', 'skin_location', 'skin_ending'];
         const newState = { ...narrativeFieldState };
 
         summaryBlocks.forEach(blockId => {
             if (lockedModules[blockId]) return;
             
             let keepOld = true;
-            // skin_age is not in the 12-word filter, give it independent 50% chance
-            if (blockId === 'skin_age') {
+            // skin_age / skin_structure / skin_volume are not in the 12-word filter, give them an independent 50% chance
+            if (blockId === 'skin_age' || blockId === 'skin_structure' || blockId === 'skin_volume') {
                 if (Math.random() >= 0.5) keepOld = false;
             } else {
                 // Check if this block passed the weighted filter
@@ -1522,20 +1522,16 @@ const App: React.FC = () => {
         persistence.clearHistory();
     };
 
+    const isCommercialThemeActive = () => {
+        return selectedDriver === DriverType.COMMERCIAL || activeBlueprint?.driverType === DriverType.COMMERCIAL || metonymyBlueprint?.driverType === DriverType.COMMERCIAL;
+    };
+
     const getMetonymyThemeAccent = () => {
-        if (metonymyBlueprint?.driverType === DriverType.COMMERCIAL) return "text-mist-cyan";
-        if (metonymyBlueprint?.driverType === DriverType.AESTHETIC) return "text-rose-400";
-        if (metonymyBlueprint?.driverType === DriverType.EXPERIMENTAL) return "text-purple-400";
-        if (metonymyBlueprint?.driverType === DriverType.TRAILER) return "text-orange-400";
-        return "text-gold-primary";
+        return isCommercialThemeActive() ? "text-mist-cyan" : "text-[var(--mist-archive-red)]";
     };
 
     const getMetonymyThemeBorder = () => {
-        if (metonymyBlueprint?.driverType === DriverType.COMMERCIAL) return "border-mist-cyan/30";
-        if (metonymyBlueprint?.driverType === DriverType.AESTHETIC) return "border-rose-500/30";
-        if (metonymyBlueprint?.driverType === DriverType.EXPERIMENTAL) return "border-purple-500/30";
-        if (metonymyBlueprint?.driverType === DriverType.TRAILER) return "border-orange-500/30";
-        return "border-gold-primary/30";
+        return isCommercialThemeActive() ? "border-mist-cyan/30" : "border-[rgba(255,98,86,0.3)]";
     };
 
     const handleBibleGenerate = async (treatment: CreativeTreatment, style: StyleConfig, force: boolean = false) => {
@@ -1901,7 +1897,8 @@ const App: React.FC = () => {
                         />
                     </div>
                 ) : (
-                    <div className="flex flex-col h-screen overflow-hidden relative">
+                    <div className={`mist-app-shell ${selectedDriver === DriverType.COMMERCIAL ? 'mist-commercial-mode' : ''} flex flex-col h-screen overflow-hidden relative`}>
+                        <div className="mist-app-film-grain" aria-hidden="true" />
                         {!isSutureOpen && (
                             <AppHeader
                                 page={page}
@@ -1929,7 +1926,7 @@ const App: React.FC = () => {
                         )}
 
                         <main
-                            className="flex-1 overflow-hidden relative bg-[var(--bg-main)] transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)"
+                            className="mist-app-content-layer flex-1 overflow-hidden relative bg-transparent transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)"
                         >
                             {viewMode === 'ENGINE' && selectedDriver && (
                                 <div className="w-full h-full animate-page-dissolve">
@@ -1965,6 +1962,34 @@ const App: React.FC = () => {
                                         onFaceStateChange={(locks) => {
                                             setFaceState(prev => ({ ...prev, ...locks }));
                                         }}
+                                        customTextSeed={visionInput}
+                                        onCustomTextSeedChange={(value) => {
+                                            setVisionInput(value);
+                                            setVisionCandidateState({});
+                                        }}
+                                        onRandomizeSummaryGroup={handleRandomizeSummaryGroup}
+                                        visionImage={visionImage}
+                                        onVisionImageChange={(value) => {
+                                            setVisionImage(value);
+                                            setVisionCandidateState({});
+                                        }}
+                                        visionImageNote={visionImageNote}
+                                        onVisionImageNoteChange={(value) => {
+                                            setVisionImageNote(value);
+                                            setVisionCandidateState({});
+                                        }}
+                                        visionAnalysis={visionAnalysis}
+                                        onVisionAnalysisChange={setVisionAnalysis}
+                                        onAnalyzeImage={handleAnalyzeImage}
+                                        isAnalyzingImage={isAnalyzingImage}
+                                        onVisionAutoFill={handleVisionAutoFill}
+                                        isVisionAutoFilling={isAutoFilling}
+                                        visionCandidateState={visionCandidateState}
+                                        onApplyVisionCandidateState={applyVisionCandidateState}
+                                        onClearVisionCandidateState={() => setVisionCandidateState({})}
+                                        worldLawConfig={worldLawConfig}
+                                        setWorldLawConfig={setWorldLawConfig}
+                                        isAdmin={isAdmin}
                                     />
                                 </div>
                             )}
@@ -2123,6 +2148,7 @@ const App: React.FC = () => {
                                 isTaskManagerOpen={isTaskManagerOpen}
                                 setIsTaskManagerOpen={setIsTaskManagerOpen}
                                 setIsPromptInspectorOpen={setIsPromptInspectorOpen}
+                                hideWorldLawControl={viewMode === 'ENGINE' && selectedDriver === DriverType.NARRATIVE}
                                 isAdmin={isAdmin}
                             />
                         )}
@@ -2245,7 +2271,7 @@ const App: React.FC = () => {
 
                 {/* WorldLawModal integrated into EngineBottomBar */}
                 {isSettingsOpen && (
-                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200] p-4">
+                    <div className="mist-archive-overlay mist-config-overlay fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200] p-4">
                         <SimpleConfigPanel lang={lang} onClose={closeSettings} />
                     </div>
                 )}

@@ -11,7 +11,7 @@ import {
     TRAILER_ENGINE_BLOCKS,
     TRAILER_SKIN_BLOCKS
 } from '../constants';
-import { ALL_SKIN_BLOCKS } from '../data/skin_libraries';
+import { ALL_SKIN_BLOCKS } from '../data/narrative/skin_libraries';
 
 interface EngineParamsOverviewProps {
     fieldState?: NarrativeFieldState;

@@ -1,8 +1,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { X, Wand2, Play, Eraser, Volume2, Video, Sliders, FileText, Check, Copy, Monitor, Film, Zap, ChevronRight, ChevronDown, BookOpen, Save, FilePlus, Aperture, Clapperboard, LayoutGrid, Mic2, Crosshair } from 'lucide-react';
 import { SutureConfig, SutureControlVersion, DensityLevel, BlueprintLanguage, DriverType, LibraryCategoryDef, MetonymyStylePreset } from '../types';
-import { DIALOGUE_STYLES, VOICEOVER_STYLES, MONOLOGUE_STYLES, VISUAL_STYLES, FILM_CASES, SCENE_MODES, SCENE_FUNCTIONS, SHOT_BUDGETS, SOUND_ARCHITECTURES } from '../data/suture_styles';
-import { MONTAGE_STYLES } from '../data/suture_montage';
+import { DIALOGUE_STYLES, VOICEOVER_STYLES, MONOLOGUE_STYLES, VISUAL_STYLES, FILM_CASES, SCENE_MODES, SCENE_FUNCTIONS, SHOT_BUDGETS, SOUND_ARCHITECTURES } from '../data/suture/styles';
+import { MONTAGE_STYLES } from '../data/suture/montage';
 import { NarrativeLibraryModal } from './NarrativeLibraryModal';
 import { ProcessingTimer } from './SharedBlueprintComponents';
 import { useTheme } from '../contexts/ThemeContext';

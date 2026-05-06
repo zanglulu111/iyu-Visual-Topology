@@ -1,8 +1,8 @@
 
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import { configService } from '../src/services/configService';
-import { AESTHETIC_ENGINE_BLOCKS, AESTHETIC_ENGINE_LIBRARY } from '../data/aesthetic_data';
-import { SKIN_LIBRARY } from '../data/skin_libraries';
+import { AESTHETIC_ENGINE_BLOCKS, AESTHETIC_ENGINE_LIBRARY } from '../data/aesthetic/core';
+import { SKIN_LIBRARY } from '../data/narrative/skin_libraries';
 import { LibraryItemDef } from '../types';
 import { runWithTask, getCallerName } from './taskManager';
 
@@ -67,7 +67,7 @@ SUBJECT
 SCENE
 > Anchor: {skin_era} {skin_location} {aes_scene_real/abstract}
 > Context: {skin_society} {skin_ideology}
-> Atmosphere: {aes_atmosphere} {aes_particles} {aes_weather}
+> Atmosphere: {aes_atmosphere} {aes_particles}
 CINEMATOGRAPHY
 > Camera: {aes_camera_system} + {aes_optical_format}
 > Lens: {aes_lens_series} + {aes_focal_length}

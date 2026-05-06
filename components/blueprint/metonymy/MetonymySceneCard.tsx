@@ -200,8 +200,8 @@ export const MetonymySceneCard: React.FC<MetonymySceneCardProps> = (props) => {
     const dynamicCols = getDynamicColumns(language, dynamicDisplayLang);
 
     // Dynamic button style based on theme
-    const btnTheme = `${theme === 'retro' ? 'h-8 px-3 rounded-lg bg-[#8B261D] border-[#8B261D] text-white hover:bg-[#A52A2A]' : `h-8 px-3 rounded-lg bg-${themeColorBase}/20 text-${themeColorBase} border border-current hover:bg-${themeColorBase}/30`} text-[10px] font-bold uppercase tracking-wider transition-all active:scale-95 flex items-center gap-2 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed`;
-    const btnGrey = `h-8 px-3 rounded-lg border text-[10px] font-bold uppercase tracking-wider transition-all active:scale-95 flex items-center gap-2 shadow-sm ${theme === 'retro' ? 'bg-white border-[#8B261D]/20 text-[#8B261D] hover:bg-[#8B261D]/10' : 'bg-zinc-900/50 border-zinc-700/50 text-zinc-400 hover:text-white hover:bg-zinc-800'}`;
+    const btnTheme = `${theme === 'retro' ? 'mist-app-primary-action h-8 px-3 bg-[#8B261D] border-[#8B261D] text-white hover:bg-[#A52A2A]' : `mist-app-primary-action h-8 px-3 bg-${themeColorBase}/20 text-${themeColorBase} border border-current hover:bg-${themeColorBase}/30`} text-[10px] font-bold uppercase tracking-wider transition-all active:scale-95 flex items-center gap-2 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed`;
+    const btnGrey = `mist-archive-button h-8 px-3 border text-[10px] font-bold uppercase tracking-wider transition-all active:scale-95 flex items-center gap-2 shadow-sm ${theme === 'retro' ? 'bg-white border-[#8B261D]/20 text-[#8B261D] hover:bg-[#8B261D]/10' : 'bg-zinc-900/50 border-zinc-700/50 text-zinc-400 hover:text-white hover:bg-zinc-800'}`;
 
     const handleMountChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         onMountPreset(e.target.value);
@@ -363,11 +363,11 @@ export const MetonymySceneCard: React.FC<MetonymySceneCardProps> = (props) => {
             onDragOver={onDragOver}
             onDrop={onDrop}
             onClick={onSetActive}
-            className={`border rounded-2xl overflow-hidden transition-all duration-300 ${isActive ? `border-${themeColorBase} ${theme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-zinc-900/25'} shadow-2xl` : `${theme === 'retro' ? 'border-[#8B261D]/30 bg-[var(--bg-header)]' : `border-zinc-800 bg-zinc-900/10 hover:border-${themeColorBase}/50`}`} ${isDragged ? 'opacity-50' : 'opacity-100'} ${isFocused ? 'h-full flex flex-col' : ''}`}
+            className={`mist-archive-panel border overflow-hidden transition-all duration-300 ${isActive ? `border-${themeColorBase} ${theme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-zinc-900/25'} shadow-2xl` : `${theme === 'retro' ? 'border-[#8B261D]/30 bg-[var(--bg-header)]' : `border-zinc-800 bg-zinc-900/10 hover:border-${themeColorBase}/50`}`} ${isDragged ? 'opacity-50' : 'opacity-100'} ${isFocused ? 'h-full flex flex-col' : ''}`}
         >
             {/* Header */}
             <div
-                className={`${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/10' : 'bg-zinc-950/80 border-zinc-900/50 hover:bg-zinc-900/60'} px-4 py-3 flex items-center gap-4 border-b cursor-pointer h-14 shrink-0 transition-colors`}
+                className={`mist-archive-toolbar ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/10' : 'bg-zinc-950/80 border-zinc-900/50 hover:bg-zinc-900/60'} px-4 py-3 flex items-center gap-4 border-b cursor-pointer h-14 shrink-0 transition-colors`}
                 onClick={onSetActive}
             >
                 <div className="flex items-center gap-3 shrink-0">
@@ -400,7 +400,7 @@ export const MetonymySceneCard: React.FC<MetonymySceneCardProps> = (props) => {
                 </div>
 
                 {/* Visual Bible Selector */}
-                <div className={`flex items-center gap-2 shrink-0 rounded-lg p-1 border ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20' : 'bg-black/40 border-zinc-800'}`} onClick={e => e.stopPropagation()}>
+                <div className={`mist-archive-panel flex items-center gap-2 shrink-0 p-1 border ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20' : 'bg-black/40 border-zinc-800'}`} onClick={e => e.stopPropagation()}>
                     <div className={`flex items-center px-2 gap-2 border-r ${theme === 'retro' ? 'border-[#8B261D]/20' : 'border-zinc-800'}`}>
                         <LayoutTemplate size={12} className={theme === 'retro' ? 'text-[#8B261D]/60' : 'text-zinc-400'} />
                         <select
@@ -519,7 +519,7 @@ export const MetonymySceneCard: React.FC<MetonymySceneCardProps> = (props) => {
                     {/* --- TAB CONTENT: SCRIPT --- */}
                     <div className={`${activeTab === 'SCRIPT' ? (isFocused ? 'flex-1 overflow-hidden flex flex-col' : 'block') : 'hidden'}`}>
                         <div className={`h-full ${isFocused ? 'overflow-y-auto custom-scrollbar pb-12' : ''}`}>
-                            <div className={`flex justify-between items-center px-4 md:px-8 py-5 ${theme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#080808]'} z-20 ${isFocused ? `sticky top-0 border-b ${theme === 'retro' ? 'border-[#8B261D]/20' : 'border-zinc-800'}` : 'mb-2'}`}>
+                            <div className={`mist-archive-toolbar flex justify-between items-center px-4 md:px-8 py-5 ${theme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#080808]'} z-20 ${isFocused ? `sticky top-0 border-b ${theme === 'retro' ? 'border-[#8B261D]/20' : 'border-zinc-800'}` : 'mb-2'}`}>
                                 <h4 className={`${theme === 'retro' ? 'text-[#8B261D]' : 'text-zinc-400'} font-bold text-xs uppercase tracking-wider flex items-center gap-2`}>
                                     <FileText size={14} /> {language === 'EN' ? "Scriptment" : "文学脚本"}
                                 </h4>
@@ -561,7 +561,7 @@ export const MetonymySceneCard: React.FC<MetonymySceneCardProps> = (props) => {
                                             }
                                         }}
                                         disabled={isGenerating || isStyleTransferring || (!!mountedPresetId && mountedPresetId !== 'original' && !hasBaseScript)}
-                                        className={`${(!!mountedPresetId && mountedPresetId !== 'original' && !hasBaseScript) ? `h-8 px-3 rounded-lg border cursor-not-allowed flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider shadow-sm ${theme === 'retro' ? 'bg-[#F9F7F1] border-[#8B261D]/20 text-[#8B261D]/40' : 'bg-zinc-900 border-zinc-800 text-zinc-600'}` : btnTheme}`}
+                                        className={`${(!!mountedPresetId && mountedPresetId !== 'original' && !hasBaseScript) ? `mist-archive-button h-8 px-3 border cursor-not-allowed flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider shadow-sm ${theme === 'retro' ? 'bg-[#F9F7F1] border-[#8B261D]/20 text-[#8B261D]/40' : 'bg-zinc-900 border-zinc-800 text-zinc-600'}` : btnTheme}`}
                                         title={(!!mountedPresetId && mountedPresetId !== 'original' && !hasBaseScript) ? (language === 'EN' ? "Please generate base script first" : "请先生成基础剧本") : ""}
                                     >
                                         <Wand2 size={12} />
@@ -594,7 +594,7 @@ export const MetonymySceneCard: React.FC<MetonymySceneCardProps> = (props) => {
                             <div className="px-4 md:px-8 pb-8">
                                 {/* Breakdown Details Panel */}
                                 {isBreakdownVisible && (
-                                    <div className="mb-6 p-0 rounded-lg animate-in slide-in-from-top-2 duration-200">
+                                    <div className="mb-6 p-0 animate-in slide-in-from-top-2 duration-200">
                                         <textarea
                                             value={section.breakdownInfo || ""}
                                             onChange={(e) => onUpdateBreakdownInfo && onUpdateBreakdownInfo(e.target.value)}
@@ -611,7 +611,7 @@ export const MetonymySceneCard: React.FC<MetonymySceneCardProps> = (props) => {
                                             <textarea
                                                 value={displayContent}
                                                 onChange={(e) => onUpdateScript(e.target.value)}
-                                                className={`w-full min-h-[400px] bg-transparent text-zinc-300 font-serif leading-loose outline-none resize-none p-4 border border-zinc-800 focus:border-${themeColorBase}/50 rounded-lg ${isFocused ? 'h-full' : ''}`}
+                                                className={`w-full min-h-[400px] bg-transparent text-zinc-300 font-serif leading-loose outline-none resize-none p-4 border border-zinc-800 focus:border-${themeColorBase}/50 ${isFocused ? 'h-full' : ''}`}
                                             />
                                         ) : (
                                             <div className={`pl-4 border-l-2 ${theme === 'retro' ? 'border-[#8B261D]/20' : 'border-zinc-800'}`}>
@@ -630,7 +630,7 @@ export const MetonymySceneCard: React.FC<MetonymySceneCardProps> = (props) => {
                                             <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
                                                 <ImageIcon size={12} className={themeAccent} /> {language === 'EN' ? "Visual Anchor" : "视觉锚点"}
                                             </div>
-                                            <div className={`relative group rounded-xl overflow-hidden border aspect-[9/16] ${theme === 'retro' ? 'border-[#8B261D]/20 bg-[var(--bg-header)] shadow-sm' : 'border-zinc-800 bg-black/40'}`}>
+                                            <div className={`mist-archive-panel relative group overflow-hidden border aspect-[9/16] ${theme === 'retro' ? 'border-[#8B261D]/20 bg-[var(--bg-header)] shadow-sm' : 'border-zinc-800 bg-black/40'}`}>
                                                 {isAnchorUploading ? (
                                                     <div className={`absolute inset-0 flex flex-col items-center justify-center backdrop-blur-sm z-10 ${theme === 'retro' ? 'bg-white/60' : 'bg-black/60'}`}>
                                                         <Loader2 size={24} className={`animate-spin ${themeAccent} mb-2`} />

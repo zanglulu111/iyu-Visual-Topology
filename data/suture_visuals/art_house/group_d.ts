@@ -1,4 +1,4 @@
-import type { SutureStyleItem } from '../../suture_styles';
+import type { SutureStyleItem } from '../../suture/styles';
 
 const ART_HOUSE_GROUP_D = '4D. 艺术电影：女性新浪潮、民俗圣像与实验散文';
 

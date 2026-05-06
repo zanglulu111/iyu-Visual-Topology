@@ -275,8 +275,8 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
     };
 
     return (
-        <div ref={containerRef} className={`flex flex-col h-full ${theme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#0a0a0a]'} relative group`}>
-            <div className={`h-16 border-b ${theme === 'retro' ? 'border-[#8B261D]/20 bg-[var(--bg-header)]' : 'border-zinc-800 bg-[#0c0c0c]'} flex justify-between items-center shrink-0 px-4`}>
+        <div ref={containerRef} className={`mist-archive-panel flex flex-col h-full ${theme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#0a0a0a]'} relative group`}>
+            <div className={`mist-archive-toolbar h-16 border-b ${theme === 'retro' ? 'border-[#8B261D]/20 bg-[var(--bg-header)]' : 'border-zinc-800 bg-[#0c0c0c]'} flex justify-between items-center shrink-0 px-4`}>
                 <div className={`flex items-center gap-2 ${theme === 'retro' ? 'text-black' : 'text-zinc-300'} font-bold text-xs uppercase tracking-widest`}>
                     <FileText size={14} className={themeAccent} />
                     {lang === 'EN' ? "Full Story" : "完整故事"}
@@ -288,7 +288,7 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
                             <button
                                 onClick={handleAutoBreakdownClick}
                                 disabled={isBreakingDown || text.trim().length === 0}
-                                className={`h-9 px-4 rounded-lg border flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95 shadow-md disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none ${theme === 'retro' ? 'bg-[#8B261D] border-[#8B261D] text-white hover:bg-[#A52A2A]' : `bg-${themeColorBase}/20 border-current ${themeAccent} hover:bg-${themeColorBase}/30`}`}
+                                className={`mist-app-primary-action h-9 px-4 border flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95 shadow-md disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none ${theme === 'retro' ? 'bg-[#8B261D] border-[#8B261D] text-white hover:bg-[#A52A2A]' : `bg-${themeColorBase}/20 border-current ${themeAccent} hover:bg-${themeColorBase}/30`}`}
                                 title={lang === 'EN' ? "Auto Break Down Scenes" : "AI 智能分场"}
                             >
                                 {isBreakingDown ? <Loader2 size={12} className="animate-spin" /> : <Scissors size={12} />}
@@ -297,7 +297,7 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
                             </button>
                             <button
                                 onClick={toggleSelectionMode}
-                                className={`h-9 ${lang === 'EN' ? 'w-[124px]' : 'w-[104px]'} justify-center rounded-lg border flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-all duration-100 active:scale-95 shadow-sm focus:outline-none ${isSelectionMode ? `${theme === 'retro' ? 'bg-[#8B261D] text-white border-[#8B261D]' : `${themeAccent.replace('text-', 'bg-')} text-black border-transparent`}` : `${theme === 'retro' ? 'bg-white border-[#8B261D]/20 text-[#8B261D]/70 hover:text-[#8B261D]' : 'bg-zinc-900 border-zinc-700/50 text-zinc-400 hover:text-white hover:border-zinc-500'}`}`}
+                                className={`mist-archive-button h-9 ${lang === 'EN' ? 'w-[124px]' : 'w-[104px]'} justify-center border flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-all duration-100 active:scale-95 shadow-sm focus:outline-none ${isSelectionMode ? `${theme === 'retro' ? 'bg-[#8B261D] text-white border-[#8B261D]' : `${themeAccent.replace('text-', 'bg-')} text-black border-transparent`}` : `${theme === 'retro' ? 'bg-white border-[#8B261D]/20 text-[#8B261D]/70 hover:text-[#8B261D]' : 'bg-zinc-900 border-zinc-700/50 text-zinc-400 hover:text-white hover:border-zinc-500'}`}`}
                             >
                                 {isSelectionMode ? <ListChecks size={12} /> : <MousePointer2 size={12} />}
                                 {lang === 'EN' ? (isSelectionMode ? "Mode: ON" : "Manual Mode") : (isSelectionMode ? "选择模式" : "手动分场")}
@@ -306,7 +306,7 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
                     )}
                     <button
                         onClick={() => { setIsEditing(!isEditing); setIsSelectionMode(false); }}
-                        className={`h-9 ${lang === 'EN' ? 'w-[124px]' : 'w-[104px]'} justify-center rounded-lg border flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest focus:outline-none transition-all active:scale-95 shadow-sm ${isEditing ? `${theme === 'retro' ? 'bg-[#DCD8CF] text-[#8B261D] border-[#8B261D]/30' : 'bg-zinc-800 text-white border-zinc-500'}` : `${theme === 'retro' ? 'bg-white border-[#8B261D]/20 text-[#8B261D]/70 hover:text-[#8B261D]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-500'}`}`}
+                        className={`mist-archive-button h-9 ${lang === 'EN' ? 'w-[124px]' : 'w-[104px]'} justify-center border flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest focus:outline-none transition-all active:scale-95 shadow-sm ${isEditing ? `${theme === 'retro' ? 'bg-[#DCD8CF] text-[#8B261D] border-[#8B261D]/30' : 'bg-zinc-800 text-white border-zinc-500'}` : `${theme === 'retro' ? 'bg-white border-[#8B261D]/20 text-[#8B261D]/70 hover:text-[#8B261D]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-500'}`}`}
                         title={isEditing ? (lang === 'EN' ? "Preview" : "预览模式") : (lang === 'EN' ? "Edit" : "编辑模式")}
                     >
                         {isEditing ? <Eye size={12} /> : <Edit3 size={12} />}
@@ -453,7 +453,7 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
                     className="absolute bottom-20 left-0 right-0 z-[2000] flex justify-center animate-in slide-in-from-bottom-2 fade-in pointer-events-none"
                     style={{ transform: `translate(${consolePos.x}px, ${consolePos.y}px)` }}
                 >
-                    <div className={`w-[calc(100%-2rem)] max-w-[460px] ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/40' : 'bg-zinc-950 border-zinc-700'} border-2 p-3 pr-4 rounded-xl shadow-2xl flex items-start gap-3 pointer-events-auto`}>
+                    <div className={`mist-archive-panel w-[calc(100%-2rem)] max-w-[460px] ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/40' : 'bg-zinc-950 border-zinc-700'} border-2 p-3 pr-4 shadow-2xl flex items-start gap-3 pointer-events-auto`}>
                         {/* Drag Handle */}
                         <div 
                             onMouseDown={handleDragStart}
@@ -482,7 +482,7 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
 
                             {/* Target Scene Selector */}
                             <div className="flex flex-col gap-2">
-                                <div className={`flex items-center gap-2 rounded-lg p-1 border ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20' : 'bg-zinc-900 border-zinc-800'}`}>
+                                <div className={`mist-archive-panel flex items-center gap-2 p-1 border ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20' : 'bg-zinc-900 border-zinc-800'}`}>
                                     <div className={`px-2 text-[9px] font-bold ${theme === 'retro' ? 'text-black/60' : 'text-zinc-400'} uppercase tracking-widest shrink-0`}>
                                         {lang === 'EN' ? "Target Scene:" : "目标场次："}
                                     </div>
@@ -507,7 +507,7 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
                                     <button
                                         onClick={() => handleAction('ASSIGN')}
                                         disabled={selectedIndices.size === 0 || !targetSceneId}
-                                        className={`flex-1 py-2 px-2 rounded-lg flex items-center justify-center gap-2 transition-all text-[10px] font-bold disabled:opacity-50 disabled:cursor-not-allowed ${theme === 'retro' ? 'bg-[#8B261D]/10 border border-[#8B261D]/30 text-[#8B261D] hover:bg-[#8B261D]/20' : `bg-${themeColorBase}/10 border border-${themeColorBase}/30 text-${themeColorBase} hover:bg-${themeColorBase}/20`}`}
+                                        className={`mist-app-primary-action flex-1 py-2 px-2 flex items-center justify-center gap-2 transition-all text-[10px] font-bold disabled:opacity-50 disabled:cursor-not-allowed ${theme === 'retro' ? 'bg-[#8B261D]/10 border border-[#8B261D]/30 text-[#8B261D] hover:bg-[#8B261D]/20' : `bg-${themeColorBase}/10 border border-${themeColorBase}/30 text-${themeColorBase} hover:bg-${themeColorBase}/20`}`}
                                         title="Sync selected text to target scene"
                                     >
                                         <RefreshCcw size={14} />
@@ -516,7 +516,7 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
                                     <button
                                         onClick={() => handleAction('NEW')}
                                         disabled={selectedIndices.size === 0}
-                                        className={`flex-1 py-2 px-2 border rounded-lg flex items-center justify-center gap-2 transition-all text-[10px] font-bold disabled:opacity-50 disabled:cursor-not-allowed ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20 text-[#8B261D]/70 hover:text-[#8B261D] hover:border-[#8B261D]/40' : 'bg-zinc-900 border-zinc-700/50 text-zinc-300 hover:text-white hover:border-zinc-500'}`}
+                                        className={`mist-archive-button flex-1 py-2 px-2 border flex items-center justify-center gap-2 transition-all text-[10px] font-bold disabled:opacity-50 disabled:cursor-not-allowed ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20 text-[#8B261D]/70 hover:text-[#8B261D] hover:border-[#8B261D]/40' : 'bg-zinc-900 border-zinc-700/50 text-zinc-300 hover:text-white hover:border-zinc-500'}`}
                                         title="Create new scene from selected text"
                                     >
                                         <Plus size={14} /> {lang === 'EN' ? "Create New Scene" : "新建场次"}

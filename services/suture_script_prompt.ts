@@ -10,8 +10,8 @@ import {
     SCENE_FUNCTIONS,
     SHOT_BUDGETS,
     SOUND_ARCHITECTURES
-} from '../data/suture_styles';
-import { MONTAGE_STYLES } from '../data/suture_montage';
+} from '../data/suture/styles';
+import { MONTAGE_STYLES } from '../data/suture/montage';
 import { findItemDetails } from './dataRegistry';
 import { getBlockName } from '../utils/blockUtils';
 

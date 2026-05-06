@@ -263,18 +263,26 @@ export const BlueprintEditor: React.FC<BlueprintEditorProps> = ({
     }, [currentBlueprint, onUpdateBlueprint]);
 
     const uiConfig = useMemo(() => {
-        let themeAccent = 'text-gold-primary';
-        let themeBorder = 'border-[#D4AF37]/30';
-        let themeText = 'text-gold-primary';
-        let themeHoverText = 'group-hover:text-gold-primary';
-        let themeBgActive = 'bg-gold-primary/10';
-        let themeSidebarBorder = 'border-[#D4AF37]/15';
-        let themeActiveBorder = 'border-gold-primary'; // Solid gold for active marker
+        let themeAccent = 'text-[var(--mist-archive-red)]';
+        let themeBorder = 'border-[rgba(255,98,86,0.3)]';
+        let themeText = 'text-[var(--mist-archive-red)]';
+        let themeHoverText = 'group-hover:text-[var(--mist-archive-red)]';
+        let themeBgActive = 'bg-[rgba(255,98,86,0.12)]';
+        let themeSidebarBorder = 'border-[rgba(255,98,86,0.18)]';
+        let themeActiveBorder = 'border-[var(--mist-archive-red)]';
         let themeSidebarBg = 'bg-[#0a0a0a]'; // Default for non-retro
-        let themeEmptyPulse = 'bg-gold-primary/20'; // Default for non-retro
+        let themeEmptyPulse = 'bg-[rgba(255,98,86,0.18)]';
         let menuItems: { id: string, label: string, icon: React.ElementType }[] = [];
 
         if (effectiveDriverType === DriverType.COMMERCIAL) {
+            themeAccent = 'text-mist-cyan';
+            themeBorder = 'border-mist-cyan/30';
+            themeText = 'text-mist-cyan';
+            themeHoverText = 'group-hover:text-mist-cyan';
+            themeBgActive = 'bg-mist-cyan/15';
+            themeSidebarBorder = 'border-mist-cyan/20';
+            themeActiveBorder = 'border-mist-cyan';
+            themeEmptyPulse = 'bg-mist-cyan/20';
             menuItems = [
                 { id: 'STRATEGY', label: language === 'EN' ? "Core Strategy" : "核心策略", icon: Target },
                 { id: 'SCRIPT', label: language === 'EN' ? "AV Script" : "声画分镜", icon: Film },
@@ -323,38 +331,6 @@ export const BlueprintEditor: React.FC<BlueprintEditorProps> = ({
             themeSidebarBorder = 'border-[#8B261D]/20';
             themeActiveBorder = 'border-[#8B261D]';
             themeEmptyPulse = 'bg-[#8B261D]/20';
-        } else if (effectiveDriverType === DriverType.COMMERCIAL) {
-            themeAccent = 'text-mist-cyan';
-            themeText = 'text-mist-cyan';
-            themeHoverText = 'group-hover:text-mist-cyan';
-            themeBorder = 'border-mist-cyan/30';
-            themeBgActive = 'bg-mist-cyan/15';
-            themeSidebarBorder = 'border-mist-cyan/20';
-            themeActiveBorder = 'border-mist-cyan';
-        } else if (effectiveDriverType === DriverType.AESTHETIC) {
-            themeAccent = 'text-rose-400';
-            themeText = 'text-rose-400';
-            themeHoverText = 'group-hover:text-rose-400';
-            themeBorder = 'border-rose-500/30';
-            themeBgActive = 'bg-rose-900/20';
-            themeSidebarBorder = 'border-rose-400/15';
-            themeActiveBorder = 'border-rose-400';
-        } else if (effectiveDriverType === DriverType.EXPERIMENTAL) {
-            themeAccent = 'text-purple-400';
-            themeText = 'text-purple-400';
-            themeHoverText = 'group-hover:text-purple-400';
-            themeBorder = 'border-purple-500/30';
-            themeBgActive = 'bg-purple-900/20';
-            themeSidebarBorder = 'border-purple-400/15';
-            themeActiveBorder = 'border-purple-400';
-        } else if (effectiveDriverType === DriverType.TRAILER) {
-            themeAccent = 'text-orange-400';
-            themeText = 'text-orange-400';
-            themeHoverText = 'group-hover:text-orange-400';
-            themeBorder = 'border-orange-500/30';
-            themeBgActive = 'bg-orange-900/20';
-            themeSidebarBorder = 'border-orange-400/15';
-            themeActiveBorder = 'border-orange-400';
         }
 
         return { type: effectiveDriverType, themeAccent, themeBorder, themeText, themeHoverText, themeBgActive, themeSidebarBorder, themeActiveBorder, themeSidebarBg, themeEmptyPulse, menuItems };
@@ -748,21 +724,21 @@ ${psychoHtml}
     };
 
     return (
-        <div className={`absolute inset-0 ${effectiveTheme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#080808]'} flex flex-col z-10`}>
+        <div className={`mist-archive-workbench mist-bible-editor ${effectiveDriverType === DriverType.COMMERCIAL ? 'mist-commercial-workbench' : ''} absolute inset-0 ${effectiveTheme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#080808]'} flex flex-col z-10`}>
 
             {/* Main Content */}
-            <div className="flex-1 flex overflow-hidden relative z-10">
+            <div className={`flex-1 flex overflow-hidden relative z-10 ${!isSutureOpen ? 'mb-14' : ''}`}>
                 {/* PARAMETERS SIDEBAR */}
                 <div className={`
-                    absolute top-0 ${isSutureOpen ? 'bottom-0' : 'bottom-14'} left-0 z-50
+                    absolute top-0 bottom-0 left-0 z-50
                     w-full max-w-lg
-                    ${effectiveTheme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#0a0a0b]/95 backdrop-blur-xl'} border-r ${effectiveTheme === 'retro' ? 'border-[#8B261D]/20' : 'border-zinc-800'}
+                    mist-archive-panel ${effectiveTheme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#0a0a0b]/95 backdrop-blur-xl'} border-r ${effectiveTheme === 'retro' ? 'border-[#8B261D]/20' : 'border-zinc-800'}
                     transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]
                     ${isParamsPanelOpen ? 'translate-x-0' : '-translate-x-full'}
                     flex flex-col ${effectiveTheme === 'retro' ? '' : 'shadow-[10px_0_30px_rgba(0,0,0,0.3)]'}
                 `}>
                     {/* Sidebar Content */}
-                    <div className={`p-6 border-b ${effectiveTheme === 'retro' ? 'border-[#8B261D]/10 bg-[var(--bg-header)]' : 'border-zinc-800 bg-[#0a0a0a]'} flex justify-between items-center`}>
+                    <div className={`mist-archive-toolbar p-6 border-b ${effectiveTheme === 'retro' ? 'border-[#8B261D]/10 bg-[var(--bg-header)]' : 'border-zinc-800 bg-[#0a0a0a]'} flex justify-between items-center`}>
                         <div className="flex items-center gap-3">
                             <Database className={uiConfig.themeText.replace('text-', 'text-')} size={20} />
                             <span className={`text-base font-bold ${effectiveTheme === 'retro' ? 'text-black' : 'text-white'} uppercase tracking-widest`}>
@@ -790,7 +766,7 @@ ${psychoHtml}
                 </div>
 
                 {!isSutureOpen && !isAnalysisMode && (
-                    <aside className={`${isSidebarOpen ? 'w-64 translate-x-0' : 'w-0 -translate-x-full opacity-0 overflow-hidden'} ${uiConfig.themeSidebarBg} border-r ${uiConfig.themeSidebarBorder} flex flex-col shrink-0 transition-all duration-300 ease-in-out`}>
+                    <aside className={`mist-archive-panel ${isSidebarOpen ? 'w-64 translate-x-0' : 'w-0 -translate-x-full opacity-0 overflow-hidden'} ${uiConfig.themeSidebarBg} border-r ${uiConfig.themeSidebarBorder} flex flex-col shrink-0 transition-all duration-300 ease-in-out`}>
                         <div className="w-64 flex flex-col h-full">
                             <div className="flex-1 flex flex-col py-6">
                                 <div className="px-6 mb-4 text-[10px] font-bold text-zinc-600 uppercase tracking-widest">
@@ -820,13 +796,13 @@ ${psychoHtml}
 
             {/* Footer */}
             {!isSutureOpen && (
-                <footer className={`fixed bottom-0 left-0 right-0 h-14 bg-[var(--bg-header)] backdrop-blur-md border-t ${theme === 'retro' ? 'border-[var(--border-main)]' : 'border-zinc-800'} flex items-center justify-between px-6 md:px-12 z-40 transition-colors duration-500`}>
+                <footer className={`mist-app-footer fixed bottom-0 left-0 right-0 h-14 bg-[var(--bg-header)] backdrop-blur-md border-t ${theme === 'retro' ? 'border-[var(--border-main)]' : 'border-zinc-800'} flex items-center justify-between px-6 md:px-12 z-40 transition-colors duration-500`}>
                     <div className="flex gap-4">
-                        <button onClick={onGoHome} className={`flex items-center gap-3 px-6 py-3 bg-[var(--bg-panel)]/50 hover:bg-[var(--bg-panel)] border border-[var(--border-main)] rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-300 group min-w-[140px] hover:scale-105 active:scale-95 ${effectiveTheme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'}`}>
+                        <button onClick={onGoHome} className={`mist-app-archive-button flex items-center gap-3 px-6 py-3 bg-[var(--bg-panel)]/50 hover:bg-[var(--bg-panel)] border border-[var(--border-main)] text-xs font-bold uppercase tracking-widest transition-all duration-300 group min-w-[140px] hover:scale-105 active:scale-95 ${effectiveTheme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'}`}>
                             <Home size={16} className="group-hover:scale-110 transition-transform" />
                             <span>{language === 'EN' ? "Back to Engine" : "返回引擎"}</span>
                         </button>
-                        <button onClick={onClose} className={`flex items-center gap-3 px-6 py-3 bg-[var(--bg-panel)]/50 hover:bg-[var(--bg-panel)] border ${uiConfig.themeSidebarBorder} rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-300 group min-w-[140px] hover:scale-105 active:scale-95 ${effectiveTheme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'}`}>
+                        <button onClick={onClose} className={`mist-app-archive-button flex items-center gap-3 px-6 py-3 bg-[var(--bg-panel)]/50 hover:bg-[var(--bg-panel)] border ${uiConfig.themeSidebarBorder} text-xs font-bold uppercase tracking-widest transition-all duration-300 group min-w-[140px] hover:scale-105 active:scale-95 ${effectiveTheme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'}`}>
                             <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
                             <span>{language === 'EN' ? "Back to Paths" : "返回分支"}</span>
                         </button>
@@ -836,7 +812,7 @@ ${psychoHtml}
                         {/* Params Button */}
                         <button
                             onClick={() => setIsParamsPanelOpen(!isParamsPanelOpen)}
-                            className="flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]"
+                            className={`mist-app-footer-control ${isParamsPanelOpen ? 'is-active' : ''} flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]`}
                         >
                             <List size={18} className={`transition-colors ${isParamsPanelOpen ? (effectiveTheme === 'retro' ? 'text-[#8B261D]' : uiConfig.themeAccent) : (effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 group-hover:text-white`)}`} />
                             <span className={`text-[9px] font-bold uppercase tracking-wider ${isParamsPanelOpen ? (effectiveTheme === 'retro' ? 'text-[#8B261D]' : uiConfig.themeAccent) : (effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 group-hover:text-white`)}`}>
@@ -849,7 +825,7 @@ ${psychoHtml}
                         {/* Archive */}
                         <button
                             onClick={onOpenHistory}
-                            className="flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]"
+                            className="mist-app-footer-control flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]"
                         >
                             <Archive size={18} className={`transition-colors ${effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`} />
                             <span className={`text-[9px] font-bold uppercase tracking-wider transition-colors ${effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`}>
@@ -860,7 +836,7 @@ ${psychoHtml}
                         {/* Save to Collection */}
                         <button
                             onClick={handleSaveToCollection}
-                            className="flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]"
+                            className="mist-app-footer-control flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]"
                         >
                             <Bookmark size={18} className={`transition-colors ${isSaved ? 'text-red-500 fill-red-500' : (effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white')}`} />
                             <span className={`text-[9px] font-bold uppercase tracking-wider transition-colors ${isSaved ? 'text-red-500' : (effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white')}`}>
@@ -871,7 +847,7 @@ ${psychoHtml}
                         {/* Copy All */}
                         <button
                             onClick={handleGlobalCopyClick}
-                            className="flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]"
+                            className="mist-app-footer-control flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]"
                         >
                             {globalCopied ? (
                                 <Check size={18} className="text-emerald-400" />
@@ -886,7 +862,7 @@ ${psychoHtml}
                         {/* Download */}
                         <button
                             onClick={handleExportHtml}
-                            className="flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]"
+                            className="mist-app-footer-control flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]"
                         >
                             <Download size={18} className={`transition-colors ${effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`} />
                             <span className={`text-[9px] font-bold uppercase tracking-wider transition-colors ${effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`}>
@@ -899,7 +875,7 @@ ${psychoHtml}
                         {/* Continue / 续写 */}
                         <button
                             onClick={() => setIsContinueModalOpen(true)}
-                            className="flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]"
+                            className="mist-app-footer-control flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]"
                             disabled={isContinuing}
                         >
                             {isContinuing ? (
@@ -915,7 +891,7 @@ ${psychoHtml}
                         {/* Upload / 图配文 */}
                         <button
                             onClick={() => !isContinueUploading && continueFileInputRef.current?.click()}
-                            className="flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]"
+                            className="mist-app-footer-control flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]"
                             disabled={isContinueUploading}
                         >
                             {isContinueUploading ? (
@@ -931,7 +907,7 @@ ${psychoHtml}
                         {/* Tasks / 任务中心 */}
                         <button
                             onClick={() => setIsTaskManagerOpen(!isTaskManagerOpen)}
-                            className="flex flex-col items-center gap-1.5 shrink-0 min-w-[60px] group transition-all duration-300 relative"
+                            className={`mist-app-footer-control ${isTaskManagerOpen ? 'is-active' : ''} flex flex-col items-center gap-1.5 shrink-0 min-w-[60px] group transition-all duration-300 relative`}
                         >
                             <div className="relative">
                                 <Activity size={18} className={`transition-colors ${isTaskManagerOpen ? (effectiveTheme === 'retro' ? 'text-[#8B261D]' : uiConfig.themeAccent) : (effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white')}`} />
@@ -1004,7 +980,7 @@ ${psychoHtml}
                             <button 
                                 onClick={handleContinueSubmit} 
                                 disabled={!continueInput.trim() && !continueImage} 
-                                className={`w-full py-3 ${effectiveTheme === 'retro' ? 'bg-[#8B261D] hover:bg-[#6D1E16] text-white shadow-none' : (uiConfig.type === DriverType.COMMERCIAL ? 'bg-mist-cyan hover:brightness-110 text-black' : (uiConfig.type === DriverType.AESTHETIC ? 'bg-rose-500 hover:bg-rose-400' : 'bg-gold-primary hover:bg-amber-400'))} font-bold uppercase tracking-widest rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2`}
+                                className={`mist-app-primary-action w-full py-3 ${effectiveTheme === 'retro' ? 'bg-[#8B261D] hover:bg-[#6D1E16] text-white shadow-none' : 'bg-[rgba(255,98,86,0.2)] hover:bg-[rgba(255,98,86,0.28)] text-white border-[rgba(255,98,86,0.55)]'} font-bold uppercase tracking-widest transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2`}
                             >
                                 {language === 'EN' ? "Generate Next Chapter" : "生成下一章"}
                             </button>

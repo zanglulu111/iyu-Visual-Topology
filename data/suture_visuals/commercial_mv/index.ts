@@ -1,4 +1,4 @@
-import type { SutureStyleItem } from '../../suture_styles';
+import type { SutureStyleItem } from '../../suture/styles';
 import { COMMERCIAL_MV_GROUP_A_STYLES } from './group_a';
 import { COMMERCIAL_MV_GROUP_B_STYLES } from './group_b';
 import { COMMERCIAL_MV_GROUP_C_STYLES } from './group_c';

@@ -38,6 +38,7 @@ philosophy-kb/
 .agents/resources/
 .agents/.python-deps/
 outputs/
+_temp/
 
 # Local asset links
 src/assets/philosophers

@@ -20,7 +20,7 @@ import {
   WORLD_MOTIF_CATEGORIES
 } from '../constants';
 import { useTheme } from '../contexts/ThemeContext';
-import { getHistoricalContext } from '../data/historical_timeline';
+import { getHistoricalContext } from '../data/reference/historical_timeline';
 
 interface TheSkinSidebarProps {
   fieldState: NarrativeFieldState;
@@ -91,7 +91,7 @@ const getBlockLibInfo = (blockId: string) => {
   return { name, count, description, descriptionEn };
 };
 
-const SkinSlot: React.FC<{
+export const SkinSlot: React.FC<{
   blockId: string;
   placeholder: string;
   fieldState: NarrativeFieldState;
@@ -114,11 +114,12 @@ const SkinSlot: React.FC<{
   onManualUpdate?: (blockId: string, tags: string[]) => void;
   alwaysShowButtons?: boolean;
   onClickOverride?: () => void;
+  hideTooltipCore?: boolean;
 }> = ({
   blockId, placeholder, fieldState, accentColor, onOpen, onRemove, lang,
   lockedTags, onToggleTagLock, onRandomizeTag, accentTextColor, driverType,
   onRandomizeBlock, onClearBlock, isBlockLocked, onToggleLockBlock, getItemDetails,
-  onAddCustomDef, onEditCustomDef, onManualUpdate, alwaysShowButtons, onClickOverride
+  onAddCustomDef, onEditCustomDef, onManualUpdate, alwaysShowButtons, onClickOverride, hideTooltipCore = false
 }) => {
     const { theme } = useTheme();
     const isCommercial = driverType === DriverType.COMMERCIAL;
@@ -272,7 +273,7 @@ const SkinSlot: React.FC<{
                     onMouseEnter={(e) => safeDetails && handleMouseEnter(e, safeDetails)}
                     onMouseLeave={handleMouseLeave}
                     className={`
-                    cursor-pointer font-serif font-bold transition-all duration-300 hover:scale-110 hover:z-50 inline-block
+                    mist-labyrinth-hover-token cursor-pointer font-serif font-bold transition-all duration-300 hover:z-50 inline-block
                     ${isTagLocked
                         ? `border ${lockedClass} px-2 rounded`
                         : `${theme === 'retro' ? 'text-black hover:bg-black/5' : 'text-white hover:bg-white/10'} border-b-2 ${accentColor} px-0.5 rounded-sm`
@@ -329,7 +330,7 @@ const SkinSlot: React.FC<{
                 core: lang === 'EN' ? "[Config Protocol] Click to enter the library." : "【配置协议】点击进入库选择具体参数。",
               }, libInfo.name)}
               onMouseLeave={handleMouseLeave}
-              className={`cursor-pointer font-serif font-medium border-b border-dashed transition-all duration-300 hover:scale-110 hover:z-50 text-base ${isBlockLocked ? (theme === 'retro' ? 'opacity-50 cursor-not-allowed text-[var(--text-muted)]/50' : 'opacity-50 cursor-not-allowed text-zinc-600') : (theme === 'retro' ? 'border-[var(--text-main)] text-zinc-500 hover:text-black' : 'border-zinc-800 text-zinc-500 hover:text-white hover:border-zinc-500')}`}
+              className={`mist-labyrinth-hover-token cursor-pointer font-serif font-medium border-b border-dashed transition-all duration-300 hover:z-50 text-base ${isBlockLocked ? (theme === 'retro' ? 'opacity-50 cursor-not-allowed text-[var(--text-muted)]/50' : 'opacity-50 cursor-not-allowed text-zinc-600') : (theme === 'retro' ? 'border-[var(--text-main)] text-zinc-500 hover:text-black' : 'border-zinc-800 text-zinc-500 hover:text-white hover:border-zinc-500')}`}
             >
               {lang === 'EN' ? '[' : '【'}{placeholder}{lang === 'EN' ? ']' : '】'}
             </span>
@@ -353,35 +354,28 @@ const SkinSlot: React.FC<{
         {/* TOOLTIP PORTAL - Moved outside to work for both tags and placeholder */}
         {hoveredPortal && createPortal(
           <div
-            className={`fixed z-[9999] w-max max-w-[320px] text-left p-5 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] pointer-events-none animate-in fade-in zoom-in-95 duration-100
-              ${hoveredPortal.showAbove ? '-translate-y-full' : ''}
-              ${theme === 'retro' ? 'bg-[#F9F7F1] border-[#1A1814] border' : 'bg-[#0a0a0a]/95 backdrop-blur-xl border-zinc-800 border'}`}
+            className={`mist-labyrinth-tooltip fixed z-[9999] pointer-events-none ${hoveredPortal.showAbove ? '-translate-y-full' : ''}`}
             style={{
               top: hoveredPortal.pos.top,
               left: hoveredPortal.pos.left
             }}
           >
-            <div className={`text-sm font-black uppercase tracking-[0.2em] mb-2 border-b pb-2 flex items-center gap-2 ${theme === 'retro' ? 'text-zinc-500 border-black/10' : 'text-zinc-500 border-white/10'}`}>
-              <span className={theme === 'retro' ? 'text-[#8B261D]' : accentTextColor}>
+            <div className="mist-labyrinth-tooltip-header">
+              <span>
                 {hoveredPortal.header || libInfo.name || "DETAILS"}
                 {hoveredPortal.count !== undefined && hoveredPortal.count > 0 && (
-                  <span className={`ml-2 font-bold ${theme === 'retro' ? 'text-black' : 'text-white'}`}>({hoveredPortal.count})</span>
+                  <b>({hoveredPortal.count})</b>
                 )}
               </span>
             </div>
-            <div className={`text-xs md:text-sm font-bold mb-3 leading-relaxed whitespace-pre-line ${theme === 'retro' ? 'text-black' : 'text-zinc-100'}`}>
+            <div className="mist-labyrinth-tooltip-def">
               {lang === 'EN' && hoveredPortal.details.defEn ? hoveredPortal.details.defEn : hoveredPortal.details.def}
-              {blockId !== 'skin_structure' && blockId !== 'skin_volume' && (
-              <span className={`block text-[10px] italic mt-2 ${theme === 'retro' ? 'text-[#8B261D]/80' : 'text-zinc-400'}`}>
-                {lang === 'EN' && hoveredPortal.details.coreEn ? hoveredPortal.details.coreEn : hoveredPortal.details.core}
-              </span>
-              )}
-              {hoveredPortal.details.reference && (
-              <span className={`block text-[10px] mt-2 font-mono ${theme === 'retro' ? 'text-[#8B261D]/60' : 'text-zinc-500'}`}>
-                {lang === 'EN' && hoveredPortal.details.referenceEn ? hoveredPortal.details.referenceEn : hoveredPortal.details.reference}
-              </span>
-              )}
             </div>
+              {!hideTooltipCore && blockId !== 'skin_structure' && blockId !== 'skin_volume' && (
+              <div className="mist-labyrinth-tooltip-core">
+                {lang === 'EN' && hoveredPortal.details.coreEn ? hoveredPortal.details.coreEn : hoveredPortal.details.core}
+              </div>
+              )}
           </div>,
           document.body
         )}
@@ -841,7 +835,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
         if (preset) {
           ageStr = `${preset.cn}（${preset.range}岁）`;
         } else {
-          ageStr = `${selectedAge}岁`;
+          ageStr = /岁|age|years?/i.test(selectedAge) ? selectedAge : `${selectedAge}岁`;
         }
       }
       displayText = `${ageStr}${selectedGender}`;

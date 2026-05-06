@@ -1,6 +1,6 @@
 
 import { LibraryItemDef } from '../../types';
-import { MASTER_PRESETS } from '../master_presets';
+import { MASTER_PRESETS } from '../aesthetic/master_presets';
 
 export interface ColorPreset extends LibraryItemDef {
     colors: string[];

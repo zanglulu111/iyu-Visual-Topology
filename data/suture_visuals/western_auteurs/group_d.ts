@@ -1,4 +1,4 @@
-import type { SutureStyleItem } from '../../suture_styles';
+import type { SutureStyleItem } from '../../suture/styles';
 
 const WESTERN_AUTEURS_GROUP_D = '1D. 西方电影作者：边缘现实、幽闭恐怖与主观崩坏';
 

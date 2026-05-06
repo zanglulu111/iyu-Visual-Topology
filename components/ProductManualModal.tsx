@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { X, BookOpen, ChevronRight, Quote, ArrowRight, ArrowLeft, Lightbulb, GraduationCap, Microscope, Cpu, Layers, Scale, Fingerprint, Zap, Ghost, BrainCircuit, ScanEye, ScanLine } from 'lucide-react';
 import { HEGEL_INDEX, MARX_INDEX, LACAN_INDEX, ZIZEK_INDEX, LacanConcept } from '../data/codex/philosophy_refined';
 import { ANALYSIS_LIBRARY } from '../data/codex/analysis_data';
-import { WHITEPAPER_DATA, WhitepaperSection } from '../data/whitepaper_data';
+import { WHITEPAPER_DATA, WhitepaperSection } from '../data/reference/whitepaper_data';
 import { DriverType } from '../types';
 
 interface ProductManualModalProps {

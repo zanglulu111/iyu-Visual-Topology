@@ -1,4 +1,4 @@
-import type { SutureStyleItem } from '../../suture_styles';
+import type { SutureStyleItem } from '../../suture/styles';
 
 const ART_HOUSE_GROUP_B = '4B. 艺术电影：慢电影、历史漫游与道德冷观察';
 

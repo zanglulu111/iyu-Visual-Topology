@@ -1,7 +1,7 @@
 
 import { NarrativeFieldState, CreativeTreatment, WorldLawConfig, StyleConfig } from '../types';
-import { POETIC_ENGINE_BLOCKS as EXPERIMENTAL_ENGINE_BLOCKS } from '../data/poetic_data';
-import { EXPERIMENTAL_SKIN_BLOCKS } from '../data/experimental_skin';
+import { POETIC_ENGINE_BLOCKS as EXPERIMENTAL_ENGINE_BLOCKS } from '../data/aesthetic/poetic_data';
+import { EXPERIMENTAL_SKIN_BLOCKS } from '../data/aesthetic/experimental_skin';
 import { findItemDetails } from './dataRegistry';
 import { getVisionAnchorProtocol } from '../data/engine_core/narrative_protocols';
 

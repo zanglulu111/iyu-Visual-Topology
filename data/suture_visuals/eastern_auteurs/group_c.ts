@@ -1,4 +1,4 @@
-import type { SutureStyleItem } from '../../suture_styles';
+import type { SutureStyleItem } from '../../suture/styles';
 
 const EASTERN_AUTEUR_GROUP_C = '2C. 东方电影作者：华语历史、现实漂流与梦境结构';
 

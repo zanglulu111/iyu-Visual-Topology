@@ -18,29 +18,31 @@ interface VideoLibraryProps {
 const decorativeNumberStyle: React.CSSProperties = {
     fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
     fontWeight: 700,
-    color: 'rgba(212, 199, 159, 0.15)',
+    color: 'rgba(255, 255, 255, 0.08)',
     lineHeight: 0.85,
     letterSpacing: '-0.04em',
     userSelect: 'none',
     pointerEvents: 'none',
 };
 
-// 主色调 - cream/gold 色系 (参照601)
+// 主色调：暗黑态收束为黑 / 白 / 灰 / 红；复古态沿用纸本与朱砂。
 export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lang, isAdmin = false, isFullScreen = false }) => {
     const { theme } = useTheme();
     const isRetro = theme === 'retro';
 
-    // 主色调 - 根据主题切换
-    const CREAM = isRetro ? '#8B261D' : '#d4c79f';
-    const CREAM_DIM = isRetro ? 'rgba(139, 38, 29, 0.6)' : 'rgba(212, 199, 159, 0.5)';
-    const CREAM_VERY_DIM = isRetro ? 'rgba(139, 38, 29, 0.25)' : 'rgba(212, 199, 159, 0.25)';
+    // 根据主题切换
+    const CREAM = isRetro ? '#8B261D' : '#f4f4f4';
+    const CREAM_DIM = isRetro ? 'rgba(139, 38, 29, 0.6)' : 'rgba(244, 244, 244, 0.56)';
+    const CREAM_VERY_DIM = isRetro ? 'rgba(139, 38, 29, 0.25)' : 'rgba(244, 244, 244, 0.16)';
+    const RED = isRetro ? '#8B261D' : '#b01b1b';
+    const RED_DIM = isRetro ? 'rgba(139, 38, 29, 0.14)' : 'rgba(176, 27, 27, 0.28)';
     const BG_COLOR = isRetro ? '#EFE9E0' : '#000000';
     const BG_OPACITY = isRetro ? 'rgba(239, 233, 224, 0.95)' : 'rgba(10, 10, 10, 0.95)';
 
     // 修改装饰性样式以适应主题
     const currentDecorativeNumberStyle = {
         ...decorativeNumberStyle,
-        color: isRetro ? 'rgba(139, 38, 29, 0.12)' : 'rgba(212, 199, 159, 0.15)',
+        color: isRetro ? 'rgba(139, 38, 29, 0.12)' : 'rgba(255, 255, 255, 0.08)',
     };
     const [videos, setVideos] = useState<Video[]>([]);
     const [loading, setLoading] = useState(true);
@@ -453,21 +455,32 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                     transition: background 0.3s ease, color 0.3s ease;
                 }
                 .cult-archive-row:hover {
-                    background: ${isRetro ? 'rgba(139, 38, 29, 0.05)' : 'rgba(212, 199, 159, 0.03)'} !important;
+                    background: ${isRetro ? 'rgba(139, 38, 29, 0.05)' : 'rgba(176, 27, 27, 0.08)'} !important;
                 }
                 .cult-thumbnail-hover {
-                    transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.8s ease;
-                    transform: perspective(1500px) rotateX(8deg) rotateY(-12deg) rotateZ(1deg) scale(0.9);
+                    transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.8s ease, border-color 0.6s ease;
+                    transform: perspective(1500px) rotateX(6deg) rotateY(-9deg) rotateZ(0.8deg) scale(0.9);
                     transform-style: preserve-3d;
-                    box-shadow: -20px 20px 60px rgba(0,0,0,0.8);
+                    box-shadow: -20px 20px 60px rgba(0,0,0,0.88);
+                    border: 1px solid ${isRetro ? 'rgba(139, 38, 29, 0.18)' : 'rgba(255, 255, 255, 0.07)'};
                 }
                 .cult-thumbnail-hover:hover {
-                    transform: perspective(1500px) rotateX(4deg) rotateY(-6deg) rotateZ(0deg) scale(0.95);
-                    box-shadow: -30px 30px 80px ${isRetro ? 'rgba(139, 38, 29, 0.2)' : 'rgba(212, 199, 159, 0.15)'};
+                    transform: perspective(1500px) rotateX(3deg) rotateY(-4deg) rotateZ(0deg) scale(0.95);
+                    box-shadow: -30px 30px 90px ${isRetro ? 'rgba(139, 38, 29, 0.2)' : 'rgba(176, 27, 27, 0.22)'};
+                    border-color: ${isRetro ? 'rgba(139, 38, 29, 0.52)' : 'rgba(176, 27, 27, 0.55)'};
+                }
+                .cult-thumb-image {
+                    filter: grayscale(1) brightness(0.52) contrast(1.24);
+                    transition: filter 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 1.1s cubic-bezier(0.16, 1, 0.3, 1);
+                    transform: scale(1.012);
+                }
+                .cult-thumbnail-hover:hover .cult-thumb-image {
+                    filter: ${isRetro ? 'grayscale(0) sepia(0.16) saturate(1.28) contrast(1.08) brightness(0.93)' : 'grayscale(0.18) saturate(1.22) contrast(1.12) brightness(0.82)'};
+                    transform: scale(1.055);
                 }
                 .cult-input {
-                    background: ${isRetro ? 'rgba(139, 38, 29, 0.05)' : 'rgba(255,255,255,0.03)'};
-                    border: 1px solid ${isRetro ? 'rgba(139, 38, 29, 0.15)' : 'rgba(212,199,159,0.15)'};
+                    background: ${isRetro ? 'rgba(139, 38, 29, 0.05)' : 'rgba(255,255,255,0.035)'};
+                    border: 1px solid ${isRetro ? 'rgba(139, 38, 29, 0.15)' : 'rgba(255,255,255,0.12)'};
                     color: ${CREAM};
                     font-size: 12px;
                     padding: 10px 14px;
@@ -481,7 +494,10 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                     border-color: ${CREAM_DIM};
                 }
                 .cult-input::placeholder {
-                    color: ${isRetro ? 'rgba(139, 38, 29, 0.3)' : 'rgba(212,199,159,0.2)'};
+                    color: ${isRetro ? 'rgba(139, 38, 29, 0.3)' : 'rgba(244,244,244,0.22)'};
+                }
+                .cult-rule {
+                    background: linear-gradient(90deg, transparent, ${isRetro ? 'rgba(139, 38, 29, 0.22)' : 'rgba(176, 27, 27, 0.35)'}, transparent);
                 }
             `}</style>
 
@@ -497,11 +513,19 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                 <div style={{ pointerEvents: 'auto' }}>
                     <div style={{
                         fontSize: '32px', fontWeight: 800, color: CREAM,
-                        fontFamily: "'Helvetica Neue', sans-serif",
+                        fontFamily: "'Songti SC', 'Noto Serif SC', serif",
                         lineHeight: 1, letterSpacing: '-0.02em',
+                        textShadow: isRetro ? 'none' : `0 0 18px ${RED_DIM}`,
                     }}>
                         邪
                     </div>
+                    <div style={{
+                        marginTop: '10px',
+                        width: '38px',
+                        height: '1px',
+                        background: RED,
+                        opacity: isRetro ? 0.75 : 0.9,
+                    }} />
                 </div>
 
                 {/* 中间: 描述文字 */}
@@ -509,7 +533,7 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                     textAlign: 'center', paddingTop: '4px',
                 }}>
                     <div style={{
-                        fontSize: '10px', fontWeight: 600, letterSpacing: '0.2em',
+                        fontSize: '10px', fontWeight: 700, letterSpacing: '0.22em',
                         textTransform: 'uppercase', color: CREAM_DIM, lineHeight: 1.8,
                         fontFamily: "'Helvetica Neue', sans-serif",
                     }}>
@@ -553,7 +577,7 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                              <span style={{
                                  position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)',
                                  width: '6px', height: '6px', borderRadius: '50%',
-                                 background: selectedCategory ? CREAM : CREAM_VERY_DIM,
+                                 background: selectedCategory ? RED : CREAM_VERY_DIM,
                                  transition: 'background 0.3s',
                              }} />
                          </div>
@@ -577,7 +601,7 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                          }
                          <span style={{
                              width: '6px', height: '6px', borderRadius: '50%',
-                             background: CREAM_DIM,
+                             background: viewMode === 'archive' ? RED : CREAM_DIM,
                          }} />
                      </button>
                 </div>
@@ -643,8 +667,19 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                                     {/* 暗角/氛围效果 */}
                                     <div style={{
                                         position: 'absolute', inset: 0, zIndex: 1,
-                                        background: 'radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.7) 100%)',
+                                        background: isRetro
+                                            ? 'radial-gradient(ellipse at center, rgba(239,233,224,0) 28%, rgba(239,233,224,0.42) 72%, rgba(139,38,29,0.12) 100%)'
+                                            : 'radial-gradient(ellipse at center, transparent 28%, rgba(0,0,0,0.74) 76%, rgba(0,0,0,0.94) 100%)',
                                         pointerEvents: 'none',
+                                    }} />
+                                    <div className="cult-rule" style={{
+                                        position: 'absolute',
+                                        left: '6%',
+                                        right: '6%',
+                                        top: '17%',
+                                        height: '1px',
+                                        zIndex: 2,
+                                        opacity: 0.62,
                                     }} />
 
                                     {/* 大号装饰性编号 - 类似 601 的 "4/6" */}
@@ -664,7 +699,7 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                                         {/* 银幕外框 (暗色) */}
                                         <div style={{
                                             position: 'absolute', inset: '-12%',
-                                            background: isRetro ? `linear-gradient(135deg, ${BG_COLOR} 0%, rgba(220, 214, 204, 1) 100%)` : 'linear-gradient(135deg, rgba(10,10,10,1) 0%, rgba(20,18,14,1) 100%)',
+                                            background: isRetro ? `linear-gradient(135deg, ${BG_COLOR} 0%, rgba(220, 214, 204, 1) 100%)` : 'linear-gradient(135deg, rgba(2,2,2,1) 0%, rgba(18,18,18,1) 100%)',
                                             borderRadius: '2px',
                                             filter: 'blur(0px)',
                                         }} />
@@ -680,10 +715,10 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                                                 <img
                                                     src={video.thumbnail_url || getYouTubeThumbnail(video.video_id)}
                                                     alt={video.title}
+                                                    className="cult-thumb-image"
                                                     style={{
                                                         width: '100%', height: '100%',
                                                         objectFit: 'cover',
-                                                        filter: 'brightness(0.85) contrast(1.1)',
                                                     }}
                                                     loading="lazy"
                                                 />
@@ -698,10 +733,10 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                                                         <img
                                                             src={video.thumbnail_url}
                                                             alt={video.title}
+                                                            className="cult-thumb-image"
                                                             style={{
                                                                 width: '100%', height: '100%',
                                                                 objectFit: 'cover',
-                                                                filter: 'brightness(0.85) contrast(1.1)',
                                                             }}
                                                             loading="lazy"
                                                         />
@@ -730,7 +765,7 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                                             <div style={{
                                                 position: 'absolute', inset: 0,
                                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                background: 'rgba(0,0,0,0.3)',
+                                                background: isRetro ? 'rgba(239,233,224,0.08)' : 'rgba(0,0,0,0.42)',
                                                 opacity: 0,
                                                 transition: 'opacity 0.5s ease',
                                             }}
@@ -739,10 +774,11 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                                             >
                                                 <div style={{
                                                     width: '64px', height: '64px', borderRadius: '50%',
-                                                    border: `2px solid ${CREAM_DIM}`,
+                                                    border: `1px solid ${isRetro ? CREAM_DIM : RED}`,
                                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                                                     backdropFilter: 'blur(8px)',
-                                                    background: isRetro ? 'rgba(139, 38, 29, 0.2)' : 'rgba(0,0,0,0.3)',
+                                                    background: isRetro ? 'rgba(139, 38, 29, 0.16)' : 'rgba(0,0,0,0.58)',
+                                                    boxShadow: isRetro ? 'none' : `0 0 26px ${RED_DIM}`,
                                                 }}>
                                                     <Play size={24} style={{ color: CREAM, marginLeft: '3px' }} />
                                                 </div>
@@ -774,6 +810,53 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                                             <Trash2 size={14} />
                                         </button>
                                     )}
+
+                                    <div style={{
+                                        position: 'absolute',
+                                        left: 'clamp(32px, 6vw, 112px)',
+                                        bottom: 'clamp(92px, 13vh, 150px)',
+                                        zIndex: 4,
+                                        maxWidth: 'min(34rem, 36vw)',
+                                        pointerEvents: 'none',
+                                    }}>
+                                        <div style={{
+                                            color: RED,
+                                            fontSize: '10px',
+                                            fontWeight: 800,
+                                            letterSpacing: '0.24em',
+                                            textTransform: 'uppercase',
+                                            marginBottom: '14px',
+                                            fontFamily: "'Helvetica Neue', sans-serif",
+                                        }}>
+                                            {video.category || 'UNCLASSIFIED'} · NO. {String(index + 1).padStart(2, '0')}
+                                        </div>
+                                        <h2 style={{
+                                            color: CREAM,
+                                            fontSize: 'clamp(24px, 3.2vw, 52px)',
+                                            fontWeight: 300,
+                                            lineHeight: 0.98,
+                                            letterSpacing: '-0.03em',
+                                            fontFamily: "'Helvetica Neue', sans-serif",
+                                            textTransform: 'uppercase',
+                                            textWrap: 'balance' as any,
+                                            textShadow: isRetro ? 'none' : '0 16px 36px rgba(0,0,0,0.9)',
+                                        }}>
+                                            {video.title}
+                                        </h2>
+                                        {video.description && (
+                                            <p style={{
+                                                marginTop: '16px',
+                                                color: CREAM_DIM,
+                                                fontSize: '12px',
+                                                lineHeight: 1.75,
+                                                letterSpacing: '0.08em',
+                                                fontFamily: "'Helvetica Neue', sans-serif",
+                                                textTransform: 'uppercase',
+                                            }}>
+                                                {video.description.length > 128 ? `${video.description.slice(0, 128)}...` : video.description}
+                                            </p>
+                                        )}
+                                    </div>
                                 </div>
                             ))}
                         </div>
@@ -875,7 +958,7 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                                     style={{
                                         width: '3px',
                                         height: i === currentIndex ? '24px' : '8px',
-                                        background: i === currentIndex ? CREAM : CREAM_VERY_DIM,
+                                        background: i === currentIndex ? RED : CREAM_VERY_DIM,
                                         border: 'none', borderRadius: '2px', cursor: 'pointer',
                                         transition: 'all 0.4s ease', padding: 0,
                                     }}
@@ -899,9 +982,16 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                             fontWeight: 300, color: CREAM,
                             fontFamily: "'Helvetica Neue', sans-serif",
                             letterSpacing: '-0.02em',
+                            textTransform: 'uppercase',
                         }}>
                             {lang === 'CN' ? '影像档案' : 'Archive'}
                         </h1>
+                        <div style={{
+                            marginTop: '16px',
+                            width: '74px',
+                            height: '2px',
+                            background: RED,
+                        }} />
                     </div>
 
                     {/* 搜索栏 */}
@@ -950,7 +1040,7 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                                 display: 'grid',
                                 gridTemplateColumns: '100px 1fr 1fr 180px',
                                  gap: '16px', padding: '18px 0',
-                                 borderBottom: isRetro ? '1px solid rgba(139, 38, 29, 0.08)' : '1px solid rgba(212,199,159,0.06)',
+                                 borderBottom: isRetro ? '1px solid rgba(139, 38, 29, 0.08)' : '1px solid rgba(255,255,255,0.06)',
                                  cursor: 'pointer', alignItems: 'center',
                                 animationDelay: `${index * 0.03}s`,
                             }}

@@ -1,4 +1,4 @@
-import type { SutureStyleItem } from '../../suture_styles';
+import type { SutureStyleItem } from '../../suture/styles';
 
 const COMMERCIAL_MV_GROUP_D = '5D. 商业与 MV：时尚姿态、感官商品与互联网氛围广告';
 

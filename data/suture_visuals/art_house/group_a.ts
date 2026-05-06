@@ -1,4 +1,4 @@
-import type { SutureStyleItem } from '../../suture_styles';
+import type { SutureStyleItem } from '../../suture/styles';
 
 const ART_HOUSE_GROUP_A = '4A. 艺术电影：欧洲现代主义与精神审判';
 

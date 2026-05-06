@@ -1,5 +1,5 @@
 
-import { MONTAGE_STYLES } from '../data/suture_montage';
+import { MONTAGE_STYLES } from '../data/suture/montage';
 
 // Helper to format montage styles for the prompt
 const getMontageStyleList = () => {

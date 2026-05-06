@@ -1,4 +1,4 @@
-import type { SutureStyleItem } from '../../suture_styles';
+import type { SutureStyleItem } from '../../suture/styles';
 
 const COMMERCIAL_MV_GROUP_A = '5A. 商业与 MV：作者型高概念、手工梦与身体异化';
 

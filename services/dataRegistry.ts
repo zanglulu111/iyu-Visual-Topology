@@ -6,25 +6,25 @@ import { NARRATIVE_ENGINE_LIBRARY } from '../data/engine_core/narrative_engine';
 
 
 // 皮肤词库 (已升级为 engine_surface 新版 patch 数据源)
-import { SKIN_LIBRARY } from '../data/skin_libraries';
+import { SKIN_LIBRARY } from '../data/narrative/skin_libraries';
 
 // 保留旧版独立引用以兼容 GENRE/MOTIF 的 blockId 特殊处理
 import { SUR1_DATA } from '../data/engine_surface/SUR1';
 
 // Commercial
-import { COMM_SKIN_LIBRARY } from '../data/commercial_skin';
-import { COMMERCIAL_ENGINE_LIBRARY } from '../data/commercial_data';
+import { COMM_SKIN_LIBRARY } from '../data/aesthetic/commercial_skin';
+import { COMMERCIAL_ENGINE_LIBRARY } from '../data/aesthetic/commercial_data';
 
 // Experimental & Poetic
-import { EXPERIMENTAL_SKIN_LIBRARY } from '../data/experimental_skin';
-import { POETIC_ENGINE_LIBRARY } from '../data/poetic_data';
+import { EXPERIMENTAL_SKIN_LIBRARY } from '../data/aesthetic/experimental_skin';
+import { POETIC_ENGINE_LIBRARY } from '../data/aesthetic/poetic_data';
 
 // Trailer
-import { TRAILER_ENGINE_LIBRARY } from '../data/trailer_data';
-import { TRAILER_SKIN_LIBRARY } from '../data/trailer_skin';
+import { TRAILER_ENGINE_LIBRARY } from '../data/aesthetic/trailer_data';
+import { TRAILER_SKIN_LIBRARY } from '../data/aesthetic/trailer_skin';
 
 // Aesthetic Main
-import { AESTHETIC_ENGINE_LIBRARY } from '../data/aesthetic_data';
+import { AESTHETIC_ENGINE_LIBRARY } from '../data/aesthetic/core';
 
 // 1. Master Collection of ALL Libraries
 // This allows us to search by Library ID globally

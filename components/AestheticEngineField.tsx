@@ -5,14 +5,14 @@ import { NarrativeEngineFieldProps } from './NarrativeEngineField';
 import {
     AESTHETIC_ENGINE_BLOCKS,
     AESTHETIC_ENGINE_LIBRARY
-} from '../data/aesthetic_data';
+} from '../data/aesthetic/core';
 import {
     COMMERCIAL_ENGINE_BLOCKS,
     COMMERCIAL_ENGINE_LIBRARY
-} from '../data/commercial_data';
-import { ALL_SKIN_BLOCKS, SKIN_LIBRARY } from '../data/skin_libraries';
+} from '../data/aesthetic/commercial_data';
+import { ALL_SKIN_BLOCKS, SKIN_LIBRARY } from '../data/narrative/skin_libraries';
 import { AES_COLOR_PRESETS } from '../data/aesthetic_libraries/color_presets';
-import { MASTER_PRESETS, MASTER_PRESETS_REALISM, MASTER_PRESETS_STYLIZED } from '../data/master_presets';
+import { MASTER_PRESETS, MASTER_PRESETS_REALISM, MASTER_PRESETS_STYLIZED } from '../data/aesthetic/master_presets';
 import { DriverType, NarrativeBlockDef, LibraryCategoryDef, NarrativeFieldState, AestheticLogicMode } from '../types';
 import { BookOpen, Camera, Eye, Zap, Box, Lock, RotateCcw, Paintbrush, Terminal, Check, Copy, Edit3, ArrowDownToLine, Eraser, Plus, X, Wand2, LayoutGrid, Palette, Dice5, Unlock, User, Layout, ChevronUp, ChevronDown, ChevronsUp, ChevronsDown } from 'lucide-react';
 import { ProphecySlot } from './ProphecySlot';

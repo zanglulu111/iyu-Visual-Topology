@@ -1211,19 +1211,19 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
 
     const btnWidthClass = language === 'EN' ? 'w-[124px]' : 'w-[104px]';
     const btnBaseClass = theme === 'retro' 
-        ? `h-9 ${btnWidthClass} justify-center rounded-lg bg-[var(--bg-header)] border border-[#8B261D]/20 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-[#8B261D]/70 hover:text-[#8B261D] hover:border-[#8B261D]/40 transition-all duration-100 active:scale-95 shadow-sm focus:outline-none`
-        : `h-9 ${btnWidthClass} justify-center rounded-lg bg-zinc-900 border border-zinc-700/50 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-white hover:border-zinc-500 transition-all duration-100 active:scale-95 shadow-sm focus:outline-none`;
+        ? `mist-archive-button h-9 ${btnWidthClass} justify-center bg-[var(--bg-header)] border border-[#8B261D]/20 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-[#8B261D]/70 hover:text-[#8B261D] hover:border-[#8B261D]/40 transition-all duration-100 active:scale-95 shadow-sm focus:outline-none`
+        : `mist-archive-button h-9 ${btnWidthClass} justify-center bg-zinc-900 border border-zinc-700/50 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-white hover:border-zinc-500 transition-all duration-100 active:scale-95 shadow-sm focus:outline-none`;
 
     const btnAddSceneClass = theme === 'retro'
-        ? `h-9 px-4 rounded-lg bg-[#8B261D] border border-[#8B261D] flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white hover:bg-[#A52A2A] transition-all duration-100 active:scale-95 shadow-md focus:outline-none`
-        : `h-9 px-4 rounded-lg bg-${themeColorBase}/20 border-current flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest ${themeAccent} hover:bg-${themeColorBase}/30 transition-all duration-100 active:scale-95 shadow-md focus:outline-none`;
+        ? `mist-app-primary-action h-9 px-4 bg-[#8B261D] border border-[#8B261D] flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white hover:bg-[#A52A2A] transition-all duration-100 active:scale-95 shadow-md focus:outline-none`
+        : `mist-app-primary-action h-9 px-4 bg-${themeColorBase}/20 border-current flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest ${themeAccent} hover:bg-${themeColorBase}/30 transition-all duration-100 active:scale-95 shadow-md focus:outline-none`;
 
     return (
-        <div className={`${isFullScreen ? 'w-full px-0' : 'w-full'} flex flex-col h-full ${theme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#080808]'}`}>
+        <div className={`mist-archive-workbench mist-metonymy-view ${isFullScreen ? 'w-full px-0' : 'w-full'} flex flex-col h-full ${theme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#080808]'}`}>
             {/* Header */}
-            <div className={`shrink-0 flex items-center justify-between border-b ${theme === 'retro' ? 'border-black/10 bg-[var(--bg-header)]' : 'border-zinc-800 bg-[#080808]'} h-16 px-6`}>
+            <div className={`mist-archive-toolbar shrink-0 flex items-center justify-between border-b ${theme === 'retro' ? 'border-black/10 bg-[var(--bg-header)]' : 'border-zinc-800 bg-[#080808]'} h-16 px-6`}>
                 <div className="flex items-center gap-3 flex-1">
-                    <div className={`p-1.5 rounded-lg ${theme === 'retro' ? 'bg-white border-[#8B261D]/20' : 'bg-zinc-900 border-zinc-700'} border ${themeAccent}`}><FileText size={16} /></div>
+                    <div className={`mist-archive-button p-1.5 ${theme === 'retro' ? 'bg-white border-[#8B261D]/20' : 'bg-zinc-900 border-zinc-700'} border ${themeAccent}`}><FileText size={16} /></div>
                     <div className="flex flex-col justify-center">
                         <span className={`text-[10px] ${theme === 'retro' ? 'text-[#8B261D]/60' : 'text-zinc-100'} uppercase tracking-widest font-bold leading-none mb-0.5`}>
                             {language === 'EN' ? "Metonymy Engine" : "换喻引擎"}
@@ -1276,7 +1276,7 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
 
             <div className="flex-1 flex flex-col overflow-hidden">
                 <div className="flex-1 flex overflow-hidden">
-                    <div className={`${isSourceVisible ? 'w-1/3 min-w-[320px] max-w-[500px] translate-x-0' : 'w-0 opacity-0 -translate-x-full overflow-hidden'} border-r ${theme === 'retro' ? 'border-black/10 bg-[var(--bg-header)]' : 'border-zinc-800 bg-[#0a0a0a]'} flex flex-col shrink-0 transition-all duration-310 ease-in-out`}>
+                    <div className={`mist-archive-panel ${isSourceVisible ? 'w-1/3 min-w-[320px] max-w-[500px] translate-x-0' : 'w-0 opacity-0 -translate-x-full overflow-hidden'} border-r ${theme === 'retro' ? 'border-black/10 bg-[var(--bg-header)]' : 'border-zinc-800 bg-[#0a0a0a]'} flex flex-col shrink-0 transition-all duration-310 ease-in-out`}>
                         <SourceViewer
                             text={sourceText}
                             onChange={handleSourceTextChange}
@@ -1480,7 +1480,7 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
             {/* Simple Themed Alert Modal */}
             {isAlertOpen && (
                 <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-                    <div className={`w-full max-w-sm ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]' : 'bg-[#0c0c0c] border-zinc-800 shadow-[0_0_20px_rgba(0,0,0,0.5)]'} border-2 rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200`}>
+                    <div className={`mist-archive-panel w-full max-w-sm ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]' : 'bg-[#0c0c0c] border-zinc-800 shadow-[0_0_20px_rgba(0,0,0,0.5)]'} border-2 shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200`}>
                         <div className={`px-6 py-8 text-center ${theme === 'retro' ? 'text-black' : 'text-white'}`}>
                             <div className={`w-14 h-14 rounded-full mx-auto mb-5 flex items-center justify-center ${theme === 'retro' ? 'bg-[#8B261D]/10 text-[#8B261D]' : 'bg-zinc-800 text-zinc-400'}`}>
                                 <AlertCircle size={28} />

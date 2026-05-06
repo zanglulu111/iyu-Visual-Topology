@@ -1,0 +1,19 @@
+
+import type { SutureStyleItem } from './styles';
+import {
+  WESTERN_AUTEURS,
+  EASTERN_AUTEURS,
+  ANIMATION_DIRECTORS,
+  ART_HOUSE_STYLES,
+  COMMERCIAL_MV_STYLES,
+  PHOTOGRAPHY_STYLES,
+} from '../suture_visuals';
+
+export const SUTURE_VISUAL_STYLES: SutureStyleItem[] = [
+  ...WESTERN_AUTEURS,
+  ...EASTERN_AUTEURS,
+  ...ANIMATION_DIRECTORS,
+  ...ART_HOUSE_STYLES,
+  ...COMMERCIAL_MV_STYLES,
+  ...PHOTOGRAPHY_STYLES
+];

@@ -5,8 +5,8 @@ import { buildCommercialBiblePrompt } from '../services/commercialGenerator';
 import { buildExperimentalBiblePrompt } from '../services/experimentalGenerator';
 import { buildAestheticBiblePrompt } from '../services/aestheticGenerator';
 import { XRayInspectorModal, type XRaySourceGroup } from './XRayInspector';
-import { STYLE_MATRIX, PERSPECTIVES, SENSORY_MODES } from '../data/style_matrix';
-import { DIRECTOR_STYLES } from '../data/director_styles';
+import { STYLE_MATRIX, PERSPECTIVES, SENSORY_MODES } from '../data/narrative/style_matrix';
+import { DIRECTOR_STYLES } from '../data/narrative/director_styles';
 import {
     AESTHETIC_ENGINE_BLOCKS,
     AESTHETIC_ENGINE_LIBRARY,

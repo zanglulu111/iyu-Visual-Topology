@@ -1,4 +1,4 @@
-import type { SutureStyleItem } from '../../suture_styles';
+import type { SutureStyleItem } from '../../suture/styles';
 
 const PHOTOGRAPHY_GROUP_C = '6C. 摄影风格：彩色日常、窗后观察与消费讽刺';
 

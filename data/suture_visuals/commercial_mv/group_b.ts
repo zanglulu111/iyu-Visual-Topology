@@ -1,4 +1,4 @@
-import type { SutureStyleItem } from '../../suture_styles';
+import type { SutureStyleItem } from '../../suture/styles';
 
 const COMMERCIAL_MV_GROUP_B = '5B. 商业与 MV：嘻哈极繁、流行奇观与几何舞台';
 

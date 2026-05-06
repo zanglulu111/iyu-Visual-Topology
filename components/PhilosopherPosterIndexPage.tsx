@@ -23,11 +23,11 @@ import {
   PHILOSOPHER_POSTER_LIST,
   PhilosopherPosterRow,
   PhilosopherTier,
-} from '../data/philosopherPosterList';
+} from '../data/reference/philosopherPosterList';
 import {
   philosopherPosterMediaStats,
   resolvePhilosopherPosterImage,
-} from '../data/philosopherPosterMedia';
+} from '../data/reference/philosopherPosterMedia';
 
 interface PhilosopherPosterIndexPageProps {
   lang: 'CN' | 'EN';

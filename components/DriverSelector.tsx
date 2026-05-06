@@ -1,191 +1,168 @@
-
-import React from 'react';
-import { DRIVERS } from '../constants';
+import React, { useEffect, useState } from 'react';
+import { ArrowRight } from 'lucide-react';
 import { DriverType } from '../types';
-import { ArrowRight, Sparkles } from 'lucide-react';
-import { useTheme } from '../contexts/ThemeContext';
 
 interface DriverSelectorProps {
-    selectedDriver: DriverType | null;
-    onSelect: (id: DriverType) => void;
-    lang: 'CN' | 'EN';
-    hoveredDriver: DriverType | null;
-    onHover: (id: DriverType | null) => void;
+  selectedDriver: DriverType | null;
+  onSelect: (id: DriverType) => void;
+  lang: 'CN' | 'EN';
+  hoveredDriver: DriverType | null;
+  onHover: (id: DriverType | null) => void;
 }
 
-export const DriverSelector: React.FC<DriverSelectorProps> = ({ selectedDriver, onSelect, lang, hoveredDriver, onHover }) => {
+interface ArchiveDriverCard {
+  id: DriverType;
+  number: string;
+  titleCn: string;
+  titleEn: string;
+  topology: string;
+  description: string;
+  imageSrc: string;
+  accent: string;
+}
 
-    const { theme } = useTheme();
-    const isRetro = theme === 'retro';
+const archiveDriverCards: ArchiveDriverCard[] = [
+  {
+    id: DriverType.COMMERCIAL,
+    number: '01',
+    titleCn: '商业欲望',
+    titleEn: 'COMMERCIAL',
+    topology: '欲望－商品－交换',
+    description: '围绕匮乏感与价值投射，驱动消费循环与身份认同的欲望结构。',
+    imageSrc: '/portal-assets/card-01-89.png',
+    accent: '#5ecfdc'
+  },
+  {
+    id: DriverType.NARRATIVE,
+    number: '02',
+    titleCn: '叙事欲望',
+    titleEn: 'NARRATIVE',
+    topology: '欲望－商品－认同',
+    description: '通过事件组织与因果链，生成主体同一性与意义连续性的欲望结构。',
+    imageSrc: '/portal-assets/card-02-88.png',
+    accent: '#c93a34'
+  },
+  {
+    id: DriverType.AESTHETIC,
+    number: '03',
+    titleCn: '审美欲望',
+    titleEn: 'AESTHETIC',
+    topology: '欲望－凝视－形式',
+    description: '以感知形式与感官组织为核心，建立愉悦结构与欲望升华的路径。',
+    imageSrc: '/portal-assets/card-03-91.png',
+    accent: '#c93a34'
+  },
+  {
+    id: DriverType.EXPERIMENTAL,
+    number: '04',
+    titleCn: '还原协议',
+    titleEn: 'EXPERIMENTAL',
+    topology: '欲望－结构－差异',
+    description: '在规则与变量之间进行结构实验，生成非线性与非定型的欲望路径。',
+    imageSrc: '/portal-assets/card-04-90.png',
+    accent: '#c93a34'
+  },
+  {
+    id: DriverType.TRAILER,
+    number: '05',
+    titleCn: '预告片欲望',
+    titleEn: 'TRAILER',
+    topology: '欲望－悬置－预示',
+    description: '以信息节制与悬念机制，激活期待结构与欲望前驱的张力系统。',
+    imageSrc: '/portal-assets/card-05-87.png',
+    accent: '#c93a34'
+  }
+];
 
-    const getAccentColor = (id: DriverType) => {
-        if (isRetro) return 'text-[var(--text-accent)]';
-        switch (id) {
-            case DriverType.COMMERCIAL: return 'text-mist-cyan';
-            case DriverType.NARRATIVE: return 'text-mist-gold'; // Narrative is Gold
-            case DriverType.AESTHETIC: return 'text-mist-rose';
-            case DriverType.EXPERIMENTAL: return 'text-mist-purple';
-            case DriverType.TRAILER: return 'text-mist-orange';
-            default: return 'text-gold-primary';
-        }
-    };
+const cardSignalPaths = [
+  'M 0 18 L 50 18 L 56 17 L 62 18 L 69 18 L 75 11 L 81 25 L 87 4 L 94 29 L 101 14 L 108 22 L 116 17 L 126 18 L 136 17 L 146 19 L 156 17 L 166 18 L 176 17 L 186 19 L 196 18 L 205 16 L 214 18 L 222 8 L 230 30 L 238 15 L 246 21 L 260 18',
+  'M 0 18 L 55 18 L 62 17 L 70 18 L 78 18 L 85 6 L 92 28 L 98 12 L 105 23 L 114 17 L 124 19 L 134 17 L 144 18 L 154 17 L 164 19 L 174 18 L 184 17 L 194 19 L 204 18 L 213 8 L 221 29 L 229 14 L 238 22 L 260 18',
+  'M 0 18 L 34 18 L 43 17 L 52 19 L 62 18 L 72 16 L 83 19 L 94 15 L 106 17 L 118 13 L 130 10 L 142 7 L 154 10 L 166 15 L 178 18 L 190 19 L 202 18 L 214 17 L 226 18 L 238 17 L 260 18',
+  'M 0 18 L 22 18 L 31 15 L 39 22 L 47 9 L 56 29 L 65 12 L 74 24 L 84 14 L 94 20 L 104 16 L 114 23 L 124 13 L 135 21 L 146 15 L 157 19 L 168 17 L 180 22 L 192 11 L 204 5 L 216 27 L 228 16 L 240 20 L 260 18',
+  'M 0 18 L 52 18 L 60 17 L 68 18 L 77 18 L 84 16 L 91 18 L 98 7 L 105 31 L 112 11 L 119 21 L 128 16 L 138 18 L 148 17 L 158 19 L 170 17 L 182 18 L 194 19 L 206 15 L 218 13 L 230 19 L 242 18 L 260 18'
+];
 
-    const getAccentValue = (id: DriverType) => {
-        if (isRetro) return 'var(--text-accent)';
-        switch (id) {
-            case DriverType.COMMERCIAL: return 'var(--mist-cyan)';
-            case DriverType.NARRATIVE: return 'var(--mist-gold)';
-            case DriverType.AESTHETIC: return 'var(--mist-rose)';
-            case DriverType.EXPERIMENTAL: return 'var(--mist-purple)';
-            case DriverType.TRAILER: return 'var(--mist-orange)';
-            default: return 'var(--gold-primary)';
-        }
-    };
+export const DriverSelector: React.FC<DriverSelectorProps> = ({
+  selectedDriver,
+  onSelect,
+  hoveredDriver,
+  onHover
+}) => {
+  const [hoverArmed, setHoverArmed] = useState(false);
 
-    return (
-        <div className="w-full max-w-[1920px] mx-auto py-2 px-2 relative z-10">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
-                {DRIVERS.map((driver) => {
-                    const isSelected = selectedDriver === driver.id;
-                    const isHovered = hoveredDriver === driver.id;
-                    const active = isHovered;
-                    const accentClass = getAccentColor(driver.id);
-                    const accentValue = getAccentValue(driver.id);
+  useEffect(() => {
+    onHover(null);
+  }, [onHover]);
+
+  const activateHover = (id: DriverType) => {
+    if (!hoverArmed) setHoverArmed(true);
+    onHover(id);
+  };
+
+  return (
+    <div className="desire-archive-card-row">
+      {archiveDriverCards.map((driver, index) => {
+        const active = hoverArmed && hoveredDriver === driver.id;
 
         return (
-                    <button
-                        key={driver.id}
-                        onClick={() => onSelect(driver.id)}
-                        onMouseEnter={() => onHover(driver.id)}
-                        onMouseLeave={() => onHover(null)}
-                        aria-pressed={isSelected}
-                        className={`
-                group relative flex flex-col items-start text-left p-6 md:p-8 rounded-sm transition-all duration-700 backdrop-blur-xl overflow-hidden
-                border min-h-[300px]
-                ${active ? '-translate-y-1' : ''}
-              `}
-                            style={{
-                                boxShadow: active ? `0 45px 100px rgba(0,0,0,0.1), 0 0 42px ${accentValue}22` : undefined,
-                                borderColor: active
-                                    ? (isRetro ? 'rgba(139, 38, 29, 0.9)' : accentValue)
-                                    : 'transparent',
-                                backgroundColor: active
-                                    ? (isRetro ? '#FDFCF8' : 'rgb(9 9 11)')
-                                    : 'transparent',
-                            }}
-                        >
-                            <div
-                                className="absolute inset-0 pointer-events-none transition-opacity duration-500"
-                                style={{
-                                    opacity: active ? 0.7 : 0,
-                                    background: isRetro
-                                        ? 'linear-gradient(180deg, rgba(255,250,240,0.34), transparent)'
-                                        : 'linear-gradient(180deg, rgba(232,220,188,0.035), rgba(5,5,4,0.28))'
-                                }}
-                            />
-                            {/* Status padding adjustment */}
-                            <div className="w-full h-2 mb-4 relative z-10"></div>
+          <button
+            key={driver.id}
+            type="button"
+            onClick={() => onSelect(driver.id)}
+            onMouseEnter={() => {
+              if (hoverArmed) onHover(driver.id);
+            }}
+            onMouseMove={() => activateHover(driver.id)}
+            onMouseLeave={() => onHover(null)}
+            aria-pressed={selectedDriver === driver.id}
+            className={`desire-archive-card ${driver.id === DriverType.COMMERCIAL ? 'is-commercial' : ''} ${active ? 'is-active' : ''}`}
+            style={{ '--desire-card-accent': driver.accent } as React.CSSProperties}
+          >
+            <span className="desire-card-corner desire-card-corner-tl" aria-hidden="true" />
+            <span className="desire-card-corner desire-card-corner-tr" aria-hidden="true" />
+            <span className="desire-card-corner desire-card-corner-bl" aria-hidden="true" />
+            <span className="desire-card-corner desire-card-corner-br" aria-hidden="true" />
 
-                            {/* Title Section */}
-                            <div className="mb-4 w-full relative z-10">
-                                <div className="h-14 overflow-hidden">
-                                    <div className={`transition-all duration-[1500ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${lang === 'EN' ? '-translate-y-1/2' : 'translate-y-0'}`}>
-                                        <div className="flex flex-col">
-                                            <div className="h-14 flex items-center shrink-0">
-                                                <h3 className={`text-xl md:text-2xl font-serif font-bold tracking-wide transition-all duration-500 leading-tight ${
-                                                    isRetro 
-                                                        ? (active ? 'text-[#8B261D]' : 'text-black/70') 
-                                                        : (active 
-                                                            ? 'text-white' 
-                                                            : 'text-white/80')
-                                                }`}>
-                                                    {driver.name}
-                                                </h3>
-                                            </div>
-                                            <div className="h-14 flex items-center shrink-0">
-                                                <h3 className={`text-lg md:text-xl font-serif font-bold tracking-wide transition-all duration-500 leading-tight ${
-                                                    isRetro 
-                                                        ? (active ? 'text-[#8B261D]' : 'text-black/70') 
-                                                        : (active 
-                                                            ? 'text-white' 
-                                                            : 'text-white/80')
-                                                }`}>
-                                                    {driver.nameEn}
-                                                </h3>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="h-6 overflow-hidden mt-1">
-                                    <div className={`transition-all duration-[1500ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${lang === 'EN' ? '-translate-y-1/2' : 'translate-y-0'}`}>
-                                        <div className="flex flex-col">
-                                             <div className={`h-6 flex items-center shrink-0 text-sm font-serif italic transition-all duration-500 ${isRetro ? (active ? 'text-black/90' : 'text-black/60') : (active ? accentClass : 'text-[var(--text-muted)] opacity-60')}`}>
-                                                 {driver.coreDriver}
-                                             </div>
-                                             <div className={`h-6 flex items-center shrink-0 text-sm font-serif italic transition-all duration-500 ${isRetro ? (active ? 'text-black/90' : 'text-black/60') : (active ? accentClass : 'text-[var(--text-muted)] opacity-60')}`}>
-                                                 {driver.coreDriverEn}
-                                             </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Description Section with robust sliding */}
-                            <div className="max-w-[98%] mb-6 relative z-10">
-                                <div className="h-[130px] overflow-hidden relative">
-                                    <div className={`transition-all duration-[1500ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${lang === 'EN' ? '-translate-y-1/2' : 'translate-y-0'}`}>
-                                        <div className="flex flex-col">
-                                            {/* CN Slot */}
-                                            <div className="h-[130px] shrink-0">
-                                                <p className={`leading-relaxed font-light transition-all duration-500 text-[12px] md:text-sm ${
-                                                    isRetro 
-                                                        ? (active ? 'text-black/90' : 'text-black/60') 
-                                                        : (active 
-                                                            ? 'text-white' 
-                                                            : 'text-[var(--text-muted)]')
-                                                }`}>
-                                                    {driver.description}
-                                                </p>
-                                            </div>
-                                            {/* EN Slot */}
-                                            <div className="h-[130px] shrink-0">
-                                                <p className={`leading-relaxed font-light transition-all duration-500 text-[11px] md:text-[13px] ${
-                                                    isRetro 
-                                                        ? (active ? 'text-black/90' : 'text-black/60') 
-                                                        : (active 
-                                                            ? 'text-white' 
-                                                            : 'text-[var(--text-muted)]')
-                                                }`}>
-                                                    {driver.descriptionEn || driver.description}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            {/* Action Footer */}
-                            <div className={`mt-auto pt-4 w-full flex items-center justify-between border-t transition-all duration-500 relative z-10 ${active ? 'opacity-100' : 'opacity-0'} ${
-                                isRetro 
-                                    ? 'border-[var(--border-main)]' 
-                                    : (active ? 'border-white/40' : 'border-[var(--border-main)]/40')
-                            }`}>
-                                <span className={`text-[10px] font-bold uppercase tracking-[0.2em] transition-colors duration-500 ${
-                                    isRetro 
-                                        ? 'text-black/80' 
-                                        : (active ? accentClass : 'text-[var(--text-main)]')
-                                }`}>
-                                    {lang === 'CN' ? '选取引擎' : 'SELECT ENGINE'}
-                                </span>
-                                <ArrowRight size={14} className={isRetro ? 'text-black/80' : accentClass} />
-                            </div>
-
-
-                            {/* Subtle background glow */}
-                            <div className={`absolute inset-0 bg-gradient-to-br from-white/[0.01] to-transparent pointer-events-none transition-opacity duration-700 ${active ? 'opacity-100' : 'opacity-0'}`}></div>
-                        </button>
-                    );
-                })}
+            <div className="desire-card-meta-row">
+              <span>{driver.number}</span>
+              <span>ENGINE</span>
             </div>
-        </div>
-    );
+
+            <header className="desire-card-title-row">
+              <span className="desire-card-title-group">
+                <span className="desire-card-title-cn">{driver.titleCn}</span>
+                <span className="desire-card-title-en">{driver.titleEn}</span>
+              </span>
+            </header>
+
+            <div className="desire-card-image-frame">
+              <img src={driver.imageSrc} alt="" draggable="false" />
+            </div>
+
+            <div className="desire-card-topology">
+              <span>TOPOLOGY</span>
+              <span aria-hidden="true">|</span>
+              <span>{driver.topology}</span>
+            </div>
+
+            <p className="desire-card-description">
+              {driver.description}
+            </p>
+
+            <div className="desire-card-signal" aria-hidden="true">
+              <svg viewBox="0 0 260 36" preserveAspectRatio="none">
+                <path d={cardSignalPaths[index % cardSignalPaths.length]} />
+              </svg>
+            </div>
+
+            <div className="desire-card-arrow" aria-hidden="true">
+              <ArrowRight size={34} strokeWidth={1.35} />
+            </div>
+
+            <div className="desire-card-bottom-line" aria-hidden="true" />
+          </button>
+        );
+      })}
+    </div>
+  );
 };

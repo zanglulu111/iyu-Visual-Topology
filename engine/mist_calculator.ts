@@ -41,7 +41,7 @@ import type { NarrativeFieldState, LibraryItemDef, WorldLawConfig } from '../typ
 // ============================================
 
 import { NARRATIVE_ENGINE_LIBRARY } from '../data/engine_core/narrative_engine';
-import { SKIN_LIBRARY } from '../data/skin_libraries';
+import { SKIN_LIBRARY } from '../data/narrative/skin_libraries';
 
 let _libraryCache: Record<string, LibraryItemDef> | null = null;
 

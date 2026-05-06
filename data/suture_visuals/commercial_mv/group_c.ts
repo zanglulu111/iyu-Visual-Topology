@@ -1,4 +1,4 @@
-import type { SutureStyleItem } from '../../suture_styles';
+import type { SutureStyleItem } from '../../suture/styles';
 
 const COMMERCIAL_MV_GROUP_C = '5C. 商业与 MV：品牌神话、产品仪式与广告叙事';
 

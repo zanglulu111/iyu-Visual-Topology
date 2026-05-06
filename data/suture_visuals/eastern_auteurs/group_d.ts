@@ -1,4 +1,4 @@
-import type { SutureStyleItem } from '../../suture_styles';
+import type { SutureStyleItem } from '../../suture/styles';
 
 const EASTERN_AUTEUR_GROUP_D = '2D. 东方电影作者：梦感自然、城市类型与边缘现实';
 

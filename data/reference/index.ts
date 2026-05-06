@@ -1,0 +1,10 @@
+export { PHILOSOPHER_POSTER_LIST } from './philosopherPosterList';
+export { resolvePhilosopherPosterImage, philosopherPosterMediaStats } from './philosopherPosterMedia';
+export { POSTER_SOURCE_DATABASE, posterSourceStats } from './posterSourceDatabase';
+export { VISUAL_TONES } from './visual_tones';
+export { WHITEPAPER_DATA } from './whitepaper_data';
+export { HISTORICAL_TIMELINE } from './historical_timeline';
+export { PRODUCT_ANCHORS } from '../aesthetic/product_anchors';
+export { APPLICATION_SCENARIOS } from '../aesthetic/application_scenarios';
+export { AUTHORITY_ENVIRONMENTS } from '../aesthetic/authority_environments';
+export { NARRATIVE_ERA_CATEGORIES } from '../narrative/spacetime_anchors';

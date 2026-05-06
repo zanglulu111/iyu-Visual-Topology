@@ -1,4 +1,4 @@
-import type { SutureStyleItem } from '../../suture_styles';
+import type { SutureStyleItem } from '../../suture/styles';
 
 const ANIMATION_DIRECTOR_GROUP_C = '3C. 动画导演：欧美工作室、图像系统与类型叙事';
 

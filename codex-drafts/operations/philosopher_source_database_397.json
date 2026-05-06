@@ -1,7 +1,7 @@
 {
   "exportedAt": "2026-05-02T00:38:32.558Z",
   "count": 416,
-  "source": "data/philosopherPosterList.ts",
+  "source": "data/reference/philosopherPosterList.ts",
   "items": [
     {
       "id": "confucius",

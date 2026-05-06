@@ -674,7 +674,7 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
                     {list.map(asset => {
                         const currentAssetLang = getAssetLang(asset.id, type);
                         return (
-                            <div key={asset.id} className={`border rounded-lg overflow-hidden flex flex-col group relative ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/30' : 'bg-black/40 border-zinc-800'}`}>
+                            <div key={asset.id} className={`mist-archive-panel border overflow-hidden flex flex-col group relative ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/30' : 'bg-black/40 border-zinc-800'}`}>
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
@@ -900,7 +900,7 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
                                 next[type] = [...next[type], { id: Date.now().toString() + Math.random().toString(36).substr(2, 5), name: "", type: type.toUpperCase() as any, analysis: { description: "", anchors: "" } }];
                                 updateActivePreset({ assets: next });
                             }}
-                            className={`aspect-video border border-dashed rounded-lg flex flex-col items-center justify-center transition-all cursor-pointer group ${theme === 'retro' ? 'bg-[var(--bg-panel)]/30 border-[#8B261D]/30 text-[#8B261D]/50 hover:text-[#8B261D] hover:border-[#8B261D]/60' : 'bg-white/5 border-zinc-800 text-zinc-500 hover:text-zinc-200 hover:border-zinc-500'}`}
+                            className={`mist-archive-panel aspect-video border border-dashed flex flex-col items-center justify-center transition-all cursor-pointer group ${theme === 'retro' ? 'bg-[var(--bg-panel)]/30 border-[#8B261D]/30 text-[#8B261D]/50 hover:text-[#8B261D] hover:border-[#8B261D]/60' : 'bg-white/5 border-zinc-800 text-zinc-500 hover:text-zinc-200 hover:border-zinc-500'}`}
                         >
                             <Plus size={32} className="group-hover:scale-110 transition-transform" />
                             <span className="text-xs font-bold uppercase tracking-widest mt-2">{lang === 'EN' ? "Add" : "添加"}</span>
@@ -912,13 +912,13 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
     };
 
     return (
-        <div className={`${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20' : 'bg-[#0a0a0a] border-zinc-800'} border-b flex flex-col shrink-0 ${isExpanded ? 'h-full' : ''}`}>
+        <div className={`mist-archive-panel ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20' : 'bg-[#0a0a0a] border-zinc-800'} border-b flex flex-col shrink-0 ${isExpanded ? 'h-full' : ''}`}>
             <div
                 onClick={handleToggle}
-                className={`h-16 px-6 flex items-center justify-between cursor-pointer transition-colors border-b sticky top-0 z-20 ${theme === 'retro' ? 'hover:bg-[#8B261D]/5 border-[#8B261D]/20 bg-[var(--bg-header)]' : 'hover:bg-white/5 border-zinc-900 bg-[#0a0a0a]'}`}
+                className={`mist-archive-toolbar h-16 px-6 flex items-center justify-between cursor-pointer transition-colors border-b sticky top-0 z-20 ${theme === 'retro' ? 'hover:bg-[#8B261D]/5 border-[#8B261D]/20 bg-[var(--bg-header)]' : 'hover:bg-white/5 border-zinc-900 bg-[#0a0a0a]'}`}
             >
                 <div className="flex items-center gap-3">
-                    <div className={`p-1.5 rounded-lg border ${theme === 'retro' ? 'bg-white border-[#8B261D]/20 text-[#8B261D]' : `bg-zinc-900 border-zinc-800 ${themeAccent}`}`}>
+                    <div className={`mist-archive-button p-1.5 border ${theme === 'retro' ? 'bg-white border-[#8B261D]/20 text-[#8B261D]' : `bg-zinc-900 border-zinc-800 ${themeAccent}`}`}>
                         <BookOpen size={18} />
                     </div>
                     <div>
@@ -1052,7 +1052,7 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
 
                                 {/* Reference Image Container - Stretches to fill height */}
                                 <div
-                                    className={`flex-1 rounded-lg border relative group overflow-hidden cursor-pointer flex items-center justify-center aspect-[4/3] h-full ${theme === 'retro' ? 'bg-[#8B261D]/5 border-[#8B261D]/20 shadow-sm' : 'bg-zinc-950 border-zinc-800'}`}
+                                    className={`mist-archive-panel flex-1 border relative group overflow-hidden cursor-pointer flex items-center justify-center aspect-[4/3] h-full ${theme === 'retro' ? 'bg-[#8B261D]/5 border-[#8B261D]/20 shadow-sm' : 'bg-zinc-950 border-zinc-800'}`}
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         fileInputRef.current?.click();
@@ -1237,7 +1237,7 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
             {/* Simple Themed Alert Modal */}
             {isAlertOpen && (
                 <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-                    <div className={`w-full max-w-sm ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]' : 'bg-[#0c0c0c] border-zinc-800 shadow-[0_0_20px_rgba(0,0,0,0.5)]'} border-2 rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200`}>
+                    <div className={`mist-archive-panel w-full max-w-sm ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]' : 'bg-[#0c0c0c] border-zinc-800 shadow-[0_0_20px_rgba(0,0,0,0.5)]'} border-2 shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200`}>
                         <div className={`px-6 py-8 text-center ${theme === 'retro' ? 'text-black' : 'text-white'}`}>
                             <div className={`w-14 h-14 rounded-full mx-auto mb-5 flex items-center justify-center ${theme === 'retro' ? 'bg-[#8B261D]/10 text-[#8B261D]' : 'bg-zinc-800 text-zinc-400'}`}>
                                 <AlertCircle size={28} />

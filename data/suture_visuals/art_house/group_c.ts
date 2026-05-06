@@ -1,4 +1,4 @@
-import type { SutureStyleItem } from '../../suture_styles';
+import type { SutureStyleItem } from '../../suture/styles';
 
 const ART_HOUSE_GROUP_C = '4C. 艺术电影：身体挑衅、狂恋与荒诞剧场';
 

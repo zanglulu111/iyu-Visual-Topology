@@ -35,7 +35,7 @@ import {
 export const HUMAN_BLOCKS = [
     'aes_age', 'aes_gender', 'aes_body_type', 'aes_ethnicity', 'aes_occupation', 'aes_persona', 
     'aes_hair_color', 'aes_hair_style_f', 'aes_hair_style_m', 'aes_eye_color', 'aes_eye_shape', 'aes_eye_fx', 'aes_face_features', 'aes_expression', 'aes_body_features', 'aes_skin_texture', 
-    // REMOVED: 'aes_clothing', 'aes_accessories', 'aes_prop_held',
+    // Legacy look/prop blocks are intentionally omitted from the active aesthetic schema.
     'aes_action_static', 'aes_action_dynamic', 'aes_action_complex'
 ];
 export const CREATURE_BLOCKS = ['aes_creature_size', 'aes_creature_class', 'aes_creature_element', 'aes_creature_head', 'aes_creature_body', 'aes_creature_mood', 'aes_creature_action', 'aes_creature_texture'];
@@ -48,7 +48,7 @@ export const AESTHETIC_GLOBAL_BLOCK_TO_CATEGORY: Record<string, string> = {
     'aes_image_focus': 'L1.2', 'aes_visual_balance': 'L1.2', 'aes_shot_size': 'L1.2', 'aes_angle': 'L1.2', 'aes_focal_length': 'L1.2', 'aes_depth': 'L1.2', 'aes_shutter': 'L1.2', 'aes_lens_fx': 'L1.2', 'aes_perspective': 'L1.2',
     'aes_camera_system': 'L1.1', 'aes_lens_series': 'L1.1', 'aes_optical_format': 'L1.1', 'aes_texture_render': 'L1.1', 'aes_physical_grain': 'L1.1', 'aes_base_tone': 'L1.1', 'aes_color_science': 'L1.1',
     'aes_art_medium': 'L1.1', 'aes_line_quality': 'L1.1', 'aes_canvas_texture': 'L1.1',
-    'aes_scene_real': 'STAGE', 'aes_scene_abstract': 'STAGE', 'aes_scene_surreal': 'STAGE', 'skin_era': 'STAGE', 'aes_air_medium': 'STAGE', 'aes_a3': 'STAGE', 'aes_weather': 'STAGE', 'aes_atmosphere': 'STAGE', 'aes_particles': 'STAGE', 'aes_synesthesia': 'STAGE',
+    'aes_scene_real': 'STAGE', 'aes_scene_abstract': 'STAGE', 'aes_scene_surreal': 'STAGE', 'skin_era': 'STAGE', 'aes_atmosphere': 'STAGE', 'aes_particles': 'STAGE',
     'aes_l3_custom': 'STAGE', // ADDED: Map L3 Custom text input to STAGE lock
     'aes_l2_custom': 'SUBJECT', // ADDED: Map L2 Custom text input to SUBJECT lock
     'aes_light_mood': 'VIBE', 'aes_light_type': 'VIBE', 'aes_light_direction': 'VIBE', 'aes_light_shape': 'VIBE',
@@ -500,7 +500,7 @@ export const generateAestheticSmartRandom = (
          }
     });
     
-    // Clear legacy blocks if present
+    // Clear legacy stage blocks if they exist in saved presets.
     ['aes_air_medium', 'aes_a3', 'aes_weather', 'aes_synesthesia'].forEach(id => {
          if (!checkLock(id)) newState[id] = [];
     });

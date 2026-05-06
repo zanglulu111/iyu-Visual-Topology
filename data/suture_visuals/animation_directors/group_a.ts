@@ -1,4 +1,4 @@
-import type { SutureStyleItem } from '../../suture_styles';
+import type { SutureStyleItem } from '../../suture/styles';
 
 const ANIMATION_DIRECTOR_GROUP_A = '3A. 动画导演：日本作者动画与主观现实';
 

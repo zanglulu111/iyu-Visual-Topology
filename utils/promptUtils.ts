@@ -1,9 +1,9 @@
 
 import { NarrativeFieldState, SubjectType, AestheticLogicMode, LibraryItemDef } from '../types';
-import { AESTHETIC_ENGINE_LIBRARY } from '../data/aesthetic_data';
-import { SKIN_LIBRARY } from '../data/skin_libraries';
-import { COMMERCIAL_ENGINE_LIBRARY } from '../data/commercial_data';
-import { MASTER_PRESETS } from '../data/master_presets';
+import { AESTHETIC_ENGINE_LIBRARY } from '../data/aesthetic/core';
+import { SKIN_LIBRARY } from '../data/narrative/skin_libraries';
+import { COMMERCIAL_ENGINE_LIBRARY } from '../data/aesthetic/commercial_data';
+import { MASTER_PRESETS } from '../data/aesthetic/master_presets';
 import { AES_COLOR_PRESETS } from '../data/aesthetic_libraries/color_presets';
 import { findItemFull } from '../services/dataRegistry';
 
@@ -296,7 +296,6 @@ export const generateAestheticPrompt = (
     const sceneCustom = getTagsWithDef('aes_l3_custom');
     const atmosphereMedium = getTagsWithDef('aes_atmosphere');
     const atmosphereParticles = getTagsWithDef('aes_particles');
-    const weather = getTagsWithDef('aes_weather');
     
     let stageStr = "";
     const loc = join(scene);
@@ -310,12 +309,9 @@ export const generateAestheticPrompt = (
     
     const atmoSentences = [];
     const surroundParts = [join(atmosphereMedium), join(atmosphereParticles)].filter(Boolean);
-    const weatherStr = join(weather);
-    
-    if (surroundParts.length > 0 || weatherStr) {
+    if (surroundParts.length > 0) {
         let s = "";
         if (surroundParts.length > 0) s += `Surrounded by ${surroundParts.join(" and ")}`;
-        if (weatherStr) s += `${s ? ", " : ""}under ${weatherStr} conditions`;
         atmoSentences.push(s);
     }
     contentMap['STAGE'] = stageStr + atmoSentences.join(". ");
