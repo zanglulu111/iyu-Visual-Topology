@@ -15,9 +15,14 @@ interface UniversePortalProps {
   openSettings: () => void;
   openProfile: () => void;
   openManual: () => void;
+  entryMode?: 'intro' | 'return';
+  returnPreviewCardNumber?: string | null;
+  onOpenDesireReproduction?: () => void;
 }
 
 type PortalTone = 'red' | 'cyan';
+
+const DESIRE_PORTAL_NUMBER = '03';
 
 interface PortalCardDef {
   number: string;
@@ -30,6 +35,24 @@ interface PortalCardDef {
   onClick: () => void;
 }
 
+interface PortalPreviewState {
+  card: PortalCardDef;
+  index: number;
+  origin: {
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+  };
+  target: {
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+  };
+  phase: 'opening' | 'open' | 'closing' | 'entering';
+}
+
 interface NavItemDef {
   titleCn: string;
   titleEn: string;
@@ -37,10 +60,14 @@ interface NavItemDef {
 }
 
 const titleChromaticShadow =
-  '2.2px 0.8px 0 rgba(212, 93, 82, 0.9), -0.9px -0.2px 0 rgba(255,255,255,0.3), -1.35px 0 0 rgba(94, 207, 220, 0.34), 0 12px 38px rgba(0, 0, 0, 0.65)';
+  '0.55px 0.24px 0 rgba(212, 93, 82, 0.36), -0.65px -0.16px 0 rgba(255,255,255,0.42), -0.8px 0 0 rgba(94, 207, 220, 0.24), 0 12px 38px rgba(0, 0, 0, 0.68)';
 
 const textChromaticShadow =
   '-0.7px 0 0 rgba(212, 93, 82, 0.56), 0.7px 0 0 rgba(94, 207, 220, 0.42)';
+
+const clamp01 = (value: number) => Math.max(0, Math.min(1, value));
+
+const easeOutQuart = (value: number) => 1 - Math.pow(1 - value, 4);
 
 const toneColor = (tone: PortalTone, isRetro: boolean) => {
   if (tone === 'cyan') return isRetro ? '#5ecfdc' : '#5ecfdc';
@@ -101,21 +128,31 @@ const PortalCard: React.FC<{
   isRetro: boolean;
   index: number;
   isGlitching: boolean;
-  onHoverStart: (index: number) => void;
+  onHoverStart: (card: PortalCardDef, index: number, rect: DOMRect) => void;
   onHoverEnd: (index: number) => void;
-}> = ({ card, isRetro, index, isGlitching, onHoverStart, onHoverEnd }) => {
+  onPreviewOpen: (card: PortalCardDef, index: number, rect: DOMRect) => void;
+}> = ({ card, isRetro, index, isGlitching, onHoverStart, onHoverEnd, onPreviewOpen }) => {
   const accent = toneColor(card.tone, isRetro);
+  const mediaRef = useRef<HTMLDivElement | null>(null);
+  const openFromMedia = () => {
+    const rect = mediaRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    onPreviewOpen(card, index, rect);
+  };
 
   return (
-    <button
-      type="button"
-      onClick={card.onClick}
-      onMouseEnter={() => onHoverStart(index)}
+    <article
+      onClick={openFromMedia}
+      onMouseEnter={() => {
+        const rect = mediaRef.current?.getBoundingClientRect();
+        if (!rect) return;
+        onHoverStart(card, index, rect);
+      }}
       onMouseLeave={() => onHoverEnd(index)}
-      className={`mist-portal-card group relative overflow-hidden bg-black/12 text-left transition-all duration-700 hover:bg-black/58 hover:shadow-[0_0_42px_rgba(255,255,255,0.08)] focus:outline-none focus-visible:ring-1 focus-visible:ring-white/60 ${isGlitching ? 'mist-portal-card-glitch-active' : ''}`}
+      className={`mist-portal-card group relative select-none overflow-hidden bg-black/12 text-left transition-all duration-700 hover:bg-black/58 hover:shadow-[0_0_42px_rgba(255,255,255,0.08)] ${isGlitching ? 'mist-portal-card-glitch-active' : ''}`}
       style={{ '--portal-card-accent': accent, '--card-index': index } as React.CSSProperties}
     >
-      <div className="mist-card-media absolute z-0 overflow-hidden bg-black" aria-hidden="true">
+      <div ref={mediaRef} className="mist-card-media absolute z-0 overflow-hidden bg-black" aria-hidden="true">
         <img
           src={card.imageSrc}
           alt=""
@@ -123,9 +160,9 @@ const PortalCard: React.FC<{
           draggable="false"
         />
       </div>
-      <div className="absolute inset-0 z-[1] bg-gradient-to-r from-black/40 via-black/18 to-transparent transition-opacity duration-700 group-hover:opacity-95" />
-      <div className="absolute inset-0 z-[2] bg-[radial-gradient(circle_at_74%_38%,rgba(255,255,255,0.16),transparent_34%),linear-gradient(to_bottom,rgba(0,0,0,0.06),transparent_35%,rgba(0,0,0,0.36))]" />
-      <div className="absolute inset-0 z-[3] bg-white/[0.04] opacity-45 transition-opacity duration-500 group-hover:opacity-100" />
+      <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-r from-black/40 via-black/18 to-transparent transition-opacity duration-700 group-hover:opacity-95" />
+      <div className="pointer-events-none absolute inset-0 z-[2] bg-[radial-gradient(circle_at_74%_38%,rgba(255,255,255,0.16),transparent_34%),linear-gradient(to_bottom,rgba(0,0,0,0.06),transparent_35%,rgba(0,0,0,0.36))]" />
+      <div className="pointer-events-none absolute inset-0 z-[3] bg-white/[0.04] opacity-45 transition-opacity duration-500 group-hover:opacity-100" />
       <div className="mist-card-film-base pointer-events-none absolute inset-0 z-[4] transition-all duration-500" aria-hidden="true" />
       <img
         src="/portal-assets/film-card-frame.png"
@@ -144,12 +181,13 @@ const PortalCard: React.FC<{
           <div className="mist-card-corner mist-card-corner-br" />
         </div>
 
-        <div
-          className="mist-card-title absolute left-1/2 top-1/2 whitespace-nowrap font-serif text-[clamp(1rem,1.08vw,1.24rem)] leading-none tracking-[0.18em] text-white/78 transition-all duration-700 group-hover:text-white"
+        <button
+          type="button"
+          className="mist-card-title mist-card-title-trigger absolute left-1/2 top-1/2 cursor-pointer select-none appearance-none whitespace-nowrap border-0 bg-transparent p-0 font-serif text-[clamp(1rem,1.08vw,1.24rem)] leading-none tracking-[0.18em] text-white/78 transition-all duration-700 group-hover:text-white focus:outline-none"
           style={{ textShadow: '0 2px 10px rgba(0,0,0,0.82)' }}
         >
           {card.titleCn}
-        </div>
+        </button>
 
         <div className="mist-card-local-ecg pointer-events-none absolute left-1/2 top-1/2 h-12 w-[58%] -translate-x-1/2 -translate-y-1/2 scale-x-75 opacity-0 transition-all duration-700 group-hover:scale-x-100 group-hover:opacity-100">
           <CardECGLine index={index} />
@@ -161,7 +199,7 @@ const PortalCard: React.FC<{
           </p>
         </div>
       </div>
-    </button>
+    </article>
   );
 };
 
@@ -170,32 +208,52 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
   setViewMode,
   setInitialProtocol,
   openManual,
+  entryMode = 'intro',
+  returnPreviewCardNumber = null,
+  onOpenDesireReproduction,
 }) => {
   const { theme } = useTheme();
   const isRetro = theme === 'retro';
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [cursorPos, setCursorPos] = useState({ x: -100, y: -100 });
   const [isHoveringClickable, setIsHoveringClickable] = useState(false);
   const [mistEnabled, setMistEnabled] = useState(true);
   const [isTitleGlitching, setIsTitleGlitching] = useState(false);
+  const [isPortalEntering, setIsPortalEntering] = useState(entryMode === 'intro');
   const [cardGlitchActive, setCardGlitchActive] = useState<boolean[]>([false, false, false, false, false]);
+  const [portalPreview, setPortalPreview] = useState<PortalPreviewState | null>(null);
+  const [desireRevealProgress, setDesireRevealProgress] = useState(0);
   const titleGlitchActiveRef = useRef(false);
   const glitchAudioRef = useRef<HTMLAudioElement | null>(null);
   const cardAudioRefs = useRef<(HTMLAudioElement | null)[]>([null, null, null, null, null]);
   const cardGlitchTimers = useRef<(ReturnType<typeof setTimeout> | null)[]>([null, null, null, null, null]);
+  const portalPreviewRef = useRef<PortalPreviewState | null>(null);
+  const portalRootRef = useRef<HTMLDivElement | null>(null);
+  const previewOpenFrameRef = useRef<number | null>(null);
+  const previewLifecycleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const desireRevealProgressRef = useRef(0);
+  const desireRevealFrameRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (entryMode !== 'intro') {
+      setIsPortalEntering(false);
+      return;
+    }
+    const timer = setTimeout(() => setIsPortalEntering(false), 1250);
+    return () => clearTimeout(timer);
+  }, [entryMode]);
 
   useEffect(() => {
     let animationFrame = 0;
     const handleMouseMove = (event: MouseEvent) => {
       cancelAnimationFrame(animationFrame);
       animationFrame = requestAnimationFrame(() => {
-        setMousePos({
-          x: (event.clientX / window.innerWidth - 0.5) * 2,
-          y: (event.clientY / window.innerHeight - 0.5) * 2,
-        });
+        const root = portalRootRef.current;
+        if (!root) return;
+        root.style.setProperty('--portal-mouse-x', ((event.clientX / window.innerWidth - 0.5) * 2).toFixed(4));
+        root.style.setProperty('--portal-mouse-y', ((event.clientY / window.innerHeight - 0.5) * 2).toFixed(4));
         setCursorPos({ x: event.clientX, y: event.clientY });
         const target = event.target as HTMLElement;
-        setIsHoveringClickable(!!target.closest('button, a, [role="button"], .pointer-events-auto, .mist-portal-title-wrap'));
+        setIsHoveringClickable(!!target.closest('button, a, [role="button"], .mist-portal-title-wrap, .mist-card-title-trigger'));
       });
     };
 
@@ -231,8 +289,15 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
       cardGlitchTimers.current.forEach((timer) => {
         if (timer) clearTimeout(timer);
       });
+      if (previewOpenFrameRef.current !== null) cancelAnimationFrame(previewOpenFrameRef.current);
+      if (previewLifecycleTimerRef.current) clearTimeout(previewLifecycleTimerRef.current);
+      if (desireRevealFrameRef.current !== null) cancelAnimationFrame(desireRevealFrameRef.current);
     };
   }, []);
+
+  useEffect(() => {
+    portalPreviewRef.current = portalPreview;
+  }, [portalPreview]);
 
   const startTitleGlitch = () => {
     if (titleGlitchActiveRef.current) return;
@@ -260,18 +325,56 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
     }
   };
 
-  const startCardHover = (index: number) => {
+  const clearPreviewLifecycleTimer = () => {
+    if (!previewLifecycleTimerRef.current) return;
+    clearTimeout(previewLifecycleTimerRef.current);
+    previewLifecycleTimerRef.current = null;
+  };
+
+  const clearPreviewOpenFrame = () => {
+    if (previewOpenFrameRef.current === null) return;
+    cancelAnimationFrame(previewOpenFrameRef.current);
+    previewOpenFrameRef.current = null;
+  };
+
+  const clearDesireRevealFrame = () => {
+    if (desireRevealFrameRef.current === null) return;
+    cancelAnimationFrame(desireRevealFrameRef.current);
+    desireRevealFrameRef.current = null;
+  };
+
+  const setDesireRevealProgressValue = (value: number) => {
+    const next = clamp01(value);
+    desireRevealProgressRef.current = next;
+    setDesireRevealProgress(next);
+  };
+
+  const clearPreviewMotion = () => {
+    clearPreviewLifecycleTimer();
+    clearPreviewOpenFrame();
+    clearDesireRevealFrame();
+  };
+
+  const finishPreviewClose = () => {
+    clearPreviewMotion();
+    setDesireRevealProgressValue(0);
+    portalPreviewRef.current = null;
+    setPortalPreview(null);
+  };
+
+  const startCardHover = (_card: PortalCardDef, index: number, _rect: DOMRect) => {
     if (cardGlitchTimers.current[index]) {
       clearTimeout(cardGlitchTimers.current[index]!);
       cardGlitchTimers.current[index] = null;
     }
+
     setCardGlitchActive((prev) => {
       const next = [...prev];
       next[index] = true;
       return next;
     });
-    const cardAudio = cardAudioRefs.current[index];
 
+    const cardAudio = cardAudioRefs.current[index];
     if (cardAudio) {
       cardAudio.currentTime = 0;
       cardAudio.onended = () => {
@@ -295,12 +398,193 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
   };
 
   const stopCardHover = (index: number) => {
+    const currentPreview = portalPreviewRef.current;
+    if (currentPreview?.index === index && currentPreview.phase !== 'closing') return;
+
     const cardAudio = cardAudioRefs.current[index];
     if (cardAudio) {
       cardAudio.pause();
       cardAudio.currentTime = 0;
       cardAudio.onended = null;
     }
+  };
+
+  const openPortalPreview = (card: PortalCardDef, index: number, rect: DOMRect) => {
+    const current = portalPreviewRef.current;
+    if (current && current.phase !== 'closing') return;
+    clearPreviewMotion();
+    setDesireRevealProgressValue(0);
+    stopTitleGlitch();
+
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const isCompact = viewportWidth < 1120;
+    const isDesire = card.number === DESIRE_PORTAL_NUMBER;
+    const targetWidth = isDesire
+      ? (isCompact ? viewportWidth * 0.92 : Math.min(viewportWidth * 0.66, 980))
+      : (isCompact ? viewportWidth * 0.9 : Math.min(viewportWidth * 0.56, 820));
+    const targetHeight = isDesire
+      ? (isCompact ? viewportHeight * 0.5 : Math.min(viewportHeight * 0.66, 760))
+      : (isCompact ? viewportHeight * 0.46 : Math.min(viewportHeight * 0.62, targetWidth * 0.56));
+    const targetLeft = isCompact ? viewportWidth * 0.04 : viewportWidth * 0.5 - targetWidth * 0.5;
+    const targetTop = isDesire
+      ? (isCompact ? viewportHeight * 0.12 : viewportHeight * 0.5 - targetHeight * 0.52)
+      : (isCompact ? viewportHeight * 0.18 : viewportHeight * 0.5 - targetHeight * 0.52);
+
+    const nextPreview: PortalPreviewState = {
+      card,
+      index,
+      origin: {
+        left: rect.left,
+        top: rect.top,
+        width: rect.width,
+        height: rect.height,
+      },
+      target: {
+        left: targetLeft,
+        top: targetTop,
+        width: targetWidth,
+        height: targetHeight,
+      },
+      phase: 'opening',
+    };
+
+    portalPreviewRef.current = nextPreview;
+    setPortalPreview(nextPreview);
+  };
+
+  const animateDesireRevealTo = (target: number, navigateOnComplete = false) => {
+    const current = portalPreviewRef.current;
+    if (!current || current.card.number !== DESIRE_PORTAL_NUMBER) return;
+    clearPreviewMotion();
+
+    const from = desireRevealProgressRef.current;
+    const to = clamp01(target);
+    const distance = Math.abs(to - from);
+    if (distance < 0.004) {
+      setDesireRevealProgressValue(to);
+      if (navigateOnComplete) {
+        current.card.onClick();
+        finishPreviewClose();
+      }
+      return;
+    }
+
+    if (to > from) {
+      setPortalPreview((preview) => {
+        const next = preview ? { ...preview, phase: 'entering' as const } : preview;
+        portalPreviewRef.current = next;
+        return next;
+      });
+    } else {
+      setPortalPreview((preview) => {
+        const next = preview ? { ...preview, phase: 'open' as const } : preview;
+        portalPreviewRef.current = next;
+        return next;
+      });
+    }
+
+    const startedAt = performance.now();
+    const duration = to > from ? 1180 : 720;
+    const step = (now: number) => {
+      const elapsed = clamp01((now - startedAt) / duration);
+      const eased = easeOutQuart(elapsed);
+      setDesireRevealProgressValue(from + (to - from) * eased);
+
+      if (elapsed < 1) {
+        desireRevealFrameRef.current = requestAnimationFrame(step);
+        return;
+      }
+
+      desireRevealFrameRef.current = null;
+      setDesireRevealProgressValue(to);
+      if (navigateOnComplete) {
+        const latest = portalPreviewRef.current;
+        latest?.card.onClick();
+        finishPreviewClose();
+      }
+    };
+
+    desireRevealFrameRef.current = requestAnimationFrame(step);
+  };
+
+  useEffect(() => {
+    if (portalPreview?.phase !== 'opening') return;
+    clearPreviewOpenFrame();
+    previewOpenFrameRef.current = requestAnimationFrame(() => {
+      previewOpenFrameRef.current = null;
+      setPortalPreview((preview) => {
+        const next = preview?.phase === 'opening' ? { ...preview, phase: 'open' as const } : preview;
+        portalPreviewRef.current = next;
+        return next;
+      });
+    });
+    return () => {
+      clearPreviewOpenFrame();
+    };
+  }, [portalPreview?.phase, portalPreview?.card.number]);
+
+  const beginPortalPreviewClose = () => {
+    const current = portalPreviewRef.current;
+    if (!current || current.phase === 'closing' || current.phase === 'entering') return;
+    clearPreviewMotion();
+    setPortalPreview((preview) => {
+      const next = preview ? { ...preview, phase: 'closing' as const } : preview;
+      portalPreviewRef.current = next;
+      return next;
+    });
+    previewLifecycleTimerRef.current = setTimeout(finishPreviewClose, 700);
+  };
+
+  const closePortalPreview = () => {
+    const current = portalPreviewRef.current;
+    if (current?.card.number === DESIRE_PORTAL_NUMBER && desireRevealProgressRef.current > 0.02 && current.phase !== 'closing') {
+      animateDesireRevealTo(0);
+      previewLifecycleTimerRef.current = setTimeout(beginPortalPreviewClose, 680);
+      return;
+    }
+    clearPreviewMotion();
+    beginPortalPreviewClose();
+  };
+
+  const enterPortalPreview = () => {
+    const current = portalPreviewRef.current;
+    if (!current) return;
+    if (current.card.number === DESIRE_PORTAL_NUMBER) {
+      if (onOpenDesireReproduction) {
+        onOpenDesireReproduction();
+        animateDesireRevealTo(1, false);
+        previewLifecycleTimerRef.current = setTimeout(() => {
+          finishPreviewClose();
+        }, 940);
+      } else {
+        animateDesireRevealTo(1, true);
+      }
+      return;
+    }
+    clearPreviewMotion();
+    setPortalPreview((preview) => {
+      const next = preview ? { ...preview, phase: 'entering' as const } : preview;
+      portalPreviewRef.current = next;
+      return next;
+    });
+    previewLifecycleTimerRef.current = setTimeout(() => {
+      portalPreviewRef.current?.card.onClick();
+      finishPreviewClose();
+    }, 920);
+  };
+
+  const handlePortalPreviewWheel = (event: React.WheelEvent<HTMLElement>) => {
+    const current = portalPreviewRef.current;
+    if (!current || current.card.number !== DESIRE_PORTAL_NUMBER) return;
+    if (current.phase === 'opening' || current.phase === 'closing') return;
+
+    event.preventDefault();
+    if (event.deltaY > 0) {
+      enterPortalPreview();
+      return;
+    }
+    closePortalPreview();
   };
 
   const goDictionary = () => {
@@ -390,15 +674,29 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
     },
   ];
 
+  const desirePageOpacity = clamp01((desireRevealProgress - 0.05) / 0.72);
+  const desireBarsProgress = clamp01((desireRevealProgress - 0.72) / 0.28);
+  const desirePreviewPanelOpacity = clamp01(1 - desireRevealProgress * 1.7);
   const portalRootStyle = {
-    '--portal-mouse-x': mousePos.x.toFixed(4),
-    '--portal-mouse-y': mousePos.y.toFixed(4),
+    '--portal-mouse-x': '0',
+    '--portal-mouse-y': '0',
     '--portal-mist-opacity': mistEnabled ? 1 : 0,
+    '--portal-film-side-opacity': portalPreview ? (portalPreview.phase === 'closing' ? 1 : 0) : 1,
+    '--desire-reveal-progress': `${desireRevealProgress}`,
+    '--desire-preview-y': `${desireRevealProgress * -77}vh`,
+    '--desire-preview-scale': `${1 - desireRevealProgress * 0.055}`,
+    '--desire-page-y': `${(1 - desireRevealProgress) * 102}vh`,
+    '--desire-page-opacity': `${desirePageOpacity}`,
+    '--desire-bars-opacity': `${desireBarsProgress}`,
+    '--desire-bars-y': `${(1 - desireBarsProgress) * 18}px`,
+    '--desire-panel-opacity': `${desirePreviewPanelOpacity}`,
+    '--desire-panel-y': `${desireRevealProgress * -28}px`,
   } as React.CSSProperties;
 
   return (
     <div
-      className={`mist-portal-root fixed inset-0 overflow-hidden bg-black text-white ${isTitleGlitching ? 'mist-portal-text-system-active' : ''}`}
+      ref={portalRootRef}
+      className={`mist-portal-root fixed inset-0 overflow-hidden bg-black text-white ${isPortalEntering ? 'mist-portal-entering' : ''} ${isTitleGlitching ? 'mist-portal-text-system-active' : ''} ${portalPreview ? `mist-portal-preview-active is-preview-${portalPreview.phase}` : ''} ${portalPreview?.card.number === DESIRE_PORTAL_NUMBER ? 'is-desire-preview' : ''}`}
       style={portalRootStyle}
     >
       <style>{`
@@ -446,6 +744,12 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
 
         .mist-portal-root .font-serif {
           font-family: var(--mist-serif);
+        }
+
+        @property --portal-enter-y {
+          syntax: '<length>';
+          inherits: false;
+          initial-value: 0px;
         }
 
         @keyframes mistPortalTitleGlitch {
@@ -598,6 +902,78 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
           }
         }
 
+        @keyframes mistCardEcgGlitch {
+          0%, 100% {
+            opacity: 0.78;
+            stroke: rgba(255,255,255,0.8);
+            clip-path: inset(0 38% 0 46%);
+            filter:
+              drop-shadow(0.8px 0.18px 0 rgba(0,229,255,0.22))
+              drop-shadow(-0.8px -0.18px 0 rgba(255,43,214,0.18));
+          }
+          9% {
+            opacity: 1;
+            stroke: rgba(255,255,255,0.98);
+            clip-path: inset(0 10% 0 64%);
+            filter:
+              drop-shadow(2.6px 0.58px 0 rgba(0,229,255,0.56))
+              drop-shadow(-2.6px -0.58px 0 rgba(255,43,214,0.5))
+              brightness(1.18);
+          }
+          18% {
+            opacity: 0.76;
+            stroke: rgba(255,255,255,0.78);
+            clip-path: inset(0 58% 0 14%);
+            filter:
+              drop-shadow(-1.4px 0.3px 0 rgba(76,110,255,0.36))
+              drop-shadow(1.4px -0.3px 0 rgba(255,79,216,0.34))
+              brightness(0.96);
+          }
+          31% {
+            opacity: 0.92;
+            stroke: rgba(255,255,255,0.9);
+            clip-path: inset(0 18% 0 28%);
+            filter:
+              drop-shadow(1.8px -0.4px 0 rgba(0,229,255,0.42))
+              drop-shadow(-1.8px 0.4px 0 rgba(255,45,128,0.4))
+              brightness(1.1);
+          }
+          45% {
+            opacity: 0.84;
+            stroke: rgba(255,255,255,0.86);
+            clip-path: inset(0 0 0 0);
+            filter:
+              drop-shadow(-1px 0.22px 0 rgba(0,229,255,0.28))
+              drop-shadow(1px -0.22px 0 rgba(255,43,214,0.24));
+          }
+          58% {
+            opacity: 1;
+            stroke: rgba(255,255,255,0.95);
+            clip-path: inset(0 46% 0 22%);
+            filter:
+              drop-shadow(2.2px 0.5px 0 rgba(0,229,255,0.48))
+              drop-shadow(-2.2px -0.5px 0 rgba(255,45,128,0.46))
+              brightness(1.14);
+          }
+          72% {
+            opacity: 0.8;
+            stroke: rgba(255,255,255,0.76);
+            clip-path: inset(0 22% 0 50%);
+            filter:
+              drop-shadow(-1.6px 0.36px 0 rgba(76,110,255,0.32))
+              drop-shadow(1.6px -0.36px 0 rgba(255,79,216,0.3))
+              brightness(0.95);
+          }
+          84% {
+            opacity: 0.96;
+            stroke: rgba(255,255,255,0.9);
+            clip-path: inset(0 0 0 0);
+            filter:
+              drop-shadow(1.2px 0.22px 0 rgba(0,229,255,0.26))
+              drop-shadow(-1.2px -0.22px 0 rgba(255,43,214,0.24));
+          }
+        }
+
         @keyframes mistCardTextBreath {
           0%, 100% {
             color: rgba(255,255,255,0.78);
@@ -664,6 +1040,8 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
         .mist-portal-title-wrap {
           position: relative;
           display: inline-block;
+          overflow: visible;
+          padding-bottom: 0.18em;
         }
 
         .mist-portal-title-scanline {
@@ -998,7 +1376,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
         @keyframes mistCardSurfaceGlitch {
           0%, 100% {
             filter:
-              grayscale(0.12)
+              grayscale(0)
               saturate(1.06)
               drop-shadow(-0.7px 0 0 rgba(0,229,255,0.16))
               drop-shadow(0.7px 0 0 rgba(255,43,214,0.14));
@@ -1006,7 +1384,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
           }
           13% {
             filter:
-              grayscale(0.12)
+              grayscale(0)
               saturate(1.08)
               brightness(1.16)
               contrast(1.16)
@@ -1016,7 +1394,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
           }
           18% {
             filter:
-              grayscale(0.12)
+              grayscale(0)
               saturate(1.04)
               brightness(0.92)
               contrast(1.06)
@@ -1026,7 +1404,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
           }
           46% {
             filter:
-              grayscale(0.12)
+              grayscale(0)
               saturate(1.08)
               brightness(1.08)
               contrast(1.14)
@@ -1036,7 +1414,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
           }
           74% {
             filter:
-              grayscale(0.12)
+              grayscale(0)
               saturate(1.08)
               brightness(1.14)
               contrast(1.16)
@@ -1068,8 +1446,101 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
           }
         }
 
+        @keyframes mistPortalPreviewInfoIn {
+          0% {
+            opacity: 0;
+            transform: translate3d(1.6rem, 1.2rem, 0);
+            clip-path: inset(0 0 0 38%);
+            filter: blur(8px) brightness(0.72);
+          }
+          100% {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+            clip-path: inset(0 0 0 0);
+            filter: blur(0) brightness(1);
+          }
+        }
+
+        @keyframes mistPortalPreviewBlackout {
+          0% {
+            opacity: 0;
+            transform: scaleY(0.04);
+          }
+          52% {
+            opacity: 0.86;
+          }
+          100% {
+            opacity: 1;
+            transform: scaleY(1);
+          }
+        }
+
+        @keyframes mistPortalPreviewFrameOut {
+          0% { opacity: 1; }
+          64% { opacity: 0.42; }
+          100% { opacity: 0; }
+        }
+
+        @keyframes mistPortalModuleEnter {
+          0% {
+            --portal-enter-y: 28px;
+            opacity: 0;
+            clip-path: inset(26% 0 0 0);
+            filter: blur(2.2px) brightness(0.86);
+          }
+          62% {
+            opacity: 1;
+            filter: blur(0.4px) brightness(1.02);
+          }
+          100% {
+            --portal-enter-y: 0px;
+            opacity: 1;
+            clip-path: inset(0 0 0 0);
+            filter: blur(0) brightness(1);
+          }
+        }
+
+        @keyframes mistPortalFilmSideDecay {
+          0% {
+            opacity: 1;
+            filter: contrast(1.28) brightness(1.08) saturate(0.72);
+          }
+          100% {
+            opacity: 0;
+            filter: contrast(1.08) brightness(0.88) saturate(0.56);
+          }
+        }
+
+        @keyframes mistPortalTitleEnter {
+          0% {
+            opacity: 0;
+            transform: translate3d(0, 34px, 0);
+            clip-path: inset(44% 0 0 0);
+            filter: blur(3px) brightness(0.82);
+          }
+          100% {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+            clip-path: inset(0 0 0 0);
+            filter: blur(0) brightness(1);
+          }
+        }
+
         .mist-portal-title {
           font-size: var(--portal-title-size);
+          display: block;
+          line-height: 0.9;
+          clip-path: none;
+          padding-bottom: 0.08em;
+        }
+
+        .mist-portal-entering .mist-portal-title {
+          animation: mistPortalTitleEnter 980ms cubic-bezier(0.16, 1, 0.3, 1) 120ms both;
+        }
+
+        .mist-portal-entering .mist-portal-title.mist-portal-title-glitch-active,
+        .mist-portal-title.mist-portal-title-glitch-active {
+          animation: mistPortalTitleGlitch 1.18s ease-in-out infinite;
         }
 
         .mist-portal-fine-grain {
@@ -1083,19 +1554,54 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
           max-width: var(--portal-frame-width);
           padding: var(--portal-pad-top) var(--portal-pad-x) var(--portal-pad-bottom);
           transform-style: preserve-3d;
+          transition:
+            transform 980ms cubic-bezier(0.16, 1, 0.3, 1),
+            filter 980ms cubic-bezier(0.16, 1, 0.3, 1),
+            opacity 760ms ease;
+          will-change: transform, filter, opacity;
+        }
+
+        .mist-portal-preview-active .mist-portal-shell {
+          transform: translate3d(0, 1.8rem, -160px) scale(0.94);
+          filter: brightness(0.52) blur(1.4px) saturate(0.92);
+          opacity: 0;
+          pointer-events: none;
+        }
+
+        .mist-portal-preview-active.is-preview-closing .mist-portal-shell {
+          transform: translate3d(0, 0, 0) scale(1);
+          filter: brightness(1) blur(0) saturate(1);
+          opacity: 1;
+          pointer-events: auto;
+          transition:
+            transform 700ms cubic-bezier(0.16, 1, 0.3, 1),
+            filter 700ms cubic-bezier(0.16, 1, 0.3, 1),
+            opacity 700ms cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .mist-portal-preview-active.is-preview-entering .mist-portal-shell {
+          transform: translate3d(0, 3.2rem, -220px) scale(0.91);
+          filter: brightness(0.18) blur(4px) saturate(0.48);
+          opacity: 0;
         }
 
         .mist-portal-atmosphere-smoke {
+          position: absolute;
+          inset: 0;
+          z-index: 14;
           opacity: var(--portal-mist-opacity);
           transition: opacity 520ms ease;
           mix-blend-mode: screen;
           overflow: hidden;
+          pointer-events: none;
         }
 
         .mist-portal-smoke-shader {
           opacity: 1;
           filter: saturate(0.42) contrast(1.32) blur(0.08px);
           mix-blend-mode: screen;
+          transform: translate3d(calc(var(--portal-mouse-x) * -15px), calc(var(--portal-mouse-y) * -15px), 0);
+          transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
           mask-image: linear-gradient(to bottom, transparent 0%, black 18%, black 68%, transparent 100%);
           -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 18%, black 68%, transparent 100%);
           will-change: transform, opacity;
@@ -1143,9 +1649,13 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
           background-color: transparent;
           background-repeat: repeat-y;
           background-size: 100% auto;
-          opacity: 1;
+          opacity: var(--portal-film-side-opacity, 1);
           filter: contrast(1.28) brightness(1.08) saturate(0.72);
           box-shadow: none;
+          transform: translate3d(0, 0, 18px);
+          transform-style: preserve-3d;
+          will-change: opacity;
+          transition: opacity 520ms cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .mist-portal-film-side::before,
@@ -1215,10 +1725,14 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
           grid-template-columns: minmax(10rem, 0.54fr) minmax(19rem, 0.9fr) minmax(40rem, 1.9fr);
           position: relative;
           z-index: 22;
-          transform: translate3d(calc(var(--portal-mouse-x) * -3px), calc(var(--portal-mouse-y) * -1.8px), 18px);
+          transform: translate3d(calc(var(--portal-mouse-x) * -3px), calc((var(--portal-mouse-y) * -1.8px) + var(--portal-enter-y, 0px)), 18px);
           transform-style: preserve-3d;
           transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
           will-change: transform;
+        }
+
+        .mist-portal-entering .mist-portal-header {
+          animation: mistPortalModuleEnter 820ms cubic-bezier(0.16, 1, 0.3, 1) 40ms both;
         }
 
         .mist-portal-header::after {
@@ -1272,6 +1786,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
 
         .mist-portal-mist-toggle {
           position: relative;
+          z-index: 1;
           overflow: hidden;
           isolation: isolate;
           color: rgba(255,255,255,0.36);
@@ -1328,6 +1843,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
         .mist-portal-mist-toggle svg {
           position: relative;
           z-index: 1;
+          pointer-events: none;
         }
 
         .mist-portal-search {
@@ -1385,8 +1901,12 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
           padding-top: var(--portal-left-top);
           position: relative;
           z-index: 6;
-          transform: translateX(var(--portal-left-shift-x)) translate3d(calc(var(--portal-mouse-x) * -9px), calc(var(--portal-mouse-y) * -5px), 24px) rotateY(calc(var(--portal-mouse-x) * -0.8deg));
+          transform: translateX(var(--portal-left-shift-x)) translate3d(calc(var(--portal-mouse-x) * -9px), calc((var(--portal-mouse-y) * -5px) + var(--portal-enter-y, 0px)), 24px) rotateY(calc(var(--portal-mouse-x) * -0.8deg));
           transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .mist-portal-entering .mist-portal-left-copy {
+          animation: mistPortalModuleEnter 980ms cubic-bezier(0.16, 1, 0.3, 1) 150ms both;
         }
 
         .mist-portal-subhead {
@@ -1416,13 +1936,17 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
           border: 0;
           background: transparent;
           box-shadow: 0 0 42px rgba(0,0,0,0.55);
-          transform: perspective(1700px) translate3d(calc(var(--portal-mouse-x) * 14px), calc(var(--portal-mouse-y) * 9px), 0) rotateX(calc(var(--portal-mouse-y) * -2.1deg)) rotateY(calc(var(--portal-mouse-x) * 2.8deg));
+          transform: perspective(1700px) translate3d(calc(var(--portal-mouse-x) * 14px), calc((var(--portal-mouse-y) * 9px) + var(--portal-enter-y, 0px)), 0) rotateX(calc(var(--portal-mouse-y) * -2.1deg)) rotateY(calc(var(--portal-mouse-x) * 2.8deg));
           transform-origin: center;
           transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
           will-change: transform;
           isolation: isolate;
           -webkit-mask-image: radial-gradient(ellipse 94% 86% at 52% 50%, #000 0%, #000 58%, rgba(0,0,0,0.82) 73%, transparent 100%);
           mask-image: radial-gradient(ellipse 94% 86% at 52% 50%, #000 0%, #000 58%, rgba(0,0,0,0.82) 73%, transparent 100%);
+        }
+
+        .mist-portal-entering .mist-portal-stage {
+          animation: mistPortalModuleEnter 1040ms cubic-bezier(0.16, 1, 0.3, 1) 260ms both;
         }
 
         .mist-portal-stage img,
@@ -1489,10 +2013,14 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
         .mist-portal-cards {
           position: relative;
           z-index: 16;
-          transform: translate3d(calc(var(--portal-mouse-x) * 5px), calc(var(--portal-mouse-y) * 3.5px), 0);
+          transform: translate3d(calc(var(--portal-mouse-x) * 5px), calc((var(--portal-mouse-y) * 3.5px) + var(--portal-enter-y, 0px)), 0);
           transform-style: preserve-3d;
           transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
           will-change: transform;
+        }
+
+        .mist-portal-entering .mist-portal-cards {
+          animation: mistPortalModuleEnter 920ms cubic-bezier(0.16, 1, 0.3, 1) 420ms both;
         }
 
         .mist-portal-card:hover {
@@ -1513,7 +2041,14 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
           transform-origin: center;
           backface-visibility: hidden;
           will-change: transform, opacity;
-          filter: saturate(1.05) contrast(1.22) brightness(0.94);
+          filter: grayscale(1) saturate(0) contrast(1.16) brightness(0.9);
+          transition: transform 980ms cubic-bezier(0.16, 1, 0.3, 1), opacity 980ms ease, filter 980ms cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .mist-portal-card:hover .mist-card-bg,
+        .mist-portal-card-glitch-active .mist-card-bg,
+        .mist-portal-text-system-active .mist-card-bg {
+          filter: grayscale(0) saturate(1.08) contrast(1.2) brightness(0.98);
         }
 
         .mist-portal-text-system-active .mist-card-bg {
@@ -1726,6 +2261,11 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
           animation: mistCardTextBreath 1.28s ease-in-out 1.08s infinite;
         }
 
+        .mist-portal-text-system-active .mist-card-title {
+          animation: mistTextChromaticGlitch 1.08s ease-in-out infinite;
+          animation-delay: calc(var(--card-index) * 90ms);
+        }
+
         .mist-card-description {
           will-change: transform, opacity;
           transform: translate3d(0, clamp(0.55rem, 1.35vh, 0.82rem), 34px);
@@ -1745,6 +2285,11 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
         .mist-portal-card-glitch-active .mist-card-description p,
         .mist-portal-text-system-active .mist-card-description p {
           animation: mistCardDescriptionBreath 1.28s ease-in-out 1.08s infinite;
+        }
+
+        .mist-portal-text-system-active .mist-card-description p {
+          animation: mistTextChromaticGlitch 1.08s ease-in-out infinite;
+          animation-delay: calc(var(--card-index) * 90ms);
         }
 
         .mist-portal-card:hover .mist-card-film-base,
@@ -1769,6 +2314,13 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
           animation: mistCardEcgTraceReveal 520ms cubic-bezier(0.19, 1, 0.22, 1) both, mistEcgSignalGlitch 620ms ease-in-out both;
         }
 
+        .mist-portal-text-system-active .mist-card-ecg-pulse {
+          animation:
+            mistCardEcgTraceReveal 760ms cubic-bezier(0.19, 1, 0.22, 1) both,
+            mistCardEcgGlitch 1.92s steps(2, end) infinite;
+          animation-delay: calc(var(--card-index) * 110ms);
+        }
+
         .mist-portal-card-glitch-active .mist-card-local-ecg {
           opacity: 1;
         }
@@ -1782,6 +2334,12 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
         .mist-portal-text-system-active .mist-card-local-ecg,
         .mist-portal-text-system-active .mist-card-description {
           opacity: 1;
+        }
+
+        .mist-portal-card,
+        .mist-portal-card * {
+          user-select: none;
+          -webkit-user-select: none;
         }
 
         .mist-portal-card::before {
@@ -1824,16 +2382,589 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
           opacity: 0.7;
         }
 
+        .mist-portal-preview-backdrop {
+          position: fixed;
+          inset: 0;
+          z-index: 120;
+          pointer-events: auto;
+          opacity: 0;
+          background: #000;
+          backdrop-filter: blur(0);
+          transition:
+            opacity 700ms cubic-bezier(0.16, 1, 0.3, 1),
+            backdrop-filter 700ms cubic-bezier(0.16, 1, 0.3, 1),
+            background 700ms cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .mist-portal-preview-layer {
+          isolation: isolate;
+        }
+
+        .mist-portal-preview-active .mist-portal-preview-backdrop {
+          opacity: 0.88;
+        }
+
+        .mist-portal-preview-active.is-preview-closing .mist-portal-preview-backdrop {
+          opacity: 0;
+          backdrop-filter: blur(0);
+          pointer-events: none;
+        }
+
+        .mist-portal-preview-active.is-preview-closing .mist-portal-preview-card,
+        .mist-portal-preview-active.is-preview-closing .mist-portal-preview-panel {
+          pointer-events: none;
+        }
+
+        .mist-portal-preview-active.is-preview-entering .mist-portal-preview-backdrop {
+          opacity: 0.88;
+          backdrop-filter: blur(8px);
+        }
+
+        .mist-portal-preview-card {
+          position: fixed;
+          z-index: 132;
+          left: var(--preview-target-left);
+          top: var(--preview-target-top);
+          width: var(--preview-target-width);
+          height: var(--preview-target-height);
+          overflow: hidden;
+          border: 1px solid rgba(255,255,255,0.18);
+          background: #020202;
+          box-shadow: 0 1.4rem 4.5rem rgba(0,0,0,0.58);
+          transform: translate3d(var(--preview-flip-x), var(--preview-flip-y), 0) scale(var(--preview-flip-scale-x), var(--preview-flip-scale-y));
+          transform-origin: top left;
+          transition:
+            transform 700ms cubic-bezier(0.16, 1, 0.3, 1),
+            filter 700ms cubic-bezier(0.16, 1, 0.3, 1),
+            opacity 700ms cubic-bezier(0.16, 1, 0.3, 1),
+            border-color 520ms ease,
+            box-shadow 700ms cubic-bezier(0.16, 1, 0.3, 1);
+          will-change: transform, filter;
+        }
+
+        .mist-portal-preview-card::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background: #020202;
+          z-index: 0;
+          pointer-events: none;
+        }
+
+        .mist-portal-preview-active.is-preview-open .mist-portal-preview-card {
+          transform: translate3d(0, 0, 0) scale(1);
+          filter: brightness(1.01) contrast(1.03) saturate(1.02);
+          border-color: rgba(255,255,255,0.2);
+          box-shadow:
+            0 2.8rem 7.5rem rgba(0,0,0,0.74),
+            0 0 0 1px rgba(255,255,255,0.08);
+        }
+
+        .is-desire-preview.mist-portal-preview-active.is-preview-open .mist-portal-preview-card,
+        .is-desire-preview.mist-portal-preview-active.is-preview-entering .mist-portal-preview-card {
+          transform: translate3d(0, var(--desire-preview-y, 0), 0) scale(var(--desire-preview-scale, 1));
+          filter: brightness(0.98) contrast(1.06) saturate(1.02);
+          left: var(--preview-target-left);
+          top: var(--preview-target-top);
+          width: var(--preview-target-width);
+          height: var(--preview-target-height);
+          border-color: rgba(255,255,255,0.2);
+          box-shadow:
+            0 2.8rem 7.5rem rgba(0,0,0,0.74),
+            0 0 0 1px rgba(255,255,255,0.08);
+        }
+
+        .mist-portal-preview-active.is-preview-closing .mist-portal-preview-card {
+          transform: translate3d(var(--preview-flip-x), var(--preview-flip-y), 0) scale(var(--preview-flip-scale-x), var(--preview-flip-scale-y));
+          filter: saturate(1.05) contrast(1.22) brightness(0.94);
+          opacity: 0;
+          border-color: rgba(255,255,255,0.18);
+          box-shadow: 0 1.4rem 4.5rem rgba(0,0,0,0.58);
+        }
+
+        .mist-portal-preview-active.is-preview-entering .mist-portal-preview-card {
+          left: 50vw;
+          top: 50vh;
+          width: min(118vw, 1500px);
+          height: min(118vh, 940px);
+          transform: translate3d(-50%, -50%, 0) scale(1.08);
+          filter: brightness(0.12) blur(4px) contrast(1.22);
+          border-color: rgba(255,255,255,0.02);
+          box-shadow: 0 0 0 100vmax rgba(0,0,0,0.98);
+        }
+
+        .mist-portal-preview-media {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+          background: #000;
+        }
+
+        .mist-portal-preview-media img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          filter: saturate(1.05) contrast(1.22) brightness(0.94);
+          transform: scale(1.01);
+          transition: transform 700ms cubic-bezier(0.16, 1, 0.3, 1), filter 700ms cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .mist-portal-preview-active.is-preview-open .mist-portal-preview-media img,
+        .mist-portal-preview-active.is-preview-entering .mist-portal-preview-media img {
+          transform: scale(1.035);
+          filter: grayscale(0.02) saturate(1.08) contrast(1.18) brightness(1.02);
+        }
+
+        .mist-portal-preview-frame {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          background:
+            linear-gradient(90deg, rgba(0,0,0,0.36), transparent 22%, transparent 78%, rgba(0,0,0,0.34)),
+            linear-gradient(180deg, rgba(255,255,255,0.12), transparent 18%, transparent 78%, rgba(0,0,0,0.34));
+          box-shadow:
+            inset 0 0 0 1px rgba(255,255,255,0.12),
+            inset 0 0 0 8px rgba(0,0,0,0.16);
+        }
+
+        .mist-portal-preview-active.is-preview-closing .mist-portal-preview-frame {
+          animation: mistPortalPreviewFrameOut 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        .mist-portal-preview-meta {
+          position: absolute;
+          left: clamp(1rem, 2.2vw, 2.4rem);
+          right: clamp(1rem, 2.2vw, 2.4rem);
+          bottom: clamp(1rem, 2.2vw, 2.3rem);
+          display: grid;
+          gap: 0.55rem;
+          pointer-events: none;
+          opacity: 0;
+          transform: translate3d(0, 0.65rem, 0);
+          transition:
+            opacity 360ms ease 300ms,
+            transform 560ms cubic-bezier(0.16, 1, 0.3, 1) 280ms;
+        }
+
+        .mist-portal-preview-active.is-preview-open .mist-portal-preview-meta {
+          opacity: 1;
+          transform: translate3d(0, 0, 0);
+        }
+
+        .is-desire-preview .mist-portal-preview-meta {
+          opacity: 0;
+        }
+
+        .mist-portal-preview-active.is-preview-closing .mist-portal-preview-meta,
+        .mist-portal-preview-active.is-preview-entering .mist-portal-preview-meta {
+          opacity: 0;
+          transform: translate3d(0, 0.35rem, 0);
+          transition-delay: 0ms;
+        }
+
+        .mist-portal-preview-meta span {
+          width: fit-content;
+          color: rgba(255,255,255,0.62);
+          font-size: clamp(0.46rem, 0.58vw, 0.68rem);
+          line-height: 1;
+          letter-spacing: 0.22em;
+          text-transform: uppercase;
+        }
+
+        .mist-portal-preview-meta strong {
+          color: #fff;
+          font-family: var(--mist-serif);
+          font-size: clamp(1.65rem, 3.4vw, 4.6rem);
+          line-height: 0.92;
+          letter-spacing: 0.14em;
+          text-shadow:
+            1.8px 0.5px 0 rgba(212, 93, 82, 0.72),
+            -0.8px 0 0 rgba(94, 207, 220, 0.28),
+            0 16px 34px rgba(0,0,0,0.72);
+        }
+
+        .mist-portal-preview-panel {
+          position: fixed;
+          z-index: 134;
+          left: calc(50vw + min(12vw, 12rem));
+          top: 50%;
+          width: min(32vw, 29rem);
+          color: white;
+          opacity: 0;
+          transform: translate3d(1.6rem, 1.2rem, 0);
+          pointer-events: auto;
+        }
+
+        .mist-portal-preview-active .mist-portal-preview-panel {
+          animation: mistPortalPreviewInfoIn 760ms cubic-bezier(0.16, 1, 0.3, 1) 360ms both;
+        }
+
+        .is-desire-preview .mist-portal-preview-panel {
+          opacity: var(--desire-panel-opacity, 1);
+          transform: translate3d(1.6rem, calc(1.2rem + var(--desire-panel-y, 0px)), 0);
+        }
+
+        .mist-portal-preview-active.is-preview-closing .mist-portal-preview-panel,
+        .mist-portal-preview-active.is-preview-entering .mist-portal-preview-panel {
+          opacity: 0;
+          transform: translate3d(1.2rem, -0.4rem, 0);
+          transition: opacity 300ms ease, transform 520ms cubic-bezier(0.16, 1, 0.3, 1);
+          animation: none;
+        }
+
+        .mist-portal-preview-panel-kicker {
+          display: flex;
+          align-items: center;
+          gap: 0.72rem;
+          color: rgba(255,255,255,0.56);
+          font-size: clamp(0.48rem, 0.58vw, 0.68rem);
+          letter-spacing: 0.22em;
+          text-transform: uppercase;
+        }
+
+        .mist-portal-preview-panel-kicker::before {
+          content: "";
+          width: clamp(2.2rem, 4vw, 4.8rem);
+          height: 1px;
+          background: linear-gradient(90deg, var(--preview-accent), transparent);
+        }
+
+        .mist-portal-preview-panel h2 {
+          margin-top: clamp(1rem, 2.2vh, 1.6rem);
+          font-family: var(--mist-serif);
+          font-size: clamp(2.1rem, 4vw, 4.8rem);
+          line-height: 0.94;
+          letter-spacing: 0.1em;
+          color: #fff;
+          text-shadow: 0 12px 36px rgba(0,0,0,0.78);
+        }
+
+        .is-desire-preview .mist-portal-preview-panel h2 {
+          font-size: clamp(1.8rem, 3.4vw, 4.1rem);
+        }
+
+        .mist-portal-preview-panel h3 {
+          margin-top: 0.7rem;
+          color: var(--preview-accent);
+          font-size: clamp(0.52rem, 0.68vw, 0.78rem);
+          line-height: 1;
+          letter-spacing: 0.26em;
+          text-transform: uppercase;
+        }
+
+        .mist-portal-preview-panel p {
+          margin-top: clamp(1.1rem, 2.5vh, 1.65rem);
+          max-width: 24rem;
+          color: rgba(255,255,255,0.68);
+          font-family: var(--mist-serif);
+          font-size: clamp(0.72rem, 0.92vw, 1.05rem);
+          line-height: 1.72;
+          letter-spacing: 0.08em;
+        }
+
+        .mist-portal-preview-actions {
+          margin-top: clamp(1.4rem, 3.2vh, 2.15rem);
+          display: flex;
+          align-items: center;
+          gap: 0.8rem;
+        }
+
+        .mist-portal-preview-actions button {
+          height: 2.5rem;
+          border: 1px solid rgba(255,255,255,0.22);
+          padding: 0 1rem;
+          color: rgba(255,255,255,0.72);
+          background: rgba(255,255,255,0.04);
+          font-size: 0.62rem;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          transition:
+            color 320ms ease,
+            border-color 320ms ease,
+            background 320ms ease,
+            transform 520ms cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .mist-portal-preview-actions button:hover {
+          color: #fff;
+          border-color: rgba(255,255,255,0.72);
+          background: rgba(255,255,255,0.08);
+          transform: translateY(-1px);
+        }
+
+        .mist-portal-preview-actions .is-primary {
+          color: #fff;
+          border-color: color-mix(in srgb, var(--preview-accent) 58%, rgba(255,255,255,0.34));
+          background: color-mix(in srgb, var(--preview-accent) 18%, rgba(255,255,255,0.04));
+        }
+
+        .mist-portal-preview-blackout {
+          position: fixed;
+          inset: 0;
+          z-index: 150;
+          pointer-events: none;
+          opacity: 0;
+          background: #000;
+          transform: scaleY(0.04);
+          transform-origin: center;
+        }
+
+        .mist-portal-preview-active.is-preview-entering .mist-portal-preview-blackout {
+          animation: mistPortalPreviewBlackout 820ms cubic-bezier(0.16, 1, 0.3, 1) 120ms both;
+        }
+
+        .is-desire-preview .mist-portal-preview-blackout {
+          display: none;
+        }
+
+        .mist-portal-desire-reveal {
+          position: fixed;
+          inset: 0;
+          z-index: 126;
+          pointer-events: none;
+          display: flex;
+          flex-direction: column;
+          color: white;
+          opacity: var(--desire-page-opacity, 0);
+          transform: translate3d(0, var(--desire-page-y, 102vh), 0);
+          will-change: transform, opacity;
+        }
+
+        .mist-portal-desire-reveal::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background:
+            radial-gradient(circle at 52% 34%, rgba(255,255,255,0.04), transparent 32%),
+            linear-gradient(180deg, rgba(0,0,0,0.92), rgba(0,0,0,0.98));
+        }
+
+        .mist-portal-desire-reveal-top,
+        .mist-portal-desire-reveal-bottom {
+          position: relative;
+          z-index: 2;
+          border-color: rgba(255,255,255,0.16);
+          opacity: var(--desire-bars-opacity, 0);
+          transform: translate3d(0, var(--desire-bars-y, 18px), 0);
+          transition: opacity 380ms ease, transform 720ms cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .mist-portal-desire-reveal-top {
+          height: var(--desire-topbar-height);
+          display: grid;
+          grid-template-columns: minmax(11rem, 17.5rem) 1fr minmax(11rem, 18rem);
+          align-items: center;
+          gap: clamp(0.65rem, 1.35vw, 2rem);
+          padding: 0 clamp(1rem, 2.25vw, 2.7rem);
+          border-bottom: 1px solid rgba(255,255,255,0.18);
+          background: linear-gradient(180deg, rgba(0,0,0,0.96), rgba(0,0,0,0.78));
+        }
+
+        .mist-portal-desire-reveal .desire-brand {
+          display: flex;
+          align-items: center;
+          gap: 0.52rem;
+          min-width: 0;
+        }
+
+        .mist-portal-desire-reveal .desire-brand-mark {
+          position: relative;
+          width: 1.58rem;
+          height: 1.05rem;
+          flex: 0 0 auto;
+        }
+
+        .mist-portal-desire-reveal .desire-brand-mark::before,
+        .mist-portal-desire-reveal .desire-brand-mark::after {
+          content: "";
+          position: absolute;
+          top: 0;
+          width: 1.05rem;
+          height: 1.05rem;
+          border: 1px solid rgba(255,255,255,0.86);
+          border-radius: 999px;
+        }
+
+        .mist-portal-desire-reveal .desire-brand-mark::before { left: 0; }
+        .mist-portal-desire-reveal .desire-brand-mark::after { right: 0; }
+
+        .mist-portal-desire-reveal .desire-brand-title {
+          font-family: var(--mist-serif);
+          font-size: clamp(0.76rem, 0.9vw, 1.08rem);
+          font-weight: 700;
+          letter-spacing: 0.11em;
+          line-height: 1;
+        }
+
+        .mist-portal-desire-reveal .desire-brand-en {
+          margin-left: 0.3rem;
+          color: rgba(255,255,255,0.74);
+          font-size: clamp(0.34rem, 0.42vw, 0.5rem);
+          letter-spacing: 0.24em;
+          white-space: nowrap;
+        }
+
+        .mist-portal-desire-reveal .desire-brand-divider {
+          height: 1.45rem;
+          width: 1px;
+          margin-left: auto;
+          background: rgba(255,255,255,0.22);
+        }
+
+        .mist-portal-desire-reveal .desire-search {
+          display: flex;
+          align-items: center;
+          gap: 0.34rem;
+          min-width: 0;
+          font-size: clamp(0.34rem, 0.42vw, 0.5rem);
+          letter-spacing: 0.16em;
+          white-space: nowrap;
+          color: rgba(255,255,255,0.8);
+        }
+
+        .mist-portal-desire-reveal-bottom {
+          margin-top: auto;
+          min-height: clamp(4.2rem, 7.6vh, 5.6rem);
+          padding: clamp(1rem, 1.7vh, 1.35rem) clamp(1rem, 2.1vw, 2.5rem) 0;
+          border-top: 1px solid rgba(255,255,255,0.16);
+          background: linear-gradient(0deg, rgba(0,0,0,0.94), rgba(0,0,0,0.72));
+        }
+
+        .mist-portal-desire-reveal-footline {
+          display: grid;
+          grid-template-columns: minmax(12rem, 1fr) minmax(20rem, 1fr) minmax(14rem, 1fr);
+          align-items: center;
+          gap: 1.3rem;
+          color: rgba(255,255,255,0.66);
+          font-size: clamp(0.38rem, 0.48vw, 0.56rem);
+          letter-spacing: 0.2em;
+        }
+
+        .mist-portal-desire-reveal-footline .footline-center {
+          justify-self: center;
+          text-align: center;
+          word-spacing: 1.1rem;
+        }
+
+        .mist-portal-desire-reveal-footline .footline-right {
+          justify-self: end;
+          text-align: right;
+        }
+
+        .mist-portal-desire-reveal-content {
+          position: relative;
+          z-index: 2;
+          flex: 1;
+          display: grid;
+          grid-template-rows: minmax(0, 1fr) auto;
+          padding: clamp(1rem, 2vw, 2.2rem);
+        }
+
+        .mist-portal-desire-reveal-stage {
+          display: grid;
+          grid-template-columns: minmax(18rem, 38%) 1fr;
+          gap: clamp(1rem, 2vw, 3rem);
+          align-items: end;
+          padding: clamp(1.4rem, 3vh, 3.2rem) 0 clamp(1.25rem, 2.6vh, 2.5rem);
+          border-bottom: 1px solid rgba(255,255,255,0.14);
+        }
+
+        .mist-portal-desire-reveal-title {
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+        }
+
+        .mist-portal-desire-reveal-title h1 {
+          font-family: var(--mist-serif);
+          font-size: clamp(3rem, 6vw, 7rem);
+          line-height: 0.92;
+          letter-spacing: 0.08em;
+          text-shadow: 0 14px 36px rgba(0,0,0,0.78);
+        }
+
+        .mist-portal-desire-reveal-title p {
+          max-width: 26rem;
+          color: rgba(255,255,255,0.68);
+          font-family: var(--mist-serif);
+          font-size: clamp(0.78rem, 1vw, 1.05rem);
+          line-height: 1.68;
+          letter-spacing: 0.08em;
+        }
+
+        .mist-portal-desire-reveal-copy {
+          align-self: center;
+          justify-self: end;
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+          width: min(100%, 48rem);
+          padding: clamp(1rem, 2vw, 2rem) 0;
+          color: rgba(255,255,255,0.66);
+          font-size: clamp(0.58rem, 0.78vw, 0.92rem);
+          letter-spacing: 0.24em;
+          text-transform: uppercase;
+        }
+
+        .mist-portal-desire-reveal-copy-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 0.9rem;
+          padding: 0.85rem 0;
+          border-top: 1px solid rgba(255,255,255,0.12);
+          border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .mist-portal-desire-reveal-copy-row.is-muted {
+          color: rgba(255,255,255,0.48);
+        }
+
+        .mist-portal-desire-reveal-rails {
+          display: grid;
+          grid-template-columns: repeat(5, minmax(0, 1fr));
+          gap: clamp(0.75rem, 1vw, 1.25rem);
+          padding-top: clamp(1rem, 2vh, 1.8rem);
+        }
+
+        .mist-portal-desire-reveal-rail {
+          min-height: clamp(6rem, 16vh, 10rem);
+          border: 1px solid rgba(255,255,255,0.12);
+          background:
+            linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02)),
+            rgba(255,255,255,0.02);
+          padding: 0.8rem;
+        }
+
+        .mist-portal-desire-reveal-rail .rail-number {
+          display: block;
+          font-size: 0.62rem;
+          letter-spacing: 0.24em;
+          color: rgba(255,255,255,0.54);
+        }
+
+        .mist-portal-desire-reveal-rail .rail-title {
+          margin-top: 0.5rem;
+          font-family: var(--mist-serif);
+          font-size: clamp(1rem, 1.3vw, 1.45rem);
+          letter-spacing: 0.1em;
+          line-height: 1.02;
+        }
+
         .mist-portal-footer {
           position: relative;
           z-index: 20;
           margin-top: auto;
           min-height: clamp(4.2rem, 7.6vh, 5.6rem);
           padding-top: clamp(1rem, 1.7vh, 1.35rem);
-          transform: translate3d(calc(var(--portal-mouse-x) * 3px), calc(var(--portal-mouse-y) * 2px), 14px);
+          transform: translate3d(calc(var(--portal-mouse-x) * 3px), calc((var(--portal-mouse-y) * 2px) + var(--portal-enter-y, 0px)), 14px);
           transform-style: preserve-3d;
           transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
           will-change: transform;
+        }
+
+        .mist-portal-entering .mist-portal-footer {
+          animation: mistPortalModuleEnter 820ms cubic-bezier(0.16, 1, 0.3, 1) 560ms both;
         }
 
         .mist-portal-footer::before {
@@ -1855,9 +2986,18 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
 
         @media (prefers-reduced-motion: reduce) {
           .mist-portal-title:hover,
+          .mist-portal-header,
+          .mist-portal-left-copy,
+          .mist-portal-stage,
+          .mist-portal-cards,
           .mist-portal-card,
           .mist-portal-card::before,
-          .mist-portal-card::after {
+          .mist-portal-card::after,
+          .mist-portal-shell,
+          .mist-portal-preview-backdrop,
+          .mist-portal-preview-card,
+          .mist-portal-preview-panel,
+          .mist-portal-preview-blackout {
             animation: none;
             transition-duration: 1ms;
           }
@@ -2125,6 +3265,21 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
             height: clamp(10.5rem, 24vw, 13.5rem);
           }
 
+          .mist-portal-preview-card {
+            left: 5vw;
+            top: 18vh;
+            width: 90vw;
+            height: 46vh;
+          }
+
+          .mist-portal-preview-panel {
+            left: 5vw;
+            right: 5vw;
+            top: auto;
+            bottom: 9vh;
+            width: auto;
+          }
+
           .mist-portal-root,
           .mist-portal-root button,
           .mist-portal-root a,
@@ -2150,18 +3305,13 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
       <div className="mist-portal-film-side mist-portal-film-side-left" />
       <div className="mist-portal-film-side mist-portal-film-side-right" />
 
-      <div className="mist-portal-shell relative z-10 mx-auto flex h-dvh max-h-dvh w-full max-w-[1900px] flex-col overflow-hidden">
-      <div className="mist-portal-atmosphere-smoke pointer-events-none absolute inset-0 z-[5]">
-        <div
-          className="mist-portal-smoke-shader absolute inset-[-10%]"
-          style={{
-            transform: `translate3d(${mousePos.x * -15}px, ${mousePos.y * -15}px, 0)`,
-          }}
-          >
-            <ShaderBackground theme={isRetro ? 'retro' : 'dark'} />
-          </div>
+      <div className="mist-portal-atmosphere-smoke">
+        <div className="mist-portal-smoke-shader absolute inset-[-10%]">
+          <ShaderBackground theme={isRetro ? 'retro' : 'dark'} />
         </div>
+      </div>
 
+      <div className="mist-portal-shell relative mx-auto flex h-dvh max-h-dvh w-full max-w-[1900px] flex-col overflow-hidden">
         <header className="mist-portal-header grid h-[34px] shrink-0 items-center gap-[clamp(0.8rem,1.3vw,2.2rem)]">
           <button
             type="button"
@@ -2298,6 +3448,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
                 isGlitching={cardGlitchActive[index]}
                 onHoverStart={startCardHover}
                 onHoverEnd={stopCardHover}
+                onPreviewOpen={openPortalPreview}
               />
             ))}
           </section>
@@ -2338,6 +3489,144 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
           </footer>
         </main>
       </div>
+
+      {portalPreview && (
+        <div
+          className={`mist-portal-preview-layer fixed inset-0 z-[120] ${portalPreview.phase === 'closing' ? 'pointer-events-none' : ''}`}
+          onWheel={handlePortalPreviewWheel}
+        >
+          <button
+            type="button"
+            className="mist-portal-preview-backdrop"
+            aria-label="关闭入口预览"
+            onClick={closePortalPreview}
+          />
+
+          <div
+            className="mist-portal-preview-card"
+            style={{
+              '--preview-origin-left': `${portalPreview.origin.left}px`,
+              '--preview-origin-top': `${portalPreview.origin.top}px`,
+              '--preview-origin-width': `${portalPreview.origin.width}px`,
+              '--preview-origin-height': `${portalPreview.origin.height}px`,
+              '--preview-target-left': `${portalPreview.target.left}px`,
+              '--preview-target-top': `${portalPreview.target.top}px`,
+              '--preview-target-width': `${portalPreview.target.width}px`,
+              '--preview-target-height': `${portalPreview.target.height}px`,
+              '--preview-flip-x': `${portalPreview.origin.left - portalPreview.target.left}px`,
+              '--preview-flip-y': `${portalPreview.origin.top - portalPreview.target.top}px`,
+              '--preview-flip-scale-x': `${portalPreview.origin.width / portalPreview.target.width}`,
+              '--preview-flip-scale-y': `${portalPreview.origin.height / portalPreview.target.height}`,
+              '--preview-accent': toneColor(portalPreview.card.tone, isRetro),
+            } as React.CSSProperties}
+            aria-hidden="true"
+          >
+            <div className="mist-portal-preview-media">
+              <img src={portalPreview.card.imageSrc} alt="" draggable="false" />
+            </div>
+            <div className="mist-portal-preview-frame" />
+            <div className="mist-portal-preview-meta">
+              <span>PORTAL_{portalPreview.card.number}</span>
+            </div>
+          </div>
+
+          <aside
+            className="mist-portal-preview-panel"
+            style={{ '--preview-accent': toneColor(portalPreview.card.tone, isRetro) } as React.CSSProperties}
+          >
+            <div className="mist-portal-preview-panel-kicker">SELECTED GATE</div>
+            {portalPreview.card.number === DESIRE_PORTAL_NUMBER ? (
+              <h3>{portalPreview.card.titleEn}</h3>
+            ) : (
+              <>
+                <h2>{portalPreview.card.titleCn}</h2>
+                <h3>{portalPreview.card.titleEn}</h3>
+              </>
+            )}
+            <p>
+              {portalPreview.card.descCn}
+              <br />
+              {portalPreview.card.descEn}
+            </p>
+            <div className="mist-portal-preview-actions">
+              <button type="button" className="is-primary" onClick={enterPortalPreview}>
+                进入页面
+              </button>
+              <button type="button" onClick={closePortalPreview}>
+                返回选择
+              </button>
+            </div>
+          </aside>
+
+          {portalPreview.card.number === DESIRE_PORTAL_NUMBER && (
+            <div className="mist-portal-desire-reveal" aria-hidden="true">
+              <div className="mist-portal-desire-reveal-top">
+                <div className="desire-brand">
+                  <div className="desire-brand-mark" />
+                  <div>
+                    <div className="desire-brand-title">迷雾学派</div>
+                    <div className="desire-brand-en">MIST SCHOOL</div>
+                  </div>
+                </div>
+                <div className="desire-brand-divider" />
+                <div className="desire-search">
+                  <Search size={12} />
+                  <span>DESIRE REPRODUCTION</span>
+                </div>
+              </div>
+              <div className="mist-portal-desire-reveal-content">
+                <section className="mist-portal-desire-reveal-stage">
+                  <div className="mist-portal-desire-reveal-title">
+                    <div className="text-[0.58rem] tracking-[0.28em] text-white/50 uppercase">Selected Gate 03</div>
+                    <h1>欲望再生产</h1>
+                    <p>精神分析电影研究与欲望机制档案库。</p>
+                  </div>
+                  <div className="mist-portal-desire-reveal-copy">
+                    <div className="mist-portal-desire-reveal-copy-row">
+                      <span>FORM</span>
+                      <span>・</span>
+                      <span>MOTION</span>
+                      <span>・</span>
+                      <span>RETURN</span>
+                    </div>
+                    <div className="mist-portal-desire-reveal-copy-row">
+                      <span>ARCHIVE</span>
+                      <span>・</span>
+                      <span>EDIT</span>
+                      <span>・</span>
+                      <span>REWRITE</span>
+                    </div>
+                    <div className="mist-portal-desire-reveal-copy-row is-muted">
+                      <span>BLACK STAGE</span>
+                      <span>・</span>
+                      <span>SOFT CUT</span>
+                      <span>・</span>
+                      <span>CONTINUITY</span>
+                    </div>
+                  </div>
+                </section>
+                <section className="mist-portal-desire-reveal-rails">
+                  {portalCards.map((card) => (
+                    <div key={card.number} className="mist-portal-desire-reveal-rail">
+                      <span className="rail-number">0{card.number}</span>
+                      <div className="rail-title">{card.titleCn}</div>
+                    </div>
+                  ))}
+                </section>
+              </div>
+              <div className="mist-portal-desire-reveal-bottom">
+                <div className="mist-portal-desire-reveal-footline">
+                  <div className="footline-left">PSYCHOANALYTIC CINEMA ARCHIVE</div>
+                  <div className="footline-center">LACAN · ŽIŽEK · MULVEY · BAUDRILLARD · DELEUZE</div>
+                  <div className="footline-right">KEEP FILMING THE UNCONSCIOUS.</div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="mist-portal-preview-blackout" aria-hidden="true" />
+        </div>
+      )}
 
       <div
         className="mist-portal-custom-cursor fixed pointer-events-none z-[9999] hidden flex-col items-center justify-center transition-opacity duration-200 ease-out lg:flex"

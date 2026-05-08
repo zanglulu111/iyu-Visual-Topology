@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useReducer } from 'react';
+import React, { useState, useEffect, useCallback, useReducer, useRef } from 'react';
 import { Cpu } from 'lucide-react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -145,6 +145,8 @@ const App: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const [page, setPage] = useState<-1 | 0 | 1 | 2>(-1);
+    const [portalEntryMode, setPortalEntryMode] = useState<'intro' | 'return'>('intro');
+    const [portalTransition, setPortalTransition] = useState<'to-engine' | 'to-portal' | null>(null);
     const [lang, setLang] = useState<'CN' | 'EN'>('CN');
     const [viewMode, setViewMode] = useState<ViewMode>('ENGINE');
     const [selectedDriver, setSelectedDriver] = useState<DriverType | null>(null);
@@ -177,6 +179,7 @@ const App: React.FC = () => {
     const [libraryModalOpen, setLibraryModalOpen] = useState(false);
     const [topSidebar, setTopSidebar] = useState<'skin' | 'vision' | null>(null);
     const [isPromptInspectorOpen, setIsPromptInspectorOpen] = useState(false);
+    const portalTransitionTimersRef = useRef<(number | null)[]>([null, null]);
 
     const [isAutoFilling, setIsAutoFilling] = useState(false);
     const [visionInput, setVisionInput] = useState("");
@@ -200,6 +203,10 @@ const App: React.FC = () => {
             });
         }
     }, [undoRedoState.present, selectedDriver]);
+
+    useEffect(() => {
+        return () => clearPortalTransitionTimers();
+    }, []);
 
     const handleUndo = () => {
         undoRedoDispatch({ type: 'UNDO' });
@@ -447,6 +454,41 @@ const App: React.FC = () => {
             setIsSkinOpen(false);
             setIsAestheticInputOpen(false);
         }
+    };
+
+    const clearPortalTransitionTimers = () => {
+        portalTransitionTimersRef.current.forEach((timer, index) => {
+            if (timer) {
+                window.clearTimeout(timer);
+                portalTransitionTimersRef.current[index] = null;
+            }
+        });
+    };
+
+    const beginPortalToEngineTransition = () => {
+        clearPortalTransitionTimers();
+        setPortalTransition('to-engine');
+        portalTransitionTimersRef.current[0] = window.setTimeout(() => {
+            setPage(0);
+            setViewMode('ENGINE');
+        }, 260);
+        portalTransitionTimersRef.current[1] = window.setTimeout(() => {
+            setPortalTransition(null);
+        }, 980);
+    };
+
+    const beginEngineToPortalTransition = () => {
+        clearPortalTransitionTimers();
+        setPortalEntryMode('return');
+        setPortalTransition('to-portal');
+        portalTransitionTimersRef.current[0] = window.setTimeout(() => {
+            setPage(-1);
+            setViewMode('ENGINE');
+        }, 260);
+        portalTransitionTimersRef.current[1] = window.setTimeout(() => {
+            setPortalEntryMode('intro');
+            setPortalTransition(null);
+        }, 980);
     };
 
     const handleAddCustomDef = (name: string, def: string, core: string) => {
@@ -1582,9 +1624,17 @@ const App: React.FC = () => {
         }
     };
 
+    const showPortalLayer = page === -1 || portalTransition !== null;
+    const showLandingLayer = page === 0 || portalTransition !== null;
+    const portalLayerAbove = portalTransition === 'to-portal';
+    const landingLayerAbove = portalTransition === 'to-engine';
+    const portalLayerPointerEvents = page === -1 && portalTransition === null ? 'pointer-events-auto' : 'pointer-events-none';
+    const landingLayerPointerEvents = page === 0 && portalTransition === null ? 'pointer-events-auto' : 'pointer-events-none';
+
     return (
         <QueryClientProvider client={queryClient}>
-            <div className="min-h-screen bg-[var(--bg-main)] text-zinc-300 font-sans selection:bg-gold-primary/30 selection:text-white overflow-hidden transition-colors duration-1000">
+            <div className="relative min-h-screen overflow-hidden bg-[var(--bg-main)] text-zinc-300 font-sans selection:bg-gold-primary/30 selection:text-white transition-colors duration-1000">
+                <div className="relative z-10">
                 {location.pathname === '/philosophers' ? (
                     isAdmin ? (
                         <PhilosopherPosterIndexPage
@@ -1613,19 +1663,68 @@ const App: React.FC = () => {
                             </div>
                         </div>
                     )
-                ) : page === -1 ? (
-                    <UniversePortal
-                        lang={lang}
-                        setLang={setLang}
-                        setPage={setPage}
-                        setViewMode={handleViewChange}
-                        setInitialProtocol={setInitialProtocol}
-                        currentUser={currentUser}
-                        openAuth={openAuth}
-                        openSettings={openSettings}
-                        openProfile={() => setIsProfileOpen(true)}
-                        openManual={openManual}
-                    />
+                ) : showPortalLayer || showLandingLayer ? (
+                    <div className="relative min-h-screen overflow-hidden">
+                        {showPortalLayer && (
+                            <div className={`absolute inset-0 ${portalLayerAbove ? 'z-20' : 'z-10'} ${portalLayerPointerEvents}`}>
+                                <UniversePortal
+                                    lang={lang}
+                                    setLang={setLang}
+                                    setPage={setPage}
+                                    setViewMode={handleViewChange}
+                                    setInitialProtocol={setInitialProtocol}
+                                    currentUser={currentUser}
+                                    openAuth={openAuth}
+                                    openSettings={openSettings}
+                                    openProfile={() => setIsProfileOpen(true)}
+                                    openManual={openManual}
+                                    entryMode={portalEntryMode}
+                                    onOpenDesireReproduction={beginPortalToEngineTransition}
+                                />
+                            </div>
+                        )}
+                        {showLandingLayer && (
+                            <div className={`absolute inset-0 ${landingLayerAbove ? 'z-20' : 'z-10'} ${landingLayerPointerEvents}`}>
+                                <LandingView
+                                    lang={lang}
+                                    setLang={setLang}
+                                    setPage={setPage}
+                                    setViewMode={handleViewChange}
+                                    onReturnToPortal={beginEngineToPortalTransition}
+                                    selectedDriver={selectedDriver}
+                                    onDriverSelect={handleDriverSelect}
+                                    hoveredDriver={hoveredDriver}
+                                    setHoveredDriver={setHoveredDriver}
+                                    handleOpenMetonymyPage={() => {
+                                        setPage(1);
+                                        handleOpenMetonymyPage();
+                                    }}
+                                    openManual={openManual}
+                                    isManualOpen={isManualOpen}
+                                    closeManual={() => setIsManualOpen(false)}
+                                    openHistory={openHistory}
+                                    isHistoryOpen={isHistoryOpen}
+                                    openAuth={openAuth}
+                                    openProfile={() => setIsProfileOpen(true)}
+                                    onLogout={() => supabaseAuthService.signOut()}
+                                    currentUser={currentUser}
+                                    closeHistory={closeHistory}
+                                    isSutureOpen={isSutureOpen}
+                                    closeSuture={() => setIsSutureOpen(false)}
+                                    onSutureGenerate={handleSutureGenerate}
+                                    isSutureGenerating={isSutureGenerating}
+                                    isAdmin={isAdmin}
+                                    history={history}
+                                    onHistoryRestore={onHistoryRestore}
+                                    onHistoryClear={onHistoryClear}
+                                    openSettings={openSettings}
+                                    showRings={showRings}
+                                    setShowRings={setShowRings}
+                                    initialProtocol={initialProtocol}
+                                />
+                            </div>
+                        )}
+                    </div>
                 ) : page === 2 ? (
                     <GlobalHomePage
                         lang={lang}
@@ -1638,43 +1737,6 @@ const App: React.FC = () => {
                         openProfile={() => setIsProfileOpen(true)}
                         showRings={showRings}
                         setShowRings={setShowRings}
-                    />
-                ) : page === 0 ? (
-                    <LandingView
-                        lang={lang}
-                        setLang={setLang}
-                        setPage={setPage}
-                        setViewMode={handleViewChange}
-                        selectedDriver={selectedDriver}
-                        onDriverSelect={handleDriverSelect}
-                        hoveredDriver={hoveredDriver}
-                        setHoveredDriver={setHoveredDriver}
-                        handleOpenMetonymyPage={() => {
-                            setPage(1);
-                            handleOpenMetonymyPage();
-                        }}
-                        openManual={openManual}
-                        isManualOpen={isManualOpen}
-                        closeManual={() => setIsManualOpen(false)}
-                        openHistory={openHistory}
-                        isHistoryOpen={isHistoryOpen}
-                        openAuth={openAuth}
-                        openProfile={() => setIsProfileOpen(true)}
-                        onLogout={() => supabaseAuthService.signOut()}
-                        currentUser={currentUser}
-                        closeHistory={closeHistory}
-                        isSutureOpen={isSutureOpen}
-                        closeSuture={() => setIsSutureOpen(false)}
-                        onSutureGenerate={handleSutureGenerate}
-                        isSutureGenerating={isSutureGenerating}
-                        isAdmin={isAdmin}
-                        history={history}
-                        onHistoryRestore={onHistoryRestore}
-                        onHistoryClear={onHistoryClear}
-                        openSettings={openSettings}
-                        showRings={showRings}
-                        setShowRings={setShowRings}
-                        initialProtocol={initialProtocol}
                     />
                 ) : viewMode === 'DICTIONARY' ? (
                     <div className="h-screen w-screen overflow-hidden animate-page-dissolve">
@@ -2311,6 +2373,7 @@ const App: React.FC = () => {
                     driverType={selectedDriver}
                     faceState={faceState}
                 />
+                </div>
             </div>
         </QueryClientProvider>
     );

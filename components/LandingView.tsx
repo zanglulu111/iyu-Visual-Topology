@@ -11,6 +11,7 @@ interface LandingViewProps {
   setLang: (lang: 'CN' | 'EN') => void;
   setPage: (page: -1 | 0 | 1 | 2) => void;
   setViewMode: (mode: any) => void;
+  onReturnToPortal: () => void;
   selectedDriver: DriverType | null;
   onDriverSelect: (id: DriverType) => void;
   hoveredDriver: DriverType | null;
@@ -71,9 +72,33 @@ export const LandingView: React.FC<LandingViewProps> = ({
   openSettings,
   showRings,
   setShowRings,
+  onReturnToPortal,
 }) => {
+  const [isLeavingToPortal, setIsLeavingToPortal] = React.useState(false);
+  const [isEntering, setIsEntering] = React.useState(true);
+
+  React.useEffect(() => {
+    setIsLeavingToPortal(false);
+    setIsEntering(true);
+    const frame = window.requestAnimationFrame(() => setIsEntering(false));
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
+
+  const handleWheel = (event: React.WheelEvent<HTMLDivElement>) => {
+    if (isLeavingToPortal || isManualOpen || isHistoryOpen || isSutureOpen) return;
+    if (event.deltaY >= 0) return;
+    event.preventDefault();
+    setIsLeavingToPortal(true);
+    window.setTimeout(() => {
+      onReturnToPortal();
+    }, 320);
+  };
+
   return (
-    <div className="desire-archive-root fixed inset-0 z-50 overflow-hidden bg-black text-[#fff8ee] selection:bg-white/20 selection:text-white">
+    <div
+      className={`desire-archive-root fixed inset-0 z-50 overflow-hidden bg-black text-[#fff8ee] selection:bg-white/20 selection:text-white ${isEntering ? 'is-entering' : ''} ${isLeavingToPortal ? 'is-leaving-portal' : ''}`}
+      onWheel={handleWheel}
+    >
       <style>{`
         .desire-archive-root {
           --desire-serif: "Songti SC", "Noto Serif SC", "Source Han Serif SC", STSong, SimSun, serif;
@@ -87,6 +112,30 @@ export const LandingView: React.FC<LandingViewProps> = ({
             radial-gradient(circle at 70% 22%, rgba(255,79,63,0.07), transparent 29%),
             radial-gradient(circle at 18% 24%, rgba(255,248,238,0.022), transparent 33%),
             linear-gradient(180deg, #000 0%, #000 100%);
+          transform: translate3d(0, 0, 0);
+          opacity: 1;
+          transition: transform 920ms cubic-bezier(0.16, 1, 0.3, 1), opacity 920ms cubic-bezier(0.16, 1, 0.3, 1);
+          will-change: transform, opacity;
+        }
+
+        .desire-archive-root.is-entering {
+          transform: translate3d(0, 100vh, 0);
+          opacity: 0;
+        }
+
+        .desire-archive-root.is-leaving-portal {
+          transform: translate3d(0, 100vh, 0);
+          opacity: 0;
+          pointer-events: none;
+        }
+
+        .desire-archive-root.is-leaving-portal .desire-topbar,
+        .desire-archive-root.is-leaving-portal .desire-stage,
+        .desire-archive-root.is-leaving-portal .desire-footer {
+          transform: translate3d(0, 2.2vh, 0) scale(0.985);
+          opacity: 0;
+          filter: blur(3px) brightness(0.8);
+          transition: transform 320ms cubic-bezier(0.16, 1, 0.3, 1), opacity 320ms ease, filter 320ms ease;
         }
 
         .desire-archive-root::before {
@@ -937,7 +986,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
         }
       `}</style>
 
-      <div className="desire-archive-film-grain" aria-hidden="true" />
+      <div className="desire-archive-film-grain pointer-events-none absolute inset-[-18%] z-0" aria-hidden="true" />
 
       <AppHeader
         page={0}
@@ -962,7 +1011,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
         setShowRings={setShowRings}
       />
 
-      <main className="desire-stage">
+      <main className="desire-stage relative z-10">
         <section className="desire-hero">
           <div className="desire-projector-area" aria-hidden="true">
             <div className="desire-projector-bg" />
