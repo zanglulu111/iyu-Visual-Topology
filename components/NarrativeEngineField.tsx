@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { NarrativeFieldState, BlueprintLanguage, DriverType, NarrativeBlockDef, LibraryCategoryDef, SubjectType, AestheticMode, AestheticPreset, WorldLawConfig } from '../types';
-import { ArrowRight, Check, Dice5, Edit2, Eye, FileText, Ghost, Image as ImageIcon, Loader2, Lock, Plus, RotateCcw, Scale, ScanEye, BrainCircuit, Shuffle, Trash2, Unlock, Upload, User, X, Zap } from 'lucide-react';
+import { ArrowRight, Check, Dice5, Edit2, Eye, FileText, Ghost, Image as ImageIcon, Loader2, Lock, Plus, RotateCcw, ScanEye, BrainCircuit, Shuffle, Trash2, Unlock, Upload, User, X, Zap } from 'lucide-react';
 import { ProphecySlot } from './ProphecySlot';
 import { SkinSlot } from './TheSkinSidebar';
 import { BorromeanRings } from './BorromeanRings';
@@ -117,12 +117,12 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
     const [labyrinthPanelMode, setLabyrinthPanelMode] = useState<'formula' | 'desire'>('formula');
     const [labyrinthSummaryMode, setLabyrinthSummaryMode] = useState<'module' | 'sentence'>('module');
     const [labyrinthSummaryExpanded, setLabyrinthSummaryExpanded] = useState(false);
-    const [labyrinthSummaryModuleExpanded, setLabyrinthSummaryModuleExpanded] = useState(true);
     const [labyrinthImplantPage, setLabyrinthImplantPage] = useState<'image' | 'mapping'>('image');
     const [isLabyrinthImageUploading, setIsLabyrinthImageUploading] = useState(false);
     const [isLabyrinthVisionResultOpen, setIsLabyrinthVisionResultOpen] = useState(false);
     const [isLabyrinthIdentityModalOpen, setIsLabyrinthIdentityModalOpen] = useState(false);
     const [isLabyrinthTimeModalOpen, setIsLabyrinthTimeModalOpen] = useState(false);
+    const [isLabyrinthWorldLawExpanded, setIsLabyrinthWorldLawExpanded] = useState(false);
     const [labyrinthWorldLawPreview, setLabyrinthWorldLawPreview] = useState<number | null>(null);
     const [customGenderInput, setCustomGenderInput] = useState('');
     const [customAgeInput, setCustomAgeInput] = useState('');
@@ -228,14 +228,14 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
 
     const getEngineTitle = () => {
         if (isCommercial) return lang === 'EN' ? "THE SUTURE" : "欲望缝合";
-        if (isExperimental) return lang === 'EN' ? "PHENOMENOLOGY" : "现象学还原";
+        if (isExperimental) return lang === 'EN' ? "METONYMIC SCRIPT" : "换喻脚本";
         if (isTrailer) return lang === 'EN' ? "VIRTUAL ILLUSION" : "虚拟幻象";
         return lang === 'EN' ? "EROS LABYRINTH" : "爱欲迷宫";
     };
 
     const getEngineSubtitle = () => {
         if (isCommercial) return lang === 'EN' ? "Quilting the sliding signifier of desire onto the product." : "将滑动的欲望能指，强行锚定在具体的产品图腾之上。";
-        if (isExperimental) return lang === 'EN' ? "Reducing the narrative to its pure phenomenological essence." : "剥离叙事的表象，提炼出最核心的观念结晶。";
+        if (isExperimental) return lang === 'EN' ? "Pasting a complete story and translating it into screenplay structure." : "粘贴完整故事，并转译为可生产的电影脚本结构。";
         if (isTrailer) return lang === 'EN' ? "Constructing the hook to induce infinite anticipation." : "构建视听钩子，制造无法被满足的期待与悬念。";
         return lang === 'EN' ? "Mapping the trajectory of desire and destiny around the Subject ($)." : "绘制主体($)围绕对象(a)的欲望轨迹与命运结构。";
     };
@@ -246,7 +246,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
 
     const getOSPlaceholder = () => {
         if (isCommercial) return lang === 'EN' ? "ANCHOR DESIRE" : "锚定欲望";
-        if (isExperimental) return lang === 'EN' ? "DISTILL CONCEPT" : "提纯观念";
+        if (isExperimental) return lang === 'EN' ? "PASTE STORY" : "粘贴故事";
         if (isTrailer) return lang === 'EN' ? "SET HOOK" : "设置钩子";
         return lang === 'EN' ? "SUBJECT STRUCTURE" : "主体结构";
     };
@@ -254,35 +254,35 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
     const osDisplay = currentPsychicOS ? getBilingualText(currentPsychicOS) : getOSPlaceholder();
 
     let osTheme = {
-        accent: theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-gold-primary',
-        hover: theme === 'retro' ? 'hover:bg-transparent' : 'hover:bg-amber-900/10',
-        label: theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-gold-primary',
-        icon: <Ghost size={24} className={theme === 'retro' ? "text-[var(--text-accent)]" : "text-gold-primary"} />
+        accent: theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-[var(--mist-active-accent)]',
+        hover: theme === 'retro' ? 'hover:bg-transparent' : 'hover:bg-[var(--mist-active-accent)]/10',
+        label: theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-[var(--mist-active-accent)]',
+        icon: <Ghost size={24} className={theme === 'retro' ? "text-[var(--text-accent)]" : "text-[var(--mist-active-accent)]"} />
     };
     let osLabel = "结构基底/STRUCTURAL BASE";
 
     if (isCommercial) {
         osTheme = {
-            accent: theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-mist-cyan',
-            hover: theme === 'retro' ? 'hover:bg-transparent' : 'hover:bg-mist-cyan/10',
-            label: theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-mist-cyan',
-            icon: <ScanEye size={24} className={theme === 'retro' ? "text-[var(--text-accent)]" : "text-mist-cyan"} />
+            accent: theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-[var(--mist-active-accent)]',
+            hover: theme === 'retro' ? 'hover:bg-transparent' : 'hover:bg-[var(--mist-active-accent)]/10',
+            label: theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-[var(--mist-active-accent)]',
+            icon: <ScanEye size={24} className={theme === 'retro' ? "text-[var(--text-accent)]" : "text-[var(--mist-active-accent)]"} />
         };
         osLabel = "对象预设/OBJECT ANCHOR";
     } else if (isExperimental) {
         osTheme = {
-            accent: theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-mist-purple',
-            hover: theme === 'retro' ? 'hover:bg-transparent' : 'hover:bg-purple-900/10',
-            label: theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-mist-purple',
-            icon: <BrainCircuit size={24} className={theme === 'retro' ? "text-[var(--text-accent)]" : "text-mist-purple"} />
+            accent: theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-[var(--mist-active-accent)]',
+            hover: theme === 'retro' ? 'hover:bg-transparent' : 'hover:bg-[var(--mist-active-accent)]/10',
+            label: theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-[var(--mist-active-accent)]',
+            icon: <BrainCircuit size={24} className={theme === 'retro' ? "text-[var(--text-accent)]" : "text-[var(--mist-active-accent)]"} />
         };
         osLabel = "核心观念/CORE CONCEPT";
     } else if (isTrailer) {
         osTheme = {
-            accent: theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-mist-orange',
-            hover: theme === 'retro' ? 'hover:bg-transparent' : 'hover:bg-orange-900/10',
-            label: theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-mist-orange',
-            icon: <Zap size={24} className={theme === 'retro' ? "text-[var(--text-accent)]" : "text-mist-orange"} />
+            accent: theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-[var(--mist-active-accent)]',
+            hover: theme === 'retro' ? 'hover:bg-transparent' : 'hover:bg-[var(--mist-active-accent)]/10',
+            label: theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-[var(--mist-active-accent)]',
+            icon: <Zap size={24} className={theme === 'retro' ? "text-[var(--text-accent)]" : "text-[var(--mist-active-accent)]"} />
         };
         osLabel = "诱饵钩子/THE LURE";
     }
@@ -866,7 +866,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
 
     const labyrinthSkinSlotProps = {
         fieldState,
-        accentColor: 'border-gold-primary',
+        accentColor: 'border-[var(--mist-active-accent)]',
         onOpen: openLibrary,
         onRemove: removeTag,
         lang,
@@ -874,7 +874,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
         onToggleTagLock,
         onRandomizeTag,
         getItemDetails,
-        accentTextColor: 'text-gold-primary',
+        accentTextColor: 'text-[var(--mist-active-accent)]',
         driverType,
         onRandomizeBlock: handleRandomizeSingleBlock,
         onClearBlock: clearBlock,
@@ -907,66 +907,65 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
 
     const renderLabyrinthWorldLawModule = () => {
         const currentGravity = worldLawConfig.gravity ?? 1;
-        const currentIndex = Math.max(0, WORLD_LAW_LEVELS.findIndex(level => level.val === currentGravity));
-        const currentLevel = WORLD_LAW_LEVELS[currentIndex] || WORLD_LAW_LEVELS[0];
-        const previewLevel = WORLD_LAW_LEVELS.find(level => level.val === labyrinthWorldLawPreview) || currentLevel;
+        const currentLevel = WORLD_LAW_LEVELS.find(level => level.val === currentGravity) || WORLD_LAW_LEVELS[0];
         const currentLabel = lang === 'EN' ? currentLevel.en : currentLevel.cn;
-        const previewDesc = lang === 'EN' ? previewLevel.descEN : previewLevel.descCN;
+        const previewLevel = WORLD_LAW_LEVELS.find(level => level.val === labyrinthWorldLawPreview) || currentLevel;
+        const previewLabel = lang === 'EN' ? previewLevel.en : previewLevel.cn;
+        const previewDescription = lang === 'EN' ? previewLevel.descEN : previewLevel.descCN;
 
         const setLabyrinthWorldLaw = (gravity: number) => {
             setWorldLawConfig?.({ ...worldLawConfig, gravity });
-        };
-
-        const cycleWorldLaw = () => {
-            const nextLevel = WORLD_LAW_LEVELS[(currentIndex + 1) % WORLD_LAW_LEVELS.length];
-            setLabyrinthWorldLaw(nextLevel.val);
+            setLabyrinthWorldLawPreview(null);
+            setIsLabyrinthWorldLawExpanded(false);
         };
 
         return (
-            <div className={`mist-labyrinth-world-law-module is-level-${currentLevel.val}`}>
+            <article className={`mist-labyrinth-surface-card mist-labyrinth-world-law-card is-level-${currentLevel.val} ${isLabyrinthWorldLawExpanded ? 'is-expanded' : ''}`}>
                 <button
                     type="button"
-                    className="mist-labyrinth-world-law-main"
-                    onClick={cycleWorldLaw}
-                    disabled={!setWorldLawConfig}
-                    aria-label={lang === 'EN' ? 'Switch reality mode' : '切换现实法则模式'}
+                    className="mist-labyrinth-world-law-toggle"
+                    onClick={() => setIsLabyrinthWorldLawExpanded(prev => !prev)}
+                    aria-expanded={isLabyrinthWorldLawExpanded}
+                    aria-label={lang === 'EN' ? 'Toggle world law options' : '展开或收起世界法则选项'}
                 >
-                    <span className="mist-labyrinth-world-law-kicker">
-                        <Scale size={12} />
-                        {lang === 'EN' ? 'Reality Mode' : '现实法则'}
-                    </span>
-                    <span className="mist-labyrinth-world-law-current">
-                        <b>{currentLabel}</b>
-                        <em>LV.{String(currentLevel.val).padStart(2, '0')}</em>
-                    </span>
-                    <span className="mist-labyrinth-world-law-description">{previewDesc}</span>
+                    <span className="mist-labyrinth-world-law-title">{lang === 'EN' ? "World Law" : "世界法则"}</span>
+                    <b className="mist-labyrinth-world-law-token">{`L${currentLevel.val}${currentLabel}`}</b>
                 </button>
-                <div className="mist-labyrinth-world-law-pips" aria-label={lang === 'EN' ? 'Reality mode levels' : '现实法则等级'}>
-                    {WORLD_LAW_LEVELS.map(level => {
-                        const isActive = level.val === currentLevel.val;
-                        const label = lang === 'EN' ? level.en : level.cn;
-                        return (
-                            <button
-                                type="button"
-                                key={level.val}
-                                className={isActive ? 'is-active' : ''}
-                                onMouseEnter={() => setLabyrinthWorldLawPreview(level.val)}
-                                onMouseLeave={() => setLabyrinthWorldLawPreview(null)}
-                                onClick={(event) => {
-                                    event.stopPropagation();
-                                    setLabyrinthWorldLaw(level.val);
-                                }}
-                                disabled={!setWorldLawConfig}
-                                aria-pressed={isActive}
-                                aria-label={lang === 'EN' ? `Set reality mode to ${level.en}` : `切换为${level.cn}模式`}
-                            >
-                                <span>{level.val}</span>
-                                <b>{label}</b>
-                            </button>
-                        );
-                    })}
-                </div>
-            </div>
+
+                {isLabyrinthWorldLawExpanded && (
+                    <div className="mist-labyrinth-world-law-popover">
+                        <div className="mist-labyrinth-world-law-preview">
+                            <div className="mist-labyrinth-world-law-preview-title">
+                                <span>LV.{previewLevel.val}</span>
+                                <b>{previewLabel}</b>
+                            </div>
+                            <p>{previewDescription}</p>
+                        </div>
+                        <div className="mist-labyrinth-world-law-options">
+                            {WORLD_LAW_LEVELS.map(level => {
+                                const isActive = level.val === currentLevel.val;
+                                const label = lang === 'EN' ? level.en : level.cn;
+
+                                return (
+                                    <button
+                                        type="button"
+                                        key={level.val}
+                                        className={isActive ? 'is-active' : ''}
+                                        onMouseEnter={() => setLabyrinthWorldLawPreview(level.val)}
+                                        onMouseLeave={() => setLabyrinthWorldLawPreview(null)}
+                                        onClick={() => setLabyrinthWorldLaw(level.val)}
+                                        disabled={!setWorldLawConfig}
+                                        aria-pressed={isActive}
+                                    >
+                                        <span>LV{level.val}</span>
+                                        <b>{label}</b>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
+            </article>
         );
     };
 
@@ -1063,6 +1062,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
         onRandomize: () => void,
         onToggleCurrentLock: () => void,
         onClearCurrent: () => void,
+        onEdit: () => void,
         labels: { random: string; lock: string; unlock: string; edit: string; clear: string }
     ) => (
         <div className="mist-labyrinth-module-slot-actions">
@@ -1092,7 +1092,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                 type="button"
                 onClick={(event) => {
                     event.stopPropagation();
-                    setIsLabyrinthIdentityModalOpen(true);
+                    onEdit();
                 }}
                 disabled={isLocked}
                 aria-label={labels.edit}
@@ -1143,6 +1143,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                     handleLabyrinthRandomGender,
                     () => onToggleLock('skin_gender'),
                     () => updateLabyrinthIdentity(null, undefined),
+                    () => setIsLabyrinthIdentityModalOpen(true),
                     {
                         random: lang === 'EN' ? 'Random gender' : '随机主体性别',
                         lock: lang === 'EN' ? 'Lock gender' : '锁定主体性别',
@@ -1185,6 +1186,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                     handleLabyrinthRandomAge,
                     () => onToggleLock('skin_age'),
                     () => updateLabyrinthIdentity(undefined, null),
+                    () => setIsLabyrinthIdentityModalOpen(true),
                     {
                         random: lang === 'EN' ? 'Random age' : '随机主体年龄',
                         lock: lang === 'EN' ? 'Lock age' : '锁定主体年龄',
@@ -1210,22 +1212,38 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
         const tokenClass = hasTimeOrLocation ? 'mist-prophecy-slot-active' : 'mist-prophecy-slot-empty';
 
         return (
-            <button
-                type="button"
-                className={`mist-labyrinth-identity-slot mist-labyrinth-time-slot ${hasTimeOrLocation ? 'is-filled' : ''} ${isLocked ? 'is-locked' : ''}`}
-                onClick={() => setIsLabyrinthTimeModalOpen(true)}
-                onMouseEnter={(e) => handleMouseEnter(e, {
-                    ...buildControlDetails(
-                        'skin_era',
-                        lang === 'EN' ? 'Exact year and country coordinates for the surface narrative.' : '表层叙事的精确年份与国家坐标。',
-                        lang === 'EN' ? '[Config] Click to open spacetime coordinate panel.' : '【配置协议】点击进入时空坐标面板。'
-                    ),
-                    count: COUNTRY_PRESETS.length
-                }, lang === 'EN' ? 'SUR3. Spacetime Coordinates' : 'SUR3.时空坐标系')}
-                onMouseLeave={handleMouseLeave}
-            >
-                <span className={`mist-labyrinth-hover-token ${tokenClass}`}>{displayText}</span>
-            </button>
+            <div className={`mist-labyrinth-module-identity-control mist-labyrinth-module-time-control ${hasTimeOrLocation ? 'is-filled' : ''} ${isLocked ? 'is-locked' : ''}`}>
+                <button
+                    type="button"
+                    className={`mist-labyrinth-identity-slot mist-labyrinth-time-slot ${hasTimeOrLocation ? 'is-filled' : ''} ${isLocked ? 'is-locked' : ''}`}
+                    onClick={() => setIsLabyrinthTimeModalOpen(true)}
+                    onMouseEnter={(e) => handleMouseEnter(e, {
+                        ...buildControlDetails(
+                            'skin_era',
+                            lang === 'EN' ? 'Exact year and country coordinates for the surface narrative.' : '表层叙事的精确年份与国家坐标。',
+                            lang === 'EN' ? '[Config] Click to open spacetime coordinate panel.' : '【配置协议】点击进入时空坐标面板。'
+                        ),
+                        count: COUNTRY_PRESETS.length
+                    }, lang === 'EN' ? 'SUR3. Spacetime Coordinates' : 'SUR3.时空坐标系')}
+                    onMouseLeave={handleMouseLeave}
+                >
+                    <span className={`mist-labyrinth-hover-token ${tokenClass}`}>{displayText}</span>
+                </button>
+                {renderLabyrinthModuleIdentityActions(
+                    isLocked,
+                    handleLabyrinthRandomTimeLocation,
+                    handleLabyrinthToggleTimeLocationLock,
+                    handleLabyrinthResetTimeLocation,
+                    () => setIsLabyrinthTimeModalOpen(true),
+                    {
+                        random: lang === 'EN' ? 'Random spacetime' : '随机时空坐标',
+                        lock: lang === 'EN' ? 'Lock spacetime' : '锁定时空坐标',
+                        unlock: lang === 'EN' ? 'Unlock spacetime' : '解锁时空坐标',
+                        edit: lang === 'EN' ? 'Edit spacetime' : '编辑时空坐标',
+                        clear: lang === 'EN' ? 'Clear spacetime' : '清空时空坐标'
+                    }
+                )}
+            </div>
         );
     };
 
@@ -1248,9 +1266,9 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                     onMouseEnter={(e) => handleMouseEnter(e, details, header, count)}
                     onMouseLeave={handleMouseLeave}
                     className={`mist-labyrinth-hover-token cursor-pointer font-serif transition-all duration-300 hover:z-50 inline-block ${isLocked
-                        ? 'border border-gold-primary text-gold-primary bg-amber-900/20 px-2 rounded font-bold text-lg md:text-xl tracking-tight'
+                        ? 'border border-[var(--mist-active-accent)] text-white bg-[var(--mist-active-accent)]/20 px-2 rounded font-bold text-lg md:text-xl tracking-tight'
                         : (isFilled
-                            ? 'font-bold text-white border-b-2 border-gold-primary hover:bg-white/10 px-0.5 rounded-sm text-lg md:text-xl tracking-tight'
+                            ? 'font-bold text-white border-b-2 border-[var(--mist-active-accent)] hover:bg-white/10 px-0.5 rounded-sm text-lg md:text-xl tracking-tight'
                             : 'font-medium border-b border-dashed border-zinc-800 text-zinc-500 hover:text-white hover:bg-white/10 hover:border-zinc-500 text-base')
                         }`}
                 >
@@ -1268,7 +1286,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                     <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); onToggleLock(); }}
-                        className={`flex items-center justify-center p-0.5 bg-zinc-900 border border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white rounded transition-colors ${isLocked ? 'border-gold-primary text-gold-primary bg-amber-900/20' : ''}`}
+                        className={`flex items-center justify-center p-0.5 bg-zinc-900 border border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white rounded transition-colors ${isLocked ? 'border-[var(--mist-active-accent)] text-[var(--mist-active-accent)] bg-[var(--mist-active-accent)]/20' : ''}`}
                     >
                         {isLocked ? <Lock size={10} /> : <Unlock size={10} />}
                     </button>
@@ -2010,12 +2028,13 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
 
     const renderLabyrinthSurfaceDeck = () => (
         <div className="mist-labyrinth-surface-grid">
+            {isLabyrinth && renderLabyrinthWorldLawModule()}
+
             <article className="mist-labyrinth-surface-card mist-labyrinth-creative-card">
                 <div className="mist-labyrinth-surface-card-header">
                     <h4>{lang === 'EN' ? "Creative Inspiration" : "创意灵感"}</h4>
                 </div>
                 {renderLabyrinthSurfaceTextSeed()}
-                {isLabyrinth && renderLabyrinthWorldLawModule()}
             </article>
 
             <article className="mist-labyrinth-surface-card mist-labyrinth-surface-summary-card">
@@ -2026,19 +2045,13 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                         <div className="mist-labyrinth-surface-actions">
                             <button
                                 type="button"
-                                className={(labyrinthSummaryMode === 'sentence' ? labyrinthSummaryExpanded : labyrinthSummaryModuleExpanded) ? 'is-locked' : ''}
-                                onClick={() => {
-                                    if (labyrinthSummaryMode === 'sentence') {
-                                        setLabyrinthSummaryExpanded(!labyrinthSummaryExpanded);
-                                    } else {
-                                        setLabyrinthSummaryModuleExpanded(!labyrinthSummaryModuleExpanded);
-                                    }
-                                }}
-                                aria-label={(labyrinthSummaryMode === 'sentence' ? labyrinthSummaryExpanded : labyrinthSummaryModuleExpanded)
+                                className={labyrinthSummaryExpanded ? 'is-locked' : ''}
+                                onClick={() => setLabyrinthSummaryExpanded(!labyrinthSummaryExpanded)}
+                                aria-label={labyrinthSummaryExpanded
                                     ? (lang === 'EN' ? "Collapse summary" : "折叠摘要")
                                     : (lang === 'EN' ? "Expand summary" : "展开摘要")}
                             >
-                                {(labyrinthSummaryMode === 'sentence' ? labyrinthSummaryExpanded : labyrinthSummaryModuleExpanded) ? <X size={11} /> : <Plus size={11} />}
+                                {labyrinthSummaryExpanded ? <X size={11} /> : <Plus size={11} />}
                             </button>
                         </div>
                         {renderSurfaceGroupActions(['skin_genre', 'skin_structure', 'skin_volume', 'skin_era', 'skin_society', 'skin_age', 'skin_gender', 'skin_profession', 'sur10x', 'skin_ideology', 'skin_everything', 'skin_location', 'skin_ending'], onRandomizeSummaryGroup)}
@@ -2047,59 +2060,59 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                 <div className="mist-labyrinth-surface-summary-body">
                     {labyrinthSummaryMode === 'module' ? (
                         <div className="mist-labyrinth-surface-blocks mist-labyrinth-surface-summary-slots">
-                            {(labyrinthSummaryModuleExpanded || hasBlockValue(['skin_genre'])) && <div className="mist-labyrinth-surface-block">
+                            {(labyrinthSummaryExpanded || hasBlockValue(['skin_genre'])) && <div className="mist-labyrinth-surface-block">
                                 <span className="mist-labyrinth-surface-label">{lang === 'EN' ? "Drive" : "叙事动力"}</span>
                                 {renderSurfaceProphecySlot("skin_genre", "SUR1. 叙事动力", "SUR1. Drive")}
                             </div>}
-                            {(labyrinthSummaryModuleExpanded || hasBlockValue(['skin_structure'])) && <div className="mist-labyrinth-surface-block">
+                            {(labyrinthSummaryExpanded || hasBlockValue(['skin_structure'])) && <div className="mist-labyrinth-surface-block">
                                 <span className="mist-labyrinth-surface-label">{lang === 'EN' ? "Structure" : "叙事结构"}</span>
                                 {renderSurfaceProphecySlot("skin_structure", "SV1. 叙事结构", "SV1. Structure")}
                             </div>}
-                            {(labyrinthSummaryModuleExpanded || hasBlockValue(['skin_volume'])) && <div className="mist-labyrinth-surface-block">
+                            {(labyrinthSummaryExpanded || hasBlockValue(['skin_volume'])) && <div className="mist-labyrinth-surface-block">
                                 <span className="mist-labyrinth-surface-label">{lang === 'EN' ? "Volume" : "故事体量"}</span>
                                 {renderSurfaceProphecySlot("skin_volume", "SV2. 故事体量", "SV2. Volume")}
                             </div>}
-                            {(labyrinthSummaryModuleExpanded || hasBlockValue(['skin_era'])) && <div className="mist-labyrinth-surface-block">
+                            {(labyrinthSummaryExpanded || hasBlockValue(['skin_era'])) && <div className="mist-labyrinth-surface-block">
                                 <span className="mist-labyrinth-surface-label">{lang === 'EN' ? "Field" : "背景场域"}</span>
                                 {renderSurfaceProphecySlot("skin_era", "SUR2. 背景场域", "SUR2. Field")}
                             </div>}
-                            {(labyrinthSummaryModuleExpanded || selectedYear !== null || selectedCountry !== '') && <div className="mist-labyrinth-surface-block mist-labyrinth-surface-static-block">
+                            {(labyrinthSummaryExpanded || selectedYear !== null || selectedCountry !== '') && <div className="mist-labyrinth-surface-block mist-labyrinth-surface-static-block">
                                 <span className="mist-labyrinth-surface-label">{lang === 'EN' ? "Spacetime" : "时空坐标"}</span>
                                 {renderLabyrinthTimeLocationSlot()}
                             </div>}
-                            {(labyrinthSummaryModuleExpanded || hasBlockValue(['skin_society'])) && <div className="mist-labyrinth-surface-block">
+                            {(labyrinthSummaryExpanded || hasBlockValue(['skin_society'])) && <div className="mist-labyrinth-surface-block">
                                 <span className="mist-labyrinth-surface-label">{lang === 'EN' ? "Order" : "社会形态"}</span>
                                 {renderSurfaceProphecySlot("skin_society", "SUR4. 社会形态", "SUR4. Order")}
                             </div>}
-                            {(labyrinthSummaryModuleExpanded || hasBlockValue(['skin_everything'])) && <div className="mist-labyrinth-surface-block">
+                            {(labyrinthSummaryExpanded || hasBlockValue(['skin_everything'])) && <div className="mist-labyrinth-surface-block">
                                 <span className="mist-labyrinth-surface-label">{lang === 'EN' ? "Object" : "对象预设"}</span>
                                 {renderSurfaceProphecySlot("skin_everything", "SUR5. 对象预设", "SUR5. Object")}
                             </div>}
-                            {(labyrinthSummaryModuleExpanded || hasBlockValue(['skin_location'])) && <div className="mist-labyrinth-surface-block">
+                            {(labyrinthSummaryExpanded || hasBlockValue(['skin_location'])) && <div className="mist-labyrinth-surface-block">
                                 <span className="mist-labyrinth-surface-label">{lang === 'EN' ? "Space" : "空间容器"}</span>
                                 {renderSurfaceProphecySlot("skin_location", "SUR6. 空间容器", "SUR6. Space")}
                             </div>}
-                            {(labyrinthSummaryModuleExpanded || hasBlockValue(['skin_gender'])) && <div className="mist-labyrinth-surface-block mist-labyrinth-surface-identity-block">
+                            {(labyrinthSummaryExpanded || hasBlockValue(['skin_gender'])) && <div className="mist-labyrinth-surface-block mist-labyrinth-surface-identity-block">
                                 <span className="mist-labyrinth-surface-label">{lang === 'EN' ? "Gender" : "主体性别"}</span>
                                 {renderLabyrinthGenderSlot()}
                             </div>}
-                            {(labyrinthSummaryModuleExpanded || hasBlockValue(['skin_age'])) && <div className="mist-labyrinth-surface-block mist-labyrinth-surface-identity-block">
+                            {(labyrinthSummaryExpanded || hasBlockValue(['skin_age'])) && <div className="mist-labyrinth-surface-block mist-labyrinth-surface-identity-block">
                                 <span className="mist-labyrinth-surface-label">{lang === 'EN' ? "Age" : "主体年龄"}</span>
                                 {renderLabyrinthAgeSlot()}
                             </div>}
-                            {(labyrinthSummaryModuleExpanded || hasBlockValue(['skin_profession'])) && <div className="mist-labyrinth-surface-block">
+                            {(labyrinthSummaryExpanded || hasBlockValue(['skin_profession'])) && <div className="mist-labyrinth-surface-block">
                                 <span className="mist-labyrinth-surface-label">{lang === 'EN' ? "Role" : "职业身份"}</span>
                                 {renderSurfaceProphecySlot("skin_profession", "SUR9. 职业身份", "SUR9. Role")}
                             </div>}
-                            {(labyrinthSummaryModuleExpanded || hasBlockValue(['skin_ideology'])) && <div className="mist-labyrinth-surface-block">
+                            {(labyrinthSummaryExpanded || hasBlockValue(['skin_ideology'])) && <div className="mist-labyrinth-surface-block">
                                 <span className="mist-labyrinth-surface-label">{lang === 'EN' ? "Belief" : "信念预设"}</span>
                                 {renderSurfaceProphecySlot("skin_ideology", "SUR10. 信念预设", "SUR10. Belief")}
                             </div>}
-                            {(labyrinthSummaryModuleExpanded || hasBlockValue(['sur10x'])) && <div className="mist-labyrinth-surface-block">
+                            {(labyrinthSummaryExpanded || hasBlockValue(['sur10x'])) && <div className="mist-labyrinth-surface-block">
                                 <span className="mist-labyrinth-surface-label">{lang === 'EN' ? "Fracture" : "信念裂度"}</span>
                                 {renderSurfaceProphecySlot("sur10x", "SUR10X. 信念裂度", "SUR10X. Fracture")}
                             </div>}
-                            {(labyrinthSummaryModuleExpanded || hasBlockValue(['skin_ending'])) && <div className="mist-labyrinth-surface-block">
+                            {(labyrinthSummaryExpanded || hasBlockValue(['skin_ending'])) && <div className="mist-labyrinth-surface-block">
                                 <span className="mist-labyrinth-surface-label">{lang === 'EN' ? "Ending" : "显性收场"}</span>
                                 {renderSurfaceProphecySlot("skin_ending", "SUR-END. 显性收场", "SUR-END. Ending")}
                             </div>}
@@ -2134,7 +2147,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                         )}
                         <div className="mist-labyrinth-screen-grid" aria-hidden="true" />
                         <div className="mist-labyrinth-title-block">
-                            <h2 className="mist-labyrinth-title mist-engine-title mist-title-shadow">
+                            <h2 className="mist-labyrinth-title mist-engine-title mist-title-shadow" data-title={getEngineTitle()}>
                                 {getEngineTitle()}
                             </h2>
                             <p className="mist-labyrinth-subtitle">{getEngineSubtitle()}</p>
@@ -2169,7 +2182,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
     return (
         <div className={`mist-engine-field ${isCommercial ? 'mist-commercial-engine' : ''} ${isLabyrinth ? 'mist-labyrinth-engine' : ''} w-full h-full flex flex-col relative bg-[var(--bg-main)] overflow-hidden transition-colors duration-500`}>
             {theme === 'retro' && <div className="absolute inset-0 pointer-events-none opacity-40 mix-blend-multiply" style={{ backgroundImage: 'var(--pattern-aged)' }}></div>}
-            {theme !== 'retro' && (
+            {theme !== 'retro' && !isLabyrinth && (
                 <div
                     className="absolute inset-0 pointer-events-none z-0"
                     style={{

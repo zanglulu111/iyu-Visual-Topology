@@ -172,7 +172,7 @@ export const LacanTopologyView: React.FC<LacanTopologyViewProps> = ({
                         </div>
                     </div>
                 </button>
-                <span className={`font-serif font-bold text-xs uppercase tracking-widest ${theme === 'retro' ? 'text-[#8B261D]' : 'text-gold-primary'}`}>
+                <span className={`font-serif font-bold text-xs uppercase tracking-widest ${theme === 'retro' ? 'text-[var(--mist-active-accent)]' : 'text-gold-primary'}`}>
                     {lang === 'CN' ? '迷雾学派：三界拓扑' : 'MIST: RSI TOPOLOGY'}
                 </span>
             </div>
@@ -251,15 +251,15 @@ export const LacanTopologyView: React.FC<LacanTopologyViewProps> = ({
                         className={`flex items-center justify-center w-7 h-7 rounded-sm ${theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'} transition-all duration-300 hover:bg-white/5 hover:scale-110 active:scale-90`}
                         title={theme === 'dark' ? "切换为复古主题" : "切换为暗黑主题"}
                     >
-                        {theme === 'dark' ? <Moon size={14} /> : <Sun size={14} className="text-[#8B261D]" />}
+                        {theme === 'dark' ? <Moon size={14} /> : <Sun size={14} className="text-[var(--mist-active-accent)]" />}
                     </button>
 
                     {/* 4. Ring Toggle */}
                     <button
                         onClick={() => setShowRings(!showRings)}
                         className={`flex items-center justify-center w-7 h-7 rounded-sm transition-all duration-300 hover:bg-white/5 hover:scale-110 active:scale-90 focus:outline-none ${
-                            showRings 
-                                ? (theme === 'retro' ? 'text-[#8B261D]' : 'text-gold-primary') 
+                            showRings
+                                ? (theme === 'retro' ? 'text-[var(--mist-active-accent)]' : 'text-gold-primary')
                                 : (theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white')
                         }`}
                         title={lang === 'CN' ? "背景圆环开关" : "Background Rings Toggle"}
@@ -342,7 +342,7 @@ export const LacanTopologyView: React.FC<LacanTopologyViewProps> = ({
                 {/* RIGHT AREA: Visualization (2/3) */}
                 <div className={`flex-1 relative flex items-center justify-center p-8 overflow-hidden bg-[var(--bg-main)] transition-colors duration-500`}>
                     
-                    <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: `radial-gradient(${isRetro ? '#8B261D' : '#D4AF37'} 1px, transparent 0)`, backgroundSize: '32px 32px' }}></div>
+                    <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: `radial-gradient(${isRetro ? 'var(--mist-active-accent)' : '#FFD700'} 1px, transparent 0)`, backgroundSize: '32px 32px' }}></div>
 
                     {/* The Rings - Large and centered */}
                     <div className="w-full h-full max-w-[1000px] max-h-[1000px] relative flex items-center justify-center -translate-y-12">
@@ -368,15 +368,15 @@ export const LacanTopologyView: React.FC<LacanTopologyViewProps> = ({
                                 onClick={() => setSelectedKey(id)}
                                 className={`w-40 p-4 border rounded-sm transition-all duration-300 text-left
                                     ${selectedKey === id 
-                                        ? 'bg-gold-primary/20 border-gold-primary shadow-[0_0_30px_rgba(212,175,55,0.15)] -translate-y-2' 
+                                        ? 'bg-gold-primary/20 border-gold-primary shadow-[0_0_30px_rgba(212,175,55,0.15)] -translate-y-2'
                                         : 'bg-black/40 border-white/5 hover:border-white/10 opacity-60 hover:opacity-100'}
                                 `}
                             >
                                 <div className={`w-6 h-6 flex items-center justify-center rounded-sm font-black text-[10px] mb-2 text-black
-                                    ${id === 'REAL' ? 'bg-amber-500' : 
-                                      id === 'SYMBOLIC' ? 'bg-gold-primary' : 
-                                      id === 'IMAGINARY' ? 'bg-rose-500' : 
-                                      'bg-emerald-500'}
+                                    ${id === 'REAL' ? 'bg-[#EF4444]' :
+                                      id === 'SYMBOLIC' ? 'bg-[#FFD700]' :
+                                      id === 'IMAGINARY' ? 'bg-[#22D3EE]' :
+                                      'bg-white'}
                                 `}>
                                     {id.charAt(0)}
                                 </div>

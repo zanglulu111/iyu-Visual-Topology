@@ -92,7 +92,7 @@ export const GlobalHomePage: React.FC<GlobalHomePageProps> = ({
       titleEn: 'THE ENGINE',
       descCn: '启动核心驱动器，进入视觉生产的符号链。构建你自己的迷雾。',
       descEn: 'Activate the core driver. Enter the symbolic chain of visual production.',
-      color: '#D4AF37',
+      color: '#FFD700',
       action: () => setPage(0),
     },
     {
@@ -101,7 +101,7 @@ export const GlobalHomePage: React.FC<GlobalHomePageProps> = ({
       titleEn: 'SUBJECT ARCHIVE',
       descCn: '在被压抑之物回归的迷雾中，阅读与漫游。每一个档案都是某人被遗忘的梦。',
       descEn: 'Wander through the fog where the repressed returns. Every file is a forgotten dream.',
-      color: '#D4AF37',
+      color: '#FFD700',
       action: () => { setViewMode('ARCHIVE'); setPage(1); },
     },
     {
@@ -144,7 +144,7 @@ export const GlobalHomePage: React.FC<GlobalHomePageProps> = ({
         <div 
           className="absolute bottom-0 left-0 right-0 h-px transition-all duration-500 z-10" 
           style={{ 
-            backgroundColor: isRetro ? '#8B261D' : 'rgba(212, 175, 55, 0.15)',
+            backgroundColor: isRetro ? '#8B261D' : 'rgba(255, 215, 0, 0.15)',
             opacity: isRetro ? 0.2 : 0.15,
             boxShadow: isRetro ? 'none' : '0 0 10px rgba(212,175,55,0.1)'
           }} 

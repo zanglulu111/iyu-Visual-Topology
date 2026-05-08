@@ -201,45 +201,23 @@ export const SutureModal: React.FC<SutureModalProps> = ({
                 bgSoft: 'bg-[var(--bg-header)]',
                 shadow: 'shadow-none', 
                 hoverShadow: 'hover:shadow-md',
-                spinnerBorder: 'border-t-[#8B261D]', 
+                spinnerBorder: 'border-t-[#8B261D]',
                 accent: 'bg-[#8B261D]'
             };
         }
-        switch (driverType) {
-            case DriverType.COMMERCIAL:
-                return {
-                    text: 'text-mist-cyan', bg: 'bg-mist-cyan', hoverBg: 'hover:brightness-110',
-                    border: 'border-mist-cyan/50', borderSoft: 'border-mist-cyan/30', bgSoft: 'bg-mist-cyan/20',
-                    shadow: 'shadow-[0_0_20px_rgba(34,211,238,0.2)]', hoverShadow: 'hover:shadow-[0_0_30px_rgba(34,211,238,0.35)]',
-                    spinnerBorder: 'border-t-mist-cyan', accent: 'bg-mist-cyan'
-                };
-            case DriverType.EXPERIMENTAL:
-                return {
-                    text: 'text-mist-purple', bg: 'bg-mist-purple', hoverBg: 'hover:bg-purple-400',
-                    border: 'border-mist-purple/50', borderSoft: 'border-purple-900/30', bgSoft: 'bg-mist-purple/20',
-                    shadow: 'shadow-[0_0_20px_rgba(168,85,247,0.2)]', hoverShadow: 'hover:shadow-[0_0_30px_rgba(168,85,247,0.4)]',
-                    spinnerBorder: 'border-t-mist-purple', accent: 'bg-purple-900'
-                };
-            case DriverType.AESTHETIC:
-                return {
-                    text: 'text-mist-rose', bg: 'bg-mist-rose', hoverBg: 'hover:bg-rose-400',
-                    border: 'border-mist-rose/50', borderSoft: 'border-rose-900/30', bgSoft: 'bg-mist-rose/20',
-                    shadow: 'shadow-[0_0_20px_rgba(244,63,94,0.2)]', hoverShadow: 'hover:shadow-[0_0_30px_rgba(244,63,94,0.4)]',
-                    spinnerBorder: 'border-t-mist-rose', accent: 'bg-rose-900'
-                };
-            case DriverType.TRAILER:
-                return {
-                    text: 'text-mist-orange', bg: 'bg-mist-orange', hoverBg: 'hover:bg-orange-400',
-                    border: 'border-mist-orange/50', borderSoft: 'border-orange-900/30', bgSoft: 'bg-mist-orange/20',
-                    shadow: 'shadow-[0_0_20px_rgba(251,146,60,0.2)]', hoverShadow: 'hover:shadow-[0_0_30px_rgba(251,146,60,0.4)]',
-                    spinnerBorder: 'border-t-mist-orange', accent: 'bg-orange-900'
-                };
-        }
+
+        // Dynamic theme based on --mist-active-accent
         return {
-            text: 'text-gold-primary', bg: 'bg-gold-primary', hoverBg: 'hover:bg-amber-400',
-            border: 'border-gold-primary/50', borderSoft: 'border-amber-900/30', bgSoft: 'bg-gold-primary/20',
-            shadow: 'shadow-[0_0_20px_rgba(212,175,55,0.2)]', hoverShadow: 'hover:shadow-[0_0_30px_rgba(212,175,55,0.4)]',
-            spinnerBorder: 'border-t-gold-primary', accent: 'bg-zinc-900'
+            text: 'text-[var(--mist-active-accent)]',
+            bg: 'bg-[var(--mist-active-accent)]',
+            hoverBg: 'hover:brightness-110',
+            border: 'border-[var(--mist-active-accent)]/50',
+            borderSoft: 'border-[var(--mist-active-accent)]/30',
+            bgSoft: 'bg-[var(--mist-active-accent)]/10',
+            shadow: 'shadow-[0_0_20px_rgba(212,175,55,0.15)]', // Generic soft shadow
+            hoverShadow: 'hover:shadow-[0_0_30px_rgba(212,175,55,0.25)]',
+            spinnerBorder: 'border-t-[var(--mist-active-accent)]',
+            accent: 'bg-zinc-900'
         };
     };
 

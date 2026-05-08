@@ -1,6 +1,7 @@
 import { getR2PublicUrl } from '../services/r2Storage';
+import type { FinalAssetsData, SubjectDossier } from '../types';
 
-export type ArchiveCategory = 'ALL' | 'NEUROSIS' | 'PSYCHOSIS' | 'PERVERSION' | 'AUTISM';
+export type ArchiveCategory = 'ALL' | 'NEUROSIS' | 'PSYCHOSIS' | 'PERVERSION' | 'AUTISM' | 'UNCLASSIFIED';
 
 export interface CaseStudy {
     id: string;
@@ -30,7 +31,10 @@ export interface CaseStudy {
             conclusion: string;
             verdict: string;
         };
+        assetGroups?: FinalAssetsData;
+        screenplay?: string[];
     };
+    sourceDossier?: SubjectDossier;
 }
 
 const detailedCaseContent: CaseStudy['content'] = {

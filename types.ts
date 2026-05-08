@@ -102,6 +102,99 @@ export interface CollectionItem {
   blueprint: CreativeBlueprint;
 }
 
+export type DesireArchiveStage = 'DIVERGENCE_SET' | 'CREATIVE_BIBLE' | 'METONYMY_SCRIPT';
+
+export type DesireArchiveStatus = 'draft' | 'candidate' | 'selected' | 'promoted' | 'archived';
+
+export type DesireProjectKind = 'DIVERGENCE_BATCH' | 'STORY_PROJECT';
+
+export type DesireProjectSourceType = 'ENGINE_GENERATED' | 'CUSTOM_STORY';
+
+export interface DesireArchiveVersion {
+  id: string;
+  stage: DesireArchiveStage;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+  status: DesireArchiveStatus;
+  sourceHistoryId?: number | string;
+  sourceTreatmentId?: string;
+  versionLabel?: string;
+  summary?: string;
+  content?: string;
+  blueprint?: CreativeBlueprint | null;
+  treatments?: CreativeTreatment[];
+  assets?: FinalAssetsData;
+}
+
+export interface DesireProject {
+  id: string;
+  archiveKind?: DesireProjectKind;
+  sourceType?: DesireProjectSourceType;
+  title: string;
+  engineType: DriverType;
+  engineName: string;
+  createdAt: string;
+  updatedAt: string;
+  fieldState: NarrativeFieldState;
+  worldLaw?: WorldLawConfig;
+  visionInput?: string;
+  visionAnalysis?: string;
+  sourceHistoryIds: Array<number | string>;
+  sourceDivergenceId?: string;
+  sourceCandidateId?: string;
+  originalStory?: {
+    title: string;
+    content: string;
+    source: 'engine' | 'user';
+  };
+  candidateCount?: number;
+  divergence?: DesireArchiveVersion;
+  bibleDrafts: DesireArchiveVersion[];
+  metonymyScripts: DesireArchiveVersion[];
+  subjectDossierIds: string[];
+  notes?: string;
+}
+
+export type SubjectDossierStatus = 'draft' | 'published' | 'archived';
+
+export type SubjectDossierCategory = 'NEUROSIS' | 'PSYCHOSIS' | 'PERVERSION' | 'AUTISM' | 'UNCLASSIFIED';
+
+export interface SubjectDossier {
+  id: string;
+  sourceProjectId?: string;
+  sourceArtifactId?: string;
+  createdAt: string;
+  updatedAt: string;
+  publishedAt?: string;
+  status: SubjectDossierStatus;
+  category: SubjectDossierCategory;
+  title: string;
+  titleEn?: string;
+  summary: string;
+  summaryEn?: string;
+  imageUrl?: string;
+  story: {
+    title: string;
+    content: string;
+    sourceArtifactId?: string;
+  };
+  psychoanalysis: {
+    title: string;
+    content: string;
+    sourceArtifactId?: string;
+  };
+  assets: FinalAssetsData;
+  screenplay: {
+    title: string;
+    content: string;
+    sections?: ScreenplaySection[];
+    sourceArtifactId?: string;
+  };
+  sourceBlueprint?: CreativeBlueprint | null;
+  adminNotes?: string;
+}
+
 export interface DriverDef {
   id: DriverType;
   name: string;

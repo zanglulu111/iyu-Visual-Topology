@@ -164,35 +164,17 @@ export const SkinSlot: React.FC<{
     };
 
     const getLockedStyle = () => {
-      if (driverType === DriverType.COMMERCIAL) return theme === 'retro' ? 'border-[var(--text-accent)] text-black bg-[var(--text-accent)]/10' : 'border-mist-cyan text-mist-cyan bg-mist-cyan/20';
-      if (driverType === DriverType.EXPERIMENTAL) return theme === 'retro' ? 'border-[var(--text-accent)] text-black bg-[var(--text-accent)]/10' : 'border-purple-400 text-purple-400 bg-purple-900/20';
-      if (driverType === DriverType.AESTHETIC) return theme === 'retro' ? 'border-[var(--text-accent)] text-black bg-[var(--text-accent)]/10' : 'border-rose-400 text-rose-400 bg-rose-900/20';
-      if (driverType === DriverType.TRAILER) return theme === 'retro' ? 'border-[var(--text-accent)] text-black bg-[var(--text-accent)]/10' : 'border-orange-400 text-orange-400 bg-orange-900/20';
-      return theme === 'retro' ? 'border-[var(--text-accent)] text-black bg-[var(--text-accent)]/10' : 'border-gold-primary text-gold-primary bg-amber-900/20';
+      if (theme === 'retro') return 'border-[var(--text-accent)] text-black bg-[var(--text-accent)]/10';
+      return 'border-[var(--mist-active-accent)] text-[var(--mist-active-accent)] bg-[var(--mist-active-accent)]/20';
     };
 
     // Style config for active/edit state
-    let labelColor = 'text-gold-primary';
-    let editAccent = 'text-gold-primary border-gold-primary focus:border-gold-primary';
+    let labelColor = 'text-[var(--mist-active-accent)]';
+    let editAccent = 'text-[var(--mist-active-accent)] border-[var(--mist-active-accent)] focus:border-[var(--mist-active-accent)]';
 
     if (theme === 'retro') {
-      labelColor = 'text-[#8B261D]';
-      editAccent = 'text-[var(--text-main)] border-[var(--border-main)] focus:border-[#8B261D]';
-    } else if (driverType === DriverType.COMMERCIAL) {
-      labelColor = 'text-mist-cyan';
-      editAccent = 'text-mist-cyan border-mist-cyan focus:border-mist-cyan';
-    } else if (driverType === DriverType.EXPERIMENTAL) {
-      labelColor = 'text-mist-purple';
-      editAccent = 'text-purple-400 border-purple-400 focus:border-purple-400';
-    } else if (driverType === DriverType.AESTHETIC) {
-      labelColor = 'text-mist-rose';
-      editAccent = 'text-rose-400 border-rose-400 focus:border-rose-400';
-    } else if (driverType === DriverType.TRAILER) {
-      labelColor = 'text-mist-orange';
-      editAccent = 'text-orange-400 border-orange-400 focus:border-orange-400';
-    } else {
-      labelColor = 'text-gold-primary';
-      editAccent = 'text-gold-primary border-gold-primary focus:border-gold-primary';
+      labelColor = 'text-[var(--text-accent)]';
+      editAccent = 'text-[var(--text-main)] border-[var(--border-main)] focus:border-[var(--text-accent)]';
     }
 
     const lockedClass = getLockedStyle();
@@ -692,24 +674,18 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
 
   if (isAesthetic) return null;
 
-  let accentBorder = 'border-gold-primary';
-  let iconColor = 'text-gold-primary';
+  let accentBorder = 'border-[var(--mist-active-accent)]';
+  let iconColor = 'text-[var(--mist-active-accent)]';
   let lockKey = 'NARR_SKIN';
 
   if (theme === 'retro') {
-    accentBorder = 'border-[#8B261D]';
-    iconColor = 'text-[#8B261D]';
+    accentBorder = 'border-[var(--text-accent)]';
+    iconColor = 'text-[var(--text-accent)]';
   } else if (isCommercial) {
-    accentBorder = 'border-mist-cyan';
-    iconColor = 'text-mist-cyan';
     lockKey = 'COMM_SKIN';
   } else if (isExperimental) {
-    accentBorder = 'border-purple-400';
-    iconColor = 'text-purple-400';
     lockKey = 'EXP_SKIN';
   } else if (isTrailer) {
-    accentBorder = 'border-orange-400';
-    iconColor = 'text-orange-400';
     lockKey = 'TRL_SKIN';
   }
 
@@ -847,9 +823,9 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
 
     const isLocked = isGenderLocked && isAgeLocked;
     const baseTextClass = 'cursor-pointer transition-transform duration-300';
-    const filledTextClass = `font-serif font-bold ${theme === 'retro' ? 'text-black border-b-2 border-[var(--text-accent)] hover:bg-black/5' : 'text-white border-b-2 border-gold-primary hover:bg-white/10'} px-0.5 hover:scale-110 hover:z-50 inline-block text-lg md:text-xl tracking-tight`;
+    const filledTextClass = `font-serif font-bold ${theme === 'retro' ? 'text-black border-b-2 border-[var(--text-accent)] hover:bg-black/5' : 'text-white border-b-2 border-[var(--mist-active-accent)] hover:bg-white/10'} px-0.5 hover:scale-110 hover:z-50 inline-block text-lg md:text-xl tracking-tight`;
     const emptyTextClass = `font-serif font-medium border-b border-dashed hover:scale-110 hover:z-50 inline-block ${theme === 'retro' ? 'border-[var(--text-muted)] text-zinc-500 hover:text-black hover:bg-black/5' : 'border-zinc-800 text-zinc-500 hover:text-white hover:bg-white/10'} hover:border-zinc-500 text-base`;
-    const lockedTextClass = `border ${theme === 'retro' ? 'border-[var(--text-accent)] text-black bg-[var(--text-accent)]/10' : 'border-gold-primary text-gold-primary bg-amber-900/20'} px-2 rounded font-serif font-bold text-lg md:text-xl tracking-tight`;
+    const lockedTextClass = `border ${theme === 'retro' ? 'border-[var(--text-accent)] text-black bg-[var(--text-accent)]/10' : 'border-[var(--mist-active-accent)] text-[var(--mist-active-accent)] bg-[var(--mist-active-accent)]/20'} px-2 rounded font-serif font-bold text-lg md:text-xl tracking-tight`;
     return (
       <span className="inline-flex flex-wrap items-baseline gap-x-1 mx-1 relative">
         <span className="group/tag relative inline-flex flex-col items-center align-top">
@@ -866,7 +842,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
           </span>
           <div className={`flex items-center gap-1 mt-1 z-10 ${theme === 'retro' ? 'bg-[var(--bg-panel)]' : 'bg-black/80'} rounded p-1 border shadow-md ${theme === 'retro' ? 'border-[var(--border-main)]/40' : 'border-zinc-800'} opacity-0 group-hover/tag:opacity-100 transition-opacity duration-300`}>
             <button onClick={(e) => { e.stopPropagation(); handleGlobalRandomizeIdentity(); }} disabled={isLocked} className={`group/btn relative flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--border-main)]' : 'bg-zinc-900 border border-zinc-700 text-zinc-500 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isLocked ? 'opacity-30 cursor-not-allowed' : ''}`}><Dice5 size={10} /></button>
-            <button onClick={(e) => { e.stopPropagation(); handleGlobalToggleLockIdentity(); }} className={`group/btn relative flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border border-zinc-700 text-zinc-500 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isLocked ? (theme === 'retro' ? 'border-[var(--text-accent)] text-black bg-[var(--text-accent)]/10' : 'border-gold-primary text-gold-primary bg-amber-900/20') : ''}`}>{isLocked ? <Lock size={10} /> : <Unlock size={10} />}</button>
+            <button onClick={(e) => { e.stopPropagation(); handleGlobalToggleLockIdentity(); }} className={`group/btn relative flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border border-zinc-700 text-zinc-500 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isLocked ? (theme === 'retro' ? 'border-[var(--text-accent)] text-black bg-[var(--text-accent)]/10' : 'border-[var(--mist-active-accent)] text-[var(--mist-active-accent)] bg-[var(--mist-active-accent)]/20') : ''}`}>{isLocked ? <Lock size={10} /> : <Unlock size={10} />}</button>
             <button onClick={(e) => { e.stopPropagation(); setIsIdentityModalOpen(true); }} disabled={isLocked} className={`group/btn relative flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border border-zinc-700 text-zinc-500 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isLocked ? 'opacity-30 cursor-not-allowed' : ''}`}><Edit2 size={10} /></button>
             <button onClick={(e) => { e.stopPropagation(); handleGlobalResetIdentity(); }} disabled={isLocked} className={`group/btn relative flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-red-700' : 'bg-zinc-900 border border-zinc-700 text-zinc-500 hover:border-red-500/50 hover:bg-red-950/20 hover:text-red-400'} border rounded transition-colors ${isLocked ? 'opacity-30 cursor-not-allowed' : ''}`}><Trash2 size={10} /></button>
           </div>
@@ -929,7 +905,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); handleGlobalToggleLockCoordinates(); }}
-              className={`flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border border-zinc-700 text-zinc-500 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isLocked ? (theme === 'retro' ? 'border-[var(--text-accent)] text-black bg-[var(--text-accent)]/10' : 'border-gold-primary text-gold-primary bg-amber-900/20') : ''}`}
+              className={`flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border border-zinc-700 text-zinc-500 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isLocked ? (theme === 'retro' ? 'border-[var(--text-accent)] text-black bg-[var(--text-accent)]/10' : 'border-[var(--mist-active-accent)] text-[var(--mist-active-accent)] bg-[var(--mist-active-accent)]/20') : ''}`}
             >
               {isLocked ? <Lock size={10} /> : <Unlock size={10} />}
             </button>
@@ -973,7 +949,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
               </span>
               <div className="flex gap-1">
                 <button onClick={handleRandomCountry} disabled={isCountryLocked} className={`p-1 rounded text-zinc-500 hover:text-white transition-all ${isCountryLocked ? 'opacity-30 cursor-not-allowed' : ''}`}><Dice5 size={10} /></button>
-                <button onClick={handleToggleLockCountry} className={`p-1 rounded transition-all ${isCountryLocked ? (theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-amber-500') : 'text-zinc-500 hover:text-white'}`}>{isCountryLocked ? <Lock size={10} /> : <Unlock size={10} />}</button>
+                <button onClick={handleToggleLockCountry} className={`p-1 rounded transition-all ${isCountryLocked ? (theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-[var(--mist-active-accent)]') : 'text-zinc-500 hover:text-white'}`}>{isCountryLocked ? <Lock size={10} /> : <Unlock size={10} />}</button>
                 <button onClick={handleResetCountry} disabled={isCountryLocked} className={`p-1 rounded text-zinc-500 hover:text-red-400 transition-all ${isCountryLocked ? 'opacity-30 cursor-not-allowed' : ''}`}><Trash2 size={10} /></button>
               </div>
             </div>
@@ -1019,7 +995,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
                 </span>
                 <div className="flex gap-1 ml-2">
                   <button onClick={handleRandomYear} disabled={isYearLocked} className={`p-1 rounded text-zinc-500 hover:text-white transition-all ${isYearLocked ? 'opacity-30 cursor-not-allowed' : ''}`}><Dice5 size={10} /></button>
-                  <button onClick={handleToggleLockYear} className={`p-1 rounded transition-all ${isYearLocked ? (theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-amber-500') : 'text-zinc-500 hover:text-white'}`}>{isYearLocked ? <Lock size={10} /> : <Unlock size={10} />}</button>
+                  <button onClick={handleToggleLockYear} className={`p-1 rounded transition-all ${isYearLocked ? (theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-[var(--mist-active-accent)]') : 'text-zinc-500 hover:text-white'}`}>{isYearLocked ? <Lock size={10} /> : <Unlock size={10} />}</button>
                   <button onClick={handleResetYear} disabled={isYearLocked} className={`p-1 rounded text-zinc-500 hover:text-red-400 transition-all ${isYearLocked ? 'opacity-30 cursor-not-allowed' : ''}`}><Trash2 size={10} /></button>
                 </div>
               </div>
@@ -1033,7 +1009,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
               value={selectedYear ?? 2026}
               disabled={isYearLocked}
               onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-              className={`w-full h-1.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)]' : 'bg-zinc-800'} rounded-lg appearance-none cursor-pointer ${isYearLocked ? 'cursor-not-allowed accent-zinc-600' : (theme === 'retro' ? 'accent-[var(--text-accent)] hover:accent-[var(--text-main)]' : 'accent-white hover:accent-gold-primary')}`}
+              className={`w-full h-1.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)]' : 'bg-zinc-800'} rounded-lg appearance-none cursor-pointer ${isYearLocked ? 'cursor-not-allowed accent-zinc-600' : (theme === 'retro' ? 'accent-[var(--text-accent)] hover:accent-[var(--text-main)]' : 'accent-white hover:accent-[var(--mist-active-accent)]')}`}
             />
 
             <div className={`flex justify-between items-center text-[9px] ${theme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-600'} font-mono`}>
@@ -1041,7 +1017,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
               <div className="flex gap-1">
                 <button onClick={() => !isYearLocked && setSelectedYear((prev) => (prev ?? 2026) - 10)} className={`px-2 py-1 ${theme === 'retro' ? 'bg-[var(--bg-panel)] text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'} rounded`}>-10</button>
                 <button onClick={() => !isYearLocked && setSelectedYear((prev) => (prev ?? 2026) - 1)} className={`px-2 py-1 ${theme === 'retro' ? 'bg-[var(--bg-panel)] text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'} rounded`}>-1</button>
-                <button onClick={handleSetNow} className={`px-2 py-1 ${theme === 'retro' ? 'bg-[var(--text-accent)]/10 text-[var(--text-accent)] font-bold' : 'bg-zinc-800 text-gold-primary hover:bg-zinc-700 font-bold'} rounded`}>Now</button>
+                <button onClick={handleSetNow} className={`px-2 py-1 ${theme === 'retro' ? 'bg-[var(--text-accent)]/10 text-[var(--text-accent)] font-bold' : 'bg-zinc-800 text-[var(--mist-active-accent)] hover:bg-zinc-700 font-bold'} rounded`}>Now</button>
                 <button onClick={() => !isYearLocked && setSelectedYear((prev) => (prev ?? 2026) + 1)} className={`px-2 py-1 ${theme === 'retro' ? 'bg-[var(--bg-panel)] text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'} rounded`}>+1</button>
                 <button onClick={() => !isYearLocked && setSelectedYear((prev) => (prev ?? 2026) + 10)} className={`px-2 py-1 ${theme === 'retro' ? 'bg-[var(--bg-panel)] text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'} rounded`}>+10</button>
               </div>
@@ -1085,7 +1061,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
           <Settings2 size={18} className={iconColor} />
           <span className={`text-sm font-black uppercase tracking-[0.25em] ${iconColor}`}>
             {isCommercial ? (lang === 'EN' ? "EXECUTION BRIEF" : "商业执行单")
-              : isExperimental ? (lang === 'EN' ? "REDUCTION PROTOCOL" : "还原协议")
+              : isExperimental ? (lang === 'EN' ? "SCRIPT PROTOCOL" : "脚本协议")
                 : isTrailer ? (lang === 'EN' ? "TRAILER BRIEF" : "预告片执行单")
                   : (lang === 'EN' ? "STORY SKIN" : "表层设定")}
           </span>
@@ -1113,7 +1089,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
             </button>
             <button
               onClick={() => onToggleLock?.(lockKey)}
-              className={`group/btn relative p-1.5 rounded transition-all ${isAllLocked ? (theme === 'retro' ? 'bg-black/5 text-[var(--text-accent)] border border-[var(--text-accent)]/30' : 'bg-zinc-800 text-amber-500 border border-amber-500/30') : 'hover:bg-white/5 text-zinc-500 hover:text-white'}`}
+              className={`group/btn relative p-1.5 rounded transition-all ${isAllLocked ? (theme === 'retro' ? 'bg-black/5 text-[var(--text-accent)] border border-[var(--text-accent)]/30' : 'bg-zinc-800 text-[var(--mist-active-accent)] border border-[var(--mist-active-accent)]/30') : 'hover:bg-white/5 text-zinc-500 hover:text-white'}`}
             >
               {isAllLocked ? <Lock size={14} /> : <Unlock size={14} />}
               <span className={`absolute top-full mt-1 right-0 px-2 py-1 text-[10px] font-normal whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity duration-150 pointer-events-none z-[100] rounded shadow-md ${theme === 'retro' ? 'bg-[#1A1814] text-[var(--text-main)] border border-[var(--border-main)]/50' : 'bg-zinc-800 text-zinc-300 border border-zinc-700'}`}>
@@ -1212,13 +1188,13 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
           <div className="space-y-3">
             <section>
               <div className={`flex items-center gap-2 text-xs font-black uppercase tracking-widest border-b border-zinc-800 pb-1 mb-3 ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}`}>
-                <TestTube size={12} className={iconColor} /> {lang === 'EN' ? "PHENOMENOLOGICAL REDUCTION" : "现象学还原设定"}
+                <TestTube size={12} className={iconColor} /> {lang === 'EN' ? "STORY TRANSLATION SETUP" : "故事转译设定"}
               </div>
               <div className={`leading-relaxed font-serif text-sm md:text-base ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}`}>
-                <span>{lang === 'EN' ? "In a state of" : "处于"}</span> <SkinSlot blockId="exp_skin_context" placeholder={lang === 'EN' ? "Context" : "还原语境"} isBlockLocked={lockedModules["exp_skin_context"]} {...slotProps} />
-                <span>{lang === 'EN' ? ", gazing at" : "之中，凝视"}</span> <SkinSlot blockId="exp_skin_object" placeholder={lang === 'EN' ? "Object" : "意向对象"} isBlockLocked={lockedModules["exp_skin_object"]} {...slotProps} />
-                <span>{lang === 'EN' ? ", filtered through" : "，透过"}</span> <SkinSlot blockId="exp_skin_method" placeholder={lang === 'EN' ? "Method" : "还原方法"} isBlockLocked={lockedModules["exp_skin_method"]} {...slotProps} />
-                <span>{lang === 'EN' ? "." : "进行本质直观。"}</span>
+                <span>{lang === 'EN' ? "Translate from" : "从"}</span> <SkinSlot blockId="exp_skin_context" placeholder={lang === 'EN' ? "Story Context" : "故事语境"} isBlockLocked={lockedModules["exp_skin_context"]} {...slotProps} />
+                <span>{lang === 'EN' ? ", following" : "中，追踪"}</span> <SkinSlot blockId="exp_skin_object" placeholder={lang === 'EN' ? "Object Chain" : "物象链条"} isBlockLocked={lockedModules["exp_skin_object"]} {...slotProps} />
+                <span>{lang === 'EN' ? ", through" : "，通过"}</span> <SkinSlot blockId="exp_skin_method" placeholder={lang === 'EN' ? "Script Method" : "脚本方法"} isBlockLocked={lockedModules["exp_skin_method"]} {...slotProps} />
+                <span>{lang === 'EN' ? "." : "生成电影脚本。"}</span>
               </div>
             </section>
           </div>
@@ -1263,7 +1239,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
                         if (!!lockedModules[b] === isAllLocked) onToggleLock?.(b);
                       });
                     }}
-                    className={`group/btn relative flex items-center justify-center p-1 rounded transition-all ${['skin_genre', 'skin_structure', 'skin_volume'].every(b => lockedModules[b]) ? (theme === 'retro' ? 'bg-black/5 text-[var(--text-accent)] border border-[var(--text-accent)]/30' : 'bg-zinc-800 text-amber-500 border border-amber-500/30') : (theme === 'retro' ? 'text-[var(--text-muted)] hover:bg-black/5 hover:text-[var(--text-main)] border border-transparent' : 'text-zinc-500 hover:bg-white/5 hover:text-white border border-transparent')}`}
+                    className={`group/btn relative flex items-center justify-center p-1 rounded transition-all ${['skin_genre', 'skin_structure', 'skin_volume'].every(b => lockedModules[b]) ? (theme === 'retro' ? 'bg-black/5 text-[var(--text-accent)] border border-[var(--text-accent)]/30' : 'bg-zinc-800 text-[var(--mist-active-accent)] border border-[var(--mist-active-accent)]/30') : (theme === 'retro' ? 'text-[var(--text-muted)] hover:bg-black/5 hover:text-[var(--text-main)] border border-transparent' : 'text-zinc-500 hover:bg-white/5 hover:text-white border border-transparent')}`}
                   >
                     {['skin_genre', 'skin_structure', 'skin_volume'].every(b => lockedModules[b]) ? <Lock size={12} /> : <Unlock size={12} />}
                     <span className={`absolute top-full mt-1 right-0 px-2 py-1 text-[10px] font-normal whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity duration-150 pointer-events-none z-[100] rounded shadow-md ${theme === 'retro' ? 'bg-[#1A1814] text-[var(--text-main)] border border-[var(--border-main)]/50' : 'bg-zinc-800 text-zinc-300 border border-zinc-700'}`}>
@@ -1311,7 +1287,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
                 <div className="flex items-center gap-1.5 opacity-50 hover:opacity-100 transition-opacity">
                   <button
                     onClick={() => setSummaryExpanded(!summaryExpanded)}
-                    className={`group/btn relative flex items-center justify-center p-1 rounded transition-all ${summaryExpanded ? (theme === 'retro' ? 'bg-black/5 text-[var(--text-accent)] border border-[var(--text-accent)]/30' : 'bg-zinc-800 text-gold-primary border border-gold-primary/30') : (theme === 'retro' ? 'text-[var(--text-muted)] hover:bg-black/5 hover:text-[var(--text-main)] border border-transparent' : 'text-zinc-500 hover:bg-white/5 hover:text-white border border-transparent')}`}
+                    className={`group/btn relative flex items-center justify-center p-1 rounded transition-all ${summaryExpanded ? (theme === 'retro' ? 'bg-black/5 text-[var(--text-accent)] border border-[var(--text-accent)]/30' : 'bg-zinc-800 text-[var(--mist-active-accent)] border border-[var(--mist-active-accent)]/30') : (theme === 'retro' ? 'text-[var(--text-muted)] hover:bg-black/5 hover:text-[var(--text-main)] border border-transparent' : 'text-zinc-500 hover:bg-white/5 hover:text-white border border-transparent')}`}
                   >
                     {summaryExpanded ? <X size={12} /> : <Plus size={12} />}
                     <span className={`absolute top-full mt-1 right-0 px-2 py-1 text-[10px] font-normal whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity duration-150 pointer-events-none z-[100] rounded shadow-md ${theme === 'retro' ? 'bg-[#1A1814] text-[var(--text-main)] border border-[var(--border-main)]/50' : 'bg-zinc-800 text-zinc-300 border border-zinc-700'}`}>
@@ -1335,7 +1311,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
                         if (!!lockedModules[b] === isAllLocked) onToggleLock?.(b);
                       });
                     }}
-                    className={`group/btn relative flex items-center justify-center p-1 rounded transition-all ${['skin_era', 'skin_society', 'skin_age', 'skin_gender', 'skin_profession', 'sur10x', 'skin_ideology', 'skin_everything', 'skin_location', 'skin_ending'].every(b => lockedModules[b]) ? (theme === 'retro' ? 'bg-black/5 text-[var(--text-accent)] border border-[var(--text-accent)]/30' : 'bg-zinc-800 text-amber-500 border border-amber-500/30') : (theme === 'retro' ? 'text-[var(--text-muted)] hover:bg-black/5 hover:text-[var(--text-main)] border border-transparent' : 'text-zinc-500 hover:bg-white/5 hover:text-white border border-transparent')}`}
+                    className={`group/btn relative flex items-center justify-center p-1 rounded transition-all ${['skin_era', 'skin_society', 'skin_age', 'skin_gender', 'skin_profession', 'sur10x', 'skin_ideology', 'skin_everything', 'skin_location', 'skin_ending'].every(b => lockedModules[b]) ? (theme === 'retro' ? 'bg-black/5 text-[var(--text-accent)] border border-[var(--text-accent)]/30' : 'bg-zinc-800 text-[var(--mist-active-accent)] border border-[var(--mist-active-accent)]/30') : (theme === 'retro' ? 'text-[var(--text-muted)] hover:bg-black/5 hover:text-[var(--text-main)] border border-transparent' : 'text-zinc-500 hover:bg-white/5 hover:text-white border border-transparent')}`}
                   >
                     {['skin_era', 'skin_society', 'skin_age', 'skin_gender', 'skin_profession', 'sur10x', 'skin_ideology', 'skin_everything', 'skin_location', 'skin_ending'].every(b => lockedModules[b]) ? <Lock size={12} /> : <Unlock size={12} />}
                     <span className={`absolute top-full mt-1 right-0 px-2 py-1 text-[10px] font-normal whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity duration-150 pointer-events-none z-[100] rounded shadow-md ${theme === 'retro' ? 'bg-[#1A1814] text-[var(--text-main)] border border-[var(--border-main)]/50' : 'bg-zinc-800 text-zinc-300 border border-zinc-700'}`}>
@@ -1512,7 +1488,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
                 </button>
                 <button
                   onClick={handleGlobalToggleLockCoordinates}
-                  className={`px-3 py-2 h-9 rounded flex items-center gap-2 ${theme === 'retro' ? 'bg-[var(--bg-main)] border border-[var(--border-main)]/40' : 'bg-zinc-900 border border-zinc-800'} transition-all ${isCountryLocked && isYearLocked ? (theme === 'retro' ? 'text-[var(--text-accent)] border-[var(--text-accent)]/30' : 'text-amber-500 border-amber-500/30') : (theme === 'retro' ? 'text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'text-zinc-500 hover:text-white hover:border-zinc-600')}`}
+                  className={`px-3 py-2 h-9 rounded flex items-center gap-2 ${theme === 'retro' ? 'bg-[var(--bg-main)] border border-[var(--border-main)]/40' : 'bg-zinc-900 border border-zinc-800'} transition-all ${isCountryLocked && isYearLocked ? (theme === 'retro' ? 'text-[var(--text-accent)] border-[var(--text-accent)]/30' : 'text-[var(--mist-active-accent)] border-[var(--mist-active-accent)]/30') : (theme === 'retro' ? 'text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'text-zinc-500 hover:text-white hover:border-zinc-600')}`}
                   title={lang === 'EN' ? 'Global Lock' : '全局锁定'}
                 >
                   {isCountryLocked && isYearLocked ? <Lock size={14} /> : <Unlock size={14} />}
@@ -1559,7 +1535,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
                   </h3>
                   <div className="flex items-center gap-1">
                     <button onClick={handleRandomGender} disabled={isGenderLocked} className={`p-1.5 rounded ${theme === 'retro' ? 'text-[var(--text-muted)] hover:text-[var(--text-main)] border border-[var(--border-main)]/30' : 'text-zinc-600 hover:text-white border border-zinc-800 hover:border-zinc-600'} transition-all ${isGenderLocked ? 'opacity-30 cursor-not-allowed' : ''}`}><Dice5 size={12} /></button>
-                    <button onClick={handleToggleLockGender} className={`p-1.5 rounded border transition-all ${isGenderLocked ? (theme === 'retro' ? 'text-[var(--text-accent)] border-[var(--text-accent)]/30 bg-[var(--text-accent)]/5' : 'text-amber-500 border-amber-500/30 bg-amber-900/20') : (theme === 'retro' ? 'text-[var(--text-muted)] hover:text-[var(--text-main)] border-[var(--border-main)]/30' : 'text-zinc-600 hover:text-white border-zinc-800 hover:border-zinc-600')}`}>{isGenderLocked ? <Lock size={12} /> : <Unlock size={12} />}</button>
+                    <button onClick={handleToggleLockGender} className={`p-1.5 rounded border transition-all ${isGenderLocked ? (theme === 'retro' ? 'text-[var(--text-accent)] border-[var(--text-accent)]/30 bg-[var(--text-accent)]/5' : 'text-[var(--mist-active-accent)] border-[var(--mist-active-accent)]/30 bg-[var(--mist-active-accent)]/10') : (theme === 'retro' ? 'text-[var(--text-muted)] hover:text-[var(--text-main)] border-[var(--border-main)]/30' : 'text-zinc-600 hover:text-white border-zinc-800 hover:border-zinc-600')}`}>{isGenderLocked ? <Lock size={12} /> : <Unlock size={12} />}</button>
                     <button onClick={handleResetGender} disabled={isGenderLocked} className={`p-1.5 rounded ${theme === 'retro' ? 'text-[var(--text-muted)] hover:text-red-700 border border-[var(--border-main)]/30' : 'text-zinc-600 hover:text-red-400 border border-zinc-800 hover:border-red-500/50'} transition-all ${isGenderLocked ? 'opacity-30 cursor-not-allowed' : ''}`}><Trash2 size={12} /></button>
                   </div>
                 </div>
@@ -1617,7 +1593,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
                   </h3>
                   <div className="flex items-center gap-1">
                     <button onClick={handleRandomAge} disabled={isAgeLocked} className={`p-1.5 rounded ${theme === 'retro' ? 'text-[var(--text-muted)] hover:text-[var(--text-main)] border border-[var(--border-main)]/30' : 'text-zinc-600 hover:text-white border border-zinc-800 hover:border-zinc-600'} transition-all ${isAgeLocked ? 'opacity-30 cursor-not-allowed' : ''}`}><Dice5 size={12} /></button>
-                    <button onClick={handleToggleLockAge} className={`p-1.5 rounded border transition-all ${isAgeLocked ? (theme === 'retro' ? 'text-[var(--text-accent)] border-[var(--text-accent)]/30 bg-[var(--text-accent)]/5' : 'text-amber-500 border-amber-500/30 bg-amber-900/20') : (theme === 'retro' ? 'text-[var(--text-muted)] hover:text-[var(--text-main)] border-[var(--border-main)]/30' : 'text-zinc-600 hover:text-white border-zinc-800 hover:border-zinc-600')}`}>{isAgeLocked ? <Lock size={12} /> : <Unlock size={12} />}</button>
+                    <button onClick={handleToggleLockAge} className={`p-1.5 rounded border transition-all ${isAgeLocked ? (theme === 'retro' ? 'text-[var(--text-accent)] border-[var(--text-accent)]/30 bg-[var(--text-accent)]/5' : 'text-[var(--mist-active-accent)] border-[var(--mist-active-accent)]/30 bg-[var(--mist-active-accent)]/10') : (theme === 'retro' ? 'text-[var(--text-muted)] hover:text-[var(--text-main)] border-[var(--border-main)]/30' : 'text-zinc-600 hover:text-white border-zinc-800 hover:border-zinc-600')}`}>{isAgeLocked ? <Lock size={12} /> : <Unlock size={12} />}</button>
                     <button onClick={handleResetAge} disabled={isAgeLocked} className={`p-1.5 rounded ${theme === 'retro' ? 'text-[var(--text-muted)] hover:text-red-700 border border-[var(--border-main)]/30' : 'text-zinc-600 hover:text-red-400 border border-zinc-800 hover:border-red-500/50'} transition-all ${isAgeLocked ? 'opacity-30 cursor-not-allowed' : ''}`}><Trash2 size={12} /></button>
                   </div>
                 </div>
@@ -1681,7 +1657,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
                 </button>
                 <button
                   onClick={handleGlobalToggleLockIdentity}
-                  className={`px-3 py-2 h-9 rounded flex items-center gap-2 ${theme === 'retro' ? 'bg-[var(--bg-main)] border border-[var(--border-main)]/40' : 'bg-zinc-900 border border-zinc-800'} transition-all ${isGenderLocked && isAgeLocked ? (theme === 'retro' ? 'text-[var(--text-accent)] border-[var(--text-accent)]/30' : 'text-amber-500 border-amber-500/30') : (theme === 'retro' ? 'text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'text-zinc-500 hover:text-white hover:border-zinc-600')}`}
+                  className={`px-3 py-2 h-9 rounded flex items-center gap-2 ${theme === 'retro' ? 'bg-[var(--bg-main)] border border-[var(--border-main)]/40' : 'bg-zinc-900 border border-zinc-800'} transition-all ${isGenderLocked && isAgeLocked ? (theme === 'retro' ? 'text-[var(--text-accent)] border-[var(--text-accent)]/30' : 'text-[var(--mist-active-accent)] border-[var(--mist-active-accent)]/30') : (theme === 'retro' ? 'text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'text-zinc-500 hover:text-white hover:border-zinc-600')}`}
                   title={lang === 'EN' ? 'Global Lock' : '全局锁定'}
                 >
                   {isGenderLocked && isAgeLocked ? <Lock size={14} /> : <Unlock size={14} />}

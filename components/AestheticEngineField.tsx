@@ -36,7 +36,7 @@ const ModuleContainer = ({ id, lockedModules, moveModule, children }: React.Prop
     const { theme } = useTheme();
     const isLocked = lockedModules[id];
     const isFixed = ['PRESETS', 'PALETTE', 'STYLE'].includes(id);
-    const borderColor = theme === 'retro' ? "border-black/5" : "border-rose-500/20";
+    const borderColor = theme === 'retro' ? "border-black/5" : "border-[var(--mist-active-accent)]/20";
 
     return (
         <div
@@ -63,8 +63,8 @@ const ModuleHeader = ({ icon: Icon, label, actionButtons }: { icon: any, label: 
     const { theme } = useTheme();
     return (
         <div className="flex items-center justify-between mb-0.5 pl-3">
-            <div className={`flex items-center gap-1.5 text-[13px] font-bold uppercase tracking-widest ${theme === 'retro' ? 'text-[#8B261D]' : 'text-rose-400'}`}>
-                <Icon size={14} className={theme === 'retro' ? 'text-[#8B261D]' : 'text-rose-400'} /> {label}
+            <div className={`flex items-center gap-1.5 text-[13px] font-bold uppercase tracking-widest ${theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-[var(--mist-active-accent)]'}`}>
+                <Icon size={14} className={theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-[var(--mist-active-accent)]'} /> {label}
             </div>
             {actionButtons}
         </div>
@@ -588,9 +588,9 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
         return (
             <div className="flex flex-row gap-1 items-center shrink-0" onClick={(e) => e.stopPropagation()}>
                 <button onClick={handleCopyCategory} className={`p-1.5 rounded transition-all group ${theme === 'retro' ? 'bg-black/5 border-black/10 hover:border-black/30 text-zinc-600 hover:text-black' : 'bg-zinc-900/50 border-zinc-800 hover:border-zinc-600 text-zinc-500 hover:text-white'}`}>{copiedCategoryId === categoryLabel ? <Check size={12} className="text-green-500" /> : <Copy size={12} />}</button>
-                <button onClick={handleRandomize} disabled={isLocked} className={`p-1.5 rounded border transition-all group ${isLocked ? (theme === 'retro' ? 'bg-black/5 border-black/5 text-zinc-400' : 'bg-zinc-950 border-zinc-900 text-zinc-800') + ' cursor-not-allowed opacity-40' : (theme === 'retro' ? 'bg-black/5 border-black/10 hover:border-[#8B261D]/50 text-zinc-600 hover:text-[#8B261D]' : 'bg-zinc-900/50 border-zinc-800 hover:border-rose-500/50 text-zinc-500 hover:text-rose-400')}`}><Dice5 size={12} className={!isLocked ? "group-hover:rotate-90 transition-transform duration-500" : ""} /></button>
+                <button onClick={handleRandomize} disabled={isLocked} className={`p-1.5 rounded border transition-all group ${isLocked ? (theme === 'retro' ? 'bg-black/5 border-black/5 text-zinc-400' : 'bg-zinc-950 border-zinc-900 text-zinc-800') + ' cursor-not-allowed opacity-40' : (theme === 'retro' ? 'bg-black/5 border-black/10 hover:border-[#8B261D]/50 text-zinc-600 hover:text-[#8B261D]' : 'bg-zinc-900/50 border-zinc-800 hover:border-[var(--mist-active-accent)]/50 text-zinc-500 hover:text-[var(--mist-active-accent)]')}`}><Dice5 size={12} className={!isLocked ? "group-hover:rotate-90 transition-transform duration-500" : ""} /></button>
                 <button onClick={handleReset} disabled={isLocked} className={`p-1.5 rounded border transition-all group ${isLocked ? (theme === 'retro' ? 'bg-black/5 border-black/5 text-zinc-400' : 'bg-zinc-950 border-zinc-900 text-zinc-800') + ' cursor-not-allowed opacity-40' : (theme === 'retro' ? 'bg-black/5 border-black/10 hover:border-red-600/50 text-zinc-600 hover:text-red-600' : 'bg-zinc-900/50 border-zinc-800 hover:border-red-500/50 text-zinc-500 hover:text-red-400')}`}><RotateCcw size={12} className={!isLocked ? "group-hover:-rotate-90 transition-transform duration-500" : ""} /></button>
-                <button onClick={() => onToggleLock(categoryLabel)} className={`p-1.5 rounded border transition-all group ${isLocked ? (theme === 'retro' ? 'bg-[#8B261D]/10 border-[#8B261D] text-[#8B261D]' : 'bg-rose-900/30 border-rose-500 text-rose-400') : (theme === 'retro' ? 'bg-black/5 border-black/10 text-zinc-500 hover:text-black hover:border-black/30' : 'bg-zinc-900/50 border-zinc-800 text-zinc-500 hover:text-white hover:border-zinc-600')}`}>{isLocked ? <Lock size={12} /> : <Unlock size={12} />}</button>
+                <button onClick={() => onToggleLock(categoryLabel)} className={`p-1.5 rounded border transition-all group ${isLocked ? (theme === 'retro' ? 'bg-[#8B261D]/10 border-[#8B261D] text-[#8B261D]' : 'bg-[var(--mist-active-accent)]/10 border-[var(--mist-active-accent)] text-[var(--mist-active-accent)]') : (theme === 'retro' ? 'bg-black/5 border-black/10 text-zinc-500 hover:text-black hover:border-black/30' : 'bg-zinc-900/50 border-zinc-800 text-zinc-500 hover:text-white hover:border-zinc-600')}`}>{isLocked ? <Lock size={12} /> : <Unlock size={12} />}</button>
             </div>
         );
     };
@@ -603,8 +603,8 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
         const l4Blocks = ['aes_light_mood', 'aes_light_type', 'aes_light_direction', 'aes_light_shape'];
         const l5Blocks = isRealism ? ['aes_render_real'] : ['aes_render_art'];
 
-        const borderColor = "border-rose-500/20";
-        const iconColor = theme === 'retro' ? "text-[#8B261D]" : "text-rose-400";
+        const borderColor = "border-[var(--mist-active-accent)]/20";
+        const iconColor = theme === 'retro' ? "text-[var(--text-accent)]" : "text-[var(--mist-active-accent)]";
 
         const slot = (bid: string, small = true, props = {}) => (
             <ProphecySlot
@@ -645,7 +645,7 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
                 return (
                     <ModuleContainer key="PRESETS" id="PRESETS" lockedModules={lockedModules} moveModule={moveModule}>
                         <div className="flex items-center justify-between mb-0.5 pl-3">
-                            <div className={`flex items-center gap-1.5 text-[13px] font-bold uppercase tracking-widest ${theme === 'retro' ? 'text-[#8B261D]' : 'text-rose-400'}`}>
+                            <div className={`flex items-center gap-1.5 text-[13px] font-bold uppercase tracking-widest ${theme === 'retro' ? 'text-[#8B261D]' : 'text-[var(--mist-active-accent)]'}`}>
                                 <Wand2 size={14} className={theme === 'retro' ? 'text-[#8B261D]' : iconColor} />
                                 {lang === 'EN' ? "MASTER BLUEPRINTS" : "集成预设"}
                             </div>
@@ -654,10 +654,10 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
                         <div className="p-1 flex flex-row items-stretch gap-3 pl-3 h-[5rem]">
                             <button
                                 onClick={() => openLibrary('aes_palette_preset')}
-                                className={`shrink-0 h-full px-2 border border-dashed rounded-lg flex flex-col items-center justify-center gap-1 transition-all group/dash w-20 ${theme === 'retro' ? (selectedPresetName ? 'bg-[#8B261D]/10 border-[#8B261D]/40' : 'bg-black/[0.02] border-[var(--border-main)] hover:border-[#8B261D]/50') : (selectedPresetName ? 'bg-rose-500/5 border-rose-500/40' : 'border-zinc-700 hover:bg-white/5 hover:border-rose-500/50')}`}
+                                className={`shrink-0 h-full px-2 border border-dashed rounded-lg flex flex-col items-center justify-center gap-1 transition-all group/dash w-20 ${theme === 'retro' ? (selectedPresetName ? 'bg-[#8B261D]/10 border-[#8B261D]/40' : 'bg-black/[0.02] border-[var(--border-main)] hover:border-[#8B261D]/50') : (selectedPresetName ? 'bg-[var(--mist-active-accent)]/5 border-[var(--mist-active-accent)]/40' : 'border-zinc-700 hover:bg-white/5 hover:border-[var(--mist-active-accent)]/50')}`}
                             >
-                                <Plus size={14} className={selectedPresetName ? (theme === 'retro' ? "text-[#8B261D]" : "text-rose-400") : (theme === 'retro' ? "text-[#8B261D]/60 group-hover/dash:text-[#8B261D]" : "text-zinc-600 group-hover/dash:text-rose-400")} />
-                                <span className={`text-[11px] font-bold uppercase tracking-tight text-center leading-tight ${selectedPresetName ? (theme === 'retro' ? 'text-black' : 'text-white') : (theme === 'retro' ? 'text-[#8B261D]/70 group-hover/dash:text-[#8B261D]' : 'text-zinc-500 group-hover/dash:text-rose-400')}`}>
+                                <Plus size={14} className={selectedPresetName ? (theme === 'retro' ? "text-[#8B261D]" : "text-[var(--mist-active-accent)]") : (theme === 'retro' ? "text-[#8B261D]/60 group-hover/dash:text-[#8B261D]" : "text-zinc-600 group-hover/dash:text-[var(--mist-active-accent)]")} />
+                                <span className={`text-[11px] font-bold uppercase tracking-tight text-center leading-tight ${selectedPresetName ? (theme === 'retro' ? 'text-black' : 'text-white') : (theme === 'retro' ? 'text-[#8B261D]/70 group-hover/dash:text-[#8B261D]' : 'text-zinc-500 group-hover/dash:text-[var(--mist-active-accent)]')}`}>
                                     {selectedPresetName ? formatTag(selectedPresetName) : (lang === 'EN' ? "SELECT" : "库选")}
                                 </span>
                             </button>
@@ -669,7 +669,7 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
                                             <button
                                                 key={preset.id}
                                                 onClick={() => onApplyPreset?.(preset)}
-                                                className={`flex flex-row items-center gap-1.5 p-1 px-2 rounded-md border transition-all text-left group/card relative w-full h-[1.6rem] ${isSelected ? (theme === 'retro' ? 'bg-[#8B261D]/20 border-[#8B261D]/50 shadow-sm' : 'bg-rose-500/10 border-rose-500/40 shadow-sm') : (theme === 'retro' ? 'bg-transparent border-[var(--border-main)] hover:bg-[#8B261D]/5' : 'bg-zinc-900/30 border-white/5 hover:bg-zinc-800 hover:border-white/10')}`}
+                                                className={`flex flex-row items-center gap-1.5 p-1 px-2 rounded-md border transition-all text-left group/card relative w-full h-[1.6rem] ${isSelected ? (theme === 'retro' ? 'bg-[#8B261D]/20 border-[#8B261D]/50 shadow-sm' : 'bg-[var(--mist-active-accent)]/10 border-[var(--mist-active-accent)]/40 shadow-sm') : (theme === 'retro' ? 'bg-transparent border-[var(--border-main)] hover:bg-[#8B261D]/5' : 'bg-zinc-900/30 border-white/5 hover:bg-zinc-800 hover:border-white/10')}`}
                                             >
                                                 <div className="flex gap-0.5 shrink-0">
                                                     {preset.colors.slice(0, 3).map((c, i) => (
@@ -693,7 +693,7 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
                 return (
                     <ModuleContainer key="PALETTE" id="PALETTE" lockedModules={lockedModules} moveModule={moveModule}>
                         <div className="flex items-center justify-between mb-0.5 pl-3">
-                            <div className={`flex items-center gap-1.5 text-[13px] font-bold uppercase tracking-widest ${theme === 'retro' ? 'text-[#8B261D]' : 'text-rose-400'}`}>
+                            <div className={`flex items-center gap-1.5 text-[13px] font-bold uppercase tracking-widest ${theme === 'retro' ? 'text-[#8B261D]' : 'text-[var(--mist-active-accent)]'}`}>
                                 <Palette size={14} className={theme === 'retro' ? 'text-[#8B261D]' : iconColor} />
                                 {lang === 'EN' ? "PALETTE" : "色彩"}
                             </div>
@@ -760,7 +760,7 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
                 return (
                     <ModuleContainer key="STYLE" id="STYLE" lockedModules={lockedModules} moveModule={moveModule}>
                         <div className="flex items-center justify-between mb-0.5 pl-3">
-                            <div className={`flex items-center gap-1.5 text-[13px] font-bold uppercase tracking-widest ${theme === 'retro' ? 'text-[#8B261D]' : 'text-rose-400'}`}>
+                            <div className={`flex items-center gap-1.5 text-[13px] font-bold uppercase tracking-widest ${theme === 'retro' ? 'text-[#8B261D]' : 'text-[var(--mist-active-accent)]'}`}>
                                 <BookOpen size={14} className={theme === 'retro' ? 'text-[#8B261D]' : iconColor} /> {lang === 'EN' ? "SOUL" : "魂"}
                             </div>
                             {renderActionButtons(l0Blocks, 'STYLE')}
@@ -789,7 +789,7 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
                     return (
                         <ModuleContainer key="SUBJECT" id="SUBJECT" lockedModules={lockedModules} moveModule={moveModule}>
                             <div className="flex items-center justify-between mb-0.5 pl-3">
-                                <div className={`flex items-center gap-1.5 text-[13px] font-bold uppercase tracking-widest ${theme === 'retro' ? 'text-[#8B261D]' : 'text-rose-400'}`}>
+                                <div className={`flex items-center gap-1.5 text-[13px] font-bold uppercase tracking-widest ${theme === 'retro' ? 'text-[#8B261D]' : 'text-[var(--mist-active-accent)]'}`}>
                                     <User size={14} className={theme === 'retro' ? 'text-[#8B261D]' : iconColor} /> L2 {lang === 'EN' ? "Subject" : "身"}
                                 </div>
                                 {renderActionButtons(HUMAN_BLOCKS, 'SUBJECT')}
@@ -844,7 +844,7 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
                                             value={fieldState['aes_l2_custom']?.[0] || ""}
                                             onChange={(e) => onChange({ ...fieldState, 'aes_l2_custom': [e.target.value] })}
                                             placeholder={lang === 'EN' ? "Custom Subject Detail (Appended to prompt)..." : "自定义主体细节 (追加在 Prompt 之后)..."}
-                                            className={`w-full border rounded px-3 py-2 text-xs placeholder-zinc-700 focus:outline-none transition-colors resize-none overflow-y-auto custom-scrollbar min-h-[4.5rem] ${theme === 'retro' ? 'bg-transparent border-[var(--border-main)] text-zinc-800 focus:border-[#8B261D]/50 shadow-none' : 'bg-black/20 border-zinc-800 text-rose-300 focus:border-rose-500/50'}`}
+                                            className={`w-full border rounded px-3 py-2 text-xs placeholder-zinc-700 focus:outline-none transition-colors resize-none overflow-y-auto custom-scrollbar min-h-[4.5rem] ${theme === 'retro' ? 'bg-transparent border-[var(--border-main)] text-zinc-800 focus:border-[#8B261D]/50 shadow-none' : 'bg-black/20 border-zinc-800 text-[var(--mist-active-accent)] focus:border-[var(--mist-active-accent)]/50'}`}
                                         />
                                     </div>
                                 </div>
@@ -863,7 +863,7 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
                                         value={fieldState['aes_l2_custom']?.[0] || ""}
                                         onChange={(e) => onChange({ ...fieldState, 'aes_l2_custom': [e.target.value] })}
                                         placeholder={lang === 'EN' ? "Custom Creature Detail..." : "自定义生物细节..."}
-                                        className={`w-full border rounded px-3 py-2 text-xs placeholder-zinc-700 focus:outline-none transition-colors resize-none overflow-y-auto custom-scrollbar min-h-[4.5rem] ${theme === 'retro' ? 'bg-transparent border-[var(--border-main)] text-zinc-800 focus:border-[#8B261D]/50 shadow-none' : 'bg-black/20 border-zinc-800 text-rose-300 focus:border-rose-500/50'}`}
+                                        className={`w-full border rounded px-3 py-2 text-xs placeholder-zinc-700 focus:outline-none transition-colors resize-none overflow-y-auto custom-scrollbar min-h-[4.5rem] ${theme === 'retro' ? 'bg-transparent border-[var(--border-main)] text-zinc-800 focus:border-[#8B261D]/50 shadow-none' : 'bg-black/20 border-zinc-800 text-[var(--mist-active-accent)] focus:border-[var(--mist-active-accent)]/50'}`}
                                     />
                                 </div>
                             </div>
@@ -874,7 +874,7 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
                 return (
                     <ModuleContainer key="STAGE" id="STAGE" lockedModules={lockedModules} moveModule={moveModule}>
                         <div className="flex items-center justify-between mb-0.5 pl-3">
-                            <div className={`flex items-center gap-1.5 text-[13px] font-bold uppercase tracking-widest ${theme === 'retro' ? 'text-[#8B261D]' : 'text-rose-400'}`}>
+                            <div className={`flex items-center gap-1.5 text-[13px] font-bold uppercase tracking-widest ${theme === 'retro' ? 'text-[#8B261D]' : 'text-[var(--mist-active-accent)]'}`}>
                                 <Box size={14} className={theme === 'retro' ? 'text-[#8B261D]' : iconColor} /> L3 {lang === 'EN' ? "Stage" : "场"}
                             </div>
                             {renderActionButtons(l3Blocks, 'STAGE')}
@@ -903,7 +903,7 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
                                         value={fieldState['aes_l3_custom']?.[0] || ""}
                                         onChange={(e) => onChange({ ...fieldState, 'aes_l3_custom': [e.target.value] })}
                                         placeholder={lang === 'EN' ? "Custom Scene Detail (Appended to prompt)..." : "自定义场景细节 (追加在 Prompt 之后)..."}
-                                        className={`w-full border rounded px-3 py-2 text-xs placeholder-zinc-700 focus:outline-none transition-colors resize-none overflow-y-auto custom-scrollbar min-h-[4.5rem] ${theme === 'retro' ? 'bg-transparent border-black/10 text-zinc-800 focus:border-[#8B261D]/50 shadow-none' : 'bg-black/20 border-zinc-800 text-rose-300 focus:border-rose-500/50'}`}
+                                        className={`w-full border rounded px-3 py-2 text-xs placeholder-zinc-700 focus:outline-none transition-colors resize-none overflow-y-auto custom-scrollbar min-h-[4.5rem] ${theme === 'retro' ? 'bg-transparent border-black/10 text-zinc-800 focus:border-[#8B261D]/50 shadow-none' : 'bg-black/20 border-zinc-800 text-[var(--mist-active-accent)] focus:border-[var(--mist-active-accent)]/50'}`}
                                     />
                                 </div>
                             </div>
@@ -947,22 +947,22 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
                 <div className={`w-1/2 h-full flex flex-col overflow-hidden border-r backdrop-blur-md ${theme === 'retro' ? 'border-[#8B261D]/10 bg-transparent' : 'border-zinc-800 bg-[var(--bg-main)]/40'}`}>
                     <div className="shrink-0 z-20 px-6 py-4 bg-transparent flex items-center justify-between">
                         <div className="pl-6">
-                            <h2 className={`text-2xl font-serif font-black tracking-[0.05em] ${theme === 'retro' ? 'text-[#8B261D]' : 'text-rose-400'}`}>
+                            <h2 className={`text-2xl font-serif font-black tracking-[0.05em] ${theme === 'retro' ? 'text-[#8B261D]' : 'text-[var(--mist-active-accent)]'}`}>
                                 {lang === 'EN' ? "AESTHETIC ENGINE" : "情绪美学"}
                             </h2>
                         </div>
                         <div className="flex items-center gap-4">
                             <div className={`flex border rounded-lg p-1 shadow-inner ${theme === 'retro' ? 'bg-black/5 border-black/10' : 'bg-zinc-900 border-zinc-700'}`}>
-                                <button onClick={() => onAestheticModeChange('REALISM')} className={`px-3 py-1 rounded text-[9px] font-bold uppercase tracking-wider flex items-center gap-2 transition-all ${isRealism ? (theme === 'retro' ? 'bg-[#8B261D] text-white' : 'bg-rose-500 text-black') : (theme === 'retro' ? 'text-zinc-500 hover:text-black hover:bg-black/5' : 'text-zinc-500 hover:text-white hover:bg-zinc-800')}`} >
+                                <button onClick={() => onAestheticModeChange('REALISM')} className={`px-3 py-1 rounded text-[9px] font-bold uppercase tracking-wider flex items-center gap-2 transition-all ${isRealism ? (theme === 'retro' ? 'bg-[#8B261D] text-white' : 'bg-[var(--mist-active-accent)] text-black') : (theme === 'retro' ? 'text-zinc-500 hover:text-black hover:bg-black/5' : 'text-zinc-500 hover:text-white hover:bg-zinc-800')}`} >
                                     <Camera size={12} /> <span>{lang === 'EN' ? "Real" : "写实"}</span>
                                 </button>
-                                <button onClick={() => onAestheticModeChange('STYLIZED')} className={`px-3 py-1 rounded text-[9px] font-bold uppercase tracking-wider flex items-center gap-2 transition-all ${isStylized ? (theme === 'retro' ? 'bg-[#8B261D] text-white' : 'bg-rose-500 text-black') : (theme === 'retro' ? 'text-zinc-500 hover:text-black hover:bg-black/5' : 'text-zinc-500 hover:text-white hover:bg-zinc-800')}`} >
+                                <button onClick={() => onAestheticModeChange('STYLIZED')} className={`px-3 py-1 rounded text-[9px] font-bold uppercase tracking-wider flex items-center gap-2 transition-all ${isStylized ? (theme === 'retro' ? 'bg-[#8B261D] text-white' : 'bg-[var(--mist-active-accent)] text-black') : (theme === 'retro' ? 'text-zinc-500 hover:text-black hover:bg-black/5' : 'text-zinc-500 hover:text-white hover:bg-zinc-800')}`} >
                                     <Paintbrush size={12} /> <span>{lang === 'EN' ? "Art" : "美术"}</span>
                                 </button>
                             </div>
                             <button
                                 onClick={() => setAestheticModuleOrder(DEFAULT_AESTHETIC_ORDER)}
-                                className={`p-1.5 border rounded transition-all group ${theme === 'retro' ? 'bg-black/5 border-black/10 hover:border-[#8B261D]/50 text-zinc-500 hover:text-[#8B261D]' : 'bg-zinc-900 border-zinc-700 hover:border-rose-500/50 text-zinc-500 hover:text-rose-400'}`}
+                                className={`p-1.5 border rounded transition-all group ${theme === 'retro' ? 'bg-black/5 border-black/10 hover:border-[#8B261D]/50 text-zinc-500 hover:text-[#8B261D]' : 'bg-zinc-900 border-zinc-700 hover:border-[var(--mist-active-accent)]/50 text-zinc-500 hover:text-[var(--mist-active-accent)]'}`}
                             >
                                 <RotateCcw size={14} className="group-hover:-rotate-90 transition-transform duration-500" />
                             </button>
@@ -980,8 +980,8 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
                         <div className={`border p-3 rounded-xl shadow-none ${theme === 'retro' ? 'bg-transparent border-black/10' : 'bg-zinc-900/40 border-zinc-800'}`}>
                             <div className="flex items-center justify-between mb-3">
                                 <div className="flex items-center gap-2">
-                                    <Layout size={12} className={theme === 'retro' ? "text-[#8B261D]" : "text-rose-400"} />
-                                    <span className={`text-[13px] font-bold uppercase tracking-widest ${theme === 'retro' ? "text-[#8B261D]" : "text-rose-400"}`}>{lang === 'EN' ? "Logic Matrix" : "逻辑矩阵"}</span>
+                                    <Layout size={12} className={theme === 'retro' ? "text-[#8B261D]" : "text-[var(--mist-active-accent)]"} />
+                                    <span className={`text-[13px] font-bold uppercase tracking-widest ${theme === 'retro' ? 'text-[#8B261D]' : 'text-[var(--mist-active-accent)]'}`}>{lang === 'EN' ? "Logic Matrix" : "逻辑矩阵"}</span>
                                 </div>
                                 <span className="text-[8px] font-mono text-zinc-600">STRUCTURE_PRESET_V3</span>
                             </div>
@@ -993,7 +993,7 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
                                         <button
                                             key={template.id}
                                             onClick={() => handleLogicModeChange(template.id)}
-                                            className={`flex flex-col items-center text-center p-1.5 rounded border transition-all duration-300 group ${isActive ? (theme === 'retro' ? 'bg-[#8B261D]/10 border-[#8B261D] shadow-sm' : 'bg-rose-500/10 border-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.1)]') : (theme === 'retro' ? 'bg-transparent border-black/5 hover:border-black/20' : 'bg-zinc-950 border-zinc-800 hover:border-zinc-700')}`}
+                                            className={`flex flex-col items-center text-center p-1.5 rounded border transition-all duration-300 group ${isActive ? (theme === 'retro' ? 'bg-[#8B261D]/10 border-[#8B261D] shadow-sm' : 'bg-[var(--mist-active-accent)]/10 border-[var(--mist-active-accent)] shadow-none') : (theme === 'retro' ? 'bg-transparent border-black/5 hover:border-black/20' : 'bg-zinc-950 border-zinc-800 hover:border-zinc-700')}`}
                                             title={lang === 'EN' ? template.descEn : template.desc}
                                         >
                                             <div className={`p-1.5 rounded-full mb-1 transition-colors ${isActive ? (theme === 'retro' ? 'bg-[#8B261D] text-white' : 'bg-rose-500 text-black') : (theme === 'retro' ? 'bg-black/5 text-zinc-400 group-hover:text-black' : 'bg-zinc-900 text-zinc-600 group-hover:text-zinc-400')}`}>
@@ -1035,16 +1035,16 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
                     </div>
 
                     <div className="flex-[1.4] min-h-0 flex flex-col p-6 pt-2 pb-16 overflow-hidden">
-                        <div className={`flex flex-col h-full rounded-xl border backdrop-blur-md overflow-hidden shadow-none relative min-h-0 ${theme === 'retro' ? 'bg-transparent border-black/10' : 'bg-white/5 border-rose-500/30'}`}>
+                        <div className={`flex flex-col h-full rounded-xl border backdrop-blur-md overflow-hidden shadow-none relative min-h-0 ${theme === 'retro' ? 'bg-transparent border-black/10' : 'bg-white/5 border-[var(--mist-active-accent)]/30'}`}>
                             <div className={`flex items-center justify-between px-4 py-2.5 border-b shrink-0 ${theme === 'retro' ? 'bg-black/5 border-black/10' : 'bg-zinc-900 border-zinc-800'}`}>
-                                <div className={`flex items-center gap-2 ${theme === 'retro' ? 'text-[#8B261D]' : 'text-rose-400'}`}>
+                                <div className={`flex items-center gap-2 ${theme === 'retro' ? 'text-[#8B261D]' : 'text-[var(--mist-active-accent)]'}`}>
                                     <Edit3 size={12} />
                                     <span className="text-[13px] font-bold uppercase tracking-widest">
                                         {lang === 'EN' ? "Polishing" : "润色"}
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-2 scale-90 origin-right">
-                                    <button onClick={() => setUserManualPrompt(getCompilerOutput())} className={`flex items-center gap-2 px-3 py-1 rounded text-[9px] font-bold uppercase tracking-widest transition-all ${theme === 'retro' ? 'bg-[#8B261D] text-white hover:bg-[#631B15]' : 'bg-rose-500 hover:bg-rose-400 text-black'}`}>
+                                    <button onClick={() => setUserManualPrompt(getCompilerOutput())} className={`flex items-center gap-2 px-3 py-1 rounded text-[9px] font-bold uppercase tracking-widest transition-all ${theme === 'retro' ? 'bg-[#8B261D] text-white hover:bg-[#631B15]' : 'bg-[var(--mist-active-accent)] hover:bg-[var(--mist-active-accent)]/90 text-black'}`}>
                                         <ArrowDownToLine size={12} /> {lang === 'EN' ? "INJECT" : "注入"}
                                     </button>
                                     <button onClick={() => setUserManualPrompt("")} className={`flex items-center gap-2 px-3 py-1 border rounded text-[9px] font-bold uppercase tracking-widest transition-all ${theme === 'retro' ? 'bg-white border-black/10 text-zinc-600 hover:text-[#8B261D] hover:bg-black/5' : 'bg-zinc-800 hover:bg-red-900/30 text-zinc-400 hover:text-red-400 border-zinc-700'}`}>

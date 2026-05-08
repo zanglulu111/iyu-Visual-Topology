@@ -210,7 +210,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
 
             <ProductManualModal isOpen={isManualOpen} onClose={closeManual} driverType={hoveredDriver} />
             <SutureModal isOpen={isSutureOpen} onClose={closeSuture} onGenerate={onSutureGenerate} isGenerating={isSutureGenerating} lang={lang} driverType={selectedDriver || DriverType.NARRATIVE} />
-            {isHistoryOpen && <HistoryModal history={history} onRestore={onHistoryRestore} onClear={onHistoryClear} onClose={closeHistory} lang={lang} />}
+            {isHistoryOpen && <HistoryModal history={history} onRestore={onHistoryRestore} onClose={closeHistory} lang={lang} />}
         </div>
     );
 };

@@ -4,9 +4,9 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { CreativeBlueprint, BlueprintLanguage, NarrativeFieldState, CreativeTreatment, DriverType, CollectionItem, WorldLawConfig, SubjectType, AestheticMode } from '../types';
 import {
     X, Wand2, Loader2, ArrowLeft, ArrowRight, History as HistoryIcon,
-    Globe, BookOpen, ImageIcon, BrainCircuit, Target, Film, Eye, Box,
+    Globe, BookOpen, ImageIcon, Target, Film, Eye, Box,
     ClipboardCopy, Check, HelpCircle, Home, TestTube, Zap, Palette,
-    Settings2, Layers, Terminal, Feather, Bookmark, Star, FilePlus, Download, List, Database, Heart, Activity, Upload, Flame,
+    Settings2, Layers, Terminal, Feather, Star, FilePlus, Download, List, Database, Heart, Activity, Upload, Flame,
     Archive, Save, Hexagon
 } from 'lucide-react';
 import * as geminiService from '../services/geminiService';
@@ -14,7 +14,6 @@ import { useTheme } from '../contexts/ThemeContext';
 import { CommercialView } from './blueprint/CommercialView';
 import { NarrativeView } from './blueprint/NarrativeView';
 import { AssetsView } from './blueprint/AssetsView';
-import { AnalysisView } from './blueprint/AnalysisView';
 import { ExperimentalView } from './blueprint/ExperimentalView';
 import { AestheticView } from './blueprint/AestheticView';
 import { TrailerView } from './blueprint/TrailerView';
@@ -93,11 +92,11 @@ const createEmptyCommercial = (lang: BlueprintLanguage): CreativeBlueprint => ({
 const createEmptyExperimental = (lang: BlueprintLanguage): CreativeBlueprint => ({
     treatmentId: `exp_manual_${Date.now()}`,
     driverType: DriverType.EXPERIMENTAL,
-    styleName: lang === 'EN' ? 'Blank Reduction Protocol' : '空白还原协议',
+    styleName: lang === 'EN' ? 'Blank Script Protocol' : '空白脚本协议',
     narrative: {
-        title: lang === 'EN' ? 'NEW EXPERIMENT' : '新实验项目',
-        logline: lang === 'EN' ? 'Enter concept axiom...' : '在此输入核心观念公理...',
-        synopsis: lang === 'EN' ? 'Define deconstruction logic...' : '在此定义还原与解构逻辑...'
+        title: lang === 'EN' ? 'NEW SCRIPT PROJECT' : '新脚本项目',
+        logline: lang === 'EN' ? 'Paste or define the source story...' : '在此粘贴或定义故事原文...',
+        synopsis: lang === 'EN' ? 'Define translation logic...' : '在此定义故事转译逻辑...'
     },
     context: { world: "", tone: "", colorPalette: ['#A855F7', '#1A0033'], moodboard: { prompt: "", images: [], selectedImageId: null } },
     assets: { characters: [], locations: [], props: [] },
@@ -151,7 +150,7 @@ const createEmptyNarrative = (lang: BlueprintLanguage): CreativeBlueprint => ({
         logline: lang === 'EN' ? 'Enter logline...' : '在此输入故事梗概...',
         synopsis: ""
     },
-    context: { world: "", tone: "", colorPalette: ['#D4AF37', '#1A1A00'], moodboard: { prompt: "", images: [], selectedImageId: null } },
+    context: { world: "", tone: "", colorPalette: ['#FFD700', '#1A1A00'], moodboard: { prompt: "", images: [], selectedImageId: null } },
     assets: { characters: [], locations: [], props: [] },
     metonymyData: {
         screenplay: [],
@@ -316,7 +315,6 @@ export const BlueprintEditor: React.FC<BlueprintEditorProps> = ({
             menuItems = [
                 { id: 'NARRATIVE', label: language === 'EN' ? "Core Narrative" : "核心叙事", icon: BookOpen },
                 { id: 'ASSETS', label: language === 'EN' ? "Scene & Assets" : "场景资产", icon: ImageIcon },
-                { id: 'ANALYSIS', label: language === 'EN' ? "Psychoanalysis" : "精神分析", icon: BrainCircuit },
                 { id: 'METONYMY', label: language === 'EN' ? "Script Metonymy" : "剧本转喻", icon: Wand2 }
             ];
         }
@@ -353,7 +351,11 @@ export const BlueprintEditor: React.FC<BlueprintEditorProps> = ({
 
     const handleExportHtml = () => {
         const bp = effectiveBlueprint;
-        const assets = bp.assets;
+        const assets = {
+            characters: Array.isArray(bp.assets?.characters) ? bp.assets.characters : [],
+            locations: Array.isArray(bp.assets?.locations) ? bp.assets.locations : [],
+            props: Array.isArray(bp.assets?.props) ? bp.assets.props : []
+        };
 
         // Helper for HTML escaping
         const escapeHtml = (unsafe: string) => {
@@ -377,27 +379,6 @@ export const BlueprintEditor: React.FC<BlueprintEditorProps> = ({
             assetsHtml += `<h3 class="gold-text">道具 (Props)</h3><ul>` + assets.props.map(p => `<li><strong>${escapeHtml(p.name)}</strong>: ${escapeHtml(p.desc)}</li>`).join('') + `</ul>`;
         }
 
-        let psychoHtml = '';
-        if (bp.narrative.psychoanalysis) {
-            // Convert markdown-ish to basic HTML
-            let analysisContent = bp.narrative.psychoanalysis
-                .replace(/\n/g, '<br>')
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                .replace(/### (.*?)(<br>|$)/g, '<h4 class="gold-text">$1</h4>')
-                .replace(/## (.*?)(<br>|$)/g, '<h3 class="gold-text">$1</h3>')
-                .replace(/# (.*?)(<br>|$)/g, '<h2 class="gold-text">$1</h2>');
-
-            // Handle formula display in HTML (simplistic replacement)
-            analysisContent = analysisContent.replace(/\$\$(.*?)\$\$/g, '<div class="formula">$1</div>');
-
-            psychoHtml = `
-        <div class="section">
-            <h2 class="gold-text">精神分析诊断报告 (Psychoanalysis)</h2>
-            <div class="analysis-content">${analysisContent}</div>
-        </div>
-        `;
-        }
-
         const htmlContent = `
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -406,16 +387,16 @@ export const BlueprintEditor: React.FC<BlueprintEditorProps> = ({
 <title>${escapeHtml(bp.narrative.title)} - Visionary Bible</title>
 <style>
 body { font-family: "Microsoft YaHei", sans-serif; background: #050505; color: #ddd; max-width: 900px; margin: 0 auto; padding: 40px; line-height: 1.8; }
-h1, h2, h3, h4 { color: #D4AF37 !important; border-bottom: 1px solid #333; padding-bottom: 10px; margin-top: 30px; }
-h1 { font-size: 2.5em; text-align: center; border-bottom: 2px solid #D4AF37; padding-bottom: 20px; }
+h1, h2, h3, h4 { color: #FFD700 !important; border-bottom: 1px solid #333; padding-bottom: 10px; margin-top: 30px; }
+h1 { font-size: 2.5em; text-align: center; border-bottom: 2px solid #FFD700; padding-bottom: 20px; }
 .meta { font-size: 0.9em; color: #888; margin-bottom: 40px; text-align: center; }
 .section { background: #111; padding: 30px; margin-bottom: 30px; border-radius: 12px; border: 1px solid #222; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
-.logline { font-style: italic; font-size: 1.2em; color: #D4AF37; margin: 10px 0; border-left: 4px solid #D4AF37; padding-left: 15px; }
+.logline { font-style: italic; font-size: 1.2em; color: #FFD700; margin: 10px 0; border-left: 4px solid #FFD700; padding-left: 15px; }
 .formula { background: #222; padding: 15px; border-radius: 5px; text-align: center; font-family: monospace; color: #fff; margin: 20px 0; border: 1px dashed #555; }
 strong { color: #fff; }
 ul { padding-left: 20px; }
 li { margin-bottom: 10px; }
-.gold-text { color: #D4AF37; }
+.gold-text { color: #FFD700; }
 </style>
 </head>
 <body>
@@ -448,8 +429,6 @@ li { margin-bottom: 10px; }
 <h2 class="gold-text">视觉资产库 (Assets)</h2>
 ${assetsHtml}
 </div>
-
-${psychoHtml}
 
 <div class="section" style="border:none; background:transparent; text-align:center;">
 <p style="color: #555; font-size: 0.8em;">Generated by Visionary Engine</p>
@@ -496,7 +475,7 @@ ${psychoHtml}
             setTimeout(() => setIsSaved(false), 3000);
         } catch (e) {
             console.error("Failed to save collection to IndexedDB", e);
-            alert(language === 'EN' ? "Failed to save collection." : "保存收藏失败。");
+            alert(language === 'EN' ? "Failed to save archive." : "保存档案失败。");
         }
     };
 
@@ -536,7 +515,6 @@ ${psychoHtml}
     };
 
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const continueFileInputRef = useRef<HTMLInputElement>(null);
     const handleContinueImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
@@ -554,9 +532,8 @@ ${psychoHtml}
         }
     };
 
-    const isAnalysisMode = activeTab === 'ANALYSIS';
     const isMetonymyMode = activeTab === 'METONYMY';
-    const mainPaddingClass = (isMetonymyMode || isAnalysisMode) ? 'p-0' : 'p-8 md:p-12';
+    const mainPaddingClass = isMetonymyMode ? 'p-0' : 'p-8 md:p-12';
 
     const renderContent = () => {
         if (activeTab === 'ASSETS') {
@@ -672,22 +649,6 @@ ${psychoHtml}
                     />
                 );
             default: // NARRATIVE
-                if (activeTab === 'ANALYSIS') {
-                    return (
-                        <AnalysisView
-                            blueprint={effectiveBlueprint}
-                            language={language}
-                            isAesthetic={false}
-                            onAnalyzePsycho={onAnalyzePsycho}
-                            onUpdateBlueprint={updateCurrentBlueprint}
-                            fieldState={fieldState}
-                            themeAccent={uiConfig.themeAccent}
-                            theme={effectiveTheme}
-                            isAdmin={isAdmin}
-                            onBack={() => setActiveTab('NARRATIVE')}
-                        />
-                    );
-                }
                 if (activeTab === 'METONYMY') {
                     return (
                         <MetonymyView
@@ -761,11 +722,12 @@ ${psychoHtml}
                             accentClass={uiConfig.themeText}
                             visionInput={visionInput}
                             visionAnalysis={visionAnalysis}
+                            worldLawConfig={worldLaw}
                         />
                     </div>
                 </div>
 
-                {!isSutureOpen && !isAnalysisMode && (
+                {!isSutureOpen && (
                     <aside className={`mist-archive-panel ${isSidebarOpen ? 'w-64 translate-x-0' : 'w-0 -translate-x-full opacity-0 overflow-hidden'} ${uiConfig.themeSidebarBg} border-r ${uiConfig.themeSidebarBorder} flex flex-col shrink-0 transition-all duration-300 ease-in-out`}>
                         <div className="w-64 flex flex-col h-full">
                             <div className="flex-1 flex flex-col py-6">
@@ -833,14 +795,19 @@ ${psychoHtml}
                             </span>
                         </button>
                         
-                        {/* Save to Collection */}
+                        {/* Save Archive */}
                         <button
                             onClick={handleSaveToCollection}
                             className="mist-app-footer-control flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]"
+                            title={language === 'EN' ? "Save archive" : "保存档案"}
                         >
-                            <Bookmark size={18} className={`transition-colors ${isSaved ? 'text-red-500 fill-red-500' : (effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white')}`} />
-                            <span className={`text-[9px] font-bold uppercase tracking-wider transition-colors ${isSaved ? 'text-red-500' : (effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white')}`}>
-                                {isSaved ? (language === 'EN' ? "Saved" : "已收藏") : (language === 'EN' ? "Save" : "收藏")}
+                            {isSaved ? (
+                                <Check size={18} className="text-emerald-400" />
+                            ) : (
+                                <Save size={18} className={`transition-colors ${effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`} />
+                            )}
+                            <span className={`text-[9px] font-bold uppercase tracking-wider transition-colors ${isSaved ? 'text-emerald-400' : (effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white')}`}>
+                                {isSaved ? (language === 'EN' ? "Saved" : "已保存") : (language === 'EN' ? "Save" : "保存档案")}
                             </span>
                         </button>
 
@@ -885,22 +852,6 @@ ${psychoHtml}
                             )}
                             <span className={`text-[9px] font-bold uppercase tracking-wider transition-colors ${effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`}>
                                 {language === 'EN' ? "Continue" : "续写"}
-                            </span>
-                        </button>
-
-                        {/* Upload / 图配文 */}
-                        <button
-                            onClick={() => !isContinueUploading && continueFileInputRef.current?.click()}
-                            className="mist-app-footer-control flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]"
-                            disabled={isContinueUploading}
-                        >
-                            {isContinueUploading ? (
-                                <Loader2 size={18} className={`animate-spin ${uiConfig.themeAccent}`} />
-                            ) : (
-                                <Upload size={18} className={`transition-colors ${effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`} />
-                            )}
-                            <span className={`text-[9px] font-bold uppercase tracking-wider transition-colors ${effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`}>
-                                {language === 'EN' ? "Upload" : "图配文"}
                             </span>
                         </button>
 
@@ -1000,13 +951,6 @@ ${psychoHtml}
                 isOpen={isTaskManagerOpen}
                 onClose={() => setIsTaskManagerOpen(false)}
                 lang={language}
-            />
-            <input
-                type="file"
-                ref={continueFileInputRef}
-                className="hidden"
-                accept="image/*"
-                onChange={handleContinueImageUpload}
             />
         </div>
     );

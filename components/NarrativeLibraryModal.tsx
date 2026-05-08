@@ -400,12 +400,8 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
     };
 
     const getThemeColor = () => {
-        if (globalTheme === 'retro') return { text: "text-[#8B261D]", border: "border-[#8B261D]/50", hex: "#8B261D" };
-        if (driverType === DriverType.COMMERCIAL) return { text: "text-mist-cyan", border: "border-mist-cyan/50", hex: "#22D3EE" };
-        if (driverType === DriverType.EXPERIMENTAL) return { text: "text-purple-400", border: "border-purple-500/50", hex: "#c084fc" };
-        if (driverType === DriverType.AESTHETIC) return { text: "text-rose-400", border: "border-rose-500/50", hex: "#fb7185" };
-        if (driverType === DriverType.TRAILER) return { text: "text-orange-400", border: "border-orange-500/50", hex: "#fb923c" };
-        return { text: "text-[#D4AF37]", border: "border-[#D4AF37]/50", hex: "#D4AF37" }; // Gold for Narrative
+        if (globalTheme === 'retro') return { text: "text-[var(--mist-active-accent)]", border: "border-[var(--mist-active-accent)]/50", hex: "var(--mist-active-accent)" };
+        return { text: "text-[var(--mist-active-accent)]", border: "border-[var(--mist-active-accent)]/50", hex: "var(--mist-active-accent)" };
     };
     const themeData = getThemeColor();
     const themeText = themeData.text;
@@ -429,9 +425,9 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
         <>
         <div className={`fixed inset-0 z-[100000] flex items-center justify-center ${globalTheme === 'retro' ? 'bg-[#8B261D]/5 backdrop-blur-md' : 'bg-black/80 backdrop-blur-[12px]'} p-0 md:p-2 xl:p-4 animate-in fade-in duration-500 pointer-events-auto`} onClick={onClose}>
             <div className={`w-full xl:w-[98vw] max-w-[1800px] h-full md:h-[96vh] ${globalTheme === 'retro' ? 'bg-[#EBE7DF] border-[#8B261D] border-2 shadow-[20px_20px_0px_0px_rgba(139,38,29,0.1)]' : `bg-[#080808] border-zinc-800/50 shadow-[0_0_100px_rgba(0,0,0,0.8)]`} md:rounded-3xl flex flex-col overflow-hidden relative transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] transform scale-100 animate-in zoom-in-95`} onClick={(e) => e.stopPropagation()}>
-                <div className={`h-24 md:h-28 border-b ${globalTheme === 'retro' ? 'border-[#8B261D]/10 bg-[#F5F2EA]' : `bg-black/40 backdrop-blur-md border-white/5`} flex items-center justify-between px-8 md:px-12 shrink-0 z-20 relative`} style={globalTheme !== 'retro' ? { borderColor: `${themeHex}1a` } : {}}>
+                <div className={`h-24 md:h-28 border-b ${globalTheme === 'retro' ? 'border-[#8B261D]/10 bg-[#F5F2EA]' : `bg-black/40 backdrop-blur-md border-[var(--mist-active-accent)]/10`} flex items-center justify-between px-8 md:px-12 shrink-0 z-20 relative`}>
                     <div className="flex items-center gap-6">
-                        <div className={`p-4 ${globalTheme === 'retro' ? 'bg-[#F9F7F1] text-[#8B261D] border-[#8B261D]/30' : `bg-zinc-900 ${themeText}`} rounded-2xl border-2 shadow-xl shadow-black/20 group-hover:scale-105 transition-transform duration-500`} style={globalTheme !== 'retro' ? { borderColor: `${themeHex}4d` } : {}}>
+                        <div className={`p-4 ${globalTheme === 'retro' ? 'bg-[#F9F7F1] text-[#8B261D] border-[#8B261D]/30' : `bg-zinc-900 ${themeText} border-[var(--mist-active-accent)]/30`} rounded-2xl border-2 shadow-xl shadow-black/20 group-hover:scale-105 transition-transform duration-500`}>
                             {blockId.includes('skin') ? <LayoutGrid size={28} /> : <Sparkles size={28} />}
                         </div>
                         <div className="flex flex-col">

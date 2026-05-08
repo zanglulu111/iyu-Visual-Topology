@@ -329,7 +329,7 @@ export const LacanGraphView: React.FC<LacanGraphViewProps> = ({
                         </div>
                     </div>
                 </button>
-                <span className={`font-serif font-bold text-xs uppercase tracking-widest ${theme === 'retro' ? 'text-[#8B261D]' : 'text-gold-primary'}`}>
+                <span className={`font-serif font-bold text-xs uppercase tracking-widest ${theme === 'retro' ? 'text-[var(--mist-active-accent)]' : 'text-gold-primary'}`}>
                     {lang === 'CN' ? '迷雾学派：欲望图式' : 'MIST: GRAPH OF DESIRE'}
                 </span>
             </div>
@@ -408,15 +408,15 @@ export const LacanGraphView: React.FC<LacanGraphViewProps> = ({
                         className={`flex items-center justify-center w-7 h-7 rounded-sm ${theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'} transition-all duration-300 hover:bg-white/5 hover:scale-110 active:scale-90`}
                         title={theme === 'dark' ? "切换为复古主题" : "切换为暗黑主题"}
                     >
-                        {theme === 'dark' ? <Moon size={14} /> : <Sun size={14} className="text-[#8B261D]" />}
+                        {theme === 'dark' ? <Moon size={14} /> : <Sun size={14} className="text-[var(--mist-active-accent)]" />}
                     </button>
 
                     {/* 4. Ring Toggle */}
                     <button
                         onClick={() => setShowRings(!showRings)}
                         className={`flex items-center justify-center w-7 h-7 rounded-sm transition-all duration-300 hover:bg-white/5 hover:scale-110 active:scale-90 focus:outline-none ${
-                            showRings 
-                                ? (theme === 'retro' ? 'text-[#8B261D]' : 'text-gold-primary') 
+                            showRings
+                                ? (theme === 'retro' ? 'text-[var(--mist-active-accent)]' : 'text-gold-primary')
                                 : (theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white')
                         }`}
                         title={lang === 'CN' ? "背景圆环开关" : "Background Rings Toggle"}
@@ -571,7 +571,7 @@ export const LacanGraphView: React.FC<LacanGraphViewProps> = ({
                 {/* RIGHT AREA: Topology Graph Canvas */}
                 <div className={`lg:w-1/2 relative flex items-center justify-center p-4 lg:p-8 overflow-hidden bg-[var(--bg-main)] transition-colors duration-500`}>
                     
-                    <div className="absolute inset-0 opacity-[0.02] pointer-events-none" style={{ backgroundImage: `radial-gradient(${isRetro ? '#8B261D' : '#D4AF37'} 1px, transparent 0)`, backgroundSize: '40px 40px' }}></div>
+                    <div className="absolute inset-0 opacity-[0.02] pointer-events-none" style={{ backgroundImage: `radial-gradient(${isRetro ? 'var(--mist-active-accent)' : '#FFD700'} 1px, transparent 0)`, backgroundSize: '40px 40px' }}></div>
 
                     <div className="relative w-full h-full max-w-[850px] max-h-[850px] flex items-center justify-center">
                         <svg 
@@ -581,7 +581,7 @@ export const LacanGraphView: React.FC<LacanGraphViewProps> = ({
                             <defs>
                                 <filter id="gold-glow-node-fix" x="-50%" y="-50%" width="200%" height="200%">
                                     <feGaussianBlur in="SourceAlpha" stdDeviation="15" result="blur" />
-                                    <feFlood floodColor="#D4AF37" floodOpacity="1" result="flood" />
+                                    <feFlood floodColor="#FFD700" floodOpacity="1" result="flood" />
                                     <feComposite in="flood" in2="blur" operator="in" />
                                     <feMerge>
                                         <feMergeNode />
@@ -590,9 +590,9 @@ export const LacanGraphView: React.FC<LacanGraphViewProps> = ({
                                 </filter>
                                 
                                 <linearGradient id="lineGradStatic" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stopColor="#D4AF37" stopOpacity="0.1" />
-                                    <stop offset="50%" stopColor="#D4AF37" stopOpacity="0.8" />
-                                    <stop offset="100%" stopColor="#D4AF37" stopOpacity="0.1" />
+                                    <stop offset="0%" stopColor="#FFD700" stopOpacity="0.1" />
+                                    <stop offset="50%" stopColor="#FFD700" stopOpacity="0.8" />
+                                    <stop offset="100%" stopColor="#FFD700" stopOpacity="0.1" />
                                 </linearGradient>
                             </defs>
                             

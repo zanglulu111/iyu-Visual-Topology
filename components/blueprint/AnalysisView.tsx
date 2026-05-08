@@ -18,7 +18,7 @@ interface AnalysisViewProps {
     isAdmin?: boolean;
 }
 
-const SimpleMathRenderer = ({ formula, language }: { formula: string, language: BlueprintLanguage }) => {
+const SimpleMathRenderer = ({ formula, language, theme }: { formula: string, language: BlueprintLanguage, theme?: string }) => {
   // Basic LaTeX symbol replacement to clean up the string for display
   const cleanText = (t: string) => {
     let text = t
@@ -68,21 +68,21 @@ const SimpleMathRenderer = ({ formula, language }: { formula: string, language: 
       <div className={containerClass}>
         {leftPart && <span className={`${textClass} text-zinc-500 font-light`}>{leftPart}</span>}
         <div className="flex flex-col items-center px-4 mx-2 group/frac">
-           <span className="border-b border-white/30 px-2 pb-1 mb-1 text-center leading-tight text-gold-primary font-bold italic group-hover/frac:text-white transition-colors text-xl md:text-2xl shadow-gold-primary/20 drop-shadow-sm">{numerator}</span>
+           <span className={`border-b ${theme === 'retro' ? 'border-[#8B261D]/30' : 'border-[var(--mist-active-accent)]/30'} px-2 pb-1 mb-1 text-center leading-tight ${theme === 'retro' ? 'text-[#8B261D]' : 'text-[var(--mist-active-accent)]'} font-bold italic group-hover/frac:text-white transition-colors text-xl md:text-2xl shadow-[var(--mist-active-accent)]/20 drop-shadow-sm`}>{numerator}</span>
            <span className="px-2 pt-1 text-center leading-tight text-zinc-400 font-medium group-hover/frac:text-zinc-200 transition-colors text-base md:text-lg">{denominator}</span>
         </div>
-        {rightPart && <span className={`${textClass} font-bold text-emerald-400 italic`}>{rightPart}</span>}
+        {rightPart && <span className={`${textClass} font-bold text-[var(--mist-active-accent)] italic`}>{rightPart}</span>}
       </div>
     );
   } else {
      // Render simple equation without fraction
-     return (
-         <div className={`${containerClass} ${textClass} text-zinc-300 italic`}>
-             <span className="bg-gradient-to-r from-zinc-200 via-gold-primary to-zinc-200 bg-clip-text text-transparent font-bold">
-                {cleanText(formula)}
-             </span>
-         </div>
-     )
+      return (
+          <div className={`${containerClass} ${textClass} text-zinc-300 italic`}>
+              <span className={`bg-gradient-to-r from-zinc-200 via-[var(--mist-active-accent)] to-zinc-200 bg-clip-text text-transparent font-bold`}>
+                 {cleanText(formula)}
+              </span>
+          </div>
+      )
   }
 }
 
@@ -192,14 +192,14 @@ export const AnalysisView: React.FC<AnalysisViewProps> = ({
                                 </span>
                                 <div className={`p-4 rounded-xl border border-dashed ${theme === 'retro' ? 'bg-white/40 border-[#8B261D]/20' : 'bg-zinc-900/30 border-zinc-700'}`}>
                                     <div className="scale-75 origin-center">
-                                         <SimpleMathRenderer formula={formula} language={language} />
+                                         <SimpleMathRenderer formula={formula} language={language} theme={theme} />
                                     </div>
                                 </div>
                             </div>
                         )}
 
                         {/* Clinical Status */}
-                        <div className={`p-4 rounded-xl ${theme === 'retro' ? 'bg-[#8B261D]/5' : 'bg-gold-primary/5 border border-gold-primary/10'}`}>
+                        <div className={`p-4 rounded-xl ${theme === 'retro' ? 'bg-[#8B261D]/5' : 'bg-[var(--mist-active-accent)]/5 border border-[var(--mist-active-accent)]/10'}`}>
                             <div className="flex items-center gap-2 mb-2">
                                 <ScanLine size={12} className={themeAccent} />
                                 <span className={`text-[10px] font-bold ${themeAccent} uppercase tracking-widest`}>
@@ -251,7 +251,7 @@ export const AnalysisView: React.FC<AnalysisViewProps> = ({
                                 <button 
                                     onClick={handleAnalyze}
                                     disabled={isAnalyzing}
-                                    className={`px-8 py-3 ${theme === 'retro' ? 'bg-[#8B261D] hover:bg-[#631B15] text-white shadow-none' : (isAesthetic ? 'bg-rose-500 hover:bg-rose-400 text-black' : 'bg-gold-primary hover:bg-amber-400 text-black')} font-bold uppercase tracking-widest rounded-lg flex items-center gap-2 transition-all disabled:opacity-50`}
+                                    className={`px-8 py-3 ${theme === 'retro' ? 'bg-[#8B261D] hover:bg-[#631B15] text-white shadow-none' : 'bg-[var(--mist-active-accent)] hover:opacity-90 text-black'} font-bold uppercase tracking-widest rounded-lg flex items-center gap-2 transition-all disabled:opacity-50`}
                                 >
                                     {isAnalyzing ? <Loader2 size={16} className="animate-spin" /> : <Zap size={16} />}
                                     {isAnalyzing ? (
@@ -303,7 +303,7 @@ export const AnalysisView: React.FC<AnalysisViewProps> = ({
                                     <textarea
                                         value={blueprint.narrative?.psychoanalysis || ""}
                                         onChange={(e) => handleUpdateText(e.target.value)}
-                                        className={`w-full h-[600px] bg-transparent ${theme === 'retro' ? 'text-black border-black/10' : 'text-zinc-300 border-zinc-800'} leading-loose border rounded p-4 focus:ring-1 focus:ring-gold-primary resize-none focus:outline-none custom-scrollbar font-mono text-sm`}
+                                        className={`w-full h-[600px] bg-transparent ${theme === 'retro' ? 'text-black border-black/10' : 'text-zinc-300 border-zinc-800'} leading-loose border rounded p-4 focus:ring-1 focus:ring-[var(--mist-active-accent)] resize-none focus:outline-none custom-scrollbar font-mono text-sm`}
                                         placeholder={language === 'EN' ? "Analysis report..." : "分析报告..."}
                                     />
                                 ) : (
@@ -320,12 +320,12 @@ export const AnalysisView: React.FC<AnalysisViewProps> = ({
                                                     <Cpu size={120} className={themeAccent} />
                                                 </div>
                                                 <div className={`flex items-center gap-2 ${themeAccent} text-[10px] font-bold uppercase tracking-[0.3em] mb-4`}>
-                                                    <Zap size={12} className="fill-gold-primary" /> 
+                                                    <Zap size={12} className={theme === 'retro' ? 'fill-[#8B261D]' : 'fill-[var(--mist-active-accent)]'} />
                                                     {language === 'EN' ? "ATTACHMENT: CORE EQUATION" : "附件: 核心算式"}
                                                 </div>
-                                                
+
                                                 {/* MATH RENDERER */}
-                                                <SimpleMathRenderer formula={formula} language={language} />
+                                                <SimpleMathRenderer formula={formula} language={language} theme={theme} />
                                                 
                                                 <p className="mt-4 text-[10px] text-zinc-600 font-serif italic text-center opacity-60">
                                                     {language === 'EN' 

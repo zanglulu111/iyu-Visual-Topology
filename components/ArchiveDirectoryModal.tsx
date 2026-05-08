@@ -1,9 +1,13 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Activity, ArrowUpRight, ChevronLeft, ChevronRight, Eye, FileSearch } from 'lucide-react';
-import { ARCHIVE_CASES, ArchiveCategory } from './archiveCasesData';
+import { ARCHIVE_CASES, ArchiveCategory, CaseStudy } from './archiveCasesData';
 import { ArchiveDetailModal } from './ArchiveDetailModal';
 import { useTheme } from '../contexts/ThemeContext';
 import { soundManager } from '../utils/soundManager';
+import { persistence } from '../services/persistence';
+import { splitTextToParagraphs } from '../services/desireArchiveService';
+import * as geminiService from '../services/geminiService';
+import type { SubjectDossier } from '../types';
 
 interface ArchiveDirectoryModalProps {
     isOpen: boolean;
@@ -53,10 +57,16 @@ const categoryMeta: Record<ArchiveCategory, {
         labelEn: 'Autism',
         code: 'AUT',
         accent: '#a9a9a2'
+    },
+    UNCLASSIFIED: {
+        labelCn: '未定型',
+        labelEn: 'Unclassified',
+        code: 'UNC',
+        accent: '#6f6b62'
     }
 };
 
-const categories: ArchiveCategory[] = ['ALL', 'NEUROSIS', 'PSYCHOSIS', 'PERVERSION', 'AUTISM'];
+const categories: ArchiveCategory[] = ['ALL', 'NEUROSIS', 'PSYCHOSIS', 'PERVERSION', 'AUTISM', 'UNCLASSIFIED'];
 
 export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
     isOpen,
@@ -71,6 +81,8 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
     const [trackEntered, setTrackEntered] = useState(false);
     const [centerIndex, setCenterIndex] = useState(0);
     const [centerPadding, setCenterPadding] = useState(MIN_WHEEL_SIDE_PADDING);
+    const [subjectDossiers, setSubjectDossiers] = useState<SubjectDossier[]>([]);
+    const [generatingAnalysisId, setGeneratingAnalysisId] = useState<string | null>(null);
 
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const archiveRootRef = useRef<HTMLDivElement>(null);
@@ -86,14 +98,81 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
     const wheelGestureRef = useRef<{ axis: 'x' | 'y' | null; lastAt: number }>({ axis: null, lastAt: 0 });
     const lastWheelInputAtRef = useRef(0);
 
+    useEffect(() => {
+        if (!isOpen) return;
+
+        let cancelled = false;
+        const loadSubjectDossiers = async () => {
+            try {
+                const dossiers = await persistence.getSubjectDossiers();
+                if (!cancelled) setSubjectDossiers(dossiers);
+            } catch (error) {
+                console.error('Failed to load subject dossiers', error);
+            }
+        };
+
+        loadSubjectDossiers();
+        return () => {
+            cancelled = true;
+        };
+    }, [isOpen]);
+
+    const dossierCases = useMemo<CaseStudy[]>(() => {
+        return subjectDossiers.map((dossier) => {
+            const story = splitTextToParagraphs(dossier.story.content);
+            const screenplay = splitTextToParagraphs(dossier.screenplay.content);
+
+            return {
+                id: dossier.id,
+                titleCn: dossier.title,
+                titleEn: dossier.titleEn || dossier.title,
+                category: dossier.category,
+                summaryCn: dossier.summary,
+                summaryEn: dossier.summaryEn || dossier.summary,
+                imageUrl: dossier.imageUrl || '/portal-assets/subject-archive-lower-1777901002241.png',
+                date: (dossier.publishedAt || dossier.updatedAt || dossier.createdAt).slice(0, 10),
+                sourceDossier: dossier,
+                content: {
+                    dna: {
+                        parameters: [
+                            `SOURCE: ${dossier.sourceProjectId || 'manual'}`,
+                            `STATUS: ${dossier.status}`,
+                            `CATEGORY: ${dossier.category}`,
+                            `ASSETS: ${dossier.assets.characters.length} characters / ${dossier.assets.props.length} props / ${dossier.assets.scenes.length} scenes`
+                        ],
+                        authorStyle: '迷雾学派主体档案',
+                        coreHook: dossier.summary
+                    },
+                    story: story.length > 0 ? story : [dossier.story.content || '故事正文待补全。'],
+                    report: {
+                        language: '简体中文',
+                        diagnosis: dossier.category,
+                        analyst: 'Visionary / Admin',
+                        subjectState: dossier.status,
+                        sections: [{
+                            title: dossier.psychoanalysis.title,
+                            body: dossier.psychoanalysis.content || '精神分析档案待补全。'
+                        }],
+                        conclusion: dossier.adminNotes || '该主体档案由欲望工作档案推送生成。',
+                        verdict: dossier.status === 'published' ? '病历归档：[已发布]' : '病历归档：[草稿]'
+                    },
+                    assetGroups: dossier.assets,
+                    screenplay: screenplay.length > 0 ? screenplay : [dossier.screenplay.content || '电影脚本待补全。']
+                }
+            };
+        });
+    }, [subjectDossiers]);
+
+    const allCases = useMemo(() => [...dossierCases, ...ARCHIVE_CASES], [dossierCases]);
+
     const filteredCases = useMemo(() => {
         return selectedCategory === 'ALL'
-            ? ARCHIVE_CASES
-            : ARCHIVE_CASES.filter(item => item.category === selectedCategory);
-    }, [selectedCategory]);
+            ? allCases
+            : allCases.filter(item => item.category === selectedCategory);
+    }, [allCases, selectedCategory]);
 
     const previewCase = filteredCases.find(item => item.id === activeCaseId) || filteredCases[centerIndex] || filteredCases[0];
-    const selectedCase = ARCHIVE_CASES.find(item => item.id === selectedCaseId) || null;
+    const selectedCase = allCases.find(item => item.id === selectedCaseId) || null;
 
     useEffect(() => {
         activeCaseIdRef.current = activeCaseId;
@@ -357,7 +436,7 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
     };
 
     const openCase = (caseId: string) => {
-        const caseItem = ARCHIVE_CASES.find(item => item.id === caseId);
+        const caseItem = allCases.find(item => item.id === caseId);
         if (!caseItem?.content) {
             setActiveCaseId(caseId);
             return;
@@ -367,6 +446,36 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
             archiveRootRef.current.scrollTop = 0;
         }
         setSelectedCaseId(caseId);
+    };
+
+    const handleGeneratePsychoanalysis = async (caseItem: CaseStudy) => {
+        const dossier = caseItem.sourceDossier;
+        if (!dossier || generatingAnalysisId) return;
+
+        setGeneratingAnalysisId(dossier.id);
+        try {
+            const sourceBlueprint = dossier.sourceBlueprint;
+            const fieldState = sourceBlueprint?.generationFieldState || {};
+            const synopsis = dossier.story.content || dossier.summary;
+            const analysis = await geminiService.analyzePsychoStructure(fieldState, synopsis);
+            if (!analysis) return;
+
+            const nextDossier: SubjectDossier = {
+                ...dossier,
+                updatedAt: new Date().toISOString(),
+                psychoanalysis: {
+                    ...dossier.psychoanalysis,
+                    title: dossier.psychoanalysis.title || '精神分析档案',
+                    content: analysis
+                }
+            };
+            await persistence.saveSubjectDossier(nextDossier);
+            setSubjectDossiers(prev => prev.map(item => item.id === nextDossier.id ? nextDossier : item));
+        } catch (error) {
+            console.error('Failed to generate subject dossier psychoanalysis', error);
+        } finally {
+            setGeneratingAnalysisId(null);
+        }
     };
 
     const activateCase = (caseId: string) => {
@@ -1278,8 +1387,8 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
                             {categories.map(category => {
                                 const meta = categoryMeta[category];
                                 const count = category === 'ALL'
-                                    ? ARCHIVE_CASES.length
-                                    : ARCHIVE_CASES.filter(item => item.category === category).length;
+                                    ? allCases.length
+                                    : allCases.filter(item => item.category === category).length;
 
                                 return (
                                     <button
@@ -1473,6 +1582,8 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
                         caseData={selectedCase}
                         lang={lang}
                         renderInPlace={true}
+                        onGeneratePsychoanalysis={handleGeneratePsychoanalysis}
+                        isGeneratingPsychoanalysis={!!selectedCase?.sourceDossier && generatingAnalysisId === selectedCase.sourceDossier.id}
                     />
                 </div>
             )}

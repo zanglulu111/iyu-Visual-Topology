@@ -139,7 +139,7 @@ export const LIGHTING_SKELETONS = [
   }
 ];
 
-export const DRIVERS: (DriverDef & { nameEn: string })[] = [
+export const DRIVERS: (DriverDef & { nameEn: string; accent: string; retroAccent: string })[] = [
   {
     id: DriverType.NARRATIVE,
     name: "爱欲迷宫",
@@ -152,7 +152,9 @@ export const DRIVERS: (DriverDef & { nameEn: string })[] = [
     kpi: "意义构建",
     forbidden: "禁止逻辑断裂",
     iconName: "Film",
-    gradient: "from-amber-900/40 to-slate-900"
+    gradient: "from-red-950/35 to-neutral-950",
+    accent: '#ff4f3f',
+    retroAccent: '#8B261D'
   },
   {
     id: DriverType.COMMERCIAL,
@@ -166,7 +168,9 @@ export const DRIVERS: (DriverDef & { nameEn: string })[] = [
     kpi: "欲望捕获",
     forbidden: "禁止展示匮乏",
     iconName: "Briefcase",
-    gradient: "from-cyan-900/40 to-slate-900"
+    gradient: "from-cyan-900/40 to-slate-900",
+    accent: '#22D3EE',
+    retroAccent: '#0E4B50'
   },
   {
     id: DriverType.AESTHETIC,
@@ -175,26 +179,30 @@ export const DRIVERS: (DriverDef & { nameEn: string })[] = [
     englishId: "AESTHETIC",
     coreDriver: "实在界",
     coreDriverEn: "The Real",
-    description: "【创伤与崇高】直抵实在界的荒漠。剥离符号的防御，通过纯粹的视听强度触碰那个无法被语言捕获的“刺点”。",
+    description: "【创伤与崇高】直抵实在界的荒漠。剥离开符号的防御，通过纯粹的视听强度触碰那个无法被语言捕获的“刺点”。",
     descriptionEn: "[Trauma & Sublime] Straight to the desert of the Real. Stripping away symbolic defense, touching the uncapturable 'punctum' through pure audiovisual intensity.",
     kpi: "感官情动",
     forbidden: "禁止平庸",
     iconName: "Palette",
-    gradient: "from-rose-900/40 to-slate-900"
+    gradient: "from-rose-900/40 to-slate-900",
+    accent: '#FB7185',
+    retroAccent: '#8A3A40'
   },
   {
     id: DriverType.EXPERIMENTAL,
-    name: "现象学还原",
-    nameEn: "REDUCTION",
-    englishId: "EXPERIMENTAL",
-    coreDriver: "悬置",
-    coreDriverEn: "The Epoche",
-    description: "【解构与还原】执行现象学还原。剥离一切叙事意义，将影像还原为纯粹的物质、时间与光影的实验。",
-    descriptionEn: "[Deconstruction & Reduction] Executing phenomenological reduction. Stripping away all narrative meaning, reducing images to pure experiments of matter, time, and light.",
-    kpi: "本质直观",
-    forbidden: "禁止因果叙事",
-    iconName: "TestTube",
-    gradient: "from-purple-900/40 to-slate-900"
+    name: "换喻脚本",
+    nameEn: "METONYMIC SCRIPT",
+    englishId: "SCRIPT_TRANSLATION",
+    coreDriver: "故事转译",
+    coreDriverEn: "Story Translation",
+    description: "【自定义故事转剧本】跳过分歧点与核心引擎，直接粘贴完整故事，进入创意圣经整理与换喻电影脚本生成。",
+    descriptionEn: "[Custom Story to Screenplay] Skip divergence and engine setup. Paste a complete story and translate it into a creative bible and metonymic screenplay.",
+    kpi: "电影脚本生成",
+    forbidden: "禁止空白原文",
+    iconName: "Wand2",
+    gradient: "from-purple-900/35 to-neutral-950",
+    accent: '#D946EF',
+    retroAccent: '#6A224E'
   },
   {
     id: DriverType.TRAILER,
@@ -208,14 +216,16 @@ export const DRIVERS: (DriverDef & { nameEn: string })[] = [
     kpi: "资产一致性",
     forbidden: "禁止散落生产",
     iconName: "Zap",
-    gradient: "from-orange-900/40 to-slate-900"
+    gradient: "from-orange-900/40 to-slate-900",
+    accent: '#FB923C',
+    retroAccent: '#85411B'
   }
 ];
 
 export const MIDDLE_LAYER_CONFIG: Record<DriverType, LayerConfig> = {
   [DriverType.NARRATIVE]: { layerName: "分场 (Scenes)", sectionPrefix: "Scene" },
   [DriverType.COMMERCIAL]: { layerName: "营销模块 (Modules)", sectionPrefix: "Module" },
-  [DriverType.EXPERIMENTAL]: { layerName: "视觉乐章 (Phases)", sectionPrefix: "Phase" },
+  [DriverType.EXPERIMENTAL]: { layerName: "脚本段落 (Script Blocks)", sectionPrefix: "Block" },
   [DriverType.AESTHETIC]: { layerName: "情绪段落 (Moods)", sectionPrefix: "Mood" },
   [DriverType.TRAILER]: { layerName: "画布节点 (Canvas Nodes)", sectionPrefix: "Node" }
 };
@@ -335,17 +345,17 @@ export const RANDOM_RANGES: Record<string, [number, number]> = {
 /** 故事摘要12词加权筛选配置 */
 export const SURFACE_WEIGHT_CONFIG = {
   slots: [
-    { id: 'SUR1',   blockIds: ['skin_genre'],                          weight: 0.65 },
-    { id: 'SUR2',   blockIds: ['skin_era'],                            weight: 0.65 },
-    { id: 'SUR3',   blockIds: ['skin_year_exact', 'skin_country_exact'], weight: 0.65 },
-    { id: 'SUR4',   blockIds: ['skin_society'],                        weight: 0.30 },
-    { id: 'SUR5',   blockIds: ['skin_everything'],                     weight: 0.50 },
-    { id: 'SUR6',   blockIds: ['skin_location'],                       weight: 0.30 },
-    { id: 'SUR7',   blockIds: ['skin_gender'],                         weight: 0.65 },
-    { id: 'SUR9',   blockIds: ['skin_profession'],                     weight: 0.65 },
-    { id: 'SUR10',  blockIds: ['skin_ideology'],                       weight: 0.30 },
-    { id: 'SUR-END', blockIds: ['skin_ending'],                        weight: 0.30 },
-    { id: 'SUR10X', blockIds: ['sur10x'],                              weight: 0.30 },
+    { id: 'SUR1', blockIds: ['skin_genre'], weight: 0.65 },
+    { id: 'SUR2', blockIds: ['skin_era'], weight: 0.65 },
+    { id: 'SUR3', blockIds: ['skin_year_exact', 'skin_country_exact'], weight: 0.65 },
+    { id: 'SUR4', blockIds: ['skin_society'], weight: 0.30 },
+    { id: 'SUR5', blockIds: ['skin_everything'], weight: 0.50 },
+    { id: 'SUR6', blockIds: ['skin_location'], weight: 0.30 },
+    { id: 'SUR7', blockIds: ['skin_gender'], weight: 0.65 },
+    { id: 'SUR9', blockIds: ['skin_profession'], weight: 0.65 },
+    { id: 'SUR10', blockIds: ['skin_ideology'], weight: 0.30 },
+    { id: 'SUR-END', blockIds: ['skin_ending'], weight: 0.30 },
+    { id: 'SUR10X', blockIds: ['sur10x'], weight: 0.30 },
   ] as const,
   cap: 6,
 };

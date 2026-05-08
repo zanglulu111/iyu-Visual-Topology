@@ -108,11 +108,11 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
 
     const getFooterButtonStyle = () => 'mist-app-primary-action';
 
-    const getFooterAccentValue = () => selectedDriver === DriverType.COMMERCIAL ? 'var(--mist-commercial-cyan)' : 'var(--mist-archive-red)';
+    const getFooterAccentValue = () => 'var(--mist-active-accent)';
 
     const getTraverseButtonLabel = () => {
         if (selectedDriver === DriverType.COMMERCIAL) return lang === 'EN' ? "SUTURE DESIRE" : "缝合欲望";
-        if (selectedDriver === DriverType.EXPERIMENTAL) return lang === 'EN' ? "REDUCTION PHENOMENA" : "现象还原";
+        if (selectedDriver === DriverType.EXPERIMENTAL) return lang === 'EN' ? "TRANSLATE STORY" : "转译故事";
         if (selectedDriver === DriverType.AESTHETIC) return lang === 'EN' ? "GENERATE AESTHETIC" : "生成美学";
         if (selectedDriver === DriverType.TRAILER) return lang === 'EN' ? "CUT TRAILER" : "剪辑预告";
         return lang === 'EN' ? "TRAVERSE FANTASY" : "穿越幻想";
@@ -125,8 +125,9 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
     const footerSegmentClass = 'mist-app-footer-segment';
     const footerActivePillClass = theme === 'retro'
         ? 'border-[var(--text-accent)] text-[var(--text-header)] scale-105 bg-[var(--surface-hover)]'
-        : 'border-[var(--mist-archive-red)] text-[var(--text-header)] scale-105 bg-white/[0.06]';
+        : 'border-[var(--mist-active-accent)] text-[var(--text-header)] scale-105 bg-white/[0.06]';
     const footerInactivePillClass = 'bg-transparent border-[var(--border-glass)] text-[var(--text-muted)] hover:text-[var(--text-header)] hover:border-[var(--border-strong)] hover:bg-[var(--surface-hover)]';
+    const isLabyrinthFooter = selectedDriver === DriverType.NARRATIVE;
 
     return (
         <div
@@ -139,22 +140,24 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
                     <span className="hidden md:inline">{lang === 'CN' ? "返回首页" : "Home"}</span>
                 </button>
             </div>
-            <div className="flex-1 flex justify-center items-center gap-4 md:gap-6 mx-4">
+            <div className={`flex-1 flex justify-center items-center ${isLabyrinthFooter ? 'gap-3 md:gap-5' : 'gap-4 md:gap-6'} mx-4`}>
 
-                {selectedDriver !== DriverType.AESTHETIC && (
+                {selectedDriver !== DriverType.AESTHETIC && !isLabyrinthFooter && (
                     <button onClick={() => setIsSkinOpen(!isSkinOpen)} className={`mist-app-footer-control ${isSkinOpen ? 'is-active' : ''} flex flex-col items-center gap-1.5 shrink-0 min-w-[60px] group transition-all duration-300 active:scale-95`} >
                         <Settings2 size={18} className={isSkinOpen ? getThemeTextColor() : mutedFooterControlClass} />
                         <span className={`text-[9px] font-bold uppercase tracking-wider transition-colors ${isSkinOpen ? getThemeTextColor() : mutedFooterControlClass}`}>
-                            {lang === 'CN' ? (selectedDriver === DriverType.COMMERCIAL ? "商业执行单" : (selectedDriver === DriverType.EXPERIMENTAL ? "还原协议" : (selectedDriver === DriverType.TRAILER ? "预告片执行单" : "表层设定"))) : (selectedDriver === DriverType.COMMERCIAL ? "Brief" : (selectedDriver === DriverType.EXPERIMENTAL ? "Reduction" : (selectedDriver === DriverType.TRAILER ? "Trailer" : "Skin")))}
+                            {lang === 'CN' ? (selectedDriver === DriverType.COMMERCIAL ? "商业执行单" : (selectedDriver === DriverType.EXPERIMENTAL ? "脚本协议" : (selectedDriver === DriverType.TRAILER ? "预告片执行单" : "表层设定"))) : (selectedDriver === DriverType.COMMERCIAL ? "Brief" : (selectedDriver === DriverType.EXPERIMENTAL ? "Script" : (selectedDriver === DriverType.TRAILER ? "Trailer" : "Skin")))}
                         </span>
                     </button>
                 )}
-                <button onClick={() => setIsVisionOpen(!isVisionOpen)} className={`mist-app-footer-control ${isVisionOpen ? 'is-active' : ''} flex flex-col items-center gap-1.5 shrink-0 min-w-[60px] group transition-all duration-300 active:scale-95`} >
-                    <PenTool size={18} className={isVisionOpen ? getThemeTextColor() : mutedFooterControlClass} />
-                    <span className={`text-[9px] font-bold uppercase tracking-wider transition-colors ${isVisionOpen ? getThemeTextColor() : mutedFooterControlClass}`}>
-                        {lang === 'CN' ? (selectedDriver === DriverType.COMMERCIAL ? "欲望输入" : selectedDriver === DriverType.AESTHETIC ? "反推解码" : "植入症候") : (selectedDriver === DriverType.AESTHETIC ? "Decoding" : "Input")}
-                    </span>
-                </button>
+                {!isLabyrinthFooter && (
+                    <button onClick={() => setIsVisionOpen(!isVisionOpen)} className={`mist-app-footer-control ${isVisionOpen ? 'is-active' : ''} flex flex-col items-center gap-1.5 shrink-0 min-w-[60px] group transition-all duration-300 active:scale-95`} >
+                        <PenTool size={18} className={isVisionOpen ? getThemeTextColor() : mutedFooterControlClass} />
+                        <span className={`text-[9px] font-bold uppercase tracking-wider transition-colors ${isVisionOpen ? getThemeTextColor() : mutedFooterControlClass}`}>
+                            {lang === 'CN' ? (selectedDriver === DriverType.COMMERCIAL ? "欲望输入" : selectedDriver === DriverType.AESTHETIC ? "反推解码" : "植入症候") : (selectedDriver === DriverType.AESTHETIC ? "Decoding" : "Input")}
+                        </span>
+                    </button>
+                )}
 
                 {!hideWorldLawControl && (
                 <div className="relative flex flex-col items-center">
@@ -248,7 +251,7 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
                 </div>
                 )}
                 
-                {setIsTensionOpen && (
+                {setIsTensionOpen && !isLabyrinthFooter && (
                     <button
                         onClick={(e) => {
                             e.stopPropagation();
@@ -263,7 +266,7 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
                     </button>
                 )}
 
-                <div className="w-px h-8 bg-[var(--border-main)] shrink-0"></div>
+                {!isLabyrinthFooter && <div className="w-px h-8 bg-[var(--border-main)] shrink-0"></div>}
                 {selectedDriver === DriverType.AESTHETIC && (
                     <>
                         <div className={`flex ${footerSegmentClass} border p-1 shrink-0 transition-all duration-300`}>

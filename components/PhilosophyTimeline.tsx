@@ -40,14 +40,14 @@ const PHILOSOPHY_SCHOOLS: School[] = [
     name: '德国古典哲学',
     nameEn: 'German Idealism',
     period: '1780-1840',
-    color: '#D4AF37',
+    color: '#FFD700',
     description: '强调思维与存在、主体与客体的辩证同一，通过精神的自我运作达到绝对真理。',
     descriptionEn: 'Emphasizes the dialectical identity of thought and being, subject and object, reaching absolute truth through the operation of spirit.',
     keyIdeas: ['绝对精神', '扬弃(Aufhebung)', '主奴辩证法', '实体即主体'],
     keyIdeasEn: ['Absolute Spirit', 'Aufhebung', 'Master-Slave Dialectic', 'Substance as Subject'],
     philosophers: [
-      { id: 'hegel', name: '黑格尔', nameEn: 'G.W.F. Hegel', years: '1770-1831', school: 'german-idealism', color: '#D4AF37' },
-      { id: 'kant', name: '康德', nameEn: 'Immanuel Kant', years: '1724-1804', school: 'german-idealism', color: '#D4AF37' }
+      { id: 'hegel', name: '黑格尔', nameEn: 'G.W.F. Hegel', years: '1770-1831', school: 'german-idealism', color: '#FFD700' },
+      { id: 'kant', name: '康德', nameEn: 'Immanuel Kant', years: '1724-1804', school: 'german-idealism', color: '#FFD700' }
     ],
     works: [
       { title: '精神现象学', titleEn: 'Phenomenology of Spirit', year: 1807 },
@@ -176,15 +176,15 @@ const PHILOSOPHY_SCHOOLS: School[] = [
     name: '精神分析',
     nameEn: 'Psychoanalysis',
     period: '1900-present',
-    color: '#D4AF37',
+    color: '#FFD700',
     description: '无意识、欲望、主体的分裂结构,从弗洛伊德到拉康的理论演进',
     descriptionEn: 'Unconscious, desire, split structure of subject, from Freud to Lacan',
     keyIdeas: ['无意识', '欲望', '主体分裂', '实在界'],
     keyIdeasEn: ['Unconscious', 'Desire', 'Split Subject', 'The Real'],
     philosophers: [
-      { id: 'freud', name: '弗洛伊德', nameEn: 'Sigmund Freud', years: '1856-1939', school: 'psychoanalysis', color: '#D4AF37' },
-      { id: 'lacan', name: '拉康', nameEn: 'Jacques Lacan', years: '1901-1981', school: 'psychoanalysis', color: '#D4AF37' },
-      { id: 'zizek', name: '齐泽克', nameEn: 'Slavoj Žižek', years: '1949-', school: 'psychoanalysis', color: '#D4AF37' }
+      { id: 'freud', name: '弗洛伊德', nameEn: 'Sigmund Freud', years: '1856-1939', school: 'psychoanalysis', color: '#FFD700' },
+      { id: 'lacan', name: '拉康', nameEn: 'Jacques Lacan', years: '1901-1981', school: 'psychoanalysis', color: '#FFD700' },
+      { id: 'zizek', name: '齐泽克', nameEn: 'Slavoj Žižek', years: '1949-', school: 'psychoanalysis', color: '#FFD700' }
     ],
     works: [
       { title: '梦的解析', titleEn: 'The Interpretation of Dreams', year: 1900 },

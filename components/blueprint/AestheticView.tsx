@@ -64,12 +64,12 @@ export const AestheticView: React.FC<AestheticViewProps> = ({
              {/* SECTION 1: VISUAL MANIFESTO / SYNOPSIS */}
              {activeTab === 'L0_SOUL' && (
                   <div className="space-y-8">
-                      <div className={`${theme === 'retro' ? 'bg-transparent border-[var(--border-main)]' : 'bg-rose-950/10 border border-rose-500/30'} p-10 rounded-2xl relative overflow-hidden group transition-all border`}>
+                      <div className={`${theme === 'retro' ? 'bg-transparent border-[var(--border-main)]' : 'bg-[var(--mist-active-accent)]/5 border border-[var(--mist-active-accent)]/30'} p-10 rounded-2xl relative overflow-hidden group transition-all border`}>
                          <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-                             <BookOpen size={160} className={theme === 'retro' ? 'text-black' : "text-rose-500"} />
+                             <BookOpen size={160} className={theme === 'retro' ? 'text-black' : "text-[var(--mist-active-accent)]"} />
                          </div>
-                         <div className={`flex justify-between items-center mb-6 border-b ${theme === 'retro' ? 'border-black/5' : 'border-rose-900/30'} pb-4 relative z-10`}>
-                             <h3 className={`${theme === 'retro' ? 'text-[#8B261D]' : 'text-rose-400'} font-bold text-[10px] uppercase tracking-[0.3em] flex items-center gap-2`}>
+                         <div className={`flex justify-between items-center mb-6 border-b ${theme === 'retro' ? 'border-black/5' : 'border-[var(--mist-active-accent)]/30'} pb-4 relative z-10`}>
+                             <h3 className={`${theme === 'retro' ? 'text-[#8B261D]' : 'text-[var(--mist-active-accent)]'} font-bold text-[10px] uppercase tracking-[0.3em] flex items-center gap-2`}>
                                  <FileText size={14} /> {language === 'EN' ? "Aesthetic Manifesto" : "美学叙事与视觉哲学"}
                              </h3>
                              <div className="flex gap-2">
@@ -80,7 +80,7 @@ export const AestheticView: React.FC<AestheticViewProps> = ({
                              ref={synopsisRef}
                              value={blueprint.narrative.synopsis}
                              onChange={(e) => handleUpdateSynopsis(e.target.value)}
-                             className={`w-full min-h-[400px] bg-transparent text-xl ${theme === 'retro' ? 'text-zinc-800' : 'text-zinc-200'} font-serif leading-loose border-none focus:outline-none resize-none p-0 relative z-10 placeholder-rose-900/60 overflow-hidden`}
+                             className={`w-full min-h-[400px] bg-transparent text-xl ${theme === 'retro' ? 'text-zinc-800' : 'text-zinc-200'} font-serif leading-loose border-none focus:outline-none resize-none p-0 relative z-10 placeholder-[var(--mist-active-accent)]/30 overflow-hidden`}
                              placeholder={language === 'EN' ? "Describe the visual logic and philosophical core..." : "描述本视觉方案背后的美学逻辑、视觉哲学与影调意境..."}
                          />
                       </div>
@@ -88,7 +88,7 @@ export const AestheticView: React.FC<AestheticViewProps> = ({
                       {/* Mode Context Card */}
                       <div className={`${theme === 'retro' ? 'bg-transparent border-[var(--border-main)]' : 'bg-zinc-900/30 border border-zinc-800'} p-8 rounded-xl border`}>
                          <div className="flex items-center gap-3 mb-4">
-                             <Zap size={18} className={theme === 'retro' ? 'text-[#8B261D]' : "text-rose-400"} />
+                             <Zap size={18} className={theme === 'retro' ? 'text-[#8B261D]' : "text-[var(--mist-active-accent)]"} />
                              <span className={`text-[10px] font-black uppercase tracking-widest ${theme === 'retro' ? 'text-black/40' : 'text-zinc-500'}`}>Selected Logic Matrix</span>
                          </div>
                          <h4 className={`text-xl font-bold ${theme === 'retro' ? 'text-black' : 'text-white'} mb-2`}>{currentModeDef?.name}</h4>
@@ -109,15 +109,15 @@ export const AestheticView: React.FC<AestheticViewProps> = ({
                   <div className="space-y-12">
                        <div className={`flex items-center justify-between border-b ${theme === 'retro' ? 'border-black/10' : 'border-zinc-800'} pb-4`}>
                             <h3 className={`text-2xl font-serif ${theme === 'retro' ? 'text-black' : 'text-white'} flex items-center gap-3`}>
-                                <Camera className={theme === 'retro' ? 'text-[#8B261D]' : "text-rose-500"} />
+                                <Camera className={theme === 'retro' ? 'text-[#8B261D]' : "text-[var(--mist-active-accent)]"} />
                                 {language === 'EN' ? "Technical Specifications" : "物理参数与显影协议"}
                             </h3>
                        </div>
                        
                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                            {(aestheticData.techSpecs || []).map((spec, i) => (
-                               <div key={i} className={`p-6 rounded-xl group transition-all border ${theme === 'retro' ? 'bg-transparent border-[var(--border-main)] hover:border-[#8B261D]/20 shadow-none' : 'bg-zinc-900/30 border-zinc-800 hover:border-rose-500/30'}`}>
-                                   <div className={`${theme === 'retro' ? 'text-[#8B261D]/50' : 'text-rose-500/50'} text-[10px] font-bold uppercase tracking-widest mb-2`}>{spec.label}</div>
+                               <div key={i} className={`p-6 rounded-xl group transition-all border ${theme === 'retro' ? 'bg-transparent border-[var(--border-main)] hover:border-[#8B261D]/20 shadow-none' : 'bg-zinc-900/30 border-zinc-800 hover:border-[var(--mist-active-accent)]/30'}`}>
+                                   <div className={`${theme === 'retro' ? 'text-[#8B261D]/50' : 'text-[var(--mist-active-accent)]/50'} text-[10px] font-bold uppercase tracking-widest mb-2`}>{spec.label}</div>
                                    <input 
                                        value={spec.value}
                                        onChange={(e) => {
@@ -131,7 +131,7 @@ export const AestheticView: React.FC<AestheticViewProps> = ({
                            ))}
                            <button 
                              onClick={() => handleUpdate('techSpecs', [...aestheticData.techSpecs, { label: "Param", value: "" }])}
-                             className={`rounded-xl flex items-center justify-center p-6 border-dashed border transition-all ${theme === 'retro' ? 'border-[#8B261D]/10 text-zinc-400 hover:text-[#8B261D] hover:border-[#8B261D]/30 bg-black/[0.02]' : 'border-zinc-800 text-zinc-600 hover:text-rose-400 hover:border-rose-500/30'}`}
+                             className={`rounded-xl flex items-center justify-center p-6 border-dashed border transition-all ${theme === 'retro' ? 'border-[#8B261D]/10 text-zinc-400 hover:text-[#8B261D] hover:border-[#8B261D]/30 bg-black/[0.02]' : 'border-zinc-800 text-zinc-600 hover:text-[var(--mist-active-accent)] hover:border-[var(--mist-active-accent)]/30'}`}
                            >
                               <Plus size={24} />
                            </button>
@@ -139,9 +139,9 @@ export const AestheticView: React.FC<AestheticViewProps> = ({
 
                         <div className={`p-8 rounded-xl relative overflow-hidden border ${theme === 'retro' ? 'bg-transparent border-[var(--border-main)] shadow-none' : 'bg-zinc-900/30 border border-zinc-800'}`}>
                             <div className="absolute top-0 right-0 p-4 opacity-5">
-                                <PaletteIcon size={120} className={theme === 'retro' ? 'text-[#8B261D]' : "text-rose-500"} />
+                                <PaletteIcon size={120} className={theme === 'retro' ? 'text-[#8B261D]' : "text-[var(--mist-active-accent)]"} />
                             </div>
-                            <h4 className={`${theme === 'retro' ? 'text-[#8B261D]' : 'text-rose-400'} font-bold text-xs uppercase tracking-widest mb-6 flex items-center gap-2 relative z-10`}>
+                            <h4 className={`${theme === 'retro' ? 'text-[#8B261D]' : 'text-[var(--mist-active-accent)]'} font-bold text-xs uppercase tracking-widest mb-6 flex items-center gap-2 relative z-10`}>
                                 <PaletteIcon size={14} /> Color Logic & Theory
                             </h4>
                             <textarea
@@ -175,13 +175,13 @@ export const AestheticView: React.FC<AestheticViewProps> = ({
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                           <div className={`p-8 rounded-xl border ${theme === 'retro' ? 'bg-transparent border-[var(--border-main)] shadow-none' : 'bg-zinc-900/30 border border-zinc-800'}`}>
-                               <h4 className={`${theme === 'retro' ? 'text-[#8B261D]' : 'text-rose-400'} font-bold text-xs uppercase tracking-widest mb-4`}>Rendering Protocol</h4>
+                               <h4 className={`${theme === 'retro' ? 'text-[#8B261D]' : 'text-[var(--mist-active-accent)]'} font-bold text-xs uppercase tracking-widest mb-4`}>Rendering Protocol</h4>
                                <p className={`text-xs leading-relaxed ${theme === 'retro' ? 'text-zinc-600' : 'text-zinc-500'}`}>
                                    {isRealism ? "Focusing on physically based rendering (PBR), raytracing, and high-dynamic range (HDR) for photographic authenticity." : "Focusing on stylized cel-shading, painted textures, and artistic medium emulation."}
                                </p>
                           </div>
                           <div className={`p-8 rounded-xl border ${theme === 'retro' ? 'bg-transparent border-[var(--border-main)] shadow-none' : 'bg-zinc-900/30 border border-zinc-800'}`}>
-                               <h4 className={`${theme === 'retro' ? 'text-[#8B261D]' : 'text-rose-400'} font-bold text-xs uppercase tracking-widest mb-4`}>Final Output Dimensions</h4>
+                               <h4 className={`${theme === 'retro' ? 'text-[#8B261D]' : 'text-[var(--mist-active-accent)]'} font-bold text-xs uppercase tracking-widest mb-4`}>Final Output Dimensions</h4>
                                <div className="flex gap-2">
                                    {["16:9", "9:16", "2.39:1", "4:3"].map(ar => (
                                        <span key={ar} className={`px-3 py-1 rounded text-[10px] font-mono border ${theme === 'retro' ? 'bg-transparent border-[var(--border-main)] text-[#8B261D]' : 'bg-black/40 border-zinc-800 text-zinc-400'}`}>{ar}</span>

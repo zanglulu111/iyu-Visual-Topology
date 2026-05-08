@@ -10,7 +10,6 @@ import { useTheme } from '../contexts/ThemeContext';
 import { NarrativeLibraryModal } from './NarrativeLibraryModal';
 import { TaskManagerPanel } from './TaskManagerPanel';
 import { BiblePromptInspectorModal } from './BiblePromptInspectorModal';
-import { AdminXRayButton } from './XRayInspector';
 import { globalTaskManager } from '../services/taskManager';
 import { ProcessingTimer } from './SharedBlueprintComponents';
 import { EngineParamsOverview } from './EngineParamsOverview';
@@ -28,10 +27,12 @@ interface NarrativePathsViewProps {
     activeDriver?: DriverType;
     cachedBlueprints?: Record<string, CreativeBlueprint>;
     fieldState?: NarrativeFieldState;
+    overviewFieldState?: NarrativeFieldState;
     visionInput?: string;
     visionAnalysis?: string;
     thinkingXml?: string;
     worldLawConfig?: WorldLawConfig;
+    overviewWorldLawConfig?: WorldLawConfig;
     onToggleTag?: (blockId: string, tag: string) => void;
     isAdmin?: boolean;
 }
@@ -48,10 +49,12 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
     activeDriver,
     cachedBlueprints = {},
     fieldState,
+    overviewFieldState,
     visionInput,
     visionAnalysis,
     thinkingXml,
     worldLawConfig,
+    overviewWorldLawConfig,
     onToggleTag,
     isAdmin = false
 }) => {
@@ -141,7 +144,7 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
             case 'REAL': return lang === 'EN' ? 'THE REAL (PAIN)' : '实在界 (痛点狙击)';
             case 'IMAGINARY': return lang === 'EN' ? 'THE IMAGINARY (DREAM)' : '想象界 (美学造梦)';
             case 'SYMBOLIC': return lang === 'EN' ? 'THE SYMBOLIC (STATUS)' : '符号界 (阶级神话)';
-            case 'PHENOMENOLOGICAL': return lang === 'EN' ? 'PHENOMENOLOGICAL' : '现象学还原';
+            case 'PHENOMENOLOGICAL': return lang === 'EN' ? 'METONYMIC SCRIPT' : '换喻脚本';
             case 'THE SPECTACLE': return lang === 'EN' ? 'THE SPECTACLE' : '异界奇观';
             case 'VISUAL_POETRY': return lang === 'EN' ? 'VISUAL POETRY' : '视觉诗 (Visual Poetry)';
             case 'ONTOLOGY': return lang === 'EN' ? 'ONTOLOGY' : '本体论 (Ontology)';
@@ -150,15 +153,6 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
             case 'THE_PULSE': return lang === 'EN' ? 'THE PULSE' : '节奏剪辑 (Pulse)';
             case 'THE_GLITCH': return lang === 'EN' ? 'THE GLITCH' : '意识流 (Glitch)';
             default: return type;
-        }
-    };
-
-    const handleGenerate = () => {
-        const treatment = treatments.find(t => t.id === selectedPathId);
-        if (treatment) {
-            // If style is selected, force regeneration (Replacement)
-            const force = !!styleConfig.styleId;
-            onSelect(treatment, styleConfig, force);
         }
     };
 
@@ -269,6 +263,29 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
         return Array.isArray(tags) && tags.length > 0 ? tags[0] : null;
     }, [fieldState]);
 
+    const getPrimaryTag = (state: NarrativeFieldState | undefined, id: string) => {
+        const tags = state?.[id];
+        return Array.isArray(tags) && tags.length > 0 ? tags[0] : null;
+    };
+
+    const hasBibleConfigChanged = useMemo(() => {
+        if (!selectedPathId) return false;
+        const cached = cachedBlueprints[selectedPathId];
+        if (!cached) return false;
+        const generatedState = cached.generationFieldState || {};
+        return getPrimaryTag(generatedState, 'skin_volume') !== currentVolumeName
+            || getPrimaryTag(generatedState, 'skin_structure') !== currentStructureName;
+    }, [cachedBlueprints, currentStructureName, currentVolumeName, selectedPathId]);
+
+    const handleGenerate = () => {
+        const treatment = treatments.find(t => t.id === selectedPathId);
+        if (treatment) {
+            // Force regeneration when the divergence-page structure/volume differs from the cached Bible.
+            const force = !!styleConfig.styleId || hasBibleConfigChanged;
+            onSelect(treatment, styleConfig, force);
+        }
+    };
+
     const handleVolumeToggle = (tagName: string) => {
         onToggleTag?.('skin_volume', tagName);
     };
@@ -286,12 +303,12 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
     const getThemeBg = () => {
         if (theme === 'retro') return 'bg-[#8B261D]';
         if (isCommercialResults) return 'bg-mist-cyan';
-        return 'bg-[rgba(255,98,86,0.2)]';
+        return 'bg-[rgba(var(--mist-active-accent-rgb),0.2)]';
     }
 
     const getEmptyStateIconColor = () => {
         if (isCommercialResults) return 'text-mist-cyan/30';
-        return theme === 'retro' ? 'text-[#8B261D]/30' : 'text-[rgba(255,98,86,0.32)]';
+        return theme === 'retro' ? 'text-[#8B261D]/30' : 'text-[rgba(var(--mist-active-accent-rgb),0.32)]';
     }
 
     const getGenerateButtonClass = (hasExisting: boolean) => {
@@ -299,10 +316,10 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
             return `bg-mist-cyan/20 hover:bg-mist-cyan/30 text-white border-mist-cyan/55`;
         }
         if (hasExisting) {
-            return `bg-[rgba(255,98,86,0.2)] hover:bg-[rgba(255,98,86,0.28)] text-white border-[rgba(255,98,86,0.55)]`;
+            return `bg-[rgba(var(--mist-active-accent-rgb),0.2)] hover:bg-[rgba(var(--mist-active-accent-rgb),0.28)] text-white border-[rgba(var(--mist-active-accent-rgb),0.55)]`;
         }
         if (theme === 'retro') return 'bg-[#8B261D] hover:bg-[#6D1E16] text-white border-[#8B261D]';
-        return 'bg-[rgba(255,98,86,0.2)] hover:bg-[rgba(255,98,86,0.28)] text-white border-[rgba(255,98,86,0.55)]';
+        return 'bg-[rgba(var(--mist-active-accent-rgb),0.2)] hover:bg-[rgba(var(--mist-active-accent-rgb),0.28)] text-white border-[rgba(var(--mist-active-accent-rgb),0.55)]';
     }
 
     const getMatrixLabel = () => {
@@ -313,10 +330,15 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
     }
 
     const hasExistingBlueprint = selectedPathId ? !!cachedBlueprints[selectedPathId] : false;
+    const readOnlyOverviewFieldState = overviewFieldState || fieldState;
+    const readOnlyOverviewWorldLaw = overviewWorldLawConfig || worldLawConfig;
 
     const getGenerateButtonLabel = () => {
         if (styleConfig.styleId) {
             return lang === 'EN' ? "Author Style Rewrite" : "作者风格重写";
+        }
+        if (hasExistingBlueprint && hasBibleConfigChanged) {
+            return lang === 'EN' ? "Regenerate with New Structure" : "按新结构生成";
         }
         if (hasExistingBlueprint) {
             return lang === 'EN' ? "View Creative Bible" : "回看创意圣经";
@@ -377,7 +399,7 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
 
     // Use dynamic theme color for the control class
     const themeTextColor = getThemeColor();
-    const controlClass = `mist-archive-button flex items-center px-3 py-1.5 ${theme === 'retro' ? 'bg-transparent border-[#8B261D]/20 shadow-none' : 'bg-zinc-900 border-white/20'} ${themeTextColor} hover:border-[#8B261D]/50 transition-all w-44`;
+    const controlClass = `mist-archive-button mist-divergence-filter-control flex items-center px-3 py-1.5 ${theme === 'retro' ? 'bg-transparent border-[#8B261D]/20 shadow-none' : 'bg-zinc-900 border-white/20'} ${themeTextColor} hover:border-[#8B261D]/50 transition-all w-44`;
 
     return (
         <div className={`mist-archive-workbench mist-divergence-view w-full h-full flex flex-col relative overflow-hidden ${theme === 'retro' ? 'bg-[var(--bg-main)]' : 'bg-[#0a0a0a]'}`}>
@@ -491,26 +513,6 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                         </>
                     )}
 
-                    <div className={`w-px h-8 ${theme === 'retro' ? 'bg-[#8B261D]/20' : 'bg-zinc-800'} mx-2 hidden lg:block`}></div>
-
-                    <div className="flex items-center gap-2">
-                        <AdminXRayButton
-                            isAdmin={isAdmin}
-                            lang={lang === 'EN' ? 'EN' : 'CN'}
-                            title={lang === 'EN' ? 'X-Ray Path Regeneration Prompt' : 'X-Ray 路径重刷指令'}
-                            payload={{
-                                task: 'Regenerate narrative paths',
-                                driverType: currentDriverType,
-                                fieldState: fieldState || {},
-                                visionInput: visionInput || '',
-                                visionAnalysis: visionAnalysis || '',
-                                worldLawConfig: worldLawConfig || { gravity: 4 }
-                            }}
-                            disabled={isProcessing}
-                            className={theme === 'retro' ? 'h-8 w-8 bg-white border-black/10 text-[#8B261D] hover:bg-[#8B261D]/10' : 'h-8 w-8 bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-gold-primary'}
-                        />
-                    </div>
-
                 </div>
             </div>
 
@@ -532,18 +534,19 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                             </span>
                         </div>
                         <span className={`text-xs ${theme === 'retro' ? 'text-zinc-500' : 'text-zinc-500'} font-mono`}>
-                            {fieldState ? Object.keys(fieldState).length : 0} {lang === 'EN' ? "ACTIVE" : "项激活"}
+                            {readOnlyOverviewFieldState ? Object.keys(readOnlyOverviewFieldState).length : 0} {lang === 'EN' ? "ACTIVE" : "项激活"}
                         </span>
                     </div>
 
                     <div className="flex-1 overflow-y-auto custom-scrollbar p-5">
                         <EngineParamsOverview
-                            fieldState={fieldState}
+                            fieldState={readOnlyOverviewFieldState}
                             language={lang}
                             theme={theme}
                             accentClass={getThemeColor()}
                             visionInput={visionInput}
                             visionAnalysis={visionAnalysis}
+                            worldLawConfig={readOnlyOverviewWorldLaw}
                         />
                     </div>
                 </div>
@@ -572,10 +575,10 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                                 const isSelected = selectedPathId === item.id;
                                 const isCached = !!cachedBlueprints[item.id];
 
-                                let accentColor = isCommercialResults ? 'bg-mist-cyan/40' : 'bg-[rgba(255,98,86,0.38)]';
-                                let borderColor = isCommercialResults ? 'border-mist-cyan/60' : 'border-[rgba(255,98,86,0.58)]';
+                                let accentColor = isCommercialResults ? 'bg-mist-cyan/40' : 'bg-[rgba(var(--mist-active-accent-rgb),0.38)]';
+                                let borderColor = isCommercialResults ? 'border-mist-cyan/60' : 'border-[rgba(var(--mist-active-accent-rgb),0.58)]';
                                 let textColor = isCommercialResults ? 'text-mist-cyan' : 'text-[var(--mist-archive-red)]';
-                                let lightBg = isCommercialResults ? 'bg-mist-cyan/10' : 'bg-[rgba(255,98,86,0.08)]';
+                                let lightBg = isCommercialResults ? 'bg-mist-cyan/10' : 'bg-[rgba(var(--mist-active-accent-rgb),0.08)]';
 
                                 let rawContent = isAestheticResults
                                     ? (promptLang === 'CN' ? (item.pitchCn || item.pitch) : (promptLang === 'EN' ? (item.pitchEn || item.pitch) : (item.universalPrompt || "")))
@@ -599,7 +602,7 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                                         <div className={`h-1 w-full ${accentColor} opacity-50 group-hover:opacity-100 transition-opacity shrink-0`}></div>
 
                                         {isCached && (
-                                            <div className={`absolute top-4 right-4 z-20 flex items-center gap-1 bg-black/80 border ${isCommercialResults ? 'border-mist-cyan/45 text-mist-cyan' : 'border-[rgba(255,98,86,0.45)] text-[var(--mist-archive-red)]'} px-2 py-1 rounded text-[9px] font-bold uppercase tracking-wider`}>
+                                            <div className={`absolute top-4 right-4 z-20 flex items-center gap-1 bg-black/80 border ${isCommercialResults ? 'border-mist-cyan/45 text-mist-cyan' : 'border-[rgba(var(--mist-active-accent-rgb),0.45)] text-[var(--mist-archive-red)]'} px-2 py-1 rounded text-[9px] font-bold uppercase tracking-wider`}>
                                                 <Check size={10} />
                                                 {lang === 'EN' ? "GENERATED" : "已生成"}
                                             </div>
@@ -849,7 +852,7 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                     >
                         <div className={`flex items-center justify-between px-6 py-4 border-b shrink-0 ${theme === 'retro' ? 'border-[#8B261D]/10 bg-[#faf5ee]' : 'border-zinc-800 bg-zinc-900/50'}`}>
                             <div className="flex items-center gap-3">
-                                <Brain size={18} className={theme === 'retro' ? 'text-[#8B261D]' : 'text-amber-400'} />
+                                <Brain size={18} className={theme === 'retro' ? 'text-[#8B261D]' : 'text-[var(--mist-active-accent)]'} />
                                 <span className={`text-sm font-bold uppercase tracking-widest ${theme === 'retro' ? 'text-[#8B261D]' : 'text-zinc-300'}`}>
                                     {lang === 'EN' ? "AI Thinking Process" : "AI 思考过程"}
                                 </span>

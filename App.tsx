@@ -73,6 +73,7 @@ import { getBlockName } from './utils/blockUtils';
 import { findItemDetails, findItemFull } from './services/dataRegistry';
 import { generateAestheticReverse } from './services/aestheticReverseService';
 import { persistence } from './services/persistence';
+import { buildDesireProjectsFromHistoryItem } from './services/desireArchiveService';
 import { supabaseAuthService, AuthUser } from './services/supabaseAuth';
 import { supabaseDatabase } from './services/supabaseDatabase';
 import { useSettings } from './contexts/SettingsContext';
@@ -128,7 +129,7 @@ function undoRedoReducer(state: UndoRedoState, action: UndoRedoAction): UndoRedo
             };
         }
         case 'SET': {
-            return { past: [], present: action.state, future: [] };
+            return { past: [], present: action.state || {}, future: [] };
         }
         default:
             return state;
@@ -193,6 +194,22 @@ const App: React.FC = () => {
     // === Undo/Redo System (useReducer — no stale closures) ===
     const pastStatesLength = undoRedoState.past.length;
     const futureStatesLength = undoRedoState.future.length;
+
+    // Sync active accent color to CSS variables
+    useEffect(() => {
+        const driverDef = DRIVERS.find(d => d.id === selectedDriver);
+        const accent = (theme === 'retro' ? driverDef?.retroAccent : driverDef?.accent) || (theme === 'retro' ? '#8B261D' : '#ff4f3f');
+
+        document.documentElement.style.setProperty('--mist-active-accent', accent);
+
+        // Convert hex to rgb for opacity support
+        if (accent.startsWith('#')) {
+            const r = parseInt(accent.slice(1, 3), 16);
+            const g = parseInt(accent.slice(3, 5), 16);
+            const b = parseInt(accent.slice(5, 7), 16);
+            document.documentElement.style.setProperty('--mist-active-accent-rgb', `${r}, ${g}, ${b}`);
+        }
+    }, [selectedDriver, theme]);
 
     // Sync savedFieldStates whenever the present state changes
     useEffect(() => {
@@ -361,6 +378,7 @@ const App: React.FC = () => {
         setHistory(prev => [item, ...prev]);
         try {
             await persistence.saveHistoryItem(item);
+            await Promise.all(buildDesireProjectsFromHistoryItem(item).map(project => persistence.saveDesireProject(project)));
         } catch (e) {
             console.error("Failed to save history item", e);
         }
@@ -371,6 +389,7 @@ const App: React.FC = () => {
         setHistory(prev => prev.map(i => i.id === updatedItem.id ? updatedItem : i));
         try {
             await persistence.saveHistoryItem(updatedItem);
+            await Promise.all(buildDesireProjectsFromHistoryItem(updatedItem).map(project => persistence.saveDesireProject(project)));
         } catch (e) {
             console.error("Failed to update history item", e);
         }
@@ -567,7 +586,7 @@ const App: React.FC = () => {
     const handleDriverSelect = (id: DriverType) => {
         setSelectedDriver(id);
         setPage(1);
-        setViewMode(id === DriverType.TRAILER ? 'CANVAS' : 'ENGINE');
+        setViewMode(id === DriverType.TRAILER ? 'CANVAS' : id === DriverType.EXPERIMENTAL ? 'METONYMY' : 'ENGINE');
         setLockedModules({});
         setLockedTags({});
         const newFieldState = savedFieldStates[id] || {};
@@ -585,6 +604,31 @@ const App: React.FC = () => {
         if (id === DriverType.AESTHETIC) {
             // Ensure palette is clean for new aesthetic session
             setColorPalette(Array(7).fill(""));
+        }
+        if (id === DriverType.EXPERIMENTAL) {
+            const customBlueprint: CreativeBlueprint = {
+                treatmentId: `custom_story_${Date.now()}`,
+                driverType: DriverType.EXPERIMENTAL,
+                styleName: lang === 'EN' ? 'Story Translation Mode' : '故事转译模式',
+                narrative: {
+                    title: lang === 'EN' ? 'Custom Story' : '自定义故事',
+                    logline: lang === 'EN' ? 'Paste a complete story and translate it into a screenplay.' : '粘贴完整故事，并转译为电影脚本。',
+                    synopsis: ''
+                },
+                context: {
+                    world: '',
+                    tone: '',
+                    colorPalette: [],
+                    moodboard: { prompt: '', images: [], selectedImageId: null }
+                },
+                assets: { characters: [], locations: [], props: [] },
+                metonymyData: {
+                    screenplay: [],
+                    staticStoryboard: [],
+                    dynamicScript: []
+                }
+            };
+            setMetonymyBlueprint(customBlueprint);
         }
         closeAllModals();
     };
@@ -1320,6 +1364,9 @@ const App: React.FC = () => {
             setIsVisionOpen(false);
             setIsAestheticInputOpen(false);
         } else if (viewMode === 'METONYMY') {
+            if (selectedDriver === DriverType.EXPERIMENTAL) {
+                setPage(0);
+            }
             handleViewChange('ENGINE');
             setMetonymyBlueprint(null);
             setIsSkinOpen(false);
@@ -1338,7 +1385,7 @@ const App: React.FC = () => {
 
     const handleTraverseFantasy = async (force: boolean = false) => {
         if (!selectedDriver) return;
-        if (!force && Object.keys(narrativeFieldState).length === 0) {
+        if (!force && Object.keys(narrativeFieldState || {}).length === 0) {
             alert("Please configure the engine first.");
             return;
         }
@@ -1423,11 +1470,24 @@ const App: React.FC = () => {
     };
 
     const handleOpenMetonymyPage = () => {
-        const standaloneBlueprint = createDefaultBlueprint();
-        standaloneBlueprint.narrative.title = lang === 'EN' ? "New Suture Project" : "新建转译项目";
+        const sourceBlueprint = activeBlueprint || null;
+        const nextBlueprint = sourceBlueprint
+            ? {
+                ...sourceBlueprint,
+                metonymyData: sourceBlueprint.metonymyData || {
+                    screenplay: [],
+                    staticStoryboard: [],
+                    dynamicScript: []
+                }
+            }
+            : createDefaultBlueprint();
 
-        setActiveHistoryItem(null);
-        setMetonymyBlueprint(standaloneBlueprint);
+        if (!sourceBlueprint) {
+            nextBlueprint.narrative.title = lang === 'EN' ? "New Suture Project" : "新建转译项目";
+            setActiveHistoryItem(null);
+        }
+
+        setMetonymyBlueprint(nextBlueprint);
 
         handleViewChange('METONYMY');
         setIsSutureOpen(false);
@@ -1489,6 +1549,19 @@ const App: React.FC = () => {
                 };
                 updateHistoryItem(updatedItem);
                 setActiveHistoryItem(updatedItem);
+            } else if (activeHistoryItem && (activeHistoryItem.type === 'BIBLE' || activeHistoryItem.type === 'NARRATIVE')) {
+                const updatedItem: HistoryItem = {
+                    ...activeHistoryItem,
+                    date: new Date().toISOString(),
+                    type: 'METONYMY',
+                    blueprint,
+                    savedBlueprints: {
+                        ...(activeHistoryItem.savedBlueprints || {}),
+                        [blueprint.treatmentId]: blueprint
+                    }
+                };
+                updateHistoryItem(updatedItem);
+                setActiveHistoryItem(updatedItem);
             } else {
                 // Create new metonymy record
                 const newItem: HistoryItem = {
@@ -1539,19 +1612,28 @@ const App: React.FC = () => {
     };
 
     const onHistoryRestore = (item: HistoryItem) => {
-        setActiveHistoryItem(item);
-        undoRedoDispatch({ type: 'SET', state: item.fieldState });
-        setSelectedDriver(item.driverId);
+        const normalizedItem: HistoryItem = {
+            ...item,
+            driverId: item.driverId || item.blueprint?.driverType || selectedDriver || DriverType.NARRATIVE,
+            driverName: item.driverName || getDriverName(),
+            fieldState: item.fieldState || item.blueprint?.generationFieldState || {},
+            treatments: item.treatments || [],
+            savedBlueprints: item.savedBlueprints || {}
+        };
 
-        if (item.type === 'METONYMY') {
-            if (item.blueprint) setMetonymyBlueprint(item.blueprint);
+        setActiveHistoryItem(normalizedItem);
+        undoRedoDispatch({ type: 'SET', state: normalizedItem.fieldState || {} });
+        setSelectedDriver(normalizedItem.driverId);
+
+        if (normalizedItem.type === 'METONYMY') {
+            if (normalizedItem.blueprint) setMetonymyBlueprint(normalizedItem.blueprint);
             handleViewChange('METONYMY');
         } else {
-            if (item.blueprint) setActiveBlueprint(item.blueprint);
-            if (item.treatments) setGeneratedTreatments(item.treatments);
-            if (item.savedBlueprints) setCachedBlueprints(item.savedBlueprints);
-            if (item.blueprint) handleViewChange('BIBLE');
-            else if (item.treatments && item.treatments.length) handleViewChange('DIVERGENCE');
+            setActiveBlueprint(normalizedItem.blueprint || null);
+            setGeneratedTreatments(normalizedItem.treatments || []);
+            setCachedBlueprints(normalizedItem.savedBlueprints || {});
+            if (normalizedItem.blueprint) handleViewChange('BIBLE');
+            else if (normalizedItem.treatments && normalizedItem.treatments.length) handleViewChange('DIVERGENCE');
             else handleViewChange('ENGINE');
         }
 
@@ -1564,6 +1646,11 @@ const App: React.FC = () => {
         persistence.clearHistory();
     };
 
+    const onHistoryDelete = (id: string | number) => {
+        setHistory(prev => prev.filter(item => String(item.id) !== String(id)));
+        persistence.deleteHistory(id);
+    };
+
     const isCommercialThemeActive = () => {
         return selectedDriver === DriverType.COMMERCIAL || activeBlueprint?.driverType === DriverType.COMMERCIAL || metonymyBlueprint?.driverType === DriverType.COMMERCIAL;
     };
@@ -1573,7 +1660,7 @@ const App: React.FC = () => {
     };
 
     const getMetonymyThemeBorder = () => {
-        return isCommercialThemeActive() ? "border-mist-cyan/30" : "border-[rgba(255,98,86,0.3)]";
+        return isCommercialThemeActive() ? "border-mist-cyan/30" : "border-[rgba(var(--mist-active-accent-rgb),0.3)]";
     };
 
     const handleBibleGenerate = async (treatment: CreativeTreatment, style: StyleConfig, force: boolean = false) => {
@@ -1959,7 +2046,7 @@ const App: React.FC = () => {
                         />
                     </div>
                 ) : (
-                    <div className={`mist-app-shell ${selectedDriver === DriverType.COMMERCIAL ? 'mist-commercial-mode' : ''} flex flex-col h-screen overflow-hidden relative`}>
+                    <div className={`mist-app-shell ${selectedDriver === DriverType.NARRATIVE ? 'mist-narrative-mode' : ''} ${selectedDriver === DriverType.COMMERCIAL ? 'mist-commercial-mode' : ''} flex flex-col h-screen overflow-hidden relative`}>
                         <div className="mist-app-film-grain" aria-hidden="true" />
                         {!isSutureOpen && (
                             <AppHeader
@@ -2092,10 +2179,12 @@ const App: React.FC = () => {
                                         activeDriver={selectedDriver}
                                         cachedBlueprints={cachedBlueprints}
                                         fieldState={generatedTreatments.length > 0 ? narrativeFieldState : {}}
+                                        overviewFieldState={generatedTreatments.length > 0 ? (activeHistoryItem?.fieldState || narrativeFieldState) : {}}
                                         visionInput={generatedTreatments.length > 0 ? (activeHistoryItem?.visionInput || '') : ''}
                                         visionAnalysis={generatedTreatments.length > 0 ? (activeHistoryItem?.visionAnalysis || '') : ''}
                                         thinkingXml={thinkingXml}
                                         worldLawConfig={activeHistoryItem?.worldLaw || worldLawConfig}
+                                        overviewWorldLawConfig={activeHistoryItem?.worldLaw || worldLawConfig}
                                         onToggleTag={handleToggleTag}
                                     />
                                 </div>
@@ -2204,7 +2293,7 @@ const App: React.FC = () => {
                                 isGenerating={isGenerating}
                                 traverseStartTime={traverseStartTime}
                                 handleTraverseFantasy={handleTraverseFantasy}
-                                hasFieldState={Object.keys(narrativeFieldState).length > 0}
+                                hasFieldState={Object.keys(narrativeFieldState || {}).length > 0}
                                 onRandomizeBlock={handleRandomizeBlock}
                                 onClearBlock={handleClearBlock}
                                 isTaskManagerOpen={isTaskManagerOpen}
@@ -2291,7 +2380,7 @@ const App: React.FC = () => {
 
 
                 {/* Modal removed in favor of full page in the Routes flow above, but we keep the logic tethered to isManualOpen for now to minimize ripple effects */}
-                {isHistoryOpen && <HistoryModal history={history} onRestore={onHistoryRestore} onClear={onHistoryClear} onClose={closeHistory} lang={lang} />}
+                {isHistoryOpen && <HistoryModal history={history} onRestore={onHistoryRestore} onClose={closeHistory} lang={lang} />}
 
                 {activeBlockId && (
                     <NarrativeLibraryModal

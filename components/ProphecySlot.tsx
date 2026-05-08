@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { NarrativeFieldState, BlueprintLanguage, DriverType, NarrativeBlockDef } from '../types';
+import { DRIVERS } from '../constants';
+
 import { useTheme } from '../contexts/ThemeContext';
 import { Lock, Unlock, Shuffle, Trash2, Edit2, X, Check, Dice5, RotateCcw } from 'lucide-react';
 
@@ -90,13 +92,17 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
     let accentColor = 'text-[var(--text-header)] border-white/70';
     let labelColor = 'text-[var(--text-header)]';
     let containerClass = `inline-flex flex-wrap items-baseline gap-1.5 md:gap-2 mx-1.5 md:mx-2 relative group/slot align-middle ${isCommercial ? 'mist-commercial-prophecy-slot' : ''}`;
-    let editAccent = 'text-[var(--text-main)] border-[var(--border-main)] focus:border-[var(--mist-archive-red)]';
+    let editAccent = 'text-[var(--text-main)] border-[var(--border-main)] focus:border-[var(--mist-active-accent)]';
+
+    const driverDef = DRIVERS.find(d => d.id === driverType);
+    const activeRetroAccent = driverDef?.retroAccent || 'var(--mist-active-accent)';
 
     if (theme === 'retro') {
-        accentColor = 'text-[#8B261D] border-[#8B261D]';
-        labelColor = 'text-[#8B261D]';
-        editAccent = 'text-[var(--text-main)] border-[var(--border-main)] focus:border-[#8B261D]';
+        accentColor = 'text-[var(--mist-active-accent)] border-[var(--mist-active-accent)]';
+        labelColor = 'text-[var(--mist-active-accent)]';
+        editAccent = 'text-[var(--text-main)] border-[var(--border-main)] focus:border-[var(--mist-active-accent)]';
     }
+
 
     const textSize = isTiny ? 'text-xs' : (isSmall ? 'text-sm md:text-base' : 'text-xl md:text-3xl');
     const prefixSize = isTiny ? 'text-[10px]' : (isSmall ? 'text-sm md:text-base' : 'text-lg md:text-2xl');
@@ -161,11 +167,10 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
                 tags.map((tag, idx) => {
                     const details = getItemDetails(tag, blockId) as { def?: string; core?: string; defEn?: string; coreEn?: string } | null;
                     const isTagLocked = lockedTags?.[blockId]?.includes(tag) || isBlockLocked;
-
                     const activeAccent = isTagLocked
                         ? (theme === 'retro'
-                            ? `mist-prophecy-slot-active text-black border-[var(--text-accent)] border bg-[var(--text-accent)]/10 px-2`
-                            : 'mist-prophecy-slot-active border border-[var(--mist-archive-red)] bg-[var(--mist-archive-red-faint)] px-2')
+                            ? `mist-prophecy-slot-active text-black border-[var(--mist-active-accent)] border bg-[var(--mist-active-accent)]/10 px-2`
+                            : 'mist-prophecy-slot-active border border-[var(--mist-active-accent)] bg-[var(--mist-active-accent)]/15 px-2')
                         : (isTiny
                             ? `mist-prophecy-slot-active border ${accentColor} ${isRetro ? 'bg-[var(--bg-card)]' : 'bg-zinc-900/70'} px-2 py-0.5 shadow-sm ${theme === 'retro' ? '' : 'hover:bg-zinc-800'}`
                             : `mist-prophecy-slot-active border-b ${accentColor} px-0.5 ${theme === 'retro' ? 'hover:bg-transparent' : 'hover:bg-white/10'}`);
@@ -189,7 +194,7 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
                                     <button onClick={(e) => { e.stopPropagation(); onRandomizeTag?.(blockId, tag); }} disabled={isTagLocked} className={`flex items-center justify-center p-0.5 ${isRetro ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--border-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isTagLocked ? 'opacity-30 cursor-not-allowed' : ''}`}>
                                         <Dice5 size={10} />
                                     </button>
-                                    <button onClick={(e) => { e.stopPropagation(); onToggleTagLock?.(blockId, tag); }} className={`flex items-center justify-center p-0.5 ${isRetro ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isTagLocked ? (isRetro ? 'border-[var(--text-accent)] text-black bg-[var(--text-accent)]/10' : 'border-[var(--mist-archive-red)] text-white bg-[var(--mist-archive-red-faint)]') : ''}`}>
+                                    <button onClick={(e) => { e.stopPropagation(); onToggleTagLock?.(blockId, tag); }} className={`flex items-center justify-center p-0.5 ${isRetro ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isTagLocked ? (isRetro ? 'border-[var(--text-accent)] text-black bg-[var(--text-accent)]/10' : 'border-[var(--mist-active-accent)] text-white bg-[var(--mist-active-accent)]/20') : ''}`}>
                                         {isTagLocked ? <Lock size={10} /> : <Unlock size={10} />}
                                     </button>
                                     <button onClick={(e) => handleEditClick(tag, e)} disabled={isTagLocked} className={`flex items-center justify-center p-0.5 ${isRetro ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isTagLocked ? 'opacity-30 cursor-not-allowed' : ''}`}>
@@ -232,7 +237,7 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
                         <button onClick={(e) => { e.stopPropagation(); onRandomizeBlock(blockId); }} disabled={isBlockLocked} className={`flex items-center justify-center p-0.5 ${isRetro ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--border-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors`}>
                             <Dice5 size={10} />
                         </button>
-                        <button onClick={(e) => { e.stopPropagation(); onToggleLockBlock(blockId); }} className={`flex items-center justify-center p-0.5 ${isRetro ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isBlockLocked ? (isRetro ? 'border-[var(--text-accent)] text-black bg-[var(--text-accent)]/10' : 'text-white border-[var(--mist-archive-red)] bg-[var(--mist-archive-red-faint)]') : ''}`}>
+                        <button onClick={(e) => { e.stopPropagation(); onToggleLockBlock(blockId); }} className={`flex items-center justify-center p-0.5 ${isRetro ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isBlockLocked ? (isRetro ? 'border-[var(--text-accent)] text-black bg-[var(--text-accent)]/10' : 'text-white border-[var(--mist-active-accent)] bg-[var(--mist-active-accent)]/20') : ''}`}>
                             {isBlockLocked ? <Lock size={10} /> : <Unlock size={10} />}
                         </button>
                         <button onClick={handleCreateClick} disabled={isBlockLocked} className={`flex items-center justify-center p-0.5 ${isRetro ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isBlockLocked ? 'opacity-30 cursor-not-allowed' : ''}`}>
@@ -292,7 +297,7 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
             {showLevelToggle && (
                 <button
                     onClick={(e) => { e.stopPropagation(); onOpenLibrary(blockId); }}
-                    className={`w-10 h-10 flex items-center justify-center border font-mono text-sm font-bold transition-all self-center shrink-0 ml-1 ${isRetro ? 'border-[#8B261D] text-[#8B261D] bg-[#F9F7F1] hover:bg-[#8B261D] hover:text-white' : 'border-zinc-700 text-zinc-400 bg-zinc-900/20 hover:border-zinc-500 hover:text-white'} rounded active:scale-90`}
+                    className={`w-10 h-10 flex items-center justify-center border font-mono text-sm font-bold transition-all self-center shrink-0 ml-1 ${isRetro ? 'border-[var(--mist-active-accent)] text-[var(--mist-active-accent)] bg-[#F9F7F1] hover:bg-[var(--mist-active-accent)] hover:text-white' : 'border-zinc-700 text-zinc-400 bg-zinc-900/20 hover:border-zinc-500 hover:text-white'} rounded active:scale-90`}
                 >
                     {(() => {
                         const currentTag = tags[0] || "";

@@ -28,8 +28,8 @@ export const buildExperimentalPrompt = (
     
     ${visionInput || visionImage ? getVisionAnchorProtocol(visionInput, Boolean(visionImage)) : ""}
 
-    ## 2. 现象学还原协议
-    去语义化，专注于存在的原始状态。
+    ## 2. 换喻脚本协议
+    将完整故事拆解为物象链、场景链与可拍摄的脚本段落。
 
     ## 3. 三种还原路径
     ### **OPTION 1: [PHENOMENOLOGICAL]**
@@ -70,7 +70,7 @@ export const buildExperimentalBiblePrompt = (
         {
           "treatmentId": "${treatment.id}",
           "driverType": "EXPERIMENTAL",
-          "styleName": "Phenomenological Reduction",
+          "styleName": "Metonymic Script",
           "narrative": { "title": "Title", "logline": "Axiom", "synopsis": "Manifesto" },
           "context": { "world": "Context", "tone": "Tone", "colorPalette": [], "moodboard": { "prompt": "MJ" } },
           "experimentalData": {

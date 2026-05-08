@@ -71,8 +71,8 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   // --- Helper Functions ---
   const isPortalChrome = viewMode === 'ARCHIVE' || viewMode === 'VIDEO' || viewMode === 'RORSCHACH' || viewMode === 'DICTIONARY';
 
-  const getHeaderTitleColor = () => !isPortalChrome && selectedDriver === DriverType.COMMERCIAL
-    ? 'text-[var(--text-accent)]'
+  const getHeaderTitleColor = () => !isPortalChrome && selectedDriver
+    ? 'text-[var(--mist-active-accent)]'
     : 'text-[var(--text-header)]';
 
   const getThemeTextColor = () => 'text-[var(--text-header)]';
@@ -85,24 +85,24 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   const getBorderAccentColor = () => {
     if (theme === 'retro') return 'rgba(139, 38, 29, 0.18)';
     if (isPortalChrome) return 'rgba(255,255,255,0.18)';
-    return selectedDriver === DriverType.COMMERCIAL ? 'var(--mist-archive-signal-wash)' : 'rgba(166, 64, 56, 0.22)';
+    return selectedDriver ? 'var(--mist-active-accent)' : 'rgba(166, 64, 56, 0.22)';
   };
 
   const getLineGlow = () => {
     if (theme === 'retro') return '';
     if (isPortalChrome) return '';
-    return selectedDriver === DriverType.COMMERCIAL ? '0 0 12px var(--mist-archive-signal-glow)' : '0 0 12px rgba(166,64,56,0.24)';
+    return selectedDriver ? '0 0 12px var(--mist-active-accent)' : '0 0 12px rgba(166,64,56,0.24)';
   };
 
   const headerTitleStyle: React.CSSProperties = theme === 'retro'
     ? { color: 'var(--text-accent)', textShadow: 'none' }
-    : (!isPortalChrome && selectedDriver === DriverType.COMMERCIAL
-      ? { color: 'var(--text-accent)', textShadow: 'none' }
-      : { color: 'var(--mist-archive-ink)', textShadow: 'none' });
+    : (!isPortalChrome && selectedDriver
+      ? { color: 'var(--mist-active-accent)', textShadow: 'none' }
+      : { color: 'var(--mist-active-accent, var(--text-header))', textShadow: 'none' });
 
   const getNarrativeEngineLabel = () => {
     if (selectedDriver === DriverType.COMMERCIAL) return lang === 'EN' ? "SUTURE ENGINE" : "欲望缝合";
-    if (selectedDriver === DriverType.EXPERIMENTAL) return lang === 'EN' ? "REDUCTION ENGINE" : "现象学还原";
+    if (selectedDriver === DriverType.EXPERIMENTAL) return lang === 'EN' ? "METONYMIC SCRIPT" : "换喻脚本";
     if (selectedDriver === DriverType.AESTHETIC) return lang === 'EN' ? "AESTHETIC" : "情绪美学";
     if (selectedDriver === DriverType.TRAILER) return lang === 'EN' ? "CANVAS ENGINE" : "迷雾画布";
     return lang === 'EN' ? "NARRATIVE ENGINE" : "爱欲迷宫";
@@ -198,6 +198,14 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                 >
                   <BookOpen size={14} />
                   {lang === 'CN' ? "创意圣经" : "CREATIVE BIBLE"}
+                </button>
+                <div className="w-4 h-px bg-[var(--border-glass)]"></div>
+                <button
+                  onClick={handleOpenMetonymyPage}
+                  className={`mist-app-nav-button ${viewMode === 'METONYMY' ? 'is-active' : ''} flex items-center gap-2 transition-all duration-300 active:scale-95 ${viewMode === 'METONYMY' ? getHeaderTitleColor() : `${mutedControlClass} font-sans`}`}
+                >
+                  <Wand2 size={14} />
+                  {lang === 'CN' ? "换喻脚本" : "METONYMY SCRIPT"}
                 </button>
               </>
             )}

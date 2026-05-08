@@ -11,7 +11,7 @@ export const MASTER_PRESETS_REALISM: AestheticPreset[] = [
     nameEn: "Style of Better Call Saul",
     group: "A. 顶级剧集",
     def: "Wide-angle low camera, minimalist composition, contrast between desert yellows and cold interiors, highlighting existential moral dilemmas.",
-    colors: ["#D4AF37", "#8B4513", "#000000", "#A9A9A9", "#FFFFFF", "#4682B4", "#F5DEB3"],
+    colors: ["#FFD700", "#8B4513", "#000000", "#A9A9A9", "#FFFFFF", "#4682B4", "#F5DEB3"],
     params: {
       "aes_director_style": ["文斯·吉里根 (Vince Gilligan)"],
       "aes_camera_system": ["RED V-RAPTOR [X] (RED V-RAPTOR [X])"],
@@ -231,7 +231,7 @@ export const MASTER_PRESETS_REALISM: AestheticPreset[] = [
     nameEn: "Style of The Crown",
     group: "A. 顶级剧集",
     def: "Royal blue tones, heavy fog, lavish interiors, expansive landscapes, and a sense of cold, isolated luxury.",
-    colors: ["#000080", "#D4AF37", "#708090", "#FFFFFF", "#000000", "#8B4513", "#556B2F"],
+    colors: ["#000080", "#FFD700", "#708090", "#FFFFFF", "#000000", "#8B4513", "#556B2F"],
     params: {
       "aes_director_style": ["史蒂芬·戴德利 (Stephen Daldry)"],
       "aes_camera_system": ["Sony Venice 2 (Sony Venice 2)"],

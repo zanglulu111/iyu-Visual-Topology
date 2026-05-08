@@ -19,7 +19,7 @@ interface UniversePortalProps {
   onOpenDesireReproduction?: () => void;
 }
 
-type PortalTone = 'red' | 'cyan';
+type PortalTone = 'gold' | 'cyan' | 'red' | 'purple' | 'orange';
 
 const DESIRE_PORTAL_NUMBER = '03';
 
@@ -51,8 +51,24 @@ const textChromaticShadow =
 
 
 const toneColor = (tone: PortalTone, isRetro: boolean) => {
-  if (tone === 'cyan') return isRetro ? '#5ecfdc' : '#5ecfdc';
-  return isRetro ? '#d45d52' : '#d45d52';
+  if (isRetro) {
+    switch (tone) {
+      case 'gold': return '#8B261D';
+      case 'cyan': return '#0E7490';
+      case 'red': return '#8B261D';
+      case 'purple': return '#4A2C40';
+      case 'orange': return '#85411B';
+      default: return '#8B261D';
+    }
+  }
+  switch (tone) {
+    case 'gold': return '#FFD700';
+    case 'cyan': return '#22D3EE';
+    case 'red': return '#EF4444';
+    case 'purple': return '#A855F7';
+    case 'orange': return '#F97316';
+    default: return '#FFD700';
+  }
 };
 
 const PortalNavItem: React.FC<NavItemDef> = ({ titleCn, titleEn, onClick }) => (
@@ -386,7 +402,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
       descCn: '进入梦、档案与主体裂缝',
       descEn: 'The crossroads of psychoanalysis and cinema theory.',
       imageSrc: '/portal-assets/card-01-89.png',
-      tone: 'red',
+      tone: 'gold',
       onClick: goArchive,
     },
     {
@@ -396,7 +412,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
       descCn: '进入光影、症候与实在界',
       descEn: 'How cinema renders unconscious structures visible.',
       imageSrc: '/portal-assets/card-02-88.png',
-      tone: 'red',
+      tone: 'cyan',
       onClick: goVideo,
     },
     {
@@ -416,7 +432,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
       descCn: '迷雾学派理论',
       descEn: 'Symptoms as gazes and sounds beyond representation.',
       imageSrc: '/portal-assets/card-04-90.png',
-      tone: 'red',
+      tone: 'purple',
       onClick: goDictionary,
     },
     {
@@ -426,7 +442,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
       descCn: '进入罗夏墨迹与潜意识探测',
       descEn: 'Archive research, image archaeology, and field work.',
       imageSrc: '/portal-assets/card-05-87.png',
-      tone: 'red',
+      tone: 'orange',
       onClick: goRorschach,
     },
   ];

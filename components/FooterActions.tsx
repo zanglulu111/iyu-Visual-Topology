@@ -29,7 +29,7 @@ export const FooterActions: React.FC<FooterActionsProps> = ({
 
     return (
         <>
-            <div className="mist-app-footer-segment flex border p-1 shrink-0 transition-all duration-300">
+            <div className="mist-app-footer-segment mist-app-footer-history-controls flex border p-1 shrink-0 transition-all duration-300">
                 <button 
                     onClick={handleUndo} 
                     disabled={!canUndo}

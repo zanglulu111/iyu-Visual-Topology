@@ -37,26 +37,11 @@ export const ProductManualModal: React.FC<ProductManualModalProps> = ({ isOpen, 
     const [selectedWhitepaper, setSelectedWhitepaper] = useState<WhitepaperSection | null>(null);
 
     const theme = {
-        text: driverType === DriverType.COMMERCIAL ? 'text-mist-cyan' :
-            driverType === DriverType.EXPERIMENTAL ? 'text-purple-400' :
-                driverType === DriverType.AESTHETIC ? 'text-rose-400' :
-                    driverType === DriverType.TRAILER ? 'text-orange-400' : 'text-gold-primary',
-        border: driverType === DriverType.COMMERCIAL ? 'border-mist-cyan' :
-            driverType === DriverType.EXPERIMENTAL ? 'border-purple-500' :
-                driverType === DriverType.AESTHETIC ? 'border-rose-500' :
-                    driverType === DriverType.TRAILER ? 'border-orange-500' : 'border-gold-primary',
-        bg: driverType === DriverType.COMMERCIAL ? 'bg-mist-cyan' :
-            driverType === DriverType.EXPERIMENTAL ? 'bg-purple-500' :
-                driverType === DriverType.AESTHETIC ? 'bg-rose-500' :
-                    driverType === DriverType.TRAILER ? 'bg-orange-500' : 'bg-gold-primary',
-        hoverBorder: driverType === DriverType.COMMERCIAL ? 'hover:border-mist-cyan/50' :
-            driverType === DriverType.EXPERIMENTAL ? 'hover:border-purple-500/50' :
-                driverType === DriverType.AESTHETIC ? 'hover:border-rose-500/50' :
-                    driverType === DriverType.TRAILER ? 'hover:border-orange-500/50' : 'hover:border-gold-primary/50',
-        groupHoverText: driverType === DriverType.COMMERCIAL ? 'group-hover:text-mist-cyan' :
-            driverType === DriverType.EXPERIMENTAL ? 'group-hover:text-purple-400' :
-                driverType === DriverType.AESTHETIC ? 'group-hover:text-rose-400' :
-                    driverType === DriverType.TRAILER ? 'group-hover:text-orange-400' : 'group-hover:text-gold-primary',
+        text: 'text-[var(--mist-active-accent)]',
+        border: 'border-[var(--mist-active-accent)]',
+        bg: 'bg-[var(--mist-active-accent)]',
+        hoverBorder: 'hover:border-[var(--mist-active-accent)]/50',
+        groupHoverText: 'group-hover:text-[var(--mist-active-accent)]',
     };
 
     const getCount = (dict: any[]) => {

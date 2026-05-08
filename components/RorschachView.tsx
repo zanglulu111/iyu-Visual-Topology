@@ -713,13 +713,13 @@ export const RorschachView: React.FC<RorschachViewProps> = ({ onClose, lang }) =
 
   const phaseColors: Record<number, string> = isRetro ? {
     1: '#4b5563',  // deep graphite — phase 1
-    2: '#8b261d',  // oxblood red — phase 2
+    2: 'var(--mist-active-accent)',  // dynamic accent — phase 2
     3: '#1e3a8a',  // indigo ink  — phase 3
     4: '#78350f',  // scorched earth — phase 4
   } : {
     1: '#b3b3b3',  // neutral gray — clinical
     2: '#c084fc',  // purple — projection
-    3: '#d4af37',  // gold — temporal
+    3: '#FFD700',  // gold — temporal
     4: '#fb7185',  // rose — desire
   };
   const phaseColor = phaseColors[phase] ?? (isRetro ? '#4b5563' : '#b3b3b3');
@@ -729,16 +729,16 @@ export const RorschachView: React.FC<RorschachViewProps> = ({ onClose, lang }) =
   // ── Theme tokens ─────────────────────────────────────────────
   const bg         = isRetro ? '#f5f0e8' : '#0a0a0b';
   const bgPanel    = isRetro ? '#ede8df' : 'transparent';
-  const borderCol  = isRetro ? 'rgba(139,38,29,0.18)' : 'rgba(255,255,255,0.06)';
-  const borderSub  = isRetro ? 'rgba(139,38,29,0.10)' : 'rgba(255,255,255,0.05)';
+  const borderCol  = isRetro ? 'rgba(var(--mist-active-accent-rgb),0.18)' : 'rgba(255,255,255,0.06)';
+  const borderSub  = isRetro ? 'rgba(var(--mist-active-accent-rgb),0.10)' : 'rgba(255,255,255,0.05)';
   const textPrimary   = isRetro ? 'rgba(20,10,5,0.98)' : 'rgba(255,255,255,0.95)';
   const textSecondary = isRetro ? 'rgba(50,30,20,0.90)' : 'rgba(255,255,255,0.70)';
   const textMuted     = isRetro ? 'rgba(80,50,40,0.80)' : 'rgba(255,255,255,0.50)';
   const textFaint     = isRetro ? 'rgba(110,70,60,0.70)' : 'rgba(255,255,255,0.35)';
-  const inputBorder   = isRetro ? 'rgba(139,38,29,0.20)' : 'rgba(255,255,255,0.08)';
-  const choiceBorder  = isRetro ? 'rgba(139,38,29,0.12)' : 'rgba(255,255,255,0.06)';
+  const inputBorder   = isRetro ? 'rgba(var(--mist-active-accent-rgb),0.20)' : 'rgba(255,255,255,0.08)';
+  const choiceBorder  = isRetro ? 'rgba(var(--mist-active-accent-rgb),0.12)' : 'rgba(255,255,255,0.06)';
   const choiceText    = isRetro ? 'rgba(60,30,20,0.55)'  : 'rgba(255,255,255,0.45)';
-  const progressEmpty = isRetro ? 'rgba(139,38,29,0.12)' : 'rgba(255,255,255,0.08)';
+  const progressEmpty = isRetro ? 'rgba(var(--mist-active-accent-rgb),0.12)' : 'rgba(255,255,255,0.08)';
   const scanlineColor = isRetro ? '0,0,0' : '0,0,0';
 
   // ─────────────────────────────────────────────────────────────
@@ -875,13 +875,13 @@ export const RorschachView: React.FC<RorschachViewProps> = ({ onClose, lang }) =
               >
                 <div
                   className="w-10 h-10 rounded-sm flex items-center justify-center border transition-all duration-300"
-                  style={{ borderColor: isRetro ? 'rgba(139,38,29,0.35)' : 'rgba(255,255,255,0.22)' }}
+                  style={{ borderColor: isRetro ? 'rgba(var(--mist-active-accent-rgb),0.35)' : 'rgba(255,255,255,0.22)' }}
                   onMouseEnter={e => {
-                    (e.currentTarget as HTMLDivElement).style.borderColor = isRetro ? 'rgba(139,38,29,0.6)' : 'rgba(255,255,255,0.4)';
-                    (e.currentTarget as HTMLDivElement).style.backgroundColor = isRetro ? 'rgba(139,38,29,0.06)' : 'rgba(255,255,255,0.06)';
+                    (e.currentTarget as HTMLDivElement).style.borderColor = isRetro ? 'rgba(var(--mist-active-accent-rgb),0.6)' : 'rgba(255,255,255,0.4)';
+                    (e.currentTarget as HTMLDivElement).style.backgroundColor = isRetro ? 'rgba(var(--mist-active-accent-rgb),0.06)' : 'rgba(255,255,255,0.06)';
                   }}
                   onMouseLeave={e => {
-                    (e.currentTarget as HTMLDivElement).style.borderColor = isRetro ? 'rgba(139,38,29,0.25)' : 'rgba(255,255,255,0.12)';
+                    (e.currentTarget as HTMLDivElement).style.borderColor = isRetro ? 'rgba(var(--mist-active-accent-rgb),0.25)' : 'rgba(255,255,255,0.12)';
                     (e.currentTarget as HTMLDivElement).style.backgroundColor = 'transparent';
                   }}
                 >
@@ -1126,7 +1126,7 @@ export const RorschachView: React.FC<RorschachViewProps> = ({ onClose, lang }) =
                     </span>
                     <span className="text-[10px] font-mono" style={{ color: v.color, opacity: 0.7 }}>{v.sub}</span>
                   </div>
-                  <div className="h-px relative overflow-hidden rounded-full" style={{ backgroundColor: isRetro ? 'rgba(139,38,29,0.08)' : 'rgba(255,255,255,0.05)' }}>
+                  <div className="h-px relative overflow-hidden rounded-full" style={{ backgroundColor: isRetro ? 'rgba(var(--mist-active-accent-rgb),0.08)' : 'rgba(255,255,255,0.05)' }}>
                     <div
                       className="h-full rounded-full transition-all duration-[1500ms] ease-out"
                       style={{
@@ -1166,7 +1166,7 @@ export const RorschachView: React.FC<RorschachViewProps> = ({ onClose, lang }) =
                   className="flex-1 text-[9px] font-mono tracking-[0.25em] uppercase py-3 rounded-sm transition-all duration-200"
                   style={{ border: `1px solid ${choiceBorder}`, color: textMuted }}
                   onMouseEnter={e => {
-                    (e.currentTarget as HTMLButtonElement).style.borderColor = isRetro ? 'rgba(139,38,29,0.40)' : 'rgba(255,255,255,0.20)';
+                    (e.currentTarget as HTMLButtonElement).style.borderColor = isRetro ? 'rgba(var(--mist-active-accent-rgb),0.40)' : 'rgba(255,255,255,0.20)';
                     (e.currentTarget as HTMLButtonElement).style.color = isRetro ? 'rgba(30,15,10,0.80)' : 'rgba(255,255,255,0.70)';
                   }}
                   onMouseLeave={e => {
@@ -1227,7 +1227,7 @@ export const RorschachView: React.FC<RorschachViewProps> = ({ onClose, lang }) =
             <div className="flex flex-col items-center gap-3" style={{ animation: 'pulseRing 2s ease-in-out infinite' }}>
               <div
                 className="w-12 h-12 rounded-full flex items-center justify-center"
-                style={{ border: `1px solid ${isRetro ? 'rgba(139,38,29,0.30)' : 'rgba(255,255,255,0.20)'}` }}
+                style={{ border: `1px solid ${isRetro ? 'rgba(var(--mist-active-accent-rgb),0.30)' : 'rgba(255,255,255,0.20)'}` }}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={isRetro ? 'rgba(100,30,20,0.5)' : 'rgba(255,255,255,0.4)'} strokeWidth="1.5">
                   <circle cx="12" cy="12" r="3" /><path d="M12 2v4M12 18v4M2 12h4M18 12h4" />

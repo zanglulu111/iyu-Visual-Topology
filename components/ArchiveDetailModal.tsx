@@ -18,6 +18,8 @@ interface ArchiveDetailModalProps {
     caseData: CaseStudy | null;
     lang: 'CN' | 'EN';
     renderInPlace?: boolean;
+    onGeneratePsychoanalysis?: (caseData: CaseStudy) => Promise<void>;
+    isGeneratingPsychoanalysis?: boolean;
 }
 
 function splitParameter(parameter: string) {
@@ -33,10 +35,12 @@ export const ArchiveDetailModal: React.FC<ArchiveDetailModalProps> = ({
     onClose,
     caseData,
     lang,
-    renderInPlace
+    renderInPlace,
+    onGeneratePsychoanalysis,
+    isGeneratingPsychoanalysis = false
 }) => {
     const { theme } = useTheme();
-    const [activePage, setActivePage] = React.useState<'story' | 'assets' | 'analysis'>('story');
+    const [activePage, setActivePage] = React.useState<'story' | 'assets' | 'analysis' | 'screenplay'>('story');
     const isRetro = theme === 'retro';
     if (!isOpen || !caseData || !caseData.content) return null;
 
@@ -82,7 +86,7 @@ export const ArchiveDetailModal: React.FC<ArchiveDetailModalProps> = ({
             caption: lang === 'CN' ? '插图 / 黑暗与水平线转场' : 'Illustration / Darkness and horizon transition'
         }
     ].filter(chapter => chapter.paragraphs.length > 0);
-    const assetItems = [
+    const staticAssetItems = [
         {
             title: lang === 'CN' ? '第14区 / 混凝土迷宫' : 'Zone 14 / Concrete maze',
             label: 'Environment',
@@ -108,11 +112,22 @@ export const ArchiveDetailModal: React.FC<ArchiveDetailModalProps> = ({
             text: lang === 'CN' ? '后续分镜、漫画、道具图、海报都归入资产页。' : 'Storyboards, comics, props, and posters live on the assets page.'
         }
     ];
+    const dossierAssetItems = content.assetGroups
+        ? [
+            ...content.assetGroups.characters.map(item => ({ title: item.name, label: 'Character', image: item.imageUrl || caseData.imageUrl, text: item.description || item.anchors })),
+            ...content.assetGroups.props.map(item => ({ title: item.name, label: 'Prop', image: item.imageUrl || caseData.imageUrl, text: item.description || item.anchors })),
+            ...content.assetGroups.scenes.map(item => ({ title: item.name, label: 'Scene', image: item.imageUrl || caseData.imageUrl, text: item.description || item.anchors }))
+        ]
+        : [];
+    const assetItems = dossierAssetItems.length > 0 ? dossierAssetItems : staticAssetItems;
+    const screenplayBlocks = content.screenplay || [];
     const pageLabel = activePage === 'story'
         ? (lang === 'CN' ? '故事页' : 'Story')
         : activePage === 'assets'
             ? (lang === 'CN' ? '资产页' : 'Assets')
-            : (lang === 'CN' ? '精神分析页' : 'Psychoanalysis');
+            : activePage === 'screenplay'
+                ? (lang === 'CN' ? '电影脚本页' : 'Screenplay')
+                : (lang === 'CN' ? '精神分析页' : 'Psychoanalysis');
 
     const page = (
         <div
@@ -482,6 +497,30 @@ export const ArchiveDetailModal: React.FC<ArchiveDetailModalProps> = ({
                     flex: 1;
                     height: 1px;
                     background: linear-gradient(90deg, var(--story-red-soft), transparent);
+                }
+
+                .subject-story-section-action {
+                    margin-left: auto;
+                    border: 1px solid var(--story-red-soft);
+                    background: var(--story-red-faint);
+                    color: var(--story-red);
+                    padding: 0.52rem 0.78rem;
+                    font-size: 0.58rem;
+                    font-weight: 950;
+                    letter-spacing: 0.15em;
+                    text-transform: uppercase;
+                    transition: color 260ms ease, border-color 260ms ease, background 260ms ease;
+                }
+
+                .subject-story-section-action:hover:not(:disabled) {
+                    color: var(--story-ink);
+                    border-color: var(--story-red);
+                    background: rgba(255,79,63,0.16);
+                }
+
+                .subject-story-section-action:disabled {
+                    opacity: 0.45;
+                    cursor: not-allowed;
                 }
 
                 .subject-story-dna-grid {
@@ -1126,6 +1165,10 @@ export const ArchiveDetailModal: React.FC<ArchiveDetailModalProps> = ({
                                 <span>{lang === 'CN' ? '资产页' : 'Assets page'}</span>
                                 <Database size={13} />
                             </button>
+                            <button type="button" className={activePage === 'screenplay' ? 'is-active' : ''} onClick={() => setActivePage('screenplay')}>
+                                <span>{lang === 'CN' ? '电影脚本页' : 'Screenplay page'}</span>
+                                <FileText size={13} />
+                            </button>
                             <button type="button" className={activePage === 'analysis' ? 'is-active' : ''} onClick={() => setActivePage('analysis')}>
                                 <span>{lang === 'CN' ? '精神分析页' : 'Analysis page'}</span>
                                 <Fingerprint size={13} />
@@ -1196,6 +1239,9 @@ export const ArchiveDetailModal: React.FC<ArchiveDetailModalProps> = ({
                                         <button type="button" onClick={() => setActivePage('analysis')}>
                                             {lang === 'CN' ? '查看精神分析页' : 'View analysis'}
                                         </button>
+                                        <button type="button" onClick={() => setActivePage('screenplay')}>
+                                            {lang === 'CN' ? '查看电影脚本页' : 'View screenplay'}
+                                        </button>
                                     </div>
                                 </div>
                             </section>
@@ -1224,6 +1270,28 @@ export const ArchiveDetailModal: React.FC<ArchiveDetailModalProps> = ({
                                             </div>
                                         </article>
                                     ))}
+                                </div>
+                            </section>
+                        )}
+
+                        {activePage === 'screenplay' && (
+                            <section id="screenplay-log" className="subject-story-section">
+                                <div className="subject-story-section-head">
+                                    <FileText size={15} />
+                                    <span>{lang === 'CN' ? '完整电影脚本 / Screenplay' : 'Screenplay'}</span>
+                                </div>
+                                <div className="subject-story-report-stack">
+                                    {screenplayBlocks.length > 0 ? screenplayBlocks.map((block, index) => (
+                                        <article key={`${index}-${block.slice(0, 18)}`} className="subject-story-report-card">
+                                            <h3>{lang === 'CN' ? `脚本段落 ${String(index + 1).padStart(2, '0')}` : `Script Block ${String(index + 1).padStart(2, '0')}`}</h3>
+                                            <div>{block}</div>
+                                        </article>
+                                    )) : (
+                                        <article className="subject-story-report-card">
+                                            <h3>{lang === 'CN' ? '脚本待补全' : 'Screenplay pending'}</h3>
+                                            <div>{lang === 'CN' ? '该主体档案尚未推送完整电影脚本。' : 'This subject dossier does not have a screenplay yet.'}</div>
+                                        </article>
+                                    )}
                                 </div>
                             </section>
                         )}
@@ -1262,6 +1330,18 @@ export const ArchiveDetailModal: React.FC<ArchiveDetailModalProps> = ({
                                     <div className="subject-story-section-head">
                                         <Fingerprint size={15} />
                                         <span>{lang === 'CN' ? '精神分析报告 / Psychoanalysis Report' : 'Psychoanalysis Report'}</span>
+                                        {caseData.sourceDossier && onGeneratePsychoanalysis && (
+                                            <button
+                                                type="button"
+                                                className="subject-story-section-action"
+                                                disabled={isGeneratingPsychoanalysis}
+                                                onClick={() => onGeneratePsychoanalysis(caseData)}
+                                            >
+                                                {isGeneratingPsychoanalysis
+                                                    ? (lang === 'CN' ? '生成中' : 'Generating')
+                                                    : (lang === 'CN' ? '生成并存档' : 'Generate & Save')}
+                                            </button>
+                                        )}
                                     </div>
                                     <div className="subject-story-report-stack">
                                         {content.report.sections.map((section) => (

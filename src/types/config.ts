@@ -30,7 +30,7 @@ export const PROVIDER_LABELS: Record<ProviderId, string> = {
 };
 
 export const PROVIDER_COLORS: Record<ProviderId, string> = {
-  gemini: '#d4af37',
+  gemini: '#FFD700',
   claude: '#c084fc',
   openai: '#22c55e',
 };

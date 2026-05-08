@@ -27,25 +27,42 @@ export const BorromeanRings: React.FC<BorromeanRingsProps> = ({
     const strokeColorHigh = isRetro ? (vivid ? 'rgba(139, 38, 29, 1.0)' : 'rgba(139, 38, 29, 0.9)') : (vivid ? 'rgba(255, 255, 255, 1.0)' : 'rgba(255, 255, 255, 0.95)');
     const textColor = isRetro ? '#5D2E2B' : '#FFFFFF';
 
-    // Premium themed palette — Desaturated or Vivid or Homepage Faint (Based on RSI)
+    // Premium themed palette — Desaturated, driver-vivid, or homepage faint.
     const ringHex = isHomepage ? {
-        // Homepage dark mode uses cyber chromatic dispersion, avoiding warm gold bleed during portal hover.
-        real: isRetro ? 'rgba(139, 38, 29, 0.45)' : 'rgba(0, 229, 255, 0.56)',        // Real (Electric cyan)
-        symbolic: isRetro ? 'rgba(156, 130, 74, 0.75)' : 'rgba(255, 43, 214, 0.52)', // Symbolic (Cyber magenta)
-        imaginary: isRetro ? 'rgba(106, 125, 106, 0.75)' : 'rgba(76, 110, 255, 0.48)', // Imaginary (Neon blue)
-        sinthome: isRetro ? 'rgba(107, 98, 87, 0.7)' : 'rgba(255, 255, 255, 0.34)',   // Sinthome (White)
+        real: isRetro ? 'rgba(139, 38, 29, 0.45)' : 'rgba(245, 158, 11, 0.55)',
+        symbolic: isRetro ? 'rgba(156, 130, 74, 0.75)' : 'rgba(6, 182, 212, 0.5)',
+        imaginary: isRetro ? 'rgba(106, 125, 106, 0.75)' : 'rgba(244, 63, 94, 0.5)',
+        sinthome: isRetro ? 'rgba(80, 102, 120, 0.7)' : 'rgba(16, 185, 129, 0.45)',
     } : (driverType || vivid) ? {
-        // Vivid mode or Driver-based mode for Topology View
-        real: isRetro ? '#A3483E' : (driverType === DriverType.COMMERCIAL ? '#06B6D4' : driverType === DriverType.EXPERIMENTAL ? '#A855F7' : driverType === DriverType.AESTHETIC ? '#F43F5E' : driverType === DriverType.TRAILER ? '#F97316' : '#F59E0B'),
-        symbolic: isRetro ? '#9C824A' : (driverType === DriverType.COMMERCIAL ? '#22D3EE' : driverType === DriverType.EXPERIMENTAL ? '#C084FC' : driverType === DriverType.AESTHETIC ? '#FB7185' : driverType === DriverType.TRAILER ? '#FB923C' : '#D4AF37'),
-        imaginary: isRetro ? '#6A7D6A' : (driverType === DriverType.COMMERCIAL ? '#0891B2' : driverType === DriverType.EXPERIMENTAL ? '#9333EA' : driverType === DriverType.AESTHETIC ? '#E11D48' : driverType === DriverType.TRAILER ? '#EA580C' : '#F43F5E'),
-        sinthome: isRetro ? '#6B6257' : (driverType === DriverType.COMMERCIAL ? '#0E7490' : driverType === DriverType.EXPERIMENTAL ? '#7E22CE' : driverType === DriverType.AESTHETIC ? '#BE123C' : driverType === DriverType.TRAILER ? '#C2410C' : '#FFFFFF'),
+        real: isRetro ? '#A3483E'
+            : driverType === DriverType.COMMERCIAL ? '#06B6D4'
+            : driverType === DriverType.EXPERIMENTAL ? '#A855F7'
+            : driverType === DriverType.AESTHETIC ? '#F43F5E'
+            : driverType === DriverType.TRAILER ? '#F97316'
+            : '#F59E0B',
+        symbolic: isRetro ? '#9C824A'
+            : driverType === DriverType.COMMERCIAL ? '#22D3EE'
+            : driverType === DriverType.EXPERIMENTAL ? '#C084FC'
+            : driverType === DriverType.AESTHETIC ? '#FB7185'
+            : driverType === DriverType.TRAILER ? '#FB923C'
+            : '#06B6D4',
+        imaginary: isRetro ? '#6A7D6A'
+            : driverType === DriverType.COMMERCIAL ? '#0891B2'
+            : driverType === DriverType.EXPERIMENTAL ? '#9333EA'
+            : driverType === DriverType.AESTHETIC ? '#E11D48'
+            : driverType === DriverType.TRAILER ? '#EA580C'
+            : '#F43F5E',
+        sinthome: isRetro ? '#506678'
+            : driverType === DriverType.COMMERCIAL ? '#0E7490'
+            : driverType === DriverType.EXPERIMENTAL ? '#7E22CE'
+            : driverType === DriverType.AESTHETIC ? '#BE123C'
+            : driverType === DriverType.TRAILER ? '#C2410C'
+            : '#10B981',
     } : {
-        // Default mode for other views
-        real: isRetro ? '#6D4340' : 'rgba(212, 175, 55, 0.55)',       
-        symbolic: isRetro ? '#5C543D' : 'rgba(180, 160, 120, 0.6)',   
-        imaginary: isRetro ? '#343B43' : 'rgba(150, 122, 84, 0.55)',  
-        sinthome: isRetro ? '#333333' : 'rgba(255, 255, 255, 0.3)',   
+        real: isRetro ? '#6D4340' : 'rgba(130, 160, 190, 0.6)',
+        symbolic: isRetro ? '#5C543D' : 'rgba(180, 160, 120, 0.6)',
+        imaginary: isRetro ? '#343B43' : 'rgba(100, 130, 160, 0.6)',
+        sinthome: isRetro ? '#333333' : 'rgba(255, 255, 255, 0.3)',
     };
 
     const getTag = (id: string, placeholder: string) => {

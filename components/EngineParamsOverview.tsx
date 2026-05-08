@@ -1,6 +1,6 @@
 import React from 'react';
-import { ChevronRight, Database, Lightbulb, List, ListChecks, ScanLine } from 'lucide-react';
-import { BlueprintLanguage, NarrativeFieldState } from '../types';
+import { ChevronRight, Database, Lightbulb, List, ListChecks, Scale, ScanLine } from 'lucide-react';
+import { BlueprintLanguage, NarrativeFieldState, WorldLawConfig } from '../types';
 import {
     AESTHETIC_ENGINE_BLOCKS,
     COMMERCIAL_ENGINE_BLOCKS,
@@ -20,6 +20,7 @@ interface EngineParamsOverviewProps {
     accentClass: string;
     visionInput?: string;
     visionAnalysis?: string;
+    worldLawConfig?: WorldLawConfig;
 }
 
 const allBlocks = [
@@ -55,13 +56,27 @@ const cleanTag = (value: string) => {
     return value.split('(')[0].trim();
 };
 
+const getWorldLawLabel = (worldLawConfig: WorldLawConfig | undefined, language: BlueprintLanguage) => {
+    const gravity = worldLawConfig?.gravity;
+    if (!gravity) return null;
+
+    const levels: Record<number, { cn: string; en: string }> = {
+        1: { cn: 'LV.1 写实 / 物理重力闭锁', en: 'LV.1 Realist / physics locked' },
+        2: { cn: 'LV.2 合理 / 逻辑补完', en: 'LV.2 Rational / logic bridge' },
+        3: { cn: 'LV.3 缝合 / 魔幻现实', en: 'LV.3 Suture / magical realism' },
+        4: { cn: 'LV.4 奇观 / 高概念幻想', en: 'LV.4 Spectacle / high concept' },
+        5: { cn: 'LV.5 狂想 / 无重力拼贴', en: 'LV.5 Phantasm / zero-gravity collage' }
+    };
+
+    const label = levels[gravity] || {
+        cn: `LV.${gravity} 世界法则`,
+        en: `LV.${gravity} World law`
+    };
+    return language === 'EN' ? label.en : label.cn;
+};
+
 const borderClassForAccent = (accentClass: string) => {
-    if (accentClass.includes('cyan')) return 'border-l-mist-cyan';
-    if (accentClass.includes('rose')) return 'border-l-rose-400';
-    if (accentClass.includes('purple')) return 'border-l-purple-400';
-    if (accentClass.includes('orange')) return 'border-l-orange-400';
-    if (accentClass.includes('8B261D')) return 'border-l-[#8B261D]';
-    return 'border-l-gold-primary';
+    return 'border-l-[var(--mist-active-accent)]';
 };
 
 const tone = (theme: string, kind: 'engine' | 'surface', accentClass: string) => {
@@ -118,8 +133,10 @@ export const EngineParamsOverview: React.FC<EngineParamsOverviewProps> = ({
     theme,
     accentClass,
     visionInput,
-    visionAnalysis
+    visionAnalysis,
+    worldLawConfig
 }) => {
+    const worldLawLabel = getWorldLawLabel(worldLawConfig, language);
     const entries = Object.entries(fieldState || {})
         .map(([id, rawValues]) => ({
             id,
@@ -128,6 +145,15 @@ export const EngineParamsOverview: React.FC<EngineParamsOverviewProps> = ({
             kind: isSurfaceBlock(id) ? 'surface' as const : 'engine' as const
         }))
         .filter(entry => entry.values.length > 0);
+    const surfaceEntries = [
+        ...entries.filter(entry => entry.kind === 'surface'),
+        ...(worldLawLabel ? [{
+            id: '__world_law',
+            label: language === 'EN' ? 'World Law' : '世界法则',
+            values: [worldLawLabel],
+            kind: 'surface' as const
+        }] : [])
+    ];
 
     const groups = [
         {
@@ -142,13 +168,13 @@ export const EngineParamsOverview: React.FC<EngineParamsOverviewProps> = ({
             id: 'surface',
             title: language === 'EN' ? 'Surface Settings' : '表层设定',
             eyebrow: language === 'EN' ? 'Skin layer / world law' : '表层皮肤 / 世界法则',
-            icon: ListChecks,
+            icon: worldLawLabel ? Scale : ListChecks,
             kind: 'surface' as const,
-            items: entries.filter(entry => entry.kind === 'surface')
+            items: surfaceEntries
         }
     ].filter(group => group.items.length > 0);
 
-    if (entries.length === 0 && !visionInput && !visionAnalysis) {
+    if (entries.length === 0 && !worldLawLabel && !visionInput && !visionAnalysis) {
         return (
             <div className="flex h-full flex-col items-center justify-center gap-4 text-zinc-600 opacity-50">
                 <List size={48} />

@@ -1,5 +1,5 @@
 import { supabase } from './supabaseAuth';
-import { HistoryItem, CollectionItem } from '../types';
+import { HistoryItem, CollectionItem, DesireProject, SubjectDossier } from '../types';
 
 
 export const supabaseDatabase = {
@@ -154,6 +154,119 @@ export const supabaseDatabase = {
 
         if (error) {
             console.error('Error deleting cloud collection:', error);
+            throw error;
+        }
+    },
+
+    // --- DESIRE WORK ARCHIVE ---
+
+    async getCloudDesireProjects(): Promise<DesireProject[]> {
+        const { data: user } = await supabase.auth.getUser();
+        if (!user.user) return [];
+
+        const { data, error } = await supabase
+            .from('desire_projects')
+            .select('project_data')
+            .eq('user_id', user.user.id)
+            .order('updated_at', { ascending: false });
+
+        if (error) {
+            console.error('Error fetching cloud desire projects:', error);
+            throw error;
+        }
+
+        return (data || []).map(row => row.project_data as DesireProject);
+    },
+
+    async saveCloudDesireProject(item: DesireProject): Promise<void> {
+        const { data: user } = await supabase.auth.getUser();
+        if (!user.user) return;
+
+        const { error } = await supabase
+            .from('desire_projects')
+            .upsert({
+                id: item.id,
+                user_id: user.user.id,
+                archive_kind: item.archiveKind,
+                source_type: item.sourceType,
+                project_data: item,
+                updated_at: item.updatedAt || new Date().toISOString()
+            }, { onConflict: 'id' });
+
+        if (error) {
+            console.error('Error saving cloud desire project:', error);
+            throw error;
+        }
+    },
+
+    async deleteCloudDesireProject(id: string): Promise<void> {
+        const { data: user } = await supabase.auth.getUser();
+        if (!user.user) return;
+
+        const { error } = await supabase
+            .from('desire_projects')
+            .delete()
+            .eq('id', id)
+            .eq('user_id', user.user.id);
+
+        if (error) {
+            console.error('Error deleting cloud desire project:', error);
+            throw error;
+        }
+    },
+
+    async getCloudSubjectDossiers(): Promise<SubjectDossier[]> {
+        const { data: user } = await supabase.auth.getUser();
+        if (!user.user) return [];
+
+        const { data, error } = await supabase
+            .from('subject_dossiers')
+            .select('dossier_data')
+            .eq('user_id', user.user.id)
+            .order('updated_at', { ascending: false });
+
+        if (error) {
+            console.error('Error fetching cloud subject dossiers:', error);
+            throw error;
+        }
+
+        return (data || []).map(row => row.dossier_data as SubjectDossier);
+    },
+
+    async saveCloudSubjectDossier(item: SubjectDossier): Promise<void> {
+        const { data: user } = await supabase.auth.getUser();
+        if (!user.user) return;
+
+        const { error } = await supabase
+            .from('subject_dossiers')
+            .upsert({
+                id: item.id,
+                user_id: user.user.id,
+                status: item.status,
+                category: item.category,
+                title: item.title,
+                dossier_data: item,
+                updated_at: item.updatedAt || new Date().toISOString()
+            }, { onConflict: 'id' });
+
+        if (error) {
+            console.error('Error saving cloud subject dossier:', error);
+            throw error;
+        }
+    },
+
+    async deleteCloudSubjectDossier(id: string): Promise<void> {
+        const { data: user } = await supabase.auth.getUser();
+        if (!user.user) return;
+
+        const { error } = await supabase
+            .from('subject_dossiers')
+            .delete()
+            .eq('id', id)
+            .eq('user_id', user.user.id);
+
+        if (error) {
+            console.error('Error deleting cloud subject dossier:', error);
             throw error;
         }
     },

@@ -1,12 +1,14 @@
 
-import { HistoryItem, CollectionItem } from '../types';
+import { HistoryItem, CollectionItem, DesireProject, SubjectDossier } from '../types';
 import { supabaseDatabase } from './supabaseDatabase';
 import { supabase } from './supabaseAuth';
 
 const DB_NAME = 'VisionaryDB';
-const DB_VERSION = 1;
+const DB_VERSION = 3;
 const STORE_HISTORY = 'history';
 const STORE_COLLECTIONS = 'collections';
+const STORE_DESIRE_PROJECTS = 'desireProjects';
+const STORE_SUBJECT_DOSSIERS = 'subjectDossiers';
 
 let lastCloudFetchTime = 0;
 const CLOUD_FETCH_COOLDOWN = 60000; // 60 seconds cooldown
@@ -24,6 +26,12 @@ const openDB = (): Promise<IDBDatabase> => {
             if (!db.objectStoreNames.contains(STORE_COLLECTIONS)) {
                 db.createObjectStore(STORE_COLLECTIONS, { keyPath: 'id' });
             }
+            if (!db.objectStoreNames.contains(STORE_DESIRE_PROJECTS)) {
+                db.createObjectStore(STORE_DESIRE_PROJECTS, { keyPath: 'id' });
+            }
+            if (!db.objectStoreNames.contains(STORE_SUBJECT_DOSSIERS)) {
+                db.createObjectStore(STORE_SUBJECT_DOSSIERS, { keyPath: 'id' });
+            }
         };
 
         request.onsuccess = (event) => {
@@ -33,6 +41,39 @@ const openDB = (): Promise<IDBDatabase> => {
         request.onerror = (event) => {
             reject((event.target as IDBOpenDBRequest).error);
         };
+    });
+};
+
+const getAllFromStore = async <T>(storeName: string): Promise<T[]> => {
+    const db = await openDB();
+    return new Promise<T[]>((resolve, reject) => {
+        const transaction = db.transaction(storeName, 'readonly');
+        const store = transaction.objectStore(storeName);
+        const request = store.getAll();
+        request.onsuccess = () => resolve(request.result as T[]);
+        request.onerror = () => reject(request.error);
+    });
+};
+
+const putInStore = async <T>(storeName: string, item: T): Promise<void> => {
+    const db = await openDB();
+    return new Promise<void>((resolve, reject) => {
+        const transaction = db.transaction(storeName, 'readwrite');
+        const store = transaction.objectStore(storeName);
+        const request = store.put(item);
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+    });
+};
+
+const deleteFromStore = async (storeName: string, id: string): Promise<void> => {
+    const db = await openDB();
+    return new Promise<void>((resolve, reject) => {
+        const transaction = db.transaction(storeName, 'readwrite');
+        const store = transaction.objectStore(storeName);
+        const request = store.delete(id);
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
     });
 };
 
@@ -117,18 +158,35 @@ export const persistence = {
         });
     },
 
-    getHistoryItem: async (id: number): Promise<HistoryItem | null> => {
+    getHistoryItem: async (id: string | number): Promise<HistoryItem | null> => {
         const db = await openDB();
-        return new Promise<HistoryItem | null>((resolve, reject) => {
+        const localItem = await new Promise<HistoryItem | null>((resolve, reject) => {
             const transaction = db.transaction(STORE_HISTORY, 'readonly');
             const store = transaction.objectStore(STORE_HISTORY);
             const request = store.get(id);
             request.onsuccess = () => resolve(request.result as HistoryItem || null);
             request.onerror = () => reject(request.error);
         });
+
+        if (localItem && !(localItem as any).is_partial) return localItem;
+
+        const { data: user } = await supabase.auth.getUser();
+        if (user.user) {
+            try {
+                const cloudItem = await supabaseDatabase.getCloudHistoryDetail(id);
+                if (cloudItem) {
+                    await putInStore(STORE_HISTORY, cloudItem);
+                    return cloudItem;
+                }
+            } catch (err) {
+                console.warn("Could not fetch full cloud history item, using local.", err);
+            }
+        }
+
+        return localItem;
     },
 
-    deleteHistory: async (id: number): Promise<void> => {
+    deleteHistory: async (id: string | number): Promise<void> => {
         const { data: user } = await supabase.auth.getUser();
         if (user.user) {
             try {
@@ -288,6 +346,106 @@ export const persistence = {
         });
     },
 
+    // --- DESIRE WORK ARCHIVE ---
+
+    getDesireProjects: async (): Promise<DesireProject[]> => {
+        const localItems = await getAllFromStore<DesireProject>(STORE_DESIRE_PROJECTS);
+
+        const { data: user } = await supabase.auth.getUser();
+        if (user.user) {
+            try {
+                const cloudItems = await supabaseDatabase.getCloudDesireProjects();
+                if (cloudItems && cloudItems.length > 0) {
+                    const idMap = new Map<string, DesireProject>();
+                    localItems.forEach(item => idMap.set(item.id, item));
+                    cloudItems.forEach(item => idMap.set(item.id, item));
+                    const merged = Array.from(idMap.values());
+                    merged.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+                    return merged;
+                }
+            } catch (err) {
+                console.warn("Could not fetch cloud desire projects, using local.", err);
+            }
+        }
+
+        localItems.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+        return localItems;
+    },
+
+    saveDesireProject: async (item: DesireProject): Promise<void> => {
+        const { data: user } = await supabase.auth.getUser();
+        if (user.user) {
+            try {
+                await supabaseDatabase.saveCloudDesireProject(item);
+            } catch (err) {
+                console.error("Failed to sync desire project to cloud", err);
+            }
+        }
+        return putInStore(STORE_DESIRE_PROJECTS, item);
+    },
+
+    deleteDesireProject: async (id: string): Promise<void> => {
+        const { data: user } = await supabase.auth.getUser();
+        if (user.user) {
+            try {
+                await supabaseDatabase.deleteCloudDesireProject(id);
+            } catch (err) {
+                console.error("Failed to sync desire project deletion to cloud", err);
+            }
+        }
+        return deleteFromStore(STORE_DESIRE_PROJECTS, id);
+    },
+
+    // --- SUBJECT DOSSIERS ---
+
+    getSubjectDossiers: async (): Promise<SubjectDossier[]> => {
+        const localItems = await getAllFromStore<SubjectDossier>(STORE_SUBJECT_DOSSIERS);
+
+        const { data: user } = await supabase.auth.getUser();
+        if (user.user) {
+            try {
+                const cloudItems = await supabaseDatabase.getCloudSubjectDossiers();
+                if (cloudItems && cloudItems.length > 0) {
+                    const idMap = new Map<string, SubjectDossier>();
+                    localItems.forEach(item => idMap.set(item.id, item));
+                    cloudItems.forEach(item => idMap.set(item.id, item));
+                    const merged = Array.from(idMap.values());
+                    merged.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+                    return merged;
+                }
+            } catch (err) {
+                console.warn("Could not fetch cloud subject dossiers, using local.", err);
+            }
+        }
+
+        localItems.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+        return localItems;
+    },
+
+    saveSubjectDossier: async (item: SubjectDossier): Promise<void> => {
+        const { data: user } = await supabase.auth.getUser();
+        if (user.user) {
+            try {
+                await supabaseDatabase.saveCloudSubjectDossier(item);
+            } catch (err) {
+                console.error("Failed to sync subject dossier to cloud", err);
+            }
+        }
+        return putInStore(STORE_SUBJECT_DOSSIERS, item);
+    },
+
+    deleteSubjectDossier: async (id: string): Promise<void> => {
+        const { data: user } = await supabase.auth.getUser();
+        if (user.user) {
+            try {
+                await supabaseDatabase.deleteCloudSubjectDossier(id);
+            } catch (err) {
+                console.error("Failed to sync subject dossier deletion to cloud", err);
+            }
+        }
+        return deleteFromStore(STORE_SUBJECT_DOSSIERS, id);
+    },
+
     syncLocalToCloud: async () => {
         const { data: user } = await supabase.auth.getUser();
         if (!user.user) throw new Error("User not logged in");
@@ -311,8 +469,11 @@ export const persistence = {
             request.onerror = () => reject(request.error);
         });
 
+        const localDesireProjects = await getAllFromStore<DesireProject>(STORE_DESIRE_PROJECTS);
+        const localSubjectDossiers = await getAllFromStore<SubjectDossier>(STORE_SUBJECT_DOSSIERS);
+
         // 3. Push to cloud
-        console.log(`Syncing ${localHistory.length} history items and ${localCollections.length} collections...`);
+        console.log(`Syncing ${localHistory.length} history items, ${localCollections.length} collections, ${localDesireProjects.length} desire projects and ${localSubjectDossiers.length} subject dossiers...`);
 
         for (const item of localHistory) {
             try { await supabaseDatabase.saveCloudHistoryItem(item); } catch (e) { console.error("Sync history failed", e); }
@@ -320,7 +481,18 @@ export const persistence = {
         for (const item of localCollections) {
             try { await supabaseDatabase.saveCloudCollectionItem(item); } catch (e) { console.error("Sync collection failed", e); }
         }
+        for (const item of localDesireProjects) {
+            try { await supabaseDatabase.saveCloudDesireProject(item); } catch (e) { console.error("Sync desire project failed", e); }
+        }
+        for (const item of localSubjectDossiers) {
+            try { await supabaseDatabase.saveCloudSubjectDossier(item); } catch (e) { console.error("Sync subject dossier failed", e); }
+        }
 
-        return { historySynced: localHistory.length, collectionsSynced: localCollections.length };
+        return {
+            historySynced: localHistory.length,
+            collectionsSynced: localCollections.length,
+            desireProjectsSynced: localDesireProjects.length,
+            subjectDossiersSynced: localSubjectDossiers.length
+        };
     }
 };

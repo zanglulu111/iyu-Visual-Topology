@@ -506,8 +506,16 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
 
     const handleManualSave = () => {
         if (onSaveToHistory) {
+            const fallbackTitle = sourceText.trim().split(/\n+/)[0]?.trim().slice(0, 32);
+            const shouldDeriveTitle = ['自定义故事', 'Custom Story', '新建转译项目', 'New Suture Project'].includes(blueprint.narrative?.title || '');
+            const narrativeTitle = shouldDeriveTitle && fallbackTitle ? fallbackTitle : blueprint.narrative?.title;
             onSaveToHistory({
                 ...blueprint,
+                narrative: {
+                    ...blueprint.narrative,
+                    title: narrativeTitle || (language === 'EN' ? 'Custom Story' : '自定义故事'),
+                    synopsis: sourceText
+                },
                 metonymyData: {
                     ...rawMetonymyData,
                     screenplay: currentSections,
@@ -1247,9 +1255,9 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
                         <span className="hidden lg:inline">{language === 'EN' ? "SIDEBAR" : "侧边折叠"}</span>
                     </button>
 
-                    <button onClick={handleManualSave} className={btnBaseClass} title={language === 'EN' ? "Save to History" : "保存至历史记录"}>
-                        {isSaved ? <Check size={14} className="text-green-500" /> : <Save size={14} />}
-                        <span className="hidden lg:inline">{isSaved ? (language === 'EN' ? "SAVED" : "已保存") : (language === 'EN' ? "SAVE" : "保存记录")}</span>
+                    <button onClick={handleManualSave} className={btnBaseClass} title={language === 'EN' ? "Save archive" : "保存档案"}>
+                        {isSaved ? <Check size={14} className="text-emerald-400" /> : <Save size={14} />}
+                        <span className="hidden lg:inline">{isSaved ? (language === 'EN' ? "SAVED" : "已保存") : (language === 'EN' ? "SAVE" : "保存档案")}</span>
                     </button>
 
                     <button onClick={handleSortScenes} className={btnBaseClass} title={language === 'EN' ? "Sort Scenes by Text Order" : "按文本顺序排序"}>

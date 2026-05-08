@@ -3,6 +3,9 @@ import { Folder, Eye, ShieldAlert, ChevronLeft, ChevronRight } from 'lucide-reac
 import { ARCHIVE_CASES, ArchiveCategory } from './archiveCasesData';
 import { ArchiveDetailModal } from './ArchiveDetailModal';
 import { useTheme } from '../contexts/ThemeContext';
+import { persistence } from '../services/persistence';
+import { splitTextToParagraphs } from '../services/desireArchiveService';
+import type { SubjectDossier } from '../types';
 
 interface ArchiveContentProps {
     lang: 'CN' | 'EN';
@@ -32,17 +35,30 @@ export const ArchiveContent: React.FC<ArchiveContentProps> = ({ lang }) => {
     const [selectedCategory, setSelectedCategory] = useState<ArchiveCategory>('ALL');
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedCaseId, setSelectedCaseId] = useState<string | null>(null);
+    const [subjectDossiers, setSubjectDossiers] = useState<SubjectDossier[]>([]);
 
     // Reset pagination when category changes
     useEffect(() => {
         setCurrentPage(1);
     }, [selectedCategory]);
 
+    useEffect(() => {
+        const loadSubjectDossiers = async () => {
+            try {
+                const dossiers = await persistence.getSubjectDossiers();
+                setSubjectDossiers(dossiers);
+            } catch (error) {
+                console.error('Failed to load subject dossiers', error);
+            }
+        };
+        loadSubjectDossiers();
+    }, []);
+
     // Theme variables for consistency mapping
     const t = {
-        textTitle: isDark ? 'text-zinc-50' : 'text-[#8B261D]',
-        textAccent: isDark ? 'text-zinc-400' : 'text-[#8B261D]',
-        textTitleAccent: isDark ? 'text-amber-500' : 'text-[#8B261D]',
+        textTitle: isDark ? 'text-zinc-50' : (theme === 'retro' ? 'text-[var(--mist-active-accent)]' : 'text-[#8B261D]'),
+        textAccent: isDark ? 'text-zinc-400' : (theme === 'retro' ? 'text-[var(--mist-active-accent)]' : 'text-[#8B261D]'),
+        textTitleAccent: isDark ? 'text-amber-500' : (theme === 'retro' ? 'text-[var(--mist-active-accent)]' : 'text-[#8B261D]'),
         textNormal: isDark ? 'text-zinc-200' : (theme === 'retro' ? 'text-black/95' : 'text-[#2B2824]'),
         textMuted: isDark ? 'text-zinc-400' : (theme === 'retro' ? 'text-black/60' : 'text-[#6A665A]'),
         textCode: isDark ? 'text-zinc-300' : 'text-[#3A352F]',
@@ -50,26 +66,27 @@ export const ArchiveContent: React.FC<ArchiveContentProps> = ({ lang }) => {
         btnDisabled: isDark ? 'opacity-30 cursor-not-allowed' : 'opacity-30 cursor-not-allowed grayscale',
         cardBg: isDark ? 'bg-[#111113]' : (theme === 'retro' ? 'bg-[#F3EFE7]' : 'bg-transparent backdrop-blur-sm'),
         cardBorder: isDark ? 'border-zinc-800 border-2' : (theme === 'retro' ? 'border-[#3A352F]/20 border-2 shadow-[0_4px_12px_rgba(0,0,0,0.05)]' : 'border-transparent'),
-        cardHoverBorder: isDark ? 'hover:border-zinc-500' : (theme === 'retro' ? 'hover:border-[#8B261D]/40' : 'hover:border-[#8B261D]/40 hover:bg-[#F9F7F1] hover:backdrop-blur-none'),
-        cardShadow: isDark ? 'hover:shadow-black hover:shadow-xl shadow-sm' : (theme === 'retro' ? 'hover:shadow-[0_20px_50px_rgba(0,0,0,0.15)]' : 'hover:shadow-[0_45px_100px_rgba(139,38,29,0.1)] shadow-none'),
+        cardHoverBorder: isDark ? 'hover:border-zinc-500' : (theme === 'retro' ? 'hover:border-[var(--mist-active-accent)]/40' : 'hover:border-[#8B261D]/40 hover:bg-[#F9F7F1] hover:backdrop-blur-none'),
+        cardShadow: isDark ? 'hover:shadow-black hover:shadow-xl shadow-sm' : (theme === 'retro' ? 'hover:shadow-[0_20px_50px_rgba(var(--mist-active-accent-rgb,139,38,29),0.15)]' : 'hover:shadow-[0_45px_100px_rgba(var(--mist-active-accent-rgb,139,38,29),0.1)] shadow-none'),
         cardImageBg: isDark ? 'bg-zinc-900' : (theme === 'retro' ? 'bg-black/5' : 'bg-transparent'),
         imageEffects: isDark ? 'grayscale-[0.3] group-hover:grayscale-0' : (theme === 'retro' ? 'grayscale-[0.6] sepia-[0.3] contrast-125 group-hover:grayscale-0 group-hover:sepia-0 transition-all duration-700' : 'grayscale group-hover:grayscale-[0.5] contrast-110 sepia-[0.1]'),
-        cardTitleHover: isDark ? 'group-hover:text-amber-400' : 'group-hover:text-[#8B261D]',
-        borderHeader: isDark ? 'border-zinc-900 border-b-2 border-dashed' : 'border-[#8B261D]/10 border-b-2 border-dashed',
-        tagBorder: isDark ? 'border-zinc-800 bg-zinc-900' : (theme === 'retro' ? 'border-black/20 bg-white' : 'border-[#8B261D]/20 bg-white/60 backdrop-blur-sm'),
+        cardTitleHover: isDark ? 'group-hover:text-amber-400' : (theme === 'retro' ? 'group-hover:text-[var(--mist-active-accent)]' : 'group-hover:text-[#8B261D]'),
+        borderHeader: isDark ? 'border-zinc-900 border-b-2 border-dashed' : (theme === 'retro' ? 'border-[var(--mist-active-accent)]/10 border-b-2 border-dashed' : 'border-[#8B261D]/10 border-b-2 border-dashed'),
+        tagBorder: isDark ? 'border-zinc-800 bg-zinc-900' : (theme === 'retro' ? 'border-black/20 bg-white' : 'border-[var(--mist-active-accent)]/20 bg-white/60 backdrop-blur-sm'),
         dateBorder: isDark ? 'border-zinc-800 bg-zinc-900 text-zinc-500' : (theme === 'retro' ? 'border-black/10 bg-black/5 text-black/60 shadow-inner' : 'border-[#6A665A]/20 bg-[#F9F7F1] text-[#6A665A]'),
         paperClipColor: isDark ? 'bg-white/10 border-white/5' : (theme === 'retro' ? 'bg-white border-black/10 shadow-sm' : 'bg-white border-black/10'),
         paginationBg: isDark ? 'bg-zinc-900 border-zinc-700 text-zinc-300' : 'bg-white border-[#3A352F] text-[#3A352F]',
         emptyIconOpacity: isDark ? 'opacity-20' : 'opacity-50',
-        emptyMessageBorder: isDark ? 'border-zinc-700 text-zinc-500' : 'border-[#8B261D] text-[#8B261D]',
+        emptyMessageBorder: isDark ? 'border-zinc-700 text-zinc-500' : (theme === 'retro' ? 'border-[var(--mist-active-accent)] text-[var(--mist-active-accent)]' : 'border-[#8B261D] text-[#8B261D]'),
     };
 
     const categories: { id: ArchiveCategory; labelCn: string; labelEn: string; color: string; darkColor: string }[] = [
-        { id: 'ALL', labelCn: '全部案例', labelEn: 'All', color: 'text-[#8B261D] bg-[#8B261D]/5', darkColor: 'text-zinc-300 bg-zinc-800' },
+        { id: 'ALL', labelCn: '全部案例', labelEn: 'All', color: (theme === 'retro' ? 'text-[var(--mist-active-accent)] bg-[var(--mist-active-accent)]/5' : 'text-[#8B261D] bg-[#8B261D]/5'), darkColor: 'text-zinc-300 bg-zinc-800' },
         { id: 'NEUROSIS', labelCn: '神经症', labelEn: 'Neurosis', color: 'text-[#304B35] bg-[#304B35]/5', darkColor: 'text-green-400 bg-green-500/10' },
         { id: 'PSYCHOSIS', labelCn: '精神病', labelEn: 'Psychosis', color: 'text-[#702424] bg-[#702424]/5', darkColor: 'text-red-400 bg-red-500/10' },
         { id: 'PERVERSION', labelCn: '倒错', labelEn: 'Perversion', color: 'text-[#3B2C4F] bg-[#3B2C4F]/5', darkColor: 'text-purple-400 bg-purple-500/10' },
-        { id: 'AUTISM', labelCn: '孤独症', labelEn: 'Autism', color: 'text-[#5A4326] bg-[#5A4326]/5', darkColor: 'text-gold-primary bg-gold-primary/10' }
+        { id: 'AUTISM', labelCn: '孤独症', labelEn: 'Autism', color: 'text-[#5A4326] bg-[#5A4326]/5', darkColor: 'text-gold-primary bg-gold-primary/10' },
+        { id: 'UNCLASSIFIED', labelCn: '未定型', labelEn: 'Unclassified', color: 'text-[#6A665A] bg-[#6A665A]/5', darkColor: 'text-zinc-400 bg-zinc-500/10' }
     ];
 
     const getCategoryStyles = (catId: ArchiveCategory) => {
@@ -82,14 +99,59 @@ export const ArchiveContent: React.FC<ArchiveContentProps> = ({ lang }) => {
         return `px-2 py-1 text-[9px] font-mono uppercase tracking-widest border-2 shadow-sm font-bold rounded-sm ${getCategoryStyles(catId)} ${t.tagBorder}`;
     };
 
-    const filteredCases = selectedCategory === 'ALL' 
-        ? ARCHIVE_CASES 
-        : ARCHIVE_CASES.filter(c => c.category === selectedCategory);
+    const dossierCases = subjectDossiers.map((dossier) => {
+        const story = splitTextToParagraphs(dossier.story.content);
+        const screenplay = splitTextToParagraphs(dossier.screenplay.content);
+        return {
+            id: dossier.id,
+            titleCn: dossier.title,
+            titleEn: dossier.titleEn || dossier.title,
+            category: dossier.category,
+            summaryCn: dossier.summary,
+            summaryEn: dossier.summaryEn || dossier.summary,
+            imageUrl: dossier.imageUrl || '/portal-assets/subject-archive-lower-1777901002241.png',
+            date: (dossier.publishedAt || dossier.updatedAt).slice(0, 10),
+            sourceDossier: dossier,
+            content: {
+                dna: {
+                    parameters: [
+                        `SOURCE: ${dossier.sourceProjectId || 'manual'}`,
+                        `STATUS: ${dossier.status}`,
+                        `CATEGORY: ${dossier.category}`,
+                        `ASSETS: ${dossier.assets.characters.length} characters / ${dossier.assets.props.length} props / ${dossier.assets.scenes.length} scenes`
+                    ],
+                    authorStyle: '迷雾学派主体档案',
+                    coreHook: dossier.summary
+                },
+                story: story.length > 0 ? story : [dossier.story.content || '故事正文待补全。'],
+                report: {
+                    language: '简体中文',
+                    diagnosis: dossier.category,
+                    analyst: 'Visionary / Admin',
+                    subjectState: dossier.status,
+                    sections: [{
+                        title: dossier.psychoanalysis.title,
+                        body: dossier.psychoanalysis.content || '精神分析档案待补全。'
+                    }],
+                    conclusion: dossier.adminNotes || '该主体档案由欲望工作档案推送生成。',
+                    verdict: dossier.status === 'published' ? '病历归档：[已发布]' : '病历归档：[草稿]'
+                },
+                assetGroups: dossier.assets,
+                screenplay: screenplay.length > 0 ? screenplay : [dossier.screenplay.content || '电影脚本待补全。']
+            }
+        };
+    });
+
+    const allCases = [...dossierCases, ...ARCHIVE_CASES];
+
+    const filteredCases = selectedCategory === 'ALL'
+        ? allCases
+        : allCases.filter(c => c.category === selectedCategory);
 
     const totalPages = Math.ceil(filteredCases.length / ITEMS_PER_PAGE);
     const currentCases = filteredCases.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
-    const selectedCaseData = ARCHIVE_CASES.find(c => c.id === selectedCaseId) || null;
+    const selectedCaseData = allCases.find(c => c.id === selectedCaseId) || null;
 
     return (
         <div className="flex-1 flex flex-col overflow-hidden relative">
@@ -99,7 +161,7 @@ export const ArchiveContent: React.FC<ArchiveContentProps> = ({ lang }) => {
                     
                     <div className="pt-20 pb-40 px-10 md:px-16 lg:px-24 flex flex-col min-h-0 relative z-10 scroll-mt-20">
                         {/* Title Section */}
-                        <div className={`shrink-0 mb-12 border-l-4 pl-6 py-2 ${isDark ? 'border-zinc-700' : 'border-[#8B261D]'}`}>
+                        <div className={`shrink-0 mb-12 border-l-4 pl-6 py-2 ${isDark ? 'border-zinc-700' : (theme === 'retro' ? 'border-[var(--mist-active-accent)]' : 'border-[var(--mist-active-accent)]')}`}>
                             <div className="flex items-center gap-2 mb-3">
                                 <ShieldAlert size={14} className={t.textTitleAccent} />
                                 <span className={`text-[11px] font-mono tracking-[0.2em] uppercase font-bold ${t.textTitleAccent}`}>
@@ -123,7 +185,7 @@ export const ArchiveContent: React.FC<ArchiveContentProps> = ({ lang }) => {
                         </div>
 
                         {/* Filters */}
-                        <div className={`shrink-0 flex flex-wrap items-center gap-3 mb-10 px-8 py-5 border-b border-dashed transition-colors ${theme === 'retro' ? 'bg-transparent border-[#8B261D]/20' : t.borderHeader}`}>
+                        <div className={`shrink-0 flex flex-wrap items-center gap-3 mb-10 px-8 py-5 border-b border-dashed transition-colors ${theme === 'retro' ? 'bg-transparent border-[var(--mist-active-accent)]/20' : t.borderHeader}`}>
                             {categories.map(cat => {
                                 const isSelected = selectedCategory === cat.id;
                                 let btnClasses = '';

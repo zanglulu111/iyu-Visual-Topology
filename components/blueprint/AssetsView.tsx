@@ -19,19 +19,22 @@ interface AssetsViewProps {
     isAdmin?: boolean;
 }
 
+const emptyBlueprintAssets = { characters: [], locations: [], props: [] };
+
 export const AssetsView: React.FC<AssetsViewProps> = ({
-    blueprint, language, isCommercial, isAesthetic, onUpdateBlueprint, onGenerateAssetImage, onZoom, themeAccent, themeBorder, theme, isAdmin
+    blueprint, language, onUpdateBlueprint, onGenerateAssetImage, onZoom, theme, isAdmin
 }) => {
+    const assets = {
+        characters: Array.isArray(blueprint.assets?.characters) ? blueprint.assets.characters : emptyBlueprintAssets.characters,
+        locations: Array.isArray(blueprint.assets?.locations) ? blueprint.assets.locations : emptyBlueprintAssets.locations,
+        props: Array.isArray(blueprint.assets?.props) ? blueprint.assets.props : emptyBlueprintAssets.props
+    };
 
     // Derived hover background from accent
-    const getHoverClass = () => {
-        if (themeAccent.includes('cyan')) return 'hover:bg-mist-cyan/10';
-        if (themeAccent.includes('rose')) return 'hover:bg-rose-900/20';
-        if (themeAccent.includes('purple')) return 'hover:bg-purple-900/20';
-        if (themeAccent.includes('orange')) return 'hover:bg-orange-900/20';
-        return 'hover:bg-gold-primary/10';
-    };
-    const themeBgHover = getHoverClass();
+    const themeBgHover = 'hover:bg-[rgba(var(--mist-active-accent-rgb),0.1)]';
+    const addAssetButtonTheme = theme === 'retro'
+        ? 'text-[#8B261D] border-[#8B261D]/30'
+        : 'text-[var(--mist-active-accent)] border-[rgba(var(--mist-active-accent-rgb),0.64)] hover:border-[var(--mist-active-accent)]';
 
     const handleAddAsset = (type: 'characters' | 'locations' | 'props') => {
         const newId = Date.now().toString();
@@ -44,24 +47,22 @@ export const AssetsView: React.FC<AssetsViewProps> = ({
             view: { promptCn: "", promptEn: "", images: [] }
         };
 
-        const updatedAssets = { ...blueprint.assets };
-        // @ts-ignore
-        updatedAssets[type] = [...updatedAssets[type], newItem];
+        const updatedAssets = { ...assets, [type]: [...assets[type], newItem] };
 
         onUpdateBlueprint({ ...blueprint, assets: updatedAssets });
     };
 
     const handleUpdateAsset = (type: 'characters' | 'locations' | 'props', updatedItem: any) => {
-        const updatedList = blueprint.assets[type].map((item: any) =>
+        const updatedList = assets[type].map((item: any) =>
             item.id === updatedItem.id ? updatedItem : item
         );
-        const updatedAssets = { ...blueprint.assets, [type]: updatedList };
+        const updatedAssets = { ...assets, [type]: updatedList };
         onUpdateBlueprint({ ...blueprint, assets: updatedAssets });
     };
 
     const handleDeleteAsset = (type: 'characters' | 'locations' | 'props', id: string) => {
-        const updatedList = blueprint.assets[type].filter((item: any) => item.id !== id);
-        const updatedAssets = { ...blueprint.assets, [type]: updatedList };
+        const updatedList = assets[type].filter((item: any) => item.id !== id);
+        const updatedAssets = { ...assets, [type]: updatedList };
         onUpdateBlueprint({ ...blueprint, assets: updatedAssets });
     };
 
@@ -81,19 +82,19 @@ export const AssetsView: React.FC<AssetsViewProps> = ({
                     </h3>
                     <button
                         onClick={() => handleAddAsset('characters')}
-                        className={`text-xs font-bold ${themeAccent} ${theme === 'retro' ? 'border-[#8B261D]/30' : themeAccent.replace('text-', 'border-')} ${themeBgHover} border px-3 py-1.5 rounded transition-colors uppercase tracking-wider flex items-center gap-2`}
+                        className={`text-xs font-bold ${addAssetButtonTheme} ${themeBgHover} border px-3 py-1.5 rounded transition-colors uppercase tracking-wider flex items-center gap-2`}
                     >
                         <Plus size={12} /> {language === 'EN' ? "Add Character" : "添加角色"}
                     </button>
                 </div>
 
-                {blueprint.assets.characters.length === 0 ? (
+                {assets.characters.length === 0 ? (
                     <div className={`text-center py-12 border ${theme === 'retro' ? 'border-[#8B261D]/20 bg-[#F9F7F1]/80' : 'border-zinc-800 bg-zinc-900/20'} border-dashed rounded-xl`}>
                         <p className={`${theme === 'retro' ? 'text-black/60' : 'text-zinc-500'} mb-4`}>{language === 'EN' ? "No characters generated yet." : "暂无角色资产。"}</p>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        {blueprint.assets.characters.map((char, i) => (
+                        {assets.characters.map((char, i) => (
                             <AssetCard
                                 key={char.id || i}
                                 item={char}
@@ -121,13 +122,13 @@ export const AssetsView: React.FC<AssetsViewProps> = ({
                     </h3>
                     <button
                         onClick={() => handleAddAsset('locations')}
-                        className={`text-xs font-bold ${themeAccent} ${theme === 'retro' ? 'border-[#8B261D]/30' : themeAccent.replace('text-', 'border-')} ${themeBgHover} border px-3 py-1.5 rounded transition-colors uppercase tracking-wider flex items-center gap-2`}
+                        className={`text-xs font-bold ${addAssetButtonTheme} ${themeBgHover} border px-3 py-1.5 rounded transition-colors uppercase tracking-wider flex items-center gap-2`}
                     >
                         <Plus size={12} /> {language === 'EN' ? "Add Location" : "添加场景"}
                     </button>
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {blueprint.assets.locations.map((loc, i) => (
+                    {assets.locations.map((loc, i) => (
                         <AssetCard
                             key={loc.id || i}
                             item={loc}
@@ -154,13 +155,13 @@ export const AssetsView: React.FC<AssetsViewProps> = ({
                     </h3>
                     <button
                         onClick={() => handleAddAsset('props')}
-                        className={`text-xs font-bold ${themeAccent} ${theme === 'retro' ? 'border-[#8B261D]/30' : themeAccent.replace('text-', 'border-')} ${themeBgHover} border px-3 py-1.5 rounded transition-colors uppercase tracking-wider flex items-center gap-2`}
+                        className={`text-xs font-bold ${addAssetButtonTheme} ${themeBgHover} border px-3 py-1.5 rounded transition-colors uppercase tracking-wider flex items-center gap-2`}
                     >
                         <Plus size={12} /> {language === 'EN' ? "Add Prop" : "添加道具"}
                     </button>
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {blueprint.assets.props.map((prop, i) => (
+                    {assets.props.map((prop, i) => (
                         <AssetCard
                             key={prop.id || i}
                             item={prop}

@@ -84,7 +84,7 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
     const getSidebarTitle = () => {
         if (isCommercial) return lang === 'EN' ? "DESIRE INPUT" : "欲望输入";
         if (isAesthetic) return lang === 'EN' ? "AESTHETIC REVERSE" : "美学逆向";
-        if (isExperimental) return lang === 'EN' ? "THE REAL" : "实在界切片";
+        if (isExperimental) return lang === 'EN' ? "STORY SOURCE" : "故事原文";
         if (isTrailer) return lang === 'EN' ? "HOOK SEED" : "钩子诱饵";
         return lang === 'EN' ? "VISUAL SEED" : "视觉种子";
     }
@@ -92,7 +92,7 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
     const getSidebarSubtitle = () => {
         if (isCommercial) return lang === 'EN' ? "Symptom & Fetish Analysis" : "症候与拜物分析";
         if (isAesthetic) return lang === 'EN' ? "Reverse Engineering" : "美学逆向工程";
-        if (isExperimental) return lang === 'EN' ? "Phenomenological Reduction" : "现象学还原";
+        if (isExperimental) return lang === 'EN' ? "Custom Story Translation" : "自定义故事转译";
         if (isTrailer) return lang === 'EN' ? "Hook & Rhythm" : "钩子与节奏";
         return lang === 'EN' ? "Story Completion From Text/Image" : "一句话/一张图补完整故事";
     }
@@ -100,73 +100,26 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
     const getThemeClasses = () => {
         if (currentTheme === 'retro') {
             return {
-                text: 'text-[#8B261D]',
-                bg: 'bg-[#8B261D]',
-                border: 'border-[#8B261D]',
-                focusBorder: 'focus:border-[#8B261D]/50',
+                text: 'text-[var(--text-accent)]',
+                bg: 'bg-[var(--text-accent)]',
+                border: 'border-[var(--text-accent)]',
+                focusBorder: 'focus:border-[var(--text-accent)]/50',
                 shadow: 'shadow-none',
-                uploadHover: 'hover:border-[#8B261D]/30 hover:bg-[#8B261D]/5',
-                spinner: 'border-zinc-300 border-t-[#8B261D]',
-                btn: 'bg-white/50 text-[#8B261D] border-[#8B261D]/30 hover:border-[#8B261D]'
+                uploadHover: 'hover:border-[var(--text-accent)]/30 hover:bg-[var(--text-accent)]/5',
+                spinner: 'border-zinc-300 border-t-[var(--text-accent)]',
+                btn: 'bg-white/50 text-[var(--text-accent)] border-[var(--text-accent)]/30 hover:border-[var(--text-accent)]'
             };
         }
-        switch (driverType) {
-            case DriverType.COMMERCIAL:
-                return {
-                    text: 'text-mist-cyan',
-                    bg: 'bg-mist-cyan',
-                    border: 'border-mist-cyan',
-                    focusBorder: 'focus:border-mist-cyan/50',
-                    shadow: 'shadow-[0_0_20px_rgba(34,211,238,0.25)]',
-                    uploadHover: 'hover:border-mist-cyan/30 hover:bg-mist-cyan/10',
-                    spinner: 'border-zinc-800 border-t-mist-cyan',
-                    btn: 'bg-mist-cyan/15 text-mist-cyan border-mist-cyan/40 hover:border-mist-cyan'
-                };
-            case DriverType.EXPERIMENTAL:
-                return {
-                    text: 'text-purple-400',
-                    bg: 'bg-purple-500',
-                    border: 'border-purple-500',
-                    focusBorder: 'focus:border-purple-500/50',
-                    shadow: 'shadow-[0_0_20px_rgba(168,85,247,0.3)]',
-                    uploadHover: 'hover:border-purple-500/30 hover:bg-purple-900/10',
-                    spinner: 'border-purple-900 border-t-purple-200',
-                    btn: 'bg-purple-900/20 text-purple-400 border-purple-800 hover:border-purple-400'
-                };
-            case DriverType.AESTHETIC:
-                return {
-                    text: 'text-rose-400',
-                    bg: 'bg-rose-500',
-                    border: 'border-rose-500',
-                    focusBorder: 'focus:border-rose-500/50',
-                    shadow: 'shadow-[0_0_20px_rgba(244,63,94,0.3)]',
-                    uploadHover: 'hover:border-rose-500/30 hover:bg-rose-900/10',
-                    spinner: 'border-rose-900 border-t-rose-200',
-                    btn: 'bg-rose-900/20 text-rose-400 border-rose-800 hover:border-rose-400'
-                };
-            case DriverType.TRAILER:
-                return {
-                    text: 'text-orange-400',
-                    bg: 'bg-orange-500',
-                    border: 'border-orange-500',
-                    focusBorder: 'focus:border-orange-500/50',
-                    shadow: 'shadow-[0_0_20px_rgba(251,146,60,0.3)]',
-                    uploadHover: 'hover:border-orange-500/30 hover:bg-orange-900/10',
-                    spinner: 'border-orange-900 border-t-orange-200',
-                    btn: 'bg-orange-900/20 text-orange-400 border-orange-800 hover:border-orange-400'
-                };
-            default:
-                return {
-                    text: 'text-gold-primary',
-                    bg: 'bg-gold-primary',
-                    border: 'border-gold-primary',
-                    focusBorder: 'focus:border-gold-primary/50',
-                    shadow: 'shadow-[0_0_20px_rgba(212,175,55,0.3)]',
-                    uploadHover: 'hover:border-gold-primary/30 hover:bg-amber-900/10',
-                    spinner: 'border-amber-900 border-t-amber-200',
-                    btn: 'bg-amber-900/20 text-gold-primary border-amber-800 hover:border-gold-primary'
-                };
-        }
+        return {
+            text: 'text-[var(--mist-active-accent)]',
+            bg: 'bg-[var(--mist-active-accent)]',
+            border: 'border-[var(--mist-active-accent)]',
+            focusBorder: 'focus:border-[var(--mist-active-accent)]/50',
+            shadow: 'shadow-[0_0_20px_rgba(var(--mist-active-accent-rgb),0.2)]',
+            uploadHover: 'hover:border-[var(--mist-active-accent)]/30 hover:bg-[var(--mist-active-accent)]/10',
+            spinner: 'border-zinc-800 border-t-[var(--mist-active-accent)]',
+            btn: 'bg-[var(--mist-active-accent)]/15 text-[var(--mist-active-accent)] border-[var(--mist-active-accent)]/40 hover:border-[var(--mist-active-accent)]'
+        };
     };
 
     const theme = getThemeClasses();
@@ -397,13 +350,13 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
     };
 
     const renderCandidateGroup = (title: string, subtitle: string, entries: [string, string[]][], accent: string) => (
-        <div className={`rounded-xl border ${currentTheme === 'retro' ? 'bg-[var(--bg-card)] border-[#8B261D]/20' : 'bg-zinc-950/40 border-zinc-800'}`}>
+        <div className={`rounded-xl border ${currentTheme === 'retro' ? 'bg-[var(--bg-card)] border-[var(--mist-active-accent)]/20' : 'bg-zinc-950/40 border-zinc-800'}`}>
             <div className="flex items-center justify-between p-3 border-b border-zinc-800/70">
                 <div>
                     <div className={`text-[11px] font-black tracking-[0.12em] ${accent}`}>{title}</div>
                     <div className="text-[9px] text-zinc-500 mt-1">{subtitle}</div>
                 </div>
-                <div className={`text-[9px] font-bold px-2 py-1 rounded-full ${currentTheme === 'retro' ? 'bg-[#8B261D]/10 text-[#8B261D]' : 'bg-zinc-900 text-zinc-400'}`}>
+                <div className={`text-[9px] font-bold px-2 py-1 rounded-full ${currentTheme === 'retro' ? 'bg-[var(--mist-active-accent)]/10 text-[var(--mist-active-accent)]' : 'bg-zinc-900 text-zinc-400'}`}>
                     {entries.reduce((sum, [, tags]) => sum + tags.length, 0)}
                 </div>
             </div>
@@ -423,8 +376,8 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
                                         key={key}
                                         onClick={() => toggleCandidate(blockId, tag)}
                                         className={`px-2.5 py-1.5 rounded-full border text-[10px] font-bold transition-all ${checked
-                                            ? `${currentTheme === 'retro' ? 'bg-[#8B261D] border-[#8B261D] text-white' : 'bg-gold-primary border-gold-primary text-black'}`
-                                            : `${currentTheme === 'retro' ? 'bg-white/50 border-[#8B261D]/20 text-[#8B261D]' : 'bg-zinc-900 border-zinc-700 text-zinc-300 hover:border-zinc-500'}`
+                                            ? `${currentTheme === 'retro' ? 'bg-[var(--mist-active-accent)] border-[var(--mist-active-accent)] text-white' : 'bg-gold-primary border-gold-primary text-black'}`
+                                            : `${currentTheme === 'retro' ? 'bg-white/50 border-[var(--mist-active-accent)]/20 text-[var(--mist-active-accent)]' : 'bg-zinc-900 border-zinc-700 text-zinc-300 hover:border-zinc-500'}`
                                         }`}
                                     >
                                         {checked ? '✓ ' : ''}{tag}
@@ -451,8 +404,8 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
             <div className={`px-6 py-4 flex items-center justify-between relative shrink-0 transition-all duration-300`}>
                 <div className="flex items-center gap-3">
                     {currentTheme === 'retro' ? <Sparkles size={20} className={theme.text} /> : (
-                        isCommercial ? <ScanEye size={20} className="text-mist-cyan" /> :
-                        isExperimental ? <BrainCircuit size={20} className="text-purple-400" /> :
+                        isCommercial ? <ScanEye size={20} className="text-[var(--mist-active-accent)]" /> :
+                        isExperimental ? <BrainCircuit size={20} className="text-[var(--mist-active-accent)]" /> :
                         <Sparkles size={20} className={theme.text} />
                     )}
                     <span className={`text-sm font-black uppercase tracking-[0.25em] ${theme.text}`}>
@@ -475,7 +428,7 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
                 <button
                     type="button"
                     onClick={() => setIsSeedModeInfoOpen(true)}
-                    className={`w-full rounded-xl border px-4 py-3 flex items-center justify-between text-left transition-all ${currentTheme === 'retro' ? 'bg-[var(--bg-card)] border-[#8B261D]/25 hover:bg-[#8B261D]/5' : 'bg-zinc-950/40 border-zinc-800 hover:border-zinc-600'}`}
+                    className={`w-full rounded-xl border px-4 py-3 flex items-center justify-between text-left transition-all ${currentTheme === 'retro' ? 'bg-[var(--bg-card)] border-[var(--mist-active-accent)]/25 hover:bg-[var(--mist-active-accent)]/5' : 'bg-zinc-950/40 border-zinc-800 hover:border-zinc-600'}`}
                 >
                     <div className="flex items-center gap-3 min-w-0">
                         <span className={`w-2 h-2 rounded-full ${theme.bg}`} />
@@ -581,7 +534,7 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
                         value={visionInput}
                         onChange={(e) => onVisionInputChange(e.target.value)}
                         placeholder={getPlaceholder()}
-                        className={`w-full h-24 ${currentTheme === 'retro' ? `bg-[var(--bg-card)] ${theme.border}/20 text-[var(--text-main)] placeholder-black/30 focus:ring-[var(--text-accent)]/30` : `bg-[var(--bg-panel)] ${isCommercial ? 'border-mist-cyan/30' : isExperimental ? 'border-purple-500/30' : isAesthetic ? 'border-rose-500/30' : isTrailer ? 'border-orange-500/30' : 'border-[#D4AF37]/40'} text-zinc-200 placeholder-zinc-500`} border-dashed border-2 rounded-xl p-4 text-xs focus:outline-none resize-none font-sans leading-relaxed transition-all ${theme.text} ${theme.focusBorder}`}
+                        className={`w-full h-24 ${currentTheme === 'retro' ? `bg-[var(--bg-card)] ${theme.border}/20 text-[var(--text-main)] placeholder-black/30 focus:ring-[var(--text-accent)]/30` : `bg-[var(--bg-panel)] border-[var(--mist-active-accent)]/30 text-zinc-200 placeholder-zinc-500`} border-dashed border-2 rounded-xl p-4 text-xs focus:outline-none resize-none font-sans leading-relaxed transition-all ${theme.text} ${theme.focusBorder}`}
                     />
                     <div className={`text-[10px] leading-relaxed ${currentTheme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-500'}`}>
                         {lang === 'EN'
@@ -615,7 +568,7 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
                             value={visionAnalysis || ""}
                             onChange={(e) => onVisionAnalysisChange?.(e.target.value)}
                             placeholder={lang === 'EN' ? "AI will decode locked facts, style, symptom kernel, story hypothesis, and engine hints..." : "AI 将在此处生成：\n1. 源事实锁定\n2. 画面反推提示词\n3. 风格与影调分析\n4. 症候核\n5. 潜在故事梗概\n6. 人物与事件推演..."}
-                            className={`w-full h-40 ${currentTheme === 'retro' ? `bg-[var(--bg-card)] ${theme.border}/20 text-[var(--text-main)] placeholder-black/30 focus:ring-[var(--text-accent)]/30` : `bg-[var(--bg-panel)] ${isCommercial ? 'border-mist-cyan/30' : isExperimental ? 'border-purple-500/30' : isAesthetic ? 'border-rose-500/30' : isTrailer ? 'border-orange-500/30' : 'border-[#D4AF37]/40'} text-zinc-300 placeholder-zinc-500 focus:ring-zinc-700/50`} border-dashed border-2 rounded-xl p-5 text-xs focus:outline-none resize-none font-mono leading-relaxed transition-all ${theme.text} ${theme.focusBorder} focus:shadow-[0_0_15px_rgba(255,255,255,0.02)] custom-scrollbar`}
+                            className={`w-full h-40 ${currentTheme === 'retro' ? `bg-[var(--bg-card)] ${theme.border}/20 text-[var(--text-main)] placeholder-black/30 focus:ring-[var(--text-accent)]/30` : `bg-[var(--bg-panel)] border-[var(--mist-active-accent)]/30 text-zinc-300 placeholder-zinc-500 focus:ring-zinc-700/50`} border-dashed border-2 rounded-xl p-5 text-xs focus:outline-none resize-none font-mono leading-relaxed transition-all ${theme.text} ${theme.focusBorder} focus:shadow-[0_0_15px_rgba(255,255,255,0.02)] custom-scrollbar`}
                         />
                         <div className={`absolute bottom-3 right-3 text-[8px] ${currentTheme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-600'} font-mono pointer-events-none select-none uppercase tracking-widest`}>
                             {isProcessing ? (lang === 'EN' ? "DECODING..." : "正在解构...") : (lang === 'EN' ? "DECODER_READY" : "解码器就绪")}
@@ -640,7 +593,7 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
                             </button>
                         </div>
 
-                        <div className={`rounded-xl border p-3 space-y-2 ${currentTheme === 'retro' ? 'bg-[var(--bg-card)] border-[#8B261D]/20' : 'bg-zinc-950/30 border-zinc-800'}`}>
+                        <div className={`rounded-xl border p-3 space-y-2 ${currentTheme === 'retro' ? 'bg-[var(--bg-card)] border-[var(--mist-active-accent)]/20' : 'bg-zinc-950/30 border-zinc-800'}`}>
                             <div className="text-[10px] text-zinc-400 leading-relaxed">
                                 {lang === 'EN'
                                     ? 'AI only proposes these parameters. They enter the engine after you apply them.'
@@ -685,13 +638,13 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
                             lang === 'EN' ? 'M Layer / Engine Candidates' : 'M 层 / 引擎候选',
                             lang === 'EN' ? 'Deep structure, desire, conflict and engine blocks.' : '深层结构、欲望、冲突与引擎参数。',
                             candidateGroups.engine,
-                            currentTheme === 'retro' ? 'text-[#8B261D]' : 'text-gold-primary'
+                            currentTheme === 'retro' ? 'text-[var(--mist-active-accent)]' : 'text-gold-primary'
                         )}
                         {renderCandidateGroup(
                             lang === 'EN' ? 'SUR / Surface Candidates' : 'SUR / 表层候选',
                             lang === 'EN' ? 'Skin, world, era, role, visual and style presets.' : '皮肤、世界、年代、身份、视觉与风格预设。',
                             candidateGroups.surface,
-                            currentTheme === 'retro' ? 'text-[#8B261D]' : 'text-emerald-400'
+                            currentTheme === 'retro' ? 'text-[var(--mist-active-accent)]' : 'text-emerald-400'
                         )}
                     </div>
                 )}
@@ -702,7 +655,7 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
                     <button
                         onClick={onAutoFill}
                         disabled={isProcessing}
-                        className={`flex-1 py-4 border rounded-xl flex items-center justify-center gap-3 transition-all disabled:opacity-50 disabled:cursor-not-allowed group relative overflow-hidden ${currentTheme === 'retro' ? 'bg-[#8B261D] hover:bg-[#631B15] border-[#8B261D] text-white shadow-none' : (isCommercial ? 'bg-mist-cyan hover:brightness-110 border-mist-cyan text-black shadow-[0_0_20px_rgba(34,211,238,0.25)]' : isExperimental ? 'bg-purple-500 hover:bg-purple-400 border-purple-500 text-black shadow-[0_0_20px_rgba(168,85,247,0.3)]' : isAesthetic ? 'bg-rose-500 hover:bg-rose-400 border-rose-500 text-black shadow-[0_0_20px_rgba(244,63,94,0.3)]' : isTrailer ? 'bg-orange-500 hover:bg-orange-400 border-orange-500 text-black shadow-[0_0_20px_rgba(251,146,60,0.3)]' : 'bg-gold-primary hover:bg-amber-400 border-gold-primary text-black shadow-[0_0_20px_rgba(212,175,55,0.2)]')}`}
+                        className={`flex-1 py-4 border rounded-xl flex items-center justify-center gap-3 transition-all disabled:opacity-50 disabled:cursor-not-allowed group relative overflow-hidden ${currentTheme === 'retro' ? 'bg-[var(--text-accent)] hover:brightness-90 border-[var(--text-accent)] text-white shadow-none' : 'bg-[var(--mist-active-accent)] hover:brightness-110 border-[var(--mist-active-accent)] text-black shadow-[0_0_20px_var(--mist-active-accent-trans)]'}`}
                     >
                         {isAutoFilling ? (
                             <>
@@ -727,7 +680,7 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
                         title={lang === 'EN' ? 'X-Ray Vision Mapping Prompt' : 'X-Ray 视觉映射指令'}
                         getPayload={getVisionMappingPromptPayload}
                         disabled={isProcessing}
-                        className={`h-14 w-14 shrink-0 ${currentTheme === 'retro' ? 'bg-white border-[#8B261D]/25 text-[#8B261D] hover:bg-[#8B261D]/10' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-500'}`}
+                        className={`h-14 w-14 shrink-0 ${currentTheme === 'retro' ? 'bg-white border-[var(--mist-active-accent)]/25 text-[var(--mist-active-accent)] hover:bg-[var(--mist-active-accent)]/10' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-500'}`}
                         iconSize={18}
                     />
                     </div>
@@ -742,7 +695,7 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
         {isSeedModeInfoOpen && (
             <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/70 backdrop-blur-sm px-4" onClick={() => setIsSeedModeInfoOpen(false)}>
                 <div
-                    className={`w-full max-w-md rounded-xl border p-6 shadow-2xl ${currentTheme === 'retro' ? 'bg-[var(--bg-card)] border-[#8B261D]/30 text-[var(--text-main)]' : 'bg-zinc-950 border-zinc-800 text-zinc-200'}`}
+                    className={`w-full max-w-md rounded-xl border p-6 shadow-2xl ${currentTheme === 'retro' ? 'bg-[var(--bg-card)] border-[var(--mist-active-accent)]/30 text-[var(--text-main)]' : 'bg-zinc-950 border-zinc-800 text-zinc-200'}`}
                     onClick={(e) => e.stopPropagation()}
                 >
                     <div className="flex items-start justify-between gap-4 mb-5">
@@ -753,7 +706,7 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
                         <button
                             type="button"
                             onClick={() => setIsSeedModeInfoOpen(false)}
-                            className={`p-2 rounded-full border ${currentTheme === 'retro' ? 'border-[#8B261D]/20 text-[#8B261D] hover:bg-[#8B261D]/10' : 'border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-500'}`}
+                            className={`p-2 rounded-full border ${currentTheme === 'retro' ? 'border-[var(--mist-active-accent)]/20 text-[var(--mist-active-accent)] hover:bg-[var(--mist-active-accent)]/10' : 'border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-500'}`}
                         >
                             <X size={16} />
                         </button>
@@ -770,7 +723,7 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
                         ].map(rule => (
                             <div
                                 key={rule}
-                                className={`rounded-lg border px-4 py-3 text-sm font-bold ${currentTheme === 'retro' ? 'border-[#8B261D]/15 bg-[#8B261D]/5' : 'border-zinc-800 bg-zinc-900/70'}`}
+                                className={`rounded-lg border px-4 py-3 text-sm font-bold ${currentTheme === 'retro' ? 'border-[var(--mist-active-accent)]/15 bg-[var(--mist-active-accent)]/5' : 'border-zinc-800 bg-zinc-900/70'}`}
                             >
                                 {rule}
                             </div>

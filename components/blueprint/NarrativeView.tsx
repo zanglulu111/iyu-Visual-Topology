@@ -415,7 +415,7 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
                         {/* The "Next Line" Edit Box */}
                         <div className={`block my-3 p-3 ${theme === 'retro' ? 'bg-[#F4EFE0] border-[#8B261D]/30' : 'bg-zinc-900/50 border-indigo-500/30'} rounded-lg shadow-xl animate-in slide-in-from-left-2 fade-in duration-200 ml-4 border-l-4 ${theme === 'retro' ? 'border-l-[#8B261D]' : 'border-l-indigo-500'}`}>
                             <div className="flex justify-between items-center mb-2">
-                                <span className={`text-[10px] font-bold ${theme === 'retro' ? 'text-[#8B261D]' : 'text-indigo-300'} uppercase tracking-wider flex items-center gap-2`}>
+                                <span className={`text-[10px] font-bold ${theme === 'retro' ? 'text-[#8B261D]' : 'text-[var(--mist-active-accent)]'} uppercase tracking-wider flex items-center gap-2`}>
                                     <PenTool size={10} />
                                     {language === 'EN' ? "Modification Note" : "修改指令"}
                                 </span>
@@ -431,7 +431,7 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
                                 type="text"
                                 value={h.note}
                                 onChange={(e) => updateHighlightNote(sectionIdx, hIdx, e.target.value)}
-                                className={`w-full ${theme === 'retro' ? 'bg-white border-[#8B261D]/20 text-black placeholder-[#8B261D]/30 focus:border-[#8B261D]' : 'bg-zinc-900/50 border-zinc-700 text-white placeholder-zinc-500 focus:border-indigo-500'} border rounded px-3 py-2 text-sm transition-colors font-medium focus:outline-none`}
+                                className={`w-full ${theme === 'retro' ? 'bg-white border-[#8B261D]/20 text-black placeholder-[#8B261D]/30 focus:border-[#8B261D]' : 'bg-zinc-900/50 border-zinc-700 text-white placeholder-zinc-500 focus:border-[var(--mist-active-accent)]'} border rounded px-3 py-2 text-sm transition-colors font-medium focus:outline-none`}
                                 placeholder={language === 'EN' ? "How should AI rewrite this specific part?" : "AI 应如何修改此处的具体措辞？"}
                                 autoFocus
                                 onClick={(e) => e.stopPropagation()}
@@ -537,7 +537,7 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
                         <CopyButton text={blueprint.narrative?.synopsis || ""} label={language === 'EN' ? "COPY SCRIPT" : "复制文本"} theme={theme} className={theme === 'retro' ? 'text-[#8B261D]/50 hover:text-[#8B261D]' : 'text-zinc-500'} />
                     </div>
                 </div>
-                <div className={`${theme === 'retro' ? 'bg-[var(--bg-main)] border-[#8B261D]/15 shadow-sm' : 'bg-[var(--bg-main)] border-zinc-800 shadow-inner'} border p-10 rounded-xl min-h-[400px]`}>
+                <div className={`${theme === 'retro' ? 'bg-[var(--bg-main)] border-[#8B261D]/15 shadow-sm' : 'bg-[var(--bg-main)] border-zinc-800'} border p-10 rounded-xl min-h-[400px]`}>
                     <textarea
                         value={blueprint.narrative?.synopsis || ""}
                         onChange={(e) => handleUpdate('synopsis', e.target.value)}
@@ -552,13 +552,13 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
                 <div className={`flex p-1 rounded-lg border shadow-lg ${theme === 'retro' ? 'bg-[#F4EFE0] border-[#8B261D]/20' : 'bg-zinc-900 border-zinc-800'}`}>
                     <button
                         onClick={() => setLocalLang('CN')}
-                        className={`px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-wider transition-all ${localLang === 'CN' ? (theme === 'retro' ? 'bg-[#8B261D] text-white shadow-none' : 'bg-gold-primary text-black') : (theme === 'retro' ? 'text-zinc-500 hover:text-[#8B261D]' : 'text-zinc-500 hover:text-white')}`}
+                        className={`px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-wider transition-all ${localLang === 'CN' ? (theme === 'retro' ? 'bg-[#8B261D] text-white shadow-none' : 'bg-[var(--mist-active-accent)] text-black') : (theme === 'retro' ? 'text-zinc-500 hover:text-[#8B261D]' : 'text-zinc-500 hover:text-white')}`}
                     >
                         中文
                     </button>
                     <button
                         onClick={() => setLocalLang('EN')}
-                        className={`px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-wider transition-all ${localLang === 'EN' ? (theme === 'retro' ? 'bg-[#8B261D] text-white shadow-none' : 'bg-gold-primary text-black') : (theme === 'retro' ? 'text-zinc-500 hover:text-[#8B261D]' : 'text-zinc-500 hover:text-white')}`}
+                        className={`px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-wider transition-all ${localLang === 'EN' ? (theme === 'retro' ? 'bg-[#8B261D] text-white shadow-none' : 'bg-[var(--mist-active-accent)] text-black') : (theme === 'retro' ? 'text-zinc-500 hover:text-[#8B261D]' : 'text-zinc-500 hover:text-white')}`}
                     >
                         EN
                     </button>
@@ -598,7 +598,7 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
                     <div className="flex items-center justify-between gap-4 mt-auto pt-4 border-t border-white/5">
                         <div className="flex gap-2">
                             {(theme === 'retro' ? ['#8B261D', '#DCD8CF', '#F4EFE0', '#2C2B29', '#E0D4B2'] : blueprint.context?.colorPalette)?.map((color, i) => (
-                                <div key={i} className="h-8 w-12 rounded border border-black/10 shadow-lg group relative" style={{ backgroundColor: color }}>
+                                <div key={i} className="h-8 w-12 rounded border border-black/10 shadow-sm group relative" style={{ backgroundColor: color }}>
                                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                         <span className={`${theme === 'retro' ? 'bg-[#F4EFE0]/90 text-[#8B261D]' : 'bg-black/80 text-white'} text-[9px] px-1 rounded`}>{color}</span>
                                     </div>
@@ -700,8 +700,8 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
                                     onClick={() => setIsStyleLibraryOpen(true)}
                                     className={`relative flex items-center gap-2 ${theme === 'retro' ? 'bg-white border-[#8B261D]/20 hover:border-[#8B261D]/40' : 'bg-zinc-900/50 border border-zinc-800 hover:border-zinc-600 hover:bg-zinc-800'} rounded px-3 py-1.5 transition-all group min-w-[120px]`}
                                 >
-                                    <Palette size={12} className={`${theme === 'retro' ? 'text-[#8B261D]/50 group-hover:text-[#8B261D]' : 'text-zinc-500 group-hover:text-gold-primary'} shrink-0 transition-colors`} />
-                                    <span className={`text-xs font-bold truncate max-w-[120px] ${selectedStyle ? (theme === 'retro' ? 'text-[#8B261D]' : 'text-gold-primary') : 'text-zinc-400'}`}>
+                                    <Palette size={12} className={`${theme === 'retro' ? 'text-[#8B261D]/50 group-hover:text-[#8B261D]' : 'text-zinc-500 group-hover:text-[var(--mist-active-accent)]'} shrink-0 transition-colors`} />
+                                    <span className={`text-xs font-bold truncate max-w-[120px] ${selectedStyle ? (theme === 'retro' ? 'text-[#8B261D]' : 'text-[var(--mist-active-accent)]') : 'text-zinc-400'}`}>
                                         {selectedStyle || (language === 'EN' ? "Select Style..." : "选择风格...")}
                                     </span>
                                     <div className="ml-auto pl-2">
@@ -738,12 +738,12 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
                                         title={language === 'EN' ? 'X-Ray Narrative Refactor Prompt' : 'X-Ray 剧本深度修改指令'}
                                         getPayload={getRefactorPrompt}
                                         disabled={isRefactoring}
-                                        className={theme === 'retro' ? 'h-9 w-9 bg-white border-[#8B261D]/20 text-[#8B261D] hover:bg-[#8B261D]/10' : 'h-9 w-9 bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-gold-primary hover:border-gold-primary'}
+                                        className={theme === 'retro' ? 'h-9 w-9 bg-white border-[#8B261D]/20 text-[#8B261D] hover:bg-[#8B261D]/10' : 'h-9 w-9 bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-[var(--mist-active-accent)] hover:border-[var(--mist-active-accent)]'}
                                     />
                                     <button
                                         onClick={handleSubmitRefactor}
                                         disabled={isRefactoring}
-                                        className={`h-9 px-4 ${theme === 'retro' ? 'bg-[#8B261D] hover:bg-[#6D1E16] text-white shadow-none' : 'bg-gold-primary hover:bg-amber-400 text-black shadow-[0_0_15px_rgba(212,175,55,0.3)] hover:shadow-[0_0_25px_rgba(212,175,55,0.5)]'} rounded font-bold uppercase tracking-widest text-[10px] flex items-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
+                                        className={`h-9 px-4 ${theme === 'retro' ? 'bg-[#8B261D] hover:bg-[#6D1E16] text-white shadow-none' : 'bg-[var(--mist-active-accent)] hover:brightness-110 text-black'} rounded font-bold uppercase tracking-widest text-[10px] flex items-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
                                     >
                                         {isRefactoring ? <Loader2 size={12} className="animate-spin" /> : <Wand2 size={12} />}
                                         {isRefactoring ? (
@@ -771,13 +771,13 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
                         {/* Sub-Header: Overall Instruction */}
                         <div className={`px-6 py-4 ${theme === 'retro' ? 'bg-[#F4EFE0] border-[#8B261D]/20' : 'bg-[#0a0a0a] border-zinc-800'} border-b shrink-0`}>
                             <div className="relative group">
-                                <div className="absolute top-3 left-3 text-zinc-500 group-focus-within:text-gold-primary transition-colors">
+                                <div className="absolute top-3 left-3 text-zinc-500 group-focus-within:text-[var(--mist-active-accent)] transition-colors">
                                     <PenTool size={14} />
                                 </div>
                                 <textarea
                                     value={overallInstruction}
                                     onChange={(e) => setOverallInstruction(e.target.value)}
-                                    className={`w-full ${theme === 'retro' ? 'bg-white border-[#8B261D]/20 text-black placeholder-[#8B261D]/30 focus:border-[#8B261D]/50 focus:bg-white' : 'bg-zinc-900/30 border-zinc-800 text-white placeholder-zinc-600 focus:border-gold-primary/50 focus:bg-zinc-900/50'} border rounded-lg pl-10 pr-4 py-3 text-sm transition-all resize-none h-20 leading-relaxed custom-scrollbar`}
+                                    className={`w-full ${theme === 'retro' ? 'bg-white border-[#8B261D]/20 text-black placeholder-[#8B261D]/30 focus:border-[#8B261D]/50 focus:bg-white' : 'bg-zinc-900/30 border-zinc-800 text-white placeholder-zinc-600 focus:border-[var(--mist-active-accent)]/50 focus:bg-zinc-900/50'} border rounded-lg pl-10 pr-4 py-3 text-sm transition-all resize-none h-20 leading-relaxed custom-scrollbar`}
                                     placeholder={language === 'EN' ? "Enter global instructions for the rewrite (e.g., 'Make the tone more suspenseful', 'Focus on character internal monologue')..." : "在此输入整体修改指示 (例如: '让整体氛围更加悬疑', '增加人物内心独白', '加快叙事节奏')..."}
                                 />
                             </div>
@@ -801,19 +801,19 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
                                     <div className="flex justify-center group">
                                         <button
                                             onClick={() => addInsertion(0)}
-                                            className={`opacity-0 group-hover:opacity-100 transition-opacity ${theme === 'retro' ? 'bg-white border-[#8B261D]/40 text-[#8B261D]/60 hover:text-[#8B261D] hover:border-[#8B261D]' : 'bg-zinc-900 border-zinc-700 text-zinc-500 hover:text-gold-primary hover:border-gold-primary/50'} border border-dashed text-xs px-4 py-1 rounded-full flex items-center gap-2`}
+                                            className={`opacity-0 group-hover:opacity-100 transition-opacity ${theme === 'retro' ? 'bg-white border-[#8B261D]/40 text-[#8B261D]/60 hover:text-[#8B261D] hover:border-[#8B261D]' : 'bg-zinc-900 border-zinc-700 text-zinc-500 hover:text-[var(--mist-active-accent)] hover:border-[var(--mist-active-accent)]/50'} border border-dashed text-xs px-4 py-1 rounded-full flex items-center gap-2`}
                                         >
                                             <Plus size={12} /> {language === 'EN' ? "Insert Start" : "在开头插入"}
                                         </button>
                                     </div>
                                     {insertions.filter(i => i.index === 0).map((ins) => (
-                                    <div key={ins.id} className={`${theme === 'retro' ? 'bg-[#F4EFE0] border-[#8B261D]/30' : 'bg-gold-primary/5 border-gold-primary/20'} border p-4 rounded-xl relative animate-in zoom-in-95 duration-200`}>
+                                    <div key={ins.id} className={`${theme === 'retro' ? 'bg-[#F4EFE0] border-[#8B261D]/30' : 'bg-[var(--mist-active-accent)]/5 border-[var(--mist-active-accent)]/20'} border p-4 rounded-xl relative animate-in zoom-in-95 duration-200`}>
                                             <button onClick={() => removeInsertion(ins.id)} className={`${theme === 'retro' ? 'text-[#8B261D]/40 hover:text-[#8B261D]' : 'text-zinc-500 hover:text-red-400'}`}><X size={14} /></button>
-                                            <span className={`text-[10px] font-bold ${theme === 'retro' ? 'text-[#8B261D]' : 'text-gold-primary'} uppercase tracking-wider mb-2 block`}>{language === 'EN' ? "Insertion Instruction" : "插入指令"}</span>
+                                            <span className={`text-[10px] font-bold ${theme === 'retro' ? 'text-[#8B261D]' : 'text-[var(--mist-active-accent)]'} uppercase tracking-wider mb-2 block`}>{language === 'EN' ? "Insertion Instruction" : "插入指令"}</span>
                                             <textarea
                                                 value={ins.instruction}
                                                 onChange={(e) => updateInsertion(ins.id, e.target.value)}
-                                                className={`w-full ${theme === 'retro' ? 'bg-white border-[#8B261D]/20 text-black focus:border-[#8B261D]' : 'bg-black/40 border-zinc-700 text-white focus:border-gold-primary'} border rounded p-2 text-sm placeholder-zinc-500 resize-none h-20 focus:outline-none`}
+                                                className={`w-full ${theme === 'retro' ? 'bg-white border-[#8B261D]/20 text-black focus:border-[#8B261D]' : 'bg-black/40 border-zinc-700 text-white focus:border-[var(--mist-active-accent)]'} border rounded p-2 text-sm placeholder-zinc-500 resize-none h-20 focus:outline-none`}
                                                 placeholder={language === 'EN' ? "Describe what to insert here..." : "描述需要在此处插入的段落内容..."}
                                             />
                                         </div>
@@ -822,14 +822,14 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
                                     {sections.map((section, idx) => (
                                         <div key={section.id} className="space-y-2">
                                             {/* Main Section Card */}
-                                            <div className={`border rounded-xl transition-all duration-300 ${section.isSelected ? (theme === 'retro' ? 'border-[#8B261D] bg-[#F4EFE0]' : `border-${themeAccent.replace('text-', '')} bg-zinc-900/40`) : (theme === 'retro' ? 'border-[#8B261D]/10 bg-white hover:border-[#8B261D]/30' : 'border-zinc-800 bg-zinc-900/10 hover:border-zinc-700')}`}>
+                                            <div className={`border rounded-xl transition-all duration-300 ${section.isSelected ? (theme === 'retro' ? 'border-[#8B261D] bg-[#F4EFE0]' : `border-[var(--mist-active-accent)] bg-zinc-900/40`) : (theme === 'retro' ? 'border-[#8B261D]/10 bg-white hover:border-[#8B261D]/30' : 'border-zinc-800 bg-zinc-900/10 hover:border-zinc-700')}`}>
                                                 <div className="p-4 flex gap-4">
                                                     <div className="pt-1">
                                                         <input
                                                             type="checkbox"
                                                             checked={section.isSelected}
                                                             onChange={() => toggleSectionSelect(idx)}
-                                                            className={`w-5 h-5 rounded border-zinc-600 ${theme === 'retro' ? 'bg-white text-[#8B261D]' : 'bg-zinc-900 text-gold-primary'} focus:ring-0 cursor-pointer`}
+                                                            className={`w-5 h-5 rounded border-zinc-600 ${theme === 'retro' ? 'bg-white text-[#8B261D]' : 'bg-zinc-900 text-[var(--mist-active-accent)]'} focus:ring-0 cursor-pointer`}
                                                         />
                                                     </div>
                                                     <div className="flex-1 space-y-3">
@@ -837,7 +837,7 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
                                                             <textarea
                                                                 value={section.text}
                                                                 onChange={(e) => updateSectionText(section.id, e.target.value)}
-                                                                className={`w-full ${theme === 'retro' ? 'bg-white border-[#8B261D]/30 text-black focus:border-[#8B261D]' : 'bg-black/40 border-zinc-700 text-white focus:border-gold-primary'} border rounded-lg p-3 text-sm leading-loose font-serif focus:outline-none min-h-[120px] resize-y`}
+                                                                className={`w-full ${theme === 'retro' ? 'bg-white border-[#8B261D]/30 text-black focus:border-[#8B261D]' : 'bg-black/40 border-zinc-700 text-white focus:border-[var(--mist-active-accent)]'} border rounded-lg p-3 text-sm leading-loose font-serif focus:outline-none min-h-[120px] resize-y`}
                                                                 autoFocus
                                                             />
                                                         ) : (
@@ -863,7 +863,7 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
                                                                     type="text"
                                                                     value={section.instruction}
                                                                     onChange={(e) => updateSectionInstruction(idx, e.target.value)}
-                                                                    className={`w-full ${theme === 'retro' ? 'bg-white border-[#8B261D]/20 text-black placeholder-[#8B261D]/30 focus:border-[#8B261D]' : 'bg-black/40 border-zinc-700 text-white placeholder-zinc-500 focus:border-gold-primary'} border rounded px-3 py-2 text-sm transition-colors focus:outline-none`}
+                                                                    className={`w-full ${theme === 'retro' ? 'bg-white border-[#8B261D]/20 text-black placeholder-[#8B261D]/30 focus:border-[#8B261D]' : 'bg-black/40 border-zinc-700 text-white placeholder-zinc-500 focus:border-[var(--mist-active-accent)]'} border rounded px-3 py-2 text-sm transition-colors focus:outline-none`}
                                                                     placeholder={language === 'EN' ? "Instruction for this section (e.g. Make it darker)..." : "本段整体修改指令 (例如: 让氛围更压抑)..."}
                                                                 />
                                                             </div>
@@ -872,7 +872,7 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
                                                     <div className="shrink-0 pt-1">
                                                         <button
                                                             onClick={() => setEditingSectionId(editingSectionId === section.id ? null : section.id)}
-                                                            className={`p-2 rounded-lg transition-all duration-300 ${editingSectionId === section.id ? 'bg-gold-primary text-black' : 'text-zinc-600 hover:text-white hover:bg-zinc-800'}`}
+                                                            className={`p-2 rounded-lg transition-all duration-300 ${editingSectionId === section.id ? 'bg-[var(--mist-active-accent)] text-black' : 'text-zinc-600 hover:text-white hover:bg-zinc-800'}`}
                                                             title={editingSectionId === section.id ? (language === 'EN' ? "Save" : "保存") : (language === 'EN' ? "Edit Paragraph" : "编辑段落")}
                                                         >
                                                             {editingSectionId === section.id ? <Check size={14} /> : <PenTool size={14} />}
@@ -886,7 +886,7 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
                                                  <div className={`absolute inset-x-0 top-1/2 h-px ${theme === 'retro' ? 'bg-[#8B261D]/20' : 'bg-zinc-800'} opacity-0 group-hover:opacity-100 transition-opacity`}></div>
                                                 <button
                                                     onClick={() => addInsertion(idx + 1)}
-                                                    className={`relative z-10 opacity-0 group-hover:opacity-100 transition-opacity ${theme === 'retro' ? 'bg-white border-[#8B261D]/40 text-[#8B261D]/60 hover:text-[#8B261D] hover:border-[#8B261D]' : 'bg-zinc-900 border-zinc-700 hover:border-gold-primary text-zinc-500 hover:text-gold-primary'} border text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1`}
+                                                    className={`relative z-10 opacity-0 group-hover:opacity-100 transition-opacity ${theme === 'retro' ? 'bg-white border-[#8B261D]/40 text-[#8B261D]/60 hover:text-[#8B261D] hover:border-[#8B261D]' : 'bg-zinc-900 border-zinc-700 hover:border-[var(--mist-active-accent)] text-zinc-500 hover:text-[var(--mist-active-accent)]'} border text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1`}
                                                 >
                                                     <Plus size={10} /> {language === 'EN' ? "Insert Here" : "在此插入"}
                                                 </button>
@@ -894,13 +894,13 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
 
                                             {/* Render Insertions for this index */}
                                             {insertions.filter(i => i.index === idx + 1).map((ins) => (
-                                                <div key={ins.id} className={`${theme === 'retro' ? 'bg-[#F4EFE0] border-[#8B261D]/30' : 'bg-gold-primary/5 border-gold-primary/20'} border p-4 rounded-xl relative animate-in zoom-in-95 duration-200 mb-2`}>
+                                                <div key={ins.id} className={`${theme === 'retro' ? 'bg-[#F4EFE0] border-[#8B261D]/30' : 'bg-[var(--mist-active-accent)]/5 border-[var(--mist-active-accent)]/20'} border p-4 rounded-xl relative animate-in zoom-in-95 duration-200 mb-2`}>
                                                     <button onClick={() => removeInsertion(ins.id)} className={`absolute top-2 right-2 ${theme === 'retro' ? 'text-[#8B261D]/40 hover:text-[#8B261D]' : 'text-zinc-500 hover:text-red-400'}`}><X size={14} /></button>
-                                                    <span className={`text-[10px] font-bold ${theme === 'retro' ? 'text-[#8B261D]' : 'text-gold-primary'} uppercase tracking-wider mb-2 block`}>{language === 'EN' ? "Insertion Instruction" : "插入指令"}</span>
+                                                    <span className={`text-[10px] font-bold ${theme === 'retro' ? 'text-[#8B261D]' : 'text-[var(--mist-active-accent)]'} uppercase tracking-wider mb-2 block`}>{language === 'EN' ? "Insertion Instruction" : "插入指令"}</span>
                                                     <textarea
                                                         value={ins.instruction}
                                                         onChange={(e) => updateInsertion(ins.id, e.target.value)}
-                                                        className={`w-full ${theme === 'retro' ? 'bg-white border-[#8B261D]/20 text-black focus:border-[#8B261D]' : 'bg-black/40 border-zinc-700 text-white focus:border-gold-primary'} border rounded p-2 text-sm placeholder-zinc-500 resize-none h-20 focus:outline-none`}
+                                                        className={`w-full ${theme === 'retro' ? 'bg-white border-[#8B261D]/20 text-black focus:border-[#8B261D]' : 'bg-black/40 border-zinc-700 text-white focus:border-[var(--mist-active-accent)]'} border rounded p-2 text-sm placeholder-zinc-500 resize-none h-20 focus:outline-none`}
                                                         placeholder={language === 'EN' ? "Describe what to insert here..." : "描述需要在此处插入的段落内容..."}
                                                     />
                                                 </div>

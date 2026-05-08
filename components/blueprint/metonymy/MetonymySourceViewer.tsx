@@ -30,7 +30,7 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
     text, onChange, lang, themeAccent, themeColorBase, activeSceneIndex, activeSceneId, scrollSyncTrigger, sections, onSendToActive, onSendToNew, onAutoBreakdown, isBreakingDown, breakdownStartTime, theme, isAdmin
 }) => {
     const [isSelectionMode, setIsSelectionMode] = useState(false);
-    const [isEditing, setIsEditing] = useState(false);
+    const [isEditing, setIsEditing] = useState(() => text.trim().length === 0);
 
     const [selectedIndices, setSelectedIndices] = useState<Set<number>>(new Set());
     const [selectionHistory, setSelectionHistory] = useState<Set<number>[]>([]);

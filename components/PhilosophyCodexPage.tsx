@@ -283,7 +283,7 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
   const themeColors = {
     accent: getThemeTextColor(),
     border: getThemeBorderColor(),
-    bg: (theme === 'retro') ? 'bg-[#8B261D]' : (activeDictionary === 'MIST' ? 'bg-[#9CA3AF]' : activeDictionary === 'MARX' ? 'bg-[#FF7675]' : activeDictionary === 'HEGEL' ? 'bg-[#D4AF37]' : activeDictionary === 'LACAN' ? 'bg-[#D4AF37]' : activeDictionary === 'ZIZEK' ? 'bg-[#C084FC]' : 'bg-white'),
+    bg: (activeDictionary === 'MIST' ? 'bg-[#FFD700]' : (theme === 'retro' ? 'bg-[#8B261D]' : (activeDictionary === 'MARX' ? 'bg-[#FF7675]' : activeDictionary === 'HEGEL' ? 'bg-[#FFD700]' : activeDictionary === 'LACAN' ? 'bg-[#FFD700]' : activeDictionary === 'ZIZEK' ? 'bg-[#C084FC]' : 'bg-white'))),
   };
   const dictionaries = {
     MIST: { name: '迷雾学派 (Mist)', data: MIST_INDEX, icon: <Sparkles size={16} /> },
@@ -1428,13 +1428,13 @@ const renderDetailView = () => {
     {/* HEADER - Matching AppHeader Style */}
     <header className={`h-14 bg-[var(--bg-header)] backdrop-blur-md border-b ${theme === 'retro' ? 'border-[var(--border-main)]' : 'border-white/[0.06]'} flex items-center justify-between px-4 md:px-5 z-50 sticky top-0 shrink-0 transition-all duration-500 animate-page-dissolve relative`}>
       {/* Theme Accent Bottom Line */}
-      <div 
-        className="absolute bottom-0 left-0 right-0 h-px z-10 transition-all duration-500" 
-        style={{ 
-           backgroundColor: theme === 'retro' ? '#8B261D' : 'rgba(212, 175, 55, 0.15)', 
-           opacity: theme === 'retro' ? 0.2 : 0.15, 
-           boxShadow: theme === 'retro' ? 'none' : '0 0 10px rgba(212,175,55,0.1)' 
-        }} 
+      <div
+        className="absolute bottom-0 left-0 right-0 h-px z-10 transition-all duration-500"
+        style={{
+           backgroundColor: theme === 'retro' ? '#8B261D' : 'rgba(255, 215, 0, 0.15)',
+           opacity: theme === 'retro' ? 0.2 : 0.15,
+           boxShadow: theme === 'retro' ? 'none' : '0 0 10px rgba(212,175,55,0.1)'
+        }}
       />
 
       {/* Left Section */}
@@ -1613,7 +1613,7 @@ const renderDetailView = () => {
             onClick={onOpenPosterWorkspace}
             className={`flex items-center gap-2 px-4 py-1.5 h-10 rounded-md border transition-all duration-300 group shrink-0 ${theme === 'retro'
                 ? 'border-[#8B261D]/20 bg-[#8B261D]/5 text-[#8B261D] hover:border-[#8B261D]/45 hover:bg-[#8B261D]/10'
-                : 'border-[#D4AF37]/20 bg-[#D4AF37]/5 text-[#FFD700] hover:border-[#D4AF37]/45 hover:bg-[#D4AF37]/10'
+                : 'border-[#FFD700]/20 bg-[#FFD700]/5 text-[#FFD700] hover:border-[#FFD700]/45 hover:bg-[#FFD700]/10'
               }`}
             title={lang === 'CN' ? '管理员：打开哲学家海报发布工作台' : 'Admin: open philosopher poster publishing desk'}
           >
@@ -1623,7 +1623,7 @@ const renderDetailView = () => {
             </span>
             <span className={`hidden xl:flex items-center gap-1 text-[8px] font-black uppercase tracking-[0.18em] px-2 py-0.5 rounded-full border ${theme === 'retro'
                 ? 'border-[#8B261D]/20 bg-white/30 text-[#8B261D]/70'
-                : 'border-[#D4AF37]/20 bg-black/20 text-[#FFD700]/70'
+                : 'border-[#FFD700]/20 bg-black/20 text-[#FFD700]/70'
               }`}
             >
               <Lock size={9} />
