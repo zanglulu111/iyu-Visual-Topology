@@ -66,7 +66,7 @@ export const ProductManualModal: React.FC<ProductManualModalProps> = ({ isOpen, 
 
     const renderDictionarySection = (dict: any[]) => {
         return (
-            <div className="space-y-12 animate-in fade-in duration-500 pb-20 w-full">
+            <div className="space-y-12 pb-20 w-full">
                 {dict.map(category => (
                     <div key={category.id} className="space-y-6">
                         <div className="border-b border-zinc-800 pb-4 flex flex-col md:flex-row md:items-end gap-2 md:gap-4">
@@ -106,7 +106,7 @@ export const ProductManualModal: React.FC<ProductManualModalProps> = ({ isOpen, 
     };
 
     return (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-[#050505]/95 backdrop-blur-xl animate-in fade-in duration-300 p-0 md:p-4">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-[#050505]/95 backdrop-blur-xl p-0 md:p-4 animate-page-dissolve">
             <div className="w-full h-full max-w-[1600px] bg-[#0c0c0c] border border-zinc-800 md:rounded-2xl shadow-2xl flex overflow-hidden relative">
 
                 {/* SIDEBAR */}
@@ -204,7 +204,7 @@ export const ProductManualModal: React.FC<ProductManualModalProps> = ({ isOpen, 
 
                     <div className="flex-1 overflow-y-auto custom-scrollbar">
                         {selectedConcept ? (
-                            <div className="p-8 md:p-16 w-full space-y-12 animate-in fade-in duration-200 pb-40">
+                            <div className="p-8 md:p-16 w-full space-y-12 pb-40">
                                 <div className="relative">
                                     <div className={`absolute -left-6 top-0 bottom-0 w-1 ${theme.bg}/30`}></div>
                                     <p className="text-2xl md:text-4xl text-zinc-100 font-serif leading-relaxed italic">
@@ -244,7 +244,7 @@ export const ProductManualModal: React.FC<ProductManualModalProps> = ({ isOpen, 
                                 </div>
                             </div>
                         ) : selectedWhitepaper ? (
-                            <div className="p-8 md:p-16 w-full space-y-12 animate-in fade-in duration-200 pb-40">
+                            <div className="p-8 md:p-16 w-full space-y-12 pb-40">
                                 <div className="bg-zinc-900/30 border border-zinc-800 rounded-2xl p-12 space-y-8 shadow-2xl">
                                     <div className={`flex items-center gap-6 ${theme.text} border-b border-zinc-800 pb-8 mb-4`}>
                                         <selectedWhitepaper.icon size={48} className={selectedWhitepaper.color} />
@@ -261,7 +261,7 @@ export const ProductManualModal: React.FC<ProductManualModalProps> = ({ isOpen, 
                         ) : (
                             <div className="p-8 md:p-12 w-full">
                                 {activeSection === 'GUIDE_WHITEPAPER' && (
-                                    <div className="w-full max-w-4xl mx-auto py-8 animate-in fade-in duration-500 pb-40 space-y-12">
+                                    <div className="w-full max-w-4xl mx-auto py-8 pb-40 space-y-12">
                                         <div className={`bg-black border border-zinc-800 p-10 rounded-2xl flex flex-col md:flex-row gap-8 items-center border-l-8 ${theme.border} shadow-2xl`}>
                                             <div className={`p-6 bg-zinc-900 rounded-full ${theme.text} border ${theme.border}/20 shrink-0`}>
                                                 <BookOpen size={40} />

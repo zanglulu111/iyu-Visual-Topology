@@ -19,7 +19,7 @@ interface AestheticViewProps {
     theme?: string;
 }
 
-export const AestheticView: React.FC<AestheticViewProps> = ({ 
+export const AestheticView: React.FC<AestheticViewProps> = ({
     blueprint, activeTab, language, onUpdateBlueprint, themeAccent, themeBorder, aestheticMode, theme
 }) => {
     const aestheticData = blueprint.aestheticData || {
@@ -59,8 +59,8 @@ export const AestheticView: React.FC<AestheticViewProps> = ({
     const isRealism = aestheticMode === 'REALISM';
 
     return (
-        <div className="max-w-7xl mx-auto space-y-12 animate-in fade-in slide-in-from-bottom-2 pb-40">
-             
+        <div className="max-w-7xl mx-auto space-y-12 pb-40">
+
              {/* SECTION 1: VISUAL MANIFESTO / SYNOPSIS */}
              {activeTab === 'L0_SOUL' && (
                   <div className="space-y-8">
@@ -113,12 +113,12 @@ export const AestheticView: React.FC<AestheticViewProps> = ({
                                 {language === 'EN' ? "Technical Specifications" : "物理参数与显影协议"}
                             </h3>
                        </div>
-                       
+
                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                            {(aestheticData.techSpecs || []).map((spec, i) => (
                                <div key={i} className={`p-6 rounded-xl group transition-all border ${theme === 'retro' ? 'bg-transparent border-[var(--border-main)] hover:border-[#8B261D]/20 shadow-none' : 'bg-zinc-900/30 border-zinc-800 hover:border-[var(--mist-active-accent)]/30'}`}>
                                    <div className={`${theme === 'retro' ? 'text-[#8B261D]/50' : 'text-[var(--mist-active-accent)]/50'} text-[10px] font-bold uppercase tracking-widest mb-2`}>{spec.label}</div>
-                                   <input 
+                                   <input
                                        value={spec.value}
                                        onChange={(e) => {
                                            const next = [...aestheticData.techSpecs];
@@ -129,7 +129,7 @@ export const AestheticView: React.FC<AestheticViewProps> = ({
                                    />
                                </div>
                            ))}
-                           <button 
+                           <button
                              onClick={() => handleUpdate('techSpecs', [...aestheticData.techSpecs, { label: "Param", value: "" }])}
                              className={`rounded-xl flex items-center justify-center p-6 border-dashed border transition-all ${theme === 'retro' ? 'border-[#8B261D]/10 text-zinc-400 hover:text-[#8B261D] hover:border-[#8B261D]/30 bg-black/[0.02]' : 'border-zinc-800 text-zinc-600 hover:text-[var(--mist-active-accent)] hover:border-[var(--mist-active-accent)]/30'}`}
                            >
@@ -165,10 +165,10 @@ export const AestheticView: React.FC<AestheticViewProps> = ({
                               </div>
                               <CopyButton text={aestheticData.promptEngineering} label="COPY LIBRARY" />
                           </div>
-                          <textarea 
-                              value={aestheticData.promptEngineering} 
-                              onChange={(e) => handleUpdate('promptEngineering', e.target.value)} 
-                              className={`w-full h-96 bg-transparent p-8 text-sm font-mono focus:outline-none resize-none leading-loose ${theme === 'retro' ? 'text-black placeholder-zinc-400' : 'text-emerald-500/80 placeholder-zinc-800'}`} 
+                          <textarea
+                              value={aestheticData.promptEngineering}
+                              onChange={(e) => handleUpdate('promptEngineering', e.target.value)}
+                              className={`w-full h-96 bg-transparent p-8 text-sm font-mono focus:outline-none resize-none leading-loose ${theme === 'retro' ? 'text-black placeholder-zinc-400' : 'text-emerald-500/80 placeholder-zinc-800'}`}
                               placeholder="在此输入最终的 Midjourney 提示词库、负向提示词或特定的画质增强参数..."
                           />
                       </div>

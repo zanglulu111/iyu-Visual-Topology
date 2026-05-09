@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { NarrativeFieldState, BlueprintLanguage, DriverType, NarrativeBlockDef, LibraryCategoryDef, SubjectType, AestheticMode, AestheticPreset, WorldLawConfig } from '../types';
-import { ArrowRight, Check, Dice5, Edit2, Eye, FileText, Ghost, Image as ImageIcon, Loader2, Lock, Plus, RotateCcw, ScanEye, BrainCircuit, Shuffle, Trash2, Unlock, Upload, User, X, Zap } from 'lucide-react';
+import { ArrowRight, Check, Dice5, Edit2, Eye, FileText, Ghost, Image as ImageIcon, Loader2, Lock, Plus, RotateCcw, RotateCw, ScanEye, BrainCircuit, Shuffle, Trash2, Unlock, Upload, User, X, Zap, ChevronRight } from 'lucide-react';
 import { ProphecySlot } from './ProphecySlot';
 import { SkinSlot } from './TheSkinSidebar';
 import { BorromeanRings } from './BorromeanRings';
@@ -237,7 +237,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
         if (isCommercial) return lang === 'EN' ? "Quilting the sliding signifier of desire onto the product." : "将滑动的欲望能指，强行锚定在具体的产品图腾之上。";
         if (isExperimental) return lang === 'EN' ? "Pasting a complete story and translating it into screenplay structure." : "粘贴完整故事，并转译为可生产的电影脚本结构。";
         if (isTrailer) return lang === 'EN' ? "Constructing the hook to induce infinite anticipation." : "构建视听钩子，制造无法被满足的期待与悬念。";
-        return lang === 'EN' ? "Mapping the trajectory of desire and destiny around the Subject ($)." : "绘制主体($)围绕对象(a)的欲望轨迹与命运结构。";
+        return lang === 'EN' ? "A closed loop of desire, action, verdict, and residue" : "欲望、行动、裁决与余痕构成的闭环";
     };
 
     const currentOSKey = isCommercial ? 'comm_c0' : (isExperimental ? 'exp_e0' : (isTrailer ? 'trl_t0' : 'engine_m0'));
@@ -319,7 +319,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
             newState[blockId] = current.filter(t => t !== tag);
         } else {
             if (current.length >= limit) {
-                alert(lang === 'EN' ? `Max ${limit} items for this module.` : `该模块最多选择 ${limit} 个。`);
+                alert(lang === 'EN' ? `Max ${limit} items for this module.` : `该预设最多选择 ${limit} 个。`);
                 return;
             }
             newState[blockId] = [...current, tag];
@@ -344,6 +344,12 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
     const selectedCountry = fieldState['skin_country_exact']?.[0] || '';
     const selectedYearTag = fieldState['skin_year_exact']?.[0] || '';
     const selectedYear = selectedYearTag && Number.isFinite(Number(selectedYearTag)) ? Number(selectedYearTag) : null;
+    const storySummaryBlocks = ['skin_genre', 'skin_structure', 'skin_volume', 'skin_era', 'skin_year_exact', 'skin_country_exact', 'skin_society', 'skin_age', 'skin_gender', 'skin_profession', 'sur10x', 'skin_ideology', 'skin_everything', 'skin_location', 'skin_ending'];
+    const isValueLocked = (blockId: string, value: string) => Boolean(value && lockedTags[blockId]?.includes(value));
+    const isGenderValueLocked = isGenderLocked || isValueLocked('skin_gender', selectedGender);
+    const isAgeValueLocked = isAgeLocked || isValueLocked('skin_age', selectedAge);
+    const isCountryValueLocked = isCountryLocked || isValueLocked('skin_country_exact', selectedCountry);
+    const isYearValueLocked = isYearLocked || isValueLocked('skin_year_exact', selectedYearTag);
 
     const getBlockDefinition = (blockId: string) => {
         const block = [...ENGINE_BLOCKS, ...ALL_SKIN_BLOCKS].find(item => item.id === blockId);
@@ -381,12 +387,12 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
         const nextState = { ...fieldState };
         let changed = false;
 
-        if (gender !== undefined && !isGenderLocked) {
+        if (gender !== undefined && !isGenderValueLocked) {
             nextState['skin_gender'] = gender ? [gender] : [];
             changed = true;
         }
 
-        if (age !== undefined && !isAgeLocked) {
+        if (age !== undefined && !isAgeValueLocked) {
             nextState['skin_age'] = age ? [age] : [];
             changed = true;
         }
@@ -395,13 +401,13 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
     };
 
     const handleLabyrinthRandomGender = () => {
-        if (isGenderLocked) return;
+        if (isGenderValueLocked) return;
         const preset = GENDER_PRESETS[Math.floor(Math.random() * GENDER_PRESETS.length)];
         updateLabyrinthIdentity(lang === 'EN' ? preset.en : preset.cn, undefined);
     };
 
     const handleLabyrinthRandomAge = () => {
-        if (isAgeLocked) return;
+        if (isAgeValueLocked) return;
         const preset = AGE_PRESETS[Math.floor(Math.random() * AGE_PRESETS.length)];
         updateLabyrinthIdentity(undefined, lang === 'EN' ? preset.en : preset.cn);
     };
@@ -410,21 +416,28 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
         const nextGender = GENDER_PRESETS[Math.floor(Math.random() * GENDER_PRESETS.length)];
         const nextAge = AGE_PRESETS[Math.floor(Math.random() * AGE_PRESETS.length)];
         updateLabyrinthIdentity(
-            isGenderLocked ? undefined : (lang === 'EN' ? nextGender.en : nextGender.cn),
-            isAgeLocked ? undefined : (lang === 'EN' ? nextAge.en : nextAge.cn)
+            isGenderValueLocked ? undefined : (lang === 'EN' ? nextGender.en : nextGender.cn),
+            isAgeValueLocked ? undefined : (lang === 'EN' ? nextAge.en : nextAge.cn)
         );
     };
 
     const handleLabyrinthResetIdentity = () => {
-        updateLabyrinthIdentity(isGenderLocked ? undefined : null, isAgeLocked ? undefined : null);
+        updateLabyrinthIdentity(isGenderValueLocked ? undefined : null, isAgeValueLocked ? undefined : null);
         setCustomGenderInput('');
         setCustomAgeInput('');
     };
 
     const handleLabyrinthToggleIdentityLock = () => {
-        const shouldLock = !isGenderLocked || !isAgeLocked;
-        if (isGenderLocked !== shouldLock) onToggleLock('skin_gender');
-        if (isAgeLocked !== shouldLock) onToggleLock('skin_age');
+        const selected = [
+            ['skin_gender', selectedGender, isGenderValueLocked],
+            ['skin_age', selectedAge, isAgeValueLocked],
+        ] as const;
+        const targets = selected.filter(([, value]) => value);
+        if (!targets.length) return;
+        const shouldUnlock = targets.every(([, , locked]) => locked);
+        targets.forEach(([blockId, value, locked]) => {
+            if (shouldUnlock === locked) onToggleTagLock(blockId, value);
+        });
     };
 
     const formatYear = (year: number, useSuffix = false) => {
@@ -436,12 +449,12 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
         const nextState = { ...fieldState };
         let changed = false;
 
-        if (country !== undefined && !isCountryLocked) {
+        if (country !== undefined && !isCountryValueLocked) {
             nextState['skin_country_exact'] = country ? [country] : [];
             changed = true;
         }
 
-        if (year !== undefined && !isYearLocked) {
+        if (year !== undefined && !isYearValueLocked) {
             nextState['skin_year_exact'] = year === null ? [] : [String(year)];
             changed = true;
         }
@@ -450,13 +463,13 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
     };
 
     const handleLabyrinthRandomCountry = () => {
-        if (isCountryLocked) return;
+        if (isCountryValueLocked) return;
         const preset = COUNTRY_PRESETS[Math.floor(Math.random() * COUNTRY_PRESETS.length)];
         updateLabyrinthTimeLocation(lang === 'EN' ? preset.en : preset.cn, undefined);
     };
 
     const handleLabyrinthRandomYear = () => {
-        if (isYearLocked) return;
+        if (isYearValueLocked) return;
         const randomYear = Math.floor(Math.random() * (2050 - (-2000) + 1)) + (-2000);
         updateLabyrinthTimeLocation(undefined, randomYear);
     };
@@ -465,19 +478,26 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
         const preset = COUNTRY_PRESETS[Math.floor(Math.random() * COUNTRY_PRESETS.length)];
         const randomYear = Math.floor(Math.random() * (2050 - (-2000) + 1)) + (-2000);
         updateLabyrinthTimeLocation(
-            isCountryLocked ? undefined : (lang === 'EN' ? preset.en : preset.cn),
-            isYearLocked ? undefined : randomYear
+            isCountryValueLocked ? undefined : (lang === 'EN' ? preset.en : preset.cn),
+            isYearValueLocked ? undefined : randomYear
         );
     };
 
     const handleLabyrinthResetTimeLocation = () => {
-        updateLabyrinthTimeLocation(isCountryLocked ? undefined : null, isYearLocked ? undefined : null);
+        updateLabyrinthTimeLocation(isCountryValueLocked ? undefined : null, isYearValueLocked ? undefined : null);
     };
 
     const handleLabyrinthToggleTimeLocationLock = () => {
-        const shouldLock = !isCountryLocked || !isYearLocked;
-        if (isCountryLocked !== shouldLock) onToggleLock('skin_country_exact');
-        if (isYearLocked !== shouldLock) onToggleLock('skin_year_exact');
+        const selected = [
+            ['skin_country_exact', selectedCountry, isCountryValueLocked],
+            ['skin_year_exact', selectedYearTag, isYearValueLocked],
+        ] as const;
+        const targets = selected.filter(([, value]) => value);
+        if (!targets.length) return;
+        const shouldUnlock = targets.every(([, , locked]) => locked);
+        targets.forEach(([blockId, value, locked]) => {
+            if (shouldUnlock === locked) onToggleTagLock(blockId, value);
+        });
     };
 
     const [hoveredPortal, setHoveredPortal] = useState<{
@@ -601,8 +621,8 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                 </p>
                 <div className="mist-labyrinth-formula-caption">
                     {lang === 'EN'
-                        ? "A closed loop of desire, act, verdict and residue."
-                        : "欲望、行动、裁决与余痕构成的闭环。"}
+                        ? "A closed loop of desire, act, verdict and residue"
+                        : "欲望、行动、裁决与余痕构成的闭环"}
                 </div>
             </div>
             <div className="mist-labyrinth-canonical-formula">
@@ -979,7 +999,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                 className={mode === 'module' ? 'is-active' : ''}
                 onClick={() => onModeChange('module')}
             >
-                {lang === 'EN' ? "MODULE" : "模块"}
+                {lang === 'EN' ? "PRESET" : "预设"}
             </button>
             <button
                 type="button"
@@ -992,7 +1012,33 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
     );
 
     const renderSurfaceGroupActions = (blocks: string[], onRandomize?: () => void) => {
-        const isGroupLocked = blocks.every(blockId => lockedModules[blockId]);
+        const selectedPairs = blocks.flatMap(blockId => (fieldState[blockId] || []).map(tag => ({ blockId, tag })));
+        const isPairLocked = ({ blockId, tag }: { blockId: string; tag: string }) => Boolean(lockedModules[blockId] || lockedTags[blockId]?.includes(tag));
+        const isGroupLocked = selectedPairs.length > 0 && selectedPairs.every(isPairLocked);
+
+        const clearGroup = () => {
+            const nextState = { ...fieldState };
+            blocks.forEach(blockId => {
+                const locks = lockedTags[blockId] || [];
+                nextState[blockId] = (nextState[blockId] || []).filter(tag => lockedModules[blockId] || locks.includes(tag));
+            });
+            onChange(nextState);
+            if (blocks.includes('skin_gender')) setCustomGenderInput('');
+            if (blocks.includes('skin_age')) setCustomAgeInput('');
+        };
+
+        const toggleCurrentGroupLocks = () => {
+            if (!selectedPairs.length) return;
+            const shouldUnlock = selectedPairs.every(isPairLocked);
+            blocks.forEach(blockId => {
+                if (lockedModules[blockId]) onToggleLock(blockId);
+            });
+            selectedPairs.forEach(({ blockId, tag }) => {
+                const isLocked = Boolean(lockedTags[blockId]?.includes(tag));
+                if (shouldUnlock ? isLocked : !isLocked) onToggleTagLock(blockId, tag);
+            });
+        };
+
         return (
             <div className="mist-labyrinth-surface-actions">
                 <button
@@ -1005,11 +1051,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                 <button
                     type="button"
                     className={isGroupLocked ? 'is-locked' : ''}
-                    onClick={() => {
-                        blocks.forEach(blockId => {
-                            if (!!lockedModules[blockId] === isGroupLocked) onToggleLock(blockId);
-                        });
-                    }}
+                    onClick={toggleCurrentGroupLocks}
                     aria-label={isGroupLocked
                         ? (lang === 'EN' ? "Unlock group" : "解锁本组")
                         : (lang === 'EN' ? "Lock group" : "锁定本组")}
@@ -1018,7 +1060,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                 </button>
                 <button
                     type="button"
-                    onClick={() => blocks.forEach(clearBlock)}
+                    onClick={clearGroup}
                     aria-label={lang === 'EN' ? "Clear group" : "清空本组"}
                 >
                     <RotateCcw size={11} />
@@ -1119,40 +1161,23 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
         const displayText = hasGender
             ? genderText
             : (lang === 'EN' ? "[SUR7. Subject Gender]" : "[SUR7. 主体性别]");
-        const tokenClass = hasGender ? 'mist-prophecy-slot-active' : 'mist-prophecy-slot-empty';
 
-        return (
-            <div className={`mist-labyrinth-module-identity-control ${hasGender ? 'is-filled' : ''} ${isGenderLocked ? 'is-locked' : ''}`}>
-                <button
-                    type="button"
-                    className={`mist-labyrinth-identity-slot mist-labyrinth-gender-slot ${hasGender ? 'is-filled' : ''} ${isGenderLocked ? 'is-locked' : ''}`}
-                    onClick={() => setIsLabyrinthIdentityModalOpen(true)}
-                    onMouseEnter={(e) => handleMouseEnter(e, {
-                        ...buildControlDetails(
-                            'skin_gender',
-                            lang === 'EN' ? 'Subject gender presentation preset.' : '主体性别与表层呈现预设。',
-                            lang === 'EN' ? '[Config] Click to open gender and age panel.' : '【配置协议】点击进入性别与年龄面板。'
-                        )
-                    }, lang === 'EN' ? 'SUR7. Subject Gender' : 'SUR7.主体性别')}
-                    onMouseLeave={handleMouseLeave}
-                >
-                    <span className={`mist-labyrinth-hover-token ${tokenClass}`}>{displayText}</span>
-                </button>
-                {renderLabyrinthModuleIdentityActions(
-                    isGenderLocked,
-                    handleLabyrinthRandomGender,
-                    () => onToggleLock('skin_gender'),
-                    () => updateLabyrinthIdentity(null, undefined),
-                    () => setIsLabyrinthIdentityModalOpen(true),
-                    {
-                        random: lang === 'EN' ? 'Random gender' : '随机主体性别',
-                        lock: lang === 'EN' ? 'Lock gender' : '锁定主体性别',
-                        unlock: lang === 'EN' ? 'Unlock gender' : '解锁主体性别',
-                        edit: lang === 'EN' ? 'Edit gender' : '编辑主体性别',
-                        clear: lang === 'EN' ? 'Clear gender' : '清空主体性别'
-                    }
-                )}
-            </div>
+        return renderLabyrinthInlineControlSlot(
+            displayText,
+            hasGender,
+            isGenderValueLocked,
+            () => setIsLabyrinthIdentityModalOpen(true),
+            handleLabyrinthRandomGender,
+            () => selectedGender && onToggleTagLock('skin_gender', selectedGender),
+            () => updateLabyrinthIdentity(null, undefined),
+            {
+                ...buildControlDetails(
+                    'skin_gender',
+                    lang === 'EN' ? 'Subject gender presentation preset.' : '主体性别与表层呈现预设。',
+                    lang === 'EN' ? '[Config] Click to open gender and age panel.' : '【配置协议】点击进入性别与年龄面板。'
+                )
+            },
+            lang === 'EN' ? 'SUR7. Subject Gender' : 'SUR7.主体性别'
         );
     };
 
@@ -1162,40 +1187,23 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
         const displayText = hasAge
             ? ageText
             : (lang === 'EN' ? "[SUR8. Subject Age]" : "[SUR8. 主体年龄]");
-        const tokenClass = hasAge ? 'mist-prophecy-slot-active' : 'mist-prophecy-slot-empty';
 
-        return (
-            <div className={`mist-labyrinth-module-identity-control ${hasAge ? 'is-filled' : ''} ${isAgeLocked ? 'is-locked' : ''}`}>
-                <button
-                    type="button"
-                    className={`mist-labyrinth-identity-slot mist-labyrinth-age-slot ${hasAge ? 'is-filled' : ''} ${isAgeLocked ? 'is-locked' : ''}`}
-                    onClick={() => setIsLabyrinthIdentityModalOpen(true)}
-                    onMouseEnter={(e) => handleMouseEnter(e, {
-                        ...buildControlDetails(
-                            'skin_age',
-                            lang === 'EN' ? 'Subject age-stage preset.' : '主体年龄阶段预设。',
-                            lang === 'EN' ? '[Config] Click to open gender and age panel.' : '【配置协议】点击进入性别与年龄面板。'
-                        )
-                    }, lang === 'EN' ? 'SUR8. Subject Age' : 'SUR8.主体年龄')}
-                    onMouseLeave={handleMouseLeave}
-                >
-                    <span className={`mist-labyrinth-hover-token ${tokenClass}`}>{displayText}</span>
-                </button>
-                {renderLabyrinthModuleIdentityActions(
-                    isAgeLocked,
-                    handleLabyrinthRandomAge,
-                    () => onToggleLock('skin_age'),
-                    () => updateLabyrinthIdentity(undefined, null),
-                    () => setIsLabyrinthIdentityModalOpen(true),
-                    {
-                        random: lang === 'EN' ? 'Random age' : '随机主体年龄',
-                        lock: lang === 'EN' ? 'Lock age' : '锁定主体年龄',
-                        unlock: lang === 'EN' ? 'Unlock age' : '解锁主体年龄',
-                        edit: lang === 'EN' ? 'Edit age' : '编辑主体年龄',
-                        clear: lang === 'EN' ? 'Clear age' : '清空主体年龄'
-                    }
-                )}
-            </div>
+        return renderLabyrinthInlineControlSlot(
+            displayText,
+            hasAge,
+            isAgeValueLocked,
+            () => setIsLabyrinthIdentityModalOpen(true),
+            handleLabyrinthRandomAge,
+            () => selectedAge && onToggleTagLock('skin_age', selectedAge),
+            () => updateLabyrinthIdentity(undefined, null),
+            {
+                ...buildControlDetails(
+                    'skin_age',
+                    lang === 'EN' ? 'Subject age-stage preset.' : '主体年龄阶段预设。',
+                    lang === 'EN' ? '[Config] Click to open gender and age panel.' : '【配置协议】点击进入性别与年龄面板。'
+                )
+            },
+            lang === 'EN' ? 'SUR8. Subject Age' : 'SUR8.主体年龄'
         );
     };
 
@@ -1208,42 +1216,26 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
             : (selectedCountry
                 ? `${selectedCountry} (AUTO)`
                 : (lang === 'EN' ? "[SUR3. Spacetime]" : "[SUR3. 时空坐标]"));
-        const isLocked = isCountryLocked && isYearLocked;
-        const tokenClass = hasTimeOrLocation ? 'mist-prophecy-slot-active' : 'mist-prophecy-slot-empty';
+        const isLocked = [selectedCountry && isCountryValueLocked, selectedYearTag && isYearValueLocked].filter(Boolean).length > 0;
 
-        return (
-            <div className={`mist-labyrinth-module-identity-control mist-labyrinth-module-time-control ${hasTimeOrLocation ? 'is-filled' : ''} ${isLocked ? 'is-locked' : ''}`}>
-                <button
-                    type="button"
-                    className={`mist-labyrinth-identity-slot mist-labyrinth-time-slot ${hasTimeOrLocation ? 'is-filled' : ''} ${isLocked ? 'is-locked' : ''}`}
-                    onClick={() => setIsLabyrinthTimeModalOpen(true)}
-                    onMouseEnter={(e) => handleMouseEnter(e, {
-                        ...buildControlDetails(
-                            'skin_era',
-                            lang === 'EN' ? 'Exact year and country coordinates for the surface narrative.' : '表层叙事的精确年份与国家坐标。',
-                            lang === 'EN' ? '[Config] Click to open spacetime coordinate panel.' : '【配置协议】点击进入时空坐标面板。'
-                        ),
-                        count: COUNTRY_PRESETS.length
-                    }, lang === 'EN' ? 'SUR3. Spacetime Coordinates' : 'SUR3.时空坐标系')}
-                    onMouseLeave={handleMouseLeave}
-                >
-                    <span className={`mist-labyrinth-hover-token ${tokenClass}`}>{displayText}</span>
-                </button>
-                {renderLabyrinthModuleIdentityActions(
-                    isLocked,
-                    handleLabyrinthRandomTimeLocation,
-                    handleLabyrinthToggleTimeLocationLock,
-                    handleLabyrinthResetTimeLocation,
-                    () => setIsLabyrinthTimeModalOpen(true),
-                    {
-                        random: lang === 'EN' ? 'Random spacetime' : '随机时空坐标',
-                        lock: lang === 'EN' ? 'Lock spacetime' : '锁定时空坐标',
-                        unlock: lang === 'EN' ? 'Unlock spacetime' : '解锁时空坐标',
-                        edit: lang === 'EN' ? 'Edit spacetime' : '编辑时空坐标',
-                        clear: lang === 'EN' ? 'Clear spacetime' : '清空时空坐标'
-                    }
-                )}
-            </div>
+        return renderLabyrinthInlineControlSlot(
+            displayText,
+            hasTimeOrLocation,
+            isLocked,
+            () => setIsLabyrinthTimeModalOpen(true),
+            handleLabyrinthRandomTimeLocation,
+            handleLabyrinthToggleTimeLocationLock,
+            handleLabyrinthResetTimeLocation,
+            {
+                ...buildControlDetails(
+                    'skin_era',
+                    lang === 'EN' ? 'Exact year and country coordinates for the surface narrative.' : '表层叙事的精确年份与国家坐标。',
+                    lang === 'EN' ? '[Config] Click to open spacetime coordinate panel.' : '【配置协议】点击进入时空坐标面板。'
+                ),
+                count: COUNTRY_PRESETS.length
+            },
+            lang === 'EN' ? 'SUR3. Spacetime Coordinates' : 'SUR3.时空坐标系',
+            COUNTRY_PRESETS.length
         );
     };
 
@@ -1265,16 +1257,16 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                     onClick={onOpen}
                     onMouseEnter={(e) => handleMouseEnter(e, details, header, count)}
                     onMouseLeave={handleMouseLeave}
-                    className={`mist-labyrinth-hover-token cursor-pointer font-serif transition-all duration-300 hover:z-50 inline-block ${isLocked
-                        ? 'border border-[var(--mist-active-accent)] text-white bg-[var(--mist-active-accent)]/20 px-2 rounded font-bold text-lg md:text-xl tracking-tight'
+                    className={`mist-labyrinth-hover-token cursor-pointer font-serif font-bold transition-all duration-300 hover:z-50 inline-block ${isLocked
+                        ? 'mist-token-locked border border-[var(--mist-active-accent)] text-white bg-[var(--mist-active-accent)]/20 px-2 rounded text-lg md:text-xl tracking-tight'
                         : (isFilled
-                            ? 'font-bold text-white border-b-2 border-[var(--mist-active-accent)] hover:bg-white/10 px-0.5 rounded-sm text-lg md:text-xl tracking-tight'
+                            ? 'text-white border-b-2 border-[var(--mist-active-accent)] hover:bg-white/10 px-0.5 rounded-sm text-lg md:text-xl tracking-tight'
                             : 'font-medium border-b border-dashed border-zinc-800 text-zinc-500 hover:text-white hover:bg-white/10 hover:border-zinc-500 text-base')
                         }`}
                 >
                     {isFilled ? displayText : (lang === 'EN' ? `[${displayText}]` : `【${displayText}】`)}
                 </span>
-                <div className="flex items-center gap-1 mt-1 z-10 bg-black/80 rounded p-1 border border-zinc-800 shadow-md opacity-0 group-hover/tag:opacity-100 transition-opacity duration-300">
+                <div className="mist-labyrinth-inline-control-actions flex items-center gap-1 mt-1 z-10 bg-black/80 rounded p-1 border border-zinc-800 shadow-md opacity-0 group-hover/tag:opacity-100 transition-opacity duration-300">
                     <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); onRandomize(); }}
@@ -1324,7 +1316,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
         return renderLabyrinthInlineControlSlot(
             displayText,
             hasTimeOrLocation,
-            isCountryLocked && isYearLocked,
+            [selectedCountry && isCountryValueLocked, selectedYearTag && isYearValueLocked].filter(Boolean).length > 0,
             () => setIsLabyrinthTimeModalOpen(true),
             handleLabyrinthRandomTimeLocation,
             handleLabyrinthToggleTimeLocationLock,
@@ -1354,7 +1346,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
         return renderLabyrinthInlineControlSlot(
             displayText,
             hasIdentity,
-            isGenderLocked && isAgeLocked,
+            [selectedGender && isGenderValueLocked, selectedAge && isAgeValueLocked].filter(Boolean).length > 0,
             () => setIsLabyrinthIdentityModalOpen(true),
             handleLabyrinthRandomIdentity,
             handleLabyrinthToggleIdentityLock,
@@ -1504,7 +1496,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
 
                 {!showExpanded && !hasAnyFragment && (
                     <span className="mist-labyrinth-surface-sentence-empty">
-                        {lang === 'EN' ? 'Click + to expand the full story sentence.' : '点击 + 展开完整故事句式。'}
+                        {lang === 'EN' ? 'Click + to expand preset keywords.' : '点击 + 展开可选预设关键词'}
                     </span>
                 )}
             </div>
@@ -1825,15 +1817,30 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                         <Trash2 size={13} />
                         {lang === 'EN' ? "Clear" : "清空返回"}
                     </button>
-                    <button
-                        type="button"
-                        className="mist-labyrinth-vision-result-primary"
-                        disabled={isVisionAutoFilling || (!visionImage && !visionAnalysis?.trim() && !visionImageNote.trim())}
-                        onClick={handleLabyrinthVisionAutoFill}
-                    >
-                        {isVisionAutoFilling ? <Loader2 size={14} className="animate-spin" /> : <ArrowRight size={14} />}
-                        {lang === 'EN' ? "Map Back To Engine" : "反推 / 映射引擎"}
-                    </button>
+                    <div className="flex items-center gap-3">
+                        <AdminXRayButton
+                            isAdmin={isAdmin}
+                            lang={lang === 'EN' ? 'EN' : 'CN'}
+                            title={lang === 'EN' ? 'X-Ray Mapping Prompt' : 'X-Ray 映射指令'}
+                            getPayload={getLabyrinthVisionMappingPromptPayload}
+                            disabled={!visionAnalysis?.trim() && !visionImage}
+                            buttonClassName="flex items-center justify-center w-8 h-8 rounded hover:bg-white/5 text-zinc-500 hover:text-white transition-colors"
+                            iconSize={14}
+                        />
+                        <button
+                            type="button"
+                            className="mist-traverse-action flex items-center gap-2 px-4 py-1.5 text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-50 disabled:cursor-not-allowed group min-w-[140px] border mist-app-primary-action"
+                            style={{ boxShadow: 'none' }}
+                            disabled={isVisionAutoFilling || (!visionImage && !visionAnalysis?.trim() && !visionImageNote.trim())}
+                            onClick={handleLabyrinthVisionAutoFill}
+                        >
+                            {isVisionAutoFilling ? <RotateCw size={14} className="animate-spin" /> : <Zap size={14} className="group-hover:scale-110 transition-transform" />}
+                            <span className="tabular-nums w-full text-center tracking-[0.2em]">
+                                {lang === 'EN' ? "Map Back To Engine" : "反推 / 映射引擎"}
+                            </span>
+                            {!isVisionAutoFilling && <ChevronRight size={13} className="group-hover:translate-x-1 transition-transform" />}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>,
@@ -1845,22 +1852,6 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
             <div className="mist-labyrinth-surface-card-header mist-labyrinth-implant-header">
                 <h4>{lang === 'EN' ? "Implant Symptoms" : "植入症候"}</h4>
                 <div className="mist-labyrinth-surface-header-tools">
-                    <div className="mist-labyrinth-implant-tabs" role="tablist" aria-label={lang === 'EN' ? "Implant pages" : "植入症候分页"}>
-                        <button
-                            type="button"
-                            className={labyrinthImplantPage === 'image' ? 'is-active' : ''}
-                            onClick={() => setLabyrinthImplantPage('image')}
-                        >
-                            01
-                        </button>
-                        <button
-                            type="button"
-                            className={labyrinthImplantPage === 'mapping' ? 'is-active' : ''}
-                            onClick={() => setLabyrinthImplantPage('mapping')}
-                        >
-                            02
-                        </button>
-                    </div>
                     <button
                         type="button"
                         className={`mist-labyrinth-implant-result-button ${visionAnalysis?.trim() ? 'is-ready' : ''}`}
@@ -1873,155 +1864,93 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
             </div>
 
             <div className="mist-labyrinth-image-implant">
-                {labyrinthImplantPage === 'image' ? (
-                    <div className="mist-labyrinth-image-implant-page">
-                        <div className={`mist-labyrinth-image-implant-frame ${visionImage ? 'has-image' : ''}`}>
-                            <input
-                                ref={labyrinthImageInputRef}
-                                type="file"
-                                className="hidden"
-                                accept="image/*"
-                                onChange={handleLabyrinthImageFileChange}
-                            />
-                            {visionImage ? (
-                                <>
-                                    <img src={visionImage} alt={lang === 'EN' ? "Reference image" : "参考图像"} />
-                                    <div className="mist-labyrinth-image-actions">
-                                        <AdminXRayButton
-                                            isAdmin={isAdmin}
-                                            lang={lang === 'EN' ? 'EN' : 'CN'}
-                                            title={lang === 'EN' ? 'X-Ray Image Analysis Prompt' : 'X-Ray 图像解析指令'}
-                                            getPayload={getLabyrinthImageAnalysisPromptPayload}
-                                            disabled={!visionImage}
-                                            buttonClassName="mist-labyrinth-image-action-button"
-                                            iconSize={13}
-                                        />
-                                        <button
-                                            type="button"
-                                            className="mist-labyrinth-image-action-button"
-                                            disabled={!onAnalyzeImage || isAnalyzingImage || !visionImage}
-                                            onClick={handleLabyrinthAnalyzeImage}
-                                            title={lang === 'EN' ? "Analyze image" : "解析图像"}
-                                        >
-                                            {isAnalyzingImage ? <Loader2 size={13} className="animate-spin" /> : <ScanEye size={13} />}
-                                            <span>{lang === 'EN' ? "Analyze" : "解析"}</span>
-                                        </button>
-                                        <button className="mist-labyrinth-image-action-button" type="button" onClick={() => labyrinthImageInputRef.current?.click()}>
-                                            <Upload size={14} />
-                                            <span>{lang === 'EN' ? "Replace" : "替换"}</span>
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className="mist-labyrinth-image-action-button"
-                                            onClick={() => {
-                                                onVisionImageChange?.(null);
-                                                onVisionAnalysisChange?.('');
-                                                onClearVisionCandidateState?.();
-                                            }}
-                                        >
-                                            <Trash2 size={14} />
-                                            <span>{lang === 'EN' ? "Remove" : "移除"}</span>
-                                        </button>
-                                    </div>
-                                </>
-                            ) : (
-                                <>
+                <div className="mist-labyrinth-image-implant-page">
+                    <div className={`mist-labyrinth-image-implant-frame ${visionImage ? 'has-image' : ''}`}>
+                        <input
+                            ref={labyrinthImageInputRef}
+                            type="file"
+                            className="hidden"
+                            accept="image/*"
+                            onChange={handleLabyrinthImageFileChange}
+                        />
+                        {visionImage ? (
+                            <>
+                                <img src={visionImage} alt={lang === 'EN' ? "Reference image" : "参考图像"} />
+                                <div className="mist-labyrinth-image-actions">
+                                    <AdminXRayButton
+                                        isAdmin={isAdmin}
+                                        lang={lang === 'EN' ? 'EN' : 'CN'}
+                                        title={lang === 'EN' ? 'X-Ray Image Analysis Prompt' : 'X-Ray 图像解析指令'}
+                                        getPayload={getLabyrinthImageAnalysisPromptPayload}
+                                        disabled={!visionImage}
+                                        buttonClassName="mist-labyrinth-image-action-button"
+                                        iconSize={13}
+                                    />
                                     <button
                                         type="button"
-                                        className="mist-labyrinth-image-implant-upload"
-                                        onClick={() => labyrinthImageInputRef.current?.click()}
+                                        className="mist-traverse-action flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest transition-all disabled:opacity-50 disabled:cursor-not-allowed group border mist-app-primary-action"
+                                        style={{ boxShadow: 'none', height: '1.45rem' }}
+                                        disabled={!onAnalyzeImage || isAnalyzingImage || !visionImage}
+                                        onClick={handleLabyrinthAnalyzeImage}
+                                        title={lang === 'EN' ? "Analyze image" : "解析图像"}
                                     >
-                                        {isLabyrinthImageUploading ? <Loader2 size={18} className="animate-spin" /> : <ImageIcon size={18} />}
-                                        <span>{isLabyrinthImageUploading ? (lang === 'EN' ? "UPLOADING" : "上传中") : (lang === 'EN' ? "INSERT IMAGE" : "插入图片")}</span>
-                                        <b>{lang === 'EN' ? "Visual seed slot" : "图像种子槽位"}</b>
+                                        {isAnalyzingImage ? <RotateCw size={10} className="animate-spin" /> : <Zap size={10} className="group-hover:scale-110 transition-transform" />}
+                                        <span className="tabular-nums w-full text-center tracking-[0.1em]">
+                                            {lang === 'EN' ? "Analyze" : "解析"}
+                                        </span>
+                                        {!isAnalyzingImage && <ChevronRight size={9} className="group-hover:translate-x-1 transition-transform" />}
                                     </button>
-                                    <div className="mist-labyrinth-image-actions">
-                                        <AdminXRayButton
-                                            isAdmin={isAdmin}
-                                            lang={lang === 'EN' ? 'EN' : 'CN'}
-                                            title={lang === 'EN' ? 'X-Ray Image Analysis Prompt' : 'X-Ray 图像解析指令'}
-                                            getPayload={getLabyrinthImageAnalysisPromptPayload}
-                                            disabled={!visionImage}
-                                            buttonClassName="mist-labyrinth-image-action-button"
-                                            iconSize={13}
-                                        />
-                                        <button
-                                            type="button"
-                                            className="mist-labyrinth-image-action-button"
-                                            disabled={!onAnalyzeImage || isAnalyzingImage || !visionImage}
-                                            onClick={handleLabyrinthAnalyzeImage}
-                                            title={lang === 'EN' ? "Analyze image" : "解析图像"}
-                                        >
-                                            {isAnalyzingImage ? <Loader2 size={13} className="animate-spin" /> : <ScanEye size={13} />}
-                                            <span>{lang === 'EN' ? "Analyze" : "解析"}</span>
-                                        </button>
-                                        <button className="mist-labyrinth-image-action-button" type="button" onClick={() => labyrinthImageInputRef.current?.click()}>
-                                            <Upload size={14} />
-                                            <span>{lang === 'EN' ? "Upload" : "上传"}</span>
-                                        </button>
-                                    </div>
-                                </>
-                            )}
-                        </div>
+                                    <button className="mist-labyrinth-image-action-button" type="button" onClick={() => labyrinthImageInputRef.current?.click()}>
+                                        <Upload size={14} />
+                                        <span>{lang === 'EN' ? "Replace" : "替换"}</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="mist-labyrinth-image-action-button"
+                                        onClick={() => {
+                                            onVisionImageChange?.(null);
+                                            onVisionAnalysisChange?.('');
+                                            onClearVisionCandidateState?.();
+                                        }}
+                                    >
+                                        <Trash2 size={14} />
+                                        <span>{lang === 'EN' ? "Remove" : "移除"}</span>
+                                    </button>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <button
+                                    type="button"
+                                    className="mist-labyrinth-image-implant-upload"
+                                    onClick={() => labyrinthImageInputRef.current?.click()}
+                                >
+                                    {isLabyrinthImageUploading ? <Loader2 size={18} className="animate-spin" /> : <ImageIcon size={18} />}
+                                    <span>{isLabyrinthImageUploading ? (lang === 'EN' ? "UPLOADING" : "上传中") : (lang === 'EN' ? "INSERT IMAGE" : "插入图片")}</span>
+                                    <b>{lang === 'EN' ? "Visual seed slot" : "图像种子槽位"}</b>
+                                </button>
 
-                        <label className="mist-labyrinth-image-note">
-                            <span>
-                                <FileText size={13} />
-                                {lang === 'EN' ? "Image Analysis Prompt" : "图片解析提示"}
-                            </span>
-                            <textarea
-                                value={visionImageNote}
-                                onChange={(event) => {
-                                    onVisionImageNoteChange?.(event.target.value);
-                                    onClearVisionCandidateState?.();
-                                }}
-                                placeholder={lang === 'EN'
-                                    ? "Tell the engine how to read this image: protagonist, atmosphere, object, conflict, ignored areas..."
-                                    : "说明这张图应该如何被读取：主角、氛围、物件、冲突、需要忽略的部分……"}
-                            />
-                        </label>
-
-                    </div>
-                ) : (
-                    <div className="mist-labyrinth-implant-mapping-page">
-                        <div>
-                            <span>{lang === 'EN' ? "PAGE 02" : "第二页"}</span>
-                            <b>{lang === 'EN' ? "Reverse Mapping" : "反推映射"}</b>
-                            <p>{lang === 'EN'
-                                ? "After reading the returned content, map it back into engine parameters here."
-                                : "查看图像解析返回后，再在这里决定是否反推到引擎参数。"}
-                            </p>
-                        </div>
-                        <div className="mist-labyrinth-implant-mapping-actions">
-                            <AdminXRayButton
-                                isAdmin={isAdmin}
-                                lang={lang === 'EN' ? 'EN' : 'CN'}
-                                title={lang === 'EN' ? 'X-Ray Visual Mapping Prompt' : 'X-Ray 视觉映射指令'}
-                                getPayload={getLabyrinthVisionMappingPromptPayload}
-                                disabled={!visionImage && !visionAnalysis?.trim() && !visionImageNote.trim()}
-                                buttonClassName="mist-labyrinth-image-action-button"
-                                iconSize={13}
-                            />
-                            <button
-                                type="button"
-                                disabled={isVisionAutoFilling || (!visionImage && !visionAnalysis?.trim() && !visionImageNote.trim())}
-                                onClick={handleLabyrinthVisionAutoFill}
-                            >
-                                {isVisionAutoFilling ? <Loader2 size={14} className="animate-spin" /> : <BrainCircuit size={14} />}
-                                {lang === 'EN' ? "Run Mapping" : "执行反推"}
-                            </button>
-                        </div>
-                        {hasLabyrinthVisionCandidates && (
-                            <button
-                                type="button"
-                                onClick={() => onApplyVisionCandidateState?.(visionCandidateState)}
-                            >
-                                <Check size={14} />
-                                {lang === 'EN' ? "Apply Returned Parameters" : "应用返回参数"}
-                            </button>
+                            </>
                         )}
                     </div>
-                )}
+
+                    <label className="mist-labyrinth-image-note">
+                        <span>
+                            <FileText size={13} />
+                            {lang === 'EN' ? "Image Analysis Prompt" : "图片解析提示"}
+                        </span>
+                        <textarea
+                            value={visionImageNote}
+                            onChange={(event) => {
+                                onVisionImageNoteChange?.(event.target.value);
+                                onClearVisionCandidateState?.();
+                            }}
+                            placeholder={lang === 'EN'
+                                ? "Tell the engine how to read this image: protagonist, atmosphere, object, conflict, ignored areas..."
+                                : "说明这张图应该如何被读取：主角、氛围、物件、冲突、需要忽略的部分……"}
+                        />
+                    </label>
+                </div>
             </div>
         </article>
     );
@@ -2054,27 +1983,35 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                                 {labyrinthSummaryExpanded ? <X size={11} /> : <Plus size={11} />}
                             </button>
                         </div>
-                        {renderSurfaceGroupActions(['skin_genre', 'skin_structure', 'skin_volume', 'skin_era', 'skin_society', 'skin_age', 'skin_gender', 'skin_profession', 'sur10x', 'skin_ideology', 'skin_everything', 'skin_location', 'skin_ending'], onRandomizeSummaryGroup)}
+                        {renderSurfaceGroupActions(storySummaryBlocks, onRandomizeSummaryGroup)}
                     </div>
                 </div>
                 <div className="mist-labyrinth-surface-summary-body">
                     {labyrinthSummaryMode === 'module' ? (
-                        <div className="mist-labyrinth-surface-blocks mist-labyrinth-surface-summary-slots">
+                        !labyrinthSummaryExpanded && !hasBlockValue(['skin_genre', 'skin_structure', 'skin_volume', 'skin_era', 'skin_society', 'skin_profession', 'sur10x', 'skin_ideology', 'skin_everything', 'skin_location', 'skin_ending']) &&
+                        selectedYear === null && selectedCountry === '' && selectedGender === '' && selectedAge === '' ? (
+                            <div className="mist-labyrinth-surface-sentence mist-labyrinth-summary-sentence is-collapsed">
+                                <span className="mist-labyrinth-surface-sentence-empty">
+                                    {lang === 'EN' ? 'Click + to expand preset keywords.' : '点击 + 展开可选预设关键词'}
+                                </span>
+                            </div>
+                        ) : (
+                            <div className="mist-labyrinth-surface-blocks mist-labyrinth-surface-summary-slots">
                             {(labyrinthSummaryExpanded || hasBlockValue(['skin_genre'])) && <div className="mist-labyrinth-surface-block">
                                 <span className="mist-labyrinth-surface-label">{lang === 'EN' ? "Drive" : "叙事动力"}</span>
-                                {renderSurfaceProphecySlot("skin_genre", "SUR1. 叙事动力", "SUR1. Drive")}
+                                {renderLabyrinthSkinSlot("skin_genre", "SUR1. 叙事动力", "SUR1. Drive")}
                             </div>}
                             {(labyrinthSummaryExpanded || hasBlockValue(['skin_structure'])) && <div className="mist-labyrinth-surface-block">
                                 <span className="mist-labyrinth-surface-label">{lang === 'EN' ? "Structure" : "叙事结构"}</span>
-                                {renderSurfaceProphecySlot("skin_structure", "SV1. 叙事结构", "SV1. Structure")}
+                                {renderLabyrinthSkinSlot("skin_structure", "SV1. 叙事结构", "SV1. Structure")}
                             </div>}
                             {(labyrinthSummaryExpanded || hasBlockValue(['skin_volume'])) && <div className="mist-labyrinth-surface-block">
                                 <span className="mist-labyrinth-surface-label">{lang === 'EN' ? "Volume" : "故事体量"}</span>
-                                {renderSurfaceProphecySlot("skin_volume", "SV2. 故事体量", "SV2. Volume")}
+                                {renderLabyrinthSkinSlot("skin_volume", "SV2. 故事体量", "SV2. Volume")}
                             </div>}
                             {(labyrinthSummaryExpanded || hasBlockValue(['skin_era'])) && <div className="mist-labyrinth-surface-block">
                                 <span className="mist-labyrinth-surface-label">{lang === 'EN' ? "Field" : "背景场域"}</span>
-                                {renderSurfaceProphecySlot("skin_era", "SUR2. 背景场域", "SUR2. Field")}
+                                {renderLabyrinthSkinSlot("skin_era", "SUR2. 背景场域", "SUR2. Field")}
                             </div>}
                             {(labyrinthSummaryExpanded || selectedYear !== null || selectedCountry !== '') && <div className="mist-labyrinth-surface-block mist-labyrinth-surface-static-block">
                                 <span className="mist-labyrinth-surface-label">{lang === 'EN' ? "Spacetime" : "时空坐标"}</span>
@@ -2082,15 +2019,15 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                             </div>}
                             {(labyrinthSummaryExpanded || hasBlockValue(['skin_society'])) && <div className="mist-labyrinth-surface-block">
                                 <span className="mist-labyrinth-surface-label">{lang === 'EN' ? "Order" : "社会形态"}</span>
-                                {renderSurfaceProphecySlot("skin_society", "SUR4. 社会形态", "SUR4. Order")}
+                                {renderLabyrinthSkinSlot("skin_society", "SUR4. 社会形态", "SUR4. Order")}
                             </div>}
                             {(labyrinthSummaryExpanded || hasBlockValue(['skin_everything'])) && <div className="mist-labyrinth-surface-block">
                                 <span className="mist-labyrinth-surface-label">{lang === 'EN' ? "Object" : "对象预设"}</span>
-                                {renderSurfaceProphecySlot("skin_everything", "SUR5. 对象预设", "SUR5. Object")}
+                                {renderLabyrinthSkinSlot("skin_everything", "SUR5. 对象预设", "SUR5. Object")}
                             </div>}
                             {(labyrinthSummaryExpanded || hasBlockValue(['skin_location'])) && <div className="mist-labyrinth-surface-block">
                                 <span className="mist-labyrinth-surface-label">{lang === 'EN' ? "Space" : "空间容器"}</span>
-                                {renderSurfaceProphecySlot("skin_location", "SUR6. 空间容器", "SUR6. Space")}
+                                {renderLabyrinthSkinSlot("skin_location", "SUR6. 空间容器", "SUR6. Space")}
                             </div>}
                             {(labyrinthSummaryExpanded || hasBlockValue(['skin_gender'])) && <div className="mist-labyrinth-surface-block mist-labyrinth-surface-identity-block">
                                 <span className="mist-labyrinth-surface-label">{lang === 'EN' ? "Gender" : "主体性别"}</span>
@@ -2102,22 +2039,23 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                             </div>}
                             {(labyrinthSummaryExpanded || hasBlockValue(['skin_profession'])) && <div className="mist-labyrinth-surface-block">
                                 <span className="mist-labyrinth-surface-label">{lang === 'EN' ? "Role" : "职业身份"}</span>
-                                {renderSurfaceProphecySlot("skin_profession", "SUR9. 职业身份", "SUR9. Role")}
+                                {renderLabyrinthSkinSlot("skin_profession", "SUR9. 职业身份", "SUR9. Role")}
                             </div>}
                             {(labyrinthSummaryExpanded || hasBlockValue(['skin_ideology'])) && <div className="mist-labyrinth-surface-block">
                                 <span className="mist-labyrinth-surface-label">{lang === 'EN' ? "Belief" : "信念预设"}</span>
-                                {renderSurfaceProphecySlot("skin_ideology", "SUR10. 信念预设", "SUR10. Belief")}
+                                {renderLabyrinthSkinSlot("skin_ideology", "SUR10. 信念预设", "SUR10. Belief")}
                             </div>}
                             {(labyrinthSummaryExpanded || hasBlockValue(['sur10x'])) && <div className="mist-labyrinth-surface-block">
                                 <span className="mist-labyrinth-surface-label">{lang === 'EN' ? "Fracture" : "信念裂度"}</span>
-                                {renderSurfaceProphecySlot("sur10x", "SUR10X. 信念裂度", "SUR10X. Fracture")}
+                                {renderLabyrinthSkinSlot("sur10x", "SUR10X. 信念裂度", "SUR10X. Fracture")}
                             </div>}
                             {(labyrinthSummaryExpanded || hasBlockValue(['skin_ending'])) && <div className="mist-labyrinth-surface-block">
                                 <span className="mist-labyrinth-surface-label">{lang === 'EN' ? "Ending" : "显性收场"}</span>
-                                {renderSurfaceProphecySlot("skin_ending", "SUR-END. 显性收场", "SUR-END. Ending")}
+                                {renderLabyrinthSkinSlot("skin_ending", "SUR-END. 显性收场", "SUR-END. Ending")}
                             </div>}
                         </div>
-                    ) : renderLabyrinthSummarySentence()}
+                    )
+                ) : renderLabyrinthSummarySentence()}
                 </div>
             </article>
 
@@ -2165,7 +2103,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                                 className={labyrinthPanelMode === 'desire' ? 'is-active' : ''}
                                 onClick={() => setLabyrinthPanelMode('desire')}
                             >
-                                {lang === 'EN' ? "MODULES" : "欲望模块"}
+                                {lang === 'EN' ? "PRESETS" : "欲望预设"}
                             </button>
                         </div>
                         {labyrinthPanelMode === 'formula' ? renderLabyrinthMainFormula() : renderLabyrinthDesirePanel()}

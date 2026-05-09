@@ -64,6 +64,7 @@ export interface XRaySourceItem {
     driverType?: DriverType;
     inlineOptions?: boolean;
     tone?: XRayTone;
+    disabled?: boolean;
 }
 
 export interface XRaySourceGroup {
@@ -288,8 +289,8 @@ const rebuildPayloadFromPaths = (groups: XRaySourceGroup[], values: XRayDraftVal
     return rebuilt;
 };
 
-const normalizeSources = (sources: XRaySourceGroup[] | (() => XRaySourceGroup[]) | undefined, payload: XRayPayload, lang: 'CN' | 'EN') => {
-    const rawGroups = typeof sources === 'function' ? sources() : sources;
+const normalizeSources = (sources: XRaySourceGroup[] | ((values: XRayDraftValues) => XRaySourceGroup[]) | undefined, payload: XRayPayload, lang: 'CN' | 'EN', values?: XRayDraftValues) => {
+    const rawGroups = typeof sources === 'function' ? (values ? sources(values) : sources({})) : sources;
     const groups = rawGroups && rawGroups.length > 0 ? cloneGroups(rawGroups) : createGroupsFromPayload(payload, lang);
     return groups.map(group => ({
         ...group,
@@ -642,7 +643,7 @@ const LibraryBlockControl: React.FC<{
     };
 
     return (
-        <div className="space-y-1.5">
+        <div className={`space-y-1.5 ${item.disabled ? 'opacity-40 pointer-events-none' : ''}`}>
             <div
                 role="button"
                 tabIndex={0}
@@ -768,14 +769,29 @@ const ChoiceLineControl: React.FC<{
         <div className="space-y-1.5">
             <button
                 type="button"
+                disabled={item.disabled}
                 onClick={() => setIsExpanded(prev => !prev)}
                 className={`flex w-full items-center gap-2 rounded-lg border px-2.5 py-1.5 text-left transition-colors ${theme === 'retro' ? 'bg-white/70 border-[#8B261D]/15 text-[#3D1A16] hover:bg-white' : 'bg-black/35 border-zinc-800 text-zinc-300 hover:border-zinc-700'}`}
             >
                 {isExpanded ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
                 <span className={`w-[35%] shrink-0 truncate text-[11px] font-black ${theme === 'retro' ? 'text-[#3D1A16]' : 'text-zinc-200'}`}>{item.label}</span>
-                <span className={`min-w-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${current ? palette.selectedPill : palette.emptyPill}`}>
-                    【{lang === 'CN' ? displayCnTag(display) : display}】
-                </span>
+                <div className="flex min-w-0 flex-1 items-center gap-1.5">
+                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${current ? palette.selectedPill : palette.emptyPill}`}>
+                        【{lang === 'CN' ? displayCnTag(display) : display}】
+                    </span>
+                    {(item.editable && current && !item.disabled) && (
+                        <button
+                            type="button"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onChange('');
+                            }}
+                            className={`rounded-full p-0.5 transition-colors ${theme === 'retro' ? 'hover:bg-[#8B261D]/10 text-[#8B261D]/60' : 'hover:bg-white/10 text-zinc-500 hover:text-white'}`}
+                        >
+                            <X size={10} />
+                        </button>
+                    )}
+                </div>
             </button>
             {isExpanded && (
                 <div className={`flex flex-wrap gap-1.5 rounded-lg border p-2 ${theme === 'retro' ? 'bg-white/55 border-[#8B261D]/10' : 'bg-black/25 border-zinc-800'}`}>
@@ -815,7 +831,7 @@ const InlineChoiceControl: React.FC<{
     const palette = toneClasses(item.tone, theme);
 
     return (
-        <div className={`rounded-lg border px-2.5 py-2 ${theme === 'retro' ? 'bg-white/70 border-[#8B261D]/15 text-[#3D1A16]' : 'bg-black/35 border-zinc-800 text-zinc-300'}`}>
+        <div className={`rounded-lg border px-2.5 py-2 ${theme === 'retro' ? 'bg-white/70 border-[#8B261D]/15 text-[#3D1A16]' : 'bg-black/35 border-zinc-800 text-zinc-300'} ${item.disabled ? 'opacity-40 pointer-events-none' : ''}`}>
             <div className="flex items-start gap-2">
                 <span className={`w-[35%] shrink-0 truncate pt-1 text-[11px] font-black ${theme === 'retro' ? 'text-[#3D1A16]' : 'text-zinc-200'}`}>{item.label}</span>
                 <div className="flex min-w-0 flex-1 flex-wrap gap-1.5">
@@ -1054,8 +1070,11 @@ export const XRayInspectorModal: React.FC<XRayInspectorModalProps> = ({
 
     const initializeWorkbench = () => {
         const nextPayload = getPayload ? getPayload() : payload;
-        const nextGroups = normalizeSources(sources, nextPayload, lang);
-        const nextValues = makeValues(nextGroups);
+        // Start with initial values to get the first set of groups
+        const initialGroups = normalizeSources(sources, nextPayload, lang, {});
+        const nextValues = makeValues(initialGroups);
+        // Re-normalize with the actual values to catch any dynamic rules
+        const nextGroups = normalizeSources(sources, nextPayload, lang, nextValues);
 
         setSourceGroups(nextGroups);
         setBaseSourceGroups(cloneGroups(nextGroups));
@@ -1122,10 +1141,8 @@ export const XRayInspectorModal: React.FC<XRayInspectorModalProps> = ({
 
     const updateValue = (itemId: string, value: unknown) => {
         const nextValues = { ...draftValues, [itemId]: value };
-        const nextGroups = sourceGroups.map(group => ({
-            ...group,
-            items: group.items.map(item => item.id === itemId ? { ...item, value } : item)
-        }));
+        const nextGroups = normalizeSources(sources, getPayload ? getPayload() : payload, lang, nextValues);
+
         setHistoryPast(prev => [...prev.slice(-79), { values: cloneDraftValues(draftValues), groups: cloneGroups(sourceGroups) }]);
         setHistoryFuture([]);
         setDraftValues(nextValues);

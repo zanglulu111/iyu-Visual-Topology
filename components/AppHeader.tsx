@@ -113,15 +113,15 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   const toolbarButtonClass = 'mist-app-nav-button border border-transparent hover:border-transparent hover:bg-transparent';
 
   return (
-    <header className={`mist-app-header bg-[var(--bg-header)] backdrop-blur-md border-b ${getThemeBorderColor()} flex items-center justify-between px-4 md:px-5 z-50 sticky top-0 shrink-0 transition-all duration-500 animate-page-dissolve relative`}>
+    <header className={`mist-app-header bg-[var(--bg-header)] backdrop-blur-md border-b ${getThemeBorderColor()} flex items-center justify-between px-4 md:px-5 z-50 sticky top-0 shrink-0 transition-all duration-500 animate-page-dissolve`}>
       {/* Theme Divider Line - Global Consistency Accent */}
-      <div 
-        className="absolute bottom-0 left-0 right-0 h-px transition-all duration-500 z-10" 
-        style={{ 
+      <div
+        className="absolute bottom-0 left-0 right-0 h-px transition-all duration-500 z-10"
+        style={{
           backgroundColor: theme === 'retro' ? 'var(--border-accent)' : getBorderAccentColor(),
           opacity: theme === 'retro' ? 0.2 : 0.15,
           boxShadow: theme === 'retro' ? 'none' : (getLineGlow() ? getLineGlow() : '0 0 15px var(--philosopher-accent)')
-        }} 
+        }}
       />
       <div className="flex items-center gap-5">
         {/* Portal-origin pages: ← 入口 button, returns to UniversePortal */}
@@ -157,11 +157,11 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             </span>
           </button>
         )}
-        <span 
+        <span
           className={`mist-app-header-title ${getHeaderTitleColor()} font-serif font-bold text-xs uppercase tracking-widest`}
           style={headerTitleStyle}
         >
-          {lang === 'CN' 
+          {lang === 'CN'
             ? (driverName && driverName.startsWith('迷雾学派') ? driverName : `迷雾学派：${driverName}`)
             : (driverName && driverName.startsWith('Mist School') ? driverName : `Mist School: ${driverName}`)}
         </span>
@@ -174,24 +174,30 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
       ) : (
         !(viewMode === 'ARCHIVE' || viewMode === 'VIDEO' || viewMode === 'TOPOLOGY' || viewMode === 'RSI' || viewMode === 'RORSCHACH' || viewMode === 'ANALYSIS' || viewMode === 'DICTIONARY' || viewMode === 'CANVAS') && (
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden md:flex items-center gap-4 text-[10px] font-bold uppercase tracking-[0.2em]">
-            <button
-              onClick={() => setViewMode('ENGINE')}
-              className={`mist-app-nav-button ${viewMode === 'ENGINE' ? 'is-active' : ''} flex items-center gap-2 font-serif font-bold transition-all duration-300 active:scale-95 ${viewMode === 'ENGINE' ? getHeaderTitleColor() : `${mutedControlClass} font-sans`}`}
-            >
-              <Cpu size={14} className={viewMode === 'ENGINE' ? `${getThemeTextColor()} fill-none` : ""} />
-              {lang === 'CN' ? "核心引擎" : "CORE ENGINE"}
-            </button>
-            <div className="w-4 h-px bg-[var(--border-glass)]"></div>
-            <button
-              onClick={() => setViewMode('DIVERGENCE')}
-                  className={`mist-app-nav-button ${viewMode === 'DIVERGENCE' ? 'is-active' : ''} flex items-center gap-2 transition-all duration-300 active:scale-95 ${viewMode === 'DIVERGENCE' ? getHeaderTitleColor() : `${mutedControlClass} font-sans`}`}
-            >
-              <GitFork size={14} />
-              {lang === 'CN' ? "分歧点" : "THE DIVERGENCE"}
-            </button>
+            {selectedDriver !== DriverType.EXPERIMENTAL && (
+              <>
+                <button
+                  onClick={() => setViewMode('ENGINE')}
+                  className={`mist-app-nav-button ${viewMode === 'ENGINE' ? 'is-active' : ''} flex items-center gap-2 font-serif font-bold transition-all duration-300 active:scale-95 ${viewMode === 'ENGINE' ? getHeaderTitleColor() : `${mutedControlClass} font-sans`}`}
+                >
+                  <Cpu size={14} className={viewMode === 'ENGINE' ? `${getThemeTextColor()} fill-none` : ""} />
+                  {lang === 'CN' ? "核心引擎" : "CORE ENGINE"}
+                </button>
+                <div className="w-4 h-px bg-[var(--border-glass)]"></div>
+                <button
+                  onClick={() => setViewMode('DIVERGENCE')}
+                      className={`mist-app-nav-button ${viewMode === 'DIVERGENCE' ? 'is-active' : ''} flex items-center gap-2 transition-all duration-300 active:scale-95 ${viewMode === 'DIVERGENCE' ? getHeaderTitleColor() : `${mutedControlClass} font-sans`}`}
+                >
+                  <GitFork size={14} />
+                  {lang === 'CN' ? "分歧点" : "THE DIVERGENCE"}
+                </button>
+              </>
+            )}
             {selectedDriver !== DriverType.AESTHETIC && (
               <>
-                <div className="w-4 h-px bg-[var(--border-glass)]"></div>
+                {selectedDriver !== DriverType.EXPERIMENTAL && (
+                  <div className="w-4 h-px bg-[var(--border-glass)]"></div>
+                )}
                 <button
                   onClick={() => setViewMode('BIBLE')}
                   className={`mist-app-nav-button ${viewMode === 'BIBLE' ? 'is-active' : ''} flex items-center gap-2 transition-all duration-300 active:scale-95 ${viewMode === 'BIBLE' ? getHeaderTitleColor() : `${mutedControlClass} font-sans`}`}
@@ -237,12 +243,12 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
 
         {/* Rightmost Toolbar Group */}
         <div className={`flex items-center gap-1 px-1 py-1 transition-all duration-500 border border-transparent backdrop-blur-sm hover:backdrop-blur-md ${toolbarShellClass}`}>
-          
+
           {/* 1. Ring Toggle */}
           <button
             onClick={() => setShowRings(!showRings)}
             className={`flex items-center justify-center w-8 h-8 transition-all duration-300 ${toolbarButtonClass} active:scale-90 focus:outline-none ${
-              showRings 
+              showRings
                 ? 'is-active ' + getThemeTextColor()
                 : mutedControlClass
             }`}

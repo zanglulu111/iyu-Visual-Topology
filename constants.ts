@@ -200,9 +200,9 @@ export const DRIVERS: (DriverDef & { nameEn: string; accent: string; retroAccent
     kpi: "电影脚本生成",
     forbidden: "禁止空白原文",
     iconName: "Wand2",
-    gradient: "from-purple-900/35 to-neutral-950",
-    accent: '#D946EF',
-    retroAccent: '#6A224E'
+    gradient: "from-purple-900/40 to-slate-900",
+    accent: '#A855F7',
+    retroAccent: '#4C1D95'
   },
   {
     id: DriverType.TRAILER,
@@ -308,7 +308,7 @@ export const BLOCK_LIMITS: Record<string, number> = {
   'engine_m0': 1, 'engine_m1': 2, 'engine_m2': 2, 'engine_m3': 3, 'engine_m4': 3, 'engine_m5': 3, 'engine_m6': 3, 'engine_m7b': 1, 'engine_m7a': 1,
   // engine_m4x/engine_m5x removed in v3.0
   'comm_c0': 1, 'comm_c1': 1, 'comm_c2': 3, 'comm_c3': 1, 'comm_c4': 3, 'comm_c5': 3, 'comm_c6': 3, 'comm_c7': 3,
-  'skin_genre': 2, 'skin_animation_genre': 1, 'skin_location': 3, 'skin_society': 1, 'skin_ideology': 1, 'skin_ending': 1,
+  'skin_genre': 2, 'skin_animation_genre': 1, 'skin_location': 2, 'skin_society': 1, 'skin_ideology': 1, 'skin_ending': 1,
   'skin_profession': 2,
   'poe_p0': 1, 'poe_p1': 1, 'poe_p2': 1, 'poe_p3': 1, 'poe_p4': 1
 };
@@ -340,6 +340,22 @@ export const RANDOM_RANGES: Record<string, [number, number]> = {
   // SV 叙事结构
   'skin_structure': [0, 1],   // SV1 叙事结构
   'skin_volume': [0, 1],      // SV2 故事体量
+};
+
+/** 单项随机按钮使用的数量区间：用户主动点骰子时不应随机为空 */
+export const SINGLE_RANDOM_RANGES: Record<string, [number, number]> = {
+  'skin_genre': [1, 2],       // SUR1 叙事动力
+  'skin_society': [1, 1],     // SUR4 社会形态
+  'skin_everything': [1, 1],  // SUR5 对象预设
+  'skin_location': [1, 2],    // SUR6 空间容器
+  'skin_gender': [1, 1],      // SUR7 选角呈现
+  'skin_age': [1, 1],         // SUR8 年龄阶段
+  'skin_profession': [1, 1],  // SUR9 职业身份
+  'skin_ideology': [1, 1],    // SUR10 信念预设
+  'skin_ending': [1, 1],      // SUR-END 显性收场
+  'sur10x': [1, 1],           // SUR10X 信念裂度
+  'skin_structure': [1, 1],   // SV1 叙事结构
+  'skin_volume': [1, 1],      // SV2 故事体量
 };
 
 /** 故事摘要12词加权筛选配置 */

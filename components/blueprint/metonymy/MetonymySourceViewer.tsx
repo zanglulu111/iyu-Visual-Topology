@@ -4,7 +4,6 @@ import { FileText, Loader2, Scissors, ListChecks, MousePointer2, Eye, Edit3, Che
 import { BlueprintLanguage, ScreenplaySection } from '../../../types';
 import { splitIntoParagraphs, getSceneColor, SCENE_COLORS } from '../../../utils/metonymyUtils';
 import { ProcessingTimer } from '../../SharedBlueprintComponents';
-
 import { BreakdownConfigModal } from './BreakdownConfigModal';
 
 interface SourceViewerProps {
@@ -19,7 +18,7 @@ interface SourceViewerProps {
     sections: ScreenplaySection[];
     onSendToActive: (targetId: string, indices: number[]) => void;
     onSendToNew: (indices: number[]) => void;
-    onAutoBreakdown: (instruction?: string, targetCount?: number) => void;
+    onAutoBreakdown: (instruction: string, targetCount?: number) => void;
     isBreakingDown: boolean;
     breakdownStartTime?: number | null;
     theme?: string;
@@ -30,13 +29,13 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
     text, onChange, lang, themeAccent, themeColorBase, activeSceneIndex, activeSceneId, scrollSyncTrigger, sections, onSendToActive, onSendToNew, onAutoBreakdown, isBreakingDown, breakdownStartTime, theme, isAdmin
 }) => {
     const [isSelectionMode, setIsSelectionMode] = useState(false);
-    const [isEditing, setIsEditing] = useState(() => text.trim().length === 0);
+    const [isEditing, setIsEditing] = useState(false);
+    const [isBreakdownModalOpen, setIsBreakdownModalOpen] = useState(false);
 
     const [selectedIndices, setSelectedIndices] = useState<Set<number>>(new Set());
     const [selectionHistory, setSelectionHistory] = useState<Set<number>[]>([]);
     const [targetSceneId, setTargetSceneId] = useState<string | null>(activeSceneId);
-    const [isBreakdownModalOpen, setIsBreakdownModalOpen] = useState(false);
-    
+
     // DRAGGABLE CONSOLE STATE
     const [consolePos, setConsolePos] = useState({ x: 0, y: 0 });
     const isDraggingRef = useRef(false);
@@ -260,7 +259,6 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
         }
     };
 
-    // Removed check for isBreakingDown inside the click handler itself, rely on button disabled state
     const handleAutoBreakdownClick = (e: React.MouseEvent) => {
         e.stopPropagation();
         if (text.trim().length === 0) return;
@@ -269,10 +267,6 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
         setIsSelectionMode(false);
     };
 
-    const handleConfirmBreakdown = (instruction: string, targetCount?: number) => {
-        setIsBreakdownModalOpen(false);
-        onAutoBreakdown(instruction, targetCount);
-    };
 
     return (
         <div ref={containerRef} className={`mist-archive-panel flex flex-col h-full ${theme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#0a0a0a]'} relative group`}>
@@ -288,7 +282,7 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
                             <button
                                 onClick={handleAutoBreakdownClick}
                                 disabled={isBreakingDown || text.trim().length === 0}
-                                className={`mist-app-primary-action h-9 px-4 border flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95 shadow-md disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none ${theme === 'retro' ? 'bg-[#8B261D] border-[#8B261D] text-white hover:bg-[#A52A2A]' : `bg-${themeColorBase}/20 border-current ${themeAccent} hover:bg-${themeColorBase}/30`}`}
+                                className={`h-9 px-4 border flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 select-none outline-none ring-0 ${theme === 'retro' ? 'bg-transparent border-[#8B261D] text-[#8B261D] hover:bg-[#8B261D]/10 shadow-sm' : 'bg-[var(--mist-active-accent)]/5 border-[var(--mist-active-accent)] text-[var(--mist-active-accent)] hover:bg-[var(--mist-active-accent)]/20 hover:brightness-125 shadow-sm'}`}
                                 title={lang === 'EN' ? "Auto Break Down Scenes" : "AI 智能分场"}
                             >
                                 {isBreakingDown ? <Loader2 size={12} className="animate-spin" /> : <Scissors size={12} />}
@@ -297,7 +291,7 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
                             </button>
                             <button
                                 onClick={toggleSelectionMode}
-                                className={`mist-archive-button h-9 ${lang === 'EN' ? 'w-[124px]' : 'w-[104px]'} justify-center border flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-all duration-100 active:scale-95 shadow-sm focus:outline-none ${isSelectionMode ? `${theme === 'retro' ? 'bg-[#8B261D] text-white border-[#8B261D]' : `${themeAccent.replace('text-', 'bg-')} text-black border-transparent`}` : `${theme === 'retro' ? 'bg-white border-[#8B261D]/20 text-[#8B261D]/70 hover:text-[#8B261D]' : 'bg-zinc-900 border-zinc-700/50 text-zinc-400 hover:text-white hover:border-zinc-500'}`}`}
+                                className={`h-9 ${lang === 'EN' ? 'w-[124px]' : 'w-[104px]'} justify-center border flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-all duration-100 active:scale-95 shadow-sm focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 select-none outline-none ring-0 ${isSelectionMode ? `${theme === 'retro' ? 'bg-[#8B261D] text-white border-[#8B261D]' : `${themeAccent.replace('text-', 'bg-')} text-black border-[var(--mist-active-accent)]`}` : `${theme === 'retro' ? 'bg-white border-[#8B261D]/20 text-[#8B261D]/70 hover:text-[#8B261D] hover:border-[#8B261D]/50' : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white hover:border-[var(--mist-active-accent)]'}`}`}
                             >
                                 {isSelectionMode ? <ListChecks size={12} /> : <MousePointer2 size={12} />}
                                 {lang === 'EN' ? (isSelectionMode ? "Mode: ON" : "Manual Mode") : (isSelectionMode ? "选择模式" : "手动分场")}
@@ -306,7 +300,7 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
                     )}
                     <button
                         onClick={() => { setIsEditing(!isEditing); setIsSelectionMode(false); }}
-                        className={`mist-archive-button h-9 ${lang === 'EN' ? 'w-[124px]' : 'w-[104px]'} justify-center border flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest focus:outline-none transition-all active:scale-95 shadow-sm ${isEditing ? `${theme === 'retro' ? 'bg-[#DCD8CF] text-[#8B261D] border-[#8B261D]/30' : 'bg-zinc-800 text-white border-zinc-500'}` : `${theme === 'retro' ? 'bg-white border-[#8B261D]/20 text-[#8B261D]/70 hover:text-[#8B261D]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-500'}`}`}
+                        className={`h-9 ${lang === 'EN' ? 'w-[124px]' : 'w-[104px]'} justify-center border flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-all duration-100 active:scale-95 shadow-sm focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 select-none outline-none ring-0 ${isEditing ? `${theme === 'retro' ? 'bg-[#DCD8CF] text-[#8B261D] border-[#8B261D]/30' : 'bg-zinc-800 text-white border-zinc-500'}` : `${theme === 'retro' ? 'bg-white border-[#8B261D]/20 text-[#8B261D]/70 hover:text-[#8B261D] hover:border-[#8B261D]/50' : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white hover:border-[var(--mist-active-accent)]'}`}`}
                         title={isEditing ? (lang === 'EN' ? "Preview" : "预览模式") : (lang === 'EN' ? "Edit" : "编辑模式")}
                     >
                         {isEditing ? <Eye size={12} /> : <Edit3 size={12} />}
@@ -327,12 +321,12 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
                     <div className="flex flex-col min-h-full">
                         {paragraphs.map((para, idx) => {
                             const isSelected = selectedIndices.has(idx);
-                            
+
                             // Get scene context for this paragraph
                             const sceneInfo = paraToSceneMap.get(idx);
                             const isInAnyScene = !!sceneInfo;
                             const isInActiveScene = sceneInfo?.isActive || false;
-                            
+
                             // Use the specific scene color, fall back to active theme color
                             const rawSceneColor = (sceneInfo?.color || getSceneColor(Math.max(0, activeSceneIndex - 1))) || SCENE_COLORS[0];
                             const c = theme === 'retro' ? ((rawSceneColor as any).retro || rawSceneColor) : rawSceneColor;
@@ -398,7 +392,7 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
                             // Calculate bottom border (either end of block border or divider)
                             const isEndOfBlock = isInAnyScene && (idx === paragraphs.length - 1 || paraToSceneMap.get(idx + 1)?.sectionId !== sceneInfo.sectionId);
                             let borderBottomClass = 'border-b border-zinc-900/50';
-                            
+
                             if (!isSelectionMode && isInAnyScene) {
                                 if (isEndOfBlock) {
                                     borderBottomClass = `border-b-2 ${c.border}`;
@@ -446,16 +440,31 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
                         )}
                     </div>
                 )}
+
+                {/* Breakdown Config Modal - Centered inside the red rectangle area */}
+                <BreakdownConfigModal
+                    isOpen={isBreakdownModalOpen}
+                    onClose={() => setIsBreakdownModalOpen(false)}
+                    onConfirm={(instruction, targetCount) => {
+                        setIsBreakdownModalOpen(false);
+                        onAutoBreakdown(instruction, targetCount);
+                    }}
+                    lang={lang === 'EN' ? 'EN' : 'CN'}
+                    themeAccent={themeAccent}
+                    theme={theme}
+                    sourceText={text}
+                    isAdmin={isAdmin}
+                />
             </div>
 
             {isSelectionMode && (
-                <div 
+                <div
                     className="absolute bottom-20 left-0 right-0 z-[2000] flex justify-center animate-in slide-in-from-bottom-2 fade-in pointer-events-none"
                     style={{ transform: `translate(${consolePos.x}px, ${consolePos.y}px)` }}
                 >
                     <div className={`mist-archive-panel w-[calc(100%-2rem)] max-w-[460px] ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/40' : 'bg-zinc-950 border-zinc-700'} border-2 p-3 pr-4 shadow-2xl flex items-start gap-3 pointer-events-auto`}>
                         {/* Drag Handle */}
-                        <div 
+                        <div
                             onMouseDown={handleDragStart}
                             className={`shrink-0 cursor-grab active:cursor-grabbing self-stretch flex items-center px-1 py-4 hover:bg-black/5 rounded transition-colors ${theme === 'retro' ? 'text-[#8B261D]/40' : 'text-zinc-600'}`}
                             title={lang === 'EN' ? "Drag to move" : "按住拖动"}
@@ -528,16 +537,6 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
                 </div>
             )}
 
-            <BreakdownConfigModal
-                isOpen={isBreakdownModalOpen}
-                onClose={() => setIsBreakdownModalOpen(false)}
-                onConfirm={handleConfirmBreakdown}
-                lang={lang === 'EN' ? 'EN' : 'CN'}
-                themeAccent={themeAccent}
-                theme={theme}
-                sourceText={text}
-                isAdmin={isAdmin}
-            />
         </div>
     );
 };

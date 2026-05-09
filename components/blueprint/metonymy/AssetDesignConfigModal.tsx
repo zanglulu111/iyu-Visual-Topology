@@ -163,9 +163,9 @@ export const AssetDesignConfigModal: React.FC<AssetDesignConfigModalProps> = ({
                                 <div
                                     key={opt.id}
                                     onClick={() => handleMediumSelect(opt.id as any)}
-                                    className={`p-3 rounded-lg border cursor-pointer transition-all flex gap-3 ${medium === opt.id ? (theme === 'retro' ? 'border-[#8B261D] bg-[#8B261D]/5' : 'border-[#FFD700] bg-[#FFD700]/5') : (theme === 'retro' ? 'border-[#8B261D]/10 bg-[var(--bg-header)]/50 hover:bg-[var(--bg-header)]' : 'border-zinc-800 bg-zinc-900/30 hover:bg-zinc-900/50 hover:border-zinc-700')}`}
+                                    className={`p-3 rounded-lg border cursor-pointer transition-all flex gap-3 ${medium === opt.id ? (theme === 'retro' ? 'border-[#8B261D] bg-[#8B261D]/5' : 'border-[var(--mist-active-accent)] bg-[var(--mist-active-accent)]/5') : (theme === 'retro' ? 'border-[#8B261D]/10 bg-[var(--bg-header)]/50 hover:bg-[var(--bg-header)]' : 'border-zinc-800 bg-zinc-900/30 hover:bg-zinc-900/50 hover:border-zinc-700')}`}
                                 >
-                                    <div className={`mt-0.5 w-10 h-10 shrink-0 rounded-none flex items-center justify-center border transition-all ${medium === opt.id ? (theme === 'retro' ? 'bg-[#8B261D] text-white border-[#8B261D]' : 'bg-[#FFD700] text-black border-[#FFD700]') : (theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20 text-[#8B261D]/60' : 'bg-black border-zinc-800 text-zinc-500')}`}>
+                                    <div className={`mt-0.5 w-10 h-10 shrink-0 rounded-none flex items-center justify-center border transition-all ${medium === opt.id ? (theme === 'retro' ? 'bg-[#8B261D] text-white border-[#8B261D]' : 'bg-[var(--mist-active-accent)] text-black border-[var(--mist-active-accent)]') : (theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20 text-[#8B261D]/60' : 'bg-black border-zinc-800 text-zinc-500')}`}>
                                         <opt.icon size={16} />
                                     </div>
                                     <div className="flex flex-col gap-0.5">
@@ -307,7 +307,8 @@ export const AssetDesignConfigModal: React.FC<AssetDesignConfigModalProps> = ({
                         />
                         <button
                             onClick={() => onConfirm(currentHints)}
-                            className={`px-6 py-2 ${theme === 'retro' ? 'bg-[#8B261D] hover:bg-[#6D1E16] text-white overflow-hidden' : `bg-${colorBase}/20 hover:bg-${colorBase}/30 text-${colorBase} border border-current`} font-bold text-sm rounded transition-all flex items-center gap-2 shadow-[0_4px_15px_rgba(0,0,0,0.3)]`}
+                            className="mist-traverse-action mist-app-primary-action px-6 py-2 font-bold text-sm rounded transition-all flex items-center gap-2 active:scale-95 border"
+                            style={{ boxShadow: 'none' }}
                         >
                             <Sparkles size={14} />
                             {lang === 'CN' ? "生成资产设计" : "GENERATE DESIGN"}

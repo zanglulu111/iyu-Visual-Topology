@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
-import { X, Sparkles, Scissors, MessageSquare, Minus, Plus } from 'lucide-react';
-import { AdminXRayButton } from '../../XRayInspector';
+import { X, Scissors, MessageSquare, Minus, Plus, Sparkles } from 'lucide-react';
 import { buildScriptBreakdownPrompt } from '../../../services/scriptBreakdownGenerator';
+import { AdminXRayButton } from '../../XRayInspector';
 
 interface BreakdownConfigModalProps {
     isOpen: boolean;
@@ -34,37 +34,40 @@ export const BreakdownConfigModal: React.FC<BreakdownConfigModalProps> = ({
     const colorBase = themeAccent.replace('text-', '');
 
     return (
-        <div className={`fixed inset-0 z-[100] flex items-start justify-center p-4 pt-4 pb-24 ${theme === 'retro' ? 'bg-[var(--bg-header)]/60' : 'bg-black/60'} backdrop-blur-sm animate-in fade-in duration-200`}>
-            <div className={`w-full max-w-2xl ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20' : 'bg-[#0c0c0c] border-zinc-800'} border rounded-xl shadow-2xl flex flex-col overflow-hidden`}>
-                {/* Header */}
+        <div
+            className="absolute inset-0 z-[100] flex items-start justify-center p-4 pt-16 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+            onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+        >
+            <div className={`w-full max-w-xl ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20' : 'bg-[#0c0c0c] border-zinc-800'} border rounded-xl shadow-2xl flex flex-col overflow-hidden`}>
+                {/* Header - Matching SourceAnalysisConfigModal hierarchy */}
                 <div className={`flex items-center justify-between px-6 py-4 border-b ${theme === 'retro' ? 'border-[#8B261D]/20 bg-[var(--bg-header)]' : 'border-zinc-900 bg-zinc-950'} shrink-0`}>
                     <div className="flex flex-col">
                         <h2 className={`text-lg font-bold ${theme === 'retro' ? 'text-black' : 'text-white'} tracking-wider flex items-center gap-2`}>
                             <Scissors size={18} className={theme === 'retro' ? 'text-[#8B261D]' : themeAccent} />
-                            {lang === 'CN' ? "剧本分场预设" : "Script Breakdown Config"}
+                            {lang === 'CN' ? "智能分场配置" : "Smart Breakdown Config"}
                         </h2>
                         <span className={`text-[11px] font-bold ${theme === 'retro' ? 'text-[#8B261D]' : 'text-zinc-300'} uppercase tracking-widest mt-1`}>
-                            {lang === 'CN' ? "提供分场逻辑指引以生成精准的场次结构" : "Provide breakdown guidance for accurate scene structure"}
+                            {lang === 'CN' ? "提供逻辑指引以生成精准的剧本场次" : "Provide logic to generate accurate screenplay scenes"}
                         </span>
                     </div>
-                    <button onClick={onClose} className={`p-1 ${theme === 'retro' ? 'text-[#8B261D]/80 hover:text-[#8B261D]' : 'text-zinc-400 hover:text-white'} transition-colors`}>
+                    <button onClick={onClose} className={`p-1 ${theme === 'retro' ? 'text-[#8B261D]/50 hover:text-[#8B261D]' : 'text-zinc-500 hover:text-white'} transition-colors`}>
                         <X size={20} />
                     </button>
                 </div>
 
-                {/* Content */}
-                <div className="p-6 space-y-6 overflow-y-auto custom-scrollbar max-h-[55vh]">
-                    {/* Target Scene Count */}
-                    <div className="space-y-4">
+                {/* Content - Reduced space-y for more compact feel */}
+                <div className="p-6 space-y-5 overflow-y-auto custom-scrollbar max-h-[70vh]">
+                    {/* Section 1: Target Scene Count */}
+                    <div className="space-y-3">
                         <label className={`text-xs font-bold ${theme === 'retro' ? 'text-[#8B261D]' : 'text-zinc-300'} uppercase tracking-widest px-1 flex items-center gap-2`}>
                             <Scissors size={12} />
                             {lang === 'CN' ? "1. 目标分场数量 (可选)" : "1. TARGET SCENE COUNT (OPTIONAL)"}
                         </label>
+                        <div className={`bg-zinc-900/10 border ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20' : 'bg-zinc-900/30 border-zinc-800'} rounded-lg p-4 relative overflow-hidden group`}>
+                            <div className={`absolute top-0 left-0 w-1 h-full ${theme === 'retro' ? 'bg-[#8B261D]' : `bg-${colorBase}/50`}`} />
 
-                        <div className="space-y-4 px-1">
-                            {/* Single Row of Quick Selection - No Custom Button */}
-                            <div className="flex flex-wrap gap-2 text-zinc-500">
-                                {[3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20].map(num => (
+                            <div className="flex flex-wrap gap-2 mb-4">
+                                {[3, 4, 5, 6, 7, 8, 10, 12].map(num => (
                                     <button
                                         key={num}
                                         onClick={() => setTargetCount(prev => prev === num ? '' : num)}
@@ -75,12 +78,11 @@ export const BreakdownConfigModal: React.FC<BreakdownConfigModalProps> = ({
                                 ))}
                             </div>
 
-                            {/* Stepper Input - Restoring Plus/Minus, Hiding Browser Spinners via CSS */}
                             <div className="flex items-center gap-3">
-                                <div className={`w-40 border rounded flex items-center overflow-hidden h-10 ${theme === 'retro' ? 'bg-white border-[#8B261D]/20' : 'bg-zinc-950 border-zinc-800'}`}>
+                                <div className={`w-36 border rounded flex items-center overflow-hidden h-9 ${theme === 'retro' ? 'bg-white border-[#8B261D]/20' : 'bg-zinc-950 border-zinc-800'}`}>
                                     <button
                                         onClick={() => setTargetCount(prev => (prev === '' ? 3 : Math.max(3, prev - 1)))}
-                                        className={`p-2.5 transition-colors border-r ${theme === 'retro' ? 'text-[#8B261D]/50 hover:text-[#8B261D] hover:bg-[#F4EFE0] border-[#8B261D]/10' : 'text-zinc-500 hover:text-white hover:bg-zinc-900 border-zinc-800'}`}
+                                        className={`p-2 transition-colors border-r ${theme === 'retro' ? 'text-[#8B261D]/50 hover:text-[#8B261D] hover:bg-[#F4EFE0] border-[#8B261D]/10' : 'text-zinc-500 hover:text-white hover:bg-zinc-900 border-zinc-800'}`}
                                     >
                                         <Minus size={14} />
                                     </button>
@@ -88,32 +90,33 @@ export const BreakdownConfigModal: React.FC<BreakdownConfigModalProps> = ({
                                         type="number"
                                         value={targetCount}
                                         onChange={(e) => {
-                                            const val = e.target.value === '' ? '' : parseInt(e.target.value);
-                                            setTargetCount(val);
+                                            const val = e.target.value;
+                                            if (val === '') setTargetCount('');
+                                            else {
+                                                const n = parseInt(val);
+                                                if (!isNaN(n)) setTargetCount(Math.max(1, Math.min(99, n)));
+                                            }
                                         }}
-                                        onBlur={() => {
-                                            if (targetCount !== '' && targetCount < 3) setTargetCount(3);
-                                        }}
+                                        className={`w-full bg-transparent text-center text-xs font-black focus:outline-none ${theme === 'retro' ? 'text-black' : 'text-white'} [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
                                         placeholder="--"
-                                        className={`w-full bg-transparent border-none ${theme === 'retro' ? 'text-black placeholder-black/50' : 'text-zinc-100 placeholder-zinc-500'} text-xs focus:ring-0 focus:outline-none focus:ring-offset-0 text-center font-mono [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
                                     />
                                     <button
-                                        onClick={() => setTargetCount(prev => (prev === '' ? 4 : prev + 1))}
-                                        className={`p-2.5 transition-colors border-l ${theme === 'retro' ? 'text-[#8B261D]/50 hover:text-[#8B261D] hover:bg-[#F4EFE0] border-[#8B261D]/10' : 'text-zinc-500 hover:text-white hover:bg-zinc-900 border-zinc-800'}`}
+                                        onClick={() => setTargetCount(prev => (prev === '' ? 5 : Math.min(99, prev + 1)))}
+                                        className={`p-2 transition-colors border-l ${theme === 'retro' ? 'text-[#8B261D]/50 hover:text-[#8B261D] hover:bg-[#F4EFE0] border-[#8B261D]/10' : 'text-zinc-500 hover:text-white hover:bg-zinc-900 border-zinc-800'}`}
                                     >
                                         <Plus size={14} />
                                     </button>
                                 </div>
-                                <span className={`text-xs ${theme === 'retro' ? 'text-[#8B261D]/80' : 'text-zinc-300'} italic`}>
-                                    {lang === 'CN' ? "最小分场数为 3" : "Min scenes is 3"}
+                                <span className={`text-[10px] font-bold italic ${theme === 'retro' ? 'text-[#8B261D]/40' : 'text-zinc-600'}`}>
+                                    {lang === 'CN' ? "自定义场次数量" : "Custom scene count"}
                                 </span>
                             </div>
                         </div>
                     </div>
 
-                    {/* Instruction */}
+                    {/* Section 2: Breakdown Requirements */}
                     <div className="space-y-3">
-                        <label className={`text-xs font-bold ${theme === 'retro' ? 'text-[#8B261D]' : 'text-zinc-300'} uppercase tracking-widest px-1 flex items-center gap-2`}>
+                        <label className={`text-xs font-bold ${theme === 'retro' ? 'text-black/60' : 'text-zinc-300'} uppercase tracking-widest px-1 flex items-center gap-2`}>
                             <MessageSquare size={12} />
                             {lang === 'CN' ? "2. 分场要求与指引 (可选)" : "2. BREAKDOWN REQUIREMENTS (OPTIONAL)"}
                         </label>
@@ -121,19 +124,14 @@ export const BreakdownConfigModal: React.FC<BreakdownConfigModalProps> = ({
                             <textarea
                                 value={instruction}
                                 onChange={(e) => setInstruction(e.target.value)}
-                                placeholder={lang === 'CN' ? "输入对分场的要求，例如：“把打斗戏拆分为决战前准备、决斗和战斗后三个独立场次”、“每场戏的篇幅不要太长，保持快节奏”。" : "Enter scene splitting requirements, e.g. 'Split the fight into prep, duel, and aftermath', 'Keep scenes short for fast pacing'."}
-                                className={`w-full h-32 bg-transparent border-none ${theme === 'retro' ? 'text-black placeholder-black/50' : 'text-zinc-100 placeholder-zinc-500'} text-xs focus:ring-0 focus:outline-none focus:ring-offset-0 resize-none custom-scrollbar`}
+                                placeholder={lang === 'CN' ? "例如：侧重人物心理变化，按地点变迁分场，或者强调动作戏的完整性..." : "e.g. Focus on character psychology, break by location, or emphasize action continuity..."}
+                                className={`w-full h-24 bg-transparent border-none ${theme === 'retro' ? 'text-black placeholder-black/50' : 'text-zinc-200 placeholder-zinc-400'} text-xs focus:ring-0 focus:outline-none focus:ring-offset-0 resize-none custom-scrollbar`}
                             />
                         </div>
-                        <p className={`text-xs ${theme === 'retro' ? 'text-black/70' : 'text-zinc-100'} px-1 leading-tight italic`}>
-                            {lang === 'CN'
-                                ? "提示：明确的指令能显著提升 AI 对剧情节奏的把控力。"
-                                : "Tip: Clear instructions significantly improve AI's control over pacing."}
-                        </p>
                     </div>
                 </div>
 
-                {/* Footer */}
+                {/* Footer - Matching SourceAnalysisConfigModal style */}
                 <div className={`px-6 py-4 border-t ${theme === 'retro' ? 'border-[#8B261D]/20 bg-[var(--bg-header)]' : 'border-zinc-900 bg-black/20'} flex justify-end gap-3`}>
                     <button
                         onClick={onClose}
@@ -145,16 +143,17 @@ export const BreakdownConfigModal: React.FC<BreakdownConfigModalProps> = ({
                         <AdminXRayButton
                             isAdmin={isAdmin}
                             lang={lang}
-                            title={lang === 'CN' ? 'X-Ray 智能分场指令' : 'X-Ray Breakdown Prompt'}
-                            getPayload={() => buildScriptBreakdownPrompt(sourceText, instruction, targetCount === '' ? undefined : targetCount)}
+                            title={lang === 'CN' ? 'X-Ray 智能分场指令' : 'X-Ray Smart Breakdown Prompt'}
+                            getPayload={() => buildScriptBreakdownPrompt(sourceText, instruction, typeof targetCount === 'number' ? targetCount : undefined)}
                             disabled={!sourceText.trim()}
                         />
                         <button
-                            onClick={() => onConfirm(instruction, targetCount === '' ? undefined : targetCount)}
-                            className={`px-6 py-2 ${theme === 'retro' ? 'bg-[#8B261D] hover:bg-[#6D1E16] text-white overflow-hidden' : `bg-${colorBase}/20 hover:bg-${colorBase}/30 text-${colorBase} border border-current`} font-bold text-sm rounded transition-all flex items-center gap-2 shadow-[0_4px_15px_rgba(0,0,0,0.3)]`}
+                            onClick={() => onConfirm(instruction, typeof targetCount === 'number' ? targetCount : undefined)}
+                            className="mist-traverse-action mist-app-primary-action px-6 py-2 font-bold text-sm rounded transition-all flex items-center gap-2 active:scale-95 border"
+                            style={{ boxShadow: 'none' }}
                         >
                             <Sparkles size={14} />
-                            {lang === 'CN' ? "开始智能分场" : "START BREAKDOWN"}
+                            {lang === 'CN' ? "开始智能分场" : "START SMART BREAKDOWN"}
                         </button>
                     </div>
                 </div>

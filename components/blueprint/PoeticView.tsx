@@ -32,8 +32,8 @@ export const PoeticView: React.FC<PoeticViewProps> = ({
     };
 
     return (
-        <div className="max-w-6xl mx-auto space-y-12 animate-in fade-in slide-in-from-bottom-2 pb-20">
-             
+        <div className="max-w-6xl mx-auto space-y-12 pb-20">
+
              {activeTab === 'PHILOSOPHY' && (
                  <>
                       <div className={`${theme === 'retro' ? 'bg-transparent border-[var(--border-main)]' : 'bg-[var(--mist-active-accent)]/10 border border-[var(--mist-active-accent)]/30'} p-10 rounded-2xl relative overflow-hidden text-center group hover:border-[var(--mist-active-accent)]/50 transition-colors border`}>

@@ -5,7 +5,7 @@ import {
     FileText, Edit3, Wand2, Globe, Sparkles, Video, Zap,
     Link, LayoutTemplate, X, CheckCircle2, Image as ImageIcon, Aperture,
     List, Grid, Table as TableIcon, ChevronsDown, ChevronsUp, Minus,
-    RefreshCw, RotateCcw, Maximize2, Minimize2, Lock, Unlock, Loader2
+    RefreshCw, RotateCcw, Maximize2, Minimize2, Lock, Unlock, Loader2, RotateCw
 } from 'lucide-react';
 import {
     ScreenplaySection, BlueprintLanguage, FinalAssetItem,
@@ -200,7 +200,7 @@ export const MetonymySceneCard: React.FC<MetonymySceneCardProps> = (props) => {
     const dynamicCols = getDynamicColumns(language, dynamicDisplayLang);
 
     // Dynamic button style based on theme
-    const btnTheme = `${theme === 'retro' ? 'mist-app-primary-action h-8 px-3 bg-[#8B261D] border-[#8B261D] text-white hover:bg-[#A52A2A]' : `mist-app-primary-action h-8 px-3 bg-${themeColorBase}/20 text-${themeColorBase} border border-current hover:bg-${themeColorBase}/30`} text-[10px] font-bold uppercase tracking-wider transition-all active:scale-95 flex items-center gap-2 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed`;
+    const btnTheme = `mist-traverse-action mist-app-primary-action h-9 px-4 border text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95 flex items-center justify-center gap-2.5 shadow-none disabled:opacity-50 disabled:cursor-not-allowed group`;
     const btnGrey = `mist-archive-button h-8 px-3 border text-[10px] font-bold uppercase tracking-wider transition-all active:scale-95 flex items-center gap-2 shadow-sm ${theme === 'retro' ? 'bg-white border-[#8B261D]/20 text-[#8B261D] hover:bg-[#8B261D]/10' : 'bg-zinc-900/50 border-zinc-700/50 text-zinc-400 hover:text-white hover:bg-zinc-800'}`;
 
     const handleMountChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -359,7 +359,7 @@ export const MetonymySceneCard: React.FC<MetonymySceneCardProps> = (props) => {
     };
 
     return (
-        <div 
+        <div
             onDragOver={onDragOver}
             onDrop={onDrop}
             onClick={onSetActive}
@@ -561,15 +561,22 @@ export const MetonymySceneCard: React.FC<MetonymySceneCardProps> = (props) => {
                                             }
                                         }}
                                         disabled={isGenerating || isStyleTransferring || (!!mountedPresetId && mountedPresetId !== 'original' && !hasBaseScript)}
-                                        className={`${(!!mountedPresetId && mountedPresetId !== 'original' && !hasBaseScript) ? `mist-archive-button h-8 px-3 border cursor-not-allowed flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider shadow-sm ${theme === 'retro' ? 'bg-[#F9F7F1] border-[#8B261D]/20 text-[#8B261D]/40' : 'bg-zinc-900 border-zinc-800 text-zinc-600'}` : btnTheme}`}
+                                        className={`${(!!mountedPresetId && mountedPresetId !== 'original' && !hasBaseScript) ? `mist-archive-button h-9 px-4 border cursor-not-allowed flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest shadow-none ${theme === 'retro' ? 'bg-[#F9F7F1] border-[#8B261D]/20 text-[#8B261D]/40' : 'bg-zinc-900 border-zinc-800 text-zinc-600'}` : btnTheme}`}
                                         title={(!!mountedPresetId && mountedPresetId !== 'original' && !hasBaseScript) ? (language === 'EN' ? "Please generate base script first" : "请先生成基础剧本") : ""}
                                     >
-                                        <Wand2 size={12} />
-                                        {(!mountedPresetId || mountedPresetId === 'original')
-                                            ? (language === 'EN' ? "Generate Base Script" : "生成基础剧本")
-                                            : (language === 'EN' ? "Visual Bible Transfer" : "视觉圣经置换")
-                                        }
-                                        {(isGenerating || isStyleTransferring) && <ProcessingTimer startTime={isGenerating ? (generationStartTime || Date.now()) : (styleTransferStartTime || Date.now())} />}
+                                        {(isGenerating || isStyleTransferring) ? (
+                                            <RotateCw size={14} className="animate-spin" />
+                                        ) : (
+                                            <Wand2 size={14} className="group-hover:scale-110 transition-transform" />
+                                        )}
+                                        <span className="tabular-nums">
+                                            {(!mountedPresetId || mountedPresetId === 'original')
+                                                ? (language === 'EN' ? "Generate Base Script" : "生成基础剧本")
+                                                : (language === 'EN' ? "Visual Bible Transfer" : "视觉圣经置换")
+                                            }
+                                            {(isGenerating || isStyleTransferring) && <ProcessingTimer startTime={isGenerating ? (generationStartTime || Date.now()) : (styleTransferStartTime || Date.now())} />}
+                                        </span>
+                                        {!(isGenerating || isStyleTransferring) && <ChevronRight size={12} className="group-hover:translate-x-1 transition-transform opacity-70" />}
                                     </button>
 
                                     <CopyButton text={displayContent} label={language === 'EN' ? "COPY" : "一键复制"} className={btnGrey} theme={theme} />
@@ -615,9 +622,9 @@ export const MetonymySceneCard: React.FC<MetonymySceneCardProps> = (props) => {
                                             />
                                         ) : (
                                             <div className={`pl-4 border-l-2 ${theme === 'retro' ? 'border-[#8B261D]/20' : 'border-zinc-800'}`}>
-                                                <MarkdownRenderer 
-                                                    content={displayContent || (isOriginalMode ? (language === 'EN' ? "Please enter narrative content or click [Generate Script]." : "请先输入叙事内容或点击【生成剧本】。") : (language === 'EN' ? "No style script generated yet." : "暂无风格剧本。"))} 
-                                                    themeAccent={displayContent ? themeAccent : (theme === 'retro' ? "text-[#8B261D]" : "text-zinc-500")} 
+                                                <MarkdownRenderer
+                                                    content={displayContent || (isOriginalMode ? (language === 'EN' ? "Please enter narrative content or click [Generate Script]." : "请先输入叙事内容或点击【生成剧本】。") : (language === 'EN' ? "No style script generated yet." : "暂无风格剧本。"))}
+                                                    themeAccent={displayContent ? themeAccent : (theme === 'retro' ? "text-[#8B261D]" : "text-zinc-500")}
                                                     theme={theme}
                                                 />
                                             </div>
@@ -714,8 +721,16 @@ export const MetonymySceneCard: React.FC<MetonymySceneCardProps> = (props) => {
                                 </div>
                                 <div className="flex items-center gap-3">
                                     <button onClick={onGenerateDynamic} disabled={isGenerating || isBibleMissing} className={`${btnTheme} ${isBibleMissing ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                                        <Zap size={12} /> {isBibleMissing ? (language === 'EN' ? "Select Bible First" : "请先挂载圣经") : (language === 'EN' ? "Generate Dynamic" : "生成动态分镜")}
-                                        {isGenerating && <ProcessingTimer startTime={generationStartTime || Date.now()} />}
+                                        {isGenerating ? (
+                                            <RotateCw size={14} className="animate-spin" />
+                                        ) : (
+                                            <Zap size={14} className="group-hover:scale-110 transition-transform" />
+                                        )}
+                                        <span className="tabular-nums">
+                                            {isBibleMissing ? (language === 'EN' ? "Select Bible First" : "请先挂载圣经") : (language === 'EN' ? "Generate Dynamic" : "生成动态分镜")}
+                                            {isGenerating && <ProcessingTimer startTime={generationStartTime || Date.now()} />}
+                                        </span>
+                                        {!isGenerating && !isBibleMissing && <ChevronRight size={12} className="group-hover:translate-x-1 transition-transform opacity-70" />}
                                     </button>
                                     <AdminXRayButton
                                         isAdmin={isAdmin}

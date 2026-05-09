@@ -310,7 +310,9 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
 
     const handleRandomize = () => {
         if (filteredItems.length === 0) return;
-        const randomItem = filteredItems[Math.floor(Math.random() * filteredItems.length)];
+        const unselectedItems = filteredItems.filter(item => !selectedTags.includes(item.name));
+        if (unselectedItems.length === 0) return;
+        const randomItem = unselectedItems[Math.floor(Math.random() * unselectedItems.length)];
         if (randomItem) {
             const isCurrentlySelected = selectedTags.includes(randomItem.name);
             onToggleTag(randomItem.name);
@@ -329,7 +331,7 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
     const handleCopyItem = (item: any) => {
         const nameCn = item.name.split('(')[0].trim();
         const nameEn = item.nameEn || item.name.match(/\((.*?)\)/)?.[1] || nameCn;
-        
+
         let text = "";
         if (driverType === DriverType.AESTHETIC) {
             if (currentLang === 'CN') {
@@ -379,12 +381,12 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
         if (!item) return;
 
         const groupContainingTag = processedGroups.find(g => (g.items || []).some(i => i.name === tagName));
-        
+
         if (groupContainingTag && activeTab !== groupContainingTag.id) {
             setActiveTab(groupContainingTag.id);
             setSearchQuery("");
         }
-        
+
         setTimeout(() => {
             const elId = `card-${(item.id || item.name).replace(/\s+/g, '_')}`;
             const el = document.getElementById(elId);
@@ -518,15 +520,15 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
 
                         <div className="relative hidden lg:block group shrink-0">
                             <Search size={14} className={`absolute left-3 top-1/2 -translate-y-1/2 transition-colors duration-300 ${globalTheme === 'retro' ? 'text-[#8B261D]/40' : 'text-zinc-600 group-focus-within:text-white'}`} />
-                            <input 
-                                type="text" 
-                                value={searchQuery} 
-                                onChange={(e) => setSearchQuery(e.target.value)} 
-                                placeholder={currentLang === 'EN' ? "SEARCH..." : "搜索词条..."} 
-                                className={`w-32 xl:w-48 border rounded-xl pl-8 pr-3 py-2 text-xs focus:outline-none transition-all duration-500 ${globalTheme === 'retro' ? 'bg-white border-[#8B261D]/20 text-black placeholder-[#8B261D]/30 focus:border-[#8B261D]/50' : `bg-black/60 ${themeText} border-white/10 focus:border-white/20 placeholder-zinc-700 shadow-xl shadow-black/50`}`} 
+                            <input
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                placeholder={currentLang === 'EN' ? "SEARCH..." : "搜索词条..."}
+                                className={`w-32 xl:w-48 border rounded-xl pl-8 pr-3 py-2 text-xs focus:outline-none transition-all duration-500 ${globalTheme === 'retro' ? 'bg-white border-[#8B261D]/20 text-black placeholder-[#8B261D]/30 focus:border-[#8B261D]/50' : `bg-black/60 ${themeText} border-white/10 focus:border-white/20 placeholder-zinc-700 shadow-xl shadow-black/50`}`}
                             />
                         </div>
-                        
+
                         {/* Content Version Toggle (Global) — only for engine M-parameter lexicons */}
                         {isEngineLexicon && (
                         <div className={`flex shrink-0 items-center p-1 rounded-xl border backdrop-blur-sm gap-0.5 mr-2 ${globalTheme === 'retro' ? 'bg-white border-[#8B261D]/10 shadow-sm' : 'bg-white/5 border-white/5'}`}>
@@ -694,7 +696,7 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                 const isCopied = copiedItemId === (item.id || item.name);
                                 const isPreset = blockId === 'aes_palette_preset';
                                 const itemMechanics = getItemMechanics(item);
-                                
+
                                 return (
                                     <div key={item.id || item.name}
                                         id={`card-${(item.id || item.name).replace(/\s+/g, '_')}`}
@@ -708,7 +710,7 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                             }
                                         }}
                                         className={`relative flex ${isPreset ? 'flex-row items-center py-2 px-4' : 'flex-col p-5 md:p-6'} text-left rounded-xl border-2 transition-all duration-200 group h-full cursor-pointer hover:scale-[1.02] ${isSelected ? (globalTheme === 'retro' ? `bg-white border-[#8B261D] shadow-sm` : `${themeText} bg-zinc-900 ${themeBorder.replace('/50', '')}`) : (globalTheme === 'retro' ? 'bg-white/60 border-black/5 text-black hover:border-[#8B261D]/40' : 'bg-zinc-900/40 border-zinc-800 text-zinc-300 hover:bg-zinc-900 hover:border-zinc-500 hover:text-zinc-100')}`}>
-                                        
+
                                         {isPreset && (item as any).colors && (
                                             <div className="flex items-center gap-3 mr-6 shrink-0">
                                                 <div className="flex gap-1">

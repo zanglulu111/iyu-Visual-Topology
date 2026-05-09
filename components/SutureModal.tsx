@@ -190,16 +190,16 @@ export const SutureModal: React.FC<SutureModalProps> = ({
     const getTheme = () => {
         if (globalTheme === 'retro') {
             return {
-                text: 'text-[#8B261D]', 
-                textSoft: 'text-[#8B261D]', 
+                text: 'text-[#8B261D]',
+                textSoft: 'text-[#8B261D]',
                 textContrast: 'text-black',
                 textSecondary: 'text-[#3D1A16]',
-                bg: 'bg-[#8B261D]', 
+                bg: 'bg-[#8B261D]',
                 hoverBg: 'hover:bg-[#6D1E16]',
-                border: 'border-[#8B261D]/50', 
-                borderSoft: 'border-[#8B261D]/20', 
+                border: 'border-[#8B261D]/50',
+                borderSoft: 'border-[#8B261D]/20',
                 bgSoft: 'bg-[var(--bg-header)]',
-                shadow: 'shadow-none', 
+                shadow: 'shadow-none',
                 hoverShadow: 'hover:shadow-md',
                 spinnerBorder: 'border-t-[#8B261D]',
                 accent: 'bg-[#8B261D]'
@@ -478,7 +478,7 @@ export const SutureModal: React.FC<SutureModalProps> = ({
     ];
 
     return (
-        <div className="fixed inset-0 z-[200] flex flex-col animate-in fade-in duration-200 overflow-hidden">
+        <div className="fixed inset-0 z-[200] flex flex-col overflow-hidden animate-page-dissolve">
             <div className={`flex-1 w-full ${globalTheme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#050505]'} flex flex-col overflow-hidden relative`}>
                 <div className="flex-1 flex overflow-hidden">
                         {/* Left Pane: Sources */}
@@ -630,7 +630,8 @@ export const SutureModal: React.FC<SutureModalProps> = ({
                                         type="button"
                                         onClick={handleGenerateClick}
                                         disabled={isGenerating || !sourceText}
-                                        className={`flex-1 flex items-center justify-center gap-3 py-3 rounded-md font-black text-sm uppercase tracking-widest transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed ${theme.bg} ${theme.hoverBg} ${globalTheme === 'retro' ? 'text-white border border-[#8B261D]' : `text-black border border-white/30`} shadow-lg`}
+                                        className="mist-traverse-action mist-app-primary-action flex-1 flex items-center justify-center gap-3 py-3 rounded-md font-black text-sm uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed border"
+                                        style={{ boxShadow: 'none' }}
                                     >
                                         {isGenerating ? <Zap size={18} className="animate-pulse" /> : <Play size={18} fill="currentColor" />}
                                         {isGenerating ? (
@@ -692,7 +693,7 @@ export const SutureModal: React.FC<SutureModalProps> = ({
                                         <span className="text-sm font-mono uppercase tracking-[0.3em] animate-pulse">{t.BTN_PROCESSING}</span>
                                     </div>
                                 ) : resultText ? (
-                                    <div className={`prose prose-invert ${globalTheme === 'retro' ? 'prose-p:text-black' : 'prose-p:text-zinc-200'} prose-p:leading-loose max-w-4xl mx-auto font-serif text-lg whitespace-pre-wrap animate-in slide-in-from-bottom-4 duration-500`}>
+                                    <div className={`prose prose-invert ${globalTheme === 'retro' ? 'prose-p:text-black' : 'prose-p:text-zinc-200'} prose-p:leading-loose max-w-4xl mx-auto font-serif text-lg whitespace-pre-wrap`}>
                                         {resultText}
                                     </div>
                                 ) : (

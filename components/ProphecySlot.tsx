@@ -66,11 +66,11 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
     const handleMouseEnter = (e: React.MouseEvent, details: any) => {
         if (!details) return;
         const rect = e.currentTarget.getBoundingClientRect();
-        
+
         // Better positioning: if it's in the lower half of the screen, show above.
         // If it's in the upper half, show below.
         const showAbove = tooltipPlacement === 'above' ? true : rect.top > window.innerHeight / 2;
-        
+
         setHoveredPortal({
             pos: {
                 top: showAbove ? rect.top - 8 : rect.bottom + 8,
@@ -169,17 +169,17 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
                     const isTagLocked = lockedTags?.[blockId]?.includes(tag) || isBlockLocked;
                     const activeAccent = isTagLocked
                         ? (theme === 'retro'
-                            ? `mist-prophecy-slot-active text-black border-[var(--mist-active-accent)] border bg-[var(--mist-active-accent)]/10 px-2`
-                            : 'mist-prophecy-slot-active border border-[var(--mist-active-accent)] bg-[var(--mist-active-accent)]/15 px-2')
+                            ? `mist-prophecy-slot-active mist-token-locked text-white border-[var(--mist-active-accent)] border bg-[var(--mist-active-accent)]/10 px-2`
+                            : 'mist-prophecy-slot-active mist-token-locked border border-[var(--mist-active-accent)] bg-[var(--mist-active-accent)]/15 px-2')
                         : (isTiny
                             ? `mist-prophecy-slot-active border ${accentColor} ${isRetro ? 'bg-[var(--bg-card)]' : 'bg-zinc-900/70'} px-2 py-0.5 shadow-sm ${theme === 'retro' ? '' : 'hover:bg-zinc-800'}`
                             : `mist-prophecy-slot-active border-b ${accentColor} px-0.5 ${theme === 'retro' ? 'hover:bg-transparent' : 'hover:bg-white/10'}`);
 
                     return (
-                        <div key={tag} className="flex flex-col items-center relative group/item align-top">
+                        <div key={tag} className="flex flex-col items-start relative group/item align-top">
                             <div className="flex items-center">
                                 <span
-                                    className={`mist-labyrinth-hover-token cursor-pointer transition-all duration-300 hover:z-50 align-top ${activeAccent} ${textSize} font-serif font-bold ${isTagLocked ? '' : (isRetro ? 'text-black' : 'text-white')} tracking-wide whitespace-nowrap inline-block`}
+                                    className={`mist-labyrinth-hover-token transition-all duration-300 hover:z-50 align-top ${activeAccent} ${textSize} font-serif font-bold ${isTagLocked ? 'cursor-not-allowed' : (isRetro ? 'cursor-pointer text-black' : 'cursor-pointer text-white')} tracking-wide whitespace-nowrap inline-block`}
                                     onClick={() => !isTagLocked && onOpenLibrary(blockId, tag)}
                                     onMouseEnter={(e) => details && handleMouseEnter(e, details)}
                                     onMouseLeave={handleMouseLeave}
@@ -190,11 +190,11 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
                             </div>
 
                             {!isTiny && (
-                                <div className={`absolute top-[calc(100%+3px)] left-1/2 -translate-x-1/2 flex items-center gap-1 z-10 opacity-0 group-hover/item:opacity-100 transition-all duration-300 ${isRetro ? 'bg-[var(--bg-panel)]/80 backdrop-blur' : 'bg-black/80 backdrop-blur'} rounded p-1 border shadow-md ${isRetro ? 'border-[var(--border-main)]/40' : 'border-zinc-800'}`}>
+                                <div className={`absolute top-[calc(100%+3px)] left-0 flex items-center gap-1 z-10 opacity-0 group-hover/item:opacity-100 transition-all duration-300 ${isRetro ? 'bg-[var(--bg-panel)]/80 backdrop-blur' : 'bg-black/80 backdrop-blur'} rounded p-1 border shadow-md ${isRetro ? 'border-[var(--border-main)]/40' : 'border-zinc-800'}`}>
                                     <button onClick={(e) => { e.stopPropagation(); onRandomizeTag?.(blockId, tag); }} disabled={isTagLocked} className={`flex items-center justify-center p-0.5 ${isRetro ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--border-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isTagLocked ? 'opacity-30 cursor-not-allowed' : ''}`}>
                                         <Dice5 size={10} />
                                     </button>
-                                    <button onClick={(e) => { e.stopPropagation(); onToggleTagLock?.(blockId, tag); }} className={`flex items-center justify-center p-0.5 ${isRetro ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isTagLocked ? (isRetro ? 'border-[var(--text-accent)] text-black bg-[var(--text-accent)]/10' : 'border-[var(--mist-active-accent)] text-white bg-[var(--mist-active-accent)]/20') : ''}`}>
+                                    <button onClick={(e) => { e.stopPropagation(); if (isBlockLocked) onToggleLockBlock(blockId); else onToggleTagLock?.(blockId, tag); }} className={`flex items-center justify-center p-0.5 ${isRetro ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isTagLocked ? (isRetro ? 'border-[var(--text-accent)] text-white bg-[var(--text-accent)]/10' : 'border-[var(--mist-active-accent)] text-white bg-[var(--mist-active-accent)]/20') : ''}`}>
                                         {isTagLocked ? <Lock size={10} /> : <Unlock size={10} />}
                                     </button>
                                     <button onClick={(e) => handleEditClick(tag, e)} disabled={isTagLocked} className={`flex items-center justify-center p-0.5 ${isRetro ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isTagLocked ? 'opacity-30 cursor-not-allowed' : ''}`}>
@@ -217,9 +217,9 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
                     );
                 })
             ) : (
-                <div className={`flex flex-col items-center group/item relative cursor-pointer align-top ${isBlockLocked ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                    <div 
-                        onClick={() => !isBlockLocked && onOpenLibrary(blockId)} 
+                <div className={`flex flex-col items-start group/item relative cursor-pointer align-top ${isBlockLocked ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                    <div
+                        onClick={() => !isBlockLocked && onOpenLibrary(blockId)}
                         onMouseEnter={(e) => blockDef && handleMouseEnter(e, {
                             def: blockDef.description,
                             defEn: blockDef.descriptionEn,
@@ -233,7 +233,7 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
                             {isTiny ? displayPlaceholder : (isSmall ? `[${displayPlaceholder}]` : `[ ${displayPlaceholder} ]`)}
                         </span>
                     </div>
-                    <div className={`absolute top-[calc(100%+3px)] left-1/2 -translate-x-1/2 flex items-center gap-1 z-10 opacity-0 group-hover/item:opacity-100 transition-all duration-300 ${isRetro ? 'bg-[var(--bg-panel)]/80 backdrop-blur' : 'bg-black/80 backdrop-blur'} rounded p-1 border shadow-md ${isRetro ? 'border-[var(--border-main)]/40' : 'border-zinc-800'}`}>
+                    <div className={`absolute top-[calc(100%+3px)] left-0 flex items-center gap-1 z-10 opacity-0 group-hover/item:opacity-100 transition-all duration-300 ${isRetro ? 'bg-[var(--bg-panel)]/80 backdrop-blur' : 'bg-black/80 backdrop-blur'} rounded p-1 border shadow-md ${isRetro ? 'border-[var(--border-main)]/40' : 'border-zinc-800'}`}>
                         <button onClick={(e) => { e.stopPropagation(); onRandomizeBlock(blockId); }} disabled={isBlockLocked} className={`flex items-center justify-center p-0.5 ${isRetro ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--border-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors`}>
                             <Dice5 size={10} />
                         </button>
@@ -307,10 +307,10 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
                 </button>
             )}
             {hoveredPortal && !editingTag && !isCreatingNew && createPortal(
-                <div 
+                <div
                     className={`mist-labyrinth-tooltip fixed z-[9999] pointer-events-none ${hoveredPortal.showAbove ? '-translate-y-full' : ''}`}
-                    style={{ 
-                        top: hoveredPortal.pos.top, 
+                    style={{
+                        top: hoveredPortal.pos.top,
                         left: hoveredPortal.pos.left
                     }}
                 >

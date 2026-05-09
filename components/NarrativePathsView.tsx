@@ -5,7 +5,7 @@ import { STYLE_MATRIX, PERSPECTIVES, SENSORY_MODES } from '../data/narrative/sty
 import { DIRECTOR_STYLES } from '../data/narrative/director_styles';
 import { SV1_DATA } from '../data/engine_sv/SV1';
 import { SV2_DATA } from '../data/engine_sv/SV2';
-import { Sparkles, Film, Zap, BrainCircuit, BookOpen, ArrowRight, RotateCw, Check, Palette, Settings2, ArrowLeft, Copy, Layers, History as HistoryIcon, GitFork, Gem, Eye, Anchor, Wind, Globe, User, Fingerprint, List, X, Database, Terminal, Activity, Brain } from 'lucide-react';
+import { Sparkles, Film, Zap, BrainCircuit, BookOpen, ArrowRight, RotateCw, Check, Palette, Settings2, ArrowLeft, Copy, Layers, History as HistoryIcon, GitFork, Gem, Eye, Anchor, Wind, Globe, User, Fingerprint, List, X, Database, Terminal, Activity, Brain, ChevronRight } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { NarrativeLibraryModal } from './NarrativeLibraryModal';
 import { TaskManagerPanel } from './TaskManagerPanel';
@@ -479,12 +479,16 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                         </button>
                     )}
 
-                    {(!styleConfig.styleId && !isCommercialResults && !isExperimentalResults && !isAestheticResults && !isTrailerResults) && (
+                    {(!isCommercialResults && !isExperimentalResults && !isAestheticResults && !isTrailerResults) && (
                         <>
                             {/* Narrative Perspective */}
-                            <div className={`${controlClass} gap-2 relative`} title={lang === 'EN' ? "Narrative Perspective" : "叙事视点：决定故事的讲述角度"}>
+                            <div
+                                className={`${controlClass} gap-2 relative ${styleConfig.styleId ? 'opacity-40 pointer-events-none' : ''}`}
+                                title={styleConfig.styleId ? (lang === 'EN' ? "Perspective is fixed by Author Style" : "叙事视点已由作者风格锁定") : (lang === 'EN' ? "Narrative Perspective" : "叙事视点：决定故事的讲述角度")}
+                            >
                                 <Eye size={14} className="shrink-0" />
                                 <select
+                                    disabled={!!styleConfig.styleId}
                                     value={styleConfig.perspectiveId || ""}
                                     onChange={(e) => setStyleConfig({ ...styleConfig, perspectiveId: e.target.value })}
                                     className={`bg-transparent border-none text-xs font-bold ${themeTextColor} focus:ring-0 cursor-pointer w-full uppercase tracking-wider outline-none p-0`}
@@ -497,9 +501,13 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                             </div>
 
                             {/* Sensory Priority */}
-                            <div className={`${controlClass} gap-2 relative`} title={lang === 'EN' ? "Sensory Priority" : "感官优先：决定描写的侧重点"}>
+                            <div
+                                className={`${controlClass} gap-2 relative ${styleConfig.styleId ? 'opacity-40 pointer-events-none' : ''}`}
+                                title={styleConfig.styleId ? (lang === 'EN' ? "Sensory focus is fixed by Author Style" : "感官侧重已由作者风格锁定") : (lang === 'EN' ? "Sensory Priority" : "感官优先：决定描写的侧重点")}
+                            >
                                 <Fingerprint size={14} className="shrink-0" />
                                 <select
+                                    disabled={!!styleConfig.styleId}
                                     value={styleConfig.sensoryId || ""}
                                     onChange={(e) => setStyleConfig({ ...styleConfig, sensoryId: e.target.value })}
                                     className={`bg-transparent border-none text-xs font-bold ${themeTextColor} focus:ring-0 cursor-pointer w-full uppercase tracking-wider outline-none p-0`}
@@ -763,29 +771,30 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                     <button
                         onClick={handleGenerate}
                         disabled={isProcessing || !selectedPathId || treatments.length === 0}
-                        className={`mist-app-primary-action flex items-center justify-center gap-3 px-8 py-3 text-xs font-bold uppercase tracking-widest transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed group min-w-[200px] border
+                        className={`mist-traverse-action mist-app-primary-action flex items-center justify-center gap-3 px-8 py-3 text-xs font-bold uppercase tracking-widest transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed group min-w-[220px] border
                 ${selectedPathId
                             ? (theme === 'retro' ? 'bg-[#8B261D] hover:bg-[#631B15] border-[#8B261D] text-white shadow-none' : getGenerateButtonClass(hasExistingBlueprint))
                             : (theme === 'retro' ? 'bg-white border-[#8B261D]/20 text-zinc-400' : 'bg-zinc-900 text-zinc-600 border-zinc-800') + ' cursor-not-allowed'
                         }
-             `}
-                >
-                    {isProcessing ? (
-                        <>
-                            <RotateCw size={16} className="animate-spin" />
-                            <span className="tabular-nums">
-                                {lang === 'EN' ? "Building" : "构建中"}
-                                <ProcessingTimer startTime={bibleStartTime} />
-                            </span>
-                        </>
-                    ) : (
-                        <>
-                            {hasExistingBlueprint ? <BookOpen size={16} /> : <Sparkles size={16} />}
-                            <span>{getGenerateButtonLabel()}</span>
-                            <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-                        </>
-                    )}
-                </button>
+              `}
+                        style={{ boxShadow: 'none' }}
+                    >
+                        {isProcessing ? (
+                            <>
+                                <RotateCw size={16} className="animate-spin" />
+                                <span className="tabular-nums w-full text-center">
+                                    {lang === 'EN' ? "Building" : "构建中"}
+                                    <ProcessingTimer startTime={bibleStartTime} />
+                                </span>
+                            </>
+                        ) : (
+                            <>
+                                {hasExistingBlueprint ? <BookOpen size={16} className="group-hover:scale-110 transition-transform" /> : <Zap size={16} className="group-hover:scale-110 transition-transform" />}
+                                <span className="tabular-nums w-full text-center">{getGenerateButtonLabel()}</span>
+                                <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                            </>
+                        )}
+                    </button>
                 </div>
             </div>
 

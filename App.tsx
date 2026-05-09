@@ -892,13 +892,47 @@ const App: React.FC = () => {
     };
 
     const handleToggleTagLock = (blockId: string, tagName: string) => {
+        const selectedTags = narrativeFieldState[blockId] || [];
+        if (!selectedTags.includes(tagName)) return;
+
         setLockedTags(prev => {
-            const currentLocks = prev[blockId] || [];
+            const currentLocks = (prev[blockId] || []).filter(t => selectedTags.includes(t));
             if (currentLocks.includes(tagName)) {
-                return { ...prev, [blockId]: currentLocks.filter(t => t !== tagName) };
-            } else {
-                return { ...prev, [blockId]: [...currentLocks, tagName] };
+                const nextLocks = currentLocks.filter(t => t !== tagName);
+                const next = { ...prev, [blockId]: nextLocks };
+                if (nextLocks.length === 0) delete next[blockId];
+                return next;
             }
+            return { ...prev, [blockId]: [...currentLocks, tagName] };
+        });
+    };
+
+    const getVisibleLockedTags = (blockId: string, sourceState: NarrativeFieldState = narrativeFieldState) => {
+        return randomizerService.getVisibleLockedTags(sourceState, lockedTags, blockId);
+    };
+
+    const getSingleRandomTargetCount = (blockId: string, lockedCount: number, baseCount: number) => {
+        if (blockId === 'skin_location' && lockedCount > 0) return Math.max(baseCount, 2);
+        return Math.max(baseCount, lockedCount);
+    };
+
+    const pruneTagLocksToVisibleState = (blockIds: string[], nextFieldState: NarrativeFieldState) => {
+        setLockedTags(prev => {
+            let changed = false;
+            const next = { ...prev };
+            blockIds.forEach(blockId => {
+                const currentVisible = new Set(narrativeFieldState[blockId] || []);
+                const nextVisible = new Set(nextFieldState[blockId] || []);
+                const locks = (prev[blockId] || []).filter(tag => currentVisible.has(tag) && nextVisible.has(tag));
+                if (locks.length > 0) {
+                    if (locks.length !== (prev[blockId] || []).length) changed = true;
+                    next[blockId] = locks;
+                } else if (prev[blockId]?.length) {
+                    changed = true;
+                    delete next[blockId];
+                }
+            });
+            return changed ? next : prev;
         });
     };
 
@@ -907,14 +941,18 @@ const App: React.FC = () => {
     };
 
     const handleRandomizeTag = (blockId: string, oldTag: string) => {
+        if (lockedModules[blockId] || getVisibleLockedTags(blockId).includes(oldTag)) return;
+
         const newTag = randomizerService.getSingleRandomTag(blockId, oldTag, selectedDriver, narrativeFieldState);
         if (newTag && newTag !== oldTag) {
             const currentTags = narrativeFieldState[blockId] || [];
             const updatedTags = currentTags.map(t => t === oldTag ? newTag : t);
-            updateNarrativeState({
+            const nextState = {
                 ...narrativeFieldState,
                 [blockId]: updatedTags
-            });
+            };
+            updateNarrativeState(nextState);
+            pruneTagLocksToVisibleState([blockId], nextState);
 
             // Clean up old tag's face and assign new face to new tag
             setFaceState(prev => {
@@ -926,13 +964,6 @@ const App: React.FC = () => {
                 }
                 return updated;
             });
-
-            if (lockedTags[blockId]) {
-                setLockedTags(prev => ({
-                    ...prev,
-                    [blockId]: (prev[blockId] || []).filter(t => t !== oldTag)
-                }));
-            }
         }
     };
 
@@ -943,27 +974,25 @@ const App: React.FC = () => {
         const newState = { ...narrativeFieldState };
         const currentTags = newState[blockId] || [];
 
-        // Use RANDOM_RANGES for count determination (v2.0 protocol)
+        // Single block randomization uses the non-empty single-random protocol.
         let count = 1;
-        if (selectedDriver === DriverType.AESTHETIC && (blockId === 'aes_skin_texture' || blockId === 'aes_body_features' || blockId === 'aes_face_features')) {
-            count = Math.floor(Math.random() * 2) + 1;
-        } else {
-            const range = RANDOM_RANGES[blockId];
-            if (range) {
-                const [min, max] = range;
-                count = min === max ? min : Math.floor(Math.random() * (max - min + 1)) + min;
+        if (selectedDriver === DriverType.AESTHETIC) {
+            if (blockId === 'aes_skin_texture' || blockId === 'aes_body_features' || blockId === 'aes_face_features') {
+                count = Math.floor(Math.random() * 2) + 1;
             } else {
-                // Fallback for aesthetic/other blocks without RANDOM_RANGES
                 const limit = BLOCK_LIMITS[blockId] || 1;
                 if (limit > 1) count = Math.floor(Math.random() * Math.min(limit, 3)) + 1;
             }
+        } else {
+            count = randomizerService.getRandomCount(blockId, 'single');
         }
 
         // For 0-count (0-1 range that rolled 0), clear the block
         if (count === 0) {
-            const locks = lockedTags[blockId] || [];
+            const locks = getVisibleLockedTags(blockId);
             newState[blockId] = (newState[blockId] || []).filter(t => locks.includes(t));
             updateNarrativeState(newState);
+            pruneTagLocksToVisibleState([blockId], newState);
             return;
         }
 
@@ -982,10 +1011,11 @@ const App: React.FC = () => {
         if (!category && (blockId === 'skin_genre' || blockId === 'skin_animation_genre' || blockId === 'skin_era')) {
             const sourceCats = blockId === 'skin_genre' ? GENRE_CATEGORIES : WORLD_MOTIF_CATEGORIES;
             const allItems = sourceCats.flatMap(c => c.items);
-            const locks = lockedTags[blockId] || [];
+            const locks = getVisibleLockedTags(blockId);
             const keptTags = currentTags.filter(t => locks.includes(t));
             const available = allItems.filter(i => !keptTags.includes(i.name));
-            const needed = Math.max(0, count - keptTags.length);
+            const targetCount = getSingleRandomTargetCount(blockId, keptTags.length, count);
+            const needed = Math.max(0, targetCount - keptTags.length);
             const selected: string[] = [];
             for (let i = 0; i < needed; i++) {
                 if (available.length === 0) break;
@@ -995,6 +1025,7 @@ const App: React.FC = () => {
             }
             newState[blockId] = [...keptTags, ...selected];
             updateNarrativeState(newState);
+            pruneTagLocksToVisibleState([blockId], newState);
             ensureFacesForTags(newState[blockId] || []);
             return;
         }
@@ -1014,6 +1045,15 @@ const App: React.FC = () => {
 
             // SUR7 Gender bias: 70% female, 30% male
             if (blockId === 'skin_gender') {
+                const locks = getVisibleLockedTags(blockId);
+                const keptTags = currentTags.filter(t => locks.includes(t));
+                if (keptTags.length > 0) {
+                    newState[blockId] = keptTags;
+                    updateNarrativeState(newState);
+                    pruneTagLocksToVisibleState([blockId], newState);
+                    ensureFacesForTags(newState[blockId] || []);
+                    return;
+                }
                 const isFemale = Math.random() < 0.70;
                 const femaleItems = availableItems.filter(i => {
                     const n = (i.name + ' ' + (i.group || '')).toLowerCase();
@@ -1028,13 +1068,15 @@ const App: React.FC = () => {
                     newState[blockId] = [targetPool[Math.floor(Math.random() * targetPool.length)].name];
                 }
                 updateNarrativeState(newState);
+                pruneTagLocksToVisibleState([blockId], newState);
                 ensureFacesForTags(newState[blockId] || []);
                 return;
             }
 
-            const locks = lockedTags[blockId] || [];
+            const locks = getVisibleLockedTags(blockId);
             const keptTags = currentTags.filter(t => locks.includes(t));
-            const needed = Math.max(0, count - keptTags.length);
+            const targetCount = getSingleRandomTargetCount(blockId, keptTags.length, count);
+            const needed = Math.max(0, targetCount - keptTags.length);
             const available = availableItems.filter(i => !keptTags.includes(i.name));
             const selected: string[] = [];
             for (let i = 0; i < needed; i++) {
@@ -1045,6 +1087,7 @@ const App: React.FC = () => {
             }
             newState[blockId] = [...keptTags, ...selected];
             updateNarrativeState(newState);
+            pruneTagLocksToVisibleState([blockId], newState);
             ensureFacesForTags(newState[blockId] || []);
         }
     };
@@ -1060,7 +1103,7 @@ const App: React.FC = () => {
 
         summaryBlocks.forEach(blockId => {
             if (lockedModules[blockId]) return;
-            
+
             let keepOld = true;
             // skin_age / skin_structure / skin_volume are not in the 12-word filter, give them an independent 50% chance
             if (blockId === 'skin_age' || blockId === 'skin_structure' || blockId === 'skin_volume') {
@@ -1070,7 +1113,7 @@ const App: React.FC = () => {
                 if (!participants.has(blockId)) keepOld = false;
             }
             if (!keepOld) {
-                const locks = lockedTags[blockId] || [];
+                const locks = getVisibleLockedTags(blockId);
                 newState[blockId] = (newState[blockId] || []).filter(t => locks.includes(t));
                 return;
             }
@@ -1079,18 +1122,38 @@ const App: React.FC = () => {
             // We inline the logic here to batch all changes into one state update
             const range = RANDOM_RANGES[blockId];
             const count = range ? (range[0] === range[1] ? range[0] : Math.floor(Math.random() * (range[1] - range[0] + 1)) + range[0]) : 1;
+            const lockedCount = getVisibleLockedTags(blockId).length;
+            const targetCount = Math.max(count, lockedCount);
             if (count === 0) {
-                const locks = lockedTags[blockId] || [];
+                const locks = getVisibleLockedTags(blockId);
                 newState[blockId] = (newState[blockId] || []).filter(t => locks.includes(t));
+                return;
+            }
+
+            // Handle special cases whose source libraries are flattened category groups.
+            if (blockId === 'skin_genre') {
+                const genreItems = GENRE_CATEGORIES.flatMap(c => c.items);
+                const locks = getVisibleLockedTags(blockId);
+                const keptTags = (newState[blockId] || []).filter(t => locks.includes(t));
+                const needed = Math.max(0, targetCount - keptTags.length);
+                const available = genreItems.filter(i => !keptTags.includes(i.name));
+                const selected: string[] = [];
+                for (let i = 0; i < needed; i++) {
+                    if (available.length === 0) break;
+                    const idx = Math.floor(Math.random() * available.length);
+                    selected.push(available[idx].name);
+                    available.splice(idx, 1);
+                }
+                newState[blockId] = [...keptTags, ...selected];
                 return;
             }
 
             // Handle special case for Era
             if (blockId === 'skin_era') {
                 const allItems = WORLD_MOTIF_CATEGORIES.flatMap(c => c.items);
-                const locks = lockedTags[blockId] || [];
+                const locks = getVisibleLockedTags(blockId);
                 const keptTags = (newState[blockId] || []).filter(t => locks.includes(t));
-                const needed = Math.max(0, count - keptTags.length);
+                const needed = Math.max(0, targetCount - keptTags.length);
                 const available = allItems.filter(i => !keptTags.includes(i.name));
                 const selected: string[] = [];
                 for (let i = 0; i < needed; i++) {
@@ -1120,6 +1183,12 @@ const App: React.FC = () => {
 
                 // SUR7 gender bias
                 if (blockId === 'skin_gender') {
+                    const locks = getVisibleLockedTags(blockId);
+                    const keptTags = (newState[blockId] || []).filter(t => locks.includes(t));
+                    if (keptTags.length > 0) {
+                        newState[blockId] = keptTags;
+                        return;
+                    }
                     const isFemale = Math.random() < 0.70;
                     const femaleItems = availableItems.filter(i => (i.name + ' ' + (i.group || '')).toLowerCase().includes('female') || (i.name + ' ' + (i.group || '')).toLowerCase().includes('女'));
                     const maleItems = availableItems.filter(i => (i.name + ' ' + (i.group || '')).toLowerCase().includes('male') || (i.name + ' ' + (i.group || '')).toLowerCase().includes('男'));
@@ -1128,9 +1197,9 @@ const App: React.FC = () => {
                     return;
                 }
 
-                const locks = lockedTags[blockId] || [];
+                const locks = getVisibleLockedTags(blockId);
                 const keptTags = (newState[blockId] || []).filter(t => locks.includes(t));
-                const needed = Math.max(0, count - keptTags.length);
+                const needed = Math.max(0, targetCount - keptTags.length);
                 const available = availableItems.filter(i => !keptTags.includes(i.name));
                 const selected: string[] = [];
                 for (let i = 0; i < needed; i++) {
@@ -1145,22 +1214,35 @@ const App: React.FC = () => {
 
         // Also handle SUR3 coordinates if they passed the filter
         if (!lockedModules['skin_year_exact']) {
+            const locks = getVisibleLockedTags('skin_year_exact');
+            const keptTags = (newState['skin_year_exact'] || []).filter(t => locks.includes(t));
             if (participants.has('skin_year_exact')) {
-                const year = Math.floor(Math.random() * (2050 - (-2000) + 1)) + (-2000);
-                newState['skin_year_exact'] = [year.toString()];
+                if (keptTags.length > 0) {
+                    newState['skin_year_exact'] = keptTags;
+                } else {
+                    const year = Math.floor(Math.random() * (2050 - (-2000) + 1)) + (-2000);
+                    newState['skin_year_exact'] = [year.toString()];
+                }
             } else {
-                newState['skin_year_exact'] = [];
+                newState['skin_year_exact'] = keptTags;
             }
         }
         if (!lockedModules['skin_country_exact']) {
+            const locks = getVisibleLockedTags('skin_country_exact');
+            const keptTags = (newState['skin_country_exact'] || []).filter(t => locks.includes(t));
             if (participants.has('skin_country_exact')) {
-                const r = COUNTRY_PRESETS[Math.floor(Math.random() * COUNTRY_PRESETS.length)];
-                newState['skin_country_exact'] = [r.cn];
+                if (keptTags.length > 0) {
+                    newState['skin_country_exact'] = keptTags;
+                } else {
+                    const r = COUNTRY_PRESETS[Math.floor(Math.random() * COUNTRY_PRESETS.length)];
+                    newState['skin_country_exact'] = [r.cn];
+                }
             } else {
-                newState['skin_country_exact'] = [];
+                newState['skin_country_exact'] = keptTags;
             }
         }
 
+        pruneTagLocksToVisibleState([...summaryBlocks, 'skin_year_exact', 'skin_country_exact'], newState);
         updateNarrativeState(newState);
         ensureFacesForTags(Object.values(newState).flat());
     };
@@ -1172,22 +1254,12 @@ const App: React.FC = () => {
 
         structureBlocks.forEach(blockId => {
             if (lockedModules[blockId]) return;
-            
-            let keepOld = true;
-            // skin_structure and skin_volume: independent 50% chance (not in 12-word filter)
-            if (blockId === 'skin_structure' || blockId === 'skin_volume') {
-                if (Math.random() >= 0.5) keepOld = false;
-            }
-            if (!keepOld) {
-                const locks = lockedTags[blockId] || [];
-                newState[blockId] = (newState[blockId] || []).filter(t => locks.includes(t));
-                return;
-            }
 
-            const range = RANDOM_RANGES[blockId];
-            const count = range ? (range[0] === range[1] ? range[0] : Math.floor(Math.random() * (range[1] - range[0] + 1)) + range[0]) : 1;
+            const count = randomizerService.getRandomCount(blockId, 'single');
+            const lockedCount = getVisibleLockedTags(blockId).length;
+            const targetCount = getSingleRandomTargetCount(blockId, lockedCount, count);
             if (count === 0) {
-                const locks = lockedTags[blockId] || [];
+                const locks = getVisibleLockedTags(blockId);
                 newState[blockId] = (newState[blockId] || []).filter(t => locks.includes(t));
                 return;
             }
@@ -1195,9 +1267,9 @@ const App: React.FC = () => {
             // Handle Genre separately
             if (blockId === 'skin_genre') {
                 const genreLib = GENRE_CATEGORIES.flatMap(c => c.items);
-                const locks = lockedTags[blockId] || [];
+                const locks = getVisibleLockedTags(blockId);
                 const keptTags = (newState[blockId] || []).filter(t => locks.includes(t));
-                const needed = Math.max(0, count - keptTags.length);
+                const needed = Math.max(0, targetCount - keptTags.length);
                 const available = genreLib.filter(i => !keptTags.includes(i.name));
                 const selected: string[] = [];
                 for (let i = 0; i < needed; i++) {
@@ -1215,9 +1287,9 @@ const App: React.FC = () => {
             const libId = `${blockId}_lib`;
             const category = fullLibrary.find(c => c.id === libId);
             if (category && category.items.length > 0) {
-                const locks = lockedTags[blockId] || [];
+                const locks = getVisibleLockedTags(blockId);
                 const keptTags = (newState[blockId] || []).filter(t => locks.includes(t));
-                const needed = Math.max(0, count - keptTags.length);
+                const needed = Math.max(0, targetCount - keptTags.length);
                 const available = category.items.filter(i => !keptTags.includes(i.name));
                 const selected: string[] = [];
                 for (let i = 0; i < needed; i++) {
@@ -1230,15 +1302,18 @@ const App: React.FC = () => {
             }
         });
 
+        pruneTagLocksToVisibleState(structureBlocks, newState);
         updateNarrativeState(newState);
         ensureFacesForTags(Object.values(newState).flat());
     };
 
     const handleClearBlock = (blockId: string) => {
         if (lockedModules[blockId]) return;
+        const locks = getVisibleLockedTags(blockId);
         const newState = { ...narrativeFieldState };
-        newState[blockId] = [];
+        newState[blockId] = (newState[blockId] || []).filter(tag => locks.includes(tag));
         updateNarrativeState(newState);
+        pruneTagLocksToVisibleState([blockId], newState);
     };
 
     const openLibrary = (blockId: string) => {
@@ -1249,6 +1324,7 @@ const App: React.FC = () => {
 
     const removeTag = (blockId: string, tag: string) => {
         if (lockedModules[blockId]) return;
+        if (getVisibleLockedTags(blockId).includes(tag)) return;
         const rawCurrent = narrativeFieldState[blockId];
         const current = Array.isArray(rawCurrent) ? rawCurrent : (rawCurrent ? [String(rawCurrent)] : []);
         handleNarrativeChange({
@@ -1259,6 +1335,8 @@ const App: React.FC = () => {
 
     const handleToggleTag = (blockId: string, tag: string) => {
         if (lockedModules[blockId]) return;
+        const visibleLocks = getVisibleLockedTags(blockId);
+        if (visibleLocks.includes(tag)) return;
 
         if (blockId === 'aes_palette_preset') {
             const preset = MASTER_PRESETS.find(p => p.name === tag || p.id === tag);
@@ -1295,6 +1373,7 @@ const App: React.FC = () => {
         const current = Array.isArray(rawCurrent) ? rawCurrent : (rawCurrent ? [String(rawCurrent)] : []);
         const limit = BLOCK_LIMITS[blockId] || 1;
         let newState = { ...narrativeFieldState };
+        if (limit === 1 && visibleLocks.length > 0 && !visibleLocks.includes(tag)) return;
         if (selectedDriver === DriverType.AESTHETIC) {
             if (['aes_action_static', 'aes_action_dynamic', 'aes_action_complex'].includes(blockId)) {
                 ['aes_action_static', 'aes_action_dynamic', 'aes_action_complex'].forEach(id => { if (id !== blockId) newState[id] = []; });
@@ -1330,6 +1409,7 @@ const App: React.FC = () => {
         }
 
         if (current.includes(tag)) {
+            if (visibleLocks.includes(tag)) return;
             newState[blockId] = current.filter(t => t !== tag);
             // Remove face state when deselecting
             setFaceState(prev => {
@@ -1624,6 +1704,15 @@ const App: React.FC = () => {
         setActiveHistoryItem(normalizedItem);
         undoRedoDispatch({ type: 'SET', state: normalizedItem.fieldState || {} });
         setSelectedDriver(normalizedItem.driverId);
+
+        // Restore all other parameters including vision symptoms (植入症候)
+        if (normalizedItem.visionInput !== undefined) setVisionInput(normalizedItem.visionInput);
+        if (normalizedItem.visionAnalysis !== undefined) setVisionAnalysis(normalizedItem.visionAnalysis);
+        if (normalizedItem.visionImage !== undefined) setVisionImage(normalizedItem.visionImage);
+        if (normalizedItem.worldLaw) setWorldLawConfig(normalizedItem.worldLaw);
+        if (normalizedItem.subjectType) setSubjectType(normalizedItem.subjectType);
+        if (normalizedItem.aestheticMode) setAestheticMode(normalizedItem.aestheticMode);
+        if (normalizedItem.colorPalette) setColorPalette(normalizedItem.colorPalette);
 
         if (normalizedItem.type === 'METONYMY') {
             if (normalizedItem.blueprint) setMetonymyBlueprint(normalizedItem.blueprint);
@@ -2301,6 +2390,7 @@ const App: React.FC = () => {
                                 setIsPromptInspectorOpen={setIsPromptInspectorOpen}
                                 hideWorldLawControl={viewMode === 'ENGINE' && selectedDriver === DriverType.NARRATIVE}
                                 isAdmin={isAdmin}
+                                viewMode={viewMode}
                             />
                         )}
 
@@ -2450,7 +2540,7 @@ const App: React.FC = () => {
                     lang={lang}
                     driverType={selectedDriver}
                 />
-                
+
                 <PromptInspectorModal
                     isOpen={isPromptInspectorOpen}
                     onClose={() => setIsPromptInspectorOpen(false)}

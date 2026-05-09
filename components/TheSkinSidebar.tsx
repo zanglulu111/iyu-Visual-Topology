@@ -164,8 +164,8 @@ export const SkinSlot: React.FC<{
     };
 
     const getLockedStyle = () => {
-      if (theme === 'retro') return 'border-[var(--text-accent)] text-black bg-[var(--text-accent)]/10';
-      return 'border-[var(--mist-active-accent)] text-[var(--mist-active-accent)] bg-[var(--mist-active-accent)]/20';
+      if (theme === 'retro') return 'mist-token-locked border-[var(--text-accent)] text-white bg-[var(--text-accent)]/10';
+      return 'mist-token-locked border-[var(--mist-active-accent)] text-white bg-[var(--mist-active-accent)]/20';
     };
 
     // Style config for active/edit state
@@ -239,7 +239,7 @@ export const SkinSlot: React.FC<{
       <span className="inline-flex flex-wrap items-baseline gap-x-1 mx-1 relative">
         {hasTags ? (
           tags.map((tag, idx) => {
-            const isTagLocked = lockedTags?.[blockId]?.includes(tag);
+            const isTagLocked = lockedTags?.[blockId]?.includes(tag) || !!isBlockLocked;
 
             let details = getItemDetails(tag, blockId);
             if (typeof details === 'string') {
@@ -251,11 +251,14 @@ export const SkinSlot: React.FC<{
               <span key={`${blockId}-${idx}`} className="inline-flex flex-col items-center group/tag relative align-top">
                 <span className="flex items-baseline relative z-10">
                   <span
-                    onClick={() => onClickOverride ? onClickOverride() : onOpen(blockId)}
+                    onClick={() => {
+                      if (isTagLocked) return;
+                      onClickOverride ? onClickOverride() : onOpen(blockId);
+                    }}
                     onMouseEnter={(e) => safeDetails && handleMouseEnter(e, safeDetails)}
                     onMouseLeave={handleMouseLeave}
                     className={`
-                    mist-labyrinth-hover-token cursor-pointer font-serif font-bold transition-all duration-300 hover:z-50 inline-block
+                    mist-labyrinth-hover-token font-serif font-bold transition-all duration-300 hover:z-50 inline-block ${isTagLocked ? 'cursor-not-allowed' : 'cursor-pointer'}
                     ${isTagLocked
                         ? `border ${lockedClass} px-2 rounded`
                         : `${theme === 'retro' ? 'text-black hover:bg-black/5' : 'text-white hover:bg-white/10'} border-b-2 ${accentColor} px-0.5 rounded-sm`
@@ -268,7 +271,7 @@ export const SkinSlot: React.FC<{
                   {idx < tags.length - 1 && <span className={`font-bold mx-0.5 text-lg ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}`}>、</span>}
                 </span>
 
-                <div className={`flex items-center gap-1 mt-1 z-10 ${theme === 'retro' ? 'bg-[var(--bg-panel)]' : 'bg-black/80'} rounded p-1 shadow-md border ${theme === 'retro' ? 'border-[var(--border-main)]/40' : 'border-zinc-800'} ${alwaysShowButtons ? 'opacity-100' : 'opacity-0 group-hover/tag:opacity-100'} transition-opacity duration-300`}>
+                <div className={`mist-skin-slot-actions flex items-center gap-1 mt-1 z-10 ${theme === 'retro' ? 'bg-[var(--bg-panel)]' : 'bg-black/80'} rounded p-1 shadow-md border ${theme === 'retro' ? 'border-[var(--border-main)]/40' : 'border-zinc-800'} ${alwaysShowButtons ? 'opacity-100' : 'opacity-0 group-hover/tag:opacity-100'} transition-opacity duration-300`}>
                   <button
                     onClick={(e) => { e.stopPropagation(); onRandomizeTag?.(blockId, tag); }}
                     disabled={isTagLocked}
@@ -277,8 +280,12 @@ export const SkinSlot: React.FC<{
                     <Dice5 size={10} />
                   </button>
                   <button
-                    onClick={(e) => { e.stopPropagation(); onToggleTagLock?.(blockId, tag); }}
-                    className={`flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isTagLocked ? (theme === 'retro' ? 'border-[var(--text-accent)] text-black bg-[var(--text-accent)]/10' : lockedClass) : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (isBlockLocked) onToggleLockBlock?.(blockId);
+                      else onToggleTagLock?.(blockId, tag);
+                    }}
+                    className={`flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isTagLocked ? (theme === 'retro' ? 'border-[var(--text-accent)] text-white bg-[var(--text-accent)]/10' : lockedClass) : ''}`}
                   >
                     {isTagLocked ? <Lock size={10} /> : <Unlock size={10} />}
                   </button>
@@ -316,7 +323,7 @@ export const SkinSlot: React.FC<{
             >
               {lang === 'EN' ? '[' : '【'}{placeholder}{lang === 'EN' ? ']' : '】'}
             </span>
-            <div className={`flex items-center gap-1 mt-1 z-10 ${theme === 'retro' ? 'bg-[var(--bg-panel)]' : 'bg-black/80'} rounded p-1 border ${theme === 'retro' ? 'border-[var(--border-main)]/40' : 'border-zinc-800'} shadow-md ${alwaysShowButtons ? 'opacity-100' : 'opacity-0 group-hover/tag:opacity-100'} transition-opacity duration-300`}>
+            <div className={`mist-skin-slot-actions flex items-center gap-1 mt-1 z-10 ${theme === 'retro' ? 'bg-[var(--bg-panel)]' : 'bg-black/80'} rounded p-1 border ${theme === 'retro' ? 'border-[var(--border-main)]/40' : 'border-zinc-800'} shadow-md ${alwaysShowButtons ? 'opacity-100' : 'opacity-0 group-hover/tag:opacity-100'} transition-opacity duration-300`}>
               <button onClick={(e) => { e.stopPropagation(); onRandomizeBlock?.(blockId); }} disabled={isBlockLocked} className={`flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-white' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-white'} border rounded transition-colors`}>
                 <Dice5 size={10} />
               </button>

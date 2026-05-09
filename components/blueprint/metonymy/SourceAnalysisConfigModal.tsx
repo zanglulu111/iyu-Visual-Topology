@@ -105,7 +105,8 @@ export const SourceAnalysisConfigModal: React.FC<SourceAnalysisConfigModalProps>
                         />
                         <button
                             onClick={() => onConfirm({ dialogue })}
-                            className={`px-6 py-2 ${theme === 'retro' ? 'bg-[#8B261D] hover:bg-[#6D1E16] text-white overflow-hidden' : `bg-${colorBase}/20 hover:bg-${colorBase}/30 text-${colorBase} border border-current`} font-bold text-sm rounded transition-all flex items-center gap-2 shadow-[0_4px_15px_rgba(0,0,0,0.3)]`}
+                            className="mist-traverse-action mist-app-primary-action px-6 py-2 font-bold text-sm rounded transition-all flex items-center gap-2 active:scale-95 border"
+                            style={{ boxShadow: 'none' }}
                         >
                             <Sparkles size={14} />
                             {lang === 'CN' ? "开始全局原文反推" : "START GLOBAL ANALYSIS"}

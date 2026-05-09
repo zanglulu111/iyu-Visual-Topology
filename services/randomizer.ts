@@ -1,24 +1,25 @@
 
 import { NarrativeFieldState, DriverType, SubjectType, NarrativeBlockDef, LibraryCategoryDef, WorldLawConfig, AestheticMode } from '../types';
-import { 
-  NARRATIVE_ENGINE_BLOCKS, 
-  NARRATIVE_ENGINE_LIBRARY, 
-  COMMERCIAL_ENGINE_BLOCKS, 
-  COMMERCIAL_ENGINE_LIBRARY, 
-  EXPERIMENTAL_ENGINE_BLOCKS, 
-  EXPERIMENTAL_ENGINE_LIBRARY, 
-  AESTHETIC_ENGINE_BLOCKS, 
-  AESTHETIC_ENGINE_LIBRARY, 
-  TRAILER_ENGINE_BLOCKS, 
+import {
+  NARRATIVE_ENGINE_BLOCKS,
+  NARRATIVE_ENGINE_LIBRARY,
+  COMMERCIAL_ENGINE_BLOCKS,
+  COMMERCIAL_ENGINE_LIBRARY,
+  EXPERIMENTAL_ENGINE_BLOCKS,
+  EXPERIMENTAL_ENGINE_LIBRARY,
+  AESTHETIC_ENGINE_BLOCKS,
+  AESTHETIC_ENGINE_LIBRARY,
+  TRAILER_ENGINE_BLOCKS,
   TRAILER_ENGINE_LIBRARY,
-  COMM_SKIN_BLOCKS, 
+  COMM_SKIN_BLOCKS,
   COMM_SKIN_LIBRARY,
-  EXPERIMENTAL_SKIN_BLOCKS, 
+  EXPERIMENTAL_SKIN_BLOCKS,
   EXPERIMENTAL_SKIN_LIBRARY,
-  TRAILER_SKIN_BLOCKS, 
+  TRAILER_SKIN_BLOCKS,
   TRAILER_SKIN_LIBRARY,
   BLOCK_LIMITS,
   RANDOM_RANGES,
+  SINGLE_RANDOM_RANGES,
   SURFACE_WEIGHT_CONFIG,
   AES_COLOR_PRESETS,
   COUNTRY_PRESETS,
@@ -33,8 +34,8 @@ import {
 
 // Constants for Aesthetic Mode Logic
 export const HUMAN_BLOCKS = [
-    'aes_age', 'aes_gender', 'aes_body_type', 'aes_ethnicity', 'aes_occupation', 'aes_persona', 
-    'aes_hair_color', 'aes_hair_style_f', 'aes_hair_style_m', 'aes_eye_color', 'aes_eye_shape', 'aes_eye_fx', 'aes_face_features', 'aes_expression', 'aes_body_features', 'aes_skin_texture', 
+    'aes_age', 'aes_gender', 'aes_body_type', 'aes_ethnicity', 'aes_occupation', 'aes_persona',
+    'aes_hair_color', 'aes_hair_style_f', 'aes_hair_style_m', 'aes_eye_color', 'aes_eye_shape', 'aes_eye_fx', 'aes_face_features', 'aes_expression', 'aes_body_features', 'aes_skin_texture',
     // Legacy look/prop blocks are intentionally omitted from the active aesthetic schema.
     'aes_action_static', 'aes_action_dynamic', 'aes_action_complex'
 ];
@@ -42,7 +43,7 @@ export const CREATURE_BLOCKS = ['aes_creature_size', 'aes_creature_class', 'aes_
 export const OBJECT_BLOCKS: string[] = [];
 
 export const AESTHETIC_GLOBAL_BLOCK_TO_CATEGORY: Record<string, string> = {
-    'aes_director_style': 'STYLE', 'aes_photo_style': 'STYLE', 'aes_art_style': 'STYLE', 
+    'aes_director_style': 'STYLE', 'aes_photo_style': 'STYLE', 'aes_art_style': 'STYLE',
     'aes_anim_director': 'STYLE', 'aes_art_movement': 'STYLE', 'aes_poster_style': 'STYLE', 'aes_color_palette': 'STYLE',
     'aes_palette_preset': 'PRESETS',
     'aes_image_focus': 'L1.2', 'aes_visual_balance': 'L1.2', 'aes_shot_size': 'L1.2', 'aes_angle': 'L1.2', 'aes_focal_length': 'L1.2', 'aes_depth': 'L1.2', 'aes_shutter': 'L1.2', 'aes_lens_fx': 'L1.2', 'aes_perspective': 'L1.2',
@@ -62,46 +63,74 @@ const getLib = (blockId: string) => {
     return cat?.items || [];
 };
 
-const pickRandom = (blockId: string, count: number, currentTags: string[], lockedTags: string[], libItems: any[]) => {
+export type RandomCountMode = 'summary' | 'single';
+
+export const getVisibleLockedTags = (
+    fieldState: NarrativeFieldState,
+    lockedTags: Record<string, string[]>,
+    blockId: string
+): string[] => {
+    const selected = new Set(fieldState[blockId] || []);
+    return (lockedTags[blockId] || []).filter(tag => selected.has(tag));
+};
+
+export const getRandomCount = (blockId: string, mode: RandomCountMode = 'summary'): number => {
+    const range = mode === 'single' ? (SINGLE_RANDOM_RANGES[blockId] || RANDOM_RANGES[blockId]) : RANDOM_RANGES[blockId];
+    if (!range) return 1;
+    const [min, max] = range;
+    if (min === max) return min;
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+};
+
+export const pickRandomWithLocks = (
+    currentTags: string[],
+    lockedTagNames: string[],
+    libItems: any[],
+    count: number
+): string[] => {
     if (!libItems || libItems.length === 0) return [];
-    const keptTags = currentTags.filter(t => lockedTags.includes(t));
-    if (keptTags.length >= count) return keptTags.slice(0, count);
-    
+    const keptTags = currentTags.filter(t => lockedTagNames.includes(t));
+    if (keptTags.length >= count) return keptTags;
+
     const needed = Math.max(0, count - keptTags.length);
     const available = libItems.filter(i => !keptTags.includes(i.name));
     const shuffled = [...available].sort(() => 0.5 - Math.random());
     return [...keptTags, ...shuffled.slice(0, Math.min(needed, shuffled.length)).map(i => i.name)];
 };
 
+const pickRandom = (blockId: string, count: number, currentTags: string[], lockedTags: string[], libItems: any[]) => {
+    return pickRandomWithLocks(currentTags, lockedTags, libItems, count);
+};
+
 const isBlockLocked = (id: string, lockedModules: Record<string, boolean>) => {
     if (lockedModules[id]) return true;
     const globalCategory = AESTHETIC_GLOBAL_BLOCK_TO_CATEGORY[id];
     if (globalCategory && lockedModules[globalCategory]) return true;
-    if (HUMAN_BLOCKS.includes(id) && lockedModules['SUBJECT']) return true; 
-    if (CREATURE_BLOCKS.includes(id) && lockedModules['SUBJECT']) return true; 
+    if (HUMAN_BLOCKS.includes(id) && lockedModules['SUBJECT']) return true;
+    if (CREATURE_BLOCKS.includes(id) && lockedModules['SUBJECT']) return true;
     return false;
 };
 
 export type Archetype = 'ANCIENT' | 'MODERN' | 'FUTURE';
 
 export const getArchetypeFromEra = (eraTag: string): Archetype => {
-    if (!eraTag) return 'MODERN'; 
+    if (!eraTag) return 'MODERN';
     const lower = eraTag.toLowerCase();
-    if (lower.includes('future') || lower.includes('cyber') || lower.includes('space') || 
-        lower.includes('2050') || lower.includes('post-human') || lower.includes('tech') || 
-        lower.includes('star') || lower.includes('galactic') || lower.includes('mars') || 
+    if (lower.includes('future') || lower.includes('cyber') || lower.includes('space') ||
+        lower.includes('2050') || lower.includes('post-human') || lower.includes('tech') ||
+        lower.includes('star') || lower.includes('galactic') || lower.includes('mars') ||
         lower.includes('solar') || lower.includes('robot') || lower.includes('ai ')) {
         return 'FUTURE';
     }
-    if (lower.includes('ancient') || lower.includes('myth') || lower.includes('medieval') || 
-        lower.includes('dynasty') || lower.includes('renaissance') || lower.includes('feudal') || 
-        lower.includes('classic') || lower.includes('empire') || lower.includes('viking') || 
-        lower.includes('qin') || lower.includes('han') || lower.includes('tang') || 
+    if (lower.includes('ancient') || lower.includes('myth') || lower.includes('medieval') ||
+        lower.includes('dynasty') || lower.includes('renaissance') || lower.includes('feudal') ||
+        lower.includes('classic') || lower.includes('empire') || lower.includes('viking') ||
+        lower.includes('qin') || lower.includes('han') || lower.includes('tang') ||
         lower.includes('song') || lower.includes('ming') || lower.includes('greek') ||
         lower.includes('roman') || lower.includes('egypt')) {
         return 'ANCIENT';
     }
-    return 'MODERN'; 
+    return 'MODERN';
 };
 
 export const filterItemsByArchetype = (items: any[], archetype: Archetype, blockId: string) => {
@@ -128,15 +157,6 @@ export const filterItemsByArchetype = (items: any[], archetype: Archetype, block
 // ============================================================
 // RANDOMIZATION PROTOCOL v2.0 — Core Helpers
 // ============================================================
-
-/** Get random count from RANDOM_RANGES config */
-const getRandomCount = (blockId: string): number => {
-    const range = RANDOM_RANGES[blockId];
-    if (!range) return 1;
-    const [min, max] = range;
-    if (min === max) return min;
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-};
 
 /**
  * Weighted surface filter for the 12-word story summary.
@@ -200,9 +220,9 @@ export const weightedSurfaceFilter = (
 };
 
 export const getSingleRandomTag = (
-    blockId: string, 
-    currentTag: string, 
-    driverType: DriverType | null, 
+    blockId: string,
+    currentTag: string,
+    driverType: DriverType | null,
     fieldState: NarrativeFieldState
 ): string => {
     // --- SPECIAL HANDLING FOR COLOR PALETTE ---
@@ -221,7 +241,7 @@ export const getSingleRandomTag = (
     if (blockId === 'aes_palette_preset') {
          // Determine mode roughly by checking other fields or just pick from all
          // Ideally we should know if it's realism or stylized, but for single tag randomizer we can mix
-         const allPresets = MASTER_PRESETS; 
+         const allPresets = MASTER_PRESETS;
          const currentTags = fieldState[blockId] || [];
          const available = allPresets.filter(p => !currentTags.includes(p.name));
          if (available.length > 0) return available[Math.floor(Math.random() * available.length)].name;
@@ -232,13 +252,13 @@ export const getSingleRandomTag = (
     if (driverType === DriverType.COMMERCIAL) {
         fullLibrary = [...COMMERCIAL_ENGINE_LIBRARY, ...COMM_SKIN_LIBRARY];
     } else if (driverType === DriverType.AESTHETIC) {
-        fullLibrary = [...AESTHETIC_ENGINE_LIBRARY, ...SKIN_LIBRARY]; 
+        fullLibrary = [...AESTHETIC_ENGINE_LIBRARY, ...SKIN_LIBRARY];
     } else if (driverType === DriverType.EXPERIMENTAL) {
-        fullLibrary = [...EXPERIMENTAL_ENGINE_LIBRARY, ...EXPERIMENTAL_SKIN_LIBRARY]; 
+        fullLibrary = [...EXPERIMENTAL_ENGINE_LIBRARY, ...EXPERIMENTAL_SKIN_LIBRARY];
     } else if (driverType === DriverType.TRAILER) {
         fullLibrary = [...TRAILER_ENGINE_LIBRARY, ...TRAILER_SKIN_LIBRARY];
     } else {
-        fullLibrary = [...NARRATIVE_ENGINE_LIBRARY, ...SKIN_LIBRARY, ...GENRE_CATEGORIES, ...WORLD_MOTIF_CATEGORIES]; 
+        fullLibrary = [...NARRATIVE_ENGINE_LIBRARY, ...SKIN_LIBRARY, ...GENRE_CATEGORIES, ...WORLD_MOTIF_CATEGORIES];
     }
 
     const libId = blockId === 'skin_era' ? 'skin_era_lib' : `${blockId}_lib`;
@@ -277,7 +297,7 @@ export const generateAestheticSmartRandom = (
     const newState = { ...currentFieldState };
     const checkLock = (id: string) => isBlockLocked(id, lockedModules);
     const presetModifiedKeys = new Set<string>();
-    
+
     // Determine the active archetype for filtering
     const currentEraTags = newState['skin_era'] || [];
     const currentEra = currentEraTags.length > 0 ? currentEraTags[0] : "";
@@ -288,11 +308,11 @@ export const generateAestheticSmartRandom = (
         const availablePresets = aestheticMode === 'REALISM' ? MASTER_PRESETS_REALISM : MASTER_PRESETS_STYLIZED;
         const randomPreset = availablePresets[Math.floor(Math.random() * availablePresets.length)];
         newState['aes_palette_preset'] = [randomPreset.name];
-        
+
         ['aes_director_style', 'aes_photo_style', 'aes_art_style', 'aes_anim_director', 'aes_art_movement'].forEach(id => {
             newState[id] = [];
         });
-        
+
         Object.entries(randomPreset.params).forEach(([key, values]) => {
             if (!checkLock(key)) {
                 newState[key] = values;
@@ -310,7 +330,7 @@ export const generateAestheticSmartRandom = (
     const isPortraitOrMacro = currentComp.includes('Portrait') || currentComp.includes('Macro') || currentComp.includes('肖像') || currentComp.includes('微距');
 
     const l1_2_Blocks = [
-        'aes_shot_size', 'aes_visual_balance', 'aes_perspective', 
+        'aes_shot_size', 'aes_visual_balance', 'aes_perspective',
         'aes_angle', 'aes_focal_length', 'aes_depth', 'aes_shutter', 'aes_lens_fx'
     ];
     l1_2_Blocks.forEach(id => {
@@ -325,13 +345,13 @@ export const generateAestheticSmartRandom = (
 
     // --- 3. Subject (L2) - HUMAN ---
     if (subjectType === 'HUMAN') {
-        
+
         // [Rule 1] Identity Exclusivity: Persona vs Occupation
         const identityOptions = ['aes_persona', 'aes_occupation'];
         let activeIdentityBlock = "";
-        
+
         const lockedIdentityBlock = identityOptions.find(id => checkLock(id) && (currentFieldState[id]?.length > 0));
-        
+
         if (lockedIdentityBlock) {
              activeIdentityBlock = lockedIdentityBlock;
         } else {
@@ -364,10 +384,10 @@ export const generateAestheticSmartRandom = (
                 if (genderItem) newState['aes_gender'] = [genderItem.name];
             }
         }
-        
+
         const currentGenderTag = newState['aes_gender']?.[0] || "";
         const isFemale = currentGenderTag.includes('Female') || currentGenderTag.includes('女性');
-        
+
         // [Rule 6] Base Attributes (Age, Body, Ethnicity - 1 each)
         if (!checkLock('aes_age')) {
              const ageLib = getLib('aes_age');
@@ -395,13 +415,13 @@ export const generateAestheticSmartRandom = (
                  newState['aes_body_type'] = [chosen.name];
              }
         }
-        
+
         // [Rule 5] Actions: Static / Dynamic / Complex - Pick 1
         const actionBlocks = ['aes_action_static', 'aes_action_dynamic', 'aes_action_complex'];
         let activeActionBlock = actionBlocks[Math.floor(Math.random() * actionBlocks.length)];
         const lockedAction = actionBlocks.find(id => checkLock(id) && (currentFieldState[id]?.length > 0));
         if (lockedAction) activeActionBlock = lockedAction;
-        
+
         actionBlocks.forEach(id => {
             if (id === activeActionBlock) {
                 if (!checkLock(id)) {
@@ -418,7 +438,7 @@ export const generateAestheticSmartRandom = (
             isFemale ? 'aes_hair_style_f' : 'aes_hair_style_m',
             'aes_face_features', 'aes_expression', 'aes_skin_texture', 'aes_body_features'
         ];
-        
+
         if (isPortraitOrMacro) {
             detailPool.push('aes_eye_color', 'aes_eye_shape', 'aes_eye_fx');
         } else {
@@ -426,7 +446,7 @@ export const generateAestheticSmartRandom = (
             if (!checkLock('aes_eye_shape')) newState['aes_eye_shape'] = [];
             if (!checkLock('aes_eye_fx')) newState['aes_eye_fx'] = [];
         }
-        
+
         const shuffledPool = detailPool.sort(() => 0.5 - Math.random());
         const selectedDetails = shuffledPool.slice(0, 5);
         const ignoredDetails = shuffledPool.slice(5);
@@ -434,7 +454,7 @@ export const generateAestheticSmartRandom = (
         ignoredDetails.forEach(id => {
              if (!checkLock(id)) newState[id] = [];
         });
-        
+
         selectedDetails.forEach(id => {
             if (!checkLock(id)) {
                  const items = filterItemsByArchetype(getLib(id), archetype, id);
@@ -442,11 +462,11 @@ export const generateAestheticSmartRandom = (
                  newState[id] = pickRandom(id, count, currentFieldState[id]||[], lockedTags[id]||[], items);
             }
         });
-        
+
         if (isFemale && !checkLock('aes_hair_style_m')) newState['aes_hair_style_m'] = [];
         if (!isFemale && !checkLock('aes_hair_style_f')) newState['aes_hair_style_f'] = [];
-        
-        if (!checkLock('aes_species')) newState['aes_species'] = []; 
+
+        if (!checkLock('aes_species')) newState['aes_species'] = [];
 
     } else if (subjectType === 'CREATURE') {
         const cMulti2 = ['aes_creature_class'];
@@ -499,7 +519,7 @@ export const generateAestheticSmartRandom = (
              }
          }
     });
-    
+
     // Clear legacy stage blocks if they exist in saved presets.
     ['aes_air_medium', 'aes_a3', 'aes_weather', 'aes_synesthesia'].forEach(id => {
          if (!checkLock(id)) newState[id] = [];
@@ -551,11 +571,15 @@ export const generateGlobalRandomState = (
 
     // ── Step 0: Run weighted surface filter (12-word story summary) ──
     const surfaceParticipants = weightedSurfaceFilter(lockedModules, !!isSkinMasterLocked);
+    const getVisibleLocks = (blockId: string) => {
+        const selected = new Set(currentFieldState[blockId] || []);
+        return (lockedTags[blockId] || []).filter(tag => selected.has(tag));
+    };
 
     // ── Step 1: Era / Archetype determination ──
     let currentArchetype: Archetype = 'MODERN';
     let eraBlockId = 'skin_era';
-    const lockedEraTags = lockedTags[eraBlockId] || [];
+    const lockedEraTags = getVisibleLocks(eraBlockId);
     const currentEraTags = currentFieldState[eraBlockId] || [];
     let activeEraTag: string | null = null;
 
@@ -577,22 +601,32 @@ export const generateGlobalRandomState = (
 
     // ── Step 2: Time/Location (SUR3) ──
     const newState = { ...currentFieldState };
-    
+
     if (!lockedModules['skin_year_exact']) {
+        const locks = getVisibleLocks('skin_year_exact');
         if (surfaceParticipants.has('skin_year_exact')) {
-            const year = Math.floor(Math.random() * (2050 - (-2000) + 1)) + (-2000);
-            newState['skin_year_exact'] = [year.toString()];
+            if (locks.length > 0) {
+                newState['skin_year_exact'] = locks;
+            } else {
+                const year = Math.floor(Math.random() * (2050 - (-2000) + 1)) + (-2000);
+                newState['skin_year_exact'] = [year.toString()];
+            }
         } else {
-            newState['skin_year_exact'] = [];
+            newState['skin_year_exact'] = locks;
         }
     }
 
     if (!lockedModules['skin_country_exact']) {
+        const locks = getVisibleLocks('skin_country_exact');
         if (surfaceParticipants.has('skin_country_exact')) {
-            const r = COUNTRY_PRESETS[Math.floor(Math.random() * COUNTRY_PRESETS.length)];
-            newState['skin_country_exact'] = [r.cn];
+            if (locks.length > 0) {
+                newState['skin_country_exact'] = locks;
+            } else {
+                const r = COUNTRY_PRESETS[Math.floor(Math.random() * COUNTRY_PRESETS.length)];
+                newState['skin_country_exact'] = [r.cn];
+            }
         } else {
-            newState['skin_country_exact'] = [];
+            newState['skin_country_exact'] = locks;
         }
     }
 
@@ -618,7 +652,7 @@ export const generateGlobalRandomState = (
         if (activeEraTag && surfaceParticipants.has('skin_era') && blocks.some(b => b.id === eraBlockId)) {
             newState[eraBlockId] = [activeEraTag];
         } else {
-            const locks = lockedTags[eraBlockId] || [];
+            const locks = getVisibleLocks(eraBlockId);
             newState[eraBlockId] = (currentFieldState[eraBlockId] || []).filter(t => locks.includes(t));
         }
     }
@@ -628,15 +662,15 @@ export const generateGlobalRandomState = (
         const genreId = 'skin_genre';
         if (!lockedModules[genreId] && surfaceParticipants.has(genreId)) {
             const genreLib = GENRE_CATEGORIES.flatMap(c => c.items);
-            const lockedGenre = lockedTags[genreId] || [];
-            const genreCount = getRandomCount(genreId); // 1-2
+            const lockedGenre = getVisibleLocks(genreId);
+            const genreCount = Math.max(getRandomCount(genreId), lockedGenre.length); // 1-2, never drop locked terms
             if (lockedGenre.length < genreCount) {
                 const available = genreLib.filter(i => !lockedGenre.includes(i.name));
                 const shuffled = [...available].sort(() => 0.5 - Math.random());
                 const needed = genreCount - lockedGenre.length;
                 newState[genreId] = [...lockedGenre, ...shuffled.slice(0, needed).map(i => i.name)];
             } else {
-                newState[genreId] = lockedGenre.slice(0, genreCount);
+                newState[genreId] = lockedGenre;
             }
         }
     }
@@ -669,11 +703,11 @@ export const generateGlobalRandomState = (
                 if (Math.random() >= 0.5) keepOld = false;
             }
             if (!keepOld) {
-                const locks = lockedTags[block.id] || [];
+                const locks = getVisibleLocks(block.id);
                 newState[block.id] = (newState[block.id] || []).filter(t => locks.includes(t));
                 return;
             }
-            
+
             // skin_animation_genre: skip (deprecated)
             if (block.id === 'skin_animation_genre') return;
         }
@@ -686,7 +720,7 @@ export const generateGlobalRandomState = (
 
             // For 0-count blocks (0-1 range that rolled 0), clear them
             if (count === 0) {
-                const locks = lockedTags[block.id] || [];
+                const locks = getVisibleLocks(block.id);
                 newState[block.id] = (newState[block.id] || []).filter(t => locks.includes(t));
                 return;
             }
@@ -697,9 +731,9 @@ export const generateGlobalRandomState = (
                 if (availableItems.length === 0) availableItems = category.items;
             }
 
-            const locks = lockedTags[block.id] || [];
+            const locks = getVisibleLocks(block.id);
             const keptTags = (newState[block.id] || []).filter(t => locks.includes(t));
-            const needed = Math.max(0, count - keptTags.length);
+            const needed = Math.max(0, Math.max(count, keptTags.length) - keptTags.length);
             const available = availableItems.filter(i => !keptTags.includes(i.name));
             const selected: string[] = [];
             for (let i = 0; i < needed; i++) {
@@ -728,14 +762,14 @@ export const resetSkinState = (
     else skinBlocks = ALL_SKIN_BLOCKS;
     if (lockedModules[lockKey]) return currentFieldState;
     const newState = { ...currentFieldState };
-    
-    // Clear Time/Location if not locked
-    if (!lockedModules['skin_year_exact']) newState['skin_year_exact'] = [];
-    if (!lockedModules['skin_country_exact']) newState['skin_country_exact'] = [];
+
+    // Clear Time/Location if not locked, preserving visible locked values
+    if (!lockedModules['skin_year_exact']) newState['skin_year_exact'] = getVisibleLockedTags(currentFieldState, lockedTags, 'skin_year_exact');
+    if (!lockedModules['skin_country_exact']) newState['skin_country_exact'] = getVisibleLockedTags(currentFieldState, lockedTags, 'skin_country_exact');
 
     skinBlocks.forEach(block => {
         if (!lockedModules[block.id]) {
-            const locks = lockedTags[block.id] || [];
+            const locks = getVisibleLockedTags(currentFieldState, lockedTags, block.id);
             newState[block.id] = (newState[block.id] || []).filter(t => locks.includes(t));
         }
     });
@@ -749,7 +783,7 @@ export const resetFormulaState = (
     lockedTags: Record<string, string[]>
 ): NarrativeFieldState => {
      let engineBlocks: NarrativeBlockDef[] = [];
-     
+
      if (driverType === DriverType.COMMERCIAL) engineBlocks = COMMERCIAL_ENGINE_BLOCKS;
      else if (driverType === DriverType.EXPERIMENTAL) engineBlocks = EXPERIMENTAL_ENGINE_BLOCKS;
      else if (driverType === DriverType.TRAILER) engineBlocks = TRAILER_ENGINE_BLOCKS;
@@ -757,10 +791,10 @@ export const resetFormulaState = (
      else engineBlocks = NARRATIVE_ENGINE_BLOCKS;
 
      const newState = { ...currentFieldState };
-     
+
      engineBlocks.forEach(block => {
         let isLocked = lockedModules[block.id];
-        
+
         if (driverType === DriverType.AESTHETIC) {
             const globalCategory = AESTHETIC_GLOBAL_BLOCK_TO_CATEGORY[block.id];
             if (globalCategory && lockedModules[globalCategory]) isLocked = true;
@@ -769,11 +803,11 @@ export const resetFormulaState = (
         }
 
         if (!isLocked) {
-             const locks = lockedTags[block.id] || [];
+             const locks = getVisibleLockedTags(currentFieldState, lockedTags, block.id);
              newState[block.id] = (newState[block.id] || []).filter(t => locks.includes(t));
         }
      });
-     
+
      return newState;
 };
 
@@ -792,7 +826,7 @@ export const randomizeSkinState = (
     else skinBlocks = ALL_SKIN_BLOCKS;
     if (lockedModules[lockKey]) return currentFieldState;
     const newState = { ...currentFieldState };
-    
+
     // Copy Time/Location if not locked
     if (!lockedModules['skin_year_exact']) newState['skin_year_exact'] = globalRandom['skin_year_exact'] || [];
     if (!lockedModules['skin_country_exact']) newState['skin_country_exact'] = globalRandom['skin_country_exact'] || [];
@@ -816,7 +850,7 @@ export const randomizeFormulaState = (
      const isAesthetic = driverType === DriverType.AESTHETIC;
      let ENGINE_BLOCKS = isAesthetic ? AESTHETIC_ENGINE_BLOCKS : (driverType === DriverType.COMMERCIAL ? COMMERCIAL_ENGINE_BLOCKS : (driverType === DriverType.EXPERIMENTAL ? EXPERIMENTAL_ENGINE_BLOCKS : (driverType === DriverType.TRAILER ? TRAILER_ENGINE_BLOCKS : NARRATIVE_ENGINE_BLOCKS)));
      let ENGINE_LIBRARY = isAesthetic ? AESTHETIC_ENGINE_LIBRARY : (driverType === DriverType.COMMERCIAL ? COMMERCIAL_ENGINE_LIBRARY : (driverType === DriverType.EXPERIMENTAL ? EXPERIMENTAL_ENGINE_LIBRARY : (driverType === DriverType.TRAILER ? TRAILER_ENGINE_LIBRARY : NARRATIVE_ENGINE_LIBRARY)));
-     
+
      const newState = { ...currentFieldState };
      const currentEraTags = newState['skin_era'] || [];
      const currentEra = currentEraTags.length > 0 ? currentEraTags[0] : "";
@@ -857,7 +891,7 @@ export const randomizeFormulaState = (
           const isCurrentModeSubject = (subjectType === 'HUMAN' && isSubjHuman) || (subjectType === 'CREATURE' && isSubjCreature);
           if (!globalCategory && !isCurrentModeSubject) return;
       }
-      
+
       const libId = `${block.id}_lib`;
       const category = ENGINE_LIBRARY.find(c => c.id === libId);
 
@@ -867,7 +901,7 @@ export const randomizeFormulaState = (
               // Aesthetic mode retains its own count logic
               const limit = BLOCK_LIMITS[block.id] || 1;
               if (block.id === 'aes_skin_texture' || block.id === 'aes_body_features' || block.id === 'aes_face_features') {
-                   count = Math.floor(Math.random() * 2) + 1; 
+                   count = Math.floor(Math.random() * 2) + 1;
               } else if (limit > 1) {
                   if (block.id === 'aes_hair_color') {
                       count = Math.random() < 0.7 ? 1 : 2;
@@ -879,17 +913,17 @@ export const randomizeFormulaState = (
               // Non-aesthetic: use RANDOM_RANGES protocol v2.0
               count = getRandomCount(block.id);
               if (count === 0) {
-                  const locks = lockedTags[block.id] || [];
+                  const locks = getVisibleLockedTags(newState, lockedTags, block.id);
                   newState[block.id] = (newState[block.id] || []).filter(t => locks.includes(t));
                   return;
               }
           }
           let availableItems = category.items;
           if (isAesthetic && block.id === 'aes_eye_shape') availableItems = availableItems.filter(i => i.group === 'A. 美型');
-          const locks = lockedTags[block.id] || [];
+          const locks = getVisibleLockedTags(newState, lockedTags, block.id);
           const currentTags = newState[block.id] || [];
           const keptTags = currentTags.filter(t => locks.includes(t));
-          const needed = Math.max(0, count - keptTags.length);
+          const needed = Math.max(0, Math.max(count, keptTags.length) - keptTags.length);
           const available = availableItems.filter(i => !currentTags.includes(i.name));
           const selected: string[] = [];
           for (let i = 0; i < needed; i++) {
@@ -911,7 +945,7 @@ export const generateGlobalResetState = (
     lockedTags: Record<string, string[]>
 ): NarrativeFieldState => {
      let engineBlocks: NarrativeBlockDef[] = [];
-     
+
      if (driverType === DriverType.COMMERCIAL) {
          engineBlocks = [...COMMERCIAL_ENGINE_BLOCKS, ...COMM_SKIN_BLOCKS];
      } else if (driverType === DriverType.EXPERIMENTAL) {
@@ -925,7 +959,7 @@ export const generateGlobalResetState = (
      }
 
      const newState = { ...currentFieldState };
-     
+
      // Explicitly handle aes_palette_preset for Aesthetic Driver
      if (driverType === DriverType.AESTHETIC) {
          const presetId = 'aes_palette_preset';
@@ -933,20 +967,20 @@ export const generateGlobalResetState = (
          let isLocked = lockedModules[presetId];
          const globalCategory = AESTHETIC_GLOBAL_BLOCK_TO_CATEGORY[presetId];
          if (globalCategory && lockedModules[globalCategory]) isLocked = true;
-         
+
          if (!isLocked) {
-             const locks = lockedTags[presetId] || [];
+             const locks = getVisibleLockedTags(currentFieldState, lockedTags, presetId);
              newState[presetId] = (newState[presetId] || []).filter(t => locks.includes(t));
          }
      }
-     
-     // Reset Time/Location if not locked
-     if (!lockedModules['skin_year_exact']) newState['skin_year_exact'] = [];
-     if (!lockedModules['skin_country_exact']) newState['skin_country_exact'] = [];
+
+     // Reset Time/Location if not locked, preserving visible locked values
+     if (!lockedModules['skin_year_exact']) newState['skin_year_exact'] = getVisibleLockedTags(currentFieldState, lockedTags, 'skin_year_exact');
+     if (!lockedModules['skin_country_exact']) newState['skin_country_exact'] = getVisibleLockedTags(currentFieldState, lockedTags, 'skin_country_exact');
 
      engineBlocks.forEach(block => {
         let isLocked = lockedModules[block.id];
-        
+
         if (driverType === DriverType.AESTHETIC) {
             const globalCategory = AESTHETIC_GLOBAL_BLOCK_TO_CATEGORY[block.id];
             if (globalCategory && lockedModules[globalCategory]) isLocked = true;
@@ -955,10 +989,10 @@ export const generateGlobalResetState = (
         }
 
         if (!isLocked) {
-             const locks = lockedTags[block.id] || [];
+             const locks = getVisibleLockedTags(currentFieldState, lockedTags, block.id);
              newState[block.id] = (newState[block.id] || []).filter(t => locks.includes(t));
         }
      });
-     
+
      return newState;
 };

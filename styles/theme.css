@@ -1,9 +1,9 @@
 :root {
   /* --- 核心背景：中性纯黑，不带冷暖偏色 --- */
-  --bg-main: #000000;         
-  --bg-panel: #000000;        
-  --bg-card: #000000;         
-  --bg-header: #000000; 
+  --bg-main: #000000;
+  --bg-panel: #000000;
+  --bg-card: #000000;
+  --bg-header: #000000;
   --surface-0: #010101;
   --surface-1: #030303;
   --surface-2: #070707;
@@ -13,13 +13,13 @@
   /* --- 动态主题变量：由 App.tsx 实时更新 --- */
   --mist-active-accent: #ff4f3f;
   --mist-active-accent-rgb: 255, 79, 63;
-  
+
   /* --- 边界与线条：中性细线，避免冷暖偏色 --- */
   --border-main: rgba(255, 255, 255, 0.06);
   --border-accent: var(--mist-active-accent, var(--mist-gold));
   --border-glass: rgba(255, 255, 255, 0.03);
   --border-strong: rgba(255, 79, 63, 0.32);
-  
+
   /* --- 文字体系：中性白与中性灰 --- */
   --text-main: #d4d4d4;
   --text-muted: #7a7a7a;
@@ -27,7 +27,7 @@
   --text-accent: var(--mist-active-accent, var(--mist-gold));
   --text-code: #a3a3a3;
   --text-header: #f4f4f4;
-  
+
   /* --- 动态哲学家氛围色 (Glow Archetypes) --- */
   --philosopher-glow: rgba(255, 79, 63, 0.2);
   --philosopher-accent: #ff4f3f;
@@ -36,7 +36,7 @@
   --selection-bg: rgba(255, 79, 63, 0.12);
   --accent-color: #ff4f3f;
   --accent-glow: rgba(255, 79, 63, 0.15);
-  
+
   /* 材质与纹理 */
   --texture-opacity: 0.1;
   --bg-texture: none;
@@ -47,7 +47,7 @@
   --mist-purple: #C084FC;
   --mist-rose: #FB7185;
   --mist-orange: #FB923C;
-  
+
   --gold-primary: #ff4f3f;
   --gold-dim: rgba(255, 79, 63, 0.4);
   --gold-bright: #ff887a;
@@ -97,7 +97,7 @@
   --gold-dim: var(--mist-active-accent);
   --gold-bright: var(--mist-active-accent);
   --gold-soft: var(--mist-active-accent);
-  
+
   /* Mist School Palette for Drivers in Retro */
   --mist-cyan: #0E4B50;   /* Desire Suture cyan */
   --mist-gold: #856610;   /* Aged gold */
@@ -318,7 +318,7 @@ body::before {
   filter: none;
 }
 
-.detail-markdown-content em, 
+.detail-markdown-content em,
 .detail-markdown-content i {
   color: var(--text-header);
   opacity: 0.9;
@@ -2340,9 +2340,9 @@ body::before {
 .mist-labyrinth-subtitle {
   margin-top: clamp(0.9rem, 1.6vh, 1.25rem);
   max-width: none;
-  color: rgba(248,248,244,0.72);
+  color: rgba(248, 248, 244, 0.38);
   font-family: Georgia, "Times New Roman", "Noto Serif SC", serif;
-  font-size: clamp(0.84rem, 0.95vw, 1rem);
+  font-size: clamp(0.68rem, 0.78vw, 0.84rem);
   line-height: 1.72;
   letter-spacing: 0.04em;
   white-space: nowrap;
@@ -2444,9 +2444,9 @@ body::before {
 }
 
 .mist-labyrinth-formula-caption {
-  color: var(--labyrinth-dim);
+  color: rgba(248, 248, 244, 0.38);
   font-family: Georgia, "Times New Roman", "Noto Serif SC", serif;
-  font-size: clamp(0.9rem, 0.98vw, 1.08rem);
+  font-size: clamp(0.68rem, 0.78vw, 0.84rem);
   line-height: 1.58;
   letter-spacing: 0.02em;
   text-align: right;
@@ -3323,6 +3323,34 @@ body::before {
   padding: 0.12rem 0.25rem;
   border: 1px solid rgba(255,255,255,0.095);
   background: rgba(255,255,255,0.035);
+}
+
+.mist-labyrinth-surface-summary-slots .mist-labyrinth-surface-block {
+  overflow: visible;
+}
+
+.mist-labyrinth-surface-summary-slots .mist-labyrinth-surface-label {
+  align-self: center;
+}
+
+.mist-labyrinth-surface-summary-slots .mist-skin-slot-actions,
+.mist-labyrinth-surface-summary-slots .mist-labyrinth-inline-control-actions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 0;
+  z-index: 320;
+  pointer-events: auto;
+}
+
+.mist-labyrinth-surface-summary-slots .group\/tag {
+  position: relative;
+  z-index: 30;
+}
+
+.mist-labyrinth-surface-summary-slots .group\/tag:hover,
+.mist-labyrinth-surface-summary-slots .group\/tag:focus-within {
+  z-index: 330;
 }
 
 .mist-labyrinth-surface-identity-block {
@@ -4684,13 +4712,14 @@ body::before {
   flex-direction: column;
   overflow: hidden;
   padding: clamp(1rem, 1.45vw, 1.35rem);
-  border: 1px solid rgba(248,248,244,0.18);
+  border: 2px solid var(--mist-active-accent);
   background:
-    radial-gradient(circle at 72% 0%, var(--mist-archive-signal-wash-faint), transparent 34%),
+    radial-gradient(circle at 72% 0%, rgba(var(--mist-active-accent-rgb), 0.1), transparent 34%),
     linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.012)),
     #080808;
   box-shadow:
     0 28px 80px rgba(0,0,0,0.74),
+    0 0 24px rgba(var(--mist-active-accent-rgb), 0.12),
     inset 0 1px 0 rgba(255,255,255,0.05);
 }
 
@@ -5380,7 +5409,6 @@ body::before {
   content: none !important;
 }
 
-.mist-labyrinth-subtitle,
 .mist-labyrinth-engine .mist-labyrinth-formula-text,
 .mist-labyrinth-engine .mist-labyrinth-desire-sentence-line > span,
 .mist-labyrinth-engine .mist-labyrinth-formula-row,
@@ -5390,9 +5418,18 @@ body::before {
   text-shadow: none !important;
 }
 
-.mist-labyrinth-engine .mist-labyrinth-formula-lead,
-.mist-labyrinth-engine .mist-labyrinth-formula-caption {
+.mist-labyrinth-subtitle {
+  color: rgba(248, 248, 244, 0.38) !important;
+  text-shadow: none !important;
+}
+
+.mist-labyrinth-engine .mist-labyrinth-formula-lead {
   color: #fff !important;
+  text-shadow: none !important;
+}
+
+.mist-labyrinth-engine .mist-labyrinth-formula-caption {
+  color: rgba(248, 248, 244, 0.38) !important;
   text-shadow: none !important;
 }
 
@@ -5402,9 +5439,14 @@ body::before {
 .mist-labyrinth-engine .mist-labyrinth-control-deck,
 .mist-labyrinth-engine .mist-labyrinth-panel-switch,
 .mist-labyrinth-engine .mist-labyrinth-mode-toggle,
-.mist-labyrinth-engine .mist-labyrinth-surface-mode-toggle,
-.mist-labyrinth-engine .mist-labyrinth-surface-actions button {
+.mist-labyrinth-engine .mist-labyrinth-surface-mode-toggle {
   border-color: rgba(var(--mist-active-accent-rgb), 0.22) !important;
+}
+
+.mist-labyrinth-engine .mist-labyrinth-surface-actions button {
+  border-color: rgba(255,255,255, 0.1) !important;
+  color: rgba(255,255,255, 0.46) !important;
+  transition: all 0.2s ease;
 }
 
 .mist-labyrinth-engine .mist-labyrinth-module:hover {
@@ -5446,10 +5488,23 @@ body::before {
 .mist-labyrinth-engine .mist-labyrinth-mode-toggle button:hover,
 .mist-labyrinth-engine .mist-labyrinth-mode-toggle button.is-active,
 .mist-labyrinth-engine .mist-labyrinth-surface-mode-toggle button:hover,
-.mist-labyrinth-engine .mist-labyrinth-surface-mode-toggle button.is-active,
-.mist-labyrinth-engine .mist-labyrinth-surface-actions button:hover,
+.mist-labyrinth-engine .mist-labyrinth-surface-mode-toggle button.is-active {
+  color: var(--gold-primary) !important;
+  text-shadow: none !important;
+}
+
+.mist-labyrinth-engine .mist-labyrinth-surface-actions button:hover {
+  color: var(--gold-primary) !important;
+  border-color: rgba(255,255,255, 0.2) !important;
+  background: rgba(255,255,255, 0.05) !important;
+  text-shadow: none !important;
+}
+
+.mist-labyrinth-engine .mist-labyrinth-surface-actions button:active,
 .mist-labyrinth-engine .mist-labyrinth-surface-actions button.is-locked {
   color: var(--gold-primary) !important;
+  border-color: var(--gold-primary) !important;
+  background: rgba(var(--mist-active-accent-rgb), 0.12) !important;
   text-shadow: none !important;
 }
 
@@ -5476,6 +5531,18 @@ body::before {
   box-shadow: none !important;
   text-shadow: none !important;
   filter: none !important;
+}
+
+.mist-labyrinth-engine .mist-token-locked,
+.mist-labyrinth-engine .mist-labyrinth-formula .mist-token-locked,
+.mist-labyrinth-engine .mist-labyrinth-surface-card .mist-token-locked,
+.mist-labyrinth-engine .mist-labyrinth-desire-sentence-slot .mist-token-locked {
+  color: #fff !important;
+  border: 1px solid var(--mist-active-accent) !important;
+  border-radius: 0.25rem !important;
+  background: rgba(var(--mist-active-accent-rgb), 0.12) !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
 }
 
 .mist-labyrinth-engine .mist-labyrinth-world-law-module,
@@ -5542,7 +5609,7 @@ body::before {
 }
 
 .mist-labyrinth-engine .mist-labyrinth-formula-caption {
-  font-size: clamp(0.98rem, 1.08vw, 1.16rem) !important;
+  font-size: clamp(0.68rem, 0.78vw, 0.84rem) !important;
 }
 
 .mist-labyrinth-engine .mist-labyrinth-canonical-formula,

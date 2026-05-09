@@ -13,8 +13,8 @@ import * as geminiService from '../services/geminiService';
 import { useTheme } from '../contexts/ThemeContext';
 import { CommercialView } from './blueprint/CommercialView';
 import { NarrativeView } from './blueprint/NarrativeView';
-import { AssetsView } from './blueprint/AssetsView';
-import { ExperimentalView } from './blueprint/ExperimentalView';
+import { VisualStyleManager } from './blueprint/metonymy/VisualStyleManager';
+import { MetonymyStylePreset, MetonymyData } from '../types';
 import { AestheticView } from './blueprint/AestheticView';
 import { TrailerView } from './blueprint/TrailerView';
 import { PoeticView } from './blueprint/PoeticView';
@@ -92,17 +92,18 @@ const createEmptyCommercial = (lang: BlueprintLanguage): CreativeBlueprint => ({
 const createEmptyExperimental = (lang: BlueprintLanguage): CreativeBlueprint => ({
     treatmentId: `exp_manual_${Date.now()}`,
     driverType: DriverType.EXPERIMENTAL,
-    styleName: lang === 'EN' ? 'Blank Script Protocol' : '空白脚本协议',
+    styleName: lang === 'EN' ? 'Metonymy Script Engine' : '换喻脚本引擎',
     narrative: {
-        title: lang === 'EN' ? 'NEW SCRIPT PROJECT' : '新脚本项目',
-        logline: lang === 'EN' ? 'Paste or define the source story...' : '在此粘贴或定义故事原文...',
-        synopsis: lang === 'EN' ? 'Define translation logic...' : '在此定义故事转译逻辑...'
+        title: lang === 'EN' ? 'NEW METONYMY PROJECT' : '新换喻项目',
+        logline: lang === 'EN' ? 'Paste the story material here...' : '在此粘贴故事素材...',
+        synopsis: ""
     },
     context: { world: "", tone: "", colorPalette: ['#A855F7', '#1A0033'], moodboard: { prompt: "", images: [], selectedImageId: null } },
     assets: { characters: [], locations: [], props: [] },
-    experimentalData: {
-        concept: lang === 'EN' ? "CONCEPT AXIOM" : "核心观念",
-        method: "", sensation: "", visualManifesto: "", installationPlan: ""
+    metonymyData: {
+        screenplay: [],
+        staticStoryboard: [],
+        dynamicScript: []
     }
 });
 
@@ -210,6 +211,7 @@ export const BlueprintEditor: React.FC<BlueprintEditorProps> = ({
     const [timeline, setTimeline] = useState<CreativeBlueprint[]>([defaultBlueprint]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isSaved, setIsSaved] = useState(false);
+    const [isVisualBibleExpanded, setIsVisualBibleExpanded] = useState(true);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isParamsPanelOpen, setIsParamsPanelOpen] = useState(false);
     const [isTaskManagerOpen, setIsTaskManagerOpen] = useState(false);
@@ -290,12 +292,17 @@ export const BlueprintEditor: React.FC<BlueprintEditorProps> = ({
                 { id: 'METONYMY', label: language === 'EN' ? "Script Metonymy" : "剧本转喻", icon: Wand2 }
             ];
         } else if (effectiveDriverType === DriverType.EXPERIMENTAL) {
+            themeAccent = 'text-purple-500';
+            themeBorder = 'border-purple-500/30';
+            themeText = 'text-purple-500';
+            themeHoverText = 'group-hover:text-purple-500';
+            themeBgActive = 'bg-purple-500/15';
+            themeSidebarBorder = 'border-purple-500/20';
+            themeActiveBorder = 'border-purple-500';
+            themeEmptyPulse = 'bg-purple-500/20';
             menuItems = [
-                { id: 'PHENOMENA', label: language === 'EN' ? "Phenomenology" : "现象学图谱", icon: Eye },
-                { id: 'STRUCTURAL', label: language === 'EN' ? "Structural Form" : "结构形式", icon: Layers },
-                { id: 'MATERIAL', label: language === 'EN' ? "Material Action" : "物质行动", icon: Terminal },
-                { id: 'ALGORITHM', label: language === 'EN' ? "Algorithmic Rules" : "算法规则", icon: Terminal },
-                { id: 'METONYMY', label: language === 'EN' ? "Process Logic" : "生成演练", icon: Wand2 }
+                { id: 'BIBLE', label: language === 'EN' ? "Creative Bible" : "创意圣经", icon: BookOpen },
+                { id: 'METONYMY', label: language === 'EN' ? "Metonymy Script" : "换喻脚本", icon: Wand2 }
             ];
         } else if (effectiveDriverType === DriverType.AESTHETIC) {
             menuItems = [
@@ -314,8 +321,7 @@ export const BlueprintEditor: React.FC<BlueprintEditorProps> = ({
         } else { // Default for Narrative
             menuItems = [
                 { id: 'NARRATIVE', label: language === 'EN' ? "Core Narrative" : "核心叙事", icon: BookOpen },
-                { id: 'ASSETS', label: language === 'EN' ? "Scene & Assets" : "场景资产", icon: ImageIcon },
-                { id: 'METONYMY', label: language === 'EN' ? "Script Metonymy" : "剧本转喻", icon: Wand2 }
+                { id: 'ASSETS', label: language === 'EN' ? "Scene & Assets" : "场景资产", icon: ImageIcon }
             ];
         }
 
@@ -537,22 +543,62 @@ ${assetsHtml}
 
     const renderContent = () => {
         if (activeTab === 'ASSETS') {
+            const metonymyData = effectiveBlueprint.metonymyData || {
+                screenplay: [],
+                staticStoryboard: [],
+                dynamicScript: [],
+                stylePresets: []
+            };
+
+            const currentPresets = (metonymyData.stylePresets && metonymyData.stylePresets.length > 0)
+                ? metonymyData.stylePresets
+                : [{
+                    id: 'original',
+                    name: language === 'EN' ? "Original Style" : "原文风格",
+                    toneAnalysis: { lighting: "", texture: "", style: "", camera: "", palette: [] },
+                    assets: { characters: [], scenes: [], props: [] }
+                }];
+            const currentActivePresetId = metonymyData.activePresetId || 'original';
+
             return (
-                <AssetsView
-                    blueprint={effectiveBlueprint}
-                    language={language}
-                    isCommercial={effectiveDriverType === DriverType.COMMERCIAL}
-                    isAesthetic={effectiveDriverType === DriverType.AESTHETIC}
-                    onUpdateBlueprint={updateCurrentBlueprint}
-                    onGenerateAssetImage={onGenerateAssetImage}
-                    onZoom={setLightboxImage}
-                    themeAccent={uiConfig.themeAccent}
-                    themeBorder={uiConfig.themeBorder}
-                    theme={effectiveTheme}
-                    isAdmin={isAdmin}
-                />
+                <div className="h-full flex flex-col">
+                    <VisualStyleManager
+                        presets={currentPresets}
+                        activePresetId={currentActivePresetId}
+                        onUpdatePresets={(newPresets) => updateCurrentBlueprint({
+                            ...effectiveBlueprint,
+                            metonymyData: {
+                                ...metonymyData,
+                                stylePresets: newPresets
+                            }
+                        })}
+                        onSetActivePreset={(id) => updateCurrentBlueprint({
+                            ...effectiveBlueprint,
+                            metonymyData: {
+                                ...metonymyData,
+                                activePresetId: id
+                            }
+                        })}
+                        onUpdatePresetsAndActive={(newPresets, newActiveId) => updateCurrentBlueprint({
+                            ...effectiveBlueprint,
+                            metonymyData: {
+                                ...metonymyData,
+                                stylePresets: newPresets,
+                                activePresetId: newActiveId
+                            }
+                        })}
+                        lang={language}
+                        themeAccent={uiConfig.themeAccent}
+                        theme={effectiveTheme}
+                        isExpanded={isVisualBibleExpanded}
+                        onToggleExpand={setIsVisualBibleExpanded}
+                        sourceText={effectiveBlueprint.narrative?.synopsis || ""}
+                        isAdmin={isAdmin}
+                    />
+                </div>
             );
         }
+
 
         switch (effectiveDriverType) {
             case DriverType.COMMERCIAL:
@@ -589,15 +635,35 @@ ${assetsHtml}
                     />
                 );
             case DriverType.EXPERIMENTAL:
+                if (activeTab === 'METONYMY') {
+                    return (
+                        <MetonymyView
+                            blueprint={effectiveBlueprint}
+                            language={language}
+                            onUpdateBlueprint={updateCurrentBlueprint}
+                            themeAccent={uiConfig.themeAccent}
+                            themeBorder={uiConfig.themeBorder}
+                            isFullScreen={!isSidebarOpen}
+                            onToggleFullScreen={() => setIsSidebarOpen(prev => !prev)}
+                            onSutureOpenChange={onSutureOpenChange}
+                            fieldState={fieldState}
+                            onSaveToHistory={onSaveToHistory}
+                            theme={effectiveTheme}
+                            isAdmin={isAdmin}
+                        />
+                    );
+                }
                 return (
-                    <ExperimentalView
+                    <NarrativeView
                         blueprint={effectiveBlueprint}
-                        activeTab={activeTab as any}
                         language={language}
-                        onUpdateBlueprint={updateCurrentBlueprint}
+                        isAesthetic={false}
                         themeAccent={uiConfig.themeAccent}
                         themeBorder={uiConfig.themeBorder}
+                        themeBgActive={uiConfig.themeBgActive}
+                        onUpdateBlueprint={updateCurrentBlueprint}
                         theme={effectiveTheme}
+                        isAdmin={isAdmin}
                     />
                 );
             case DriverType.AESTHETIC:
@@ -769,7 +835,7 @@ ${assetsHtml}
                             <span>{language === 'EN' ? "Back to Paths" : "返回分支"}</span>
                         </button>
                     </div>
-    
+
                     <div className="flex-1 flex justify-center items-center gap-6 mx-4 overflow-x-auto no-scrollbar">
                         {/* Params Button */}
                         <button
@@ -794,7 +860,7 @@ ${assetsHtml}
                                 {language === 'EN' ? "Archive" : "档案馆"}
                             </span>
                         </button>
-                        
+
                         {/* Save Archive */}
                         <button
                             onClick={handleSaveToCollection}
@@ -902,11 +968,11 @@ ${assetsHtml}
                         <div className="space-y-4">
                             <div className="space-y-2">
                                 <label className={`text-[10px] font-bold uppercase ${effectiveTheme === 'retro' ? 'text-zinc-600' : 'text-zinc-500'}`}>{language === 'EN' ? "Instructions" : "续写要求"}</label>
-                                <textarea 
-                                    value={continueInput} 
-                                    onChange={(e) => setContinueInput(e.target.value)} 
-                                    placeholder={language === 'EN' ? "e.g. Introduce a new villain..." : "例如：引入一个新的反派，或者转向内心的冲突..."} 
-                                    className={`w-full h-32 ${effectiveTheme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20 text-black placeholder-[#8B261D]/30' : 'bg-black/50 border-zinc-800 text-white placeholder-zinc-700'} border rounded-lg p-3 text-sm focus:outline-none focus:border-[#8B261D]/50 resize-none custom-scrollbar`} 
+                                <textarea
+                                    value={continueInput}
+                                    onChange={(e) => setContinueInput(e.target.value)}
+                                    placeholder={language === 'EN' ? "e.g. Introduce a new villain..." : "例如：引入一个新的反派，或者转向内心的冲突..."}
+                                    className={`w-full h-32 ${effectiveTheme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20 text-black placeholder-[#8B261D]/30' : 'bg-black/50 border-zinc-800 text-white placeholder-zinc-700'} border rounded-lg p-3 text-sm focus:outline-none focus:border-[#8B261D]/50 resize-none custom-scrollbar`}
                                 />
                             </div>
                             <div className="space-y-2">
@@ -928,9 +994,9 @@ ${assetsHtml}
                                     </div>
                                 )}
                             </div>
-                            <button 
-                                onClick={handleContinueSubmit} 
-                                disabled={!continueInput.trim() && !continueImage} 
+                            <button
+                                onClick={handleContinueSubmit}
+                                disabled={!continueInput.trim() && !continueImage}
                                 className={`mist-app-primary-action w-full py-3 ${effectiveTheme === 'retro' ? 'bg-[#8B261D] hover:bg-[#6D1E16] text-white shadow-none' : 'bg-[rgba(255,98,86,0.2)] hover:bg-[rgba(255,98,86,0.28)] text-white border-[rgba(255,98,86,0.55)]'} font-bold uppercase tracking-widest transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2`}
                             >
                                 {language === 'EN' ? "Generate Next Chapter" : "生成下一章"}

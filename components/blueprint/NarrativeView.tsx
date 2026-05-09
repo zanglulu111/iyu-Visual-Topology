@@ -1,7 +1,7 @@
 
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { CreativeBlueprint, BlueprintLanguage, DriverType, VersionHistoryItem } from '../../types';
-import { Star, FileText, PenTool, Globe, Palette, Languages, Copy, Check, Wand2, X, Plus, GripVertical, AlertCircle, Loader2, ArrowDown, ArrowUp, Trash2, RotateCcw, History as HistoryIcon, GitCommit, ListChecks } from 'lucide-react';
+import { Star, FileText, PenTool, Globe, Palette, Languages, Copy, Check, Wand2, X, Plus, GripVertical, AlertCircle, Loader2, ArrowDown, ArrowUp, Trash2, RotateCcw, History as HistoryIcon, GitCommit, ListChecks, Zap, RotateCw, ChevronRight } from 'lucide-react';
 import { CopyButton, SimpleTextRenderer, ProcessingTimer, MarkdownRenderer } from '../SharedBlueprintComponents';
 import { modifyNarrativeWithAI, ModifySectionRequest, ModifyInsertionRequest } from '../../services/geminiService';
 import { buildRefactorPrompt } from '../../services/refactorPrompt';
@@ -396,7 +396,7 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
         let remainingText = section.text;
 
         // Process highlights sequentially
-        // Note: This naive approach assumes the first match is the intended one. 
+        // Note: This naive approach assumes the first match is the intended one.
         // Ideally we would store indices, but for this prototype string matching allows flexibility if text changes slightly.
         section.highlights.forEach((h, hIdx) => {
             const matchIndex = remainingText.indexOf(h.text);
@@ -470,8 +470,25 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
 
     const isTitleTemplate = blueprint.narrative?.title === "NEW CONCEPT" || !blueprint.narrative?.title;
 
+    const getLocalizedStyleName = (style: string) => {
+        if (!style) return "";
+        if (style === '空白故事圣经' || style === 'Blank Story Bible') {
+            return language === 'EN' ? 'Blank Story Bible' : '空白故事圣经';
+        }
+
+        if (language === 'EN') {
+            // Match English name inside parentheses if it exists
+            const match = style.match(/\((.*?)\)/);
+            return match ? match[1] : style;
+        } else {
+            // Match Chinese name before parentheses if it exists
+            const match = style.match(/^(.*?)\s*\(/);
+            return match ? match[1].trim() : style;
+        }
+    };
+
     return (
-        <div className="max-w-5xl mx-auto space-y-12 animate-in fade-in slide-in-from-bottom-2 pb-20">
+        <div className="max-w-5xl mx-auto space-y-12 pb-20">
             {/* LOGLINE SECTION */}
             <div className={`${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/15 shadow-sm' : `bg-zinc-900/40 border-zinc-800 hover:${themeAccent.replace('text-', 'border-')}/30`} border p-8 rounded-2xl relative overflow-hidden group transition-all`}>
                 <div className={`absolute top-0 left-0 w-1.5 h-full ${theme === 'retro' ? 'bg-[#8B261D]' : themeAccent.replace('text-', 'bg-')}`}></div>
@@ -529,7 +546,7 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
                         <button
                             onClick={openModifyModal}
                             disabled={!blueprint.narrative?.synopsis}
-                            className={`flex items-center gap-2 px-3 py-1.5 border rounded text-[10px] font-bold uppercase tracking-wider transition-all disabled:opacity-50 ${theme === 'retro' ? 'bg-[#8B261D] border-[#8B261D] text-white hover:bg-[#6D1E16]' : `bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-white hover:border-${themeAccent.replace('text-', '')}`}`}
+                            className={`flex items-center gap-2 px-3 py-1.5 border rounded text-[10px] font-bold uppercase tracking-wider transition-all duration-200 disabled:opacity-50 ${theme === 'retro' ? 'bg-transparent border-[#8B261D] text-[#8B261D] hover:bg-[#8B261D]/10 shadow-sm' : 'bg-[var(--mist-active-accent)]/5 border-[var(--mist-active-accent)] text-[var(--mist-active-accent)] hover:bg-[var(--mist-active-accent)]/20 hover:brightness-125 shadow-sm'}`}
                         >
                             <Wand2 size={12} /> {language === 'EN' ? "AI Modify" : "AI 深度修改"}
                         </button>
@@ -700,9 +717,9 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
                                     onClick={() => setIsStyleLibraryOpen(true)}
                                     className={`relative flex items-center gap-2 ${theme === 'retro' ? 'bg-white border-[#8B261D]/20 hover:border-[#8B261D]/40' : 'bg-zinc-900/50 border border-zinc-800 hover:border-zinc-600 hover:bg-zinc-800'} rounded px-3 py-1.5 transition-all group min-w-[120px]`}
                                 >
-                                    <Palette size={12} className={`${theme === 'retro' ? 'text-[#8B261D]/50 group-hover:text-[#8B261D]' : 'text-zinc-500 group-hover:text-[var(--mist-active-accent)]'} shrink-0 transition-colors`} />
-                                    <span className={`text-xs font-bold truncate max-w-[120px] ${selectedStyle ? (theme === 'retro' ? 'text-[#8B261D]' : 'text-[var(--mist-active-accent)]') : 'text-zinc-400'}`}>
-                                        {selectedStyle || (language === 'EN' ? "Select Style..." : "选择风格...")}
+                                    <Palette size={12} className={`${theme === 'retro' ? 'text-[#8B261D]' : 'text-[var(--mist-active-accent)]'} shrink-0 transition-colors`} />
+                                    <span className={`text-xs font-bold truncate max-w-[120px] ${selectedStyle ? (theme === 'retro' ? 'text-black' : 'text-zinc-100') : 'text-zinc-500'}`}>
+                                        {selectedStyle ? getLocalizedStyleName(selectedStyle) : (language === 'EN' ? "Select Style..." : "选择风格...")}
                                     </span>
                                     <div className="ml-auto pl-2">
                                         <ArrowDown size={10} className="text-zinc-500 group-hover:text-zinc-400" />
@@ -743,17 +760,25 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
                                     <button
                                         onClick={handleSubmitRefactor}
                                         disabled={isRefactoring}
-                                        className={`h-9 px-4 ${theme === 'retro' ? 'bg-[#8B261D] hover:bg-[#6D1E16] text-white shadow-none' : 'bg-[var(--mist-active-accent)] hover:brightness-110 text-black'} rounded font-bold uppercase tracking-widest text-[10px] flex items-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
+                                        className={`mist-traverse-action mist-app-primary-action h-9 px-4 ${theme === 'retro' ? 'bg-[#8B261D] hover:bg-[#6D1E16] text-white shadow-none' : 'bg-[var(--mist-active-accent)] text-black'} rounded font-bold uppercase tracking-widest text-[10px] flex items-center justify-center gap-2.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed group border-none`}
+                                        style={{ boxShadow: 'none' }}
                                     >
-                                        {isRefactoring ? <Loader2 size={12} className="animate-spin" /> : <Wand2 size={12} />}
                                         {isRefactoring ? (
-                                            <span className="flex items-center gap-2">
-                                                {language === 'EN' ? "Refactoring..." : "重构中..."}
-                                                <ProcessingTimer startTime={refactorStartTime} />
-                                            </span>
+                                            <RotateCw size={14} className="animate-spin" />
                                         ) : (
-                                            language === 'EN' ? "Execute Changes" : "执行修改"
+                                            <Zap size={14} className="group-hover:scale-110 transition-transform" />
                                         )}
+                                        <span className="tabular-nums">
+                                            {isRefactoring ? (
+                                                <span className="flex items-center gap-2">
+                                                    {language === 'EN' ? "Refactoring..." : "重构中..."}
+                                                    <ProcessingTimer startTime={refactorStartTime} />
+                                                </span>
+                                            ) : (
+                                                language === 'EN' ? "Execute Changes" : "执行修改"
+                                            )}
+                                        </span>
+                                        {!isRefactoring && <ChevronRight size={12} className="group-hover:translate-x-1 transition-transform opacity-70" />}
                                     </button>
                                 </div>
 

@@ -45,6 +45,7 @@ import { SourceViewer } from './metonymy/MetonymySourceViewer';
 import { MetonymySceneCard } from './metonymy/MetonymySceneCard';
 import { PreviewContentModal } from './metonymy/MetonymyPreviewModal';
 import { VisualStyleManager } from './metonymy/VisualStyleManager';
+import { BreakdownConfigModal } from './metonymy/BreakdownConfigModal';
 
 // Define the 2 states now (COLLAPSED removed)
 export type SceneCollapseState = 'EXPANDED' | 'PARTIAL';
@@ -69,6 +70,7 @@ interface MetonymyViewProps {
 export const MetonymyView: React.FC<MetonymyViewProps> = ({
     blueprint, language, onUpdateBlueprint, themeAccent, themeBorder, isFullScreen, onToggleFullScreen, fieldState, onSaveToHistory, onGenerateAssetImage, onSutureOpenChange, theme, isAdmin
 }) => {
+    const [isBreakdownModalOpen, setIsBreakdownModalOpen] = useState(false);
     const rawMetonymyData = blueprint.metonymyData || { screenplay: [], staticStoryboard: [], dynamicScript: [], stylePresets: [] };
 
     // Use ref to track latest blueprint for async operations
@@ -467,7 +469,7 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
 
     // Toggle between EXPANDED and PARTIAL
     const handleToggleSceneState = (id: string) => {
-        // If scene is focused, it's always expanded visually in the UI due to layout, 
+        // If scene is focused, it's always expanded visually in the UI due to layout,
         // but we can toggle the state map for when it un-focuses.
         setSceneStateMap(prev => {
             const current = prev[id] || 'PARTIAL'; // Default to PARTIAL
@@ -659,7 +661,7 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
     const getDisplayAssets = (section: ScreenplaySection, presetId: string) => {
         const sutureData = getActiveSutureData(section, presetId);
 
-        // BUG FIX: Check if finalAssets exists, NOT if it has length. 
+        // BUG FIX: Check if finalAssets exists, NOT if it has length.
         // We want to allow empty arrays if the user deliberately deleted everything.
         if (sutureData?.finalAssets) {
             return sutureData.finalAssets;
@@ -1218,16 +1220,16 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
     const activeSectionSourceContent = activeSection?.content || "";
 
     const btnWidthClass = language === 'EN' ? 'w-[124px]' : 'w-[104px]';
-    const btnBaseClass = theme === 'retro' 
+    const btnBaseClass = theme === 'retro'
         ? `mist-archive-button h-9 ${btnWidthClass} justify-center bg-[var(--bg-header)] border border-[#8B261D]/20 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-[#8B261D]/70 hover:text-[#8B261D] hover:border-[#8B261D]/40 transition-all duration-100 active:scale-95 shadow-sm focus:outline-none`
-        : `mist-archive-button h-9 ${btnWidthClass} justify-center bg-zinc-900 border border-zinc-700/50 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-white hover:border-zinc-500 transition-all duration-100 active:scale-95 shadow-sm focus:outline-none`;
+        : `mist-archive-button h-9 ${btnWidthClass} justify-center bg-zinc-900 border border-zinc-800 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-white hover:border-[var(--mist-active-accent)] transition-all duration-100 active:scale-95 shadow-sm focus:outline-none`;
 
     const btnAddSceneClass = theme === 'retro'
-        ? `mist-app-primary-action h-9 px-4 bg-[#8B261D] border border-[#8B261D] flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white hover:bg-[#A52A2A] transition-all duration-100 active:scale-95 shadow-md focus:outline-none`
-        : `mist-app-primary-action h-9 px-4 bg-${themeColorBase}/20 border-current flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest ${themeAccent} hover:bg-${themeColorBase}/30 transition-all duration-100 active:scale-95 shadow-md focus:outline-none`;
+        ? `mist-archive-button h-9 px-4 bg-transparent border border-[#8B261D] flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-[#8B261D] hover:bg-[#8B261D]/10 transition-all duration-200 active:scale-95 shadow-sm focus:outline-none`
+        : `mist-archive-button h-9 px-4 bg-[var(--mist-active-accent)]/5 border border-[var(--mist-active-accent)] flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-[var(--mist-active-accent)] hover:bg-[var(--mist-active-accent)]/20 hover:brightness-125 transition-all duration-200 active:scale-95 shadow-sm focus:outline-none`;
 
     return (
-        <div className={`mist-archive-workbench mist-metonymy-view ${isFullScreen ? 'w-full px-0' : 'w-full'} flex flex-col h-full ${theme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#080808]'}`}>
+        <div className={`mist-archive-workbench mist-metonymy-view ${isFullScreen ? 'w-full px-0' : 'w-full'} flex flex-col h-full ${theme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#080808]'} relative`}>
             {/* Header */}
             <div className={`mist-archive-toolbar shrink-0 flex items-center justify-between border-b ${theme === 'retro' ? 'border-black/10 bg-[var(--bg-header)]' : 'border-zinc-800 bg-[#080808]'} h-16 px-6`}>
                 <div className="flex items-center gap-3 flex-1">
@@ -1241,14 +1243,6 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
                 </div>
 
                 <div className="flex items-center gap-2">
-                    <button
-                        onClick={onToggleFullScreen}
-                        className={btnBaseClass}
-                        title={isFullScreen ? (language === 'EN' ? "Exit Fullscreen" : "退出全屏") : (language === 'EN' ? "Expand Engine" : "全屏模式")}
-                    >
-                        {isFullScreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
-                        <span className="hidden lg:inline">{isFullScreen ? (language === 'EN' ? "NORMAL" : "常规视图") : (language === 'EN' ? "FULLSCREEN" : "全屏展开")}</span>
-                    </button>
 
                     <button onClick={() => setIsSourceVisible(!isSourceVisible)} className={btnBaseClass} title={language === 'EN' ? "Toggle Sidebar" : "侧边开关"}>
                         {isSourceVisible ? <PanelLeftClose size={14} /> : <PanelLeft size={14} />}
@@ -1284,7 +1278,7 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
 
             <div className="flex-1 flex flex-col overflow-hidden">
                 <div className="flex-1 flex overflow-hidden">
-                    <div className={`mist-archive-panel ${isSourceVisible ? 'w-1/3 min-w-[320px] max-w-[500px] translate-x-0' : 'w-0 opacity-0 -translate-x-full overflow-hidden'} border-r ${theme === 'retro' ? 'border-black/10 bg-[var(--bg-header)]' : 'border-zinc-800 bg-[#0a0a0a]'} flex flex-col shrink-0 transition-all duration-310 ease-in-out`}>
+                    <div className={`mist-archive-panel relative ${isSourceVisible ? 'w-1/3 min-w-[320px] max-w-[500px] translate-x-0' : 'w-0 opacity-0 -translate-x-full overflow-hidden'} border-r ${theme === 'retro' ? 'border-black/10 bg-[var(--bg-header)]' : 'border-zinc-800 bg-[#0a0a0a]'} flex flex-col shrink-0 transition-all duration-310 ease-in-out`}>
                         <SourceViewer
                             text={sourceText}
                             onChange={handleSourceTextChange}
@@ -1324,7 +1318,7 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
                         )}
 
                         {(!isStyleExpanded || focusedSceneId) && (
-                            <div className={`flex-1 ${theme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#080808]'} animate-in fade-in duration-300 ${focusedSceneId ? 'overflow-hidden px-6 pt-6 pb-16 flex flex-col' : 'overflow-y-auto custom-scrollbar p-6 pb-32 space-y-8'}`}>
+                            <div className={`flex-1 ${theme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#080808]'} ${focusedSceneId ? 'overflow-hidden px-6 pt-6 pb-16 flex flex-col' : 'overflow-y-auto custom-scrollbar p-6 pb-32 space-y-8'}`}>
                                 {currentSections.length > 0 ? currentSections
                                     // FILTER: Only show the focused scene if one is selected
                                     .filter(s => focusedSceneId ? s.id === focusedSceneId : true)

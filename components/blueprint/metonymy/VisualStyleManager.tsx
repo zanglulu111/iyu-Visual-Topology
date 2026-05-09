@@ -721,7 +721,7 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
                                                     setAssetConfigTarget({ type, asset });
                                                 }}
                                                 disabled={isAnalyzingAsset === asset.id}
-                                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition-all text-[11px] font-bold uppercase tracking-wider border disabled:opacity-50 disabled:cursor-not-allowed ${theme === 'retro' ? 'bg-[#8B261D] border-[#8B261D] text-white hover:bg-[#A52A2A]' : `bg-${colorBase}/20 text-${colorBase} hover:bg-${colorBase}/30 border-current`}`}
+                                                className={`h-9 px-4 border flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 select-none outline-none ring-0 ${theme === 'retro' ? 'bg-transparent border-[#8B261D] text-[#8B261D] hover:bg-[#8B261D]/10 shadow-sm' : 'bg-[var(--mist-active-accent)]/5 border-[var(--mist-active-accent)] text-[var(--mist-active-accent)] hover:bg-[var(--mist-active-accent)]/20 hover:brightness-125 shadow-sm'}`}
                                                 title={lang === 'EN' ? "Asset Design" : "资产设计"}
                                             >
                                                 {isAnalyzingAsset === asset.id ? <Loader2 size={12} className="animate-spin" /> : <ScanEye size={12} />}
@@ -737,7 +737,7 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
                                                     handleGenerateAssetWithLovart(type, asset);
                                                 }}
                                                 disabled={isAssetGeneratingMap[asset.id]}
-                                                className={`p-1 rounded border transition-all w-5 h-5 flex items-center justify-center outline-none shadow-sm disabled:opacity-50 disabled:cursor-not-allowed ${theme === 'retro' ? 'bg-white border-[#8B261D]/20 hover:border-[#8B261D]/50 text-[#8B261D]/70 hover:text-[#8B261D]' : 'bg-zinc-900 border-zinc-700/50 hover:border-zinc-500 text-zinc-100 hover:text-white'}`}
+                                                className={`p-1 rounded border transition-all w-5 h-5 flex items-center justify-center outline-none shadow-sm disabled:opacity-50 disabled:cursor-not-allowed ${theme === 'retro' ? 'bg-white border-[#8B261D]/20 hover:border-[#8B261D]/50 text-[#8B261D]/70 hover:text-[#8B261D]' : 'bg-zinc-900 border-zinc-800 hover:border-[var(--mist-active-accent)] text-zinc-100 hover:text-white'}`}
                                                 title={lang === 'EN' ? "Generate Asset Image with Lovart" : "用 Lovart 生成资产图"}
                                             >
                                                 {isAssetGeneratingMap[asset.id] ? <Loader2 size={11} className="animate-spin" /> : <Sparkles size={11} />}
@@ -754,7 +754,7 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
                                                     setCopiedAssetId(asset.id + "_prompt");
                                                     setTimeout(() => setCopiedAssetId(null), 2000);
                                                 }}
-                                                className={`p-1 rounded border transition-all w-5 h-5 flex items-center justify-center outline-none shadow-sm ${theme === 'retro' ? 'bg-white border-[#8B261D]/20 hover:border-[#8B261D]/50 text-[#8B261D]/70 hover:text-[#8B261D]' : 'bg-zinc-900 border-zinc-700/50 hover:border-zinc-500 text-zinc-100 hover:text-white'}`}
+                                                className={`p-1 rounded border transition-all w-5 h-5 flex items-center justify-center outline-none shadow-sm ${theme === 'retro' ? 'bg-white border-[#8B261D]/20 hover:border-[#8B261D]/50 text-[#8B261D]/70 hover:text-[#8B261D]' : 'bg-zinc-900 border-zinc-800 hover:border-[var(--mist-active-accent)] text-zinc-100 hover:text-white'}`}
                                                 title={lang === 'EN' ? "Copy Design Prompt" : "复制设计图提示词"}
                                             >
                                                 {copiedAssetId === asset.id + "_prompt" ? <Check size={11} className="text-green-500" /> : <Paintbrush size={11} />}
@@ -771,7 +771,7 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
                                                     setCopiedAssetId(asset.id + "_concept");
                                                     setTimeout(() => setCopiedAssetId(null), 2000);
                                                 }}
-                                                className={`p-1 rounded border transition-all w-5 h-5 flex items-center justify-center outline-none shadow-sm ${theme === 'retro' ? 'bg-white border-[#8B261D]/20 hover:border-[#8B261D]/50 text-[#8B261D]/70 hover:text-[#8B261D]' : 'bg-zinc-900 border-zinc-700/50 hover:border-zinc-500 text-zinc-100 hover:text-white'}`}
+                                                className={`p-1 rounded border transition-all w-5 h-5 flex items-center justify-center outline-none shadow-sm ${theme === 'retro' ? 'bg-white border-[#8B261D]/20 hover:border-[#8B261D]/50 text-[#8B261D]/70 hover:text-[#8B261D]' : 'bg-zinc-900 border-zinc-800 hover:border-[var(--mist-active-accent)] text-zinc-100 hover:text-white'}`}
                                                 title={lang === 'EN' ? "Copy Concept Prompt" : "复制概念图提示词"}
                                             >
                                                 {copiedAssetId === asset.id + "_concept" ? <Check size={11} className="text-green-500" /> : <Layers size={11} />}
@@ -788,7 +788,7 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
                                                     setCopiedAssetId(asset.id + "_desc");
                                                     setTimeout(() => setCopiedAssetId(null), 2000);
                                                 }}
-                                                className={`p-1 rounded border transition-all w-5 h-5 flex items-center justify-center outline-none shadow-sm ${theme === 'retro' ? 'bg-white border-[#8B261D]/20 hover:border-[#8B261D]/50 text-[#8B261D]/70 hover:text-[#8B261D]' : 'bg-zinc-900 border-zinc-700/50 hover:border-zinc-500 text-zinc-100 hover:text-white'}`}
+                                                className={`p-1 rounded border transition-all w-5 h-5 flex items-center justify-center outline-none shadow-sm ${theme === 'retro' ? 'bg-white border-[#8B261D]/20 hover:border-[#8B261D]/50 text-[#8B261D]/70 hover:text-[#8B261D]' : 'bg-zinc-900 border-zinc-800 hover:border-[var(--mist-active-accent)] text-zinc-100 hover:text-white'}`}
                                                 title={lang === 'EN' ? "Copy Description" : "复制主体描述"}
                                             >
                                                 {copiedAssetId === asset.id + "_desc" ? <Check size={11} className="text-green-500" /> : <Copy size={11} />}
@@ -851,7 +851,7 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
                                             </span>
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); toggleAssetLang(asset.id, type); }}
-                                                className={`p-1 rounded border transition-all font-bold text-[10px] w-5 h-5 flex items-center justify-center outline-none ${theme === 'retro' ? 'bg-white border-[#8B261D]/20 hover:border-[#8B261D]/50 text-[#8B261D] hover:text-[#8B261D]/80' : 'bg-zinc-900 border-zinc-800 hover:border-zinc-600 text-zinc-100 hover:text-white'}`}
+                                                className={`p-1 rounded border transition-all font-bold text-[10px] w-5 h-5 flex items-center justify-center outline-none ${theme === 'retro' ? 'bg-white border-[#8B261D]/20 hover:border-[#8B261D]/50 text-[#8B261D] hover:text-[#8B261D]/80' : 'bg-zinc-900 border-zinc-800 hover:border-[var(--mist-active-accent)] text-zinc-100 hover:text-white'}`}
                                                 title={lang === 'EN' ? "Toggle Language" : "切换中英"}
                                             >
                                                 {currentAssetLang === 'CN' ? '中' : 'EN'}
@@ -1009,7 +1009,7 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
                                             <button
                                                 onClick={handleAnalyzeAll}
                                                 disabled={isAnalyzing || isAnalyzingTone}
-                                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition-all text-[11px] font-bold uppercase tracking-wider border disabled:opacity-50 disabled:cursor-not-allowed ${theme === 'retro' ? 'bg-[#8B261D] border-[#8B261D] text-white hover:bg-[#A52A2A]' : `bg-${colorBase}/20 text-${colorBase} hover:bg-${colorBase}/30 border-current`}`}
+                                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition-all duration-200 text-[11px] font-bold uppercase tracking-wider border disabled:opacity-50 disabled:cursor-not-allowed ${theme === 'retro' ? 'bg-transparent border-[#8B261D] text-[#8B261D] hover:bg-[#8B261D]/10 shadow-sm' : 'bg-[var(--mist-active-accent)]/5 border-[var(--mist-active-accent)] text-[var(--mist-active-accent)] hover:bg-[var(--mist-active-accent)]/20 hover:brightness-125 shadow-sm'}`}
                                                 title={lang === 'EN' ? "Reference Reverse" : (activePreset.id === 'original' ? "参考文本反推" : "参考图视觉反推")}
                                             >
                                                 {isAnalyzing || isAnalyzingTone ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
@@ -1025,7 +1025,7 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
 
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); setDisplayLang(prev => prev === 'CN' ? 'EN' : 'CN'); }}
-                                                className={`p-1 rounded border transition-all font-bold text-[10px] w-5 h-5 flex items-center justify-center outline-none ${theme === 'retro' ? 'bg-white border-[#8B261D]/20 hover:border-[#8B261D]/50 text-[#8B261D]/70 hover:text-[#8B261D]' : 'bg-zinc-900 border-zinc-700/50 hover:border-zinc-500 text-zinc-100 hover:text-white'}`}
+                                                className={`p-1 rounded border transition-all font-bold text-[10px] w-5 h-5 flex items-center justify-center outline-none ${theme === 'retro' ? 'bg-white border-[#8B261D]/20 hover:border-[#8B261D]/50 text-[#8B261D]/70 hover:text-[#8B261D]' : 'bg-zinc-900 border-zinc-800 hover:border-[var(--mist-active-accent)] text-zinc-100 hover:text-white'}`}
                                                 title={lang === 'EN' ? "Toggle Language" : "切换中英"}
                                             >
                                                 {displayLang === 'CN' ? '中' : 'EN'}
@@ -1033,7 +1033,7 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
 
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); handleCopyAll(e); }}
-                                                className={`p-1 rounded border transition-all w-5 h-5 flex items-center justify-center outline-none shadow-sm ${theme === 'retro' ? 'bg-white border-[#8B261D]/20 hover:border-[#8B261D]/50 text-[#8B261D]/70 hover:text-[#8B261D]' : 'bg-zinc-900 border-zinc-700/50 hover:border-zinc-500 text-zinc-100 hover:text-white'}`}
+                                                className={`p-1 rounded border transition-all w-5 h-5 flex items-center justify-center outline-none shadow-sm ${theme === 'retro' ? 'bg-white border-[#8B261D]/20 hover:border-[#8B261D]/50 text-[#8B261D]/70 hover:text-[#8B261D]' : 'bg-zinc-900 border-zinc-800 hover:border-[var(--mist-active-accent)] text-zinc-100 hover:text-white'}`}
                                                 title={lang === 'EN' ? "Copy All" : "一键复制"}
                                             >
                                                 {copiedAll ? <Check size={11} className="text-green-500" /> : <Copy size={11} />}

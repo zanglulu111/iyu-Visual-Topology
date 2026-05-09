@@ -90,6 +90,10 @@ const isSurfaceBlock = (blockId: string) => {
 const getLibraryBlockItems = (blocks: NarrativeBlockDef[], library: LibraryCategoryDef[], fieldState: NarrativeFieldState, lang: 'CN' | 'EN', driverType: DriverType) => {
     return blocks.map(block => {
         const cat = getLibraryForBlock(block.id, library);
+        // Only SV1 (skin_structure) and SV2 (skin_volume) are editable in the Bible Inspector.
+        // Everything else is a generated engine parameter or surface setting and should be read-only.
+        const isSV = block.id === 'skin_structure' || block.id === 'skin_volume';
+
         return {
             id: block.id,
             label: lang === 'EN' ? (block.enName || block.name) : block.name,
@@ -102,7 +106,7 @@ const getLibraryBlockItems = (blocks: NarrativeBlockDef[], library: LibraryCateg
                     ? (item.coreEn || item.defEn || item.essenceEn || item.core || item.def)
                     : (item.core || item.def || item.essence)
             })),
-            editable: true,
+            editable: isSV,
             maxSelected: BLOCK_LIMITS[block.id] || 1,
             placeholder: getBlockPlaceholder(block, lang),
             driverType,
@@ -169,60 +173,66 @@ export const BiblePromptInspectorModal: React.FC<BiblePromptInspectorModalProps>
         }
     })();
 
-    const getSources = (): XRaySourceGroup[] => [
-        {
-            id: 'engine-params',
-            title: lang === 'EN' ? 'Engine Parameters' : '引擎参数',
-            items: getLibraryBlockItems(engineBlocks, library, defaultFieldState, lang, driverType)
-        },
-        {
-            id: 'surface-settings',
-            title: lang === 'EN' ? 'Surface Settings' : '表层设定',
-            items: [
-                {
-                    id: 'worldLawGravity',
-                    label: lang === 'EN' ? 'World Law' : '世界法则',
-                    kind: 'select',
-                    value: defaultWorldLaw?.gravity || '',
-                    options: WORLD_LAW_OPTIONS,
-                    editable: true,
-                    placeholder: lang === 'EN' ? 'World Law' : '世界法则'
-                },
-                {
-                    id: 'styleId',
-                    label: driverType === DriverType.NARRATIVE
-                        ? (lang === 'EN' ? 'Author Style' : '作者风格')
-                        : (lang === 'EN' ? 'Bible Style' : '圣经风格'),
-                    kind: 'select',
-                    value: styleConfig.styleId || '',
-                    options: getStyleOptions(driverType),
-                    editable: true,
-                    placeholder: driverType === DriverType.NARRATIVE
-                        ? (lang === 'EN' ? 'Author Style' : '作者风格')
-                        : (lang === 'EN' ? 'Bible Style' : '圣经风格')
-                },
-                ...(showPerspectiveAndSensory ? [
+    const getSources = (values?: Record<string, any>): XRaySourceGroup[] => {
+        const currentStyleId = values?.styleId ?? styleConfig.styleId;
+        const isStyleLocked = !!currentStyleId;
+
+        return [
+            {
+                id: 'engine-params',
+                title: lang === 'EN' ? 'Engine Parameters' : '引擎参数',
+                items: getLibraryBlockItems(engineBlocks, library, defaultFieldState, lang, driverType)
+            },
+            {
+                id: 'surface-settings',
+                title: lang === 'EN' ? 'Surface Settings' : '表层设定',
+                items: [
                     {
-                        id: 'perspectiveId',
-                        label: lang === 'EN' ? 'Perspective' : '叙事视点',
-                        kind: 'select' as const,
-                        value: styleConfig.perspectiveId || '',
-                        options: PERSPECTIVES.map(item => ({ value: item.id, label: item.name, description: item.prompt })),
-                        editable: true,
-                        placeholder: lang === 'EN' ? 'Perspective' : '叙事视点'
+                        id: 'worldLawGravity',
+                        label: lang === 'EN' ? 'World Law' : '世界法则',
+                        kind: 'select',
+                        value: defaultWorldLaw?.gravity || '',
+                        options: WORLD_LAW_OPTIONS,
+                        editable: false,
+                        placeholder: lang === 'EN' ? 'World Law' : '世界法则'
                     },
                     {
-                        id: 'sensoryId',
-                        label: lang === 'EN' ? 'Sensory Mode' : '感官侧重',
-                        kind: 'select' as const,
-                        value: styleConfig.sensoryId || '',
-                        options: SENSORY_MODES.map(item => ({ value: item.id, label: item.name, description: item.prompt })),
-                        editable: true
-                    }
-                ] : []),
-                ...getLibraryBlockItems(surfaceBlocks, library, defaultFieldState, lang, driverType)
-            ]
-        },
+                        id: 'styleId',
+                        label: driverType === DriverType.NARRATIVE
+                            ? (lang === 'EN' ? 'Author Style' : '作者风格')
+                            : (lang === 'EN' ? 'Bible Style' : '圣经风格'),
+                        kind: 'select',
+                        value: styleConfig.styleId || '',
+                        options: getStyleOptions(driverType),
+                        editable: true,
+                        placeholder: driverType === DriverType.NARRATIVE
+                            ? (lang === 'EN' ? 'Author Style' : '作者风格')
+                            : (lang === 'EN' ? 'Bible Style' : '圣经风格')
+                    },
+                    ...(showPerspectiveAndSensory ? [
+                        {
+                            id: 'perspectiveId',
+                            label: lang === 'EN' ? 'Perspective' : '叙事视点',
+                            kind: 'select' as const,
+                            value: styleConfig.perspectiveId || '',
+                            options: PERSPECTIVES.map(item => ({ value: item.id, label: item.name, description: item.prompt })),
+                            editable: true,
+                            disabled: isStyleLocked,
+                            placeholder: lang === 'EN' ? 'Perspective' : '叙事视点'
+                        },
+                        {
+                            id: 'sensoryId',
+                            label: lang === 'EN' ? 'Sensory Mode' : '感官侧重',
+                            kind: 'select' as const,
+                            value: styleConfig.sensoryId || '',
+                            options: SENSORY_MODES.map(item => ({ value: item.id, label: item.name, description: item.prompt })),
+                            editable: true,
+                            disabled: isStyleLocked
+                        }
+                    ] : []),
+                    ...getLibraryBlockItems(surfaceBlocks, library, defaultFieldState, lang, driverType)
+                ]
+            },
         {
             id: 'text',
             title: lang === 'EN' ? 'Text & Image Sources' : '文本与图像源',
@@ -287,6 +297,7 @@ export const BiblePromptInspectorModal: React.FC<BiblePromptInspectorModalProps>
             ]
         }
     ];
+    };
 
     const buildPayload = (values: Record<string, unknown>) => {
         if (!treatment) {

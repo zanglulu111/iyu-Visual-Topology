@@ -14,8 +14,8 @@ interface TrailerViewProps {
     theme?: string;
 }
 
-export const TrailerView: React.FC<TrailerViewProps> = ({ 
-    blueprint, activeTab, language, onUpdateBlueprint, themeAccent, themeBorder, theme 
+export const TrailerView: React.FC<TrailerViewProps> = ({
+    blueprint, activeTab, language, onUpdateBlueprint, themeAccent, themeBorder, theme
 }) => {
     const data = blueprint.trailerData || {
         hook: "TRAILER HOOK",
@@ -30,7 +30,7 @@ export const TrailerView: React.FC<TrailerViewProps> = ({
     };
 
     return (
-        <div className="max-w-6xl mx-auto space-y-12 animate-in fade-in slide-in-from-bottom-2 pb-20">
+        <div className="max-w-6xl mx-auto space-y-12 pb-20">
              {activeTab === 'HYPE' && (
                  <>
                     <div className={`${theme === 'retro' ? 'bg-transparent border-[var(--border-main)]' : 'bg-[var(--mist-active-accent)]/10 border border-[var(--mist-active-accent)]/30'} p-10 rounded-2xl relative overflow-hidden text-center border`}>
@@ -46,7 +46,7 @@ export const TrailerView: React.FC<TrailerViewProps> = ({
                         {data.copywriting.map((line, i) => (
                             <div key={i} className={`p-6 rounded-xl border ${theme === 'retro' ? 'bg-transparent border-[var(--border-main)]' : 'bg-zinc-900/30 border-zinc-800'}`}>
                                 <span className={`text-[10px] ${theme === 'retro' ? 'text-black/40' : 'text-zinc-500'} font-bold uppercase mb-2 block`}>Voiceover Line 0{i+1}</span>
-                                <textarea 
+                                <textarea
                                     value={line}
                                     onChange={(e) => {
                                         const next = [...data.copywriting];
