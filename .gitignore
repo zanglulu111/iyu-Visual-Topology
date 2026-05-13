@@ -39,6 +39,8 @@ philosophy-kb/
 .agents/.python-deps/
 outputs/
 _temp/
+_tmp_mist-retro-*.png
+2-24版/.tmp/
 
 # Local asset links
 src/assets/philosophers
