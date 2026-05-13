@@ -153,7 +153,7 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
                             title: dossier.psychoanalysis.title,
                             body: dossier.psychoanalysis.content || '精神分析档案待补全。'
                         }],
-                        conclusion: dossier.adminNotes || '该主体档案由欲望工作档案推送生成。',
+                        conclusion: dossier.adminNotes || '该主体档案由欲望存档推送生成。',
                         verdict: dossier.status === 'published' ? '病历归档：[已发布]' : '病历归档：[草稿]'
                     },
                     assetGroups: dossier.assets,
@@ -1270,6 +1270,9 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
                 }
 
                 .subject-archive-root.is-retro {
+                    --subject-red: #8B261D;
+                    --subject-red-dark: #6D1E16;
+                    --subject-line: rgba(139,38,29,0.16);
                     background: #f2f0ea;
                     color: #161512;
                 }
@@ -1303,6 +1306,142 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
                 .subject-archive-root.is-retro .subject-overview-panel {
                     border-color: rgba(20,18,15,0.16);
                     background: rgba(255,255,255,0.44);
+                }
+
+                .subject-archive-root.is-retro .subject-archive-lower-bg {
+                    opacity: 0.58;
+                    background:
+                        radial-gradient(circle at 32% 42%, rgba(139,38,29,0.034), transparent 31%),
+                        linear-gradient(180deg, rgba(255,252,246,0) 0%, rgba(255,252,246,0.06) 22%, rgba(239,233,223,0.26) 62%, rgba(239,233,223,0.58) 100%),
+                        linear-gradient(90deg, rgba(239,233,223,0.12) 0%, rgba(239,233,223,0.03) 40%, rgba(139,38,29,0.08) 100%);
+                }
+
+                .subject-archive-root.is-retro .subject-archive-lower-bg::before {
+                    opacity: 0.28;
+                    filter: grayscale(0.9) sepia(0.18) saturate(0.76) contrast(0.82) brightness(1.18);
+                    -webkit-mask-image: radial-gradient(ellipse 68% 58% at 27% 86%, #000 0%, #000 32%, rgba(0,0,0,0.52) 50%, rgba(0,0,0,0.14) 66%, transparent 88%);
+                    mask-image: radial-gradient(ellipse 68% 58% at 27% 86%, #000 0%, #000 32%, rgba(0,0,0,0.52) 50%, rgba(0,0,0,0.14) 66%, transparent 88%);
+                }
+
+                .subject-archive-root.is-retro .subject-archive-lower-bg::after {
+                    background:
+                        radial-gradient(circle at 28% 42%, rgba(255,252,246,0.22), transparent 34%),
+                        radial-gradient(circle at 42% 52%, rgba(139,38,29,0.028), transparent 36%),
+                        linear-gradient(180deg, rgba(255,252,246,0) 0%, rgba(239,233,223,0.1) 18%, rgba(239,233,223,0.24) 52%, rgba(239,233,223,0.48) 100%),
+                        linear-gradient(90deg, rgba(239,233,223,0.3), transparent 18%, transparent 60%, rgba(139,38,29,0.065) 78%, rgba(239,233,223,0.42) 100%);
+                }
+
+                .subject-archive-root.is-retro .subject-kicker-line,
+                .subject-archive-root.is-retro .subject-section-top-left::after,
+                .subject-archive-root.is-retro .subject-footer-center::before,
+                .subject-archive-root.is-retro .subject-footer-center::after {
+                    background: linear-gradient(90deg, rgba(139,38,29,0.34), transparent);
+                }
+
+                .subject-archive-root.is-retro .subject-filter {
+                    color: rgba(54,32,25,0.66);
+                    border-color: rgba(139,38,29,0.16);
+                    background: rgba(255,252,246,0.58);
+                    box-shadow: 0 8px 18px rgba(92,65,38,0.05);
+                }
+
+                .subject-archive-root.is-retro .subject-filter:hover,
+                .subject-archive-root.is-retro .subject-filter.is-selected {
+                    color: #251916;
+                    border-color: rgba(139,38,29,0.36);
+                    background:
+                        linear-gradient(180deg, rgba(255,252,246,0.96), rgba(246,240,231,0.84));
+                }
+
+                .subject-archive-root.is-retro .subject-filter-dot {
+                    box-shadow: none;
+                }
+
+                .subject-archive-root.is-retro .subject-pager button,
+                .subject-archive-root.is-retro .subject-wheel-nav {
+                    color: #251916;
+                    border-color: rgba(139,38,29,0.16);
+                    background: rgba(255,252,246,0.82);
+                    box-shadow: 0 8px 20px rgba(92,65,38,0.08);
+                    backdrop-filter: none;
+                }
+
+                .subject-archive-root.is-retro .subject-pager button:hover:not(:disabled),
+                .subject-archive-root.is-retro .subject-wheel-nav:hover {
+                    color: #8B261D;
+                    border-color: rgba(139,38,29,0.34);
+                    background: rgba(255,252,246,0.96);
+                }
+
+                .subject-archive-root.is-retro .subject-case-card {
+                    border-color: rgba(37,25,22,0.18);
+                    background:
+                        linear-gradient(135deg, rgba(255,255,255,0.82), rgba(255,255,255,0.3) 44%, rgba(139,38,29,0.02)),
+                        radial-gradient(circle at 22% 8%, rgba(255,255,255,0.92), transparent 28%),
+                        var(--subject-paper);
+                    box-shadow:
+                        inset 0 0 0 0.17rem rgba(255,255,255,0.72),
+                        inset 0 0 0 0.25rem rgba(139,38,29,0.09),
+                        0 1.1rem 2.4rem rgba(92,65,38,0.14);
+                }
+
+                .subject-archive-root.is-retro .subject-case-card::before {
+                    opacity: 0.06;
+                }
+
+                .subject-archive-root.is-retro .subject-case-card.is-active {
+                    filter: brightness(1.01);
+                    border-color: rgba(139,38,29,0.36);
+                    box-shadow:
+                        inset 0 0 0 0.17rem rgba(255,255,255,0.78),
+                        inset 0 0 0 0.25rem rgba(139,38,29,0.12),
+                        0 1.55rem 3.2rem rgba(92,65,38,0.18),
+                        0 0 0 1px rgba(139,38,29,0.1);
+                }
+
+                .subject-archive-root.is-retro .subject-card-corner {
+                    border-color: rgba(37,25,22,0.22);
+                }
+
+                .subject-archive-root.is-retro .subject-case-card.is-active .subject-card-corner {
+                    border-color: rgba(139,38,29,0.46);
+                }
+
+                .subject-archive-root.is-retro .subject-card-image {
+                    background: rgba(255,252,246,0.56);
+                    border-color: rgba(139,38,29,0.16);
+                }
+
+                .subject-archive-root.is-retro .subject-card-image img {
+                    filter: grayscale(0.34) sepia(0.14) saturate(0.86) contrast(1.02) brightness(1.04);
+                }
+
+                .subject-archive-root.is-retro .subject-case-card.is-active .subject-card-image img {
+                    filter: grayscale(0.18) sepia(0.12) saturate(0.92) contrast(1.04) brightness(1.08);
+                }
+
+                .subject-archive-root.is-retro .subject-card-image::after {
+                    background:
+                        linear-gradient(90deg, rgba(139,38,29,0.09), transparent 14%, transparent 86%, rgba(255,252,246,0.12)),
+                        linear-gradient(180deg, transparent, rgba(37,25,22,0.06));
+                    mix-blend-mode: multiply;
+                }
+
+                .subject-archive-root.is-retro .subject-card-meta,
+                .subject-archive-root.is-retro .subject-card-open {
+                    border-color: rgba(139,38,29,0.16);
+                    color: rgba(37,25,22,0.66);
+                }
+
+                .subject-archive-root.is-retro .subject-case-card.is-active .subject-card-meta,
+                .subject-archive-root.is-retro .subject-case-card.is-active .subject-card-open,
+                .subject-archive-root.is-retro .subject-case-card.is-active .subject-card-signal {
+                    color: #8B261D;
+                    border-color: rgba(139,38,29,0.24);
+                }
+
+                .subject-archive-root.is-retro .subject-detail-layer {
+                    background: rgba(239,233,223,0.96);
                 }
 
                 @media (max-height: 860px) {

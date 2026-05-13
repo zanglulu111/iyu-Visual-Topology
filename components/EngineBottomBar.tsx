@@ -5,7 +5,6 @@ import { DriverType, WorldLawConfig, ViewMode } from '../types';
 import { FooterActions } from './FooterActions';
 import { ProcessingTimer } from './SharedBlueprintComponents';
 import { useTheme } from '../contexts/ThemeContext';
-import { TaskManagerPanel } from './TaskManagerPanel';
 import { globalTaskManager } from '../services/taskManager';
 
 interface EngineBottomBarProps {
@@ -104,11 +103,16 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
         return () => unsubscribe();
     }, []);
 
-    const getFooterThemeColor = () => 'text-[var(--text-header)] hover:text-[var(--text-header)]';
+    const getFooterThemeColor = () => theme === 'retro'
+        ? 'text-[var(--text-accent)] hover:text-[var(--text-accent)]'
+        : 'text-[var(--text-header)] hover:text-[var(--text-header)]';
 
-    const getThemeTextColor = () => 'text-[var(--text-header)]';
+    const getThemeTextColor = () => theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-[var(--text-header)]';
 
-    const getFooterButtonStyle = () => 'mist-app-primary-action';
+    const getFooterButtonStyle = () => {
+        if (theme === 'retro') return 'bg-[#8B261D] hover:bg-[#631B15] border-[#8B261D] text-white shadow-none';
+        return 'mist-app-primary-action';
+    };
 
     const getFooterAccentValue = () => 'var(--mist-active-accent)';
 
@@ -117,27 +121,27 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
         if (selectedDriver === DriverType.EXPERIMENTAL) return lang === 'EN' ? "TRANSLATE STORY" : "转译故事";
         if (selectedDriver === DriverType.AESTHETIC) return lang === 'EN' ? "GENERATE AESTHETIC" : "生成美学";
         if (selectedDriver === DriverType.TRAILER) return lang === 'EN' ? "CUT TRAILER" : "剪辑预告";
-        return lang === 'EN' ? "TRAVERSE FANTASY" : "穿越幻想";
+        return lang === 'EN' ? "GENERATE DIVERGENCES" : "生成分歧点";
     };
 
     const mutedFooterControlClass = 'text-[var(--text-muted)] group-hover:text-[var(--text-header)] transition-colors';
     const footerPanelClass = theme === 'retro'
-        ? 'mist-app-footer-segment mist-world-law-panel bg-[var(--bg-panel)] border-2 border-[#8B261D]'
+        ? 'mist-app-footer-segment mist-world-law-panel bg-[var(--bg-panel)] border border-[var(--border-main)] shadow-none'
         : 'mist-app-footer-segment mist-world-law-panel bg-[#050505] border-2 border-[var(--mist-active-accent)] shadow-[0_0_24px_rgba(var(--mist-active-accent-rgb),0.12)]';
     const footerSegmentClass = 'mist-app-footer-segment';
     const footerActivePillClass = theme === 'retro'
-        ? 'border-[var(--text-accent)] text-[var(--text-header)] scale-105 bg-[var(--surface-hover)]'
+        ? 'border-[var(--border-strong)] text-[var(--text-accent)] scale-105 bg-[var(--bg-card)]'
         : 'border-[var(--mist-active-accent)] text-[var(--text-header)] scale-105 bg-white/[0.06]';
-    const footerInactivePillClass = 'bg-transparent border-[var(--border-glass)] text-[var(--text-muted)] hover:text-[var(--text-header)] hover:border-[var(--border-strong)] hover:bg-[var(--surface-hover)]';
+    const footerInactivePillClass = 'bg-transparent border-[var(--border-glass)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--border-strong)] hover:bg-[var(--surface-hover)]';
     const isLabyrinthFooter = selectedDriver === DriverType.NARRATIVE;
 
     return (
         <div
-            className={`mist-app-footer fixed bottom-0 left-0 right-0 bg-[var(--bg-header)] backdrop-blur-md border-t border-[var(--border-main)] flex items-center justify-between px-6 md:px-12 z-40 transition-colors duration-500 animate-page-dissolve`}
+            className={`mist-app-footer ${selectedDriver === DriverType.AESTHETIC ? 'mist-aesthetic-footer' : ''} fixed bottom-0 left-0 right-0 h-14 bg-[var(--bg-header)] backdrop-blur-md border-t border-[var(--border-main)] flex items-center justify-between px-6 md:px-12 z-40 transition-colors duration-500 animate-page-dissolve`}
             style={{ ['--footer-accent' as any]: getFooterAccentValue() }}
         >
             <div className="flex items-center gap-4 shrink-0 w-[180px] md:w-[240px]">
-                <button onClick={handleBackStep} className={`mist-app-archive-button flex items-center gap-3 px-6 py-3 bg-[var(--bg-panel)] hover:bg-[var(--surface-hover)] border border-[var(--border-main)] text-xs font-bold uppercase tracking-widest transition-all duration-300 group min-w-[140px] active:scale-95 ${theme === 'retro' ? 'text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'text-[var(--text-muted)] hover:text-[var(--text-header)]'}`} >
+                <button onClick={handleBackStep} className={`flex items-center gap-3 px-6 py-3 bg-[var(--bg-panel)]/50 hover:bg-[var(--bg-panel)] border border-[var(--border-main)] rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-300 group min-w-[140px] hover:scale-105 active:scale-95 ${theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'}`} >
                     <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
                     <span className="hidden md:inline">{lang === 'CN' ? "返回首页" : "Home"}</span>
                 </button>
@@ -146,7 +150,7 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
                 {viewMode !== 'METONYMY' && (
                     <>
                         {selectedDriver !== DriverType.AESTHETIC && !isLabyrinthFooter && (
-                            <button onClick={() => setIsSkinOpen(!isSkinOpen)} className={`mist-app-footer-control ${isSkinOpen ? 'is-active' : ''} flex flex-col items-center gap-1.5 shrink-0 min-w-[60px] group transition-all duration-300 active:scale-95`} >
+                            <button onClick={() => setIsSkinOpen(!isSkinOpen)} className={`mist-app-footer-control ${isSkinOpen ? 'is-active' : ''} flex flex-col items-center gap-1.5 shrink-0 min-w-[60px] group transition-all duration-300 hover:scale-105 active:scale-95`} >
                                 <Settings2 size={18} className={isSkinOpen ? getThemeTextColor() : mutedFooterControlClass} />
                                 <span className={`text-[9px] font-bold uppercase tracking-wider transition-colors ${isSkinOpen ? getThemeTextColor() : mutedFooterControlClass}`}>
                                     {lang === 'CN' ? (selectedDriver === DriverType.COMMERCIAL ? "商业执行单" : (selectedDriver === DriverType.EXPERIMENTAL ? "脚本协议" : (selectedDriver === DriverType.TRAILER ? "预告片执行单" : "表层设定"))) : (selectedDriver === DriverType.COMMERCIAL ? "Brief" : (selectedDriver === DriverType.EXPERIMENTAL ? "Script" : (selectedDriver === DriverType.TRAILER ? "Trailer" : "Skin")))}
@@ -154,7 +158,7 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
                             </button>
                         )}
                         {!isLabyrinthFooter && (
-                            <button onClick={() => setIsVisionOpen(!isVisionOpen)} className={`mist-app-footer-control ${isVisionOpen ? 'is-active' : ''} flex flex-col items-center gap-1.5 shrink-0 min-w-[60px] group transition-all duration-300 active:scale-95`} >
+                            <button onClick={() => setIsVisionOpen(!isVisionOpen)} className={`mist-app-footer-control ${isVisionOpen ? 'is-active' : ''} flex flex-col items-center gap-1.5 shrink-0 min-w-[60px] group transition-all duration-300 hover:scale-105 active:scale-95`} >
                                 <PenTool size={18} className={isVisionOpen ? getThemeTextColor() : mutedFooterControlClass} />
                                 <span className={`text-[9px] font-bold uppercase tracking-wider transition-colors ${isVisionOpen ? getThemeTextColor() : mutedFooterControlClass}`}>
                                     {lang === 'CN' ? (selectedDriver === DriverType.COMMERCIAL ? "欲望输入" : selectedDriver === DriverType.AESTHETIC ? "反推解码" : "植入症候") : (selectedDriver === DriverType.AESTHETIC ? "Decoding" : "Input")}
@@ -235,7 +239,7 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
                                     e.stopPropagation();
                                     setIsWorldLawOpen(!isWorldLawOpen);
                                 }}
-                                className={`mist-app-footer-control ${isWorldLawOpen ? 'is-active' : ''} flex flex-col items-center gap-1.5 shrink-0 min-w-[70px] group transition-all duration-300 active:scale-95`}
+                                className={`mist-app-footer-control ${isWorldLawOpen ? 'is-active' : ''} flex flex-col items-center gap-1.5 shrink-0 min-w-[70px] group transition-all duration-300 hover:scale-105 active:scale-95`}
                             >
                                 <Scale size={18} className={getThemeTextColor()} />
                                 <span className={`text-[10px] font-black uppercase tracking-widest transition-colors ${getThemeTextColor()}`}>
@@ -260,7 +264,7 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
                                     e.stopPropagation();
                                     setIsTensionOpen(!isTensionOpen);
                                 }}
-                                className={`mist-app-footer-control ${isTensionOpen ? 'is-active' : ''} flex flex-col items-center gap-1.5 shrink-0 min-w-[70px] group transition-all duration-300 active:scale-95`}
+                                className={`mist-app-footer-control ${isTensionOpen ? 'is-active' : ''} flex flex-col items-center gap-1.5 shrink-0 min-w-[70px] group transition-all duration-300 hover:scale-105 active:scale-95`}
                             >
                                 <Cpu size={18} className={isTensionOpen ? getThemeTextColor() : mutedFooterControlClass} />
                                 <span className={`text-[10px] font-black uppercase tracking-widest transition-colors ${isTensionOpen ? getThemeTextColor() : mutedFooterControlClass}`}>
@@ -293,22 +297,22 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
                                 </div>
                                 <div className="w-px h-8 bg-[var(--border-main)] shrink-0 mx-2"></div>
                                 <div className={`flex border p-1 shrink-0 transition-all duration-300 ${footerSegmentClass}`}>
-                                    <button onClick={() => setSubjectType('HUMAN')} className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 transition-all ${subjectType === 'HUMAN' ? 'text-[var(--text-header)] bg-white/[0.06] border-b border-[var(--mist-archive-red)]' : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--surface-hover)]'}`} >
+                                    <button onClick={() => setSubjectType('HUMAN')} className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 transition-all ${subjectType === 'HUMAN' ? 'text-[var(--text-accent)] bg-[var(--surface-hover)] border-b border-[var(--mist-archive-red)]' : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--surface-hover)]'}`} >
                                         <UserIcon size={12} /> {lang === 'CN' ? "人类" : "Human"}
                                     </button>
-                                    <button onClick={() => setSubjectType('CREATURE')} className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 transition-all ${subjectType === 'CREATURE' ? 'text-[var(--text-header)] bg-white/[0.06] border-b border-[var(--mist-archive-red)]' : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--surface-hover)]'}`} >
+                                    <button onClick={() => setSubjectType('CREATURE')} className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 transition-all ${subjectType === 'CREATURE' ? 'text-[var(--text-accent)] bg-[var(--surface-hover)] border-b border-[var(--mist-archive-red)]' : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--surface-hover)]'}`} >
                                         <Ghost size={12} /> {lang === 'CN' ? "异种" : "Creature"}
                                     </button>
                                 </div>
                                 <div className="w-px h-8 bg-[var(--border-main)] shrink-0 mx-2"></div>
-                                <button onClick={handleAestheticSmartRandom} className="mist-app-footer-control flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]" >
+                                <button onClick={handleAestheticSmartRandom} className="mist-app-footer-control flex flex-col items-center gap-1.5 group transition-all duration-300 hover:scale-105 active:scale-95 shrink-0 min-w-[60px]" >
                                     <Sparkles size={18} className="text-[var(--text-muted)] group-hover:text-[var(--text-header)] group-hover:rotate-90 transition-transform" />
                                     <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--text-muted)] group-hover:text-[var(--text-header)]">{lang === 'CN' ? "灵感涌现" : "Inspiration Surge"}</span>
                                 </button>
 
                                 <button
                                     onClick={handleCopyAestheticPrompt}
-                                    className={`mist-app-footer-control ${promptCopied ? 'is-active' : ''} flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]`}
+                                    className={`mist-app-footer-control ${promptCopied ? 'is-active' : ''} flex flex-col items-center gap-1.5 group transition-all duration-300 hover:scale-105 active:scale-95 shrink-0 min-w-[60px]`}
                                 >
                                     {promptCopied ? <Check size={18} className="text-[var(--text-header)]" /> : <Terminal size={18} className="transition-colors text-[var(--text-muted)] group-hover:text-[var(--text-header)]" />}
                                     <span className={`text-[9px] font-bold uppercase tracking-wider ${promptCopied ? 'text-[var(--text-header)]' : 'text-[var(--text-muted)] group-hover:text-[var(--text-header)]'}`}>
@@ -316,7 +320,7 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
                                     </span>
                                 </button>
 
-                                <button onClick={handleGlobalReset} className="mist-app-footer-control flex flex-col items-center gap-1.5 group transition-all duration-100 shrink-0 min-w-[60px] text-[var(--text-muted)]" >
+                                <button onClick={handleGlobalReset} className="mist-app-footer-control flex flex-col items-center gap-1.5 group transition-all duration-300 hover:scale-105 active:scale-95 shrink-0 min-w-[60px] text-[var(--text-muted)]" >
                                     <RotateCcw size={18} className="transition-colors text-[var(--text-muted)] group-hover:text-[var(--text-header)]" />
                                     <span className="font-bold uppercase tracking-wider group-hover:text-[var(--text-header)]" style={{ fontSize: '9px' }}>{lang === 'CN' ? "全局重置" : "Reset All"}</span>
                                 </button>
@@ -345,7 +349,7 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
 
                 <button
                     onClick={() => setIsTaskManagerOpen(!isTaskManagerOpen)}
-                    className={`mist-app-footer-control ${isTaskManagerOpen ? 'is-active' : ''} flex flex-col items-center gap-1.5 shrink-0 min-w-[60px] group transition-all duration-300 active:scale-95`}
+                    className={`mist-app-footer-control ${isTaskManagerOpen ? 'is-active' : ''} flex flex-col items-center gap-1.5 shrink-0 min-w-[60px] group transition-all duration-300 hover:scale-105 active:scale-95`}
                 >
                     <div className="relative">
                         <Activity size={18} className={`transition-colors ${isTaskManagerOpen ? getThemeTextColor() : mutedFooterControlClass}`} />
@@ -365,7 +369,7 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
                 {viewMode !== 'METONYMY' && isAdmin && setIsPromptInspectorOpen && (
                     <button
                         onClick={() => setIsPromptInspectorOpen(true)}
-                        className="mist-app-archive-button flex items-center justify-center w-10 h-10 transition-all group border shrink-0 active:scale-95 bg-[var(--bg-card)] border-[var(--border-main)] hover:bg-[var(--surface-hover)] hover:border-[var(--border-accent)] text-[var(--text-muted)] hover:text-[var(--text-header)]"
+                        className="flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-300 group border shrink-0 hover:scale-105 active:scale-95 bg-[var(--bg-panel)]/50 border-[var(--border-main)] hover:bg-[var(--bg-panel)] hover:border-[var(--border-accent)] text-[var(--text-muted)] hover:text-[var(--text-main)]"
                         title={lang === 'CN' ? "X-RAY 指令透视" : "X-RAY Inspector"}
                     >
                         <Terminal size={18} className="group-hover:animate-pulse" />
@@ -376,7 +380,7 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
                     <button
                         onClick={() => handleTraverseFantasy(false)}
                         disabled={isGenerating || !hasFieldState}
-                        className={`mist-traverse-action flex items-center gap-3 px-6 py-3 text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-50 disabled:cursor-not-allowed group min-w-[180px] border ${getFooterButtonStyle()}`}
+                        className={`mist-traverse-action flex items-center gap-3 px-6 py-3 rounded-lg text-xs font-bold uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(212,175,55,0.2)] hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] disabled:opacity-50 disabled:cursor-not-allowed group min-w-[180px] border hover:scale-105 active:scale-95 ${getFooterButtonStyle()}`}
                         style={{ boxShadow: 'none' }}
                     >
                         {isGenerating ? <RotateCw size={16} className="animate-spin" /> : <Zap size={16} className="group-hover:scale-110 transition-transform" />}

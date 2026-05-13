@@ -498,7 +498,8 @@ export const COMMERCIAL_ENGINE_LIBRARY: LibraryCategoryDef[] = [
   },
   {
     id: "comm_c6_lib",
-    name: "C6. 潜在威胁 (The Threat)",
+    name: "潜在威胁",
+    nameEn: "The Threat",
     desc: "30种阉割恐惧：如果不采取行动，主体将坠入的必然深渊",
     items: [
       { id: "c6_1", name: "美貌的枯萎 (The Wilt)", group: "1. 镜像崩塌", def: "逻辑：原本引以为傲的资本由于不可抗力（时间/疾病）迅速缩水。", core: "侧重：针对“容貌焦虑”。应用：医美、高端个护。" },
@@ -535,7 +536,8 @@ export const COMMERCIAL_ENGINE_LIBRARY: LibraryCategoryDef[] = [
   },
   {
     id: "comm_c7_lib",
-    name: "C7. 承诺幻象 (The Promise)",
+    name: "承诺幻象",
+    nameEn: "The Promise",
     desc: "30种终极缝合状态：消费后抵达的“理想我”彼岸",
     items: [
       // 1. 永恒与神性 (Eternal & Divine) - 对应自恋/救赎

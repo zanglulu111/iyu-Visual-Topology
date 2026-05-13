@@ -7,9 +7,9 @@ export const SUR1_GROUP_E: LibraryCategoryDef = {
   items: [
     {
       id: "slasher",
-      name: "砍杀/血浆", nameEn: "Slasher",
-      def: "面具怪人、连环杀戮、青少年受害、B级趣味、断肢。",
-      defEn: "Masked psycho, serial killing, teen victims, B-movie tropes, dismemberment.",
+      name: "砍杀恐怖", nameEn: "Slasher",
+      def: "以追杀节奏和生存恐惧为类型核心，面具怪人、血浆感、身体威胁只作可选恐怖符号。",
+      defEn: "Chase rhythm and survival dread; masked killers, gore texture, and bodily threat are optional horror signs.",
       core: "脆弱的肉体 vs 不可阻挡的杀戮机器。性与死的隐秘关联，猎物的每一个选择都可能是最后一个。",
       coreEn: "Fragile flesh vs unstoppable killing machine. The covert link between sex and death; every choice the prey makes could be the last.",
       reference: "《月光光心慌慌》(1978, 约翰·卡朋特) / 《猛鬼街》(1984, 韦斯·克雷文)",
@@ -17,8 +17,8 @@ export const SUR1_GROUP_E: LibraryCategoryDef = {
     },
     {
       id: "supernatural_horror",
-      name: "超自然/灵异", nameEn: "Supernatural Horror",
-      def: "鬼魂、恶魔附身、驱魔、看不见的恐惧、跳吓 (Jump Scare)。",
+      name: "灵异恐怖", nameEn: "Supernatural Horror",
+      def: "以不可见力量造成的恐惧和秩序失灵为类型核心，鬼魂、附身、驱魔、跳吓只作可选机制。",
       defEn: "Ghosts, demonic possession, exorcism, unseen fears, jump scares.",
       core: "不可见的恶意入侵安全的家。理性科学无法触及的领域——恐惧来自看不见、摸不着、却确实存在的东西。",
       coreEn: "Unseen malice invading the safe home. A domain beyond rational science — fear comes from what cannot be seen or touched, yet undeniably exists.",
@@ -27,8 +27,8 @@ export const SUR1_GROUP_E: LibraryCategoryDef = {
     },
     {
       id: "zombie",
-      name: "丧尸/感染", nameEn: "Zombie",
-      def: "活死人潮、围城、人性崩坏、生存恐惧、病毒爆发。",
+      name: "丧尸感染", nameEn: "Zombie",
+      def: "以感染扩散和群体生存崩坏为类型核心，活死人、围城、病毒爆发等只作可选形态。",
       defEn: "Undead hordes, siege, humanity collapse, survival fear, viral outbreak.",
       core: "文明秩序的崩塌 vs 原始生存本能。当外部威胁剥离一切规则，人与人之间的关系才是真正的恐怖来源。",
       coreEn: "Collapse of civilized order vs primal survival instinct. When external threats strip away all rules, the relationships between people become the true source of horror.",
@@ -38,7 +38,7 @@ export const SUR1_GROUP_E: LibraryCategoryDef = {
     {
       id: "body_horror",
       name: "身体恐怖", nameEn: "Body Horror",
-      def: "肉体变形、寄生、残毁、生理不适感、异化。",
+      def: "以身体边界被破坏和异化为类型核心，变形、寄生、残毁等只在心理冲击需要时使用。",
       defEn: "Physical mutation, parasitism, mutilation, physiological discomfort, alienation.",
       core: "自我意志 vs 失控的肉体。身体不再服从自己，皮肤之下的异变将自我与肉身撕裂为二。",
       coreEn: "Self-will vs out-of-control body. The body no longer obeys; mutation beneath the skin tears the self apart from the flesh.",
@@ -47,8 +47,8 @@ export const SUR1_GROUP_E: LibraryCategoryDef = {
     },
     {
       id: "folk_horror",
-      name: "民俗/邪教", nameEn: "Folk Horror",
-      def: "偏远村落、古老仪式、白日恐怖、异教崇拜、排外。",
+      name: "民俗恐怖", nameEn: "Folk Horror",
+      def: "以封闭共同体、民俗仪式和排外秩序为类型核心，村落、邪教、白日恐怖只作可选场域。",
       defEn: "Remote villages, ancient rituals, daylight horror, pagan cults, xenophobia.",
       core: "现代文明人 vs 原始古老的集体信仰。文明与野蛮的边界在偏远的净土上完全消融，日光之下无处藏身。",
       coreEn: "Modern civilized person vs ancient collective belief. The boundary between civilization and barbarism completely dissolves in remote sanctuaries; there is nowhere to hide under daylight.",
@@ -57,8 +57,8 @@ export const SUR1_GROUP_E: LibraryCategoryDef = {
     },
     {
       id: "found_footage",
-      name: "伪纪录片", nameEn: "Found Footage",
-      def: "手持DV、录像带遗失、真实感恐怖、第一人称受限视角。",
+      name: "伪纪录恐怖", nameEn: "Found Footage",
+      def: "以残留影像和受限视角制造真实感恐惧，手持 DV、遗失录像带只作可选媒介。",
       defEn: "Handheld DV, lost tapes, realistic horror, restricted first-person POV.",
       core: "绝对在场感 vs 正在发生的未知恐怖。镜头的受限视角既是唯一的见证工具，也是恐惧的放大器。",
       coreEn: "Absolute presence vs unfolding unknown horror. The camera's restricted viewpoint is both the only witness tool and an amplifier of fear.",
@@ -67,8 +67,8 @@ export const SUR1_GROUP_E: LibraryCategoryDef = {
     },
     {
       id: "giallo",
-      name: "铅黄/美学恐怖", nameEn: "Giallo",
-      def: "鲜艳色彩、神秘黑手套、风格化谋杀、视听艺术。",
+      name: "铅黄恐怖", nameEn: "Giallo",
+      def: "以强风格视听和悬疑谋杀的感官化处理为类型核心，黑手套、鲜艳色彩只作可选符号。",
       defEn: "Vivid colors, mysterious black gloves, stylized murders, audiovisual art.",
       core: "死亡被绝对仪式化与审美化。逻辑让位于噩梦般的感官体验，谋杀本身成为一种扭曲的艺术形式。",
       coreEn: "Death is absolutely ritualized and aestheticized. Logic yields to nightmarish sensory experience; murder itself becomes a twisted art form.",
@@ -78,7 +78,7 @@ export const SUR1_GROUP_E: LibraryCategoryDef = {
     {
       id: "home_invasion",
       name: "家庭入侵", nameEn: "Home Invasion",
-      def: "安全避风港被打破、陌生人暴力闯入、无处可逃。",
+      def: "以私人安全空间被侵入为类型核心，陌生人闯入、无处可逃等只作可选压力形态。",
       defEn: "Safe haven shattered, strangers breaking in violently, nowhere to hide.",
       core: "最安全的家变成了最危险的牢笼。猎人与猎物在室内狭小空间内的物理周旋，安全感本身被彻底颠覆。",
       coreEn: "The safest home becomes the deadliest cage. Hunter and prey physically maneuver in confined indoor spaces; the very concept of safety is completely subverted.",
@@ -87,8 +87,8 @@ export const SUR1_GROUP_E: LibraryCategoryDef = {
     },
     {
       id: "lovecraftian",
-      name: "克苏鲁", nameEn: "Lovecraftian",
-      def: "不可名状、古神、深海恐惧、人类渺小与理智丧失。",
+      name: "克苏鲁恐怖", nameEn: "Lovecraftian",
+      def: "以宇宙尺度的不可理解和理智受损为类型核心，古神、深海等只作可选意象。",
       defEn: "Unnameable, Elder Gods, deep sea terror, human insignificance, loss of sanity.",
       core: "人类理性的脆弱 vs 宇宙冷漠的真相。知识本身是一种不可逆的侵蚀——理解越深，理性的地基越动摇。",
       coreEn: "Fragility of human reason vs the universe's apathetic truth. Knowledge itself is an irreversible erosion — the deeper the understanding, the more the foundations of reason tremble.",
@@ -97,8 +97,8 @@ export const SUR1_GROUP_E: LibraryCategoryDef = {
     },
     {
       id: "psychological_horror",
-      name: "心理/精神恐怖", nameEn: "Psychological Horror",
-      def: "疯人院、幻觉、无法区分现实、压抑、自我解体。不可靠叙事。",
+      name: "心理恐怖", nameEn: "Psychological Horror",
+      def: "以精神压迫、现实感崩塌和自我解体为类型核心，幻觉、疯人院、不可靠叙事只作可选手段。",
       defEn: "Asylum, hallucinations, unable to distinguish reality, self-disintegration. Unreliable narrative.",
       core: "最大的恐怖来自大脑内部。感官和记忆都不可信任，自我与现实之间的边界永远在液化。",
       coreEn: "The greatest terror comes from within the brain. Senses and memory cannot be trusted; the boundary between self and reality is forever liquefying.",
@@ -108,7 +108,7 @@ export const SUR1_GROUP_E: LibraryCategoryDef = {
     {
       id: "tech_horror",
       name: "科技恐怖", nameEn: "Tech Horror",
-      def: "杀人机器、诅咒录像带/网站、科技反噬、屏幕生活。数字异化。",
+      def: "以技术媒介反噬日常生活为类型核心，杀人机器、诅咒网站、屏幕生活只作可选形态。",
       defEn: "Killer machines, cursed tapes/sites, tech backlash, screen life. Digital alienation.",
       core: "人类对连接的渴望 vs 技术的异化与吞噬。被设计来服务人类的工具反过来成为恐怖的载体。",
       coreEn: "Human desire for connection vs technology's alienation and consumption. Tools designed to serve humanity turn around to become vehicles of horror.",
@@ -118,7 +118,7 @@ export const SUR1_GROUP_E: LibraryCategoryDef = {
     {
       id: "horror_comedy",
       name: "喜剧恐怖", nameEn: "Horror Comedy",
-      def: "吓人但好笑、解构恐怖片套路、荒诞血腥。",
+      def: "以恐怖机制和喜剧节奏的错位为类型核心，血腥、套路解构等只作可选笑点来源。",
       defEn: "Scary but funny, deconstructing horror tropes, absurd gore.",
       core: "对恐怖套路的绝对解构。当恐惧被推到极致时翻转为荒诞，笑声与尖叫共享同一根神经。",
       coreEn: "Absolute deconstruction of horror tropes. When fear is pushed to its extreme, it flips into absurdity; laughter and screams share the same nerve.",

@@ -20,7 +20,6 @@ import { TrailerView } from './blueprint/TrailerView';
 import { PoeticView } from './blueprint/PoeticView';
 import { MetonymyView } from './blueprint/MetonymyView';
 import { persistence } from '../services/persistence';
-import { TaskManagerPanel } from './TaskManagerPanel';
 import { globalTaskManager } from '../services/taskManager';
 import { supabaseDatabase } from '../services/supabaseDatabase';
 import { supabase } from '../services/supabaseAuth';
@@ -63,6 +62,8 @@ interface BlueprintEditorProps {
     isSutureOpen?: boolean;
     onSutureOpenChange?: (open: boolean) => void;
     isAdmin?: boolean;
+    isTaskManagerOpen?: boolean;
+    setIsTaskManagerOpen?: (open: boolean) => void;
 }
 
 // ... (Create Empty Blueprint Functions remain the same)
@@ -145,7 +146,7 @@ const createEmptyAesthetic = (lang: BlueprintLanguage): CreativeBlueprint => ({
 const createEmptyNarrative = (lang: BlueprintLanguage): CreativeBlueprint => ({
     treatmentId: `narr_manual_${Date.now()}`,
     driverType: DriverType.NARRATIVE,
-    styleName: lang === 'EN' ? 'Blank Story Bible' : '空白故事圣经',
+    styleName: lang === 'EN' ? 'Blank Story Project' : '空白故事工程',
     narrative: {
         title: lang === 'EN' ? 'NEW STORY' : '新故事项目',
         logline: lang === 'EN' ? 'Enter logline...' : '在此输入故事梗概...',
@@ -192,7 +193,9 @@ export const BlueprintEditor: React.FC<BlueprintEditorProps> = ({
     isSutureOpen,
     onSutureOpenChange,
     theme,
-    isAdmin
+    isAdmin,
+    isTaskManagerOpen,
+    setIsTaskManagerOpen
 }) => {
     const { theme: contextTheme } = useTheme(); // Renamed to avoid conflict, though `theme` prop will override
     const effectiveTheme = theme || contextTheme;
@@ -214,7 +217,6 @@ export const BlueprintEditor: React.FC<BlueprintEditorProps> = ({
     const [isVisualBibleExpanded, setIsVisualBibleExpanded] = useState(true);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isParamsPanelOpen, setIsParamsPanelOpen] = useState(false);
-    const [isTaskManagerOpen, setIsTaskManagerOpen] = useState(false);
     const [activeTaskCount, setActiveTaskCount] = useState(0);
     const [isContinueUploading, setIsContinueUploading] = useState(false);
 
@@ -301,7 +303,7 @@ export const BlueprintEditor: React.FC<BlueprintEditorProps> = ({
             themeActiveBorder = 'border-purple-500';
             themeEmptyPulse = 'bg-purple-500/20';
             menuItems = [
-                { id: 'BIBLE', label: language === 'EN' ? "Creative Bible" : "创意圣经", icon: BookOpen },
+                { id: 'BIBLE', label: language === 'EN' ? "Story Project" : "故事工程", icon: BookOpen },
                 { id: 'METONYMY', label: language === 'EN' ? "Metonymy Script" : "换喻脚本", icon: Wand2 }
             ];
         } else if (effectiveDriverType === DriverType.AESTHETIC) {
@@ -326,15 +328,15 @@ export const BlueprintEditor: React.FC<BlueprintEditorProps> = ({
         }
 
         if (effectiveTheme === 'retro') {
-            themeAccent = 'text-[#8B261D]';
-            themeText = 'text-[#8B261D]';
-            themeHoverText = 'group-hover:text-[#8B261D]';
-            themeBorder = 'border-[#8B261D]/20';
-            themeBgActive = 'bg-[#8B261D]/10';
-            themeSidebarBg = 'bg-[var(--bg-header)]';
-            themeSidebarBorder = 'border-[#8B261D]/20';
-            themeActiveBorder = 'border-[#8B261D]';
-            themeEmptyPulse = 'bg-[#8B261D]/20';
+            themeAccent = 'text-[var(--text-accent)]';
+            themeText = 'text-[var(--text-accent)]';
+            themeHoverText = 'group-hover:text-[var(--text-accent)]';
+            themeBorder = 'border-[var(--border-main)]';
+            themeBgActive = 'bg-[var(--surface-hover)]';
+            themeSidebarBg = 'bg-[var(--bg-panel)]';
+            themeSidebarBorder = 'border-[var(--border-main)]';
+            themeActiveBorder = 'border-[var(--border-main)]';
+            themeEmptyPulse = 'bg-[rgba(139,38,29,0.14)]';
         }
 
         return { type: effectiveDriverType, themeAccent, themeBorder, themeText, themeHoverText, themeBgActive, themeSidebarBorder, themeActiveBorder, themeSidebarBg, themeEmptyPulse, menuItems };
@@ -347,6 +349,10 @@ export const BlueprintEditor: React.FC<BlueprintEditorProps> = ({
             setActiveTab(uiConfig.menuItems[0].id);
         }
     }, [uiConfig.menuItems, activeTab]);
+
+    useEffect(() => {
+        setIsTaskManagerOpen?.(false);
+    }, [activeTab, effectiveDriverType]);
 
     const [globalCopied, setGlobalCopied] = useState(false);
     const [isContinueModalOpen, setIsContinueModalOpen] = useState(false);
@@ -759,23 +765,28 @@ ${assetsHtml}
                 <div className={`
                     absolute top-0 bottom-0 left-0 z-50
                     w-full max-w-lg
-                    mist-archive-panel ${effectiveTheme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#0a0a0b]/95 backdrop-blur-xl'} border-r ${effectiveTheme === 'retro' ? 'border-[#8B261D]/20' : 'border-zinc-800'}
+                    mist-archive-panel mist-bible-params-panel ${effectiveTheme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#0a0a0b]/95 backdrop-blur-xl'} border-r ${effectiveTheme === 'retro' ? 'border-[#8B261D]/20' : 'border-zinc-800'}
                     transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]
                     ${isParamsPanelOpen ? 'translate-x-0' : '-translate-x-full'}
                     flex flex-col ${effectiveTheme === 'retro' ? '' : 'shadow-[10px_0_30px_rgba(0,0,0,0.3)]'}
                 `}>
                     {/* Sidebar Content */}
-                    <div className={`mist-archive-toolbar p-6 border-b ${effectiveTheme === 'retro' ? 'border-[#8B261D]/10 bg-[var(--bg-header)]' : 'border-zinc-800 bg-[#0a0a0a]'} flex justify-between items-center`}>
+                    <div className={`mist-archive-toolbar relative p-6 pr-16 border-b ${effectiveTheme === 'retro' ? 'border-[#8B261D]/10 bg-[var(--bg-header)]' : 'border-zinc-800 bg-[#0a0a0a]'} flex justify-between items-center`}>
                         <div className="flex items-center gap-3">
                             <Database className={uiConfig.themeText.replace('text-', 'text-')} size={20} />
-                            <span className={`text-base font-bold ${effectiveTheme === 'retro' ? 'text-black' : 'text-white'} uppercase tracking-widest`}>
+                            <span className={`text-base font-bold ${effectiveTheme === 'retro' ? 'text-[var(--text-main)]' : 'text-white'} uppercase tracking-widest`}>
                                 {language === 'EN' ? "Engine Parameters" : "引擎参数概览"}
                             </span>
                         </div>
                         <span className="text-xs text-zinc-500 font-mono">
                             {fieldState ? Object.keys(fieldState).length : 0} {language === 'EN' ? "ACTIVE" : "项激活"}
                         </span>
-                        <button onClick={() => setIsParamsPanelOpen(false)} className="text-zinc-500 hover:text-white transition-colors">
+                        <button
+                            type="button"
+                            onClick={() => setIsParamsPanelOpen(false)}
+                            className={`absolute right-5 top-1/2 -translate-y-1/2 z-[80] p-2 rounded-md transition-colors ${effectiveTheme === 'retro' ? 'text-[var(--text-muted)] hover:text-[var(--text-accent)]' : 'text-zinc-400 hover:text-white hover:bg-white/5'}`}
+                            aria-label={language === 'EN' ? 'Close engine parameters' : '关闭引擎参数概览'}
+                        >
                             <X size={18} />
                         </button>
                     </div>
@@ -798,15 +809,18 @@ ${assetsHtml}
                         <div className="w-64 flex flex-col h-full">
                             <div className="flex-1 flex flex-col py-6">
                                 <div className="px-6 mb-4 text-[10px] font-bold text-zinc-600 uppercase tracking-widest">
-                                    {language === 'EN' ? `${uiConfig.type} BIBLE` : `${driverName} 圣经`}
+                                    {language === 'EN' ? `${uiConfig.type} PROJECT` : `${driverName} 工程`}
                                 </div>
                                 <nav className="flex flex-col gap-1">
                                     {uiConfig.menuItems.map(item => (
                                         <button
                                             key={item.id}
                                             onClick={() => setActiveTab(item.id)}
-                                            className={`w-full text-left px-6 py-4 flex items-center gap-3 transition-all border-r-4 ${activeTab === item.id ? (effectiveTheme === 'retro' ? `bg-white text-[#8B261D] border-[#8B261D]` : `bg-zinc-900 text-white ${uiConfig.themeActiveBorder}`) : (effectiveTheme === 'retro' ? 'text-zinc-600 border-transparent hover:bg-white/50 hover:text-black' : 'text-zinc-500 border-transparent hover:bg-zinc-900/50 hover:text-zinc-300')}`}
+                                            className={`mist-bible-nav-item ${activeTab === item.id ? 'is-active' : ''} relative w-full text-left px-6 py-4 flex items-center gap-3 transition-all border-r-4 ${activeTab === item.id ? (effectiveTheme === 'retro' ? `text-[var(--text-accent)] border-transparent` : `text-zinc-100 border-transparent`) : (effectiveTheme === 'retro' ? 'text-[var(--text-muted)] border-transparent hover:bg-[var(--surface-hover)] hover:text-[var(--text-main)]' : 'text-zinc-500 border-transparent hover:bg-zinc-900/50 hover:text-zinc-300')}`}
                                         >
+                                            {activeTab === item.id && (
+                                                <span className="mist-bible-nav-active-rail absolute right-0 top-0 bottom-0 w-[3px] rounded-l-full" />
+                                            )}
                                             <item.icon size={18} className={activeTab === item.id ? uiConfig.themeText : ''} />
                                             <span className="text-xs font-bold uppercase tracking-wider">{item.label}</span>
                                         </button>
@@ -826,11 +840,11 @@ ${assetsHtml}
             {!isSutureOpen && (
                 <footer className={`mist-app-footer fixed bottom-0 left-0 right-0 h-14 bg-[var(--bg-header)] backdrop-blur-md border-t ${theme === 'retro' ? 'border-[var(--border-main)]' : 'border-zinc-800'} flex items-center justify-between px-6 md:px-12 z-40 transition-colors duration-500`}>
                     <div className="flex gap-4">
-                        <button onClick={onGoHome} className={`mist-app-archive-button flex items-center gap-3 px-6 py-3 bg-[var(--bg-panel)]/50 hover:bg-[var(--bg-panel)] border border-[var(--border-main)] text-xs font-bold uppercase tracking-widest transition-all duration-300 group min-w-[140px] hover:scale-105 active:scale-95 ${effectiveTheme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'}`}>
+                        <button onClick={onGoHome} className={`mist-app-archive-button flex items-center gap-3 h-[42px] px-4 rounded-[8px] bg-[var(--bg-panel)]/50 hover:bg-[var(--bg-panel)] border border-[var(--border-main)] text-[12px] font-bold uppercase tracking-[0.12em] transition-all duration-300 group min-w-[140px] hover:scale-105 active:scale-95 ${effectiveTheme === 'retro' ? 'text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'text-zinc-400 hover:text-white'}`}>
                             <Home size={16} className="group-hover:scale-110 transition-transform" />
                             <span>{language === 'EN' ? "Back to Engine" : "返回引擎"}</span>
                         </button>
-                        <button onClick={onClose} className={`mist-app-archive-button flex items-center gap-3 px-6 py-3 bg-[var(--bg-panel)]/50 hover:bg-[var(--bg-panel)] border ${uiConfig.themeSidebarBorder} text-xs font-bold uppercase tracking-widest transition-all duration-300 group min-w-[140px] hover:scale-105 active:scale-95 ${effectiveTheme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'}`}>
+                        <button onClick={onClose} className={`mist-app-archive-button flex items-center gap-3 h-[42px] px-4 rounded-[8px] bg-[var(--bg-panel)]/50 hover:bg-[var(--bg-panel)] border ${uiConfig.themeSidebarBorder} text-[12px] font-bold uppercase tracking-[0.12em] transition-all duration-300 group min-w-[140px] hover:scale-105 active:scale-95 ${effectiveTheme === 'retro' ? 'text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'text-zinc-400 hover:text-white'}`}>
                             <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
                             <span>{language === 'EN' ? "Back to Paths" : "返回分支"}</span>
                         </button>
@@ -842,21 +856,21 @@ ${assetsHtml}
                             onClick={() => setIsParamsPanelOpen(!isParamsPanelOpen)}
                             className={`mist-app-footer-control ${isParamsPanelOpen ? 'is-active' : ''} flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]`}
                         >
-                            <List size={18} className={`transition-colors ${isParamsPanelOpen ? (effectiveTheme === 'retro' ? 'text-[#8B261D]' : uiConfig.themeAccent) : (effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 group-hover:text-white`)}`} />
-                            <span className={`text-[9px] font-bold uppercase tracking-wider ${isParamsPanelOpen ? (effectiveTheme === 'retro' ? 'text-[#8B261D]' : uiConfig.themeAccent) : (effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : `text-zinc-400 group-hover:text-white`)}`}>
+                            <List size={18} className={`transition-colors ${isParamsPanelOpen ? (effectiveTheme === 'retro' ? 'text-[var(--text-accent)]' : uiConfig.themeAccent) : (effectiveTheme === 'retro' ? 'text-[var(--text-muted)] group-hover:text-[var(--text-main)]' : `text-zinc-400 group-hover:text-white`)}`} />
+                            <span className={`text-[9px] font-bold uppercase tracking-wider ${isParamsPanelOpen ? (effectiveTheme === 'retro' ? 'text-[var(--text-accent)]' : uiConfig.themeAccent) : (effectiveTheme === 'retro' ? 'text-[var(--text-muted)] group-hover:text-[var(--text-main)]' : `text-zinc-400 group-hover:text-white`)}`}>
                                 {language === 'EN' ? "Params" : "参数"}
                             </span>
                         </button>
 
-                        <div className={`w-px h-8 ${effectiveTheme === 'retro' ? 'bg-[#8B261D]/20' : 'bg-zinc-800'} shrink-0`}></div>
+                        <div className={`w-px h-8 ${effectiveTheme === 'retro' ? 'bg-[var(--border-main)]' : 'bg-zinc-800'} shrink-0`}></div>
 
                         {/* Archive */}
                         <button
                             onClick={onOpenHistory}
                             className="mist-app-footer-control flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]"
                         >
-                            <Archive size={18} className={`transition-colors ${effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`} />
-                            <span className={`text-[9px] font-bold uppercase tracking-wider transition-colors ${effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`}>
+                            <Archive size={18} className={`transition-colors ${effectiveTheme === 'retro' ? 'text-[var(--text-muted)] group-hover:text-[var(--text-main)]' : 'text-zinc-400 group-hover:text-white'}`} />
+                            <span className={`text-[9px] font-bold uppercase tracking-wider transition-colors ${effectiveTheme === 'retro' ? 'text-[var(--text-muted)] group-hover:text-[var(--text-main)]' : 'text-zinc-400 group-hover:text-white'}`}>
                                 {language === 'EN' ? "Archive" : "档案馆"}
                             </span>
                         </button>
@@ -870,9 +884,9 @@ ${assetsHtml}
                             {isSaved ? (
                                 <Check size={18} className="text-emerald-400" />
                             ) : (
-                                <Save size={18} className={`transition-colors ${effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`} />
+                                <Save size={18} className={`transition-colors ${effectiveTheme === 'retro' ? 'text-[var(--text-muted)] group-hover:text-[var(--text-main)]' : 'text-zinc-400 group-hover:text-white'}`} />
                             )}
-                            <span className={`text-[9px] font-bold uppercase tracking-wider transition-colors ${isSaved ? 'text-emerald-400' : (effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white')}`}>
+                            <span className={`text-[9px] font-bold uppercase tracking-wider transition-colors ${isSaved ? 'text-emerald-400' : (effectiveTheme === 'retro' ? 'text-[var(--text-muted)] group-hover:text-[var(--text-main)]' : 'text-zinc-400 group-hover:text-white')}`}>
                                 {isSaved ? (language === 'EN' ? "Saved" : "已保存") : (language === 'EN' ? "Save" : "保存档案")}
                             </span>
                         </button>
@@ -885,9 +899,9 @@ ${assetsHtml}
                             {globalCopied ? (
                                 <Check size={18} className="text-emerald-400" />
                             ) : (
-                                <ClipboardCopy size={18} className={`transition-colors ${effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`} />
+                                <ClipboardCopy size={18} className={`transition-colors ${effectiveTheme === 'retro' ? 'text-[var(--text-muted)] group-hover:text-[var(--text-main)]' : 'text-zinc-400 group-hover:text-white'}`} />
                             )}
-                            <span className={`text-[9px] font-bold uppercase tracking-wider transition-colors ${globalCopied ? 'text-emerald-400' : (effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white')}`}>
+                            <span className={`text-[9px] font-bold uppercase tracking-wider transition-colors ${globalCopied ? 'text-emerald-400' : (effectiveTheme === 'retro' ? 'text-[var(--text-muted)] group-hover:text-[var(--text-main)]' : 'text-zinc-400 group-hover:text-white')}`}>
                                 {language === 'EN' ? "Copy" : "复制"}
                             </span>
                         </button>
@@ -897,13 +911,13 @@ ${assetsHtml}
                             onClick={handleExportHtml}
                             className="mist-app-footer-control flex flex-col items-center gap-1.5 group transition-all shrink-0 min-w-[60px]"
                         >
-                            <Download size={18} className={`transition-colors ${effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`} />
-                            <span className={`text-[9px] font-bold uppercase tracking-wider transition-colors ${effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`}>
+                            <Download size={18} className={`transition-colors ${effectiveTheme === 'retro' ? 'text-[var(--text-muted)] group-hover:text-[var(--text-main)]' : 'text-zinc-400 group-hover:text-white'}`} />
+                            <span className={`text-[9px] font-bold uppercase tracking-wider transition-colors ${effectiveTheme === 'retro' ? 'text-[var(--text-muted)] group-hover:text-[var(--text-main)]' : 'text-zinc-400 group-hover:text-white'}`}>
                                 {language === 'EN' ? "Download" : "导出"}
                             </span>
                         </button>
 
-                        <div className={`w-px h-8 ${effectiveTheme === 'retro' ? 'bg-[#8B261D]/20' : 'bg-zinc-800'} shrink-0`}></div>
+                        <div className={`w-px h-8 ${effectiveTheme === 'retro' ? 'bg-[var(--border-main)]' : 'bg-zinc-800'} shrink-0`}></div>
 
                         {/* Continue / 续写 */}
                         <button
@@ -914,40 +928,40 @@ ${assetsHtml}
                             {isContinuing ? (
                                 <Loader2 size={18} className={`animate-spin ${uiConfig.themeAccent}`} />
                             ) : (
-                                <Zap size={18} className={`transition-colors ${effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`} />
+                                <Zap size={18} className={`transition-colors ${effectiveTheme === 'retro' ? 'text-[var(--text-muted)] group-hover:text-[var(--text-main)]' : 'text-zinc-400 group-hover:text-white'}`} />
                             )}
-                            <span className={`text-[9px] font-bold uppercase tracking-wider transition-colors ${effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white'}`}>
+                            <span className={`text-[9px] font-bold uppercase tracking-wider transition-colors ${effectiveTheme === 'retro' ? 'text-[var(--text-muted)] group-hover:text-[var(--text-main)]' : 'text-zinc-400 group-hover:text-white'}`}>
                                 {language === 'EN' ? "Continue" : "续写"}
                             </span>
                         </button>
 
                         {/* Tasks / 任务中心 */}
                         <button
-                            onClick={() => setIsTaskManagerOpen(!isTaskManagerOpen)}
+                            onClick={() => setIsTaskManagerOpen?.(!isTaskManagerOpen)}
                             className={`mist-app-footer-control ${isTaskManagerOpen ? 'is-active' : ''} flex flex-col items-center gap-1.5 shrink-0 min-w-[60px] group transition-all duration-300 relative`}
                         >
                             <div className="relative">
-                                <Activity size={18} className={`transition-colors ${isTaskManagerOpen ? (effectiveTheme === 'retro' ? 'text-[#8B261D]' : uiConfig.themeAccent) : (effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white')}`} />
+                                <Activity size={18} className={`transition-colors ${isTaskManagerOpen ? (effectiveTheme === 'retro' ? 'text-[var(--text-accent)]' : uiConfig.themeAccent) : (effectiveTheme === 'retro' ? 'text-[var(--text-muted)] group-hover:text-[var(--text-main)]' : 'text-zinc-400 group-hover:text-white')}`} />
                                 {activeTaskCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-gold-primary rounded-full text-[8px] flex items-center justify-center font-bold text-black shadow-[0_0_10px_rgba(212,175,55,0.35)]">
+                                    <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-[var(--bg-panel)] border border-[var(--border-main)] rounded-full text-[8px] flex items-center justify-center font-bold text-[var(--text-main)] shadow-none">
                                         {activeTaskCount}
                                     </span>
                                 )}
                             </div>
-                            <span className={`text-[9px] font-bold uppercase tracking-wider transition-all duration-300 ${isTaskManagerOpen ? (effectiveTheme === 'retro' ? 'text-[#8B261D]' : uiConfig.themeAccent) : (effectiveTheme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white')}`}>
+                            <span className={`text-[9px] font-bold uppercase tracking-wider transition-all duration-300 ${isTaskManagerOpen ? (effectiveTheme === 'retro' ? 'text-[var(--text-accent)]' : uiConfig.themeAccent) : (effectiveTheme === 'retro' ? 'text-[var(--text-muted)] group-hover:text-[var(--text-main)]' : 'text-zinc-400 group-hover:text-white')}`}>
                                 {language === 'EN' ? "Tasks" : "任务中心"}
                             </span>
                         </button>
                     </div>
                     <div className="flex items-center gap-4 shrink-0">
                         <div className="flex items-center gap-2">
-                            <span className={`text-[10px] font-bold ${effectiveTheme === 'retro' ? 'text-zinc-400' : 'text-zinc-500'} uppercase tracking-wider mr-2`}>
+                            <span className={`text-[10px] font-bold ${effectiveTheme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-500'} uppercase tracking-wider mr-2`}>
                                 {language === 'EN' ? `VER ${currentIndex + 1} / ${timeline.length}` : `第 ${currentIndex + 1} / ${timeline.length} 版`}
                             </span>
-                            <button onClick={() => setCurrentIndex(prev => Math.max(0, prev - 1))} disabled={currentIndex === 0} className={`p-2 ${effectiveTheme === 'retro' ? 'bg-white border-[#8B261D]/10 hover:text-[#8B261D]' : 'bg-zinc-900 border-zinc-800 hover:bg-zinc-800 hover:text-white'} border rounded disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-zinc-400`}>
+                            <button onClick={() => setCurrentIndex(prev => Math.max(0, prev - 1))} disabled={currentIndex === 0} className={`p-2 ${effectiveTheme === 'retro' ? 'bg-[var(--bg-card)] border-[var(--border-main)] hover:text-[var(--text-accent)]' : 'bg-zinc-900 border-zinc-800 hover:bg-zinc-800 hover:text-white'} border rounded disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-zinc-400`}>
                                 <ArrowLeft size={16} />
                             </button>
-                            <button onClick={() => setCurrentIndex(prev => Math.min(timeline.length - 1, prev + 1))} disabled={currentIndex === timeline.length - 1} className={`p-2 ${effectiveTheme === 'retro' ? 'bg-white border-[#8B261D]/10 hover:text-[#8B261D]' : 'bg-zinc-900 border-zinc-800 hover:bg-zinc-800 hover:text-white'} border rounded disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-zinc-400`}>
+                            <button onClick={() => setCurrentIndex(prev => Math.min(timeline.length - 1, prev + 1))} disabled={currentIndex === timeline.length - 1} className={`p-2 ${effectiveTheme === 'retro' ? 'bg-[var(--bg-card)] border-[var(--border-main)] hover:text-[var(--text-accent)]' : 'bg-zinc-900 border-zinc-800 hover:bg-zinc-800 hover:text-white'} border rounded disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-zinc-400`}>
                                 <ArrowRight size={16} />
                             </button>
                         </div>
@@ -960,34 +974,34 @@ ${assetsHtml}
 
             {isContinueModalOpen && (
                 <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-                    <div className={`w-full max-w-lg ${effectiveTheme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]' : 'bg-[#0c0c0c] border-zinc-800'} border rounded-xl shadow-2xl p-6 relative`}>
-                        <button onClick={() => setIsContinueModalOpen(false)} className={`absolute top-4 right-4 ${effectiveTheme === 'retro' ? 'text-[#8B261D] hover:text-[#6D1E16]' : 'text-zinc-500 hover:text-white'}`}><X size={20} /></button>
-                        <h3 className={`text-lg font-bold ${effectiveTheme === 'retro' ? 'text-black' : 'text-white'} uppercase tracking-wider mb-4 flex items-center gap-2`}>
+                    <div className={`w-full max-w-lg ${effectiveTheme === 'retro' ? 'bg-[var(--bg-card)] border-[var(--border-main)]' : 'bg-[#0c0c0c] border-zinc-800'} border rounded-xl shadow-2xl p-6 relative`}>
+                        <button onClick={() => setIsContinueModalOpen(false)} className={`absolute top-4 right-4 ${effectiveTheme === 'retro' ? 'text-[var(--text-accent)] hover:text-[#6D1E16]' : 'text-zinc-500 hover:text-white'}`}><X size={20} /></button>
+                        <h3 className={`text-lg font-bold ${effectiveTheme === 'retro' ? 'text-[var(--text-main)]' : 'text-white'} uppercase tracking-wider mb-4 flex items-center gap-2`}>
                             <Wand2 size={18} className={effectiveTheme === 'retro' ? 'text-[#8B261D]' : uiConfig.themeAccent} /> {language === 'EN' ? "Continue Story" : "续写故事"}
                         </h3>
                         <div className="space-y-4">
                             <div className="space-y-2">
-                                <label className={`text-[10px] font-bold uppercase ${effectiveTheme === 'retro' ? 'text-zinc-600' : 'text-zinc-500'}`}>{language === 'EN' ? "Instructions" : "续写要求"}</label>
+                                <label className={`text-[10px] font-bold uppercase ${effectiveTheme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-500'}`}>{language === 'EN' ? "Instructions" : "续写要求"}</label>
                                 <textarea
                                     value={continueInput}
                                     onChange={(e) => setContinueInput(e.target.value)}
                                     placeholder={language === 'EN' ? "e.g. Introduce a new villain..." : "例如：引入一个新的反派，或者转向内心的冲突..."}
-                                    className={`w-full h-32 ${effectiveTheme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20 text-black placeholder-[#8B261D]/30' : 'bg-black/50 border-zinc-800 text-white placeholder-zinc-700'} border rounded-lg p-3 text-sm focus:outline-none focus:border-[#8B261D]/50 resize-none custom-scrollbar`}
+                                    className={`w-full h-32 ${effectiveTheme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)] text-[var(--text-main)] placeholder-[rgba(45,45,45,0.34)]' : 'bg-black/50 border-zinc-800 text-white placeholder-zinc-700'} border rounded-lg p-3 text-sm focus:outline-none focus:border-[var(--border-strong)] resize-none custom-scrollbar`}
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className={`text-[10px] font-bold uppercase ${effectiveTheme === 'retro' ? 'text-zinc-600' : 'text-zinc-500'}`}>{language === 'EN' ? "Visual Reference (Optional)" : "视觉参考 (可选)"}</label>
+                                <label className={`text-[10px] font-bold uppercase ${effectiveTheme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-500'}`}>{language === 'EN' ? "Visual Reference (Optional)" : "视觉参考 (可选)"}</label>
                                 {continueImage ? (
-                                    <div className={`relative w-full h-32 rounded-lg border ${effectiveTheme === 'retro' ? 'border-[#8B261D]/20' : 'border-zinc-800'} overflow-hidden group`}>
+                                    <div className={`relative w-full h-32 rounded-lg border ${effectiveTheme === 'retro' ? 'border-[var(--border-main)]' : 'border-zinc-800'} overflow-hidden group`}>
                                         <img src={continueImage} className="w-full h-full object-cover" alt="Continue" />
                                         <button onClick={() => setContinueImage(null)} className="absolute top-2 right-2 p-1.5 bg-black/60 text-white rounded-full hover:bg-red-600 transition-colors"><X size={14} /></button>
                                     </div>
                                 ) : (
-                                    <div onClick={() => fileInputRef.current?.click()} className={`w-full h-24 border border-dashed ${effectiveTheme === 'retro' ? 'border-[#8B261D]/20 hover:border-[#8B261D]/40' : 'border-zinc-800 hover:bg-zinc-900/50 hover:border-zinc-600'} rounded-lg flex flex-col items-center justify-center cursor-pointer transition-all group`}>
-                                        <div className={`p-3 ${effectiveTheme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/10 text-[#8B261D]' : 'bg-zinc-900 border-zinc-800 text-zinc-400'} rounded-full group-hover:text-[#8B261D] transition-all transform group-hover:scale-110 shadow-sm border`}>
+                                    <div onClick={() => fileInputRef.current?.click()} className={`w-full h-24 border border-dashed ${effectiveTheme === 'retro' ? 'border-[var(--border-main)] hover:border-[var(--border-strong)]' : 'border-zinc-800 hover:bg-zinc-900/50 hover:border-zinc-600'} rounded-lg flex flex-col items-center justify-center cursor-pointer transition-all group`}>
+                                        <div className={`p-3 ${effectiveTheme === 'retro' ? 'bg-[var(--bg-card)] border-[var(--border-main)] text-[var(--text-accent)]' : 'bg-zinc-900 border-zinc-800 text-zinc-400'} rounded-full group-hover:text-[#8B261D] transition-all transform group-hover:scale-110 shadow-sm border`}>
                                             {isContinueUploading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
                                         </div>
-                                        <span className={`text-[10px] ${effectiveTheme === 'retro' ? 'text-[#8B261D]/60' : 'text-zinc-600'} uppercase mt-2`}>
+                                        <span className={`text-[10px] ${effectiveTheme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-600'} uppercase mt-2`}>
                                             {isContinueUploading ? (language === 'EN' ? "Uploading..." : "上传中...") : (language === 'EN' ? "Upload Image" : "上传图片")}
                                         </span>
                                         <input type="file" alt="Continue Image" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleContinueImageUpload} />
@@ -997,7 +1011,7 @@ ${assetsHtml}
                             <button
                                 onClick={handleContinueSubmit}
                                 disabled={!continueInput.trim() && !continueImage}
-                                className={`mist-app-primary-action w-full py-3 ${effectiveTheme === 'retro' ? 'bg-[#8B261D] hover:bg-[#6D1E16] text-white shadow-none' : 'bg-[rgba(255,98,86,0.2)] hover:bg-[rgba(255,98,86,0.28)] text-white border-[rgba(255,98,86,0.55)]'} font-bold uppercase tracking-widest transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2`}
+                                className={`mist-app-primary-action w-full py-3 ${effectiveTheme === 'retro' ? 'bg-[var(--mist-active-accent)] hover:bg-[#6D1E16] text-white shadow-none' : 'bg-[rgba(255,98,86,0.2)] hover:bg-[rgba(255,98,86,0.28)] text-white border-[rgba(255,98,86,0.55)]'} font-bold uppercase tracking-widest transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2`}
                             >
                                 {language === 'EN' ? "Generate Next Chapter" : "生成下一章"}
                             </button>
@@ -1013,11 +1027,6 @@ ${assetsHtml}
                 </div>
             )}
 
-            <TaskManagerPanel
-                isOpen={isTaskManagerOpen}
-                onClose={() => setIsTaskManagerOpen(false)}
-                lang={language}
-            />
         </div>
     );
 };

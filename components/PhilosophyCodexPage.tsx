@@ -34,11 +34,11 @@ import {
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { DriverType, User } from '../types';
-import { PhilosophyTimeline } from './PhilosophyTimeline';
+
 import { MIST_INDEX, HEGEL_INDEX, MARX_INDEX, LACAN_INDEX, ZIZEK_INDEX, LacanConcept, LacanCategory } from '../data/codex/philosophy_refined';
 
 // import { ANALYSIS_LIBRARY } from '../data/codex/analysis_data';
-import { ARCHIVE_CASES, CaseStudy } from './archiveCasesData';
+
 import { BorromeanRings } from './BorromeanRings';
 import { usePhilosophyIndex, usePhilosophySummaries, usePhilosophyDetail, usePreloadPopularConcepts } from '../hooks/usePhilosophy';
 
@@ -72,7 +72,7 @@ interface PhilosophyCodexPageProps {
 
 const ConceptCard = React.memo(({ concept, onClick, activeDictionary, theme, themeColors }: any) => {
   const isSelected = activeDictionary === concept.id;
-  
+
   return (
     <button
       onClick={() => onClick(concept)}
@@ -80,7 +80,7 @@ const ConceptCard = React.memo(({ concept, onClick, activeDictionary, theme, the
           ? 'bg-white/0 border-transparent hover:border-[#8B261D]/40 hover:bg-white shadow-none hover:shadow-[0_45px_100px_rgba(139,38,29,0.15)]'
           : 'bg-black/20 border-transparent hover:border-[#FFD700]/80 hover:bg-black/40 hover:shadow-[0_0_25px_rgba(255,215,0,0.2)]'
         }`}
-      style={{ 
+      style={{
         boxShadow: (theme !== 'retro' && isSelected) ? '0 0 40px var(--philosopher-glow)' : undefined,
         backdropFilter: theme === 'retro' ? 'none' : 'blur(10px)'
       }}
@@ -113,7 +113,7 @@ const AnimatedText = ({ cn, en, lang, className = "", hClass = "h-5" }: { cn: Re
 
 const CIPHER_CHARS = "ψφΔσηλξθΠΣΩαβγδεζηθικλμνξοπρστυφχψω";
 
-type CodexSection = 'CONCEPTS' | 'PERSONNEL' | 'RESEARCH' | 'TIMELINE';
+export type CodexSection = 'CONCEPTS';
 
 export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
   onClose,
@@ -197,7 +197,7 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
       return audio;
     });
     flipAudioRefs.current = audios;
-    
+
     return () => {
       // Cleanup
       flipAudioRefs.current.forEach(audio => {
@@ -209,13 +209,13 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
 
   const playFlipSound = React.useCallback(() => {
     if (flipAudioRefs.current.length === 0) return;
-    
+
     let randomIndex;
     // Ensure the next sound is different from the last one to avoid repetition
     do {
       randomIndex = Math.floor(Math.random() * flipAudioRefs.current.length);
     } while (randomIndex === lastFlipIndex.current && flipAudioRefs.current.length > 1);
-    
+
     lastFlipIndex.current = randomIndex;
     const audio = flipAudioRefs.current[randomIndex];
     if (audio) {
@@ -233,7 +233,7 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
     if (selectedItem) {
       playFlipSound();
     }
-  }, [selectedItem, detailActiveTab, playFlipSound]); 
+  }, [selectedItem, detailActiveTab, playFlipSound]);
 
   React.useEffect(() => {
     if (onDetailTabChange) onDetailTabChange(detailActiveTab);
@@ -286,21 +286,14 @@ export const PhilosophyCodexPage: React.FC<PhilosophyCodexPageProps> = ({
     bg: (activeDictionary === 'MIST' ? 'bg-[#FFD700]' : (theme === 'retro' ? 'bg-[#8B261D]' : (activeDictionary === 'MARX' ? 'bg-[#FF7675]' : activeDictionary === 'HEGEL' ? 'bg-[#FFD700]' : activeDictionary === 'LACAN' ? 'bg-[#FFD700]' : activeDictionary === 'ZIZEK' ? 'bg-[#C084FC]' : 'bg-white'))),
   };
   const dictionaries = {
-    MIST: { name: '迷雾学派 (Mist)', data: MIST_INDEX, icon: <Sparkles size={16} /> },
-    HEGEL: { name: '黑格尔 (Hegel)', data: HEGEL_INDEX, icon: <Aperture size={16} /> },
-    MARX: { name: '马克思 (Marx)', data: MARX_INDEX, icon: <Sun size={16} /> },
-    LACAN: { name: '拉康 (Lacan)', data: LACAN_INDEX, icon: <Moon size={16} /> },
-    ZIZEK: { name: '齐泽克 (Žižek)', data: ZIZEK_INDEX, icon: <Zap size={16} /> },
+    MIST: { name: lang === 'EN' ? 'Mist' : '迷雾学派', data: MIST_INDEX, icon: <Sparkles size={16} /> },
+    HEGEL: { name: lang === 'EN' ? 'Hegel' : '黑格尔', data: HEGEL_INDEX, icon: <Aperture size={16} /> },
+    MARX: { name: lang === 'EN' ? 'Marx' : '马克思', data: MARX_INDEX, icon: <Sun size={16} /> },
+    LACAN: { name: lang === 'EN' ? 'Lacan' : '拉康', data: LACAN_INDEX, icon: <Moon size={16} /> },
+    ZIZEK: { name: lang === 'EN' ? 'Žižek' : '齐泽克', data: ZIZEK_INDEX, icon: <Zap size={16} /> },
   };
 
-  const personnelData = [
-    { id: 'heg', name: 'G.W.F. 黑格尔', title: 'G.W.F. Hegel', role: '德国古典哲学集大成者 / 精神现象学作者', status: 'ARCHIVED', fileId: 'SUB-1770', summary: '辩证法与绝对精神的织造者。揭示了精神在矛盾与扬弃中自我实现的动力机制。', color: 'text-mist-gold' },
-    { id: 'marx', name: '卡尔·马克思', title: 'Karl Marx', role: '科学唯物主义奠基人 / 资本论作者', status: 'ARCHIVED', fileId: 'SUB-1818', summary: '将辩证法立于大地。揭示了资本逻辑对主体的异化以及阶级斗争的必然性。', color: 'text-mist-red' },
-    { id: 'lac', name: '雅克·拉康', title: 'Jacques Lacan', role: '迷雾学派奠基人 / 精神分析学家', status: 'DECEASED / ARCHIVED', fileId: 'SUB-1901', summary: '拓扑学与精神分析的缝合者。提出了“想象界、象征界、实在界”的三位一体结构。', color: 'text-mist-cyan' },
-    { id: 'ziz', name: '斯拉沃热·齐泽克', title: 'Slavoj Žižek', role: '潜意识观测员 / 哲学家', status: 'ACTIVE', fileId: 'SUB-1949', summary: '意识形态缝隙的捕捉者。擅长通过通俗文化揭示欲望的悖论。', color: 'text-mist-purple' },
-    { id: 'del', name: '吉尔·德勒兹', title: 'Gilles Deleuze', role: '生成之主体 / 块茎研究者', status: 'DECEASED', fileId: 'SUB-1925', summary: '拒绝中心化的树状逻辑，提倡平滑空间与生成-动物。', color: 'text-mist-rose' },
-    { id: 'fouc', name: '米歇尔·福柯', title: 'Michel Foucault', role: '话语档案员 / 考古学家', status: 'DECEASED', fileId: 'SUB-1926', summary: '权力的解剖者。揭示了知识、权力与主体性之间的复杂结缔。', color: 'text-mist-orange' },
-  ];
+
 
   const filteredConcepts = useMemo(() => {
     const dict = dictionaries[activeDictionary as keyof typeof dictionaries]?.data || [];
@@ -351,208 +344,137 @@ const handleRandom = (e: React.MouseEvent) => {
 // --- Rendering Functions ---
 
 const renderConcepts = () => (
-  <div className={`flex-1 flex flex-col overflow-hidden transition-all duration-700 ease-in-out ${renderInPlace
+  <div className={`flex-1 flex flex-col md:flex-row overflow-hidden transition-all duration-700 ease-in-out ${renderInPlace
       ? 'bg-white/0'
       : (theme === 'retro' ? 'bg-[var(--bg-main)]' : 'bg-white/[0.015] backdrop-blur-2xl rounded-xl border-transparent')
     }`}
     style={{ backdropFilter: theme === 'retro' ? 'none' : 'blur(16px)' }}
     >
-    <div className={`h-14 flex items-center gap-2 px-6 border-b border-transparent overflow-x-auto no-scrollbar shrink-0 transition-all duration-500`}>
-      {Object.entries(dictionaries).map(([id, info]) => (
-        <button
-          key={id}
-          onClick={() => setActiveDictionary(id)}
-          className={`flex items-center gap-2 px-5 py-2 rounded-sm text-[10px] font-extrabold uppercase tracking-widest transition-all whitespace-nowrap border ${activeDictionary === id
-              ? (theme === 'retro' ? 'bg-[#8B261D]/10 text-[#8B261D] shadow-sm border-[#8B261D]/30' : 'bg-[var(--philosopher-accent)]/10 text-[var(--philosopher-accent)] border-[var(--philosopher-accent)] shadow-[0_0_15px_var(--philosopher-accent)]/30')
-              : (theme === 'retro' ? 'text-[#8B261D]/60 hover:text-[#8B261D] hover:bg-[#8B261D]/5 border-transparent' : 'text-zinc-500 hover:text-white/80 border-transparent')
-            }`}
-        >
-          <span className={activeDictionary === id ? "animate-pulse" : ""}>{info.icon}</span>
-          {info.name}
-        </button>
-      ))}
+
+    {/* LEFT SIDEBAR: Library Index */}
+    <div className={`w-full md:w-80 shrink-0 border-r ${theme === 'retro' ? 'border-[#8B261D]/10 bg-white/40' : 'border-white/5 bg-black/40'} flex flex-col transition-colors duration-700 z-20 shadow-2xl`}>
+        <div className="p-8 pb-6 border-b border-transparent">
+           <h2 className={`text-2xl font-serif font-black tracking-widest uppercase ${theme === 'retro' ? 'text-[#8B261D]' : 'text-white'}`}>
+             {lang === 'CN' ? '理论档案库' : 'THEORY ARCHIVE'}
+           </h2>
+           <p className={`text-[10px] font-mono tracking-widest uppercase mt-2 ${theme === 'retro' ? 'text-black/40' : 'text-zinc-500'}`}>
+             MIST OBSERVATORY v2.0
+           </p>
+        </div>
+        <div className="flex-1 overflow-y-auto px-6 py-6 custom-scrollbar flex flex-col gap-4">
+           {Object.entries(dictionaries).map(([id, info], index) => {
+              const isActive = activeDictionary === id;
+              return (
+                 <button
+                   key={id}
+                   onClick={() => setActiveDictionary(id)}
+                   className={`relative group text-left px-6 py-6 rounded-2xl transition-all duration-500 border overflow-hidden ${
+                     isActive
+                     ? (theme === 'retro' ? 'bg-[#8B261D]/5 border-[#8B261D]/30 shadow-lg' : 'bg-black/60 border-[var(--philosopher-accent)]/30 shadow-[0_10px_30px_rgba(0,0,0,0.5)]')
+                     : (theme === 'retro' ? 'bg-transparent border-transparent hover:border-[#8B261D]/20 hover:bg-white' : 'bg-transparent border-transparent hover:border-white/10 hover:bg-white/[0.02]')
+                   }`}
+                   style={isActive && theme !== 'retro' ? { boxShadow: `0 0 20px color-mix(in srgb, var(--philosopher-accent), transparent 80%)` } : {}}
+                 >
+                   {/* Background Glow for Active Item */}
+                   {isActive && (
+                     <div className={`absolute right-0 bottom-0 w-32 h-32 blur-[40px] opacity-20 pointer-events-none ${theme === 'retro' ? 'bg-[#8B261D]' : 'bg-[var(--philosopher-accent)]'}`}></div>
+                   )}
+
+                   <div className="relative z-10 flex items-center justify-between mb-4">
+                     <span className={`text-[10px] font-mono font-bold tracking-widest transition-colors duration-300 ${isActive ? (theme === 'retro' ? 'text-[#8B261D]' : 'text-[var(--philosopher-accent)]') : (theme === 'retro' ? 'text-black/30' : 'text-zinc-600')}`}>
+                        SEC // 0{index + 1}
+                     </span>
+                     <span className={`transition-all duration-500 ${isActive ? 'rotate-180 scale-110' : 'group-hover:rotate-90 scale-90 opacity-50'} ${isActive ? (theme === 'retro' ? 'text-[#8B261D]' : 'text-[var(--philosopher-accent)]') : (theme === 'retro' ? 'text-black/40' : 'text-zinc-500')}`}>
+                       {info.icon}
+                     </span>
+                   </div>
+                   <h3 className={`relative z-10 text-xl font-serif tracking-widest uppercase transition-colors duration-300 ${isActive ? (theme === 'retro' ? 'text-black font-black' : 'text-white font-bold') : (theme === 'retro' ? 'text-black/60 group-hover:text-black' : 'text-zinc-400 group-hover:text-zinc-200')}`}>
+                     {info.name.split(' ')[0]}
+                   </h3>
+                   <p className={`relative z-10 text-[9px] font-mono tracking-widest uppercase mt-1 transition-colors duration-300 ${isActive ? (theme === 'retro' ? 'text-[#8B261D]/70' : 'text-[var(--philosopher-accent)]/70') : (theme === 'retro' ? 'text-black/30' : 'text-zinc-600')}`}>
+                     {info.name.match(/\((.*?)\)/)?.[1] || id}
+                   </p>
+                 </button>
+              )
+           })}
+        </div>
     </div>
 
-    <div className={`flex-1 overflow-y-auto ${renderInPlace ? 'p-8 pt-10' : 'p-6'} custom-scrollbar`}>
-      {filteredConcepts.map((category: any, index: number) => {
-        const prevCategory = index > 0 ? filteredConcepts[index - 1] : null;
-        const isSameHeader = prevCategory && (lang === 'CN' ? prevCategory.name === category.name : prevCategory.enName === category.enName);
-        const isMistHierarchy = activeDictionary === 'MIST';
-
-        return (
-          <div key={category.id} className={isSameHeader ? (isMistHierarchy ? "mb-12 mt-8" : "mb-10 mt-[-20px]") : "mb-14"}>
-            {!isSameHeader && (
-              <div className="flex items-center gap-4 mb-8">
-                <div className={`w-8 h-[2px] rounded-full ${theme === 'retro' ? 'bg-[var(--text-accent)]' : 'bg-white/20'}`}></div>
-                <h3 className={`text-2xl font-serif tracking-widest leading-none ${theme === 'retro' ? 'text-[var(--text-accent)] font-black' : 'text-[#FFD700]'}`}>
-                  {lang === 'CN' ? category.name : category.enName}
-                </h3>
-              </div>
-            )}
-
-            {category.desc && (
-              <div className={`flex items-baseline gap-3 mb-6 ${isMistHierarchy ? 'ml-12' : 'ml-2'}`}>
-                <div className={`${isMistHierarchy ? 'w-5 h-[1px] rounded-full' : 'w-1.5 h-1.5 rounded-full'} ${theme === 'retro' ? 'bg-[var(--text-accent)]' : 'bg-[var(--accent-color)]/40'}`}></div>
-                <h4 className={`${isMistHierarchy ? 'text-lg' : 'text-base'} font-serif tracking-wide opacity-80 ${theme === 'retro' ? 'text-black font-bold' : 'text-zinc-400'}`}>
-                  {category.desc}
-                </h4>
-              </div>
-            )}
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {category.concepts.map((concept: LacanConcept) => (
-                <ConceptCard
-                  key={concept.id}
-                  concept={concept}
-                  theme={theme}
-                  activeDictionary={activeDictionary}
-                  themeColors={themeColors}
-                  onClick={(concept: any) => {
-                    if (concept.id === 'rsi-topology-card' && setViewMode) {
-                      setViewMode('RSI');
-                    } else if (concept.id === 'desire-graph-card' && setViewMode) {
-                      setViewMode('TOPOLOGY');
-                    } else {
-                      openConceptDetail(concept, 'reset');
-                    }
-                  }}
-                />
-              ))}
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  </div>
-);
-
-const renderPersonnel = () => (
-  <div className="flex-1 grid grid-cols-1 xl:grid-cols-2 gap-6 overflow-y-auto p-6 custom-scrollbar">
-    {personnelData.map(person => (
-      <div
-        key={person.id}
-        onClick={() => setSelectedItem({ type: 'PERSONNEL', data: person })}
-        className={`group relative transition-all duration-700 cursor-pointer flex flex-col md:flex-row h-full md:h-72 rounded-2xl overflow-hidden border-transparent ${theme === 'retro'
-            ? 'bg-white/[0.01] hover:border-[var(--border-accent)] hover:bg-white shadow-none hover:shadow-[0_45px_100px_rgba(139,38,29,0.1)] hover:-translate-y-1.5'
-            : 'bg-white/[0.015] backdrop-blur-2xl hover:bg-[#0c0d10] hover:backdrop-blur-none shadow-none hover:shadow-[0_45px_100px_var(--philosopher-accent)]/10 hover:-translate-y-1.5'
-          }`}
-      >
-        <div className="w-full md:w-48 bg-zinc-900 shrink-0 relative overflow-hidden flex items-center justify-center">
-          <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
-          <Users size={64} className="text-zinc-800 group-hover:text-zinc-700 transition-colors" />
-          <div className={`absolute bottom-0 left-0 right-0 h-1 ${person.color.replace('text', 'bg')}`}></div>
-        </div>
-        <div className="flex-1 p-8 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-mono text-zinc-600 tracking-[0.3em] font-bold">{person.fileId}</span>
-              <span className={`text-[9px] font-bold px-2 py-0.5 rounded border border-zinc-800/50 bg-black/50 ${person.status === 'ACTIVE' ? 'text-green-500 border-green-500/20' : 'text-zinc-500'}`}>{person.status}</span>
-            </div>
-            <AnimatedText
-              lang={lang}
-              hClass="h-8"
-              className={`text-2xl font-serif mb-1 group-hover:text-gold-primary transition-colors ${theme === 'retro' ? 'text-black font-extrabold' : 'text-zinc-100'}`}
-              cn={person.name}
-              en={person.title}
-            />
-            <AnimatedText
-              lang={lang}
-              hClass="h-4"
-              className={`text-[10px] font-bold uppercase tracking-widest ${person.color} mb-4`}
-              cn={person.role}
-              en={person.role === '迷雾学派奠基人 / 精神分析学家' ? 'MIST FOUNDER / PSYCHOANALYST' : person.role} // Simple mapping or just use original if no EN
-            />
-            <AnimatedText
-              lang={lang}
-              hClass="h-10"
-              className={`text-sm leading-relaxed line-clamp-2 ${theme === 'retro' ? 'text-black/80 font-medium' : 'text-zinc-400'}`}
-              cn={person.summary}
-              en={person.summary} // If no separate summaryEn provided, we can keep it same or wrap it
-            />
-          </div>
-          <div className="flex items-center gap-4 pt-4 border-t border-zinc-800/50 mt-4 overflow-hidden">
-            {['Structure', 'Real', 'Mirror', 'Logic'].map(tag => (
-              <span key={tag} className="text-[9px] font-mono text-zinc-700 uppercase">{tag}</span>
-            ))}
-          </div>
-        </div>
+    {/* RIGHT CONTENT: Concepts Grid */}
+    <div className={`flex-1 overflow-y-auto ${renderInPlace ? 'p-8 pt-10' : 'p-10 lg:p-16'} custom-scrollbar relative`}>
+      {/* Dynamic Background Glow for specific philosopher */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+        <div className={`absolute top-0 right-0 w-[800px] h-[800px] blur-[150px] rounded-full opacity-10 transition-colors duration-1000 ${theme === 'retro' ? 'bg-[#8B261D]' : 'bg-[var(--philosopher-accent)]'}`}></div>
       </div>
-    ))}
-  </div>
-);
 
-const renderResearch = () => (
-  <div className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-y-auto p-6 custom-scrollbar">
-    {ARCHIVE_CASES.map((caseStudy: CaseStudy) => (
-      <div
-        key={caseStudy.id}
-        onClick={() => setSelectedItem({ type: 'RESEARCH', data: caseStudy })}
-        className={`group transition-all duration-700 cursor-pointer relative rounded-2xl overflow-hidden border-transparent ${theme === 'retro'
-            ? 'bg-white/[0.01] hover:border-[var(--border-accent)] hover:bg-white shadow-none hover:shadow-[0_45px_100px_rgba(139,38,29,0.1)] hover:-translate-y-1.5'
-            : 'bg-white/[0.01] backdrop-blur-2xl hover:bg-[#0c0d10] hover:backdrop-blur-none shadow-none hover:shadow-[0_45px_100px_var(--philosopher-accent)]/10 hover:-translate-y-1.5'
-          }`}
-      >
-        <div className={`h-48 relative overflow-hidden ${theme === 'retro' ? 'bg-black/5' : 'bg-zinc-900'}`}>
-          <img src={caseStudy.imageUrl} alt={caseStudy.titleCn} className="w-full h-full object-cover opacity-40 group-hover:opacity-80 transition-opacity grayscale hover:grayscale-0 duration-700" />
-          <div className="absolute top-4 left-4">
-            <span className={`text-[9px] font-bold px-2 py-1 rounded bg-black/80 border border-zinc-700 text-zinc-300 uppercase tracking-widest`}>{caseStudy.category}</span>
-          </div>
-        </div>
-        <div className="p-6">
-          <div className="text-[10px] font-mono text-zinc-600 mb-2">{caseStudy.date}</div>
-          <AnimatedText
-            lang={lang}
-            hClass="h-14"
-            className={`text-xl font-serif mb-3 group-hover:text-gold-primary transition-colors ${theme === 'retro' ? 'text-black font-extrabold' : 'text-zinc-100'}`}
-            cn={caseStudy.titleCn}
-            en={caseStudy.titleEn}
-          />
-          <AnimatedText
-            lang={lang}
-            hClass="h-16"
-            className={`text-xs leading-relaxed line-clamp-3 italic mb-6 ${theme === 'retro' ? 'text-black/60' : 'text-zinc-400'}`}
-            cn={`"${caseStudy.summaryCn}"`}
-            en={`"${caseStudy.summaryEn}"`}
-          />
-          <div className={`flex items-center justify-between text-[10px] font-bold uppercase tracking-widest transition-colors ${theme === 'retro' ? 'text-black/40 group-hover:text-black' : 'text-zinc-700 group-hover:text-zinc-500'}`}>
-            <span>{lang === 'CN' ? '检阅档案' : 'READ FILE'}</span>
-            <ArrowLeft size={14} className="rotate-180 transition-transform group-hover:translate-x-1" />
-          </div>
-        </div>
+      {/* Philosopher Hero */}
+      <div className="mb-16 relative z-10 animate-in slide-in-from-bottom-5 fade-in duration-1000">
+         <h1 className={`text-5xl md:text-7xl font-serif font-black tracking-wider uppercase mb-4 transition-colors duration-700 ${theme === 'retro' ? 'text-black' : 'text-white'}`}>
+           {dictionaries[activeDictionary as keyof typeof dictionaries]?.name.split(' ')[0]}
+         </h1>
+         <div className="flex items-center gap-4">
+            <div className={`h-[2px] w-12 transition-colors duration-700 ${theme === 'retro' ? 'bg-[#8B261D]' : 'bg-[var(--philosopher-accent)]'}`}></div>
+            <p className={`text-xs font-mono tracking-[0.3em] uppercase font-bold transition-colors duration-700 ${theme === 'retro' ? 'text-[#8B261D]' : 'text-[var(--philosopher-accent)]'}`}>
+              {dictionaries[activeDictionary as keyof typeof dictionaries]?.name.match(/\((.*?)\)/)?.[1] || activeDictionary} ARCHIVE
+            </p>
+         </div>
       </div>
-    ))}
+
+      <div className="relative z-10 animate-in slide-in-from-bottom-10 fade-in duration-1000 delay-150 fill-mode-both">
+        {filteredConcepts.map((category: any, index: number) => {
+          const prevCategory = index > 0 ? filteredConcepts[index - 1] : null;
+          const isSameHeader = prevCategory && (lang === 'CN' ? prevCategory.name === category.name : prevCategory.enName === category.enName);
+          const isMistHierarchy = activeDictionary === 'MIST';
+
+          return (
+            <div key={category.id} className={isSameHeader ? (isMistHierarchy ? "mb-12 mt-8" : "mb-10 mt-[-20px]") : "mb-14"}>
+              {!isSameHeader && (
+                <div className="flex items-center gap-4 mb-8">
+                  <div className={`w-8 h-[2px] rounded-full transition-colors duration-700 ${theme === 'retro' ? 'bg-[var(--text-accent)]' : 'bg-white/20'}`}></div>
+                  <h3 className={`text-2xl font-serif tracking-widest leading-none transition-colors duration-700 ${theme === 'retro' ? 'text-[var(--text-accent)] font-black' : ''}`} style={theme !== 'retro' ? { color: 'var(--philosopher-accent)' } : {}}>
+                    {lang === 'CN' ? category.name : category.enName}
+                  </h3>
+                </div>
+              )}
+
+              {category.desc && (
+                <div className={`flex items-baseline gap-3 mb-6 ${isMistHierarchy ? 'ml-12' : 'ml-2'}`}>
+                  <div className={`${isMistHierarchy ? 'w-5 h-[1px] rounded-full' : 'w-1.5 h-1.5 rounded-full'} transition-colors duration-700 ${theme === 'retro' ? 'bg-[var(--text-accent)]' : 'bg-[var(--philosopher-accent)]/40'}`}></div>
+                  <h4 className={`${isMistHierarchy ? 'text-lg' : 'text-base'} font-serif tracking-wide opacity-80 transition-colors duration-700 ${theme === 'retro' ? 'text-black font-bold' : 'text-zinc-400'}`}>
+                    {category.desc}
+                  </h4>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                {category.concepts.map((concept: LacanConcept) => (
+                  <ConceptCard
+                    key={concept.id}
+                    concept={concept}
+                    theme={theme}
+                    activeDictionary={activeDictionary}
+                    themeColors={themeColors}
+                    onClick={(concept: any) => {
+                      if (concept.id === 'rsi-topology-card' && setViewMode) {
+                        setViewMode('RSI');
+                      } else if (concept.id === 'desire-graph-card' && setViewMode) {
+                        setViewMode('TOPOLOGY');
+                      } else {
+                        openConceptDetail(concept, 'reset');
+                      }
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
   </div>
 );
 
-const renderCollective = () => (
-  <div className="flex-1 flex flex-col items-center justify-center p-12 text-center">
-    <div className="w-24 h-24 rounded-full border border-dashed border-zinc-800 flex items-center justify-center mb-6 animate-pulse">
-      <MessageSquare size={32} className="text-zinc-700" />
-    </div>
-    <h3 className="text-2xl font-serif text-zinc-200 mb-4 tracking-wider">Collective Subconscious Simulation</h3>
-    <p className="text-sm text-zinc-400 max-w-md leading-relaxed font-light mb-8 italic">
-      "The collective subconscious is currently in a state of high entropy. Meaning strings are being decrypted and re-synthesized."
-    </p>
-    <div className="flex flex-col gap-3 w-full max-w-md">
-      {[
-        { user: 'ARCHIVIST-01', text: 'Does the Real exist outside of the gaze?', time: '2m ago' },
-        { user: 'VOID-WALKER', text: 'Repression is the only form of truth left.', time: '15m ago' },
-        { user: 'ECHO-9', text: 'The labyrinth is simply a mirror in three dimensions.', time: '1h ago' }
-      ].map((msg, i) => (
-        <div key={i} className="text-left bg-zinc-900/60 p-4 rounded-xl transition-all border border-transparent hover:border-[var(--philosopher-accent)]/20">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-[9px] font-mono text-gold-primary/70">{msg.user}</span>
-            <span className="text-[9px] font-mono text-zinc-600">{msg.time}</span>
-          </div>
-          <p className="text-xs text-zinc-300">{msg.text}</p>
-        </div>
-      ))}
-    </div>
-    <button className="mt-8 px-8 py-2 rounded-full border border-white/10 hover:border-white/30 text-[10px] font-bold uppercase tracking-widest text-zinc-500 transition-all hover:text-white">
-      Join Resonance
-    </button>
-  </div>
-);
+
 
 // --- Simple Markdown Processor ---
 const renderMarkdown = (text: string = "") => {
@@ -936,16 +858,16 @@ const renderMarkdown = (text: string = "") => {
 
     if (isSkeleton) {
       const loaderColor = theme === 'retro' ? '#8B261D' : 'var(--philosopher-accent)';
-      
+
       return (
         <div key="cipher-loader" className="animate-pulse space-y-8 opacity-90 px-1 py-4 font-mono select-none pointer-events-none">
           {/* Option C: Cipher Decoder / Symbolic Bitstream */}
           <div className="space-y-6">
             {/* Refined Data Stream Header instead of gray bar */}
             <div className="flex items-center gap-4 mb-10 opacity-60">
-              <div 
-                className={`text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-0.5 border rounded-sm`} 
-                style={{ 
+              <div
+                className={`text-[10px] uppercase tracking-[0.2em] font-bold px-2 py-0.5 border rounded-sm`}
+                style={{
                   color: loaderColor,
                   borderColor: theme === 'retro' ? 'rgba(139, 38, 29, 0.4)' : 'rgba(255, 255, 255, 0.2)'
                 }}
@@ -953,33 +875,33 @@ const renderMarkdown = (text: string = "") => {
                 {lang === 'CN' ? '概念解构' : 'SEGMENT_DECO'}
               </div>
               <div className="flex-1 h-[1px] relative overflow-hidden">
-                <div 
+                <div
                   className="absolute inset-0 bg-gradient-to-r from-transparent via-[var(--philosopher-accent)]/40 to-transparent translate-x-[-100%] animate-[shimmer_2s_infinite]"
-                  style={{ 
-                    background: theme === 'retro' 
-                      ? 'linear-gradient(to right, transparent, rgba(139, 38, 29, 0.4), transparent)' 
-                      : undefined 
+                  style={{
+                    background: theme === 'retro'
+                      ? 'linear-gradient(to right, transparent, rgba(139, 38, 29, 0.4), transparent)'
+                      : undefined
                   }}
                 ></div>
-                <div 
+                <div
                   className="w-full h-full opacity-20"
                   style={{ backgroundColor: loaderColor }}
                 ></div>
               </div>
             </div>
-            
+
             <div className="space-y-4">
               {[0, 1, 2, 3].map(row => (
-                <div 
-                  key={row} 
+                <div
+                  key={row}
                   className="flex flex-wrap gap-x-2.5 gap-y-1.5 overflow-hidden h-10 border-l-2 pl-4 py-1"
                   style={{ borderColor: theme === 'retro' ? 'rgba(139, 38, 29, 0.3)' : undefined }}
                 >
                   {Array.from({ length: row === 3 ? 15 : 30 }).map((_, i) => (
-                    <span 
-                      key={i} 
+                    <span
+                      key={i}
                       className="text-[12px] font-bold transition-all duration-300 cipher-char-flicker"
-                      style={{ 
+                      style={{
                         color: loaderColor,
                         opacity: 0.35 + ((i + row) % 5) * 0.15,
                         animationDelay: `${(i + row) * 50}ms`
@@ -993,11 +915,11 @@ const renderMarkdown = (text: string = "") => {
             </div>
           </div>
 
-          <div 
+          <div
             className="pt-12 flex items-center gap-3 text-[10px] font-mono tracking-[0.3em] uppercase font-bold"
             style={{ color: loaderColor }}
           >
-            <div 
+            <div
               className="w-4 h-[1px] animate-ping"
               style={{ backgroundColor: loaderColor }}
             ></div>
@@ -1067,13 +989,13 @@ const renderDetailView = () => {
       {/* Uniform Header Section */}
       <header className={`h-14 ${dt.headerBg} flex items-center justify-between px-6 md:px-12 z-50 sticky top-0 shrink-0 transition-all duration-500 animate-page-dissolve relative`}>
         {/* Theme Divider Line - Global Consistency Accent */}
-        <div 
-          className="absolute bottom-0 left-0 right-0 h-px transition-all duration-500 z-10" 
-          style={{ 
+        <div
+          className="absolute bottom-0 left-0 right-0 h-px transition-all duration-500 z-10"
+          style={{
             backgroundColor: theme === 'retro' ? '#8B261D' : 'var(--philosopher-accent)',
             opacity: theme === 'retro' ? 0.2 : 0.15,
             boxShadow: theme === 'retro' ? 'none' : '0 0 15px var(--philosopher-accent)'
-          }} 
+          }}
         />
         <div className="flex items-center gap-5">
           <button
@@ -1091,7 +1013,7 @@ const renderDetailView = () => {
               </div>
             </div>
           </button>
-          <span 
+          <span
             className={`${getHeaderTitleColor()} font-serif font-bold text-xs uppercase tracking-widest transition-colors duration-500`}
             style={theme === 'retro' ? { color: '#8B261D' } : {}}
           >
@@ -1101,20 +1023,23 @@ const renderDetailView = () => {
 
         <div className="flex items-center flex-row-reverse gap-4">
           {/* Rightmost Toolbar Group */}
-          <div className={`flex items-center gap-1 px-1 py-1 rounded-full transition-all duration-500 border border-transparent hover:border-white/5 backdrop-blur-sm hover:backdrop-blur-md 
+          <div className={`flex items-center gap-1 px-1 py-1 rounded-full transition-all duration-500 border border-transparent hover:border-white/5 backdrop-blur-sm hover:backdrop-blur-md
             ${theme === 'retro' ? 'hover:bg-[#FDFCF8]/90 hover:border-[#8B261D]/15' : 'hover:bg-black/30'}`}>
-            
+
             {/* 1. Ring Toggle */}
             <button
               onClick={() => setShowRings(!showRings)}
               className={`flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300 border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-90 focus:outline-none ${
-                showRings 
-                  ? (theme === 'retro' ? 'text-[#8B261D]' : getThemeTextColor()) 
+                showRings
+                  ? 'text-[var(--mist-active-accent)]'
                   : (theme === 'retro' ? 'text-zinc-600 hover:text-black hover:border-black/5' : 'text-zinc-400 hover:text-white')
               }`}
               title={lang === 'CN' ? "背景圆环开关" : "Background Rings Toggle"}
             >
-              <Aperture size={14} className={`shrink-0 transition-all duration-300 ${showRings ? 'rotate-180' : ''}`} />
+              <Aperture
+                size={14}
+                className={`shrink-0 transition-all duration-700 ${showRings ? 'rotate-[360deg] text-[var(--mist-active-accent)]' : 'rotate-0'} ${showRings ? 'cult-pulse' : ''}`}
+              />
             </button>
 
             {/* 2. Theme Toggle */}
@@ -1309,7 +1234,7 @@ const renderDetailView = () => {
                           >
                             <ChevronLeft size={16} />
                           </button>
-                          
+
                           <button
                             onClick={handleRandom}
                             className={`p-2 rounded-lg border flex items-center justify-center transition-all ${theme === 'retro' ? 'bg-white/40 border-black/10 hover:bg-white text-black/60' : 'bg-transparent border-zinc-700/80 hover:bg-white/[0.05] text-zinc-500'}`}
@@ -1335,7 +1260,7 @@ const renderDetailView = () => {
                 {/* RIGHT COLUMN: Content Area */}
                 <div className={`flex-1 flex flex-col rounded-2xl ${dt.cardBg} overflow-hidden border border-white/5 transition-opacity duration-300`}>
                   {/* Definition Tab Container */}
-                  <div 
+                  <div
                     key="tab-container-definition"
                     ref={(node) => { detailScrollRefs.current.DEFINITION = node; }}
                     className={`flex-1 overflow-y-auto p-8 custom-scrollbar ${detailActiveTab === 'DEFINITION' ? 'block animate-in fade-in duration-300' : 'hidden'}`}
@@ -1347,7 +1272,7 @@ const renderDetailView = () => {
                   </div>
 
                   {/* Analogy Tab Container */}
-                  <div 
+                  <div
                     key="tab-container-analogy"
                     ref={(node) => { detailScrollRefs.current.ANALOGY = node; }}
                     className={`flex-1 overflow-y-auto p-8 custom-scrollbar ${detailActiveTab === 'ANALOGY' ? 'block animate-in fade-in duration-300' : 'hidden'}`}
@@ -1359,7 +1284,7 @@ const renderDetailView = () => {
                   </div>
 
                   {/* Application Tab Container */}
-                  <div 
+                  <div
                     key="tab-container-application"
                     ref={(node) => { detailScrollRefs.current.APPLICATION = node; }}
                     className={`flex-1 overflow-y-auto p-8 custom-scrollbar ${detailActiveTab === 'APPLICATION' ? 'block animate-in fade-in duration-300' : 'hidden'}`}
@@ -1388,23 +1313,17 @@ const renderDetailView = () => {
 };
 
   const getSectionTheme = () => {
-    switch (activeSection) {
-      case 'TIMELINE': return 'marx'; // Red (Timeline)
-      default: return 'hegel';
-    }
+    return 'hegel';
   };
 
   const getSectionColor = (sectionId: string) => {
-    switch (sectionId) {
-      case 'TIMELINE': return '#ff8a80';
-      default: return '#FFD700';
-    }
+    return '#FFD700';
   };
 
   return (
     <div className={`theme-${getSectionTheme()} ${renderInPlace ? 'relative w-full h-full p-0 flex flex-col' : 'fixed inset-0 z-[100] flex flex-col'} ${theme === 'retro' ? 'bg-[var(--bg-main)]' : (renderInPlace ? 'bg-black/40' : 'bg-[var(--bg-header)]')
       } overflow-hidden transition-all duration-700 ease-in-out`}>
-    
+
     {/* TEXTURE OVERLAY - Smoother than global body::before alone */}
     {theme === 'retro' && (
       <div className="absolute inset-0 pointer-events-none opacity-20 texture-paper animate-in fade-in duration-1000"></div>
@@ -1454,7 +1373,7 @@ const renderDetailView = () => {
             </div>
           </div>
         </button>
-        <span 
+        <span
           className={`${getHeaderTitleColor()} font-serif font-bold text-xs uppercase tracking-widest transition-colors duration-500`}
           style={theme === 'retro' ? { color: '#8B261D' } : {}}
         >
@@ -1488,21 +1407,61 @@ const renderDetailView = () => {
 
         {/* Right Section */}
         <div className="flex items-center justify-end gap-2 ml-auto z-20">
+
+          {/* Admin & Expand buttons moved from SUBNAV */}
+          <div className="flex items-center gap-2 mr-2">
+            {isAdmin && onOpenPosterWorkspace && (
+              <button
+                onClick={onOpenPosterWorkspace}
+                className={`flex items-center gap-2 px-3 py-1 h-8 rounded-full border transition-all duration-300 group shrink-0 ${theme === 'retro'
+                    ? 'border-[#8B261D]/20 bg-[#8B261D]/5 text-[#8B261D] hover:border-[#8B261D]/45 hover:bg-[#8B261D]/10'
+                    : 'border-[#FFD700]/20 bg-[#FFD700]/5 text-[#FFD700] hover:border-[#FFD700]/45 hover:bg-[#FFD700]/10'
+                  }`}
+                title={lang === 'CN' ? '管理员：打开哲学家海报发布工作台' : 'Admin: open philosopher poster publishing desk'}
+              >
+                <Database size={12} className="shrink-0" />
+                <span className="hidden sm:inline text-[9px] font-bold uppercase tracking-[0.2em]">
+                  {lang === 'CN' ? '发布' : 'PUBLISH'}
+                </span>
+              </button>
+            )}
+
+            {renderInPlace && onToggleExpand && (
+              <button
+                onClick={onToggleExpand}
+                className={`flex items-center gap-2 px-3 py-1 h-8 rounded-full border transition-all duration-300 group shrink-0 ${theme === 'retro'
+                    ? 'border-black/10 hover:border-black/30 text-black/60 hover:text-black hover:bg-black/5'
+                    : 'border-white/10 hover:border-white/30 text-zinc-400 hover:text-white bg-white/5'
+                  }`}
+              >
+                <span className="text-[9px] font-bold uppercase tracking-widest">
+                  {isExpanded ? (lang === 'CN' ? '收起' : 'COLLAPSE') : (lang === 'CN' ? '展开' : 'EXPAND')}
+                </span>
+                <div className={`transition-transform duration-500 ${isExpanded ? '' : 'rotate-180'}`}>
+                  <ChevronRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
+                </div>
+              </button>
+            )}
+          </div>
+
           {/* Rightmost Toolbar Group */}
-          <div className={`flex items-center gap-1 px-1 py-1 rounded-full transition-all duration-500 border border-transparent hover:border-white/5 backdrop-blur-sm hover:backdrop-blur-md 
+          <div className={`flex items-center gap-1 px-1 py-1 rounded-full transition-all duration-500 border border-transparent hover:border-white/5 backdrop-blur-sm hover:backdrop-blur-md
             ${theme === 'retro' ? 'hover:bg-[#FDFCF8]/90 hover:border-[#8B261D]/15' : 'hover:bg-black/30'}`}>
-            
+
             {/* 1. Ring Toggle */}
             <button
               onClick={() => setShowRings(!showRings)}
               className={`flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300 border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-90 focus:outline-none ${
-                showRings 
-                  ? (theme === 'retro' ? 'text-[#8B261D]' : getThemeTextColor()) 
+                showRings
+                  ? 'text-[var(--mist-active-accent)]'
                   : (theme === 'retro' ? 'text-zinc-600 hover:text-black hover:border-black/5' : 'text-zinc-400 hover:text-white')
               }`}
               title={lang === 'CN' ? "背景圆环开关" : "Background Rings Toggle"}
             >
-              <Aperture size={13} className={`shrink-0 transition-all duration-300 ${showRings ? 'rotate-180' : ''}`} />
+              <Aperture
+                size={13}
+                className={`shrink-0 transition-all duration-700 ${showRings ? 'rotate-[360deg] text-[var(--mist-active-accent)]' : 'rotate-0'} ${showRings ? 'cult-pulse' : ''}`}
+              />
             </button>
 
             {/* 2. Theme Toggle */}
@@ -1554,109 +1513,11 @@ const renderDetailView = () => {
         </div>
       </header>
 
-    {/* SUBNAV */}
-    <nav 
-      className={`h-14 border-b border-transparent flex items-center justify-between px-10 shrink-0 relative z-20 transition-all duration-500 ${renderInPlace ? (theme === 'retro' ? 'bg-transparent' : 'bg-black/20') : ''}`}
-    >
-      <div className="flex items-center gap-10 overflow-x-auto no-scrollbar">
-        {[
-          { id: 'CONCEPTS', label: lang === 'CN' ? '辞条检索' : 'CONCEPTS', en: 'CONCEPTS', icon: <Search size={16} /> },
-          { id: 'PERSONNEL', label: lang === 'CN' ? '人员档案' : 'PERSONNEL', en: 'PERSONNEL', icon: <UserIcon size={16} /> },
-          { id: 'RESEARCH', label: lang === 'CN' ? '研究报告' : 'RESEARCH', en: 'RESEARCH', icon: <FileText size={16} /> },
-          { id: 'TIMELINE', label: lang === 'CN' ? '哲学时间轴' : 'TIMELINE', en: 'TIMELINE', icon: <Clock size={16} /> },
-        ].map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => { setActiveSection(tab.id as CodexSection); setSelectedItem(null); }}
-            className={`flex items-center gap-3 transition-all duration-300 relative px-6 py-2 h-10 group/tab rounded-md border-b border-transparent ${activeSection === tab.id
-                ? (theme === 'retro' ? 'text-[#8B261D]' : '')
-                : (theme === 'retro' ? 'text-[#8B261D]/60 hover:text-[#8B261D] hover:bg-[#8B261D]/5' : 'text-zinc-500 hover:text-white')
-              }`}
-            style={theme !== 'retro' ? {
-              backgroundColor: activeSection === tab.id ? `color-mix(in srgb, ${getSectionColor(tab.id)}, transparent 95%)` : 'transparent',
-              borderBottom: activeSection === tab.id ? `1px solid color-mix(in srgb, ${getSectionColor(tab.id)}, transparent 60%)` : '1px solid transparent',
-              boxShadow: activeSection === tab.id ? `0 0 25px color-mix(in srgb, ${getSectionColor(tab.id)}, transparent 80%)` : '0 0 0px transparent',
-              color: activeSection === tab.id ? getSectionColor(tab.id) : undefined
-            } : {}}
-          >
-            <span 
-              className={`transition-all duration-500 ${activeSection === tab.id ? 'scale-110' : "group-hover/tab:scale-110"}`}
-              style={activeSection === tab.id && theme !== 'retro' ? { color: getSectionColor(tab.id) } : {}}
-            >
-              {tab.icon}
-            </span>
-            <div className="flex flex-col items-start justify-center">
-              <span 
-                className={`text-[11px] font-bold tracking-[0.25em] uppercase transition-all duration-300 ${activeSection === tab.id ? '' : 'text-zinc-500 group-hover/tab:text-zinc-300'}`}
-                style={activeSection === tab.id && theme !== 'retro' ? { color: getSectionColor(tab.id) } : {}}
-              >
-                {lang === 'CN' ? tab.label : tab.en}
-              </span>
-            </div>
 
-            {theme !== 'retro' && (
-              <div 
-                className={`absolute inset-x-4 bottom-0.5 h-[1.5px] blur-[1.5px] z-10 rounded-full transition-all duration-500 ${activeSection === tab.id ? 'opacity-50 scale-100' : 'opacity-0 scale-50'}`}
-                style={{ backgroundColor: getSectionColor(tab.id) }}
-              ></div>
-            )}
-            {activeSection === tab.id && theme === 'retro' && (
-              <div className={`absolute bottom-[-1px] left-0 right-0 h-px bg-[#8B261D]`}></div>
-            )}
-          </button>
-        ))}
-      </div>
-
-      <div className="flex items-center gap-3 shrink-0">
-        {isAdmin && onOpenPosterWorkspace && (
-          <button
-            onClick={onOpenPosterWorkspace}
-            className={`flex items-center gap-2 px-4 py-1.5 h-10 rounded-md border transition-all duration-300 group shrink-0 ${theme === 'retro'
-                ? 'border-[#8B261D]/20 bg-[#8B261D]/5 text-[#8B261D] hover:border-[#8B261D]/45 hover:bg-[#8B261D]/10'
-                : 'border-[#FFD700]/20 bg-[#FFD700]/5 text-[#FFD700] hover:border-[#FFD700]/45 hover:bg-[#FFD700]/10'
-              }`}
-            title={lang === 'CN' ? '管理员：打开哲学家海报发布工作台' : 'Admin: open philosopher poster publishing desk'}
-          >
-            <Database size={14} className="shrink-0" />
-            <span className="hidden sm:inline text-[10px] font-bold uppercase tracking-[0.2em]">
-              {lang === 'CN' ? '发布工作台' : 'Publishing Desk'}
-            </span>
-            <span className={`hidden xl:flex items-center gap-1 text-[8px] font-black uppercase tracking-[0.18em] px-2 py-0.5 rounded-full border ${theme === 'retro'
-                ? 'border-[#8B261D]/20 bg-white/30 text-[#8B261D]/70'
-                : 'border-[#FFD700]/20 bg-black/20 text-[#FFD700]/70'
-              }`}
-            >
-              <Lock size={9} />
-              Admin
-            </span>
-          </button>
-        )}
-
-        {renderInPlace && onToggleExpand && (
-          <button
-            onClick={onToggleExpand}
-            className={`flex items-center gap-2 px-4 py-1.5 rounded-full border transition-all duration-300 group shrink-0 ${theme === 'retro'
-                ? 'border-black/10 hover:border-black/30 text-black/60 hover:text-black hover:bg-black/5'
-                : 'border-white/10 hover:border-white/30 text-zinc-400 hover:text-white bg-white/5'
-              }`}
-          >
-            <span className="text-[10px] font-bold uppercase tracking-widest">
-              {isExpanded ? (lang === 'CN' ? '收起侧边栏' : 'COLLAPSE') : (lang === 'CN' ? '展开全屏' : 'EXPAND')}
-            </span>
-            <div className={`transition-transform duration-500 ${isExpanded ? '' : 'rotate-180'}`}>
-              <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
-            </div>
-          </button>
-        )}
-      </div>
-    </nav>
 
     {/* CONTENT AREA */}
     <main className={`flex-1 overflow-hidden flex flex-col relative z-10 ${renderInPlace ? 'p-0' : 'p-6 md:p-8'} ${theme === 'retro' ? 'bg-transparent' : ''}`}>
       {activeSection === 'CONCEPTS' && renderConcepts()}
-      {activeSection === 'PERSONNEL' && renderPersonnel()}
-      {activeSection === 'RESEARCH' && renderResearch()}
-      {activeSection === 'TIMELINE' && <PhilosophyTimeline lang={lang} />}
     </main>
 
     {/* DETAIL MODAL OVERLAY */}

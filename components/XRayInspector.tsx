@@ -955,7 +955,7 @@ const classifyPromptTone = (token: string, line = '', fallback: XRayTone = 'dire
     const tokenUpper = cleanToken.toUpperCase();
     const lineText = line.trim();
     const engineLine = /(^|\s|\*|#|[-:：])(?:M[0-9][AB]?|C[0-9]+|T[0-9]+)[.。\s:：]|缺失主体|真实遭遇|欲望幻想|大他者阻断|行动驱力|代价|爱欲重构|实在余痕/i.test(lineText);
-    const surfaceLine = /(SUR(?:[0-9X]*|-END)|SV[0-9]+|世界法则|表层|皮肤|外壳|类型基因|叙事动力|叙事结构|故事体量|时空|社会|职业身份|信念预设|对象预设|空间容器|显性收场|圣经风格|作者风格|叙事视点|感官侧重|WORLD LAW|SURFACE|SKIN|PERSPECTIVE|SENSORY|BIBLE STYLE|AUTHOR STYLE)/i.test(lineText);
+    const surfaceLine = /(SUR(?:[0-9X]*|-END)|SV[0-9]+|世界法则|表层|皮肤|外壳|类型基因|故事类型|叙事动力|叙事结构|故事体量|时空|社会|职业身份|信念预设|对象预设|空间容器|显性收场|圣经风格|作者风格|叙事视点|感官侧重|WORLD LAW|SURFACE|SKIN|PERSPECTIVE|SENSORY|BIBLE STYLE|AUTHOR STYLE)/i.test(lineText);
     const textLine = /(文本|图像|视觉|素材|输入|来源|源文本|参考图|TEXT|IMAGE|VISUAL|SOURCE|VISION|INPUT|TREATMENT|PATH CONTENT)/i.test(lineText);
 
     if (/导演笔记|导演手记|DIRECTOR'?S NOTE/i.test(cleanToken)) return 'text';

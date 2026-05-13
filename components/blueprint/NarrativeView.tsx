@@ -1,7 +1,7 @@
 
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { CreativeBlueprint, BlueprintLanguage, DriverType, VersionHistoryItem } from '../../types';
-import { Star, FileText, PenTool, Globe, Palette, Languages, Copy, Check, Wand2, X, Plus, GripVertical, AlertCircle, Loader2, ArrowDown, ArrowUp, Trash2, RotateCcw, History as HistoryIcon, GitCommit, ListChecks, Zap, RotateCw, ChevronRight } from 'lucide-react';
+import { Star, FileText, PenTool, Palette, Check, Wand2, X, Plus, AlertCircle, Loader2, ArrowDown, ArrowUp, Trash2, RotateCcw, History as HistoryIcon, GitCommit, ListChecks, Zap, RotateCw, ChevronRight } from 'lucide-react';
 import { CopyButton, SimpleTextRenderer, ProcessingTimer, MarkdownRenderer } from '../SharedBlueprintComponents';
 import { modifyNarrativeWithAI, ModifySectionRequest, ModifyInsertionRequest } from '../../services/geminiService';
 import { buildRefactorPrompt } from '../../services/refactorPrompt';
@@ -53,8 +53,6 @@ const DiffViewer = ({ oldText, newText }: { oldText: string, newText: string }) 
 export const NarrativeView: React.FC<NarrativeViewProps> = ({
     blueprint, language, isAesthetic, themeAccent, themeBorder, themeBgActive, onUpdateBlueprint, theme, isAdmin
 }) => {
-    const [localLang, setLocalLang] = useState<'CN' | 'EN'>('CN');
-
     // AI Modify State
     const [isModifyModalOpen, setIsModifyModalOpen] = useState(false);
     const [sections, setSections] = useState<{ id: string; text: string; isSelected: boolean; instruction: string; highlights: { text: string; note: string; }[] }[]>([]);
@@ -74,6 +72,7 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
     // Edit Mode State
     const [isEditMode, setIsEditMode] = useState(false);
     const [editText, setEditText] = useState("");
+    const [storyViewMode, setStoryViewMode] = useState<'preview' | 'edit'>('preview');
 
     const toggleEditMode = () => {
         if (scrollContainerRef.current) {
@@ -151,21 +150,6 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
     const history = blueprint.versionHistory || [];
     const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
     const [selectedVersion, setSelectedVersion] = useState<VersionHistoryItem | null>(null);
-
-    // Refs for auto-resizing standard textareas
-    const worldRef = useRef<HTMLTextAreaElement>(null);
-    const toneRef = useRef<HTMLTextAreaElement>(null);
-
-    useEffect(() => {
-        if (worldRef.current) {
-            worldRef.current.style.height = 'auto';
-            worldRef.current.style.height = worldRef.current.scrollHeight + 'px';
-        }
-        if (toneRef.current) {
-            toneRef.current.style.height = 'auto';
-            toneRef.current.style.height = toneRef.current.scrollHeight + 'px';
-        }
-    }, [blueprint.context?.world, blueprint.context?.worldCn, blueprint.context?.worldEn, blueprint.context?.tone, blueprint.context?.toneCn, blueprint.context?.toneEn, localLang]);
 
     const handleUpdate = (field: string, value: string) => {
         if (field.startsWith('world') || field.startsWith('tone')) {
@@ -453,27 +437,12 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
         return elements;
     };
 
-    // --- RENDER HELPERS ---
-
-    const getToneWithHexText = () => {
-        const toneText = localLang === 'CN'
-            ? (blueprint.context?.toneCn || blueprint.context?.tone || '')
-            : (blueprint.context?.toneEn || blueprint.context?.tone || '');
-        const hexCodes = (blueprint.context?.colorPalette || []).join(', ');
-        const label = localLang === 'CN' ? '色值' : 'Hex Codes';
-        return `${toneText}\n\n${label}: ${hexCodes}`;
-    };
-
-    const getHexOnlyText = () => {
-        return (blueprint.context?.colorPalette || []).join(', ');
-    };
-
     const isTitleTemplate = blueprint.narrative?.title === "NEW CONCEPT" || !blueprint.narrative?.title;
 
     const getLocalizedStyleName = (style: string) => {
         if (!style) return "";
-        if (style === '空白故事圣经' || style === 'Blank Story Bible') {
-            return language === 'EN' ? 'Blank Story Bible' : '空白故事圣经';
+        if (style === '空白故事圣经' || style === 'Blank Story Bible' || style === '空白故事工程' || style === 'Blank Story Project') {
+            return language === 'EN' ? 'Blank Story Project' : '空白故事工程';
         }
 
         if (language === 'EN') {
@@ -490,140 +459,134 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
     return (
         <div className="max-w-5xl mx-auto space-y-12 pb-20">
             {/* LOGLINE SECTION */}
-            <div className={`${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/15 shadow-sm' : `bg-zinc-900/40 border-zinc-800 hover:${themeAccent.replace('text-', 'border-')}/30`} border p-8 rounded-2xl relative overflow-hidden group transition-all`}>
-                <div className={`absolute top-0 left-0 w-1.5 h-full ${theme === 'retro' ? 'bg-[#8B261D]' : themeAccent.replace('text-', 'bg-')}`}></div>
-                <div className="flex justify-between items-start mb-4">
+            <div className={`mist-story-logline-card ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/15 shadow-sm' : `bg-zinc-900/40 border-zinc-800 hover:${themeAccent.replace('text-', 'border-')}/30`} border p-8 rounded-2xl relative overflow-hidden group transition-all`}>
+                <div className={`mist-story-logline-rail absolute top-0 left-0 w-1.5 h-full ${theme === 'retro' ? 'bg-[#8B261D]' : themeAccent.replace('text-', 'bg-')}`}></div>
+                <div className="mist-story-logline-head flex justify-between items-start mb-3">
                     <h3 className={`${theme === 'retro' ? 'text-[#8B261D]' : themeAccent} font-bold text-xs uppercase tracking-[0.2em] flex items-center gap-2`}>
-                        <Star size={12} /> {language === 'EN' ? "Logline" : "一句话梗概"}
+                        <Star size={12} />
+                        <span>{language === 'EN' ? "Logline" : "一句话梗概"}</span>
                     </h3>
-                    <CopyButton text={blueprint.narrative?.logline || ""} theme={theme} className={theme === 'retro' ? 'text-[#8B261D]/50 hover:text-[#8B261D]' : `text-zinc-500 hover:${themeAccent}`} />
+                    <CopyButton
+                        text={blueprint.narrative?.logline || ""}
+                        theme={theme}
+                        iconOnly
+                        className={theme === 'retro' ? 'mist-story-copy-icon text-black/70 hover:text-[#8B261D]' : `mist-story-copy-icon text-zinc-500 hover:${themeAccent}`}
+                    />
                 </div>
                 <textarea
                     value={blueprint.narrative?.logline || ""}
                     onChange={(e) => handleUpdate('logline', e.target.value)}
-                    className={`w-full bg-transparent text-xl md:text-2xl font-serif leading-relaxed italic border-none focus:ring-0 resize-none p-0 focus:outline-none ${theme === 'retro' ? 'placeholder-[#8B261D]/30' : 'placeholder-zinc-600'} ${theme === 'retro' ? 'text-[#3D1A16]' : ((blueprint.narrative?.logline || '').includes('...') ? 'text-zinc-500' : 'text-white')}`}
+                    className={`w-full bg-transparent text-xl md:text-2xl font-serif leading-relaxed italic border-none focus:ring-0 resize-none p-0 focus:outline-none ${theme === 'retro' ? 'placeholder-[#8B261D]/30 text-[#3D1A16]' : 'placeholder-zinc-600 text-white'}`}
                     rows={2}
-                    placeholder="在此输入故事的核心钩子..."
+                    placeholder="在此输入故事梗概..."
                 />
             </div>
 
-            {/* SYNOPSIS SECTION */}
-            <div>
-                <div className={`flex items-center justify-between border-b ${theme === 'retro' ? 'border-[#8B261D]/20' : 'border-zinc-800'} pb-4 mb-6`}>
-                    <div>
-                        <div className="flex items-center gap-3 mb-1">
-                            <FileText className="text-zinc-500" size={18} />
+            {/* STORY PROJECT / SYNOPSIS AREA */}
+            <div className="space-y-10">
+                <div className="mist-story-project-header flex items-center justify-between pb-8 border-none">
+                    <div className="flex-1">
+                        <div className="flex items-center gap-4 mb-4">
+                            <FileText className="text-[#8B261D]/20" size={28} />
                             <input
                                 type="text"
                                 value={blueprint.narrative?.title || ""}
                                 onChange={(e) => handleUpdate('title', e.target.value)}
-                                className={`text-2xl font-serif bg-transparent border-none focus:ring-0 p-0 focus:outline-none w-full max-w-md placeholder-zinc-600 ${theme === 'retro' ? 'text-black' : (isTitleTemplate ? 'text-zinc-500' : 'text-white')}`}
+                                className={`text-5xl font-serif bg-transparent border-none focus:ring-0 p-0 focus:outline-none w-full font-bold tracking-tight ${theme === 'retro' ? 'placeholder-[#8B261D]/10 text-[#1A1A1A]' : 'placeholder-white/10 text-white'}`}
                                 placeholder="未命名项目标题"
                             />
                         </div>
                         {blueprint.styleName && (
-                            <div className={`text-xs font-mono ${themeAccent} flex items-center gap-2 ml-9`}>
-                                <PenTool size={12} />
-                                {language === 'EN' ? "Style: " : "风格："}
-                                {blueprint.styleName}
+                            <div className={`text-[10px] font-mono flex items-center gap-2 ml-11 ${theme === 'retro' ? 'text-[#8B261D]/40' : 'text-white/70'}`}>
+                                <PenTool size={10} className="opacity-50" />
+                                <span className="uppercase tracking-[0.2em]">{language === 'EN' ? "Aesthetic: " : "美学风格："}</span>
+                                <span className={`font-bold ${theme === 'retro' ? 'text-[#8B261D]/80' : 'text-white'}`}>{getLocalizedStyleName(blueprint.styleName)}</span>
                             </div>
                         )}
                     </div>
-                    <div className="flex items-center gap-4">
-                        <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">
-                            {(blueprint.narrative?.synopsis || "").length} {language === 'EN' ? "CHARS" : "字"}
-                        </span>
 
-                        <button
-                            onClick={() => setIsHistoryModalOpen(true)}
-                            className={`flex items-center gap-2 px-3 py-1.5 border rounded text-[10px] font-bold uppercase tracking-wider transition-all ${theme === 'retro' ? 'bg-[#8B261D] border-[#8B261D] text-white hover:bg-[#6D1E16]' : `bg-zinc-900 border-zinc-700 hover:border-${themeAccent.replace('text-', '')} text-zinc-400 hover:text-white`}`}
-                            title={language === 'EN' ? "View History" : "查看历史"}
-                        >
-                            <HistoryIcon size={12} />
-                            {language === 'EN' ? `History: ${history.length}` : `历史版本：${history.length}版`}
-                        </button>
-
-                        <button
-                            onClick={openModifyModal}
-                            disabled={!blueprint.narrative?.synopsis}
-                            className={`flex items-center gap-2 px-3 py-1.5 border rounded text-[10px] font-bold uppercase tracking-wider transition-all duration-200 disabled:opacity-50 ${theme === 'retro' ? 'bg-transparent border-[#8B261D] text-[#8B261D] hover:bg-[#8B261D]/10 shadow-sm' : 'bg-[var(--mist-active-accent)]/5 border-[var(--mist-active-accent)] text-[var(--mist-active-accent)] hover:bg-[var(--mist-active-accent)]/20 hover:brightness-125 shadow-sm'}`}
-                        >
-                            <Wand2 size={12} /> {language === 'EN' ? "AI Modify" : "AI 深度修改"}
-                        </button>
-
-                        <CopyButton text={blueprint.narrative?.synopsis || ""} label={language === 'EN' ? "COPY SCRIPT" : "复制文本"} theme={theme} className={theme === 'retro' ? 'text-[#8B261D]/50 hover:text-[#8B261D]' : 'text-zinc-500'} />
-                    </div>
-                </div>
-                <div className={`${theme === 'retro' ? 'bg-[var(--bg-main)] border-[#8B261D]/15 shadow-sm' : 'bg-[var(--bg-main)] border-zinc-800'} border p-10 rounded-xl min-h-[400px]`}>
-                    <textarea
-                        value={blueprint.narrative?.synopsis || ""}
-                        onChange={(e) => handleUpdate('synopsis', e.target.value)}
-                        className={`w-full h-full min-h-[400px] bg-transparent font-light leading-relaxed border-none focus:ring-0 resize-none p-0 focus:outline-none custom-scrollbar ${theme === 'retro' ? 'placeholder-[#8B261D]/30' : 'placeholder-zinc-400'} ${theme === 'retro' ? 'text-[#3D1A16]' : ((blueprint.narrative?.synopsis || '').includes('...') ? 'text-zinc-500' : 'text-zinc-300')}`}
-                        placeholder="输入详细的故事大纲、视听节奏与叙事逻辑..."
-                    />
-                </div>
-            </div>
-
-            {/* Language Toggle for Modules */}
-            <div className="flex justify-end mb-[-2rem]">
-                <div className={`flex p-1 rounded-lg border shadow-lg ${theme === 'retro' ? 'bg-[#F4EFE0] border-[#8B261D]/20' : 'bg-zinc-900 border-zinc-800'}`}>
-                    <button
-                        onClick={() => setLocalLang('CN')}
-                        className={`px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-wider transition-all ${localLang === 'CN' ? (theme === 'retro' ? 'bg-[#8B261D] text-white shadow-none' : 'bg-[var(--mist-active-accent)] text-black') : (theme === 'retro' ? 'text-zinc-500 hover:text-[#8B261D]' : 'text-zinc-500 hover:text-white')}`}
-                    >
-                        中文
-                    </button>
-                    <button
-                        onClick={() => setLocalLang('EN')}
-                        className={`px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-wider transition-all ${localLang === 'EN' ? (theme === 'retro' ? 'bg-[#8B261D] text-white shadow-none' : 'bg-[var(--mist-active-accent)] text-black') : (theme === 'retro' ? 'text-zinc-500 hover:text-[#8B261D]' : 'text-zinc-500 hover:text-white')}`}
-                    >
-                        EN
-                    </button>
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
-                <div className={`${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/15 shadow-sm' : 'bg-zinc-900/30 border border-zinc-800'} border p-6 rounded-xl transition-colors flex flex-col h-full hover:${theme === 'retro' ? 'border-[#8B261D]/30' : (themeBorder || 'border-zinc-700')}`}>
-                    <div className="flex justify-between items-center mb-4">
-                        <h4 className={`${themeAccent} font-bold text-xs uppercase tracking-widest flex items-center gap-2`}>
-                            <Globe size={14} /> {localLang === 'EN' ? "World Rules" : "世界法则"}
-                        </h4>
-                        <CopyButton text={localLang === 'CN' ? (blueprint.context?.worldCn || blueprint.context?.world || '') : (blueprint.context?.worldEn || blueprint.context?.world || '')} theme={theme} className={theme === 'retro' ? 'text-[#8B261D]/50 hover:text-[#8B261D]' : ''} />
-                    </div>
-                    <textarea
-                        ref={worldRef}
-                        value={localLang === 'CN' ? (blueprint.context?.worldCn || blueprint.context?.world || '') : (blueprint.context?.worldEn || blueprint.context?.world || '')}
-                        onChange={(e) => handleUpdate(localLang === 'CN' ? 'worldCn' : 'worldEn', e.target.value)}
-                        className={`w-full flex-1 bg-transparent text-sm ${theme === 'retro' ? 'text-[#3D1A16]' : 'text-zinc-300'} leading-loose border-none focus:ring-0 resize-none p-0 focus:outline-none placeholder-zinc-600 overflow-hidden min-h-[160px]`}
-                        placeholder={localLang === 'EN' ? "Describe the rules of the world..." : "在此定义世界物理规律、社会秩序与背景..."}
-                    />
-                </div>
-                <div className={`${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/15 shadow-sm' : 'bg-zinc-900/30 border border-zinc-800'} border p-6 rounded-xl transition-colors flex flex-col h-full hover:${theme === 'retro' ? 'border-[#8B261D]/30' : (themeBorder || 'border-zinc-700')}`}>
-                    <div className="flex justify-between items-center mb-4">
-                        <h4 className={`${themeAccent} font-bold text-xs uppercase tracking-widest flex items-center gap-2`}>
-                            <Palette size={14} /> {localLang === 'EN' ? "Tone & Visuals" : "影调与视觉"}
-                        </h4>
-                        <CopyButton text={getToneWithHexText()} theme={theme} className={theme === 'retro' ? 'text-[#8B261D]/50 hover:text-[#8B261D]' : ''} />
-                    </div>
-                    <textarea
-                        ref={toneRef}
-                        value={localLang === 'CN' ? (blueprint.context?.toneCn || blueprint.context?.tone || '') : (blueprint.context?.toneEn || blueprint.context?.tone || '')}
-                        onChange={(e) => handleUpdate(localLang === 'CN' ? 'toneCn' : 'toneEn', e.target.value)}
-                        className={`w-full flex-1 bg-transparent text-sm ${theme === 'retro' ? 'text-[#3D1A16]' : 'text-zinc-300'} leading-loose border-none focus:outline-none focus:ring-0 resize-none p-0 placeholder-zinc-600 mb-4 overflow-hidden min-h-[128px]`}
-                        placeholder={localLang === 'EN' ? "Describe visual style and color logic..." : "在此定义视觉影调、色彩逻辑与美学风格..."}
-                    />
-                    <div className="flex items-center justify-between gap-4 mt-auto pt-4 border-t border-white/5">
-                        <div className="flex gap-2">
-                            {(theme === 'retro' ? ['#8B261D', '#DCD8CF', '#F4EFE0', '#2C2B29', '#E0D4B2'] : blueprint.context?.colorPalette)?.map((color, i) => (
-                                <div key={i} className="h-8 w-12 rounded border border-black/10 shadow-sm group relative" style={{ backgroundColor: color }}>
-                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <span className={`${theme === 'retro' ? 'bg-[#F4EFE0]/90 text-[#8B261D]' : 'bg-black/80 text-white'} text-[9px] px-1 rounded`}>{color}</span>
-                                    </div>
-                                </div>
-                            ))}
+                    <div className="flex items-center gap-6">
+                        <div className="flex flex-col items-end">
+                            <span className={`text-[10px] font-mono uppercase tracking-[0.2em] mb-1 ${theme === 'retro' ? 'text-[#8B261D]/40' : 'text-white/48'}`}>
+                                {language === 'EN' ? "Word Count" : "实时字数"}
+                            </span>
+                            <span className={`text-xs font-bold ${theme === 'retro' ? 'text-[#8B261D]' : 'text-white/80'}`}>
+                                {(blueprint.narrative?.synopsis || "").length} <span className="text-xs opacity-100 ml-0.5">{language === 'EN' ? "CHARS" : "字"}</span>
+                            </span>
                         </div>
-                        <CopyButton text={theme === 'retro' ? '#8B261D, #DCD8CF, #F4EFE0, #2C2B29, #E0D4B2' : getHexOnlyText()} theme={theme} className={theme === 'retro' ? 'text-[#8B261D]/50 hover:text-[#8B261D]' : ''} />
+
+                        <div className="h-8 w-px bg-[#8B261D]/10"></div>
+
+                        <div className="mist-story-toolbar flex items-center gap-2">
+                            <button
+                                onClick={() => setIsHistoryModalOpen(true)}
+                                className="mist-story-header-action"
+                                title={language === 'EN' ? "View History" : "查看历史版本"}
+                            >
+                                <HistoryIcon size={14} />
+                                <span>{language === 'EN' ? `HISTORY ${history.length}` : `历史版本 ${history.length}`}</span>
+                            </button>
+
+                            <button
+                                onClick={openModifyModal}
+                                disabled={!blueprint.narrative?.synopsis}
+                                className="mist-story-header-action"
+                                title={language === 'EN' ? "AI Deep Modify" : "AI 深度修改"}
+                            >
+                                <Wand2 size={14} />
+                                <span>{language === 'EN' ? "AI MODIFY" : "AI 深度修改"}</span>
+                            </button>
+
+                            <div className="mist-story-view-toggle" role="tablist" aria-label={language === 'EN' ? "Story view mode" : "故事查看模式"}>
+                                <button
+                                    type="button"
+                                    className={storyViewMode === 'preview' ? 'is-active' : ''}
+                                    onClick={() => setStoryViewMode('preview')}
+                                >
+                                    {language === 'EN' ? "VIEW" : "浏览"}
+                                </button>
+                                <button
+                                    type="button"
+                                    className={storyViewMode === 'edit' ? 'is-active' : ''}
+                                    onClick={() => setStoryViewMode('edit')}
+                                >
+                                    {language === 'EN' ? "EDIT" : "编辑"}
+                                </button>
+                            </div>
+
+                            <CopyButton
+                                text={blueprint.narrative?.synopsis || ""}
+                                theme={theme}
+                                iconOnly
+                                className={theme === 'retro' ? 'mist-story-copy-icon text-black/70 hover:text-[#8B261D]' : 'mist-story-copy-icon text-zinc-500'}
+                            />
+                        </div>
                     </div>
+                </div>
+
+                <div className="mist-story-text-card min-h-[600px] py-4">
+                    {storyViewMode === 'edit' ? (
+                        <textarea
+                            value={blueprint.narrative?.synopsis || ""}
+                            onChange={(e) => handleUpdate('synopsis', e.target.value)}
+                            className={`w-full h-full min-h-[600px] bg-transparent font-light leading-[2] text-lg border-none focus:ring-0 resize-none p-0 focus:outline-none custom-scrollbar ${theme === 'retro' ? 'placeholder-[#8B261D]/20 text-[#3D1A16]/80' : 'placeholder-white/24 text-zinc-200'}`}
+                            placeholder="输入详细的故事大纲、视听节奏与叙事逻辑..."
+                        />
+                    ) : (
+                        <div className="mist-story-preview min-h-[600px]">
+                            {(blueprint.narrative?.synopsis || "").trim() ? (
+                                <MarkdownRenderer
+                                    content={blueprint.narrative?.synopsis || ""}
+                                    themeAccent={theme === 'retro' ? 'text-[#8B261D]' : themeAccent}
+                                    theme={theme}
+                                />
+                            ) : (
+                                <div className="mist-story-preview-placeholder">
+                                    {language === 'EN' ? "No story text yet. Switch to Edit to write." : "暂无故事正文。切换到编辑后可输入故事工程文本。"}
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
 

@@ -125,7 +125,7 @@ export interface MistEngineInput {
   // m4x/m5x removed in v3.0 (正交性优化)
 
   // === 皮层：SUR1-SUR10 ===
-  sur1?: string;       // 叙事动力 (Genre)
+  sur1?: string;       // 故事类型 (Genre)
   sur2?: string;       // 世界模体 (World Motif)
   sur3?: string;       // 时空场域 (Spacetime Field)
   sur4?: string;       // 社会形态 (Social Order)
@@ -533,7 +533,7 @@ function compileDirectives(
   // ====== SUR1-SUR10 皮层语义指令 ======
   // 这些不参与公式计算，但要告诉 AI "穿什么皮"
   const skinSlots: Array<{ target: string; id?: string; label: string }> = [
-    { target: 'SUR1_GENRE', id: input.sur1, label: '叙事动力' },
+    { target: 'SUR1_GENRE', id: input.sur1, label: '故事类型' },
     { target: 'SUR2_MOTIF', id: input.sur2, label: '世界模体' },
     { target: 'SUR3_SPACETIME', id: input.sur3, label: '时空场域' },
     { target: 'SUR4_SOCIETY', id: input.sur4, label: '社会形态' },
@@ -773,7 +773,7 @@ ${m0Section}
 ### 🎭 表层设定 (SUR1-SUR10 + SV)
 | 参数 | 选择 |
 |:---|:---|
-| SUR1 叙事动力 | ${getName(input.sur1)} |
+| SUR1 故事类型 | ${getName(input.sur1)} |
 | SUR2 世界模体 | ${getName(input.sur2)} |
 | SUR3 时空场域 | ${getName(input.sur3)} |
 | SUR4 社会形态 | ${getName(input.sur4)} |

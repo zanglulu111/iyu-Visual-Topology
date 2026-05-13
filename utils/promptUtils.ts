@@ -400,3 +400,222 @@ export const generateAestheticPrompt = (
 
     return orderedSentences.filter(Boolean).join(". ").replace(/\.\./g, ".").replace(/,\./g, ".").trim();
 };
+
+type AssetConceptKind = 'CHARACTER' | 'CREATURE' | 'ENVIRONMENT';
+
+const cleanSentence = (text: string): string => {
+    return text
+        .replace(/\s+/g, ' ')
+        .replace(/\s+,/g, ',')
+        .replace(/,\s*\./g, '.')
+        .replace(/\.\s*\./g, '.')
+        .trim();
+};
+
+const firstNonEmpty = (...groups: string[][]): string => {
+    for (const group of groups) {
+        const value = group.find(Boolean);
+        if (value) return value;
+    }
+    return "";
+};
+
+const takeBudget = (items: string[], limit: number): string[] => {
+    return items.filter(Boolean).slice(0, limit);
+};
+
+export const generateAestheticAssetConceptPrompt = (
+    fieldState: NarrativeFieldState,
+    subjectType: SubjectType,
+    lang: 'CN' | 'EN',
+    customLibraryDefs: Record<string, { def: string; core: string }>
+): string => {
+    const getEnglishName = (tag: string) => {
+        const match = tag.match(/\((.*?)\)/);
+        return match ? match[1].trim() : tag.trim();
+    };
+
+    const getTags = (blockId: string, withDef = false): string[] => {
+        const tags = fieldState[blockId];
+        if (!tags || !Array.isArray(tags) || tags.length === 0) return [];
+
+        return tags.map(tag => {
+            if (blockId === 'aes_l2_custom' || blockId === 'aes_l3_custom') return tag.trim();
+
+            const name = getEnglishName(tag);
+            if (!withDef) return name;
+
+            let def = "";
+            if (customLibraryDefs && customLibraryDefs[tag]) {
+                def = customLibraryDefs[tag].def;
+            } else {
+                const item = findAestheticItemFull(tag, blockId);
+                if (item) {
+                    if (lang === 'EN') {
+                        def = (item as any).defEn || (!/[\u4e00-\u9fa5]/.test(item.def || "") ? item.def || "" : "");
+                    } else {
+                        def = item.def || (item as any).defEn || "";
+                    }
+                }
+            }
+
+            def = def.trim().replace(/[。.]$/, "");
+            return def ? `${name} (${def})` : name;
+        }).filter(Boolean);
+    };
+
+    const hasHuman = [
+        'aes_age', 'aes_gender', 'aes_body_type', 'aes_ethnicity', 'aes_occupation', 'aes_persona',
+        'aes_hair_color', 'aes_hair_style_f', 'aes_hair_style_m', 'aes_eye_color', 'aes_eye_shape',
+        'aes_face_features', 'aes_expression', 'aes_body_features', 'aes_skin_texture',
+        'aes_action_static', 'aes_action_dynamic', 'aes_action_complex', 'aes_l2_custom'
+    ].some(id => (fieldState[id] || []).some(Boolean));
+    const hasCreature = [
+        'aes_creature_size', 'aes_creature_class', 'aes_creature_element', 'aes_creature_head',
+        'aes_creature_body', 'aes_creature_mood', 'aes_creature_action', 'aes_creature_texture', 'aes_l2_custom'
+    ].some(id => (fieldState[id] || []).some(Boolean));
+
+    const assetKind: AssetConceptKind = subjectType === 'CREATURE' && hasCreature
+        ? 'CREATURE'
+        : subjectType === 'HUMAN' && hasHuman
+            ? 'CHARACTER'
+            : 'ENVIRONMENT';
+
+    const style = firstNonEmpty(
+        getTags('aes_director_style'),
+        getTags('aes_photo_style'),
+        getTags('aes_art_style'),
+        getTags('aes_anim_director'),
+        getTags('aes_art_movement'),
+        getTags('aes_poster_style')
+    );
+    const styleLine = style ? `visual language: ${style}` : "";
+
+    const camera = firstNonEmpty(getTags('aes_camera_system'), getTags('aes_lens_series'), getTags('aes_focal_length'));
+    const shot = firstNonEmpty(getTags('aes_image_focus'), getTags('aes_shot_size'), getTags('aes_angle'), getTags('aes_perspective'));
+    const lighting = firstNonEmpty(getTags('aes_light_mood'), getTags('aes_light_type'), getTags('aes_light_direction'), getTags('aes_light_shape'));
+    const render = firstNonEmpty(getTags('aes_render_real'), getTags('aes_render_art'), getTags('aes_texture_render'), getTags('aes_art_medium'));
+    const palette = firstNonEmpty(getTags('aes_color_palette'), getTags('aes_base_tone'), getTags('aes_color_science'));
+
+    const scene = firstNonEmpty(getTags('aes_scene_real'), getTags('aes_scene_surreal'), getTags('aes_scene_abstract'));
+    const era = firstNonEmpty(getTags('skin_era'));
+    const atmosphere = firstNonEmpty(getTags('aes_atmosphere'), getTags('aes_particles'));
+    const sceneCustom = firstNonEmpty(getTags('aes_l3_custom'));
+
+    const sceneAnchor = cleanSentence([scene, era, sceneCustom].filter(Boolean).join(', '));
+    const environmentLine = sceneAnchor ? `environment: ${sceneAnchor}` : "";
+    const atmosphereLine = atmosphere ? `atmosphere: ${atmosphere}` : "";
+
+    let subjectCore = "";
+    let subjectDetails: string[] = [];
+    let action = "";
+
+    if (assetKind === 'CHARACTER') {
+        subjectCore = cleanSentence([
+            firstNonEmpty(getTags('aes_age')),
+            firstNonEmpty(getTags('aes_ethnicity')),
+            firstNonEmpty(getTags('aes_gender')),
+            firstNonEmpty(getTags('aes_body_type')),
+            firstNonEmpty(getTags('aes_occupation'), getTags('aes_persona'))
+        ].filter(Boolean).join(' '));
+        subjectDetails = takeBudget([
+            firstNonEmpty(getTags('aes_hair_color'), getTags('aes_hair_style_f'), getTags('aes_hair_style_m')),
+            firstNonEmpty(getTags('aes_eye_color'), getTags('aes_eye_shape')),
+            firstNonEmpty(getTags('aes_face_features'), getTags('aes_expression')),
+            firstNonEmpty(getTags('aes_skin_texture'), getTags('aes_body_features')),
+            firstNonEmpty(getTags('aes_l2_custom'))
+        ], 4);
+        action = firstNonEmpty(getTags('aes_action_static'), getTags('aes_action_dynamic'), getTags('aes_action_complex'));
+    } else if (assetKind === 'CREATURE') {
+        subjectCore = cleanSentence([
+            firstNonEmpty(getTags('aes_creature_size')),
+            firstNonEmpty(getTags('aes_creature_element')),
+            firstNonEmpty(getTags('aes_creature_class'))
+        ].filter(Boolean).join(' '));
+        subjectDetails = takeBudget([
+            firstNonEmpty(getTags('aes_creature_head')),
+            firstNonEmpty(getTags('aes_creature_body')),
+            firstNonEmpty(getTags('aes_creature_texture')),
+            firstNonEmpty(getTags('aes_creature_mood')),
+            firstNonEmpty(getTags('aes_l2_custom'))
+        ], 4);
+        action = firstNonEmpty(getTags('aes_creature_action'));
+    } else {
+        subjectCore = scene || sceneCustom || "environment concept";
+        subjectDetails = takeBudget([
+            era,
+            atmosphere,
+            firstNonEmpty(getTags('aes_particles')),
+            firstNonEmpty(getTags('aes_l3_custom'))
+        ], 4);
+    }
+
+    const punctum = firstNonEmpty(
+        getTags('aes_eye_fx'),
+        getTags('aes_particles'),
+        getTags('aes_scene_surreal'),
+        getTags('aes_scene_abstract'),
+        getTags('aes_l2_custom'),
+        getTags('aes_l3_custom')
+    );
+
+    const assetLabel = assetKind === 'CHARACTER'
+        ? 'Character Concept'
+        : assetKind === 'CREATURE'
+            ? 'Creature Concept'
+            : 'Environment Concept';
+
+    const subjectLine = cleanSentence([
+        subjectCore || assetLabel.toLowerCase(),
+        subjectDetails.length > 0 ? `with ${subjectDetails.join(', ')}` : "",
+        action ? `action: ${action}` : ""
+    ].filter(Boolean).join(', '));
+
+    const mjParts = [
+        `${assetLabel}: ${subjectLine}`,
+        environmentLine,
+        atmosphereLine,
+        lighting ? `lighting: ${lighting}` : "",
+        styleLine,
+        shot ? `composition: ${shot}` : "",
+        punctum ? `one surreal punctum only: ${punctum}` : "",
+        render ? `finish: ${render}` : ""
+    ].filter(Boolean);
+
+    const gptParts = [
+        `Create a precise ${assetLabel.toLowerCase()} image.`,
+        `Primary subject: ${subjectLine}.`,
+        environmentLine ? `Place it in this restrained setting: ${sceneAnchor}.` : "",
+        atmosphere ? `Atmosphere: ${atmosphere}.` : "",
+        lighting ? `Lighting: ${lighting}.` : "",
+        palette ? `Color logic: ${palette}.` : "",
+        style ? `Use one coherent style influence only: ${style}.` : "",
+        camera || shot ? `Camera and composition: ${[camera, shot].filter(Boolean).join(', ')}.` : "",
+        punctum ? `Add exactly one uncanny detail, not more: ${punctum}.` : "",
+        "Keep the image readable: one dominant focal point, no extra characters, no crowded symbols, no decorative clutter."
+    ].filter(Boolean);
+
+    const designNotes = [
+        `TYPE: ${assetLabel}`,
+        `PRIMARY ANCHOR: ${subjectCore || assetLabel}`,
+        `VISIBLE DETAILS: ${subjectDetails.join(' / ') || 'none'}`,
+        `ENVIRONMENT: ${sceneAnchor || 'minimal or undefined'}`,
+        `LIGHT: ${lighting || 'not specified'}`,
+        `STYLE LIMIT: ${style || 'single coherent visual system'}`,
+        `PUNCTUM: ${punctum || 'none'}`,
+        `RULE: Full DNA is treated as background memory. Only the above elements should visibly appear in the generated image.`
+    ];
+
+    return [
+        'ASSET CONCEPT COMPILER v1',
+        '',
+        '[MJ_SIMPLE]',
+        cleanSentence(mjParts.join(', ')),
+        '',
+        '[GPT_IMAGE_2]',
+        cleanSentence(gptParts.join(' ')),
+        '',
+        '[ASSET_DESIGN_NOTE]',
+        designNotes.join('\n')
+    ].join('\n');
+};

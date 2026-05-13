@@ -258,7 +258,7 @@ export const SkinSlot: React.FC<{
                     onMouseEnter={(e) => safeDetails && handleMouseEnter(e, safeDetails)}
                     onMouseLeave={handleMouseLeave}
                     className={`
-                    mist-labyrinth-hover-token font-serif font-bold transition-all duration-300 hover:z-50 inline-block ${isTagLocked ? 'cursor-not-allowed' : 'cursor-pointer'}
+                    mist-labyrinth-hover-token is-filled font-serif font-bold transition-all duration-300 hover:z-50 inline-block ${isTagLocked ? 'cursor-not-allowed' : 'cursor-pointer'}
                     ${isTagLocked
                         ? `border ${lockedClass} px-2 rounded`
                         : `${theme === 'retro' ? 'text-black hover:bg-black/5' : 'text-white hover:bg-white/10'} border-b-2 ${accentColor} px-0.5 rounded-sm`
@@ -319,7 +319,7 @@ export const SkinSlot: React.FC<{
                 core: lang === 'EN' ? "[Config Protocol] Click to enter the library." : "【配置协议】点击进入库选择具体参数。",
               }, libInfo.name)}
               onMouseLeave={handleMouseLeave}
-              className={`mist-labyrinth-hover-token cursor-pointer font-serif font-medium border-b border-dashed transition-all duration-300 hover:z-50 text-base ${isBlockLocked ? (theme === 'retro' ? 'opacity-50 cursor-not-allowed text-[var(--text-muted)]/50' : 'opacity-50 cursor-not-allowed text-zinc-600') : (theme === 'retro' ? 'border-[var(--text-main)] text-zinc-500 hover:text-black' : 'border-zinc-800 text-zinc-500 hover:text-white hover:border-zinc-500')}`}
+              className={`mist-labyrinth-hover-token is-empty cursor-pointer font-serif font-medium border-b border-dashed transition-all duration-300 hover:z-50 text-base ${isBlockLocked ? (theme === 'retro' ? 'opacity-50 cursor-not-allowed text-[var(--text-muted)]/50' : 'opacity-50 cursor-not-allowed text-zinc-600') : (theme === 'retro' ? 'border-[var(--text-main)] text-zinc-500 hover:text-black' : 'border-zinc-800 text-zinc-500 hover:text-white hover:border-zinc-500')}`}
             >
               {lang === 'EN' ? '[' : '【'}{placeholder}{lang === 'EN' ? ']' : '】'}
             </span>
@@ -1268,7 +1268,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
                 <div>
                   <div>
                     <span>{lang === 'EN' ? "Genre: " : "类型："}</span>
-                    <SkinSlot blockId="skin_genre" placeholder={lang === 'EN' ? "Genre Drive" : "叙事动力"} isBlockLocked={lockedModules["skin_genre"]} {...slotProps} />
+                    <SkinSlot blockId="skin_genre" placeholder={lang === 'EN' ? "Genre" : "故事类型"} isBlockLocked={lockedModules["skin_genre"]} {...slotProps} />
                   </div>
                   <div className="flex flex-wrap items-center gap-x-6">
                     <div>

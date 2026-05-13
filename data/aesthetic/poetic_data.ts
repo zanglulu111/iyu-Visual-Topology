@@ -12,7 +12,8 @@ export const POETIC_ENGINE_BLOCKS: NarrativeBlockDef[] = [
 export const POETIC_ENGINE_LIBRARY: LibraryCategoryDef[] = [
   {
     id: "exp_skin_context_lib",
-    name: "还原语境 (Context)",
+    name: "还原语境",
+    nameEn: "Context",
     desc: "实验的背景环境。",
     items: [
       { id: "esc_1", name: "绝对真空 (Absolute Vacuum)", def: "没有重力，没有空气，只有纯粹的空间。", core: "语境：隔离所有干扰。" },

@@ -18,7 +18,7 @@ import { BookOpen, Camera, Eye, Zap, Box, Lock, RotateCcw, Paintbrush, Terminal,
 import { ProphecySlot } from './ProphecySlot';
 import { NarrativeLibraryModal } from './NarrativeLibraryModal';
 import { generateAestheticSmartRandom, HUMAN_BLOCKS, CREATURE_BLOCKS, AESTHETIC_GLOBAL_BLOCK_TO_CATEGORY, getSingleRandomTag } from '../services/randomizer';
-import { generateAestheticPrompt } from '../utils/promptUtils';
+import { generateAestheticAssetConceptPrompt, generateAestheticPrompt } from '../utils/promptUtils';
 import { AESTHETIC_LOGIC_TEMPLATES, BLOCK_LIMITS } from '../constants';
 import { findItemFull } from '../services/dataRegistry';
 import { BorromeanRings } from './BorromeanRings';
@@ -40,9 +40,9 @@ const ModuleContainer = ({ id, lockedModules, moveModule, children }: React.Prop
 
     return (
         <div
-            className={`flex flex-row gap-0 rounded-xl border ${borderColor} ${isLocked ? (theme === 'retro' ? 'bg-black/5 grayscale-[0.5]' : 'bg-black/40 grayscale-[0.5]') : (theme === 'retro' ? 'bg-transparent shadow-none' : 'bg-white/5')} w-full relative transition-all duration-300 shadow-none`}
+            className={`mist-aesthetic-module flex flex-row gap-0 rounded-xl border ${borderColor} ${isLocked ? (theme === 'retro' ? 'bg-black/5 grayscale-[0.5]' : 'bg-black/40 grayscale-[0.5]') : (theme === 'retro' ? 'bg-transparent shadow-none' : 'bg-white/5')} w-full relative transition-all duration-300 shadow-none`}
         >
-            <div className={`flex flex-col items-center justify-center border-r ${theme === 'retro' ? 'border-black/10 bg-black/5' : 'border-white/5 bg-black/20'} w-7 shrink-0 py-2 gap-1 rounded-l-xl`}>
+            <div className={`mist-aesthetic-module-rail flex flex-col items-center justify-center border-r ${theme === 'retro' ? 'border-black/10 bg-black/5' : 'border-white/5 bg-black/20'} w-7 shrink-0 py-2 gap-1 rounded-l-xl`}>
                 {!isFixed && (
                     <>
                         <button onClick={() => moveModule(id, 'TOP')} className="p-0.5 text-zinc-600 hover:text-rose-400 transition-colors" title="置顶"><ChevronsUp size={12} /></button>
@@ -52,7 +52,7 @@ const ModuleContainer = ({ id, lockedModules, moveModule, children }: React.Prop
                     </>
                 )}
             </div>
-            <div className="flex-1 flex flex-col gap-1 p-2">
+            <div className="mist-aesthetic-module-body flex-1 flex flex-col gap-1 p-2">
                 {children}
             </div>
         </div>
@@ -62,7 +62,7 @@ const ModuleContainer = ({ id, lockedModules, moveModule, children }: React.Prop
 const ModuleHeader = ({ icon: Icon, label, actionButtons }: { icon: any, label: string, actionButtons: React.ReactNode }) => {
     const { theme } = useTheme();
     return (
-        <div className="flex items-center justify-between mb-0.5 pl-3">
+        <div className="mist-aesthetic-module-header flex items-center justify-between mb-0.5 pl-3">
             <div className={`flex items-center gap-1.5 text-[13px] font-bold uppercase tracking-widest ${theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-[var(--mist-active-accent)]'}`}>
                 <Icon size={14} className={theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-[var(--mist-active-accent)]'} /> {label}
             </div>
@@ -81,7 +81,7 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
     const [libraryModalOpen, setLibraryModalOpen] = useState(false);
     const [activeBlockId, setActiveBlockId] = useState<string | null>(null);
     const [compilerLang, setCompilerLang] = useState<'CN' | 'EN'>('EN');
-    const [compilerMode, setCompilerMode] = useState<'TEXT' | 'JSON' | 'PROMPT'>('TEXT');
+    const [compilerMode, setCompilerMode] = useState<'TEXT' | 'JSON' | 'PROMPT' | 'ASSET'>('TEXT');
     const [userManualPrompt, setUserManualPrompt] = useState("");
     const [copiedCategoryId, setCopiedCategoryId] = useState<string | null>(null);
     const [logicMode, setLogicMode] = useState<AestheticLogicMode>('DEFAULT');
@@ -319,6 +319,53 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
         updateNarrativeState(newState);
     };
 
+    const setBlockTags = (blockId: string, tags: string[]) => {
+        if (isBlockLockedByHierarchy(blockId)) return;
+        const tag = tags[0];
+
+        if (blockId === 'aes_palette_preset') {
+            const preset = MASTER_PRESETS.find(p => p.name === tag || p.id === tag);
+            if (preset) onApplyPreset?.(preset);
+            else onChange({ ...fieldState, [blockId]: tag ? [tag] : [] });
+            setLibraryModalOpen(false);
+            return;
+        }
+
+        if (blockId === 'aes_color_palette') {
+            const preset = AES_COLOR_PRESETS.find(p => p.name === tag || p.id === tag);
+            if (preset && onPaletteChange) {
+                const nextPalette = [...preset.colors];
+                while (nextPalette.length < 7) nextPalette.push("");
+                onPaletteChange(nextPalette.slice(0, 7));
+            }
+            onChange({ ...fieldState, [blockId]: tag ? [tag] : [] });
+            setLibraryModalOpen(false);
+            return;
+        }
+
+        const limit = BLOCK_LIMITS[blockId] || 1;
+        const seen = new Set<string>();
+        let newState = { ...fieldState };
+        if (['aes_action_static', 'aes_action_dynamic', 'aes_action_complex'].includes(blockId)) {
+            ['aes_action_static', 'aes_action_dynamic', 'aes_action_complex'].forEach(id => { if (id !== blockId) newState[id] = []; });
+        }
+        if (['aes_hair_style_f', 'aes_hair_style_m'].includes(blockId)) {
+            ['aes_hair_style_f', 'aes_hair_style_m'].forEach(id => { if (id !== blockId) newState[id] = []; });
+        }
+        if (['aes_scene_real', 'aes_scene_abstract', 'aes_scene_surreal'].includes(blockId)) {
+            ['aes_scene_real', 'aes_scene_abstract', 'aes_scene_surreal'].forEach(id => { if (id !== blockId) newState[id] = []; });
+        }
+        newState[blockId] = tags
+            .filter(Boolean)
+            .filter(tagName => {
+                if (seen.has(tagName)) return false;
+                seen.add(tagName);
+                return true;
+            })
+            .slice(0, limit);
+        updateNarrativeState(newState);
+    };
+
     const updateNarrativeState = (newState: NarrativeFieldState) => {
         onChange(newState);
     };
@@ -487,6 +534,15 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
             );
         }
 
+        if (compilerMode === 'ASSET') {
+            return generateAestheticAssetConceptPrompt(
+                fieldState,
+                subjectType,
+                compilerLang === 'CN' ? 'CN' : 'EN',
+                customLibraryDefs || {}
+            );
+        }
+
         let output = "";
 
         aestheticModuleOrder.forEach(modId => {
@@ -586,7 +642,7 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
         };
 
         return (
-            <div className="flex flex-row gap-1 items-center shrink-0" onClick={(e) => e.stopPropagation()}>
+            <div className="mist-aesthetic-action-buttons flex flex-row gap-1 items-center shrink-0" onClick={(e) => e.stopPropagation()}>
                 <button onClick={handleCopyCategory} className={`p-1.5 rounded transition-all group ${theme === 'retro' ? 'bg-black/5 border-black/10 hover:border-black/30 text-zinc-600 hover:text-black' : 'bg-zinc-900/50 border-zinc-800 hover:border-zinc-600 text-zinc-500 hover:text-white'}`}>{copiedCategoryId === categoryLabel ? <Check size={12} className="text-green-500" /> : <Copy size={12} />}</button>
                 <button onClick={handleRandomize} disabled={isLocked} className={`p-1.5 rounded border transition-all group ${isLocked ? (theme === 'retro' ? 'bg-black/5 border-black/5 text-zinc-400' : 'bg-zinc-950 border-zinc-900 text-zinc-800') + ' cursor-not-allowed opacity-40' : (theme === 'retro' ? 'bg-black/5 border-black/10 hover:border-[#8B261D]/50 text-zinc-600 hover:text-[#8B261D]' : 'bg-zinc-900/50 border-zinc-800 hover:border-[var(--mist-active-accent)]/50 text-zinc-500 hover:text-[var(--mist-active-accent)]')}`}><Dice5 size={12} className={!isLocked ? "group-hover:rotate-90 transition-transform duration-500" : ""} /></button>
                 <button onClick={handleReset} disabled={isLocked} className={`p-1.5 rounded border transition-all group ${isLocked ? (theme === 'retro' ? 'bg-black/5 border-black/5 text-zinc-400' : 'bg-zinc-950 border-zinc-900 text-zinc-800') + ' cursor-not-allowed opacity-40' : (theme === 'retro' ? 'bg-black/5 border-black/10 hover:border-red-600/50 text-zinc-600 hover:text-red-600' : 'bg-zinc-900/50 border-zinc-800 hover:border-red-500/50 text-zinc-500 hover:text-red-400')}`}><RotateCcw size={12} className={!isLocked ? "group-hover:-rotate-90 transition-transform duration-500" : ""} /></button>
@@ -729,7 +785,7 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
                             </div>
                             <div className={`flex-1 flex gap-1 border-l ${theme === 'retro' ? 'border-[var(--border-main)]' : 'border-white/10'} pl-3 items-center relative group/hex`}>
                                 {colorPalette.map((color, idx) => (
-                                    <div key={idx} className={`flex-1 aspect-square rounded border relative overflow-hidden group/color shadow-md min-w-[18px] max-w-[24px] ${isPaletteBound ? (theme === 'retro' ? 'border-[var(--border-main)] opacity-60 cursor-not-allowed' : 'border-zinc-800 opacity-60 cursor-not-allowed') : (theme === 'retro' ? 'border-black/20 cursor-pointer hover:border-black' : 'border-zinc-700 cursor-pointer hover:border-zinc-500')}`} style={{ backgroundColor: color || (theme === 'retro' ? '#fff' : '#111') }}>
+                                    <div key={idx} className={`flex-1 aspect-square rounded border relative overflow-hidden group/color shadow-md min-w-[18px] max-w-[24px] ${isPaletteBound ? (theme === 'retro' ? 'border-[var(--border-main)] opacity-60 cursor-not-allowed' : 'border-zinc-800 opacity-60 cursor-not-allowed') : (theme === 'retro' ? 'border-black/20 cursor-pointer hover:border-black' : 'border-zinc-700 cursor-pointer hover:border-zinc-500')}`} style={{ backgroundColor: color || (theme === 'retro' ? '#EFE9E0' : '#111') }}>
                                         <input
                                             type="color"
                                             value={color || "#000000"}
@@ -929,55 +985,53 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
     };
 
     return (
-        <div className={`w-full h-full flex flex-col relative overflow-hidden bg-[var(--bg-main)]`}>
+        <div className={`mist-aesthetic-engine w-full h-full flex flex-col relative overflow-hidden bg-[var(--bg-main)]`}>
             {/* Background Borromean Rings - Clear rings with subtle 'frosted' context */}
-            {showRings && (
-                <div className="absolute inset-0 z-0 pointer-events-none transition-all duration-1000" style={{ filter: 'blur(1px)' }}>
-                    <BorromeanRings 
-                        fieldState={fieldState} 
-                        lang={lang} 
-                        driverType={driverType} 
-                        opacity={0.8} 
-                        centered={true}
-                        vivid={true}
-                    />
-                </div>
-            )}
+            <div className={`mist-aesthetic-rings absolute inset-0 z-0 pointer-events-none ${showRings ? 'is-active' : 'is-exiting'}`} style={{ filter: 'none' }}>
+                <BorromeanRings
+                    fieldState={fieldState}
+                    lang={lang}
+                    driverType={driverType}
+                    opacity={0.8}
+                    centered={true}
+                    vivid={true}
+                />
+            </div>
             <div className="flex-1 flex-row overflow-hidden min-h-0 relative z-10 hidden md:flex">
-                <div className={`w-1/2 h-full flex flex-col overflow-hidden border-r backdrop-blur-md ${theme === 'retro' ? 'border-[#8B261D]/10 bg-transparent' : 'border-zinc-800 bg-[var(--bg-main)]/40'}`}>
-                    <div className="shrink-0 z-20 px-6 py-4 bg-transparent flex items-center justify-between">
+                <div className={`mist-aesthetic-left-pane w-1/2 h-full flex flex-col overflow-hidden border-r backdrop-blur-md ${theme === 'retro' ? 'border-[#8B261D]/10 bg-transparent' : 'border-zinc-800 bg-[var(--bg-main)]/40'}`}>
+                    <div className="mist-aesthetic-page-header shrink-0 z-20 px-6 py-4 bg-transparent flex items-center justify-between">
                         <div className="pl-6">
                             <h2 className={`text-2xl font-serif font-black tracking-[0.05em] ${theme === 'retro' ? 'text-[#8B261D]' : 'text-[var(--mist-active-accent)]'}`}>
                                 {lang === 'EN' ? "AESTHETIC ENGINE" : "情绪美学"}
                             </h2>
                         </div>
                         <div className="flex items-center gap-4">
-                            <div className={`flex border rounded-lg p-1 shadow-inner ${theme === 'retro' ? 'bg-black/5 border-black/10' : 'bg-zinc-900 border-zinc-700'}`}>
-                                <button onClick={() => onAestheticModeChange('REALISM')} className={`px-3 py-1 rounded text-[9px] font-bold uppercase tracking-wider flex items-center gap-2 transition-all ${isRealism ? (theme === 'retro' ? 'bg-[#8B261D] text-white' : 'bg-[var(--mist-active-accent)] text-black') : (theme === 'retro' ? 'text-zinc-500 hover:text-black hover:bg-black/5' : 'text-zinc-500 hover:text-white hover:bg-zinc-800')}`} >
+                            <div className={`mist-aesthetic-mode-toggle flex border rounded-lg p-1 shadow-inner ${theme === 'retro' ? 'bg-black/5 border-black/10' : 'bg-zinc-900 border-zinc-700'}`}>
+                                <button onClick={() => onAestheticModeChange('REALISM')} className={`px-3 py-1 rounded text-[9px] font-bold uppercase tracking-wider flex items-center gap-2 transition-all ${isRealism ? 'is-active ' : ''}${isRealism ? (theme === 'retro' ? 'bg-[#8B261D] text-white' : 'bg-[var(--mist-active-accent)] text-black') : (theme === 'retro' ? 'text-zinc-500 hover:text-black hover:bg-black/5' : 'text-zinc-500 hover:text-white hover:bg-zinc-800')}`} >
                                     <Camera size={12} /> <span>{lang === 'EN' ? "Real" : "写实"}</span>
                                 </button>
-                                <button onClick={() => onAestheticModeChange('STYLIZED')} className={`px-3 py-1 rounded text-[9px] font-bold uppercase tracking-wider flex items-center gap-2 transition-all ${isStylized ? (theme === 'retro' ? 'bg-[#8B261D] text-white' : 'bg-[var(--mist-active-accent)] text-black') : (theme === 'retro' ? 'text-zinc-500 hover:text-black hover:bg-black/5' : 'text-zinc-500 hover:text-white hover:bg-zinc-800')}`} >
+                                <button onClick={() => onAestheticModeChange('STYLIZED')} className={`px-3 py-1 rounded text-[9px] font-bold uppercase tracking-wider flex items-center gap-2 transition-all ${isStylized ? 'is-active ' : ''}${isStylized ? (theme === 'retro' ? 'bg-[#8B261D] text-white' : 'bg-[var(--mist-active-accent)] text-black') : (theme === 'retro' ? 'text-zinc-500 hover:text-black hover:bg-black/5' : 'text-zinc-500 hover:text-white hover:bg-zinc-800')}`} >
                                     <Paintbrush size={12} /> <span>{lang === 'EN' ? "Art" : "美术"}</span>
                                 </button>
                             </div>
                             <button
                                 onClick={() => setAestheticModuleOrder(DEFAULT_AESTHETIC_ORDER)}
-                                className={`p-1.5 border rounded transition-all group ${theme === 'retro' ? 'bg-black/5 border-black/10 hover:border-[#8B261D]/50 text-zinc-500 hover:text-[#8B261D]' : 'bg-zinc-900 border-zinc-700 hover:border-[var(--mist-active-accent)]/50 text-zinc-500 hover:text-[var(--mist-active-accent)]'}`}
+                                className={`mist-aesthetic-reset-button p-1.5 border rounded transition-all group ${theme === 'retro' ? 'bg-black/5 border-black/10 hover:border-[#8B261D]/50 text-zinc-500 hover:text-[#8B261D]' : 'bg-zinc-900 border-zinc-700 hover:border-[var(--mist-active-accent)]/50 text-zinc-500 hover:text-[var(--mist-active-accent)]'}`}
                             >
                                 <RotateCcw size={14} className="group-hover:-rotate-90 transition-transform duration-500" />
                             </button>
                         </div>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-4">
+                    <div className="mist-aesthetic-module-list flex-1 overflow-y-auto custom-scrollbar p-6 space-y-4">
                         {aestheticModuleOrder.map(moduleId => renderModuleById(moduleId))}
                         <div className="h-10 w-full shrink-0"></div>
                     </div>
                 </div>
 
-                <div className={`w-1/2 h-full flex flex-col overflow-hidden backdrop-blur-md border-l relative min-h-0 ${theme === 'retro' ? 'border-[#8B261D]/10 bg-transparent' : 'border-zinc-800 bg-[var(--bg-main)]/40'}`}>
+                <div className={`mist-aesthetic-right-pane w-1/2 h-full flex flex-col overflow-hidden backdrop-blur-md border-l relative min-h-0 ${theme === 'retro' ? 'border-[#8B261D]/10 bg-transparent' : 'border-zinc-800 bg-[var(--bg-main)]/40'}`}>
                     <div className="p-6 pb-2 shrink-0">
-                        <div className={`border p-3 rounded-xl shadow-none ${theme === 'retro' ? 'bg-transparent border-black/10' : 'bg-zinc-900/40 border-zinc-800'}`}>
+                        <div className={`mist-aesthetic-logic-panel border p-3 rounded-xl shadow-none ${theme === 'retro' ? 'bg-transparent border-black/10' : 'bg-zinc-900/40 border-zinc-800'}`}>
                             <div className="flex items-center justify-between mb-3">
                                 <div className="flex items-center gap-2">
                                     <Layout size={12} className={theme === 'retro' ? "text-[#8B261D]" : "text-[var(--mist-active-accent)]"} />
@@ -993,7 +1047,7 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
                                         <button
                                             key={template.id}
                                             onClick={() => handleLogicModeChange(template.id)}
-                                            className={`flex flex-col items-center text-center p-1.5 rounded border transition-all duration-300 group ${isActive ? (theme === 'retro' ? 'bg-[#8B261D]/10 border-[#8B261D] shadow-sm' : 'bg-[var(--mist-active-accent)]/10 border-[var(--mist-active-accent)] shadow-none') : (theme === 'retro' ? 'bg-transparent border-black/5 hover:border-black/20' : 'bg-zinc-950 border-zinc-800 hover:border-zinc-700')}`}
+                                            className={`mist-aesthetic-logic-option flex flex-col items-center text-center p-1.5 rounded border transition-all duration-300 group ${isActive ? 'is-active ' : ''}${isActive ? (theme === 'retro' ? 'bg-[#8B261D]/10 border-[#8B261D] shadow-sm' : 'bg-[var(--mist-active-accent)]/10 border-[var(--mist-active-accent)] shadow-none') : (theme === 'retro' ? 'bg-transparent border-black/5 hover:border-black/20' : 'bg-zinc-950 border-zinc-800 hover:border-zinc-700')}`}
                                             title={lang === 'EN' ? template.descEn : template.desc}
                                         >
                                             <div className={`p-1.5 rounded-full mb-1 transition-colors ${isActive ? (theme === 'retro' ? 'bg-[#8B261D] text-white' : 'bg-rose-500 text-black') : (theme === 'retro' ? 'bg-black/5 text-zinc-400 group-hover:text-black' : 'bg-zinc-900 text-zinc-600 group-hover:text-zinc-400')}`}>
@@ -1007,43 +1061,44 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
                         </div>
                     </div>
 
-                    <div className={`flex-[0.6] min-h-0 flex flex-col mx-6 rounded-xl border backdrop-blur-md overflow-hidden shadow-none ${theme === 'retro' ? 'border-black/10 bg-transparent' : 'bg-white/5 border-zinc-800'}`}>
-                        <div className={`flex items-center justify-between px-4 py-2.5 border-b shrink-0 ${theme === 'retro' ? 'bg-black/5 border-black/10' : 'bg-zinc-900 border-zinc-800'}`}>
+                    <div className={`mist-aesthetic-compiler-panel flex-[0.6] min-h-0 flex flex-col mx-6 rounded-xl border backdrop-blur-md overflow-hidden shadow-none ${theme === 'retro' ? 'border-black/10 bg-transparent' : 'bg-white/5 border-zinc-800'}`}>
+                        <div className={`mist-aesthetic-compiler-header flex items-center justify-between px-4 py-2.5 border-b shrink-0 ${theme === 'retro' ? 'bg-black/5 border-black/10' : 'bg-zinc-900 border-zinc-800'}`}>
                             <div className="flex items-center gap-3">
                                 <span className={`text-[13px] font-mono font-bold uppercase tracking-widest flex items-center gap-2 ${theme === 'retro' ? 'text-[#8B261D]' : 'text-emerald-500'}`}>
                                     <Terminal size={14} />
                                     <span>{lang === 'EN' ? "PROMPT_COMPILER.EXE" : "提示词编译器 (COMPILER)"}</span>
                                 </span>
-                                <div className={`flex rounded p-0.5 border scale-75 origin-left ${theme === 'retro' ? 'bg-transparent border-black/10' : 'bg-black border-zinc-800'}`}>
-                                    <button onClick={() => setCompilerMode('TEXT')} className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase transition-all ${compilerMode === 'TEXT' ? (theme === 'retro' ? 'bg-[#2D2D2D] text-[#EFE9E0]' : 'bg-zinc-700 text-white') : 'text-zinc-500 hover:text-black'}`}>TEXT</button>
-                                    <button onClick={() => setCompilerMode('JSON')} className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase transition-all ${compilerMode === 'JSON' ? (theme === 'retro' ? 'bg-[#2D2D2D] text-[#EFE9E0]' : 'bg-zinc-700 text-white') : 'text-zinc-500 hover:text-black'}`}>JSON</button>
-                                    <button onClick={() => setCompilerMode('PROMPT')} className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase transition-all ${compilerMode === 'PROMPT' ? (theme === 'retro' ? 'bg-[#2D2D2D] text-[#EFE9E0]' : 'bg-zinc-700 text-white') : 'text-zinc-500 hover:text-black'}`}>PROMPT</button>
+                                <div className={`mist-aesthetic-compiler-mode-toggle flex rounded p-0.5 border scale-75 origin-left ${theme === 'retro' ? 'bg-transparent border-black/10' : 'bg-black border-zinc-800'}`}>
+                                    <button onClick={() => setCompilerMode('TEXT')} className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase transition-all ${compilerMode === 'TEXT' ? 'is-active ' : ''}${compilerMode === 'TEXT' ? (theme === 'retro' ? 'bg-[#2D2D2D] text-[#EFE9E0]' : 'bg-zinc-700 text-white') : 'text-zinc-500 hover:text-black'}`}>TEXT</button>
+                                    <button onClick={() => setCompilerMode('JSON')} className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase transition-all ${compilerMode === 'JSON' ? 'is-active ' : ''}${compilerMode === 'JSON' ? (theme === 'retro' ? 'bg-[#2D2D2D] text-[#EFE9E0]' : 'bg-zinc-700 text-white') : 'text-zinc-500 hover:text-black'}`}>JSON</button>
+                                    <button onClick={() => setCompilerMode('PROMPT')} className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase transition-all ${compilerMode === 'PROMPT' ? 'is-active ' : ''}${compilerMode === 'PROMPT' ? (theme === 'retro' ? 'bg-[#2D2D2D] text-[#EFE9E0]' : 'bg-zinc-700 text-white') : 'text-zinc-500 hover:text-black'}`}>PROMPT</button>
+                                    <button onClick={() => setCompilerMode('ASSET')} className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase transition-all ${compilerMode === 'ASSET' ? 'is-active ' : ''}${compilerMode === 'ASSET' ? (theme === 'retro' ? 'bg-[#8B261D] text-white' : 'bg-[var(--mist-active-accent)] text-black') : 'text-zinc-500 hover:text-black'}`}>ASSET</button>
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
-                                <div className={`flex border rounded overflow-hidden scale-90 ${theme === 'retro' ? 'border-black/10' : 'border-zinc-700'}`}>
-                                    <button onClick={() => setCompilerLang('CN')} className={`px-1.5 py-0.5 text-[8px] font-bold uppercase ${compilerLang === 'CN' ? (theme === 'retro' ? 'bg-[#2D2D2D] text-[#EFE9E0]' : 'bg-zinc-700 text-white') : (theme === 'retro' ? 'bg-transparent text-black hover:bg-black/5' : 'bg-zinc-900 text-zinc-500 hover:text-zinc-300')}`}>CN</button>
-                                    <button onClick={() => setCompilerLang('EN')} className={`px-1.5 py-0.5 text-[8px] font-bold uppercase ${compilerLang === 'EN' ? (theme === 'retro' ? 'bg-[#2D2D2D] text-[#EFE9E0]' : 'bg-zinc-700 text-white') : (theme === 'retro' ? 'bg-white text-black hover:bg-black/5' : 'bg-zinc-900 text-zinc-500 hover:text-zinc-300')}`}>EN</button>
+                                <div className={`mist-aesthetic-compiler-lang-toggle flex border rounded overflow-hidden scale-90 ${theme === 'retro' ? 'border-black/10' : 'border-zinc-700'}`}>
+                                    <button onClick={() => setCompilerLang('CN')} className={`px-1.5 py-0.5 text-[8px] font-bold uppercase ${compilerLang === 'CN' ? 'is-active ' : ''}${compilerLang === 'CN' ? (theme === 'retro' ? 'bg-[#2D2D2D] text-[#EFE9E0]' : 'bg-zinc-700 text-white') : (theme === 'retro' ? 'bg-transparent text-black hover:bg-black/5' : 'bg-zinc-900 text-zinc-500 hover:text-zinc-300')}`}>CN</button>
+                                    <button onClick={() => setCompilerLang('EN')} className={`px-1.5 py-0.5 text-[8px] font-bold uppercase ${compilerLang === 'EN' ? 'is-active ' : ''}${compilerLang === 'EN' ? (theme === 'retro' ? 'bg-[#2D2D2D] text-[#EFE9E0]' : 'bg-zinc-700 text-white') : (theme === 'retro' ? 'bg-white text-black hover:bg-black/5' : 'bg-zinc-900 text-zinc-500 hover:text-zinc-300')}`}>EN</button>
                                 </div>
-                                <button onClick={() => { navigator.clipboard.writeText(getCompilerOutput()); setCopiedCategoryId('SUMMARY'); setTimeout(() => setCopiedCategoryId(null), 2000); }} className={`transition-colors ml-1 ${theme === 'retro' ? 'text-zinc-400 hover:text-black' : 'text-zinc-500 hover:text-white'}`} title="Copy">{copiedCategoryId === 'SUMMARY' ? <Check size={12} className="text-green-500" /> : <Copy size={12} />}</button>
+                                <button onClick={() => { navigator.clipboard.writeText(getCompilerOutput()); setCopiedCategoryId('SUMMARY'); setTimeout(() => setCopiedCategoryId(null), 2000); }} className={`mist-aesthetic-copy-button transition-colors ml-1 ${theme === 'retro' ? 'text-zinc-400 hover:text-black' : 'text-zinc-500 hover:text-white'}`} title="Copy">{copiedCategoryId === 'SUMMARY' ? <Check size={12} className="text-green-500" /> : <Copy size={12} />}</button>
                             </div>
                         </div>
-                        <div className={`flex-1 min-h-0 p-4 font-mono text-[10px] leading-relaxed whitespace-pre-line break-words select-text overflow-y-auto custom-scrollbar ${theme === 'retro' ? 'text-black' : 'text-green-500/90'}`}>
+                        <div className={`mist-aesthetic-compiler-output flex-1 min-h-0 p-4 font-mono text-[10px] leading-relaxed whitespace-pre-line break-words select-text overflow-y-auto custom-scrollbar ${theme === 'retro' ? 'text-black' : 'text-green-500/90'}`}>
                             <span className={`${theme === 'retro' ? 'text-zinc-400' : 'text-zinc-600'} mr-2 select-none`}>$</span>
                             {getCompilerOutput()}
                         </div>
                     </div>
 
                     <div className="flex-[1.4] min-h-0 flex flex-col p-6 pt-2 pb-16 overflow-hidden">
-                        <div className={`flex flex-col h-full rounded-xl border backdrop-blur-md overflow-hidden shadow-none relative min-h-0 ${theme === 'retro' ? 'bg-transparent border-black/10' : 'bg-white/5 border-[var(--mist-active-accent)]/30'}`}>
-                            <div className={`flex items-center justify-between px-4 py-2.5 border-b shrink-0 ${theme === 'retro' ? 'bg-black/5 border-black/10' : 'bg-zinc-900 border-zinc-800'}`}>
+                        <div className={`mist-aesthetic-polish-panel flex flex-col h-full rounded-xl border backdrop-blur-md overflow-hidden shadow-none relative min-h-0 ${theme === 'retro' ? 'bg-transparent border-black/10' : 'bg-white/5 border-[var(--mist-active-accent)]/30'}`}>
+                            <div className={`mist-aesthetic-polish-header flex items-center justify-between px-4 py-2.5 border-b shrink-0 ${theme === 'retro' ? 'bg-black/5 border-black/10' : 'bg-zinc-900 border-zinc-800'}`}>
                                 <div className={`flex items-center gap-2 ${theme === 'retro' ? 'text-[#8B261D]' : 'text-[var(--mist-active-accent)]'}`}>
                                     <Edit3 size={12} />
                                     <span className="text-[13px] font-bold uppercase tracking-widest">
                                         {lang === 'EN' ? "Polishing" : "润色"}
                                     </span>
                                 </div>
-                                <div className="flex items-center gap-2 scale-90 origin-right">
+                                <div className="mist-aesthetic-polish-actions flex items-center gap-2 scale-90 origin-right">
                                     <button onClick={() => setUserManualPrompt(getCompilerOutput())} className={`flex items-center gap-2 px-3 py-1 rounded text-[9px] font-bold uppercase tracking-widest transition-all ${theme === 'retro' ? 'bg-[#8B261D] text-white hover:bg-[#631B15]' : 'bg-[var(--mist-active-accent)] hover:bg-[var(--mist-active-accent)]/90 text-black'}`}>
                                         <ArrowDownToLine size={12} /> {lang === 'EN' ? "INJECT" : "注入"}
                                     </button>
@@ -1071,6 +1126,7 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
                     blockName={ENGINE_BLOCKS.find(b => b.id === activeBlockId)?.name || activeBlockId}
                     selectedTags={fieldState[activeBlockId] || []}
                     onToggleTag={(tag) => toggleTag(activeBlockId, tag)}
+                    onSetTags={(tags) => setBlockTags(activeBlockId, tags)}
                     onClear={() => clearBlock(activeBlockId)}
                     lang={lang}
                     driverType={driverType}

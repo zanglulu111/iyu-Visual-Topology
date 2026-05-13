@@ -107,6 +107,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
         onVisionAutoFill, isVisionAutoFilling = false,
         visionCandidateState = {}, onApplyVisionCandidateState, onClearVisionCandidateState,
         worldLawConfig = { gravity: 1 }, setWorldLawConfig,
+        onApplyPreset, onPaletteChange,
         isAdmin = false
     } = props;
 
@@ -327,6 +328,47 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
         onChange(newState);
     };
 
+    const setBlockTags = (blockId: string, tags: string[]) => {
+        if (lockedModules[blockId]) return;
+
+        if (blockId === 'aes_palette_preset') {
+            const tag = tags[0];
+            const preset = MASTER_PRESETS.find(p => p.name === tag || p.id === tag);
+            if (preset) onApplyPreset?.(preset);
+            else onChange({ ...fieldState, [blockId]: tag ? [tag] : [] });
+            setLibraryModalOpen(false);
+            return;
+        }
+
+        if (blockId === 'aes_color_palette') {
+            const tag = tags[0];
+            const preset = AES_COLOR_PRESETS.find(p => p.name === tag || p.id === tag);
+            if (preset && onPaletteChange) {
+                const nextPalette = [...preset.colors];
+                while (nextPalette.length < 7) nextPalette.push("");
+                onPaletteChange(nextPalette.slice(0, 7));
+            }
+            onChange({ ...fieldState, [blockId]: tag ? [tag] : [] });
+            setLibraryModalOpen(false);
+            return;
+        }
+
+        const rawCurrent = fieldState[blockId];
+        const current = Array.isArray(rawCurrent) ? rawCurrent : (rawCurrent ? [String(rawCurrent)] : []);
+        const visibleLocks = (lockedTags[blockId] || []).filter(tag => current.includes(tag));
+        const limit = BLOCK_LIMITS[blockId] || 1;
+        const seen = new Set<string>();
+        const nextTags = [...visibleLocks, ...tags]
+            .filter(Boolean)
+            .filter(tag => {
+                if (seen.has(tag)) return false;
+                seen.add(tag);
+                return true;
+            })
+            .slice(0, limit);
+        onChange({ ...fieldState, [blockId]: nextTags });
+    };
+
     const handleManualUpdate = (blockId: string, tags: string[]) => {
         onChange({ ...fieldState, [blockId]: tags });
     };
@@ -402,7 +444,9 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
 
     const handleLabyrinthRandomGender = () => {
         if (isGenderValueLocked) return;
-        const preset = GENDER_PRESETS[Math.floor(Math.random() * GENDER_PRESETS.length)];
+        const availablePresets = GENDER_PRESETS.filter(item => item.cn !== selectedGender && item.en !== selectedGender);
+        const pool = availablePresets.length > 0 ? availablePresets : GENDER_PRESETS;
+        const preset = pool[Math.floor(Math.random() * pool.length)];
         updateLabyrinthIdentity(lang === 'EN' ? preset.en : preset.cn, undefined);
     };
 
@@ -709,10 +753,10 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
             index: "01",
             titleCN: "故事摘要",
             titleEN: "STORY SUMMARY",
-            noteCN: "叙事动力、结构、体量与表层世界",
-            noteEN: "Drive, structure, volume and surface world",
+            noteCN: "故事类型、结构、体量与表层世界",
+            noteEN: "Genre, structure, volume and surface world",
             blocks: [
-                { id: "skin_genre", placeholderCN: "SUR1. 叙事动力", placeholderEN: "SUR1. Drive" },
+                { id: "skin_genre", placeholderCN: "SUR1. 故事类型", placeholderEN: "SUR1. Genre" },
                 { id: "skin_structure", placeholderCN: "SV1. 叙事结构", placeholderEN: "SV1. Structure" },
                 { id: "skin_volume", placeholderCN: "SV2. 故事体量", placeholderEN: "SV2. Volume" },
                 { id: "skin_era", placeholderCN: "SUR2. 背景场域", placeholderEN: "SUR2. Field" },
@@ -1257,7 +1301,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                     onClick={onOpen}
                     onMouseEnter={(e) => handleMouseEnter(e, details, header, count)}
                     onMouseLeave={handleMouseLeave}
-                    className={`mist-labyrinth-hover-token cursor-pointer font-serif font-bold transition-all duration-300 hover:z-50 inline-block ${isLocked
+                    className={`mist-labyrinth-hover-token ${isFilled ? 'is-filled' : 'is-empty'} ${isLocked ? 'is-locked' : ''} cursor-pointer font-serif font-bold transition-all duration-300 hover:z-50 inline-block ${isLocked
                         ? 'mist-token-locked border border-[var(--mist-active-accent)] text-white bg-[var(--mist-active-accent)]/20 px-2 rounded text-lg md:text-xl tracking-tight'
                         : (isFilled
                             ? 'text-white border-b-2 border-[var(--mist-active-accent)] hover:bg-white/10 px-0.5 rounded-sm text-lg md:text-xl tracking-tight'
@@ -1366,7 +1410,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
         <div className="mist-labyrinth-surface-sentence mist-labyrinth-structure-sentence">
             <div className="mist-labyrinth-structure-sentence-row">
                 <span>{lang === 'EN' ? "Genre: " : "类型："}</span>
-                {renderLabyrinthSentenceSlot("skin_genre", "叙事动力", "Genre Drive")}
+                {renderLabyrinthSentenceSlot("skin_genre", "故事类型", "Genre")}
             </div>
             <div className="mist-labyrinth-structure-sentence-row">
                 <span>{lang === 'EN' ? "Structure: " : "结构："}</span>
@@ -1414,7 +1458,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                 {(showExpanded || hasFrame) && (
                     <div className="mist-labyrinth-summary-line">
                         <span>{lang === 'EN' ? "A story framed by " : "一个以"}</span>
-                        {(showExpanded || hasGenre) && renderLabyrinthSkinSlot("skin_genre", "叙事动力", "Genre Drive")}
+                        {(showExpanded || hasGenre) && renderLabyrinthSkinSlot("skin_genre", "故事类型", "Genre")}
                         {(showExpanded || hasGenre) && (showExpanded || hasStructure || hasVolume) && <span>{lang === 'EN' ? ", " : "、"}</span>}
                         {(showExpanded || hasStructure) && renderLabyrinthSkinSlot("skin_structure", "叙事结构", "Structure")}
                         {(showExpanded || hasStructure) && (showExpanded || hasVolume) && <span>{lang === 'EN' ? " and " : "与"}</span>}
@@ -1998,8 +2042,8 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                         ) : (
                             <div className="mist-labyrinth-surface-blocks mist-labyrinth-surface-summary-slots">
                             {(labyrinthSummaryExpanded || hasBlockValue(['skin_genre'])) && <div className="mist-labyrinth-surface-block">
-                                <span className="mist-labyrinth-surface-label">{lang === 'EN' ? "Drive" : "叙事动力"}</span>
-                                {renderLabyrinthSkinSlot("skin_genre", "SUR1. 叙事动力", "SUR1. Drive")}
+                                <span className="mist-labyrinth-surface-label">{lang === 'EN' ? "Genre" : "故事类型"}</span>
+                                {renderLabyrinthSkinSlot("skin_genre", "SUR1. 故事类型", "SUR1. Genre")}
                             </div>}
                             {(labyrinthSummaryExpanded || hasBlockValue(['skin_structure'])) && <div className="mist-labyrinth-surface-block">
                                 <span className="mist-labyrinth-surface-label">{lang === 'EN' ? "Structure" : "叙事结构"}</span>
@@ -2071,18 +2115,16 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
             <section className="mist-labyrinth-hero" aria-label={lang === 'EN' ? "Labyrinth formula console" : "爱欲迷宫公式控制台"}>
                 <div className="mist-labyrinth-film-window">
                     <div className="mist-labyrinth-screen">
-                        {showRings && (
-                            <div className="mist-labyrinth-rings" aria-hidden="true">
-                                <BorromeanRings
-                                    fieldState={fieldState}
-                                    lang={lang}
-                                    driverType={driverType}
-                                    opacity={0.34}
-                                    centered={true}
-                                    vivid={false}
-                                />
-                            </div>
-                        )}
+                        <div className={`mist-labyrinth-rings ${showRings ? 'is-active' : 'is-exiting'}`} aria-hidden="true">
+                            <BorromeanRings
+                                fieldState={fieldState}
+                                lang={lang}
+                                driverType={driverType}
+                                opacity={0.65}
+                                centered={true}
+                                vivid={true}
+                            />
+                        </div>
                         <div className="mist-labyrinth-screen-grid" aria-hidden="true" />
                         <div className="mist-labyrinth-title-block">
                             <h2 className="mist-labyrinth-title mist-engine-title mist-title-shadow" data-title={getEngineTitle()}>
@@ -2130,37 +2172,70 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
             )}
 
             {showRings && !isLabyrinth && (
-                <div className="absolute inset-0 z-0 pointer-events-none transition-all duration-1000" style={{ filter: 'blur(0.45px)', transform: 'translateY(18px)' }}>
+                <div className="absolute inset-0 z-0 pointer-events-none transition-all duration-1000" style={{ filter: 'none' }}>
                     <BorromeanRings
                         fieldState={fieldState}
                         lang={lang}
                         driverType={driverType}
-                        opacity={theme === 'retro' ? 0.42 : 0.5}
+                        opacity={0.85}
                         centered={true}
-                        vivid={false}
+                        vivid={true}
                     />
                 </div>
             )}
 
-            {!isLabyrinth && <div className={`flex-shrink-0 px-6 pt-20 pb-6 flex items-center justify-center z-20 bg-transparent relative`}>
+            {!isLabyrinth && <div className="flex-shrink-0 px-6 pt-6 pb-2 flex items-center justify-center z-20 bg-transparent relative">
                 <div className="max-w-5xl mx-auto w-full flex flex-col items-center justify-center relative">
                     <div className="flex-1 flex flex-col items-center justify-center pointer-events-none">
-                        <h2 className={`mist-engine-title text-5xl md:text-7xl font-serif font-bold tracking-[0.1em] mb-6 text-center mist-title-shadow ${isCommercial && theme !== 'retro' ? 'mist-commercial-title-pill text-white' : (theme === 'retro' ? 'text-[var(--text-accent)]' : osTheme.accent)}`}>
-                            {getEngineTitle()}
+                        <h2 className="mist-engine-title text-4xl md:text-5xl font-serif font-bold tracking-[0.05em] -mr-[0.05em] text-center mb-4 transition-all duration-300">
+                            <span className={theme === 'retro' ? 'text-[#8B261D]' : osTheme.accent}>
+                                {getEngineTitle()}
+                            </span>
                         </h2>
-                        <div className={`mist-engine-subtitle text-sm md:text-lg font-normal w-full max-w-xl mx-auto px-4 text-center leading-relaxed whitespace-pre-line ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-[var(--text-muted)]'}`}>
+                        <p className={`mist-engine-subtitle text-[10px] md:text-base font-medium md:font-light uppercase tracking-[0.2em] -mr-[0.2em] text-center w-full whitespace-nowrap overflow-hidden text-ellipsis ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}`}>
                             {getEngineSubtitle()}
-                        </div>
+                        </p>
                     </div>
                 </div>
             </div>}
 
             <div className="mist-engine-canvas flex-1 flex flex-col overflow-y-auto custom-scrollbar relative z-10 transition-all duration-300">
+                {!isLabyrinth && (
+                    <div className="flex-shrink-0 py-0 px-4 flex justify-center z-10">
+                        <div className="relative w-full max-w-5xl">
+                            <div className={`relative flex flex-col items-center justify-center w-full p-6 transition-colors duration-300 rounded-xl ${osTheme.hover}`}>
+                                <div className="flex items-center gap-3 mb-4">
+                                    {osTheme.icon}
+                                    <span className={`text-base uppercase tracking-[0.3em] font-black text-zinc-400 transition-colors ${osTheme.label}`}>
+                                        {lang === 'EN' ? osLabel.split('/')[1] : osLabel.split('/')[0]}
+                                    </span>
+                                </div>
+                                <div
+                                    onClick={() => openLibrary(currentOSKey)}
+                                    className={`text-3xl md:text-6xl font-serif font-bold tracking-[0.1em] mb-3 transition duration-300 cursor-pointer hover:scale-110 hover:z-50 inline-block ${currentPsychicOS ? (theme === 'retro' ? 'text-black' : 'text-white') : (theme === 'retro' ? 'text-zinc-500 hover:text-black' : 'text-zinc-500 hover:text-white')}`}
+                                >
+                                    {osDisplay}
+                                </div>
+                                {osDetails && (
+                                    <div className={`text-sm md:text-lg font-normal w-full px-4 text-center leading-relaxed whitespace-pre-line ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}`}>
+                                        {lang === 'EN' && osDetails.defEn ? osDetails.defEn : osDetails.def}
+                                        <span className={`block text-xs md:text-sm italic mt-1 ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}`}>
+                                            {lang === 'EN' && osDetails.coreEn ? osDetails.coreEn : osDetails.core}
+                                        </span>
+                                    </div>
+                                )}
+                                <div className={`absolute right-4 top-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity ${osTheme.accent}`}>
+                                    <ChevronRight size={24} />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
                 <div className="flex-1 overflow-y-auto custom-scrollbar">
                     {isLabyrinth ? (
                         renderLabyrinthConsole()
                     ) : (
-                    <div className="min-h-full flex flex-col items-center justify-start p-4 md:px-8 pt-8 md:pb-60 space-y-2 md:space-y-2">
+                    <div className="min-h-full flex flex-col items-center justify-start p-4 md:px-8 pt-0 md:pt-2 md:pb-60 space-y-24 md:space-y-36">
                     {isCommercial ? (
                         <div className="flex flex-col gap-8 md:gap-12 min-w-0">
                             <div className="flex flex-wrap justify-center items-center gap-x-2 gap-y-4 w-full">
@@ -2315,6 +2390,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                     blockName={getBlockName(activeBlockId, lang)}
                     selectedTags={fieldState[activeBlockId] || []}
                     onToggleTag={(tag) => toggleTag(activeBlockId, tag)}
+                    onSetTags={(tags) => setBlockTags(activeBlockId, tags)}
                     onClear={() => clearBlock(activeBlockId)}
                     lang={lang}
                     driverType={driverType}

@@ -720,18 +720,6 @@ export const MetonymySceneCard: React.FC<MetonymySceneCardProps> = (props) => {
                                     <Video size={14} /> {language === 'EN' ? "Dynamic Storyboard" : "动态分镜表"}
                                 </div>
                                 <div className="flex items-center gap-3">
-                                    <button onClick={onGenerateDynamic} disabled={isGenerating || isBibleMissing} className={`${btnTheme} ${isBibleMissing ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                                        {isGenerating ? (
-                                            <RotateCw size={14} className="animate-spin" />
-                                        ) : (
-                                            <Zap size={14} className="group-hover:scale-110 transition-transform" />
-                                        )}
-                                        <span className="tabular-nums">
-                                            {isBibleMissing ? (language === 'EN' ? "Select Bible First" : "请先挂载圣经") : (language === 'EN' ? "Generate Dynamic" : "生成动态分镜")}
-                                            {isGenerating && <ProcessingTimer startTime={generationStartTime || Date.now()} />}
-                                        </span>
-                                        {!isGenerating && !isBibleMissing && <ChevronRight size={12} className="group-hover:translate-x-1 transition-transform opacity-70" />}
-                                    </button>
                                     <AdminXRayButton
                                         isAdmin={isAdmin}
                                         lang={language === 'EN' ? 'EN' : 'CN'}
@@ -749,6 +737,18 @@ export const MetonymySceneCard: React.FC<MetonymySceneCardProps> = (props) => {
                                         className={theme === 'retro' ? 'h-8 w-8 bg-white border-[#8B261D]/20 text-[#8B261D] hover:bg-[#8B261D]/10' : 'h-8 w-8 bg-zinc-900/50 border-zinc-700/50 text-zinc-400 hover:text-white hover:bg-zinc-800'}
                                         iconSize={12}
                                     />
+                                    <button onClick={onGenerateDynamic} disabled={isGenerating || isBibleMissing} className={`${btnTheme} ${isBibleMissing ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                        {isGenerating ? (
+                                            <RotateCw size={14} className="animate-spin" />
+                                        ) : (
+                                            <Zap size={14} className="group-hover:scale-110 transition-transform" />
+                                        )}
+                                        <span className="tabular-nums">
+                                            {isBibleMissing ? (language === 'EN' ? "Select Bible First" : "请先挂载圣经") : (language === 'EN' ? "Generate Dynamic" : "生成动态分镜")}
+                                            {isGenerating && <ProcessingTimer startTime={generationStartTime || Date.now()} />}
+                                        </span>
+                                        {!isGenerating && !isBibleMissing && <ChevronRight size={12} className="group-hover:translate-x-1 transition-transform opacity-70" />}
+                                    </button>
                                     <button onClick={onToggleDynamicLang} className={btnGrey}>
                                         <Globe size={12} /> {dynamicDisplayLang === 'CN' ? '中' : 'EN'}
                                     </button>

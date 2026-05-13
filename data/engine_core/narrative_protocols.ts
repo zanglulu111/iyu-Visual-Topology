@@ -89,7 +89,7 @@ export const NARRATIVE_ENGINE_FORMULA = `
 ### **II. 表层设定 (THE SKIN: SUR1-SUR10 + SUR-END) - 现象层容器**
 *这些参数负责为底层 M 公式提供具体的类型节奏、世界材质、社会外壳、对象、空间、人物外观、身份接口、开场信念语言与可见收场。严禁表层设定改变底层 M 的结构原因。*
 
-**SUR1. 叙事动力 (Genre/Mode)**
+**SUR1. 故事类型 (Genre/Mode)**
 *   **Logic:** 定义故事的类型节奏与行动呈现方式（如爱情、复仇、寻宝、逃杀）。它只染色行动形态，不解释 M5 的驱力来源。
 
 **SUR2. 背景场域 (Background Field)**
@@ -343,7 +343,7 @@ export const STYLE_LOGIC_PROTOCOL = `
 
 export const THE_MASK_PROTOCOL = `
 ## 🎭 面具协议 (THE MASK PROTOCOL - SUBTEXTUAL REALITY)
-**关键指令：** 用户选择了特定的叙事动力或类型 [SUR1]。你必须**尊重**该类型的表象，同时将拉康式结构隐藏在底层。
+**关键指令：** 用户选择了特定的故事类型 [SUR1]。你必须**尊重**该类型的表象，同时将拉康式结构隐藏在底层。
 
 **1. 拒绝露阴癖 (No Exhibitionism of the Real):**
 *   **规则:** **不要**直接向观众展示“悲凉的结构性虚无”（实在界/荒漠）。那是疯子的行为。

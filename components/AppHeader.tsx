@@ -1,5 +1,5 @@
-import React from 'react';
-import { Globe, Wand2, HelpCircle, History as HistoryIcon, Cpu, GitFork, BookOpen, Settings, User as UserIcon, LogOut, Aperture, Sun, Moon } from 'lucide-react';
+import React, { useState } from 'react';
+import { Globe, Wand2, History as HistoryIcon, Cpu, GitFork, BookOpen, Settings, User as UserIcon, Aperture, Sun, Moon, FolderOpen } from 'lucide-react';
 import { DriverType, User, ViewMode } from '../types';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -31,6 +31,9 @@ interface AppHeaderProps {
   isManualOpen: boolean;
   openHistory: () => void;
   isHistoryOpen: boolean;
+  openProjects?: () => void;
+  isProjectsOpen?: boolean;
+  activeProjectTitle?: string;
   openSettings: () => void;
   openAuth: () => void;
   openProfile: () => void;
@@ -56,6 +59,9 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   isManualOpen,
   openHistory,
   isHistoryOpen,
+  openProjects,
+  isProjectsOpen = false,
+  activeProjectTitle,
   openSettings,
   openAuth,
   openProfile,
@@ -67,15 +73,16 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   children,
 }) => {
   const { theme, toggleTheme } = useTheme();
+  const [ringSpinKey, setRingSpinKey] = useState(0);
 
   // --- Helper Functions ---
   const isPortalChrome = viewMode === 'ARCHIVE' || viewMode === 'VIDEO' || viewMode === 'RORSCHACH' || viewMode === 'DICTIONARY';
 
   const getHeaderTitleColor = () => !isPortalChrome && selectedDriver
-    ? 'text-[var(--mist-active-accent)]'
-    : 'text-[var(--text-header)]';
+    ? (theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-[var(--mist-active-accent)]')
+    : (theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-[var(--text-header)]');
 
-  const getThemeTextColor = () => 'text-[var(--text-header)]';
+  const getThemeTextColor = () => theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-[var(--text-header)]';
 
   const getThemeBorderColor = () => {
     if (theme === 'retro') return 'border-[var(--border-main)]';
@@ -108,12 +115,16 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
     return lang === 'EN' ? "NARRATIVE ENGINE" : "爱欲迷宫";
   };
 
-  const mutedControlClass = 'text-[var(--text-muted)] hover:text-[var(--text-header)]';
-  const toolbarShellClass = 'mist-app-toolbar-shell';
-  const toolbarButtonClass = 'mist-app-nav-button border border-transparent hover:border-transparent hover:bg-transparent';
+  const mutedControlClass = theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white';
+  const inactiveControlClass = theme === 'retro' ? 'text-zinc-600 hover:text-black hover:border-black/5' : 'text-zinc-400 hover:text-white';
+  const inactiveIconClass = theme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white';
+  const headerSeparatorClass = `select-none text-[10px] font-mono font-bold leading-none ${theme === 'retro' ? 'text-zinc-600' : 'text-white/70'}`;
+  const renderHeaderSeparator = () => (
+    <span className={headerSeparatorClass} aria-hidden="true">-</span>
+  );
 
   return (
-    <header className={`mist-app-header bg-[var(--bg-header)] backdrop-blur-md border-b ${getThemeBorderColor()} flex items-center justify-between px-4 md:px-5 z-50 sticky top-0 shrink-0 transition-all duration-500 animate-page-dissolve`}>
+    <header className={`mist-app-header h-14 bg-[var(--bg-header)] backdrop-blur-md border-b ${getThemeBorderColor()} flex items-center justify-between px-4 md:px-5 z-50 sticky top-0 shrink-0 transition-all duration-500 animate-page-dissolve`}>
       {/* Theme Divider Line - Global Consistency Accent */}
       <div
         className="absolute bottom-0 left-0 right-0 h-px transition-all duration-500 z-10"
@@ -128,7 +139,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         {(viewMode === 'RORSCHACH' || viewMode === 'ARCHIVE' || viewMode === 'VIDEO' || viewMode === 'DICTIONARY') ? (
           <button
             onClick={() => setPage(-1)}
-            className={`mist-app-archive-button text-[9px] font-mono tracking-[0.15em] transition-all duration-300 active:scale-95 px-2 py-1 border w-[72px] flex items-center justify-center ${
+            className={`mist-app-archive-button text-[9px] font-mono tracking-[0.15em] transition-all duration-300 hover:scale-105 active:scale-95 px-2 py-1 rounded-sm border w-[72px] flex items-center justify-center ${
               theme === 'retro'
                 ? 'text-[var(--text-accent)] border-[var(--border-main)] hover:border-[var(--border-accent)]'
                 : 'text-[var(--text-muted)] hover:text-[var(--text-header)] border-[var(--border-glass)] hover:border-[var(--border-strong)]'
@@ -149,7 +160,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               if (setInitialProtocol) setInitialProtocol(undefined);
               setPage(0);
             }}
-            className={`mist-app-archive-button flex items-center gap-1.5 transition-all duration-300 group px-2 py-1 bg-transparent active:scale-95`}
+            className="mist-app-top-nav-button flex items-center gap-1.5 transition-all duration-300 group px-2 py-1 rounded-md bg-transparent hover:scale-105 active:scale-95"
           >
             <Globe size={14} className={`shrink-0 transition-all duration-100 ${mutedControlClass}`} />
             <span className={`text-[10px] font-bold uppercase tracking-[0.1em] transition-all duration-100 hidden md:block ${mutedControlClass}`}>
@@ -178,15 +189,15 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               <>
                 <button
                   onClick={() => setViewMode('ENGINE')}
-                  className={`mist-app-nav-button ${viewMode === 'ENGINE' ? 'is-active' : ''} flex items-center gap-2 font-serif font-bold transition-all duration-300 active:scale-95 ${viewMode === 'ENGINE' ? getHeaderTitleColor() : `${mutedControlClass} font-sans`}`}
+                  className={`mist-app-top-nav-button flex items-center gap-2 font-serif font-bold transition-all duration-300 hover:scale-105 active:scale-95 ${viewMode === 'ENGINE' ? getHeaderTitleColor() : `${mutedControlClass} font-sans`}`}
                 >
                   <Cpu size={14} className={viewMode === 'ENGINE' ? `${getThemeTextColor()} fill-none` : ""} />
                   {lang === 'CN' ? "核心引擎" : "CORE ENGINE"}
                 </button>
-                <div className="w-4 h-px bg-[var(--border-glass)]"></div>
+                {renderHeaderSeparator()}
                 <button
                   onClick={() => setViewMode('DIVERGENCE')}
-                      className={`mist-app-nav-button ${viewMode === 'DIVERGENCE' ? 'is-active' : ''} flex items-center gap-2 transition-all duration-300 active:scale-95 ${viewMode === 'DIVERGENCE' ? getHeaderTitleColor() : `${mutedControlClass} font-sans`}`}
+                  className={`mist-app-top-nav-button flex items-center gap-2 transition-all duration-300 hover:scale-105 active:scale-95 ${viewMode === 'DIVERGENCE' ? getHeaderTitleColor() : `${mutedControlClass} font-sans`}`}
                 >
                   <GitFork size={14} />
                   {lang === 'CN' ? "分歧点" : "THE DIVERGENCE"}
@@ -195,20 +206,18 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             )}
             {selectedDriver !== DriverType.AESTHETIC && (
               <>
-                {selectedDriver !== DriverType.EXPERIMENTAL && (
-                  <div className="w-4 h-px bg-[var(--border-glass)]"></div>
-                )}
+                {selectedDriver !== DriverType.EXPERIMENTAL && renderHeaderSeparator()}
                 <button
                   onClick={() => setViewMode('BIBLE')}
-                  className={`mist-app-nav-button ${viewMode === 'BIBLE' ? 'is-active' : ''} flex items-center gap-2 transition-all duration-300 active:scale-95 ${viewMode === 'BIBLE' ? getHeaderTitleColor() : `${mutedControlClass} font-sans`}`}
+                  className={`mist-app-top-nav-button flex items-center gap-2 transition-all duration-300 hover:scale-105 active:scale-95 ${viewMode === 'BIBLE' ? getHeaderTitleColor() : `${mutedControlClass} font-sans`}`}
                 >
                   <BookOpen size={14} />
-                  {lang === 'CN' ? "创意圣经" : "CREATIVE BIBLE"}
+                  {lang === 'CN' ? "故事工程" : "STORY PROJECT"}
                 </button>
-                <div className="w-4 h-px bg-[var(--border-glass)]"></div>
+                {renderHeaderSeparator()}
                 <button
                   onClick={handleOpenMetonymyPage}
-                  className={`mist-app-nav-button ${viewMode === 'METONYMY' ? 'is-active' : ''} flex items-center gap-2 transition-all duration-300 active:scale-95 ${viewMode === 'METONYMY' ? getHeaderTitleColor() : `${mutedControlClass} font-sans`}`}
+                  className={`mist-app-top-nav-button flex items-center gap-2 transition-all duration-300 hover:scale-105 active:scale-95 ${viewMode === 'METONYMY' ? getHeaderTitleColor() : `${mutedControlClass} font-sans`}`}
                 >
                   <Wand2 size={14} />
                   {lang === 'CN' ? "换喻脚本" : "METONYMY SCRIPT"}
@@ -222,18 +231,21 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
       <div className="flex items-center justify-end gap-2 ml-auto">
         {/* Navigation Links — ARCHIVE ONLY */}
         {!(viewMode === 'ARCHIVE' || viewMode === 'VIDEO' || viewMode === 'DICTIONARY' || viewMode === 'RORSCHACH' || viewMode === 'ANALYSIS') && (
-          <div className={`flex items-center p-1 transition-all duration-300 border border-transparent ${toolbarShellClass}`}>
+          <div className={`flex items-center p-1 rounded-full transition-all duration-300 border border-transparent bg-transparent ${
+            theme === 'retro' ? '' : 'hover:bg-black/30'
+          }`}>
             {[
+              ...(openProjects ? [{ icon: FolderOpen, label: activeProjectTitle || (lang === 'CN' ? '项目' : 'PROJECT'), labelCn: activeProjectTitle || '项目', labelEn: activeProjectTitle || 'PROJECT', onClick: openProjects, isActive: isProjectsOpen }] : []),
               { icon: Settings, label: lang === 'CN' ? '系统配置' : 'SETTINGS', labelCn: '系统配置', labelEn: 'SETTINGS', onClick: openSettings, isActive: false },
               { icon: HistoryIcon, label: lang === 'CN' ? '欲望档案' : 'ARCHIVE', labelCn: '欲望档案', labelEn: 'ARCHIVE', onClick: openHistory, isActive: isHistoryOpen },
             ].map((item, idx) => (
               <button
                 key={idx}
                 onClick={item.onClick}
-                className={`flex items-center gap-1.5 transition-all duration-300 group px-3 h-8 ${toolbarButtonClass} active:scale-95 ${item.isActive ? 'is-active ' + getThemeTextColor() : mutedControlClass}`}
+                className={`flex items-center gap-1.5 transition-all duration-300 group px-3 h-8 rounded-full border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-95 ${item.isActive ? getThemeTextColor() : inactiveControlClass}`}
               >
-                <item.icon size={13} className={`shrink-0 transition-all duration-100 ${item.isActive ? 'text-current' : mutedControlClass}`} />
-                <span className={`text-[10px] font-bold uppercase tracking-[0.1em] transition-all duration-100 hidden md:block ${item.isActive ? 'text-current' : mutedControlClass}`}>
+                <item.icon size={13} className={`shrink-0 transition-all duration-100 ${item.isActive ? 'text-current' : inactiveIconClass}`} />
+                <span className={`text-[10px] font-bold uppercase tracking-[0.1em] transition-all duration-100 hidden md:block ${item.isActive ? 'text-current' : inactiveIconClass}`}>
                   {item.label}
                 </span>
               </button>
@@ -242,25 +254,34 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         )}
 
         {/* Rightmost Toolbar Group */}
-        <div className={`flex items-center gap-1 px-1 py-1 transition-all duration-500 border border-transparent backdrop-blur-sm hover:backdrop-blur-md ${toolbarShellClass}`}>
+        <div className={`flex items-center gap-1 px-1 py-1 rounded-full transition-all duration-500 border border-transparent bg-transparent ${
+          theme === 'retro' ? '' : 'hover:bg-black/30'
+        }`}>
 
           {/* 1. Ring Toggle */}
           <button
-            onClick={() => setShowRings(!showRings)}
-            className={`flex items-center justify-center w-8 h-8 transition-all duration-300 ${toolbarButtonClass} active:scale-90 focus:outline-none ${
+            onClick={() => {
+              setRingSpinKey(prev => prev + 1);
+              setShowRings(!showRings);
+            }}
+            className={`mist-ring-toggle-button flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300 border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-90 focus:outline-none ${
               showRings
-                ? 'is-active ' + getThemeTextColor()
-                : mutedControlClass
+                ? 'is-active ' + (theme === 'retro' ? 'text-[#8B261D]' : 'text-[var(--mist-active-accent)]')
+                : inactiveControlClass
             }`}
             title={lang === 'CN' ? "背景圆环开关" : "Background Rings Toggle"}
           >
-            <Aperture size={13} className={`shrink-0 transition-all duration-300 ${showRings ? 'rotate-180' : ''}`} />
+            <Aperture
+              key={ringSpinKey}
+              size={13}
+              className={`mist-ring-toggle-icon ${ringSpinKey > 0 ? 'is-click-spinning' : ''} shrink-0 ${showRings ? (theme === 'retro' ? 'text-[#8B261D]' : 'text-[var(--mist-active-accent)]') : ''}`}
+            />
           </button>
 
           {/* 2. Theme Toggle */}
           <button
             onClick={toggleTheme}
-            className={`flex items-center justify-center w-8 h-8 ${toolbarButtonClass} active:scale-90 transition-all duration-300 ${mutedControlClass}`}
+            className={`flex items-center justify-center w-8 h-8 rounded-full border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-90 transition-all duration-300 ${inactiveControlClass}`}
             title={theme === 'dark' ? (lang === 'CN' ? "切换为复古主题" : "Switch to Retro") : (lang === 'CN' ? "切换为暗黑主题" : "Switch to Dark")}
           >
             {theme === 'dark' ? <Moon size={13} strokeWidth={2} /> : <Sun size={13} strokeWidth={2} className="text-[var(--text-accent)]" />}
@@ -269,7 +290,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           {/* 3. Language Toggle */}
           <button
             onClick={() => setLang(lang === 'CN' ? 'EN' : 'CN')}
-            className={`w-8 h-8 flex items-center justify-center ${toolbarButtonClass} active:scale-90 transition-all duration-300 ${mutedControlClass}`}
+            className={`w-8 h-8 flex items-center justify-center rounded-full border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-90 transition-all duration-300 ${inactiveControlClass}`}
             title={lang === 'CN' ? 'Switch to English' : '切换至中文'}
           >
             <span className="text-[10px] font-bold uppercase tracking-widest">{lang === 'CN' ? '中' : 'EN'}</span>
@@ -278,7 +299,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           {/* 4. Profile / User */}
           <button
             onClick={() => currentUser.id !== 'guest_user' ? openProfile() : openAuth()}
-            className={`flex items-center gap-2 group transition-all duration-300 px-2 h-8 ${toolbarButtonClass} active:scale-95`}
+            className="flex items-center gap-2 group transition-all duration-300 px-2 h-8 rounded-full border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-95"
           >
             <div className={`w-5 h-5 rounded-full ${!currentUser.avatarUrl && (currentUser.avatarColor || 'bg-gold-primary')} border border-[var(--border-main)]/30 flex items-center justify-center text-[10px] font-bold text-white shadow-sm overflow-hidden group-hover:scale-110 transition-transform`}>
               {currentUser.avatarUrl ? (

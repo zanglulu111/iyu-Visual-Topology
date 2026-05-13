@@ -1,4 +1,4 @@
-import { X, Search, Layers, Check, Dice5, Trash2, Plus, Zap, Sparkles, Eye, Heart, Music, Sun, Moon, Cloud, Feather, Globe, Copy, LayoutGrid, Info, Hash, ChevronRight, ArrowLeftRight } from 'lucide-react';
+import { X, Search, Layers, Check, Dice5, Trash2, Plus, Zap, Sparkles, Eye, Heart, Music, Sun, Moon, Cloud, Feather, Globe, Copy, LayoutGrid, Info, Hash, ChevronRight, ArrowLeftRight, Undo2, Redo2 } from 'lucide-react';
 import React, { useState, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTheme } from '../contexts/ThemeContext';
@@ -28,6 +28,7 @@ interface NarrativeLibraryModalProps {
     blockName: string;
     selectedTags: string[];
     onToggleTag: (tag: string) => void;
+    onSetTags?: (tags: string[]) => void;
     onClear?: () => void;
     lang?: BlueprintLanguage;
     customLibraryData?: LibraryCategoryDef[];
@@ -50,7 +51,7 @@ const displayCnTag = (value: unknown) => String(value || '')
     .trim();
 
 export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
-    isOpen, onClose, blockId, blockName, selectedTags, onToggleTag, onClear, lang = 'CN', customLibraryData, driverType, onAddCustomDef, scrollToTag, onTempLockChange, initialFaceState
+    isOpen, onClose, blockId, blockName, selectedTags, onToggleTag, onSetTags, onClear, lang = 'CN', customLibraryData, driverType, onAddCustomDef, scrollToTag, onTempLockChange, initialFaceState
 }) => {
     const { theme: globalTheme } = useTheme();
     const [searchQuery, setSearchQuery] = useState("");
@@ -64,6 +65,10 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
     const [useAltGroup, setUseAltGroup] = useState(false);
     const [protocolOpenId, setProtocolOpenId] = useState<string | null>(null);
     const isSkinSV = blockId === 'skin_structure' || blockId === 'skin_volume';
+    const limit = BLOCK_LIMITS[blockId] || 1;
+    const [activeSlotIndex, setActiveSlotIndex] = useState(0);
+    const [selectionPast, setSelectionPast] = useState<string[][]>([]);
+    const [selectionFuture, setSelectionFuture] = useState<string[][]>([]);
 
     const [currentLang, setCurrentLang] = useState<BlueprintLanguage>(lang);
 
@@ -82,6 +87,13 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
     useEffect(() => {
         setCurrentLang(lang);
     }, [lang]);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        setSelectionPast([]);
+        setSelectionFuture([]);
+        setActiveSlotIndex(Math.max(0, Math.min(limit - 1, Math.max(0, selectedTags.length - 1))));
+    }, [blockId, isOpen, limit]);
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -282,10 +294,23 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
         return group.items || [];
     }, [activeTab, processedGroups, searchQuery, blockId, currentLang]);
 
+    const allCurrentLibraryItems = useMemo(() => {
+        const seen = new Set<string>();
+        return processedGroups.flatMap(group =>
+            (group.items || [])
+                .filter(item => {
+                    if (!item?.name || seen.has(item.name)) return false;
+                    seen.add(item.name);
+                    return true;
+                })
+                .map(item => ({ ...item, _groupName: group.name }))
+        );
+    }, [processedGroups]);
+
     const handleAddCustom = () => {
         if (customInputName && onAddCustomDef) {
             onAddCustomDef(customInputName, customInputDef, customInputCore);
-            onToggleTag(customInputName);
+            applySlotSelection(customInputName);
             setCustomInputName("");
             setCustomInputDef("");
             setCustomInputCore("");
@@ -308,14 +333,123 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
         return item.patch?.mechanics || item.mechanics || item.patch?.mechanicsEn || item.mechanicsEn;
     };
 
+    const normalizeTags = (tags: string[]) => {
+        const seen = new Set<string>();
+        return tags
+            .filter(Boolean)
+            .filter(tag => {
+                if (seen.has(tag)) return false;
+                seen.add(tag);
+                return true;
+            })
+            .slice(0, limit);
+    };
+
+    const areTagsEqual = (a: string[], b: string[]) => a.length === b.length && a.every((tag, index) => tag === b[index]);
+
+    const slotTags = useMemo(
+        () => Array.from({ length: limit }, (_, index) => selectedTags[index] || ''),
+        [limit, selectedTags]
+    );
+
+    const applyTags = (nextTags: string[], nextActiveSlot = activeSlotIndex, pushHistory = true) => {
+        const normalizedNext = normalizeTags(nextTags);
+        const normalizedCurrent = normalizeTags(selectedTags);
+        if (areTagsEqual(normalizedCurrent, normalizedNext)) {
+            setActiveSlotIndex(Math.max(0, Math.min(limit - 1, nextActiveSlot)));
+            return;
+        }
+
+        if (pushHistory) {
+            setSelectionPast(prev => [...prev.slice(-39), normalizedCurrent]);
+            setSelectionFuture([]);
+        }
+
+        setActiveSlotIndex(Math.max(0, Math.min(limit - 1, nextActiveSlot)));
+
+        if (onSetTags) {
+            onSetTags(normalizedNext);
+            return;
+        }
+
+        const removedTags = normalizedCurrent.filter(tag => !normalizedNext.includes(tag));
+        const addedTags = normalizedNext.filter(tag => !normalizedCurrent.includes(tag));
+        removedTags.forEach(onToggleTag);
+        if (removedTags.length > 0 && addedTags.length > 0) {
+            setTimeout(() => {
+                addedTags.forEach(onToggleTag);
+            }, 0);
+            return;
+        }
+        addedTags.forEach(onToggleTag);
+    };
+
+    const getTargetSlotIndex = () => {
+        const firstEmptyIndex = slotTags.findIndex(tag => !tag);
+        if (firstEmptyIndex !== -1) return firstEmptyIndex;
+        return Math.max(0, Math.min(limit - 1, activeSlotIndex));
+    };
+
+    const applySlotSelection = (tag: string) => {
+        const currentIndex = selectedTags.indexOf(tag);
+        if (currentIndex !== -1) {
+            setActiveSlotIndex(currentIndex);
+            handleScrollToCard(tag);
+            return;
+        }
+
+        const targetIndex = getTargetSlotIndex();
+        const nextSlots = [...slotTags];
+        nextSlots[targetIndex] = tag;
+        applyTags(nextSlots.filter(Boolean), selectedTags.length + 1 >= limit ? targetIndex : Math.min(limit - 1, targetIndex + 1));
+        setTimeout(() => {
+            handleScrollToCard(tag);
+        }, 100);
+    };
+
+    const removeSlotTag = (slotIndex: number) => {
+        const tag = slotTags[slotIndex];
+        if (!tag) {
+            setActiveSlotIndex(slotIndex);
+            return;
+        }
+        const nextTags = selectedTags.filter((_, index) => index !== slotIndex);
+        applyTags(nextTags, Math.min(slotIndex, Math.max(0, limit - 1)));
+    };
+
+    const removeSelectedTag = (tag: string) => {
+        const slotIndex = selectedTags.indexOf(tag);
+        if (slotIndex === -1) return;
+        removeSlotTag(slotIndex);
+    };
+
+    const handleSelectionUndo = () => {
+        if (selectionPast.length === 0) return;
+        const previousTags = selectionPast[selectionPast.length - 1];
+        setSelectionPast(prev => prev.slice(0, -1));
+        setSelectionFuture(prev => [normalizeTags(selectedTags), ...prev].slice(0, 40));
+        applyTags(previousTags, Math.min(previousTags.length, limit) - 1, false);
+    };
+
+    const handleSelectionRedo = () => {
+        if (selectionFuture.length === 0) return;
+        const nextTags = selectionFuture[0];
+        setSelectionFuture(prev => prev.slice(1));
+        setSelectionPast(prev => [...prev.slice(-39), normalizeTags(selectedTags)]);
+        applyTags(nextTags, Math.min(nextTags.length, limit) - 1, false);
+    };
+
     const handleRandomize = () => {
-        if (filteredItems.length === 0) return;
-        const unselectedItems = filteredItems.filter(item => !selectedTags.includes(item.name));
-        if (unselectedItems.length === 0) return;
-        const randomItem = unselectedItems[Math.floor(Math.random() * unselectedItems.length)];
+        if (allCurrentLibraryItems.length === 0) return;
+        const targetIndex = getTargetSlotIndex();
+        const candidateItems = allCurrentLibraryItems.filter(item => !selectedTags.includes(item.name));
+        if (candidateItems.length === 0) return;
+        const randomItem = candidateItems[Math.floor(Math.random() * candidateItems.length)];
         if (randomItem) {
             const isCurrentlySelected = selectedTags.includes(randomItem.name);
-            onToggleTag(randomItem.name);
+            const nextSlots = [...slotTags];
+            nextSlots[targetIndex] = randomItem.name;
+            applyTags(nextSlots.filter(Boolean), selectedTags.length + 1 >= limit ? targetIndex : Math.min(limit - 1, targetIndex + 1));
             if (isEngineLexicon && !isCurrentlySelected && randomItem.directive && typeof randomItem.directive === 'object') {
                 const temps: ('bright' | 'dark' | 'tension')[] = ['bright', 'dark', 'tension'];
                 const randomTemp = temps[Math.floor(Math.random() * temps.length)];
@@ -419,19 +553,37 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
         return count;
     };
 
-    const limit = BLOCK_LIMITS[blockId] || 1;
+    const getLexiconIdentityLine = () => {
+        if (currentLang === 'EN') {
+            if (isEngineLexicon) {
+                const match = blockDisplayName.match(/M\d+[AB]?/i)?.[0] || 'M';
+                return `${match} defines this parameter's place in the engine: its narrative authority, desire pressure, and generative instruction role.`;
+            }
+            if (blockId.includes('skin')) {
+                return 'This surface lexicon gives the engine a visible historical, bodily, social, and atmospheric form.';
+            }
+            return 'This lexicon translates abstract theory into selectable narrative decisions for the current module.';
+        }
+
+        if (isEngineLexicon) {
+            const match = blockDisplayName.match(/M\d+[AB]?/)?.[0] || 'M参数';
+            const cleanName = blockDisplayName.replace(/^M\d+[AB]?[.。]\s*/, '');
+            return `${match} 词库说明「${cleanName}」在公式中的位格：它决定叙事权力、欲望压力与生成指令如何进入结构。`;
+        }
+        if (blockId.includes('skin')) {
+            return '这个表层词库说明故事如何获得可见的历史外壳、身体坐标、社会肌理与氛围材质。';
+        }
+        return '这个词库把抽象理论参数转译为当前模块可选择、可组合、可进入生成流程的叙事决策。';
+    };
 
     if (!isOpen) return null;
 
     return createPortal(
         <>
         <div className={`fixed inset-0 z-[100000] flex items-center justify-center ${globalTheme === 'retro' ? 'bg-[#8B261D]/5 backdrop-blur-md' : 'bg-black/80 backdrop-blur-[12px]'} p-0 md:p-2 xl:p-4 animate-in fade-in duration-500 pointer-events-auto`} onClick={onClose}>
-            <div className={`w-full xl:w-[98vw] max-w-[1800px] h-full md:h-[96vh] ${globalTheme === 'retro' ? 'bg-[#EBE7DF] border-[#8B261D] border-2 shadow-[20px_20px_0px_0px_rgba(139,38,29,0.1)]' : `bg-[#080808] border-zinc-800/50 shadow-[0_0_100px_rgba(0,0,0,0.8)]`} md:rounded-3xl flex flex-col overflow-hidden relative transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] transform scale-100 animate-in zoom-in-95`} onClick={(e) => e.stopPropagation()}>
+            <div className={`mist-lexicon-modal w-full xl:w-[98vw] max-w-[1800px] h-full md:h-[96vh] ${globalTheme === 'retro' ? 'bg-[#EBE7DF] border-[#8B261D] border-2 shadow-[20px_20px_0px_0px_rgba(139,38,29,0.1)]' : `bg-[#080808] border-zinc-800/50 shadow-[0_0_100px_rgba(0,0,0,0.8)]`} md:rounded-3xl flex flex-col overflow-hidden relative transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] transform scale-100 animate-in zoom-in-95`} onClick={(e) => e.stopPropagation()}>
                 <div className={`h-24 md:h-28 border-b ${globalTheme === 'retro' ? 'border-[#8B261D]/10 bg-[#F5F2EA]' : `bg-black/40 backdrop-blur-md border-[var(--mist-active-accent)]/10`} flex items-center justify-between px-8 md:px-12 shrink-0 z-20 relative`}>
                     <div className="flex items-center gap-6">
-                        <div className={`p-4 ${globalTheme === 'retro' ? 'bg-[#F9F7F1] text-[#8B261D] border-[#8B261D]/30' : `bg-zinc-900 ${themeText} border-[var(--mist-active-accent)]/30`} rounded-2xl border-2 shadow-xl shadow-black/20 group-hover:scale-105 transition-transform duration-500`}>
-                            {blockId.includes('skin') ? <LayoutGrid size={28} /> : <Sparkles size={28} />}
-                        </div>
                         <div className="flex flex-col">
                             <div className="flex items-center gap-4 mb-1">
                                 <h3 className={`text-2xl md:text-3xl font-serif font-black tracking-wider ${globalTheme === 'retro' ? 'text-[#8B261D]' : 'text-white'}`}>
@@ -439,34 +591,64 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                 </h3>
                                 <div className={`px-3 py-1 rounded-full border ${themeBorder.replace('/50', '')} ${globalTheme === 'retro' ? 'bg-[#F9F7F1]' : 'bg-white/5'} text-[10px] md:text-[11px] font-black uppercase tracking-[0.2em] ${themeText} flex items-center gap-2`}>
                                    <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${globalTheme === 'retro' ? 'bg-[#8B261D]' : themeText.replace('text-', 'bg-')}`} />
-                                   {currentLang === 'EN' ? `DATABASE: ${getLibraryTotalCount()} ENTRIES` : `系统词库: ${getLibraryTotalCount()} 条`}
+                                   {currentLang === 'EN' ? `TOTAL ${getLibraryTotalCount()} · SELECT ${limit}` : `统计 ${getLibraryTotalCount()} · 可选 ${limit}`}
                                 </div>
                             </div>
                             <div className="flex items-center gap-4">
-                                <p className={`text-[10px] md:text-xs font-mono uppercase tracking-[0.4em] ${globalTheme === 'retro' ? 'text-[#8B261D]/50' : 'text-zinc-500'}`}>
-                                    {currentLang === 'EN' ? "AESTHETIC TOPOLOGY PARAMETERS" : "爱欲视觉拓扑参数"}
+                                <p className={`max-w-[620px] text-[11px] md:text-xs font-medium tracking-[0.04em] leading-relaxed ${globalTheme === 'retro' ? 'text-[#3D1A16]/65' : 'text-zinc-500'}`}>
+                                    {getLexiconIdentityLine()}
                                 </p>
-                                <span className={`w-1 h-1 rounded-full ${globalTheme === 'retro' ? 'bg-black/10' : 'bg-white/10'}`} />
-                                <div className={`text-[10px] md:text-xs font-bold uppercase tracking-widest ${themeText}`}>
-                                    {currentLang === 'EN' ? `LMT: ${limit}` : `可选: ${limit}`}
-                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2 md:gap-4 flex-1 justify-end ml-4 overflow-hidden">
-                        <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar flex-1 justify-end max-w-full xl:max-w-none pr-2" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-                            {selectedTags.length === 0 ? (
-                                <div className="flex items-center gap-2 text-zinc-500 whitespace-nowrap opacity-60 mr-2">
-                                     <Info size={14} className={themeText} />
-                                     <span className={`text-[11px] font-medium uppercase tracking-[0.2em] ${globalTheme === 'retro' ? 'text-[#8B261D]/70' : ''}`}>
-                                         {currentLang === 'EN' ? "Select desired parameters" : "请从下方词库中选择所需的拓扑参数"}
-                                     </span>
+                    <div className="flex items-center gap-2 md:gap-3 flex-1 justify-end ml-4 overflow-hidden">
+                        <div className="mist-lexicon-selection-search shrink-0 flex flex-col gap-1">
+                            <div className="mist-lexicon-selection-row flex items-center gap-2 overflow-x-auto custom-scrollbar justify-end max-w-full pr-1" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                                <div className={`mist-lexicon-history-controls shrink-0 flex items-center rounded-lg border overflow-hidden ${globalTheme === 'retro' ? 'bg-white/55 border-[#8B261D]/20' : 'bg-black/40 border-white/10'}`}>
+                                    <button
+                                        type="button"
+                                        onClick={handleSelectionUndo}
+                                        disabled={selectionPast.length === 0}
+                                        className="mist-lexicon-history-button"
+                                        title={currentLang === 'EN' ? 'Undo selection' : '撤销选择'}
+                                        aria-label={currentLang === 'EN' ? 'Undo selection' : '撤销选择'}
+                                    >
+                                        <Undo2 size={14} />
+                                    </button>
+                                    <div className={`mist-lexicon-soft-separator w-px h-4 ${globalTheme === 'retro' ? 'bg-[#8B261D]/20' : 'bg-white/10'}`} />
+                                    <button
+                                        type="button"
+                                        onClick={handleSelectionRedo}
+                                        disabled={selectionFuture.length === 0}
+                                        className="mist-lexicon-history-button"
+                                        title={currentLang === 'EN' ? 'Redo selection' : '前进选择'}
+                                        aria-label={currentLang === 'EN' ? 'Redo selection' : '前进选择'}
+                                    >
+                                        <Redo2 size={14} />
+                                    </button>
                                 </div>
-                            ) : (
-                                selectedTags.map(tag => {
+
+                                {slotTags.map((tag, slotIndex) => {
+                                    if (!tag) {
+                                        const isActiveSlot = activeSlotIndex === slotIndex;
+                                        return (
+                                            <button
+                                                key={`slot-empty-${slotIndex}`}
+                                                type="button"
+                                                onClick={() => setActiveSlotIndex(slotIndex)}
+                                                className={`mist-lexicon-slot ${isActiveSlot ? 'is-active' : ''} is-empty flex shrink-0 items-center gap-1.5 h-8 px-2.5 rounded-lg border text-[10px] whitespace-nowrap font-black transition-all duration-300 active:scale-95`}
+                                                title={currentLang === 'EN' ? `Slot ${slotIndex + 1}` : `槽位 ${slotIndex + 1}`}
+                                            >
+                                                <span className="mist-lexicon-slot-index">{slotIndex + 1}</span>
+                                                <span>{currentLang === 'EN' ? 'EMPTY' : '空位'}</span>
+                                            </button>
+                                        );
+                                    }
+
                                     const item = filteredItems.find(i => i.name === tag) || processedGroups.flatMap(g => g.items || []).find(i => i.name === tag);
                                     const displayTag = item ? getLocalizedItemName(item) : displayCnTag(tag);
+                                    const isActiveSlot = activeSlotIndex === slotIndex;
 
                                     // Get temperature color for this tag (only for engine lexicons)
                                     const tagTemp = isEngineLexicon ? faceState[tag] : undefined;
@@ -488,24 +670,27 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
 
                                     return (
                                         <div
-                                            key={tag}
+                                            key={`${tag}-${slotIndex}`}
                                             role="button"
                                             tabIndex={0}
-                                            onClick={() => handleScrollToCard(tag)}
+                                            onClick={() => {
+                                                setActiveSlotIndex(slotIndex);
+                                                handleScrollToCard(tag);
+                                            }}
                                             onKeyDown={(e) => {
                                                 if (e.key === 'Enter' || e.key === ' ') {
                                                     e.preventDefault();
+                                                    setActiveSlotIndex(slotIndex);
                                                     handleScrollToCard(tag);
                                                 }
                                             }}
-                                            className={`flex shrink-0 items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] whitespace-nowrap font-black border transition-all duration-300 transform active:scale-95 group shadow-sm
-                                                ${globalTheme === 'retro' ? `bg-white ${tempBorderClass} ${tempColorClass}` : `bg-zinc-900 ${tempBorderClass} ${tempColorClass} hover:border-white/30 hover:bg-zinc-800`}`}
+                                            className={`mist-lexicon-slot ${isActiveSlot ? 'is-active' : ''} is-filled flex shrink-0 items-center gap-1.5 h-8 px-2.5 rounded-lg text-[10px] whitespace-nowrap font-black border transition-all duration-300 transform active:scale-95 group shadow-sm ${tempBorderClass} ${tempColorClass}`}
                                         >
-                                            <Hash size={10} className="opacity-40" />
-                                            {displayTag}
+                                            <span className="mist-lexicon-slot-index">{slotIndex + 1}</span>
+                                            <span className="max-w-[130px] truncate">{displayTag}</span>
                                             <button
                                                 type="button"
-                                                onClick={(e) => { e.stopPropagation(); onToggleTag(tag); }}
+                                                onClick={(e) => { e.stopPropagation(); removeSlotTag(slotIndex); }}
                                                 className="opacity-50 hover:opacity-100 group-hover:rotate-90 transition-all ml-1 cursor-pointer p-0.5 rounded-full hover:bg-black/10"
                                                 title={currentLang === 'EN' ? 'Remove' : '删除'}
                                                 aria-label={currentLang === 'EN' ? `Remove ${displayTag}` : `删除 ${displayTag}`}
@@ -514,61 +699,67 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                             </button>
                                         </div>
                                     );
-                                })
-                            )}
+                                })}
+
+                                {selectedTags.length === 0 && (
+                                    <div className="hidden 2xl:flex items-center gap-2 text-zinc-500 whitespace-nowrap opacity-60">
+                                         <Info size={13} className={themeText} />
+                                         <span className={`text-[10px] font-medium uppercase tracking-[0.16em] ${globalTheme === 'retro' ? 'text-[#8B261D]/70' : ''}`}>
+                                             {currentLang === 'EN' ? "Select desired parameters" : "请从下方词库中选择所需的拓扑参数"}
+                                         </span>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="relative hidden lg:block group">
+                                <Search size={13} className={`absolute left-3 top-1/2 -translate-y-1/2 transition-colors duration-300 ${globalTheme === 'retro' ? 'text-[#8B261D]/40' : 'text-zinc-600 group-focus-within:text-white'}`} />
+                                <input
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    placeholder={currentLang === 'EN' ? "SEARCH..." : "搜索词条..."}
+                                    className={`w-full border rounded-xl pl-8 pr-3 py-2 text-xs focus:outline-none transition-all duration-500 ${globalTheme === 'retro' ? 'bg-white border-[#8B261D]/20 text-black placeholder-[#8B261D]/30 focus:border-[#8B261D]/50' : `bg-black/60 ${themeText} border-white/10 focus:border-white/20 placeholder-zinc-700 shadow-xl shadow-black/50`}`}
+                                />
+                            </div>
                         </div>
 
-                        <div className="relative hidden lg:block group shrink-0">
-                            <Search size={14} className={`absolute left-3 top-1/2 -translate-y-1/2 transition-colors duration-300 ${globalTheme === 'retro' ? 'text-[#8B261D]/40' : 'text-zinc-600 group-focus-within:text-white'}`} />
-                            <input
-                                type="text"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder={currentLang === 'EN' ? "SEARCH..." : "搜索词条..."}
-                                className={`w-32 xl:w-48 border rounded-xl pl-8 pr-3 py-2 text-xs focus:outline-none transition-all duration-500 ${globalTheme === 'retro' ? 'bg-white border-[#8B261D]/20 text-black placeholder-[#8B261D]/30 focus:border-[#8B261D]/50' : `bg-black/60 ${themeText} border-white/10 focus:border-white/20 placeholder-zinc-700 shadow-xl shadow-black/50`}`}
-                            />
-                        </div>
-
-                        {/* Content Version Toggle (Global) — only for engine M-parameter lexicons */}
                         {isEngineLexicon && (
-                        <div className={`flex shrink-0 items-center p-1 rounded-xl border backdrop-blur-sm gap-0.5 mr-2 ${globalTheme === 'retro' ? 'bg-white border-[#8B261D]/10 shadow-sm' : 'bg-white/5 border-white/5'}`}>
-                            <button
-                                onClick={() => setContentVersion('academic')}
-                                className={`flex items-center gap-1.5 px-3 h-8 rounded-lg text-[10px] font-black uppercase tracking-[0.15em] transition-all ${
-                                    contentVersion === 'academic'
-                                        ? (globalTheme === 'retro' ? 'bg-[#8B261D] text-white' : `${themeText} bg-zinc-800`)
-                                        : (globalTheme === 'retro' ? 'text-[#8B261D]/60 hover:bg-[#8B261D]/5' : 'text-zinc-400 hover:bg-white/10 hover:text-white')
-                                }`}
-                                title={currentLang === 'EN' ? "Academic Version" : "学术版"}
-                            >
-                                <span className="hidden xl:inline">{currentLang === 'EN' ? 'Academic' : '学术版'}</span>
-                                <span className="xl:hidden">{currentLang === 'EN' ? 'AC' : '学术'}</span>
-                            </button>
-                            <button
-                                onClick={() => setContentVersion('ai')}
-                                className={`flex items-center gap-1.5 px-3 h-8 rounded-lg text-[10px] font-black uppercase tracking-[0.15em] transition-all ${
-                                    contentVersion === 'ai'
-                                        ? (globalTheme === 'retro' ? 'bg-[#8B261D] text-white' : `${themeText} bg-zinc-800`)
-                                        : (globalTheme === 'retro' ? 'text-[#8B261D]/60 hover:bg-[#8B261D]/5' : 'text-zinc-400 hover:bg-white/10 hover:text-white')
-                                }`}
-                                title={currentLang === 'EN' ? "AI Directive Version" : "AI指令版"}
-                            >
-                                <span className="hidden xl:inline">{currentLang === 'EN' ? 'AI Directive' : 'AI指令版'}</span>
-                                <span className="xl:hidden">AI</span>
-                            </button>
-                        </div>
-                        )}
-
-                        {/* Global Temperature Toggle (only show when AI version is selected AND engine lexicon) */}
-                        {effectiveContentVersion === 'ai' && (
-                            <div className={`flex shrink-0 items-center p-1 rounded-xl border backdrop-blur-sm gap-0.5 mr-2 ${globalTheme === 'retro' ? 'bg-white border-[#8B261D]/10 shadow-sm' : 'bg-white/5 border-white/5'}`}>
+                            <div className={`mist-lexicon-mode-stack shrink-0 mr-1 flex flex-col rounded-xl border overflow-hidden backdrop-blur-sm ${globalTheme === 'retro' ? 'bg-white border-[#8B261D]/10 shadow-sm' : 'bg-white/5 border-white/5'}`}>
+                                <div className={`mist-lexicon-mode-row flex items-center p-1 gap-0.5 border-b ${globalTheme === 'retro' ? 'border-[#8B261D]/10' : 'border-white/5'}`}>
+                                    <button
+                                        onClick={() => setContentVersion('academic')}
+                                        className={`mist-lexicon-mode-button ${contentVersion === 'academic' ? 'is-active' : 'is-inactive'} flex items-center justify-center gap-1.5 px-3 h-7 rounded-lg text-[10px] font-black uppercase tracking-[0.15em] transition-all ${
+                                            contentVersion === 'academic'
+                                                ? (globalTheme === 'retro' ? 'bg-[#8B261D] text-white' : `${themeText} bg-zinc-800`)
+                                                : (globalTheme === 'retro' ? 'text-[#8B261D]/60 hover:bg-[#8B261D]/5' : 'text-zinc-400 hover:bg-white/10 hover:text-white')
+                                        }`}
+                                        title={currentLang === 'EN' ? "Academic Version" : "学术版"}
+                                    >
+                                        <span className="hidden xl:inline">{currentLang === 'EN' ? 'Academic' : '学术版'}</span>
+                                        <span className="xl:hidden">{currentLang === 'EN' ? 'AC' : '学术'}</span>
+                                    </button>
+                                    <button
+                                        onClick={() => setContentVersion('ai')}
+                                        className={`mist-lexicon-mode-button ${contentVersion === 'ai' ? 'is-active' : 'is-inactive'} flex items-center justify-center gap-1.5 px-3 h-7 rounded-lg text-[10px] font-black uppercase tracking-[0.15em] transition-all ${
+                                            contentVersion === 'ai'
+                                                ? (globalTheme === 'retro' ? 'bg-[#8B261D] text-white' : `${themeText} bg-zinc-800`)
+                                                : (globalTheme === 'retro' ? 'text-[#8B261D]/60 hover:bg-[#8B261D]/5' : 'text-zinc-400 hover:bg-white/10 hover:text-white')
+                                        }`}
+                                        title={currentLang === 'EN' ? "AI Directive Version" : "AI指令版"}
+                                    >
+                                        <span className="hidden xl:inline">{currentLang === 'EN' ? 'AI Directive' : 'AI指令版'}</span>
+                                        <span className="xl:hidden">AI</span>
+                                    </button>
+                                </div>
+                                <div className={`mist-lexicon-mode-row flex items-center p-1 gap-0.5 ${effectiveContentVersion !== 'ai' ? 'opacity-45' : ''}`}>
                                 <button
                                     onClick={() => setDirectiveTemp('bright')}
-                                    className={`flex items-center gap-1.5 px-3 h-8 rounded-lg text-[10px] font-black uppercase tracking-[0.15em] transition-all ${
-                                        directiveTemp === 'bright'
+                                    disabled={effectiveContentVersion !== 'ai'}
+                                    className={`mist-lexicon-face-button ${effectiveContentVersion === 'ai' && directiveTemp === 'bright' ? 'is-active' : 'is-inactive'} flex items-center justify-center gap-1.5 px-3 h-7 rounded-lg text-[10px] font-black uppercase tracking-[0.15em] transition-all ${
+                                        effectiveContentVersion === 'ai' && directiveTemp === 'bright'
                                             ? (globalTheme === 'retro' ? 'bg-[#8B261D] text-white' : 'bg-amber-500/20 text-amber-400')
                                             : (globalTheme === 'retro' ? 'text-[#8B261D]/60 hover:bg-[#8B261D]/5' : 'text-zinc-400 hover:bg-white/10 hover:text-amber-400/60')
-                                    }`}
+                                    } ${effectiveContentVersion !== 'ai' ? 'cursor-not-allowed hover:bg-transparent' : ''}`}
                                     title={currentLang === 'EN' ? "Bright" : "亮面"}
                                 >
                                     <span className="hidden xl:inline">{currentLang === 'EN' ? 'Bright' : '亮面'}</span>
@@ -576,11 +767,12 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                 </button>
                                 <button
                                     onClick={() => setDirectiveTemp('dark')}
-                                    className={`flex items-center gap-1.5 px-3 h-8 rounded-lg text-[10px] font-black uppercase tracking-[0.15em] transition-all ${
-                                        directiveTemp === 'dark'
+                                    disabled={effectiveContentVersion !== 'ai'}
+                                    className={`mist-lexicon-face-button ${effectiveContentVersion === 'ai' && directiveTemp === 'dark' ? 'is-active' : 'is-inactive'} flex items-center justify-center gap-1.5 px-3 h-7 rounded-lg text-[10px] font-black uppercase tracking-[0.15em] transition-all ${
+                                        effectiveContentVersion === 'ai' && directiveTemp === 'dark'
                                             ? (globalTheme === 'retro' ? 'bg-[#8B261D] text-white' : 'bg-indigo-500/20 text-indigo-400')
                                             : (globalTheme === 'retro' ? 'text-[#8B261D]/60 hover:bg-[#8B261D]/5' : 'text-zinc-400 hover:bg-white/10 hover:text-indigo-400/60')
-                                    }`}
+                                    } ${effectiveContentVersion !== 'ai' ? 'cursor-not-allowed hover:bg-transparent' : ''}`}
                                     title={currentLang === 'EN' ? "Dark" : "暗面"}
                                 >
                                     <span className="hidden xl:inline">{currentLang === 'EN' ? 'Dark' : '暗面'}</span>
@@ -588,64 +780,66 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                 </button>
                                 <button
                                     onClick={() => setDirectiveTemp('tension')}
-                                    className={`flex items-center gap-1.5 px-3 h-8 rounded-lg text-[10px] font-black uppercase tracking-[0.15em] transition-all ${
-                                        directiveTemp === 'tension'
+                                    disabled={effectiveContentVersion !== 'ai'}
+                                    className={`mist-lexicon-face-button ${effectiveContentVersion === 'ai' && directiveTemp === 'tension' ? 'is-active' : 'is-inactive'} flex items-center justify-center gap-1.5 px-3 h-7 rounded-lg text-[10px] font-black uppercase tracking-[0.15em] transition-all ${
+                                        effectiveContentVersion === 'ai' && directiveTemp === 'tension'
                                             ? (globalTheme === 'retro' ? 'bg-[#8B261D] text-white' : 'bg-violet-500/20 text-violet-400')
                                             : (globalTheme === 'retro' ? 'text-[#8B261D]/60 hover:bg-[#8B261D]/5' : 'text-zinc-400 hover:bg-white/10 hover:text-violet-400/60')
-                                    }`}
+                                    } ${effectiveContentVersion !== 'ai' ? 'cursor-not-allowed hover:bg-transparent' : ''}`}
                                     title={currentLang === 'EN' ? "Tension" : "张力"}
                                 >
                                     <span className="hidden xl:inline">{currentLang === 'EN' ? 'Tension' : '张力'}</span>
                                     <span className="xl:hidden">{currentLang === 'EN' ? 'T' : '张'}</span>
                                 </button>
+                                </div>
                             </div>
                         )}
 
-                        <div className={`flex shrink-0 items-center p-1 rounded-xl border backdrop-blur-sm gap-0.5 ${globalTheme === 'retro' ? 'bg-white border-[#8B261D]/10 shadow-sm' : 'bg-white/5 border-white/5'}`}>
-                            <button
-                                onClick={handleRandomize}
-                                className={`flex items-center gap-1.5 px-3 h-8 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] transition-all hover:bg-white/10 ${globalTheme === 'retro' ? 'text-[#8B261D] hover:bg-[#8B261D]/5' : `${themeText} hover:bg-white/10`} active:scale-95`}
-                                title={currentLang === 'EN' ? "RANDOM" : "随机"}
-                            >
-                                <Dice5 size={14} />
-                                <span className="hidden xl:inline">{currentLang === 'EN' ? "RANDOM" : "随机"}</span>
-                            </button>
-
-                            {onClear && (
+                        <div className={`mist-lexicon-action-stack shrink-0 flex flex-col rounded-xl border backdrop-blur-sm overflow-hidden ${globalTheme === 'retro' ? 'bg-white border-[#8B261D]/10 shadow-sm' : 'bg-white/5 border-white/5'}`}>
+                            <div className={`flex items-center p-1 gap-0.5 border-b ${globalTheme === 'retro' ? 'border-[#8B261D]/10' : 'border-white/5'}`}>
                                 <button
-                                    onClick={onClear}
-                                    disabled={selectedTags.length === 0}
-                                    className={`flex items-center gap-1.5 px-3 h-8 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${selectedTags.length > 0 ? 'hover:bg-red-500/10 hover:text-red-500 cursor-pointer' : 'opacity-50 cursor-not-allowed'} group ${globalTheme === 'retro' ? 'text-black/40' : 'text-zinc-400'}`}
-                                    title={currentLang === 'EN' ? "CLEAR" : "重置"}
+                                    onClick={handleRandomize}
+                                    className={`mist-lexicon-action-button flex items-center gap-1.5 px-3 h-8 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] transition-all ${globalTheme === 'retro' ? 'text-[#8B261D]' : `${themeText} hover:bg-white/10`} active:scale-95`}
+                                    title={currentLang === 'EN' ? "RANDOM" : "随机"}
                                 >
-                                    <Trash2 size={14} className={selectedTags.length > 0 ? "group-hover:rotate-12 transition-transform" : ""} />
-                                    <span className="hidden xl:inline">{currentLang === 'EN' ? "CLEAR" : "重置"}</span>
-                                    <span className={`bg-red-500/20 px-1.5 py-0.5 rounded-full text-[9px] text-red-500`}>{selectedTags.length}</span>
+                                    <Dice5 size={14} />
+                                    <span className="hidden xl:inline">{currentLang === 'EN' ? "RANDOM" : "随机"}</span>
                                 </button>
-                            )}
 
-                            <button
-                                onClick={() => setCurrentLang(prev => prev === 'CN' ? 'EN' : 'CN')}
-                                className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all ${globalTheme === 'retro' ? 'text-black/40 hover:text-[#8B261D] hover:bg-[#8B261D]/5' : 'text-zinc-400 hover:bg-white/10 hover:text-white'}`}
-                                title={currentLang === 'CN' ? "Switch to English" : "切换中文"}
-                            >
-                                <Globe size={16} />
-                            </button>
+                                {onClear && (
+                                    <button
+                                        onClick={() => applyTags([], 0)}
+                                        disabled={selectedTags.length === 0}
+                                        className={`flex items-center gap-1.5 px-3 h-8 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${selectedTags.length > 0 ? 'hover:bg-red-500/10 hover:text-red-500 cursor-pointer' : 'opacity-50 cursor-not-allowed'} group ${globalTheme === 'retro' ? 'text-black/40' : 'text-zinc-400'}`}
+                                        title={currentLang === 'EN' ? "CLEAR" : "重置"}
+                                    >
+                                        <Trash2 size={14} className={selectedTags.length > 0 ? "group-hover:rotate-12 transition-transform" : ""} />
+                                        <span className="hidden xl:inline">{currentLang === 'EN' ? "CLEAR" : "重置"}</span>
+                                        <span className={`bg-red-500/20 px-1.5 py-0.5 rounded-full text-[9px] text-red-500`}>{selectedTags.length}</span>
+                                    </button>
+                                )}
 
-                            <div className={`w-[1px] h-4 mx-1 ${globalTheme === 'retro' ? 'bg-[#8B261D]/10' : 'bg-white/10'}`} />
+                                <button
+                                    onClick={() => setCurrentLang(prev => prev === 'CN' ? 'EN' : 'CN')}
+                                    className={`mist-lexicon-lang-button w-8 h-8 flex items-center justify-center rounded-lg transition-all text-[10px] font-black tracking-widest ${globalTheme === 'retro' ? 'text-[#8B261D]' : 'text-zinc-400 hover:bg-white/10 hover:text-white'}`}
+                                    title={currentLang === 'CN' ? "Switch to English" : "切换中文"}
+                                >
+                                    {currentLang === 'CN' ? '中' : 'EN'}
+                                </button>
 
-                            <button
-                                onClick={onClose}
-                                className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all hover:bg-red-500 hover:text-white ${globalTheme === 'retro' ? 'text-black/40' : 'text-zinc-400'}`}
-                            >
-                                <X size={20} />
-                            </button>
+                                <div className={`mist-lexicon-soft-separator w-[1px] h-4 mx-1 ${globalTheme === 'retro' ? 'bg-[#8B261D]/10' : 'bg-[var(--mist-active-accent)]/15'}`} />
+
+                                <button
+                                    onClick={onClose}
+                                    className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all hover:bg-red-500 hover:text-white ${globalTheme === 'retro' ? 'text-black/40' : 'text-zinc-400'}`}
+                                >
+                                    <X size={20} />
+                                </button>
+                            </div>
+                            <span className={`h-7 px-3 flex items-center justify-end text-[9px] font-mono whitespace-nowrap tracking-widest opacity-80 ${globalTheme === 'retro' ? 'text-[#8B261D]/60' : 'text-zinc-500'}`}>
+                                {currentLang === 'EN' ? "PRESS ESC TO CLOSE" : "点击 ESC 关闭当前面板"}
+                            </span>
                         </div>
-                    </div>
-                    <div className="absolute bottom-2 right-8 md:right-12 z-30 pointer-events-none">
-                        <span className={`text-[9px] font-mono whitespace-nowrap tracking-widest opacity-80 ${globalTheme === 'retro' ? 'text-[#8B261D]/60' : 'text-zinc-500'}`}>
-                            {currentLang === 'EN' ? "PRESS ESC TO CLOSE" : "点击 ESC 关闭当前面板"}
-                        </span>
                     </div>
                 </div>
                 <div className="flex-1 flex overflow-hidden flex-col md:flex-row">
@@ -696,20 +890,21 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                 const isCopied = copiedItemId === (item.id || item.name);
                                 const isPreset = blockId === 'aes_palette_preset';
                                 const itemMechanics = getItemMechanics(item);
+                                const effectiveItemTemp = isSelected ? (faceState[item.name] || directiveTemp) : directiveTemp;
 
                                 return (
                                     <div key={item.id || item.name}
                                         id={`card-${(item.id || item.name).replace(/\s+/g, '_')}`}
                                         onClick={() => {
                                             const isCurrentlySelected = selectedTags.includes(item.name);
-                                            onToggleTag(item.name);
+                                            applySlotSelection(item.name);
                                             if (isEngineLexicon && !isCurrentlySelected && item.directive && typeof item.directive === 'object') {
                                                 const temps: ('bright' | 'dark' | 'tension')[] = ['bright', 'dark', 'tension'];
                                                 const randomTemp = temps[Math.floor(Math.random() * temps.length)];
                                                 setFace(item.name, randomTemp);
                                             }
                                         }}
-                                        className={`relative flex ${isPreset ? 'flex-row items-center py-2 px-4' : 'flex-col p-5 md:p-6'} text-left rounded-xl border-2 transition-all duration-200 group h-full cursor-pointer hover:scale-[1.02] ${isSelected ? (globalTheme === 'retro' ? `bg-white border-[#8B261D] shadow-sm` : `${themeText} bg-zinc-900 ${themeBorder.replace('/50', '')}`) : (globalTheme === 'retro' ? 'bg-white/60 border-black/5 text-black hover:border-[#8B261D]/40' : 'bg-zinc-900/40 border-zinc-800 text-zinc-300 hover:bg-zinc-900 hover:border-zinc-500 hover:text-zinc-100')}`}>
+                                        className={`mist-lexicon-item-card ${isSelected ? 'is-selected' : 'is-unselected'} relative flex ${isPreset ? 'flex-row items-center py-2 px-4' : 'flex-col p-5 md:p-6'} text-left rounded-xl border-2 transition-all duration-200 group h-full cursor-pointer hover:scale-[1.02] ${isSelected ? (globalTheme === 'retro' ? `bg-white border-[#8B261D] shadow-sm` : `${themeText} bg-zinc-900 ${themeBorder.replace('/50', '')}`) : (globalTheme === 'retro' ? 'bg-white/60 border-black/5 text-black hover:border-[#8B261D]/40' : 'bg-zinc-900/40 border-zinc-800 text-zinc-300 hover:bg-zinc-900 hover:border-zinc-500 hover:text-zinc-100')}`}>
 
                                         {isPreset && (item as any).colors && (
                                             <div className="flex items-center gap-3 mr-6 shrink-0">
@@ -762,19 +957,19 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                                                     const currentTemp = faceState[item.name];
 
                                                                     if (isCurrentlySelected && currentTemp === 'bright') {
-                                                                        onToggleTag(item.name);
+                                                                        removeSelectedTag(item.name);
                                                                     } else {
                                                                         if (!isCurrentlySelected) {
-                                                                            onToggleTag(item.name);
+                                                                            applySlotSelection(item.name);
                                                                         }
                                                                         setFace(item.name, 'bright');
                                                                     }
                                                                 }}
-                                                                className={`flex-1 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all relative ${
+                                                                className={`mist-lexicon-card-face-button is-bright ${selectedTags.includes(item.name) && faceState[item.name] === 'bright' ? 'is-locked' : ''} ${effectiveItemTemp === 'bright' ? 'is-effective' : ''} flex-1 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all relative ${
                                                                     // Only highlight if selected AND this is the locked temperature
                                                                     selectedTags.includes(item.name) && faceState[item.name] === 'bright'
                                                                         ? (globalTheme === 'retro' ? 'bg-[#8B261D] text-white shadow-md' : 'bg-amber-500/30 text-amber-300 border-2 border-amber-500')
-                                                                        : (faceState[item.name] || directiveTemp) === 'bright'
+                                                                        : effectiveItemTemp === 'bright'
                                                                         ? (globalTheme === 'retro' ? 'bg-white/60 text-[#8B261D]/40 border border-[#8B261D]/10' : 'bg-black/10 text-amber-400/40 border border-amber-500/20')
                                                                         : (globalTheme === 'retro' ? 'bg-white/40 text-[#8B261D]/30 border border-[#8B261D]/10 hover:bg-white/60' : 'bg-black/20 text-zinc-600 border border-white/5 hover:text-amber-400/60 hover:border-amber-500/30')
                                                                 }`}
@@ -792,18 +987,18 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                                                     const currentTemp = faceState[item.name];
 
                                                                     if (isCurrentlySelected && currentTemp === 'dark') {
-                                                                        onToggleTag(item.name);
+                                                                        removeSelectedTag(item.name);
                                                                     } else {
                                                                         if (!isCurrentlySelected) {
-                                                                            onToggleTag(item.name);
+                                                                            applySlotSelection(item.name);
                                                                         }
                                                                         setFace(item.name, 'dark');
                                                                     }
                                                                 }}
-                                                                className={`flex-1 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all relative ${
+                                                                className={`mist-lexicon-card-face-button is-dark ${selectedTags.includes(item.name) && faceState[item.name] === 'dark' ? 'is-locked' : ''} ${effectiveItemTemp === 'dark' ? 'is-effective' : ''} flex-1 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all relative ${
                                                                     selectedTags.includes(item.name) && faceState[item.name] === 'dark'
                                                                         ? (globalTheme === 'retro' ? 'bg-[#8B261D] text-white shadow-md' : 'bg-indigo-500/30 text-indigo-300 border-2 border-indigo-500')
-                                                                        : (faceState[item.name] || directiveTemp) === 'dark'
+                                                                        : effectiveItemTemp === 'dark'
                                                                         ? (globalTheme === 'retro' ? 'bg-white/60 text-[#8B261D]/40 border border-[#8B261D]/10' : 'bg-black/10 text-indigo-400/40 border border-indigo-500/20')
                                                                         : (globalTheme === 'retro' ? 'bg-white/40 text-[#8B261D]/30 border border-[#8B261D]/10 hover:bg-white/60' : 'bg-black/20 text-zinc-600 border border-white/5 hover:text-indigo-400/60 hover:border-indigo-500/30')
                                                                 }`}
@@ -820,18 +1015,18 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                                                     const currentTemp = faceState[item.name];
 
                                                                     if (isCurrentlySelected && currentTemp === 'tension') {
-                                                                        onToggleTag(item.name);
+                                                                        removeSelectedTag(item.name);
                                                                     } else {
                                                                         if (!isCurrentlySelected) {
-                                                                            onToggleTag(item.name);
+                                                                            applySlotSelection(item.name);
                                                                         }
                                                                         setFace(item.name, 'tension');
                                                                     }
                                                                 }}
-                                                                className={`flex-1 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all relative ${
+                                                                className={`mist-lexicon-card-face-button is-tension ${selectedTags.includes(item.name) && faceState[item.name] === 'tension' ? 'is-locked' : ''} ${effectiveItemTemp === 'tension' ? 'is-effective' : ''} flex-1 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all relative ${
                                                                     selectedTags.includes(item.name) && faceState[item.name] === 'tension'
                                                                         ? (globalTheme === 'retro' ? 'bg-[#8B261D] text-white shadow-md' : 'bg-violet-500/30 text-violet-300 border-2 border-violet-500')
-                                                                        : (faceState[item.name] || directiveTemp) === 'tension'
+                                                                        : effectiveItemTemp === 'tension'
                                                                         ? (globalTheme === 'retro' ? 'bg-white/60 text-[#8B261D]/40 border border-[#8B261D]/10' : 'bg-black/10 text-violet-400/40 border border-violet-500/20')
                                                                         : (globalTheme === 'retro' ? 'bg-white/40 text-[#8B261D]/30 border border-[#8B261D]/10 hover:bg-white/60' : 'bg-black/20 text-zinc-600 border border-white/5 hover:text-violet-400/60 hover:border-violet-500/30')
                                                                 }`}
@@ -895,7 +1090,7 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                                                 ) : (
                                                                     // M7A/M7B: Object with bright/dark/tension
                                                                     // Use locked temperature if available, otherwise use global temperature
-                                                                    <span>{(item.directive as any)[faceState[item.name] || directiveTemp]}</span>
+                                                                    <span>{(item.directive as any)[effectiveItemTemp]}</span>
                                                                 )}
                                                             </div>
                                                         ) : (
@@ -948,10 +1143,10 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                         ) : (
                             <div className={`space-y-3 p-4 rounded-xl border ${globalTheme === 'retro' ? 'bg-[#F2EDDE] border-[#8B261D]/20 shadow-sm' : 'bg-zinc-900 border-zinc-700'}`}>
                                 <div className="flex flex-col md:flex-row gap-4">
-                                    <input value={customInputName} onChange={e => setCustomInputName(e.target.value)} placeholder={currentLang === 'EN' ? "Name (e.g. My Concept)" : "名称 (如: 我的概念)"} className={`flex-1 ${globalTheme === 'retro' ? 'bg-[#F9F7F1] border-black/10 text-black placeholder-black/30' : 'bg-black border-zinc-700 text-white placeholder-zinc-600'} border rounded px-3 py-2 text-sm focus:outline-none focus:border-[#8B261D]`} />
-                                    <input value={customInputCore} onChange={e => setCustomInputCore(e.target.value)} placeholder={currentLang === 'EN' ? "Core Logic" : "核心逻辑"} className={`flex-1 ${globalTheme === 'retro' ? 'bg-[#F9F7F1] border-black/10 text-black placeholder-black/30' : 'bg-black border-zinc-700 text-white placeholder-zinc-600'} border rounded px-3 py-2 text-sm focus:outline-none focus:border-[#8B261D]`} />
+                                    <input value={customInputName} onChange={e => setCustomInputName(e.target.value)} placeholder={currentLang === 'EN' ? "Name (e.g. My Concept)" : "名称 (如: 我的概念)"} className={`mist-lexicon-custom-input flex-1 ${globalTheme === 'retro' ? 'bg-[#F9F7F1] border-black/10 text-black placeholder-black/30' : 'bg-black border-zinc-700 text-white placeholder-zinc-600'} border rounded px-3 py-2 text-sm focus:outline-none focus:border-[#8B261D]`} />
+                                    <input value={customInputCore} onChange={e => setCustomInputCore(e.target.value)} placeholder={currentLang === 'EN' ? "Core Logic" : "核心逻辑"} className={`mist-lexicon-custom-input flex-1 ${globalTheme === 'retro' ? 'bg-[#F9F7F1] border-black/10 text-black placeholder-black/30' : 'bg-black border-zinc-700 text-white placeholder-zinc-600'} border rounded px-3 py-2 text-sm focus:outline-none focus:border-[#8B261D]`} />
                                 </div>
-                                <input value={customInputDef} onChange={e => setCustomInputDef(e.target.value)} placeholder={currentLang === 'EN' ? "Definition" : "详细定义"} className={`w-full ${globalTheme === 'retro' ? 'bg-[#F9F7F1] border-black/10 text-black placeholder-black/30' : 'bg-black border-zinc-700 text-white placeholder-zinc-600'} border rounded px-3 py-2 text-sm focus:outline-none focus:border-[#8B261D]`} />
+                                <input value={customInputDef} onChange={e => setCustomInputDef(e.target.value)} placeholder={currentLang === 'EN' ? "Definition" : "详细定义"} className={`mist-lexicon-custom-input w-full ${globalTheme === 'retro' ? 'bg-[#F9F7F1] border-black/10 text-black placeholder-black/30' : 'bg-black border-zinc-700 text-white placeholder-zinc-600'} border rounded px-3 py-2 text-sm focus:outline-none focus:border-[#8B261D]`} />
                                 <div className="flex justify-end gap-2">
                                     <button onClick={() => setShowCustomInput(false)} className={`px-4 py-2 text-xs font-bold ${globalTheme === 'retro' ? 'text-[#8B261D]/50' : 'text-zinc-500'} hover:opacity-80`}>{currentLang === 'EN' ? "Cancel" : "取消"}</button>
                                     <button onClick={handleAddCustom} disabled={!customInputName} className={`px-6 py-2 text-xs font-bold ${globalTheme === 'retro' ? 'bg-[#8B261D] text-white' : 'bg-white text-black'} rounded hover:opacity-90 disabled:opacity-50`}>{currentLang === 'EN' ? "Add & Select" : "添加并选择"}</button>

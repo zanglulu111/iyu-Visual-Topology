@@ -20,6 +20,7 @@ interface GlobalHomePageProps {
   openProfile: () => void;
   showRings: boolean;
   setShowRings: (show: boolean) => void;
+  onReturnToPortal?: () => void;
 }
 
 // ─── 动画文字组件 ───────────────────────────────────────────
@@ -57,7 +58,7 @@ interface NavCard {
 // ─── 主组件 ────────────────────────────────────────────────
 export const GlobalHomePage: React.FC<GlobalHomePageProps> = ({
   lang, setLang, setPage, setViewMode, setInitialProtocol,
-  currentUser, openAuth, openProfile, showRings, setShowRings
+  currentUser, openAuth, openProfile, showRings, setShowRings, onReturnToPortal
 }) => {
   const { theme, toggleTheme } = useTheme();
   const isRetro = theme === 'retro';
@@ -88,9 +89,9 @@ export const GlobalHomePage: React.FC<GlobalHomePageProps> = ({
   const navCards: NavCard[] = [
     {
       icon: Cpu,
-      titleCn: '工具层',
-      titleEn: 'THE ENGINE',
-      descCn: '启动核心驱动器，进入视觉生产的符号链。构建你自己的迷雾。',
+      titleCn: '核心驱动器',
+      titleEn: 'CORE DRIVERS',
+      descCn: '启动欲望再生产，进入视觉生产的符号链。构建你自己的迷雾。',
       descEn: 'Activate the core driver. Enter the symbolic chain of visual production.',
       color: '#FFD700',
       action: () => setPage(0),
@@ -141,19 +142,19 @@ export const GlobalHomePage: React.FC<GlobalHomePageProps> = ({
         } relative`}
       >
         {/* Theme Divider Line - Global Consistency Accent */}
-        <div 
-          className="absolute bottom-0 left-0 right-0 h-px transition-all duration-500 z-10" 
-          style={{ 
+        <div
+          className="absolute bottom-0 left-0 right-0 h-px transition-all duration-500 z-10"
+          style={{
             backgroundColor: isRetro ? '#8B261D' : 'rgba(255, 215, 0, 0.15)',
             opacity: isRetro ? 0.2 : 0.15,
             boxShadow: isRetro ? 'none' : '0 0 10px rgba(212,175,55,0.1)'
-          }} 
+          }}
         />
 
         {/* 左侧：返回入口 */}
         <div className="flex items-center gap-5">
           <button
-            onClick={() => setPage(-1)}
+            onClick={() => onReturnToPortal ? onReturnToPortal() : setPage(-1)}
             className={`text-[9px] font-mono tracking-[0.15em] transition-all duration-300 hover:scale-105 active:scale-95 px-2 py-1 rounded-sm border flex items-center gap-1.5 ${
               isRetro
                 ? 'text-[var(--text-accent)] border-[var(--border-main)] hover:border-[var(--border-accent)]'
@@ -171,7 +172,7 @@ export const GlobalHomePage: React.FC<GlobalHomePageProps> = ({
             />
           </button>
 
-          <span 
+          <span
             className={`font-serif font-bold text-xs uppercase tracking-widest transition-colors duration-500 ${
               isRetro ? 'text-[#8B261D]' : 'text-white'
             }`}
@@ -182,20 +183,23 @@ export const GlobalHomePage: React.FC<GlobalHomePageProps> = ({
 
         {/* 右侧：控制区 - Synchronized with AppHeader */}
         <div className="flex items-center flex-row-reverse gap-4">
-          <div className={`flex items-center gap-1 px-1 py-1 rounded-full transition-all duration-500 border border-transparent hover:border-white/5 backdrop-blur-sm hover:backdrop-blur-md 
+          <div className={`flex items-center gap-1 px-1 py-1 rounded-full transition-all duration-500 border border-transparent hover:border-white/5 backdrop-blur-sm hover:backdrop-blur-md
             ${isRetro ? 'hover:bg-[#FDFCF8]/90 hover:border-[#8B261D]/15' : 'hover:bg-black/30'}`}>
-            
+
             {/* 1. Ring Toggle */}
             <button
               onClick={() => setShowRings(!showRings)}
               className={`flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300 border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-90 focus:outline-none ${
                 showRings
-                  ? isRetro ? 'text-[#8B261D]' : 'text-white/80'
-                  : isRetro ? 'text-zinc-600 hover:text-black' : 'text-zinc-500 hover:text-white'
+                  ? 'text-[var(--mist-active-accent)]'
+                  : (isRetro ? 'text-zinc-600 hover:text-black' : 'text-zinc-500 hover:text-white')
               }`}
               title={lang === 'CN' ? '背景圆环开关' : 'Background Rings Toggle'}
             >
-              <Aperture size={13} className={`shrink-0 transition-all duration-300 ${showRings ? 'rotate-180' : ''}`} />
+              <Aperture
+                size={13}
+                className={`shrink-0 transition-all duration-700 ${showRings ? 'rotate-[360deg] text-[var(--mist-active-accent)]' : 'rotate-0'} ${showRings ? 'cult-pulse' : ''}`}
+              />
             </button>
 
             {/* 2. Theme Toggle */}

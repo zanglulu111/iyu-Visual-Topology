@@ -89,13 +89,13 @@ export const AestheticInputSidebar: React.FC<AestheticInputSidebarProps> = ({
               }
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <span className={`text-[10px] px-2 py-1 rounded font-mono border ${theme === 'retro' ? 'bg-[#8B261D]/5 text-[#8B261D] border-[#8B261D]/10' : 'bg-rose-900/20 text-rose-400 border-rose-500/20'}`}>Format: "Key: Value"</span>
+              <span className={`text-[10px] px-2 py-1 rounded font-mono border ${theme === 'retro' ? 'bg-[#8B261D]/5 text-[#8B261D] border-[#8B261D]/10' : 'bg-[var(--mist-active-accent)]/20 text-[var(--mist-active-accent)] border-[var(--mist-active-accent)]/20'}`}>Format: "Key: Value"</span>
             </div>
           </div>
 
           {lastLog && (
             <div className="flex flex-col items-end animate-in fade-in slide-in-from-bottom-2">
-              <div className={`p-4 rounded-2xl rounded-tr-sm shadow-lg max-w-[90%] whitespace-pre-wrap font-mono text-xs ${theme === 'retro' ? 'bg-[#8B261D] text-white shadow-[#8B261D]/10' : 'bg-rose-500 text-black'}`}>
+              <div className={`p-4 rounded-2xl rounded-tr-sm shadow-lg max-w-[90%] whitespace-pre-wrap font-mono text-xs ${theme === 'retro' ? 'bg-[#8B261D] text-white shadow-[#8B261D]/10' : 'bg-[var(--mist-active-accent)] text-black'}`}>
                 {lastLog}
               </div>
               <span className={`text-[9px] mt-1 mr-1 ${theme === 'retro' ? 'text-black/30' : 'text-zinc-600'}`}>Mapped</span>
@@ -105,7 +105,7 @@ export const AestheticInputSidebar: React.FC<AestheticInputSidebarProps> = ({
           {isProcessing && (
             <div className="flex flex-col items-start animate-in fade-in slide-in-from-bottom-2">
               <div className={`p-4 rounded-2xl rounded-tl-sm text-sm shadow-lg flex items-center gap-3 border ${theme === 'retro' ? 'bg-transparent border-[var(--border-main)] text-black font-serif' : 'bg-zinc-800 border-zinc-700 text-zinc-300'}`}>
-                <Loader2 size={16} className={`animate-spin ${theme === 'retro' ? 'text-[#8B261D]' : 'text-rose-400'}`} />
+                <Loader2 size={16} className={`animate-spin ${theme === 'retro' ? 'text-[#8B261D]' : 'text-[var(--mist-active-accent)]'}`} />
                 <span>
                   {lang === 'EN' ? "Parsing Specs..." : "正在解析参数..."}
                 </span>
@@ -121,7 +121,7 @@ export const AestheticInputSidebar: React.FC<AestheticInputSidebarProps> = ({
             onChange={(e) => setTextInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={getPlaceholder()}
-            className={`w-full h-48 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)] text-[var(--text-main)] placeholder-[var(--text-muted)] focus:ring-[var(--text-accent)]/30' : 'bg-[#080808] border-zinc-700 text-white placeholder-zinc-600 focus:ring-rose-500/50'} border focus:border-rose-500 rounded-xl p-4 pr-14 text-xs font-mono resize-none focus:outline-none focus:ring-1 transition-all shadow-inner leading-relaxed custom-scrollbar`}
+            className={`w-full h-48 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)] text-[var(--text-main)] placeholder-[var(--text-muted)] focus:ring-[var(--text-accent)]/30' : 'bg-[#080808] border-zinc-700 text-white placeholder-zinc-600 focus:ring-[var(--mist-active-accent)]/50'} border focus:border-[var(--mist-active-accent)] rounded-xl p-4 pr-14 text-xs font-mono resize-none focus:outline-none focus:ring-1 transition-all shadow-inner leading-relaxed custom-scrollbar`}
           />
           <div className="absolute bottom-3 right-3 flex gap-2">
             {inputText && (
@@ -142,13 +142,13 @@ export const AestheticInputSidebar: React.FC<AestheticInputSidebarProps> = ({
                 inputText
               }}
               disabled={!inputText.trim()}
-              className={`${inputText.trim() ? 'bg-zinc-800 text-rose-300 border-zinc-700 hover:border-rose-500' : 'bg-zinc-800 text-zinc-600 border-zinc-800'} p-2 rounded-lg`}
+              className={`${inputText.trim() ? 'bg-zinc-800 text-[var(--mist-active-accent)] border-zinc-700 hover:border-[var(--mist-active-accent)]' : 'bg-zinc-800 text-zinc-600 border-zinc-800'} p-2 rounded-lg`}
               iconSize={18}
             />
             <button
               onClick={handleSubmit}
               disabled={isProcessing || !inputText.trim()}
-              className={`p-2 rounded-lg transition-all shadow-lg flex items-center justify-center ${inputText.trim() ? 'bg-rose-500 text-black hover:bg-rose-400 hover:scale-105' : 'bg-zinc-800 text-zinc-600 cursor-not-allowed'}`}
+              className={`p-2 rounded-lg transition-all shadow-lg flex items-center justify-center ${inputText.trim() ? 'bg-[var(--mist-active-accent)] text-black hover:brightness-110 hover:scale-105' : 'bg-zinc-800 text-zinc-600 cursor-not-allowed'}`}
             >
               {isProcessing ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
             </button>

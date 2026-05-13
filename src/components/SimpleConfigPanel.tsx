@@ -10,7 +10,6 @@ import {
   getModelOption,
   getProviderForModel,
 } from '../types/config';
-import { DRIVERS } from '../../constants';
 import {
   AlertTriangle,
   Check,
@@ -78,9 +77,7 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
 
   const getThemeColor = (id: DriverType | null | undefined) => {
     if (isRetro) {
-      // Use the driver's specific retro accent if available, otherwise fallback to the active accent variable
-      const driver = DRIVERS.find(d => d.id === id);
-      return driver?.retroAccent || 'var(--mist-active-accent)';
+      return 'var(--mist-archive-red)';
     }
     return id === DriverType.COMMERCIAL ? 'var(--mist-commercial-cyan)' : 'var(--mist-archive-red)';
   };
@@ -284,7 +281,7 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
     const showBaseUrl = provider !== 'gemini' || providerConfig.mode === 'proxy';
 
     return (
-      <div className={`${isRetro ? 'bg-[#F4EFE0]' : 'bg-zinc-900/30'} rounded-sm p-4 border ${panelBorder}`}>
+      <div className={`mist-config-provider-card ${isRetro ? 'bg-[#F4EFE0]' : 'bg-zinc-900/30'} rounded-sm p-4 border ${panelBorder}`}>
         <div className="flex items-start justify-between mb-3 gap-3">
           <div>
             <div className="flex items-center gap-2">
@@ -388,11 +385,7 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
           )}
           <button
             onClick={() => { handleSave(); if (onClose) onClose(); }}
-            className={`mist-app-primary-action flex items-center gap-2 px-5 py-2 ${isRetro ? 'bg-[var(--mist-active-accent)] text-white' : 'text-black'} font-bold text-[11px] tracking-widest rounded-sm transition-all uppercase hover:brightness-110 active:scale-95`}
-            style={{
-              backgroundColor: isRetro ? 'var(--mist-active-accent)' : accentColor,
-              boxShadow: isRetro ? 'none' : `0 0 20px ${accentColor}33`,
-            }}
+            className="mist-config-deploy-button flex items-center gap-2 px-5 py-2 font-bold text-[11px] tracking-widest rounded-sm transition-all uppercase active:scale-95"
           >
             <Save className="w-3.5 h-3.5" />
             {lang === 'CN' ? '部署配置' : 'DEPLOY'}
@@ -471,7 +464,7 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
                 return (
                   <div
                     key={preset.id}
-                    className={`group flex items-center gap-1.5 px-3 py-1.5 rounded-sm border text-[10px] font-mono transition-all cursor-pointer ${isActive
+                    className={`mist-config-preset-chip group flex items-center gap-1.5 px-3 py-1.5 rounded-sm border text-[10px] font-mono transition-all cursor-pointer ${isActive
                       ? isRetro
                         ? 'bg-[var(--mist-active-accent)] text-white border-[var(--mist-active-accent)]'
                         : 'bg-white/10 text-white border-zinc-500'
@@ -520,7 +513,7 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
               const providerColor = isRetro ? 'var(--mist-active-accent)' : 'var(--mist-archive-red)';
 
               return (
-                <div key={engine.id} className={`${isRetro ? 'bg-[#F4EFE0] border-[var(--mist-active-accent)]/10 hover:border-[var(--mist-active-accent)]/30' : 'bg-zinc-900/10 border-zinc-800/40 hover:bg-white/[0.02]'} border rounded-sm p-3.5 transition-colors group`}>
+                <div key={engine.id} className={`mist-config-engine-card ${isRetro ? 'bg-[#F4EFE0] border-[var(--mist-active-accent)]/10 hover:border-[var(--mist-active-accent)]/30' : 'bg-zinc-900/10 border-zinc-800/40 hover:bg-white/[0.02]'} border rounded-sm p-3.5 transition-colors group`}>
                   <div className="flex flex-col h-full justify-between">
                     <div className="space-y-1 mb-2">
                       <div className="flex items-center justify-between mb-1">

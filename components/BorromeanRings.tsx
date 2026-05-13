@@ -27,38 +27,22 @@ export const BorromeanRings: React.FC<BorromeanRingsProps> = ({
     const strokeColorHigh = isRetro ? (vivid ? 'rgba(139, 38, 29, 1.0)' : 'rgba(139, 38, 29, 0.9)') : (vivid ? 'rgba(255, 255, 255, 1.0)' : 'rgba(255, 255, 255, 0.95)');
     const textColor = isRetro ? '#5D2E2B' : '#FFFFFF';
 
-    // Premium themed palette — Desaturated, driver-vivid, or homepage faint.
+    // Premium themed palette — Desaturated or Vivid or Homepage Faint (Based on RSI)
+    // Premium themed palette — Desaturated or Vivid or Homepage Faint (Based on RSI)
     const ringHex = isHomepage ? {
-        real: isRetro ? 'rgba(139, 38, 29, 0.45)' : 'rgba(245, 158, 11, 0.55)',
-        symbolic: isRetro ? 'rgba(156, 130, 74, 0.75)' : 'rgba(6, 182, 212, 0.5)',
-        imaginary: isRetro ? 'rgba(106, 125, 106, 0.75)' : 'rgba(244, 63, 94, 0.5)',
-        sinthome: isRetro ? 'rgba(80, 102, 120, 0.7)' : 'rgba(16, 185, 129, 0.45)',
+        // More visible RSI-based palette for Homepage gateway/background
+        real: isRetro ? 'rgba(139, 38, 29, 0.45)' : 'rgba(245, 158, 11, 0.55)',       // Real (Amber-based)
+        symbolic: isRetro ? 'rgba(156, 130, 74, 0.75)' : 'rgba(6, 182, 212, 0.5)',   // Symbolic (Cyan-based)
+        imaginary: isRetro ? 'rgba(106, 125, 106, 0.75)' : 'rgba(244, 63, 94, 0.5)',  // Imaginary (Rose-based)
+        sinthome: isRetro ? 'rgba(80, 102, 120, 0.7)' : 'rgba(16, 185, 129, 0.45)',   // Sinthome (Emerald-based)
     } : (driverType || vivid) ? {
-        real: isRetro ? '#A3483E'
-            : driverType === DriverType.COMMERCIAL ? '#06B6D4'
-            : driverType === DriverType.EXPERIMENTAL ? '#A855F7'
-            : driverType === DriverType.AESTHETIC ? '#F43F5E'
-            : driverType === DriverType.TRAILER ? '#F97316'
-            : '#F59E0B',
-        symbolic: isRetro ? '#9C824A'
-            : driverType === DriverType.COMMERCIAL ? '#22D3EE'
-            : driverType === DriverType.EXPERIMENTAL ? '#C084FC'
-            : driverType === DriverType.AESTHETIC ? '#FB7185'
-            : driverType === DriverType.TRAILER ? '#FB923C'
-            : '#06B6D4',
-        imaginary: isRetro ? '#6A7D6A'
-            : driverType === DriverType.COMMERCIAL ? '#0891B2'
-            : driverType === DriverType.EXPERIMENTAL ? '#9333EA'
-            : driverType === DriverType.AESTHETIC ? '#E11D48'
-            : driverType === DriverType.TRAILER ? '#EA580C'
-            : '#F43F5E',
-        sinthome: isRetro ? '#506678'
-            : driverType === DriverType.COMMERCIAL ? '#0E7490'
-            : driverType === DriverType.EXPERIMENTAL ? '#7E22CE'
-            : driverType === DriverType.AESTHETIC ? '#BE123C'
-            : driverType === DriverType.TRAILER ? '#C2410C'
-            : '#10B981',
+        // Vivid mode or Driver-based mode for Topology View
+        real: isRetro ? '#A3483E' : (driverType === DriverType.COMMERCIAL ? '#06B6D4' : driverType === DriverType.EXPERIMENTAL ? '#D946EF' : driverType === DriverType.AESTHETIC ? '#8B5CF6' : driverType === DriverType.TRAILER ? '#F97316' : driverType === DriverType.SUTURE ? '#22D3EE' : '#F59E0B'),
+        symbolic: isRetro ? '#9C824A' : (driverType === DriverType.COMMERCIAL ? '#22D3EE' : driverType === DriverType.EXPERIMENTAL ? '#F0ABFC' : driverType === DriverType.AESTHETIC ? '#A78BFA' : driverType === DriverType.TRAILER ? '#FB923C' : driverType === DriverType.SUTURE ? '#67E8F9' : '#06B6D4'),
+        imaginary: isRetro ? '#6A7D6A' : (driverType === DriverType.COMMERCIAL ? '#0891B2' : driverType === DriverType.EXPERIMENTAL ? '#A21CAF' : driverType === DriverType.AESTHETIC ? '#6D28D9' : driverType === DriverType.TRAILER ? '#EA580C' : driverType === DriverType.SUTURE ? '#0E7490' : '#F43F5E'),
+        sinthome: isRetro ? '#506678' : (driverType === DriverType.COMMERCIAL ? '#0E7490' : driverType === DriverType.EXPERIMENTAL ? '#86198F' : driverType === DriverType.AESTHETIC ? '#4C1D95' : driverType === DriverType.TRAILER ? '#C2410C' : driverType === DriverType.SUTURE ? '#06B6D4' : '#10B981'),
     } : {
+        // Default mode for other views
         real: isRetro ? '#6D4340' : 'rgba(130, 160, 190, 0.6)',
         symbolic: isRetro ? '#5C543D' : 'rgba(180, 160, 120, 0.6)',
         imaginary: isRetro ? '#343B43' : 'rgba(100, 130, 160, 0.6)',
@@ -75,10 +59,10 @@ export const BorromeanRings: React.FC<BorromeanRingsProps> = ({
     };
 
     const labels = {
-        m0: vivid ? "SINTHOME 圣状" : getTag('engine_m0', '圣状'),
-        m1: vivid ? "SYMBOLIC 象征界" : getTag('engine_m1', '象征界'),
-        m2: vivid ? "REAL 实在界" : getTag('engine_m2', '实在界'),
-        m3: vivid ? "IMAGINARY 想象界" : getTag('engine_m3', '想象界'),
+        m0: (vivid || driverType === DriverType.SUTURE) ? (driverType === DriverType.SUTURE ? "SUTURE 缝合" : "SINTHOME 圣状") : getTag('engine_m0', '圣状'),
+        m1: (vivid || driverType === DriverType.SUTURE) ? (driverType === DriverType.SUTURE ? "OBJECT a 对象a" : "SYMBOLIC 象征界") : getTag('engine_m1', '象征界'),
+        m2: (vivid || driverType === DriverType.SUTURE) ? (driverType === DriverType.SUTURE ? "DESIRE 欲望" : "REAL 实在界") : getTag('engine_m2', '实在界'),
+        m3: (vivid || driverType === DriverType.SUTURE) ? (driverType === DriverType.SUTURE ? "LACK 匮乏" : "IMAGINARY 想象界") : getTag('engine_m3', '想象界'),
     };
 
     const containerClass = centered
@@ -97,9 +81,9 @@ export const BorromeanRings: React.FC<BorromeanRingsProps> = ({
             <div className={innerContainerClass} style={centered ? { transform: 'scale(1.0)', transformOrigin: 'center' } : {}}>
                 <style>{`
                     .borromean-svg-root * {
-                        transition: stroke 1.2s cubic-bezier(0.16, 1, 0.3, 1), 
-                                    fill 1.2s cubic-bezier(0.16, 1, 0.3, 1), 
-                                    stroke-opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), 
+                        transition: stroke 1.2s cubic-bezier(0.16, 1, 0.3, 1),
+                                    fill 1.2s cubic-bezier(0.16, 1, 0.3, 1),
+                                    stroke-opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1),
                                     stop-color 1.2s cubic-bezier(0.16, 1, 0.3, 1);
                         will-change: stroke, fill, stroke-opacity;
                     }
@@ -128,7 +112,7 @@ export const BorromeanRings: React.FC<BorromeanRingsProps> = ({
                         <circle cx="100" cy="100" r="95" fill="none" stroke={strokeColorHigh} strokeWidth={isRetro ? "0.15" : "0.05"} strokeDasharray="0.5 2" />
                         <circle cx="100" cy="100" r="92" fill="none" stroke={strokeColor} strokeWidth={isRetro ? "0.2" : "0.1"} strokeDasharray="4 2" />
                         <circle cx="100" cy="100" r="90" fill="none" stroke={strokeColor} strokeWidth={isRetro ? "0.15" : "0.05"} />
-                        
+
                         <circle cx="100" cy="100" r="80" fill="none" stroke={strokeColor} strokeWidth={isRetro ? "0.3" : "0.15"} />
                         <circle cx="100" cy="100" r="78" fill="none" stroke={strokeColorHigh} strokeWidth={isRetro ? "0.15" : "0.05"} strokeDasharray="1 4" />
 
@@ -137,9 +121,15 @@ export const BorromeanRings: React.FC<BorromeanRingsProps> = ({
 
                         <text fill={textColor} fontSize="2.2" fontFamily="'Inter', monospace"
                                fontWeight={isRetro ? "700" : "300"} letterSpacing="0.6" className="uppercase" textLength="280" opacity={vivid ? "0.9" : (isRetro ? "0.8" : "0.3")}>
-                            <textPath href="#outerPath" startOffset="5%" textAnchor="start">T.BORROMEAN // RSI_NODE</textPath>
-                            <textPath href="#outerPath" startOffset="45%" textAnchor="middle">OBSERVATORY_CORE</textPath>
-                            <textPath href="#outerPath" startOffset="85%" textAnchor="end">SYS.ACTIVE // REV.2</textPath>
+                            <textPath href="#outerPath" startOffset="5%" textAnchor="start">
+                                {driverType === DriverType.SUTURE ? "SUTURE_OPERATOR // VIDEO_NODE" : "T.BORROMEAN // RSI_NODE"}
+                            </textPath>
+                            <textPath href="#outerPath" startOffset="45%" textAnchor="middle">
+                                {driverType === DriverType.SUTURE ? "CINEMATIC_TOPOLOGY" : "OBSERVATORY_CORE"}
+                            </textPath>
+                            <textPath href="#outerPath" startOffset="85%" textAnchor="end">
+                                {driverType === DriverType.SUTURE ? "SYSTEM.SUTURE // REV.4" : "SYS.ACTIVE // REV.2"}
+                            </textPath>
                         </text>
                     </g>
 
@@ -173,7 +163,7 @@ export const BorromeanRings: React.FC<BorromeanRingsProps> = ({
                             from="0 100 100" to="-360 100 100" dur="260s" repeatCount="indefinite" />
                         <circle cx="100" cy="100" r="75" fill="none" stroke={strokeColorHigh} strokeWidth={isRetro ? "0.15" : "0.05"} strokeDasharray="1 3" />
                         <circle cx="100" cy="100" r="70" fill="none" stroke={strokeColor} strokeWidth={isRetro ? "0.2" : "0.1"} />
-                        
+
                         <path d="M 100,20 L 100,30 M 100,170 L 100,180 M 20,100 L 30,100 M 170,100 L 180,100" stroke={strokeColorHigh} strokeWidth={isRetro ? "0.3" : "0.15"} />
                         <path d="M 98,25 L 102,25 M 98,175 L 102,175 M 25,98 L 25,102 M 175,98 L 175,102" stroke={strokeColorHigh} strokeWidth={isRetro ? "0.2" : "0.1"} />
                     </g>
@@ -183,7 +173,7 @@ export const BorromeanRings: React.FC<BorromeanRingsProps> = ({
                             from="0 100 100" to="360 100 100" dur="120s" repeatCount="indefinite" />
                         <polygon points="100,75 80,110 120,110"
                             fill="none" stroke={strokeColor} strokeWidth="0.1" strokeDasharray="1 2" />
-                            
+
                         <line x1="50" y1="100" x2="150" y2="100" stroke={strokeColorHigh} strokeWidth="0.05" strokeDasharray="0.5 1.5" />
                         <line x1="100" y1="50" x2="100" y2="150" stroke={strokeColorHigh} strokeWidth="0.05" strokeDasharray="0.5 1.5" />
 

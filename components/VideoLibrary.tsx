@@ -2,9 +2,10 @@
 // 邪典影像 - Cult Cinema 沉浸式影像档案馆
 // 复刻 601 Studio 风格的全屏沉浸式视频展示界面
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { Plus, Trash2, Loader2, ExternalLink, Volume2, VolumeX, Pause, Play, Info, X, ArrowDown } from 'lucide-react';
+import { Plus, Trash2, Loader2, ExternalLink, Volume2, VolumeX, Pause, Play, Info, X, ArrowDown, Aperture } from 'lucide-react';
 import { videoService, Video, getEmbedUrl, getYouTubeThumbnail } from '../services/videoService';
 import { useTheme } from '../contexts/ThemeContext';
+import { BorromeanRings } from './BorromeanRings';
 
 interface VideoLibraryProps {
     isOpen: boolean;
@@ -12,6 +13,8 @@ interface VideoLibraryProps {
     lang: 'CN' | 'EN';
     isAdmin?: boolean;
     isFullScreen?: boolean;
+    showRings: boolean;
+    setShowRings: (show: boolean) => void;
 }
 
 // 大号装饰性编号字体样式
@@ -26,7 +29,7 @@ const decorativeNumberStyle: React.CSSProperties = {
 };
 
 // 主色调：暗黑态收束为黑 / 白 / 灰 / 红；复古态沿用纸本与朱砂。
-export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lang, isAdmin = false, isFullScreen = false }) => {
+export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lang, isAdmin = false, isFullScreen = false, showRings, setShowRings }) => {
     const { theme } = useTheme();
     const isRetro = theme === 'retro';
 
@@ -73,7 +76,7 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
             const data = isAdmin
                 ? await videoService.getAllVideos()
                 : await videoService.getPublishedVideos(selectedCategory || undefined);
-            
+
             // 如果视频数量太少，注入几个占位视频方便预览效果
             let displayVideos = [...data];
             if (displayVideos.length < 5) {
@@ -88,10 +91,10 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                 const needed = 6 - displayVideos.length;
                 displayVideos = [...displayVideos, ...placeholderVideos.slice(0, needed)];
             }
-            
+
             setVideos(displayVideos);
             const cats = await videoService.getCategories();
-            
+
             // 补充一些占位分类
             const displayCats = new Set([...cats, 'CYBERPUNK', 'SCI-FI', 'PHILOSOPHY', 'ART FILM', 'ANIME']);
             setCategories(Array.from(displayCats));
@@ -442,6 +445,7 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                 @keyframes cultFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
                 .cult-fade-in { animation: cultFadeIn 0.8s ease-out forwards; }
                 .cult-slide-up { animation: cultSlideUp 0.8s ease-out forwards; }
+                .cult-pulse { animation: cultPulse 2s infinite ease-in-out; }
                 .cult-gallery-scroll {
                     scroll-snap-type: y mandatory;
                     -webkit-overflow-scrolling: touch;
@@ -604,8 +608,40 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                              background: viewMode === 'archive' ? RED : CREAM_DIM,
                          }} />
                      </button>
+                     {/* Ring Toggle */}
+                     <button
+                        onClick={() => setShowRings(!showRings)}
+                        style={{
+                            background: 'none', border: 'none', cursor: 'pointer',
+                            color: showRings ? (isRetro ? RED : 'rgba(255,215,0,0.8)') : CREAM_DIM,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            transition: 'all 0.3s',
+                        }}
+                        onMouseEnter={e => !showRings && (e.currentTarget.style.color = CREAM)}
+                        onMouseLeave={e => !showRings && (e.currentTarget.style.color = CREAM_DIM)}
+                        title={lang === 'CN' ? "背景圆环开关" : "Background Rings Toggle"}
+                    >
+                        <Aperture
+                            size={14}
+                            className={`shrink-0 transition-all duration-700 ${showRings ? 'rotate-[360deg] text-amber-400' : 'rotate-0'}`}
+                        />
+                    </button>
                 </div>
             </div>
+
+            {/* ═══ 背景圆环 ═══ */}
+            {showRings && (
+                <div className="mist-labyrinth-rings" style={{
+                    opacity: isRetro ? 0.48 : 0.42,
+                    pointerEvents: 'none',
+                    inset: '-5% -10% -5% -10%',
+                    filter: isRetro ? 'none' : 'saturate(0.7) contrast(1.1) brightness(1.1)',
+                    zIndex: 1,
+                    position: 'absolute'
+                }}>
+                    <BorromeanRings centered={true} opacity={1} vivid={true} />
+                </div>
+            )}
 
             {/* ═══ 加载状态 ═══ */}
             {loading && (

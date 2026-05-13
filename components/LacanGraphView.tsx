@@ -32,7 +32,7 @@ const AnimatedText = ({ cn, en, lang, className = "", hClass = "h-5" }: { cn: Re
 );
 
 // Data structure supporting dual language
-const DESCRIPTIONS: Record<string, { 
+const DESCRIPTIONS: Record<string, {
     CN: { title: string; subtitle: string; desc: string; formula: string; connections: string[] },
     EN: { title: string; subtitle: string; desc: string; formula: string; connections: string[] }
 }> = {
@@ -262,8 +262,8 @@ const DESCRIPTIONS: Record<string, {
     }
 };
 
-export const LacanGraphView: React.FC<LacanGraphViewProps> = ({ 
-    lang, 
+export const LacanGraphView: React.FC<LacanGraphViewProps> = ({
+    lang,
     setLang,
     onClose,
     openManual,
@@ -303,7 +303,7 @@ export const LacanGraphView: React.FC<LacanGraphViewProps> = ({
     return (
         <div className={`flex flex-col h-full w-full bg-[var(--bg-main)] text-[var(--accent-color)] font-sans overflow-hidden transition-colors duration-500`}>
             {isRetro && <div className="absolute inset-0 pointer-events-none opacity-30 mix-blend-multiply z-0" style={{ backgroundImage: 'var(--pattern-aged)' }}></div>}
-            
+
         {/* Header - Unified AppHeader Style */}
         <header className={`shrink-0 z-50 h-14 flex items-center justify-between px-6 transition-all duration-500 bg-[var(--bg-header)] backdrop-blur-md border-b ${theme === 'retro' ? 'border-[var(--border-main)]' : 'border-white/[0.06]'} relative animate-page-dissolve`}>
             {/* Accent bottom line */}
@@ -339,8 +339,8 @@ export const LacanGraphView: React.FC<LacanGraphViewProps> = ({
                 <div className="relative group/search">
                     <div className={`relative flex items-center ${theme === 'retro' ? 'bg-white/40 border-black/20 group-hover/search:border-black/40 hover:bg-white/60' : 'bg-black/20 border-white/10 hover:bg-black/40'} border rounded-full px-4 py-1.5 transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] shadow-sm hover:shadow-lg w-64 md:w-80 group/input`}>
                         <Search size={12} className={`mr-2 transition-colors duration-500 ${theme === 'retro' ? 'text-black/40' : 'text-zinc-500'} group-hover/input:scale-110 transition-transform duration-300`} />
-                        <input 
-                            type="text" 
+                        <input
+                            type="text"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder={lang === 'CN' ? '搜索协议、档案或理论词条...' : 'Search protocols, archives or codex...'}
@@ -394,7 +394,7 @@ export const LacanGraphView: React.FC<LacanGraphViewProps> = ({
                     </button>
 
                     {/* 2. Language Toggle */}
-                    <button 
+                    <button
                         onClick={toggleLang}
                         className={`text-[10px] font-bold ${theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'} transition-all duration-300 w-7 h-7 flex items-center justify-center rounded-sm tracking-widest hover:bg-white/5 hover:scale-110 active:scale-90`}
                         title="Toggle Language"
@@ -403,7 +403,7 @@ export const LacanGraphView: React.FC<LacanGraphViewProps> = ({
                     </button>
 
                     {/* 3. Theme Toggle */}
-                    <button 
+                    <button
                         onClick={toggleTheme}
                         className={`flex items-center justify-center w-7 h-7 rounded-sm ${theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'} transition-all duration-300 hover:bg-white/5 hover:scale-110 active:scale-90`}
                         title={theme === 'dark' ? "切换为复古主题" : "切换为暗黑主题"}
@@ -411,27 +411,29 @@ export const LacanGraphView: React.FC<LacanGraphViewProps> = ({
                         {theme === 'dark' ? <Moon size={14} /> : <Sun size={14} className="text-[var(--mist-active-accent)]" />}
                     </button>
 
-                    {/* 4. Ring Toggle */}
                     <button
                         onClick={() => setShowRings(!showRings)}
                         className={`flex items-center justify-center w-7 h-7 rounded-sm transition-all duration-300 hover:bg-white/5 hover:scale-110 active:scale-90 focus:outline-none ${
                             showRings
-                                ? (theme === 'retro' ? 'text-[var(--mist-active-accent)]' : 'text-gold-primary')
+                                ? 'text-[var(--mist-active-accent)]'
                                 : (theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white')
                         }`}
                         title={lang === 'CN' ? "背景圆环开关" : "Background Rings Toggle"}
                     >
-                        <Aperture size={14} className={`shrink-0 transition-all duration-300 ${showRings ? 'rotate-180' : ''}`} />
+                        <Aperture
+                            size={14}
+                            className={`shrink-0 transition-all duration-700 ${showRings ? 'rotate-[360deg] text-[var(--mist-active-accent)]' : 'rotate-0'}`}
+                        />
                     </button>
                 </div>
             </div>
         </header>
 
             <div className="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
-                
+
                 {/* LEFT AREA: Content Section */}
                 <div className={`w-full lg:w-1/2 bg-[var(--bg-panel)] border-r border-[var(--border-main)] flex flex-col z-20 shadow-[40px_0_120px_rgba(0,0,0,0.9)] flex-shrink-0 relative overflow-hidden transition-colors duration-500`}>
-                    
+
                     <header className="p-8 lg:px-12 pt-12 pb-6 relative z-10 flex-shrink-0">
                         <div className="flex flex-col">
                             <h1 className="text-5xl lg:text-6xl font-serif font-black tracking-tight text-white leading-tight">
@@ -449,7 +451,7 @@ export const LacanGraphView: React.FC<LacanGraphViewProps> = ({
                     </header>
 
                     <div className="flex-1 flex flex-col overflow-hidden px-8 lg:px-12 pb-6 gap-5">
-                        
+
                         <div className={`flex-1 min-h-0 flex flex-col border border-[var(--border-main)] bg-[var(--bg-card)] rounded-sm overflow-hidden relative group transition-colors duration-500`}>
                             {activeInfo ? (
                                 <div className="flex-1 flex flex-col overflow-hidden">
@@ -496,9 +498,9 @@ export const LacanGraphView: React.FC<LacanGraphViewProps> = ({
                                         </div>
                                         <div className="flex flex-wrap gap-2">
                                             {activeInfo.connections.map(id => (
-                                                <div 
-                                                    key={id} 
-                                                    onClick={() => handleNodeClick(id)} 
+                                                <div
+                                                    key={id}
+                                                    onClick={() => handleNodeClick(id)}
                                                     className="px-2.5 py-1 rounded-sm border border-gold-primary/15 bg-gold-primary/5 text-[9px] font-black text-gold-primary cursor-pointer hover:bg-gold-primary hover:text-black transition-all"
                                                 >
                                                     {renderId(id)}
@@ -530,11 +532,11 @@ export const LacanGraphView: React.FC<LacanGraphViewProps> = ({
                                     {lang === 'CN' ? '能指项索引 / SIGNIFIER INDEX' : 'SIGNIFIER INDEX'}
                                 </h4>
                             </div>
-                            
+
                             <div className="grid grid-cols-5 gap-1.5">
                                 {Object.keys(DESCRIPTIONS).map((id) => (
-                                    <button 
-                                        key={id} 
+                                    <button
+                                        key={id}
                                         onClick={() => handleNodeClick(id)}
                                         onMouseEnter={() => setHoveredId(id)}
                                         onMouseLeave={() => setHoveredId(null)}
@@ -554,8 +556,8 @@ export const LacanGraphView: React.FC<LacanGraphViewProps> = ({
                                     { eq: '$ \u22C4 d', node: 'd', label: lang === 'CN' ? '欲望' : 'DESIRE' },
                                     { eq: 'S(\u023A)', node: 'S(A)', label: lang === 'CN' ? '匮乏' : 'LACK' }
                                 ].map((item, idx) => (
-                                    <button 
-                                        key={idx} 
+                                    <button
+                                        key={idx}
                                         onClick={() => handleNodeClick(item.node)}
                                         className={`flex-1 py-2 px-1 text-[10px] font-black tracking-[0.05em] transition-all border ${selectedId === item.node ? 'text-white border-gold-primary/50 bg-gold-primary/20 shadow-[0_0_15px_rgba(212,175,55,0.1)]' : 'text-zinc-400 border-white/5 bg-white/[0.02] hover:text-white hover:border-white/20'}`}
                                     >
@@ -570,12 +572,12 @@ export const LacanGraphView: React.FC<LacanGraphViewProps> = ({
 
                 {/* RIGHT AREA: Topology Graph Canvas */}
                 <div className={`lg:w-1/2 relative flex items-center justify-center p-4 lg:p-8 overflow-hidden bg-[var(--bg-main)] transition-colors duration-500`}>
-                    
+
                     <div className="absolute inset-0 opacity-[0.02] pointer-events-none" style={{ backgroundImage: `radial-gradient(${isRetro ? 'var(--mist-active-accent)' : '#FFD700'} 1px, transparent 0)`, backgroundSize: '40px 40px' }}></div>
 
                     <div className="relative w-full h-full max-w-[850px] max-h-[850px] flex items-center justify-center">
-                        <svg 
-                            viewBox="-50 -150 900 1150" 
+                        <svg
+                            viewBox="-50 -150 900 1150"
                             className="w-full h-full drop-shadow-[0_0_80px_rgba(212,175,55,0.1)]"
                         >
                             <defs>
@@ -588,14 +590,14 @@ export const LacanGraphView: React.FC<LacanGraphViewProps> = ({
                                         <feMergeNode in="SourceGraphic" />
                                     </feMerge>
                                 </filter>
-                                
+
                                 <linearGradient id="lineGradStatic" x1="0%" y1="0%" x2="100%" y2="100%">
                                     <stop offset="0%" stopColor="#FFD700" stopOpacity="0.1" />
                                     <stop offset="50%" stopColor="#FFD700" stopOpacity="0.8" />
                                     <stop offset="100%" stopColor="#FFD700" stopOpacity="0.1" />
                                 </linearGradient>
                             </defs>
-                            
+
                             <g className="transition-all duration-700">
                                 <path d="M 600,850 C 580,750 570,650 550,550 C 400,500 300,500 150,550 C 130,650 120,750 100,850" fill="none" stroke="url(#lineGradStatic)" strokeWidth="3" className="opacity-50" />
                                 <path d="M 50,710 C 100,660 140,600 150,550 L 150,250 C 200,100 500,100 550,250 L 550,550 C 560,600 600,660 650,710" fill="none" stroke="url(#lineGradStatic)" strokeWidth="3" className="opacity-50" />
@@ -607,12 +609,12 @@ export const LacanGraphView: React.FC<LacanGraphViewProps> = ({
                                 { id: 'Jouissance', cx: 70, cy: 160, label: lang === 'CN' ? '享乐' : 'Jouissance' },
                                 { id: 'Castration', cx: 730, cy: 160, label: lang === 'CN' ? '阉割' : 'Castration' }
                             ].map((label) => (
-                                <g 
+                                <g
                                     key={label.id}
                                     className="group cursor-pointer"
                                     onClick={() => handleNodeClick(label.id)}
                                 >
-                                    <text 
+                                    <text
                                         x={label.cx} y={label.cy}
                                         className={`font-black tracking-[0.4em] transition-all duration-300 ${activeId === label.id ? 'fill-white text-[24px]' : 'fill-gold-primary text-[18px] opacity-90'}`}
                                         style={{ textAnchor: 'middle', textShadow: '0 0 15px rgba(212,175,55,0.4)' }}
@@ -635,7 +637,7 @@ export const LacanGraphView: React.FC<LacanGraphViewProps> = ({
                                 { id: '$', cx: 610, cy: 875, label: '$', type: 'text', fs: 42 },
                                 { id: 'I(A)', cx: 80, cy: 875, label: 'I(A)', type: 'text', fs: 24 }
                             ].map((node) => (
-                                <g 
+                                <g
                                     key={node.id}
                                     className="group cursor-pointer"
                                     onClick={() => handleNodeClick(node.id)}

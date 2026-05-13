@@ -18,6 +18,7 @@ import { UserProfileModal } from './components/UserProfileModal';
 import { AppHeader } from './components/AppHeader';
 import { EngineBottomBar } from './components/EngineBottomBar';
 import { TaskManagerPanel } from './components/TaskManagerPanel';
+import { ProjectSystemModal } from './components/ProjectSystemModal';
 import { LandingView } from './components/LandingView';
 import { UniversePortal } from './components/UniversePortalReplica';
 import { GlobalHomePage } from './components/GlobalHomePage';
@@ -39,7 +40,11 @@ import {
     ViewMode,
     AestheticMode,
     AestheticPreset,
-    FaceState
+    FaceState,
+    MistProject,
+    ProjectWorkspaceSnapshot,
+    ArchiveSource,
+    ArchiveReason
 } from './types';
 import {
     DRIVERS,
@@ -84,9 +89,11 @@ import { useTheme } from './contexts/ThemeContext';
 import { LacanGraphView } from './components/LacanGraphView';
 import { LacanTopologyView } from './components/LacanTopologyView';
 import { ArchiveDirectoryModal } from './components/ArchiveDirectoryModal';
+import { BorromeanRings } from './components/BorromeanRings';
 import { VideoLibrary } from './components/VideoLibrary';
 import { PhilosophyCodexPage } from './components/PhilosophyCodexPage';
 import { PhilosopherPosterIndexPage } from './components/PhilosopherPosterIndexPage';
+import { MistLexiconLandingPage } from './components/MistLexiconLandingPage';
 import { RorschachView } from './components/RorschachView';
 
 // === Undo/Redo Reducer (defined outside component — no stale closures) ===
@@ -136,6 +143,26 @@ function undoRedoReducer(state: UndoRedoState, action: UndoRedoAction): UndoRedo
     }
 }
 
+type SaveArchiveOptions = {
+    archiveSource?: ArchiveSource;
+    archiveReason?: ArchiveReason;
+};
+
+const ACTIVE_PROJECT_STORAGE_KEY = 'mistActiveProjectId';
+
+const createProjectId = () => `mist_project_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+
+const createUntitledProject = (lang: 'CN' | 'EN', title?: string): MistProject => {
+    const now = new Date().toISOString();
+    return {
+        id: createProjectId(),
+        title: title?.trim() || (lang === 'CN' ? `未命名项目 ${new Date().toLocaleDateString('zh-CN')}` : `Untitled Project ${new Date().toLocaleDateString('en-US')}`),
+        createdAt: now,
+        updatedAt: now,
+        lastSavedAt: now
+    };
+};
+
 const App: React.FC = () => {
     const { theme } = useTheme();
     const { isOpen: isSettingsOpen, openSettings: openSettingsContext, closeSettings } = useSettings();
@@ -164,6 +191,21 @@ const App: React.FC = () => {
     const [faceState, setFaceState] = useState<FaceState>({});
     const [worldLawConfig, setWorldLawConfig] = useState<WorldLawConfig>({ gravity: 1 });
     const [showRings, setShowRings] = useState(true);
+    const [ringAnimClass, setRingAnimClass] = useState(showRings ? 'animate-ring-entrance' : 'opacity-0');
+    const [ringAnimKey, setRingAnimKey] = useState(0);
+    const lastShowRingsRef = useRef(showRings);
+
+    useEffect(() => {
+        if (showRings === lastShowRingsRef.current) return;
+
+        if (showRings) {
+            setRingAnimClass('animate-ring-entrance');
+        } else {
+            setRingAnimClass('animate-ring-exit');
+        }
+        setRingAnimKey(prev => prev + 1);
+        lastShowRingsRef.current = showRings;
+    }, [showRings]);
 
     // FIXED: Always maintain 7 slots
     const [colorPalette, setColorPalette] = useState<string[]>(Array(7).fill(""));
@@ -198,7 +240,9 @@ const App: React.FC = () => {
     // Sync active accent color to CSS variables
     useEffect(() => {
         const driverDef = DRIVERS.find(d => d.id === selectedDriver);
-        const accent = (theme === 'retro' ? driverDef?.retroAccent : driverDef?.accent) || (theme === 'retro' ? '#8B261D' : '#ff4f3f');
+        const accent = theme === 'retro'
+            ? '#8B261D'
+            : (driverDef?.accent || '#ff4f3f');
 
         document.documentElement.style.setProperty('--mist-active-accent', accent);
 
@@ -207,7 +251,24 @@ const App: React.FC = () => {
             const r = parseInt(accent.slice(1, 3), 16);
             const g = parseInt(accent.slice(3, 5), 16);
             const b = parseInt(accent.slice(5, 7), 16);
-            document.documentElement.style.setProperty('--mist-active-accent-rgb', `${r}, ${g}, ${b}`);
+            const rgb = `${r}, ${g}, ${b}`;
+            document.documentElement.style.setProperty('--mist-active-accent-rgb', rgb);
+            document.documentElement.style.setProperty('--text-accent', accent);
+            document.documentElement.style.setProperty('--border-accent', accent);
+            document.documentElement.style.setProperty('--accent-color', accent);
+            document.documentElement.style.setProperty('--accent-glow', `rgba(${rgb}, 0.18)`);
+            document.documentElement.style.setProperty('--gold-primary', accent);
+            document.documentElement.style.setProperty('--gold-bright', accent);
+            document.documentElement.style.setProperty('--gold-soft', `rgba(${rgb}, 0.18)`);
+            document.documentElement.style.setProperty('--mist-archive-red', accent);
+            document.documentElement.style.setProperty('--mist-archive-red-soft', `rgba(${rgb}, 0.72)`);
+            document.documentElement.style.setProperty('--mist-archive-red-faint', `rgba(${rgb}, 0.12)`);
+            document.documentElement.style.setProperty('--mist-archive-signal-line', `rgba(${rgb}, 0.05)`);
+            document.documentElement.style.setProperty('--mist-archive-signal-line-strong', `rgba(${rgb}, 0.1)`);
+            document.documentElement.style.setProperty('--mist-archive-signal-wash', `rgba(${rgb}, 0.045)`);
+            document.documentElement.style.setProperty('--mist-archive-signal-wash-faint', `rgba(${rgb}, 0.026)`);
+            document.documentElement.style.setProperty('--mist-archive-signal-glow', `rgba(${rgb}, 0.38)`);
+            document.documentElement.style.setProperty('--mist-archive-signal-shadow', `rgba(${rgb}, 0.18)`);
         }
     }, [selectedDriver, theme]);
 
@@ -305,16 +366,26 @@ const App: React.FC = () => {
 
     const [history, setHistory] = useState<HistoryItem[]>([]);
     const [activeHistoryItem, setActiveHistoryItem] = useState<HistoryItem | null>(null);
+    const [projects, setProjects] = useState<MistProject[]>([]);
+    const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
+    const [isProjectsOpen, setIsProjectsOpen] = useState(false);
     const [activeBlockId, setActiveBlockId] = useState<string | null>(null);
     const [promptCopied, setPromptCopied] = useState(false);
     const [globalCopied, setGlobalCopied] = useState(false);
     const [isTaskManagerOpen, setIsTaskManagerOpen] = useState(false);
     const [isTensionOpen, setIsTensionOpen] = useState(false);
 
+    useEffect(() => {
+        if (isSettingsOpen) {
+            setIsTaskManagerOpen(false);
+        }
+    }, [isSettingsOpen]);
+
     // DB Initialization and Loading
     useEffect(() => {
         persistence.init().then(() => {
             loadHistoryFromDB();
+            loadProjectsFromDB();
         });
 
         // Supabase Auth Listener
@@ -372,6 +443,32 @@ const App: React.FC = () => {
         }
     };
 
+    const loadProjectsFromDB = async () => {
+        try {
+            const savedProjects = await persistence.getMistProjects();
+            if (savedProjects.length > 0) {
+                setProjects(savedProjects);
+                const storedActiveId = localStorage.getItem(ACTIVE_PROJECT_STORAGE_KEY);
+                const nextActiveId = storedActiveId && savedProjects.some(project => project.id === storedActiveId)
+                    ? storedActiveId
+                    : savedProjects[0].id;
+                setActiveProjectId(nextActiveId);
+                localStorage.setItem(ACTIVE_PROJECT_STORAGE_KEY, nextActiveId);
+                const active = savedProjects.find(project => project.id === nextActiveId);
+                if (active?.snapshot) restoreProjectWorkspace(active.snapshot, false);
+                return;
+            }
+
+            const defaultProject = createUntitledProject(lang, lang === 'CN' ? '默认项目' : 'Default Project');
+            await persistence.saveMistProject(defaultProject);
+            setProjects([defaultProject]);
+            setActiveProjectId(defaultProject.id);
+            localStorage.setItem(ACTIVE_PROJECT_STORAGE_KEY, defaultProject.id);
+        } catch (e) {
+            console.error("Failed to load projects from DB", e);
+        }
+    };
+
     // Helper to add a new item to history state AND DB
     const addHistoryItem = async (item: HistoryItem) => {
         // Optimistic update
@@ -400,15 +497,295 @@ const App: React.FC = () => {
         if (currentUser.id !== 'guest_user') {
             loadHistoryFromDB();
         }
+        setIsTaskManagerOpen(false);
         setIsHistoryOpen(true);
+        setIsProjectsOpen(false);
         setIsManualOpen(false);
         setIsSutureOpen(false);
     };
     const closeHistory = () => setIsHistoryOpen(false);
 
+    const activeProject = projects.find(project => project.id === activeProjectId) || null;
+
+    const openProjects = () => {
+        setIsProjectsOpen(true);
+        setIsHistoryOpen(false);
+        setIsManualOpen(false);
+        setIsSutureOpen(false);
+    };
+
+    const createWorkspaceSnapshot = (modeOverride?: ViewMode): ProjectWorkspaceSnapshot => ({
+        selectedDriver,
+        viewMode: modeOverride || viewMode,
+        fieldState: { ...narrativeFieldState },
+        worldLaw: { ...worldLawConfig },
+        visionInput,
+        visionAnalysis,
+        visionImage,
+        visionImageNote,
+        subjectType,
+        aestheticMode,
+        colorPalette: [...colorPalette],
+        faceState: { ...faceState },
+        treatments: generatedTreatments,
+        activeBlueprint,
+        metonymyBlueprint,
+        cachedBlueprints,
+        activeHistoryItem
+    });
+
+    const inferProjectTitle = (fallback?: string) => {
+        const candidate = activeBlueprint?.narrative?.title
+            || metonymyBlueprint?.narrative?.title
+            || generatedTreatments[0]?.title
+            || fallback
+            || activeProject?.title;
+        return candidate && candidate.trim() ? candidate.trim() : (lang === 'CN' ? '未命名项目' : 'Untitled Project');
+    };
+
+    const upsertProject = async (project: MistProject) => {
+        setProjects(prev => [project, ...prev.filter(item => item.id !== project.id)]);
+        setActiveProjectId(project.id);
+        localStorage.setItem(ACTIVE_PROJECT_STORAGE_KEY, project.id);
+        await persistence.saveMistProject(project);
+    };
+
+    const resetWorkspaceForProject = () => {
+        setActiveHistoryItem(null);
+        setActiveBlueprint(null);
+        setMetonymyBlueprint(null);
+        setCachedBlueprints({});
+        setGeneratedTreatments([]);
+        setThinkingXml('');
+        undoRedoDispatch({ type: 'SET', state: {} });
+        setVisionInput('');
+        setVisionAnalysis('');
+        setVisionImage(null);
+        setVisionImageNote('');
+        setWorldLawConfig({ gravity: 1 });
+        setColorPalette(Array(7).fill(""));
+        setFaceState({});
+        setViewMode('ENGINE');
+        setPage(1);
+    };
+
+    const handleCreateProject = async (title?: string) => {
+        const nextProject: MistProject = {
+            ...createUntitledProject(lang, title),
+            snapshot: {
+                ...createWorkspaceSnapshot('ENGINE'),
+                selectedDriver,
+                viewMode: 'ENGINE' as ViewMode,
+                fieldState: {},
+                treatments: [],
+                activeBlueprint: null,
+                metonymyBlueprint: null,
+                cachedBlueprints: {},
+                activeHistoryItem: null
+            }
+        };
+        await upsertProject(nextProject);
+        resetWorkspaceForProject();
+        setIsProjectsOpen(false);
+    };
+
+    const restoreProjectWorkspace = (snapshot?: ProjectWorkspaceSnapshot, jumpToPage: boolean = true) => {
+        if (!snapshot) {
+            resetWorkspaceForProject();
+            return;
+        }
+
+        setSelectedDriver(snapshot.selectedDriver || null);
+        undoRedoDispatch({ type: 'SET', state: snapshot.fieldState || {} });
+        setWorldLawConfig(snapshot.worldLaw || { gravity: 1 });
+        setVisionInput(snapshot.visionInput || '');
+        setVisionAnalysis(snapshot.visionAnalysis || '');
+        setVisionImage(snapshot.visionImage ?? null);
+        setVisionImageNote(snapshot.visionImageNote || '');
+        setSubjectType(snapshot.subjectType || 'HUMAN');
+        setAestheticMode(snapshot.aestheticMode || 'REALISM');
+        setColorPalette(snapshot.colorPalette?.length ? snapshot.colorPalette : Array(7).fill(""));
+        setFaceState(snapshot.faceState || {});
+        setGeneratedTreatments(snapshot.treatments || []);
+        setActiveBlueprint(snapshot.activeBlueprint || null);
+        setMetonymyBlueprint(snapshot.metonymyBlueprint || null);
+        setCachedBlueprints(snapshot.cachedBlueprints || {});
+        setActiveHistoryItem(snapshot.activeHistoryItem || null);
+        setViewMode(snapshot.viewMode || 'ENGINE');
+        if (jumpToPage) setPage(1);
+    };
+
+    // Auto-dismiss Task Manager on navigation
+    useEffect(() => {
+        setIsTaskManagerOpen(false);
+    }, [viewMode, page]);
+
+    const handleRestoreProject = async (project: MistProject) => {
+        setActiveProjectId(project.id);
+        localStorage.setItem(ACTIVE_PROJECT_STORAGE_KEY, project.id);
+        restoreProjectWorkspace(project.snapshot);
+        setIsProjectsOpen(false);
+    };
+
+    const handleDeleteProject = async (projectId: string) => {
+        const target = projects.find(project => project.id === projectId);
+        if (!target) return;
+        const confirmed = window.confirm(lang === 'CN' ? `确认删除项目「${target.title}」？项目内历史档案不会被删除。` : `Delete project "${target.title}"? Its archives will remain.`);
+        if (!confirmed) return;
+        await persistence.deleteMistProject(projectId);
+        const nextProjects = projects.filter(project => project.id !== projectId);
+        setProjects(nextProjects);
+        if (activeProjectId === projectId) {
+            const nextProject = nextProjects[0] || createUntitledProject(lang, lang === 'CN' ? '默认项目' : 'Default Project');
+            if (nextProjects.length === 0) await persistence.saveMistProject(nextProject);
+            setProjects(nextProjects.length === 0 ? [nextProject] : nextProjects);
+            setActiveProjectId(nextProject.id);
+            localStorage.setItem(ACTIVE_PROJECT_STORAGE_KEY, nextProject.id);
+            restoreProjectWorkspace(nextProject.snapshot);
+        }
+    };
+
+    const saveProjectShell = async (overrides: Partial<MistProject> = {}, snapshotOverride?: Partial<ProjectWorkspaceSnapshot>) => {
+        const now = new Date().toISOString();
+        const project = activeProject || createUntitledProject(lang);
+        const nextProject: MistProject = {
+            ...project,
+            ...overrides,
+            title: overrides.title || inferProjectTitle(project.title),
+            updatedAt: now,
+            lastSavedAt: overrides.lastSavedAt !== undefined ? overrides.lastSavedAt : project.lastSavedAt,
+            snapshot: {
+                ...createWorkspaceSnapshot(),
+                ...snapshotOverride
+            }
+        };
+        await upsertProject(nextProject);
+        return nextProject;
+    };
+
+    const handleSaveProject = async () => {
+        let savedHistoryItem: HistoryItem | undefined;
+        if (viewMode === 'BIBLE' && activeBlueprint) {
+            savedHistoryItem = handleAddToHistory(activeBlueprint, {
+                archiveSource: 'MANUAL_SAVE',
+                archiveReason: 'PROJECT_SAVED'
+            });
+        } else if (viewMode === 'METONYMY' && metonymyBlueprint) {
+            savedHistoryItem = handleAddToHistory(metonymyBlueprint, {
+                archiveSource: 'MANUAL_SAVE',
+                archiveReason: 'PROJECT_SAVED'
+            });
+        }
+
+        await saveProjectShell(
+            {
+                activeHistoryId: savedHistoryItem?.id || activeHistoryItem?.id,
+                title: inferProjectTitle(),
+                lastSavedAt: new Date().toISOString()
+            },
+            {
+                activeHistoryItem: savedHistoryItem || activeHistoryItem
+            }
+        );
+        setIsProjectsOpen(false);
+    };
+
+    const cloneBlueprintWithArchiveTitle = (blueprint: CreativeBlueprint | null | undefined, title?: string) => {
+        if (!blueprint || !title?.trim()) return blueprint || null;
+        return {
+            ...blueprint,
+            narrative: {
+                ...blueprint.narrative,
+                title: title.trim()
+            }
+        };
+    };
+
+    const createCurrentArchiveItem = (options: SaveArchiveOptions & { id?: number; title?: string } = {}): HistoryItem => {
+        const now = new Date().toISOString();
+        const bibleBlueprint = cloneBlueprintWithArchiveTitle(activeBlueprint || activeHistoryItem?.blueprint || null, options.title);
+        const scriptBlueprint = cloneBlueprintWithArchiveTitle(metonymyBlueprint || activeHistoryItem?.metonymyBlueprint || null, options.title);
+        const primaryBlueprint = bibleBlueprint || scriptBlueprint;
+        const snapshotFieldState = primaryBlueprint?.generationFieldState || activeHistoryItem?.fieldState || narrativeFieldState;
+        const snapshotWorldLaw = primaryBlueprint?.generationWorldLaw || activeHistoryItem?.worldLaw || worldLawConfig;
+        const snapshotVisionInput = primaryBlueprint?.generationVisionInput ?? activeHistoryItem?.visionInput ?? visionInput;
+        const snapshotVisionAnalysis = primaryBlueprint?.generationVisionAnalysis ?? activeHistoryItem?.visionAnalysis ?? visionAnalysis;
+        const snapshotVisionImage = primaryBlueprint?.generationVisionImage ?? activeHistoryItem?.visionImage ?? visionImage;
+        const snapshotVisionImageNote = primaryBlueprint?.generationVisionImageNote ?? activeHistoryItem?.visionImageNote ?? visionImageNote;
+        const snapshotSubjectType = primaryBlueprint?.generationSubjectType ?? activeHistoryItem?.subjectType ?? subjectType;
+        const snapshotAestheticMode = primaryBlueprint?.generationAestheticMode ?? activeHistoryItem?.aestheticMode ?? aestheticMode;
+        const snapshotColorPalette = primaryBlueprint?.generationColorPalette ?? activeHistoryItem?.colorPalette ?? [...colorPalette];
+        const snapshotFaceState = primaryBlueprint?.generationFaceState ?? activeHistoryItem?.faceState ?? { ...faceState };
+        const snapshotTreatments = activeHistoryItem?.treatments?.length ? activeHistoryItem.treatments : generatedTreatments;
+        const savedBlueprints = bibleBlueprint
+            ? { ...(activeHistoryItem?.savedBlueprints || {}), [bibleBlueprint.treatmentId]: bibleBlueprint }
+            : activeHistoryItem?.savedBlueprints;
+
+        return {
+            id: options.id || Date.now(),
+            projectId: activeProjectId || undefined,
+            archiveSource: options.archiveSource || 'MANUAL_SAVE',
+            archiveReason: options.archiveReason || 'USER_SAVED',
+            date: now,
+            type: scriptBlueprint && !bibleBlueprint ? 'METONYMY' : (primaryBlueprint ? 'BIBLE' : 'NARRATIVE'),
+            driverId: selectedDriver || primaryBlueprint?.driverType || activeHistoryItem?.driverId || DriverType.NARRATIVE,
+            driverName: getDriverName(),
+            fieldState: { ...snapshotFieldState },
+            worldLaw: { ...snapshotWorldLaw },
+            visionInput: snapshotVisionInput,
+            visionAnalysis: snapshotVisionAnalysis,
+            visionImage: snapshotVisionImage,
+            visionImageNote: snapshotVisionImageNote,
+            subjectType: snapshotSubjectType,
+            aestheticMode: snapshotAestheticMode,
+            colorPalette: [...snapshotColorPalette],
+            faceState: { ...snapshotFaceState },
+            blueprint: primaryBlueprint,
+            metonymyBlueprint: scriptBlueprint,
+            treatments: snapshotTreatments,
+            savedBlueprints
+        };
+    };
+
+    const handleSaveCurrentToArchive = async (options: { targetHistoryId?: number | string; saveAs?: boolean; title?: string } = {}) => {
+        const targetId = !options.saveAs ? options.targetHistoryId : undefined;
+        const existing = targetId !== undefined
+            ? history.find(item => String(item.id) === String(targetId))
+            : undefined;
+        const nextItem = createCurrentArchiveItem({
+            id: existing ? Number(existing.id) : undefined,
+            title: options.title,
+            archiveSource: 'MANUAL_SAVE',
+            archiveReason: options.saveAs ? 'USER_SAVED' : 'PROJECT_SAVED'
+        });
+
+        if (existing) {
+            await Promise.all(buildDesireProjectsFromHistoryItem(existing).map(project => persistence.deleteDesireProject(project.id)));
+            await updateHistoryItem(nextItem);
+        } else {
+            await addHistoryItem(nextItem);
+        }
+
+        setActiveHistoryItem(nextItem);
+        await saveProjectShell(
+            {
+                activeHistoryId: nextItem.id,
+                title: inferProjectTitle(options.title),
+                lastSavedAt: nextItem.date
+            },
+            {
+                activeHistoryItem: nextItem,
+                activeBlueprint: nextItem.blueprint,
+                metonymyBlueprint: nextItem.metonymyBlueprint || metonymyBlueprint
+            }
+        );
+        return nextItem;
+    };
+
     const openAuth = () => { setIsAuthOpen(true); closeAllModals(); };
     const closeAllModals = () => {
         setIsHistoryOpen(false);
+        setIsProjectsOpen(false);
         if (location.pathname === '/codex') navigate('/');
         setIsManualOpen(false);
         setIsSutureOpen(false);
@@ -462,6 +839,7 @@ const App: React.FC = () => {
     };
 
     const handleViewChange = (viewMode: ViewMode) => {
+        setIsTaskManagerOpen(false);
         if (viewMode === 'DICTIONARY') {
             setCodexDictionary('MIST');
             setCodexSection('CONCEPTS');
@@ -498,14 +876,17 @@ const App: React.FC = () => {
 
     const beginEngineToPortalTransition = () => {
         clearPortalTransitionTimers();
-        setPortalEntryMode('return');
+        // Set to 'intro' immediately so the portal begins its cinematic opening as it fades in
+        setPortalEntryMode('intro');
         setPortalTransition('to-portal');
+
         portalTransitionTimersRef.current[0] = window.setTimeout(() => {
             setPage(-1);
+            // Reset viewMode to default ENGINE state when returning to the main portal
             setViewMode('ENGINE');
         }, 260);
+
         portalTransitionTimersRef.current[1] = window.setTimeout(() => {
-            setPortalEntryMode('intro');
             setPortalTransition(null);
         }, 980);
     };
@@ -584,6 +965,7 @@ const App: React.FC = () => {
     };
 
     const handleDriverSelect = (id: DriverType) => {
+        setIsTaskManagerOpen(false);
         setSelectedDriver(id);
         setPage(1);
         setViewMode(id === DriverType.TRAILER ? 'CANVAS' : id === DriverType.EXPERIMENTAL ? 'METONYMY' : 'ENGINE');
@@ -1043,7 +1425,7 @@ const App: React.FC = () => {
                 if (availableItems.length === 0) availableItems = category.items;
             }
 
-            // SUR7 Gender bias: 70% female, 30% male
+            // SUR7 single-block random: choose uniformly from the remaining gender presets.
             if (blockId === 'skin_gender') {
                 const locks = getVisibleLockedTags(blockId);
                 const keptTags = currentTags.filter(t => locks.includes(t));
@@ -1054,19 +1436,8 @@ const App: React.FC = () => {
                     ensureFacesForTags(newState[blockId] || []);
                     return;
                 }
-                const isFemale = Math.random() < 0.70;
-                const femaleItems = availableItems.filter(i => {
-                    const n = (i.name + ' ' + (i.group || '')).toLowerCase();
-                    return n.includes('female') || n.includes('女');
-                });
-                const maleItems = availableItems.filter(i => {
-                    const n = (i.name + ' ' + (i.group || '')).toLowerCase();
-                    return n.includes('male') || n.includes('男');
-                });
-                const targetPool = isFemale && femaleItems.length > 0 ? femaleItems : (maleItems.length > 0 ? maleItems : availableItems);
-                if (targetPool.length > 0) {
-                    newState[blockId] = [targetPool[Math.floor(Math.random() * targetPool.length)].name];
-                }
+                const selectedGender = randomizerService.pickRemainingGenderName(availableItems, currentTags);
+                newState[blockId] = selectedGender ? [selectedGender] : [];
                 updateNarrativeState(newState);
                 pruneTagLocksToVisibleState([blockId], newState);
                 ensureFacesForTags(newState[blockId] || []);
@@ -1181,7 +1552,7 @@ const App: React.FC = () => {
                     if (availableItems.length === 0) availableItems = category.items;
                 }
 
-                // SUR7 gender bias
+                // SUR7 story-summary random: preserve locks; otherwise only female/male with 70/30 bias.
                 if (blockId === 'skin_gender') {
                     const locks = getVisibleLockedTags(blockId);
                     const keptTags = (newState[blockId] || []).filter(t => locks.includes(t));
@@ -1189,11 +1560,8 @@ const App: React.FC = () => {
                         newState[blockId] = keptTags;
                         return;
                     }
-                    const isFemale = Math.random() < 0.70;
-                    const femaleItems = availableItems.filter(i => (i.name + ' ' + (i.group || '')).toLowerCase().includes('female') || (i.name + ' ' + (i.group || '')).toLowerCase().includes('女'));
-                    const maleItems = availableItems.filter(i => (i.name + ' ' + (i.group || '')).toLowerCase().includes('male') || (i.name + ' ' + (i.group || '')).toLowerCase().includes('男'));
-                    const pool = isFemale && femaleItems.length > 0 ? femaleItems : (maleItems.length > 0 ? maleItems : availableItems);
-                    if (pool.length > 0) newState[blockId] = [pool[Math.floor(Math.random() * pool.length)].name];
+                    const selectedGender = randomizerService.pickBiasedBinaryGenderName(availableItems);
+                    newState[blockId] = selectedGender ? [selectedGender] : [];
                     return;
                 }
 
@@ -1435,6 +1803,74 @@ const App: React.FC = () => {
         updateNarrativeState(newState);
     };
 
+    const handleSetBlockTags = (blockId: string, tags: string[]) => {
+        if (lockedModules[blockId]) return;
+        const visibleLocks = getVisibleLockedTags(blockId);
+
+        if (blockId === 'aes_palette_preset') {
+            const tag = tags[0];
+            const preset = MASTER_PRESETS.find(p => p.name === tag || p.id === tag);
+            if (preset) {
+                handleApplyPreset(preset);
+            } else {
+                updateNarrativeState({ ...narrativeFieldState, [blockId]: tag ? [tag] : [] });
+            }
+            return;
+        }
+
+        if (blockId === 'aes_color_palette') {
+            const tag = tags[0];
+            const preset = AES_COLOR_PRESETS.find(p => p.name === tag || p.id === tag);
+            if (preset) {
+                const nextPalette = [...preset.colors];
+                while (nextPalette.length < 7) nextPalette.push("");
+                setColorPalette(nextPalette.slice(0, 7));
+            }
+            updateNarrativeState({ ...narrativeFieldState, [blockId]: tag ? [tag] : [] });
+            return;
+        }
+
+        const limit = BLOCK_LIMITS[blockId] || 1;
+        let newState = { ...narrativeFieldState };
+        if (selectedDriver === DriverType.AESTHETIC) {
+            if (['aes_action_static', 'aes_action_dynamic', 'aes_action_complex'].includes(blockId)) {
+                ['aes_action_static', 'aes_action_dynamic', 'aes_action_complex'].forEach(id => { if (id !== blockId) newState[id] = []; });
+            }
+            if (['aes_hair_style_f', 'aes_hair_style_m'].includes(blockId)) {
+                ['aes_hair_style_f', 'aes_hair_style_m'].forEach(id => { if (id !== blockId) newState[id] = []; });
+            }
+            if (['aes_scene_real', 'aes_scene_abstract', 'aes_scene_surreal'].includes(blockId)) {
+                ['aes_scene_real', 'aes_scene_abstract', 'aes_scene_surreal'].forEach(id => { if (id !== blockId) newState[id] = []; });
+            }
+            if (['aes_object_real', 'aes_object_unreal', 'aes_object_weapon'].includes(blockId)) {
+                ['aes_object_real', 'aes_object_unreal', 'aes_object_weapon'].forEach(id => { if (id !== blockId) newState[id] = []; });
+            }
+        }
+
+        const seen = new Set<string>();
+        const normalized = [...visibleLocks, ...tags]
+            .filter(Boolean)
+            .filter(tag => {
+                if (seen.has(tag)) return false;
+                seen.add(tag);
+                return true;
+            })
+            .slice(0, limit);
+
+        const rawCurrent = narrativeFieldState[blockId];
+        const current = Array.isArray(rawCurrent) ? rawCurrent : (rawCurrent ? [String(rawCurrent)] : []);
+        newState[blockId] = normalized;
+        updateNarrativeState(newState);
+
+        setFaceState(prev => {
+            const next = { ...prev };
+            current.filter(tag => !normalized.includes(tag)).forEach(tag => {
+                delete next[tag];
+            });
+            return next;
+        });
+    };
+
     const handleBackStep = () => {
         if (viewMode === 'BIBLE') handleViewChange('DIVERGENCE');
         else if (viewMode === 'DIVERGENCE') {
@@ -1497,6 +1933,9 @@ const App: React.FC = () => {
                 handleViewChange('DIVERGENCE');
                 const newItem: HistoryItem = {
                     id: Date.now(),
+                    projectId: activeProjectId || undefined,
+                    archiveSource: 'AI_SNAPSHOT',
+                    archiveReason: 'DIVERGENCE_GENERATED',
                     date: new Date().toISOString(),
                     type: 'NARRATIVE',
                     driverId: selectedDriver,
@@ -1506,15 +1945,31 @@ const App: React.FC = () => {
                     visionInput: visionInput,
                     visionAnalysis: visionAnalysis,
                     visionImage: visionImage,
+                    visionImageNote: visionImageNote,
                     subjectType: subjectType,
                     aestheticMode: aestheticMode,
                     colorPalette: [...colorPalette],
+                    faceState: { ...faceState },
                     blueprint: null,
-                    treatments: treatments,
+                    treatments: treatmentsWithIds,
                     savedBlueprints: {}
                 };
                 addHistoryItem(newItem);
                 setActiveHistoryItem(newItem);
+                saveProjectShell(
+                    {
+                        activeHistoryId: newItem.id,
+                        title: inferProjectTitle(treatmentsWithIds[0]?.title)
+                    },
+                    {
+                        viewMode: 'DIVERGENCE',
+                        treatments: treatmentsWithIds,
+                        activeHistoryItem: newItem,
+                        activeBlueprint: null,
+                        metonymyBlueprint: null,
+                        cachedBlueprints: {}
+                    }
+                );
             }
         } catch (e) {
             console.error(e);
@@ -1579,115 +2034,128 @@ const App: React.FC = () => {
             // REDESIGNED: Metonymy only updates local state, NOT history DB.
             // History saving is manual-only via the save button in MetonymyView.
             setMetonymyBlueprint(blueprint);
-            // If restoring from history, keep the activeHistoryItem reference but don't auto-persist
-            if (activeHistoryItem && activeHistoryItem.type === 'METONYMY') {
-                setActiveHistoryItem({ ...activeHistoryItem, blueprint: blueprint });
-            }
         } else {
             const blueprintWithSnapshot: CreativeBlueprint = {
                 ...blueprint,
                 generationFieldState: blueprint.generationFieldState || activeBlueprint?.generationFieldState || activeHistoryItem?.fieldState,
                 generationWorldLaw: blueprint.generationWorldLaw || activeBlueprint?.generationWorldLaw || activeHistoryItem?.worldLaw,
                 generationVisionInput: blueprint.generationVisionInput ?? activeBlueprint?.generationVisionInput ?? activeHistoryItem?.visionInput,
-                generationVisionAnalysis: blueprint.generationVisionAnalysis ?? activeBlueprint?.generationVisionAnalysis ?? activeHistoryItem?.visionAnalysis
+                generationVisionAnalysis: blueprint.generationVisionAnalysis ?? activeBlueprint?.generationVisionAnalysis ?? activeHistoryItem?.visionAnalysis,
+                generationVisionImage: blueprint.generationVisionImage ?? activeBlueprint?.generationVisionImage ?? activeHistoryItem?.visionImage,
+                generationVisionImageNote: blueprint.generationVisionImageNote ?? activeBlueprint?.generationVisionImageNote ?? activeHistoryItem?.visionImageNote,
+                generationSubjectType: blueprint.generationSubjectType ?? activeBlueprint?.generationSubjectType ?? activeHistoryItem?.subjectType,
+                generationAestheticMode: blueprint.generationAestheticMode ?? activeBlueprint?.generationAestheticMode ?? activeHistoryItem?.aestheticMode,
+                generationColorPalette: blueprint.generationColorPalette ?? activeBlueprint?.generationColorPalette ?? activeHistoryItem?.colorPalette,
+                generationFaceState: blueprint.generationFaceState ?? activeBlueprint?.generationFaceState ?? activeHistoryItem?.faceState
             };
 
             setActiveBlueprint(blueprintWithSnapshot);
-
-            if (activeHistoryItem && (activeHistoryItem.type === 'NARRATIVE' || activeHistoryItem.type === 'BIBLE')) {
-                setCachedBlueprints(prev => ({
-                    ...prev,
-                    [blueprintWithSnapshot.treatmentId]: blueprintWithSnapshot
-                }));
-
-                const updatedItem = {
-                    ...activeHistoryItem,
-                    type: 'BIBLE' as const,
-                    blueprint: blueprintWithSnapshot,
-                    savedBlueprints: {
-                        ...(activeHistoryItem.savedBlueprints || {}),
-                        [blueprintWithSnapshot.treatmentId]: blueprintWithSnapshot
-                    }
-                };
-                updateHistoryItem(updatedItem);
-                setActiveHistoryItem(updatedItem);
-            }
+            setCachedBlueprints(prev => ({
+                ...prev,
+                [blueprintWithSnapshot.treatmentId]: blueprintWithSnapshot
+            }));
         }
     };
 
-    const handleAddToHistory = (blueprint: CreativeBlueprint) => {
+    const handleAddToHistory = (blueprint: CreativeBlueprint, options: SaveArchiveOptions = {}) => {
+        const archiveSource = options.archiveSource || 'MANUAL_SAVE';
+        const archiveReason = options.archiveReason || 'USER_SAVED';
         const isMetonymy = viewMode === 'METONYMY';
+        const snapshotFieldState = blueprint.generationFieldState || activeHistoryItem?.fieldState || narrativeFieldState;
+        const snapshotWorldLaw = blueprint.generationWorldLaw || activeHistoryItem?.worldLaw || worldLawConfig;
+        const snapshotVisionInput = blueprint.generationVisionInput ?? activeHistoryItem?.visionInput ?? visionInput;
+        const snapshotVisionAnalysis = blueprint.generationVisionAnalysis ?? activeHistoryItem?.visionAnalysis ?? visionAnalysis;
+        const snapshotVisionImage = blueprint.generationVisionImage ?? activeHistoryItem?.visionImage ?? visionImage;
+        const snapshotVisionImageNote = blueprint.generationVisionImageNote ?? activeHistoryItem?.visionImageNote ?? visionImageNote;
+        const snapshotSubjectType = blueprint.generationSubjectType ?? activeHistoryItem?.subjectType ?? subjectType;
+        const snapshotAestheticMode = blueprint.generationAestheticMode ?? activeHistoryItem?.aestheticMode ?? aestheticMode;
+        const snapshotColorPalette = blueprint.generationColorPalette ?? activeHistoryItem?.colorPalette ?? [...colorPalette];
+        const snapshotFaceState = blueprint.generationFaceState ?? activeHistoryItem?.faceState ?? { ...faceState };
+        const snapshotTreatments = activeHistoryItem?.treatments?.length ? activeHistoryItem.treatments : generatedTreatments;
 
         if (isMetonymy) {
-            // REDESIGNED: Metonymy always creates or updates via manual save
-            if (activeHistoryItem && activeHistoryItem.type === 'METONYMY') {
-                // Update existing metonymy record
-                const updatedItem = {
-                    ...activeHistoryItem,
-                    date: new Date().toISOString(),
-                    blueprint: blueprint
-                };
-                updateHistoryItem(updatedItem);
-                setActiveHistoryItem(updatedItem);
-            } else if (activeHistoryItem && (activeHistoryItem.type === 'BIBLE' || activeHistoryItem.type === 'NARRATIVE')) {
-                const updatedItem: HistoryItem = {
-                    ...activeHistoryItem,
-                    date: new Date().toISOString(),
-                    type: 'METONYMY',
-                    blueprint,
-                    savedBlueprints: {
-                        ...(activeHistoryItem.savedBlueprints || {}),
-                        [blueprint.treatmentId]: blueprint
-                    }
-                };
-                updateHistoryItem(updatedItem);
-                setActiveHistoryItem(updatedItem);
-            } else {
-                // Create new metonymy record
-                const newItem: HistoryItem = {
-                    id: Date.now(),
-                    date: new Date().toISOString(),
-                    type: 'METONYMY',
-                    driverId: selectedDriver || DriverType.NARRATIVE,
-                    driverName: getDriverName(),
-                    fieldState: { ...narrativeFieldState },
-                    worldLaw: { ...worldLawConfig },
-                    blueprint: blueprint,
-                    treatments: [],
-                    savedBlueprints: undefined
-                };
-                addHistoryItem(newItem);
-                setActiveHistoryItem(newItem);
-            }
+            const storyBlueprintForItem = activeBlueprint || activeHistoryItem?.blueprint || null;
+            const newItem: HistoryItem = {
+                id: Date.now(),
+                projectId: activeProjectId || undefined,
+                archiveSource,
+                archiveReason,
+                date: new Date().toISOString(),
+                type: storyBlueprintForItem ? 'BIBLE' : 'METONYMY',
+                driverId: selectedDriver || blueprint.driverType || activeHistoryItem?.driverId || DriverType.NARRATIVE,
+                driverName: getDriverName(),
+                fieldState: { ...snapshotFieldState },
+                worldLaw: { ...snapshotWorldLaw },
+                visionInput: snapshotVisionInput,
+                visionAnalysis: snapshotVisionAnalysis,
+                visionImage: snapshotVisionImage,
+                visionImageNote: snapshotVisionImageNote,
+                subjectType: snapshotSubjectType,
+                aestheticMode: snapshotAestheticMode,
+                colorPalette: [...snapshotColorPalette],
+                faceState: { ...snapshotFaceState },
+                blueprint: storyBlueprintForItem || blueprint,
+                metonymyBlueprint: blueprint,
+                treatments: snapshotTreatments,
+                savedBlueprints: storyBlueprintForItem
+                    ? { ...(activeHistoryItem?.savedBlueprints || {}), [storyBlueprintForItem.treatmentId]: storyBlueprintForItem }
+                    : activeHistoryItem?.savedBlueprints
+            };
+            addHistoryItem(newItem);
+            setActiveHistoryItem(newItem);
+            saveProjectShell(
+                {
+                    activeHistoryId: newItem.id,
+                    title: inferProjectTitle(blueprint.narrative?.title),
+                    lastSavedAt: archiveSource === 'MANUAL_SAVE' ? newItem.date : activeProject?.lastSavedAt
+                },
+                {
+                    viewMode: 'METONYMY',
+                    metonymyBlueprint: blueprint,
+                    activeHistoryItem: newItem
+                }
+            );
+            return newItem;
         } else {
-            // Narrative / Bible: auto-save (update existing or create new)
-            if (activeHistoryItem) {
-                const updatedItem = {
-                    ...activeHistoryItem,
-                    type: 'BIBLE' as const,
-                    blueprint: blueprint,
-                    savedBlueprints: { ...(activeHistoryItem.savedBlueprints || {}), [blueprint.treatmentId]: blueprint }
-                };
-                updateHistoryItem(updatedItem);
-                setActiveHistoryItem(updatedItem);
-            } else {
-                const newItem: HistoryItem = {
-                    id: Date.now(),
-                    date: new Date().toISOString(),
-                    type: 'BIBLE',
-                    driverId: selectedDriver!,
-                    driverName: getDriverName(),
-                    fieldState: { ...(blueprint.generationFieldState || narrativeFieldState) },
-                    worldLaw: { ...(blueprint.generationWorldLaw || worldLawConfig) },
-                    visionInput: blueprint.generationVisionInput ?? visionInput,
-                    visionAnalysis: blueprint.generationVisionAnalysis ?? visionAnalysis,
-                    blueprint: blueprint,
-                    treatments: generatedTreatments,
-                    savedBlueprints: { [blueprint.treatmentId]: blueprint }
-                };
-                addHistoryItem(newItem);
-                setActiveHistoryItem(newItem);
-            }
+            const newItem: HistoryItem = {
+                id: Date.now(),
+                projectId: activeProjectId || undefined,
+                archiveSource,
+                archiveReason,
+                date: new Date().toISOString(),
+                type: 'BIBLE',
+                driverId: selectedDriver || blueprint.driverType || activeHistoryItem?.driverId || DriverType.NARRATIVE,
+                driverName: getDriverName(),
+                fieldState: { ...snapshotFieldState },
+                worldLaw: { ...snapshotWorldLaw },
+                visionInput: snapshotVisionInput,
+                visionAnalysis: snapshotVisionAnalysis,
+                visionImage: snapshotVisionImage,
+                visionImageNote: snapshotVisionImageNote,
+                subjectType: snapshotSubjectType,
+                aestheticMode: snapshotAestheticMode,
+                colorPalette: [...snapshotColorPalette],
+                faceState: { ...snapshotFaceState },
+                blueprint,
+                treatments: snapshotTreatments,
+                savedBlueprints: { ...(activeHistoryItem?.savedBlueprints || {}), [blueprint.treatmentId]: blueprint }
+            };
+            addHistoryItem(newItem);
+            setActiveHistoryItem(newItem);
+            saveProjectShell(
+                {
+                    activeHistoryId: newItem.id,
+                    title: inferProjectTitle(blueprint.narrative?.title),
+                    lastSavedAt: archiveSource === 'MANUAL_SAVE' ? newItem.date : activeProject?.lastSavedAt
+                },
+                {
+                    viewMode: 'BIBLE',
+                    activeBlueprint: blueprint,
+                    activeHistoryItem: newItem,
+                    cachedBlueprints: { ...(cachedBlueprints || {}), [blueprint.treatmentId]: blueprint }
+                }
+            );
+            return newItem;
         }
     };
 
@@ -1697,11 +2165,25 @@ const App: React.FC = () => {
             driverId: item.driverId || item.blueprint?.driverType || selectedDriver || DriverType.NARRATIVE,
             driverName: item.driverName || getDriverName(),
             fieldState: item.fieldState || item.blueprint?.generationFieldState || {},
+            worldLaw: item.worldLaw || item.blueprint?.generationWorldLaw,
+            visionInput: item.visionInput ?? item.blueprint?.generationVisionInput,
+            visionAnalysis: item.visionAnalysis ?? item.blueprint?.generationVisionAnalysis,
+            visionImage: item.visionImage ?? item.blueprint?.generationVisionImage,
+            visionImageNote: item.visionImageNote ?? item.blueprint?.generationVisionImageNote,
+            subjectType: item.subjectType || item.blueprint?.generationSubjectType,
+            aestheticMode: item.aestheticMode || item.blueprint?.generationAestheticMode,
+            colorPalette: item.colorPalette || item.blueprint?.generationColorPalette,
+            faceState: item.faceState || item.blueprint?.generationFaceState,
+            metonymyBlueprint: item.metonymyBlueprint || null,
             treatments: item.treatments || [],
             savedBlueprints: item.savedBlueprints || {}
         };
 
         setActiveHistoryItem(normalizedItem);
+        if (normalizedItem.projectId) {
+            setActiveProjectId(normalizedItem.projectId);
+            localStorage.setItem(ACTIVE_PROJECT_STORAGE_KEY, normalizedItem.projectId);
+        }
         undoRedoDispatch({ type: 'SET', state: normalizedItem.fieldState || {} });
         setSelectedDriver(normalizedItem.driverId);
 
@@ -1709,16 +2191,19 @@ const App: React.FC = () => {
         if (normalizedItem.visionInput !== undefined) setVisionInput(normalizedItem.visionInput);
         if (normalizedItem.visionAnalysis !== undefined) setVisionAnalysis(normalizedItem.visionAnalysis);
         if (normalizedItem.visionImage !== undefined) setVisionImage(normalizedItem.visionImage);
+        if (normalizedItem.visionImageNote !== undefined) setVisionImageNote(normalizedItem.visionImageNote);
         if (normalizedItem.worldLaw) setWorldLawConfig(normalizedItem.worldLaw);
         if (normalizedItem.subjectType) setSubjectType(normalizedItem.subjectType);
         if (normalizedItem.aestheticMode) setAestheticMode(normalizedItem.aestheticMode);
         if (normalizedItem.colorPalette) setColorPalette(normalizedItem.colorPalette);
+        if (normalizedItem.faceState) setFaceState(normalizedItem.faceState);
 
         if (normalizedItem.type === 'METONYMY') {
             if (normalizedItem.blueprint) setMetonymyBlueprint(normalizedItem.blueprint);
             handleViewChange('METONYMY');
         } else {
             setActiveBlueprint(normalizedItem.blueprint || null);
+            setMetonymyBlueprint(normalizedItem.metonymyBlueprint || null);
             setGeneratedTreatments(normalizedItem.treatments || []);
             setCachedBlueprints(normalizedItem.savedBlueprints || {});
             if (normalizedItem.blueprint) handleViewChange('BIBLE');
@@ -1765,6 +2250,12 @@ const App: React.FC = () => {
             const snapshotWorldLaw = activeHistoryItem?.worldLaw || { ...worldLawConfig };
             const snapshotVisionInput = activeHistoryItem?.visionInput ?? visionInput;
             const snapshotVisionAnalysis = activeHistoryItem?.visionAnalysis ?? visionAnalysis;
+            const snapshotVisionImage = activeHistoryItem?.visionImage ?? visionImage;
+            const snapshotVisionImageNote = activeHistoryItem?.visionImageNote ?? visionImageNote;
+            const snapshotSubjectType = activeHistoryItem?.subjectType ?? subjectType;
+            const snapshotAestheticMode = activeHistoryItem?.aestheticMode ?? aestheticMode;
+            const snapshotColorPalette = activeHistoryItem?.colorPalette ?? [...colorPalette];
+            const snapshotFaceState = activeHistoryItem?.faceState ?? { ...faceState };
 
             const bp = await geminiService.generateBlueprint(
                 selectedDriver!,
@@ -1772,10 +2263,10 @@ const App: React.FC = () => {
                 style,
                 snapshotFieldState,
                 snapshotVisionInput,
-                visionImage,
+                snapshotVisionImage,
                 snapshotWorldLaw,
                 snapshotVisionAnalysis,
-                colorPalette.filter(c => c !== "")
+                snapshotColorPalette.filter(c => c !== "")
             );
             if (bp) {
                 const blueprintWithSnapshot: CreativeBlueprint = {
@@ -1784,11 +2275,20 @@ const App: React.FC = () => {
                     generationFieldState: { ...snapshotFieldState },
                     generationWorldLaw: { ...snapshotWorldLaw },
                     generationVisionInput: snapshotVisionInput,
-                    generationVisionAnalysis: snapshotVisionAnalysis
+                    generationVisionAnalysis: snapshotVisionAnalysis,
+                    generationVisionImage: snapshotVisionImage,
+                    generationVisionImageNote: snapshotVisionImageNote,
+                    generationSubjectType: snapshotSubjectType,
+                    generationAestheticMode: snapshotAestheticMode,
+                    generationColorPalette: [...snapshotColorPalette],
+                    generationFaceState: { ...snapshotFaceState }
                 };
                 setCachedBlueprints(prev => ({ ...prev, [treatment.id]: blueprintWithSnapshot }));
                 setActiveBlueprint(blueprintWithSnapshot);
-                handleAddToHistory(blueprintWithSnapshot); // Automatically save the generated Creative Bible
+                handleAddToHistory(blueprintWithSnapshot, {
+                    archiveSource: 'AI_SNAPSHOT',
+                    archiveReason: 'STORY_GENERATED'
+                }); // Automatically save the generated Story Project
                 handleViewChange('BIBLE');
             }
         } catch (e) {
@@ -1801,7 +2301,7 @@ const App: React.FC = () => {
     };
 
     const showPortalLayer = page === -1 || portalTransition !== null;
-    const showLandingLayer = page === 0 || portalTransition !== null;
+    const showLandingLayer = page === 0 || portalTransition === 'to-engine';
     const portalLayerAbove = portalTransition === 'to-portal';
     const landingLayerAbove = portalTransition === 'to-engine';
     const portalLayerPointerEvents = page === -1 && portalTransition === null ? 'pointer-events-auto' : 'pointer-events-none';
@@ -1842,7 +2342,7 @@ const App: React.FC = () => {
                 ) : showPortalLayer || showLandingLayer ? (
                     <div className="relative min-h-screen overflow-hidden">
                         {showPortalLayer && (
-                            <div className={`absolute inset-0 ${portalLayerAbove ? 'z-20' : 'z-10'} ${portalLayerPointerEvents}`}>
+                            <div className={`absolute inset-0 transition-opacity duration-[980ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${portalTransition === 'to-portal' ? 'opacity-100 z-20' : portalTransition === 'to-engine' ? 'opacity-0 z-10' : page === -1 ? 'opacity-100 z-20' : 'opacity-0 z-10'} ${portalLayerPointerEvents}`}>
                                 <UniversePortal
                                     lang={lang}
                                     setLang={setLang}
@@ -1855,12 +2355,12 @@ const App: React.FC = () => {
                                     openProfile={() => setIsProfileOpen(true)}
                                     openManual={openManual}
                                     entryMode={portalEntryMode}
-                                    onOpenDesireReproduction={beginPortalToEngineTransition}
+                                    onOpenCoreDrivers={beginPortalToEngineTransition}
                                 />
                             </div>
                         )}
                         {showLandingLayer && (
-                            <div className={`absolute inset-0 ${landingLayerAbove ? 'z-20' : 'z-10'} ${landingLayerPointerEvents}`}>
+                            <div className={`absolute inset-0 transition-opacity duration-[980ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${portalTransition === 'to-engine' ? 'opacity-100 z-20' : portalTransition === 'to-portal' ? 'opacity-0 z-10' : page === 0 ? 'opacity-100 z-20' : 'opacity-0 z-10'} ${landingLayerPointerEvents}`}>
                                 <LandingView
                                     lang={lang}
                                     setLang={setLang}
@@ -1913,11 +2413,12 @@ const App: React.FC = () => {
                         openProfile={() => setIsProfileOpen(true)}
                         showRings={showRings}
                         setShowRings={setShowRings}
+                        onReturnToPortal={beginEngineToPortalTransition}
                     />
                 ) : viewMode === 'DICTIONARY' ? (
                     <div className="h-screen w-screen overflow-hidden animate-page-dissolve">
-                        <PhilosophyCodexPage
-                            onClose={() => setPage(-1)}
+                        <MistLexiconLandingPage
+                            onClose={beginEngineToPortalTransition}
                             driverType={selectedDriver}
                             lang={lang}
                             currentUser={currentUser}
@@ -1929,15 +2430,13 @@ const App: React.FC = () => {
                             showRings={showRings}
                             setShowRings={setShowRings}
                             setViewMode={handleViewChange}
-                            renderInPlace={false}
+                            isAdmin={isAdmin}
                             initialDictionary={codexDictionary}
                             initialSection={codexSection as any}
                             initialDetailTab={codexDetailTab}
                             onDictionaryChange={setCodexDictionary}
                             onSectionChange={setCodexSection}
                             onDetailTabChange={setCodexDetailTab}
-                            isAdmin={isAdmin}
-                            onOpenPosterWorkspace={() => navigate('/philosophers')}
                         />
                     </div>
                 ) : viewMode === 'TOPOLOGY' ? (
@@ -1945,9 +2444,7 @@ const App: React.FC = () => {
                         <LacanGraphView
                             lang={lang}
                             setLang={setLang}
-                            onClose={() => {
-                                handleViewChange('DICTIONARY');
-                            }}
+                            onClose={beginEngineToPortalTransition}
                             openManual={openManual}
                             openHistory={openHistory}
                             openSettings={openSettings}
@@ -1982,12 +2479,17 @@ const App: React.FC = () => {
                             setShowRings={setShowRings}
                         />
                         <div className="flex-1 overflow-hidden relative">
+                            <div
+                                key={`rings-anim-archive-${ringAnimKey}`}
+                                className={`absolute inset-0 flex items-center justify-end pr-[5%] pointer-events-none z-0 select-none overflow-hidden ${ringAnimClass}`}
+                            >
+                                <div className="w-[1000px] h-[1000px] flex items-center justify-center translate-x-1/4">
+                                    <BorromeanRings centered={true} opacity={theme === 'retro' ? 0.85 : 0.95} driverType={selectedDriver || undefined} vivid={true} />
+                                </div>
+                            </div>
                             <ArchiveDirectoryModal
                                 isOpen={true}
-                                onClose={() => {
-                                    setPage(0);
-                                    setViewMode('ENGINE');
-                                }}
+                                onClose={beginEngineToPortalTransition}
                                 lang={lang}
                                 isFullScreen={true}
                             />
@@ -2018,15 +2520,22 @@ const App: React.FC = () => {
                             setShowRings={setShowRings}
                         />
                         <div className="flex-1 overflow-hidden relative">
+                            <div
+                                key={`rings-anim-video-${ringAnimKey}`}
+                                className={`absolute inset-0 flex items-center justify-end pr-[5%] pointer-events-none z-0 select-none overflow-hidden ${ringAnimClass}`}
+                            >
+                                <div className="w-[1000px] h-[1000px] flex items-center justify-center translate-x-1/4">
+                                    <BorromeanRings centered={true} opacity={theme === 'retro' ? 0.85 : 0.95} driverType={DriverType.SUTURE} vivid={true} />
+                                </div>
+                            </div>
                             <VideoLibrary
                                 isOpen={true}
-                                onClose={() => {
-                                    setPage(0);
-                                    setViewMode('ENGINE');
-                                }}
+                                onClose={beginEngineToPortalTransition}
                                 lang={lang}
                                 isAdmin={isAdmin}
                                 isFullScreen={true}
+                                showRings={showRings}
+                                setShowRings={setShowRings}
                             />
                         </div>
                     </div>
@@ -2079,10 +2588,7 @@ const App: React.FC = () => {
                                 setLang={setLang}
                                 setPage={setPage}
                                 setViewMode={setViewMode}
-                                onClose={() => {
-                                    setPage(0);
-                                    setViewMode('ENGINE');
-                                }}
+                                onClose={beginEngineToPortalTransition}
                                 openManual={openManual}
                                 openHistory={openHistory}
                                 openSettings={openSettings}
@@ -2125,7 +2631,7 @@ const App: React.FC = () => {
                             }}
                             onUpdateBlueprint={(bp) => setActiveBlueprint(bp)}
                             fieldState={narrativeFieldState}
-                            themeAccent="text-rose-400"
+                            themeAccent={theme === 'retro' ? 'text-[#8B261D]' : 'text-rose-400'}
                             theme={theme}
                             isAdmin={isAdmin}
                             onBack={() => {
@@ -2135,7 +2641,7 @@ const App: React.FC = () => {
                         />
                     </div>
                 ) : (
-                    <div className={`mist-app-shell ${selectedDriver === DriverType.NARRATIVE ? 'mist-narrative-mode' : ''} ${selectedDriver === DriverType.COMMERCIAL ? 'mist-commercial-mode' : ''} flex flex-col h-screen overflow-hidden relative`}>
+                    <div className={`mist-app-shell ${selectedDriver ? `mist-driver-${selectedDriver.toLowerCase()}` : ''} ${selectedDriver === DriverType.NARRATIVE ? 'mist-narrative-mode' : ''} ${selectedDriver === DriverType.COMMERCIAL ? 'mist-commercial-mode' : ''} flex flex-col h-screen overflow-hidden relative`}>
                         <div className="mist-app-film-grain" aria-hidden="true" />
                         {!isSutureOpen && (
                             <AppHeader
@@ -2152,6 +2658,9 @@ const App: React.FC = () => {
                                 isManualOpen={isManualOpen}
                                 openHistory={openHistory}
                                 isHistoryOpen={isHistoryOpen}
+                                openProjects={openProjects}
+                                isProjectsOpen={isProjectsOpen}
+                                activeProjectTitle={activeProject?.title}
                                 openSettings={openSettings}
                                 openAuth={openAuth}
                                 openProfile={() => setIsProfileOpen(true)}
@@ -2242,7 +2751,7 @@ const App: React.FC = () => {
                                     <p className="max-w-md text-sm text-zinc-500 font-medium leading-relaxed mb-10">
                                         {lang === 'EN'
                                             ? "No desire structure detected. Please select a core driver to initiate production."
-                                            : "未检测到任务欲望结构。请选择一个核心驱动器以开始生产。"}
+                                            : "未检测到欲望结构。请选择一个核心驱动器以开始生产。"}
                                     </p>
                                     <button
                                         onClick={() => setPage(0)}
@@ -2258,6 +2767,8 @@ const App: React.FC = () => {
                                         treatments={generatedTreatments}
                                         onSelect={handleBibleGenerate}
                                         isProcessing={isGenerating}
+                                        isTaskManagerOpen={isTaskManagerOpen}
+                                        setIsTaskManagerOpen={setIsTaskManagerOpen}
                                         bibleStartTime={bibleStartTime}
                                         isHistoryMode={!!activeHistoryItem}
                                         onRegenerate={() => handleTraverseFantasy(true)}
@@ -2310,12 +2821,14 @@ const App: React.FC = () => {
                                         worldLaw={activeBlueprint?.generationWorldLaw || activeHistoryItem?.worldLaw || {}}
                                         visionInput={activeBlueprint?.generationVisionInput || activeHistoryItem?.visionInput || ''}
                                         visionAnalysis={activeBlueprint?.generationVisionAnalysis || activeHistoryItem?.visionAnalysis || ''}
-                                        subjectType={activeHistoryItem?.subjectType || subjectType}
-                                        aestheticMode={activeHistoryItem?.aestheticMode || aestheticMode}
+                                        subjectType={activeBlueprint?.generationSubjectType || activeHistoryItem?.subjectType || subjectType}
+                                        aestheticMode={activeBlueprint?.generationAestheticMode || activeHistoryItem?.aestheticMode || aestheticMode}
                                         customLibraryDefs={customLibraryDefs}
                                         isSutureOpen={isSutureOpen}
                                         onSutureOpenChange={setIsSutureOpen}
                                         isAdmin={isAdmin}
+                                        isTaskManagerOpen={isTaskManagerOpen}
+                                        setIsTaskManagerOpen={setIsTaskManagerOpen}
                                     />
                                 </div>
                             )}
@@ -2328,6 +2841,7 @@ const App: React.FC = () => {
                                         onUpdateBlueprint={handleUpdateBlueprintCache}
                                         themeAccent={getMetonymyThemeAccent()}
                                         themeBorder={getMetonymyThemeBorder()}
+                                        theme={theme}
                                         isFullScreen={false}
                                         onToggleFullScreen={() => handleViewChange('ENGINE')}
                                         fieldState={narrativeFieldState}
@@ -2470,7 +2984,28 @@ const App: React.FC = () => {
 
 
                 {/* Modal removed in favor of full page in the Routes flow above, but we keep the logic tethered to isManualOpen for now to minimize ripple effects */}
-                {isHistoryOpen && <HistoryModal history={history} onRestore={onHistoryRestore} onClose={closeHistory} lang={lang} />}
+                {isHistoryOpen && (
+                    <HistoryModal
+                        history={history}
+                        onRestore={onHistoryRestore}
+                        onClose={closeHistory}
+                        lang={lang}
+                        activeProjectId={activeProjectId}
+                        onSaveCurrent={handleSaveCurrentToArchive}
+                    />
+                )}
+                {isProjectsOpen && (
+                    <ProjectSystemModal
+                        projects={projects}
+                        activeProjectId={activeProjectId}
+                        lang={lang}
+                        onClose={() => setIsProjectsOpen(false)}
+                        onCreateProject={handleCreateProject}
+                        onSaveProject={handleSaveProject}
+                        onRestoreProject={handleRestoreProject}
+                        onDeleteProject={handleDeleteProject}
+                    />
+                )}
 
                 {activeBlockId && (
                     <NarrativeLibraryModal
@@ -2480,6 +3015,7 @@ const App: React.FC = () => {
                         blockName={getBlockName(activeBlockId, lang)}
                         selectedTags={narrativeFieldState[activeBlockId] || []}
                         onToggleTag={(tag) => handleToggleTag(activeBlockId, tag)}
+                        onSetTags={(tags) => handleSetBlockTags(activeBlockId, tags)}
                         onClear={() => {
                             const newState = { ...narrativeFieldState, [activeBlockId]: [] };
                             updateNarrativeState(newState);

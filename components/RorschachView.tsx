@@ -1,5 +1,7 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
+import { BorromeanRings } from './BorromeanRings';
+import { Aperture } from 'lucide-react';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // WEBGL SHADER — Dynamic inkblot that responds to session phase
@@ -418,10 +420,10 @@ type SessionState = 'intro' | 'testing' | 'result';
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPEWRITER COMPONENT - Handles character-by-character display and SFX
 // ─────────────────────────────────────────────────────────────────────────────
-const TypewriterText: React.FC<{ 
-  text: string; 
-  onComplete?: () => void; 
-  speed?: number; 
+const TypewriterText: React.FC<{
+  text: string;
+  onComplete?: () => void;
+  speed?: number;
   className?: string;
   style?: React.CSSProperties;
   skip?: boolean;
@@ -445,7 +447,7 @@ const TypewriterText: React.FC<{
 
     audioRef.current = new Audio('/audio/typewriter.mp3');
     audioRef.current.volume = 0.12;
-    
+
     setDisplayedText("");
     let i = 0;
     let timeoutId: NodeJS.Timeout;
@@ -456,7 +458,7 @@ const TypewriterText: React.FC<{
         const nextChar = text[i];
         if (nextChar !== undefined) {
           setDisplayedText(text.substring(0, i + 1));
-          
+
           // Play sound
           if (audioRef.current) {
             const click = audioRef.current.cloneNode() as HTMLAudioElement;
@@ -465,7 +467,7 @@ const TypewriterText: React.FC<{
             click.play().catch(() => {});
           }
         }
-        
+
         i++;
         const jitter = Math.random() * 100;
         timeoutId = setTimeout(typeChar, speed + jitter);
@@ -485,7 +487,12 @@ const TypewriterText: React.FC<{
   return <span className={className} style={style}>{displayedText}</span>;
 }
 
-export const RorschachView: React.FC<RorschachViewProps> = ({ onClose, lang }) => {
+export const RorschachView: React.FC<RorschachViewProps> = ({
+  onClose,
+  lang,
+  showRings,
+  setShowRings
+}) => {
   const { theme } = useTheme();
   const isRetro = theme === 'retro';
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -640,7 +647,7 @@ export const RorschachView: React.FC<RorschachViewProps> = ({ onClose, lang }) =
   useEffect(() => {
     if (sessionState === 'testing') {
       const existing = answers[currentQ];
-      
+
       if (existing) {
         // Already answered: show immediately, restore values
         setQuestionVisible(true);
@@ -671,7 +678,7 @@ export const RorschachView: React.FC<RorschachViewProps> = ({ onClose, lang }) =
 
   const submitAnswer = useCallback((value: string, pos?: { x: number; y: number }) => {
     const newAnswer: Answer = { questionId: question.id, value, clickPos: pos };
-    
+
     // Check if we are overwriting
     let newAnswers: Answer[];
     if (currentQ < answers.length) {
@@ -680,7 +687,7 @@ export const RorschachView: React.FC<RorschachViewProps> = ({ onClose, lang }) =
     } else {
       newAnswers = [...answers, newAnswer];
     }
-    
+
     setAnswers(newAnswers);
     setIsTransitioning(true);
     setQuestionVisible(false);
@@ -800,6 +807,12 @@ export const RorschachView: React.FC<RorschachViewProps> = ({ onClose, lang }) =
         className="relative flex flex-col w-[420px] min-w-[340px] max-w-[45vw] h-full overflow-hidden z-10"
         style={{ backgroundColor: bgPanel, borderRight: `1px solid ${borderCol}` }}
       >
+        {/* Background Rings */}
+        {showRings && (
+          <div className="mist-labyrinth-rings" style={{ opacity: 0.42, pointerEvents: 'none', inset: '-5% -10% -5% -10%' }}>
+            <BorromeanRings centered={true} opacity={1} vivid={true} />
+          </div>
+        )}
 
         {/* Header */}
         <div className="flex items-center justify-between px-8 py-6" style={{ borderBottom: `1px solid ${borderSub}` }}>
@@ -815,34 +828,53 @@ export const RorschachView: React.FC<RorschachViewProps> = ({ onClose, lang }) =
             </h1>
           </div>
 
-          {/* Progress indicator */}
-          {sessionState === 'testing' && (
-            <div className="flex flex-col items-end gap-1.5">
-              <div className="flex gap-1">
-                {QUESTIONS.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => {
-                      if (i <= answers.length) jumpToQuestion(i);
-                    }}
-                    className={`w-1 rounded-full transition-all duration-500 ${i <= answers.length ? 'cursor-pointer hover:opacity-80' : 'cursor-default'}`}
-                    style={{
-                      height: i === currentQ ? '18px' : '5px',
-                      backgroundColor: i < answers.length
-                        ? phaseColors[QUESTIONS[i].phase]
-                        : i === currentQ
-                        ? phaseColor
-                        : borderSub,
-                    }}
-                    title={i < answers.length ? (lang === 'CN' ? '点击修改此回答' : 'Click to edit') : ''}
-                  />
-                ))}
+          {/* Controls */}
+          <div className="flex items-center gap-3">
+            {/* Ring Toggle */}
+            <button
+              onClick={() => setShowRings(!showRings)}
+              className={`flex items-center justify-center w-7 h-7 rounded-sm transition-all duration-300 hover:bg-black/5 dark:hover:bg-white/5 hover:scale-110 active:scale-90 focus:outline-none ${
+                showRings
+                  ? (isRetro ? 'text-[var(--mist-active-accent)]' : 'text-amber-500')
+                  : 'text-zinc-500'
+              }`}
+              title={lang === 'CN' ? "背景圆环开关" : "Background Rings Toggle"}
+            >
+              <Aperture
+                size={14}
+                className={`shrink-0 transition-all duration-700 ${showRings ? 'rotate-[360deg] text-[var(--mist-active-accent)]' : 'rotate-0'}`}
+              />
+            </button>
+
+            {/* Progress indicator */}
+            {sessionState === 'testing' && (
+              <div className="flex flex-col items-end gap-1.5 ml-1">
+                <div className="flex gap-1">
+                  {QUESTIONS.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => {
+                        if (i <= answers.length) jumpToQuestion(i);
+                      }}
+                      className={`w-1 rounded-full transition-all duration-500 ${i <= answers.length ? 'cursor-pointer hover:opacity-80' : 'cursor-default'}`}
+                      style={{
+                        height: i === currentQ ? '18px' : '5px',
+                        backgroundColor: i < answers.length
+                          ? phaseColors[QUESTIONS[i].phase]
+                          : i === currentQ
+                          ? phaseColor
+                          : borderSub,
+                      }}
+                      title={i < answers.length ? (lang === 'CN' ? '点击修改此回答' : 'Click to edit') : ''}
+                    />
+                  ))}
+                </div>
+                <span className="text-[12px] font-mono tracking-[0.2em]" style={{ color: textSecondary }}>
+                  {completedCount + 1} / {QUESTIONS.length}
+                </span>
               </div>
-              <span className="text-[12px] font-mono tracking-[0.2em]" style={{ color: textSecondary }}>
-                {completedCount + 1} / {QUESTIONS.length}
-              </span>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         {/* ── INTRO ── */}
@@ -919,8 +951,8 @@ export const RorschachView: React.FC<RorschachViewProps> = ({ onClose, lang }) =
                     className="text-[18px] leading-[1.55] font-medium"
                     style={{ fontFamily: "'Noto Serif SC', 'Playfair Display', serif", color: textPrimary }}
                   >
-                    <TypewriterText 
-                      text={lang === 'CN' ? question.prompt.cn : question.prompt.en} 
+                    <TypewriterText
+                      text={lang === 'CN' ? question.prompt.cn : question.prompt.en}
                       speed={50}
                       skip={!!answers[currentQ]}
                     />
@@ -939,7 +971,7 @@ export const RorschachView: React.FC<RorschachViewProps> = ({ onClose, lang }) =
               <div className="px-8 pt-5 flex-shrink-0">
                 {(question.type === 'text' || question.type === 'silent_text') && (
                   <>
-                    <div 
+                    <div
                       className="w-full border-b transition-colors duration-300 mt-1"
                       style={{ borderBottomColor: inputValue ? phaseColor + '90' : inputBorder, borderBottomWidth: '1.5px' }}
                     >
@@ -1053,8 +1085,8 @@ export const RorschachView: React.FC<RorschachViewProps> = ({ onClose, lang }) =
                         const q = QUESTIONS.find(q => q.id === a.questionId);
                         const isCurrent = i === currentQ;
                         return (
-                          <button 
-                            key={i} 
+                          <button
+                            key={i}
                             onClick={() => jumpToQuestion(i)}
                             className="answer-history flex gap-3 items-start w-full text-left hover:bg-black/5 dark:hover:bg-white/5 p-1 rounded transition-colors group"
                           >

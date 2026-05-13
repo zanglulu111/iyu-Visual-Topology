@@ -593,9 +593,9 @@ const cleanAndParseJSON = (text: string) => {
 };
 
 const FANTASY_TRAVERSE_TYPES: CreativeTreatment['type'][] = [
-    'STRUCTURALIST',
-    'POST_STRUCTURALIST',
-    'THE_REAL'
+    'PLOT',
+    'FORM',
+    'ATMOSPHERE'
 ];
 
 const getAutoFillBlocksAndLibraries = (driver: DriverType): { blocks: NarrativeBlockDef[]; libraries: LibraryCategoryDef[] } => {
@@ -792,6 +792,7 @@ const isOptionKey = (key: string): boolean => {
 const normalizeTreatmentType = (rawType: string, index: number): CreativeTreatment['type'] => {
     const normalized = rawType.trim().toUpperCase().replace(/\s+/g, '_').replace(/-/g, '_');
     const known = new Set<CreativeTreatment['type']>([
+        'PLOT', 'FORM', 'CHARACTER',
         'CLASSIC', 'STYLIZED', 'SUBVERSIVE',
         'REAL', 'IMAGINARY', 'SYMBOLIC',
         'PHENOMENOLOGICAL', 'STRUCTURALIST', 'THE SPECTACLE',
@@ -803,10 +804,14 @@ const normalizeTreatmentType = (rawType: string, index: number): CreativeTreatme
     ]);
 
     if (known.has(normalized as CreativeTreatment['type'])) return normalized as CreativeTreatment['type'];
+    if (normalized.includes('FORM') || normalized.includes('SV2') || rawType.includes('体裁') || rawType.includes('体量')) return 'FORM';
+    if (normalized.includes('CHARACTER') || rawType.includes('人物') || rawType.includes('角色')) return 'CHARACTER';
+    if (normalized.includes('ATMOSPHERE') || rawType.includes('氛围') || rawType.includes('场域')) return 'ATMOSPHERE';
+    if (normalized.includes('PLOT') || rawType.includes('情节') || rawType.includes('事件')) return 'PLOT';
     if (normalized.includes('POST')) return 'POST_STRUCTURALIST';
     if (normalized.includes('REAL') || rawType.includes('实在')) return 'THE_REAL';
     if (normalized.includes('STRUCT') || rawType.includes('结构')) return 'STRUCTURALIST';
-    return FANTASY_TRAVERSE_TYPES[index] || 'STRUCTURALIST';
+    return FANTASY_TRAVERSE_TYPES[index] || 'PLOT';
 };
 
 const candidateToTreatment = (candidate: any, index: number, sourceKey?: string): CreativeTreatment | null => {
@@ -877,10 +882,15 @@ const candidateToTreatment = (candidate: any, index: number, sourceKey?: string)
     };
 };
 
-const normalizeFantasyTraversePayload = (parsed: any): { treatments: CreativeTreatment[]; thoughtProcess: string } => {
-    if (!parsed) return { treatments: [], thoughtProcess: '' };
+const normalizeFantasyTraversePayload = (parsed: any): { treatments: CreativeTreatment[]; auditXml: string } => {
+    if (!parsed) return { treatments: [], auditXml: '' };
 
-    const thoughtProcess = readAliasedString(parsed, [
+    const auditXml = readAliasedString(parsed, [
+        'design_audit',
+        'designAudit',
+        'audit',
+        'structure_audit',
+        '结构审查',
         'thought_process',
         'thoughtProcess',
         'thinking',
@@ -919,7 +929,7 @@ const normalizeFantasyTraversePayload = (parsed: any): { treatments: CreativeTre
         .map((candidate, index) => candidateToTreatment(candidate.value, index, candidate.sourceKey))
         .filter((item): item is CreativeTreatment => Boolean(item));
 
-    return { treatments, thoughtProcess };
+    return { treatments, auditXml };
 };
 
 const getCallerName = (): string => {
@@ -1213,9 +1223,9 @@ export const generateFantasyTraverse = async (driver: DriverType, duration: stri
 
 【输出兼容性硬约束】
 最终必须返回可解析的 JSON 数组，数组内正好 3 个方案对象。
-不要把方案包在 "thought_process"、"方案A"、"方案B"、"方案C" 这类外层字段里。
-每个方案对象必须包含：id, type, title, tagline, pitch, structure。
-如果需要思考过程，只能放在 JSON 数组之前的 <thought_process>...</thought_process> XML 标签里。`;
+不要把方案包在 "design_audit"、"thought_process"、"方案A"、"方案B"、"方案C" 这类外层字段里。
+每个方案对象必须包含：id, type, title, tagline, structure，并包含 pitch 或 pitch_structure。
+如果主提示要求结构审查，必须放在 JSON 数组之前的 <design_audit>...</design_audit> XML 标签里；只有旧架构明确要求时才允许 <thought_process>...</thought_process>。`;
 
         const parts: any[] = [{ text: `${promptData.text}\n\n${fantasyTraverseOutputContract}` }];
         if (promptData.images && promptData.images.length > 0) parts.push({ inlineData: await toInlineImageData(promptData.images[0]) });
@@ -1230,20 +1240,22 @@ export const generateFantasyTraverse = async (driver: DriverType, duration: stri
         const rawText = response.text || "";
         console.log(`[CoreEngine] Fantasy Traverse raw response (${rawText.length} chars):`, rawText.substring(0, 500));
 
-        // Extract <thought_process> XML before parsing JSON
+        // Extract audit XML before parsing JSON. New V3 prompts use <design_audit>;
+        // legacy prompts may still return <thought_process>.
         let thinkingXml = '';
-        const xmlMatch = rawText.match(/<thought_process[\s\S]*?<\/thought_process>/);
+        const xmlMatch = rawText.match(/<design_audit[\s\S]*?<\/design_audit>/)
+            || rawText.match(/<thought_process[\s\S]*?<\/thought_process>/);
         if (xmlMatch) {
             thinkingXml = xmlMatch[0];
-            console.log(`[CoreEngine] Extracted thinking XML (${thinkingXml.length} chars)`);
+            console.log(`[CoreEngine] Extracted audit XML (${thinkingXml.length} chars)`);
         }
         const textForParsing = xmlMatch ? rawText.replace(xmlMatch[0], '').trim() : rawText;
         const parsed = cleanAndParseJSON(textForParsing);
 
         if (parsed) {
             const normalized = normalizeFantasyTraversePayload(parsed);
-            if (!thinkingXml && normalized.thoughtProcess) {
-                thinkingXml = `<thought_process>\n${normalized.thoughtProcess}\n</thought_process>`;
+            if (!thinkingXml && normalized.auditXml) {
+                thinkingXml = `<design_audit>\n${normalized.auditXml}\n</design_audit>`;
             }
 
             if (normalized.treatments.length > 0) {

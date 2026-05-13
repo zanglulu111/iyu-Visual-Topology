@@ -185,7 +185,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
                 {/* Top Accent */}
                 <div className={`absolute top-0 left-0 w-full h-px ${theme === 'retro' ? 'bg-[#8B261D]' : 'bg-[var(--mist-archive-red)]'} opacity-70`}></div>
 
-                <button onClick={onClose} className="absolute top-4 right-4 text-zinc-500 hover:text-white transition-colors">
+                <button onClick={onClose} className={`absolute top-4 right-4 text-zinc-500 transition-colors ${theme === 'retro' ? 'hover:text-[var(--mist-active-accent)]' : 'hover:text-white'}`}>
                     <X size={20} />
                 </button>
 
@@ -201,7 +201,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
                         )}
 
                         {/* Hover Overlay */}
-                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className={`absolute inset-0 ${theme === 'retro' ? 'bg-[rgba(37,25,22,0.34)]' : 'bg-black/60'} flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity`}>
                             {isUploading ? <Loader2 size={24} className="animate-spin text-[var(--mist-archive-red)]" /> : <Upload size={24} className="text-white" />}
                         </div>
                     </div>
@@ -249,11 +249,11 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
                             </div>
                         </div>
                         {isActiveMember ? (
-                            <span className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-200 uppercase tracking-widest bg-white/[0.04] border border-white/20 rounded px-3 py-1.5">
+                            <span className={`flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest border rounded px-3 py-1.5 ${theme === 'retro' ? 'text-[var(--text-main)] bg-white/50 border-[var(--border-main)]' : 'text-zinc-200 bg-white/[0.04] border-white/20'}`}>
                                 <CheckCircle2 size={12} /> {t.active}
                             </span>
                         ) : (
-                            <span className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest bg-zinc-900 border border-zinc-800 rounded px-3 py-1.5">
+                            <span className={`flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest border rounded px-3 py-1.5 ${theme === 'retro' ? 'text-[var(--text-muted)] bg-[var(--surface-glass)] border-[var(--border-main)]' : 'text-zinc-500 bg-zinc-900 border-zinc-800'}`}>
                                 <ShieldCheck size={12} /> {t.inactive}
                             </span>
                         )}
@@ -313,7 +313,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
                     {redeemResult && (
                         <div className={`mt-3 p-3 rounded-lg border text-[11px] font-mono leading-relaxed ${redeemResult.success
                             ? (theme === 'retro' ? 'bg-[#F4EFE0] border-[#8B261D]/20 text-[#3D1A16]' : 'bg-white/[0.04] border-white/20 text-zinc-200')
-                            : (theme === 'retro' ? 'bg-red-100 border-red-300 text-red-800' : 'bg-[var(--mist-archive-red-faint)] border-[var(--mist-archive-red-soft)] text-[var(--mist-archive-red)]')
+                            : (theme === 'retro' ? 'bg-[rgba(var(--mist-active-accent-rgb),0.08)] border-[rgba(var(--mist-active-accent-rgb),0.2)] text-[var(--text-main)]' : 'bg-[var(--mist-archive-red-faint)] border-[var(--mist-archive-red-soft)] text-[var(--mist-archive-red)]')
                             }`}>
                             {redeemResult.message}
                         </div>
@@ -325,7 +325,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
                         onLogout();
                         onClose();
                     }}
-                    className={`w-full ${theme === 'retro' ? 'bg-[#F4EFE0] text-zinc-600 border-[#8B261D]/20 hover:bg-red-50 hover:text-[#8B261D] hover:border-[#8B261D]' : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:bg-red-950/30 hover:text-red-400 hover:border-red-900/50'} border font-bold uppercase tracking-[0.2em] py-4 rounded-lg flex items-center justify-center gap-3 transition-all duration-300 shadow-sm`}
+                    className={`w-full ${theme === 'retro' ? 'bg-[var(--bg-card)] text-[var(--text-muted)] border-[var(--border-main)] hover:bg-[rgba(var(--mist-active-accent-rgb),0.06)] hover:text-[var(--mist-active-accent)] hover:border-[rgba(var(--mist-active-accent-rgb),0.36)]' : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:bg-red-950/30 hover:text-red-400 hover:border-red-900/50'} border font-bold uppercase tracking-[0.2em] py-4 rounded-lg flex items-center justify-center gap-3 transition-all duration-300 shadow-sm`}
                 >
                     <LogOut size={16} />
                     <span className="text-[10px]">{t.logout}</span>

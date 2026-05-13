@@ -22,7 +22,7 @@ export const DriverSelector: React.FC<DriverSelectorProps> = ({ selectedDriver, 
         switch (id) {
             case DriverType.COMMERCIAL: return 'text-mist-cyan';
             case DriverType.NARRATIVE: return 'text-[#ff4f3f]'; // Narrative is archive red
-            case DriverType.AESTHETIC: return 'text-mist-rose';
+            case DriverType.AESTHETIC: return 'text-mist-aesthetic';
             case DriverType.EXPERIMENTAL: return 'text-fuchsia-400';
             case DriverType.TRAILER: return 'text-mist-orange';
             default: return 'text-gold-primary';
@@ -40,7 +40,7 @@ export const DriverSelector: React.FC<DriverSelectorProps> = ({ selectedDriver, 
         switch (id) {
             case DriverType.COMMERCIAL: return 'border-cyan-500';
             case DriverType.NARRATIVE: return 'border-[#ff4f3f]';
-            case DriverType.AESTHETIC: return 'border-rose-500';
+            case DriverType.AESTHETIC: return 'border-[var(--mist-aesthetic)]';
             case DriverType.EXPERIMENTAL: return 'border-fuchsia-500';
             case DriverType.TRAILER: return 'border-orange-500';
             default: return 'border-[#ff4f3f]';
@@ -64,7 +64,7 @@ export const DriverSelector: React.FC<DriverSelectorProps> = ({ selectedDriver, 
                             onMouseLeave={() => onHover(null)}
                             aria-pressed={selectedDriver === driver.id}
                             className={`
-                group relative flex flex-col items-start text-left p-6 md:p-8 rounded-sm transition-all duration-300
+                group relative flex flex-col items-start text-left p-6 md:p-8 rounded-sm transition-all duration-700
                 border min-h-[300px]
                 ${active
                     ? `${borderClass} shadow-[0_45px_100px_rgba(0,0,0,0.1)] -translate-y-1 ${isRetro ? 'bg-[#FDFCF8]' : 'bg-zinc-950'}`
@@ -78,7 +78,7 @@ export const DriverSelector: React.FC<DriverSelectorProps> = ({ selectedDriver, 
                             {/* Title Section */}
                             <div className="mb-4 w-full">
                                 <div className="h-14 overflow-hidden">
-                                    <div className={`transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${lang === 'EN' ? '-translate-y-1/2' : 'translate-y-0'}`}>
+                                    <div className={`transition-all duration-[1500ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${lang === 'EN' ? '-translate-y-1/2' : 'translate-y-0'}`}>
                                         <div className="flex flex-col">
                                             <div className="h-14 flex items-center shrink-0">
                                                 <h3 className={`text-xl md:text-2xl font-serif font-bold tracking-wide transition-all duration-500 leading-tight ${
@@ -106,7 +106,7 @@ export const DriverSelector: React.FC<DriverSelectorProps> = ({ selectedDriver, 
                                     </div>
                                 </div>
                                 <div className="h-6 overflow-hidden mt-1">
-                                    <div className={`transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${lang === 'EN' ? '-translate-y-1/2' : 'translate-y-0'}`}>
+                                    <div className={`transition-all duration-[1500ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${lang === 'EN' ? '-translate-y-1/2' : 'translate-y-0'}`}>
                                         <div className="flex flex-col">
                                              <div className={`h-6 flex items-center shrink-0 text-sm font-serif italic transition-all duration-500 ${active ? accentClass : (isRetro ? 'text-black opacity-60' : 'text-[var(--text-muted)] opacity-60')}`}>
                                                  {driver.coreDriver}
@@ -122,7 +122,7 @@ export const DriverSelector: React.FC<DriverSelectorProps> = ({ selectedDriver, 
                             {/* Description Section with robust sliding */}
                             <div className="max-w-[98%] mb-6">
                                 <div className="h-[130px] overflow-hidden relative">
-                                    <div className={`transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${lang === 'EN' ? '-translate-y-1/2' : 'translate-y-0'}`}>
+                                    <div className={`transition-all duration-[1500ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${lang === 'EN' ? '-translate-y-1/2' : 'translate-y-0'}`}>
                                         <div className="flex flex-col">
                                             {/* CN Slot */}
                                             <div className="h-[130px] shrink-0">
@@ -170,7 +170,7 @@ export const DriverSelector: React.FC<DriverSelectorProps> = ({ selectedDriver, 
 
 
                             {/* Subtle background glow */}
-                            <div className={`absolute inset-0 bg-gradient-to-br from-white/[0.01] to-transparent pointer-events-none transition-opacity duration-300 ${active ? 'opacity-100' : 'opacity-0'}`}></div>
+                            <div className={`absolute inset-0 bg-gradient-to-br from-white/[0.01] to-transparent pointer-events-none transition-opacity duration-700 ${active ? 'opacity-100' : 'opacity-0'}`}></div>
                         </button>
                     );
                 })}

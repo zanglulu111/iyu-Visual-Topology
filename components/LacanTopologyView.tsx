@@ -139,14 +139,14 @@ export const LacanTopologyView: React.FC<LacanTopologyViewProps> = ({
     const activeData = RSI_DESCRIPTIONS[activeKey];
 
     return (
-        <div 
+        <div
             className={`flex flex-col h-full w-full bg-[var(--bg-main)] text-[var(--accent-color)] font-sans overflow-hidden transition-all duration-500`}
-            style={{ 
+            style={{
                 filter: isRetro ? 'saturate(1.05) brightness(1.01)' : 'saturate(1.2) brightness(1.15)'
             }}
         >
             {isRetro && <div className="absolute inset-0 pointer-events-none opacity-30 mix-blend-multiply z-0" style={{ backgroundImage: 'var(--pattern-aged)' }}></div>}
-            
+
         {/* Header - Unified AppHeader Style */}
         <header className={`shrink-0 z-50 h-14 flex items-center justify-between px-6 transition-all duration-500 bg-[var(--bg-header)] backdrop-blur-md border-b ${theme === 'retro' ? 'border-[var(--border-main)]' : 'border-white/[0.06]'} relative animate-page-dissolve`}>
             {/* Accent bottom line */}
@@ -182,8 +182,8 @@ export const LacanTopologyView: React.FC<LacanTopologyViewProps> = ({
                 <div className="relative group/search">
                     <div className={`relative flex items-center ${theme === 'retro' ? 'bg-white/40 border-black/20 group-hover/search:border-black/40 hover:bg-white/60' : 'bg-black/20 border-white/10 hover:bg-black/40'} border rounded-full px-4 py-1.5 transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] shadow-sm hover:shadow-lg w-64 md:w-80 group/input`}>
                         <Search size={12} className={`mr-2 transition-colors duration-500 ${theme === 'retro' ? 'text-black/40' : 'text-zinc-500'} group-hover/input:scale-110 transition-transform duration-300`} />
-                        <input 
-                            type="text" 
+                        <input
+                            type="text"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder={lang === 'CN' ? '搜索协议、档案或理论词条...' : 'Search protocols, archives or codex...'}
@@ -237,7 +237,7 @@ export const LacanTopologyView: React.FC<LacanTopologyViewProps> = ({
                     </button>
 
                     {/* 2. Language Toggle */}
-                    <button 
+                    <button
                         onClick={toggleLang}
                         className={`text-[10px] font-bold ${theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'} transition-all duration-300 w-7 h-7 flex items-center justify-center rounded-sm tracking-widest hover:bg-white/5 hover:scale-110 active:scale-90`}
                         title="Toggle Language"
@@ -246,7 +246,7 @@ export const LacanTopologyView: React.FC<LacanTopologyViewProps> = ({
                     </button>
 
                     {/* 3. Theme Toggle */}
-                    <button 
+                    <button
                         onClick={toggleTheme}
                         className={`flex items-center justify-center w-7 h-7 rounded-sm ${theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'} transition-all duration-300 hover:bg-white/5 hover:scale-110 active:scale-90`}
                         title={theme === 'dark' ? "切换为复古主题" : "切换为暗黑主题"}
@@ -254,17 +254,19 @@ export const LacanTopologyView: React.FC<LacanTopologyViewProps> = ({
                         {theme === 'dark' ? <Moon size={14} /> : <Sun size={14} className="text-[var(--mist-active-accent)]" />}
                     </button>
 
-                    {/* 4. Ring Toggle */}
                     <button
                         onClick={() => setShowRings(!showRings)}
                         className={`flex items-center justify-center w-7 h-7 rounded-sm transition-all duration-300 hover:bg-white/5 hover:scale-110 active:scale-90 focus:outline-none ${
                             showRings
-                                ? (theme === 'retro' ? 'text-[var(--mist-active-accent)]' : 'text-gold-primary')
+                                ? 'text-[var(--mist-active-accent)]'
                                 : (theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white')
                         }`}
                         title={lang === 'CN' ? "背景圆环开关" : "Background Rings Toggle"}
                     >
-                        <Aperture size={14} className={`shrink-0 transition-all duration-300 ${showRings ? 'rotate-180' : ''}`} />
+                        <Aperture
+                            size={14}
+                            className={`shrink-0 transition-all duration-700 ${showRings ? 'rotate-[360deg] text-[var(--mist-active-accent)]' : 'rotate-0'}`}
+                        />
                     </button>
                 </div>
             </div>
@@ -277,9 +279,9 @@ export const LacanTopologyView: React.FC<LacanTopologyViewProps> = ({
                 {/* LEFT AREA: Detailed Explanation (1/3) */}
                 {!hideSidebar && (
                 <div className={`w-full lg:w-[35%] bg-[var(--bg-panel)] border-r border-[var(--border-main)] flex flex-col z-20 shadow-[40px_0_120px_rgba(0,0,0,0.9)] flex-shrink-0 relative overflow-hidden transition-colors duration-500`}>
-                    
+
                     <div className="flex-1 flex flex-col p-8 lg:p-14 overflow-y-auto custom-scrollbar">
-                        
+
                         <div className="mb-12">
                             <div className="flex items-center gap-3 mb-6 text-gold-primary brightness-125 text-[12px] uppercase tracking-[0.4em] font-black underline underline-offset-8 decoration-gold-primary/30">
                                  <Info size={14} />
@@ -341,17 +343,17 @@ export const LacanTopologyView: React.FC<LacanTopologyViewProps> = ({
 
                 {/* RIGHT AREA: Visualization (2/3) */}
                 <div className={`flex-1 relative flex items-center justify-center p-8 overflow-hidden bg-[var(--bg-main)] transition-colors duration-500`}>
-                    
+
                     <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: `radial-gradient(${isRetro ? 'var(--mist-active-accent)' : '#FFD700'} 1px, transparent 0)`, backgroundSize: '32px 32px' }}></div>
 
                     {/* The Rings - Large and centered */}
                     <div className="w-full h-full max-w-[1000px] max-h-[1000px] relative flex items-center justify-center -translate-y-12">
                         <BorromeanRings centered={true} opacity={1} vivid={true} />
-                        
+
                         {/* Interactive Targets Overlay - HOVER DISABLED AS PER REQUEST */}
                         <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 z-10 pointer-events-auto">
                             {['REAL', 'SYMBOLIC', 'IMAGINARY', 'SINTHOME'].map(key => (
-                                <div 
+                                <div
                                     key={key}
                                     onClick={() => setSelectedKey(key)}
                                     className="cursor-pointer"
@@ -363,11 +365,11 @@ export const LacanTopologyView: React.FC<LacanTopologyViewProps> = ({
                     {/* Selection Cards at the bottom */}
                     <div className="absolute bottom-12 flex gap-4 px-8 z-40">
                         {Object.entries(RSI_DESCRIPTIONS).map(([id, data]) => (
-                            <button 
+                            <button
                                 key={id}
                                 onClick={() => setSelectedKey(id)}
                                 className={`w-40 p-4 border rounded-sm transition-all duration-300 text-left
-                                    ${selectedKey === id 
+                                    ${selectedKey === id
                                         ? 'bg-gold-primary/20 border-gold-primary shadow-[0_0_30px_rgba(212,175,55,0.15)] -translate-y-2'
                                         : 'bg-black/40 border-white/5 hover:border-white/10 opacity-60 hover:opacity-100'}
                                 `}

@@ -1,14 +1,15 @@
 
-import { HistoryItem, CollectionItem, DesireProject, SubjectDossier } from '../types';
+import { HistoryItem, CollectionItem, DesireProject, SubjectDossier, MistProject } from '../types';
 import { supabaseDatabase } from './supabaseDatabase';
 import { supabase } from './supabaseAuth';
 
 const DB_NAME = 'VisionaryDB';
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 const STORE_HISTORY = 'history';
 const STORE_COLLECTIONS = 'collections';
 const STORE_DESIRE_PROJECTS = 'desireProjects';
 const STORE_SUBJECT_DOSSIERS = 'subjectDossiers';
+const STORE_MIST_PROJECTS = 'mistProjects';
 
 let lastCloudFetchTime = 0;
 const CLOUD_FETCH_COOLDOWN = 60000; // 60 seconds cooldown
@@ -31,6 +32,9 @@ const openDB = (): Promise<IDBDatabase> => {
             }
             if (!db.objectStoreNames.contains(STORE_SUBJECT_DOSSIERS)) {
                 db.createObjectStore(STORE_SUBJECT_DOSSIERS, { keyPath: 'id' });
+            }
+            if (!db.objectStoreNames.contains(STORE_MIST_PROJECTS)) {
+                db.createObjectStore(STORE_MIST_PROJECTS, { keyPath: 'id' });
             }
         };
 
@@ -86,6 +90,21 @@ export const persistence = {
         } catch (e) {
             console.error("Failed to init DB", e);
         }
+    },
+
+    // --- PROJECT SYSTEM ---
+
+    getMistProjects: async (): Promise<MistProject[]> => {
+        const items = await getAllFromStore<MistProject>(STORE_MIST_PROJECTS);
+        return items.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+    },
+
+    saveMistProject: async (item: MistProject): Promise<void> => {
+        return putInStore(STORE_MIST_PROJECTS, item);
+    },
+
+    deleteMistProject: async (id: string): Promise<void> => {
+        return deleteFromStore(STORE_MIST_PROJECTS, id);
     },
 
     // --- HISTORY OPERATIONS ---

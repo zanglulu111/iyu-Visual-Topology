@@ -136,7 +136,7 @@ export const MIST_INDEX: LacanCategory[] = [
         enName: "03 SUR/SV Surface & Production Protocols",
         desc: "（二）参数簇",
         concepts: [
-            { id: "narrative_dynamics_and_soul", name: "SUR1-SUR2：叙事动力与背景场域", enName: "Genre Mode & World Motif", category: "SUR", shortDef: "类型节奏与世界底色只提供显现频率，不解释主体为何运动。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" },
+            { id: "narrative_dynamics_and_soul", name: "SUR1-SUR2：故事类型与背景场域", enName: "Genre Mode & World Motif", category: "SUR", shortDef: "类型节奏与世界底色只提供显现频率，不解释主体为何运动。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" },
             { id: "spacetime_and_space_container", name: "SUR3-SUR6：时空坐标与空间容器", enName: "Spacetime & Space Container", category: "SUR", shortDef: "时空锚点与空间场景提供发生容器，不承担遭遇、阻断或代价的本体原因。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" },
             { id: "order_and_object", name: "SUR4-SUR5：社会形态与对象预设", enName: "Order Shell & Object Anchor", category: "SUR", shortDef: "社会外壳与对象锚点只提供可见材料，不替 M4 或 M3 解释结构原因。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" },
             { id: "visible_profile_opening_belief", name: "SUR7-SUR10：人物呈现与开场话语", enName: "Visible Profile & Opening Belief", category: "SUR", shortDef: "选角、年龄、职业与信念语言是入口界面，不是人物本质。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" },

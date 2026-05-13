@@ -10,22 +10,30 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [theme, setThemeState] = useState<Theme>('dark');
+const isTheme = (value: string | null): value is Theme => value === 'dark' || value === 'retro';
 
-    useEffect(() => {
-        const savedTheme = localStorage.getItem('app_theme') as Theme;
-        if (savedTheme && (savedTheme === 'dark' || savedTheme === 'retro')) {
-            setThemeState(savedTheme);
-        }
-    }, []);
+const getInitialTheme = (): Theme => {
+    if (typeof window === 'undefined') return 'dark';
+    const savedTheme = window.localStorage.getItem('app_theme');
+    return isTheme(savedTheme) ? savedTheme : 'dark';
+};
+
+const applyThemeClass = (newTheme: Theme) => {
+    document.documentElement.classList.remove('dark', 'retro');
+    document.documentElement.classList.add(newTheme);
+    document.documentElement.dataset.theme = newTheme;
+    document.body.classList.remove('dark', 'retro');
+    document.body.classList.add(newTheme);
+    document.body.dataset.theme = newTheme;
+};
+
+export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const [theme, setThemeState] = useState<Theme>(getInitialTheme);
 
     const setTheme = (newTheme: Theme) => {
         setThemeState(newTheme);
         localStorage.setItem('app_theme', newTheme);
-        // We can also apply a class to the html/body if needed for tailwind 'class' strategy
-        document.documentElement.classList.remove('dark', 'retro');
-        document.documentElement.classList.add(newTheme);
+        applyThemeClass(newTheme);
     };
 
     const toggleTheme = () => {
@@ -35,8 +43,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     // Apply theme on initial load
     useEffect(() => {
-        document.documentElement.classList.remove('dark', 'retro');
-        document.documentElement.classList.add(theme);
+        applyThemeClass(theme);
     }, [theme]);
 
     return (

@@ -19,7 +19,7 @@ interface UniversePortalProps {
   openProfile: () => void;
   openManual: () => void;
   entryMode?: 'intro' | 'return';
-  onOpenDesireReproduction?: () => void;
+  onOpenCoreDrivers?: () => void;
 }
 
 const AnimatedText = ({ cn, en, lang, className = "", hClass = "h-5", style = {} }: { cn: React.ReactNode, en: React.ReactNode, lang: 'CN' | 'EN', className?: string, hClass?: string, style?: React.CSSProperties }) => {
@@ -86,11 +86,11 @@ const REALMS: RealmDef[] = [
   },
   {
     id: 'engine',
-    titleCn: '情绪美学',
-    titleEn: 'EMOTIONAL\nAESTHETICS',
+    titleCn: '核心驱动器',
+    titleEn: 'CORE DRIVERS',
     subtitleCn: '创作引擎 // 符号链条',
     subtitleEn: 'CREATIVE ENGINE // SYMBOLIC CHAIN',
-    descCn: '启动核心驱动器，进入视觉生产的符号链。构建你自己的迷雾。',
+    descCn: '启动欲望再生产，进入视觉生产的符号链。构建你自己的迷雾。',
     descEn: 'Activate the core driver. Enter the symbolic chain of visual production.',
     color: '#EF4444',
     glowRgba: 'rgba(239, 68, 68, 0.2)',
@@ -143,7 +143,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
   openProfile,
   openManual,
   entryMode = 'intro',
-  onOpenDesireReproduction
+  onOpenCoreDrivers
 }) => {
   const { theme, toggleTheme } = useTheme();
   const isRetro = theme === 'retro';

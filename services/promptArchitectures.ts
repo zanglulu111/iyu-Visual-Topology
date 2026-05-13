@@ -254,7 +254,7 @@ Task: 基于以下迷雾学派引擎参数，生成 3 个电影级故事概念�
 
   // 音色平衡器 (Tonal Calibrator)
   LAYER_1 += `### 🎵 音色校准 (TONAL CALIBRATION)\n`;
-  LAYER_1 += `故事的默认色调由 SUR1（叙事动力）决定，而非由 M 参数的暗面决定。\n`;
+  LAYER_1 += `故事的默认色调由 SUR1（故事类型）决定，而非由 M 参数的暗面决定。\n`;
   LAYER_1 += `- 如果 SUR1 = 爱情 → 基调是浪漫的，痛苦藏在甜蜜的缝隙里。\n`;
   LAYER_1 += `- 如果 SUR1 = 喜剧 → 基调是好笑的，虚无藏在过度的笑声里。\n`;
   LAYER_1 += `- 如果 SUR1 = 黑色电影 → 阴暗中必须有风格化的冷幽默与宿命感。\n`;
@@ -528,7 +528,7 @@ Task: 基于以下迷雾学派引擎参数，生成 3 个电影级故事概念�
 
   // 音色平衡器 (Tonal Calibrator)
   BLOCK_1B += `### 🎵 音色校准 (TONAL CALIBRATION)\n`;
-  BLOCK_1B += `故事的默认色调由 SUR1（叙事动力）决定，而非由 M 参数的暗面决定。\n`;
+  BLOCK_1B += `故事的默认色调由 SUR1（故事类型）决定，而非由 M 参数的暗面决定。\n`;
   BLOCK_1B += `- 如果 SUR1 = 爱情 → 基调是浪漫的，痛苦藏在甜蜜的缝隙里。\n`;
   BLOCK_1B += `- 如果 SUR1 = 喜剧 → 基调是好笑的，虚无藏在过度的笑声里。\n`;
   BLOCK_1B += `- 如果 SUR1 = 黑色电影 → 阴暗中必须有风格化的冷幽默与宿命感。\n`;
@@ -546,7 +546,7 @@ Task: 基于以下迷雾学派引擎参数，生成 3 个电影级故事概念�
 
   // 遍历 SUR 参数，只列有值的
   const surParams = [
-    { label: 'SUR1. 叙事动力', suffix: '_genre' },
+    { label: 'SUR1. 故事类型', suffix: '_genre' },
     { label: 'SUR2. 背景场域', suffix: '_era' },
     { label: 'SUR3. 时空坐标', suffix: '_spacetime' },
     { label: 'SUR4. 社会形态', suffix: '_society' },

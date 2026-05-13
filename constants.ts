@@ -184,9 +184,9 @@ export const DRIVERS: (DriverDef & { nameEn: string; accent: string; retroAccent
     kpi: "感官情动",
     forbidden: "禁止平庸",
     iconName: "Palette",
-    gradient: "from-rose-900/40 to-slate-900",
-    accent: '#FB7185',
-    retroAccent: '#8A3A40'
+    gradient: "from-violet-900/40 to-slate-900",
+    accent: '#8B5CF6',
+    retroAccent: '#5B4B8A'
   },
   {
     id: DriverType.EXPERIMENTAL,
@@ -227,7 +227,8 @@ export const MIDDLE_LAYER_CONFIG: Record<DriverType, LayerConfig> = {
   [DriverType.COMMERCIAL]: { layerName: "营销模块 (Modules)", sectionPrefix: "Module" },
   [DriverType.EXPERIMENTAL]: { layerName: "脚本段落 (Script Blocks)", sectionPrefix: "Block" },
   [DriverType.AESTHETIC]: { layerName: "情绪段落 (Moods)", sectionPrefix: "Mood" },
-  [DriverType.TRAILER]: { layerName: "画布节点 (Canvas Nodes)", sectionPrefix: "Node" }
+  [DriverType.TRAILER]: { layerName: "画布节点 (Canvas Nodes)", sectionPrefix: "Node" },
+  [DriverType.SUTURE]: { layerName: "缝合节点 (Suture Nodes)", sectionPrefix: "Suture" }
 };
 
 export const BLOCK_LIMITS: Record<string, number> = {
@@ -325,7 +326,7 @@ export const RANDOM_RANGES: Record<string, [number, number]> = {
   'engine_m6': [1, 2], 'engine_m7b': [1, 1], 'engine_m7a': [1, 1],
   // engine_m4x/engine_m5x removed in v3.0
   // SUR 表层设定
-  'skin_genre': [1, 2],      // SUR1 叙事动力
+  'skin_genre': [1, 2],      // SUR1 故事类型
   'skin_era': [1, 1],         // SUR2 背景场域
   'skin_society': [0, 1],     // SUR4 社会形态
   'skin_everything': [0, 1],  // SUR5 对象预设
@@ -344,7 +345,7 @@ export const RANDOM_RANGES: Record<string, [number, number]> = {
 
 /** 单项随机按钮使用的数量区间：用户主动点骰子时不应随机为空 */
 export const SINGLE_RANDOM_RANGES: Record<string, [number, number]> = {
-  'skin_genre': [1, 2],       // SUR1 叙事动力
+  'skin_genre': [1, 2],       // SUR1 故事类型
   'skin_society': [1, 1],     // SUR4 社会形态
   'skin_everything': [1, 1],  // SUR5 对象预设
   'skin_location': [1, 2],    // SUR6 空间容器

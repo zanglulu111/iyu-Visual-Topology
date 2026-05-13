@@ -133,7 +133,7 @@ export const ArchiveContent: React.FC<ArchiveContentProps> = ({ lang }) => {
                         title: dossier.psychoanalysis.title,
                         body: dossier.psychoanalysis.content || '精神分析档案待补全。'
                     }],
-                    conclusion: dossier.adminNotes || '该主体档案由欲望工作档案推送生成。',
+                    conclusion: dossier.adminNotes || '该主体档案由欲望存档推送生成。',
                     verdict: dossier.status === 'published' ? '病历归档：[已发布]' : '病历归档：[草稿]'
                 },
                 assetGroups: dossier.assets,

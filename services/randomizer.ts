@@ -98,6 +98,37 @@ export const pickRandomWithLocks = (
     return [...keptTags, ...shuffled.slice(0, Math.min(needed, shuffled.length)).map(i => i.name)];
 };
 
+const getGenderKind = (item: any): 'female' | 'male' | 'nonBinary' | null => {
+    const id = String(item?.id || '').toLowerCase();
+    const name = String(item?.name || item || '');
+    const nameEn = String(item?.nameEn || item?.enName || '');
+    const text = `${id} ${name} ${nameEn}`.toLowerCase();
+
+    if (id === 'gen_f' || name === '女性' || nameEn.toLowerCase() === 'female') return 'female';
+    if (id === 'gen_m' || name === '男性' || nameEn.toLowerCase() === 'male') return 'male';
+    if (id === 'gen_nb' || name === '非二元' || text.includes('non-binary') || text.includes('non binary')) return 'nonBinary';
+    return null;
+};
+
+export const pickBiasedBinaryGenderName = (libItems: any[]): string | null => {
+    const femaleItems = libItems.filter(item => getGenderKind(item) === 'female');
+    const maleItems = libItems.filter(item => getGenderKind(item) === 'male');
+    const preferFemale = Math.random() < 0.70;
+    const primaryPool = preferFemale ? femaleItems : maleItems;
+    const fallbackPool = preferFemale ? maleItems : femaleItems;
+    const pool = primaryPool.length > 0 ? primaryPool : fallbackPool;
+    if (pool.length === 0) return null;
+    return pool[Math.floor(Math.random() * pool.length)].name;
+};
+
+export const pickRemainingGenderName = (libItems: any[], currentTags: string[] = []): string | null => {
+    const current = new Set(currentTags);
+    const available = libItems.filter(item => !current.has(item.name) && !current.has(item.nameEn));
+    const pool = available.length > 0 ? available : libItems;
+    if (pool.length === 0) return null;
+    return pool[Math.floor(Math.random() * pool.length)].name;
+};
+
 const pickRandom = (blockId: string, count: number, currentTags: string[], lockedTags: string[], libItems: any[]) => {
     return pickRandomWithLocks(currentTags, lockedTags, libItems, count);
 };
@@ -729,6 +760,17 @@ export const generateGlobalRandomState = (
             if (['skin_location', 'skin_profession', 'skin_society', 'skin_ideology', 'comm_skin_scenario', 'engine_m1', 'skin_origin'].includes(block.id)) {
                 availableItems = filterItemsByArchetype(category.items, currentArchetype, block.id);
                 if (availableItems.length === 0) availableItems = category.items;
+            }
+
+            if (block.id === 'skin_gender') {
+                const locks = getVisibleLocks(block.id);
+                if (locks.length > 0) {
+                    newState[block.id] = locks;
+                    return;
+                }
+                const selectedGender = pickBiasedBinaryGenderName(availableItems);
+                newState[block.id] = selectedGender ? [selectedGender] : [];
+                return;
             }
 
             const locks = getVisibleLocks(block.id);

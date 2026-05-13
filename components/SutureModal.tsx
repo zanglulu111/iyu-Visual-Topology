@@ -626,21 +626,6 @@ export const SutureModal: React.FC<SutureModalProps> = ({
 
                                 {/* Execute Button integrated into bottom of scroll */}
                                 <div className="pt-6 pb-2 flex items-center gap-2">
-                                    <button
-                                        type="button"
-                                        onClick={handleGenerateClick}
-                                        disabled={isGenerating || !sourceText}
-                                        className="mist-traverse-action mist-app-primary-action flex-1 flex items-center justify-center gap-3 py-3 rounded-md font-black text-sm uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed border"
-                                        style={{ boxShadow: 'none' }}
-                                    >
-                                        {isGenerating ? <Zap size={18} className="animate-pulse" /> : <Play size={18} fill="currentColor" />}
-                                        {isGenerating ? (
-                                            <>
-                                                {t.BTN_PROCESSING}
-                                                <ProcessingTimer startTime={generationStartTime} />
-                                            </>
-                                        ) : t.BTN_GENERATE}
-                                    </button>
                                     <AdminXRayButton
                                         isAdmin={isAdmin}
                                         lang={lang === 'EN' ? 'EN' : 'CN'}
@@ -656,6 +641,21 @@ export const SutureModal: React.FC<SutureModalProps> = ({
                                         )}
                                         disabled={!sourceText}
                                     />
+                                    <button
+                                        type="button"
+                                        onClick={handleGenerateClick}
+                                        disabled={isGenerating || !sourceText}
+                                        className="mist-traverse-action mist-app-primary-action flex-1 flex items-center justify-center gap-3 py-3 rounded-md font-black text-sm uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed border"
+                                        style={{ boxShadow: 'none' }}
+                                    >
+                                        {isGenerating ? <Zap size={18} className="animate-pulse" /> : <Play size={18} fill="currentColor" />}
+                                        {isGenerating ? (
+                                            <>
+                                                {t.BTN_PROCESSING}
+                                                <ProcessingTimer startTime={generationStartTime} />
+                                            </>
+                                        ) : t.BTN_GENERATE}
+                                    </button>
                                 </div>
                             </div>
                         </div>

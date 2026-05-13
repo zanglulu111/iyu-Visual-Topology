@@ -178,10 +178,14 @@ const buildArtifact = (
         content?: string;
         blueprint?: CreativeBlueprint | null;
         treatments?: HistoryItem['treatments'];
+        archiveSource?: HistoryItem['archiveSource'];
+        archiveReason?: HistoryItem['archiveReason'];
     }
 ): DesireArchiveVersion => ({
     id: `${stage.toLowerCase()}-${source.sourceHistoryId || makeId('artifact')}-${source.sourceTreatmentId || source.versionLabel || 'base'}`,
     stage,
+    archiveSource: source.archiveSource,
+    archiveReason: source.archiveReason,
     title: source.title,
     createdAt: source.createdAt,
     updatedAt: source.updatedAt || source.createdAt,
@@ -205,7 +209,10 @@ const buildDivergenceProjectFromHistoryItem = (item: HistoryItem): DesireProject
 
     return {
         id: `divergence-history-${sourceId}`,
+        projectId: item.projectId,
         archiveKind: 'DIVERGENCE_BATCH',
+        archiveSource: item.archiveSource,
+        archiveReason: item.archiveReason,
         sourceType: 'ENGINE_GENERATED',
         title,
         engineType: item.driverId || DriverType.NARRATIVE,
@@ -216,6 +223,12 @@ const buildDivergenceProjectFromHistoryItem = (item: HistoryItem): DesireProject
         worldLaw: item.worldLaw,
         visionInput: item.visionInput,
         visionAnalysis: item.visionAnalysis,
+        visionImage: item.visionImage,
+        visionImageNote: item.visionImageNote,
+        subjectType: item.subjectType,
+        aestheticMode: item.aestheticMode,
+        colorPalette: item.colorPalette,
+        faceState: item.faceState,
         sourceHistoryIds: [sourceId],
         candidateCount: item.treatments.length,
         divergence: buildArtifact('DIVERGENCE_SET', {
@@ -223,6 +236,8 @@ const buildDivergenceProjectFromHistoryItem = (item: HistoryItem): DesireProject
             createdAt,
             sourceHistoryId: sourceId,
             content: buildDivergenceContent(item),
+            archiveSource: item.archiveSource,
+            archiveReason: item.archiveReason,
             treatments: item.treatments
         }),
         bibleDrafts: [],
@@ -235,7 +250,8 @@ const buildStoryProjectFromBlueprint = (
     item: HistoryItem,
     blueprint: CreativeBlueprint,
     index: number,
-    mode: 'BIBLE' | 'METONYMY'
+    mode: 'BIBLE' | 'METONYMY',
+    projectIdOverride?: string
 ): DesireProject => {
     const createdAt = item.date;
     const sourceId = item.id;
@@ -248,8 +264,11 @@ const buildStoryProjectFromBlueprint = (
     const sourceDivergenceId = item.treatments?.length ? `divergence-history-${sourceId}` : undefined;
 
     const project: DesireProject = {
-        id: `story-${sourceId}-${sourceTreatmentId}`,
+        id: projectIdOverride || `story-${sourceId}-${sourceTreatmentId}`,
+        projectId: item.projectId,
         archiveKind: 'STORY_PROJECT',
+        archiveSource: item.archiveSource,
+        archiveReason: item.archiveReason,
         sourceType,
         title: projectTitle,
         engineType: item.driverId || DriverType.NARRATIVE,
@@ -260,6 +279,12 @@ const buildStoryProjectFromBlueprint = (
         worldLaw: item.worldLaw,
         visionInput: item.visionInput,
         visionAnalysis: item.visionAnalysis,
+        visionImage: item.visionImage,
+        visionImageNote: item.visionImageNote,
+        subjectType: item.subjectType,
+        aestheticMode: item.aestheticMode,
+        colorPalette: item.colorPalette,
+        faceState: item.faceState,
         sourceHistoryIds: [sourceId],
         sourceDivergenceId,
         sourceCandidateId: sourceTreatmentId,
@@ -281,6 +306,8 @@ const buildStoryProjectFromBlueprint = (
             sourceTreatmentId,
             versionLabel: sourceType === 'CUSTOM_STORY' ? 'Original Story' : `Bible ${index + 1}`,
             content: storyContent,
+            archiveSource: item.archiveSource,
+            archiveReason: item.archiveReason,
             blueprint
         })];
     }
@@ -293,6 +320,8 @@ const buildStoryProjectFromBlueprint = (
             sourceTreatmentId,
             versionLabel: `Script ${index + 1}`,
             content: getScreenplayContent(blueprint),
+            archiveSource: item.archiveSource,
+            archiveReason: item.archiveReason,
             blueprint
         })];
     }
@@ -343,15 +372,35 @@ export const buildDesireProjectsFromHistoryItem = (item: HistoryItem): DesirePro
     const divergenceProject = buildDivergenceProjectFromHistoryItem(item);
     if (divergenceProject) projects.push(divergenceProject);
 
-    const bibleBlueprints = item.savedBlueprints
-        ? Object.values(item.savedBlueprints)
-        : (item.type === 'BIBLE' && item.blueprint ? [item.blueprint] : []);
+    const bibleBlueprints = item.metonymyBlueprint
+        ? []
+        : item.savedBlueprints
+            ? Object.values(item.savedBlueprints)
+            : (item.type === 'BIBLE' && item.blueprint ? [item.blueprint] : []);
     bibleBlueprints.forEach((blueprint, index) => {
         projects.push(buildStoryProjectFromBlueprint(item, blueprint, index, 'BIBLE'));
     });
 
-    if (item.type === 'METONYMY' && item.blueprint) {
+    if (item.type === 'METONYMY' && item.blueprint && !item.metonymyBlueprint) {
         projects.push(buildStoryProjectFromBlueprint(item, item.blueprint, 0, 'METONYMY'));
+    }
+
+    if (item.metonymyBlueprint) {
+        const primaryBlueprint = item.blueprint || item.metonymyBlueprint;
+        const combined = buildStoryProjectFromBlueprint(item, primaryBlueprint, 0, 'BIBLE', `story-${item.id}-workspace`);
+        combined.title = `故事工作台｜${getTitleFromBlueprint(primaryBlueprint)}`;
+        combined.metonymyScripts = [buildArtifact('METONYMY_SCRIPT', {
+            title: getTitleFromBlueprint(item.metonymyBlueprint),
+            createdAt: item.date,
+            sourceHistoryId: item.id,
+            sourceTreatmentId: item.metonymyBlueprint.treatmentId || 'metonymy',
+            versionLabel: 'Metonymy Script',
+            content: getScreenplayContent(item.metonymyBlueprint),
+            archiveSource: item.archiveSource,
+            archiveReason: item.archiveReason,
+            blueprint: item.metonymyBlueprint
+        })];
+        projects.push(combined);
     }
 
     return mergeStoryProjects(projects);
@@ -360,7 +409,10 @@ export const buildDesireProjectsFromHistoryItem = (item: HistoryItem): DesirePro
 export const buildDesireProjectFromHistoryItem = (item: HistoryItem): DesireProject => {
     return buildDesireProjectsFromHistoryItem(item)[0] || {
         id: `story-${item.id}`,
+        projectId: item.projectId,
         archiveKind: 'STORY_PROJECT',
+        archiveSource: item.archiveSource,
+        archiveReason: item.archiveReason,
         sourceType: item.driverId === DriverType.EXPERIMENTAL ? 'CUSTOM_STORY' : 'ENGINE_GENERATED',
         title: item.blueprint ? `故事工程｜${getTitleFromBlueprint(item.blueprint)}` : '未命名故事工程',
         engineType: item.driverId || DriverType.NARRATIVE,
@@ -371,6 +423,12 @@ export const buildDesireProjectFromHistoryItem = (item: HistoryItem): DesireProj
         worldLaw: item.worldLaw,
         visionInput: item.visionInput,
         visionAnalysis: item.visionAnalysis,
+        visionImage: item.visionImage,
+        visionImageNote: item.visionImageNote,
+        subjectType: item.subjectType,
+        aestheticMode: item.aestheticMode,
+        colorPalette: item.colorPalette,
+        faceState: item.faceState,
         sourceHistoryIds: [item.id],
         bibleDrafts: [],
         metonymyScripts: [],

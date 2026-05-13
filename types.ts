@@ -23,7 +23,8 @@ export enum DriverType {
   NARRATIVE = 'NARRATIVE',
   EXPERIMENTAL = 'EXPERIMENTAL',
   AESTHETIC = 'AESTHETIC',
-  TRAILER = 'TRAILER'
+  TRAILER = 'TRAILER',
+  SUTURE = 'SUTURE'
 }
 
 export type ViewMode = 'ENGINE' | 'DIVERGENCE' | 'BIBLE' | 'METONYMY' | 'CANVAS' | 'TOPOLOGY' | 'RSI' | 'ARCHIVE' | 'VIDEO' | 'RORSCHACH' | 'ANALYSIS' | 'DICTIONARY';
@@ -110,9 +111,15 @@ export type DesireProjectKind = 'DIVERGENCE_BATCH' | 'STORY_PROJECT';
 
 export type DesireProjectSourceType = 'ENGINE_GENERATED' | 'CUSTOM_STORY';
 
+export type ArchiveSource = 'AI_SNAPSHOT' | 'MANUAL_SAVE';
+
+export type ArchiveReason = 'DIVERGENCE_GENERATED' | 'STORY_GENERATED' | 'METONYMY_GENERATED' | 'USER_SAVED' | 'PROJECT_SAVED';
+
 export interface DesireArchiveVersion {
   id: string;
   stage: DesireArchiveStage;
+  archiveSource?: ArchiveSource;
+  archiveReason?: ArchiveReason;
   title: string;
   createdAt: string;
   updatedAt: string;
@@ -129,7 +136,10 @@ export interface DesireArchiveVersion {
 
 export interface DesireProject {
   id: string;
+  projectId?: string;
   archiveKind?: DesireProjectKind;
+  archiveSource?: ArchiveSource;
+  archiveReason?: ArchiveReason;
   sourceType?: DesireProjectSourceType;
   title: string;
   engineType: DriverType;
@@ -140,6 +150,12 @@ export interface DesireProject {
   worldLaw?: WorldLawConfig;
   visionInput?: string;
   visionAnalysis?: string;
+  visionImage?: string | null;
+  visionImageNote?: string;
+  subjectType?: SubjectType;
+  aestheticMode?: AestheticMode;
+  colorPalette?: string[];
+  faceState?: FaceState;
   sourceHistoryIds: Array<number | string>;
   sourceDivergenceId?: string;
   sourceCandidateId?: string;
@@ -240,7 +256,8 @@ export interface CreativeBrief {
 
 export interface CreativeTreatment {
   id: string;
-  type: 'CLASSIC' | 'STYLIZED' | 'SUBVERSIVE' |
+  type: 'PLOT' | 'FORM' | 'CHARACTER' |
+  'CLASSIC' | 'STYLIZED' | 'SUBVERSIVE' |
   'REAL' | 'IMAGINARY' | 'SYMBOLIC' |
   'PHENOMENOLOGICAL' | 'STRUCTURALIST' | 'THE SPECTACLE' |
   'ONTOLOGY' | 'ATMOSPHERE' | 'SEMIOTIC' |
@@ -582,6 +599,12 @@ export interface CreativeBlueprint {
   generationWorldLaw?: WorldLawConfig;
   generationVisionInput?: string;
   generationVisionAnalysis?: string;
+  generationVisionImage?: string | null;
+  generationVisionImageNote?: string;
+  generationSubjectType?: SubjectType;
+  generationAestheticMode?: AestheticMode;
+  generationColorPalette?: string[];
+  generationFaceState?: FaceState;
   childBlueprint?: CreativeBlueprint;
   narrative: BlueprintNarrative;
   context: BlueprintContext;
@@ -634,6 +657,9 @@ export type HistoryType = 'NARRATIVE' | 'METONYMY' | 'BIBLE';
 
 export interface HistoryItem {
   id: number;
+  projectId?: string;
+  archiveSource?: ArchiveSource;
+  archiveReason?: ArchiveReason;
   date: string;
   type: HistoryType;
   driverId: DriverType;
@@ -643,12 +669,46 @@ export interface HistoryItem {
   visionInput?: string;
   visionAnalysis?: string;
   visionImage?: string | null;
+  visionImageNote?: string;
   subjectType?: SubjectType;
   aestheticMode?: AestheticMode;
   colorPalette?: string[];
+  faceState?: FaceState;
   blueprint: CreativeBlueprint | null;
+  metonymyBlueprint?: CreativeBlueprint | null;
   treatments: CreativeTreatment[];
   savedBlueprints?: Record<string, CreativeBlueprint>;
+}
+
+export interface ProjectWorkspaceSnapshot {
+  selectedDriver: DriverType | null;
+  viewMode: ViewMode;
+  fieldState: NarrativeFieldState;
+  worldLaw?: WorldLawConfig;
+  visionInput?: string;
+  visionAnalysis?: string;
+  visionImage?: string | null;
+  visionImageNote?: string;
+  subjectType?: SubjectType;
+  aestheticMode?: AestheticMode;
+  colorPalette?: string[];
+  faceState?: FaceState;
+  treatments?: CreativeTreatment[];
+  activeBlueprint?: CreativeBlueprint | null;
+  metonymyBlueprint?: CreativeBlueprint | null;
+  cachedBlueprints?: Record<string, CreativeBlueprint>;
+  activeHistoryItem?: HistoryItem | null;
+}
+
+export interface MistProject {
+  id: string;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+  lastSavedAt?: string;
+  activeHistoryId?: number | string;
+  snapshot?: ProjectWorkspaceSnapshot;
+  notes?: string;
 }
 
 export interface StoryVolume {

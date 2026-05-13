@@ -15,7 +15,8 @@ export const TRAILER_ENGINE_BLOCKS: NarrativeBlockDef[] = [
 export const TRAILER_ENGINE_LIBRARY: LibraryCategoryDef[] = [
   {
     id: "trl_t0_lib",
-    name: "核心钩子 (The Hook)",
+    name: "核心钩子",
+    nameEn: "The Hook",
     desc: "预告片的视觉抓手。",
     items: [
       { id: "t0_1", name: "无声的爆炸 (Silent Blast)", def: "巨大的爆炸却没有任何声音。", core: "钩子：视听错位。" },
@@ -24,7 +25,8 @@ export const TRAILER_ENGINE_LIBRARY: LibraryCategoryDef[] = [
   },
   {
     id: "trl_t7_lib",
-    name: "终极悬停 (The Cliffhanger)",
+    name: "终极悬停",
+    nameEn: "The Cliffhanger",
     desc: "预告片的结尾方式。",
     items: [
       { id: "t7_1", name: "坠落的一瞬 (The Fall)", def: "在角色落地前黑屏。", core: "效果：诱导期待。" },

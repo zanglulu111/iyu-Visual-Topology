@@ -93,14 +93,14 @@ const tone = (theme: string, kind: 'engine' | 'surface', accentClass: string) =>
                 muted: 'text-[#8B261D]/45'
             }
             : {
-                border: 'border-l-[#3D5A4B]',
-                header: 'bg-[#3D5A4B]/5',
-                icon: 'text-[#3D5A4B]',
-                badge: 'bg-[#3D5A4B]/10 text-[#3D5A4B]',
-                chip: 'bg-white/70 text-[#3D5A4B] ring-1 ring-[#3D5A4B]/18',
-                row: 'bg-white/60 border-[#3D5A4B]/14',
+                border: 'border-l-[#8B261D]',
+                header: 'bg-[#8B261D]/5',
+                icon: 'text-[#8B261D]',
+                badge: 'bg-[#8B261D]/10 text-[#8B261D]',
+                chip: 'bg-white/70 text-[#8B261D] ring-1 ring-[#8B261D]/20',
+                row: 'bg-white/60 border-[#8B261D]/14',
                 rowText: 'text-[#3D1A16]',
-                muted: 'text-[#3D5A4B]/45'
+                muted: 'text-[#8B261D]/45'
             };
     }
 
@@ -219,12 +219,12 @@ export const EngineParamsOverview: React.FC<EngineParamsOverviewProps> = ({
                         key={group.id}
                         className={`overflow-hidden rounded-xl border border-l-4 ${theme === 'retro' ? 'bg-white/40 border-[#8B261D]/10' : 'bg-zinc-950/50 border-zinc-800/80'} ${palette.border}`}
                     >
-                        <div className={`flex items-center gap-3 border-b px-3 py-4 ${palette.header} ${theme === 'retro' ? 'border-[#8B261D]/10' : 'border-zinc-800/80'}`}>
-                            <ChevronRight size={15} className={theme === 'retro' ? 'text-[#3D1A16]' : 'text-zinc-300'} />
+                        <div className={`mist-engine-params-group-header flex items-center gap-3 border-b px-3 py-4 ${palette.header} ${theme === 'retro' ? 'border-[#8B261D]/10' : 'border-zinc-800/80'}`}>
+                            <ChevronRight size={15} className={`mist-engine-params-header-chevron ${theme === 'retro' ? 'text-[#3D1A16]' : 'text-zinc-300'}`} />
                             <Icon size={17} className={palette.icon} />
                             <div className="min-w-0 flex-1">
-                                <div className={`truncate text-base font-black tracking-wider ${theme === 'retro' ? 'text-[#3D1A16]' : 'text-white'}`}>{group.title}</div>
-                                <div className={`mt-1 truncate text-[10px] font-bold uppercase tracking-wider ${theme === 'retro' ? 'text-black/35' : 'text-zinc-600'}`}>{group.eyebrow}</div>
+                                <div className={`mist-engine-params-title truncate text-base font-black tracking-wider ${theme === 'retro' ? 'text-[#3D1A16]' : 'text-white'}`}>{group.title}</div>
+                                <div className={`mist-engine-params-eyebrow mt-1 truncate text-[10px] font-bold uppercase tracking-wider ${theme === 'retro' ? 'text-black/35' : 'text-zinc-600'}`}>{group.eyebrow}</div>
                             </div>
                             <span className={`hidden text-[10px] font-bold xl:inline ${palette.muted}`}>
                                 {language === 'EN' ? 'Read only' : '已锁定'}

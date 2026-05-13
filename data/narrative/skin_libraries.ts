@@ -120,10 +120,10 @@ export const SKIN_BLOCKS: NarrativeBlockDef[] = [
 export const ALL_SKIN_BLOCKS = [
     {
       id: "skin_genre",
-      name: "SUR1.叙事动力",
-      enName: "sur1.Drive",
-      description: "决定能量喷发的物理形式，如：爱情、复仇、寻宝、逃杀。",
-      descriptionEn: "The physical form of energy eruption (e.g., Revenge).",
+      name: "SUR1.故事类型",
+      enName: "sur1.Genre",
+      description: "决定故事类型、类型节奏和观众期待，如：爱情、复仇、寻宝、逃杀。",
+      descriptionEn: "Defines the story genre, rhythm, and audience expectations.",
       tags: []
     },
     ...SKIN_BLOCKS,
@@ -146,12 +146,12 @@ const FLAT_STRUCTURE_ITEMS: LibraryItemDef[] = SV1_DATA.flatMap(cat => cat.items
 // SKIN_LIBRARY: 全量词库（新版 engine_surface 数据源）
 // ============================================================
 export const SKIN_LIBRARY: LibraryCategoryDef[] = [
-    // SUR1: 叙事动力 — 从 engine_surface/SUR1 加载 (也供其他调用后备)
+    // SUR1: 故事类型 — 从 engine_surface/SUR1 加载 (也供其他调用后备)
     {
         id: "skin_genre_lib",
-        name: "叙事动力",
-        nameEn: "Drive",
-        desc: "决定能量喷发的物理形式",
+        name: "故事类型",
+        nameEn: "Genre",
+        desc: "决定故事类型、类型节奏和观众期待",
         items: SUR1_DATA.flatMap(cat => (cat.items || []).map(item => ({ ...item, group: cat.name, groupEn: cat.nameEn })))
     },
 

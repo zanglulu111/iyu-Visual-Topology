@@ -23,7 +23,7 @@ export const FooterActions: React.FC<FooterActionsProps> = ({
 }) => {
     if (selectedDriver === DriverType.AESTHETIC) return null;
 
-    const controlClass = 'mist-app-footer-control flex flex-col items-center gap-1.5 group transition-all duration-300 shrink-0 min-w-[60px] active:scale-95';
+    const controlClass = 'mist-app-footer-control flex flex-col items-center gap-1.5 group transition-all duration-300 shrink-0 min-w-[60px] hover:scale-105 active:scale-95';
     const controlIconClass = 'transition-colors text-[var(--text-muted)] group-hover:text-[var(--text-header)]';
     const controlTextClass = 'text-[9px] font-bold uppercase tracking-wider transition-colors text-[var(--text-muted)] group-hover:text-[var(--text-header)]';
 
@@ -33,7 +33,7 @@ export const FooterActions: React.FC<FooterActionsProps> = ({
                 <button 
                     onClick={handleUndo} 
                     disabled={!canUndo}
-                    className={`p-2 transition-all hover:bg-white/5 ${!canUndo ? 'opacity-30 grayscale cursor-not-allowed' : 'text-white'}`}
+                    className={`mist-footer-icon-button mist-footer-undo-button p-2 transition-all hover:bg-white/5 ${!canUndo ? 'opacity-30 grayscale cursor-not-allowed' : 'text-white'}`}
                     title={lang === 'CN' ? "撤销" : "Undo"}
                 >
                     <Undo2 size={18} className={canUndo ? 'text-zinc-400 hover:text-white' : 'text-zinc-600'} />
@@ -42,7 +42,7 @@ export const FooterActions: React.FC<FooterActionsProps> = ({
                 <button 
                     onClick={handleRedo} 
                     disabled={!canRedo}
-                    className={`p-2 transition-all hover:bg-white/5 ${!canRedo ? 'opacity-30 grayscale cursor-not-allowed' : 'text-white'}`}
+                    className={`mist-footer-icon-button mist-footer-redo-button p-2 transition-all hover:bg-white/5 ${!canRedo ? 'opacity-30 grayscale cursor-not-allowed' : 'text-white'}`}
                     title={lang === 'CN' ? "重做" : "Redo"}
                 >
                     <Redo2 size={18} className={canRedo ? 'text-zinc-400 hover:text-white' : 'text-zinc-600'} />

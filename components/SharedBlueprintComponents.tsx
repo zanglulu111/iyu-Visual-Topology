@@ -2,7 +2,7 @@
 import React, { useState, useEffect, memo } from 'react';
 import { Copy, Check } from 'lucide-react';
 
-export const CopyButton = ({ text, className = "", label = "", theme = "dark" }: { text: string | null, className?: string, label?: string, theme?: string }) => {
+export const CopyButton = ({ text, className = "", label = "", theme = "dark", iconOnly = false }: { text: string | null, className?: string, label?: string, theme?: string, iconOnly?: boolean }) => {
     const [copied, setCopied] = useState(false);
     const handleCopy = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -14,13 +14,13 @@ export const CopyButton = ({ text, className = "", label = "", theme = "dark" }:
     return (
         <button 
             onClick={handleCopy}
-            className={`transition-all active:scale-95 flex items-center gap-1 ${theme === 'retro' ? 'hover:bg-[#8B261D]/10 text-black/80' : 'hover:bg-white/10 text-zinc-400 hover:text-white'} ${className || 'p-1.5 rounded'}`}
+            className={`transition-all active:scale-95 flex items-center gap-1 ${theme === 'retro' ? (iconOnly ? 'text-black/80' : 'hover:bg-[#8B261D]/10 text-black/80') : 'hover:bg-white/10 text-zinc-400 hover:text-white'} ${className || 'p-1.5 rounded'}`}
             title="Copy Text"
             disabled={!text}
         >
             {copied ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
-            {label && <span className="text-[10px] font-bold uppercase tracking-wider">{label}</span>}
-            {copied && !label && <span className="text-[9px] font-bold text-green-500 uppercase">Copied</span>}
+            {!iconOnly && label && <span className="text-[10px] font-bold uppercase tracking-wider">{label}</span>}
+            {!iconOnly && copied && !label && <span className="text-[9px] font-bold text-green-500 uppercase">Copied</span>}
         </button>
     );
 };

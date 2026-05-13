@@ -80,7 +80,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
     switch (driverId) {
       case DriverType.COMMERCIAL: return 'shadow-cyan-500/10';
       case DriverType.NARRATIVE: return 'shadow-yellow-500/10';
-      case DriverType.AESTHETIC: return 'shadow-rose-500/10';
+      case DriverType.AESTHETIC: return 'shadow-violet-500/10';
       case DriverType.EXPERIMENTAL: return 'shadow-purple-500/10';
       case DriverType.TRAILER: return 'shadow-orange-500/10';
       default: return 'shadow-zinc-500/5';
@@ -91,7 +91,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
     switch (driverId) {
       case DriverType.COMMERCIAL: return 'border-mist-cyan/30 text-mist-cyan';
       case DriverType.NARRATIVE: return 'border-yellow-500/30 text-yellow-400';
-      case DriverType.AESTHETIC: return 'border-rose-500/30 text-rose-400';
+      case DriverType.AESTHETIC: return 'border-violet-500/30 text-violet-400';
       case DriverType.EXPERIMENTAL: return 'border-purple-500/30 text-purple-400';
       case DriverType.TRAILER: return 'border-orange-500/30 text-orange-400';
       default: return 'border-white/5 text-zinc-300';

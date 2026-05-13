@@ -37,7 +37,9 @@ import {
     MetonymyStylePreset,
     MetonymyAssetInput,
     FinalAssetsData,
-    StaticShot
+    StaticShot,
+    ArchiveSource,
+    ArchiveReason
 } from '../../types';
 import { SutureModal } from '../SutureModal';
 import { splitIntoParagraphs, getSceneColor, formatDialogueList, formatStaticList, formatDynamicList, getStaticColumns, getDynamicColumns, parseLiteraryScriptToStaticShots, syncDynamicWithStatic } from '../../utils/metonymyUtils';
@@ -60,7 +62,7 @@ interface MetonymyViewProps {
     isFullScreen: boolean;
     onToggleFullScreen?: () => void;
     fieldState: NarrativeFieldState;
-    onSaveToHistory: (blueprint: CreativeBlueprint) => void;
+    onSaveToHistory: (blueprint: CreativeBlueprint, options?: { archiveSource?: ArchiveSource; archiveReason?: ArchiveReason }) => void;
     onGenerateAssetImage?: (prompt: string) => Promise<string | null>;
     onSutureOpenChange?: (open: boolean) => void;
     theme?: string;
@@ -987,7 +989,7 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
                         : (latestMetonymyData.stylePresets || currentPresets);
 
                     console.log('[Metonymy] Calling onUpdateBlueprint with', newSections.length, 'sections');
-                    onUpdateBlueprint({
+                    const nextBlueprint = {
                         ...latestBlueprint,
                         metonymyData: {
                             screenplay: newSections,
@@ -996,7 +998,9 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
                             stylePresets: nextStylePresets,
                             activePresetId: latestMetonymyData.activePresetId || 'original'
                         }
-                    });
+                    };
+                    onUpdateBlueprint(nextBlueprint);
+                    onSaveToHistory(nextBlueprint, { archiveSource: 'AI_SNAPSHOT', archiveReason: 'METONYMY_GENERATED' });
                     return response.literaryScript;
                 }
             } else {
@@ -1052,7 +1056,17 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
                         }
                         return s;
                     });
-                    updateMetonymyData({ screenplay: newSections });
+                    const nextBlueprint = {
+                        ...blueprintRef.current,
+                        metonymyData: {
+                            ...rawMetonymyData,
+                            screenplay: newSections,
+                            stylePresets: currentPresets,
+                            activePresetId: currentActivePresetId || 'original'
+                        }
+                    };
+                    onUpdateBlueprint(nextBlueprint);
+                    onSaveToHistory(nextBlueprint, { archiveSource: 'AI_SNAPSHOT', archiveReason: 'METONYMY_GENERATED' });
                     return transferredScript;
                 }
             }
@@ -1221,11 +1235,11 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
 
     const btnWidthClass = language === 'EN' ? 'w-[124px]' : 'w-[104px]';
     const btnBaseClass = theme === 'retro'
-        ? `mist-archive-button h-9 ${btnWidthClass} justify-center bg-[var(--bg-header)] border border-[#8B261D]/20 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-[#8B261D]/70 hover:text-[#8B261D] hover:border-[#8B261D]/40 transition-all duration-100 active:scale-95 shadow-sm focus:outline-none`
+        ? `mist-archive-button h-9 ${btnWidthClass} justify-center rounded-lg bg-[var(--bg-header)] border border-[#8B261D]/20 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-[#8B261D]/70 hover:text-[#8B261D] hover:border-[#8B261D]/40 transition-all duration-100 active:scale-95 shadow-sm focus:outline-none`
         : `mist-archive-button h-9 ${btnWidthClass} justify-center bg-zinc-900 border border-zinc-800 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-white hover:border-[var(--mist-active-accent)] transition-all duration-100 active:scale-95 shadow-sm focus:outline-none`;
 
     const btnAddSceneClass = theme === 'retro'
-        ? `mist-archive-button h-9 px-4 bg-transparent border border-[#8B261D] flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-[#8B261D] hover:bg-[#8B261D]/10 transition-all duration-200 active:scale-95 shadow-sm focus:outline-none`
+        ? `mist-archive-button h-9 px-4 rounded-lg bg-transparent border border-[#8B261D] flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-[#8B261D] hover:bg-[#8B261D]/10 transition-all duration-200 active:scale-95 shadow-sm focus:outline-none`
         : `mist-archive-button h-9 px-4 bg-[var(--mist-active-accent)]/5 border border-[var(--mist-active-accent)] flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-[var(--mist-active-accent)] hover:bg-[var(--mist-active-accent)]/20 hover:brightness-125 transition-all duration-200 active:scale-95 shadow-sm focus:outline-none`;
 
     return (
