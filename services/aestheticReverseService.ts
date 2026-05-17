@@ -1,24 +1,11 @@
 
-import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
+import { GenerateContentResponse } from "@google/genai";
 import { configService } from '../src/services/configService';
 import { AESTHETIC_ENGINE_BLOCKS, AESTHETIC_ENGINE_LIBRARY } from '../data/aesthetic/core';
 import { SKIN_LIBRARY } from '../data/narrative/skin_libraries';
 import { LibraryItemDef } from '../types';
 import { runWithTask, getCallerName } from './taskManager';
-
-// Helper to get a new AI instance with the current API key
-const getAI = () => {
-    try {
-        const apiKey = configService.getApiKey();
-        if (apiKey) {
-            return new GoogleGenAI({ apiKey });
-        }
-    } catch (error) {
-        console.warn('Failed to get config:', error);
-    }
-    // Fallback to environment variable
-    return new GoogleGenAI({ apiKey: process.env.API_KEY });
-};
+import { generateContentWithRuntime } from './geminiService';
 
 // ============================================================================
 // 1. DATA PREPARATION: MASTER PARAMETER TABLE
@@ -196,9 +183,10 @@ export const generateAestheticReverse = async (
         }
 
         const model = configService.getEngineModel('visualSeed');
-        const response = await retryWithBackoff<GenerateContentResponse>(() => getAI().models.generateContent({
+        const response = await retryWithBackoff<GenerateContentResponse>(() => generateContentWithRuntime({
             model: model || 'gemini-3-pro-image-preview',
-            contents: { parts: parts }
+            contents: { parts: parts },
+            config: { engineId: 'visualSeed' }
         }));
 
         return response.text || "Analysis failed.";

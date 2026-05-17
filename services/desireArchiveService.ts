@@ -260,7 +260,7 @@ const buildStoryProjectFromBlueprint = (
     const storyContent = getStoryContent(blueprint);
     const projectTitle = sourceType === 'CUSTOM_STORY'
         ? `自定义剧本｜${getTitleFromBlueprint(blueprint)}`
-        : `故事工程｜${getTitleFromBlueprint(blueprint)}`;
+        : `叙事创作｜${getTitleFromBlueprint(blueprint)}`;
     const sourceDivergenceId = item.treatments?.length ? `divergence-history-${sourceId}` : undefined;
 
     const project: DesireProject = {
@@ -304,7 +304,7 @@ const buildStoryProjectFromBlueprint = (
             createdAt,
             sourceHistoryId: sourceId,
             sourceTreatmentId,
-            versionLabel: sourceType === 'CUSTOM_STORY' ? 'Original Story' : `Bible ${index + 1}`,
+            versionLabel: sourceType === 'CUSTOM_STORY' ? 'Original Story' : `Narrative ${index + 1}`,
             content: storyContent,
             archiveSource: item.archiveSource,
             archiveReason: item.archiveReason,
@@ -414,7 +414,7 @@ export const buildDesireProjectFromHistoryItem = (item: HistoryItem): DesireProj
         archiveSource: item.archiveSource,
         archiveReason: item.archiveReason,
         sourceType: item.driverId === DriverType.EXPERIMENTAL ? 'CUSTOM_STORY' : 'ENGINE_GENERATED',
-        title: item.blueprint ? `故事工程｜${getTitleFromBlueprint(item.blueprint)}` : '未命名故事工程',
+        title: item.blueprint ? `叙事创作｜${getTitleFromBlueprint(item.blueprint)}` : '未命名叙事创作',
         engineType: item.driverId || DriverType.NARRATIVE,
         engineName: item.driverName || '爱欲迷宫',
         createdAt: item.date,

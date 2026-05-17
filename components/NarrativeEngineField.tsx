@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useTheme } from '../contexts/ThemeContext';
-import { NarrativeFieldState, BlueprintLanguage, DriverType, NarrativeBlockDef, LibraryCategoryDef, SubjectType, AestheticMode, AestheticPreset, WorldLawConfig } from '../types';
+import { NarrativeFieldState, BlueprintLanguage, DriverType, NarrativeBlockDef, LibraryCategoryDef, SubjectType, AestheticMode, AestheticPreset, WorldLawConfig, PromptFocusState, M7BResidueIntensity } from '../types';
 import { ArrowRight, Check, Dice5, Edit2, Eye, FileText, Ghost, Image as ImageIcon, Loader2, Lock, Plus, RotateCcw, RotateCw, ScanEye, BrainCircuit, Shuffle, Trash2, Unlock, Upload, User, X, Zap, ChevronRight } from 'lucide-react';
 import { ProphecySlot } from './ProphecySlot';
 import { SkinSlot } from './TheSkinSidebar';
@@ -12,6 +12,11 @@ import { AdminXRayButton } from './XRayInspector';
 import { supabaseDatabase } from '../services/supabaseDatabase';
 import { buildAutoFillPrompt } from '../services/geminiService';
 import { buildNarrativeDiagnosisPrompt } from '../services/narrativeDiagnosis';
+import {
+    getWorldLawDisplay,
+    patchWorldLawConfig,
+    WORLD_LAW_LEVEL_OPTIONS
+} from '../services/worldLaw';
 import {
     NARRATIVE_ENGINE_BLOCKS,
     COMMERCIAL_ENGINE_BLOCKS,
@@ -66,6 +71,10 @@ export interface NarrativeEngineFieldProps {
     showRings?: boolean;
     faceState?: Record<string, 'bright' | 'dark' | 'tension'>;
     onFaceStateChange?: (locks: Record<string, 'bright' | 'dark' | 'tension'>) => void;
+    focusState?: PromptFocusState;
+    onFocusStateChange?: (locks: PromptFocusState) => void;
+    m7bIntensity?: M7BResidueIntensity;
+    onM7BIntensityChange?: (intensity: M7BResidueIntensity) => void;
     customTextSeed?: string;
     onCustomTextSeedChange?: (value: string) => void;
     onRandomizeSummaryGroup?: () => void;
@@ -98,6 +107,8 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
         lockedModules, onToggleLock, lockedTags, onToggleTagLock, onRandomizeTag,
         customLibraryDefs, onAddCustomDef, onEditCustomDef, showRings = true,
         faceState, onFaceStateChange,
+        focusState = {}, onFocusStateChange,
+        m7bIntensity = 'light', onM7BIntensityChange,
         customTextSeed = '', onCustomTextSeedChange,
         onRandomizeSummaryGroup,
         visionImage = null, onVisionImageChange,
@@ -106,7 +117,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
         onAnalyzeImage, isAnalyzingImage = false,
         onVisionAutoFill, isVisionAutoFilling = false,
         visionCandidateState = {}, onApplyVisionCandidateState, onClearVisionCandidateState,
-        worldLawConfig = { gravity: 1 }, setWorldLawConfig,
+        worldLawConfig = { gravity: 2 }, setWorldLawConfig,
         onApplyPreset, onPaletteChange,
         isAdmin = false
     } = props;
@@ -127,6 +138,8 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
     const [labyrinthWorldLawPreview, setLabyrinthWorldLawPreview] = useState<number | null>(null);
     const [customGenderInput, setCustomGenderInput] = useState('');
     const [customAgeInput, setCustomAgeInput] = useState('');
+    const [labyrinthYearInputDraft, setLabyrinthYearInputDraft] = useState<string | null>(null);
+    const [labyrinthYearInputInvalid, setLabyrinthYearInputInvalid] = useState(false);
 
     const isCommercial = driverType === DriverType.COMMERCIAL;
     const isExperimental = driverType === DriverType.EXPERIMENTAL;
@@ -151,43 +164,18 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
         { id: 'age_10', cn: '耄者', en: 'Venerable', range: '80-100' },
         { id: 'age_11', cn: '永生', en: 'Immortal', range: '∞' },
     ];
-    const WORLD_LAW_LEVELS = [
-        {
-            val: 1,
-            cn: '写实',
-            en: 'Real',
-            descCN: '物理重力闭锁。没有奇迹，死亡是绝对的，重力是必然的。',
-            descEN: 'Locked physical gravity. No miracles; death is absolute and gravity is binding.'
-        },
-        {
-            val: 2,
-            cn: '合理',
-            en: 'Plausible',
-            descCN: '超现实元素必须被赋予科学、机械或社会逻辑的合理解释。',
-            descEN: 'Surreal elements need a scientific, mechanical, or social explanation.'
-        },
-        {
-            val: 3,
-            cn: '缝合',
-            en: 'Suture',
-            descCN: '现实为底，允许局部缝合超现实能指，像症状一样浮出。',
-            descEN: 'Reality remains the base, with local surreal signifiers surfacing like symptoms.'
-        },
-        {
-            val: 4,
-            cn: '奇观',
-            en: 'Spectacle',
-            descCN: '科幻或魔幻法则公开运行，但仍维持基本的内部一致性。',
-            descEN: 'Sci-fi or fantasy rules are explicit, while keeping basic internal consistency.'
-        },
-        {
-            val: 5,
-            cn: '狂想',
-            en: 'Frenzy',
-            descCN: '绝对无重力。允许能指越界拼贴，幻想系统彻底脱轨。',
-            descEN: 'Absolute zero-gravity. Signifiers may collide and the fantasy system can derail.'
-        }
-    ];
+    const M7B_INTENSITY_OPTIONS: Array<{
+        id: M7BResidueIntensity;
+        cn: string;
+        en: string;
+        descCN: string;
+        descEN: string;
+    }> = [
+            { id: 'off', cn: '关闭', en: 'Off', descCN: '不强制余痕', descEN: 'No forced residue' },
+            { id: 'implicit', cn: '隐性', en: 'Implicit', descCN: '只留异常', descEN: 'Tiny anomaly' },
+            { id: 'light', cn: '轻触', en: 'Light', descCN: '默认 1-3 句', descEN: 'Default 1-3 lines' },
+            { id: 'strong', cn: '强显影', en: 'Strong', descCN: '最后核心画面', descEN: 'Final core image' },
+        ];
 
     let ENGINE_BLOCKS: NarrativeBlockDef[] = [];
     let ENGINE_LIBRARY: LibraryCategoryDef[] = [];
@@ -489,6 +477,52 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
         return lang === 'EN' ? `${year}` : `公元${year}${useSuffix ? '年' : ''}`;
     };
 
+    const TIMELINE_YEAR_MIN = -2000;
+    const TIMELINE_YEAR_MAX = 2050;
+    const TIMELINE_YEAR_NOW = 2026;
+
+    const clampTimelineYear = (year: number) => (
+        Math.min(TIMELINE_YEAR_MAX, Math.max(TIMELINE_YEAR_MIN, Math.trunc(year)))
+    );
+
+    const parseTimelineYearInput = (value: string): number | null => {
+        const compact = value.trim().replace(/\s+/g, '').replace(/年$/, '');
+        if (!compact) return null;
+
+        const chineseBC = compact.match(/^公元前(\d{1,5})$/);
+        if (chineseBC) return -Number(chineseBC[1]);
+
+        const chineseAD = compact.match(/^公元(-?\d{1,5})$/);
+        if (chineseAD) return Number(chineseAD[1]);
+
+        const westernBC = compact.match(/^(\d{1,5})(BC|BCE)$/i);
+        if (westernBC) return -Number(westernBC[1]);
+
+        const westernAD = compact.match(/^(AD|CE)?(-?\d{1,5})$/i);
+        if (westernAD) return Number(westernAD[2]);
+
+        return null;
+    };
+
+    const commitLabyrinthYearInput = (value: string) => {
+        if (isYearValueLocked) return;
+        const parsedYear = parseTimelineYearInput(value);
+        if (parsedYear === null) {
+            if (!value.trim()) {
+                updateLabyrinthTimeLocation(undefined, null);
+                setLabyrinthYearInputDraft(null);
+                setLabyrinthYearInputInvalid(false);
+            } else {
+                setLabyrinthYearInputInvalid(true);
+            }
+            return;
+        }
+
+        updateLabyrinthTimeLocation(undefined, clampTimelineYear(parsedYear));
+        setLabyrinthYearInputDraft(null);
+        setLabyrinthYearInputInvalid(false);
+    };
+
     const updateLabyrinthTimeLocation = (country?: string | null, year?: number | null) => {
         const nextState = { ...fieldState };
         let changed = false;
@@ -499,7 +533,9 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
         }
 
         if (year !== undefined && !isYearValueLocked) {
-            nextState['skin_year_exact'] = year === null ? [] : [String(year)];
+            nextState['skin_year_exact'] = year === null ? [] : [String(clampTimelineYear(year))];
+            setLabyrinthYearInputDraft(null);
+            setLabyrinthYearInputInvalid(false);
             changed = true;
         }
 
@@ -514,21 +550,49 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
 
     const handleLabyrinthRandomYear = () => {
         if (isYearValueLocked) return;
-        const randomYear = Math.floor(Math.random() * (2050 - (-2000) + 1)) + (-2000);
+        const randomYear = Math.floor(Math.random() * (TIMELINE_YEAR_MAX - TIMELINE_YEAR_MIN + 1)) + TIMELINE_YEAR_MIN;
         updateLabyrinthTimeLocation(undefined, randomYear);
+        setLabyrinthYearInputDraft(null);
+        setLabyrinthYearInputInvalid(false);
     };
 
     const handleLabyrinthRandomTimeLocation = () => {
         const preset = COUNTRY_PRESETS[Math.floor(Math.random() * COUNTRY_PRESETS.length)];
-        const randomYear = Math.floor(Math.random() * (2050 - (-2000) + 1)) + (-2000);
+        const randomYear = Math.floor(Math.random() * (TIMELINE_YEAR_MAX - TIMELINE_YEAR_MIN + 1)) + TIMELINE_YEAR_MIN;
         updateLabyrinthTimeLocation(
             isCountryValueLocked ? undefined : (lang === 'EN' ? preset.en : preset.cn),
             isYearValueLocked ? undefined : randomYear
         );
+        if (!isYearValueLocked) {
+            setLabyrinthYearInputDraft(null);
+            setLabyrinthYearInputInvalid(false);
+        }
     };
 
     const handleLabyrinthResetTimeLocation = () => {
         updateLabyrinthTimeLocation(isCountryValueLocked ? undefined : null, isYearValueLocked ? undefined : null);
+        if (!isYearValueLocked) {
+            setLabyrinthYearInputDraft(null);
+            setLabyrinthYearInputInvalid(false);
+        }
+    };
+
+    const handleLabyrinthYearInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Enter') {
+            commitLabyrinthYearInput(event.currentTarget.value);
+            event.currentTarget.blur();
+        }
+        if (event.key === 'Escape') {
+            setLabyrinthYearInputDraft(null);
+            setLabyrinthYearInputInvalid(false);
+            event.currentTarget.blur();
+        }
+    };
+
+    const closeLabyrinthTimeModal = () => {
+        setLabyrinthYearInputDraft(null);
+        setLabyrinthYearInputInvalid(false);
+        setIsLabyrinthTimeModalOpen(false);
     };
 
     const handleLabyrinthToggleTimeLocationLock = () => {
@@ -657,6 +721,38 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
         </span>
     );
 
+    const renderM7BIntensityControl = (compact = false) => (
+        <div className={`flex flex-wrap items-center justify-center gap-2 ${compact ? 'mt-3' : 'mt-5'}`}>
+            <span className="text-[10px] font-black uppercase tracking-[0.22em] text-[var(--text-muted)]">
+                {lang === 'EN' ? 'M7B VISIBILITY' : 'M7B 显影'}
+            </span>
+            <div className="flex flex-wrap items-center justify-center gap-1 rounded-lg border border-[var(--border-main)] bg-[var(--bg-card)]/70 p-1">
+                {M7B_INTENSITY_OPTIONS.map(option => {
+                    const active = m7bIntensity === option.id;
+                    return (
+                        <button
+                            key={option.id}
+                            type="button"
+                            onClick={() => onM7BIntensityChange?.(option.id)}
+                            className={`min-w-[56px] rounded-md px-2.5 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] transition-all ${active
+                                ? 'bg-[var(--mist-active-accent)] text-black shadow-[0_0_16px_rgba(var(--mist-active-accent-rgb),0.28)]'
+                                : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)]'
+                                }`}
+                            title={lang === 'EN' ? option.descEN : option.descCN}
+                        >
+                            {lang === 'EN' ? option.en : option.cn}
+                        </button>
+                    );
+                })}
+            </div>
+            <span className="text-[10px] text-[var(--text-muted)]">
+                {lang === 'EN'
+                    ? M7B_INTENSITY_OPTIONS.find(option => option.id === m7bIntensity)?.descEN
+                    : M7B_INTENSITY_OPTIONS.find(option => option.id === m7bIntensity)?.descCN}
+            </span>
+        </div>
+    );
+
     const renderLabyrinthMainFormula = () => (
         <div className="mist-labyrinth-formula">
             <div className="mist-labyrinth-formula-header">
@@ -697,6 +793,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                     {renderFormulaText("↺ M1'", "↺ M1'")}
                 </div>
             </div>
+            {renderM7BIntensityControl()}
         </div>
     );
 
@@ -758,7 +855,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
             blocks: [
                 { id: "skin_genre", placeholderCN: "SUR1. 故事类型", placeholderEN: "SUR1. Genre" },
                 { id: "skin_structure", placeholderCN: "SV1. 叙事结构", placeholderEN: "SV1. Structure" },
-                { id: "skin_volume", placeholderCN: "SV2. 故事体量", placeholderEN: "SV2. Volume" },
+                { id: "skin_volume", placeholderCN: "SV2. 时长/容量", placeholderEN: "SV2. Runtime / Capacity" },
                 { id: "skin_era", placeholderCN: "SUR2. 背景场域", placeholderEN: "SUR2. Field" },
                 { id: "skin_society", placeholderCN: "SUR4. 社会形态", placeholderEN: "SUR4. Order" },
                 { id: "skin_ideology", placeholderCN: "SUR10. 信念预设", placeholderEN: "SUR10. Belief" },
@@ -878,11 +975,12 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                 <div className="mist-labyrinth-desire-sentence-line">
                     <span>{lang === 'EN' ? "ultimately receiving" : "最终迎来了"}</span>
                     {renderDesireSentenceSlot("engine_m7a", "M7A. 象征裁决", "M7A. Verdict")}
-                    <span>{lang === 'EN' ? ", and forever living with" : "，并在此后永远带着"}</span>
+                    <span>{lang === 'EN' ? ", leaving in the final frame" : "，并在最后一帧留下"}</span>
                     {renderDesireSentenceSlot("engine_m7b", "M7B. 实在余痕", "M7B. Residue")}
-                    <span>{lang === 'EN' ? "." : "活下去。"}</span>
+                    <span>{lang === 'EN' ? "." : "。"}</span>
                 </div>
             </div>
+            {renderM7BIntensityControl(true)}
         </div>
     );
 
@@ -970,21 +1068,22 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
     );
 
     const renderLabyrinthWorldLawModule = () => {
-        const currentGravity = worldLawConfig.gravity ?? 1;
-        const currentLevel = WORLD_LAW_LEVELS.find(level => level.val === currentGravity) || WORLD_LAW_LEVELS[0];
-        const currentLabel = lang === 'EN' ? currentLevel.en : currentLevel.cn;
-        const previewLevel = WORLD_LAW_LEVELS.find(level => level.val === labyrinthWorldLawPreview) || currentLevel;
-        const previewLabel = lang === 'EN' ? previewLevel.en : previewLevel.cn;
-        const previewDescription = lang === 'EN' ? previewLevel.descEN : previewLevel.descCN;
+        const currentDisplay = getWorldLawDisplay(worldLawConfig, lang);
+        const previewOption = WORLD_LAW_LEVEL_OPTIONS.find(option => option.id === labyrinthWorldLawPreview) || null;
+        const previewLabel = previewOption
+            ? (lang === 'EN' ? previewOption.en : previewOption.cn)
+            : (lang === 'EN' ? currentDisplay.en : currentDisplay.cn);
+        const previewDescription = previewOption
+            ? (lang === 'EN' ? previewOption.descEN : previewOption.descCN)
+            : (lang === 'EN' ? currentDisplay.descEN : currentDisplay.descCN);
 
-        const setLabyrinthWorldLaw = (gravity: number) => {
-            setWorldLawConfig?.({ ...worldLawConfig, gravity });
+        const setLabyrinthWorldLaw = (value: number) => {
+            setWorldLawConfig?.(patchWorldLawConfig(worldLawConfig, value));
             setLabyrinthWorldLawPreview(null);
-            setIsLabyrinthWorldLawExpanded(false);
         };
 
         return (
-            <article className={`mist-labyrinth-surface-card mist-labyrinth-world-law-card is-level-${currentLevel.val} ${isLabyrinthWorldLawExpanded ? 'is-expanded' : ''}`}>
+            <article className={`mist-labyrinth-surface-card mist-labyrinth-world-law-card is-level-${currentDisplay.gravity} ${isLabyrinthWorldLawExpanded ? 'is-expanded' : ''}`}>
                 <button
                     type="button"
                     className="mist-labyrinth-world-law-toggle"
@@ -993,39 +1092,44 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                     aria-label={lang === 'EN' ? 'Toggle world law options' : '展开或收起世界法则选项'}
                 >
                     <span className="mist-labyrinth-world-law-title">{lang === 'EN' ? "World Law" : "世界法则"}</span>
-                    <b className="mist-labyrinth-world-law-token">{`L${currentLevel.val}${currentLabel}`}</b>
+                    <b className="mist-labyrinth-world-law-token">{lang === 'EN' ? currentDisplay.en : currentDisplay.cn}</b>
                 </button>
 
                 {isLabyrinthWorldLawExpanded && (
                     <div className="mist-labyrinth-world-law-popover">
                         <div className="mist-labyrinth-world-law-preview">
                             <div className="mist-labyrinth-world-law-preview-title">
-                                <span>LV.{previewLevel.val}</span>
+                                <span>{lang === 'EN' ? 'Level' : '等级'}</span>
                                 <b>{previewLabel}</b>
                             </div>
                             <p>{previewDescription}</p>
                         </div>
                         <div className="mist-labyrinth-world-law-options">
-                            {WORLD_LAW_LEVELS.map(level => {
-                                const isActive = level.val === currentLevel.val;
-                                const label = lang === 'EN' ? level.en : level.cn;
+                            <div className="mist-labyrinth-world-law-axis-row">
+                                <div
+                                    className="mist-labyrinth-world-law-axis-buttons"
+                                    onMouseLeave={() => setLabyrinthWorldLawPreview(null)}
+                                >
+                                    {WORLD_LAW_LEVEL_OPTIONS.map(option => {
+                                        const isActive = option.id === currentDisplay.level;
+                                        const label = lang === 'EN' ? option.en : option.cn;
 
-                                return (
-                                    <button
-                                        type="button"
-                                        key={level.val}
-                                        className={isActive ? 'is-active' : ''}
-                                        onMouseEnter={() => setLabyrinthWorldLawPreview(level.val)}
-                                        onMouseLeave={() => setLabyrinthWorldLawPreview(null)}
-                                        onClick={() => setLabyrinthWorldLaw(level.val)}
-                                        disabled={!setWorldLawConfig}
-                                        aria-pressed={isActive}
-                                    >
-                                        <span>LV{level.val}</span>
-                                        <b>{label}</b>
-                                    </button>
-                                );
-                            })}
+                                        return (
+                                            <button
+                                                type="button"
+                                                key={option.id}
+                                                className={isActive ? 'is-active' : ''}
+                                                onMouseEnter={() => setLabyrinthWorldLawPreview(option.id)}
+                                                onClick={() => setLabyrinthWorldLaw(option.id)}
+                                                disabled={!setWorldLawConfig}
+                                                aria-pressed={isActive}
+                                            >
+                                                <b>{label}</b>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 )}
@@ -1417,8 +1521,8 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                 {renderLabyrinthSentenceSlot("skin_structure", "叙事结构", "Structure")}
             </div>
             <div className="mist-labyrinth-structure-sentence-row">
-                <span>{lang === 'EN' ? "Volume: " : "体量："}</span>
-                {renderLabyrinthSentenceSlot("skin_volume", "故事体量", "Volume")}
+                <span>{lang === 'EN' ? "Runtime: " : "时长："}</span>
+                {renderLabyrinthSentenceSlot("skin_volume", "时长/容量", "Runtime")}
             </div>
         </div>
     );
@@ -1462,7 +1566,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                         {(showExpanded || hasGenre) && (showExpanded || hasStructure || hasVolume) && <span>{lang === 'EN' ? ", " : "、"}</span>}
                         {(showExpanded || hasStructure) && renderLabyrinthSkinSlot("skin_structure", "叙事结构", "Structure")}
                         {(showExpanded || hasStructure) && (showExpanded || hasVolume) && <span>{lang === 'EN' ? " and " : "与"}</span>}
-                        {(showExpanded || hasVolume) && renderLabyrinthSkinSlot("skin_volume", "故事体量", "Volume")}
+                        {(showExpanded || hasVolume) && renderLabyrinthSkinSlot("skin_volume", "时长/容量", "Runtime")}
                         <span>{lang === 'EN' ? ", " : "为骨架，"}</span>
                     </div>
                 )}
@@ -1548,14 +1652,15 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
     };
 
     const renderLabyrinthTimeModal = () => {
-        const currentYear = selectedYear ?? 2026;
+        const currentYear = selectedYear === null ? TIMELINE_YEAR_NOW : clampTimelineYear(selectedYear);
+        const yearInputValue = labyrinthYearInputDraft ?? (selectedYear === null ? '' : String(selectedYear));
         return (
             <div className="mist-labyrinth-identity-modal">
                 <div className="mist-labyrinth-identity-panel mist-labyrinth-time-panel">
                     <button
                         type="button"
                         className="mist-labyrinth-identity-close"
-                        onClick={() => setIsLabyrinthTimeModalOpen(false)}
+                        onClick={closeLabyrinthTimeModal}
                         aria-label={lang === 'EN' ? "Close spacetime panel" : "关闭时空面板"}
                     >
                         <X size={18} />
@@ -1610,11 +1715,35 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                                     <button type="button" onClick={() => updateLabyrinthTimeLocation(undefined, null)} disabled={isYearLocked}><Trash2 size={12} /></button>
                                 </div>
                             </div>
-                            <div className="mist-labyrinth-year-readout">{selectedYear === null ? (lang === 'EN' ? "AUTO" : "自动") : formatYear(selectedYear, true)}</div>
+                            <div className="mist-labyrinth-year-readout">
+                                <span className="mist-labyrinth-year-readout-value">
+                                    {selectedYear === null ? (lang === 'EN' ? "AUTO" : "自动") : formatYear(selectedYear, true)}
+                                </span>
+                                <input
+                                    type="text"
+                                    inputMode="numeric"
+                                    value={yearInputValue}
+                                    disabled={isYearLocked}
+                                    placeholder="1840 / -221"
+                                    aria-label={lang === 'EN' ? "Manual year input" : "手动输入年份"}
+                                    aria-invalid={labyrinthYearInputInvalid}
+                                    className={`mist-labyrinth-year-manual-input ${labyrinthYearInputInvalid ? 'is-invalid' : ''}`}
+                                    onFocus={() => {
+                                        setLabyrinthYearInputDraft(selectedYear === null ? '' : String(selectedYear));
+                                        setLabyrinthYearInputInvalid(false);
+                                    }}
+                                    onChange={(event) => {
+                                        setLabyrinthYearInputDraft(event.target.value);
+                                        setLabyrinthYearInputInvalid(false);
+                                    }}
+                                    onBlur={(event) => commitLabyrinthYearInput(event.currentTarget.value)}
+                                    onKeyDown={handleLabyrinthYearInputKeyDown}
+                                />
+                            </div>
                             <input
                                 type="range"
-                                min="-2000"
-                                max="2050"
+                                min={TIMELINE_YEAR_MIN}
+                                max={TIMELINE_YEAR_MAX}
                                 step="1"
                                 value={currentYear}
                                 disabled={isYearLocked}
@@ -1626,7 +1755,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                                 <div>
                                     <button type="button" onClick={() => updateLabyrinthTimeLocation(undefined, currentYear - 10)}>-10</button>
                                     <button type="button" onClick={() => updateLabyrinthTimeLocation(undefined, currentYear - 1)}>-1</button>
-                                    <button type="button" onClick={() => updateLabyrinthTimeLocation(undefined, 2026)}>Now</button>
+                                    <button type="button" onClick={() => updateLabyrinthTimeLocation(undefined, TIMELINE_YEAR_NOW)}>Now</button>
                                     <button type="button" onClick={() => updateLabyrinthTimeLocation(undefined, currentYear + 1)}>+1</button>
                                     <button type="button" onClick={() => updateLabyrinthTimeLocation(undefined, currentYear + 10)}>+10</button>
                                 </div>
@@ -1643,7 +1772,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                         <button
                             type="button"
                             className="mist-labyrinth-identity-confirm"
-                            onClick={() => setIsLabyrinthTimeModalOpen(false)}
+                            onClick={closeLabyrinthTimeModal}
                         >
                             <Check size={14} />
                             {lang === 'EN' ? "CONFIRM" : "确认设定"}
@@ -2049,9 +2178,9 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                                 <span className="mist-labyrinth-surface-label">{lang === 'EN' ? "Structure" : "叙事结构"}</span>
                                 {renderLabyrinthSkinSlot("skin_structure", "SV1. 叙事结构", "SV1. Structure")}
                             </div>}
-                            {(labyrinthSummaryExpanded || hasBlockValue(['skin_volume'])) && <div className="mist-labyrinth-surface-block">
-                                <span className="mist-labyrinth-surface-label">{lang === 'EN' ? "Volume" : "故事体量"}</span>
-                                {renderLabyrinthSkinSlot("skin_volume", "SV2. 故事体量", "SV2. Volume")}
+                            {(labyrinthSummaryExpanded || hasBlockValue(['skin_volume'])) && <div className="mist-labyrinth-surface-block mist-labyrinth-surface-volume-block">
+                                <span className="mist-labyrinth-surface-label">{lang === 'EN' ? "Runtime" : "时长/容量"}</span>
+                                {renderLabyrinthSkinSlot("skin_volume", "SV2. 时长/容量", "SV2. Runtime")}
                             </div>}
                             {(labyrinthSummaryExpanded || hasBlockValue(['skin_era'])) && <div className="mist-labyrinth-surface-block">
                                 <span className="mist-labyrinth-surface-label">{lang === 'EN' ? "Field" : "背景场域"}</span>
@@ -2115,12 +2244,16 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
             <section className="mist-labyrinth-hero" aria-label={lang === 'EN' ? "Labyrinth formula console" : "爱欲迷宫公式控制台"}>
                 <div className="mist-labyrinth-film-window">
                     <div className="mist-labyrinth-screen">
-                        <div className={`mist-labyrinth-rings ${showRings ? 'is-active' : 'is-exiting'}`} aria-hidden="true">
+                        <div
+                            key={`labyrinth-rings-${showRings ? 'active' : 'exit'}`}
+                            className={`mist-labyrinth-rings ${showRings ? 'is-active' : 'is-exiting'}`}
+                            aria-hidden="true"
+                        >
                             <BorromeanRings
                                 fieldState={fieldState}
                                 lang={lang}
                                 driverType={driverType}
-                                opacity={0.65}
+                                opacity={theme === 'retro' ? 0.3 : 0.7}
                                 centered={true}
                                 vivid={true}
                             />
@@ -2171,23 +2304,27 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                 />
             )}
 
-            {showRings && !isLabyrinth && (
-                <div className="absolute inset-0 z-0 pointer-events-none transition-all duration-1000" style={{ filter: 'none' }}>
+            {!isLabyrinth && (
+                <div className={`${
+                    isCommercial ? 'mist-rings-suture' :
+                    isExperimental ? 'mist-rings-experimental' :
+                    isTrailer ? 'mist-rings-trailer' : ''
+                } ${showRings ? 'is-active' : 'is-exiting'}`} aria-hidden="true">
                     <BorromeanRings
                         fieldState={fieldState}
                         lang={lang}
                         driverType={driverType}
-                        opacity={0.85}
+                        opacity={theme === 'retro' ? 0.3 : 0.7}
                         centered={true}
                         vivid={true}
                     />
                 </div>
             )}
 
-            {!isLabyrinth && <div className="flex-shrink-0 px-6 pt-6 pb-2 flex items-center justify-center z-20 bg-transparent relative">
+            {!isLabyrinth && <div className={`flex-shrink-0 px-6 pt-6 pb-2 flex items-center justify-center z-20 bg-transparent relative ${isCommercial ? 'mist-commercial-title-zone' : ''}`}>
                 <div className="max-w-5xl mx-auto w-full flex flex-col items-center justify-center relative">
                     <div className="flex-1 flex flex-col items-center justify-center pointer-events-none">
-                        <h2 className="mist-engine-title text-4xl md:text-5xl font-serif font-bold tracking-[0.05em] -mr-[0.05em] text-center mb-4 transition-all duration-300">
+                        <h2 className={`mist-engine-title text-4xl md:text-5xl font-serif font-bold tracking-[0.05em] -mr-[0.05em] text-center mb-4 ${isCommercial ? 'mist-commercial-engine-title' : 'transition-all duration-300'}`}>
                             <span className={theme === 'retro' ? 'text-[#8B261D]' : osTheme.accent}>
                                 {getEngineTitle()}
                             </span>
@@ -2237,8 +2374,8 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                     ) : (
                     <div className="min-h-full flex flex-col items-center justify-start p-4 md:px-8 pt-0 md:pt-2 md:pb-60 space-y-24 md:space-y-36">
                     {isCommercial ? (
-                        <div className="flex flex-col gap-8 md:gap-12 min-w-0">
-                            <div className="flex flex-wrap justify-center items-center gap-x-2 gap-y-4 w-full">
+                        <div className="mist-commercial-formula-module flex flex-col gap-8 md:gap-12 min-w-0">
+                            <div className="mist-commercial-formula-line flex flex-wrap justify-center items-center gap-x-2 gap-y-4 w-full">
                                 {renderProphecySlot({ prefixCN: "一个处于", prefixEN: "A", blockId: "comm_c0", placeholderCN: "C0. 底层欲望", placeholderEN: "C0. Core Desire" })}
                                 <span className="font-serif text-xl md:text-3xl font-light text-[var(--text-main)]">的</span>
                                 {renderProphecySlot({ blockId: "comm_c1", placeholderCN: "C1. 缺失主体", placeholderEN: "C1. Subject", hideAffixes: true })}
@@ -2246,14 +2383,14 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                                 {renderProphecySlot({ blockId: "comm_c2", placeholderCN: "C2. 痛点场景", placeholderEN: "C2. Pain Scenario", hideAffixes: true })}
                                 <span className="font-serif text-xl md:text-3xl font-light text-[var(--text-main)]">中，</span>
                             </div>
-                            <div className="flex flex-wrap justify-center items-center gap-x-2 gap-y-4 w-full">
+                            <div className="mist-commercial-formula-line flex flex-wrap justify-center items-center gap-x-2 gap-y-4 w-full">
                                 <span className="font-serif text-xl md:text-3xl font-light text-[var(--text-main)]">由于恐惧</span>
                                 {renderProphecySlot({ blockId: "comm_c6", placeholderCN: "C6. 潜在威胁", placeholderEN: "C6. Threat", hideAffixes: true })}
                                 <span className="font-serif text-xl md:text-3xl font-light text-[var(--text-main)]">，渴望获得作为救赎的</span>
                                 {renderProphecySlot({ blockId: "comm_c3", placeholderCN: "C3. 产品图腾", placeholderEN: "C3. Product", hideAffixes: true })}
                                 <span className="font-serif text-xl md:text-3xl font-light text-[var(--text-main)]">；</span>
                             </div>
-                            <div className="flex flex-wrap justify-center items-center gap-x-2 gap-y-4 w-full">
+                            <div className="mist-commercial-formula-line flex flex-wrap justify-center items-center gap-x-2 gap-y-4 w-full">
                                 <span className="font-serif text-xl md:text-3xl font-light text-[var(--text-main)]">在得到</span>
                                 {renderProphecySlot({ blockId: "comm_c4", placeholderCN: "C4. 信任背书", placeholderEN: "C4. Endorsement", hideAffixes: true })}
                                 <span className="font-serif text-xl md:text-3xl font-light text-[var(--text-main)]">提供的权威背书后，他通过</span>
@@ -2369,13 +2506,14 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                                 </span>
                                 {renderProphecySlot({ blockId: "engine_m7a", placeholderCN: "M7A. 象征裁决", placeholderEN: "M7A. Verdict", hideAffixes: true })}
                                 <span className="font-serif text-xl md:text-3xl font-light select-none text-[var(--text-main)]">
-                                    {lang === 'EN' ? ", and forever lives on with" : "，并在此后永远带着"}
+                                    {lang === 'EN' ? ", leaving in the final frame" : "，并在最后一帧留下"}
                                 </span>
                                 {renderProphecySlot({ blockId: "engine_m7b", placeholderCN: "M7B. 实在余痕", placeholderEN: "M7B. Residue", hideAffixes: true })}
                                 <span className="font-serif text-xl md:text-3xl font-light select-none text-[var(--text-main)]">
-                                    {lang === 'EN' ? "." : "活下去。"}
+                                    {lang === 'EN' ? "." : "。"}
                                 </span>
                             </div>
+                            {renderM7BIntensityControl(true)}
                         </div>
                     )}
                     </div>
@@ -2399,7 +2537,11 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                     onTempLockChange={(locks) => {
                         onFaceStateChange?.(locks);
                     }}
+                    onFocusStateChange={(locks) => {
+                        onFocusStateChange?.(locks);
+                    }}
                     initialFaceState={faceState}
+                    initialFocusState={focusState}
                     customLibraryData={
                         activeBlockId === 'aes_palette_preset'
                             ? [{ id: 'lib_master', name: '视觉大师预设 (Master Presets)', desc: 'Pre-configured Cinematic Styles', items: MASTER_PRESETS }]

@@ -21,7 +21,6 @@ import { generateAestheticSmartRandom, HUMAN_BLOCKS, CREATURE_BLOCKS, AESTHETIC_
 import { generateAestheticAssetConceptPrompt, generateAestheticPrompt } from '../utils/promptUtils';
 import { AESTHETIC_LOGIC_TEMPLATES, BLOCK_LIMITS } from '../constants';
 import { findItemFull } from '../services/dataRegistry';
-import { BorromeanRings } from './BorromeanRings';
 
 const iconMap: Record<string, any> = {
     User, Zap, Eye, Palette, Camera, Layout
@@ -75,7 +74,8 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
     fieldState, onChange, lang, driverType, subjectType,
     lockedModules, onToggleLock, lockedTags, onToggleTagLock, onRandomizeTag,
     customLibraryDefs, onAddCustomDef, aestheticMode, onAestheticModeChange,
-    colorPalette = [], onPaletteChange, onApplyPreset, showRings = true
+    colorPalette = [], onPaletteChange, onApplyPreset, showRings = true,
+    faceState, onFaceStateChange, focusState = {}, onFocusStateChange
 }) => {
     const { theme } = useTheme();
     const [libraryModalOpen, setLibraryModalOpen] = useState(false);
@@ -86,11 +86,27 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
     const [copiedCategoryId, setCopiedCategoryId] = useState<string | null>(null);
     const [logicMode, setLogicMode] = useState<AestheticLogicMode>('DEFAULT');
 
-    // Default order
     const DEFAULT_AESTHETIC_ORDER = [
         'PRESETS', 'PALETTE', 'STYLE', 'L1.1', 'L1.2', 'SUBJECT', 'STAGE', 'VIBE', 'RENDER'
     ];
-    const [aestheticModuleOrder, setAestheticModuleOrder] = useState<string[]>(DEFAULT_AESTHETIC_ORDER);
+
+    const getOrderForMode = (mode: AestheticLogicMode) => {
+        switch (mode) {
+            case 'IDENTITY': return ['PRESETS', 'PALETTE', 'SUBJECT', 'STYLE', 'L1.2', 'STAGE', 'VIBE', 'L1.1', 'RENDER'];
+            case 'ACTION': return ['PRESETS', 'PALETTE', 'SUBJECT', 'L1.2', 'STAGE', 'VIBE', 'STYLE', 'L1.1', 'RENDER'];
+            case 'ATMOSPHERE': return ['PRESETS', 'PALETTE', 'VIBE', 'STAGE', 'STYLE', 'L1.1', 'L1.2', 'SUBJECT', 'RENDER'];
+            case 'LOOK': return ['PRESETS', 'PALETTE', 'STYLE', 'L1.1', 'SUBJECT', 'L1.2', 'RENDER', 'VIBE', 'STAGE'];
+            case 'TECH': return ['PRESETS', 'PALETTE', 'L1.1', 'RENDER', 'L1.2', 'VIBE', 'STAGE', 'SUBJECT', 'STYLE'];
+            default: return DEFAULT_AESTHETIC_ORDER;
+        }
+    };
+
+    const [aestheticModuleOrder, setAestheticModuleOrder] = useState<string[]>(() => {
+        if (fieldState['aes_logic_mode']?.[0]) {
+            return getOrderForMode(fieldState['aes_logic_mode'][0] as AestheticLogicMode);
+        }
+        return DEFAULT_AESTHETIC_ORDER;
+    });
 
     const isStylized = aestheticMode === 'STYLIZED';
     const isRealism = aestheticMode === 'REALISM';
@@ -107,30 +123,7 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
     const handleLogicModeChange = (mode: AestheticLogicMode) => {
         setLogicMode(mode);
         onChange({ ...fieldState, 'aes_logic_mode': [mode] });
-
-        let newOrder = [...DEFAULT_AESTHETIC_ORDER];
-        switch (mode) {
-            case 'IDENTITY':
-                newOrder = ['PRESETS', 'PALETTE', 'SUBJECT', 'STYLE', 'L1.2', 'STAGE', 'VIBE', 'L1.1', 'RENDER'];
-                break;
-            case 'ACTION':
-                newOrder = ['PRESETS', 'PALETTE', 'SUBJECT', 'L1.2', 'STAGE', 'VIBE', 'STYLE', 'L1.1', 'RENDER'];
-                break;
-            case 'ATMOSPHERE':
-                newOrder = ['PRESETS', 'PALETTE', 'VIBE', 'STAGE', 'STYLE', 'L1.1', 'L1.2', 'SUBJECT', 'RENDER'];
-                break;
-            case 'LOOK':
-                newOrder = ['PRESETS', 'PALETTE', 'STYLE', 'L1.1', 'SUBJECT', 'L1.2', 'RENDER', 'VIBE', 'STAGE'];
-                break;
-            case 'TECH':
-                newOrder = ['PRESETS', 'PALETTE', 'L1.1', 'RENDER', 'L1.2', 'VIBE', 'STAGE', 'SUBJECT', 'STYLE'];
-                break;
-            case 'DEFAULT':
-            default:
-                newOrder = DEFAULT_AESTHETIC_ORDER;
-                break;
-        }
-        setAestheticModuleOrder(newOrder);
+        setAestheticModuleOrder(getOrderForMode(mode));
     };
 
     const ENGINE_BLOCKS: NarrativeBlockDef[] = [
@@ -986,19 +979,8 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
 
     return (
         <div className={`mist-aesthetic-engine w-full h-full flex flex-col relative overflow-hidden bg-[var(--bg-main)]`}>
-            {/* Background Borromean Rings - Clear rings with subtle 'frosted' context */}
-            <div className={`mist-aesthetic-rings absolute inset-0 z-0 pointer-events-none ${showRings ? 'is-active' : 'is-exiting'}`} style={{ filter: 'none' }}>
-                <BorromeanRings
-                    fieldState={fieldState}
-                    lang={lang}
-                    driverType={driverType}
-                    opacity={0.8}
-                    centered={true}
-                    vivid={true}
-                />
-            </div>
             <div className="flex-1 flex-row overflow-hidden min-h-0 relative z-10 hidden md:flex">
-                <div className={`mist-aesthetic-left-pane w-1/2 h-full flex flex-col overflow-hidden border-r backdrop-blur-md ${theme === 'retro' ? 'border-[#8B261D]/10 bg-transparent' : 'border-zinc-800 bg-[var(--bg-main)]/40'}`}>
+                <div className={`mist-aesthetic-left-pane w-1/2 h-full flex flex-col overflow-hidden border-r backdrop-blur-xl ${theme === 'retro' ? 'border-[#8B261D]/15 bg-[#EFE9E0]/80' : 'border-zinc-800 bg-[var(--bg-main)]/50'}`}>
                     <div className="mist-aesthetic-page-header shrink-0 z-20 px-6 py-4 bg-transparent flex items-center justify-between">
                         <div className="pl-6">
                             <h2 className={`text-2xl font-serif font-black tracking-[0.05em] ${theme === 'retro' ? 'text-[#8B261D]' : 'text-[var(--mist-active-accent)]'}`}>
@@ -1099,10 +1081,10 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
                                     </span>
                                 </div>
                                 <div className="mist-aesthetic-polish-actions flex items-center gap-2 scale-90 origin-right">
-                                    <button onClick={() => setUserManualPrompt(getCompilerOutput())} className={`flex items-center gap-2 px-3 py-1 rounded text-[9px] font-bold uppercase tracking-widest transition-all ${theme === 'retro' ? 'bg-[#8B261D] text-white hover:bg-[#631B15]' : 'bg-[var(--mist-active-accent)] hover:bg-[var(--mist-active-accent)]/90 text-black'}`}>
+                                    <button onClick={() => setUserManualPrompt(getCompilerOutput())} className={`mist-aesthetic-polish-inject-button flex items-center gap-2 px-3 py-1 rounded text-[9px] font-bold uppercase tracking-widest transition-all ${theme === 'retro' ? 'bg-[#8B261D] text-white hover:bg-[#631B15]' : 'bg-[var(--mist-active-accent)] hover:bg-[var(--mist-active-accent)]/90 text-black'}`}>
                                         <ArrowDownToLine size={12} /> {lang === 'EN' ? "INJECT" : "注入"}
                                     </button>
-                                    <button onClick={() => setUserManualPrompt("")} className={`flex items-center gap-2 px-3 py-1 border rounded text-[9px] font-bold uppercase tracking-widest transition-all ${theme === 'retro' ? 'bg-white border-black/10 text-zinc-600 hover:text-[#8B261D] hover:bg-black/5' : 'bg-zinc-800 hover:bg-red-900/30 text-zinc-400 hover:text-red-400 border-zinc-700'}`}>
+                                    <button onClick={() => setUserManualPrompt("")} className={`mist-aesthetic-polish-clear-button flex items-center gap-2 px-3 py-1 border rounded text-[9px] font-bold uppercase tracking-widest transition-all ${theme === 'retro' ? 'bg-white border-black/10 text-zinc-600 hover:text-[#8B261D] hover:bg-black/5' : 'bg-zinc-800 hover:bg-red-900/30 text-zinc-400 hover:text-red-400 border-zinc-700'}`}>
                                         <Eraser size={12} /> {lang === 'EN' ? "CLEAR" : "清空"}
                                     </button>
                                 </div>
@@ -1130,6 +1112,14 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
                     onClear={() => clearBlock(activeBlockId)}
                     lang={lang}
                     driverType={driverType}
+                    onTempLockChange={(locks) => {
+                        onFaceStateChange?.(locks);
+                    }}
+                    onFocusStateChange={(locks) => {
+                        onFocusStateChange?.(locks);
+                    }}
+                    initialFaceState={faceState}
+                    initialFocusState={focusState}
                     customLibraryData={
                         activeBlockId === 'aes_palette_preset'
                             ? [{

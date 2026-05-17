@@ -17,7 +17,8 @@ const LLM_MODELS = [
     { id: 'gemini-3.1-flash-lite-preview', name: 'Gemini 3.1 Flash Lite Preview' },
     { id: 'gemini-3-pro-preview', name: 'Gemini 3.0 Pro Preview' },
     { id: 'claude-opus-4-6', name: 'Claude 4.6 Opus' },
-    { id: 'claude-sonnet-4-6', name: 'Claude 4.6 Sonnet' },
+    { id: 'deepseek-v4-flash', name: 'DeepSeek V4 Flash' },
+    { id: 'deepseek-v4-pro', name: 'DeepSeek V4 Pro' },
 ];
 
 const IMAGE_MODELS = [
@@ -255,4 +256,3 @@ export const APISettingsModal: React.FC<APISettingsModalProps> = ({ onClose, lan
         </div>
     );
 };
-

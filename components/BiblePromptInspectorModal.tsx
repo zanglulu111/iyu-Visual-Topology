@@ -1,5 +1,5 @@
 import React from 'react';
-import { CreativeTreatment, StyleConfig, NarrativeFieldState, WorldLawConfig, DriverType, NarrativeBlockDef, LibraryCategoryDef } from '../types';
+import { CreativeTreatment, StyleConfig, NarrativeFieldState, WorldLawConfig, DriverType, PromptFocusState, NarrativeBlockDef, LibraryCategoryDef, M7BResidueIntensity } from '../types';
 import { buildNarrativeBiblePrompt } from '../services/narrativeGenerator';
 import { buildCommercialBiblePrompt } from '../services/commercialGenerator';
 import { buildExperimentalBiblePrompt } from '../services/experimentalGenerator';
@@ -7,6 +7,11 @@ import { buildAestheticBiblePrompt } from '../services/aestheticGenerator';
 import { XRayInspectorModal, type XRaySourceGroup } from './XRayInspector';
 import { STYLE_MATRIX, PERSPECTIVES, SENSORY_MODES } from '../data/narrative/style_matrix';
 import { DIRECTOR_STYLES } from '../data/narrative/director_styles';
+import {
+    normalizeWorldLawConfig,
+    resolveWorldLawLevel,
+    WORLD_LAW_LEVEL_OPTIONS
+} from '../services/worldLaw';
 import {
     AESTHETIC_ENGINE_BLOCKS,
     AESTHETIC_ENGINE_LIBRARY,
@@ -40,15 +45,9 @@ interface BiblePromptInspectorModalProps {
     visionAnalysis?: string;
     worldLawConfig?: WorldLawConfig;
     driverType: DriverType;
+    focusState?: PromptFocusState;
+    m7bIntensity?: M7BResidueIntensity;
 }
-
-const WORLD_LAW_OPTIONS = [
-    { value: 1, label: '写实', description: '物理重力闭锁。' },
-    { value: 2, label: '合理', description: '超现实元素必须被合理解释。' },
-    { value: 3, label: '缝合', description: '现实为底，允许局部症状化超现实。' },
-    { value: 4, label: '奇观', description: '高概念幻想公开运行。' },
-    { value: 5, label: '狂想', description: '绝对无重力的疯狂拼贴。' }
-];
 
 const getDriverBlocksAndLibrary = (driverType: DriverType): { blocks: NarrativeBlockDef[]; library: LibraryCategoryDef[] } => {
     switch (driverType) {
@@ -154,14 +153,22 @@ export const BiblePromptInspectorModal: React.FC<BiblePromptInspectorModalProps>
     visionInput,
     visionAnalysis,
     worldLawConfig,
-    driverType
+    driverType,
+    focusState,
+    m7bIntensity
 }) => {
     const defaultFieldState = (fieldState || {}) as NarrativeFieldState;
-    const defaultWorldLaw = (worldLawConfig || { gravity: 4 }) as WorldLawConfig;
+    const defaultWorldLaw = normalizeWorldLawConfig(worldLawConfig || { gravity: 2 });
     const { blocks, library } = getDriverBlocksAndLibrary(driverType);
     const engineBlocks = blocks.filter(block => !isSurfaceBlock(block.id));
     const surfaceBlocks = blocks.filter(block => isSurfaceBlock(block.id));
     const showPerspectiveAndSensory = driverType !== DriverType.NARRATIVE || !styleConfig.styleId;
+    const worldLawLevel = resolveWorldLawLevel(defaultWorldLaw);
+    const worldLawOptions = WORLD_LAW_LEVEL_OPTIONS.map(option => ({
+        value: option.id,
+        label: lang === 'EN' ? option.shortEN : option.shortCN,
+        description: lang === 'EN' ? option.descEN : option.descCN
+    }));
 
     const driverLabel = (() => {
         switch (driverType) {
@@ -169,9 +176,12 @@ export const BiblePromptInspectorModal: React.FC<BiblePromptInspectorModalProps>
             case DriverType.EXPERIMENTAL: return lang === 'CN' ? '实验圣经' : 'Experimental Bible';
             case DriverType.AESTHETIC: return lang === 'CN' ? '美学创意圣经' : 'Aesthetic Bible';
             case DriverType.TRAILER: return lang === 'CN' ? '预告片执行单' : 'Trailer Bible';
-            default: return lang === 'CN' ? '创意圣经' : 'Creative Bible';
+            default: return lang === 'CN' ? '叙事创作' : 'Narrative Writing';
         }
     })();
+    const inspectorTitle = driverType === DriverType.NARRATIVE
+        ? (lang === 'CN' ? `X-Ray 叙事创作指令透视 · ${driverLabel}` : `Narrative Prompt Inspector · ${driverLabel}`)
+        : (lang === 'CN' ? `X-Ray 圣经指令透视 · ${driverLabel}` : `Bible Prompt Inspector · ${driverLabel}`);
 
     const getSources = (values?: Record<string, any>): XRaySourceGroup[] => {
         const currentStyleId = values?.styleId ?? styleConfig.styleId;
@@ -188,11 +198,11 @@ export const BiblePromptInspectorModal: React.FC<BiblePromptInspectorModalProps>
                 title: lang === 'EN' ? 'Surface Settings' : '表层设定',
                 items: [
                     {
-                        id: 'worldLawGravity',
+                        id: 'worldLawLevel',
                         label: lang === 'EN' ? 'World Law' : '世界法则',
                         kind: 'select',
-                        value: defaultWorldLaw?.gravity || '',
-                        options: WORLD_LAW_OPTIONS,
+                        value: worldLawLevel,
+                        options: worldLawOptions,
                         editable: false,
                         placeholder: lang === 'EN' ? 'World Law' : '世界法则'
                     },
@@ -302,8 +312,8 @@ export const BiblePromptInspectorModal: React.FC<BiblePromptInspectorModalProps>
     const buildPayload = (values: Record<string, unknown>) => {
         if (!treatment) {
             return lang === 'CN'
-                ? '请先选择一个叙事路径，然后再查看完整的创意圣经指令。'
-                : 'Select a narrative path first to inspect the full Creative Bible prompt.';
+                ? '请先选择一个叙事路径，然后再查看完整的叙事创作指令。'
+                : 'Select a narrative path first to inspect the full Narrative Writing prompt.';
         }
 
         try {
@@ -326,8 +336,10 @@ export const BiblePromptInspectorModal: React.FC<BiblePromptInspectorModalProps>
                 nextStyleConfig.sensoryId = null;
             }
             const nextFieldState = collectFieldState(values, blocks, defaultFieldState);
-            const gravity = Number(values.worldLawGravity || defaultWorldLaw?.gravity || 4);
-            const nextWorldLaw: WorldLawConfig = { ...defaultWorldLaw, gravity };
+            const nextWorldLaw: WorldLawConfig = normalizeWorldLawConfig({
+                ...defaultWorldLaw,
+                gravity: Number(values.worldLawLevel || worldLawLevel)
+            });
             const nextVisionInput = String(values.visionInput ?? '');
             const nextVisionAnalysis = String(values.visionAnalysis ?? '');
             const nextDriver = driverType;
@@ -340,7 +352,7 @@ export const BiblePromptInspectorModal: React.FC<BiblePromptInspectorModalProps>
                 case DriverType.AESTHETIC:
                     return buildAestheticBiblePrompt(nextTreatment, nextStyleConfig, nextFieldState, nextVisionInput, nextWorldLaw);
                 default:
-                    return buildNarrativeBiblePrompt(nextTreatment, nextStyleConfig, nextFieldState, nextVisionInput, null, nextWorldLaw, nextVisionAnalysis);
+                    return buildNarrativeBiblePrompt(nextTreatment, nextStyleConfig, nextFieldState, nextVisionInput, null, nextWorldLaw, nextVisionAnalysis, focusState, m7bIntensity);
             }
         } catch (e) {
             return `提示词生成过程中遇到错误。\n\n[ERROR]\n${e instanceof Error ? e.stack : String(e)}`;
@@ -352,7 +364,7 @@ export const BiblePromptInspectorModal: React.FC<BiblePromptInspectorModalProps>
             isOpen={isOpen}
             onClose={onClose}
             lang={lang}
-            title={lang === 'CN' ? `X-Ray 圣经指令透视 · ${driverLabel}` : `Bible Prompt Inspector · ${driverLabel}`}
+            title={inspectorTitle}
             sources={getSources}
             buildPayload={buildPayload}
         />

@@ -27,10 +27,13 @@ export enum DriverType {
   SUTURE = 'SUTURE'
 }
 
+export type NarrativePromptVersion = 'v3' | 'v4';
+
 export type ViewMode = 'ENGINE' | 'DIVERGENCE' | 'BIBLE' | 'METONYMY' | 'CANVAS' | 'TOPOLOGY' | 'RSI' | 'ARCHIVE' | 'VIDEO' | 'RORSCHACH' | 'ANALYSIS' | 'DICTIONARY';
 
 export type SubjectType = 'HUMAN' | 'CREATURE';
 export type AestheticMode = 'REALISM' | 'STYLIZED';
+export type M7BResidueIntensity = 'off' | 'implicit' | 'light' | 'strong';
 
 export type AestheticLogicMode = 'DEFAULT' | 'IDENTITY' | 'ACTION' | 'ATMOSPHERE' | 'LOOK' | 'TECH';
 
@@ -48,6 +51,8 @@ export interface LibraryItemDef {
   essenceEn?: string;
   reference?: string;
   referenceEn?: string;
+  aliases?: string[];
+  aliasesEn?: string[];
   reality?: string;
   realityEn?: string;
   group?: string;
@@ -238,12 +243,17 @@ export type NarrativeFieldState = Record<string, string[]>;
 
 export type DirectiveFace = 'bright' | 'dark' | 'tension';
 export type FaceState = Record<string, DirectiveFace>;
+export type PromptFocusState = Record<string, boolean>;
+export type RealityAnchorMode = 'strict' | 'inferred' | 'drift';
+export type GenreManifestationMode = 'metaphoric' | 'rationalized' | 'literal' | 'phantasmic';
 
 export interface WorldLawConfig {
   physics?: number;
   timeline?: number;
   continuity?: number;
   gravity?: number;
+  realityAnchor?: RealityAnchorMode;
+  genreManifestation?: GenreManifestationMode;
 }
 
 export interface CreativeBrief {
@@ -605,6 +615,8 @@ export interface CreativeBlueprint {
   generationAestheticMode?: AestheticMode;
   generationColorPalette?: string[];
   generationFaceState?: FaceState;
+  generationFocusState?: PromptFocusState;
+  generationM7BIntensity?: M7BResidueIntensity;
   childBlueprint?: CreativeBlueprint;
   narrative: BlueprintNarrative;
   context: BlueprintContext;
@@ -674,6 +686,8 @@ export interface HistoryItem {
   aestheticMode?: AestheticMode;
   colorPalette?: string[];
   faceState?: FaceState;
+  focusState?: PromptFocusState;
+  m7bIntensity?: M7BResidueIntensity;
   blueprint: CreativeBlueprint | null;
   metonymyBlueprint?: CreativeBlueprint | null;
   treatments: CreativeTreatment[];
@@ -693,6 +707,8 @@ export interface ProjectWorkspaceSnapshot {
   aestheticMode?: AestheticMode;
   colorPalette?: string[];
   faceState?: FaceState;
+  focusState?: PromptFocusState;
+  m7bIntensity?: M7BResidueIntensity;
   treatments?: CreativeTreatment[];
   activeBlueprint?: CreativeBlueprint | null;
   metonymyBlueprint?: CreativeBlueprint | null;
@@ -756,6 +772,9 @@ export interface StyleConfig {
   styleId: string | null;
   perspectiveId: string | null;
   sensoryId: string | null;
+  customStyleName?: string | null;
+  customStyleDef?: string | null;
+  customStyleCore?: string | null;
 }
 
 export type DensityLevel = 'NONE' | 'LOW' | 'MID' | 'HIGH' | 'AUTO';

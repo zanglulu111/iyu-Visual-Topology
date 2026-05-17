@@ -73,37 +73,14 @@ export const generateGlobalDump = (options: GlobalDumpOptions): string => {
 
     const bibles = Object.values(cachedBlueprints);
     if (bibles.length > 0) {
-        lines.push(`\n## 2. 创意圣经与文学剧本 (CREATIVE BIBLES)`);
+        lines.push(`\n## 2. 叙事创作与文学正文 (NARRATIVE WRITING)`);
         bibles.forEach((b, i) => {
-            lines.push(`\n### 📜 圣经项目 ${i + 1}: ${b.narrative.title}`);
+            lines.push(`\n### 📜 叙事创作 ${i + 1}: ${b.narrative.title}`);
             lines.push(`**风格指向:** ${b.styleName}`);
             lines.push(`**核心 Logline:** ${b.narrative.logline}`);
 
             lines.push(`\n#### [叙事核心 / Narrative Core]`);
             lines.push(b.narrative.synopsis);
-
-            lines.push(`\n#### [世界法则 / World Rules]`);
-            lines.push(b.context.world || "未定义世界法则。");
-
-            lines.push(`\n#### [影调与视觉 / Tone & Visuals]`);
-            lines.push(b.context.tone || "未定义影调。");
-            if (b.context.colorPalette.length) {
-                lines.push(`**色板:** ${b.context.colorPalette.join(', ')}`);
-            }
-
-            lines.push(`\n#### [视觉资产库 / Visual Asset Library]`);
-            if (b.assets.characters.length) {
-                lines.push(`\n**人物 (Characters):**`);
-                b.assets.characters.forEach(c => lines.push(`- [${c.name} (${c.tag})] ${c.desc}\n  * Prompt: ${c.view.prompt || 'N/A'}`));
-            }
-            if (b.assets.locations.length) {
-                lines.push(`\n**场景 (Locations):**`);
-                b.assets.locations.forEach(l => lines.push(`- [${l.name} (${l.tag})] ${l.desc}\n  * Prompt: l.view.prompt || 'N/A'}`));
-            }
-            if (b.assets.props.length) {
-                lines.push(`\n**道具 (Props):**`);
-                b.assets.props.forEach(p => lines.push(`- [${p.name} (${p.type})] ${p.desc}\n  * Prompt: p.view.prompt || 'N/A'}`));
-            }
 
             if (b.narrative.psychoanalysis) {
                 lines.push(`\n#### [精神分析诊断报告 / Psychoanalysis Report]`);

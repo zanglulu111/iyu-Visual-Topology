@@ -1,7 +1,8 @@
-import { X, Search, Layers, Check, Dice5, Trash2, Plus, Zap, Sparkles, Eye, Heart, Music, Sun, Moon, Cloud, Feather, Globe, Copy, LayoutGrid, Info, Hash, ChevronRight, ArrowLeftRight, Undo2, Redo2 } from 'lucide-react';
+import { X, Search, Layers, Check, Dice5, Trash2, Plus, Zap, Sparkles, Eye, Heart, Music, Sun, Moon, Cloud, Feather, Globe, Copy, LayoutGrid, Info, Hash, ChevronRight, ArrowLeftRight, Undo2, Redo2, Star } from 'lucide-react';
 import React, { useState, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTheme } from '../contexts/ThemeContext';
+import { PromptFocusState } from '../types';
 import {
     NARRATIVE_ENGINE_BLOCKS,
     NARRATIVE_ENGINE_LIBRARY,
@@ -36,7 +37,9 @@ interface NarrativeLibraryModalProps {
     onAddCustomDef?: (name: string, def: string, core: string) => void;
     scrollToTag?: string;
     onTempLockChange?: (itemTempLock: Record<string, 'bright' | 'dark' | 'tension'>) => void;
+    onFocusStateChange?: (focusState: PromptFocusState) => void;
     initialFaceState?: Record<string, 'bright' | 'dark' | 'tension'>;
+    initialFocusState?: PromptFocusState;
 }
 
 const iconMap: Record<string, React.ElementType> = {
@@ -46,12 +49,40 @@ const iconMap: Record<string, React.ElementType> = {
 const displayCnTag = (value: unknown) => String(value || '')
     .replace(/^\[?SUR-END[.。]\s*/i, '')
     .replace(/^\[?SURX[.。]\s*/i, '')
-    .replace(/\s*\([A-Za-z0-9\s/.'"_-]+\)\s*/g, '')
+    .replace(/\s*\((?![^)]*[\u3400-\u9fff])[^)]*\)\s*/g, '')
     .replace(/^\[|\]$/g, '')
     .trim();
 
+const containsCjk = (value: string) => /[\u3400-\u9fff]/.test(value);
+
+const getEnglishLabel = (name?: string, nameEn?: string) => {
+    if (nameEn) return nameEn.trim();
+    const rawName = String(name || '');
+    const parenthetical = rawName.match(/\((.*?)\)/)?.[1];
+    if (parenthetical) return parenthetical.trim();
+    return containsCjk(rawName) ? '' : rawName.trim();
+};
+
+const getLocalizedLabel = (name: string | undefined, nameEn: string | undefined, lang: BlueprintLanguage) => {
+    if (lang === 'EN') return getEnglishLabel(name, nameEn);
+    return displayCnTag(name);
+};
+
+const getLocalizedText = (item: any, cnKey: string, enKey: string, lang: BlueprintLanguage) => {
+    const text = lang === 'EN' ? item?.[enKey] : item?.[cnKey];
+    return typeof text === 'string' ? text.trim() : text;
+};
+
+const itemTagMatches = (item: any, tag: string) =>
+    item?.name === tag
+    || item?.id === tag
+    || item?.aliases?.includes(tag)
+    || item?.aliasesEn?.includes(tag);
+
+const itemMatchesAnyTag = (item: any, tags: string[]) => tags.some(tag => itemTagMatches(item, tag));
+
 export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
-    isOpen, onClose, blockId, blockName, selectedTags, onToggleTag, onSetTags, onClear, lang = 'CN', customLibraryData, driverType, onAddCustomDef, scrollToTag, onTempLockChange, initialFaceState
+    isOpen, onClose, blockId, blockName, selectedTags, onToggleTag, onSetTags, onClear, lang = 'CN', customLibraryData, driverType, onAddCustomDef, scrollToTag, onTempLockChange, onFocusStateChange, initialFaceState, initialFocusState
 }) => {
     const { theme: globalTheme } = useTheme();
     const [searchQuery, setSearchQuery] = useState("");
@@ -79,9 +110,14 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
     // Global temperature control for browsing (bright/dark/tension)
     const [directiveTemp, setDirectiveTemp] = useState<'bright' | 'dark' | 'tension'>('bright');
     const faceState = initialFaceState || {};
+    const focusState = initialFocusState || {};
 
     const setFace = (name: string, temp: 'bright' | 'dark' | 'tension') => {
         onTempLockChange?.({ [name]: temp });
+    };
+
+    const setFocus = (name: string, focus: boolean) => {
+        onFocusStateChange?.({ [name]: focus });
     };
 
     useEffect(() => {
@@ -160,12 +196,12 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                         ? TRAILER_ENGINE_BLOCKS
                         : NARRATIVE_ENGINE_BLOCKS;
         const block = [...engineBlocks, ...skinBlocks].find(item => item.id === blockId);
-        if (block) return currentLang === 'EN' ? block.enName : displayCnTag(block.name);
+        if (block) return getLocalizedLabel(block.name, block.enName, currentLang) || block.id;
 
         const library = libraryData.find(item => item.id === `${blockId}_lib` || item.id === blockId);
-        if (library) return currentLang === 'EN' ? (library.nameEn || library.name.match(/\((.*?)\)/)?.[1] || library.name) : displayCnTag(library.name);
+        if (library) return getLocalizedLabel(library.name, library.nameEn, currentLang) || library.id;
 
-        return currentLang === 'EN' ? (blockName.match(/\((.*?)\)/)?.[1] || blockName) : displayCnTag(blockName);
+        return getLocalizedLabel(blockName, undefined, currentLang) || blockId;
     }, [blockId, blockName, currentLang, driverType, libraryData]);
 
     // Super group functionality removed to simplify genre selection
@@ -179,12 +215,8 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
 
     const processedGroups = useMemo(() => {
         const formatName = (name: string, en?: string) => {
-            if (!name) return "";
-            if (currentLang === 'EN') {
-                return en || name.match(/\((.*?)\)/)?.[1] || name;
-            } else {
-                return displayCnTag(name);
-            }
+            if (!name && !en) return "";
+            return getLocalizedLabel(name, en, currentLang) || name;
         };
 
         let filteredLibraryData = libraryData;
@@ -202,7 +234,7 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
         if (filteredLibraryData.length > 1) {
             return filteredLibraryData.map(cat => ({
                 id: cat.id,
-                name: formatName(cat.name, cat.nameEn),
+                name: formatName(cat.name, cat.nameEn) || cat.id,
                 items: cat.items || []
             }));
         } else if (filteredLibraryData.length === 1) {
@@ -226,7 +258,7 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                 const enName = useAltGroup && firstItem?.altGroupEn ? firstItem.altGroupEn : firstItem?.groupEn;
                 return {
                     id: groupName,
-                    name: formatName(groupName, enName),
+                    name: formatName(groupName, enName) || (currentLang === 'EN' ? 'Group' : groupName),
                     items: groupedItems[groupName]
                 };
             }).sort((a, b) => a.id.localeCompare(b.id));
@@ -324,8 +356,8 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
         const nameCn = blockId === 'skin_volume' && volumeDuration
             ? `${rawNameCn.split('(')[0].trim()}（${volumeDuration}）`
             : displayCnTag(item.name);
-        const nameEn = item.nameEn || String(item.name || '').match(/\((.*?)\)/)?.[1] || nameCn;
-        return currentLang === 'EN' ? nameEn : nameCn;
+        const nameEn = getEnglishLabel(item.name, item.nameEn);
+        return (currentLang === 'EN' ? nameEn : nameCn) || item.id || '';
     };
 
     const getItemMechanics = (item: any) => {
@@ -442,11 +474,11 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
     const handleRandomize = () => {
         if (allCurrentLibraryItems.length === 0) return;
         const targetIndex = getTargetSlotIndex();
-        const candidateItems = allCurrentLibraryItems.filter(item => !selectedTags.includes(item.name));
+        const candidateItems = allCurrentLibraryItems.filter(item => !itemMatchesAnyTag(item, selectedTags));
         if (candidateItems.length === 0) return;
         const randomItem = candidateItems[Math.floor(Math.random() * candidateItems.length)];
         if (randomItem) {
-            const isCurrentlySelected = selectedTags.includes(randomItem.name);
+            const isCurrentlySelected = itemMatchesAnyTag(randomItem, selectedTags);
             const nextSlots = [...slotTags];
             nextSlots[targetIndex] = randomItem.name;
             applyTags(nextSlots.filter(Boolean), selectedTags.length + 1 >= limit ? targetIndex : Math.min(limit - 1, targetIndex + 1));
@@ -463,8 +495,8 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
     };
 
     const handleCopyItem = (item: any) => {
-        const nameCn = item.name.split('(')[0].trim();
-        const nameEn = item.nameEn || item.name.match(/\((.*?)\)/)?.[1] || nameCn;
+        const nameCn = displayCnTag(item.name);
+        const nameEn = getEnglishLabel(item.name, item.nameEn);
 
         let text = "";
         if (driverType === DriverType.AESTHETIC) {
@@ -477,30 +509,28 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                 }
                 text = parts.join('\n');
             } else {
-                const parts = [nameEn];
+                const parts = [nameEn].filter(Boolean);
                 if (item.essenceEn) parts.push(item.essenceEn);
-                else if (item.essence) parts.push(item.essence);
                 else {
                     if (item.defEn) parts.push(item.defEn);
-                    else if (item.def) parts.push(item.def);
                     if (item.coreEn) parts.push(item.coreEn);
                 }
                 text = parts.join('\n');
             }
         } else {
             const name = currentLang === 'EN' ? nameEn : nameCn;
-            const essence = (currentLang === 'EN' && item.essenceEn) ? item.essenceEn : item.essence;
-            const def = (currentLang === 'EN' && item.defEn) ? item.defEn : item.def;
-            const core = (currentLang === 'EN' && item.coreEn) ? item.coreEn : item.core;
-            const parts = [name];
+            const essence = getLocalizedText(item, 'essence', 'essenceEn', currentLang);
+            const def = getLocalizedText(item, 'def', 'defEn', currentLang);
+            const core = getLocalizedText(item, 'core', 'coreEn', currentLang);
+            const parts = [name].filter(Boolean);
             if (essence) {
                 parts.push(essence);
             } else {
                 if (def) parts.push(def);
                 if (core) parts.push(core);
             }
-            if (item.reality) {
-                const reality = (currentLang === 'EN' && item.realityEn) ? item.realityEn : item.reality;
+            const reality = getLocalizedText(item, 'reality', 'realityEn', currentLang);
+            if (reality) {
                 parts.push(reality);
             }
             text = parts.join('\n');
@@ -752,9 +782,9 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                     </button>
                                 </div>
                                 <div className={`mist-lexicon-mode-row flex items-center p-1 gap-0.5 ${effectiveContentVersion !== 'ai' ? 'opacity-45' : ''}`}>
-                                <button
-                                    onClick={() => setDirectiveTemp('bright')}
-                                    disabled={effectiveContentVersion !== 'ai'}
+                                    <button
+                                        onClick={() => setDirectiveTemp('bright')}
+                                        disabled={effectiveContentVersion !== 'ai'}
                                     className={`mist-lexicon-face-button ${effectiveContentVersion === 'ai' && directiveTemp === 'bright' ? 'is-active' : 'is-inactive'} flex items-center justify-center gap-1.5 px-3 h-7 rounded-lg text-[10px] font-black uppercase tracking-[0.15em] transition-all ${
                                         effectiveContentVersion === 'ai' && directiveTemp === 'bright'
                                             ? (globalTheme === 'retro' ? 'bg-[#8B261D] text-white' : 'bg-amber-500/20 text-amber-400')
@@ -791,6 +821,21 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                     <span className="hidden xl:inline">{currentLang === 'EN' ? 'Tension' : '张力'}</span>
                                     <span className="xl:hidden">{currentLang === 'EN' ? 'T' : '张'}</span>
                                 </button>
+                                {isEngineLexicon && (
+                                    <button
+                                        onClick={() => setFocus(blockId, !focusState[blockId])}
+                                        className={`mist-lexicon-face-button flex items-center justify-center gap-1.5 px-3 h-7 rounded-lg text-[10px] font-black uppercase tracking-[0.15em] transition-all ${
+                                            focusState[blockId]
+                                                ? (globalTheme === 'retro' ? 'bg-[#8B261D] text-white' : 'bg-amber-400/20 text-amber-300')
+                                                : (globalTheme === 'retro' ? 'text-[#8B261D]/60 hover:bg-[#8B261D]/5' : 'text-zinc-400 hover:bg-white/10 hover:text-amber-300/60')
+                                        }`}
+                                        title={currentLang === 'EN' ? 'Focus: send core tension' : '重点：发送核心张力'}
+                                    >
+                                        <Star size={12} />
+                                        <span className="hidden xl:inline">{currentLang === 'EN' ? 'Focus' : '重点'}</span>
+                                        <span className="xl:hidden">★</span>
+                                    </button>
+                                )}
                                 </div>
                             </div>
                         )}
@@ -886,17 +931,29 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                         )}
                         <div className={blockId === 'aes_palette_preset' ? "flex flex-col gap-2 pb-20" : "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 md:gap-5 pb-20"}>
                             {filteredItems.map(item => {
-                                const isSelected = selectedTags.includes(item.name);
+                                const isSelected = itemMatchesAnyTag(item, selectedTags);
                                 const isCopied = copiedItemId === (item.id || item.name);
                                 const isPreset = blockId === 'aes_palette_preset';
                                 const itemMechanics = getItemMechanics(item);
                                 const effectiveItemTemp = isSelected ? (faceState[item.name] || directiveTemp) : directiveTemp;
+                                const isFocused = Boolean(focusState[item.name]);
+                                const itemName = getLocalizedItemName(item);
+                                const essenceText = getLocalizedText(item, 'essence', 'essenceEn', currentLang);
+                                const defText = getLocalizedText(item, 'def', 'defEn', currentLang);
+                                const coreText = getLocalizedText(item, 'core', 'coreEn', currentLang);
+                                const topologyText = getLocalizedText(item, 'topology', 'topologyEn', currentLang);
+                                const directiveValue = currentLang === 'EN' ? item.directiveEn : item.directive;
+                                const directiveText = typeof directiveValue === 'string'
+                                    ? directiveValue
+                                    : directiveValue?.[effectiveItemTemp];
+                                const realityText = getLocalizedText(item, 'reality', 'realityEn', currentLang);
+                                const referenceText = getLocalizedText(item, 'reference', 'referenceEn', currentLang);
 
                                 return (
                                     <div key={item.id || item.name}
                                         id={`card-${(item.id || item.name).replace(/\s+/g, '_')}`}
                                         onClick={() => {
-                                            const isCurrentlySelected = selectedTags.includes(item.name);
+                                            const isCurrentlySelected = itemMatchesAnyTag(item, selectedTags);
                                             applySlotSelection(item.name);
                                             if (isEngineLexicon && !isCurrentlySelected && item.directive && typeof item.directive === 'object') {
                                                 const temps: ('bright' | 'dark' | 'tension')[] = ['bright', 'dark', 'tension'];
@@ -920,9 +977,30 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                         )}
 
                                         <div className={`flex justify-between ${isPreset ? 'flex-1 items-center' : 'w-full items-center mb-3'}`}>
-                                            <h4 className={`font-serif font-bold ${isPreset ? 'text-base' : 'text-lg md:text-xl'} leading-tight ${isSelected ? (globalTheme === 'retro' ? 'text-[#8B261D]' : themeText) : (globalTheme === 'retro' ? 'text-black/80' : 'text-zinc-100 group-hover:text-white')}`}>{getLocalizedItemName(item)}</h4>
+                                            <h4 className={`font-serif font-bold ${isPreset ? 'text-base' : 'text-lg md:text-xl'} leading-tight ${isSelected ? (globalTheme === 'retro' ? 'text-[#8B261D]' : themeText) : (globalTheme === 'retro' ? 'text-black/80' : 'text-zinc-100 group-hover:text-white')}`}>{itemName}</h4>
                                             {!isPreset && (
                                                 <div className="flex items-center gap-2 shrink-0 ml-3">
+                                                    {isEngineLexicon && (
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                if (!isSelected && !isFocused) {
+                                                                    applySlotSelection(item.name);
+                                                                }
+                                                                setFocus(item.name, !isFocused);
+                                                            }}
+                                                            className={`mist-lexicon-card-focus-button flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-wider transition-all border ${
+                                                                isFocused
+                                                                    ? (globalTheme === 'retro' ? 'bg-[#8B261D] text-white border-[#8B261D]' : 'bg-amber-400/20 text-amber-300 border-amber-400/40')
+                                                                    : (globalTheme === 'retro' ? 'bg-transparent text-[#8B261D]/50 border-[#8B261D]/20 hover:border-[#8B261D]/50 hover:text-[#8B261D]' : 'bg-transparent text-zinc-500 border-zinc-700 hover:border-amber-400/40 hover:text-amber-300')
+                                                            }`}
+                                                            title={currentLang === 'EN' ? 'Focus this term: send core tension' : '重点此词条：发送核心张力'}
+                                                            aria-label={currentLang === 'EN' ? `Focus ${itemName}` : `重点 ${itemName}`}
+                                                        >
+                                                            <Star size={12} fill={isFocused ? 'currentColor' : 'none'} />
+                                                            <span>{currentLang === 'EN' ? 'Focus' : '重点'}</span>
+                                                        </button>
+                                                    )}
                                                     {isSkinSV && item.core && (
                                                         <button
                                                             onClick={(e) => { e.stopPropagation(); setProtocolOpenId(item.id || item.name); }}
@@ -953,7 +1031,7 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                                             <button
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
-                                                                    const isCurrentlySelected = selectedTags.includes(item.name);
+                                                                    const isCurrentlySelected = itemMatchesAnyTag(item, selectedTags);
                                                                     const currentTemp = faceState[item.name];
 
                                                                     if (isCurrentlySelected && currentTemp === 'bright') {
@@ -965,9 +1043,9 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                                                         setFace(item.name, 'bright');
                                                                     }
                                                                 }}
-                                                                className={`mist-lexicon-card-face-button is-bright ${selectedTags.includes(item.name) && faceState[item.name] === 'bright' ? 'is-locked' : ''} ${effectiveItemTemp === 'bright' ? 'is-effective' : ''} flex-1 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all relative ${
+                                                                className={`mist-lexicon-card-face-button is-bright ${isSelected && faceState[item.name] === 'bright' ? 'is-locked' : ''} ${effectiveItemTemp === 'bright' ? 'is-effective' : ''} flex-1 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all relative ${
                                                                     // Only highlight if selected AND this is the locked temperature
-                                                                    selectedTags.includes(item.name) && faceState[item.name] === 'bright'
+                                                                    isSelected && faceState[item.name] === 'bright'
                                                                         ? (globalTheme === 'retro' ? 'bg-[#8B261D] text-white shadow-md' : 'bg-amber-500/30 text-amber-300 border-2 border-amber-500')
                                                                         : effectiveItemTemp === 'bright'
                                                                         ? (globalTheme === 'retro' ? 'bg-white/60 text-[#8B261D]/40 border border-[#8B261D]/10' : 'bg-black/10 text-amber-400/40 border border-amber-500/20')
@@ -976,14 +1054,14 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                                             >
                                                                 {currentLang === 'EN' ? 'Bright' : '亮面'}
                                                                 {/* Checkmark for locked selection */}
-                                                                {selectedTags.includes(item.name) && faceState[item.name] === 'bright' && (
+                                                                {isSelected && faceState[item.name] === 'bright' && (
                                                                     <span className="ml-1 text-xs">✓</span>
                                                                 )}
                                                             </button>
                                                             <button
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
-                                                                    const isCurrentlySelected = selectedTags.includes(item.name);
+                                                                    const isCurrentlySelected = itemMatchesAnyTag(item, selectedTags);
                                                                     const currentTemp = faceState[item.name];
 
                                                                     if (isCurrentlySelected && currentTemp === 'dark') {
@@ -995,8 +1073,8 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                                                         setFace(item.name, 'dark');
                                                                     }
                                                                 }}
-                                                                className={`mist-lexicon-card-face-button is-dark ${selectedTags.includes(item.name) && faceState[item.name] === 'dark' ? 'is-locked' : ''} ${effectiveItemTemp === 'dark' ? 'is-effective' : ''} flex-1 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all relative ${
-                                                                    selectedTags.includes(item.name) && faceState[item.name] === 'dark'
+                                                                className={`mist-lexicon-card-face-button is-dark ${isSelected && faceState[item.name] === 'dark' ? 'is-locked' : ''} ${effectiveItemTemp === 'dark' ? 'is-effective' : ''} flex-1 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all relative ${
+                                                                    isSelected && faceState[item.name] === 'dark'
                                                                         ? (globalTheme === 'retro' ? 'bg-[#8B261D] text-white shadow-md' : 'bg-indigo-500/30 text-indigo-300 border-2 border-indigo-500')
                                                                         : effectiveItemTemp === 'dark'
                                                                         ? (globalTheme === 'retro' ? 'bg-white/60 text-[#8B261D]/40 border border-[#8B261D]/10' : 'bg-black/10 text-indigo-400/40 border border-indigo-500/20')
@@ -1004,14 +1082,14 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                                                 }`}
                                                             >
                                                                 {currentLang === 'EN' ? 'Dark' : '暗面'}
-                                                                {selectedTags.includes(item.name) && faceState[item.name] === 'dark' && (
+                                                                {isSelected && faceState[item.name] === 'dark' && (
                                                                     <span className="ml-1 text-xs">✓</span>
                                                                 )}
                                                             </button>
                                                             <button
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
-                                                                    const isCurrentlySelected = selectedTags.includes(item.name);
+                                                                    const isCurrentlySelected = itemMatchesAnyTag(item, selectedTags);
                                                                     const currentTemp = faceState[item.name];
 
                                                                     if (isCurrentlySelected && currentTemp === 'tension') {
@@ -1023,8 +1101,8 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                                                         setFace(item.name, 'tension');
                                                                     }
                                                                 }}
-                                                                className={`mist-lexicon-card-face-button is-tension ${selectedTags.includes(item.name) && faceState[item.name] === 'tension' ? 'is-locked' : ''} ${effectiveItemTemp === 'tension' ? 'is-effective' : ''} flex-1 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all relative ${
-                                                                    selectedTags.includes(item.name) && faceState[item.name] === 'tension'
+                                                                className={`mist-lexicon-card-face-button is-tension ${isSelected && faceState[item.name] === 'tension' ? 'is-locked' : ''} ${effectiveItemTemp === 'tension' ? 'is-effective' : ''} flex-1 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all relative ${
+                                                                    isSelected && faceState[item.name] === 'tension'
                                                                         ? (globalTheme === 'retro' ? 'bg-[#8B261D] text-white shadow-md' : 'bg-violet-500/30 text-violet-300 border-2 border-violet-500')
                                                                         : effectiveItemTemp === 'tension'
                                                                         ? (globalTheme === 'retro' ? 'bg-white/60 text-[#8B261D]/40 border border-[#8B261D]/10' : 'bg-black/10 text-violet-400/40 border border-violet-500/20')
@@ -1032,7 +1110,7 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                                                 }`}
                                                             >
                                                                 {currentLang === 'EN' ? 'Tension' : '张力'}
-                                                                {selectedTags.includes(item.name) && faceState[item.name] === 'tension' && (
+                                                                {isSelected && faceState[item.name] === 'tension' && (
                                                                     <span className="ml-1 text-xs">✓</span>
                                                                 )}
                                                             </button>
@@ -1040,27 +1118,27 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                                     </div>
                                                 )}
                                                 {/* Content Display Logic */}
-                                                {effectiveContentVersion === 'academic' ? (
-                                                    // Academic Version: Show def + core (or essence)
-                                                    <>
-                                                        {item.essence ? (
-                                                            <div className={`mb-4 w-full`}><p className={`text-sm md:text-base leading-relaxed opacity-90 font-light ${isSelected ? (globalTheme === 'retro' ? 'text-[#8B261D]' : themeText) : (globalTheme === 'retro' ? 'text-[#3D1A16]' : 'text-white transition-colors')}`}>{currentLang === 'EN' && item.essenceEn ? item.essenceEn : item.essence}</p></div>
+                                {effectiveContentVersion === 'academic' ? (
+                                    // Academic Version: Show def + core (or essence)
+                                    <>
+                                        {essenceText ? (
+                                                            <div className={`mb-4 w-full`}><p className={`text-sm md:text-base leading-relaxed opacity-90 font-light ${isSelected ? (globalTheme === 'retro' ? 'text-[#8B261D]' : themeText) : (globalTheme === 'retro' ? 'text-[#3D1A16]' : 'text-white transition-colors')}`}>{essenceText}</p></div>
                                                         ) : (
                                                             <>
-                                                                {item.def && (
+                                                                {defText && (
                                                                     <div className={`text-sm md:text-base leading-relaxed mb-3 font-light ${isSelected ? (globalTheme === 'retro' ? 'text-[#8B261D]' : 'text-white') : (globalTheme === 'retro' ? 'text-[#3D1A16]' : 'text-zinc-200 group-hover:text-white transition-colors')}`}>
                                                                         <span className="mr-1">
                                                                             {blockId === 'skin_era' ? (currentLang === 'EN' ? "Background:" : "时空背景:") : blockId === 'skin_society' ? (currentLang === 'EN' ? "Social:" : "社会描写:") : (currentLang === 'EN' ? "Def:" : "定义:")}
                                                                         </span>
-                                                                        <span>{currentLang === 'EN' && item.defEn ? item.defEn : item.def}</span>
+                                                                        <span>{defText}</span>
                                                                     </div>
                                                                 )}
-                                                                {item.core && !isSkinSV && (
+                                                                {coreText && !isSkinSV && (
                                                                     <div className={`text-sm md:text-base font-mono tracking-tight mb-4 ${isSelected ? (globalTheme === 'retro' ? 'text-[#8B261D]' : themeText) : (globalTheme === 'retro' ? 'text-[#8B261D]/80 group-hover:text-[#8B261D]' : 'text-zinc-300 group-hover:text-zinc-100 transition-colors')}`}>
                                                                         <span className="mr-1">
                                                                             {blockId === 'skin_era' ? (currentLang === 'EN' ? "Core Tension:" : "核心张力:") : (currentLang === 'EN' ? "Core:" : "核心逻辑:")}
                                                                         </span>
-                                                                        <span>{currentLang === 'EN' && item.coreEn ? item.coreEn : item.core}</span>
+                                                                        <span>{coreText}</span>
                                                                     </div>
                                                                 )}
                                                             </>
@@ -1070,33 +1148,26 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                                     // AI Directive Version: Show topology first, then directive based on temperature
                                                     <>
                                                         {/* Topology Field */}
-                                                        {(item as any).topology && (
+                                                        {topologyText && (
                                                             <div className={`mb-4 pb-3 border-b border-dashed ${globalTheme === 'retro' ? 'border-[#8B261D]/20' : 'border-white/10'}`}>
                                                                 <div className={`text-xs md:text-sm leading-relaxed font-light ${isSelected ? (globalTheme === 'retro' ? 'text-[#8B261D]' : themeText) : (globalTheme === 'retro' ? 'text-[#3D1A16]/80' : 'text-zinc-400 group-hover:text-zinc-300 transition-colors')}`}>
                                                                     <span className="mr-1 opacity-60 font-bold uppercase tracking-wider">
                                                                         {currentLang === 'EN' ? 'Topology:' : '拓扑结构:'}
                                                                     </span>
-                                                                    <span>{currentLang === 'EN' && (item as any).topologyEn ? (item as any).topologyEn : (item as any).topology}</span>
+                                                                    <span>{topologyText}</span>
                                                                 </div>
                                                             </div>
                                                         )}
 
                                                         {/* Directive Field */}
-                                                        {item.directive ? (
+                                                        {directiveText ? (
                                                             <div className={`text-sm md:text-base leading-relaxed mb-4 font-light ${isSelected ? (globalTheme === 'retro' ? 'text-[#8B261D]' : 'text-white') : (globalTheme === 'retro' ? 'text-[#3D1A16]' : 'text-zinc-200 group-hover:text-white transition-colors')}`}>
-                                                                {typeof item.directive === 'string' ? (
-                                                                    // M1: Single directive string
-                                                                    <span>{item.directive}</span>
-                                                                ) : (
-                                                                    // M7A/M7B: Object with bright/dark/tension
-                                                                    // Use locked temperature if available, otherwise use global temperature
-                                                                    <span>{(item.directive as any)[effectiveItemTemp]}</span>
-                                                                )}
+                                                                <span>{directiveText}</span>
                                                             </div>
                                                         ) : (
                                                             // Fallback: If no directive, show def+core
                                                             <>
-                                                                {item.def && (
+                                                                {defText && (
                                                                     <div className={`text-sm md:text-base leading-relaxed mb-3 font-light ${isSelected ? (globalTheme === 'retro' ? 'text-[#8B261D]' : 'text-white') : (globalTheme === 'retro' ? 'text-[#3D1A16]' : 'text-zinc-200 group-hover:text-white transition-colors')}`}>
                                                                         <span className="mr-1 opacity-60">{currentLang === 'EN' ? "No directive available" : "无AI指令"}</span>
                                                                     </div>
@@ -1105,7 +1176,7 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                                         )}
                                                     </>
                                                 )}
-                                                {item.reality && <div className={`mt-3 pt-3 border-t border-dashed ${globalTheme === 'retro' ? 'border-[#8B261D]/20' : 'border-white/10'} w-full`}><p className={`text-xs md:text-sm leading-relaxed ${globalTheme === 'retro' ? 'text-[#8B261D]/80' : 'text-zinc-400'}`}><span className="opacity-60 mr-1">{currentLang === 'EN' ? 'REALITY:' : '现实隐喻:'}</span>{currentLang === 'EN' && item.realityEn ? item.realityEn : item.reality}</p></div>}
+                                                {realityText && <div className={`mt-3 pt-3 border-t border-dashed ${globalTheme === 'retro' ? 'border-[#8B261D]/20' : 'border-white/10'} w-full`}><p className={`text-xs md:text-sm leading-relaxed ${globalTheme === 'retro' ? 'text-[#8B261D]/80' : 'text-zinc-400'}`}><span className="opacity-60 mr-1">{currentLang === 'EN' ? 'REALITY:' : '现实隐喻:'}</span>{realityText}</p></div>}
                                                 {blockId === 'skin_volume' && itemMechanics && (
                                                     <div className={`mt-3 pt-3 border-t border-dashed ${globalTheme === 'retro' ? 'border-[#8B261D]/20' : 'border-white/10'} w-full`}>
                                                         <p className={`whitespace-pre-line text-[10px] md:text-xs font-mono leading-relaxed ${globalTheme === 'retro' ? 'text-[#8B261D]/75' : 'text-zinc-400 group-hover:text-zinc-300'} transition-colors`}>
@@ -1114,7 +1185,7 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                                         </p>
                                                     </div>
                                                 )}
-                                                {item.reference && <div className={`mt-2 pt-2 border-t border-dashed ${globalTheme === 'retro' ? 'border-[#8B261D]/20' : 'border-white/10'} w-full`}><p className={`text-[10px] md:text-xs font-mono leading-relaxed ${globalTheme === 'retro' ? 'text-[#8B261D]/70' : 'text-zinc-400 group-hover:text-zinc-300'} transition-colors`}><span className="mr-1">{currentLang === 'EN' ? 'REF:' : '参考:'}</span>{currentLang === 'EN' && item.referenceEn ? item.referenceEn : item.reference}</p></div>}
+                                                {referenceText && <div className={`mt-2 pt-2 border-t border-dashed ${globalTheme === 'retro' ? 'border-[#8B261D]/20' : 'border-white/10'} w-full`}><p className={`text-[10px] md:text-xs font-mono leading-relaxed ${globalTheme === 'retro' ? 'text-[#8B261D]/70' : 'text-zinc-400 group-hover:text-zinc-300'} transition-colors`}><span className="mr-1">{currentLang === 'EN' ? 'REF:' : '参考:'}</span>{referenceText}</p></div>}
                                                 {/* DISPLAY PRESET COLORS */}
                                                 {(item as any).colors && (
                                                     <div className="mt-4 flex gap-1.5 overflow-hidden">
@@ -1158,44 +1229,45 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
             </div>
         </div>
         {protocolOpenId && (() => {
-            const protocolItem = filteredItems.find(i => (i.id || i.name) === protocolOpenId);
-            if (!protocolItem?.core) return null;
+            const protocolItem = allCurrentLibraryItems.find(i => (i.id || i.name) === protocolOpenId);
+            const protocolCore = getLocalizedText(protocolItem, 'core', 'coreEn', currentLang);
+            if (!protocolCore) return null;
             return (
                 <div
-                    className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+                    className="fixed inset-0 z-[100001] flex items-center justify-center p-4"
                     onClick={() => setProtocolOpenId(null)}
                 >
-                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+                    <div className={`absolute inset-0 ${globalTheme === 'retro' ? 'bg-[#3D1A16]/20 backdrop-blur-md' : 'bg-black/72 backdrop-blur-[10px]'}`} />
                     <div
                         onClick={(e) => e.stopPropagation()}
-                        className={`relative max-w-lg w-full max-h-[70vh] overflow-y-auto custom-scrollbar rounded-2xl border p-6 md:p-8 shadow-2xl ${
+                        className={`relative max-w-2xl w-full max-h-[76vh] overflow-y-auto custom-scrollbar rounded-2xl border-2 p-6 md:p-8 shadow-2xl ${
                             globalTheme === 'retro'
-                                ? 'bg-[#F5F2EA] border-[#8B261D]/20'
-                                : 'bg-[#111] border-white/10'
+                                ? 'bg-[#F5F2EA] border-[#8B261D] text-[#2A1714] shadow-[16px_16px_0_rgba(139,38,29,0.10)]'
+                                : 'bg-[#070707] border-[var(--mist-active-accent)] text-zinc-100 shadow-[0_0_0_1px_rgba(var(--mist-active-accent-rgb),0.18),0_30px_90px_rgba(0,0,0,0.78)]'
                         }`}
                     >
                         <button
                             onClick={() => setProtocolOpenId(null)}
                             className={`absolute top-4 right-4 p-1.5 rounded-md transition-colors ${
-                                globalTheme === 'retro' ? 'text-[#8B261D]/40 hover:text-[#8B261D]' : 'text-zinc-500 hover:text-white'
+                                globalTheme === 'retro' ? 'text-[#8B261D]/60 hover:text-[#8B261D] hover:bg-[#8B261D]/10' : 'text-zinc-500 hover:text-[var(--mist-active-accent)] hover:bg-white/10'
                             }`}
                         >
                             <X size={16} />
                         </button>
-                        <h3 className={`font-serif font-bold text-lg md:text-xl mb-1 ${
+                        <h3 className={`font-serif font-bold text-lg md:text-2xl mb-1 pr-8 ${
                             globalTheme === 'retro' ? 'text-[#8B261D]' : 'text-white'
                         }`}>
-                            {currentLang === 'EN' ? (protocolItem.nameEn || protocolItem.name.match(/\((.*?)\)/)?.[1] || protocolItem.name) : protocolItem.name.split('(')[0]}
+                            {getLocalizedLabel(protocolItem.name, protocolItem.nameEn, currentLang) || protocolItem.id}
                         </h3>
                         <div className={`mb-4 text-[9px] font-bold uppercase tracking-widest ${
-                            globalTheme === 'retro' ? 'text-[#8B261D]/40' : 'text-zinc-500'
+                            globalTheme === 'retro' ? 'text-[#8B261D]/70' : 'text-[var(--mist-active-accent)]/85'
                         }`}>
                             {currentLang === 'EN' ? 'Protocol — Core Logic' : '协议 — 核心逻辑'}
                         </div>
-                        <div className={`text-sm md:text-base font-mono tracking-tight leading-relaxed whitespace-pre-wrap ${
-                            globalTheme === 'retro' ? 'text-[#3D1A16]' : 'text-zinc-300'
+                        <div className={`text-sm md:text-base font-mono tracking-tight leading-8 whitespace-pre-wrap ${
+                            globalTheme === 'retro' ? 'text-[#2A1714]' : 'text-zinc-100'
                         }`}>
-                            {currentLang === 'EN' && protocolItem.coreEn ? protocolItem.coreEn : protocolItem.core}
+                            {protocolCore}
                         </div>
                     </div>
                 </div>

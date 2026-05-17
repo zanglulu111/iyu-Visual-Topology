@@ -212,7 +212,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                   className={`mist-app-top-nav-button flex items-center gap-2 transition-all duration-300 hover:scale-105 active:scale-95 ${viewMode === 'BIBLE' ? getHeaderTitleColor() : `${mutedControlClass} font-sans`}`}
                 >
                   <BookOpen size={14} />
-                  {lang === 'CN' ? "故事工程" : "STORY PROJECT"}
+                  {lang === 'CN' ? "叙事创作" : "NARRATIVE WRITING"}
                 </button>
                 {renderHeaderSeparator()}
                 <button

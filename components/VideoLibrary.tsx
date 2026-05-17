@@ -611,6 +611,7 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                      {/* Ring Toggle */}
                      <button
                         onClick={() => setShowRings(!showRings)}
+                        className="mist-ring-toggle-button"
                         style={{
                             background: 'none', border: 'none', cursor: 'pointer',
                             color: showRings ? (isRetro ? RED : 'rgba(255,215,0,0.8)') : CREAM_DIM,
@@ -623,7 +624,7 @@ export const VideoLibrary: React.FC<VideoLibraryProps> = ({ isOpen, onClose, lan
                     >
                         <Aperture
                             size={14}
-                            className={`shrink-0 transition-all duration-700 ${showRings ? 'rotate-[360deg] text-amber-400' : 'rotate-0'}`}
+                            className={`mist-ring-toggle-icon shrink-0 ${showRings ? 'text-amber-400' : ''}`}
                         />
                     </button>
                 </div>

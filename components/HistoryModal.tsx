@@ -45,7 +45,7 @@ interface HistoryModalProps {
 
 const stageMeta: Record<StageFilter, { cn: string; en: string; short: string; icon: React.ElementType }> = {
     DIVERGENCE_SET: { cn: '分歧点故事大纲', en: 'Divergence Outlines', short: 'DIV', icon: GitFork },
-    CREATIVE_BIBLE: { cn: '故事工程版本', en: 'Story Project Drafts', short: 'STO', icon: BookOpen },
+    CREATIVE_BIBLE: { cn: '叙事创作版本', en: 'Narrative Drafts', short: 'NAR', icon: BookOpen },
     METONYMY_SCRIPT: { cn: '换喻电影脚本', en: 'Metonymy Screenplays', short: 'SCR', icon: Wand2 },
 };
 
@@ -98,7 +98,8 @@ const applyBlueprintGenerationSnapshot = (item: HistoryItem, blueprint?: DesireA
         subjectType: blueprint.generationSubjectType || item.subjectType,
         aestheticMode: blueprint.generationAestheticMode || item.aestheticMode,
         colorPalette: blueprint.generationColorPalette || item.colorPalette,
-        faceState: blueprint.generationFaceState || item.faceState
+        faceState: blueprint.generationFaceState || item.faceState,
+        focusState: (blueprint as any).generationFocusState || (item as any).focusState
     };
 };
 
@@ -767,7 +768,7 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({ history, onRestore, 
                                                     <span className="text-[10px] font-bold uppercase tracking-[0.22em]">
                                                         {selectedArtifact.stage === 'METONYMY_SCRIPT'
                                                             ? (lang === 'CN' ? '换喻脚本' : 'Metonymy Script')
-                                                            : (lang === 'CN' ? '故事工程完整故事' : 'Full Story Project')}
+                                                            : (lang === 'CN' ? '叙事创作完整故事' : 'Full Narrative')}
                                                     </span>
                                                 </div>
                                                 <h1 className="font-serif text-4xl text-white font-bold mb-4">{selectedArtifact.title}</h1>

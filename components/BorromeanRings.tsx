@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { NarrativeFieldState, BlueprintLanguage, DriverType } from '../types';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -10,6 +10,7 @@ interface BorromeanRingsProps {
     centered?: boolean;
     isHomepage?: boolean;
     vivid?: boolean;
+    animated?: boolean;
 }
 
 export const BorromeanRings: React.FC<BorromeanRingsProps> = ({
@@ -19,10 +20,54 @@ export const BorromeanRings: React.FC<BorromeanRingsProps> = ({
     opacity = 1.0,
     centered = true,
     isHomepage = false,
-    vivid = false
+    vivid = false,
+    animated = true
 }) => {
     const { theme } = useTheme();
     const isRetro = theme === 'retro';
+    const [canAnimate, setCanAnimate] = useState(animated);
+    const [animationCycle, setAnimationCycle] = useState(0);
+
+    useEffect(() => {
+        const media = window.matchMedia?.('(prefers-reduced-motion: reduce)');
+        const update = () => {
+            const nextCanAnimate = animated && !document.hidden && !(media?.matches ?? false);
+            setCanAnimate(nextCanAnimate);
+
+            if (nextCanAnimate) {
+                window.requestAnimationFrame(() => setAnimationCycle(prev => prev + 1));
+            }
+        };
+
+        update();
+        document.addEventListener('visibilitychange', update);
+        window.addEventListener('pageshow', update);
+        media?.addEventListener?.('change', update);
+
+        return () => {
+            document.removeEventListener('visibilitychange', update);
+            window.removeEventListener('pageshow', update);
+            media?.removeEventListener?.('change', update);
+        };
+    }, [animated]);
+
+    const rotate = (
+        from: string,
+        to: string,
+        dur: string,
+        center = '100 100',
+        additive?: 'sum'
+    ) => canAnimate ? (
+        <animateTransform
+            attributeName="transform"
+            type="rotate"
+            from={`${from} ${center}`}
+            to={`${to} ${center}`}
+            dur={dur}
+            additive={additive}
+            repeatCount="indefinite"
+        />
+    ) : null;
     const strokeColor = isRetro ? (vivid ? 'rgba(139, 38, 29, 0.85)' : 'rgba(139, 38, 29, 0.75)') : (vivid ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.8)');
     const strokeColorHigh = isRetro ? (vivid ? 'rgba(139, 38, 29, 1.0)' : 'rgba(139, 38, 29, 0.9)') : (vivid ? 'rgba(255, 255, 255, 1.0)' : 'rgba(255, 255, 255, 0.95)');
     const textColor = isRetro ? '#5D2E2B' : '#FFFFFF';
@@ -80,16 +125,16 @@ export const BorromeanRings: React.FC<BorromeanRingsProps> = ({
         <div className={containerClass} style={{ opacity }}>
             <div className={innerContainerClass} style={centered ? { transform: 'scale(1.0)', transformOrigin: 'center' } : {}}>
                 <style>{`
-                    .borromean-svg-root * {
+                    .borromean-svg-root :where(circle, path, line, polygon, rect, text) {
                         transition: stroke 1.2s cubic-bezier(0.16, 1, 0.3, 1),
                                     fill 1.2s cubic-bezier(0.16, 1, 0.3, 1),
                                     stroke-opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1),
                                     stop-color 1.2s cubic-bezier(0.16, 1, 0.3, 1);
-                        will-change: stroke, fill, stroke-opacity;
                     }
                 `}</style>
 
                 <svg
+                    key={animationCycle}
                     viewBox="0 0 200 200"
                     xmlns="http://www.w3.org/2000/svg"
                     className="w-full h-full overflow-visible pointer-events-auto borromean-svg-root"
@@ -106,8 +151,7 @@ export const BorromeanRings: React.FC<BorromeanRingsProps> = ({
 
                     {/* ═══ OUTER OBSERVATORY RINGS — rotate around (100,100) ═══ */}
                     <g>
-                        <animateTransform attributeName="transform" type="rotate"
-                            from="0 100 100" to="360 100 100" dur="400s" repeatCount="indefinite" />
+                        {rotate('0', '360', '400s')}
 
                         <circle cx="100" cy="100" r="95" fill="none" stroke={strokeColorHigh} strokeWidth={isRetro ? "0.15" : "0.05"} strokeDasharray="0.5 2" />
                         <circle cx="100" cy="100" r="92" fill="none" stroke={strokeColor} strokeWidth={isRetro ? "0.2" : "0.1"} strokeDasharray="4 2" />
@@ -134,8 +178,7 @@ export const BorromeanRings: React.FC<BorromeanRingsProps> = ({
                     </g>
 
                     <g>
-                        <animateTransform attributeName="transform" type="rotate"
-                            from="0 100 100" to="-360 100 100" dur="200s" repeatCount="indefinite" />
+                        {rotate('0', '-360', '200s')}
                         <circle cx="100" cy="100" r="84" fill="none" stroke={strokeColor}
                             strokeWidth={isRetro ? "1.2" : "0.8"} strokeOpacity={isRetro ? "0.2" : "0.1"} strokeDasharray="2 12" />
                         <circle cx="100" cy="100" r="84" fill="none" stroke={strokeColorHigh}
@@ -143,8 +186,7 @@ export const BorromeanRings: React.FC<BorromeanRingsProps> = ({
                     </g>
 
                     <g>
-                        <animateTransform attributeName="transform" type="rotate"
-                            from="0 100 100" to="360 100 100" dur="200s" repeatCount="indefinite" />
+                        {rotate('0', '360', '200s')}
                         <text fill={strokeColorHigh} fontSize="1.8" fontFamily="monospace" letterSpacing="0.6" opacity={vivid ? "0.8" : (isRetro ? "0.6" : "0.2")}>
                             <textPath href="#formulaOuterPath" startOffset="0%">
                                 $ » a » S(A) // DRV:&gt; // OBJ:a // ALG: M0|M1|M2|M3
@@ -159,8 +201,7 @@ export const BorromeanRings: React.FC<BorromeanRingsProps> = ({
                     </g>
 
                     <g>
-                        <animateTransform attributeName="transform" type="rotate"
-                            from="0 100 100" to="-360 100 100" dur="260s" repeatCount="indefinite" />
+                        {rotate('0', '-360', '260s')}
                         <circle cx="100" cy="100" r="75" fill="none" stroke={strokeColorHigh} strokeWidth={isRetro ? "0.15" : "0.05"} strokeDasharray="1 3" />
                         <circle cx="100" cy="100" r="70" fill="none" stroke={strokeColor} strokeWidth={isRetro ? "0.2" : "0.1"} />
 
@@ -169,8 +210,7 @@ export const BorromeanRings: React.FC<BorromeanRingsProps> = ({
                     </g>
 
                     <g style={{ opacity: ringOpacity }}>
-                        <animateTransform attributeName="transform" type="rotate"
-                            from="0 100 100" to="360 100 100" dur="120s" repeatCount="indefinite" />
+                        {rotate('0', '360', '120s')}
                         <polygon points="100,75 80,110 120,110"
                             fill="none" stroke={strokeColor} strokeWidth="0.1" strokeDasharray="1 2" />
 
@@ -182,9 +222,7 @@ export const BorromeanRings: React.FC<BorromeanRingsProps> = ({
                             stroke={ringHex.real} strokeWidth={ringStrokeWidth} strokeDasharray={vivid ? "none" : (isRetro ? "6 1.5" : "4 1")} />
                         <rect x="99.2" y="44.2" width="1.6" height="1.6" fill={ringHex.real} transform="rotate(45 100 45)" />
                         <g>
-                            <animateTransform attributeName="transform" type="rotate"
-                                from="0 100 75" to="360 100 75" dur="40s"
-                                additive="sum" repeatCount="indefinite" />
+                            {rotate('0', '360', '40s', '100 75', 'sum')}
                             <text fill={ringHex.real} fontSize="3.0"
                                   fontFamily="'Inter', 'Noto Serif SC', sans-serif"
                                   fontWeight={isRetro ? "900" : "600"} letterSpacing="0.05">
@@ -200,9 +238,7 @@ export const BorromeanRings: React.FC<BorromeanRingsProps> = ({
                             stroke={ringHex.symbolic} strokeWidth={ringStrokeWidth} />
                         <rect x="49.2" y="109.2" width="1.6" height="1.6" fill={ringHex.symbolic} transform="rotate(45 50 110)" />
                         <g>
-                            <animateTransform attributeName="transform" type="rotate"
-                                from="0 80 110" to="-360 80 110" dur="50s"
-                                additive="sum" repeatCount="indefinite" />
+                            {rotate('0', '-360', '50s', '80 110', 'sum')}
                             <text fill={ringHex.symbolic} fontSize="3.0"
                                   fontFamily="'Inter', 'Noto Serif SC', sans-serif"
                                   fontWeight={isRetro ? "900" : "600"} letterSpacing="0.05">
@@ -218,9 +254,7 @@ export const BorromeanRings: React.FC<BorromeanRingsProps> = ({
                             stroke={ringHex.imaginary} strokeWidth={ringStrokeWidth} />
                         <rect x="149.2" y="109.2" width="1.6" height="1.6" fill={ringHex.imaginary} transform="rotate(45 150 110)" />
                         <g>
-                            <animateTransform attributeName="transform" type="rotate"
-                                from="0 120 110" to="360 120 110" dur="35s"
-                                additive="sum" repeatCount="indefinite" />
+                            {rotate('0', '360', '35s', '120 110', 'sum')}
                             <text fill={ringHex.imaginary} fontSize="3.0"
                                   fontFamily="'Inter', 'Noto Serif SC', sans-serif"
                                   fontWeight={isRetro ? "900" : "600"} letterSpacing="0.05">
@@ -238,9 +272,7 @@ export const BorromeanRings: React.FC<BorromeanRingsProps> = ({
                             strokeDasharray={vivid ? "none" : "2 4 8 4"} />
                         <rect x="98.5" y="60.5" width="3" height="3" fill="none" stroke={ringHex.sinthome} strokeWidth="0.2" transform="rotate(45 100 62)" />
                         <g>
-                            <animateTransform attributeName="transform" type="rotate"
-                                from="0 100 100" to="-360 100 100" dur="80s"
-                                additive="sum" repeatCount="indefinite" />
+                            {rotate('0', '-360', '80s', '100 100', 'sum')}
                             <text fill={ringHex.sinthome}
                                   fontSize="3.0"
                                   fontFamily="'Noto Serif SC', 'Playfair Display', serif" fontWeight="black"
@@ -255,9 +287,7 @@ export const BorromeanRings: React.FC<BorromeanRingsProps> = ({
                         <circle cx="100" cy="100" r="1.2" fill={strokeColorHigh} opacity="0.3" />
                         <circle cx="100" cy="100" r="4" fill="none" stroke={strokeColorHigh} strokeWidth={isRetro ? "0.2" : "0.1"} strokeDasharray="1 1" opacity="0.3" />
                         <g opacity="0.3">
-                            <animateTransform attributeName="transform" type="rotate"
-                                from="0 100 100" to="360 100 100" dur="15s"
-                                additive="sum" repeatCount="indefinite" />
+                            {rotate('0', '360', '15s', '100 100', 'sum')}
                             <rect x="99.5" y="93" width="1" height="2" fill={strokeColorHigh} />
                             <rect x="99.5" y="105" width="1" height="2" fill={strokeColorHigh} />
                         </g>

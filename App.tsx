@@ -41,6 +41,9 @@ import {
     AestheticMode,
     AestheticPreset,
     FaceState,
+    PromptFocusState,
+    M7BResidueIntensity,
+    NarrativePromptVersion,
     MistProject,
     ProjectWorkspaceSnapshot,
     ArchiveSource,
@@ -60,6 +63,9 @@ import {
 import { MASTER_PRESETS } from './data/aesthetic/master_presets';
 import * as geminiService from './services/geminiService';
 import * as randomizerService from './services/randomizer';
+import { normalizeWorldLawConfig } from './services/worldLaw';
+
+const DEFAULT_WORLD_LAW_CONFIG: WorldLawConfig = normalizeWorldLawConfig({ gravity: 2 });
 
 // 创建 React Query 客户端
 const queryClient = new QueryClient({
@@ -71,6 +77,9 @@ const queryClient = new QueryClient({
         },
     },
 });
+
+const isNoShiftEntryDriver = (driver: DriverType | null) =>
+    driver === DriverType.COMMERCIAL || driver === DriverType.SUTURE || driver === DriverType.AESTHETIC || driver === DriverType.NARRATIVE || driver === DriverType.TRAILER || driver === DriverType.EXPERIMENTAL;
 import { supabase } from './services/supabaseAuth';
 import { generateGlobalDump } from './utils/exportUtils';
 import { generateAestheticPrompt } from './utils/promptUtils';
@@ -189,13 +198,24 @@ const App: React.FC = () => {
     const narrativeFieldState = undoRedoState.present;
     const [savedFieldStates, setSavedFieldStates] = useState<Record<string, NarrativeFieldState>>({});
     const [faceState, setFaceState] = useState<FaceState>({});
-    const [worldLawConfig, setWorldLawConfig] = useState<WorldLawConfig>({ gravity: 1 });
+    const [focusState, setFocusState] = useState<PromptFocusState>({});
+    const [m7bIntensity, setM7bIntensity] = useState<M7BResidueIntensity>('light');
+    const [worldLawConfig, setWorldLawConfig] = useState<WorldLawConfig>(DEFAULT_WORLD_LAW_CONFIG);
     const [showRings, setShowRings] = useState(true);
     const [ringAnimClass, setRingAnimClass] = useState(showRings ? 'animate-ring-entrance' : 'opacity-0');
     const [ringAnimKey, setRingAnimKey] = useState(0);
     const lastShowRingsRef = useRef(showRings);
 
     useEffect(() => {
+        // Handle page transition exit animation
+        if (portalTransition === 'to-portal') {
+            if (ringAnimClass !== 'animate-ring-exit') {
+                setRingAnimClass('animate-ring-exit');
+                setRingAnimKey(prev => prev + 1);
+            }
+            return;
+        }
+
         if (showRings === lastShowRingsRef.current) return;
 
         if (showRings) {
@@ -205,7 +225,7 @@ const App: React.FC = () => {
         }
         setRingAnimKey(prev => prev + 1);
         lastShowRingsRef.current = showRings;
-    }, [showRings]);
+    }, [showRings, portalTransition]);
 
     // FIXED: Always maintain 7 slots
     const [colorPalette, setColorPalette] = useState<string[]>(Array(7).fill(""));
@@ -222,6 +242,7 @@ const App: React.FC = () => {
     const [libraryModalOpen, setLibraryModalOpen] = useState(false);
     const [topSidebar, setTopSidebar] = useState<'skin' | 'vision' | null>(null);
     const [isPromptInspectorOpen, setIsPromptInspectorOpen] = useState(false);
+    const [narrativePromptVersion, setNarrativePromptVersion] = useState<NarrativePromptVersion>('v4');
     const portalTransitionTimersRef = useRef<(number | null)[]>([null, null]);
 
     const [isAutoFilling, setIsAutoFilling] = useState(false);
@@ -518,7 +539,7 @@ const App: React.FC = () => {
         selectedDriver,
         viewMode: modeOverride || viewMode,
         fieldState: { ...narrativeFieldState },
-        worldLaw: { ...worldLawConfig },
+        worldLaw: normalizeWorldLawConfig(worldLawConfig),
         visionInput,
         visionAnalysis,
         visionImage,
@@ -527,6 +548,8 @@ const App: React.FC = () => {
         aestheticMode,
         colorPalette: [...colorPalette],
         faceState: { ...faceState },
+        focusState: { ...focusState },
+        m7bIntensity,
         treatments: generatedTreatments,
         activeBlueprint,
         metonymyBlueprint,
@@ -562,9 +585,11 @@ const App: React.FC = () => {
         setVisionAnalysis('');
         setVisionImage(null);
         setVisionImageNote('');
-        setWorldLawConfig({ gravity: 1 });
+        setWorldLawConfig(DEFAULT_WORLD_LAW_CONFIG);
         setColorPalette(Array(7).fill(""));
         setFaceState({});
+        setFocusState({});
+        setM7bIntensity('light');
         setViewMode('ENGINE');
         setPage(1);
     };
@@ -597,7 +622,7 @@ const App: React.FC = () => {
 
         setSelectedDriver(snapshot.selectedDriver || null);
         undoRedoDispatch({ type: 'SET', state: snapshot.fieldState || {} });
-        setWorldLawConfig(snapshot.worldLaw || { gravity: 1 });
+        setWorldLawConfig(normalizeWorldLawConfig(snapshot.worldLaw || DEFAULT_WORLD_LAW_CONFIG));
         setVisionInput(snapshot.visionInput || '');
         setVisionAnalysis(snapshot.visionAnalysis || '');
         setVisionImage(snapshot.visionImage ?? null);
@@ -606,6 +631,8 @@ const App: React.FC = () => {
         setAestheticMode(snapshot.aestheticMode || 'REALISM');
         setColorPalette(snapshot.colorPalette?.length ? snapshot.colorPalette : Array(7).fill(""));
         setFaceState(snapshot.faceState || {});
+        setFocusState((snapshot as any).focusState || {});
+        setM7bIntensity(snapshot.m7bIntensity || 'light');
         setGeneratedTreatments(snapshot.treatments || []);
         setActiveBlueprint(snapshot.activeBlueprint || null);
         setMetonymyBlueprint(snapshot.metonymyBlueprint || null);
@@ -716,6 +743,8 @@ const App: React.FC = () => {
         const snapshotAestheticMode = primaryBlueprint?.generationAestheticMode ?? activeHistoryItem?.aestheticMode ?? aestheticMode;
         const snapshotColorPalette = primaryBlueprint?.generationColorPalette ?? activeHistoryItem?.colorPalette ?? [...colorPalette];
         const snapshotFaceState = primaryBlueprint?.generationFaceState ?? activeHistoryItem?.faceState ?? { ...faceState };
+        const snapshotFocusState = primaryBlueprint?.generationFocusState ?? activeHistoryItem?.focusState ?? { ...focusState };
+        const snapshotM7BIntensity = primaryBlueprint?.generationM7BIntensity ?? activeHistoryItem?.m7bIntensity ?? m7bIntensity;
         const snapshotTreatments = activeHistoryItem?.treatments?.length ? activeHistoryItem.treatments : generatedTreatments;
         const savedBlueprints = bibleBlueprint
             ? { ...(activeHistoryItem?.savedBlueprints || {}), [bibleBlueprint.treatmentId]: bibleBlueprint }
@@ -740,6 +769,8 @@ const App: React.FC = () => {
             aestheticMode: snapshotAestheticMode,
             colorPalette: [...snapshotColorPalette],
             faceState: { ...snapshotFaceState },
+            focusState: { ...snapshotFocusState },
+            m7bIntensity: snapshotM7BIntensity,
             blueprint: primaryBlueprint,
             metonymyBlueprint: scriptBlueprint,
             treatments: snapshotTreatments,
@@ -977,7 +1008,7 @@ const App: React.FC = () => {
         setGeneratedTreatments([]);
         setActiveBlueprint(null);
         setCachedBlueprints({});
-        setWorldLawConfig({ gravity: 1 });
+        setWorldLawConfig(DEFAULT_WORLD_LAW_CONFIG);
 
         // All modes: close sidebars by default as per user request
         setIsSkinOpen(false);
@@ -1908,6 +1939,13 @@ const App: React.FC = () => {
         if (!(await checkAndDeductToken(2))) return; // Traversal costs 2
         setIsGenerating(true);
         setTraverseStartTime(Date.now());
+        const traverseTaskName = (() => {
+            if (selectedDriver === DriverType.COMMERCIAL) return lang === 'EN' ? "SUTURE DESIRE" : "缝合欲望";
+            if (selectedDriver === DriverType.EXPERIMENTAL) return lang === 'EN' ? "TRANSLATE STORY" : "转译故事";
+            if (selectedDriver === DriverType.AESTHETIC) return lang === 'EN' ? "GENERATE AESTHETIC" : "生成美学";
+            if (selectedDriver === DriverType.TRAILER) return lang === 'EN' ? "CUT TRAILER" : "剪辑预告";
+            return lang === 'EN' ? "GENERATE DIVERGENCES" : "生成分歧点";
+        })();
         try {
             const result = await geminiService.generateFantasyTraverse(
                 selectedDriver,
@@ -1919,7 +1957,11 @@ const App: React.FC = () => {
                 subjectType,
                 visionAnalysis,
                 colorPalette.filter(c => c !== ""),
-                faceState
+                faceState,
+                focusState,
+                narrativePromptVersion,
+                traverseTaskName,
+                m7bIntensity
             );
             const treatments = result.treatments;
             if (result.thinkingXml) setThinkingXml(result.thinkingXml);
@@ -1941,7 +1983,7 @@ const App: React.FC = () => {
                     driverId: selectedDriver,
                     driverName: getDriverName(),
                     fieldState: { ...narrativeFieldState },
-                    worldLaw: { ...worldLawConfig },
+                    worldLaw: normalizeWorldLawConfig(worldLawConfig),
                     visionInput: visionInput,
                     visionAnalysis: visionAnalysis,
                     visionImage: visionImage,
@@ -1950,6 +1992,8 @@ const App: React.FC = () => {
                     aestheticMode: aestheticMode,
                     colorPalette: [...colorPalette],
                     faceState: { ...faceState },
+                    focusState: { ...focusState },
+                    m7bIntensity,
                     blueprint: null,
                     treatments: treatmentsWithIds,
                     savedBlueprints: {}
@@ -2046,7 +2090,9 @@ const App: React.FC = () => {
                 generationSubjectType: blueprint.generationSubjectType ?? activeBlueprint?.generationSubjectType ?? activeHistoryItem?.subjectType,
                 generationAestheticMode: blueprint.generationAestheticMode ?? activeBlueprint?.generationAestheticMode ?? activeHistoryItem?.aestheticMode,
                 generationColorPalette: blueprint.generationColorPalette ?? activeBlueprint?.generationColorPalette ?? activeHistoryItem?.colorPalette,
-                generationFaceState: blueprint.generationFaceState ?? activeBlueprint?.generationFaceState ?? activeHistoryItem?.faceState
+                generationFaceState: blueprint.generationFaceState ?? activeBlueprint?.generationFaceState ?? activeHistoryItem?.faceState,
+                generationFocusState: (blueprint as any).generationFocusState ?? activeBlueprint?.generationFocusState ?? activeHistoryItem?.focusState,
+                generationM7BIntensity: blueprint.generationM7BIntensity ?? activeBlueprint?.generationM7BIntensity ?? activeHistoryItem?.m7bIntensity
             };
 
             setActiveBlueprint(blueprintWithSnapshot);
@@ -2071,6 +2117,8 @@ const App: React.FC = () => {
         const snapshotAestheticMode = blueprint.generationAestheticMode ?? activeHistoryItem?.aestheticMode ?? aestheticMode;
         const snapshotColorPalette = blueprint.generationColorPalette ?? activeHistoryItem?.colorPalette ?? [...colorPalette];
         const snapshotFaceState = blueprint.generationFaceState ?? activeHistoryItem?.faceState ?? { ...faceState };
+        const snapshotFocusState = (blueprint as any).generationFocusState ?? activeHistoryItem?.focusState ?? { ...focusState };
+        const snapshotM7BIntensity = blueprint.generationM7BIntensity ?? activeHistoryItem?.m7bIntensity ?? m7bIntensity;
         const snapshotTreatments = activeHistoryItem?.treatments?.length ? activeHistoryItem.treatments : generatedTreatments;
 
         if (isMetonymy) {
@@ -2094,6 +2142,8 @@ const App: React.FC = () => {
                 aestheticMode: snapshotAestheticMode,
                 colorPalette: [...snapshotColorPalette],
                 faceState: { ...snapshotFaceState },
+                focusState: { ...snapshotFocusState },
+                m7bIntensity: snapshotM7BIntensity,
                 blueprint: storyBlueprintForItem || blueprint,
                 metonymyBlueprint: blueprint,
                 treatments: snapshotTreatments,
@@ -2136,6 +2186,8 @@ const App: React.FC = () => {
                 aestheticMode: snapshotAestheticMode,
                 colorPalette: [...snapshotColorPalette],
                 faceState: { ...snapshotFaceState },
+                focusState: { ...snapshotFocusState },
+                m7bIntensity: snapshotM7BIntensity,
                 blueprint,
                 treatments: snapshotTreatments,
                 savedBlueprints: { ...(activeHistoryItem?.savedBlueprints || {}), [blueprint.treatmentId]: blueprint }
@@ -2174,6 +2226,8 @@ const App: React.FC = () => {
             aestheticMode: item.aestheticMode || item.blueprint?.generationAestheticMode,
             colorPalette: item.colorPalette || item.blueprint?.generationColorPalette,
             faceState: item.faceState || item.blueprint?.generationFaceState,
+            focusState: item.focusState || (item.blueprint as any)?.generationFocusState,
+            m7bIntensity: item.m7bIntensity || item.blueprint?.generationM7BIntensity,
             metonymyBlueprint: item.metonymyBlueprint || null,
             treatments: item.treatments || [],
             savedBlueprints: item.savedBlueprints || {}
@@ -2192,11 +2246,13 @@ const App: React.FC = () => {
         if (normalizedItem.visionAnalysis !== undefined) setVisionAnalysis(normalizedItem.visionAnalysis);
         if (normalizedItem.visionImage !== undefined) setVisionImage(normalizedItem.visionImage);
         if (normalizedItem.visionImageNote !== undefined) setVisionImageNote(normalizedItem.visionImageNote);
-        if (normalizedItem.worldLaw) setWorldLawConfig(normalizedItem.worldLaw);
+        if (normalizedItem.worldLaw) setWorldLawConfig(normalizeWorldLawConfig(normalizedItem.worldLaw));
         if (normalizedItem.subjectType) setSubjectType(normalizedItem.subjectType);
         if (normalizedItem.aestheticMode) setAestheticMode(normalizedItem.aestheticMode);
         if (normalizedItem.colorPalette) setColorPalette(normalizedItem.colorPalette);
         if (normalizedItem.faceState) setFaceState(normalizedItem.faceState);
+        if ((normalizedItem as any).focusState) setFocusState((normalizedItem as any).focusState);
+        setM7bIntensity(normalizedItem.m7bIntensity || 'light');
 
         if (normalizedItem.type === 'METONYMY') {
             if (normalizedItem.blueprint) setMetonymyBlueprint(normalizedItem.blueprint);
@@ -2256,6 +2312,8 @@ const App: React.FC = () => {
             const snapshotAestheticMode = activeHistoryItem?.aestheticMode ?? aestheticMode;
             const snapshotColorPalette = activeHistoryItem?.colorPalette ?? [...colorPalette];
             const snapshotFaceState = activeHistoryItem?.faceState ?? { ...faceState };
+            const snapshotFocusState = activeHistoryItem?.focusState ?? { ...focusState };
+            const snapshotM7BIntensity = activeHistoryItem?.m7bIntensity ?? m7bIntensity;
 
             const bp = await geminiService.generateBlueprint(
                 selectedDriver!,
@@ -2266,7 +2324,9 @@ const App: React.FC = () => {
                 snapshotVisionImage,
                 snapshotWorldLaw,
                 snapshotVisionAnalysis,
-                snapshotColorPalette.filter(c => c !== "")
+                snapshotColorPalette.filter(c => c !== ""),
+                snapshotFocusState,
+                snapshotM7BIntensity
             );
             if (bp) {
                 const blueprintWithSnapshot: CreativeBlueprint = {
@@ -2281,19 +2341,21 @@ const App: React.FC = () => {
                     generationSubjectType: snapshotSubjectType,
                     generationAestheticMode: snapshotAestheticMode,
                     generationColorPalette: [...snapshotColorPalette],
-                    generationFaceState: { ...snapshotFaceState }
+                    generationFaceState: { ...snapshotFaceState },
+                    generationFocusState: { ...snapshotFocusState },
+                    generationM7BIntensity: snapshotM7BIntensity
                 };
                 setCachedBlueprints(prev => ({ ...prev, [treatment.id]: blueprintWithSnapshot }));
                 setActiveBlueprint(blueprintWithSnapshot);
                 handleAddToHistory(blueprintWithSnapshot, {
                     archiveSource: 'AI_SNAPSHOT',
                     archiveReason: 'STORY_GENERATED'
-                }); // Automatically save the generated Story Project
+                }); // Automatically save the generated narrative writing
                 handleViewChange('BIBLE');
             }
         } catch (e) {
             console.error(e);
-            alert(lang === 'EN' ? "Failed to generate Bible." : "生成圣经失败，请重试。");
+            alert(lang === 'EN' ? "Failed to generate narrative." : "生成叙事创作失败，请重试。");
         } finally {
             setIsGenerating(false);
             setBibleStartTime(null);
@@ -2367,6 +2429,7 @@ const App: React.FC = () => {
                                     setPage={setPage}
                                     setViewMode={handleViewChange}
                                     onReturnToPortal={beginEngineToPortalTransition}
+                                    portalTransition={portalTransition}
                                     selectedDriver={selectedDriver}
                                     onDriverSelect={handleDriverSelect}
                                     hoveredDriver={hoveredDriver}
@@ -2676,7 +2739,10 @@ const App: React.FC = () => {
                             className="mist-app-content-layer flex-1 overflow-hidden relative bg-transparent transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)"
                         >
                             {viewMode === 'ENGINE' && selectedDriver && (
-                                <div className="w-full h-full animate-page-dissolve">
+                                <div
+                                    key={`engine-open-${selectedDriver}`}
+                                    className={`mist-engine-simple-entry w-full h-full ${isNoShiftEntryDriver(selectedDriver) ? 'mist-no-shift-entry' : 'animate-engine-simple-fade'}`}
+                                >
                                     <NarrativeEngineField
                                         key={selectedDriver}
                                         fieldState={narrativeFieldState}
@@ -2709,6 +2775,12 @@ const App: React.FC = () => {
                                         onFaceStateChange={(locks) => {
                                             setFaceState(prev => ({ ...prev, ...locks }));
                                         }}
+                                        focusState={focusState}
+                                        onFocusStateChange={(locks) => {
+                                            setFocusState(prev => ({ ...prev, ...locks }));
+                                        }}
+                                        m7bIntensity={m7bIntensity}
+                                        onM7BIntensityChange={setM7bIntensity}
                                         customTextSeed={visionInput}
                                         onCustomTextSeedChange={(value) => {
                                             setVisionInput(value);
@@ -2750,8 +2822,8 @@ const App: React.FC = () => {
                                     <h2 className="text-2xl font-serif tracking-[0.3em] uppercase text-gold-primary/60 mb-4">引擎未激活 // ENGINE INACTIVE</h2>
                                     <p className="max-w-md text-sm text-zinc-500 font-medium leading-relaxed mb-10">
                                         {lang === 'EN'
-                                            ? "No desire structure detected. Please select a core driver to initiate production."
-                                            : "未检测到欲望结构。请选择一个核心驱动器以开始生产。"}
+                                            ? "No desire structure detected. Please select a desire reproduction entry to initiate production."
+                                            : "未检测到欲望结构。请选择一个欲望再生产入口以开始生产。"}
                                     </p>
                                     <button
                                         onClick={() => setPage(0)}
@@ -2785,7 +2857,11 @@ const App: React.FC = () => {
                                         thinkingXml={thinkingXml}
                                         worldLawConfig={activeHistoryItem?.worldLaw || worldLawConfig}
                                         overviewWorldLawConfig={activeHistoryItem?.worldLaw || worldLawConfig}
+                                        m7bIntensity={activeHistoryItem?.m7bIntensity || m7bIntensity}
                                         onToggleTag={handleToggleTag}
+                                        onSetTags={handleSetBlockTags}
+                                        onClearBlock={handleClearBlock}
+                                        onAddCustomDef={handleAddCustomDef}
                                     />
                                 </div>
                             )}
@@ -2834,7 +2910,7 @@ const App: React.FC = () => {
                             )}
                             {/* MetonymyView integrated into main layout to share EngineBottomBar */}
                             {viewMode === 'METONYMY' && metonymyBlueprint && (
-                                <div className="w-full h-full animate-page-dissolve">
+                                <div key="engine-open-metonymy" className="mist-engine-simple-entry mist-no-shift-entry w-full h-full">
                                     <MetonymyView
                                         blueprint={metonymyBlueprint}
                                         language={lang}
@@ -2853,10 +2929,11 @@ const App: React.FC = () => {
                                 </div>
                             )}
                             {viewMode === 'CANVAS' && selectedDriver === DriverType.TRAILER && (
-                                <div className="w-full h-full animate-page-dissolve">
+                                <div key="engine-open-canvas" className="mist-engine-simple-entry mist-no-shift-entry w-full h-full">
                                     <MistCanvasEngine
                                         lang={lang}
                                         isAdmin={isAdmin}
+                                        showRings={showRings}
                                     />
                                 </div>
                             )}
@@ -3026,7 +3103,11 @@ const App: React.FC = () => {
                         onTempLockChange={(locks) => {
                             setFaceState(prev => ({ ...prev, ...locks }));
                         }}
+                        onFocusStateChange={(locks) => {
+                            setFocusState(prev => ({ ...prev, ...locks }));
+                        }}
                         initialFaceState={faceState}
+                        initialFocusState={focusState}
                         customLibraryData={
                             activeBlockId === 'aes_palette_preset'
                                 ? [{ id: 'lib_master', name: '视觉大师预设 (Master Presets)', desc: 'Pre-configured Cinematic Styles', items: MASTER_PRESETS }]
@@ -3048,7 +3129,7 @@ const App: React.FC = () => {
 
                 {/* WorldLawModal integrated into EngineBottomBar */}
                 {isSettingsOpen && (
-                    <div className="mist-archive-overlay mist-config-overlay fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200] p-4">
+                    <div className="mist-archive-overlay mist-config-overlay fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[200] p-0">
                         <SimpleConfigPanel lang={lang} onClose={closeSettings} />
                     </div>
                 )}
@@ -3087,6 +3168,10 @@ const App: React.FC = () => {
                     worldLawConfig={worldLawConfig}
                     driverType={selectedDriver}
                     faceState={faceState}
+                    focusState={focusState}
+                    m7bIntensity={m7bIntensity}
+                    promptVersion={narrativePromptVersion}
+                    onPromptVersionChange={setNarrativePromptVersion}
                 />
                 </div>
             </div>

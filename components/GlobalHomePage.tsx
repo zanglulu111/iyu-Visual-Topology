@@ -68,6 +68,7 @@ export const GlobalHomePage: React.FC<GlobalHomePageProps> = ({
   // 圆环动画：始终挂载元素，用 key 强制重置动画
   const [ringAnimClass, setRingAnimClass] = useState('animate-ring-entrance');
   const [ringAnimKey, setRingAnimKey] = useState(0);
+  const [ringSpinKey, setRingSpinKey] = useState(0);
 
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 50);
@@ -89,10 +90,10 @@ export const GlobalHomePage: React.FC<GlobalHomePageProps> = ({
   const navCards: NavCard[] = [
     {
       icon: Cpu,
-      titleCn: '核心驱动器',
-      titleEn: 'CORE DRIVERS',
+      titleCn: '欲望再生产',
+      titleEn: 'DESIRE REPRODUCTION',
       descCn: '启动欲望再生产，进入视觉生产的符号链。构建你自己的迷雾。',
-      descEn: 'Activate the core driver. Enter the symbolic chain of visual production.',
+      descEn: 'Activate desire reproduction. Enter the symbolic chain of visual production.',
       color: '#FFD700',
       action: () => setPage(0),
     },
@@ -188,17 +189,21 @@ export const GlobalHomePage: React.FC<GlobalHomePageProps> = ({
 
             {/* 1. Ring Toggle */}
             <button
-              onClick={() => setShowRings(!showRings)}
-              className={`flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300 border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-90 focus:outline-none ${
+              onClick={() => {
+                setRingSpinKey(prev => prev + 1);
+                setShowRings(!showRings);
+              }}
+              className={`mist-ring-toggle-button flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300 border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-90 focus:outline-none ${
                 showRings
-                  ? 'text-[var(--mist-active-accent)]'
+                  ? 'is-active text-[var(--mist-active-accent)]'
                   : (isRetro ? 'text-zinc-600 hover:text-black' : 'text-zinc-500 hover:text-white')
               }`}
               title={lang === 'CN' ? '背景圆环开关' : 'Background Rings Toggle'}
             >
               <Aperture
+                key={ringSpinKey}
                 size={13}
-                className={`shrink-0 transition-all duration-700 ${showRings ? 'rotate-[360deg] text-[var(--mist-active-accent)]' : 'rotate-0'} ${showRings ? 'cult-pulse' : ''}`}
+                className={`mist-ring-toggle-icon ${ringSpinKey > 0 ? 'is-click-spinning' : ''} shrink-0 ${showRings ? 'text-[var(--mist-active-accent)]' : ''}`}
               />
             </button>
 

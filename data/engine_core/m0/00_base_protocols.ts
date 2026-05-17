@@ -8,10 +8,10 @@
  * 会产生截然不同的力学反应。
  * 
  * 四大协议：
- *  - NEUROSIS   (神经症/折叠)：承认缺失，承认法律，内耗生热
- *  - PERVERSION (性倒错/翻转)：知道缺失，否认法律，工具化超导
- *  - PSYCHOSIS  (精神病/撕裂)：排除大他者，真实界直涌
- *  - AUTISM     (孤独症/合拢)：拒绝进入语言，自足闭环
+ *  - NEUROSIS   (神经症结构/折叠)：承认缺失，承认法律，内耗生热
+ *  - PERVERSION (倒错结构/翻转)：知道缺失，否认法律，工具化超导
+ *  - PSYCHOSIS  (精神病结构/撕裂)：排除大他者，真实界直涌
+ *  - AUTISM     (自足闭环/合拢)：感官优先，秩序闭环
  * 
  * 各子项（如 A1.癔症、B1.恋物）仅作为对基类的"增量偏移 (Patch)"。
  */
@@ -38,11 +38,11 @@ export const M0_BASE_PROTOCOLS = {
     runtimeEn: "IF (Subject_Collides_with_Real) THEN Trigger(Ritual_Defense) OR Enter(Stagnation_Rumination). FORBID: Subject achieving genuine psychological equilibrium or total self-acceptance."
   },
 
-  // ═══ 2. 性倒错基类 (Perversion) —— "肯定的否定" ═══
+  // ═══ 2. 倒错结构基类 (Perversion) —— "肯定的否定" ═══
   // 翻转：主体把自己化身为大他者享乐的利刃(Instrument of Jouissance)。
   // 通过比法律更彻底的服从来挑战它，通过将意义坍缩到"物"来否认缺失。
   PERVERSION: {
-    name: "性倒错基类",
+    name: "倒错结构基类",
     nameEn: "Perversion Base Protocol",
 
     mechanics: "M4传导 = 杠杆效应(法律被视为外部工具，主体寻租); M1→M5转化率 ≈ 100%(主体将自身视为工具，超导转化); M2创伤吸收 = 物理磨损(创伤被视为实现目标的必要成本); 主体价值 = 0; 客体价值 = 最大。",
@@ -55,11 +55,11 @@ export const M0_BASE_PROTOCOLS = {
     runtimeEn: "IF (Subject_Generates_Empathy_or_Conscience) THEN Force(Objectify_Emotional_Target) OR Convert_to(Jouissance_Instrument). FORBID: Genuine empathic connection or moral-dilemma reflection."
   },
 
-  // ═══ 3. 精神病基类 (Psychosis) —— "排除的肯定" ═══
+  // ═══ 3. 精神病结构基类 (Psychosis) —— "排除的肯定" ═══
   // 撕裂：大他者被排除(Forclusion)，真实界的岩浆直接喷涌。
   // 系统中不存在有效的除法体系(M4)，妄想或自创逻辑即为现实。
   PSYCHOSIS: {
-    name: "精神病基类",
+    name: "精神病结构基类",
     nameEn: "Psychosis Base Protocol",
 
     mechanics: "M4传导 = 直通穿透(规则如背景噪音，无约束力；公式分母趋近缺如); M1→M5转化率 = 非线性脉冲(行动与冲动之间缺乏逻辑中介); M2创伤吸收 = 系统蓝屏(创伤直接触发象征界局部解体); 噪音过滤 = 关闭; 信号强度 = 全域100%。",
@@ -72,20 +72,20 @@ export const M0_BASE_PROTOCOLS = {
     runtimeEn: "IF (Subject_Admits_'Just_Coincidence') THEN Force_Generate(Reality_Glitch) to puncture normal illusion. FORBID: System allowing subject to stably accept external common-sense logic as final explanation."
   },
 
-  // ═══ 4. 孤独症基类 (Autism) —— "拒绝的肯定" ═══
-  // 合拢：主体拒绝进入语言的大他者。未完成从"实在"到"符号"的跨越。
-  // 通过绝对的物理性节奏(重复动作、触感)防御外界侵入。世界自足且无裂隙。
+  // ═══ 4. 自足闭环基类 (Autism) —— "拒绝的肯定" ═══
+  // 合拢：主体不以社会隐喻作为第一接口，而是通过感官、节奏、位置和流程让世界成立。
+  // 通过稳定的物理性秩序(重复动作、触感、边界)防御外界侵入。世界自足且精确。
   AUTISM: {
-    name: "孤独症基类",
+    name: "自足闭环基类",
     nameEn: "Autism Base Protocol",
 
-    mechanics: "M4传导 = 完全绝缘(外部法律无法穿透其外壳，主体不受社会规则驱动); M1→M5转化率 ≈ 0%(对外输出) / 100%(对内循环，零损耗闭环); M2创伤吸收 = 边界崩坏(创伤表现为对边界的触碰，引发极端回避或生理性应激); 外部请求 = null。",
+    mechanics: "M4传导 = 高绝缘(外部法律必须经过感官秩序/流程边界才可能生效，主体不直接受社会暗示驱动); M1→M5转化率 ≈ 0%(对外输出) / 100%(对内循环，零损耗闭环); M2创伤吸收 = 边界过载(创伤表现为对边界的触碰，引发回避、重排或生理性应激); 外部请求 = 需转译。",
     mechanicsEn: "M4_Transmission = Total_Insulation (external_law_cannot_penetrate_shell; subject_not_driven_by_social_rules); M1→M5_Conversion ≈ 0%_external / 100%_internal (zero-loss_closed_loop); M2_Absorption = Boundary_Collapse (trauma=boundary_contact→extreme_avoidance_or_physiological_stress); External_Request = null.",
 
-    aesthetic: "[GENRE_ADAPTIVE] 叙事节奏 = 静止、循环；极度聚焦于物理细节(温度/质地/频率/声响节奏)；彻底禁绝比喻和象征；文字如解剖报告般精准枯燥；隐喻权重 = 0; 感官权重 = 最大。",
-    aestheticEn: "[GENRE_ADAPTIVE] Narrative_Rhythm = Static_Cyclical; hyper-focus_on_physical_detail (temperature/texture/frequency/sonic_rhythm); absolute_prohibition_on_metaphor_and_symbolism; text=autopsy-report_precision; Metaphor_Weight = 0; Sensation_Weight = Max.",
+    aesthetic: "[GENRE_ADAPTIVE] 叙事节奏 = 静止、循环；极度聚焦于物理细节(温度/质地/频率/声响节奏)；比喻必须从具体感官关系中生长，避免抽象象征解释；文字精准但保持文学性；感官权重 = 最大。",
+    aestheticEn: "[GENRE_ADAPTIVE] Narrative_Rhythm = Static_Cyclical; hyper-focus_on_physical_detail (temperature/texture/frequency/sonic_rhythm); metaphors_must_grow_from_concrete_sensory_relations; avoid_abstract_symbolic_explanation; prose=precise_but_literary; Sensation_Weight = Max.",
 
-    runtime: "IF (主体为'理想'或'大义'而行动) THEN 强制回归纯粹感官闭环状态(象征秩序入侵检测→漏电修复)。FORBID：主体理解任何'暗示'、'潜台词'或社会性隐喻。",
-    runtimeEn: "IF (Subject_Acts_for_'Ideal'_or_'Greater_Good') THEN Force_Return_to_Pure_Sensory_Loop (Symbolic_intrusion_detected→leak_repair). FORBID: Subject understanding any 'hints', 'subtext', or social metaphors."
+    runtime: "IF (主体为'理想'或'大义'而行动) THEN 必须先把理想转译为可触摸、可重复、可校准的感官秩序。FORBID：用'学会社交'、'被爱融化'或诊断式解释完成故事。",
+    runtimeEn: "IF (Subject_Acts_for_'Ideal'_or_'Greater_Good') THEN translate_the_ideal_into_tactile_repeatable_calibrated_sensory_order_first. FORBID: completing the story through 'learning social skills,' 'melted by love,' or diagnostic explanation."
   }
 };

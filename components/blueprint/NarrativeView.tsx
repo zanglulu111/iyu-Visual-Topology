@@ -441,8 +441,8 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
 
     const getLocalizedStyleName = (style: string) => {
         if (!style) return "";
-        if (style === '空白故事圣经' || style === 'Blank Story Bible' || style === '空白故事工程' || style === 'Blank Story Project') {
-            return language === 'EN' ? 'Blank Story Project' : '空白故事工程';
+        if (style === '空白故事圣经' || style === 'Blank Story Bible' || style === '空白故事工程' || style === 'Blank Story Project' || style === '空白叙事创作' || style === 'Blank Narrative Writing') {
+            return language === 'EN' ? 'Blank Narrative Writing' : '空白叙事创作';
         }
 
         if (language === 'EN') {
@@ -484,82 +484,86 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
 
             {/* STORY PROJECT / SYNOPSIS AREA */}
             <div className="space-y-10">
-                <div className="mist-story-project-header flex items-center justify-between pb-8 border-none">
-                    <div className="flex-1">
-                        <div className="flex items-center gap-4 mb-4">
-                            <FileText className="text-[#8B261D]/20" size={28} />
+                <div className="mist-story-project-header pb-8 border-none">
+                    <div className="mist-story-title-row">
+                        <div className="mist-story-title-mark" aria-hidden="true">
+                            <FileText size={28} />
+                        </div>
+                        <div className="flex-1 min-w-0">
                             <input
                                 type="text"
                                 value={blueprint.narrative?.title || ""}
                                 onChange={(e) => handleUpdate('title', e.target.value)}
-                                className={`text-5xl font-serif bg-transparent border-none focus:ring-0 p-0 focus:outline-none w-full font-bold tracking-tight ${theme === 'retro' ? 'placeholder-[#8B261D]/10 text-[#1A1A1A]' : 'placeholder-white/10 text-white'}`}
+                                className={`mist-story-title-input text-5xl font-serif bg-transparent border-none focus:ring-0 p-0 focus:outline-none w-full font-bold tracking-tight ${theme === 'retro' ? 'placeholder-[#8B261D]/10 text-[#1A1A1A]' : 'placeholder-white/10 text-white'}`}
                                 placeholder="未命名项目标题"
                             />
                         </div>
-                        {blueprint.styleName && (
-                            <div className={`text-[10px] font-mono flex items-center gap-2 ml-11 ${theme === 'retro' ? 'text-[#8B261D]/40' : 'text-white/70'}`}>
-                                <PenTool size={10} className="opacity-50" />
-                                <span className="uppercase tracking-[0.2em]">{language === 'EN' ? "Aesthetic: " : "美学风格："}</span>
-                                <span className={`font-bold ${theme === 'retro' ? 'text-[#8B261D]/80' : 'text-white'}`}>{getLocalizedStyleName(blueprint.styleName)}</span>
-                            </div>
-                        )}
                     </div>
 
-                    <div className="flex items-center gap-6">
-                        <div className="flex flex-col items-end">
-                            <span className={`text-[10px] font-mono uppercase tracking-[0.2em] mb-1 ${theme === 'retro' ? 'text-[#8B261D]/40' : 'text-white/48'}`}>
-                                {language === 'EN' ? "Word Count" : "实时字数"}
-                            </span>
-                            <span className={`text-xs font-bold ${theme === 'retro' ? 'text-[#8B261D]' : 'text-white/80'}`}>
-                                {(blueprint.narrative?.synopsis || "").length} <span className="text-xs opacity-100 ml-0.5">{language === 'EN' ? "CHARS" : "字"}</span>
-                            </span>
+                    <div className="mist-story-meta-row">
+                        <div className="mist-story-meta-stack">
+                            {blueprint.styleName && (
+                                <div className={`mist-story-style-chip ${theme === 'retro' ? 'text-[#8B261D]/70' : 'text-white/70'}`}>
+                                    <PenTool size={12} className="opacity-60" />
+                                    <span>{language === 'EN' ? "Aesthetic" : "美学风格"}</span>
+                                    <strong className={theme === 'retro' ? 'text-[#8B261D]' : 'text-white'}>{getLocalizedStyleName(blueprint.styleName)}</strong>
+                                </div>
+                            )}
                         </div>
 
-                        <div className="h-8 w-px bg-[#8B261D]/10"></div>
-
-                        <div className="mist-story-toolbar flex items-center gap-2">
-                            <button
-                                onClick={() => setIsHistoryModalOpen(true)}
-                                className="mist-story-header-action"
-                                title={language === 'EN' ? "View History" : "查看历史版本"}
-                            >
-                                <HistoryIcon size={14} />
-                                <span>{language === 'EN' ? `HISTORY ${history.length}` : `历史版本 ${history.length}`}</span>
-                            </button>
-
-                            <button
-                                onClick={openModifyModal}
-                                disabled={!blueprint.narrative?.synopsis}
-                                className="mist-story-header-action"
-                                title={language === 'EN' ? "AI Deep Modify" : "AI 深度修改"}
-                            >
-                                <Wand2 size={14} />
-                                <span>{language === 'EN' ? "AI MODIFY" : "AI 深度修改"}</span>
-                            </button>
-
-                            <div className="mist-story-view-toggle" role="tablist" aria-label={language === 'EN' ? "Story view mode" : "故事查看模式"}>
-                                <button
-                                    type="button"
-                                    className={storyViewMode === 'preview' ? 'is-active' : ''}
-                                    onClick={() => setStoryViewMode('preview')}
-                                >
-                                    {language === 'EN' ? "VIEW" : "浏览"}
-                                </button>
-                                <button
-                                    type="button"
-                                    className={storyViewMode === 'edit' ? 'is-active' : ''}
-                                    onClick={() => setStoryViewMode('edit')}
-                                >
-                                    {language === 'EN' ? "EDIT" : "编辑"}
-                                </button>
+                        <div className="mist-story-control-row">
+                            <div className={`mist-story-word-count ${theme === 'retro' ? 'is-retro' : ''}`}>
+                                <span>{language === 'EN' ? "Word Count" : "实时字数"}</span>
+                                <strong>
+                                    {(blueprint.narrative?.synopsis || "").length}
+                                    <small>{language === 'EN' ? "CHARS" : "字"}</small>
+                                </strong>
                             </div>
 
-                            <CopyButton
-                                text={blueprint.narrative?.synopsis || ""}
-                                theme={theme}
-                                iconOnly
-                                className={theme === 'retro' ? 'mist-story-copy-icon text-black/70 hover:text-[#8B261D]' : 'mist-story-copy-icon text-zinc-500'}
-                            />
+                            <div className="mist-story-toolbar flex items-center gap-2">
+                                <button
+                                    onClick={() => setIsHistoryModalOpen(true)}
+                                    className="mist-story-header-action"
+                                    title={language === 'EN' ? "View History" : "查看历史版本"}
+                                >
+                                    <HistoryIcon size={14} />
+                                    <span>{language === 'EN' ? `HISTORY ${history.length}` : `历史版本 ${history.length}`}</span>
+                                </button>
+
+                                <button
+                                    onClick={openModifyModal}
+                                    disabled={!blueprint.narrative?.synopsis}
+                                    className="mist-story-header-action"
+                                    title={language === 'EN' ? "AI Deep Modify" : "AI 深度修改"}
+                                >
+                                    <Wand2 size={14} />
+                                    <span>{language === 'EN' ? "AI MODIFY" : "AI 深度修改"}</span>
+                                </button>
+
+                                <div className="mist-story-view-toggle" role="tablist" aria-label={language === 'EN' ? "Story view mode" : "故事查看模式"}>
+                                    <button
+                                        type="button"
+                                        className={storyViewMode === 'preview' ? 'is-active' : ''}
+                                        onClick={() => setStoryViewMode('preview')}
+                                    >
+                                        {language === 'EN' ? "VIEW" : "浏览"}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={storyViewMode === 'edit' ? 'is-active' : ''}
+                                        onClick={() => setStoryViewMode('edit')}
+                                    >
+                                        {language === 'EN' ? "EDIT" : "编辑"}
+                                    </button>
+                                </div>
+
+                                <CopyButton
+                                    text={blueprint.narrative?.synopsis || ""}
+                                    theme={theme}
+                                    iconOnly
+                                    className={theme === 'retro' ? 'mist-story-copy-icon text-black/70 hover:text-[#8B261D]' : 'mist-story-copy-icon text-zinc-500'}
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -582,7 +586,7 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
                                 />
                             ) : (
                                 <div className="mist-story-preview-placeholder">
-                                    {language === 'EN' ? "No story text yet. Switch to Edit to write." : "暂无故事正文。切换到编辑后可输入故事工程文本。"}
+                                    {language === 'EN' ? "No story text yet. Switch to Edit to write." : "暂无故事正文。切换到编辑后可输入叙事创作文本。"}
                                 </div>
                             )}
                         </div>

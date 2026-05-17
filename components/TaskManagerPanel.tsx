@@ -139,7 +139,7 @@ export const TaskManagerPanel: React.FC<TaskManagerPanelProps> = ({ isOpen, onCl
                         >
                             <div className="flex justify-between items-start">
                                 <div className="flex items-center gap-3 max-w-[75%]">
-                                    <div className={`p-1 rounded ${theme === 'retro' ? 'bg-[#8B261D]/5' : 'bg-black/40'}`}>
+                                    <div className={`mist-task-status-icon-shell p-1 rounded ${theme === 'retro' ? 'bg-[#8B261D]/5' : 'bg-black/40'}`}>
                                         {getStatusIcon(task.status)}
                                     </div>
                                     <div className="flex flex-col gap-0.5">

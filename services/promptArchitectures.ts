@@ -12,6 +12,8 @@ import { ALL_SKIN_BLOCKS } from '../data/narrative/skin_libraries';
 import { SV2_DATA } from '../data/engine_sv/SV2';
 import { getVisionAnchorProtocol } from '../data/engine_core/narrative_protocols';
 import { runMistEngine } from '../engine/mist_calculator';
+import { buildBannedWords as buildHardBannedWords, buildSoftAvoidLabels, buildWorldLawPrompt } from './promptV3';
+import { getWorldLawDisplay } from './worldLaw';
 
 // ============================================================================
 // 共享工具函数 (Shared Utilities)
@@ -25,18 +27,9 @@ const getTagsBySuffix = (fieldState: NarrativeFieldState, suffixes: string | str
     .flatMap(k => fieldState[k]);
 };
 
-/** 提取禁用词表 */
+/** 提取硬禁词表 */
 const getBannedWords = (fieldState: NarrativeFieldState): string => {
-  const tags = Object.values(fieldState).flat();
-  if (tags.length === 0) return "";
-  const words = tags.map(t => t.split('(')[0].trim()).filter(w => w.length > 1);
-  const fullTags = tags.filter(t => t.length > 1);
-  const philosophicalTerms = [
-    "大他者", "Big Other", "Object a", "对象a", "Symbolic Order", "符号界",
-    "Real", "实在界", "Imaginary", "想象界", "Alienation", "异化",
-    "Castration", "阉割", "Sinthome", "圣状", "Phallus", "菲勒斯"
-  ];
-  return [...new Set([...words, ...fullTags, ...philosophicalTerms])].join(', ');
+  return buildHardBannedWords(fieldState);
 };
 
 /** 构建 DNA 上下文（标签定义清单）*/
@@ -105,16 +98,7 @@ const getMParamInfo = (fieldState: NarrativeFieldState, suffix: string): {
 };
 
 /** 构建世界法则文本 */
-const buildWorldLawText = (gravity: number): string => {
-  const worldLawMap: Record<number, string> = {
-    1: `🚨 **LV.1 写实 / STRICT REALISM**\n→ 绝对物理锁死。重力、熵增、生物学极限不可逾越。严禁奇迹/超自然。死亡是物理性的绝对终结。`,
-    2: `⚠️ **LV.2 合理 / RATIONALIZED**\n→ 逻辑补完。允许奇观但必须赋予科学/机械的合理解释。大他者表现为严密逻辑网格。可利用漏洞，不可无视规则。`,
-    3: `📋 **LV.3 缝合 / MAGICAL REALISM**\n→ 以残酷现实为底，允许局部缝合超现实的符号与症状。正常与荒诞通过视差共生。超现实部分伴随巨大代价。`,
-    4: `⚠️ **LV.4 奇观 / HIGH CONCEPT**\n→ 超自然协议公开运行。魔法/超能力是日常。但内部逻辑必须一致——规则可荒谬，执行必须是铁律。`,
-    5: `📋 **LV.5 狂想 / RHAPSODY**\n→ 绝对无重力拼贴。取消所有恒定约束。不同位面/时代/逻辑自由碰撞。纯粹欲望试验场。`
-  };
-  return worldLawMap[gravity] || worldLawMap[3];
-};
+const buildWorldLawText = (worldLaw: WorldLawConfig): string => buildWorldLawPrompt(worldLaw);
 
 /** 构建体量指令 */
 const buildVolumeInstruction = (fieldState: NarrativeFieldState): string => {
@@ -142,11 +126,15 @@ const buildSpacetimeAnchor = (fieldState: NarrativeFieldState, worldLaw: WorldLa
   }
 
   if (sur2Tags.length === 0 && locTags.length === 0 && !exactYear && !exactCountry) {
-    const gravity = worldLaw.gravity || 3;
-    if (gravity <= 2) {
-      result += `\n**⚓ 锚点推演 (STRICT REALISM)**\n→ 未指定时空。基于 M-Engine 标签反向推演最合逻辑的时代坐标。\n→ 默认国际化场域。严禁默认中国小镇。\n`;
+    const display = getWorldLawDisplay(worldLaw);
+    if (display.level <= 2) {
+      result += `\n**⚓ 世界坐标推演：${display.fullLabel}**\n→ 未指定时空时，不默认当代，也不默认历史。基于 SUR1 类型动力、SUR2/SUR4/SUR5/SUR9 与外部故事机关推演最可信、最有戏剧张力的世界坐标。\n→ 世界法则只裁决 SUR1 与 SUR2/SUR3 的冲突；SUR1 只提供类型语法，不单独授权科幻、近未来、AI、义体、太空等材料成为世界事实。若这些材料已被世界法则、SUR2/SUR3 或用户输入明确授权，它们可以成为候选世界，但不能无依据泛滥。\n`;
+    } else if (display.level === 3) {
+      result += `\n**⚓ 世界坐标推演：${display.fullLabel}**\n→ 未指定时空时，先推演可信世界坐标，再允许局部异常、传闻、仪式、幻觉或象征物承载类型压力。\n→ 局部缝合不得扩展成完整新世界体系。\n`;
+    } else if (display.level === 4) {
+      result += `\n**⚓ 世界坐标推演：${display.fullLabel}**\n→ 未指定时空时，允许由 SUR1 反向生成架空历史、异史、技术分歧或类型化世界。\n→ 必须说明分歧点、来源、运行方式和代价。\n`;
     } else {
-      result += `\n**⚓ 锚点推演 (CREATIVE FREEDOM)**\n→ 未指定时空。放手创造最大化标签张力的异世界。\n`;
+      result += `\n**⚓ 世界坐标推演：${display.fullLabel}**\n→ 未指定时空时，允许梦、神话、象征和跨时代拼贴接管世界规则。\n→ 故事目标、阻断、升级、高潮选择和代价兑现仍要清楚。\n`;
     }
   }
 
@@ -217,10 +205,10 @@ export const buildPromptV1 = (
   const sur1Tags = getTagsBySuffix(fieldState, '_genre');
   const sur2Tags = getTagsBySuffix(fieldState, '_era');
   const activeWorldLogic = `${sur1Tags.join('/') || 'Cinema/Drama'} (场域: ${sur2Tags.join('/') || 'Unknown'})`;
-  const gravity = worldLaw.gravity || 3;
   const m7aInfo = getMParamInfo(fieldState, '_m7a');
   const m7bInfo = getMParamInfo(fieldState, '_m7b');
   const bannedWords = getBannedWords(fieldState);
+  const softAvoidLabels = buildSoftAvoidLabels(fieldState);
 
   // ============================================================================
   // LAYER 0: 身份宣言 (~50字)
@@ -291,6 +279,7 @@ Task: 基于以下迷雾学派引擎参数，生成 3 个电影级故事概念�
   }
 
   // 2D. 时空锚点
+  LAYER_2 += `### 世界法则\n${buildWorldLawText(worldLaw)}\n\n`;
   const spacetimeAnchor = buildSpacetimeAnchor(fieldState, worldLaw);
   if (spacetimeAnchor) LAYER_2 += spacetimeAnchor;
 
@@ -351,8 +340,10 @@ ${volumeInst}
 [LAW_2] REQUIRE: 激励事件→上升动作→高潮→余痕收束。DENY: 机械降神、无冲突流水账。
 [LAW_3] 极精致电影化小说。DENY: 剧本格式、学术论文腔、网络小说腔。
 
-### 🚫 动态禁用词
-[ ${bannedWords} ]
+### 🚫 硬禁词与参数转译
+硬禁词（仅正文）: [ ${bannedWords} ]
+参数复述限制: 下列已选参数名不得作为解释性标签机械复述，必须转译为世界内称谓、制度、物件、动作或关系压力：
+[ ${softAvoidLabels || '无'} ]
 
 ### 三重镜头
 OPTION 1 [STRUCTURALIST]: 经典类型执行。M4 是具体外部力量。适配 [${activeWorldLogic}]。
@@ -421,8 +412,8 @@ export const buildPromptV2 = (
   const sur1Tags = getTagsBySuffix(fieldState, '_genre');
   const sur2Tags = getTagsBySuffix(fieldState, '_era');
   const activeWorldLogic = `${sur1Tags.join('/') || 'Cinema/Drama'} (场域: ${sur2Tags.join('/') || 'Unknown'})`;
-  const gravity = worldLaw.gravity || 3;
   const bannedWords = getBannedWords(fieldState);
+  const softAvoidLabels = buildSoftAvoidLabels(fieldState);
 
   // ============================================================================
   // BLOCK 0: 身份
@@ -590,12 +581,12 @@ Task: 基于以下迷雾学派引擎参数，生成 3 个电影级故事概念�
   // ============================================================================
   // BLOCK 3: 世界法则
   // ============================================================================
-  const BLOCK_3 = `## ⚖️ 世界法则
+const BLOCK_3 = `## ⚖️ 世界法则
 
-${buildWorldLawText(gravity)}
+${buildWorldLawText(worldLaw)}
 
 🚨 **任何违反此法则的生成判定为失败。**
-如果物理法则为 STRICT REALISM，严禁出现魔法/鬼魂/超光速。`;
+禁止把世界法则误解为主动添加未授权奇观，也禁止让 SUR1 因时空冲突而完全失效。`;
 
   // ============================================================================
   // BLOCK 4: 叙事结构 & 输出
@@ -661,8 +652,10 @@ ${buildJSONTemplate(activeWorldLogic)}
 - 模仿风格时模仿底层逻辑，严禁堆砌表层符号。
 - 面具协议：故事必须首先作为合格类型片运作。
 
-### 🚫 动态禁用词
-[ ${bannedWords} ]`;
+### 🚫 硬禁词与参数转译
+硬禁词（仅正文）: [ ${bannedWords} ]
+参数复述限制: 下列已选参数名不得作为解释性标签机械复述，必须转译为世界内称谓、制度、物件、动作或关系压力：
+[ ${softAvoidLabels || '无'} ]`;
 
   // ============================================================================
   // 最终拼接：B0 + B1A + B1B + B2 + B3 + B4 + B5

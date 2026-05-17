@@ -1,28 +1,15 @@
 
-import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
+import { GenerateContentResponse } from "@google/genai";
 import { runWithTask, getCallerName } from './taskManager';
 import { configService } from '../src/services/configService';
 import { GlobalVisualTone, MetonymyStylePreset, FinalAssetItem } from '../types';
+import { generateContentWithRuntime } from './geminiService';
 
 export interface VisualBibleAnalysisHints {
     medium?: 'PAINTING' | 'CGI' | 'PHOTOGRAPHY' | 'tangible';
     dialogue?: string;
     detailImages?: string[]; // Array of base64 images
 }
-
-// Helper to get a new AI instance with the current API key
-const getAI = () => {
-    try {
-        const apiKey = configService.getApiKey();
-        if (apiKey) {
-            return new GoogleGenAI({ apiKey });
-        }
-    } catch (error) {
-        console.warn('Failed to get config:', error);
-    }
-    // Fallback to environment variable
-    return new GoogleGenAI({ apiKey: (typeof process !== 'undefined' && process.env.API_KEY) || "" });
-};
 
 const cleanAndParseJSON = (text: string) => {
     try {
@@ -206,10 +193,10 @@ export const analyzeToneImage = async (imageUrl: string, hints?: VisualBibleAnal
     try {
         const model = configService.getEngineModel('visualBible') || 'gemini-3.1-pro-preview';
         console.log(`[VisualBible] Analyzing Tone Image with model: ${model}, Hints: ${JSON.stringify(hints)}`);
-        const res = await retryWithBackoff<GenerateContentResponse>(() => getAI().models.generateContent({
+        const res = await retryWithBackoff<GenerateContentResponse>(() => generateContentWithRuntime({
             model: model,
             contents: { parts: [{ text: tonePrompt }, { inlineData: { mimeType, data: imageBytes } }] },
-            config: { responseMimeType: 'application/json' }
+            config: { responseMimeType: 'application/json', engineId: 'visualBible' }
         }));
 
         return cleanAndParseJSON(res.text || "");
@@ -370,10 +357,10 @@ export const analyzeAssetImage = async (imageUrl: string, type: 'CHARACTER' | 'S
     try {
         const model = configService.getEngineModel('visualBible') || 'gemini-3.1-pro-preview';
         console.log(`[VisualBible] Analyzing Asset Image (${type}) with model: ${model}`);
-        const res = await retryWithBackoff<GenerateContentResponse>(() => getAI().models.generateContent({
+        const res = await retryWithBackoff<GenerateContentResponse>(() => generateContentWithRuntime({
             model: model,
             contents: { parts: parts },
-            config: { responseMimeType: 'application/json' }
+            config: { responseMimeType: 'application/json', engineId: 'visualBible' }
         }));
 
         const rawJson = cleanAndParseJSON(res.text || "");
@@ -597,10 +584,10 @@ export const generateTextBasedVisualBible = async (text: string, hints?: VisualB
     try {
         const model = configService.getEngineModel('visualBible') || 'gemini-3.1-pro-preview';
         console.log(`[VisualBible] Generating Text-Based Bible with model: ${model}`);
-        const res = await retryWithBackoff<GenerateContentResponse>(() => getAI().models.generateContent({
+        const res = await retryWithBackoff<GenerateContentResponse>(() => generateContentWithRuntime({
             model: model,
             contents: { parts: [{ text: prompt }] },
-            config: { responseMimeType: 'application/json' }
+            config: { responseMimeType: 'application/json', engineId: 'visualBible' }
         }));
         const json = cleanAndParseJSON(res.text || "");
         if (json && json.assets) {
@@ -627,7 +614,6 @@ export async function generateDesignImage(
     referenceImage?: string
 ): Promise<string | null> {
     const model = configService.getEngineModel('imageGen') || 'gemini-3-pro-image-preview';
-    const ai = getAI();
     const parts: any[] = [{ text: prompt }];
 
     if (referenceImage) {
@@ -642,10 +628,11 @@ export async function generateDesignImage(
     }
 
     try {
-        const response = await ai.models.generateContent({
+        const response = await generateContentWithRuntime({
             model: model,
             contents: { parts: parts },
             config: {
+                engineId: 'imageGen',
                 // @ts-ignore
                 imageConfig: {
                     aspectRatio: "16:9"

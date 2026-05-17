@@ -1,8 +1,8 @@
 
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import { configService } from "../src/services/configService";
-import { getEffectiveBaseUrl, getOpenAIChatCompletionsUrl, getProviderForModel } from "../src/types/config";
-import { SutureConfig, NarrativeFieldState, CreativeTreatment, StyleConfig, WorldLawConfig, CreativeBlueprint, DriverType, SubjectType, SutureResponse, FinalAssetsData, FinalAssetItem, GlobalVisualTone, AssetView, MetonymyStylePreset, MetonymyAssetInput, APISettings, FaceState, NarrativeBlockDef, LibraryCategoryDef } from "../types";
+import { EngineId, getOpenAIChatCompletionsUrl, getProviderForModel } from "../src/types/config";
+import { SutureConfig, NarrativeFieldState, CreativeTreatment, StyleConfig, WorldLawConfig, CreativeBlueprint, DriverType, SubjectType, SutureResponse, FinalAssetsData, FinalAssetItem, GlobalVisualTone, AssetView, MetonymyStylePreset, MetonymyAssetInput, APISettings, FaceState, PromptFocusState, NarrativePromptVersion, NarrativeBlockDef, LibraryCategoryDef, M7BResidueIntensity } from "../types";
 import { buildSutureStep1Prompt, buildStyleTransferPrompt } from "./suture_script_prompt";
 import { buildSutureStep2Prompt } from "./sutureGenerator";
 import { buildNarrativePrompt, buildNarrativeBiblePrompt } from "./narrativeGenerator";
@@ -37,6 +37,17 @@ import { buildRefactorPrompt } from "./refactorPrompt";
 import { buildScriptBreakdownPrompt } from "./scriptBreakdownGenerator";
 import { runWithTask } from "./taskManager";
 
+export const FANTASY_TRAVERSE_OUTPUT_CONTRACT = `
+
+【输出兼容性硬约束】
+最终必须返回可解析的 JSON 数组，数组内正好 3 个方案对象。
+不要把方案包在 "design_audit"、"thought_process"、"方案A"、"方案B"、"方案C" 这类外层字段里。
+每个方案对象必须包含：id, type, title, tagline, structure，并包含 pitch 或 pitch_structure。
+如果主提示要求结构审查，必须放在 JSON 数组之前的 <design_audit>...</design_audit> XML 标签里；只有旧架构明确要求时才允许 <thought_process>...</thought_process>。`;
+
+export const appendFantasyTraverseOutputContract = (promptText: string): string =>
+    `${promptText}\n\n${FANTASY_TRAVERSE_OUTPUT_CONTRACT}`;
+
 export interface ModifySectionRequest {
     id: string;
     text: string;
@@ -54,6 +65,12 @@ const getSettings = (): APISettings | null => {
     if (typeof window === 'undefined') return null;
     const saved = localStorage.getItem('api_settings');
     return saved ? JSON.parse(saved) : null;
+};
+
+const stripRuntimeConfig = (params: any) => {
+    if (!params?.config?.engineId) return params;
+    const { engineId: _engineId, ...config } = params.config;
+    return { ...params, config };
 };
 
 function proxyFetch(url: string, options: RequestInit): Promise<Response> {
@@ -103,8 +120,9 @@ class OpenAIAdapter {
 
                 const fetchUrl = getOpenAIChatCompletionsUrl(this.baseUrl);
                 const maxTokens = params.config?.maxOutputTokens || 32768;
-                const wantsJson = params.config?.responseMimeType === 'application/json';
-                const shouldStream = !wantsJson;
+                // Long-form narrative tasks still need a complete parsable payload at the end,
+                // but streaming keeps proxy gateways from waiting silently for the full body.
+                const shouldStream = params.config?.stream === false ? false : true;
 
                 console.log(`[ProxyStream] Calling: ${fetchUrl} with model: ${model}, max_tokens: ${maxTokens}, stream=${shouldStream}`);
                 const startTime = Date.now();
@@ -130,8 +148,8 @@ class OpenAIAdapter {
                 if (!response.ok) {
                     const err = await response.text();
                     let errMsg = `Proxy Error: ${response.status} (耗时 ${elapsed}s)`;
-                    if (response.status === 502) {
-                        errMsg = `代理返回 502 Bad Gateway (耗时 ${elapsed}s)。\n代理服务器可能超时了。\n请检查代理超时设置（建议 ≥ 120 秒）。\n\n请求地址: ${fetchUrl}\n模型: ${model}`;
+                    if ([502, 504, 524].includes(response.status)) {
+                        errMsg = `代理返回 ${response.status}（耗时 ${elapsed}s）。\n上游模型或中转网关没有及时返回，常见原因是模型过慢、输出过长，或代理超时。\n请切换到更稳定的核心文本模型，或检查代理超时设置（V3 长叙事建议 ≥ 180-300 秒）。\n\n请求地址: ${fetchUrl}\n模型: ${model}`;
                         throw new Error(errMsg);
                     }
                     if (response.status === 404) {
@@ -167,7 +185,7 @@ class OpenAIAdapter {
                     return '';
                 };
 
-                // 如果代理不支持流式，fallback 到普通 JSON 解析
+                // 如果代理不支持流式，或显式要求非流式，fallback 到普通 JSON 解析
                 if (!shouldStream || contentType.includes('application/json')) {
                     const responseText = await response.text();
                     if (!responseText.trim()) {
@@ -434,11 +452,11 @@ class AnthropicAdapter {
 const getAI = () => {
     const settings = getSettings();
     const fullConfig = configService.getConfig();
-    
+
     // Gemini Provider 配置
     const geminiConfig = fullConfig.gemini;
     const geminiKey = geminiConfig.apiKey || settings?.llm.apiKey || process.env.API_KEY || "";
-    
+
     // Claude Provider 配置
     const claudeConfig = fullConfig.claude;
     const claudeKey = claudeConfig.apiKey || settings?.llm.claudeApiKey || "";
@@ -449,67 +467,82 @@ const getAI = () => {
         ? settings?.llm.apiKey
         : '';
     const openaiKey = openaiConfig.apiKey || legacyOpenAIKey || "";
+
+    // DeepSeek Provider 配置（OpenAI-compatible）
+    const deepseekConfig = fullConfig.deepseek;
+    const deepseekKey = deepseekConfig.apiKey || "";
     
     return {
         models: {
             generateContent: async (params: any) => {
                 const modelId = params.model || '';
-                const provider = getProviderForModel(modelId);
-                
-                if (provider === 'claude') {
-                    // ═══ Claude 路径：通过代理，始终使用 Anthropic 原生格式 ═══
-                    const apiKey = claudeKey;
-                    const baseUrl = getEffectiveBaseUrl('claude', claudeConfig) || settings?.llm.baseUrl || '';
+                const engineId = params.config?.engineId as EngineId | undefined;
+                const runtime = engineId
+                    ? configService.getRuntimeForEngine(engineId, modelId)
+                    : configService.getRuntimeForModel(modelId);
+                const cleanParams = stripRuntimeConfig(params);
+                const fallbackProvider = getProviderForModel(modelId);
+                const fallbackApiKey = fallbackProvider === 'claude'
+                    ? claudeKey
+                    : fallbackProvider === 'openai'
+                        ? openaiKey
+                        : fallbackProvider === 'deepseek'
+                            ? deepseekKey
+                            : geminiKey;
+                const apiKey = runtime.key?.apiKey || fallbackApiKey;
+                const baseUrl = runtime.baseUrl
+                    || (fallbackProvider === 'claude' ? claudeConfig.baseUrl : '')
+                    || (fallbackProvider === 'openai' ? openaiConfig.baseUrl : '')
+                    || (fallbackProvider === 'deepseek' ? deepseekConfig.baseUrl : '')
+                    || settings?.llm.baseUrl
+                    || '';
 
+                console.log(`[RuntimeRoute] ${engineId || 'model'} -> ${runtime.key?.name || fallbackProvider} | ${runtime.apiFormat} | ${runtime.requestUrl || baseUrl || 'google-native'}`);
+
+                if (runtime.apiFormat === 'anthropic') {
                     if (!apiKey) {
-                        throw new Error('Claude 模型需要配置 API Key。请在系统配置中填写 Claude API Key。');
+                        throw new Error('Claude / Anthropic 路由需要配置 API Key。请在系统配置中选择或填写可用 Key。');
                     }
-
                     if (!baseUrl) {
-                        throw new Error('Claude 模型需要配置代理地址 (Base URL)。请在系统配置中设置 Claude 的代理地址。');
+                        throw new Error('Claude / Anthropic 路由需要配置代理地址 (Base URL)。');
                     }
-
                     const adapter = new AnthropicAdapter(apiKey, baseUrl);
-                    return adapter.models.generateContent(params);
+                    return adapter.models.generateContent(cleanParams);
                 }
 
-                if (provider === 'openai') {
-                    // ═══ OpenAI 路径：官方 API 或 OpenAI-compatible 网关 ═══
-                    const apiKey = openaiKey;
-                    const baseUrl = getEffectiveBaseUrl('openai', openaiConfig) || settings?.llm.baseUrl || 'https://api.openai.com/v1';
-
+                if (runtime.apiFormat === 'openai') {
                     if (!apiKey) {
-                        throw new Error('OpenAI 模型需要配置 API Key。请在系统配置中填写 OpenAI API Key。');
+                        throw new Error('OpenAI-compatible 路由需要配置 API Key。请在系统配置中选择或填写可用 Key。');
                     }
-
+                    if (!baseUrl) {
+                        throw new Error('OpenAI-compatible 路由需要配置 Base URL。官方 OpenAI 请使用 https://api.openai.com/v1，第三方网关请填写网关地址。');
+                    }
                     const adapter = new OpenAIAdapter(apiKey, baseUrl);
-                    return adapter.models.generateContent(params);
+                    return adapter.models.generateContent(cleanParams);
                 }
-                
-                if (geminiConfig.mode === 'proxy' && geminiConfig.baseUrl) {
-                    // ═══ Gemini 代理路径：通过第三方 OpenAI-compatible 代理 ═══
-                    const adapter = new OpenAIAdapter(geminiKey, geminiConfig.baseUrl);
-                    return adapter.models.generateContent(params);
+
+                if (!apiKey) {
+                    throw new Error('Gemini 官方路由需要配置 API Key。请在系统配置中填写 Gemini API Key。');
                 }
-                
-                // ═══ Gemini 官方路径：直连 Google SDK ═══
-                if (!geminiKey) {
-                    throw new Error('Gemini 模型需要配置 API Key。请在系统配置中填写 Gemini API Key。');
-                }
-                const genAI = new GoogleGenAI({ apiKey: geminiKey });
-                return (genAI as any).models.generateContent(params);
+                const genAI = new GoogleGenAI({ apiKey });
+                return (genAI as any).models.generateContent(cleanParams);
             }
         }
     };
 };
 
+export const generateContentWithRuntime = (params: any): Promise<GenerateContentResponse> => {
+    return getAI().models.generateContent(params);
+};
+
 export const testConnection = async (section: 'llm' | 'image'): Promise<boolean> => {
     try {
-        const model = configService.getEngineModel(section === 'llm' ? 'coreEngine' : 'imageGen');
+        const engineId = section === 'llm' ? 'coreEngine' : 'imageGen';
+        const model = configService.getEngineModel(engineId);
         const response = await getAI().models.generateContent({
             model: model || (section === 'llm' ? 'gemini-3.1-flash-lite-preview' : 'gemini-3-pro-image-preview'),
             contents: { parts: [{ text: "ping" }] },
-            config: { maxOutputTokens: 5 }
+            config: { maxOutputTokens: 5, engineId }
         });
         return !!response.text;
     } catch (e) {
@@ -804,7 +837,7 @@ const normalizeTreatmentType = (rawType: string, index: number): CreativeTreatme
     ]);
 
     if (known.has(normalized as CreativeTreatment['type'])) return normalized as CreativeTreatment['type'];
-    if (normalized.includes('FORM') || normalized.includes('SV2') || rawType.includes('体裁') || rawType.includes('体量')) return 'FORM';
+    if (normalized.includes('FORM') || rawType.includes('形式') || rawType.includes('载体') || rawType.includes('体裁')) return 'FORM';
     if (normalized.includes('CHARACTER') || rawType.includes('人物') || rawType.includes('角色')) return 'CHARACTER';
     if (normalized.includes('ATMOSPHERE') || rawType.includes('氛围') || rawType.includes('场域')) return 'ATMOSPHERE';
     if (normalized.includes('PLOT') || rawType.includes('情节') || rawType.includes('事件')) return 'PLOT';
@@ -948,8 +981,8 @@ const getCallerName = (): string => {
     return "AI Generation Task";
 };
 
-async function retryWithBackoff<T>(fn: (signal?: AbortSignal) => Promise<T>, retries = 3, delay = 1000): Promise<T> {
-    const taskName = getCallerName();
+async function retryWithBackoff<T>(fn: (signal?: AbortSignal) => Promise<T>, retries = 3, delay = 1000, taskNameOverride?: string): Promise<T> {
+    const taskName = taskNameOverride || getCallerName();
     return runWithTask(taskName, async (signal: AbortSignal) => {
         const attempt = async (currentRetries: number, currentDelay: number): Promise<T> => {
             try {
@@ -961,8 +994,8 @@ async function retryWithBackoff<T>(fn: (signal?: AbortSignal) => Promise<T>, ret
                     }
                     throw err;
                 }
-                // 502 代理超时不重试 — 重试只会继续超时，浪费用户等待时间
-                if (err?.message?.includes('502')) {
+                // 代理/网关超时不重试；重试通常只会继续超时，浪费用户等待时间。
+                if (err?.message?.includes('502') || err?.message?.includes('504') || err?.message?.includes('524')) {
                     throw err;
                 }
                 if (currentRetries === 0) throw err;
@@ -978,8 +1011,8 @@ const handleApiError = (context: string, e: any) => {
     console.error(`[GeminiServiceError] ${context}:`, e);
     const errorMsg = e?.message || e?.toString() || "Unknown error";
     if (typeof window !== 'undefined') {
-        if (errorMsg.includes("502")) {
-            alert(`代理服务器超时 (502 Bad Gateway)。\n\nClaude 模型生成内容较慢，代理服务器可能在等待响应时超时了。\n建议：将代理的超时时间设置为 120 秒以上。\n\n${errorMsg}`);
+        if (errorMsg.includes("502") || errorMsg.includes("504") || errorMsg.includes("524")) {
+            alert(`代理服务器超时或网关失败。\n\n模型生成内容较慢，代理服务器可能在等待响应时超时了。\n建议：切换到更稳定的核心文本模型，或将代理超时时间设置为 180-300 秒以上；V3 长叙事提示词越完整，越需要更长的上游等待窗口。\n\n${errorMsg}`);
         } else if (errorMsg.includes("代理地址错误") || errorMsg.includes("Base URL")) {
             alert(`代理配置错误 (Proxy Config Error)。\n\n${errorMsg}`);
         } else if (errorMsg.includes("429") || errorMsg.toLowerCase().includes("quota") || errorMsg.includes("exhausted") || errorMsg.toLowerCase().includes("rate limit")) {
@@ -1030,7 +1063,8 @@ export const generateSutureScript = async (
             config: {
                 responseMimeType: 'application/json',
                 temperature: 0.7,  // Add randomness for varied outputs
-                maxOutputTokens: 32768  // Increase token limit for longer scripts
+                maxOutputTokens: 32768,  // Increase token limit for longer scripts
+                engineId: 'metonymyEngine'
             }
         }));
         const data1 = cleanAndParseJSON(res1.text || "");
@@ -1081,7 +1115,8 @@ export const transformScriptStyle = async (
             config: {
                 responseMimeType: 'application/json',
                 temperature: 0.7,  // Add randomness for varied outputs
-                maxOutputTokens: 32768  // Increase token limit for longer scripts
+                maxOutputTokens: 32768,  // Increase token limit for longer scripts
+                engineId: 'metonymyEngine'
             }
         }));
         const data = cleanAndParseJSON(response.text || "");
@@ -1144,7 +1179,7 @@ export const generateSutureStoryboard = async (
         const response = await retryWithBackoff<GenerateContentResponse>(() => getAI().models.generateContent({
             model: model,
             contents: { parts: parts },
-            config: { responseMimeType: 'application/json' }
+            config: { responseMimeType: 'application/json', engineId: 'metonymyEngine' }
         }));
         return cleanAndParseJSON(response.text || "");
     } catch (e: any) {
@@ -1161,7 +1196,7 @@ export const mapAestheticInputToEngine = async (input: string): Promise<Narrativ
         const response = await retryWithBackoff<GenerateContentResponse>(() => getAI().models.generateContent({
             model: model,
             contents: { parts: [{ text: prompt }] },
-            config: { responseMimeType: 'application/json' }
+            config: { responseMimeType: 'application/json', engineId: 'visualSeed' }
         }));
         return cleanAndParseJSON(response.text || "") || {};
     } catch (e: any) {
@@ -1181,7 +1216,7 @@ export const analyzeImage = async (base64Image: string | null, textInput?: strin
         const response = await retryWithBackoff<GenerateContentResponse>(() => getAI().models.generateContent({
             model: model,
             contents: { parts: parts },
-            config: { maxOutputTokens: 4096 }
+            config: { maxOutputTokens: 4096, engineId: 'visualBible' }
         }));
         return response.text || "Decoding failed.";
     } catch (e: any) {
@@ -1200,7 +1235,7 @@ export const generateNarrativeAutoFill = async (driver: DriverType, visionInput:
         const response = await retryWithBackoff<GenerateContentResponse>(() => getAI().models.generateContent({
             model: model,
             contents: { parts: parts },
-            config: { responseMimeType: 'application/json' }
+            config: { responseMimeType: 'application/json', engineId: 'coreEngine' }
         }));
         const parsed = cleanAndParseJSON(response.text || "");
         return normalizeAutoFillState(driver, parsed);
@@ -1210,24 +1245,16 @@ export const generateNarrativeAutoFill = async (driver: DriverType, visionInput:
     }
 };
 
-export const generateFantasyTraverse = async (driver: DriverType, duration: string, fieldState: NarrativeFieldState, visionInput: string, visionImage: string | null, worldLaw: WorldLawConfig, subjectType: SubjectType, visionAnalysis: string, colorPalette: string[] = [], faceState?: FaceState): Promise<{ treatments: CreativeTreatment[]; thinkingXml: string }> => {
+export const generateFantasyTraverse = async (driver: DriverType, duration: string, fieldState: NarrativeFieldState, visionInput: string, visionImage: string | null, worldLaw: WorldLawConfig, subjectType: SubjectType, visionAnalysis: string, colorPalette: string[] = [], faceState?: FaceState, focusState?: PromptFocusState, promptVersion: NarrativePromptVersion = 'v4', taskName?: string, m7bIntensity?: M7BResidueIntensity): Promise<{ treatments: CreativeTreatment[]; thinkingXml: string }> => {
     try {
         let promptData;
         if (driver === DriverType.COMMERCIAL) promptData = buildCommercialPrompt(duration, fieldState, visionInput, visionImage, worldLaw);
         else if (driver === DriverType.EXPERIMENTAL) promptData = buildExperimentalPrompt(duration, fieldState, visionInput, visionImage);
         else if (driver === DriverType.AESTHETIC) promptData = buildAestheticPrompt(duration, fieldState, visionInput, visionImage, subjectType, worldLaw, colorPalette);
         else if (driver === DriverType.TRAILER) promptData = buildTrailerPrompt(duration, fieldState, visionInput, visionImage);
-        else promptData = buildNarrativePrompt(duration, fieldState, visionInput, visionImage, worldLaw, 'v3', faceState);
+        else promptData = buildNarrativePrompt(duration, fieldState, visionInput, visionImage, worldLaw, promptVersion, faceState, focusState, m7bIntensity);
 
-        const fantasyTraverseOutputContract = `
-
-【输出兼容性硬约束】
-最终必须返回可解析的 JSON 数组，数组内正好 3 个方案对象。
-不要把方案包在 "design_audit"、"thought_process"、"方案A"、"方案B"、"方案C" 这类外层字段里。
-每个方案对象必须包含：id, type, title, tagline, structure，并包含 pitch 或 pitch_structure。
-如果主提示要求结构审查，必须放在 JSON 数组之前的 <design_audit>...</design_audit> XML 标签里；只有旧架构明确要求时才允许 <thought_process>...</thought_process>。`;
-
-        const parts: any[] = [{ text: `${promptData.text}\n\n${fantasyTraverseOutputContract}` }];
+        const parts: any[] = [{ text: appendFantasyTraverseOutputContract(promptData.text) }];
         if (promptData.images && promptData.images.length > 0) parts.push({ inlineData: await toInlineImageData(promptData.images[0]) });
 
         const model = configService.getEngineModel('coreEngine') || 'gemini-3.1-pro-preview';
@@ -1235,8 +1262,8 @@ export const generateFantasyTraverse = async (driver: DriverType, duration: stri
         const response = await retryWithBackoff<GenerateContentResponse>(() => getAI().models.generateContent({
             model: model,
             contents: { parts: parts },
-            config: { responseMimeType: 'application/json' }
-        }));
+            config: { responseMimeType: 'application/json', engineId: 'coreEngine' }
+        }), 3, 1000, taskName);
         const rawText = response.text || "";
         console.log(`[CoreEngine] Fantasy Traverse raw response (${rawText.length} chars):`, rawText.substring(0, 500));
 
@@ -1285,13 +1312,13 @@ export const generateFantasyTraverse = async (driver: DriverType, duration: stri
     }
 };
 
-export const generateBlueprint = async (driver: DriverType, treatment: CreativeTreatment, style: StyleConfig, fieldState: NarrativeFieldState, visionInput: string, visionImage: string | null, worldLaw: WorldLawConfig, visionAnalysis: string, colorPalette: string[] = []): Promise<CreativeBlueprint | null> => {
+export const generateBlueprint = async (driver: DriverType, treatment: CreativeTreatment, style: StyleConfig, fieldState: NarrativeFieldState, visionInput: string, visionImage: string | null, worldLaw: WorldLawConfig, visionAnalysis: string, colorPalette: string[] = [], focusState?: PromptFocusState, m7bIntensity?: M7BResidueIntensity): Promise<CreativeBlueprint | null> => {
     try {
         let promptText;
         if (driver === DriverType.COMMERCIAL) promptText = buildCommercialBiblePrompt(treatment, style, fieldState, visionInput, worldLaw);
         else if (driver === DriverType.EXPERIMENTAL) promptText = buildExperimentalBiblePrompt(treatment, style, fieldState, visionInput, worldLaw);
         else if (driver === DriverType.AESTHETIC) promptText = buildAestheticBiblePrompt(treatment, style, fieldState, visionInput, worldLaw, colorPalette);
-        else promptText = buildNarrativeBiblePrompt(treatment, style, fieldState, visionInput, visionImage, worldLaw, visionAnalysis);
+        else promptText = buildNarrativeBiblePrompt(treatment, style, fieldState, visionInput, visionImage, worldLaw, visionAnalysis, focusState, m7bIntensity);
 
         const parts: any[] = [{ text: promptText }];
         if (visionImage) parts.push({ inlineData: await toInlineImageData(visionImage) });
@@ -1301,7 +1328,7 @@ export const generateBlueprint = async (driver: DriverType, treatment: CreativeT
         const response = await retryWithBackoff<GenerateContentResponse>(() => getAI().models.generateContent({
             model: model,
             contents: { parts: parts },
-            config: { responseMimeType: 'application/json' }
+            config: { responseMimeType: 'application/json', engineId: 'coreEngine' }
         }));
         const rawText = response.text || "";
         let parsed = cleanAndParseJSON(rawText);
@@ -1331,11 +1358,23 @@ export const generateBlueprint = async (driver: DriverType, treatment: CreativeT
             };
         }
         
-        if (parsed && !parsed.context) {
+        if (parsed) {
+            const context = parsed.context || {};
             parsed.context = {
-                world: parsed.world || parsed.worldCn || parsed.worldEn || "",
-                tone: parsed.tone || parsed.toneCn || parsed.toneEn || "",
-                colorPalette: parsed.colorPalette || colorPalette || []
+                ...context,
+                world: context.world || parsed.world || parsed.worldCn || parsed.worldEn || "",
+                tone: context.tone || parsed.tone || parsed.toneCn || parsed.toneEn || "",
+                colorPalette: Array.isArray(context.colorPalette) ? context.colorPalette : (parsed.colorPalette || colorPalette || []),
+                moodboard: context.moodboard || { prompt: "", images: [], selectedImageId: null }
+            };
+        }
+
+        if (parsed) {
+            const assets = parsed.assets || {};
+            parsed.assets = {
+                characters: Array.isArray(assets.characters) ? assets.characters : [],
+                locations: Array.isArray(assets.locations) ? assets.locations : [],
+                props: Array.isArray(assets.props) ? assets.props : []
             };
         }
 
@@ -1359,7 +1398,8 @@ export const modifyNarrativeWithAI = async (
         console.log(`[CoreEngine] Modifying Narrative with model: ${model}`);
         const response = await retryWithBackoff<GenerateContentResponse>(() => getAI().models.generateContent({
             model: model,
-            contents: { parts: [{ text: prompt }] }
+            contents: { parts: [{ text: prompt }] },
+            config: { engineId: 'coreEngine' }
         }));
         return response.text || fullStory;
     } catch (e: any) {
@@ -1374,7 +1414,8 @@ export const generateAssetImage = async (prompt: string): Promise<string | null>
         console.log(`[ImageGen] Generating Asset Image with model: ${model}`);
         const response = await retryWithBackoff<GenerateContentResponse>(() => getAI().models.generateContent({
             model: model,
-            contents: { parts: [{ text: prompt }] }
+            contents: { parts: [{ text: prompt }] },
+            config: { engineId: 'imageGen' }
         }));
         if (response.candidates && response.candidates[0].content.parts) {
             for (const part of response.candidates[0].content.parts) {
@@ -1401,7 +1442,7 @@ export const breakdownScript = async (sourceText: string, instruction?: string, 
         const response = await retryWithBackoff<GenerateContentResponse>(() => getAI().models.generateContent({
             model: model,
             contents: { parts: [{ text: prompt }] },
-            config: { responseMimeType: 'application/json' }
+            config: { responseMimeType: 'application/json', engineId: 'metonymyEngine' }
         }));
 
         if (!response.text) return null;
@@ -1479,7 +1520,7 @@ export const generateGlobalVisualTone = async (script: string, assets: FinalAsse
         const response = await retryWithBackoff<GenerateContentResponse>(() => getAI().models.generateContent({
             model: model,
             contents: { parts: [{ text: prompt }] },
-            config: { responseMimeType: 'application/json' }
+            config: { responseMimeType: 'application/json', engineId: 'visualBible' }
         }));
         return cleanAndParseJSON(response.text || "");
     } catch (e: any) {
@@ -1496,7 +1537,7 @@ export const updateBlueprint = async (blueprint: CreativeBlueprint, instruction:
         const response = await retryWithBackoff<GenerateContentResponse>(() => getAI().models.generateContent({
             model: model,
             contents: { parts: [{ text: prompt }] },
-            config: { responseMimeType: 'application/json' }
+            config: { responseMimeType: 'application/json', engineId: 'coreEngine' }
         }));
         return cleanAndParseJSON(response.text || "") || blueprint;
     } catch (e: any) {
@@ -1515,7 +1556,7 @@ export const generateContinuation = async (blueprint: CreativeBlueprint, instruc
         const response = await retryWithBackoff<GenerateContentResponse>(() => getAI().models.generateContent({
             model: model,
             contents: { parts: parts },
-            config: { responseMimeType: 'application/json' }
+            config: { responseMimeType: 'application/json', engineId: 'coreEngine' }
         }));
         return cleanAndParseJSON(response.text || "");
     } catch (e) { return null; }
@@ -1529,7 +1570,7 @@ export const generateAssetPrompts = async (blueprint: CreativeBlueprint) => {
         const response = await retryWithBackoff<GenerateContentResponse>(() => getAI().models.generateContent({
             model: model,
             contents: { parts: [{ text: prompt }] },
-            config: { responseMimeType: 'application/json' }
+            config: { responseMimeType: 'application/json', engineId: 'coreEngine' }
         }));
         const newAssets = cleanAndParseJSON(response.text || "");
         if (newAssets) return { ...blueprint, assets: newAssets };
@@ -1547,7 +1588,8 @@ export const analyzePsychoStructure = async (fieldState: NarrativeFieldState, sy
         console.log(`[PsychoAnalysis] Analyzing Structure with model: ${model}`);
         const response = await retryWithBackoff<GenerateContentResponse>(() => getAI().models.generateContent({
             model: model,
-            contents: { parts: [{ text: prompt }] }
+            contents: { parts: [{ text: prompt }] },
+            config: { engineId: 'psychoAnalysis' }
         }));
         return response.text || "";
     } catch (e: any) {

@@ -12,7 +12,7 @@ interface DriverSelectorProps {
     onHover: (id: DriverType | null) => void;
 }
 
-export const DriverSelector: React.FC<DriverSelectorProps> = ({ selectedDriver, onSelect, lang, hoveredDriver, onHover }) => {
+const DriverSelectorComponent: React.FC<DriverSelectorProps> = ({ selectedDriver, onSelect, lang, hoveredDriver, onHover }) => {
 
     const { theme } = useTheme();
     const isRetro = theme === 'retro';
@@ -47,6 +47,17 @@ export const DriverSelector: React.FC<DriverSelectorProps> = ({ selectedDriver, 
         }
     };
 
+    const getTitleClass = (id: DriverType) => {
+        switch (id) {
+            case DriverType.COMMERCIAL: return 'mist-commercial-engine-title';
+            case DriverType.NARRATIVE: return 'mist-narrative-engine-title';
+            case DriverType.AESTHETIC: return 'mist-aesthetic-engine-title';
+            case DriverType.EXPERIMENTAL: return 'mist-experimental-engine-title';
+            case DriverType.TRAILER: return 'mist-trailer-engine-title';
+            default: return '';
+        }
+    };
+
     return (
         <div className="w-full max-w-[1920px] mx-auto py-4 px-2 relative z-10">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
@@ -55,6 +66,7 @@ export const DriverSelector: React.FC<DriverSelectorProps> = ({ selectedDriver, 
                     const active = isHovered;
                     const accentClass = getAccentColor(driver.id);
                     const borderClass = getBorderColor(driver.id, active);
+                    const titleClass = getTitleClass(driver.id);
 
                     return (
                         <button
@@ -81,7 +93,7 @@ export const DriverSelector: React.FC<DriverSelectorProps> = ({ selectedDriver, 
                                     <div className={`transition-all duration-[1500ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${lang === 'EN' ? '-translate-y-1/2' : 'translate-y-0'}`}>
                                         <div className="flex flex-col">
                                             <div className="h-14 flex items-center shrink-0">
-                                                <h3 className={`text-xl md:text-2xl font-serif font-bold tracking-wide transition-all duration-500 leading-tight ${
+                                                <h3 className={`${titleClass} text-xl md:text-2xl font-serif font-bold tracking-wide transition-all duration-500 leading-tight ${
                                                     isRetro
                                                         ? (active ? 'text-black' : 'text-black/70')
                                                         : (active
@@ -92,7 +104,7 @@ export const DriverSelector: React.FC<DriverSelectorProps> = ({ selectedDriver, 
                                                 </h3>
                                             </div>
                                             <div className="h-14 flex items-center shrink-0">
-                                                <h3 className={`text-lg md:text-xl font-serif font-bold tracking-wide transition-all duration-500 leading-tight ${
+                                                <h3 className={`${titleClass} text-lg md:text-xl font-serif font-bold tracking-wide transition-all duration-500 leading-tight ${
                                                     isRetro
                                                         ? (active ? 'text-black' : 'text-black/70')
                                                         : (active
@@ -178,3 +190,5 @@ export const DriverSelector: React.FC<DriverSelectorProps> = ({ selectedDriver, 
         </div>
     );
 };
+
+export const DriverSelector = React.memo(DriverSelectorComponent);

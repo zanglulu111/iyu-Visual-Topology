@@ -495,6 +495,7 @@ export const RorschachView: React.FC<RorschachViewProps> = ({
 }) => {
   const { theme } = useTheme();
   const isRetro = theme === 'retro';
+  const [renderRings, setRenderRings] = useState(showRings);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const glRef = useRef<WebGLRenderingContext | null>(null);
   const programRef = useRef<WebGLProgram | null>(null);
@@ -508,6 +509,16 @@ export const RorschachView: React.FC<RorschachViewProps> = ({
   const [inputValue, setInputValue] = useState('');
   const [questionVisible, setQuestionVisible] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
+
+  useEffect(() => {
+    if (showRings) {
+      setRenderRings(true);
+      return;
+    }
+
+    const timer = window.setTimeout(() => setRenderRings(false), 1500);
+    return () => window.clearTimeout(timer);
+  }, [showRings]);
   const [profile, setProfile] = useState<DesireProfile | null>(null);
   const [awaitingClick, setAwaitingClick] = useState(false);
   const [clickPos, setClickPos] = useState<{ x: number; y: number } | null>(null);
@@ -808,8 +819,11 @@ export const RorschachView: React.FC<RorschachViewProps> = ({
         style={{ backgroundColor: bgPanel, borderRight: `1px solid ${borderCol}` }}
       >
         {/* Background Rings */}
-        {showRings && (
-          <div className="mist-labyrinth-rings" style={{ opacity: 0.42, pointerEvents: 'none', inset: '-5% -10% -5% -10%' }}>
+        {renderRings && (
+          <div
+            className={`mist-labyrinth-rings ${showRings ? 'is-active' : 'is-exiting'}`}
+            style={{ opacity: 0.42, pointerEvents: 'none', inset: '-5% -10% -5% -10%' }}
+          >
             <BorromeanRings centered={true} opacity={1} vivid={true} />
           </div>
         )}
@@ -833,7 +847,7 @@ export const RorschachView: React.FC<RorschachViewProps> = ({
             {/* Ring Toggle */}
             <button
               onClick={() => setShowRings(!showRings)}
-              className={`flex items-center justify-center w-7 h-7 rounded-sm transition-all duration-300 hover:bg-black/5 dark:hover:bg-white/5 hover:scale-110 active:scale-90 focus:outline-none ${
+              className={`mist-ring-toggle-button flex items-center justify-center w-7 h-7 rounded-sm transition-all duration-300 hover:bg-black/5 dark:hover:bg-white/5 hover:scale-110 active:scale-90 focus:outline-none ${
                 showRings
                   ? (isRetro ? 'text-[var(--mist-active-accent)]' : 'text-amber-500')
                   : 'text-zinc-500'
@@ -842,7 +856,7 @@ export const RorschachView: React.FC<RorschachViewProps> = ({
             >
               <Aperture
                 size={14}
-                className={`shrink-0 transition-all duration-700 ${showRings ? 'rotate-[360deg] text-[var(--mist-active-accent)]' : 'rotate-0'}`}
+                className={`mist-ring-toggle-icon shrink-0 ${showRings ? 'text-[var(--mist-active-accent)]' : ''}`}
               />
             </button>
 

@@ -6,6 +6,11 @@ import { FooterActions } from './FooterActions';
 import { ProcessingTimer } from './SharedBlueprintComponents';
 import { useTheme } from '../contexts/ThemeContext';
 import { globalTaskManager } from '../services/taskManager';
+import {
+    getWorldLawDisplay,
+    patchWorldLawConfig,
+    WORLD_LAW_LEVEL_OPTIONS
+} from '../services/worldLaw';
 
 interface EngineBottomBarProps {
     lang: 'CN' | 'EN';
@@ -94,7 +99,7 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
 }) => {
     const { theme } = useTheme();
     const [activeTaskCount, setActiveTaskCount] = React.useState(0);
-    const [hoveredGravity, setHoveredGravity] = React.useState<number | null>(null);
+    const [hoveredWorldLaw, setHoveredWorldLaw] = React.useState<number | null>(null);
 
     React.useEffect(() => {
         const unsubscribe = globalTaskManager.subscribe(tasks => {
@@ -170,66 +175,59 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
                         <div className="relative flex flex-col items-center">
                             {/* Inline Expander - Horizontal Row above */}
                             {isWorldLawOpen && (
-                                <div className="absolute bottom-[calc(100%+16px)] flex flex-col items-center gap-2 animate-in slide-in-from-bottom-4 fade-in duration-300 z-[100]">
+                                <div className="mist-world-law-footer-popover absolute bottom-[calc(100%+16px)] flex flex-col items-center gap-2 z-[100]">
                                     {/* Description Box - Matched with NarrativeEngineField Tooltip style */}
-                                    <div className={`p-5 min-w-[300px] max-w-[320px] text-left shadow-[0_20px_50px_rgba(0,0,0,0.72)] relative overflow-hidden border ${footerPanelClass}`}>
+                                    <div className={`mist-world-law-footer-preview p-5 min-w-[300px] max-w-[320px] text-left shadow-[0_20px_50px_rgba(0,0,0,0.72)] relative overflow-hidden border ${footerPanelClass}`}>
                                         <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none"></div>
                                         {(() => {
-                                            const levels = [
-                                                { val: 1, cn: '写实', desc: '物理重力闭锁。严禁任何违法时代背景的物理常数。没有任何奇迹，死亡是绝对的，重力是必然的。' },
-                                                { val: 2, cn: '合理', desc: '逻辑补完路径。超现实元素必须被赋予一个“科学或机械”的合理解释。' },
-                                                { val: 3, cn: '缝合', desc: '魔幻现实主义。以现实为底，允许局部“缝合”超现实能指（即症状）。' },
-                                                { val: 4, cn: '奇观', desc: '高概念幻想。科幻/魔幻逻辑公开运行，但需要基本的内部一致性。' },
-                                                { val: 5, cn: '狂想', desc: '绝对无重力。允许所有标签无视物理常数进行疯狂拼贴、大杂烩。' }
-                                            ];
-                                            const activeVal = hoveredGravity || worldLawConfig.gravity;
-                                            const current = levels.find(l => l.val === activeVal);
+                                            const display = getWorldLawDisplay(worldLawConfig, lang);
+                                            const hoveredOption = WORLD_LAW_LEVEL_OPTIONS.find(option => option.id === hoveredWorldLaw) || null;
+                                            const activeTitle = hoveredOption
+                                                ? (lang === 'EN' ? hoveredOption.en : hoveredOption.cn)
+                                                : (lang === 'EN' ? display.en : display.cn);
+                                            const activeDesc = hoveredOption
+                                                ? (lang === 'EN' ? hoveredOption.descEN : hoveredOption.descCN)
+                                                : (lang === 'EN' ? display.descEN : display.descCN);
                                             return (
                                                 <div className="flex flex-col relative z-10">
-                                                    <div className="text-sm font-black uppercase tracking-[0.2em] mb-2 border-b pb-2 text-[var(--text-muted)] border-[var(--border-main)]">
-                                                        <span className="text-[var(--text-accent)]">
-                                                            LV.{current?.val} {current?.cn}
-                                                        </span>
+                                                    <div className="flex items-baseline gap-2 text-base font-black tracking-[0.12em] mb-2 border-b pb-2 text-[var(--text-muted)] border-[var(--border-main)]">
+                                                        <span>{lang === 'CN' ? '等级' : 'Level'}</span>
+                                                        <b className="text-[var(--text-accent)]">{activeTitle}</b>
                                                     </div>
-                                                    <div className="text-[13px] font-bold leading-relaxed text-[var(--text-main)]">
-                                                        {current?.desc}
+                                                    <div className="mist-world-law-footer-description text-[14px] font-bold leading-relaxed text-[var(--text-main)]">
+                                                        {activeDesc}
                                                     </div>
                                                 </div>
                                             );
                                         })()}
                                     </div>
 
-                                    {/* 5-Button Row */}
-                                    <div className={`flex items-center gap-2 border px-4 py-3 shadow-2xl ${footerPanelClass}`}>
-                                        {[1, 2, 3, 4, 5].map((val) => {
-                                            const level = [
-                                                { val: 1, cn: '写实' },
-                                                { val: 2, cn: '合理' },
-                                                { val: 3, cn: '缝合' },
-                                                { val: 4, cn: '奇观' },
-                                                { val: 5, cn: '狂想' }
-                                            ].find(l => l.val === val);
-
-                                            return (
-                                                <button
-                                                    key={val}
-                                                    onMouseEnter={() => setHoveredGravity(val)}
-                                                    onMouseLeave={() => setHoveredGravity(null)}
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setWorldLawConfig({ gravity: val as any });
-                                                    }}
-                                                    className={`w-12 h-12 rounded-full text-[10px] font-black transition-all flex flex-col items-center justify-center border-2 ${
-                                                        worldLawConfig.gravity === val
-                                                            ? footerActivePillClass
-                                                            : footerInactivePillClass
-                                                    }`}
-                                                >
-                                                    <span className="opacity-50 text-[8px] mb-0.5">LV{val}</span>
-                                                    <span>{level?.cn}</span>
-                                                </button>
-                                            );
-                                        })}
+                                    {/* World law levels */}
+                                    <div className={`grid border p-3 shadow-2xl w-[320px] max-w-[calc(100vw-2rem)] ${footerPanelClass}`}>
+                                        <div
+                                            className="grid grid-cols-5 gap-1.5"
+                                            onMouseLeave={() => setHoveredWorldLaw(null)}
+                                        >
+                                            {WORLD_LAW_LEVEL_OPTIONS.map(option => {
+                                                const display = getWorldLawDisplay(worldLawConfig, lang);
+                                                const isActive = option.id === display.level;
+                                                return (
+                                                    <button
+                                                        key={option.id}
+                                                        onMouseEnter={() => setHoveredWorldLaw(option.id)}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setWorldLawConfig(patchWorldLawConfig(worldLawConfig, option.id));
+                                                        }}
+                                                        className={`min-w-0 h-9 rounded px-1 text-[10px] font-black transition-all flex items-center justify-center border-2 ${
+                                                            isActive ? footerActivePillClass : footerInactivePillClass
+                                                        }`}
+                                                    >
+                                                        {lang === 'CN' ? option.cn : option.en}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
                                     </div>
                                 </div>
                             )}
@@ -244,14 +242,8 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
                                 <Scale size={18} className={getThemeTextColor()} />
                                 <span className={`text-[10px] font-black uppercase tracking-widest transition-colors ${getThemeTextColor()}`}>
                                     {(() => {
-                                        const level = [
-                                            { val: 1, cn: '写实' },
-                                            { val: 2, cn: '合理' },
-                                            { val: 3, cn: '缝合' },
-                                            { val: 4, cn: '奇观' },
-                                            { val: 5, cn: '狂想' }
-                                        ].find(l => l.val === worldLawConfig.gravity);
-                                        return level?.cn || (lang === 'CN' ? "世界法则" : "LAW");
+                                        const display = getWorldLawDisplay(worldLawConfig, lang);
+                                        return lang === 'CN' ? display.cn : display.en;
                                     })()}
                                 </span>
                             </button>
@@ -354,7 +346,7 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
                     <div className="relative">
                         <Activity size={18} className={`transition-colors ${isTaskManagerOpen ? getThemeTextColor() : mutedFooterControlClass}`} />
                         {activeTaskCount > 0 && (
-                            <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-[var(--mist-archive-red)] rounded-full text-[8px] flex items-center justify-center font-bold text-white shadow-[0_0_10px_var(--accent-glow)]">
+                            <span className="mist-task-count-badge absolute -top-1 -right-1 w-3.5 h-3.5 bg-[var(--mist-archive-red)] rounded-full text-[8px] flex items-center justify-center font-bold text-white shadow-[0_0_10px_var(--accent-glow)]">
                                 {activeTaskCount}
                             </span>
                         )}

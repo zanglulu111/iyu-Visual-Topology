@@ -229,7 +229,7 @@ export const AnalysisView: React.FC<AnalysisViewProps> = ({
                             className={`mb-8 flex items-center gap-2 text-xs font-bold uppercase tracking-widest ${theme === 'retro' ? 'text-zinc-500 hover:text-black' : 'text-zinc-500 hover:text-white'} transition-colors group`}
                         >
                             <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
-                            {language === 'EN' ? "Back to Story Project" : "返回故事工程"}
+                            {language === 'EN' ? "Back to Narrative" : "返回叙事创作"}
                         </button>
                     )}
 

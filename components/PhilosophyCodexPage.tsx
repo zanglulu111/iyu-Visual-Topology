@@ -1029,7 +1029,7 @@ const renderDetailView = () => {
             {/* 1. Ring Toggle */}
             <button
               onClick={() => setShowRings(!showRings)}
-              className={`flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300 border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-90 focus:outline-none ${
+              className={`mist-ring-toggle-button flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300 border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-90 focus:outline-none ${
                 showRings
                   ? 'text-[var(--mist-active-accent)]'
                   : (theme === 'retro' ? 'text-zinc-600 hover:text-black hover:border-black/5' : 'text-zinc-400 hover:text-white')
@@ -1038,7 +1038,7 @@ const renderDetailView = () => {
             >
               <Aperture
                 size={14}
-                className={`shrink-0 transition-all duration-700 ${showRings ? 'rotate-[360deg] text-[var(--mist-active-accent)]' : 'rotate-0'} ${showRings ? 'cult-pulse' : ''}`}
+                className={`mist-ring-toggle-icon shrink-0 ${showRings ? 'text-[var(--mist-active-accent)]' : ''}`}
               />
             </button>
 
@@ -1451,7 +1451,7 @@ const renderDetailView = () => {
             {/* 1. Ring Toggle */}
             <button
               onClick={() => setShowRings(!showRings)}
-              className={`flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300 border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-90 focus:outline-none ${
+              className={`mist-ring-toggle-button flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300 border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-90 focus:outline-none ${
                 showRings
                   ? 'text-[var(--mist-active-accent)]'
                   : (theme === 'retro' ? 'text-zinc-600 hover:text-black hover:border-black/5' : 'text-zinc-400 hover:text-white')
@@ -1460,7 +1460,7 @@ const renderDetailView = () => {
             >
               <Aperture
                 size={13}
-                className={`shrink-0 transition-all duration-700 ${showRings ? 'rotate-[360deg] text-[var(--mist-active-accent)]' : 'rotate-0'} ${showRings ? 'cult-pulse' : ''}`}
+                className={`mist-ring-toggle-icon shrink-0 ${showRings ? 'text-[var(--mist-active-accent)]' : ''}`}
               />
             </button>
 

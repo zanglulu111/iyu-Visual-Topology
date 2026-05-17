@@ -36,7 +36,7 @@ export const MIST_INDEX: LacanCategory[] = [
         enName: "00 Constitution & Canon",
         desc: "（一）理论总纲",
         concepts: [
-            { id: "mist_school_complete_theory", name: "迷雾学派完整理论总纲", enName: "Complete Mist School Theory", category: "Canon", shortDef: "三卷制最终理论包：爱欲结构拓扑学、M0-M7 核心叙事引擎、SUR/SV 表层生产协议。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" }
+            { id: "mist_school_complete_theory", name: "迷雾学派完整理论总纲", enName: "Complete Mist School Theory", category: "Canon", shortDef: "三卷制最终理论包：爱欲结构拓扑学、M0-M7A/M7B 核心叙事引擎、SUR/SV 表层生产协议。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" }
         ]
     },
     {
@@ -45,7 +45,7 @@ export const MIST_INDEX: LacanCategory[] = [
         enName: "00 Constitution & Canon",
         desc: "（二）核心公式与叙事宪法",
         concepts: [
-            { id: "mist_core_narrative_engine_canonical_theory", name: "叙事宪法与核心公式", enName: "Narrative Constitution & Core Formula", category: "Canon", shortDef: "规定 M轴、SUR轴、SV轴的分权边界，并统一 M0-M7、M7A/M7B 双结项与 SUR-END 的结尾宪法。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" }
+            { id: "mist_core_narrative_engine_canonical_theory", name: "叙事宪法与核心公式", enName: "Narrative Constitution & Core Formula", category: "Canon", shortDef: "规定 M轴、SUR轴、SV轴的分权边界，并统一 M0-M7A/M7B 双结项与 SUR-END 的结尾宪法。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" }
         ]
     },
     {
@@ -89,7 +89,7 @@ export const MIST_INDEX: LacanCategory[] = [
         enName: "02 Core Narrative Engine M0-M7",
         desc: "（二）基础公式",
         concepts: [
-            { id: "generative_engine_formula", name: "叙事生成引擎基础公式", enName: "Narrative Engine Formula", category: "Engine Theory", shortDef: "将 M0-M7 双结项整合为可执行叙事代数的核心协议。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" }
+            { id: "generative_engine_formula", name: "叙事生成引擎基础公式", enName: "Narrative Engine Formula", category: "Engine Theory", shortDef: "将 M0-M7A/M7B 双结项整合为可执行叙事代数的核心协议。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" }
         ]
     },
     {
@@ -100,7 +100,7 @@ export const MIST_INDEX: LacanCategory[] = [
         concepts: [
             { id: "mist_circuit_arc", name: "M1-M2-M3：创伤防御弧", enName: "Trauma-Defense Arc", category: "Circuit", shortDef: "缺失、真实遭遇与幻想如何构成主体最初的防御回路。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" },
             { id: "mist_circuit_parallax", name: "M2-M4：现实冲突视差", enName: "Reality Conflict Parallax", category: "Circuit", shortDef: "实在遭遇如何被大他者剪裁成不可调和的现实冲突。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" },
-            { id: "mist_circuit_drive", name: "M5-M6-M7：驱力结项回路", enName: "Drive & Dual-Terminal Resolution", category: "Circuit", shortDef: "行动驱力如何通过代价分裂为象征裁决与实在余痕。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" }
+            { id: "mist_circuit_drive", name: "M5-M6-M7A/M7B：驱力结项回路", enName: "Drive & Dual-Terminal Resolution", category: "Circuit", shortDef: "行动驱力如何通过代价分裂为象征裁决与实在余痕。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" }
         ]
     },
     {

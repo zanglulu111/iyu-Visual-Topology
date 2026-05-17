@@ -12,6 +12,7 @@ import {
     TRAILER_SKIN_BLOCKS
 } from '../constants';
 import { ALL_SKIN_BLOCKS } from '../data/narrative/skin_libraries';
+import { getWorldLawDisplay } from '../services/worldLaw';
 
 interface EngineParamsOverviewProps {
     fieldState?: NarrativeFieldState;
@@ -57,22 +58,8 @@ const cleanTag = (value: string) => {
 };
 
 const getWorldLawLabel = (worldLawConfig: WorldLawConfig | undefined, language: BlueprintLanguage) => {
-    const gravity = worldLawConfig?.gravity;
-    if (!gravity) return null;
-
-    const levels: Record<number, { cn: string; en: string }> = {
-        1: { cn: 'LV.1 写实 / 物理重力闭锁', en: 'LV.1 Realist / physics locked' },
-        2: { cn: 'LV.2 合理 / 逻辑补完', en: 'LV.2 Rational / logic bridge' },
-        3: { cn: 'LV.3 缝合 / 魔幻现实', en: 'LV.3 Suture / magical realism' },
-        4: { cn: 'LV.4 奇观 / 高概念幻想', en: 'LV.4 Spectacle / high concept' },
-        5: { cn: 'LV.5 狂想 / 无重力拼贴', en: 'LV.5 Phantasm / zero-gravity collage' }
-    };
-
-    const label = levels[gravity] || {
-        cn: `LV.${gravity} 世界法则`,
-        en: `LV.${gravity} World law`
-    };
-    return language === 'EN' ? label.en : label.cn;
+    if (!worldLawConfig) return null;
+    return getWorldLawDisplay(worldLawConfig, language).fullLabel;
 };
 
 const borderClassForAccent = (accentClass: string) => {

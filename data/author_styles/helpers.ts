@@ -36,7 +36,7 @@ const DEFAULT_TRANSFORM: Transform = {
 
 const DEFAULT_PRESERVE = [
   '保留已选草稿的人物关系、关键事件、因果方向和结局方向。',
-  '保留 M0-M7A/M7B 的精神弧线、意义裁决与实在余痕。',
+  '保留 M0-M7A/M7B 的精神弧线、M7A 意义裁决与 M7B 末帧余震；不得把 M7B 扩写成后日谈。',
   '保留世界法则、SUR 表层设定、体量结构与 SOURCE 中人物的社会位置。'
 ];
 
@@ -52,7 +52,7 @@ const defaultLens = (styleTitle: string): Record<string, string> => ({
   M2: `保留已选 M2 的真实穿刺，只把遭遇包装成「${styleTitle}」偏好的事件入口、感官冲击或认知断裂。`,
   M4: `保留已选 M4 的阻断逻辑，只把阻断的可见外壳染成「${styleTitle}」擅长的秩序、关系、空间或命运压力。`,
   M5: `保留已选 M5 的行动驱力，只改变行动的姿态、节奏、重复方式和身体质感。`,
-  M7B: `保留已选 M7B 的身体余痕，只让余痕带有「${styleTitle}」的感官残响、物件残留或空间回声。`
+  M7B: `保留已选 M7B 的末帧余震，只让它贴在最后一个动作、物件、声音、目光、姿势或身体反应上带有「${styleTitle}」的感官残响；不得另起尾声。`
 });
 
 const mergeTransform = (

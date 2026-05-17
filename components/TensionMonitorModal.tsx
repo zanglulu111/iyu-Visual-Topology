@@ -3,6 +3,7 @@ import { Network, AlertTriangle, ShieldAlert, Cpu, Activity, Info, X } from 'luc
 import { NarrativeFieldState, WorldLawConfig, DriverType } from '../types';
 import { extractEngineInput, runMistEngine } from '../engine/mist_calculator';
 import { useTheme } from '../contexts/ThemeContext';
+import { getWorldLawDisplay } from '../services/worldLaw';
 
 interface TensionMonitorModalProps {
     isOpen: boolean;
@@ -17,6 +18,7 @@ export const TensionMonitorModal: React.FC<TensionMonitorModalProps> = ({
     isOpen, onClose, fieldState, worldLaw, lang, selectedDriver
 }) => {
     const { theme } = useTheme();
+    const worldLawDisplay = getWorldLawDisplay(worldLaw, lang);
     
     // Only process if modal is open
     const engineOutput = useMemo(() => {
@@ -114,13 +116,13 @@ export const TensionMonitorModal: React.FC<TensionMonitorModalProps> = ({
                         {/* WORLD LAW */}
                         <div className={`p-4 rounded-lg border ${theme === 'retro' ? 'bg-black/5 border-black/10' : 'bg-white/5 border-white/10'}`}>
                             <div className={`text-[10px] font-bold tracking-widest uppercase mb-1 ${theme === 'retro' ? 'text-zinc-500' : 'text-zinc-400'}`}>
-                                {lang === 'CN' ? '重力法则 (Gravity Law)' : 'GRAVITY LAW'}
+                                {lang === 'CN' ? '世界法则' : 'WORLD LAW'}
                             </div>
                             <div className={`text-xl font-black mt-2 tracking-wider ${theme === 'retro' ? 'text-[#8B261D]' : 'text-gold-primary'}`}>
-                                LV.{worldLaw.gravity}
+                                {worldLawDisplay.label}
                             </div>
                             <div className={`text-xs mt-1 opacity-70 ${theme === 'retro' ? 'text-zinc-700' : 'text-zinc-400'}`}>
-                                {lang === 'CN' ? '影响物理断裂、超自然限制、世界缝合度。' : 'Dictates physical constraints and surreal stitching.'}
+                                {lang === 'CN' ? '裁决故事类型与时空坐标的冲突。' : 'Governs conflicts between genre and spacetime.'}
                             </div>
                         </div>
                     </div>

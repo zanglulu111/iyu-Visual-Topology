@@ -482,15 +482,15 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
         }
 
         @keyframes retro-portal-glitch {
-          0%, 100% { text-shadow: -1px -0.5px 0.5px rgba(139,38,29, 0.3), 1px 0.5px 0.5px rgba(139,38,29, 0.3); transform: translate(0, 0); clip-path: none; filter: brightness(1); }
-          25% { text-shadow: -3px 0.8px 1px rgba(139,38,29, 0.5), 3px -0.8px 1px rgba(139,38,29, 0.5); transform: translate(-1.5px, 0.8px) skewX(1deg); clip-path: inset(30% 0 65% 0); filter: brightness(1.2); }
-          50% { text-shadow: 2px -2px 1.5px rgba(139,38,29, 0.4), -2px 2px 1.5px rgba(139,38,29, 0.4); transform: translate(1px, -1.2px); clip-path: none; filter: brightness(0.9); }
-          75% { text-shadow: -3px 2px 1px rgba(139,38,29, 0.5), 3px -2px 1px rgba(139,38,29, 0.5); transform: translate(-1px, 1.5px) skewX(-1deg); clip-path: inset(70% 0 25% 0); filter: brightness(1.1); }
+          0%, 100% { text-shadow: none; transform: translate(0, 0); clip-path: none; filter: brightness(1); }
+          25% { text-shadow: none; transform: translate(-1.5px, 0.8px) skewX(1deg); clip-path: inset(30% 0 65% 0); filter: brightness(1.2); }
+          50% { text-shadow: none; transform: translate(1px, -1.2px); clip-path: none; filter: brightness(0.9); }
+          75% { text-shadow: none; transform: translate(-1px, 1.5px) skewX(-1deg); clip-path: inset(70% 0 25% 0); filter: brightness(1.1); }
         }
 
         @keyframes retro-subtle-flow {
-          0%, 100% { text-shadow: -1.5px -0.5px 0.5px rgba(139,38,29, 0.3), 1.5px 0.5px 0.5px rgba(139,38,29, 0.3); opacity: 0.9; }
-          50% { text-shadow: 2px 1px 1.5px rgba(139,38,29, 0.5), -2px -1px 1.5px rgba(139,38,29, 0.5); opacity: 1; }
+          0%, 100% { text-shadow: none; opacity: 0.9; }
+          50% { text-shadow: none; opacity: 1; }
         }
 
         .rgb-split-hover:hover, .rgb-split-active {
@@ -536,14 +536,14 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
         }
         @keyframes retro-jitter-dispersion {
           /* Burst 1 */
-          0%, 12% { transform: translate(-1px, 0.5px); filter: brightness(1.3); text-shadow: 1px 0px 0px rgba(139,38,29,0.4); }
-          13%, 32% { transform: translate(0,0); filter: brightness(1.1); text-shadow: 1px 0px 0px rgba(139,38,29,0.3); }
+          0%, 12% { transform: translate(-1px, 0.5px); filter: brightness(1.3); text-shadow: none; }
+          13%, 32% { transform: translate(0,0); filter: brightness(1.1); text-shadow: none; }
           /* Burst 2 */
-          33%, 45% { transform: translate(1.5px, -1px); filter: brightness(0.85); text-shadow: -1.5px 0.5px 0px rgba(139,38,29,0.4); }
-          46%, 65% { transform: translate(0,0); filter: brightness(1.1); text-shadow: 1px 0px 0px rgba(139,38,29,0.3); }
+          33%, 45% { transform: translate(1.5px, -1px); filter: brightness(0.85); text-shadow: none; }
+          46%, 65% { transform: translate(0,0); filter: brightness(1.1); text-shadow: none; }
           /* Burst 3 */
-          66%, 78% { transform: translate(-1px, 1px); filter: brightness(1.4); text-shadow: 1.5px -1px 0px rgba(139,38,29,0.5); }
-          79%, 100% { transform: translate(0,0); filter: brightness(1.1); text-shadow: 1px 0px 0px rgba(139,38,29,0.3); }
+          66%, 78% { transform: translate(-1px, 1px); filter: brightness(1.4); text-shadow: none; }
+          79%, 100% { transform: translate(0,0); filter: brightness(1.1); text-shadow: none; }
         }
         .rgb-jitter-active {
           animation: text-jitter-dispersion 1s linear 1 forwards !important;
@@ -804,7 +804,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
                       transform: isHovered ? 'scale(1.05)' : 'scale(1)',
                       transition: 'transform 1.2s cubic-bezier(0.19, 1, 0.22, 1), color 1.2s ease, opacity 1.2s ease',
                       willChange: 'transform',
-                      textShadow: isRetro ? '0.5px 0.5px 0.5px rgba(255,255,255,0.8)' : 'none',
+                      textShadow: 'none',
                       animationDelay: (isTitleHovered || glitchActive[i]) && !isRetro ? `${[0.2, 0.8, 0.2, 0.8, 1.4][i]}s` : '0s'
                     }}
                     cn={realm.titleCn}

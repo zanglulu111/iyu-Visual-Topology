@@ -1,10 +1,11 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { flushSync } from 'react-dom';
 /* Added SubjectType and AestheticMode to imports */
 import { CreativeBlueprint, BlueprintLanguage, NarrativeFieldState, CreativeTreatment, DriverType, CollectionItem, WorldLawConfig, SubjectType, AestheticMode } from '../types';
 import {
     X, Wand2, Loader2, ArrowLeft, ArrowRight, History as HistoryIcon,
-    Globe, BookOpen, ImageIcon, Target, Film, Eye, Box,
+    Globe, BookOpen, Target, Film, Eye, Box,
     ClipboardCopy, Check, HelpCircle, Home, TestTube, Zap, Palette,
     Settings2, Layers, Terminal, Feather, Star, FilePlus, Download, List, Database, Heart, Activity, Upload, Flame,
     Archive, Save, Hexagon
@@ -146,7 +147,7 @@ const createEmptyAesthetic = (lang: BlueprintLanguage): CreativeBlueprint => ({
 const createEmptyNarrative = (lang: BlueprintLanguage): CreativeBlueprint => ({
     treatmentId: `narr_manual_${Date.now()}`,
     driverType: DriverType.NARRATIVE,
-    styleName: lang === 'EN' ? 'Blank Story Project' : '空白故事工程',
+    styleName: lang === 'EN' ? 'Blank Narrative Writing' : '空白叙事创作',
     narrative: {
         title: lang === 'EN' ? 'NEW STORY' : '新故事项目',
         logline: lang === 'EN' ? 'Enter logline...' : '在此输入故事梗概...',
@@ -219,6 +220,12 @@ export const BlueprintEditor: React.FC<BlueprintEditorProps> = ({
     const [isParamsPanelOpen, setIsParamsPanelOpen] = useState(false);
     const [activeTaskCount, setActiveTaskCount] = useState(0);
     const [isContinueUploading, setIsContinueUploading] = useState(false);
+
+    const closeParamsPanelImmediately = () => {
+        flushSync(() => {
+            setIsParamsPanelOpen(false);
+        });
+    };
 
     useEffect(() => {
         const unsubscribe = globalTaskManager.subscribe(tasks => {
@@ -303,7 +310,7 @@ export const BlueprintEditor: React.FC<BlueprintEditorProps> = ({
             themeActiveBorder = 'border-purple-500';
             themeEmptyPulse = 'bg-purple-500/20';
             menuItems = [
-                { id: 'BIBLE', label: language === 'EN' ? "Story Project" : "故事工程", icon: BookOpen },
+                { id: 'BIBLE', label: language === 'EN' ? "Narrative Writing" : "叙事创作", icon: BookOpen },
                 { id: 'METONYMY', label: language === 'EN' ? "Metonymy Script" : "换喻脚本", icon: Wand2 }
             ];
         } else if (effectiveDriverType === DriverType.AESTHETIC) {
@@ -322,8 +329,7 @@ export const BlueprintEditor: React.FC<BlueprintEditorProps> = ({
             ];
         } else { // Default for Narrative
             menuItems = [
-                { id: 'NARRATIVE', label: language === 'EN' ? "Core Narrative" : "核心叙事", icon: BookOpen },
-                { id: 'ASSETS', label: language === 'EN' ? "Scene & Assets" : "场景资产", icon: ImageIcon }
+                { id: 'NARRATIVE', label: language === 'EN' ? "Narrative Writing" : "叙事创作", icon: BookOpen }
             ];
         }
 
@@ -390,13 +396,31 @@ export const BlueprintEditor: React.FC<BlueprintEditorProps> = ({
         if (assets.props.length) {
             assetsHtml += `<h3 class="gold-text">道具 (Props)</h3><ul>` + assets.props.map(p => `<li><strong>${escapeHtml(p.name)}</strong>: ${escapeHtml(p.desc)}</li>`).join('') + `</ul>`;
         }
+        const isNarrativeExport = bp.driverType === DriverType.NARRATIVE;
+        const contextHtml = !isNarrativeExport ? `
+<div class="section">
+<h2 class="gold-text">世界法则 (World Rules)</h2>
+<p>${escapeHtml(bp.context.world)}</p>
+</div>
+
+<div class="section">
+<h2 class="gold-text">影调与视觉 (Tone & Visuals)</h2>
+<p>${escapeHtml(bp.context.tone)}</p>
+</div>
+` : '';
+        const assetsSectionHtml = !isNarrativeExport && assetsHtml ? `
+<div class="section">
+<h2 class="gold-text">视觉资产库 (Assets)</h2>
+${assetsHtml}
+</div>
+` : '';
 
         const htmlContent = `
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>${escapeHtml(bp.narrative.title)} - Visionary Bible</title>
+<title>${escapeHtml(bp.narrative.title)} - Narrative Writing</title>
 <style>
 body { font-family: "Microsoft YaHei", sans-serif; background: #050505; color: #ddd; max-width: 900px; margin: 0 auto; padding: 40px; line-height: 1.8; }
 h1, h2, h3, h4 { color: #FFD700 !important; border-bottom: 1px solid #333; padding-bottom: 10px; margin-top: 30px; }
@@ -423,24 +447,12 @@ li { margin-bottom: 10px; }
 </div>
 
 <div class="section">
-<h2 class="gold-text">故事大纲 (Synopsis)</h2>
+<h2 class="gold-text">叙事创作正文 (Narrative)</h2>
 <p>${escapeHtml(bp.narrative.synopsis)}</p>
 </div>
 
-<div class="section">
-<h2 class="gold-text">世界法则 (World Rules)</h2>
-<p>${escapeHtml(bp.context.world)}</p>
-</div>
-
-<div class="section">
-<h2 class="gold-text">影调与视觉 (Tone & Visuals)</h2>
-<p>${escapeHtml(bp.context.tone)}</p>
-</div>
-
-<div class="section">
-<h2 class="gold-text">视觉资产库 (Assets)</h2>
-${assetsHtml}
-</div>
+${contextHtml}
+${assetsSectionHtml}
 
 <div class="section" style="border:none; background:transparent; text-align:center;">
 <p style="color: #555; font-size: 0.8em;">Generated by Visionary Engine</p>
@@ -454,7 +466,7 @@ ${assetsHtml}
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `${bp.narrative.title || 'Visionary_Project'}_Bible.html`;
+        link.download = `${bp.narrative.title || 'Narrative_Writing'}_Narrative.html`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -765,9 +777,9 @@ ${assetsHtml}
                 <div className={`
                     absolute top-0 bottom-0 left-0 z-50
                     w-full max-w-lg
-                    mist-archive-panel mist-bible-params-panel ${effectiveTheme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#0a0a0b]/95 backdrop-blur-xl'} border-r ${effectiveTheme === 'retro' ? 'border-[#8B261D]/20' : 'border-zinc-800'}
-                    transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]
-                    ${isParamsPanelOpen ? 'translate-x-0' : '-translate-x-full'}
+                    mist-archive-panel mist-bible-params-panel ${isParamsPanelOpen ? 'is-open' : 'is-closed'} ${effectiveTheme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#0a0a0b]/95 backdrop-blur-xl'} border-r ${effectiveTheme === 'retro' ? 'border-[#8B261D]/20' : 'border-zinc-800'}
+                    transition-transform ease-[cubic-bezier(0.23,1,0.32,1)]
+                    ${isParamsPanelOpen ? 'translate-x-0 duration-500' : '-translate-x-full duration-0'}
                     flex flex-col ${effectiveTheme === 'retro' ? '' : 'shadow-[10px_0_30px_rgba(0,0,0,0.3)]'}
                 `}>
                     {/* Sidebar Content */}
@@ -783,8 +795,12 @@ ${assetsHtml}
                         </span>
                         <button
                             type="button"
-                            onClick={() => setIsParamsPanelOpen(false)}
-                            className={`absolute right-5 top-1/2 -translate-y-1/2 z-[80] p-2 rounded-md transition-colors ${effectiveTheme === 'retro' ? 'text-[var(--text-muted)] hover:text-[var(--text-accent)]' : 'text-zinc-400 hover:text-white hover:bg-white/5'}`}
+                            onPointerDown={closeParamsPanelImmediately}
+                            onClick={(event) => {
+                                event.preventDefault();
+                                event.stopPropagation();
+                            }}
+                            className={`mist-engine-params-close-button absolute right-5 top-1/2 -translate-y-1/2 z-[80] p-2 rounded-md transition-colors ${effectiveTheme === 'retro' ? 'text-[var(--text-muted)] hover:text-[var(--text-accent)]' : 'text-zinc-400 hover:text-white hover:bg-white/5'}`}
                             aria-label={language === 'EN' ? 'Close engine parameters' : '关闭引擎参数概览'}
                         >
                             <X size={18} />
@@ -943,7 +959,7 @@ ${assetsHtml}
                             <div className="relative">
                                 <Activity size={18} className={`transition-colors ${isTaskManagerOpen ? (effectiveTheme === 'retro' ? 'text-[var(--text-accent)]' : uiConfig.themeAccent) : (effectiveTheme === 'retro' ? 'text-[var(--text-muted)] group-hover:text-[var(--text-main)]' : 'text-zinc-400 group-hover:text-white')}`} />
                                 {activeTaskCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-[var(--bg-panel)] border border-[var(--border-main)] rounded-full text-[8px] flex items-center justify-center font-bold text-[var(--text-main)] shadow-none">
+                                    <span className="mist-task-count-badge absolute -top-1 -right-1 w-3.5 h-3.5 bg-[var(--bg-panel)] border border-[var(--border-main)] rounded-full text-[8px] flex items-center justify-center font-bold text-[var(--text-main)] shadow-none">
                                         {activeTaskCount}
                                     </span>
                                 )}

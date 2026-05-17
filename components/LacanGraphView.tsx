@@ -413,7 +413,7 @@ export const LacanGraphView: React.FC<LacanGraphViewProps> = ({
 
                     <button
                         onClick={() => setShowRings(!showRings)}
-                        className={`flex items-center justify-center w-7 h-7 rounded-sm transition-all duration-300 hover:bg-white/5 hover:scale-110 active:scale-90 focus:outline-none ${
+                        className={`mist-ring-toggle-button flex items-center justify-center w-7 h-7 rounded-sm transition-all duration-300 hover:bg-white/5 hover:scale-110 active:scale-90 focus:outline-none ${
                             showRings
                                 ? 'text-[var(--mist-active-accent)]'
                                 : (theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white')
@@ -422,7 +422,7 @@ export const LacanGraphView: React.FC<LacanGraphViewProps> = ({
                     >
                         <Aperture
                             size={14}
-                            className={`shrink-0 transition-all duration-700 ${showRings ? 'rotate-[360deg] text-[var(--mist-active-accent)]' : 'rotate-0'}`}
+                            className={`mist-ring-toggle-icon shrink-0 ${showRings ? 'text-[var(--mist-active-accent)]' : ''}`}
                         />
                     </button>
                 </div>

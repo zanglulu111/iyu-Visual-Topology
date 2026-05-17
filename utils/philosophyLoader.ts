@@ -26,7 +26,7 @@ export interface PhilosophyDetail {
   application: string;
 }
 
-const CACHE_VERSION = 'v26_04_28_mist_scroll_math_table_defaults'; // Increment this whenever data structure changes significantly
+const CACHE_VERSION = 'v26_05_17_mist_theory_dictionary_title_alignment'; // Increment this whenever data structure changes significantly
 
 // 缓存管理
 class PhilosophyCache {

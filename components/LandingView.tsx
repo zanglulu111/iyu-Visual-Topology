@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { DriverSelector } from './DriverSelector';
 import { DriverType, User } from '../types';
 import { Globe, Wand2, HelpCircle, History as HistoryIcon, Settings, User as UserIcon, BookOpen, Terminal, Database, ShieldAlert, Cpu, Film, Folder, Aperture, Zap, Sun, Moon } from 'lucide-react';
@@ -58,6 +58,7 @@ interface LandingViewProps {
   setShowRings: (show: boolean) => void;
   isAdmin?: boolean;
   onReturnToPortal?: () => void;
+  portalTransition?: string | null;
 }
 
 enum ProtocolType {
@@ -100,7 +101,8 @@ export const LandingView: React.FC<LandingViewProps> = ({
   setShowRings,
   initialProtocol,
   isAdmin,
-  onReturnToPortal
+  onReturnToPortal,
+  portalTransition
 }) => {
   const [localMounted, setLocalMounted] = useState(false);
   // 圆环动画：始终挂载元素，用 key 强制重置动画
@@ -126,6 +128,15 @@ export const LandingView: React.FC<LandingViewProps> = ({
   useEffect(() => {
     if (!localMounted) return;
 
+    // 如果正在执行页面退出到 Portal 的大转场，强制触发圆环退出动画
+    if (portalTransition === 'to-portal') {
+      if (ringAnimClass !== 'animate-ring-exit') {
+        setRingAnimClass('animate-ring-exit');
+        setRingAnimKey(prev => prev + 1);
+      }
+      return;
+    }
+
     // 如果 showRings 没有发生实质性变化（比如从其他页面切换回来时状态已同步），不要重新触发动画
     if (showRings === lastShowRingsRef.current) return;
 
@@ -136,15 +147,19 @@ export const LandingView: React.FC<LandingViewProps> = ({
     }
     setRingAnimKey(prev => prev + 1);
     lastShowRingsRef.current = showRings;
-  }, [showRings, localMounted]);
+  }, [showRings, localMounted, portalTransition]);
 
   const { theme, toggleTheme } = useTheme();
+  const [ringSpinKey, setRingSpinKey] = useState(0);
   const [selectedProtocol, setSelectedProtocol] = useState<ProtocolType>(
     (initialProtocol && Object.values(ProtocolType).includes(initialProtocol as any) ? initialProtocol as ProtocolType : ProtocolType.CORE_DRIVERS)
   );
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  // 当切换到非核心驱动协议时，或是 showRings 关闭时，需要让退出动画有机会执行
+  // 这里我们让 shouldRenderRings 在 exit 状态下也保持 true，直到元素彻底不可见
+  const shouldRenderRings = selectedProtocol === ProtocolType.CORE_DRIVERS && (showRings || ringAnimClass === 'animate-ring-exit');
 
-  const getGlowTheme = (driverId: DriverType | null) => {
+  const getGlowTheme = useCallback((driverId: DriverType | null) => {
     if (theme === 'retro') return 'shadow-none';
     switch (driverId) {
       case DriverType.COMMERCIAL: return 'shadow-cyan-500/10';
@@ -154,9 +169,9 @@ export const LandingView: React.FC<LandingViewProps> = ({
       case DriverType.TRAILER: return 'shadow-orange-500/10';
       default: return 'shadow-zinc-500/5';
     }
-  };
+  }, [theme]);
 
-  const getAccentColor = (driverId: DriverType | null) => {
+  const getAccentColor = useCallback((driverId: DriverType | null) => {
     if (theme === 'retro') return '#2D2D2D';
     switch (driverId) {
       case DriverType.COMMERCIAL: return 'var(--mist-cyan)';
@@ -166,9 +181,9 @@ export const LandingView: React.FC<LandingViewProps> = ({
       case DriverType.TRAILER: return 'var(--mist-orange)';
       default: return 'rgba(255,255,255,0.8)';
     }
-  };
+  }, [theme]);
 
-  const getBorderAccentColor = (driverId: DriverType | null) => {
+  const getBorderAccentColor = useCallback((driverId: DriverType | null) => {
     if (theme === 'retro') return '#8B261D';
     switch (driverId) {
       case DriverType.COMMERCIAL: return 'var(--mist-cyan)';
@@ -178,18 +193,18 @@ export const LandingView: React.FC<LandingViewProps> = ({
       case DriverType.TRAILER: return 'var(--mist-orange)';
       default: return 'var(--border-main)';
     }
-  };
+  }, [theme]);
 
-  const getProtocolTitle = () => {
+  const protocolTitle = useMemo(() => {
 
 
     if (selectedProtocol === ProtocolType.RSI || selectedProtocol === ProtocolType.TOPOLOGY) {
        return lang === 'CN' ? '迷雾学派：拓扑三界' : 'MIST: TOPOLOGY';
     }
     return lang === 'CN' ? '主体观测中心 // 序列号: MIST-O-1' : 'SUBJECT OBSERVATION CENTER // SEQ: MIST-O-1';
-  };
+  }, [lang, selectedProtocol]);
 
-  const getLineGlow = (driverId: DriverType | null) => {
+  const getLineGlow = useCallback((driverId: DriverType | null) => {
     if (theme === 'retro' || !driverId) return '';
     switch (driverId) {
       case DriverType.COMMERCIAL: return '0 0 10px rgba(34,211,238,0.3)';
@@ -199,9 +214,9 @@ export const LandingView: React.FC<LandingViewProps> = ({
       case DriverType.TRAILER: return '0 0 10px rgba(251,146,60,0.3)';
       default: return '';
     }
-  };
+  }, [theme]);
 
-  const getHeaderShadow = (driverId: DriverType | null) => {
+  const getHeaderShadow = useCallback((driverId: DriverType | null) => {
     if (theme === 'retro' || !driverId) return '';
     switch (driverId) {
       case DriverType.COMMERCIAL: return 'shadow-[0_8px_30px_-5px_rgba(34,211,238,0.25)]';
@@ -211,7 +226,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
       case DriverType.TRAILER: return 'shadow-[0_8px_30px_-5px_rgba(251,146,60,0.25)]';
       default: return '';
     }
-  };
+  }, [theme]);
 
 
   const signalLogs = [
@@ -263,8 +278,8 @@ export const LandingView: React.FC<LandingViewProps> = ({
             lang={lang}
             hClass="h-4"
             className={`${theme === 'retro' ? 'text-[#8B261D]' : 'text-white'} font-serif font-bold text-xs uppercase tracking-widest transition-colors duration-500`}
-            cn={<span className="whitespace-nowrap">{getProtocolTitle()}</span>}
-            en={<span className="whitespace-nowrap">{getProtocolTitle()}</span>}
+            cn={<span className="whitespace-nowrap">{protocolTitle}</span>}
+            en={<span className="whitespace-nowrap">{protocolTitle}</span>}
           />
         </div>
 
@@ -292,17 +307,21 @@ export const LandingView: React.FC<LandingViewProps> = ({
 
             {/* 1. Ring Toggle */}
             <button
-              onClick={() => setShowRings(!showRings)}
-              className={`flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300 border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-90 focus:outline-none ${
+              onClick={() => {
+                setRingSpinKey(prev => prev + 1);
+                setShowRings(!showRings);
+              }}
+              className={`mist-ring-toggle-button flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300 border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-90 focus:outline-none ${
                 showRings
-                  ? (theme === 'retro' ? 'text-[#8B261D]' : getThemeTextColor())
+                  ? 'is-active ' + (theme === 'retro' ? 'text-[#8B261D]' : getThemeTextColor())
                   : (theme === 'retro' ? 'text-zinc-600 hover:text-black hover:border-black/5' : 'text-zinc-400 hover:text-white')
               }`}
               title={lang === 'CN' ? "背景圆环开关" : "Background Rings Toggle"}
             >
               <Aperture
+                key={ringSpinKey}
                 size={13}
-                className={`shrink-0 transition-all duration-700 ${showRings ? 'rotate-[360deg] text-[var(--mist-active-accent)]' : 'rotate-0'} ${showRings ? 'cult-pulse' : ''}`}
+                className={`mist-ring-toggle-icon ${ringSpinKey > 0 ? 'is-click-spinning' : ''} shrink-0 ${showRings ? (theme === 'retro' ? 'text-[#8B261D]' : getThemeTextColor()) : ''}`}
               />
             </button>
 
@@ -357,13 +376,13 @@ export const LandingView: React.FC<LandingViewProps> = ({
         )}
 
         {/* Background Rings - 始终挂载，用 key 强制触发CSS动画 */}
-        {selectedProtocol === ProtocolType.CORE_DRIVERS && (
+        {shouldRenderRings && (
           <div
             key={`rings-anim-${ringAnimKey}`}
             className={`absolute inset-0 flex items-center justify-end pr-[5%] pointer-events-none z-0 select-none overflow-hidden ${ringAnimClass}`}
           >
             <div className="w-[1000px] h-[1000px] flex items-center justify-center translate-x-1/4">
-              <BorromeanRings centered={true} opacity={theme === 'retro' ? 0.85 : 0.95} driverType={hoveredDriver || undefined} vivid={true} />
+              <BorromeanRings centered={true} opacity={theme === 'retro' ? 0.85 : 0.95} driverType={hoveredDriver || undefined} vivid={true} animated={showRings} />
             </div>
           </div>
         )}
@@ -405,7 +424,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
                 />
               </div>
               {[
-                { id: ProtocolType.CORE_DRIVERS, icon: Cpu, labelCn: '核心驱动器', labelEn: 'CORE DRIVERS' },
+                { id: ProtocolType.CORE_DRIVERS, icon: Cpu, labelCn: '欲望再生产', labelEn: 'DESIRE REPRODUCTION' },
                 { id: ProtocolType.UTILITIES, icon: Zap, labelCn: '实用工具', labelEn: 'UTILITIES' },
             ].map((item: any, idx) => (
               <button
@@ -495,8 +514,8 @@ export const LandingView: React.FC<LandingViewProps> = ({
                         lang={lang}
                         hClass="h-8 md:h-10"
                         className={`text-2xl md:text-3xl font-serif font-black tracking-[0.15em] ${theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-white'}`}
-                        cn="核心驱动器"
-                        en="CORE DRIVERS"
+                        cn="欲望再生产"
+                        en="DESIRE REPRODUCTION"
                       />
                     </div>
                     <AnimatedText

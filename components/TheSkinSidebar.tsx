@@ -1276,8 +1276,8 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
                       <SkinSlot blockId="skin_structure" placeholder={lang === 'EN' ? "Structure" : "叙事结构"} isBlockLocked={lockedModules["skin_structure"]} {...slotProps} />
                     </div>
                     <div>
-                      <span>{lang === 'EN' ? "Volume: " : "体量："}</span>
-                      <SkinSlot blockId="skin_volume" placeholder={lang === 'EN' ? "Volume" : "故事体量"} isBlockLocked={lockedModules["skin_volume"]} {...slotProps} />
+                      <span>{lang === 'EN' ? "Runtime: " : "时长："}</span>
+                      <SkinSlot blockId="skin_volume" placeholder={lang === 'EN' ? "Runtime" : "时长/容量"} isBlockLocked={lockedModules["skin_volume"]} {...slotProps} />
                     </div>
                   </div>
                 </div>

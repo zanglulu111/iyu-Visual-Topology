@@ -195,7 +195,7 @@ export const DRIVERS: (DriverDef & { nameEn: string; accent: string; retroAccent
     englishId: "SCRIPT_TRANSLATION",
     coreDriver: "故事转译",
     coreDriverEn: "Story Translation",
-    description: "【自定义故事转剧本】跳过分歧点与核心引擎，直接粘贴完整故事，进入创意圣经整理与换喻电影脚本生成。",
+    description: "【自定义故事转剧本】跳过分歧点与核心引擎，直接粘贴完整故事，进入叙事创作整理与换喻电影脚本生成。",
     descriptionEn: "[Custom Story to Screenplay] Skip divergence and engine setup. Paste a complete story and translate it into a creative bible and metonymic screenplay.",
     kpi: "电影脚本生成",
     forbidden: "禁止空白原文",

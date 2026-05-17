@@ -23,6 +23,8 @@ import {
   ZoomOut
 } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
+import { BorromeanRings } from '../BorromeanRings';
+import { DriverType } from '../../types';
 import { generateLovartImage, LovartGenerateResult } from '../../services/lovartImageService';
 
 type CanvasMode = 'image' | 'asset-sheet' | 'storyboard-grid' | 'video';
@@ -31,6 +33,7 @@ type NodeKind = 'text' | 'image' | 'video' | 'audio' | 'world';
 interface MistCanvasEngineProps {
   lang: 'CN' | 'EN';
   isAdmin?: boolean;
+  showRings?: boolean;
 }
 
 interface CanvasNode {
@@ -285,7 +288,9 @@ function getEdgePathToPoint(from: CanvasNode, point: { x: number; y: number }) {
   return `M ${start.x} ${start.y} C ${start.x + tension} ${start.y}, ${point.x - tension} ${point.y}, ${point.x} ${point.y}`;
 }
 
-export const MistCanvasEngine: React.FC<MistCanvasEngineProps> = ({ lang, isAdmin = false }) => {
+
+
+export const MistCanvasEngine: React.FC<MistCanvasEngineProps> = ({ lang, isAdmin = false, showRings = true }) => {
   const { theme } = useTheme();
   const isRetro = theme === 'retro';
   const canvasRef = useRef<HTMLDivElement | null>(null);
@@ -302,11 +307,36 @@ export const MistCanvasEngine: React.FC<MistCanvasEngineProps> = ({ lang, isAdmi
   const nodesSyncTimerRef = useRef<number | null>(null);
   const gestureScaleRef = useRef(1);
   const wheelZoomStep = 0.0025;
-  const [nodes, setNodes] = useState<CanvasNode[]>(() => [
-    createNode('image', 220, 120, { title: 'Image', prompt: lang === 'EN' ? 'Drop or generate an image here.' : '在这里上传或生成图片。' })
-  ]);
-  const [edges, setEdges] = useState<CanvasEdge[]>([]);
-  const [viewport, setViewport] = useState<Viewport>({ x: 180, y: 90, zoom: 1 });
+  const [nodes, setNodes] = useState<CanvasNode[]>(() => {
+    try {
+      const raw = window.localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed.nodes)) return parsed.nodes;
+      }
+    } catch { }
+    return [createNode('image', 220, 120, { title: 'Image', prompt: lang === 'EN' ? 'Drop or generate an image here.' : '在这里上传或生成图片。' })];
+  });
+  const [edges, setEdges] = useState<CanvasEdge[]>(() => {
+    try {
+      const raw = window.localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed.edges)) return parsed.edges;
+      }
+    } catch { }
+    return [];
+  });
+  const [viewport, setViewport] = useState<Viewport>(() => {
+    try {
+      const raw = window.localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed.viewport) return parsed.viewport;
+      }
+    } catch { }
+    return { x: 180, y: 90, zoom: 1 };
+  });
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [pendingConnectionFrom, setPendingConnectionFrom] = useState<string | null>(null);
   const previewConnectionRef = useRef<PreviewConnection | null>(null);
@@ -319,18 +349,7 @@ export const MistCanvasEngine: React.FC<MistCanvasEngineProps> = ({ lang, isAdmi
   const [error, setError] = useState('');
   const [crops, setCrops] = useState<CropItem[]>([]);
 
-  useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed.nodes)) setNodes(parsed.nodes);
-      if (Array.isArray(parsed.edges)) setEdges(parsed.edges);
-      if (parsed.viewport) setViewport(parsed.viewport);
-    } catch {
-      // Ignore stale local canvas documents.
-    }
-  }, []);
+
 
   useEffect(() => {
     viewportRef.current = viewport;
@@ -1001,6 +1020,16 @@ export const MistCanvasEngine: React.FC<MistCanvasEngineProps> = ({ lang, isAdmi
 
   return (
     <div className={`relative h-full overflow-hidden select-none ${isRetro ? 'bg-[#0B0A08]' : 'bg-black'}`}>
+      {/* Background Borromean Rings - Standardized Canvas/Trailer Design */}
+      <div className={`mist-rings-trailer ${showRings ? 'is-active' : 'is-exiting'}`} aria-hidden="true">
+        <BorromeanRings
+          lang={lang}
+          driverType={DriverType.TRAILER}
+          opacity={theme === 'retro' ? 0.3 : 0.7}
+          centered={true}
+          vivid={false}
+        />
+      </div>
       <div
         ref={canvasRef}
         className="absolute inset-0 overflow-hidden cursor-grab active:cursor-grabbing touch-none"

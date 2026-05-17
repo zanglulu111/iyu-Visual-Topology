@@ -118,10 +118,11 @@ const PortalCard: React.FC<{
   isRetro: boolean;
   index: number;
   isGlitching: boolean;
+  isBreathing: boolean;
   onHoverStart: (card: PortalCardDef, index: number, rect: DOMRect) => void;
   onHoverEnd: (index: number) => void;
   onCardClick: (card: PortalCardDef, index: number, rect: DOMRect) => void;
-}> = ({ card, isRetro, index, isGlitching, onHoverStart, onHoverEnd, onCardClick }) => {
+}> = ({ card, isRetro, index, isGlitching, isBreathing, onHoverStart, onHoverEnd, onCardClick }) => {
   const accent = toneColor(card.tone, isRetro);
   const mediaRef = useRef<HTMLDivElement | null>(null);
   const handleClick = () => {
@@ -139,7 +140,7 @@ const PortalCard: React.FC<{
         onHoverStart(card, index, rect);
       }}
       onMouseLeave={() => onHoverEnd(index)}
-      className={`mist-portal-card group relative select-none overflow-hidden bg-black/12 text-left transition-all duration-700 hover:bg-black/58 hover:shadow-[0_0_42px_rgba(255,255,255,0.08)] ${isGlitching ? 'mist-portal-card-glitch-active' : ''}`}
+      className={`mist-portal-card group relative select-none overflow-hidden bg-black/12 text-left transition-all duration-700 hover:bg-black/58 hover:shadow-[0_0_42px_rgba(255,255,255,0.08)] ${isGlitching ? 'mist-portal-card-glitch-active' : ''} ${isBreathing ? 'mist-portal-card-breath-active' : ''}`}
       style={{ '--portal-card-accent': accent, '--card-index': index } as React.CSSProperties}
     >
       <div ref={mediaRef} className="mist-card-media absolute z-0 overflow-hidden bg-black" aria-hidden="true">
@@ -173,8 +174,7 @@ const PortalCard: React.FC<{
 
         <button
           type="button"
-          className="mist-card-title mist-card-title-trigger absolute left-1/2 top-1/2 cursor-pointer select-none appearance-none whitespace-nowrap border-0 bg-transparent p-0 font-serif text-[clamp(1rem,1.08vw,1.24rem)] leading-none tracking-[0.18em] text-white/78 transition-all duration-700 group-hover:text-white focus:outline-none active:outline-none"
-          style={{ textShadow: '0 2px 10px rgba(0,0,0,0.82)' }}
+          className="mist-card-title mist-card-title-trigger absolute left-1/2 top-1/2 cursor-pointer select-none appearance-none whitespace-nowrap border-0 bg-transparent p-0 font-serif text-[clamp(0.96rem,1.02vw,1.18rem)] leading-none tracking-[0.2em] text-white/60 transition-all duration-700 group-hover:text-white focus:outline-none active:outline-none"
         >
           {card.titleCn}
         </button>
@@ -203,19 +203,21 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
 }) => {
   const { theme } = useTheme();
   const isRetro = theme === 'retro';
-  const [cursorPos, setCursorPos] = useState({ x: -100, y: -100 });
-  const [isHoveringClickable, setIsHoveringClickable] = useState(false);
   const [mistEnabled, setMistEnabled] = useState(true);
   const [isTitleGlitching, setIsTitleGlitching] = useState(false);
   const [isPortalEntering, setIsPortalEntering] = useState(entryMode === 'intro');
   const [bootStage, setBootStage] = useState<'black' | 'beam' | 'text' | 'ready'>(entryMode === 'intro' ? 'black' : 'ready');
   const [activeStageMedia, setActiveStageMedia] = useState<string | null>(null);
   const [cardGlitchActive, setCardGlitchActive] = useState<boolean[]>([false, false, false, false, false]);
+  const [cardBreathActive, setCardBreathActive] = useState<boolean[]>([false, false, false, false, false]);
   const titleGlitchActiveRef = useRef(false);
   const glitchAudioRef = useRef<HTMLAudioElement | null>(null);
   const cardAudioRefs = useRef<(HTMLAudioElement | null)[]>([null, null, null, null, null]);
   const cardGlitchTimers = useRef<(ReturnType<typeof setTimeout> | null)[]>([null, null, null, null, null]);
+  const cardHoverActiveRef = useRef<boolean[]>([false, false, false, false, false]);
   const portalRootRef = useRef<HTMLDivElement | null>(null);
+  const cursorRef = useRef<HTMLDivElement | null>(null);
+  const cursorLabelRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (entryMode !== 'intro') {
@@ -267,20 +269,36 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
 
   useEffect(() => {
     let animationFrame = 0;
+    let lastClientX = -100;
+    let lastClientY = -100;
+    let lastClickable = false;
     const handleMouseMove = (event: MouseEvent) => {
+      lastClientX = event.clientX;
+      lastClientY = event.clientY;
       cancelAnimationFrame(animationFrame);
       animationFrame = requestAnimationFrame(() => {
         const root = portalRootRef.current;
         if (!root) return;
-        root.style.setProperty('--portal-mouse-x', ((event.clientX / window.innerWidth - 0.5) * 2).toFixed(4));
-        root.style.setProperty('--portal-mouse-y', ((event.clientY / window.innerHeight - 0.5) * 2).toFixed(4));
-        setCursorPos({ x: event.clientX, y: event.clientY });
+        root.style.setProperty('--portal-mouse-x', ((lastClientX / window.innerWidth - 0.5) * 2).toFixed(4));
+        root.style.setProperty('--portal-mouse-y', ((lastClientY / window.innerHeight - 0.5) * 2).toFixed(4));
+        root.style.setProperty('--portal-cursor-x', `${lastClientX}px`);
+        root.style.setProperty('--portal-cursor-y', `${lastClientY}px`);
+        root.classList.add('has-cursor');
+
         const target = event.target as HTMLElement;
-        setIsHoveringClickable(!!target.closest('button, a, [role="button"], .mist-portal-title-wrap, .mist-card-title-trigger'));
+        const isClickable = !!target.closest('button, a, [role="button"], .mist-portal-title-wrap, .mist-card-title-trigger');
+        if (isClickable !== lastClickable) {
+          cursorRef.current?.classList.toggle('is-clickable', isClickable);
+          lastClickable = isClickable;
+        }
+
+        if (cursorLabelRef.current) {
+          cursorLabelRef.current.textContent = `[X:${Math.max(0, lastClientX).toFixed(0)} Y:${Math.max(0, lastClientY).toFixed(0)}]`;
+        }
       });
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
     return () => {
       cancelAnimationFrame(animationFrame);
       window.removeEventListener('mousemove', handleMouseMove);
@@ -343,10 +361,18 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
 
   const startCardHover = (card: PortalCardDef, index: number, _rect: DOMRect) => {
     setActiveStageMedia(card.imageSrc);
+    cardHoverActiveRef.current[index] = true;
     if (cardGlitchTimers.current[index]) {
       clearTimeout(cardGlitchTimers.current[index]!);
       cardGlitchTimers.current[index] = null;
     }
+
+    setCardBreathActive((prev) => {
+      if (!prev[index]) return prev;
+      const next = [...prev];
+      next[index] = false;
+      return next;
+    });
 
     setCardGlitchActive((prev) => {
       const next = [...prev];
@@ -357,13 +383,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
     const cardAudio = cardAudioRefs.current[index];
     if (cardAudio) {
       cardAudio.currentTime = 0;
-      cardAudio.onended = () => {
-        setCardGlitchActive((prev) => {
-          const next = [...prev];
-          next[index] = false;
-          return next;
-        });
-      };
+      cardAudio.onended = null;
       cardAudio.play().catch(() => {});
     }
 
@@ -373,12 +393,26 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
         next[index] = false;
         return next;
       });
+      setCardBreathActive((prev) => {
+        const shouldBreathe = cardHoverActiveRef.current[index];
+        if (prev[index] === shouldBreathe) return prev;
+        const next = [...prev];
+        next[index] = shouldBreathe;
+        return next;
+      });
       cardGlitchTimers.current[index] = null;
     }, 620);
   };
 
   const stopCardHover = (index: number) => {
     setActiveStageMedia(null);
+    cardHoverActiveRef.current[index] = false;
+    setCardBreathActive((prev) => {
+      if (!prev[index]) return prev;
+      const next = [...prev];
+      next[index] = false;
+      return next;
+    });
     const cardAudio = cardAudioRefs.current[index];
     if (cardAudio) {
       cardAudio.pause();
@@ -453,10 +487,10 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
     },
     {
       number: '03',
-      titleCn: '核心驱动器',
-      titleEn: 'CORE DRIVERS',
+      titleCn: '欲望再生产',
+      titleEn: 'Desire Reproduction',
       descCn: '启动欲望再生产，进入视觉生产的符号链',
-      descEn: 'Activate the core driver. Enter the symbolic chain of visual production.',
+      descEn: 'Activate desire reproduction. Enter the symbolic chain of visual production.',
       imageSrc: '/portal-assets/card-03-91.png',
       tone: 'red',
       onClick: goEngine,
@@ -531,6 +565,8 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
           --portal-cyan-soft: rgba(94, 207, 220, 0.55);
           perspective: 1600px;
           cursor: none;
+          --portal-cursor-x: -100px;
+          --portal-cursor-y: -100px;
         }
 
         .mist-portal-root.is-retro {
@@ -2145,8 +2181,51 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
         }
 
         .mist-card-title {
+          color: rgba(222,229,228,0.58);
+          opacity: 0.72;
           transform: translate3d(-50%, -50%, 28px);
+          isolation: isolate;
+          mix-blend-mode: screen;
+          filter: brightness(0.88) contrast(0.96);
+          -webkit-text-stroke: 0.18px rgba(255,255,255,0.08);
+          text-shadow:
+            0 1px 0 rgba(255,255,255,0.08),
+            -0.52px -0.12px 0.34px rgba(116,211,226,0.12),
+            0.52px 0.12px 0.34px rgba(166,64,56,0.1),
+            0 5px 16px rgba(0,0,0,0.92);
+          transition:
+            transform 700ms cubic-bezier(0.16, 1, 0.3, 1),
+            color 520ms ease,
+            opacity 520ms ease,
+            filter 700ms cubic-bezier(0.16, 1, 0.3, 1),
+            text-shadow 700ms ease;
           will-change: transform, opacity;
+        }
+
+        .mist-card-title::before {
+          content: "";
+          position: absolute;
+          inset: -0.78em -1.45em -0.62em -1.2em;
+          z-index: -1;
+          pointer-events: none;
+          opacity: 0.5;
+          background:
+            radial-gradient(ellipse at 50% 52%, rgba(255,255,255,0.08), rgba(255,255,255,0.025) 42%, transparent 72%),
+            linear-gradient(90deg, transparent, rgba(116,211,226,0.055) 46%, rgba(166,64,56,0.05) 56%, transparent);
+          filter: blur(7px);
+          transform: scaleX(0.92);
+          transition: opacity 520ms ease, transform 700ms cubic-bezier(0.16, 1, 0.3, 1), filter 700ms ease;
+        }
+
+        .mist-portal-root.is-retro .mist-card-title {
+          color: rgba(92,65,38,0.64) !important;
+          opacity: 0.72;
+          mix-blend-mode: multiply;
+          filter: brightness(0.98) contrast(0.92);
+          -webkit-text-stroke: 0;
+          text-shadow:
+            0 1px 0 rgba(255,252,246,0.22),
+            0 5px 14px rgba(92,65,38,0.1);
         }
 
         .mist-card-title-trigger,
@@ -2164,8 +2243,34 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
         .mist-portal-card:hover .mist-card-title,
         .mist-portal-card-glitch-active .mist-card-title,
         .mist-portal-text-system-active .mist-card-title {
+          color: rgba(255,255,255,0.94);
+          opacity: 1;
           transform: translate3d(-50%, calc(-50% - clamp(1.48rem, 3.15vh, 2.12rem)), 42px);
+          filter: brightness(1.06) contrast(1.04);
+          text-shadow:
+            1px 0.25px 0.5px rgba(166,64,56,0.28),
+            -0.55px -0.12px 0.35px rgba(255,255,255,0.2),
+            0 0 16px rgba(255,255,255,0.12),
+            0 2px 11px rgba(0,0,0,0.9);
           animation: mistCardTextBreath 1.28s ease-in-out 1.08s infinite;
+        }
+
+        .mist-portal-card:hover .mist-card-title::before,
+        .mist-portal-card-glitch-active .mist-card-title::before,
+        .mist-portal-text-system-active .mist-card-title::before {
+          opacity: 0.78;
+          filter: blur(9px);
+          transform: scaleX(1.08);
+        }
+
+        .mist-portal-root.is-retro .mist-portal-card:hover .mist-card-title,
+        .mist-portal-root.is-retro .mist-portal-card-glitch-active .mist-card-title,
+        .mist-portal-root.is-retro.mist-portal-text-system-active .mist-card-title {
+          color: rgba(92,65,38,0.86) !important;
+          filter: brightness(1.02) contrast(1.02);
+          text-shadow:
+            0 1px 0 rgba(255,252,246,0.36),
+            0 0 16px rgba(92,65,38,0.1);
         }
 
         .mist-portal-text-system-active .mist-card-title {
@@ -2234,6 +2339,37 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
 
         .mist-portal-card-glitch-active .mist-card-description,
         .mist-portal-card-glitch-active .mist-card-hover-field {
+          opacity: 1;
+        }
+
+        .mist-portal-card:not(.mist-portal-card-glitch-active).mist-portal-card-breath-active .mist-card-title {
+          transform: translate3d(-50%, calc(-50% - clamp(1.48rem, 3.15vh, 2.12rem)), 42px);
+          animation: mistCardTextBreath 1.28s ease-in-out -120ms infinite;
+        }
+
+        .mist-portal-card:not(.mist-portal-card-glitch-active).mist-portal-card-breath-active .mist-card-description {
+          opacity: 1;
+          transform: translate3d(0, clamp(1rem, 2.45vh, 1.68rem), 34px);
+          animation: none;
+        }
+
+        .mist-portal-card:not(.mist-portal-card-glitch-active).mist-portal-card-breath-active .mist-card-description p {
+          animation: mistCardDescriptionBreath 1.28s ease-in-out -120ms infinite;
+        }
+
+        .mist-portal-card:not(.mist-portal-card-glitch-active).mist-portal-card-breath-active .mist-card-local-ecg {
+          opacity: 1;
+          transform: translate3d(-50%, -50%, 40px) scaleX(1) scaleY(1);
+          animation: none;
+        }
+
+        .mist-portal-card:not(.mist-portal-card-glitch-active).mist-portal-card-breath-active .mist-card-ecg-pulse {
+          clip-path: inset(0 0 0 0);
+          opacity: 0.9;
+          animation: mistCardEcgBreath 1.28s ease-in-out -120ms infinite;
+        }
+
+        .mist-portal-card:not(.mist-portal-card-glitch-active).mist-portal-card-breath-active .mist-card-hover-field {
           opacity: 1;
         }
 
@@ -2846,6 +2982,185 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
           }
         }
 
+        .mist-portal-custom-cursor {
+          left: var(--portal-cursor-x);
+          top: var(--portal-cursor-y);
+          transform: translate3d(-50%, -50%, 0);
+          opacity: 0;
+          will-change: transform, left, top, opacity;
+        }
+
+        .mist-portal-root.has-cursor .mist-portal-custom-cursor {
+          opacity: 1;
+        }
+
+        .mist-portal-custom-cursor-ring {
+          height: 0.75rem;
+          width: 0.75rem;
+          border-radius: 9999px;
+          border: 1px solid rgba(255,255,255,0.4);
+        }
+
+        .mist-portal-root.is-retro .mist-portal-custom-cursor-ring {
+          border-color: rgba(139,38,29,0.5);
+          background: rgba(139,38,29,0.05);
+        }
+
+        .mist-portal-custom-cursor.is-clickable .mist-portal-custom-cursor-ring {
+          height: 3rem;
+          width: 3rem;
+          transform: scale(1);
+          border-radius: 0;
+          border-color: transparent;
+        }
+
+        .mist-portal-custom-cursor-dot {
+          height: 0.25rem;
+          width: 0.25rem;
+          border-radius: 9999px;
+          opacity: 1;
+          transform: scale(1);
+        }
+
+        .mist-portal-custom-cursor.is-clickable .mist-portal-custom-cursor-dot {
+          opacity: 0;
+          transform: scale(0.5);
+        }
+
+        .mist-portal-custom-cursor-corner {
+          position: absolute;
+          height: 0.625rem;
+          width: 0.625rem;
+          opacity: 0;
+          transition: transform 300ms ease, opacity 300ms ease;
+        }
+
+        .mist-portal-custom-cursor-corner-tl {
+          left: 0;
+          top: 0;
+          border-left: 1.5px solid currentColor;
+          border-top: 1.5px solid currentColor;
+          transform: translate(0.25rem, 0.25rem);
+        }
+
+        .mist-portal-custom-cursor-corner-tr {
+          right: 0;
+          top: 0;
+          border-right: 1.5px solid currentColor;
+          border-top: 1.5px solid currentColor;
+          transform: translate(-0.25rem, 0.25rem);
+        }
+
+        .mist-portal-custom-cursor-corner-bl {
+          left: 0;
+          bottom: 0;
+          border-left: 1.5px solid currentColor;
+          border-bottom: 1.5px solid currentColor;
+          transform: translate(0.25rem, -0.25rem);
+        }
+
+        .mist-portal-custom-cursor-corner-br {
+          right: 0;
+          bottom: 0;
+          border-right: 1.5px solid currentColor;
+          border-bottom: 1.5px solid currentColor;
+          transform: translate(-0.25rem, -0.25rem);
+        }
+
+        .mist-portal-custom-cursor.is-clickable .mist-portal-custom-cursor-corner {
+          opacity: 1;
+        }
+
+        .mist-portal-custom-cursor.is-clickable .mist-portal-custom-cursor-corner-tl {
+          transform: translate(-0.25rem, -0.25rem);
+        }
+
+        .mist-portal-custom-cursor.is-clickable .mist-portal-custom-cursor-corner-tr {
+          transform: translate(0.25rem, -0.25rem);
+        }
+
+        .mist-portal-custom-cursor.is-clickable .mist-portal-custom-cursor-corner-bl {
+          transform: translate(-0.25rem, 0.25rem);
+        }
+
+        .mist-portal-custom-cursor.is-clickable .mist-portal-custom-cursor-corner-br {
+          transform: translate(0.25rem, 0.25rem);
+        }
+
+        .mist-portal-custom-cursor-cross-v {
+          position: absolute;
+          height: 0.75rem;
+          width: 1px;
+          opacity: 0;
+        }
+
+        .mist-portal-custom-cursor-cross-h {
+          position: absolute;
+          height: 1px;
+          width: 0.75rem;
+          opacity: 0;
+        }
+
+        .mist-portal-custom-cursor.is-clickable .mist-portal-custom-cursor-cross-v,
+        .mist-portal-custom-cursor.is-clickable .mist-portal-custom-cursor-cross-h {
+          opacity: 0.6;
+        }
+
+        .mist-portal-custom-cursor-label {
+          font-size: 8px;
+          opacity: 0.4;
+        }
+
+        .mist-portal-custom-cursor.is-clickable .mist-portal-custom-cursor-label {
+          transform: translateY(0.25rem);
+          font-size: 9px;
+          letter-spacing: 0.1em;
+          opacity: 0;
+        }
+
+        .mist-portal-root.is-retro .mist-portal-custom-cursor-ring,
+        .mist-portal-root.is-retro .mist-portal-custom-cursor-dot,
+        .mist-portal-root.is-retro .mist-portal-custom-cursor-cross-v,
+        .mist-portal-root.is-retro .mist-portal-custom-cursor-cross-h {
+          background-color: #8B261D;
+        }
+
+        .mist-portal-root.is-retro .mist-portal-custom-cursor {
+          color: #8B261D;
+        }
+
+        .mist-portal-root.is-dark .mist-portal-custom-cursor {
+          color: white;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .mist-portal-smoke-layer,
+          .mist-portal-title-glitch-active,
+          .mist-portal-title-wrap.is-glitching .mist-portal-title-scanline,
+          .mist-portal-card-glitch-active .mist-card-bg,
+          .mist-portal-card-breath-active .mist-card-title,
+          .mist-portal-card-breath-active .mist-card-description p,
+          .mist-card-ecg-pulse,
+          .mist-portal-text-system-active * {
+            animation: none !important;
+          }
+
+          .mist-portal-header,
+          .mist-portal-left-copy,
+          .mist-portal-stage,
+          .mist-portal-stage-wrap,
+          .mist-portal-smoke-shader,
+          .mist-portal-particles {
+            transition-duration: 0ms !important;
+          }
+        }
+
+        @media (hover: none), (pointer: coarse) {
+          .mist-portal-custom-cursor {
+            display: none;
+          }
+        }
+
         .mist-portal-root:has(.mist-portal-card:hover) .mist-portal-custom-cursor > div:first-child {
           height: 1.9rem;
           width: 1.9rem;
@@ -2871,7 +3186,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
 
       <div className="mist-portal-atmosphere-smoke">
         <div className="mist-portal-smoke-shader absolute inset-[-10%]">
-          <ShaderBackground theme={isRetro ? 'retro' : 'dark'} />
+          {mistEnabled && <ShaderBackground theme={isRetro ? 'retro' : 'dark'} enabled={mistEnabled} maxFps={24} />}
         </div>
       </div>
 
@@ -3009,7 +3324,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
                   loop
                   muted
                   playsInline
-                  preload="auto"
+                  preload="metadata"
                   aria-label="Lacanian topology stage"
                 />
 
@@ -3025,6 +3340,8 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
                       src={card.imageSrc}
                       alt=""
                       className="max-h-[85%] max-w-[85%] object-contain drop-shadow-[0_0_35px_rgba(255,255,255,0.15)]"
+                      loading="lazy"
+                      decoding="async"
                     />
                   </div>
                 ))}
@@ -3047,6 +3364,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
                 index={index}
                 isRetro={isRetro}
                 isGlitching={cardGlitchActive[index]}
+                isBreathing={cardBreathActive[index]}
                 onHoverStart={startCardHover}
                 onHoverEnd={stopCardHover}
                 onCardClick={handleCardClick}
@@ -3094,36 +3412,24 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
 
 
       <div
+        ref={cursorRef}
         className="mist-portal-custom-cursor fixed pointer-events-none z-[9999] hidden flex-col items-center justify-center transition-opacity duration-200 ease-out lg:flex"
-        style={{
-          left: cursorPos.x,
-          top: cursorPos.y,
-          transform: 'translate(-50%, -50%)',
-          opacity: cursorPos.x < 0 ? 0 : 1,
-        }}
       >
         <div
-          className={`relative flex items-center justify-center transition-all duration-500 backdrop-invert backdrop-hue-rotate-180 ${
-            isRetro ? 'bg-[#8B261D]/5' : 'bg-white/5 mix-blend-difference'
-          } ${
-            isHoveringClickable ? 'h-12 w-12 scale-100' : 'h-3 w-3 rounded-full border border-opacity-40'
-          } ${!isHoveringClickable && (isRetro ? 'border-[#8B261D]/50' : 'border-white')}`}
+          className={`mist-portal-custom-cursor-ring relative flex items-center justify-center transition-all duration-500 backdrop-invert backdrop-hue-rotate-180 ${isRetro ? 'bg-[#8B261D]/5' : 'bg-white/5 mix-blend-difference'}`}
         >
-          <div className={`h-1 w-1 transition-all duration-300 ${isRetro ? 'bg-[#8B261D]' : 'bg-white'} ${isHoveringClickable ? 'scale-50 opacity-0' : 'scale-100 rounded-full opacity-100'}`} />
-          <div className={`absolute left-0 top-0 h-2.5 w-2.5 border-l-[1.5px] border-t-[1.5px] transition-all duration-300 ${isHoveringClickable ? '-translate-x-1 -translate-y-1 opacity-100' : 'translate-x-1 translate-y-1 opacity-0'} ${isRetro ? 'border-[#8B261D]' : 'border-white'}`} />
-          <div className={`absolute right-0 top-0 h-2.5 w-2.5 border-r-[1.5px] border-t-[1.5px] transition-all duration-300 ${isHoveringClickable ? 'translate-x-1 -translate-y-1 opacity-100' : '-translate-x-1 translate-y-1 opacity-0'} ${isRetro ? 'border-[#8B261D]' : 'border-white'}`} />
-          <div className={`absolute bottom-0 left-0 h-2.5 w-2.5 border-b-[1.5px] border-l-[1.5px] transition-all duration-300 ${isHoveringClickable ? '-translate-x-1 translate-y-1 opacity-100' : 'translate-x-1 -translate-y-1 opacity-0'} ${isRetro ? 'border-[#8B261D]' : 'border-white'}`} />
-          <div className={`absolute bottom-0 right-0 h-2.5 w-2.5 border-b-[1.5px] border-r-[1.5px] transition-all duration-300 ${isHoveringClickable ? 'translate-x-1 translate-y-1 opacity-100' : '-translate-x-1 -translate-y-1 opacity-0'} ${isRetro ? 'border-[#8B261D]' : 'border-white'}`} />
-          <div className={`absolute h-3 w-px transition-opacity duration-300 ${isHoveringClickable ? 'opacity-60' : 'opacity-0'} ${isRetro ? 'bg-[#8B261D]' : 'bg-white'}`} />
-          <div className={`absolute h-px w-3 transition-opacity duration-300 ${isHoveringClickable ? 'opacity-60' : 'opacity-0'} ${isRetro ? 'bg-[#8B261D]' : 'bg-white'}`} />
+          <div className={`mist-portal-custom-cursor-dot transition-all duration-300 ${isRetro ? 'bg-[#8B261D]' : 'bg-white'}`} />
+          <div className="mist-portal-custom-cursor-corner mist-portal-custom-cursor-corner-tl" />
+          <div className="mist-portal-custom-cursor-corner mist-portal-custom-cursor-corner-tr" />
+          <div className="mist-portal-custom-cursor-corner mist-portal-custom-cursor-corner-bl" />
+          <div className="mist-portal-custom-cursor-corner mist-portal-custom-cursor-corner-br" />
+          <div className={`mist-portal-custom-cursor-cross-v transition-opacity duration-300 ${isRetro ? 'bg-[#8B261D]' : 'bg-white'}`} />
+          <div className={`mist-portal-custom-cursor-cross-h transition-opacity duration-300 ${isRetro ? 'bg-[#8B261D]' : 'bg-white'}`} />
         </div>
         <div
-          className={`absolute top-full mt-3 whitespace-nowrap font-mono mix-blend-difference transition-all duration-300 ${
-            isHoveringClickable ? 'translate-y-1 text-[9px] tracking-widest opacity-0' : 'text-[8px] opacity-40'
-          } ${isRetro ? 'text-[#8B261D]' : 'text-white'}`}
-        >
-          [X:{Math.max(0, cursorPos.x).toFixed(0)} Y:{Math.max(0, cursorPos.y).toFixed(0)}]
-        </div>
+          ref={cursorLabelRef}
+          className={`mist-portal-custom-cursor-label absolute top-full mt-3 whitespace-nowrap font-mono mix-blend-difference transition-all duration-300 ${isRetro ? 'text-[#8B261D]' : 'text-white'}`}
+        />
       </div>
     </div>
   );

@@ -22,13 +22,23 @@ function createShader(gl: WebGLRenderingContext, type: number, source: string) {
   return shader;
 }
 
-export const ShaderBackground: React.FC<{ theme?: string }> = ({ theme = 'dark' }) => {
+interface ShaderBackgroundProps {
+  theme?: string;
+  enabled?: boolean;
+  maxFps?: number;
+}
+
+export const ShaderBackground: React.FC<ShaderBackgroundProps> = ({
+  theme = 'dark',
+  enabled = true,
+  maxFps = 24,
+}) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const isRetro = theme === 'retro';
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas || !enabled) return;
     const gl = canvas.getContext('webgl', { alpha: true, premultipliedAlpha: true });
     if (!gl) return;
 
@@ -167,12 +177,21 @@ export const ShaderBackground: React.FC<{ theme?: string }> = ({ theme = 'dark' 
       mouseY = 1.0 - (e.clientY / window.innerHeight);
       hasMouse = 1;
     };
-    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
 
     let animationFrameId: number;
     let startTime = performance.now();
+    let lastFrameTime = 0;
+    const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+    const frameInterval = reducedMotion ? 1000 : 1000 / Math.max(1, maxFps);
 
     const render = (time: number) => {
+      if (document.hidden || time - lastFrameTime < frameInterval) {
+        animationFrameId = requestAnimationFrame(render);
+        return;
+      }
+
+      lastFrameTime = time;
       const displayWidth = window.innerWidth;
       const displayHeight = window.innerHeight;
 
@@ -205,8 +224,12 @@ export const ShaderBackground: React.FC<{ theme?: string }> = ({ theme = 'dark' 
     return () => {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener('mousemove', handleMouseMove);
+      gl.deleteBuffer(positionBuffer);
+      gl.deleteProgram(program);
+      gl.deleteShader(vertexShader);
+      gl.deleteShader(fragmentShader);
     };
-  }, [isRetro]);
+  }, [enabled, isRetro, maxFps]);
 
   return (
     <canvas

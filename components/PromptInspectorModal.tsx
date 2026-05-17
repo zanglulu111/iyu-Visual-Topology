@@ -1,7 +1,13 @@
 import React from 'react';
-import { NarrativeFieldState, WorldLawConfig, DriverType, FaceState, NarrativeBlockDef, LibraryCategoryDef } from '../types';
+import { NarrativeFieldState, WorldLawConfig, DriverType, FaceState, PromptFocusState, NarrativePromptVersion, NarrativeBlockDef, LibraryCategoryDef, M7BResidueIntensity } from '../types';
 import { buildNarrativePrompt } from '../services/narrativeGenerator';
+import { appendFantasyTraverseOutputContract } from '../services/geminiService';
 import { XRayInspectorModal, type XRaySourceGroup } from './XRayInspector';
+import {
+    normalizeWorldLawConfig,
+    resolveWorldLawLevel,
+    WORLD_LAW_LEVEL_OPTIONS
+} from '../services/worldLaw';
 import {
     AESTHETIC_ENGINE_BLOCKS,
     AESTHETIC_ENGINE_LIBRARY,
@@ -34,15 +40,11 @@ interface PromptInspectorModalProps {
     worldLawConfig: WorldLawConfig;
     driverType: DriverType | null;
     faceState: FaceState;
+    focusState?: PromptFocusState;
+    m7bIntensity?: M7BResidueIntensity;
+    promptVersion: NarrativePromptVersion;
+    onPromptVersionChange: (version: NarrativePromptVersion) => void;
 }
-
-const WORLD_LAW_OPTIONS = [
-    { value: 1, label: '写实', description: '物理重力闭锁。' },
-    { value: 2, label: '合理', description: '超现实元素必须被合理解释。' },
-    { value: 3, label: '缝合', description: '现实为底，允许局部症状化超现实。' },
-    { value: 4, label: '奇观', description: '高概念幻想公开运行。' },
-    { value: 5, label: '狂想', description: '绝对无重力的疯狂拼贴。' }
-];
 
 const getDriverBlocksAndLibrary = (driverType: DriverType | null): { blocks: NarrativeBlockDef[]; library: LibraryCategoryDef[] } => {
     switch (driverType) {
@@ -125,10 +127,20 @@ export const PromptInspectorModal: React.FC<PromptInspectorModalProps> = ({
     visionImage,
     worldLawConfig,
     driverType,
-    faceState
+    faceState,
+    focusState,
+    m7bIntensity,
+    promptVersion,
+    onPromptVersionChange
 }) => {
     const activeDriver = driverType || DriverType.NARRATIVE;
     const { blocks, library } = getDriverBlocksAndLibrary(activeDriver);
+    const worldLawLevel = resolveWorldLawLevel(worldLawConfig);
+    const worldLawOptions = WORLD_LAW_LEVEL_OPTIONS.map(option => ({
+        value: option.id,
+        label: lang === 'EN' ? option.shortEN : option.shortCN,
+        description: lang === 'EN' ? option.descEN : option.descCN
+    }));
     const engineBlocks = blocks.filter(block => !isSurfaceBlock(block.id));
     const surfaceBlocks = blocks.filter(block => isSurfaceBlock(block.id));
 
@@ -143,11 +155,38 @@ export const PromptInspectorModal: React.FC<PromptInspectorModalProps> = ({
             title: lang === 'EN' ? 'Surface Settings' : '表层设定',
             items: [
                 {
-                    id: 'worldLawGravity',
+                    id: 'promptVersion',
+                    label: lang === 'EN' ? 'Prompt Version' : '提示词版本',
+                    kind: 'select',
+                    value: promptVersion,
+                    options: [
+                        {
+                            value: 'v4',
+                            label: 'V4',
+                            description: lang === 'EN'
+                                ? 'External-story-first rebuild. Recommended for divergence quality.'
+                                : '外部故事优先的新架构，推荐用于分歧点生成。'
+                        },
+                        {
+                            value: 'v3',
+                            label: 'V3',
+                            description: lang === 'EN'
+                                ? 'Director-brief architecture kept for comparison and fallback.'
+                                : '导演笔记旧架构，用于对照和回退。'
+                        }
+                    ],
+                    editable: true,
+                    inlineOptions: true,
+                    tone: 'surface',
+                    placeholder: lang === 'EN' ? 'Prompt Version' : '提示词版本',
+                    alwaysShow: true
+                },
+                {
+                    id: 'worldLawLevel',
                     label: lang === 'EN' ? 'World Law' : '世界法则',
                     kind: 'select',
-                    value: worldLawConfig?.gravity || '',
-                    options: WORLD_LAW_OPTIONS,
+                    value: worldLawLevel,
+                    options: worldLawOptions,
                     editable: true,
                     placeholder: lang === 'EN' ? 'World Law' : '世界法则'
                 },
@@ -179,12 +218,17 @@ export const PromptInspectorModal: React.FC<PromptInspectorModalProps> = ({
     const buildPayload = (values: Record<string, unknown>) => {
         try {
             const nextFieldState = collectFieldState(values, blocks, fieldState);
-            const gravity = Number(values.worldLawGravity || worldLawConfig?.gravity || 1);
-            const nextWorldLaw: WorldLawConfig = { ...worldLawConfig, gravity };
+            const nextWorldLaw: WorldLawConfig = normalizeWorldLawConfig({
+                ...worldLawConfig,
+                gravity: Number(values.worldLawLevel || worldLawLevel)
+            });
             const nextVisionInput = String(values.visionInput ?? '');
             const nextVisionImage = typeof values.visionImage === 'string' && values.visionImage.trim() ? values.visionImage : null;
+            const nextPromptVersion = values.promptVersion === 'v3' ? 'v3' : 'v4';
+            if (nextPromptVersion !== promptVersion) onPromptVersionChange(nextPromptVersion);
 
-            return buildNarrativePrompt("", nextFieldState, nextVisionInput, nextVisionImage, nextWorldLaw, 'v3', faceState).text;
+            const promptData = buildNarrativePrompt("SHORT", nextFieldState, nextVisionInput, nextVisionImage, nextWorldLaw, nextPromptVersion, faceState, focusState, m7bIntensity);
+            return appendFantasyTraverseOutputContract(promptData.text);
         } catch (e) {
             return `提示词生成过程中遇到错误，请检查左侧输入源。\n\n[ERROR DETAILS]\n${e instanceof Error ? e.stack : String(e)}`;
         }
