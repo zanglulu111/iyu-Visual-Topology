@@ -24,35 +24,6 @@ type PortalTone = 'gold' | 'cyan' | 'red' | 'purple' | 'orange';
 const DESIRE_PORTAL_NUMBER = '03';
 const PORTAL_HERO_POSTER_LIGHT = '/portal-assets/portal-hero-86-light.jpg';
 
-const detectLowPowerPortal = () => {
-  if (typeof window === 'undefined' || typeof navigator === 'undefined') return false;
-  const params = new URLSearchParams(window.location.search);
-  let storedOverride: string | null = null;
-  try {
-    storedOverride = window.localStorage.getItem('mistPortalMotion');
-  } catch {
-    storedOverride = null;
-  }
-  const override = params.get('portalMotion') || storedOverride;
-  if (override === 'full') return false;
-  if (override === 'lite' || params.get('lowPower') === '1') return true;
-
-  const nav = navigator as Navigator & {
-    deviceMemory?: number;
-    connection?: { saveData?: boolean; effectiveType?: string };
-  };
-  const cores = nav.hardwareConcurrency || 8;
-  const memory = nav.deviceMemory || 8;
-  const effectiveType = nav.connection?.effectiveType || '';
-  const ua = nav.userAgent || '';
-  const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
-  const oldWindows = /Windows NT (5|6\.)/.test(ua);
-  const lowEndWindows = /Windows/i.test(ua) && (cores <= 4 || memory <= 4);
-  const constrainedNetwork = nav.connection?.saveData || /^(slow-2g|2g|3g)$/.test(effectiveType);
-
-  return reducedMotion || oldWindows || lowEndWindows || memory <= 2 || cores <= 2 || !!constrainedNetwork;
-};
-
 interface PortalCardDef {
   number: string;
   titleCn: string;
@@ -149,11 +120,10 @@ const PortalCard: React.FC<{
   index: number;
   isGlitching: boolean;
   isBreathing: boolean;
-  isLowPower: boolean;
   onHoverStart: (card: PortalCardDef, index: number, rect: DOMRect) => void;
   onHoverEnd: (index: number) => void;
   onCardClick: (card: PortalCardDef, index: number, rect: DOMRect) => void;
-}> = ({ card, isRetro, index, isGlitching, isBreathing, isLowPower, onHoverStart, onHoverEnd, onCardClick }) => {
+}> = ({ card, isRetro, index, isGlitching, isBreathing, onHoverStart, onHoverEnd, onCardClick }) => {
   const accent = toneColor(card.tone, isRetro);
   const mediaRef = useRef<HTMLDivElement | null>(null);
   const handleClick = () => {
@@ -187,18 +157,14 @@ const PortalCard: React.FC<{
       <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-r from-black/40 via-black/18 to-transparent transition-opacity duration-700 group-hover:opacity-95" />
       <div className="pointer-events-none absolute inset-0 z-[2] bg-[radial-gradient(circle_at_74%_38%,rgba(255,255,255,0.16),transparent_34%),linear-gradient(to_bottom,rgba(0,0,0,0.06),transparent_35%,rgba(0,0,0,0.36))]" />
       <div className="pointer-events-none absolute inset-0 z-[3] bg-white/[0.04] opacity-45 transition-opacity duration-500 group-hover:opacity-100" />
-      {!isLowPower && (
-        <>
-          <div className="mist-card-film-base pointer-events-none absolute inset-0 z-[4] transition-all duration-500" aria-hidden="true" />
-          <img
-            src="/portal-assets/film-card-frame.png"
-            alt=""
-            aria-hidden="true"
-            className="mist-card-film-frame pointer-events-none absolute inset-0 z-[8] h-full w-full object-fill opacity-100 transition-all duration-500"
-            draggable="false"
-          />
-        </>
-      )}
+      <div className="mist-card-film-base pointer-events-none absolute inset-0 z-[4] transition-all duration-500" aria-hidden="true" />
+      <img
+        src="/portal-assets/film-card-frame.png"
+        alt=""
+        aria-hidden="true"
+        className="mist-card-film-frame pointer-events-none absolute inset-0 z-[8] h-full w-full object-fill opacity-100 transition-all duration-500"
+        draggable="false"
+      />
       <div className="mist-card-red-splice pointer-events-none absolute z-[11]" aria-hidden="true" />
 
       <div className="mist-card-body relative z-10 h-full px-5 py-6 text-center 2xl:px-8 2xl:py-7">
@@ -240,8 +206,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
 }) => {
   const { theme } = useTheme();
   const isRetro = theme === 'retro';
-  const [isLowPowerPortal] = useState(() => detectLowPowerPortal());
-  const [mistEnabled, setMistEnabled] = useState(() => !isLowPowerPortal);
+  const [mistEnabled, setMistEnabled] = useState(true);
   const [isLeavingPortal, setIsLeavingPortal] = useState(false);
   const [isTitleGlitching, setIsTitleGlitching] = useState(false);
   const [isPortalEntering, setIsPortalEntering] = useState(entryMode === 'intro');
@@ -275,11 +240,11 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
 
     const t1 = setTimeout(() => {
       setBootStage('beam');
-    }, isLowPowerPortal ? 80 : 600); // 0.6s: Beam hits the screen
+    }, 600); // 0.6s: Beam hits the screen
 
     const t2 = setTimeout(() => {
       setBootStage('text');
-    }, isLowPowerPortal ? 180 : 1800); // 1.8s: Text starts fading in
+    }, 1800); // 1.8s: Text starts fading in
 
     const t3 = setTimeout(() => {
       setBootStage('ready'); // 3.2s: Cards fade up
@@ -296,7 +261,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
         }
       }, 100);
       */
-    }, isLowPowerPortal ? 420 : 3200);
+    }, 3200);
 
     return () => {
       clearTimeout(t1);
@@ -304,19 +269,25 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
       clearTimeout(t3);
       // bootAudio.pause(); - DISABLED
     };
-  }, [entryMode, isLowPowerPortal]);
+  }, [entryMode]);
 
   useEffect(() => {
-    if (isLowPowerPortal) return;
     let animationFrame = 0;
+    let framePending = false;
+    let lastFrameTime = 0;
     let lastClientX = -100;
     let lastClientY = -100;
     let lastClickable = false;
+    const minFrameMs = 24;
     const handleMouseMove = (event: MouseEvent) => {
       lastClientX = event.clientX;
       lastClientY = event.clientY;
-      cancelAnimationFrame(animationFrame);
-      animationFrame = requestAnimationFrame(() => {
+      if (framePending) return;
+      framePending = true;
+      animationFrame = requestAnimationFrame((now) => {
+        framePending = false;
+        if (now - lastFrameTime < minFrameMs) return;
+        lastFrameTime = now;
         const root = portalRootRef.current;
         if (!root) return;
         root.style.setProperty('--portal-mouse-x', ((lastClientX / window.innerWidth - 0.5) * 2).toFixed(4));
@@ -343,17 +314,20 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
       cancelAnimationFrame(animationFrame);
       window.removeEventListener('mousemove', handleMouseMove);
     };
-  }, [isLowPowerPortal]);
+  }, []);
 
   useEffect(() => {
-    if (isLowPowerPortal) return;
-    const audio = new Audio('/audio/glitch.mp3');
+    const audio = new Audio();
+    audio.preload = 'none';
+    audio.src = '/audio/glitch.mp3';
     audio.volume = 0.8;
     audio.loop = true;
     glitchAudioRef.current = audio;
 
     [1, 2, 3, 4, 5].forEach((num, index) => {
-      const cardAudio = new Audio(`/audio/realm-0${num}.mp3`);
+      const cardAudio = new Audio();
+      cardAudio.preload = 'none';
+      cardAudio.src = `/audio/realm-0${num}.mp3`;
       cardAudio.volume = 0.6;
       cardAudio.loop = false;
       cardAudioRefs.current[index] = cardAudio;
@@ -372,10 +346,9 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
         if (timer) clearTimeout(timer);
       });
     };
-  }, [isLowPowerPortal]);
+  }, []);
 
   const startTitleGlitch = () => {
-    if (isLowPowerPortal) return;
     if (titleGlitchActiveRef.current) return;
     titleGlitchActiveRef.current = true;
     cardAudioRefs.current.forEach((cardAudio) => {
@@ -402,7 +375,6 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
   };
 
   const startCardHover = (card: PortalCardDef, index: number, _rect: DOMRect) => {
-    if (isLowPowerPortal) return;
     setActiveStageMedia(card.imageSrc);
     cardHoverActiveRef.current[index] = true;
     if (cardGlitchTimers.current[index]) {
@@ -565,14 +537,14 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
   const portalRootStyle = {
     '--portal-mouse-x': '0',
     '--portal-mouse-y': '0',
-    '--portal-mist-opacity': mistEnabled && !isLowPowerPortal ? 1 : 0,
-    '--portal-film-side-opacity': isLowPowerPortal ? 0 : 1,
+    '--portal-mist-opacity': mistEnabled ? 1 : 0,
+    '--portal-film-side-opacity': 1,
   } as React.CSSProperties;
 
   return (
     <div
       ref={portalRootRef}
-      className={`mist-portal-root ${isRetro ? 'is-retro' : 'is-dark'} ${isLowPowerPortal ? 'is-low-power' : ''} fixed inset-0 overflow-hidden bg-black text-white ${isPortalEntering ? 'mist-portal-entering' : ''} ${isTitleGlitching ? 'mist-portal-text-system-active' : ''}`}
+      className={`mist-portal-root ${isRetro ? 'is-retro' : 'is-dark'} fixed inset-0 overflow-hidden bg-black text-white ${isPortalEntering ? 'mist-portal-entering' : ''} ${isTitleGlitching ? 'mist-portal-text-system-active' : ''}`}
       style={portalRootStyle}
     >
       <style>{`
@@ -595,8 +567,8 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
           --portal-card-height: clamp(10rem, min(21.5vh, 10vw), 13.5rem);
           --portal-card-gap: clamp(0.65rem, 0.9vw, 1rem);
           --portal-available-hero: calc(100dvh - var(--portal-pad-top) - var(--portal-pad-bottom) - 34px - var(--portal-main-top) - var(--portal-card-height) - var(--portal-footer-height) - (var(--portal-main-gap) * 2));
-          --portal-stage-width-cap: clamp(72vw, calc(var(--portal-available-hero) * 2.357), 100%);
-          --portal-stage-height-cap: calc(var(--portal-stage-width-cap) * 0.4242);
+          --portal-stage-width-cap: clamp(72vw, calc(var(--portal-available-hero) * 2.333333), 100%);
+          --portal-stage-height-cap: calc(var(--portal-stage-width-cap) * 0.428571);
           --portal-hero-height: clamp(25rem, var(--portal-available-hero), 43rem);
           --stage-top: 0;
           --stage-bottom-inset: clamp(0.34rem, 0.82vh, 0.68rem);
@@ -1837,7 +1809,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
           right: 0;
           width: min(100%, var(--portal-stage-width-cap));
           height: auto;
-          aspect-ratio: 33 / 14;
+          aspect-ratio: 7 / 3;
           border: 0;
           background: transparent;
           box-shadow: 0 0 42px rgba(0,0,0,0.55);
@@ -2738,108 +2710,6 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
           text-shadow: 0 0 12px rgba(166,64,56,0.3);
         }
 
-        .mist-portal-root.is-low-power,
-        .mist-portal-root.is-low-power button,
-        .mist-portal-root.is-low-power a,
-        .mist-portal-root.is-low-power [role="button"] {
-          cursor: auto;
-        }
-
-        .mist-portal-root.is-low-power *,
-        .mist-portal-root.is-low-power *::before,
-        .mist-portal-root.is-low-power *::after {
-          animation-duration: 1ms !important;
-          animation-iteration-count: 1 !important;
-          transition-duration: 80ms !important;
-          will-change: auto !important;
-        }
-
-        .mist-portal-root.is-low-power :where(
-          .mist-portal-custom-cursor,
-          .mist-portal-film-side,
-          .mist-portal-atmosphere-smoke,
-          .mist-portal-particles,
-          .mist-card-film-frame,
-          .mist-card-film-base,
-          .mist-card-hover-field,
-          .mist-card-local-ecg,
-          .mist-card-red-splice,
-          .mist-portal-title-scanline
-        ) {
-          display: none !important;
-        }
-
-        .mist-portal-root.is-low-power :where(
-          .mist-portal-header,
-          .mist-portal-left-copy,
-          .mist-portal-left-copy > div,
-          .mist-portal-stage-wrap,
-          .mist-portal-stage,
-          .mist-portal-footer,
-          .mist-portal-shell,
-          .mist-portal-card
-        ) {
-          transform: none !important;
-          transform-style: flat !important;
-          transition-property: color, background-color, border-color, opacity !important;
-        }
-
-        .mist-portal-root.is-low-power :where(
-          .mist-portal-title,
-          .mist-card-title,
-          .mist-card-title::before,
-          .mist-card-description,
-          .mist-card-description p,
-          .mist-card-bg,
-          .mist-portal-stage img,
-          .mist-portal-stage video
-        ) {
-          filter: none !important;
-        }
-
-        .mist-portal-root.is-low-power .mist-portal-stage {
-          box-shadow: 0 0 18px rgba(0,0,0,0.38);
-          -webkit-mask-image: none;
-          mask-image: none;
-        }
-
-        .mist-portal-root.is-low-power .mist-portal-card {
-          transform: none !important;
-          box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
-          background: rgba(0,0,0,0.24);
-        }
-
-        .mist-portal-root.is-low-power .mist-portal-card:hover {
-          transform: none !important;
-          background: rgba(0,0,0,0.42);
-          box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--portal-card-accent) 42%, transparent);
-        }
-
-        .mist-portal-root.is-low-power .mist-card-bg,
-        .mist-portal-root.is-low-power .mist-portal-card:hover .mist-card-bg,
-        .mist-portal-root.is-low-power .mist-portal-card-glitch-active .mist-card-bg {
-          transform: none !important;
-          opacity: 0.82;
-          animation: none !important;
-        }
-
-        .mist-portal-root.is-low-power .mist-card-title,
-        .mist-portal-root.is-low-power .mist-portal-card:hover .mist-card-title,
-        .mist-portal-root.is-low-power .mist-portal-card-glitch-active .mist-card-title {
-          transform: translate3d(-50%, -50%, 0) !important;
-          animation: none !important;
-          color: rgba(255,255,255,0.88);
-          text-shadow: 0 2px 10px rgba(0,0,0,0.78);
-        }
-
-        .mist-portal-root.is-low-power .mist-card-description,
-        .mist-portal-root.is-low-power .mist-portal-card:hover .mist-card-description,
-        .mist-portal-root.is-low-power .mist-portal-card-glitch-active .mist-card-description {
-          opacity: 0;
-          transform: none !important;
-          animation: none !important;
-        }
-
         @media (prefers-reduced-motion: reduce) {
           .mist-portal-title:hover,
           .mist-portal-header,
@@ -2870,8 +2740,8 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
             --portal-title-size: clamp(5.8rem, 5.5vw, 7.3rem);
             --portal-left-top: clamp(4.45rem, 8.25vh, 7.3rem);
             --portal-left-shift-x: clamp(2.4rem, 3.4vw, 4.6rem);
-            --portal-stage-width-cap: clamp(72vw, calc(var(--portal-available-hero) * 2.357), 100%);
-            --portal-stage-height-cap: calc(var(--portal-stage-width-cap) * 0.4242);
+            --portal-stage-width-cap: clamp(72vw, calc(var(--portal-available-hero) * 2.333333), 100%);
+            --portal-stage-height-cap: calc(var(--portal-stage-width-cap) * 0.428571);
             --portal-hero-height: clamp(29rem, var(--portal-available-hero), 44rem);
             --stage-left-clearance: 0px;
             --stage-overlap: clamp(12rem, 17.2vw, 23rem);
@@ -2889,8 +2759,8 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
             --portal-left-col: minmax(19.2rem, 0.29fr);
             --portal-stage-col: minmax(47rem, 0.71fr);
             --portal-title-size: clamp(4.2rem, 6.05vw, 6.35rem);
-            --portal-stage-width-cap: clamp(72vw, calc(var(--portal-available-hero) * 2.357), 100%);
-            --portal-stage-height-cap: calc(var(--portal-stage-width-cap) * 0.4242);
+            --portal-stage-width-cap: clamp(72vw, calc(var(--portal-available-hero) * 2.333333), 100%);
+            --portal-stage-height-cap: calc(var(--portal-stage-width-cap) * 0.428571);
             --portal-hero-height: clamp(26rem, var(--portal-available-hero), 37rem);
             --stage-left-clearance: 0px;
             --stage-overlap: clamp(8rem, 19vw, 18rem);
@@ -2914,8 +2784,8 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
           .mist-portal-root {
             --portal-pad-x: clamp(1.65rem, 2.7vw, 2.4rem);
             --portal-title-size: clamp(3.95rem, 5.75vw, 5.55rem);
-            --portal-stage-width-cap: clamp(72vw, calc(var(--portal-available-hero) * 2.357), 100%);
-            --portal-stage-height-cap: calc(var(--portal-stage-width-cap) * 0.4242);
+            --portal-stage-width-cap: clamp(72vw, calc(var(--portal-available-hero) * 2.333333), 100%);
+            --portal-stage-height-cap: calc(var(--portal-stage-width-cap) * 0.428571);
             --portal-hero-height: clamp(24.5rem, var(--portal-available-hero), 34rem);
             --portal-left-col: minmax(18rem, 0.28fr);
             --portal-stage-col: minmax(39.5rem, 0.72fr);
@@ -2943,8 +2813,8 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
             --portal-main-top: clamp(0.35rem, 0.85vh, 0.6rem);
             --portal-left-top: clamp(3rem, 6.45vh, 4.45rem);
             --portal-title-size: clamp(3.8rem, 5.75vw, 6rem);
-            --portal-stage-width-cap: clamp(70vw, calc(var(--portal-available-hero) * 2.357), 100%);
-            --portal-stage-height-cap: calc(var(--portal-stage-width-cap) * 0.4242);
+            --portal-stage-width-cap: clamp(70vw, calc(var(--portal-available-hero) * 2.333333), 100%);
+            --portal-stage-height-cap: calc(var(--portal-stage-width-cap) * 0.428571);
             --portal-hero-height: clamp(23rem, var(--portal-available-hero), 30rem);
             --stage-top: 0;
             --stage-bottom-inset: clamp(0.26rem, 0.68vh, 0.52rem);
@@ -3021,8 +2891,8 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
             --portal-left-col: minmax(17rem, 0.3fr);
             --portal-stage-col: minmax(33rem, 0.7fr);
             --portal-title-size: clamp(3.4rem, 5.1vw, 5.05rem);
-            --portal-stage-width-cap: clamp(70vw, calc(var(--portal-available-hero) * 2.357), 100%);
-            --portal-stage-height-cap: calc(var(--portal-stage-width-cap) * 0.4242);
+            --portal-stage-width-cap: clamp(70vw, calc(var(--portal-available-hero) * 2.333333), 100%);
+            --portal-stage-height-cap: calc(var(--portal-stage-width-cap) * 0.428571);
             --portal-hero-height: clamp(22.5rem, var(--portal-available-hero), 31rem);
             --portal-left-top: clamp(2.85rem, 6.15vh, 4.3rem);
             --portal-left-shift-x: clamp(0.7rem, 1.55vw, 1.35rem);
@@ -3110,7 +2980,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
             inset: auto;
             height: auto;
             width: 100%;
-            aspect-ratio: 33 / 14;
+            aspect-ratio: 7 / 3;
           }
 
           .mist-portal-card {
@@ -3321,25 +3191,21 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
       <div className="mist-portal-film-side mist-portal-film-side-left" />
       <div className="mist-portal-film-side mist-portal-film-side-right" />
 
-      {!isLowPowerPortal && (
-        <>
-          {/* Floating Particles Parallax Layer */}
-          <div
-            className="pointer-events-none absolute inset-[-5%] transition-transform duration-100 ease-linear mist-portal-particles"
-            style={{
-              transform: 'translate3d(calc(var(--portal-mouse-x, 0) * -1.5%), calc(var(--portal-mouse-y, 0) * -1.5%), 0)',
-              background: 'radial-gradient(1px 1px at 15% 25%, rgba(255,255,255,0.4) 100%, transparent), radial-gradient(1.5px 1.5px at 85% 75%, rgba(255,255,255,0.3) 100%, transparent), radial-gradient(2px 2px at 50% 50%, rgba(255,255,255,0.2) 100%, transparent), radial-gradient(1px 1px at 35% 85%, rgba(255,255,255,0.25) 100%, transparent), radial-gradient(1px 1px at 75% 25%, rgba(255,255,255,0.15) 100%, transparent)',
-              backgroundSize: '150% 150%',
-            }}
-          />
+      {/* Floating Particles Parallax Layer */}
+      <div
+        className="pointer-events-none absolute inset-[-5%] transition-transform duration-100 ease-linear mist-portal-particles"
+        style={{
+          transform: 'translate3d(calc(var(--portal-mouse-x, 0) * -1.5%), calc(var(--portal-mouse-y, 0) * -1.5%), 0)',
+          background: 'radial-gradient(1px 1px at 15% 25%, rgba(255,255,255,0.4) 100%, transparent), radial-gradient(1.5px 1.5px at 85% 75%, rgba(255,255,255,0.3) 100%, transparent), radial-gradient(2px 2px at 50% 50%, rgba(255,255,255,0.2) 100%, transparent), radial-gradient(1px 1px at 35% 85%, rgba(255,255,255,0.25) 100%, transparent), radial-gradient(1px 1px at 75% 25%, rgba(255,255,255,0.15) 100%, transparent)',
+          backgroundSize: '150% 150%',
+        }}
+      />
 
-          <div className="mist-portal-atmosphere-smoke">
-            <div className="mist-portal-smoke-shader absolute inset-[-10%]">
-              {mistEnabled && <ShaderBackground theme={isRetro ? 'retro' : 'dark'} enabled={mistEnabled && !isLeavingPortal} maxFps={16} />}
-            </div>
-          </div>
-        </>
-      )}
+      <div className="mist-portal-atmosphere-smoke">
+        <div className="mist-portal-smoke-shader absolute inset-[-10%]">
+          {mistEnabled && <ShaderBackground theme={isRetro ? 'retro' : 'dark'} enabled={mistEnabled && !isLeavingPortal} maxFps={16} />}
+        </div>
+      </div>
 
       <div className="mist-portal-shell relative mx-auto flex h-dvh max-h-dvh w-full max-w-[1900px] flex-col overflow-hidden">
         <header className="mist-portal-header grid h-[34px] shrink-0 items-center gap-[clamp(0.8rem,1.3vw,2.2rem)]">
@@ -3467,31 +3333,20 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
                 }}
               >
               <div className="mist-portal-stage overflow-hidden relative">
-                {isLowPowerPortal ? (
-                  <img
-                    src={PORTAL_HERO_POSTER_LIGHT}
-                    alt=""
-                    className="absolute inset-0 h-full w-full object-contain opacity-100"
-                    decoding="async"
-                    draggable="false"
-                    aria-hidden="true"
-                  />
-                ) : (
-                  <video
-                    src="/portal-assets/portal-hero-loop.mp4"
-                    poster={PORTAL_HERO_POSTER_LIGHT}
-                    className={`absolute inset-0 h-full w-full object-contain transition-all duration-1000 ${activeStageMedia ? 'opacity-15 blur-md scale-[1.02]' : 'opacity-100 blur-0 scale-100'}`}
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    preload="metadata"
-                    aria-label="Lacanian topology stage"
-                  />
-                )}
+                <video
+                  src="/portal-assets/portal-hero-loop.mp4"
+                  poster={PORTAL_HERO_POSTER_LIGHT}
+                  className={`absolute inset-0 h-full w-full object-contain transition-all duration-1000 ${activeStageMedia ? 'opacity-15 blur-md scale-[1.02]' : 'opacity-100 blur-0 scale-100'}`}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  preload="metadata"
+                  aria-label="Lacanian topology stage"
+                />
 
                 {/* Dynamic Projected Media */}
-                {!isLowPowerPortal && portalCards.map((card) => (
+                {portalCards.map((card) => (
                   <div
                     key={card.number}
                     className={`absolute inset-0 flex items-center justify-center transition-all duration-[800ms] pointer-events-none mix-blend-screen ${
@@ -3527,7 +3382,6 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
                 isRetro={isRetro}
                 isGlitching={cardGlitchActive[index]}
                 isBreathing={cardBreathActive[index]}
-                isLowPower={isLowPowerPortal}
                 onHoverStart={startCardHover}
                 onHoverEnd={stopCardHover}
                 onCardClick={handleCardClick}
