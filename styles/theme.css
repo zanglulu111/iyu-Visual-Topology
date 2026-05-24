@@ -2228,9 +2228,9 @@ body.mist-theme-switching::before {
 }
 
 .mist-labyrinth-page-film {
-  position: absolute;
+  position: fixed;
   top: 0;
-  bottom: 0;
+  bottom: 3.5rem;
   width: var(--labyrinth-page-film-width);
   pointer-events: none;
   z-index: 1;
@@ -2273,13 +2273,13 @@ body.mist-theme-switching::before {
 }
 
 .mist-labyrinth-page-film-left {
-  left: -0.18rem;
+  left: 0;
   background-image: url('/portal-assets/film-side-left.png');
   background-position: 50% top;
 }
 
 .mist-labyrinth-page-film-right {
-  right: -0.18rem;
+  right: 0;
   background-image: url('/portal-assets/film-side-right.png');
   background-position: 50% top;
 }

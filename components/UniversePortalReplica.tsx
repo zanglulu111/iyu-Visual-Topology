@@ -1525,9 +1525,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
           opacity: var(--portal-film-side-opacity, 1);
           filter: contrast(1.28) brightness(1.08) saturate(0.72);
           box-shadow: none;
-          transform: translate3d(0, 0, 18px);
-          transform-style: preserve-3d;
-          will-change: opacity;
+          transform: none;
           transition: opacity 520ms cubic-bezier(0.16, 1, 0.3, 1);
         }
 
@@ -1558,13 +1556,13 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
         }
 
         .mist-portal-film-side-left {
-          left: max(var(--portal-film-side-breath), calc((100vw - var(--portal-frame-width)) / 2 + var(--portal-film-side-breath)));
+          left: 0;
           background-image: url('/portal-assets/film-side-left.png');
           background-position: left top;
         }
 
         .mist-portal-film-side-right {
-          right: max(var(--portal-film-side-breath), calc((100vw - var(--portal-frame-width)) / 2 + var(--portal-film-side-breath)));
+          right: 0;
           background-image: url('/portal-assets/film-side-right.png');
           background-position: right top;
         }
