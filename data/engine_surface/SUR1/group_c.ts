@@ -8,7 +8,7 @@ export const SUR1_GROUP_C: LibraryCategoryDef = {
     {
       id: "high_fantasy",
       name: "史诗奇幻", nameEn: "High Fantasy",
-      def: "以完整架空世界和英雄征途为类型核心，精灵、矮人、魔法战争等只作可选世界资源。",
+      def: "以完整架空世界和英雄征途为识别重点，精灵、矮人、魔法战争等只作可选世界资源。",
       defEn: "Complete secondary world, elves/dwarves, magic wars, hero's journey.",
       core: "光明与黑暗的永恒对峙。渺小的个体被卷入远超自身尺度的宿命棋局。",
       coreEn: "Eternal standoff between light and darkness. Insignificant individuals drawn into a fateful chess game far exceeding their own scale.",
@@ -18,7 +18,7 @@ export const SUR1_GROUP_C: LibraryCategoryDef = {
     {
       id: "magical_realism",
       name: "魔幻现实", nameEn: "Magical Realism",
-      def: "以现实秩序中自然嵌入魔幻为类型核心，魔法来源不必解释，服务于记忆和隐喻。",
+      def: "以现实秩序中自然嵌入魔幻为识别重点，魔法来源不必解释，服务于记忆和隐喻。",
       defEn: "Magic ingrained in reality with no explanation, metaphor for heavy memory.",
       core: "荒诞的超自然现象 vs 沉重苦难的现实历史。魔法不需要解释，它像空气一样存在于日常的苦难之中。",
       coreEn: "Absurd supernatural phenomena vs the heavy suffering of real history. Magic requires no explanation — it exists in daily suffering like air.",
@@ -28,7 +28,7 @@ export const SUR1_GROUP_C: LibraryCategoryDef = {
     {
       id: "dark_fantasy",
       name: "暗黑奇幻", nameEn: "Dark Fantasy",
-      def: "以残酷世界观和反英雄处境为类型核心，洛夫克拉夫特式元素只作可选暗面。",
+      def: "以残酷世界观和反英雄处境为识别重点，洛夫克拉夫特式元素只作可选暗面。",
       defEn: "Cruel, mature, anti-hero, despairing worldview, Lovecraftian elements.",
       core: "人类微茫的火光 vs 充满恶意的世界意志。世界本身是敌人，每一寸安全都是暂借的幻觉。",
       coreEn: "Tiny spark of humanity vs the malicious will of the world. The world itself is the enemy; every inch of safety is a borrowed illusion.",
@@ -38,7 +38,7 @@ export const SUR1_GROUP_C: LibraryCategoryDef = {
     {
       id: "urban_fantasy",
       name: "都市奇幻", nameEn: "Urban Fantasy",
-      def: "以现代城市与隐藏超自然秩序并存为类型核心，猎人、吸血鬼、地下社会只作可选配置。",
+      def: "以现代城市与隐藏超自然秩序并存为识别重点，猎人、吸血鬼、地下社会只作可选配置。",
       defEn: "Magic in modern cities, vampire hunters, hidden non-human societies.",
       core: "枯燥的现代日常 vs 帷幕之下的神秘战线。两个世界共享同一座城市，大多数人看不见另一半。",
       coreEn: "Boring modern mundane vs the mysterious battlefront behind the veil. Two worlds share the same city; most people cannot see the other half.",
@@ -48,7 +48,7 @@ export const SUR1_GROUP_C: LibraryCategoryDef = {
     {
       id: "fairy_tale",
       name: "童话寓言", nameEn: "Fairy Tale",
-      def: "以童话原型和寓言化因果为类型核心，民间传说、暗黑童话等只作可选路径。",
+      def: "以童话原型和寓言化因果为识别重点，民间传说、暗黑童话等只作可选路径。",
       defEn: "Folklore reconstruction, dark fairy tales, psychological archetypes.",
       core: "纯真的丧失 vs 成长的残酷代价。简易涂鸦般的表面下藏着成人世界的残酷法则。",
       coreEn: "Loss of innocence vs the cruel price of growing up. Beneath the surface of childlike simplicity hide the brutal rules of the adult world.",
@@ -58,7 +58,7 @@ export const SUR1_GROUP_C: LibraryCategoryDef = {
     {
       id: "mythological",
       name: "神话重述", nameEn: "Mythological",
-      def: "以神话母题的重新讲述为类型核心，半神英雄、神圣干预等只按故事需要取用。",
+      def: "以神话母题的重新讲述为识别重点，半神英雄、神圣干预等只按故事需要取用。",
       defEn: "Modern retelling of ancient myths, demigod destiny, divine intervention.",
       core: "凡人的自由意志 vs 众神与命运的绝对操控。神话的棋盘上，英雄既是棋手也是棋子。",
       coreEn: "Mortal free will vs absolute manipulation by gods and fate. On mythology's chessboard, the hero is both player and pawn.",
@@ -68,7 +68,7 @@ export const SUR1_GROUP_C: LibraryCategoryDef = {
     {
       id: "gothic",
       name: "哥特吸血鬼", nameEn: "Gothic / Vampire",
-      def: "以哥特氛围、怪物欲望和永生困境为类型核心，古堡、吸血鬼等只作可选符号。",
+      def: "以哥特氛围、怪物欲望和永生困境为识别重点，古堡、吸血鬼等只作可选符号。",
       defEn: "Old castles, elegant monsters, immortality despair, eroticism and horror.",
       core: "爱欲与死亡的高度黏合纠缠。永生是诅咒还是恩赐，美丽永远与腐朽共生。",
       coreEn: "Extreme entanglement of desire and death. Is immortality a curse or a blessing — beauty forever coexists with decay.",
@@ -78,7 +78,7 @@ export const SUR1_GROUP_C: LibraryCategoryDef = {
     {
       id: "isekai",
       name: "异世界穿越", nameEn: "Isekai / Portal",
-      def: "以角色进入异世界后的规则适应和身份重置为类型核心，系统、逆袭等只作可选机制。",
+      def: "以角色进入异世界后的规则适应和身份重置为识别重点，系统、逆袭等只作可选机制。",
       defEn: "Modern person falls into magic world, system UI, zero to hero or OP.",
       core: "现实世界的认知嵌入异世界的规则体系。降维打击的权力优势与水土不服的错位感永远共存。",
       coreEn: "Real-world cognition embedded into an otherworldly rule system. The power advantage of dimensional superiority forever coexists with the disorientation of displacement.",
@@ -88,7 +88,7 @@ export const SUR1_GROUP_C: LibraryCategoryDef = {
     {
       id: "sword_sorcery",
       name: "剑与魔法", nameEn: "Sword & Sorcery",
-      def: "以冷兵器冒险和魔法冲突为类型核心，地牢、雇佣兵、跑团感等只作可选素材。",
+      def: "以冷兵器冒险和魔法冲突为识别重点，地牢、雇佣兵、跑团感等只作可选素材。",
       defEn: "Barbarian adventure, dungeon crawling, mercenaries, DND bloody style.",
       core: "野蛮的肉体力量 vs 堕落文明的阴谋与邪恶巫术的诡计。粗暴直接的解决方式对抗迂回狡诈的权力。",
       coreEn: "Barbaric physical might vs scheming corrupt civilization and cunning evil sorcery. Brutal directness pitted against devious, circuitous power.",
@@ -98,7 +98,7 @@ export const SUR1_GROUP_C: LibraryCategoryDef = {
     {
       id: "gaslamp",
       name: "蒸汽奇幻", nameEn: "Gaslamp Fantasy",
-      def: "以早期工业文明与神秘学混合为类型核心，煤气灯、怪物等只作可选氛围资源。",
+      def: "以早期工业文明与神秘学混合为识别重点，煤气灯、怪物等只作可选氛围资源。",
       defEn: "Early industrial revolution mixed with occultism, monsters stalking under gaslamps.",
       core: "理性启蒙的傲慢光晕 vs 古老神秘学在阴影中的反噬。齿轮与触手、科学与炼金术共存于同一个蒸汽时代。",
       coreEn: "Arrogant halo of rational enlightenment vs ancient occult backlash in the shadows. Gears and tentacles, science and alchemy, coexisting in the same steam age.",
@@ -108,7 +108,7 @@ export const SUR1_GROUP_C: LibraryCategoryDef = {
     {
       id: "new_weird",
       name: "新怪谈", nameEn: "New Weird",
-      def: "以现代空间中的异常规则和不可解释症候为类型核心，规则怪谈等只作可选形式。",
+      def: "以现代空间中的异常规则和不可解释症候为识别重点，规则怪谈等只作可选形式。",
       defEn: "Eerie syndromes of modern urban space, rule-based horror, unspeakable logic.",
       core: "人类理性建构 vs 本质荒谬的世界规则。日常物件开始违反物理定律，逻辑本身成为不可靠的工具。",
       coreEn: "Human rational constructs vs essentially absurd world rules. Everyday objects begin violating physical laws; logic itself becomes an unreliable tool.",
@@ -118,7 +118,7 @@ export const SUR1_GROUP_C: LibraryCategoryDef = {
     {
       id: "supernatural",
       name: "超能异能", nameEn: "Supernatural Power",
-      def: "以超常能力改变身份、关系和社会压力为类型核心，校园战、隐藏能力等只作可选设定。",
+      def: "以超常能力改变身份、关系和社会压力为识别重点，校园战、隐藏能力等只作可选设定。",
       defEn: "Modern mutants, school battle, hidden powers, disaster control.",
       core: "渴望融入群体的普通人心愿 vs 拥有特殊力量带来的异化。能力是天赋还是诅咒，取决于世界如何对待异类。",
       coreEn: "The ordinary person's desire to fit in vs the alienation brought by possessing special power. Whether ability is a gift or curse depends on how the world treats the different.",

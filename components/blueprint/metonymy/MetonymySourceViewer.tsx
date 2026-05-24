@@ -38,43 +38,83 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
 
     // DRAGGABLE CONSOLE STATE
     const [consolePos, setConsolePos] = useState({ x: 0, y: 0 });
+    const scrollBodyRef = useRef<HTMLDivElement>(null);
     const isDraggingRef = useRef(false);
     const dragStartRef = useRef({ x: 0, y: 0 });
+    const dragPointerIdRef = useRef<number | null>(null);
+    const lastScrollSyncTriggerRef = useRef(scrollSyncTrigger ?? 0);
 
     useEffect(() => {
+        const handleMove = (clientX: number, clientY: number) => {
+            setConsolePos({
+                x: clientX - dragStartRef.current.x,
+                y: clientY - dragStartRef.current.y
+            });
+        };
         const handleMouseMove = (e: MouseEvent) => {
             if (!isDraggingRef.current) return;
-            setConsolePos({
-                x: e.clientX - dragStartRef.current.x,
-                y: e.clientY - dragStartRef.current.y
-            });
+            handleMove(e.clientX, e.clientY);
+        };
+        const handlePointerMove = (e: PointerEvent) => {
+            if (!isDraggingRef.current) return;
+            if (dragPointerIdRef.current !== null && e.pointerId !== dragPointerIdRef.current) return;
+            handleMove(e.clientX, e.clientY);
         };
         const handleMouseUp = () => {
             isDraggingRef.current = false;
+            dragPointerIdRef.current = null;
+        };
+        const handlePointerUp = (e: PointerEvent) => {
+            if (dragPointerIdRef.current !== null && e.pointerId !== dragPointerIdRef.current) return;
+            isDraggingRef.current = false;
+            dragPointerIdRef.current = null;
         };
         if (isSelectionMode) {
             window.addEventListener('mousemove', handleMouseMove);
             window.addEventListener('mouseup', handleMouseUp);
+            window.addEventListener('pointermove', handlePointerMove);
+            window.addEventListener('pointerup', handlePointerUp);
+            window.addEventListener('pointercancel', handlePointerUp);
         }
         return () => {
             window.removeEventListener('mousemove', handleMouseMove);
             window.removeEventListener('mouseup', handleMouseUp);
+            window.removeEventListener('pointermove', handlePointerMove);
+            window.removeEventListener('pointerup', handlePointerUp);
+            window.removeEventListener('pointercancel', handlePointerUp);
         };
     }, [isSelectionMode]);
 
-    const handleDragStart = (e: React.MouseEvent) => {
+    const handleDragStart = (e: React.MouseEvent<HTMLDivElement> | React.PointerEvent<HTMLDivElement>) => {
+        if (!isSelectionMode) return;
+        e.preventDefault();
+        e.stopPropagation();
         isDraggingRef.current = true;
+        if ('pointerId' in e) {
+            dragPointerIdRef.current = e.pointerId;
+            try {
+                e.currentTarget.setPointerCapture?.(e.pointerId);
+            } catch {
+                // no-op
+            }
+        } else {
+            dragPointerIdRef.current = null;
+        }
         dragStartRef.current = {
             x: e.clientX - consolePos.x,
             y: e.clientY - consolePos.y
         };
     };
 
-    const handleClearSelection = () => {
+    const resetSelectionConsole = () => {
         setSelectedIndices(new Set());
         setSelectionHistory([]);
         setIsSelectionMode(false);
-        setConsolePos({ x: 0, y: 0 }); // Reset position when closing
+        setConsolePos({ x: 0, y: 0 });
+    };
+
+    const handleClearSelection = () => {
+        resetSelectionConsole();
     };
 
     // Measurement ref for fixing position
@@ -113,6 +153,9 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
 
         if (activeSceneId) {
             setTargetSceneId(activeSceneId);
+            const currentScrollSyncTrigger = scrollSyncTrigger ?? 0;
+            const shouldForceJump = currentScrollSyncTrigger !== lastScrollSyncTriggerRef.current;
+            lastScrollSyncTriggerRef.current = currentScrollSyncTrigger;
 
             // Auto-scroll logic
             const activeSection = sections.find(s => s.id === activeSceneId);
@@ -122,9 +165,19 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
                 // Clear any existing timeout
                 timeoutId = setTimeout(() => {
                     const el = document.getElementById(`source-para-${firstIndex}`);
-                    if (el) {
-                        // Changed block from 'center' to 'start' per user request ("偏上方")
-                        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    const scrollBody = scrollBodyRef.current;
+                    if (el && scrollBody) {
+                        const bodyRect = scrollBody.getBoundingClientRect();
+                        const elRect = el.getBoundingClientRect();
+                        const targetTop = Math.max(0, scrollBody.scrollTop + elRect.top - bodyRect.top);
+                        const isFullyVisible = elRect.top >= bodyRect.top && elRect.bottom <= bodyRect.bottom;
+
+                        if (shouldForceJump || !isFullyVisible) {
+                            scrollBody.scrollTo({
+                                top: targetTop,
+                                behavior: shouldForceJump ? 'smooth' : 'auto'
+                            });
+                        }
                     }
                 }, 100);
             }
@@ -248,14 +301,12 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
 
         if (type === 'ASSIGN') {
             if (targetSceneId) {
+                resetSelectionConsole();
                 onSendToActive(targetSceneId, indices);
-                setSelectedIndices(new Set());
-                setIsSelectionMode(false);
             }
         } else {
+            resetSelectionConsole();
             onSendToNew(indices);
-            setSelectedIndices(new Set());
-            setIsSelectionMode(false);
         }
     };
 
@@ -263,13 +314,14 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
         e.stopPropagation();
         if (text.trim().length === 0) return;
         setIsBreakdownModalOpen(true);
-        // Task 4: Clicking Smart Breakdown should close selection mode
         setIsSelectionMode(false);
     };
 
+    const storyBottomPaddingClass = isSelectionMode ? 'pb-72' : 'pb-32';
+
 
     return (
-        <div ref={containerRef} className={`mist-archive-panel flex flex-col h-full ${theme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#0a0a0a]'} relative group`}>
+        <div ref={containerRef} className={`mist-archive-panel flex flex-col h-full min-h-0 overflow-hidden ${theme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#0a0a0a]'} relative group`}>
             <div className={`mist-archive-toolbar h-16 border-b ${theme === 'retro' ? 'border-[#8B261D]/20 bg-[var(--bg-header)]' : 'border-zinc-800 bg-[#0c0c0c]'} flex justify-between items-center shrink-0 px-4`}>
                 <div className={`flex items-center gap-2 ${theme === 'retro' ? 'text-black' : 'text-zinc-300'} font-bold text-xs uppercase tracking-widest`}>
                     <FileText size={14} className={themeAccent} />
@@ -309,7 +361,11 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
                 </div>
             </div>
 
-            <div className={`flex-1 overflow-y-auto custom-scrollbar p-0 ${theme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#0a0a0a]'} relative ${isSelectionMode ? 'pb-80' : 'pb-10'}`}>
+            <div
+                ref={scrollBodyRef}
+                className={`flex-1 min-h-0 overflow-y-auto custom-scrollbar p-0 ${theme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#0a0a0a]'} relative ${storyBottomPaddingClass}`}
+                style={{ overflowAnchor: 'none', overscrollBehavior: 'contain' }}
+            >
                 {isEditing ? (
                     <textarea
                         value={text}
@@ -441,7 +497,6 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
                     </div>
                 )}
 
-                {/* Breakdown Config Modal - Centered inside the red rectangle area */}
                 <BreakdownConfigModal
                     isOpen={isBreakdownModalOpen}
                     onClose={() => setIsBreakdownModalOpen(false)}
@@ -459,31 +514,31 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
 
             {isSelectionMode && (
                 <div
-                    className="absolute bottom-20 left-0 right-0 z-[2000] flex justify-center animate-in slide-in-from-bottom-2 fade-in pointer-events-none"
+                    className="absolute bottom-20 left-0 right-0 z-[2000] flex justify-center pointer-events-none"
                     style={{ transform: `translate(${consolePos.x}px, ${consolePos.y}px)` }}
                 >
-                    <div className={`mist-archive-panel w-[calc(100%-2rem)] max-w-[460px] ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/40' : 'bg-zinc-950 border-zinc-700'} border-2 p-3 pr-4 shadow-2xl flex items-start gap-3 pointer-events-auto`}>
+                    <div className={`mist-manual-split-console w-[calc(100%-2rem)] max-w-[460px] ${theme === 'retro' ? 'bg-[#F4EFE0] border-[#8B261D]/45' : 'bg-[#0d0d0d] border-zinc-700'} border-2 p-3 pr-4 shadow-2xl flex items-start gap-3 pointer-events-auto`}>
                         {/* Drag Handle */}
                         <div
-                            onMouseDown={handleDragStart}
-                            className={`shrink-0 cursor-grab active:cursor-grabbing self-stretch flex items-center px-1 py-4 hover:bg-black/5 rounded transition-colors ${theme === 'retro' ? 'text-[#8B261D]/40' : 'text-zinc-600'}`}
+                            onPointerDown={handleDragStart}
+                            className={`mist-manual-split-handle shrink-0 w-12 cursor-grab active:cursor-grabbing self-stretch flex items-center justify-center rounded border select-none transition-colors ${theme === 'retro' ? 'bg-[#F8F2E5] border-[#8B261D]/20 text-[#8B261D] hover:bg-[#EFE4D0]' : 'bg-[#141414] border-zinc-700 text-zinc-300 hover:bg-[#1b1b1b]'}`}
                             title={lang === 'EN' ? "Drag to move" : "按住拖动"}
                         >
                             <GripVertical size={16} />
                         </div>
 
                         <div className="flex-1 flex flex-col gap-3">
-                            <div className={`flex justify-between items-center text-[9px] ${theme === 'retro' ? 'text-black/70 border-[#8B261D]/10' : 'text-zinc-400 border-zinc-800'} font-bold uppercase tracking-wider border-b pb-2`}>
+                            <div className={`flex justify-between items-center text-[9px] ${theme === 'retro' ? 'text-[#3D1A16] border-[#8B261D]/20' : 'text-zinc-400 border-zinc-800'} font-bold uppercase tracking-wider border-b pb-2`}>
                                 <div className="flex items-center gap-2">
-                                    <span>{lang === 'EN' ? "Selected Paragraphs" : "已选段落"}: <span className={`px-1.5 py-0.5 rounded ${theme === 'retro' ? 'bg-[#8B261D] text-white' : 'bg-zinc-800 text-white'}`}>{selectedIndices.size}</span></span>
-                                    <span className={theme === 'retro' ? 'text-black/20' : 'text-zinc-700'}>|</span>
-                                    <span>Range: <span className={theme === 'retro' ? 'text-black font-black' : themeAccent}>{getSelectionRangeString()}</span></span>
+                                    <span>{lang === 'EN' ? "Selected Paragraphs" : "已选段落"}: <span className={`px-1.5 py-0.5 rounded ${theme === 'retro' ? 'bg-[#8B261D] text-white' : 'bg-[#1d1d1d] text-white'}`}>{selectedIndices.size}</span></span>
+                                    <span className={theme === 'retro' ? 'text-[#8B261D]/20' : 'text-zinc-700'}>|</span>
+                                    <span>Range: <span className={theme === 'retro' ? 'text-[#8B261D] font-black' : themeAccent}>{getSelectionRangeString()}</span></span>
                                 </div>
                                 <div className="flex gap-3">
-                                    <button onClick={handleUndo} disabled={selectionHistory.length === 0} className={`flex items-center gap-1 transition-colors ${selectionHistory.length === 0 ? (theme === 'retro' ? 'text-black/20' : 'text-zinc-700') : (theme === 'retro' ? 'text-black/60 hover:text-black' : 'text-zinc-400 hover:text-white')}`}>
+                                    <button onClick={handleUndo} disabled={selectionHistory.length === 0} className={`flex items-center gap-1 transition-colors ${selectionHistory.length === 0 ? (theme === 'retro' ? 'text-[#8B261D]/20' : 'text-zinc-700') : (theme === 'retro' ? 'text-[#8B261D]/70 hover:text-[#8B261D]' : 'text-zinc-400 hover:text-white')}`}>
                                         <Undo2 size={12} /> {lang === 'EN' ? "Undo" : "撤销"}
                                     </button>
-                                    <button onClick={clearSelection} className={`flex items-center gap-1 transition-colors ${theme === 'retro' ? 'text-black/60 hover:text-black' : 'text-zinc-400 hover:text-white'}`}>
+                                    <button onClick={clearSelection} className={`flex items-center gap-1 transition-colors ${theme === 'retro' ? 'text-[#8B261D]/70 hover:text-[#8B261D]' : 'text-zinc-400 hover:text-white'}`}>
                                         <Eraser size={12} /> {lang === 'EN' ? "Clear" : "清空"}
                                     </button>
                                 </div>
@@ -491,24 +546,24 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
 
                             {/* Target Scene Selector */}
                             <div className="flex flex-col gap-2">
-                                <div className={`mist-archive-panel flex items-center gap-2 p-1 border ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20' : 'bg-zinc-900 border-zinc-800'}`}>
-                                    <div className={`px-2 text-[9px] font-bold ${theme === 'retro' ? 'text-black/60' : 'text-zinc-400'} uppercase tracking-widest shrink-0`}>
+                                <div className={`mist-manual-split-console-surface flex items-center gap-2 p-1 border ${theme === 'retro' ? 'bg-[#F8F2E5] border-[#8B261D]/20' : 'bg-[#151515] border-zinc-700'}`}>
+                                    <div className={`px-2 text-[9px] font-bold ${theme === 'retro' ? 'text-[#3D1A16]/70' : 'text-zinc-400'} uppercase tracking-widest shrink-0`}>
                                         {lang === 'EN' ? "Target Scene:" : "目标场次："}
                                     </div>
-                                    <div className={`relative flex-1 ${theme === 'retro' ? 'text-black' : 'text-white'}`}>
+                                    <div className={`relative flex-1 ${theme === 'retro' ? 'text-[#3D1A16]' : 'text-white'}`}>
                                         <select
                                             value={targetSceneId || ""}
                                             onChange={(e) => setTargetSceneId(e.target.value)}
-                                            className={`w-full bg-transparent text-[10px] font-bold focus:outline-none appearance-none py-1.5 pl-2 pr-8 cursor-pointer ${theme === 'retro' ? 'text-black' : 'text-white'}`}
+                                            className={`w-full text-[10px] font-bold focus:outline-none appearance-none py-1.5 pl-2 pr-8 cursor-pointer ${theme === 'retro' ? 'bg-[#F8F2E5] text-[#3D1A16]' : 'bg-[#151515] text-white'}`}
                                         >
                                             <option value="" disabled>{lang === 'EN' ? "Select a Scene..." : "选择目标场次..."}</option>
                                             {sections.map((s, idx) => (
-                                                <option key={s.id} value={s.id} className={theme === 'retro' ? 'bg-[var(--bg-header)] text-black' : 'bg-zinc-900 text-zinc-300'}>
+                                                <option key={s.id} value={s.id} className={theme === 'retro' ? 'bg-[#F8F2E5] text-[#3D1A16]' : 'bg-[#151515] text-zinc-300'}>
                                                     #{idx + 1} - {s.title}
                                                 </option>
                                             ))}
                                         </select>
-                                        <ChevronDown size={12} className={`absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none ${theme === 'retro' ? 'text-[#8B261D]/50' : 'text-zinc-500'}`} />
+                                        <ChevronDown size={12} className={`absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none ${theme === 'retro' ? 'text-[#8B261D]/60' : 'text-zinc-500'}`} />
                                     </div>
                                 </div>
 
@@ -516,7 +571,7 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
                                     <button
                                         onClick={() => handleAction('ASSIGN')}
                                         disabled={selectedIndices.size === 0 || !targetSceneId}
-                                        className={`mist-app-primary-action flex-1 py-2 px-2 flex items-center justify-center gap-2 transition-all text-[10px] font-bold disabled:opacity-50 disabled:cursor-not-allowed ${theme === 'retro' ? 'bg-[#8B261D]/10 border border-[#8B261D]/30 text-[#8B261D] hover:bg-[#8B261D]/20' : `bg-${themeColorBase}/10 border border-${themeColorBase}/30 text-${themeColorBase} hover:bg-${themeColorBase}/20`}`}
+                                        className={`mist-app-primary-action flex-1 py-2 px-2 flex items-center justify-center gap-2 transition-all text-[10px] font-bold disabled:opacity-50 disabled:cursor-not-allowed ${theme === 'retro' ? 'bg-[#8B261D] border border-[#8B261D] text-white hover:bg-[#7a2319]' : 'bg-[#151515] border border-zinc-700 text-[var(--mist-active-accent)] hover:bg-[#1f1f1f] hover:border-[var(--mist-active-accent)]'}`}
                                         title="Sync selected text to target scene"
                                     >
                                         <RefreshCcw size={14} />
@@ -525,7 +580,7 @@ export const SourceViewer: React.FC<SourceViewerProps> = ({
                                     <button
                                         onClick={() => handleAction('NEW')}
                                         disabled={selectedIndices.size === 0}
-                                        className={`mist-archive-button flex-1 py-2 px-2 border flex items-center justify-center gap-2 transition-all text-[10px] font-bold disabled:opacity-50 disabled:cursor-not-allowed ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20 text-[#8B261D]/70 hover:text-[#8B261D] hover:border-[#8B261D]/40' : 'bg-zinc-900 border-zinc-700/50 text-zinc-300 hover:text-white hover:border-zinc-500'}`}
+                                        className={`mist-archive-button flex-1 py-2 px-2 border flex items-center justify-center gap-2 transition-all text-[10px] font-bold disabled:opacity-50 disabled:cursor-not-allowed ${theme === 'retro' ? 'bg-[#F8F2E5] border-[#8B261D]/25 text-[#8B261D] hover:bg-[#efe4d0] hover:border-[#8B261D]/45' : 'bg-[#151515] border-zinc-700 text-zinc-300 hover:text-white hover:border-zinc-500'}`}
                                         title="Create new scene from selected text"
                                     >
                                         <Plus size={14} /> {lang === 'EN' ? "Create New Scene" : "新建场次"}

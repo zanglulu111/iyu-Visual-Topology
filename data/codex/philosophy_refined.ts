@@ -126,7 +126,7 @@ export const MIST_INDEX: LacanCategory[] = [
             { id: "mist_ontological_metonymy_dictionary", name: "存在级转译字典", enName: "Ontological Metonymy", category: "SUR/SV", shortDef: "把跨文明、跨类型的表层材料按功能对齐到同一结构位置。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" },
             { id: "mist_mask_manifestation_protocol", name: "叙事遮罩与显现协议", enName: "Mask & Manifestation Protocol", category: "SUR/SV", shortDef: "解释表层遮罩如何显现结构，而不是把结构稀释成装饰。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" },
             { id: "mist_world_law_protocol", name: "世界法则协议", enName: "World Law Protocol", category: "SUR/SV", shortDef: "为世界物理常量、社会法则与叙事重力建立底层约束。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" },
-            { id: "mist_topology_synthesizer", name: "叙事调音台与刻度协议", enName: "Topology Synthesizer", category: "SUR/SV", shortDef: "处理信念裂度等表层强度如何进入生成前的调音与约束。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" },
+            { id: "mist_topology_synthesizer", name: "SUR10X 信念裂度词条协议", enName: "Belief Fracture Protocol", category: "SUR/SV", shortDef: "处理人物与开场信念语言的粘合程度；当前作为表层词条，不归入 M 轴调音台。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" },
             { id: "symptomatic_planting", name: "植入症候与反向解码", enName: "Symptomatic Planting", category: "SUR/SV", shortDef: "把可见症候反向追溯到参数来源，防止表层现象失去结构归属。", author: "迷雾学派 (Mist School)", source: "《迷雾学派完整理论》" }
         ]
     },

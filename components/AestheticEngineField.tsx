@@ -21,6 +21,7 @@ import { generateAestheticSmartRandom, HUMAN_BLOCKS, CREATURE_BLOCKS, AESTHETIC_
 import { generateAestheticAssetConceptPrompt, generateAestheticPrompt } from '../utils/promptUtils';
 import { AESTHETIC_LOGIC_TEMPLATES, BLOCK_LIMITS } from '../constants';
 import { findItemFull } from '../services/dataRegistry';
+import { clearFocusForTagsPatch, getAllSelectedTags, getSelectedFocusUnitMap } from '../utils/focusTerms';
 
 const iconMap: Record<string, any> = {
     User, Zap, Eye, Palette, Camera, Layout
@@ -154,11 +155,15 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
         if (isBlockLockedByHierarchy(blockId)) return;
         const rawCurrent = fieldState[blockId];
         const current = Array.isArray(rawCurrent) ? rawCurrent : (rawCurrent ? [String(rawCurrent)] : []);
+        onFocusStateChange?.(clearFocusForTagsPatch(blockId, [tag]));
         onChange({ ...fieldState, [blockId]: current.filter(t => t !== tag) });
     };
 
     const clearBlock = (blockId: string) => {
         if (isBlockLockedByHierarchy(blockId)) return;
+        const rawCurrent = fieldState[blockId];
+        const current = Array.isArray(rawCurrent) ? rawCurrent : (rawCurrent ? [String(rawCurrent)] : []);
+        if (current.length > 0) onFocusStateChange?.(clearFocusForTagsPatch(blockId, current));
         onChange({ ...fieldState, [blockId]: [] });
     };
 
@@ -172,6 +177,8 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
         if (newTag) {
             newState[blockId] = [newTag];
         }
+        const removedTags = currentTags.filter(tag => !(newState[blockId] || []).includes(tag));
+        if (removedTags.length > 0) onFocusStateChange?.(clearFocusForTagsPatch(blockId, removedTags));
 
         // --- Special Handling for Presets & Palette Randomization ---
         if (blockId === 'aes_palette_preset' && newState[blockId].length > 0) {
@@ -297,11 +304,14 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
         }
         if (limit === 1) {
             newState[blockId] = current.includes(tag) ? [] : [tag];
+            const removedTags = current.filter(currentTag => !(newState[blockId] || []).includes(currentTag));
+            if (removedTags.length > 0) onFocusStateChange?.(clearFocusForTagsPatch(blockId, removedTags));
             updateNarrativeState(newState);
             return;
         }
         if (current.includes(tag)) {
             newState[blockId] = current.filter(t => t !== tag);
+            onFocusStateChange?.(clearFocusForTagsPatch(blockId, [tag]));
         } else {
             if (current.length >= limit) {
                 alert(lang === 'EN' ? `Max ${limit} items for this module.` : `该模块最多选择 ${limit} 个。`);
@@ -336,6 +346,8 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
             return;
         }
 
+        const rawCurrent = fieldState[blockId];
+        const current = Array.isArray(rawCurrent) ? rawCurrent : (rawCurrent ? [String(rawCurrent)] : []);
         const limit = BLOCK_LIMITS[blockId] || 1;
         const seen = new Set<string>();
         let newState = { ...fieldState };
@@ -356,6 +368,9 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
                 return true;
             })
             .slice(0, limit);
+        const nextTags = newState[blockId] || [];
+        const removedTags = current.filter(tagName => !nextTags.includes(tagName));
+        if (removedTags.length > 0) onFocusStateChange?.(clearFocusForTagsPatch(blockId, removedTags));
         updateNarrativeState(newState);
     };
 
@@ -1120,6 +1135,8 @@ export const AestheticEngineField: React.FC<NarrativeEngineFieldProps> = ({
                     }}
                     initialFaceState={faceState}
                     initialFocusState={focusState}
+                    allSelectedTags={getAllSelectedTags(fieldState)}
+                    allSelectedFocusUnitMap={getSelectedFocusUnitMap(fieldState)}
                     customLibraryData={
                         activeBlockId === 'aes_palette_preset'
                             ? [{

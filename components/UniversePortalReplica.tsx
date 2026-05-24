@@ -204,6 +204,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
   const { theme } = useTheme();
   const isRetro = theme === 'retro';
   const [mistEnabled, setMistEnabled] = useState(true);
+  const [isLeavingPortal, setIsLeavingPortal] = useState(false);
   const [isTitleGlitching, setIsTitleGlitching] = useState(false);
   const [isPortalEntering, setIsPortalEntering] = useState(entryMode === 'intro');
   const [bootStage, setBootStage] = useState<'black' | 'beam' | 'text' | 'ready'>(entryMode === 'intro' ? 'black' : 'ready');
@@ -423,6 +424,8 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
 
   const handleCardClick = (card: PortalCardDef, index: number, rect: DOMRect) => {
     stopTitleGlitch();
+    stopCardHover(index);
+    setIsLeavingPortal(true);
     if (card.number === DESIRE_PORTAL_NUMBER && onOpenCoreDrivers) {
       onOpenCoreDrivers();
     } else {
@@ -3186,7 +3189,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
 
       <div className="mist-portal-atmosphere-smoke">
         <div className="mist-portal-smoke-shader absolute inset-[-10%]">
-          {mistEnabled && <ShaderBackground theme={isRetro ? 'retro' : 'dark'} enabled={mistEnabled} maxFps={24} />}
+          {mistEnabled && <ShaderBackground theme={isRetro ? 'retro' : 'dark'} enabled={mistEnabled && !isLeavingPortal} maxFps={20} />}
         </div>
       </div>
 

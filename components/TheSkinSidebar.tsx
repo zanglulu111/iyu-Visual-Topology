@@ -1,10 +1,10 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { NarrativeFieldState, BlueprintLanguage, DriverType } from '../types';
+import { NarrativeFieldState, BlueprintLanguage, DriverType, PromptFocusState } from '../types';
 import {
   Settings2, X, Lock, Unlock, RotateCcw, Shuffle, Trash2, Plus,
-  Anchor, Palette, Box, Info, TestTube, Zap, Dice5, Calendar, MapPin, Globe, Check, Edit2, User, FileText
+  Anchor, Palette, Box, Info, TestTube, Zap, Dice5, Calendar, MapPin, Globe, Check, Edit2, User, FileText, Star
 } from 'lucide-react';
 import {
   COMM_SKIN_LIBRARY,
@@ -13,7 +13,8 @@ import {
   EXPERIMENTAL_SKIN_LIBRARY,
   TRAILER_SKIN_BLOCKS,
   TRAILER_SKIN_LIBRARY,
-  COUNTRY_PRESETS,
+  SUR3_COORDINATE_PRESETS,
+  SUR3_SPACE_ANCHOR_PRESETS,
   SKIN_LIBRARY,
   ALL_SKIN_BLOCKS,
   GENRE_CATEGORIES,
@@ -21,6 +22,7 @@ import {
 } from '../constants';
 import { useTheme } from '../contexts/ThemeContext';
 import { getHistoricalContext } from '../data/reference/historical_timeline';
+import { buildTermFocusPatch, clearFocusForTagsPatch, getAllSelectedTags, getFocusLimitReason, getSelectedFocusBlockMap, getSelectedFocusUnitMap, isFocusableBlock, MAX_FOCUS_TERMS } from '../utils/focusTerms';
 
 interface TheSkinSidebarProps {
   fieldState: NarrativeFieldState;
@@ -48,6 +50,8 @@ interface TheSkinSidebarProps {
   onRandomizeStructureGroup?: () => void;
   customTextSeed?: string;
   onCustomTextSeedChange?: (value: string) => void;
+  focusState?: PromptFocusState;
+  onFocusStateChange?: (locks: PromptFocusState) => void;
 }
 
 const getBlockLibInfo = (blockId: string) => {
@@ -112,6 +116,9 @@ export const SkinSlot: React.FC<{
   onAddCustomDef?: (name: string, def: string, core: string) => void;
   onEditCustomDef?: (oldName: string, newName: string, def: string, core: string) => void;
   onManualUpdate?: (blockId: string, tags: string[]) => void;
+  focusState?: PromptFocusState;
+  onFocusStateChange?: (locks: PromptFocusState) => void;
+  alignStart?: boolean;
   alwaysShowButtons?: boolean;
   onClickOverride?: () => void;
   hideTooltipCore?: boolean;
@@ -119,13 +126,17 @@ export const SkinSlot: React.FC<{
   blockId, placeholder, fieldState, accentColor, onOpen, onRemove, lang,
   lockedTags, onToggleTagLock, onRandomizeTag, accentTextColor, driverType,
   onRandomizeBlock, onClearBlock, isBlockLocked, onToggleLockBlock, getItemDetails,
-  onAddCustomDef, onEditCustomDef, onManualUpdate, alwaysShowButtons, onClickOverride, hideTooltipCore = false
+  onAddCustomDef, onEditCustomDef, onManualUpdate, focusState = {}, onFocusStateChange, alignStart = false, alwaysShowButtons, onClickOverride, hideTooltipCore = false
 }) => {
     const { theme } = useTheme();
     const isCommercial = driverType === DriverType.COMMERCIAL;
     const tags = fieldState[blockId] || [];
     const hasTags = tags.length > 0;
     const libInfo = getBlockLibInfo(blockId);
+    const canFocusTerms = isFocusableBlock(blockId);
+    const selectedFocusTags = getAllSelectedTags(fieldState);
+    const focusUnitMap = getSelectedFocusUnitMap(fieldState);
+    const focusBlockMap = getSelectedFocusBlockMap(fieldState);
 
     // PORTAL TOOLTIP STATE
     const [hoveredPortal, setHoveredPortal] = useState<{
@@ -160,7 +171,12 @@ export const SkinSlot: React.FC<{
       const englishMatch = text.match(/\((.*?)\)/);
       const chinesePart = text.split('(')[0].trim();
       const englishPart = englishMatch ? englishMatch[1].trim() : "";
-      return lang === 'EN' && englishPart ? englishPart : chinesePart;
+      if (lang === 'EN') {
+        if (englishPart) return englishPart;
+        const details = getItemDetails(text, blockId);
+        if (details && typeof details === 'object' && details.nameEn) return details.nameEn;
+      }
+      return chinesePart;
     };
 
     const getLockedStyle = () => {
@@ -235,11 +251,25 @@ export const SkinSlot: React.FC<{
       handleCloseEdit();
     };
 
+    const toggleFocusTag = (tag: string, e: React.MouseEvent) => {
+      e.stopPropagation();
+      const patch = buildTermFocusPatch(focusState, blockId, tags, tag, !focusState[tag], selectedFocusTags, focusUnitMap, focusBlockMap);
+      if (patch) onFocusStateChange?.(patch);
+    };
+
     return (
       <span className="inline-flex flex-wrap items-baseline gap-x-1 mx-1 relative">
         {hasTags ? (
           tags.map((tag, idx) => {
             const isTagLocked = lockedTags?.[blockId]?.includes(tag) || !!isBlockLocked;
+            const isFocusedTag = canFocusTerms && Boolean(focusState[tag]);
+            const focusLimitReason = getFocusLimitReason(focusState, blockId, tag, selectedFocusTags, focusUnitMap, focusBlockMap);
+            const isFocusDisabled = !isFocusedTag && Boolean(focusLimitReason);
+            const focusLimitTitle = focusLimitReason === 'm'
+              ? (lang === 'EN' ? 'Focus limit: max 2 M-axis terms' : 'M层重点最多2个')
+              : focusLimitReason === 'surface'
+                ? (lang === 'EN' ? 'Focus limit: max 2 SUR/SV focus groups' : 'SUR/SV重点最多2组')
+                : (lang === 'EN' ? `Focus limit: max ${MAX_FOCUS_TERMS} focus groups` : `重点最多 ${MAX_FOCUS_TERMS} 组`);
 
             let details = getItemDetails(tag, blockId);
             if (typeof details === 'string') {
@@ -248,17 +278,20 @@ export const SkinSlot: React.FC<{
             const safeDetails = details as { def?: string; core?: string; defEn?: string; coreEn?: string } | null;
 
             return (
-              <span key={`${blockId}-${idx}`} className="inline-flex flex-col items-center group/tag relative align-top">
+              <span
+                key={`${blockId}-${idx}`}
+                className={`inline-flex flex-col ${alignStart ? 'items-start' : 'items-center'} group/tag relative align-top`}
+                onMouseEnter={(e) => safeDetails && handleMouseEnter(e, safeDetails)}
+                onMouseLeave={handleMouseLeave}
+              >
                 <span className="flex items-baseline relative z-10">
                   <span
                     onClick={() => {
                       if (isTagLocked) return;
                       onClickOverride ? onClickOverride() : onOpen(blockId);
                     }}
-                    onMouseEnter={(e) => safeDetails && handleMouseEnter(e, safeDetails)}
-                    onMouseLeave={handleMouseLeave}
                     className={`
-                    mist-labyrinth-hover-token is-filled font-serif font-bold transition-all duration-300 hover:z-50 inline-block ${isTagLocked ? 'cursor-not-allowed' : 'cursor-pointer'}
+                    mist-labyrinth-hover-token is-filled ${isFocusedTag ? 'mist-token-focused' : ''} font-serif font-bold transition-all duration-300 hover:z-50 inline-block ${isTagLocked ? 'cursor-not-allowed' : 'cursor-pointer'}
                     ${isTagLocked
                         ? `border ${lockedClass} px-2 rounded`
                         : `${theme === 'retro' ? 'text-black hover:bg-black/5' : 'text-white hover:bg-white/10'} border-b-2 ${accentColor} px-0.5 rounded-sm`
@@ -268,6 +301,21 @@ export const SkinSlot: React.FC<{
                   >
                     {getBilingualText(tag)}
                   </span>
+                  {isFocusedTag && (
+                    <span className="mist-token-focus-badge" title={lang === 'EN' ? 'Focused term' : '重点词条'}>
+                      <Star size={11} className="fill-current" />
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); onRemove(blockId, tag); }}
+                    disabled={isTagLocked}
+                    title={lang === 'EN' ? 'Remove' : '删除'}
+                    aria-label={lang === 'EN' ? `Remove ${tag}` : `删除 ${tag}`}
+                    className={`ml-1 inline-flex h-5 w-5 items-center justify-center opacity-0 group-hover/tag:opacity-100 transition-colors duration-200 ${theme === 'retro' ? 'text-[var(--text-muted)] hover:text-red-700' : 'text-zinc-500 hover:text-red-400'} ${isTagLocked ? 'opacity-20 cursor-not-allowed group-hover/tag:opacity-20' : ''}`}
+                  >
+                    <X size={16} strokeWidth={2.6} />
+                  </button>
                   {idx < tags.length - 1 && <span className={`font-bold mx-0.5 text-lg ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}`}>、</span>}
                 </span>
 
@@ -290,35 +338,32 @@ export const SkinSlot: React.FC<{
                     {isTagLocked ? <Lock size={10} /> : <Unlock size={10} />}
                   </button>
 
-                  <button
-                    onClick={(e) => handleEditClick(tag, e)}
-                    disabled={isTagLocked}
-                    className={`flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isTagLocked ? 'opacity-30 cursor-not-allowed' : ''}`}
-                  >
-                    <Edit2 size={10} />
-                  </button>
-
-                  <button
-                    onClick={(e) => { e.stopPropagation(); onRemove(blockId, tag); }}
-                    disabled={isTagLocked}
-                    className={`flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-red-700' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-red-500/50 hover:bg-red-950/20 hover:text-red-400'} border rounded transition-colors ${isTagLocked ? 'opacity-30 cursor-not-allowed' : ''}`}
-                  >
-                    <Trash2 size={10} />
-                  </button>
+                  {canFocusTerms && (
+                    <button
+                      onClick={(e) => toggleFocusTag(tag, e)}
+                      disabled={isFocusDisabled}
+                      title={isFocusDisabled ? focusLimitTitle : (lang === 'EN' ? 'Focus this term' : '重点')}
+                      className={`flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-[var(--mist-active-accent)] hover:bg-[rgba(var(--mist-active-accent-rgb),0.10)] hover:text-[var(--mist-active-accent)]'} border rounded transition-colors ${isFocusedTag ? (theme === 'retro' ? 'border-[var(--text-accent)] text-[var(--text-accent)] bg-[var(--text-accent)]/10' : 'border-[var(--mist-active-accent)] text-[var(--mist-active-accent)] bg-[rgba(var(--mist-active-accent-rgb),0.10)]') : ''} ${isFocusDisabled ? 'opacity-30 cursor-not-allowed' : ''}`}
+                    >
+                      <Star size={10} className={isFocusedTag ? 'fill-current' : ''} />
+                    </button>
+                  )}
                 </div>
               </span>
             );
           })
         ) : (
-          <span className="group/tag relative inline-flex flex-col items-center align-top">
+          <span
+            className={`group/tag relative inline-flex flex-col ${alignStart ? 'items-start' : 'items-center'} align-top`}
+            onMouseEnter={(e) => handleMouseEnter(e, {
+              def: libInfo.description,
+              defEn: libInfo.descriptionEn,
+              core: lang === 'EN' ? "[Config Protocol] Click to enter the library." : "【配置协议】点击进入库选择具体参数。",
+            }, libInfo.name)}
+            onMouseLeave={handleMouseLeave}
+          >
             <span
               onClick={() => !isBlockLocked && (onClickOverride ? onClickOverride() : onOpen(blockId))}
-              onMouseEnter={(e) => handleMouseEnter(e, {
-                def: libInfo.description,
-                defEn: libInfo.descriptionEn,
-                core: lang === 'EN' ? "[Config Protocol] Click to enter the library." : "【配置协议】点击进入库选择具体参数。",
-              }, libInfo.name)}
-              onMouseLeave={handleMouseLeave}
               className={`mist-labyrinth-hover-token is-empty cursor-pointer font-serif font-medium border-b border-dashed transition-all duration-300 hover:z-50 text-base ${isBlockLocked ? (theme === 'retro' ? 'opacity-50 cursor-not-allowed text-[var(--text-muted)]/50' : 'opacity-50 cursor-not-allowed text-zinc-600') : (theme === 'retro' ? 'border-[var(--text-main)] text-zinc-500 hover:text-black' : 'border-zinc-800 text-zinc-500 hover:text-white hover:border-zinc-500')}`}
             >
               {lang === 'EN' ? '[' : '【'}{placeholder}{lang === 'EN' ? ']' : '】'}
@@ -332,9 +377,6 @@ export const SkinSlot: React.FC<{
               </button>
               <button onClick={handleCreateClick} disabled={isBlockLocked} className={`flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-white' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-white'} border rounded transition-colors`}>
                 <Edit2 size={10} />
-              </button>
-              <button onClick={(e) => { e.stopPropagation(); onClearBlock?.(blockId); }} disabled={isBlockLocked} className={`flex items-center justify-center p-0.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-red-700' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-red-400'} border rounded transition-colors`}>
-                <Trash2 size={10} />
               </button>
             </div>
           </span>
@@ -455,7 +497,9 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
   onRandomizeSummaryGroup,
   onRandomizeStructureGroup,
   customTextSeed = '',
-  onCustomTextSeedChange
+  onCustomTextSeedChange,
+  focusState = {},
+  onFocusStateChange
 }) => {
   const { theme } = useTheme();
   const isCommercial = driverType === DriverType.COMMERCIAL;
@@ -466,6 +510,10 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
 
   // Manual update wrapper for SkinSlot
   const handleManualUpdate = (blockId: string, tags: string[]) => {
+    const rawCurrent = fieldState[blockId];
+    const current = Array.isArray(rawCurrent) ? rawCurrent : (rawCurrent ? [String(rawCurrent)] : []);
+    const removedTags = current.filter(tag => !tags.includes(tag));
+    if (removedTags.length > 0) onFocusStateChange?.(clearFocusForTagsPatch(blockId, removedTags));
     if (onUpdateState) {
       onUpdateState({ ...fieldState, [blockId]: tags });
     }
@@ -506,6 +554,46 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
   const [selectedAge, setSelectedAge] = useState<string>('');
   const isGenderLocked = lockedModules?.['skin_gender'] || false;
   const isAgeLocked = lockedModules?.['skin_age'] || false;
+
+  const normalizeAgeValue = (value: string) => value
+    .replace(/[（(].*?[）)]/g, '')
+    .replace(/\b(age|years?)\b/gi, '')
+    .replace(/岁/g, '')
+    .trim();
+
+  const findGenderPreset = (value: string) => GENDER_PRESETS.find(g => g.cn === value || g.en === value);
+
+  const findAgePreset = (value: string) => {
+    if (!value) return undefined;
+    const normalized = normalizeAgeValue(value);
+    const normalizedLower = normalized.toLowerCase();
+    return AGE_PRESETS.find(a => {
+      const rangeCN = `${a.cn}（${a.range}岁）`;
+      const rangeCNHalf = `${a.cn}(${a.range}岁)`;
+      const rangeEN = `${a.en} (${a.range})`;
+      return a.cn === value
+        || a.en === value
+        || rangeCN === value
+        || rangeCNHalf === value
+        || rangeEN === value
+        || a.range === normalized
+        || a.cn === normalized
+        || a.en.toLowerCase() === normalizedLower;
+    });
+  };
+
+  const getGenderDisplay = (value: string) => {
+    const preset = findGenderPreset(value);
+    if (!preset) return value;
+    return lang === 'EN' ? preset.en : preset.cn;
+  };
+
+  const getAgeDisplay = (value: string) => {
+    if (!value) return '';
+    const preset = findAgePreset(value);
+    if (!preset) return lang === 'EN' || /岁|age|years?/i.test(value) ? value : `${value}岁`;
+    return lang === 'EN' ? preset.en : `${preset.cn}（${preset.range}岁）`;
+  };
 
   // Sync identity state from fieldState
   useEffect(() => {
@@ -619,7 +707,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
   // Auto-switch country label based on language if it matches a preset
   useEffect(() => {
     if (selectedCountry) {
-      const preset = COUNTRY_PRESETS.find(p => p.cn === selectedCountry || p.en === selectedCountry);
+      const preset = SUR3_SPACE_ANCHOR_PRESETS.find(p => p.cn === selectedCountry || p.en === selectedCountry);
       if (preset) {
         const targetVal = lang === 'EN' ? preset.en : preset.cn;
         if (targetVal !== selectedCountry) {
@@ -715,13 +803,19 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
     onToggleLockBlock: onToggleLock,
     onAddCustomDef,
     onEditCustomDef,
-    onManualUpdate: handleManualUpdate
+    onManualUpdate: handleManualUpdate,
+    focusState,
+    onFocusStateChange
+  };
+  const summarySlotProps = {
+    ...slotProps,
+    alignStart: true,
   };
 
   // ... (time/location handlers remain the same) ...
   const handleRandomCountry = () => {
     if (isCountryLocked) return;
-    const r = COUNTRY_PRESETS[Math.floor(Math.random() * COUNTRY_PRESETS.length)];
+    const r = SUR3_SPACE_ANCHOR_PRESETS[Math.floor(Math.random() * SUR3_SPACE_ANCHOR_PRESETS.length)];
     setSelectedCountry(lang === 'EN' ? r.en : r.cn);
   };
 
@@ -736,7 +830,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
 
   const handleRandomYear = () => {
     if (isYearLocked) return;
-    const randomYear = Math.floor(Math.random() * (2050 - (-2000) + 1)) + (-2000);
+    const randomYear = Math.floor(Math.random() * (2300 - (-2000) + 1)) + (-2000);
     setSelectedYear(randomYear);
   };
 
@@ -756,8 +850,9 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
 
   // Global Controls for the Modal
   const handleGlobalRandomizeCoordinates = () => {
-    if (!isCountryLocked) handleRandomCountry();
-    if (!isYearLocked) handleRandomYear();
+    const preset = SUR3_COORDINATE_PRESETS[Math.floor(Math.random() * SUR3_COORDINATE_PRESETS.length)];
+    if (!isCountryLocked) setSelectedCountry(lang === 'EN' ? preset.spaceEn : preset.spaceCn);
+    if (!isYearLocked) setSelectedYear(preset.year);
   };
 
   const handleGlobalResetCoordinates = () => {
@@ -810,18 +905,9 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
     let displayText = '';
 
     if (lang === 'EN') {
-      displayText = [selectedAge, selectedGender].filter(Boolean).join(' ');
+      displayText = [getAgeDisplay(selectedAge), getGenderDisplay(selectedGender)].filter(Boolean).join(' ');
     } else {
-      let ageStr = selectedAge;
-      if (selectedAge) {
-        const preset = AGE_PRESETS.find(a => a.cn === selectedAge);
-        if (preset) {
-          ageStr = `${preset.cn}（${preset.range}岁）`;
-        } else {
-          ageStr = /岁|age|years?/i.test(selectedAge) ? selectedAge : `${selectedAge}岁`;
-        }
-      }
-      displayText = `${ageStr}${selectedGender}`;
+      displayText = `${getAgeDisplay(selectedAge)}${getGenderDisplay(selectedGender)}`;
     }
 
     if (!displayText) {
@@ -866,11 +952,13 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
   // Specialized Renderer for Time/Location Slot in Sidebar
   const renderTimeLocationSlot = () => {
     const hasTimeOrLoc = selectedYear !== null || selectedCountry !== "";
+    const countryPreset = selectedCountry ? SUR3_SPACE_ANCHOR_PRESETS.find(p => p.cn === selectedCountry || p.en === selectedCountry) : null;
+    const countryDisplay = countryPreset ? (lang === 'EN' ? countryPreset.en : countryPreset.cn) : selectedCountry;
     const displayText = selectedYear !== null
       ? (lang === 'EN'
-        ? `${formatYear(selectedYear)}${selectedCountry ? ' ' + selectedCountry : ''}`
-        : `${formatYear(selectedYear, true)}${selectedCountry}`)
-      : (selectedCountry ? `${selectedCountry} (AUTO)` : (lang === 'EN' ? "Spacetime Coordinates" : "时空坐标"));
+        ? `${formatYear(selectedYear)}${countryDisplay ? ' ' + countryDisplay : ''}`
+        : `${formatYear(selectedYear, true)}${countryDisplay}`)
+      : (selectedCountry ? `${countryDisplay} (AUTO)` : (lang === 'EN' ? "Precise Coordinate" : "精确坐标"));
 
     const isLocked = isCountryLocked && isYearLocked;
 
@@ -892,9 +980,9 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
               handleMouseEnter(e, {
                 def: lib.description,
                 defEn: lib.descriptionEn,
-                core: lang === 'EN' ? "[Config Protocol] Click for spacetime coordinates." : "【配置协议】点击进入时空坐标映射面板。",
+                core: lang === 'EN' ? "[Config Protocol] Click for precise coordinate calibration." : "【配置协议】点击进入精确坐标校准面板。",
                 count: lib.count
-              }, lang === 'EN' ? "Coordinates" : "国家/年份");
+              }, lang === 'EN' ? "Coordinate" : "精确坐标");
             }}
             onMouseLeave={handleMouseLeave}
             className={`${baseTextClass} ${isLocked ? lockedTextClass : (hasTimeOrLoc ? filledTextClass : emptyTextClass)}`}
@@ -943,7 +1031,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
         <div className={`flex items-center gap-2 mb-4 pb-2 border-b ${theme === 'retro' ? 'border-[var(--border-main)]/30' : 'border-zinc-700'}`}>
           <MapPin size={14} className={theme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-400'} />
           <span className={`text-xs font-black uppercase tracking-widest ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}`}>
-            {lang === 'EN' ? "Coordinates" : "国家/年份"}
+            {lang === 'EN' ? "Precise Coordinate" : "精确坐标"}
           </span>
         </div>
 
@@ -952,7 +1040,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <span className={`text-[10px] ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-400'} font-bold uppercase tracking-wider`}>
-                {lang === 'EN' ? "Country / Region" : "国家与地区"}
+                {lang === 'EN' ? "Space Anchor" : "空间锚点"}
               </span>
               <div className="flex gap-1">
                 <button onClick={handleRandomCountry} disabled={isCountryLocked} className={`p-1 rounded text-zinc-500 hover:text-white transition-all ${isCountryLocked ? 'opacity-30 cursor-not-allowed' : ''}`}><Dice5 size={10} /></button>
@@ -969,14 +1057,14 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
                   value={selectedCountry}
                   onChange={(e) => !isCountryLocked && setSelectedCountry(e.target.value)}
                   disabled={isCountryLocked}
-                  placeholder={lang === 'EN' ? "SELECT" : "自定义"}
+                  placeholder={lang === 'EN' ? "ANCHOR" : "自定义"}
                   className={`w-full bg-transparent text-xs font-bold text-center truncate px-2 focus:outline-none placeholder-${theme === 'retro' ? '[var(--text-muted)]/50' : 'zinc-700'} ${theme === 'retro' ? 'text-[var(--text-main)]' : ''}`}
                 />
               </div>
 
               {/* List Side */}
               <div className="flex-1 overflow-x-auto overflow-y-hidden custom-scrollbar p-1.5 flex items-center gap-1.5">
-                {COUNTRY_PRESETS.map(c => (
+                {SUR3_SPACE_ANCHOR_PRESETS.map(c => (
                   <button
                     key={c.cn}
                     onClick={() => !isCountryLocked && setSelectedCountry(lang === 'EN' ? c.en : c.cn)}
@@ -993,7 +1081,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
           <div className={`space-y-4 ${isYearLocked ? 'grayscale opacity-50 pointer-events-none' : ''}`}>
             <div className="flex justify-between items-center">
               <span className={`text-[10px] ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-400'} font-bold uppercase tracking-wider`}>
-                {lang === 'EN' ? "Timeline" : "时间轴"}
+                {lang === 'EN' ? "Time Anchor" : "时间锚点"}
               </span>
 
               <div className="flex gap-2 items-center">
@@ -1011,7 +1099,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
             <input
               type="range"
               min="-2000"
-              max="2050"
+              max="2300"
               step="1"
               value={selectedYear ?? 2026}
               disabled={isYearLocked}
@@ -1028,7 +1116,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
                 <button onClick={() => !isYearLocked && setSelectedYear((prev) => (prev ?? 2026) + 1)} className={`px-2 py-1 ${theme === 'retro' ? 'bg-[var(--bg-panel)] text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'} rounded`}>+1</button>
                 <button onClick={() => !isYearLocked && setSelectedYear((prev) => (prev ?? 2026) + 10)} className={`px-2 py-1 ${theme === 'retro' ? 'bg-[var(--bg-panel)] text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'} rounded`}>+10</button>
               </div>
-              <span>2050</span>
+              <span>2300</span>
             </div>
 
             {/* Context Display */}
@@ -1354,7 +1442,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
                       <span>{lang === 'EN' ? "In " : "在"}</span>
                       {showTime && renderTimeLocationSlot()}
                       {showTime && showEra && <span>{lang === 'EN' ? " " : "的"}</span>}
-                      {showEra && <SkinSlot blockId="skin_era" placeholder={lang === 'EN' ? "Background" : "背景场域"} isBlockLocked={lockedModules["skin_era"]} {...slotProps} />}
+                      {showEra && <SkinSlot blockId="skin_era" placeholder={lang === 'EN' ? "Background" : "背景场域"} isBlockLocked={lockedModules["skin_era"]} {...summarySlotProps} />}
                       {showEra && !isLast && <span>{lang === 'EN' ? " world, " : "世界中，"}</span>}
                       {showEra && isLast && <span>{lang === 'EN' ? " world" : "世界中"}</span>}
                       {!showEra && !isLast && <span>，</span>}
@@ -1372,7 +1460,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
                   return (
                     <span className="animate-in fade-in duration-300">
                       <span>{lang === 'EN' ? "society under " : "运行于"}</span>
-                      {show4 && <SkinSlot blockId="skin_society" placeholder={lang === 'EN' ? "Social Order" : "社会形态"} isBlockLocked={lockedModules["skin_society"]} {...slotProps} />}
+                      {show4 && <SkinSlot blockId="skin_society" placeholder={lang === 'EN' ? "Social Order" : "社会形态"} isBlockLocked={lockedModules["skin_society"]} {...summarySlotProps} />}
                       <span>{isLast ? (lang === 'EN' ? " " : "社会体系之下") : (lang === 'EN' ? ", " : "社会体系之下，")}</span>
                     </span>
                   );
@@ -1391,7 +1479,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
                     <span className="animate-in fade-in duration-300">
                       <span>{lang === 'EN' ? "A " : "一个"}</span>
                       {showIdentity && renderIdentitySlot()}
-                      {showProf && <SkinSlot blockId="skin_profession" placeholder={lang === 'EN' ? "Role Preset" : "职业身份"} isBlockLocked={lockedModules["skin_profession"]} {...slotProps} />}
+                      {showProf && <SkinSlot blockId="skin_profession" placeholder={lang === 'EN' ? "Role Preset" : "职业身份"} isBlockLocked={lockedModules["skin_profession"]} {...summarySlotProps} />}
                       {!isLast && <span>，</span>}
                     </span>
                   );
@@ -1409,9 +1497,9 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
                   return (
                     <span className="animate-in fade-in duration-300">
                       <span>{lang === 'EN' ? "with " : "带着"}</span>
-                      {show10x && <SkinSlot blockId="sur10x" placeholder={lang === 'EN' ? "Fracture" : "信念裂度"} isBlockLocked={lockedModules["sur10x"]} {...slotProps} />}
+                      {show10x && <SkinSlot blockId="sur10x" placeholder={lang === 'EN' ? "Fracture" : "信念裂度"} isBlockLocked={lockedModules["sur10x"]} {...summarySlotProps} />}
                       {show10x && show10 && <span>{lang === 'EN' ? " towards " : "的"}</span>}
-                      {show10 && <SkinSlot blockId="skin_ideology" placeholder={lang === 'EN' ? "Belief Preset" : "信念预设"} isBlockLocked={lockedModules["skin_ideology"]} {...slotProps} />}
+                      {show10 && <SkinSlot blockId="skin_ideology" placeholder={lang === 'EN' ? "Belief Preset" : "信念预设"} isBlockLocked={lockedModules["skin_ideology"]} {...summarySlotProps} />}
                       <span>{isLast ? (lang === 'EN' ? " language" : "语言") : (lang === 'EN' ? " language, " : "语言，")}</span>
                     </span>
                   );
@@ -1421,7 +1509,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
                 {(summaryExpanded || hasBlockValue(['skin_everything'])) && (
                   <span className="animate-in fade-in duration-300">
                     <span>{lang === 'EN' ? "around " : "围绕"}</span>
-                    <SkinSlot blockId="skin_everything" placeholder={lang === 'EN' ? "Object Anchor" : "对象预设"} isBlockLocked={lockedModules["skin_everything"]} {...slotProps} />
+                    <SkinSlot blockId="skin_everything" placeholder={lang === 'EN' ? "Object Anchor" : "对象预设"} isBlockLocked={lockedModules["skin_everything"]} {...summarySlotProps} />
                     <span>{lastVisibleFrag === 'E' ? (lang === 'EN' ? "" : "展开") : (lang === 'EN' ? ", " : "展开，")}</span>
                   </span>
                 )}
@@ -1430,7 +1518,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
                 {(summaryExpanded || hasBlockValue(['skin_location'])) && (
                   <span className="animate-in fade-in duration-300">
                     <span>{lang === 'EN' ? "set in " : "事件发生于"}</span>
-                    <SkinSlot blockId="skin_location" placeholder={lang === 'EN' ? "Space Container" : "空间容器"} isBlockLocked={lockedModules["skin_location"]} {...slotProps} />
+                    <SkinSlot blockId="skin_location" placeholder={lang === 'EN' ? "Space Container" : "空间容器"} isBlockLocked={lockedModules["skin_location"]} {...summarySlotProps} />
                     <span>{lastVisibleFrag === 'F' ? "" : (lang === 'EN' ? ", " : "，")}</span>
                   </span>
                 )}
@@ -1439,7 +1527,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
                 {(summaryExpanded || hasBlockValue(['skin_ending'])) && (
                   <span className="animate-in fade-in duration-300">
                     <span>{lang === 'EN' ? "culminating in " : "最终走向"}</span>
-                    <SkinSlot blockId="skin_ending" placeholder={lang === 'EN' ? "Visible Ending" : "显性收场"} isBlockLocked={lockedModules["skin_ending"]} {...slotProps} />
+                    <SkinSlot blockId="skin_ending" placeholder={lang === 'EN' ? "Visible Ending" : "显性收场"} isBlockLocked={lockedModules["skin_ending"]} {...summarySlotProps} />
                   </span>
                 )}
 
@@ -1476,7 +1564,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
             </button>
             <div className={`flex items-center gap-3 mb-6 border-b ${theme === 'retro' ? 'border-[var(--border-main)]/30' : 'border-zinc-800'} pb-4 shrink-0`}>
               <Globe size={20} className={iconColor} />
-              <h2 className={`text-lg font-serif font-bold ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-white'} tracking-wider`}>{lang === 'EN' ? "SUR3.Spacetime Coordinate System" : "SUR3.时空坐标系"}</h2>
+              <h2 className={`text-lg font-serif font-bold ${theme === 'retro' ? 'text-[var(--text-main)]' : 'text-white'} tracking-wider`}>{lang === 'EN' ? "SUR3. Precise Coordinate" : "SUR3.精确坐标"}</h2>
             </div>
 
             <div className="overflow-y-auto custom-scrollbar flex-1 pr-1">
@@ -1549,14 +1637,14 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
                 <div className="grid grid-cols-4 gap-2">
                   {/* Custom Gender Cell */}
                   <div className={`rounded transition-all flex items-center justify-center h-[52px] border ${
-                    selectedGender && !GENDER_PRESETS.some(g => selectedGender === (lang === 'EN' ? g.en : g.cn))
+                    selectedGender && !findGenderPreset(selectedGender)
                       ? (theme === 'retro' ? `bg-[var(--text-accent)]/10 border-[var(--text-accent)]/50` : `bg-zinc-800/80 border-zinc-500 shadow-sm shadow-black`)
                       : (theme === 'retro' ? `bg-[var(--bg-panel)] border-[var(--border-main)]/30` : `bg-zinc-900/50 border-zinc-800`)
                   } ${isGenderLocked ? 'opacity-40 cursor-not-allowed' : ''}`}>
                     <input
                       type="text"
                       placeholder={lang === 'EN' ? 'Custom' : '自定义'}
-                      value={selectedGender && !GENDER_PRESETS.some(g => selectedGender === (lang === 'EN' ? g.en : g.cn)) ? selectedGender : customGenderInput}
+                      value={selectedGender && !findGenderPreset(selectedGender) ? selectedGender : customGenderInput}
                       onChange={(e) => {
                         if (isGenderLocked) return;
                         setCustomGenderInput(e.target.value);
@@ -1564,7 +1652,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
                       }}
                       disabled={isGenderLocked}
                       className={`w-full h-full bg-transparent text-sm font-bold text-center px-1 border-none focus:outline-none ${
-                        selectedGender && !GENDER_PRESETS.some(g => selectedGender === (lang === 'EN' ? g.en : g.cn))
+                        selectedGender && !findGenderPreset(selectedGender)
                           ? iconColor
                           : (theme === 'retro' ? 'text-[var(--text-main)] placeholder-[var(--text-muted)]/50' : 'text-white placeholder-zinc-700')
                       }`}
@@ -1573,7 +1661,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
                   {/* Preset Gender Cells */}
                   {GENDER_PRESETS.map(g => {
                     const label = lang === 'EN' ? g.en : g.cn;
-                    const isActive = selectedGender === label;
+                    const isActive = findGenderPreset(selectedGender)?.id === g.id;
                     return (
                       <button
                         key={g.id}
@@ -1607,14 +1695,14 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
                 <div className="grid grid-cols-3 gap-2">
                   {/* Custom Age Cell */}
                   <div className={`rounded transition-all flex items-center justify-center h-[52px] border ${
-                    selectedAge && !AGE_PRESETS.some(a => selectedAge === (lang === 'EN' ? a.en : a.cn))
+                    selectedAge && !findAgePreset(selectedAge)
                       ? (theme === 'retro' ? `bg-[var(--text-accent)]/10 border-[var(--text-accent)]/50` : `bg-zinc-800/80 border-zinc-500 shadow-sm shadow-black`)
                       : (theme === 'retro' ? `bg-[var(--bg-panel)] border-[var(--border-main)]/30` : `bg-zinc-900/50 border-zinc-800`)
                   } ${isAgeLocked ? 'opacity-40 cursor-not-allowed' : ''}`}>
                     <input
                       type="text"
                       placeholder={lang === 'EN' ? 'Custom' : '自定义'}
-                      value={selectedAge && !AGE_PRESETS.some(a => selectedAge === (lang === 'EN' ? a.en : a.cn)) ? selectedAge : customAgeInput}
+                      value={selectedAge && !findAgePreset(selectedAge) ? selectedAge : customAgeInput}
                       onChange={(e) => {
                         if (isAgeLocked) return;
                         setCustomAgeInput(e.target.value);
@@ -1622,7 +1710,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
                       }}
                       disabled={isAgeLocked}
                       className={`w-full h-full bg-transparent text-sm font-bold text-center px-1 border-none focus:outline-none ${
-                        selectedAge && !AGE_PRESETS.some(a => selectedAge === (lang === 'EN' ? a.en : a.cn))
+                        selectedAge && !findAgePreset(selectedAge)
                           ? iconColor
                           : (theme === 'retro' ? 'text-[var(--text-main)] placeholder-[var(--text-muted)]/50' : 'text-white placeholder-zinc-700')
                       }`}
@@ -1631,7 +1719,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
                   {/* Preset Age Cells */}
                   {AGE_PRESETS.map(a => {
                     const label = lang === 'EN' ? a.en : a.cn;
-                    const isActive = selectedAge === label;
+                    const isActive = findAgePreset(selectedAge)?.id === a.id;
                     return (
                       <button
                         key={a.id}

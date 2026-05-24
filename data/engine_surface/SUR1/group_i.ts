@@ -8,7 +8,7 @@ export const SUR1_GROUP_I: LibraryCategoryDef = {
     {
       id: "slapstick",
       name: "肢体喜剧", nameEn: "Slapstick",
-      def: "以身体动作、节奏误差和物理笑料为类型核心，滑倒、砸蛋糕等只作可选桥段。",
+      def: "以身体动作、节奏误差和物理笑料为识别重点，滑倒、砸蛋糕等只作可选桥段。",
       defEn: "Chaplin-esque, Jackie Chan style, slipping, pie in the face, exaggerated physical comedy.",
       core: "理性的意图被肉体的笨拙或环境的恶意所破坏。痛苦与笑声共享同一个瞬间——身体的失控即是喜剧的源泉。",
       coreEn: "Rational intentions destroyed by physical clumsiness or environmental malice. Pain and laughter share the same instant — the body's loss of control is the wellspring of comedy.",
@@ -18,7 +18,7 @@ export const SUR1_GROUP_I: LibraryCategoryDef = {
     {
       id: "screwball",
       name: "神经喜剧", nameEn: "Screwball",
-      def: "以高速对白、误会和关系反转为类型核心，性别斗嘴或黄金时代风格只作可选参照。",
+      def: "以高速对白、误会和关系反转为识别重点，性别斗嘴或黄金时代风格只作可选参照。",
       defEn: "Fast-talking, linguistic sparring between leads, battle of the sexes, Hollywood Golden Age.",
       core: "密集的、带有性暗示的唇枪舌剑构成关系的推进力。智力势均力敌的对手之间，攻击本身就是求爱。",
       coreEn: "Dense, sexually charged verbal sparring constitutes the driving force of the relationship. Between intellectually matched opponents, attack itself is courtship.",
@@ -28,7 +28,7 @@ export const SUR1_GROUP_I: LibraryCategoryDef = {
     {
       id: "satire",
       name: "讽刺黑色喜剧", nameEn: "Satire / Black Comedy",
-      def: "以喜剧方式拆解政治、社会或道德荒诞为类型核心，黑色幽默服务于批判对象。",
+      def: "以喜剧方式拆解政治、社会或道德荒诞为识别重点，黑色幽默服务于批判对象。",
       defEn: "Deconstructing political or social morality, laughing in the face of despair, Dr. Strangelove mode.",
       core: "以最荒谬的方式呈现最严肃的事物。笑声不是逃避，而是对权力、死亡与虚伪最锋利的手术刀。",
       coreEn: "Presenting the most serious matters in the most absurd way. Laughter is not escape, but the sharpest scalpel against power, death, and hypocrisy.",
@@ -38,7 +38,7 @@ export const SUR1_GROUP_I: LibraryCategoryDef = {
     {
       id: "spoof",
       name: "恶搞喜剧", nameEn: "Spoof / Parody",
-      def: "以 parody 和类型解构为类型核心，第四面墙、无厘头、迷影梗只作可选喜剧手段。",
+      def: "以 parody 和类型解构为识别重点，第四面墙、无厘头、迷影梗只作可选喜剧手段。",
       defEn: "Breaking the 4th wall, nonsensical, dense cinephile tropes, genre mockery.",
       core: "寄生在经典作品上的狂欢。打破所有虚构的边界，暴露叙事套路本身——笑的对象是\"故事是怎么讲的\"。",
       coreEn: "A carnival parasitic on classics. Breaking all fictional boundaries, exposing narrative tropes themselves — the target of laughter is 'how stories are told'.",
@@ -68,7 +68,7 @@ export const SUR1_GROUP_I: LibraryCategoryDef = {
     {
       id: "romantic_comedy",
       name: "浪漫喜剧", nameEn: "Rom-Com",
-      def: "以爱情关系中的误会、靠近和和解为类型核心，闺蜜助攻、完美结局只作可选模式。",
+      def: "以爱情关系中的误会、靠近和和解为识别重点，闺蜜助攻、完美结局只作可选模式。",
       defEn: "Starts with misunderstanding, bestie assists, chasing true love, perfect ending.",
       core: "一连串可笑的误会构成情感的障碍赛道。吸引力与阻力同时存在，荒诞的巧合既是阻碍也是催化剂。",
       coreEn: "A series of ridiculous misunderstandings forming an obstacle course for emotions. Attraction and resistance coexist; absurd coincidences serve as both barriers and catalysts.",
@@ -98,7 +98,7 @@ export const SUR1_GROUP_I: LibraryCategoryDef = {
     {
       id: "sitcom",
       name: "情景喜剧", nameEn: "Sitcom / Family",
-      def: "以固定关系网中的日常误会和重复笑点为类型核心，亲属、节日、罐头笑声只作可选形式。",
+      def: "以固定关系网中的日常误会和重复笑点为识别重点，亲属、节日、罐头笑声只作可选形式。",
       defEn: "Trivialities, relative dynamics, holiday gatherings, warmth and noise, laugh tracks.",
       core: "家庭或朋友间的小摩擦 vs 永恒的情感纽带。封闭的关系生态系统内，冲突的烈度与修复的速度成正比。",
       coreEn: "Minor friction among family or friends vs eternal emotional bonds. Within a closed relational ecosystem, the intensity of conflict is proportional to the speed of repair.",
@@ -108,7 +108,7 @@ export const SUR1_GROUP_I: LibraryCategoryDef = {
     {
       id: "workplace",
       name: "职场喜剧", nameEn: "Workplace Comedy",
-      def: "以职场等级和办公室规则的荒诞化为类型核心，老板员工关系只作可选冲突。",
+      def: "以职场等级和办公室规则的荒诞化为识别重点，老板员工关系只作可选冲突。",
       defEn: "Humorous office politics, boss vs employees, wage-slave relatable daily life.",
       core: "荒谬的工作要求 vs 摸鱼的生存智慧。职场的权力结构与日常的荒诞性互相放大。",
       coreEn: "Absurd work demands vs the survival wisdom of slacking off. The power structure of the workplace and the absurdity of daily routine mutually amplify each other.",
@@ -118,7 +118,7 @@ export const SUR1_GROUP_I: LibraryCategoryDef = {
     {
       id: "dramedy",
       name: "悲喜剧", nameEn: "Dramedy",
-      def: "以喜剧和伤感并置为类型核心，生活流、苦涩幽默等服务于人物真实处境。",
+      def: "以喜剧和伤感并置为识别重点，生活流、苦涩幽默等服务于人物真实处境。",
       defEn: "Laughing through tears, bitter humor, slice of life, the absurdity of real life.",
       core: "生活的悲剧底色 vs 幽默的应对方式。笑与泪共用同一个出口，荒诞与深情无法被分离。",
       coreEn: "The tragic undertone of life vs humorous coping mechanisms. Laughter and tears share the same outlet; absurdity and deep emotion cannot be separated.",

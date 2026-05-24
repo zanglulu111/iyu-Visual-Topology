@@ -6,6 +6,47 @@ export const SV1_GROUP_A: LibraryCategoryDef = {
   nameEn: 'Classic Arc Structures',
   items: [
     {
+      id: 'STANDARD_CAUSAL_ARC',
+      name: '标准因果弧',
+      nameEn: 'Standard Causal Arc',
+      group: 'A. 经典弧光结构',
+      groupEn: 'Classic Arc Structures',
+
+      def: '通用短故事骨架。以激励事件、上升动作、高潮选择和余痕收束四个节点组织因果，不预设类型、视角、容器或文体。',
+      defEn: 'A general short-story spine. Organizes causality through inciting incident, rising action, climax choice, and residue closure without preselecting genre, POV, container, or prose style.',
+
+      core: `【节点序列（四步因果骨架）】
+1. 激励事件：外部处境被具体事件打破，主角必须进入行动。
+2. 上升动作：目标、阻断、误认、关系压力或世界规则持续加码；每一步都由前一步的后果推出。
+3. 高潮选择：主角做出不可逆行动，交出代价或暴露真正的关系位置。
+4. 余痕收束：显示行动后果、关系位移、物件状态或空间余震；不额外解释主题。
+【信息规则】观众跟随因果推进，而不是听设定说明。每个节点必须回答“上一节点造成了什么新局面”，不允许四段互不相干。
+【M参数映射】M1-M2负责打破日常并启动问题；M3-M4负责目标与阻断；M5-M6负责行动和代价；M7A/M7B负责末端回咬与余痕形式。
+【结构比例】激励事件≈20% / 上升动作≈45% / 高潮选择≈25% / 余痕收束≈10%。短体量时可以压缩铺垫，但不能取消高潮选择。
+【禁忌】不得写成氛围散文、设定清单或纯心理状态；必须有可复述的外部目标、阻断升级、不可逆选择和可见后果。`,
+
+      coreEn: `[Node Sequence (four-step causal spine)]
+1. Inciting incident: a concrete external event breaks the situation and forces action.
+2. Rising action: goal, obstruction, misrecognition, relation pressure, or world rule escalates; each step follows from the previous consequence.
+3. Climax choice: the protagonist makes an irreversible action, pays a cost, or exposes a true relation position.
+4. Residue closure: show action consequence, relation displacement, object state, or spatial aftershock; no theme explanation.
+[Info Rule] Audience follows causality, not exposition. Each node must answer what new situation the previous node caused.
+[M Mapping] M1-M2 launch the problem; M3-M4 shape goal and obstruction; M5-M6 handle action and cost; M7A/M7B handle retroactive bite and residue form.
+[Proportions] Inciting≈20% / Rising≈45% / Climax≈25% / Residue≈10%.
+[Prohibitions] Do not write atmosphere prose, setup lists, or pure mental state; keep a retellable external goal, escalating blockage, irreversible choice, and visible consequence.`,
+
+      skeletons: [
+        'inciting_incident_激励事件',
+        'rising_action_上升动作',
+        'climax_高潮',
+        'resolution_余痕收束',
+      ],
+
+      reference: '作为 SV1 固定初始项：在用户未主动选择特殊结构前，提供最小但完整的因果骨架。',
+      referenceEn: 'Fixed initial SV1 item: a minimal complete causal spine before the user selects a specialized structure.',
+    },
+
+    {
       id: 'HERO_JOURNEY',
       name: '英雄之旅',
       nameEn: "The Hero's Journey",

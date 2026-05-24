@@ -47,6 +47,43 @@ export const COUNTRY_PRESETS = [
   { cn: "南非", en: "South Africa" }
 ];
 
+export const SUR3_SPACE_ANCHOR_PRESETS = [
+  ...COUNTRY_PRESETS,
+  { cn: "南亚河流聚落", en: "South Asian river settlements" },
+  { cn: "日本长崎近海", en: "Nagasaki offshore Japan" },
+  { cn: "黄海海军边界", en: "Yellow Sea naval frontier" },
+  { cn: "上海租界边缘", en: "Shanghai concession edge" },
+  { cn: "东京湾地下物流层", en: "Tokyo Bay underground logistics layer" },
+  { cn: "木星轨道移民环站", en: "Jupiter orbit immigrant ring" },
+  { cn: "火星极地矿业聚落", en: "Martian polar mining settlement" },
+  { cn: "近地轨道碎片带", en: "Low Earth orbit debris belt" },
+  { cn: "人体肺泡内", en: "Inside human lung alveoli" },
+  { cn: "纳米尺度血管通道", en: "Nanoscopic blood-vessel channel" },
+  { cn: "异维折叠城", en: "Folded extra-dimensional city" },
+  { cn: "无固定年代的梦档案", en: "Dream archive with no fixed calendar" },
+];
+
+export const SUR3_COORDINATE_PRESETS = [
+  { year: -1655, spaceCn: "南亚河流聚落", spaceEn: "South Asian river settlements" },
+  { year: -1200, spaceCn: "东地中海海岸城邦", spaceEn: "Eastern Mediterranean coastal city-states" },
+  { year: -500, spaceCn: "波斯帝国驿道", spaceEn: "Persian imperial road" },
+  { year: -221, spaceCn: "秦边郡城门", spaceEn: "Qin frontier commandery gate" },
+  { year: 1830, spaceCn: "日本长崎近海", spaceEn: "Nagasaki offshore Japan" },
+  { year: 1894, spaceCn: "黄海海军边界", spaceEn: "Yellow Sea naval frontier" },
+  { year: 1936, spaceCn: "上海租界边缘", spaceEn: "Shanghai concession edge" },
+  { year: 1968, spaceCn: "布拉格被占领街区", spaceEn: "Occupied Prague streets" },
+  { year: 1997, spaceCn: "香港交接夜", spaceEn: "Hong Kong handover night" },
+  { year: 2026, spaceCn: "首尔当代公寓区", spaceEn: "Contemporary Seoul apartment district" },
+  { year: 2042, spaceCn: "东京湾地下物流层", spaceEn: "Tokyo Bay underground logistics layer" },
+  { year: 2077, spaceCn: "近地轨道碎片带", spaceEn: "Low Earth orbit debris belt" },
+  { year: 2150, spaceCn: "木星轨道移民环站", spaceEn: "Jupiter orbit immigrant ring" },
+  { year: 2290, spaceCn: "火星极地矿业聚落", spaceEn: "Martian polar mining settlement" },
+  { year: 2026, spaceCn: "人体肺泡内", spaceEn: "Inside human lung alveoli" },
+  { year: 2026, spaceCn: "纳米尺度血管通道", spaceEn: "Nanoscopic blood-vessel channel" },
+  { year: null, spaceCn: "异维折叠城", spaceEn: "Folded extra-dimensional city" },
+  { year: null, spaceCn: "无固定年代的梦档案", spaceEn: "Dream archive with no fixed calendar" },
+];
+
 export const AESTHETIC_LOGIC_TEMPLATES: LogicTemplateDef[] = [
   {
     id: 'DEFAULT',
@@ -336,7 +373,7 @@ export const RANDOM_RANGES: Record<string, [number, number]> = {
   'skin_profession': [0, 1],  // SUR9 职业身份
   'skin_ideology': [0, 1],    // SUR10 信念预设
   'skin_ending': [0, 1],      // SUR-END 显性收场
-  // SUR10X 调音台推子 (SUR4X removed in v3.1)
+  // SUR10X 表层信念裂度词条
   'sur10x': [0, 1],           // SUR10X 信念裂度
   // SV 叙事结构
   'skin_structure': [0, 1],   // SV1 叙事结构

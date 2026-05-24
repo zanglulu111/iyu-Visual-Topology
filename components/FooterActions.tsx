@@ -51,7 +51,7 @@ export const FooterActions: React.FC<FooterActionsProps> = ({
 
             <button onClick={handleGlobalRandomize} className={controlClass} >
                 <Dice5 size={18} className={controlIconClass} />
-                <span className={controlTextClass}>{lang === 'CN' ? "随机生成" : "Randomize"}</span>
+                <span className={controlTextClass}>{lang === 'CN' ? "全局随机" : "Global Random"}</span>
             </button>
 
             <button onClick={handleGlobalReset} className={controlClass} >

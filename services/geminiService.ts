@@ -2,7 +2,7 @@
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import { configService } from "../src/services/configService";
 import { EngineId, getOpenAIChatCompletionsUrl, getProviderForModel } from "../src/types/config";
-import { SutureConfig, NarrativeFieldState, CreativeTreatment, StyleConfig, WorldLawConfig, CreativeBlueprint, DriverType, SubjectType, SutureResponse, FinalAssetsData, FinalAssetItem, GlobalVisualTone, AssetView, MetonymyStylePreset, MetonymyAssetInput, APISettings, FaceState, PromptFocusState, NarrativePromptVersion, NarrativeBlockDef, LibraryCategoryDef, M7BResidueIntensity } from "../types";
+import { SutureConfig, NarrativeFieldState, CreativeTreatment, StyleConfig, WorldLawConfig, CreativeBlueprint, DriverType, SubjectType, SutureResponse, FinalAssetsData, FinalAssetItem, GlobalVisualTone, AssetView, MetonymyStylePreset, MetonymyAssetInput, APISettings, FaceState, PromptFocusState, NarrativePromptVersion, NarrativeBlockDef, LibraryCategoryDef, MAxisMixerState, M7BResidueIntensity } from "../types";
 import { buildSutureStep1Prompt, buildStyleTransferPrompt } from "./suture_script_prompt";
 import { buildSutureStep2Prompt } from "./sutureGenerator";
 import { buildNarrativePrompt, buildNarrativeBiblePrompt } from "./narrativeGenerator";
@@ -12,7 +12,7 @@ import { buildTrailerPrompt } from "./trailerGenerator";
 import { buildAestheticPrompt, buildAestheticBiblePrompt } from "./aestheticGenerator";
 import { buildPsychoAnalysisPrompt } from "./psychoAnalysisGenerator";
 import { buildDesireDiagnosisPrompt } from "./sutureDiagnosis";
-import { buildNarrativeDiagnosisPrompt } from "./narrativeDiagnosis";
+import { buildNarrativeDiagnosisPrompt, buildNarrativeDiagnosisRepairPrompt, fillNarrativeDiagnosisTailGaps, hasNarrativeDiagnosisTailGap, stripNarrativeDiagnosisTail } from "./narrativeDiagnosis";
 import {
     NARRATIVE_ENGINE_BLOCKS,
     NARRATIVE_ENGINE_LIBRARY,
@@ -33,7 +33,7 @@ import {
     TRAILER_SKIN_BLOCKS,
     TRAILER_SKIN_LIBRARY
 } from "../constants";
-import { buildRefactorPrompt } from "./refactorPrompt";
+import { buildRefactorPrompt, type RefactorPromptOptions } from "./refactorPrompt";
 import { buildScriptBreakdownPrompt } from "./scriptBreakdownGenerator";
 import { runWithTask } from "./taskManager";
 
@@ -630,6 +630,22 @@ const FANTASY_TRAVERSE_TYPES: CreativeTreatment['type'][] = [
     'FORM',
     'ATMOSPHERE'
 ];
+const FANTASY_TRAVERSE_EXPECTED_COUNT = FANTASY_TRAVERSE_TYPES.length;
+
+const buildFantasyTraverseCorrectionPrompt = (basePrompt: string, invalidOutput: string, parsedCount: number): string => `${basePrompt}
+
+【上一轮输出格式失败，必须重写】
+上一轮只解析到 ${parsedCount}/${FANTASY_TRAVERSE_EXPECTED_COUNT} 个方案；这在分歧点生成中视为失败。
+现在不要解释原因，不要继续上一轮残稿，直接重新输出完整结果：
+- JSON 数组必须正好 ${FANTASY_TRAVERSE_EXPECTED_COUNT} 个对象。
+- 第 1 个必须是 PLOT / SV1_DRIVEN。
+- 第 2 个必须是 FORM / FORM_DRIVEN。
+- 第 3 个必须是 ATMOSPHERE / SENSORY_FIELD。
+- 三个对象都必须有 title、tagline、structure、pitch_structure。
+- 不得只输出一个故事，不得把三个方向合并成一个故事。
+
+【上一轮无效输出预览】
+${invalidOutput.slice(0, 4000)}`;
 
 const getAutoFillBlocksAndLibraries = (driver: DriverType): { blocks: NarrativeBlockDef[]; libraries: LibraryCategoryDef[] } => {
     switch (driver) {
@@ -698,35 +714,57 @@ const normalizeAutoFillState = (driver: DriverType, parsed: any): NarrativeField
 
 export const buildAutoFillPrompt = (driver: DriverType, visionInput: string, hasImage: boolean, analysis?: string): string => {
     const textSeed = visionInput.trim();
-    const sourceMode = hasImage && textSeed
-        ? '图文双锚模式：图片锁定视觉物理事实，文本锁定语义/关系/动机。'
-        : hasImage
-            ? '图像锁定模式：图片中可见事实最高优先。'
-            : textSeed
-                ? '文本锁定模式：用户文字最高语义优先。'
-                : analysis?.trim()
-                    ? '解码结果模式：使用已有解码文本作为种子。'
-                    : '空白反推模式：无自由种子，直接根据该 Driver 随机反推出一组自洽参数。';
+    const confirmedAnalysis = analysis?.trim() || '';
+    const sourceMode = confirmedAnalysis
+        ? '已确认解码种子：使用用户确认后的图文解析结果作为底座。'
+        : hasImage && textSeed
+            ? '图文通用反推：用户文字最高优先，图像只提供可见事实、氛围、关系与材料。'
+            : hasImage
+                ? '图像通用反推：直接读图，只读取可见事实。'
+                : textSeed
+                    ? '文本锁定反推：用户文字最高语义优先。'
+                    : '空白反推：无自由种子，直接根据该 Driver 随机反推出一组自洽参数。';
 
     return `
 角色：迷雾引擎种子映射器。
-任务：把用户的文本/图像/解码结果，映射为 ${driver} 的参数状态。
+任务：把用户的文本/图像/解码结果，映射为 ${driver} 的完整参数状态。你的目标不是挑几个印象标签，而是尽可能为所有能被种子可靠支持的 M 层、SUR 层、SV 层与调音参数给出候选。
 
 ## 输入模式
 ${sourceMode}
 
 ## 种子
 ${textSeed ? `文本种子:\n${textSeed}` : '文本种子: 未填写'}
-${hasImage ? '图像种子: 已上传，在附件中。可见人物、空间、物件、材质、光线、色彩与构图是最高视觉事实。' : '图像种子: 未上传'}
-${analysis?.trim() ? `已有解码:\n${analysis.trim()}` : ''}
+${confirmedAnalysis
+        ? '图像种子: 本次映射不重新读取附件图像；图像信息只能来自下方已有解码。'
+        : hasImage
+            ? '图像种子: 已上传，在附件中。它只提供可见事实、关系、氛围与材料。'
+            : '图像种子: 未上传'}
+${confirmedAnalysis ? `已有解码:\n${confirmedAnalysis}` : ''}
+
+## 重要边界：只做参数映射
+${confirmedAnalysis
+        ? `- 你不是图像解析器，不得重写、改写、扩写、摘要、替换或补完 01-06 模块。
+- 你只负责把【已有解码】映射成参数候选；如果用户已经手动编辑 01-06，以编辑后的文本为准。
+- 不得重新解释图片，不得根据附件图像补写【已有解码】没有支持的事实、职业、制度、历史、科技体系或魔法体系。
+- 输出中不得出现 01-06 模块标题、分析段落、解释文字或 Markdown。`
+        : `- 没有已有解码时，才允许直接从文本/图像种子反推参数。
+- 即便直接反推，也不得输出分析段落或 01-06 模块，只能输出参数 JSON。`}
 
 ## 裁决宪法
-1. 文本输入是语义锁定：明确写出的事实、关系、事件、对象、欲望与禁令必须优先。
-2. 图片输入是视觉物理锁定：图片中可见的一切必须优先，不得被表层设定或随机补完覆盖。
-3. 图文并存时，图片负责“世界长什么样”，文本负责“这意味着什么/为什么发生”。
-4. 表层设定只是懒人预设；若与种子冲突，选择能服务种子的标签，或把冲突降级为风格、制度、隐喻。
-5. M/C/L/实验/预告等结构层只解释症候运动，不改写种子事实。
-6. 空白反推时允许随机性，但要选出一组内部自洽、可生成完整故事/方案的参数。
+1. 用户文字、创意灵感、手动修改和确认后的解码种子最高优先。若用户要求把图中女孩和兔子改成男人和老虎，参数反推必须服从这个替换。
+2. 图像只提供可见事实、氛围、构图、材质、关系张力与世界材料，不在这里重新裁决图片用途。
+3. 已有解码是可编辑故事种子，不是不可违背的客观事实；若它与用户文字冲突，以用户文字为准。
+4. 反推参数只是创作建议；输出的 M/SUR/SV 候选不能覆盖用户意图、确认解析和图片事实。
+5. 表层设定只是懒人预设；若与种子冲突，选择能服务种子的标签，或把冲突降级为风格、制度、隐喻、类型语法。
+6. M/C/L/实验/预告等结构层只解释症候运动，不改写用户已锁定的事实或替换要求。
+7. 空白反推时允许随机性，但要选出一组内部自洽、可生成完整故事/方案的参数。
+
+## 全参数映射要求
+- 优先覆盖深层结构：M0、M1、M2、M3、M4、M5、M6、M7A、M7B。每个被选择的标签都必须能从确认解析里的行动张力、冲突、欲望、代价或余痕推出。
+- 同时覆盖表层预设：SUR1 故事类型、SUR2 背景场域、SUR4 社会形态、SUR5 对象预设、SUR6 空间容器、SUR7 选角呈现、SUR8 年龄阶段、SUR9 职业身份、SUR10 信念预设、SUR-END 显性收场、SV1 叙事结构、SV2 故事体量，以及可用的调音参数。
+- 若图片强烈呈现魔幻、神话、科幻、超现实、废墟、仪式、亡灵、怪物、梦境等世界本体，SUR/SV 必须优先贴合这个本体，不得默认折译成当代现实主义。
+- 若某个 block 缺乏可靠依据，可以略过；但不要因为输出保守而只返回 2-3 个 block。对确认解析已经明确支持的 block，应尽量完整输出。
+- 每个 block 最多输出 1-3 个最强候选，避免把同义或互相冲突的标签堆满。
 
 ## 可选参数清单
 你只能使用下列 blockId 和 item name。不要输出 item id。不要创造新标签。
@@ -1216,9 +1254,24 @@ export const analyzeImage = async (base64Image: string | null, textInput?: strin
         const response = await retryWithBackoff<GenerateContentResponse>(() => getAI().models.generateContent({
             model: model,
             contents: { parts: parts },
-            config: { maxOutputTokens: 4096, engineId: 'visualBible' }
+            config: { maxOutputTokens: 8192, engineId: 'visualBible' }
         }));
-        return response.text || "Decoding failed.";
+        const diagnosis = response.text || "";
+        if (!diagnosis.trim()) return "Decoding failed.";
+        if (!hasNarrativeDiagnosisTailGap(diagnosis)) return diagnosis;
+
+        const repairParts: any[] = [{ text: buildNarrativeDiagnosisRepairPrompt(textInput || "", hasImage, diagnosis) }];
+        if (base64Image) repairParts.push({ inlineData: await toInlineImageData(base64Image) });
+        const repairResponse = await retryWithBackoff<GenerateContentResponse>(() => getAI().models.generateContent({
+            model: model,
+            contents: { parts: repairParts },
+            config: { maxOutputTokens: 2048, engineId: 'visualBible' }
+        }));
+        const repairTail = repairResponse.text || "";
+        const merged = repairTail.trim()
+            ? `${stripNarrativeDiagnosisTail(diagnosis)}\n\n${repairTail.trim()}`.trim()
+            : diagnosis;
+        return fillNarrativeDiagnosisTailGaps(merged || diagnosis, textInput || "", hasImage);
     } catch (e: any) {
         handleApiError("Seed Analysis Error", e);
         return "Error decoding seed.";
@@ -1227,9 +1280,10 @@ export const analyzeImage = async (base64Image: string | null, textInput?: strin
 
 export const generateNarrativeAutoFill = async (driver: DriverType, visionInput: string, visionImage: string | null, analysis?: string): Promise<NarrativeFieldState> => {
     try {
-        const prompt = buildAutoFillPrompt(driver, visionInput, Boolean(visionImage), analysis);
+        const hasConfirmedAnalysis = Boolean(analysis?.trim());
+        const prompt = buildAutoFillPrompt(driver, visionInput, hasConfirmedAnalysis ? false : Boolean(visionImage), analysis);
         const parts: any[] = [{ text: prompt }];
-        if (visionImage) parts.push({ inlineData: await toInlineImageData(visionImage) });
+        if (visionImage && !hasConfirmedAnalysis) parts.push({ inlineData: await toInlineImageData(visionImage) });
         const model = configService.getEngineModel('coreEngine') || 'gemini-3-flash-preview';
         console.log(`[CoreEngine] Generating AutoFill with model: ${model}`);
         const response = await retryWithBackoff<GenerateContentResponse>(() => getAI().models.generateContent({
@@ -1245,80 +1299,94 @@ export const generateNarrativeAutoFill = async (driver: DriverType, visionInput:
     }
 };
 
-export const generateFantasyTraverse = async (driver: DriverType, duration: string, fieldState: NarrativeFieldState, visionInput: string, visionImage: string | null, worldLaw: WorldLawConfig, subjectType: SubjectType, visionAnalysis: string, colorPalette: string[] = [], faceState?: FaceState, focusState?: PromptFocusState, promptVersion: NarrativePromptVersion = 'v4', taskName?: string, m7bIntensity?: M7BResidueIntensity): Promise<{ treatments: CreativeTreatment[]; thinkingXml: string }> => {
+export const generateFantasyTraverse = async (driver: DriverType, duration: string, fieldState: NarrativeFieldState, visionInput: string, visionImage: string | null, worldLaw: WorldLawConfig, subjectType: SubjectType, visionAnalysis: string, colorPalette: string[] = [], faceState?: FaceState, focusState?: PromptFocusState, promptVersion: NarrativePromptVersion = 'v4', taskName?: string, mAxisMixer?: MAxisMixerState, m7bIntensity?: M7BResidueIntensity): Promise<{ treatments: CreativeTreatment[]; thinkingXml: string }> => {
     try {
         let promptData;
         if (driver === DriverType.COMMERCIAL) promptData = buildCommercialPrompt(duration, fieldState, visionInput, visionImage, worldLaw);
         else if (driver === DriverType.EXPERIMENTAL) promptData = buildExperimentalPrompt(duration, fieldState, visionInput, visionImage);
         else if (driver === DriverType.AESTHETIC) promptData = buildAestheticPrompt(duration, fieldState, visionInput, visionImage, subjectType, worldLaw, colorPalette);
         else if (driver === DriverType.TRAILER) promptData = buildTrailerPrompt(duration, fieldState, visionInput, visionImage);
-        else promptData = buildNarrativePrompt(duration, fieldState, visionInput, visionImage, worldLaw, promptVersion, faceState, focusState, m7bIntensity);
+        else promptData = buildNarrativePrompt(duration, fieldState, visionInput, visionImage, worldLaw, promptVersion, faceState, focusState, mAxisMixer, m7bIntensity);
 
-        const parts: any[] = [{ text: appendFantasyTraverseOutputContract(promptData.text) }];
-        if (promptData.images && promptData.images.length > 0) parts.push({ inlineData: await toInlineImageData(promptData.images[0]) });
+        const basePrompt = appendFantasyTraverseOutputContract(promptData.text);
+        const imagePart = promptData.images && promptData.images.length > 0
+            ? { inlineData: await toInlineImageData(promptData.images[0]) }
+            : null;
 
         const model = configService.getEngineModel('coreEngine') || 'gemini-3.1-pro-preview';
         console.log(`[CoreEngine] Generating Fantasy Traverse with model: ${model}`);
-        const response = await retryWithBackoff<GenerateContentResponse>(() => getAI().models.generateContent({
-            model: model,
-            contents: { parts: parts },
-            config: { responseMimeType: 'application/json', engineId: 'coreEngine' }
-        }), 3, 1000, taskName);
-        const rawText = response.text || "";
-        console.log(`[CoreEngine] Fantasy Traverse raw response (${rawText.length} chars):`, rawText.substring(0, 500));
+        let currentPrompt = basePrompt;
+        let lastRawText = '';
+        let lastParsedCount = 0;
 
-        // Extract audit XML before parsing JSON. New V3 prompts use <design_audit>;
-        // legacy prompts may still return <thought_process>.
-        let thinkingXml = '';
-        const xmlMatch = rawText.match(/<design_audit[\s\S]*?<\/design_audit>/)
-            || rawText.match(/<thought_process[\s\S]*?<\/thought_process>/);
-        if (xmlMatch) {
-            thinkingXml = xmlMatch[0];
-            console.log(`[CoreEngine] Extracted audit XML (${thinkingXml.length} chars)`);
-        }
-        const textForParsing = xmlMatch ? rawText.replace(xmlMatch[0], '').trim() : rawText;
-        const parsed = cleanAndParseJSON(textForParsing);
+        for (let attempt = 0; attempt < 2; attempt++) {
+            const parts: any[] = [{ text: currentPrompt }];
+            if (imagePart) parts.push(imagePart);
 
-        if (parsed) {
-            const normalized = normalizeFantasyTraversePayload(parsed);
-            if (!thinkingXml && normalized.auditXml) {
-                thinkingXml = `<design_audit>\n${normalized.auditXml}\n</design_audit>`;
+            const response = await retryWithBackoff<GenerateContentResponse>(() => getAI().models.generateContent({
+                model: model,
+                contents: { parts: parts },
+                config: { responseMimeType: 'application/json', engineId: 'coreEngine' }
+            }), 3, 1000, taskName);
+            const rawText = response.text || "";
+            lastRawText = rawText;
+            console.log(`[CoreEngine] Fantasy Traverse raw response (${rawText.length} chars):`, rawText.substring(0, 500));
+
+            // Extract audit XML before parsing JSON. New V3 prompts use <design_audit>;
+            // legacy prompts may still return <thought_process>.
+            let thinkingXml = '';
+            const xmlMatch = rawText.match(/<design_audit[\s\S]*?<\/design_audit>/)
+                || rawText.match(/<thought_process[\s\S]*?<\/thought_process>/);
+            if (xmlMatch) {
+                thinkingXml = xmlMatch[0];
+                console.log(`[CoreEngine] Extracted audit XML (${thinkingXml.length} chars)`);
+            }
+            const textForParsing = xmlMatch ? rawText.replace(xmlMatch[0], '').trim() : rawText;
+            const parsed = cleanAndParseJSON(textForParsing);
+
+            if (parsed) {
+                const normalized = normalizeFantasyTraversePayload(parsed);
+                lastParsedCount = normalized.treatments.length;
+                if (!thinkingXml && normalized.auditXml) {
+                    thinkingXml = `<design_audit>\n${normalized.auditXml}\n</design_audit>`;
+                }
+
+                if (normalized.treatments.length === FANTASY_TRAVERSE_EXPECTED_COUNT) {
+                    console.log(`[CoreEngine] Parsed ${normalized.treatments.length} treatments. First item pitch length: ${normalized.treatments[0]?.pitch?.length || 0}`);
+                    return { treatments: normalized.treatments, thinkingXml };
+                }
+
+                console.warn(`[CoreEngine] Expected ${FANTASY_TRAVERSE_EXPECTED_COUNT} treatments, parsed ${normalized.treatments.length}. Retrying with correction prompt.`);
+                if (attempt === 0) {
+                    currentPrompt = buildFantasyTraverseCorrectionPrompt(basePrompt, rawText, normalized.treatments.length);
+                    continue;
+                }
+
+                throw new Error(`模型只返回了 ${normalized.treatments.length}/${FANTASY_TRAVERSE_EXPECTED_COUNT} 个叙事方案。分歧点必须同时返回 PLOT / FORM / ATMOSPHERE 三条路径，请重新生成或换回更稳定的核心模型。`);
             }
 
-            if (normalized.treatments.length > 0) {
-                console.log(`[CoreEngine] Parsed ${normalized.treatments.length} treatments. First item pitch length: ${normalized.treatments[0]?.pitch?.length || 0}`);
-                return { treatments: normalized.treatments, thinkingXml };
+            if (attempt === 0) {
+                currentPrompt = buildFantasyTraverseCorrectionPrompt(basePrompt, rawText, 0);
+                continue;
             }
 
-            throw new Error('模型返回了 JSON，但没有包含可展示的叙事方案。请重新生成；系统已加强输出格式约束。');
+            throw new Error('模型返回内容不是可解析的三方案 JSON。请重新生成；系统已加强输出格式约束。');
         }
 
-        // Fallback if parsing totally failed
-        if (rawText.length > 50) {
-            return { treatments: [{
-                id: "fallback_1",
-                type: "CLASSIC",
-                title: "Generated Concept",
-                tagline: "Extracted from raw model output",
-                pitch: textForParsing,
-                structure: "UNKNOWN",
-                visualAnchor: ""
-            }], thinkingXml };
-        }
-        return { treatments: [], thinkingXml };
+        throw new Error(`模型未能返回完整三方案。最后一次解析数量：${lastParsedCount}/${FANTASY_TRAVERSE_EXPECTED_COUNT}；输出预览：${lastRawText.slice(0, 300)}`);
     } catch (e: any) {
         handleApiError("Fantasy Traverse Generate Error", e);
         return { treatments: [], thinkingXml: '' };
     }
 };
 
-export const generateBlueprint = async (driver: DriverType, treatment: CreativeTreatment, style: StyleConfig, fieldState: NarrativeFieldState, visionInput: string, visionImage: string | null, worldLaw: WorldLawConfig, visionAnalysis: string, colorPalette: string[] = [], focusState?: PromptFocusState, m7bIntensity?: M7BResidueIntensity): Promise<CreativeBlueprint | null> => {
+export const generateBlueprint = async (driver: DriverType, treatment: CreativeTreatment, style: StyleConfig, fieldState: NarrativeFieldState, visionInput: string, visionImage: string | null, worldLaw: WorldLawConfig, visionAnalysis: string, colorPalette: string[] = [], focusState?: PromptFocusState, mAxisMixer?: MAxisMixerState, m7bIntensity?: M7BResidueIntensity): Promise<CreativeBlueprint | null> => {
     try {
         let promptText;
         if (driver === DriverType.COMMERCIAL) promptText = buildCommercialBiblePrompt(treatment, style, fieldState, visionInput, worldLaw);
         else if (driver === DriverType.EXPERIMENTAL) promptText = buildExperimentalBiblePrompt(treatment, style, fieldState, visionInput, worldLaw);
         else if (driver === DriverType.AESTHETIC) promptText = buildAestheticBiblePrompt(treatment, style, fieldState, visionInput, worldLaw, colorPalette);
-        else promptText = buildNarrativeBiblePrompt(treatment, style, fieldState, visionInput, visionImage, worldLaw, visionAnalysis, focusState, m7bIntensity);
+        else promptText = buildNarrativeBiblePrompt(treatment, style, fieldState, visionInput, visionImage, worldLaw, visionAnalysis, focusState, mAxisMixer, m7bIntensity);
 
         const parts: any[] = [{ text: promptText }];
         if (visionImage) parts.push({ inlineData: await toInlineImageData(visionImage) });
@@ -1390,10 +1458,11 @@ export const modifyNarrativeWithAI = async (
     sections: ModifySectionRequest[],
     insertions: ModifyInsertionRequest[],
     overallInstruction: string = "",
-    style: string = ""
+    style: string = "",
+    refactorOptions: RefactorPromptOptions = {}
 ): Promise<string> => {
     try {
-        const prompt = buildRefactorPrompt(fullStory, sections, insertions, overallInstruction, style);
+        const prompt = buildRefactorPrompt(fullStory, sections, insertions, overallInstruction, style, refactorOptions);
         const model = configService.getEngineModel('coreEngine') || 'gemini-3.1-pro-preview';
         console.log(`[CoreEngine] Modifying Narrative with model: ${model}`);
         const response = await retryWithBackoff<GenerateContentResponse>(() => getAI().models.generateContent({
@@ -1446,8 +1515,22 @@ export const breakdownScript = async (sourceText: string, instruction?: string, 
         }));
 
         if (!response.text) return null;
-        const rawData = cleanAndParseJSON(response.text);
-        if (rawData && rawData.scenes) {
+        const parsedData = cleanAndParseJSON(response.text);
+        const rawData = typeof parsedData === 'string' ? cleanAndParseJSON(parsedData) : parsedData;
+        const sceneListCandidate = Array.isArray(rawData)
+            ? rawData
+            : rawData?.scenes
+                || rawData?.sections
+                || rawData?.screenplay
+                || rawData?.sceneBreakdown
+                || rawData?.breakdown?.scenes
+                || rawData?.result?.scenes
+                || rawData?.data?.scenes;
+        const sceneList = Array.isArray(sceneListCandidate)
+            ? sceneListCandidate
+            : (sceneListCandidate && typeof sceneListCandidate === 'object' ? Object.values(sceneListCandidate) : []);
+
+        if (rawData && sceneList.length > 0) {
             const normalizeVisualBibleAsset = (asset: any) => ({
                 ...asset,
                 analysis: {
@@ -1483,28 +1566,88 @@ export const breakdownScript = async (sourceText: string, instruction?: string, 
                 palette: Array.isArray(tone.palette) ? tone.palette : []
             });
 
-            const mappedScenes = rawData.scenes.map((scene: any) => {
-                const rangeStart = Number(scene.sourceRange?.paragraphStart);
-                const rangeEnd = Number(scene.sourceRange?.paragraphEnd);
+            const parseIndexValue = (value: any): number[] => {
+                if (typeof value === 'number') return [value];
+                if (typeof value !== 'string') return [];
+                const trimmed = value.trim();
+                if (!trimmed) return [];
+
+                const rangeMatch = trimmed.match(/^(\d+)\s*[-~—至到]\s*(\d+)$/);
+                if (rangeMatch) {
+                    const start = Number(rangeMatch[1]);
+                    const end = Number(rangeMatch[2]);
+                    if (Number.isFinite(start) && Number.isFinite(end)) {
+                        const min = Math.min(start, end);
+                        const max = Math.max(start, end);
+                        return Array.from({ length: max - min + 1 }, (_, i) => min + i);
+                    }
+                }
+
+                const nums = trimmed.match(/\d+/g);
+                return nums ? nums.map(Number).filter(Number.isFinite) : [];
+            };
+
+            const getRangeValue = (range: any, keys: string[]) => {
+                if (!range || typeof range !== 'object') return undefined;
+                for (const key of keys) {
+                    if (range[key] !== undefined) return range[key];
+                }
+                return undefined;
+            };
+
+            const mappedScenes = sceneList.map((scene: any, index: number) => {
+                const sourceRange = scene.sourceRange || scene.source_range || scene.range || {};
+                const rangeStart = Number(getRangeValue(sourceRange, ['paragraphStart', 'paragraph_start', 'startParagraph', 'start', 'from']));
+                const rangeEnd = Number(getRangeValue(sourceRange, ['paragraphEnd', 'paragraph_end', 'endParagraph', 'end', 'to']));
                 const rangeIndices = Number.isFinite(rangeStart) && Number.isFinite(rangeEnd)
-                    ? Array.from({ length: Math.max(0, rangeEnd - rangeStart + 1) }, (_, i) => rangeStart + i)
+                    ? Array.from({ length: Math.max(0, Math.abs(rangeEnd - rangeStart) + 1) }, (_, i) => Math.min(rangeStart, rangeEnd) + i)
                     : [];
-                const rawIndices = Array.isArray(scene.paragraph_indices) && scene.paragraph_indices.length > 0
-                    ? scene.paragraph_indices
-                    : rangeIndices;
-                const sourceIndices = rawIndices
-                    .map((i: number) => Number(i) - 1)
-                    .filter((idx: number) => Number.isFinite(idx) && idx >= 0 && idx < paragraphs.length);
-                const sourceContent = sourceIndices.map((idx: number) => paragraphs[idx] || "").join('\n\n');
-                const breakdownInfo = `**Slugline:** ${scene.slugline || 'N/A'}\n**Scene Type:** ${scene.sceneType || 'N/A'}\n**Visual Style:** [${scene.visualStyleName || 'N/A'}] (${scene.montageId || 'montage_none'})\n**Narrative Arc:** ${scene.narrativeArc || 'N/A'}\n**Key Action Beats:**\n${(scene.keyActionBeats || []).map((beat: string) => `- ${beat}`).join('\n')}\n**Continuity Out:** ${scene.continuityOut || 'N/A'}`;
-                return { title: scene.title, content: sourceContent, breakdownInfo: breakdownInfo.trim(), visualStyleName: scene.visualStyleName, montageId: scene.montageId, indices: sourceIndices };
-            });
-            const visualBible = rawData.visualBible ? {
-                toneAnalysis: normalizeVisualBibleTone(rawData.visualBible.toneAnalysis),
-                assets: normalizeVisualBibleAssets(rawData.visualBible.assets)
+                const rawIndicesValue = scene.paragraph_indices
+                    || scene.paragraphIndices
+                    || scene.sourceIndices
+                    || scene.source_indices
+                    || scene.indices
+                    || scene.paragraphs;
+                const rawIndices = (Array.isArray(rawIndicesValue) ? rawIndicesValue : [rawIndicesValue])
+                    .flatMap(parseIndexValue)
+                    .filter(Number.isFinite);
+                const oneOrZeroBased = rawIndices.length > 0 ? rawIndices : rangeIndices;
+                const appearsZeroBased = oneOrZeroBased.some((i: number) => i === 0);
+                const sourceIndices = Array.from(new Set(oneOrZeroBased
+                    .map((i: number) => appearsZeroBased ? Number(i) : Number(i) - 1)
+                    .filter((idx: number) => Number.isFinite(idx) && idx >= 0 && idx < paragraphs.length)))
+                    .sort((a: number, b: number) => a - b);
+                const sourceContent = String(sourceIndices.map((idx: number) => paragraphs[idx] || "").join('\n\n')
+                    || scene.content
+                    || scene.sceneContent
+                    || scene.sceneText
+                    || scene.sourceText
+                    || scene.text
+                    || "");
+                const keyActionBeats = Array.isArray(scene.keyActionBeats)
+                    ? scene.keyActionBeats
+                    : (Array.isArray(scene.key_action_beats) ? scene.key_action_beats : []);
+                const breakdownInfo = `**Slugline:** ${scene.slugline || 'N/A'}\n**Scene Type:** ${scene.sceneType || scene.scene_type || 'N/A'}\n**Visual Style:** [${scene.visualStyleName || scene.visual_style_name || 'N/A'}] (${scene.montageId || scene.montage_id || 'montage_none'})\n**Narrative Arc:** ${scene.narrativeArc || scene.narrative_arc || 'N/A'}\n**Key Action Beats:**\n${keyActionBeats.map((beat: string) => `- ${beat}`).join('\n')}\n**Continuity Out:** ${scene.continuityOut || scene.continuity_out || 'N/A'}`;
+                return {
+                    title: scene.title || scene.name || `Scene ${index + 1}`,
+                    content: sourceContent,
+                    breakdownInfo: breakdownInfo.trim(),
+                    visualStyleName: scene.visualStyleName || scene.visual_style_name,
+                    montageId: scene.montageId || scene.montage_id,
+                    indices: sourceIndices
+                };
+            }).filter((scene: any) => scene.content.trim() || String(scene.title).trim());
+            const rawVisualBible = rawData.visualBible || rawData.visual_bible || rawData.visuals;
+            const visualBible = rawVisualBible ? {
+                toneAnalysis: normalizeVisualBibleTone(rawVisualBible.toneAnalysis || rawVisualBible.tone_analysis || rawVisualBible.tone),
+                assets: normalizeVisualBibleAssets(rawVisualBible.assets)
             } : undefined;
             return { scenes: mappedScenes, visualBible };
         }
+        console.warn('[Metonymy] Breakdown parse returned no scenes', {
+            parsedKeys: rawData && typeof rawData === 'object' ? Object.keys(rawData) : typeof rawData,
+            preview: response.text.slice(0, 800)
+        });
         return null;
     } catch (e: any) {
         handleApiError("Script Breakdown Error", e);

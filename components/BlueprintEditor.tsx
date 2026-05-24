@@ -6,7 +6,7 @@ import { CreativeBlueprint, BlueprintLanguage, NarrativeFieldState, CreativeTrea
 import {
     X, Wand2, Loader2, ArrowLeft, ArrowRight, History as HistoryIcon,
     Globe, BookOpen, Target, Film, Eye, Box,
-    ClipboardCopy, Check, HelpCircle, Home, TestTube, Zap, Palette,
+    ClipboardCopy, Check, HelpCircle, TestTube, Zap, Palette,
     Settings2, Layers, Terminal, Feather, Star, FilePlus, Download, List, Database, Heart, Activity, Upload, Flame,
     Archive, Save, Hexagon
 } from 'lucide-react';
@@ -329,7 +329,8 @@ export const BlueprintEditor: React.FC<BlueprintEditorProps> = ({
             ];
         } else { // Default for Narrative
             menuItems = [
-                { id: 'NARRATIVE', label: language === 'EN' ? "Narrative Writing" : "叙事创作", icon: BookOpen }
+                { id: 'NARRATIVE', label: language === 'EN' ? "Narrative Writing" : "叙事创作", icon: BookOpen },
+                { id: 'VISUAL_BIBLE', label: language === 'EN' ? "Visual Bible" : "视觉圣经", icon: Eye }
             ];
         }
 
@@ -557,10 +558,11 @@ ${assetsSectionHtml}
     };
 
     const isMetonymyMode = activeTab === 'METONYMY';
-    const mainPaddingClass = isMetonymyMode ? 'p-0' : 'p-8 md:p-12';
+    const isVisualBibleMode = activeTab === 'VISUAL_BIBLE';
+    const mainPaddingClass = isMetonymyMode || isVisualBibleMode ? 'p-0' : 'p-8 md:p-12';
 
     const renderContent = () => {
-        if (activeTab === 'ASSETS') {
+        if (activeTab === 'ASSETS' || activeTab === 'VISUAL_BIBLE') {
             const metonymyData = effectiveBlueprint.metonymyData || {
                 screenplay: [],
                 staticStoryboard: [],
@@ -847,7 +849,7 @@ ${assetsSectionHtml}
                     </aside>
                 )}
 
-                <main className={`flex-1 ${isMetonymyMode ? 'overflow-hidden' : 'overflow-y-auto custom-scrollbar'} bg-[var(--bg-main)] ${mainPaddingClass} relative transition-all duration-300`}>
+                <main className={`flex-1 ${isMetonymyMode || isVisualBibleMode ? 'overflow-hidden' : 'overflow-y-auto custom-scrollbar'} bg-[var(--bg-main)] ${mainPaddingClass} relative transition-all duration-300`}>
                     {renderContent()}
                 </main>
             </div>
@@ -856,11 +858,11 @@ ${assetsSectionHtml}
             {!isSutureOpen && (
                 <footer className={`mist-app-footer fixed bottom-0 left-0 right-0 h-14 bg-[var(--bg-header)] backdrop-blur-md border-t ${theme === 'retro' ? 'border-[var(--border-main)]' : 'border-zinc-800'} flex items-center justify-between px-6 md:px-12 z-40 transition-colors duration-500`}>
                     <div className="flex gap-4">
-                        <button onClick={onGoHome} className={`mist-app-archive-button flex items-center gap-3 h-[42px] px-4 rounded-[8px] bg-[var(--bg-panel)]/50 hover:bg-[var(--bg-panel)] border border-[var(--border-main)] text-[12px] font-bold uppercase tracking-[0.12em] transition-all duration-300 group min-w-[140px] hover:scale-105 active:scale-95 ${effectiveTheme === 'retro' ? 'text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'text-zinc-400 hover:text-white'}`}>
-                            <Home size={16} className="group-hover:scale-110 transition-transform" />
-                            <span>{language === 'EN' ? "Back to Engine" : "返回引擎"}</span>
+                        <button onClick={onGoHome} className={`mist-app-archive-button mist-footer-return-button flex items-center gap-3 h-[42px] px-4 rounded-[8px] bg-[var(--bg-panel)]/50 hover:bg-[var(--bg-panel)] border border-[var(--border-main)] text-[12px] font-bold uppercase tracking-[0.12em] transition-all duration-300 group min-w-[140px] hover:scale-105 active:scale-95 ${effectiveTheme === 'retro' ? 'text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'text-zinc-400 hover:text-white'}`}>
+                            <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+                            <span>{isMetonymyMode ? (language === 'EN' ? "Home" : "返回首页") : (language === 'EN' ? "Back to Engine" : "返回引擎")}</span>
                         </button>
-                        <button onClick={onClose} className={`mist-app-archive-button flex items-center gap-3 h-[42px] px-4 rounded-[8px] bg-[var(--bg-panel)]/50 hover:bg-[var(--bg-panel)] border ${uiConfig.themeSidebarBorder} text-[12px] font-bold uppercase tracking-[0.12em] transition-all duration-300 group min-w-[140px] hover:scale-105 active:scale-95 ${effectiveTheme === 'retro' ? 'text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'text-zinc-400 hover:text-white'}`}>
+                        <button onClick={onClose} className={`mist-app-archive-button mist-footer-return-button flex items-center gap-3 h-[42px] px-4 rounded-[8px] bg-[var(--bg-panel)]/50 hover:bg-[var(--bg-panel)] border border-[var(--border-main)] text-[12px] font-bold uppercase tracking-[0.12em] transition-all duration-300 group min-w-[140px] hover:scale-105 active:scale-95 ${effectiveTheme === 'retro' ? 'text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'text-zinc-400 hover:text-white'}`}>
                             <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
                             <span>{language === 'EN' ? "Back to Paths" : "返回分支"}</span>
                         </button>

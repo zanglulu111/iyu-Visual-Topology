@@ -146,9 +146,9 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
             style={{ ['--footer-accent' as any]: getFooterAccentValue() }}
         >
             <div className="flex items-center gap-4 shrink-0 w-[180px] md:w-[240px]">
-                <button onClick={handleBackStep} className={`flex items-center gap-3 px-6 py-3 bg-[var(--bg-panel)]/50 hover:bg-[var(--bg-panel)] border border-[var(--border-main)] rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-300 group min-w-[140px] hover:scale-105 active:scale-95 ${theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'}`} >
+                <button onClick={handleBackStep} className={`mist-app-archive-button mist-footer-return-button flex items-center gap-3 h-[42px] px-4 rounded-[8px] bg-[var(--bg-panel)]/50 hover:bg-[var(--bg-panel)] border border-[var(--border-main)] text-[12px] font-bold uppercase tracking-[0.12em] transition-all duration-300 group min-w-[140px] hover:scale-105 active:scale-95 ${theme === 'retro' ? 'text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'text-zinc-400 hover:text-white'}`} >
                     <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-                    <span className="hidden md:inline">{lang === 'CN' ? "返回首页" : "Home"}</span>
+                    <span>{lang === 'CN' ? "返回首页" : "Home"}</span>
                 </button>
             </div>
             <div className={`flex-1 flex justify-center items-center ${isLabyrinthFooter ? 'gap-3 md:gap-5' : 'gap-4 md:gap-6'} mx-4`}>

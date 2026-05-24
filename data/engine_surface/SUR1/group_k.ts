@@ -8,7 +8,7 @@ export const SUR1_GROUP_K: LibraryCategoryDef = {
     {
       id: "surrealism",
       name: "超现实主义", nameEn: "Surrealism",
-      def: "以梦境逻辑、潜意识和非理性连接为类型核心，达利式意象只作可选视觉参照。",
+      def: "以梦境逻辑、潜意识和非理性连接为识别重点，达利式意象只作可选视觉参照。",
       defEn: "Dream logic, subconscious, Daliesque imagery, irrational.",
       core: "梦境逻辑 vs 物理现实。意识深层的运作直接具象化为叙事奇观，因果律被悬置。",
       coreEn: "Dream logic vs physical reality. Deep-level operations of consciousness directly manifest as narrative spectacles; causality is suspended.",
@@ -18,7 +18,7 @@ export const SUR1_GROUP_K: LibraryCategoryDef = {
     {
       id: "experimental",
       name: "实验影像", nameEn: "Experimental",
-      def: "以形式实验和观看机制为类型核心，无叙事、胶片划痕、装置感只作可选手段。",
+      def: "以形式实验和观看机制为识别重点，无叙事、胶片划痕、装置感只作可选手段。",
       defEn: "Non-narrative, film scratches, pure visuals, installation art, concept over content.",
       core: "形式本身即内容。挑战受众的接收习惯，探索叙事与表达的边界——规则存在的意义在于被打破。",
       coreEn: "Form itself is content. Challenging the audience's reception habits, exploring the boundaries of narrative and expression — the purpose of rules is to be broken.",
@@ -28,7 +28,7 @@ export const SUR1_GROUP_K: LibraryCategoryDef = {
     {
       id: "new_wave",
       name: "新浪潮", nameEn: "New Wave",
-      def: "以自由剪辑、即兴感和作者表达为类型核心，跳接、打破规则等只作可选技法。",
+      def: "以自由剪辑、即兴感和作者表达为识别重点，跳接、打破规则等只作可选技法。",
       defEn: "Jump cuts, improvisation, breaking rules, free style, auteur cinema.",
       core: "即兴的自由 vs 剧本的束缚。自觉地打破叙事惯例，强调创作行为本身的在场感。",
       coreEn: "Improvisational freedom vs script constraints. Self-consciously breaking narrative conventions, emphasizing the presence of the creative act itself.",
@@ -38,7 +38,7 @@ export const SUR1_GROUP_K: LibraryCategoryDef = {
     {
       id: "cult",
       name: "邪典电影", nameEn: "Cult",
-      def: "以怪诞审美和小众狂热气质为类型核心，B 级趣味、Camp 风格只作可选语汇。",
+      def: "以怪诞审美和小众狂热气质为识别重点，B 级趣味、Camp 风格只作可选语汇。",
       defEn: "Niche fanaticism, grotesque aesthetics, B-movie flavor, Camp style.",
       core: "糟糕的品味 vs 极致的狂欢。故意挑战主流审美标准，在怪诞与恶趣味中建立另类的美学共同体。",
       coreEn: "Bad taste vs ultimate carnival. Deliberately challenging mainstream aesthetic standards, building an alternative aesthetic community through grotesque and bad taste.",
@@ -48,7 +48,7 @@ export const SUR1_GROUP_K: LibraryCategoryDef = {
     {
       id: "minimalism",
       name: "极简主义", nameEn: "Minimalism",
-      def: "以减法叙事、静观和留白为类型核心，少对白、固定长镜头只作可选形式。",
+      def: "以减法叙事、静观和留白为识别重点，少对白、固定长镜头只作可选形式。",
       defEn: "Less dialogue, fixed long takes, slice of life, blank space.",
       core: "极少的表面动作 vs 丰富的内在潜流。剥离一切修饰之后，沉默本身成为最有密度的表达。",
       coreEn: "Minimal surface action vs rich inner undercurrents. After stripping away all decoration, silence itself becomes the most dense form of expression.",
@@ -58,7 +58,7 @@ export const SUR1_GROUP_K: LibraryCategoryDef = {
     {
       id: "stream",
       name: "意识流", nameEn: "Stream of Consciousness",
-      def: "以主观意识流动组织叙事为类型核心，时空破碎、梦实交织只作可选表现。",
+      def: "以主观意识流动组织叙事为识别重点，时空破碎、梦实交织只作可选表现。",
       defEn: "Manifestation of thoughts, shattered space-time, dreams intertwined with reality.",
       core: "主观意识的流动 vs 客观时间的线性。过去、现在、未来在内心中并置，叙事的时序服从记忆的逻辑而非时钟。",
       coreEn: "Flow of subjective consciousness vs linear objective time. Past, present, future juxtaposed within; narrative chronology obeys the logic of memory, not the clock.",
@@ -68,7 +68,7 @@ export const SUR1_GROUP_K: LibraryCategoryDef = {
     {
       id: "dogme95",
       name: "道格玛95", nameEn: "Dogme 95",
-      def: "以去修饰化的真实感和现场限制为类型核心，手持、自然光、无配乐只作可选规则。",
+      def: "以去修饰化的真实感和现场限制为识别重点，手持、自然光、无配乐只作可选规则。",
       defEn: "Handheld, natural light, no score, pursuing extreme realism, de-artificialization.",
       core: "绝对的真实 vs 叙事的虚构本质。拒绝一切人工修饰，迫使受众直面最赤裸的表达。",
       coreEn: "Absolute truth vs the fictional nature of narrative. Rejecting all artificial modification, forcing the audience to face the most naked expression.",
@@ -78,7 +78,7 @@ export const SUR1_GROUP_K: LibraryCategoryDef = {
     {
       id: "grindhouse",
       name: "剥削电影", nameEn: "Grindhouse / Exploitation",
-      def: "以低成本类型刺激和复古粗粝感为类型核心，暴力、胶片颗粒等只作可选风格资源。",
+      def: "以低成本类型刺激和复古粗粝感为识别重点，暴力、胶片颗粒等只作可选风格资源。",
       defEn: "Violence, sex, film grain, low budget aesthetic, retro trash films.",
       core: "感官刺激的极端化 vs 道德底线的挑战。暴力与情色被推到纯粹的感官消费层面，快感即正义。",
       coreEn: "Extremification of sensory stimulation vs challenge of moral bottom lines. Violence and eroticism pushed to a purely sensory consumption level; pleasure is justice.",
@@ -88,7 +88,7 @@ export const SUR1_GROUP_K: LibraryCategoryDef = {
     {
       id: "poetic",
       name: "诗意电影", nameEn: "Poetic Cinema",
-      def: "以诗性时间、精神凝视和自然元素为类型核心，塔可夫斯基式处理只作可选参照。",
+      def: "以诗性时间、精神凝视和自然元素为识别重点，塔可夫斯基式处理只作可选参照。",
       defEn: "Tarkovskian, sculpting in time, spirituality, natural elements.",
       core: "时间的流逝本身就是主角。在凝视中寻找精神性的超越——叙事让位于冥想。",
       coreEn: "The passage of time itself is the protagonist. Seeking spiritual transcendence through gazing — narrative yields to meditation.",
@@ -98,7 +98,7 @@ export const SUR1_GROUP_K: LibraryCategoryDef = {
     {
       id: "silent",
       name: "默片", nameEn: "Silent",
-      def: "以无对白或弱对白的视觉叙事为类型核心，肢体表演、配乐驱动只作可选方法。",
+      def: "以无对白或弱对白的视觉叙事为识别重点，肢体表演、配乐驱动只作可选方法。",
       defEn: "Silence speaks volumes, driven by body language and music, retro homage.",
       core: "纯视觉叙事。剥离语言后，身体与表情成为唯一的信息载体——表达的限制反而放大了表达的强度。",
       coreEn: "Pure visual narrative. After stripping language, body and expression become the sole information carrier — limitations on expression paradoxically amplify expression's intensity.",
@@ -108,7 +108,7 @@ export const SUR1_GROUP_K: LibraryCategoryDef = {
     {
       id: "psychedelic",
       name: "迷幻电影", nameEn: "Psychedelic",
-      def: "以感知变形和意识漂移为类型核心，强色彩、感官过载等只作可选视听手段。",
+      def: "以感知变形和意识漂移为识别重点，强色彩、感官过载等只作可选视听手段。",
       defEn: "Visual hallucinations, color explosion, sensory overload, drug experience.",
       core: "理性的丧失 vs 感官的狂欢。认知的正常通道被关闭，万花筒般的替代感知取代了线性逻辑。",
       coreEn: "Loss of rationality vs sensory carnival. Normal channels of cognition are shut down; kaleidoscopic alternative perception replaces linear logic.",
@@ -118,7 +118,7 @@ export const SUR1_GROUP_K: LibraryCategoryDef = {
     {
       id: "slow",
       name: "慢电影", nameEn: "Slow Cinema",
-      def: "以极慢节奏和时间重量为类型核心，长镜头、冥想感只作可选形式。",
+      def: "以极慢节奏和时间重量为识别重点，长镜头、冥想感只作可选形式。",
       defEn: "Extremely slow pace, long take gaze, meditative state, weight of time.",
       core: "对受众耐心的挑战 vs 沉浸式的时间体验。叙事的节奏被极端拉长，时间本身获得了物理重量。",
       coreEn: "Challenge to audience patience vs immersive time experience. The rhythm of narrative is extremely stretched; time itself acquires physical weight.",

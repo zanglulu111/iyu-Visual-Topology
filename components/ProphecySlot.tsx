@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { NarrativeFieldState, BlueprintLanguage, DriverType, NarrativeBlockDef } from '../types';
+import { NarrativeFieldState, BlueprintLanguage, DriverType, NarrativeBlockDef, PromptFocusState } from '../types';
 import { DRIVERS } from '../constants';
+import { buildTermFocusPatch, getAllSelectedTags, getFocusLimitReason, getFocusUnitKey, getSelectedFocusBlockMap, getSelectedFocusUnitMap, isFocusableBlock, MAX_FOCUS_TERMS } from '../utils/focusTerms';
 
 import { useTheme } from '../contexts/ThemeContext';
-import { Lock, Unlock, Shuffle, Trash2, Edit2, X, Check, Dice5, RotateCcw } from 'lucide-react';
+import { Lock, Unlock, Shuffle, Trash2, Edit2, X, Check, Dice5, RotateCcw, Star } from 'lucide-react';
 
 interface ProphecySlotProps {
     blockId: string;
@@ -35,6 +36,8 @@ interface ProphecySlotProps {
     onEditCustomDef?: (oldName: string, newName: string, def: string, core: string) => void;
     onAddCustomDef?: (name: string, def: string, core: string) => void;
     onManualUpdate?: (blockId: string, tags: string[]) => void;
+    focusState?: PromptFocusState;
+    onFocusStateChange?: (locks: PromptFocusState) => void;
     showLevelToggle?: boolean;
     hideAffixes?: boolean;
     tooltipPlacement?: 'auto' | 'above';
@@ -45,6 +48,7 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
     fieldState, lang, driverType, onOpenLibrary, onRemoveTag, onClearBlock, getItemDetails, getBilingualText, ENGINE_BLOCKS, isSmall = false, isTiny = false,
     onRandomizeBlock, onToggleLockBlock, isBlockLocked,
     lockedTags, onToggleTagLock, onRandomizeTag, getLibraryCount, onEditCustomDef, onAddCustomDef, onManualUpdate,
+    focusState = {}, onFocusStateChange,
     showLevelToggle = false,
     hideAffixes = false,
     tooltipPlacement = 'auto'
@@ -56,6 +60,10 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
     const tags = Array.isArray(rawTags) ? rawTags : (rawTags ? [String(rawTags)] : []);
     const blockDef = ENGINE_BLOCKS?.find(b => b.id === blockId);
     const libCount = getLibraryCount(blockId);
+    const canFocusTerms = isFocusableBlock(blockId);
+    const selectedFocusTags = getAllSelectedTags(fieldState);
+    const focusUnitMap = getSelectedFocusUnitMap(fieldState);
+    const focusBlockMap = getSelectedFocusBlockMap(fieldState);
 
     const [hoveredPortal, setHoveredPortal] = useState<{
         pos: { top: number; left: number };
@@ -159,14 +167,29 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
         handleCloseEdit();
     };
 
+    const toggleFocusTag = (tag: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        const patch = buildTermFocusPatch(focusState, blockId, tags, tag, !focusState[tag], selectedFocusTags, focusUnitMap, focusBlockMap);
+        if (patch) onFocusStateChange?.(patch);
+    };
+
     return (
         <div className={containerClass}>
             {prefix && <span className={`font-serif ${prefixSize} font-light select-none whitespace-nowrap self-start mt-0.5 text-[var(--text-main)]`}>{prefix}</span>}
 
             {tags.length > 0 ? (
                 tags.map((tag, idx) => {
-                    const details = getItemDetails(tag, blockId) as { def?: string; core?: string; defEn?: string; coreEn?: string } | null;
+                    const details = getItemDetails(tag, blockId) as { nameEn?: string; def?: string; core?: string; defEn?: string; coreEn?: string } | null;
+                    const displayTag = lang === 'EN' && details?.nameEn ? details.nameEn : getBilingualText(tag);
                     const isTagLocked = lockedTags?.[blockId]?.includes(tag) || isBlockLocked;
+                    const isFocusedTag = Boolean(focusState[tag]);
+                    const focusLimitReason = getFocusLimitReason(focusState, blockId, tag, selectedFocusTags, focusUnitMap, focusBlockMap);
+                    const isFocusDisabled = !isFocusedTag && Boolean(focusLimitReason);
+                    const focusLimitTitle = focusLimitReason === 'm'
+                        ? (lang === 'EN' ? 'Focus limit: max 2 M-axis terms' : 'M层重点最多2个')
+                        : focusLimitReason === 'surface'
+                            ? (lang === 'EN' ? 'Focus limit: max 2 SUR/SV focus groups' : 'SUR/SV重点最多2组')
+                            : (lang === 'EN' ? `Focus limit: max ${MAX_FOCUS_TERMS} focus groups` : `重点最多 ${MAX_FOCUS_TERMS} 组`);
                     const activeAccent = isTagLocked
                         ? (theme === 'retro'
                             ? `mist-prophecy-slot-active mist-token-locked text-white border-[var(--mist-active-accent)] border bg-[var(--mist-active-accent)]/10 px-2`
@@ -176,16 +199,34 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
                             : `mist-prophecy-slot-active border-b ${accentColor} px-0.5 ${theme === 'retro' ? 'hover:bg-transparent' : 'hover:bg-white/10'}`);
 
                     return (
-                        <div key={tag} className="flex flex-col items-start relative group/item align-top">
-                            <div className="flex items-center">
+                        <div
+                            key={tag}
+                            className="flex flex-col items-start relative group/item align-top"
+                            onMouseEnter={(e) => details && handleMouseEnter(e, details)}
+                            onMouseLeave={handleMouseLeave}
+                        >
+                            <div className="flex items-center whitespace-nowrap">
                                 <span
-                                    className={`mist-labyrinth-hover-token transition-all duration-300 hover:z-50 align-top ${activeAccent} ${textSize} font-serif font-bold ${isTagLocked ? 'cursor-not-allowed' : (isRetro ? 'cursor-pointer text-black' : 'cursor-pointer text-white')} tracking-wide whitespace-nowrap inline-block`}
+                                    className={`mist-labyrinth-hover-token transition-all duration-300 hover:z-50 align-top ${activeAccent} ${isFocusedTag ? 'mist-token-focused' : ''} ${textSize} font-serif font-bold ${isTagLocked ? 'cursor-not-allowed' : (isRetro ? 'cursor-pointer text-black' : 'cursor-pointer text-white')} tracking-wide whitespace-nowrap inline-block`}
                                     onClick={() => !isTagLocked && onOpenLibrary(blockId, tag)}
-                                    onMouseEnter={(e) => details && handleMouseEnter(e, details)}
-                                    onMouseLeave={handleMouseLeave}
                                 >
-                                    {getBilingualText(tag)}
+                                    {displayTag}
                                 </span>
+                                {isFocusedTag && (
+                                    <span className="mist-token-focus-badge" title={lang === 'EN' ? 'Focused term' : '重点词条'}>
+                                        <Star size={11} className="fill-current" />
+                                    </span>
+                                )}
+                                <button
+                                    type="button"
+                                    onClick={(e) => { e.stopPropagation(); onRemoveTag(blockId, tag); }}
+                                    disabled={isTagLocked}
+                                    title={lang === 'EN' ? 'Remove' : '删除'}
+                                    aria-label={lang === 'EN' ? `Remove ${tag}` : `删除 ${tag}`}
+                                    className={`ml-1 inline-flex h-5 w-5 items-center justify-center opacity-0 group-hover/item:opacity-100 transition-colors duration-200 ${isRetro ? 'text-[var(--text-muted)] hover:text-red-700' : 'text-zinc-500 hover:text-red-400'} ${isTagLocked ? 'opacity-20 cursor-not-allowed group-hover/item:opacity-20' : ''}`}
+                                >
+                                    <X size={16} strokeWidth={2.6} />
+                                </button>
                                 {idx < tags.length - 1 && <span className="text-zinc-600 font-serif text-sm ml-0.5 mr-1 select-none font-bold">,</span>}
                             </div>
 
@@ -197,19 +238,26 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
                                     <button onClick={(e) => { e.stopPropagation(); if (isBlockLocked) onToggleLockBlock(blockId); else onToggleTagLock?.(blockId, tag); }} className={`flex items-center justify-center p-0.5 ${isRetro ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isTagLocked ? (isRetro ? 'border-[var(--text-accent)] text-white bg-[var(--text-accent)]/10' : 'border-[var(--mist-active-accent)] text-white bg-[var(--mist-active-accent)]/20') : ''}`}>
                                         {isTagLocked ? <Lock size={10} /> : <Unlock size={10} />}
                                     </button>
-                                    <button onClick={(e) => handleEditClick(tag, e)} disabled={isTagLocked} className={`flex items-center justify-center p-0.5 ${isRetro ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isTagLocked ? 'opacity-30 cursor-not-allowed' : ''}`}>
-                                        <Edit2 size={10} />
-                                    </button>
-                                    <button onClick={(e) => { e.stopPropagation(); onRemoveTag(blockId, tag); }} disabled={isTagLocked} className={`flex items-center justify-center p-0.5 ${isRetro ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-red-700' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-red-500/50 hover:bg-red-950/20 hover:text-red-400'} border rounded transition-colors ${isTagLocked ? 'opacity-30 cursor-not-allowed' : ''}`}>
-                                        <Trash2 size={10} />
-                                    </button>
+                                    {canFocusTerms && (
+                                        <button
+                                            onClick={(e) => toggleFocusTag(tag, e)}
+                                            disabled={isFocusDisabled}
+                                            title={isFocusDisabled ? focusLimitTitle : (lang === 'EN' ? 'Focus this term' : '重点')}
+                                            className={`flex items-center justify-center p-0.5 ${isRetro ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-[var(--mist-active-accent)] hover:bg-[rgba(var(--mist-active-accent-rgb),0.10)] hover:text-[var(--mist-active-accent)]'} border rounded transition-colors ${isFocusedTag ? (isRetro ? 'border-[var(--mist-active-accent)] text-[var(--mist-active-accent)] bg-[var(--mist-active-accent)]/10' : 'border-[var(--mist-active-accent)] text-[var(--mist-active-accent)] bg-[rgba(var(--mist-active-accent-rgb),0.10)]') : ''} ${isFocusDisabled ? 'opacity-30 cursor-not-allowed' : ''}`}
+                                        >
+                                            <Star size={10} className={isFocusedTag ? 'fill-current' : ''} />
+                                        </button>
+                                    )}
                                 </div>
                             )}
 
                             {isTiny && (
                                 <div className="absolute top-full left-0 z-50 flex gap-1 mt-1 opacity-0 group-hover/item:opacity-100 transition-opacity bg-black border border-zinc-800 p-0.5 rounded shadow-lg">
-                                    <button onClick={(e) => handleEditClick(tag, e)} className="p-1 hover:text-white text-zinc-400"><Edit2 size={10} /></button>
-                                    <button onClick={(e) => { e.stopPropagation(); onRemoveTag(blockId, tag); }} className="p-1 hover:text-red-400 text-zinc-400"><Trash2 size={10} /></button>
+                                    <button onClick={(e) => { e.stopPropagation(); onRandomizeTag?.(blockId, tag); }} disabled={isTagLocked} className={`p-1 hover:text-white text-zinc-400 ${isTagLocked ? 'opacity-30 cursor-not-allowed' : ''}`}><Dice5 size={10} /></button>
+                                    <button onClick={(e) => { e.stopPropagation(); if (isBlockLocked) onToggleLockBlock(blockId); else onToggleTagLock?.(blockId, tag); }} className={`p-1 hover:text-white text-zinc-400 ${isTagLocked ? 'text-white' : ''}`}>{isTagLocked ? <Lock size={10} /> : <Unlock size={10} />}</button>
+                                    {canFocusTerms && (
+                                        <button onClick={(e) => toggleFocusTag(tag, e)} disabled={isFocusDisabled} className={`p-1 ${isFocusedTag ? 'text-[var(--mist-active-accent)]' : 'text-zinc-400 hover:text-[var(--mist-active-accent)]'} ${isFocusDisabled ? 'opacity-30 cursor-not-allowed' : ''}`}><Star size={10} className={isFocusedTag ? 'fill-current' : ''} /></button>
+                                    )}
                                 </div>
                             )}
 
@@ -217,16 +265,18 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
                     );
                 })
             ) : (
-                <div className={`flex flex-col items-start group/item relative cursor-pointer align-top ${isBlockLocked ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                <div
+                    className={`flex flex-col items-start group/item relative cursor-pointer align-top ${isBlockLocked ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    onMouseEnter={(e) => blockDef && handleMouseEnter(e, {
+                        def: blockDef.description,
+                        defEn: blockDef.descriptionEn,
+                        core: "",
+                        coreEn: ""
+                    })}
+                    onMouseLeave={handleMouseLeave}
+                >
                     <div
                         onClick={() => !isBlockLocked && onOpenLibrary(blockId)}
-                        onMouseEnter={(e) => blockDef && handleMouseEnter(e, {
-                            def: blockDef.description,
-                            defEn: blockDef.descriptionEn,
-                            core: "",
-                            coreEn: ""
-                        })}
-                        onMouseLeave={handleMouseLeave}
                         className="flex items-center"
                     >
                         <span className={`mist-labyrinth-hover-token mist-prophecy-slot-empty ${textSize} font-serif font-bold px-0.5 tracking-wide whitespace-nowrap transition-all duration-300 hover:z-50 inline-block ${theme === 'retro' ? 'text-zinc-500 hover:text-black' : 'text-zinc-500 hover:text-white'} ${isTiny ? 'border border-dashed border-zinc-700 px-2 py-0.5 hover:border-zinc-500' : 'border-b border-zinc-800 hover:border-zinc-600'} transition-all`}>
@@ -242,9 +292,6 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
                         </button>
                         <button onClick={handleCreateClick} disabled={isBlockLocked} className={`flex items-center justify-center p-0.5 ${isRetro ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isBlockLocked ? 'opacity-30 cursor-not-allowed' : ''}`}>
                             <Edit2 size={10} />
-                        </button>
-                        <button onClick={(e) => { e.stopPropagation(); onClearBlock(blockId); }} disabled={isBlockLocked} className={`flex items-center justify-center p-0.5 ${isRetro ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-red-700' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-red-500/50 hover:bg-red-950/20 hover:text-red-400'} border rounded transition-colors`}>
-                            <Trash2 size={10} />
                         </button>
                     </div>
 

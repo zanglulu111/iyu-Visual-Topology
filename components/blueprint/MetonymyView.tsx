@@ -47,7 +47,6 @@ import { SourceViewer } from './metonymy/MetonymySourceViewer';
 import { MetonymySceneCard } from './metonymy/MetonymySceneCard';
 import { PreviewContentModal } from './metonymy/MetonymyPreviewModal';
 import { VisualStyleManager } from './metonymy/VisualStyleManager';
-import { BreakdownConfigModal } from './metonymy/BreakdownConfigModal';
 
 // Define the 2 states now (COLLAPSED removed)
 export type SceneCollapseState = 'EXPANDED' | 'PARTIAL';
@@ -72,7 +71,6 @@ interface MetonymyViewProps {
 export const MetonymyView: React.FC<MetonymyViewProps> = ({
     blueprint, language, onUpdateBlueprint, themeAccent, themeBorder, isFullScreen, onToggleFullScreen, fieldState, onSaveToHistory, onGenerateAssetImage, onSutureOpenChange, theme, isAdmin
 }) => {
-    const [isBreakdownModalOpen, setIsBreakdownModalOpen] = useState(false);
     const rawMetonymyData = blueprint.metonymyData || { screenplay: [], staticStoryboard: [], dynamicScript: [], stylePresets: [] };
 
     // Use ref to track latest blueprint for async operations
@@ -153,6 +151,16 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
 
     // NEW: Focused Scene State
     const [focusedSceneId, setFocusedSceneId] = useState<string | null>(null);
+
+    useEffect(() => {
+        const frame = window.requestAnimationFrame(() => {
+            const scroller = document.scrollingElement || document.documentElement;
+            scroller.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+            document.body.scrollTop = 0;
+        });
+
+        return () => window.cancelAnimationFrame(frame);
+    }, [currentSections.length, focusedSceneId]);
 
     // Sync local isSutureOpen with parent if callback exists
     const handleSetSutureOpen = useCallback((open: boolean) => {
@@ -562,7 +570,6 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
 
         updateMetonymyData({ screenplay: newSections });
         setActiveSectionId(sceneId);
-        setScrollSyncTrigger(prev => prev + 1);
     };
 
     const handleSendSelectionToNew = (indices: number[]) => {
@@ -581,17 +588,16 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
 
         updateMetonymyData({ screenplay: [...currentSections, newSection] });
         setActiveSectionId(id);
-        setScrollSyncTrigger(prev => prev + 1);
     };
 
     const handleAutoBreakdown = useCallback(async (instruction?: string, targetCount?: number) => {
-        setIsStyleExpanded(false); // Close Visual Bible when auto-breaking down scenes
+        setIsStyleExpanded(false);
         if (!sourceText.trim()) return;
         setIsBreakingDown(true);
         setBreakdownStartTime(Date.now());
         try {
             const result = await breakdownScript(sourceText, instruction, targetCount);
-            if (result && result.scenes) {
+            if (result && result.scenes.length > 0) {
                 const newSections: ScreenplaySection[] = result.scenes.map((s, sIdx) => ({
                     id: `scene-${Date.now()}-${sIdx}`,
                     title: s.title,
@@ -600,7 +606,7 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
                     sourceIndices: s.indices || [],
                     isGlobalSynced: true,
                     sutureDataMap: {
-                        'original': {
+                        original: {
                             literaryScript: "",
                             globalTone: { lighting: "", texture: "", style: "", camera: "", palette: [] },
                             staticStoryboard: [],
@@ -624,10 +630,8 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
                     stylePresets: newPresets
                 });
 
-                if (newSections.length > 0) {
-                    setActiveSectionId(newSections[0].id);
-                    setScrollSyncTrigger(prev => prev + 1);
-                }
+                setActiveSectionId(newSections[0].id);
+                setScrollSyncTrigger(prev => prev + 1);
                 setIsStyleExpanded(false);
             } else {
                 setAlertMessage(language === 'EN' ? "Breakdown failed. AI returned empty result." : "分场失败。AI 未能返回有效结果。");
@@ -1243,7 +1247,7 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
         : `mist-archive-button h-9 px-4 bg-[var(--mist-active-accent)]/5 border border-[var(--mist-active-accent)] flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-[var(--mist-active-accent)] hover:bg-[var(--mist-active-accent)]/20 hover:brightness-125 transition-all duration-200 active:scale-95 shadow-sm focus:outline-none`;
 
     return (
-        <div className={`mist-archive-workbench mist-metonymy-view ${isFullScreen ? 'w-full px-0' : 'w-full'} flex flex-col h-full ${theme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#080808]'} relative`}>
+        <div className={`mist-archive-workbench mist-metonymy-view ${isFullScreen ? 'w-full px-0' : 'w-full'} flex flex-col h-full min-h-0 overflow-hidden ${theme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#080808]'} relative`}>
             {/* Header */}
             <div className={`mist-archive-toolbar shrink-0 flex items-center justify-between border-b ${theme === 'retro' ? 'border-black/10 bg-[var(--bg-header)]' : 'border-zinc-800 bg-[#080808]'} h-16 px-6`}>
                 <div className="flex items-center gap-3 flex-1">
@@ -1290,9 +1294,9 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
                 </div>
             </div>
 
-            <div className="flex-1 flex flex-col overflow-hidden">
-                <div className="flex-1 flex overflow-hidden">
-                    <div className={`mist-archive-panel relative ${isSourceVisible ? 'w-1/3 min-w-[320px] max-w-[500px] translate-x-0' : 'w-0 opacity-0 -translate-x-full overflow-hidden'} border-r ${theme === 'retro' ? 'border-black/10 bg-[var(--bg-header)]' : 'border-zinc-800 bg-[#0a0a0a]'} flex flex-col shrink-0 transition-all duration-310 ease-in-out`}>
+            <div className="flex-1 flex flex-col overflow-hidden min-h-0">
+                <div className="flex-1 flex overflow-hidden min-h-0">
+                    <div className={`mist-archive-panel relative h-full min-h-0 overflow-hidden ${isSourceVisible ? 'w-1/3 min-w-[320px] max-w-[500px] translate-x-0' : 'w-0 opacity-0 -translate-x-full'} border-r ${theme === 'retro' ? 'border-black/10 bg-[var(--bg-header)]' : 'border-zinc-800 bg-[#0a0a0a]'} flex flex-col shrink-0 transition-all duration-310 ease-in-out`}>
                         <SourceViewer
                             text={sourceText}
                             onChange={handleSourceTextChange}
@@ -1313,7 +1317,7 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
                         />
                     </div>
 
-                    <div className="flex-1 flex flex-col overflow-hidden">
+                    <div className="flex-1 flex flex-col overflow-hidden min-h-0">
                         {!focusedSceneId && (
                             <VisualStyleManager
                                 presets={currentPresets}
@@ -1332,7 +1336,7 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
                         )}
 
                         {(!isStyleExpanded || focusedSceneId) && (
-                            <div className={`flex-1 ${theme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#080808]'} ${focusedSceneId ? 'overflow-hidden px-6 pt-6 pb-16 flex flex-col' : 'overflow-y-auto custom-scrollbar p-6 pb-32 space-y-8'}`}>
+                            <div className={`flex-1 min-h-0 ${theme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#080808]'} ${focusedSceneId ? 'overflow-hidden px-6 pt-6 pb-16 flex flex-col' : 'overflow-y-auto custom-scrollbar p-6 pb-32 space-y-8'}`}>
                                 {currentSections.length > 0 ? currentSections
                                     // FILTER: Only show the focused scene if one is selected
                                     .filter(s => focusedSceneId ? s.id === focusedSceneId : true)
@@ -1357,8 +1361,10 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
                                                 collapseState={sceneStateMap[section.id] || 'PARTIAL'}
                                                 onToggleState={() => handleToggleSceneState(section.id)}
                                                 onSetActive={() => {
+                                                    if (activeSectionId !== section.id) {
+                                                        setScrollSyncTrigger(prev => prev + 1);
+                                                    }
                                                     setActiveSectionId(section.id);
-                                                    setScrollSyncTrigger(prev => prev + 1);
                                                 }}
                                                 onUpdateSectionTitle={(title) => { const newSecs = [...currentSections]; newSecs[originalIndex].title = title; updateMetonymyData({ screenplay: newSecs }); }}
                                                 onDeleteScene={() => handleDeleteScene(section.id)}
@@ -1385,8 +1391,10 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
                                                 }}
                                                 onUpdateBreakdownInfo={(text) => handleUpdateBreakdownInfo(section.id, text)}
                                                 onGenerateSuture={() => {
+                                                    if (activeSectionId !== section.id) {
+                                                        setScrollSyncTrigger(prev => prev + 1);
+                                                    }
                                                     setActiveSectionId(section.id);
-                                                    setScrollSyncTrigger(prev => prev + 1);
                                                     handleSetSutureOpen(true);
                                                 }}
 

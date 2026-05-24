@@ -20,9 +20,9 @@ export const WORLD_LAW_LEVEL_OPTIONS: WorldLawLevelOption[] = [
     en: 'Realist',
     shortCN: 'L1 写实',
     shortEN: 'L1 Real',
-    descCN: '坐标闭锁。SUR2/SUR3 决定现实边界；SUR1 只提供类型语法，不自动生成奇观本体。',
-    descEN: 'Coordinate locked. SUR2/SUR3 set the real boundary; SUR1 supplies genre grammar, not literal spectacle by itself.',
-    promptCN: '坐标闭锁：严格服从 SUR2/SUR3 与当前世界的物理、技术、政治、文化边界。SUR1 只保留类型承诺、叙事节奏、阻力语法和观看快感，不得仅因类型标题含有外星、超能力、鬼神、魔法等词就写成真实本体；必须转译为当前现实中可成立的信号误读、公共神话、装备能力、制度实验、表演骗局、宗教解释、谣言危机、救援责任或同构事件机关。',
+    descCN: '彻底写实。SUR2/SUR3 锁死现实边界；SUR1 只能落成当前坐标内真实可发生的事件。',
+    descEN: 'Fully realist. SUR2/SUR3 lock the real boundary; SUR1 must become events that could truly happen in the coordinate.',
+    promptCN: '彻底写实：严格服从 SUR2/SUR3 与当前世界的物理、技术、政治、文化边界。SUR1 只能保留类型承诺、叙事节奏、阻力语法和观看快感，并落成当前现实中真实可发生的目标、关系、制度、空间、职业流程、误会、追捕、交易、事故或选择。不得出现真实超自然、真实科幻奇观、真实灵异、真实魔法、真实超能力、真实外星生命、跨时代技术或无法解释的异常本体。',
   },
   {
     id: 2,
@@ -31,9 +31,9 @@ export const WORLD_LAW_LEVEL_OPTIONS: WorldLawLevelOption[] = [
     en: 'Translate',
     shortCN: 'L2 折译',
     shortEN: 'L2 Translate',
-    descCN: '默认推荐。保留坐标，把 SUR1 折成同构故事机关；类型词不直接变成真实物种或能力。',
+    descCN: '现实折译。保留坐标，把超现实或类型强刺激折成现实下的同构故事机关。',
     descEN: 'Recommended default. Keep the coordinate and translate SUR1 into equivalent machinery; genre terms do not become literal beings or powers.',
-    promptCN: '类型折译：严守 SUR2/SUR3 的时空物理坐标，同时不能让 SUR1 失效。若 SUR1 与时空冲突，必须把 SUR1 的类型承诺折译为当前世界内可成立的同构故事机关：目标、阻断、职业流程、空间规则、关系压力、危险、升级链和高潮行动。类型标题中的超常名词优先折译为功能等价物，除非世界法则、SUR2/SUR3 或用户输入已经明确授权其真实存在。',
+    promptCN: '现实折译：严守 SUR2 的场域母体与 SUR3 的精确坐标，同时不能让 SUR1 失效。若 SUR1 含超现实、科幻、灵异、魔法、超能力、外星生命或其他当前坐标不支持的强刺激材料，必须折译为当前世界内可成立的同构故事机关：目标、阻断、职业流程、空间规则、关系压力、危险、公共神话、误读危机、制度实验、表演骗局、媒体事件、升级链和高潮行动。类型标题中的超常名词不直接变成世界事实，除非 SUR2/SUR3 或用户输入已经明确授权其真实存在。',
   },
   {
     id: 3,
@@ -42,20 +42,20 @@ export const WORLD_LAW_LEVEL_OPTIONS: WorldLawLevelOption[] = [
     en: 'Seam',
     shortCN: 'L3 缝合',
     shortEN: 'L3 Seam',
-    descCN: '现实坐标仍是底座，允许局部异常或不可证实事件承载类型压力，但不扩展成完整新现实。',
+    descCN: '局部异常。现实坐标仍是底座，允许幻觉、异常或无法解释的局部内容出现。',
     descEN: 'The coordinate remains the base; local anomalies or unverified events may carry genre pressure without becoming a full new reality.',
-    promptCN: '局部缝合：SUR2/SUR3 仍是现实底座，但允许 SUR1 的类型压力以局部异常、传闻、仪式、幻觉、民间解释、象征物、不可证实事件或社会症状出现。它可以改变人物行动和意义判断，但不得扩展成完整新世界体系；结尾也不能用一句话确认超常本体真实存在。',
+    promptCN: '局部异常：SUR2/SUR3 仍是现实底座，但允许 SUR1 的类型压力以异常事件、幻觉、梦、传闻、仪式、民间解释、象征物、监控盲区、集体误认、不可证实事件或社会症状出现。它可以改变人物行动和意义判断，但不得扩展成完整新世界体系；结尾也不能用解释句把异常整理成稳定设定。',
   },
   {
     id: 4,
     code: 'L4',
-    cn: '升维',
-    en: 'Elevate',
-    shortCN: 'L4 升维',
-    shortEN: 'L4 Elevate',
-    descCN: '类型本体授权。SUR1 可以改写现实边界，真实外星、异能、魔法或技术分歧可成为世界事实。',
-    descEN: 'Genre ontology authorized. SUR1 may alter reality, allowing aliens, powers, magic, or technical divergence to be factual.',
-    promptCN: '类型升维：允许 SUR1 反过来改写 SUR2/SUR3，形成架空历史、异史、技术分歧或类型化世界。此层级可以把类型标题中的外星生命、超常力量、魔法制度、异星生态或其他奇观本体写成真实世界事实；但必须交代分歧点、来源、运行方式、公共后果和代价，不能只是把奇观名词硬塞进场景。',
+    cn: '超现实',
+    en: 'Surreal',
+    shortCN: 'L4 超现实',
+    shortEN: 'L4 Surreal',
+    descCN: '超现实本体成立。科幻、灵异、魔法、外星、超能力等可以成为真实世界材料。',
+    descEN: 'Non-realist ontology manifests. Sci-fi, surreal, supernatural, magical, alien, or superhuman materials may become real world facts.',
+    promptCN: '超现实：科幻、灵异、魔法、神话、外星生命、超能力、异种生态、时间异常、平行宇宙等可以真实存在，并成为制度、空间、身体、物件、危险、职业流程或公共秩序的一部分。若 SUR1 本身是怪兽、超级英雄、外星接触、奇幻、灵异等奇观本体类型，L4 就按该类型的纯正标准类型片写，让本体字面成立。若 SUR1 是爱情、现实主义、校园霸凌、公路剧情等现实经验类型，L4 不是把它们“变得更类型片”，而是在真实超现实世界中讲该类型故事：爱情仍以亲密关系为主线，校园霸凌仍以压迫关系和群体秩序为主线，公路剧情仍以旅程和关系位移为主线；新增奇观只提供世界规则、阻断、身体/制度代价和可拍事件，不能抢走主控类型。',
   },
   {
     id: 5,
@@ -64,9 +64,9 @@ export const WORLD_LAW_LEVEL_OPTIONS: WorldLawLevelOption[] = [
     en: 'Rhapsody',
     shortCN: 'L5 狂想',
     shortEN: 'L5 Rhapsody',
-    descCN: '梦、神话、象征和跨时代拼贴可接管世界规则，但故事机关仍要清楚、自然、可复述。',
+    descCN: '类型狂想曲。世界变成梦幻、MV、象征化的类型宇宙，但故事机关仍要清楚。',
     descEN: 'Dream, myth, symbol, and cross-era collage may govern the world, while the story mechanism stays clear.',
-    promptCN: '狂想漂移：允许梦、神话、象征、跨时代拼贴和类型奇观接管世界规则。它可以让类型本体直接支配现实，也可以让现实变成可变形的舞台；但故事仍必须有清楚的目标、阻断、升级、高潮选择和代价兑现，不能变成无因果散文。',
+    promptCN: '类型狂想曲：允许梦、神话、象征、MV 逻辑、跨时代拼贴和类型奇观接管世界规则。现实可以变成可变形的舞台，城市、身体、时间、空间、交通、仪式、天气和群体行为都可以按 SUR1 的类型情绪重排。爱情可以成为爱情狂想曲，校园霸凌可以成为噩梦学校，公路剧情可以成为道路与身份不断变形的旅程，超级英雄可以成为神话化公共灾难。但故事仍必须有清楚的目标、阻断、升级、高潮选择和代价兑现，不能变成无因果散文。',
   },
 ];
 
@@ -128,19 +128,19 @@ export const buildWorldLawLevelPrompt = (worldLaw?: WorldLawConfig): string => {
 
   return `**世界法则 ${option.code}：${option.cn}**
 
-本模块只裁决一个问题：当 SUR1 故事类型与 SUR2/SUR3 时空物理坐标冲突时，类型材料是否能成为世界事实，以及不能成为事实时如何转译。
+本模块裁决一个连续谱：从“彻底服从现实坐标”到“类型狂想接管世界”。它只调节世界本体强度：是否允许超现实、科幻、灵异、魔法、外星、超能力等成为世界事实；它不决定类型是否纯正。无论 L1-L5，SUR1 都必须作为强类型运作。
 
 **授权层级**:
-1. 本体授权只能来自：图像事实、SUR2/SUR3 已经支持的世界材料、当前世界法则 L4/L5，或用户明确声明且未被当前世界法则否决的世界事实。
-2. SUR3 > SUR2 决定默认物理、技术、制度、文化、交通、武器、身体与生活材料边界。
-3. SUR1 决定故事类型、叙事动力、冲突快感和氛围基调；它本身不自动授权外星人、超能力、鬼神、魔法、义体、AI 治理等奇观本体真实存在。
-4. 其他 SUR 参数若与时空坐标冲突，按当前世界法则转译为该坐标内可成立的材料；若已被本体授权，则必须作为世界现实承担叙事功能。
+1. L1 禁止非现实本体；L2 把冲突本体折译成现实同构机关；L3 只允许局部异常；L4 允许超现实本体成为世界事实；L5 进入类型狂想曲。
+2. SUR2 是场域预设包，决定世界母体、制度气味、危险来源、公共情绪和生活材料；SUR3 只有在被选择时作为精确坐标校准器，固定现实域、时间锚、空间锚、尺度边界、物理现实、技术边界和文化接口。
+3. SUR1 决定故事类型、叙事动力、冲突快感和氛围基调；类型纯度在每一档都必须最高。现实经验类型在 L1/L2 也是标准类型片；奇观本体类型在 L4 才按本体字面成立。
+4. 其他 SUR 参数若与 SUR3 精确坐标冲突，按当前世界法则转译、异常化、超现实化或狂想化；进入 L4/L5 后仍必须承担具体叙事功能，不能只是装饰。
 
 **当前规则**:
 ${option.promptCN}
 
 **执行禁令**:
-- 不得因为 SUR1 标题含有类型名词，就主动添加未被本体授权的科幻、魔法、异能、神话、现代科技或奇观材料。
-- 若 SUR1 与 SUR2/SUR3 不冲突，直接让 SUR1 成为外部故事机关；不要为了执行世界法则而额外降维。
-- 若用户想要“当代现实坐标 + 真实超能力/真实外星人/真实魔法”的类型世界，应选择 L4；L1/L2 下只能保留类型运动并转译其物理载体。`;
+- L1 禁止任何无法由当前现实解释的奇观本体；L2 必须把冲突材料折译为现实同构机关；L3 只能局部异常，不能扩展成完整新世界体系。
+- L4 是超现实，不是类型质量开关。若 SUR1 是现实经验类型，新增奇观只能作为世界规则和阻断材料，不能抢走原类型的主线、高潮选择和结尾落点。
+- L5 是类型狂想曲，不是乱炖；梦幻、MV、象征和奇观都必须服务已选类型的目标、阻断、升级、高潮选择和代价兑现。`;
 };

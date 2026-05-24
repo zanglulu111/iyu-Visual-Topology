@@ -8,7 +8,7 @@ export const SUR1_GROUP_L: LibraryCategoryDef = {
     {
       id: "musical",
       name: "歌舞片", nameEn: "Broadway / Musical",
-      def: "以歌舞段落推动情节和情绪为类型核心，百老汇、群舞、经典改编只作可选形式。",
+      def: "以歌舞段落推动情节和情绪为识别重点，百老汇、群舞、经典改编只作可选形式。",
       defEn: "Singing & dancing narrative, gorgeous stages, group dances, classic adaptations.",
       core: "现实的压抑 vs 歌舞的释放。当语言无法承载情感的重量时，表达自动升级为音乐与肢体。",
       coreEn: "Reality's suppression vs musical's release. When language cannot bear the weight of emotion, expression automatically upgrades to music and body.",
@@ -18,7 +18,7 @@ export const SUR1_GROUP_L: LibraryCategoryDef = {
     {
       id: "music_biopic",
       name: "音乐传记", nameEn: "Music Biopic",
-      def: "以音乐人物生平、创作和成名代价为类型核心，演唱会重现只作可选场面。",
+      def: "以音乐人物生平、创作和成名代价为识别重点，演唱会重现只作可选场面。",
       defEn: "Legendary singer's life, fame and fall, concert recreations.",
       core: "凡人的脆弱 vs 舞台上的神性。台前的万众瞩目与幕后的个人真实之间的极端温差。",
       coreEn: "Mortal fragility vs onstage divinity. The extreme temperature gap between the spotlight of public attention and the reality backstage.",
@@ -28,7 +28,7 @@ export const SUR1_GROUP_L: LibraryCategoryDef = {
     {
       id: "dance",
       name: "舞蹈电影", nameEn: "Dance",
-      def: "以舞蹈身体语言和训练代价为类型核心，街舞、芭蕾、斗舞只作可选舞种。",
+      def: "以舞蹈身体语言和训练代价为识别重点，街舞、芭蕾、斗舞只作可选舞种。",
       defEn: "Street dance, ballet, physical expression, dance battles.",
       core: "肉体的极限 vs 灵魂的自由。身体是唯一的语言，舞蹈既是对话也是战斗、既是表达也是抵抗。",
       coreEn: "Physical limits vs soul's freedom. The body is the only language; dance is both dialogue and combat, both expression and resistance.",
@@ -38,7 +38,7 @@ export const SUR1_GROUP_L: LibraryCategoryDef = {
     {
       id: "animated_musical",
       name: "动画歌舞", nameEn: "Animated Musical",
-      def: "以动画叙事和歌曲段落结合为类型核心，公主、合家欢、主题曲驱动只作可选模式。",
+      def: "以动画叙事和歌曲段落结合为识别重点，公主、合家欢、主题曲驱动只作可选模式。",
       defEn: "Princess movies, theme song driven, family friendly.",
       core: "纯真的愿望 vs 魔法世界的阻碍。歌曲是欲望的直接出口——\"我想要\"的旋律驱动着整个叙事。",
       coreEn: "Innocent wishes vs magical world's obstacles. Song is the direct outlet of desire — the melody of 'I Want' drives the entire narrative.",
@@ -48,7 +48,7 @@ export const SUR1_GROUP_L: LibraryCategoryDef = {
     {
       id: "concert",
       name: "演唱会电影", nameEn: "Concert Film",
-      def: "以现场演出记录和观演关系为类型核心，粉丝向、舞台记录只按项目需要取用。",
+      def: "以现场演出记录和观演关系为识别重点，粉丝向、舞台记录只按项目需要取用。",
       defEn: "Pure stage documentation, live feel, fan-oriented.",
       core: "偶像与粉丝之间的能量交换场。纯粹的现场氛围与集体情感共振，叙事让位于体验。",
       coreEn: "An energy exchange field between idol and fans. Pure live atmosphere and collective emotional resonance; narrative yields to experience.",
@@ -58,7 +58,7 @@ export const SUR1_GROUP_L: LibraryCategoryDef = {
     {
       id: "opera",
       name: "歌剧电影", nameEn: "Opera / Classical",
-      def: "以古典音乐或歌剧结构承载宏大情感为类型核心，悲剧色彩只作可选方向。",
+      def: "以古典音乐或歌剧结构承载宏大情感为识别重点，悲剧色彩只作可选方向。",
       defEn: "Serious music, grand narrative, high art, tragic undertones.",
       core: "极端的情感 vs 极致的形式美。爱与死被推到最高的声域与最大的舞台尺度，情感的浓度突破日常的上限。",
       coreEn: "Extreme emotion vs ultimate formal beauty. Love and death pushed to the highest vocal range and grandest stage scale; emotional concentration breaks through the ceiling of the everyday.",
@@ -68,7 +68,7 @@ export const SUR1_GROUP_L: LibraryCategoryDef = {
     {
       id: "hiphop",
       name: "嘻哈街头", nameEn: "Hip Hop / Street",
-      def: "以说唱文化、街头身份和节奏表达为类型核心，地下斗争只作可选冲突。",
+      def: "以说唱文化、街头身份和节奏表达为识别重点，地下斗争只作可选冲突。",
       defEn: "Rap culture, underground battles, authentic streets, sense of rhythm.",
       core: "街头的残酷 vs 麦克风前的尊严。韵脚与节奏是武器，语言的精准度就是战斗力。",
       coreEn: "Cruelty of streets vs dignity before microphones. Rhymes and rhythm are weapons; linguistic precision is combat power.",
@@ -78,7 +78,7 @@ export const SUR1_GROUP_L: LibraryCategoryDef = {
     {
       id: "rock",
       name: "摇滚音乐", nameEn: "Rock / Metal",
-      def: "以乐队生活、叛逆表达和舞台能量为类型核心，巡演、公路、金属躁动只作可选资源。",
+      def: "以乐队生活、叛逆表达和舞台能量为识别重点，巡演、公路、金属躁动只作可选资源。",
       defEn: "Rebellion, band life, road tours, restlessness.",
       core: "对体制的愤怒 vs 自我毁灭的倾向。反叛的能量既是创造力的燃料也是自燃的引信。",
       coreEn: "Anger against the system vs self-destructive tendencies. The energy of rebellion is both fuel for creativity and a fuse for self-combustion.",
@@ -88,7 +88,7 @@ export const SUR1_GROUP_L: LibraryCategoryDef = {
     {
       id: "bollywood",
       name: "宝莱坞", nameEn: "Bollywood",
-      def: "以印度类型片的歌舞、家族情感和悲喜交织为类型核心，强色彩和长篇幅只作可选风格。",
+      def: "以印度类型片的歌舞、家族情感和悲喜交织为识别重点，强色彩和长篇幅只作可选风格。",
       defEn: "Indian songs and dances, colorful, ultra-long runtime, blending joy and sorrow.",
       core: "极致的通俗娱乐合金。爱情、动作、喜剧、悲剧在同一个叙事内无缝或生硬地熔铸在一起。",
       coreEn: "The ultimate alloy of popular entertainment. Romance, action, comedy, tragedy fused — seamlessly or abruptly — within the same narrative.",
@@ -98,7 +98,7 @@ export const SUR1_GROUP_L: LibraryCategoryDef = {
     {
       id: "mv_style",
       name: "视觉专辑", nameEn: "Music Video Style",
-      def: "以音乐驱动画面和概念化段落为类型核心，碎片化、强视觉只作可选结构。",
+      def: "以音乐驱动画面和概念化段落为识别重点，碎片化、强视觉只作可选结构。",
       defEn: "Fragmented, strong visuals, music-driven visuals, concept film.",
       core: "视觉服务于听觉节奏。非线性的概念展示，氛围的密度优先于叙事的逻辑。",
       coreEn: "Visuals serve auditory rhythms. Non-linear conceptual display; density of atmosphere takes priority over narrative logic.",
@@ -108,7 +108,7 @@ export const SUR1_GROUP_L: LibraryCategoryDef = {
     {
       id: "backstage",
       name: "后台演艺", nameEn: "Backstage Drama",
-      def: "以舞台背后的职业关系和成名代价为类型核心，勾心斗角只作可选冲突。",
+      def: "以舞台背后的职业关系和成名代价为识别重点，勾心斗角只作可选冲突。",
       defEn: "Backstage scheming, price of fame, one minute on stage.",
       core: "台前的光鲜 vs 幕后的真实。表演的面具与真实的自我之间的极端温差，舞台灯灭后才是真正的戏。",
       coreEn: "Frontstage glamour vs backstage reality. The extreme temperature gap between the performance mask and the true self; the real drama begins when the stage lights go off.",
@@ -118,7 +118,7 @@ export const SUR1_GROUP_L: LibraryCategoryDef = {
     {
       id: "audiovisual",
       name: "实验声画", nameEn: "Audio-Visual Experimental",
-      def: "以声音和抽象画面的通感关系为类型核心，纯音乐或实验画面只作可选方法。",
+      def: "以声音和抽象画面的通感关系为识别重点，纯音乐或实验画面只作可选方法。",
       defEn: "Combination of pure music and abstract visuals, synesthesia experience.",
       core: "联觉 (Synesthesia)。声音直接转化为视觉，视觉直接转化为情绪——感官通道之间的壁垒被打通。",
       coreEn: "Synesthesia. Sound directly converts to vision; vision directly converts to emotion — the barriers between sensory channels are broken through.",

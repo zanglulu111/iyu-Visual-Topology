@@ -8,7 +8,7 @@ export const SUR1_GROUP_F: LibraryCategoryDef = {
     {
       id: "whodunit",
       name: "本格推理", nameEn: "Whodunit",
-      def: "以逻辑解谜和公平线索为类型核心，侦探、凶手、谜面等只作可选配置。",
+      def: "以逻辑解谜和公平线索为识别重点，侦探、凶手、谜面等只作可选配置。",
       defEn: "Logic supreme, puzzle games, detective vs killer, fair clues for audience.",
       core: "混乱的犯罪现场 vs 侦探的绝对理性。所有线索都公平呈现，智力拼图的乐趣在于还原唯一的真相。",
       coreEn: "Chaotic crime scene vs detective's absolute rationality. All clues presented fairly; the joy of the intellectual puzzle lies in restoring the sole truth.",
@@ -18,7 +18,7 @@ export const SUR1_GROUP_F: LibraryCategoryDef = {
     {
       id: "social_mystery",
       name: "社会派推理", nameEn: "Social Mystery",
-      def: "以案件牵出社会结构和人性困境为类型核心，诡计服务于现实主义动机。",
+      def: "以案件牵出社会结构和人性困境为识别重点，诡计服务于现实主义动机。",
       defEn: "Analyzing humanity and society via crime, motive > trick, realism.",
       core: "个体罪行 vs 社会体制的结构性压迫。案件的表面是犯罪，底层是社会结构本身的病灶。",
       coreEn: "Individual crime vs structural oppression of social systems. The surface is crime; the underlying layer is the pathology of social structure itself.",
@@ -28,7 +28,7 @@ export const SUR1_GROUP_F: LibraryCategoryDef = {
     {
       id: "noir",
       name: "黑色侦探", nameEn: "Hardboiled / Noir",
-      def: "以道德暧昧的城市侦查和宿命感为类型核心，烟酒、诱惑角色等只作可选 noir 符号。",
+      def: "以道德暧昧的城市侦查和宿命感为识别重点，烟酒、诱惑角色等只作可选 noir 符号。",
       defEn: "Morally ambiguous urban investigation and fatalism; smoke, alcohol, or seductive figures are optional noir signs.",
       core: "道德沦丧的城市 vs 坚守底线的孤独侦探。查的不仅是案件，更是人性的边界在哪里。",
       coreEn: "Morally decayed city vs lonely detective holding the line. What's investigated isn't just the case, but where the boundaries of human nature lie.",
@@ -38,7 +38,7 @@ export const SUR1_GROUP_F: LibraryCategoryDef = {
     {
       id: "locked_room",
       name: "密室推理", nameEn: "Locked Room",
-      def: "以封闭空间中的不可能谜案和互疑关系为类型核心，孤岛、山庄等只是可选空间形式。",
+      def: "以封闭空间中的不可能谜案和互疑关系为识别重点，孤岛、山庄等只是可选空间形式。",
       defEn: "Closed space, everyone is a suspect, impossible crimes, isolated island, chain of suspicion.",
       core: "物理上的绝对封闭 vs 心理上的无限猜忌。有限空间内所有人互为嫌疑、互为猎物。",
       coreEn: "Absolute physical confinement vs infinite psychological suspicion. Within limited space, everyone is simultaneously suspect and prey.",
@@ -48,7 +48,7 @@ export const SUR1_GROUP_F: LibraryCategoryDef = {
     {
       id: "police",
       name: "犯罪刑侦", nameEn: "Police Procedural",
-      def: "以刑侦流程和案件推进为类型核心，取证、法医、协作、连环案等只按剧情需要选用。",
+      def: "以刑侦流程和案件推进为识别重点，取证、法医、协作、连环案等只按剧情需要选用。",
       defEn: "Realistic investigation process, forensics, institutional collaboration, serial cases.",
       core: "繁琐的程序正义 vs 狡猾的罪犯。体制本身——官僚主义、内部政治——同样是破案的阻力。",
       coreEn: "Tedious procedural justice vs cunning criminals. The institution itself — bureaucracy, internal politics — is equally an obstacle to solving the case.",
@@ -58,7 +58,7 @@ export const SUR1_GROUP_F: LibraryCategoryDef = {
     {
       id: "psychological_thriller",
       name: "心理惊悚", nameEn: "Psychological Thriller",
-      def: "以认知不稳定和心理压迫为类型核心，不可靠叙述、记忆碎片、反转等按结构需要使用。",
+      def: "以认知不稳定和心理压迫为识别重点，不可靠叙述、记忆碎片、反转等按结构需要使用。",
       defEn: "Mind games, unreliable narrators, memory fragments, twist after twist.",
       core: "叙述者自己的认知 vs 客观现实。叙事本身不可信任，认知的裂缝就是悬念的入口。",
       coreEn: "Narrator's own perception vs objective reality. The narrative itself cannot be trusted; the crack in cognition is the entrance to suspense.",
@@ -68,7 +68,7 @@ export const SUR1_GROUP_F: LibraryCategoryDef = {
     {
       id: "serial_killer",
       name: "连环杀手", nameEn: "Serial Killer",
-      def: "以追捕连环犯罪者的心理对峙为类型核心，侧写、猫鼠游戏、仪式痕迹只作可选手段。",
+      def: "以追捕连环犯罪者的心理对峙为识别重点，侧写、猫鼠游戏、仪式痕迹只作可选手段。",
       defEn: "Profiling, cat and mouse, abnormal psychology, hunting monsters, ritualistic crimes.",
       core: "猎手与怪物之间的镜像关系。为了理解猎物的逻辑，追捕者必须进入同一片黑暗领域。",
       coreEn: "The mirror relationship between hunter and monster. To understand the prey's logic, the pursuer must enter the same territory of darkness.",
@@ -78,7 +78,7 @@ export const SUR1_GROUP_F: LibraryCategoryDef = {
     {
       id: "espionage",
       name: "谍战间谍", nameEn: "Espionage",
-      def: "以情报、伪装和信任崩塌为类型核心，双重间谍、冷战暗影等只作可选类型符号。",
+      def: "以情报、伪装和信任崩塌为识别重点，双重间谍、冷战暗影等只作可选类型符号。",
       defEn: "Identity disguise, double agents, intel theft, national security, cold war shadows.",
       core: "信任的绝对缺失。每个人都戴着面具，爱人可能是敌人。身份本身成为武器与牢笼。",
       coreEn: "Absolute absence of trust. Everyone wears masks; lovers might be enemies. Identity itself becomes both weapon and prison.",
@@ -88,7 +88,7 @@ export const SUR1_GROUP_F: LibraryCategoryDef = {
     {
       id: "legal",
       name: "庭审律政", nameEn: "Legal Thriller",
-      def: "以法庭攻防、证据解释和程序正义为类型核心，陪审团、反转等按案件需要选用。",
+      def: "以法庭攻防、证据解释和程序正义为识别重点，陪审团、反转等按案件需要选用。",
       defEn: "Prosecution vs defense, evidence twists, procedural justice, verbal combat, jury psychology.",
       core: "法律事实 vs 客观真相。语言和逻辑成为武器，法庭是一个以规则约束的角斗场。",
       coreEn: "Legal facts vs objective truth. Language and logic become weapons; the courtroom is an arena constrained by rules.",
@@ -98,7 +98,7 @@ export const SUR1_GROUP_F: LibraryCategoryDef = {
     {
       id: "heist",
       name: "高智商犯罪", nameEn: "Heist / Caper",
-      def: "以精密计划、骗局或盗案结构为类型核心，团队协作、炫技、多线并进只作可选策略。",
+      def: "以精密计划、骗局或盗案结构为识别重点，团队协作、炫技、多线并进只作可选策略。",
       defEn: "Meticulously planned robberies or cons, teamwork, showing off, anti-tropes, multi-threaded.",
       core: "完美的计划 vs 突发的变数。团队协作的精密节奏感，规则框架内的创造性越界。",
       coreEn: "Perfect plan vs sudden variables. The precise rhythm of team coordination; creative transgression within the framework of rules.",
@@ -108,7 +108,7 @@ export const SUR1_GROUP_F: LibraryCategoryDef = {
     {
       id: "techno",
       name: "网络悬疑", nameEn: "Techno-Thriller",
-      def: "以数字系统引发的悬疑和现实伤害为类型核心，黑客、暗网、监控等只按需要取用。",
+      def: "以数字系统引发的悬疑和现实伤害为识别重点，黑客、暗网、监控等只按需要取用。",
       defEn: "Hacking, dark web, surveillance, high-tech crimes, deadly games in cyberspace.",
       core: "隐形的数字幽灵 vs 现实世界的物理性破坏。敌人看不见、摸不着，但造成的伤害却是实体的。",
       coreEn: "Invisible digital ghost vs physical destruction in the real world. The enemy cannot be seen or touched, yet the damage inflicted is physical.",
@@ -118,7 +118,7 @@ export const SUR1_GROUP_F: LibraryCategoryDef = {
     {
       id: "hitchcockian",
       name: "希区柯克悬疑", nameEn: "Hitchcockian",
-      def: "以悬念调度和信息差焦虑为类型核心，麦高芬、偷窥、蒙冤逃亡等只作可选机制。",
+      def: "以悬念调度和信息差焦虑为识别重点，麦高芬、偷窥、蒙冤逃亡等只作可选机制。",
       defEn: "Suspense > scare, MacGuffin, voyeurism, innocent wrongly accused, runaways.",
       core: "观众知道炸弹在哪但角色不知道的极致焦灼。无辜的普通人被卷入远超自身理解的阴谋齿轮。",
       coreEn: "Extreme anxiety when the audience knows where the bomb is but the character doesn't. An innocent ordinary person caught in conspiratorial gears far beyond their comprehension.",

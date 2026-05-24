@@ -1,11 +1,11 @@
 import React from 'react';
-import { CreativeTreatment, StyleConfig, NarrativeFieldState, WorldLawConfig, DriverType, PromptFocusState, NarrativeBlockDef, LibraryCategoryDef, M7BResidueIntensity } from '../types';
+import { CreativeTreatment, StyleConfig, NarrativeFieldState, WorldLawConfig, DriverType, PromptFocusState, NarrativeBlockDef, LibraryCategoryDef, MAxisMixerState, M7BResidueIntensity } from '../types';
 import { buildNarrativeBiblePrompt } from '../services/narrativeGenerator';
 import { buildCommercialBiblePrompt } from '../services/commercialGenerator';
 import { buildExperimentalBiblePrompt } from '../services/experimentalGenerator';
 import { buildAestheticBiblePrompt } from '../services/aestheticGenerator';
 import { XRayInspectorModal, type XRaySourceGroup } from './XRayInspector';
-import { STYLE_MATRIX, PERSPECTIVES, SENSORY_MODES } from '../data/narrative/style_matrix';
+import { STYLE_MATRIX } from '../data/narrative/style_matrix';
 import { DIRECTOR_STYLES } from '../data/narrative/director_styles';
 import {
     normalizeWorldLawConfig,
@@ -43,9 +43,11 @@ interface BiblePromptInspectorModalProps {
     fieldState?: NarrativeFieldState;
     visionInput?: string;
     visionAnalysis?: string;
+    visionImage?: string | null;
     worldLawConfig?: WorldLawConfig;
     driverType: DriverType;
     focusState?: PromptFocusState;
+    mAxisMixer?: MAxisMixerState;
     m7bIntensity?: M7BResidueIntensity;
 }
 
@@ -152,9 +154,11 @@ export const BiblePromptInspectorModal: React.FC<BiblePromptInspectorModalProps>
     fieldState,
     visionInput,
     visionAnalysis,
+    visionImage,
     worldLawConfig,
     driverType,
     focusState,
+    mAxisMixer,
     m7bIntensity
 }) => {
     const defaultFieldState = (fieldState || {}) as NarrativeFieldState;
@@ -162,7 +166,6 @@ export const BiblePromptInspectorModal: React.FC<BiblePromptInspectorModalProps>
     const { blocks, library } = getDriverBlocksAndLibrary(driverType);
     const engineBlocks = blocks.filter(block => !isSurfaceBlock(block.id));
     const surfaceBlocks = blocks.filter(block => isSurfaceBlock(block.id));
-    const showPerspectiveAndSensory = driverType !== DriverType.NARRATIVE || !styleConfig.styleId;
     const worldLawLevel = resolveWorldLawLevel(defaultWorldLaw);
     const worldLawOptions = WORLD_LAW_LEVEL_OPTIONS.map(option => ({
         value: option.id,
@@ -183,9 +186,22 @@ export const BiblePromptInspectorModal: React.FC<BiblePromptInspectorModalProps>
         ? (lang === 'CN' ? `X-Ray 叙事创作指令透视 · ${driverLabel}` : `Narrative Prompt Inspector · ${driverLabel}`)
         : (lang === 'CN' ? `X-Ray 圣经指令透视 · ${driverLabel}` : `Bible Prompt Inspector · ${driverLabel}`);
 
-    const getSources = (values?: Record<string, any>): XRaySourceGroup[] => {
-        const currentStyleId = values?.styleId ?? styleConfig.styleId;
-        const isStyleLocked = !!currentStyleId;
+    const getSources = (_values?: Record<string, any>): XRaySourceGroup[] => {
+        const styleOptions = getStyleOptions(driverType);
+        if (styleConfig.customStyleName) {
+            const customDescription = [styleConfig.customStyleDef, styleConfig.customStyleCore].filter(Boolean).join(' | ') || styleConfig.customStyleName;
+            const customOption = {
+                value: styleConfig.styleId || styleConfig.customStyleName,
+                label: styleConfig.customStyleName,
+                description: customDescription
+            };
+            const existingIndex = styleOptions.findIndex(option => option.value === customOption.value);
+            if (existingIndex >= 0) {
+                styleOptions[existingIndex] = customOption;
+            } else {
+                styleOptions.unshift(customOption);
+            }
+        }
 
         return [
             {
@@ -213,45 +229,31 @@ export const BiblePromptInspectorModal: React.FC<BiblePromptInspectorModalProps>
                             : (lang === 'EN' ? 'Bible Style' : '圣经风格'),
                         kind: 'select',
                         value: styleConfig.styleId || '',
-                        options: getStyleOptions(driverType),
+                        options: styleOptions,
                         editable: true,
                         placeholder: driverType === DriverType.NARRATIVE
                             ? (lang === 'EN' ? 'Author Style' : '作者风格')
                             : (lang === 'EN' ? 'Bible Style' : '圣经风格')
                     },
-                    ...(showPerspectiveAndSensory ? [
-                        {
-                            id: 'perspectiveId',
-                            label: lang === 'EN' ? 'Perspective' : '叙事视点',
-                            kind: 'select' as const,
-                            value: styleConfig.perspectiveId || '',
-                            options: PERSPECTIVES.map(item => ({ value: item.id, label: item.name, description: item.prompt })),
-                            editable: true,
-                            disabled: isStyleLocked,
-                            placeholder: lang === 'EN' ? 'Perspective' : '叙事视点'
-                        },
-                        {
-                            id: 'sensoryId',
-                            label: lang === 'EN' ? 'Sensory Mode' : '感官侧重',
-                            kind: 'select' as const,
-                            value: styleConfig.sensoryId || '',
-                            options: SENSORY_MODES.map(item => ({ value: item.id, label: item.name, description: item.prompt })),
-                            editable: true,
-                            disabled: isStyleLocked
-                        }
-                    ] : []),
                     ...getLibraryBlockItems(surfaceBlocks, library, defaultFieldState, lang, driverType)
                 ]
             },
-        {
-            id: 'text',
-            title: lang === 'EN' ? 'Text & Image Sources' : '文本与图像源',
-            items: [
-                {
-                    id: 'treatmentTitle',
-                    label: lang === 'EN' ? 'Selected Path' : '已选路径',
-                    kind: 'text',
-                    value: treatment?.title || '',
+            {
+                id: 'text',
+                title: lang === 'EN' ? 'Text & Image Sources' : '文本与图像源',
+                items: [
+                    {
+                        id: 'visionImage',
+                        label: lang === 'EN' ? 'Image Seed / Visual Lock' : '图像种子 / 视觉锁定',
+                        kind: visionImage ? 'image' : 'text',
+                        value: visionImage || '',
+                        editable: true
+                    },
+                    {
+                        id: 'treatmentTitle',
+                        label: lang === 'EN' ? 'Selected Path' : '已选路径',
+                        kind: 'text',
+                        value: treatment?.title || '',
                     editable: Boolean(treatment),
                     placeholder: lang === 'EN' ? 'Select a path first' : '请先选择路径',
                     alwaysShow: true
@@ -328,13 +330,9 @@ export const BiblePromptInspectorModal: React.FC<BiblePromptInspectorModalProps>
             const nextStyleConfig: StyleConfig = {
                 ...styleConfig,
                 styleId: typeof values.styleId === 'string' && values.styleId.trim() ? values.styleId : null,
-                perspectiveId: typeof values.perspectiveId === 'string' && values.perspectiveId.trim() ? values.perspectiveId : null,
-                sensoryId: typeof values.sensoryId === 'string' && values.sensoryId.trim() ? values.sensoryId : null
+                perspectiveId: null,
+                sensoryId: null
             };
-            if (driverType === DriverType.NARRATIVE && nextStyleConfig.styleId) {
-                nextStyleConfig.perspectiveId = null;
-                nextStyleConfig.sensoryId = null;
-            }
             const nextFieldState = collectFieldState(values, blocks, defaultFieldState);
             const nextWorldLaw: WorldLawConfig = normalizeWorldLawConfig({
                 ...defaultWorldLaw,
@@ -342,6 +340,7 @@ export const BiblePromptInspectorModal: React.FC<BiblePromptInspectorModalProps>
             });
             const nextVisionInput = String(values.visionInput ?? '');
             const nextVisionAnalysis = String(values.visionAnalysis ?? '');
+            const nextVisionImage = typeof values.visionImage === 'string' && values.visionImage.trim() ? values.visionImage : null;
             const nextDriver = driverType;
 
             switch (nextDriver) {
@@ -352,7 +351,7 @@ export const BiblePromptInspectorModal: React.FC<BiblePromptInspectorModalProps>
                 case DriverType.AESTHETIC:
                     return buildAestheticBiblePrompt(nextTreatment, nextStyleConfig, nextFieldState, nextVisionInput, nextWorldLaw);
                 default:
-                    return buildNarrativeBiblePrompt(nextTreatment, nextStyleConfig, nextFieldState, nextVisionInput, null, nextWorldLaw, nextVisionAnalysis, focusState, m7bIntensity);
+                    return buildNarrativeBiblePrompt(nextTreatment, nextStyleConfig, nextFieldState, nextVisionInput, nextVisionImage, nextWorldLaw, nextVisionAnalysis, focusState, mAxisMixer, m7bIntensity);
             }
         } catch (e) {
             return `提示词生成过程中遇到错误。\n\n[ERROR]\n${e instanceof Error ? e.stack : String(e)}`;

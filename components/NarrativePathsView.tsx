@@ -1,12 +1,12 @@
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { flushSync } from 'react-dom';
-import { CreativeTreatment, StyleConfig, LibraryCategoryDef, BlueprintLanguage, DriverType, CreativeBlueprint, NarrativeFieldState, WorldLawConfig, M7BResidueIntensity } from '../types';
-import { STYLE_MATRIX, PERSPECTIVES, SENSORY_MODES } from '../data/narrative/style_matrix';
+import { CreativeTreatment, StyleConfig, LibraryCategoryDef, BlueprintLanguage, DriverType, CreativeBlueprint, NarrativeFieldState, WorldLawConfig, PromptFocusState, MAxisMixerState, M7BResidueIntensity } from '../types';
+import { STYLE_MATRIX } from '../data/narrative/style_matrix';
 import { DIRECTOR_STYLES } from '../data/narrative/director_styles';
 import { SV1_DATA } from '../data/engine_sv/SV1';
 import { SV2_DATA } from '../data/engine_sv/SV2';
-import { Sparkles, Film, Zap, BrainCircuit, BookOpen, ArrowRight, RotateCw, Check, Palette, Settings2, ArrowLeft, Copy, Layers, History as HistoryIcon, GitFork, Gem, Eye, Anchor, Wind, Globe, User, Fingerprint, List, X, Database, Terminal, Activity, Brain, ChevronRight } from 'lucide-react';
+import { Sparkles, Film, Zap, BrainCircuit, BookOpen, ArrowRight, RotateCw, Check, Palette, Settings2, ArrowLeft, Copy, Layers, History as HistoryIcon, GitFork, Gem, Anchor, Wind, Globe, User, List, X, Database, Terminal, Activity, Brain, ChevronRight, Eye } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { NarrativeLibraryModal } from './NarrativeLibraryModal';
 import { BiblePromptInspectorModal } from './BiblePromptInspectorModal';
@@ -30,9 +30,12 @@ interface NarrativePathsViewProps {
     overviewFieldState?: NarrativeFieldState;
     visionInput?: string;
     visionAnalysis?: string;
+    visionImage?: string | null;
     thinkingXml?: string;
     worldLawConfig?: WorldLawConfig;
     overviewWorldLawConfig?: WorldLawConfig;
+    focusState?: PromptFocusState;
+    mAxisMixer?: MAxisMixerState;
     m7bIntensity?: M7BResidueIntensity;
     onToggleTag?: (blockId: string, tag: string) => void;
     onSetTags?: (blockId: string, tags: string[]) => void;
@@ -95,9 +98,12 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
     overviewFieldState,
     visionInput,
     visionAnalysis,
+    visionImage,
     thinkingXml,
     worldLawConfig,
     overviewWorldLawConfig,
+    focusState,
+    mAxisMixer,
     m7bIntensity,
     onToggleTag,
     onSetTags,
@@ -112,8 +118,8 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
     const [isThinkingPanelOpen, setIsThinkingPanelOpen] = useState(false);
     const [styleConfig, setStyleConfig] = useState<StyleConfig>({
         styleId: null,
-        perspectiveId: 'SCREENPLAY',
-        sensoryId: 'VISUAL'
+        perspectiveId: null,
+        sensoryId: null
     });
     const [isStyleModalOpen, setIsStyleModalOpen] = useState(false);
     const [isVolumeModalOpen, setIsVolumeModalOpen] = useState(false);
@@ -546,8 +552,8 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
 
     return (
         <div className={`mist-archive-workbench mist-divergence-view w-full h-full flex flex-col relative overflow-hidden ${theme === 'retro' ? 'bg-[var(--bg-main)]' : 'bg-[#0a0a0a]'}`}>
-            <div className={`mist-archive-toolbar shrink-0 h-14 ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[var(--border-main)] shadow-none' : 'bg-[#0a0a0a] border-zinc-800 shadow-[0_15px_45px_rgba(0,0,0,1)]'} border-b flex items-center justify-between px-6 z-20`}>
-                <div className="flex items-center gap-4">
+            <div className={`mist-archive-toolbar mist-divergence-filter-toolbar shrink-0 h-14 ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[var(--border-main)] shadow-none' : 'bg-[#0a0a0a] border-zinc-800 shadow-[0_15px_45px_rgba(0,0,0,1)]'} border-b grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center px-6 z-20`}>
+                <div className="flex items-center gap-4 min-w-0 justify-self-start">
                     <div className={`flex items-center gap-2 ${getThemeColor()}`}>
                         <Settings2 size={16} />
                         <span className="text-xs font-bold uppercase tracking-widest">{getMatrixLabel()}</span>
@@ -577,18 +583,18 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                     )}
                 </div>
 
-                <div className="flex flex-wrap gap-4 items-center justify-center flex-1">
+                <div className="mist-divergence-filter-controls flex flex-wrap gap-4 items-center justify-center justify-self-center">
                     {/* Story Volume Button */}
                     <button
                         onClick={() => setIsVolumeModalOpen(true)}
                         className={`${controlClass} ${currentVolumeName ? 'is-selected' : 'is-empty'} text-left gap-2`}
-                        title={lang === 'EN' ? "Select Runtime / Capacity" : "选择时长/容量"}
+                        title={lang === 'EN' ? "Select Story Volume" : "选择故事体量"}
                     >
                         <Database size={14} className="shrink-0" />
                         <span className="text-xs font-bold truncate">
                             {currentVolumeName
                                 ? formatVolumeName(currentVolumeName)
-                                : (lang === 'EN' ? "RUNTIME" : "时长/容量")}
+                                : (lang === 'EN' ? "STORY VOLUME" : "故事体量")}
                         </span>
                     </button>
 
@@ -622,49 +628,8 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                         </button>
                     )}
 
-                    {(!isCommercialResults && !isExperimentalResults && !isAestheticResults && !isTrailerResults) && (
-                        <>
-                            {/* Narrative Perspective */}
-                            <div
-                                className={`${controlClass} ${styleConfig.perspectiveId ? 'is-selected' : 'is-empty'} gap-2 relative ${styleConfig.styleId ? 'opacity-40 pointer-events-none' : ''}`}
-                                title={styleConfig.styleId ? (lang === 'EN' ? "Perspective is fixed by Author Style" : "叙事视点已由作者风格锁定") : (lang === 'EN' ? "Narrative Perspective" : "叙事视点：决定故事的讲述角度")}
-                            >
-                                <Eye size={14} className="shrink-0" />
-                                <select
-                                    disabled={!!styleConfig.styleId}
-                                    value={styleConfig.perspectiveId || ""}
-                                    onChange={(e) => setStyleConfig({ ...styleConfig, perspectiveId: e.target.value })}
-                                    className={`bg-transparent border-none text-xs font-bold ${themeTextColor} focus:ring-0 cursor-pointer w-full uppercase tracking-wider outline-none p-0`}
-                                >
-                                    <option value="" disabled className="bg-zinc-900">{lang === 'EN' ? "POV..." : "叙事视点..."}</option>
-                                    {PERSPECTIVES.map(p => (
-                                        <option key={p.id} value={p.id} className="bg-zinc-900">{formatName(p.name)}</option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            {/* Sensory Priority */}
-                            <div
-                                className={`${controlClass} ${styleConfig.sensoryId ? 'is-selected' : 'is-empty'} gap-2 relative ${styleConfig.styleId ? 'opacity-40 pointer-events-none' : ''}`}
-                                title={styleConfig.styleId ? (lang === 'EN' ? "Sensory focus is fixed by Author Style" : "感官侧重已由作者风格锁定") : (lang === 'EN' ? "Sensory Priority" : "感官优先：决定描写的侧重点")}
-                            >
-                                <Fingerprint size={14} className="shrink-0" />
-                                <select
-                                    disabled={!!styleConfig.styleId}
-                                    value={styleConfig.sensoryId || ""}
-                                    onChange={(e) => setStyleConfig({ ...styleConfig, sensoryId: e.target.value })}
-                                    className={`bg-transparent border-none text-xs font-bold ${themeTextColor} focus:ring-0 cursor-pointer w-full uppercase tracking-wider outline-none p-0`}
-                                >
-                                    <option value="" disabled className="bg-zinc-900">{lang === 'EN' ? "SENSE..." : "感官侧重..."}</option>
-                                    {SENSORY_MODES.map(s => (
-                                        <option key={s.id} value={s.id} className="bg-zinc-900">{formatName(s.name)}</option>
-                                    ))}
-                                </select>
-                            </div>
-                        </>
-                    )}
-
                 </div>
+                <div className="min-w-0 justify-self-end" aria-hidden="true"></div>
             </div>
 
             <div className="flex-1 w-full relative overflow-hidden flex mb-14 min-h-0">
@@ -849,7 +814,7 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
 
             <div className={`mist-app-footer fixed bottom-0 left-0 right-0 h-14 bg-[var(--bg-header)] backdrop-blur-md border-t ${theme === 'retro' ? 'border-[var(--border-main)]' : 'border-zinc-800'} flex items-center justify-between px-6 md:px-12 z-40 transition-colors duration-500`}>
                 <div className="flex items-center gap-4 shrink-0 w-[180px] md:w-[240px]">
-                    <button onClick={onBack} className={`mist-app-archive-button flex items-center gap-3 h-[42px] px-4 rounded-[8px] bg-[var(--bg-panel)]/50 hover:bg-[var(--bg-panel)] border border-[var(--border-main)] text-[12px] font-bold uppercase tracking-[0.12em] transition-all duration-300 group min-w-[140px] hover:scale-105 active:scale-95 ${theme === 'retro' ? 'text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'text-zinc-400 hover:text-white'}`}>
+                    <button onClick={onBack} className={`mist-app-archive-button mist-footer-return-button flex items-center gap-3 h-[42px] px-4 rounded-[8px] bg-[var(--bg-panel)]/50 hover:bg-[var(--bg-panel)] border border-[var(--border-main)] text-[12px] font-bold uppercase tracking-[0.12em] transition-all duration-300 group min-w-[140px] hover:scale-105 active:scale-95 ${theme === 'retro' ? 'text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'text-zinc-400 hover:text-white'}`}>
                         <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
                         <span>{lang === 'CN' ? "返回引擎" : "Home"}</span>
                     </button>
@@ -995,7 +960,7 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                 isOpen={isVolumeModalOpen}
                 onClose={() => setIsVolumeModalOpen(false)}
                 blockId="skin_volume"
-                blockName={lang === 'EN' ? "RUNTIME / CAPACITY" : "时长/容量"}
+                blockName={lang === 'EN' ? "STORY VOLUME" : "故事体量"}
                 selectedTags={currentVolumeName ? [currentVolumeName] : []}
                 onToggleTag={handleVolumeToggle}
                 onSetTags={(tags) => onSetTags?.('skin_volume', tags)}
@@ -1031,8 +996,11 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                 fieldState={fieldState}
                 visionInput={visionInput}
                 visionAnalysis={visionAnalysis}
+                visionImage={visionImage}
                 worldLawConfig={worldLawConfig}
                 driverType={currentDriverType}
+                focusState={focusState}
+                mAxisMixer={mAxisMixer}
                 m7bIntensity={m7bIntensity}
             />
 

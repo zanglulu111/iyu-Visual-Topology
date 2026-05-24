@@ -8,7 +8,7 @@ export const SUR1_GROUP_B: LibraryCategoryDef = {
     {
       id: "hard_scifi",
       name: "硬科幻", nameEn: "Hard Sci-Fi",
-      def: "以科学规则和技术推演为类型核心，宇航细节、物理法则等按设定尺度选用。",
+      def: "以科学规则和技术推演为识别重点，宇航细节、物理法则等按设定尺度选用。",
       defEn: "Rigorous physics, aerospace details, scientific deduction, no magic.",
       core: "人类渺小的理性 vs 宇宙冷酷的物理定律。科学是唯一的工具，但工具的精度永远追不上未知的尺度。",
       coreEn: "Puny human rationality vs the universe's cold physical laws. Science is the only tool, but no tool's precision can match the scale of the unknown.",
@@ -18,7 +18,7 @@ export const SUR1_GROUP_B: LibraryCategoryDef = {
     {
       id: "mecha",
       name: "机甲科幻", nameEn: "Mecha / Giant Robot",
-      def: "以人与巨型机器的绑定和战争压力为类型核心，驾驶员创伤、武器崇拜等只作可选符号。",
+      def: "以人与巨型机器的绑定和战争压力为识别重点，驾驶员创伤、武器崇拜等只作可选符号。",
       defEn: "Giant robots, pilot trauma and hot blood, weapon worship, war metaphor.",
       core: "脆弱的肉身 vs 钢铁巨兽的支配力量。驾驶者与机体的融合既是力量的延伸也是自我的吞噬。",
       coreEn: "Fragile flesh vs the dominant power of steel behemoths. The fusion between pilot and machine is both extension of power and consumption of self.",
@@ -28,7 +28,7 @@ export const SUR1_GROUP_B: LibraryCategoryDef = {
     {
       id: "space_opera",
       name: "太空歌剧", nameEn: "Space Opera",
-      def: "以星际尺度的冒险、政治和战争为类型核心，帝国、外星种族等只作可选世界资源。",
+      def: "以星际尺度的冒险、政治和战争为识别重点，帝国、外星种族等只作可选世界资源。",
       defEn: "Interstellar empires, grand wars, alien races, non-hardcore epic adventures.",
       core: "古典神话的命运叙事在星辰大海中的宏大重演。帝国与反叛、血统与预言、权力轮转的永恒循环。",
       coreEn: "Grand replay of classical myth's fate narratives among the stars. Empire and rebellion, bloodline and prophecy, the eternal cycle of power rotation.",
@@ -38,7 +38,7 @@ export const SUR1_GROUP_B: LibraryCategoryDef = {
     {
       id: "time_travel",
       name: "时间旅行", nameEn: "Time Travel",
-      def: "以时间因果被改写或困住为类型核心，循环、悖论、蝴蝶效应只按故事机制选用。",
+      def: "以时间因果被改写或困住为识别重点，循环、悖论、蝴蝶效应只按故事机制选用。",
       defEn: "Loops, grandfather paradox, butterfly effect, changing past/future.",
       core: "改变遗憾的绝望渴望 vs 因果律的冷血逻辑。每一次修改都在另一端制造等量的扭曲。",
       coreEn: "Desperate desire to alter regret vs the cold logic of causality. Every modification creates an equal distortion at the other end.",
@@ -48,7 +48,7 @@ export const SUR1_GROUP_B: LibraryCategoryDef = {
     {
       id: "ai",
       name: "AI科幻", nameEn: "Artificial Intelligence (AI)",
-      def: "以人工智能与人的边界问题为类型核心，觉醒、图灵测试、缸中脑等只作可选议题。",
+      def: "以人工智能与人的边界问题为识别重点，觉醒、图灵测试、缸中脑等只作可选议题。",
       defEn: "Awakening, ethics, brain in a vat, the ultimate question of the Turing test.",
       core: "造物与被造物之间的权力颠覆。意识的边界在哪里——什么是真实，什么是模拟。",
       coreEn: "Power subversion between creator and created. Where is the boundary of consciousness — what is real, what is simulation.",
@@ -58,7 +58,7 @@ export const SUR1_GROUP_B: LibraryCategoryDef = {
     {
       id: "post_apocalyptic",
       name: "末世废土", nameEn: "Post-Apocalyptic",
-      def: "以旧秩序崩塌后的生存和重建为类型核心，资源争夺、黄沙、防毒面具只作可选景观。",
+      def: "以旧秩序崩塌后的生存和重建为识别重点，资源争夺、黄沙、防毒面具只作可选景观。",
       defEn: "Destroyed civilization, scavenging, return to the jungle, gas masks and sand.",
       core: "旧秩序的灰烬 vs 纯粹的生存本能。文明的规则已死，新的规则尚未诞生。",
       coreEn: "Ashes of the old order vs pure survival instinct. The rules of civilization are dead; new rules have yet to be born.",
@@ -68,7 +68,7 @@ export const SUR1_GROUP_B: LibraryCategoryDef = {
     {
       id: "alien",
       name: "外星接触", nameEn: "Alien Contact",
-      def: "以人类面对外星他者的理解危机为类型核心，语言谜题、神圣感或入侵威胁只作可选方向。",
+      def: "以人类面对外星他者的理解危机为识别重点，语言谜题、神圣感或入侵威胁只作可选方向。",
       defEn: "Close encounters, undecipherable language, god-like arrivals or terror invasions.",
       core: "对未知的绝对恐惧 vs 跨物种沟通的极致迷恋。理解的欲望与理解的不可能性同时存在。",
       coreEn: "Absolute terror of the unknown vs extreme fascination with cross-species communication. The desire to understand and the impossibility of understanding coexist.",
@@ -78,7 +78,7 @@ export const SUR1_GROUP_B: LibraryCategoryDef = {
     {
       id: "virtual_reality",
       name: "虚拟现实", nameEn: "Virtual Reality / Matrix",
-      def: "以现实层级和意识空间的真假崩塌为类型核心，骇客、梦境、数字乌托邦只作可选机制。",
+      def: "以现实层级和意识空间的真假崩塌为识别重点，骇客、梦境、数字乌托邦只作可选机制。",
       defEn: "Brain in a vat, layered dreams, matrix cyber-heists, fake utopias.",
       core: "虚拟的甘美幻象 vs 破败残酷的真实。选择本身就是永恒的悖论——真实并不等于更好。",
       coreEn: "Sweet virtual illusion vs broken cruel reality. The choice itself is an eternal paradox — real does not equal better.",
@@ -88,7 +88,7 @@ export const SUR1_GROUP_B: LibraryCategoryDef = {
     {
       id: "biopunk",
       name: "生化科幻", nameEn: "Biopunk",
-      def: "以生命技术失控和肉身边界变化为类型核心，病毒、克隆、畸变等只作可选案型。",
+      def: "以生命技术失控和肉身边界变化为识别重点，病毒、克隆、畸变等只作可选案型。",
       defEn: "Genetic engineering, viral leaks, loss of bodily dignity, clone farms.",
       core: "自然的神圣界限 vs 肉体的彻底数据化与商品化。身体不再属于自己，基因成为可交易的资产。",
       coreEn: "Sacred boundaries of nature vs total datafication and commodification of flesh. The body no longer belongs to its owner; genes become tradable assets.",
@@ -108,7 +108,7 @@ export const SUR1_GROUP_B: LibraryCategoryDef = {
     {
       id: "multiverse",
       name: "平行宇宙", nameEn: "Multiverse",
-      def: "以多重现实造成的身份和选择崩塌为类型核心，量子分支等只作可选解释框架。",
+      def: "以多重现实造成的身份和选择崩塌为识别重点，量子分支等只作可选解释框架。",
       defEn: "Infinite branching realities, quantum superposition, identity collapse.",
       core: "无限选择的彻底虚无 vs 此刻唯一锚点的存在主义重量。当一切皆可能，意义本身面临坍缩。",
       coreEn: "Total nihilism of infinite choice vs the existential weight of the singular present anchor. When everything is possible, meaning itself faces collapse.",
@@ -118,7 +118,7 @@ export const SUR1_GROUP_B: LibraryCategoryDef = {
     {
       id: "retro_futurism",
       name: "复古未来", nameEn: "Retro-Futurism",
-      def: "以旧时代想象出的未来感为类型核心，真空管、原子时代、反乌托邦等只作可选美术语汇。",
+      def: "以旧时代想象出的未来感为识别重点，真空管、原子时代、反乌托邦等只作可选美术语汇。",
       defEn: "Past's naive fantasy of the future, vacuum tubes, atomic age optimism hiding dystopia.",
       core: "过去对未来的天真许诺 vs 许诺实际导致的反乌托邦现实。技术的外壳光鲜复古，内核蛀满了失败。",
       coreEn: "Past's naive promises about the future vs the dystopian reality those promises actually produced. Technology's shell is retro-glamorous; its core is riddled with failure.",

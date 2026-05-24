@@ -13,6 +13,7 @@ interface APISettingsModalProps {
 }
 
 const LLM_MODELS = [
+    { id: 'gemini-3.5-flash', name: 'Gemini 3.5 Flash' },
     { id: 'gemini-3.1-pro-preview', name: 'Gemini 3.1 Pro Preview' },
     { id: 'gemini-3.1-flash-lite-preview', name: 'Gemini 3.1 Flash Lite Preview' },
     { id: 'gemini-3-pro-preview', name: 'Gemini 3.0 Pro Preview' },

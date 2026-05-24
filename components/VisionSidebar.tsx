@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef, useState, useMemo } from 'react';
-import { X, Sparkles, Image as ImageIcon, Upload, Trash2, Zap, Briefcase, Loader2, ScanEye, BrainCircuit, FileText, Cpu, ScanLine, ArrowDown, Palette, Camera, Sun, Layers, Aperture, Layout } from 'lucide-react';
+import { X, Sparkles, Image as ImageIcon, Upload, Trash2, Zap, Briefcase, Loader2, ScanEye, BrainCircuit, FileText, Cpu, ScanLine, ArrowDown, Palette, Camera, Sun, Layers, Aperture } from 'lucide-react';
 import { BlueprintLanguage, DriverType, NarrativeBlockDef, NarrativeFieldState } from '../types';
 import { supabaseDatabase } from '../services/supabaseDatabase';
 import { buildAestheticReversePrompt } from '../services/aestheticReverseService';
@@ -137,20 +137,20 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
     const seedMode = useMemo(() => {
         if (hasTextSeed && hasImageSeed) {
             return {
-                badge: lang === 'EN' ? 'DUAL LOCK' : '图文双锚',
-                title: lang === 'EN' ? 'Anchored Completion' : '锚定补完模式',
+                badge: lang === 'EN' ? 'IMAGE X-RAY' : '图像反推',
+                title: lang === 'EN' ? 'Universal Image X-Ray' : '通用图像反推',
                 desc: lang === 'EN'
-                    ? 'Image locks visible physics; text locks meaning, relation, and motivation.'
-                    : '图片锁定可见世界的物理事实；文本锁定不可见的意义、关系与动机。'
+                    ? 'User text is highest priority. The engine directly reads the image and decides how it should enter the story.'
+                    : '用户文字最高优先；引擎直接读图，并判断图片应如何进入故事。'
             };
         }
         if (hasImageSeed) {
             return {
-                badge: lang === 'EN' ? 'IMAGE LOCK' : '图像锁定',
-                title: lang === 'EN' ? 'Image-Locked Reverse' : '图像锁定反推',
+                badge: lang === 'EN' ? 'IMAGE X-RAY' : '图像反推',
+                title: lang === 'EN' ? 'Universal Image X-Ray' : '通用图像反推',
                 desc: lang === 'EN'
-                    ? 'The uploaded image is the highest visual/physical authority. Surface settings become auxiliary.'
-                    : '上传图像拥有最高视觉/物理解释权，表层设定自动降级为辅助预设。'
+                    ? 'The engine directly reads the image and decides its narrative function.'
+                    : '引擎直接读取图片，并判断图片在故事中的功能。'
             };
         }
         if (hasTextSeed) {
@@ -249,13 +249,13 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
         }
         if (hasTextSeed && hasImageSeed) {
             return lang === 'EN'
-                ? "Image physics + text meaning -> symptom decoding -> engine mapping"
-                : "图像物理事实 + 文本语义事实 -> 症候解码 -> 引擎映射";
+                ? "Creative text decides image use -> seed decoding -> optional parameter mapping"
+                : "创意灵感裁决图片用法 -> 种子解码 -> 可选参数映射";
         }
         if (hasImageSeed) {
             return lang === 'EN'
-                ? "Image facts -> story reverse -> engine mapping"
-                : "图像事实锁定 -> 故事反推 -> 引擎映射";
+                ? "Image use mode -> story seed decoding -> optional parameter mapping"
+                : "图片策略 -> 故事种子解码 -> 可选参数映射";
         }
         return lang === 'EN'
             ? "Text facts -> story completion -> engine mapping"
@@ -525,7 +525,7 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
                     <div className="flex justify-between items-baseline">
                         <label className={`text-xs font-bold uppercase tracking-widest flex items-center gap-2 ${theme.text}`}>
                             <FileText size={14} className={theme.text} />
-                            {lang === 'EN' ? "2. Image Reading Note" : "2. 图片解析提示"}
+                            {lang === 'EN' ? "3. Image Reading Note" : "3. 图片解析提示"}
                             {visionInput && <span className={`w-1.5 h-1.5 rounded-full ${theme.bg} animate-pulse`}></span>}
                         </label>
                         {visionInput && <button onClick={() => onVisionInputChange("")} className={`text-[9px] hover:text-red-400 uppercase ${currentTheme === 'retro' ? 'text-[var(--text-main)]' : 'text-zinc-300'}`}>{lang === 'EN' ? "Clear" : "清空"}</button>}
@@ -538,8 +538,8 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
                     />
                     <div className={`text-[10px] leading-relaxed ${currentTheme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-500'}`}>
                         {lang === 'EN'
-                            ? 'Global text seed lives in the left Surface Settings panel. This note only guides image interpretation.'
-                            : '全局文本种子在左侧「表层设定」。这里的文字只用于说明图片该如何被读取。'}
+                            ? 'Creative inspiration in the left Surface Settings panel is highest priority. This note only explains how the image should be used.'
+                            : '左侧「创意灵感」是最高优先级。这里的文字只说明图片应该如何被使用。'}
                     </div>
                 </div>
 
@@ -548,7 +548,7 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
                     <div className="flex justify-between items-baseline">
                         <label className={`text-xs font-bold uppercase tracking-widest flex items-center gap-2 ${theme.text}`}>
                             <ScanLine size={16} className={theme.text} />
-                            <span>{lang === 'EN' ? "3. Seed Narrative Decoding" : "3. 种子叙事解码"}</span>
+                            <span>{lang === 'EN' ? "4. Seed Narrative Decoding" : "4. 种子叙事解码"}</span>
                             {visionAnalysis && <span className={`w-1.5 h-1.5 rounded-full ${theme.bg} animate-pulse`}></span>}
                         </label>
                         <div className="flex gap-2">
@@ -567,7 +567,7 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
                         <textarea
                             value={visionAnalysis || ""}
                             onChange={(e) => onVisionAnalysisChange?.(e.target.value)}
-                            placeholder={lang === 'EN' ? "AI will decode locked facts, style, symptom kernel, story hypothesis, and engine hints..." : "AI 将在此处生成：\n1. 源事实锁定\n2. 画面反推提示词\n3. 风格与影调分析\n4. 症候核\n5. 潜在故事梗概\n6. 人物与事件推演..."}
+                            placeholder={lang === 'EN' ? "AI will decode locked facts, style, symptom kernel, story cross-section, story hypothesis, and engine hints..." : "AI 将在此处生成：\n1. 源事实锁定\n2. 画面反推提示词\n3. 风格与影调分析\n4. 症候核\n5. 故事横截面\n6. 潜在故事梗概\n7. 人物与事件推演..."}
                             className={`w-full h-40 ${currentTheme === 'retro' ? `bg-[var(--bg-card)] ${theme.border}/20 text-[var(--text-main)] placeholder-black/30 focus:ring-[var(--text-accent)]/30` : `bg-[var(--bg-panel)] border-[var(--mist-active-accent)]/30 text-zinc-300 placeholder-zinc-500 focus:ring-zinc-700/50`} border-dashed border-2 rounded-xl p-5 text-xs focus:outline-none resize-none font-mono leading-relaxed transition-all ${theme.text} ${theme.focusBorder} focus:shadow-[0_0_15px_rgba(255,255,255,0.02)] custom-scrollbar`}
                         />
                         <div className={`absolute bottom-3 right-3 text-[8px] ${currentTheme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-600'} font-mono pointer-events-none select-none uppercase tracking-widest`}>
@@ -582,7 +582,7 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
                         <div className="flex justify-between items-baseline">
                             <label className={`text-xs font-bold uppercase tracking-widest flex items-center gap-2 ${theme.text}`}>
                                 <Layers size={15} className={theme.text} />
-                                <span>{lang === 'EN' ? "4. Candidate Parameters" : "4. 可选参数"}</span>
+                                <span>{lang === 'EN' ? "5. Candidate Parameters" : "5. 可选参数"}</span>
                                 <span className={`w-1.5 h-1.5 rounded-full ${theme.bg} animate-pulse`}></span>
                             </label>
                             <button
@@ -649,7 +649,7 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
                     </div>
                 )}
 
-                {/* 5. Action Button (Engine Mapping) */}
+                {/* 6. Action Button (Engine Mapping) */}
                 <div className="mt-8">
                     <div className="flex items-center gap-2">
                     <button
@@ -716,10 +716,10 @@ export const VisionSidebar: React.FC<VisionSidebarProps> = ({
 
                     <div className="space-y-3">
                         {[
-                            lang === 'EN' ? 'Text > surface presets' : '文本 > 表层预设',
-                            lang === 'EN' ? 'Image > visual physics' : '图像 > 视觉物理',
-                            lang === 'EN' ? 'SUR = helper presets' : 'SUR = 辅助预设',
-                            lang === 'EN' ? 'M = desire structure' : 'M层 = 爱欲结构'
+                            lang === 'EN' ? 'Creative text > image facts' : '创意灵感 > 图片事实',
+                            lang === 'EN' ? 'Universal image reverse' : '通用图像反推',
+                            lang === 'EN' ? 'Decoded result is editable story seed' : '解析结果是可编辑故事种子',
+                            lang === 'EN' ? 'Mapped parameters are suggestions until applied' : '反推参数应用后才生效'
                         ].map(rule => (
                             <div
                                 key={rule}

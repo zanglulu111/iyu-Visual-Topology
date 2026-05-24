@@ -42,8 +42,10 @@ import {
     AestheticPreset,
     FaceState,
     PromptFocusState,
+    MAxisMixerState,
     M7BResidueIntensity,
     NarrativePromptVersion,
+    VisionImageUseMode,
     MistProject,
     ProjectWorkspaceSnapshot,
     ArchiveSource,
@@ -64,8 +66,8 @@ import { MASTER_PRESETS } from './data/aesthetic/master_presets';
 import * as geminiService from './services/geminiService';
 import * as randomizerService from './services/randomizer';
 import { normalizeWorldLawConfig } from './services/worldLaw';
-
-const DEFAULT_WORLD_LAW_CONFIG: WorldLawConfig = normalizeWorldLawConfig({ gravity: 2 });
+import { buildVisibleFocusPatch, clearFocusForTagsPatch, getAllSelectedTags, getSelectedFocusBlockMap, getSelectedFocusUnitMap } from './utils/focusTerms';
+import { withDefaultSvSelections, SV_DEFAULT_BLOCKS } from './data/engine_sv/defaults';
 
 // 创建 React Query 客户端
 const queryClient = new QueryClient({
@@ -93,8 +95,6 @@ import { supabaseDatabase } from './services/supabaseDatabase';
 import { useSettings } from './contexts/SettingsContext';
 import { SimpleConfigPanel } from './src/components/SimpleConfigPanel';
 import { useTheme } from './contexts/ThemeContext';
-
-
 import { LacanGraphView } from './components/LacanGraphView';
 import { LacanTopologyView } from './components/LacanTopologyView';
 import { ArchiveDirectoryModal } from './components/ArchiveDirectoryModal';
@@ -104,6 +104,51 @@ import { PhilosophyCodexPage } from './components/PhilosophyCodexPage';
 import { PhilosopherPosterIndexPage } from './components/PhilosopherPosterIndexPage';
 import { MistLexiconLandingPage } from './components/MistLexiconLandingPage';
 import { RorschachView } from './components/RorschachView';
+
+const DEFAULT_WORLD_LAW_CONFIG: WorldLawConfig = normalizeWorldLawConfig({ gravity: 2 });
+
+const shouldApplyNarrativeSvDefaults = (driver: DriverType | null | undefined) => (
+    !driver || driver === DriverType.NARRATIVE
+);
+
+const normalizeNarrativeFieldState = (
+    state: NarrativeFieldState | null | undefined,
+    driver: DriverType | null | undefined
+): NarrativeFieldState => {
+    const base = { ...(state || {}) };
+    return shouldApplyNarrativeSvDefaults(driver) ? withDefaultSvSelections(base) : base;
+};
+
+const useDelayedPresence = (isPresent: boolean, delayMs = 520) => {
+    const [shouldRender, setShouldRender] = useState(isPresent);
+    const timerRef = useRef<number | null>(null);
+
+    useEffect(() => {
+        if (timerRef.current !== null) {
+            window.clearTimeout(timerRef.current);
+            timerRef.current = null;
+        }
+
+        if (isPresent) {
+            setShouldRender(true);
+            return;
+        }
+
+        timerRef.current = window.setTimeout(() => {
+            setShouldRender(false);
+            timerRef.current = null;
+        }, delayMs);
+
+        return () => {
+            if (timerRef.current !== null) {
+                window.clearTimeout(timerRef.current);
+                timerRef.current = null;
+            }
+        };
+    }, [isPresent, delayMs]);
+
+    return shouldRender;
+};
 
 // === Undo/Redo Reducer (defined outside component — no stale closures) ===
 type UndoRedoAction =
@@ -194,11 +239,12 @@ const App: React.FC = () => {
     const [aestheticMode, setAestheticMode] = useState<AestheticMode>('REALISM');
     const [lockedModules, setLockedModules] = useState<Record<string, boolean>>({});
     const [lockedTags, setLockedTags] = useState<Record<string, string[]>>({});
-    const [undoRedoState, undoRedoDispatch] = useReducer(undoRedoReducer, { past: [], present: {} as NarrativeFieldState, future: [] });
+    const [undoRedoState, undoRedoDispatch] = useReducer(undoRedoReducer, { past: [], present: withDefaultSvSelections({} as NarrativeFieldState), future: [] });
     const narrativeFieldState = undoRedoState.present;
     const [savedFieldStates, setSavedFieldStates] = useState<Record<string, NarrativeFieldState>>({});
     const [faceState, setFaceState] = useState<FaceState>({});
     const [focusState, setFocusState] = useState<PromptFocusState>({});
+    const [mAxisMixer, setMAxisMixer] = useState<MAxisMixerState>({});
     const [m7bIntensity, setM7bIntensity] = useState<M7BResidueIntensity>('light');
     const [worldLawConfig, setWorldLawConfig] = useState<WorldLawConfig>(DEFAULT_WORLD_LAW_CONFIG);
     const [showRings, setShowRings] = useState(true);
@@ -244,12 +290,17 @@ const App: React.FC = () => {
     const [isPromptInspectorOpen, setIsPromptInspectorOpen] = useState(false);
     const [narrativePromptVersion, setNarrativePromptVersion] = useState<NarrativePromptVersion>('v4');
     const portalTransitionTimersRef = useRef<(number | null)[]>([null, null]);
+    const shouldRenderSkinSidebar = useDelayedPresence(isSkinOpen);
+    const shouldRenderVisionSidebar = useDelayedPresence(isVisionOpen);
+    const shouldRenderAestheticInputSidebar = useDelayedPresence(isAestheticInputOpen);
 
     const [isAutoFilling, setIsAutoFilling] = useState(false);
     const [visionInput, setVisionInput] = useState("");
     const [visionImageNote, setVisionImageNote] = useState("");
+    const [visionImageMode, setVisionImageMode] = useState<VisionImageUseMode>('auto');
     const [visionImage, setVisionImage] = useState<string | null>(null);
     const [visionAnalysis, setVisionAnalysis] = useState("");
+    const [visionImplantEnabled, setVisionImplantEnabled] = useState(true);
     const [visionCandidateState, setVisionCandidateState] = useState<NarrativeFieldState>({});
     const [isAnalyzingImage, setIsAnalyzingImage] = useState(false);
     const [customLibraryDefs, setCustomLibraryDefs] = useState<Record<string, { def: string; core: string }>>({});
@@ -315,8 +366,34 @@ const App: React.FC = () => {
         undoRedoDispatch({ type: 'REDO' });
     };
 
+    const clearFocusForRemovedStateTags = (previousState: NarrativeFieldState, nextState: NarrativeFieldState) => {
+        const nextVisibleTags = new Set(getAllSelectedTags(nextState));
+        const removedTags = Array.from(new Set(getAllSelectedTags(previousState).filter(tag => !nextVisibleTags.has(tag))));
+        if (removedTags.length === 0) return;
+        setFocusState(prev => ({
+            ...prev,
+            ...removedTags.reduce<PromptFocusState>((acc, tag) => {
+                acc[tag] = false;
+                return acc;
+            }, {})
+        }));
+    };
+
+    useEffect(() => {
+        const patch = buildVisibleFocusPatch(
+            focusState,
+            getAllSelectedTags(narrativeFieldState),
+            getSelectedFocusBlockMap(narrativeFieldState)
+        );
+        if (Object.keys(patch).length > 0) {
+            setFocusState(prev => ({ ...prev, ...patch }));
+        }
+    }, [focusState, narrativeFieldState]);
+
     const updateNarrativeState = (newState: NarrativeFieldState) => {
-        undoRedoDispatch({ type: 'PUSH', state: newState });
+        const normalizedState = normalizeNarrativeFieldState(newState, selectedDriver);
+        clearFocusForRemovedStateTags(narrativeFieldState, normalizedState);
+        undoRedoDispatch({ type: 'PUSH', state: normalizedState });
         setActiveHistoryItem(null);
     };
 
@@ -333,12 +410,30 @@ const App: React.FC = () => {
         updateNarrativeState(mergedState);
     };
 
-    const buildVisionTextContext = () => {
+    const buildVisionCreativeContext = () => {
         const parts: string[] = [];
-        if (visionInput.trim()) parts.push(`【全局自定义需求 / 文本种子】\n${visionInput.trim()}`);
+        if (visionInput.trim()) parts.push(`【最高优先级：创意灵感 / 用户补充】\n${visionInput.trim()}`);
+        return parts.join('\n\n');
+    };
+
+    const buildVisionAnalysisContext = () => {
+        const parts: string[] = [];
+        const creativeContext = buildVisionCreativeContext();
+        if (creativeContext) parts.push(creativeContext);
+        if (visionImage) parts.push(`【图像通用反推】\n请根据用户文字与图像本身，自行判断哪些是必须保留的图像事实，哪些只是氛围/构图/材质参考，哪些可以被用户文字替换。用户文字最高优先。`);
         if (visionImageNote.trim()) parts.push(`【图片解析提示】\n${visionImageNote.trim()}`);
         return parts.join('\n\n');
     };
+
+    const buildVisionGenerationContext = (includeImplantContent: boolean = true) => {
+        const parts = [buildVisionCreativeContext()];
+        if (includeImplantContent && visionAnalysis.trim()) parts.push(`【用户确认/可编辑的图片解析结果】\n${visionAnalysis.trim()}`);
+        return parts.filter(Boolean).join('\n\n');
+    };
+
+    const isVisionImplantPayloadEnabled = (snapshotEnabled?: boolean) => (
+        visionImplantEnabled && snapshotEnabled !== false
+    );
 
     const ensureFacesForTags = (tags: string[]) => {
         setFaceState(prev => {
@@ -544,11 +639,14 @@ const App: React.FC = () => {
         visionAnalysis,
         visionImage,
         visionImageNote,
+        visionImageMode,
+        visionImplantEnabled,
         subjectType,
         aestheticMode,
         colorPalette: [...colorPalette],
         faceState: { ...faceState },
         focusState: { ...focusState },
+        mAxisMixer: { ...mAxisMixer },
         m7bIntensity,
         treatments: generatedTreatments,
         activeBlueprint,
@@ -580,15 +678,17 @@ const App: React.FC = () => {
         setCachedBlueprints({});
         setGeneratedTreatments([]);
         setThinkingXml('');
-        undoRedoDispatch({ type: 'SET', state: {} });
+        undoRedoDispatch({ type: 'SET', state: normalizeNarrativeFieldState({}, selectedDriver) });
         setVisionInput('');
         setVisionAnalysis('');
         setVisionImage(null);
         setVisionImageNote('');
+        setVisionImplantEnabled(true);
         setWorldLawConfig(DEFAULT_WORLD_LAW_CONFIG);
         setColorPalette(Array(7).fill(""));
         setFaceState({});
         setFocusState({});
+        setMAxisMixer({});
         setM7bIntensity('light');
         setViewMode('ENGINE');
         setPage(1);
@@ -601,7 +701,7 @@ const App: React.FC = () => {
                 ...createWorkspaceSnapshot('ENGINE'),
                 selectedDriver,
                 viewMode: 'ENGINE' as ViewMode,
-                fieldState: {},
+                fieldState: normalizeNarrativeFieldState({}, selectedDriver),
                 treatments: [],
                 activeBlueprint: null,
                 metonymyBlueprint: null,
@@ -621,17 +721,21 @@ const App: React.FC = () => {
         }
 
         setSelectedDriver(snapshot.selectedDriver || null);
-        undoRedoDispatch({ type: 'SET', state: snapshot.fieldState || {} });
+        const snapshotDriver = snapshot.selectedDriver || null;
+        undoRedoDispatch({ type: 'SET', state: normalizeNarrativeFieldState(snapshot.fieldState || {}, snapshotDriver) });
         setWorldLawConfig(normalizeWorldLawConfig(snapshot.worldLaw || DEFAULT_WORLD_LAW_CONFIG));
         setVisionInput(snapshot.visionInput || '');
         setVisionAnalysis(snapshot.visionAnalysis || '');
         setVisionImage(snapshot.visionImage ?? null);
         setVisionImageNote(snapshot.visionImageNote || '');
+        setVisionImageMode(snapshot.visionImageMode === 'anchor' ? 'anchor' : 'auto');
+        setVisionImplantEnabled(snapshot.visionImplantEnabled !== false);
         setSubjectType(snapshot.subjectType || 'HUMAN');
         setAestheticMode(snapshot.aestheticMode || 'REALISM');
         setColorPalette(snapshot.colorPalette?.length ? snapshot.colorPalette : Array(7).fill(""));
         setFaceState(snapshot.faceState || {});
         setFocusState((snapshot as any).focusState || {});
+        setMAxisMixer(snapshot.mAxisMixer || {});
         setM7bIntensity(snapshot.m7bIntensity || 'light');
         setGeneratedTreatments(snapshot.treatments || []);
         setActiveBlueprint(snapshot.activeBlueprint || null);
@@ -739,11 +843,14 @@ const App: React.FC = () => {
         const snapshotVisionAnalysis = primaryBlueprint?.generationVisionAnalysis ?? activeHistoryItem?.visionAnalysis ?? visionAnalysis;
         const snapshotVisionImage = primaryBlueprint?.generationVisionImage ?? activeHistoryItem?.visionImage ?? visionImage;
         const snapshotVisionImageNote = primaryBlueprint?.generationVisionImageNote ?? activeHistoryItem?.visionImageNote ?? visionImageNote;
+        const snapshotVisionImageMode = primaryBlueprint?.generationVisionImageMode ?? activeHistoryItem?.visionImageMode ?? visionImageMode;
+        const snapshotVisionImplantEnabled = primaryBlueprint?.generationVisionImplantEnabled ?? activeHistoryItem?.visionImplantEnabled ?? visionImplantEnabled;
         const snapshotSubjectType = primaryBlueprint?.generationSubjectType ?? activeHistoryItem?.subjectType ?? subjectType;
         const snapshotAestheticMode = primaryBlueprint?.generationAestheticMode ?? activeHistoryItem?.aestheticMode ?? aestheticMode;
         const snapshotColorPalette = primaryBlueprint?.generationColorPalette ?? activeHistoryItem?.colorPalette ?? [...colorPalette];
         const snapshotFaceState = primaryBlueprint?.generationFaceState ?? activeHistoryItem?.faceState ?? { ...faceState };
         const snapshotFocusState = primaryBlueprint?.generationFocusState ?? activeHistoryItem?.focusState ?? { ...focusState };
+        const snapshotMAxisMixer = primaryBlueprint?.generationMAxisMixer ?? activeHistoryItem?.mAxisMixer ?? { ...mAxisMixer };
         const snapshotM7BIntensity = primaryBlueprint?.generationM7BIntensity ?? activeHistoryItem?.m7bIntensity ?? m7bIntensity;
         const snapshotTreatments = activeHistoryItem?.treatments?.length ? activeHistoryItem.treatments : generatedTreatments;
         const savedBlueprints = bibleBlueprint
@@ -765,11 +872,14 @@ const App: React.FC = () => {
             visionAnalysis: snapshotVisionAnalysis,
             visionImage: snapshotVisionImage,
             visionImageNote: snapshotVisionImageNote,
+            visionImageMode: snapshotVisionImageMode,
+            visionImplantEnabled: snapshotVisionImplantEnabled,
             subjectType: snapshotSubjectType,
             aestheticMode: snapshotAestheticMode,
             colorPalette: [...snapshotColorPalette],
             faceState: { ...snapshotFaceState },
             focusState: { ...snapshotFocusState },
+            mAxisMixer: { ...snapshotMAxisMixer },
             m7bIntensity: snapshotM7BIntensity,
             blueprint: primaryBlueprint,
             metonymyBlueprint: scriptBlueprint,
@@ -1002,7 +1112,7 @@ const App: React.FC = () => {
         setViewMode(id === DriverType.TRAILER ? 'CANVAS' : id === DriverType.EXPERIMENTAL ? 'METONYMY' : 'ENGINE');
         setLockedModules({});
         setLockedTags({});
-        const newFieldState = savedFieldStates[id] || {};
+        const newFieldState = normalizeNarrativeFieldState(savedFieldStates[id] || {}, id);
         undoRedoDispatch({ type: 'SET', state: newFieldState });
         setActiveHistoryItem(null);
         setGeneratedTreatments([]);
@@ -1088,13 +1198,15 @@ const App: React.FC = () => {
         setIsAutoFilling(true); setVisionStartTime(Date.now());
         try {
             setVisionCandidateState({});
-            let currentAnalysis = visionAnalysis;
-            const visionTextContext = buildVisionTextContext();
+            const implantPayloadEnabled = visionImplantEnabled;
+            let currentAnalysis = implantPayloadEnabled ? visionAnalysis : '';
+            const visionTextContext = implantPayloadEnabled ? buildVisionAnalysisContext() : buildVisionCreativeContext();
+            const visionPayloadImage = implantPayloadEnabled ? visionImage : null;
             if (selectedDriver === DriverType.AESTHETIC) {
-                if (visionTextContext || visionImage) {
+                if (implantPayloadEnabled && (visionTextContext || visionPayloadImage)) {
                     setIsAnalyzingImage(true);
                     try {
-                        const directive = await generateAestheticReverse(visionTextContext, visionImage);
+                        const directive = await generateAestheticReverse(visionTextContext, visionPayloadImage);
                         currentAnalysis = directive;
                         setVisionAnalysis(directive);
                     } catch (e) {
@@ -1103,30 +1215,30 @@ const App: React.FC = () => {
                         setIsAnalyzingImage(false);
                     }
                 }
-                const result = await geminiService.generateNarrativeAutoFill(selectedDriver, visionTextContext, visionImage, currentAnalysis);
+                const result = await geminiService.generateNarrativeAutoFill(selectedDriver, visionTextContext, visionPayloadImage, currentAnalysis);
                 setVisionCandidateState(result);
                 return;
             }
 
-            if (selectedDriver === DriverType.COMMERCIAL) {
+            if (implantPayloadEnabled && selectedDriver === DriverType.COMMERCIAL) {
                 setIsAnalyzingImage(true);
                 try {
-                    const diagnosis = await geminiService.analyzeImage(visionImage, visionTextContext);
+                    const diagnosis = await geminiService.analyzeImage(visionPayloadImage, visionTextContext);
                     currentAnalysis = diagnosis;
                     setVisionAnalysis(diagnosis);
                 } catch (e) { console.error("Narrative diagnosis failed", e); }
                 finally { setIsAnalyzingImage(false); }
-            } else if (visionImage) {
+            } else if (implantPayloadEnabled && visionPayloadImage) {
                 setIsAnalyzingImage(true);
                 try {
-                    const result = await geminiService.analyzeImage(visionImage, visionTextContext);
+                    const result = await geminiService.analyzeImage(visionPayloadImage, visionTextContext);
                     currentAnalysis = result;
                     setVisionAnalysis(result);
                 } catch (e) { console.error("Image analysis failed", e); }
                 finally { setIsAnalyzingImage(false); }
             }
 
-            const result = await geminiService.generateNarrativeAutoFill(selectedDriver, visionTextContext, visionImage, currentAnalysis);
+            const result = await geminiService.generateNarrativeAutoFill(selectedDriver, visionTextContext, visionPayloadImage, currentAnalysis);
             setVisionCandidateState(result);
 
         } catch (e) {
@@ -1139,7 +1251,8 @@ const App: React.FC = () => {
     };
 
     const handleAnalyzeImage = async () => {
-        const visionTextContext = buildVisionTextContext();
+        if (!visionImplantEnabled) return;
+        const visionTextContext = buildVisionAnalysisContext();
         if (!visionImage && !visionTextContext && selectedDriver !== DriverType.COMMERCIAL && selectedDriver !== DriverType.NARRATIVE && selectedDriver !== DriverType.AESTHETIC) return;
 
         if (!(await checkAndDeductToken(1))) return;
@@ -1231,10 +1344,24 @@ const App: React.FC = () => {
         updateNarrativeState(newState);
     };
 
+    const randomizeNarrativeGenerationControls = (newState: NarrativeFieldState, mode: 'global' | 'formula') => {
+        if (selectedDriver !== DriverType.NARRATIVE) return;
+        const nextFocusState = randomizerService.randomizePromptFocusState(
+            newState,
+            mode,
+            mode === 'formula' ? focusState : undefined
+        );
+        setFocusState(nextFocusState);
+        setMAxisMixer(randomizerService.randomizeMAxisMixerState(newState, nextFocusState));
+        setM7bIntensity(randomizerService.randomizeM7BResidueIntensity(newState));
+    };
+
     const handleGlobalRandomize = () => {
         if (!selectedDriver) return;
         const newState = randomizerService.generateGlobalRandomState(selectedDriver, narrativeFieldState, lockedModules, lockedTags);
         updateNarrativeState(newState);
+        randomizeNarrativeGenerationControls(newState, 'global');
+        setWorldLawConfig(prev => randomizerService.randomizeWorldLawConfig(prev));
         ensureFacesForTags(Object.values(newState).flat());
     };
 
@@ -1299,6 +1426,7 @@ const App: React.FC = () => {
         if (!selectedDriver) return;
         const newState = randomizerService.randomizeFormulaState(selectedDriver, narrativeFieldState, lockedModules, lockedTags, subjectType, aestheticMode);
         updateNarrativeState(newState);
+        randomizeNarrativeGenerationControls(newState, 'formula');
 
         const allTags = Object.values(newState).flat();
         ensureFacesForTags(allTags);
@@ -1500,15 +1628,15 @@ const App: React.FC = () => {
         // Use the weighted surface filter to determine which blocks participate
         const participants = randomizerService.weightedSurfaceFilter(lockedModules, false);
         // For each participating block, randomize it individually
-        const summaryBlocks = ['skin_genre', 'skin_structure', 'skin_volume', 'skin_era', 'skin_society', 'skin_age', 'skin_gender', 'skin_profession', 'sur10x', 'skin_ideology', 'skin_everything', 'skin_location', 'skin_ending'];
+        const summaryBlocks = ['skin_genre', 'skin_era', 'skin_society', 'skin_age', 'skin_gender', 'skin_profession', 'sur10x', 'skin_ideology', 'skin_everything', 'skin_location', 'skin_ending'];
         const newState = { ...narrativeFieldState };
 
         summaryBlocks.forEach(blockId => {
             if (lockedModules[blockId]) return;
 
             let keepOld = true;
-            // skin_age / skin_structure / skin_volume are not in the 12-word filter, give them an independent 50% chance
-            if (blockId === 'skin_age' || blockId === 'skin_structure' || blockId === 'skin_volume') {
+            // skin_age is not in the 12-word filter, give it an independent 50% chance.
+            if (blockId === 'skin_age') {
                 if (Math.random() >= 0.5) keepOld = false;
             } else {
                 // Check if this block passed the weighted filter
@@ -1538,13 +1666,22 @@ const App: React.FC = () => {
                 const locks = getVisibleLockedTags(blockId);
                 const keptTags = (newState[blockId] || []).filter(t => locks.includes(t));
                 const needed = Math.max(0, targetCount - keptTags.length);
-                const available = genreItems.filter(i => !keptTags.includes(i.name));
+                const previousTags = new Set(narrativeFieldState[blockId] || []);
+                const available = genreItems.filter(i => !keptTags.includes(i.name) && !previousTags.has(i.name));
                 const selected: string[] = [];
                 for (let i = 0; i < needed; i++) {
                     if (available.length === 0) break;
                     const idx = Math.floor(Math.random() * available.length);
                     selected.push(available[idx].name);
                     available.splice(idx, 1);
+                }
+                if (selected.length < needed) {
+                    const fallback = genreItems
+                        .filter(i => !keptTags.includes(i.name) && !selected.includes(i.name))
+                        .sort(() => 0.5 - Math.random())
+                        .slice(0, needed - selected.length)
+                        .map(i => i.name);
+                    selected.push(...fallback);
                 }
                 newState[blockId] = [...keptTags, ...selected];
                 return;
@@ -1710,7 +1847,16 @@ const App: React.FC = () => {
         if (lockedModules[blockId]) return;
         const locks = getVisibleLockedTags(blockId);
         const newState = { ...narrativeFieldState };
-        newState[blockId] = (newState[blockId] || []).filter(tag => locks.includes(tag));
+        const current = newState[blockId] || [];
+        const nextTags = current.filter(tag => locks.includes(tag));
+        const removedTags = current.filter(tag => !nextTags.includes(tag));
+        if (removedTags.length > 0) {
+            setFocusState(prev => ({ ...prev, ...clearFocusForTagsPatch(blockId, removedTags) }));
+        }
+        newState[blockId] = nextTags;
+        if (shouldApplyNarrativeSvDefaults(selectedDriver) && (SV_DEFAULT_BLOCKS as readonly string[]).includes(blockId)) {
+            Object.assign(newState, withDefaultSvSelections(newState));
+        }
         updateNarrativeState(newState);
         pruneTagLocksToVisibleState([blockId], newState);
     };
@@ -1726,6 +1872,7 @@ const App: React.FC = () => {
         if (getVisibleLockedTags(blockId).includes(tag)) return;
         const rawCurrent = narrativeFieldState[blockId];
         const current = Array.isArray(rawCurrent) ? rawCurrent : (rawCurrent ? [String(rawCurrent)] : []);
+        setFocusState(prev => ({ ...prev, ...clearFocusForTagsPatch(blockId, [tag]) }));
         handleNarrativeChange({
             ...narrativeFieldState,
             [blockId]: current.filter(t => t !== tag)
@@ -1803,6 +1950,7 @@ const App: React.FC = () => {
                     delete next[tag];
                     return next;
                 });
+                setFocusState(prev => ({ ...prev, ...clearFocusForTagsPatch(blockId, [tag]) }));
             }
             return;
         }
@@ -1810,6 +1958,7 @@ const App: React.FC = () => {
         if (current.includes(tag)) {
             if (visibleLocks.includes(tag)) return;
             newState[blockId] = current.filter(t => t !== tag);
+            setFocusState(prev => ({ ...prev, ...clearFocusForTagsPatch(blockId, [tag]) }));
             // Remove face state when deselecting
             setFaceState(prev => {
                 const next = { ...prev };
@@ -1895,9 +2044,13 @@ const App: React.FC = () => {
 
         setFaceState(prev => {
             const next = { ...prev };
-            current.filter(tag => !normalized.includes(tag)).forEach(tag => {
+            const removedTags = current.filter(tag => !normalized.includes(tag));
+            removedTags.forEach(tag => {
                 delete next[tag];
             });
+            if (removedTags.length > 0) {
+                setFocusState(prevFocus => ({ ...prevFocus, ...clearFocusForTagsPatch(blockId, removedTags) }));
+            }
             return next;
         });
     };
@@ -1947,20 +2100,25 @@ const App: React.FC = () => {
             return lang === 'EN' ? "GENERATE DIVERGENCES" : "生成分歧点";
         })();
         try {
+            const traverseVisionAnalysis = visionImplantEnabled ? visionAnalysis : '';
+            const traverseVisionImage = visionImplantEnabled
+                ? (selectedDriver === DriverType.NARRATIVE && traverseVisionAnalysis.trim() ? null : visionImage)
+                : null;
             const result = await geminiService.generateFantasyTraverse(
                 selectedDriver,
                 "SHORT",
                 narrativeFieldState,
-                visionInput,
-                visionImage,
+                buildVisionGenerationContext(visionImplantEnabled),
+                traverseVisionImage,
                 worldLawConfig,
                 subjectType,
-                visionAnalysis,
+                traverseVisionAnalysis,
                 colorPalette.filter(c => c !== ""),
                 faceState,
                 focusState,
                 narrativePromptVersion,
                 traverseTaskName,
+                mAxisMixer,
                 m7bIntensity
             );
             const treatments = result.treatments;
@@ -1988,11 +2146,14 @@ const App: React.FC = () => {
                     visionAnalysis: visionAnalysis,
                     visionImage: visionImage,
                     visionImageNote: visionImageNote,
+                    visionImageMode: visionImageMode,
+                    visionImplantEnabled,
                     subjectType: subjectType,
                     aestheticMode: aestheticMode,
                     colorPalette: [...colorPalette],
                     faceState: { ...faceState },
                     focusState: { ...focusState },
+                    mAxisMixer: { ...mAxisMixer },
                     m7bIntensity,
                     blueprint: null,
                     treatments: treatmentsWithIds,
@@ -2087,11 +2248,14 @@ const App: React.FC = () => {
                 generationVisionAnalysis: blueprint.generationVisionAnalysis ?? activeBlueprint?.generationVisionAnalysis ?? activeHistoryItem?.visionAnalysis,
                 generationVisionImage: blueprint.generationVisionImage ?? activeBlueprint?.generationVisionImage ?? activeHistoryItem?.visionImage,
                 generationVisionImageNote: blueprint.generationVisionImageNote ?? activeBlueprint?.generationVisionImageNote ?? activeHistoryItem?.visionImageNote,
+                generationVisionImageMode: blueprint.generationVisionImageMode ?? activeBlueprint?.generationVisionImageMode ?? activeHistoryItem?.visionImageMode,
+                generationVisionImplantEnabled: blueprint.generationVisionImplantEnabled ?? activeBlueprint?.generationVisionImplantEnabled ?? activeHistoryItem?.visionImplantEnabled ?? visionImplantEnabled,
                 generationSubjectType: blueprint.generationSubjectType ?? activeBlueprint?.generationSubjectType ?? activeHistoryItem?.subjectType,
                 generationAestheticMode: blueprint.generationAestheticMode ?? activeBlueprint?.generationAestheticMode ?? activeHistoryItem?.aestheticMode,
                 generationColorPalette: blueprint.generationColorPalette ?? activeBlueprint?.generationColorPalette ?? activeHistoryItem?.colorPalette,
                 generationFaceState: blueprint.generationFaceState ?? activeBlueprint?.generationFaceState ?? activeHistoryItem?.faceState,
                 generationFocusState: (blueprint as any).generationFocusState ?? activeBlueprint?.generationFocusState ?? activeHistoryItem?.focusState,
+                generationMAxisMixer: blueprint.generationMAxisMixer ?? activeBlueprint?.generationMAxisMixer ?? activeHistoryItem?.mAxisMixer,
                 generationM7BIntensity: blueprint.generationM7BIntensity ?? activeBlueprint?.generationM7BIntensity ?? activeHistoryItem?.m7bIntensity
             };
 
@@ -2113,11 +2277,14 @@ const App: React.FC = () => {
         const snapshotVisionAnalysis = blueprint.generationVisionAnalysis ?? activeHistoryItem?.visionAnalysis ?? visionAnalysis;
         const snapshotVisionImage = blueprint.generationVisionImage ?? activeHistoryItem?.visionImage ?? visionImage;
         const snapshotVisionImageNote = blueprint.generationVisionImageNote ?? activeHistoryItem?.visionImageNote ?? visionImageNote;
+        const snapshotVisionImageMode = blueprint.generationVisionImageMode ?? activeHistoryItem?.visionImageMode ?? visionImageMode;
+        const snapshotVisionImplantEnabled = blueprint.generationVisionImplantEnabled ?? activeHistoryItem?.visionImplantEnabled ?? visionImplantEnabled;
         const snapshotSubjectType = blueprint.generationSubjectType ?? activeHistoryItem?.subjectType ?? subjectType;
         const snapshotAestheticMode = blueprint.generationAestheticMode ?? activeHistoryItem?.aestheticMode ?? aestheticMode;
         const snapshotColorPalette = blueprint.generationColorPalette ?? activeHistoryItem?.colorPalette ?? [...colorPalette];
         const snapshotFaceState = blueprint.generationFaceState ?? activeHistoryItem?.faceState ?? { ...faceState };
         const snapshotFocusState = (blueprint as any).generationFocusState ?? activeHistoryItem?.focusState ?? { ...focusState };
+        const snapshotMAxisMixer = blueprint.generationMAxisMixer ?? activeHistoryItem?.mAxisMixer ?? { ...mAxisMixer };
         const snapshotM7BIntensity = blueprint.generationM7BIntensity ?? activeHistoryItem?.m7bIntensity ?? m7bIntensity;
         const snapshotTreatments = activeHistoryItem?.treatments?.length ? activeHistoryItem.treatments : generatedTreatments;
 
@@ -2138,11 +2305,14 @@ const App: React.FC = () => {
                 visionAnalysis: snapshotVisionAnalysis,
                 visionImage: snapshotVisionImage,
                 visionImageNote: snapshotVisionImageNote,
+                visionImageMode: snapshotVisionImageMode,
+                visionImplantEnabled: snapshotVisionImplantEnabled,
                 subjectType: snapshotSubjectType,
                 aestheticMode: snapshotAestheticMode,
                 colorPalette: [...snapshotColorPalette],
                 faceState: { ...snapshotFaceState },
                 focusState: { ...snapshotFocusState },
+                mAxisMixer: { ...snapshotMAxisMixer },
                 m7bIntensity: snapshotM7BIntensity,
                 blueprint: storyBlueprintForItem || blueprint,
                 metonymyBlueprint: blueprint,
@@ -2182,11 +2352,14 @@ const App: React.FC = () => {
                 visionAnalysis: snapshotVisionAnalysis,
                 visionImage: snapshotVisionImage,
                 visionImageNote: snapshotVisionImageNote,
+                visionImageMode: snapshotVisionImageMode,
+                visionImplantEnabled: snapshotVisionImplantEnabled,
                 subjectType: snapshotSubjectType,
                 aestheticMode: snapshotAestheticMode,
                 colorPalette: [...snapshotColorPalette],
                 faceState: { ...snapshotFaceState },
                 focusState: { ...snapshotFocusState },
+                mAxisMixer: { ...snapshotMAxisMixer },
                 m7bIntensity: snapshotM7BIntensity,
                 blueprint,
                 treatments: snapshotTreatments,
@@ -2222,11 +2395,14 @@ const App: React.FC = () => {
             visionAnalysis: item.visionAnalysis ?? item.blueprint?.generationVisionAnalysis,
             visionImage: item.visionImage ?? item.blueprint?.generationVisionImage,
             visionImageNote: item.visionImageNote ?? item.blueprint?.generationVisionImageNote,
+            visionImageMode: item.visionImageMode ?? item.blueprint?.generationVisionImageMode,
+            visionImplantEnabled: item.visionImplantEnabled ?? item.blueprint?.generationVisionImplantEnabled,
             subjectType: item.subjectType || item.blueprint?.generationSubjectType,
             aestheticMode: item.aestheticMode || item.blueprint?.generationAestheticMode,
             colorPalette: item.colorPalette || item.blueprint?.generationColorPalette,
             faceState: item.faceState || item.blueprint?.generationFaceState,
             focusState: item.focusState || (item.blueprint as any)?.generationFocusState,
+            mAxisMixer: item.mAxisMixer || item.blueprint?.generationMAxisMixer,
             m7bIntensity: item.m7bIntensity || item.blueprint?.generationM7BIntensity,
             metonymyBlueprint: item.metonymyBlueprint || null,
             treatments: item.treatments || [],
@@ -2238,7 +2414,7 @@ const App: React.FC = () => {
             setActiveProjectId(normalizedItem.projectId);
             localStorage.setItem(ACTIVE_PROJECT_STORAGE_KEY, normalizedItem.projectId);
         }
-        undoRedoDispatch({ type: 'SET', state: normalizedItem.fieldState || {} });
+        undoRedoDispatch({ type: 'SET', state: normalizeNarrativeFieldState(normalizedItem.fieldState || {}, normalizedItem.driverId) });
         setSelectedDriver(normalizedItem.driverId);
 
         // Restore all other parameters including vision symptoms (植入症候)
@@ -2246,12 +2422,15 @@ const App: React.FC = () => {
         if (normalizedItem.visionAnalysis !== undefined) setVisionAnalysis(normalizedItem.visionAnalysis);
         if (normalizedItem.visionImage !== undefined) setVisionImage(normalizedItem.visionImage);
         if (normalizedItem.visionImageNote !== undefined) setVisionImageNote(normalizedItem.visionImageNote);
+        if (normalizedItem.visionImageMode !== undefined) setVisionImageMode(normalizedItem.visionImageMode === 'anchor' ? 'anchor' : 'auto');
+        setVisionImplantEnabled(normalizedItem.visionImplantEnabled !== false);
         if (normalizedItem.worldLaw) setWorldLawConfig(normalizeWorldLawConfig(normalizedItem.worldLaw));
         if (normalizedItem.subjectType) setSubjectType(normalizedItem.subjectType);
         if (normalizedItem.aestheticMode) setAestheticMode(normalizedItem.aestheticMode);
         if (normalizedItem.colorPalette) setColorPalette(normalizedItem.colorPalette);
         if (normalizedItem.faceState) setFaceState(normalizedItem.faceState);
         if ((normalizedItem as any).focusState) setFocusState((normalizedItem as any).focusState);
+        setMAxisMixer(normalizedItem.mAxisMixer || {});
         setM7bIntensity(normalizedItem.m7bIntensity || 'light');
 
         if (normalizedItem.type === 'METONYMY') {
@@ -2305,14 +2484,18 @@ const App: React.FC = () => {
             const snapshotFieldState = { ...narrativeFieldState };
             const snapshotWorldLaw = activeHistoryItem?.worldLaw || { ...worldLawConfig };
             const snapshotVisionInput = activeHistoryItem?.visionInput ?? visionInput;
-            const snapshotVisionAnalysis = activeHistoryItem?.visionAnalysis ?? visionAnalysis;
-            const snapshotVisionImage = activeHistoryItem?.visionImage ?? visionImage;
-            const snapshotVisionImageNote = activeHistoryItem?.visionImageNote ?? visionImageNote;
+            const snapshotVisionImplantEnabled = activeHistoryItem?.visionImplantEnabled ?? visionImplantEnabled;
+            const shouldSendVisionImplant = isVisionImplantPayloadEnabled(snapshotVisionImplantEnabled);
+            const snapshotVisionAnalysis = shouldSendVisionImplant ? (activeHistoryItem?.visionAnalysis ?? visionAnalysis) : '';
+            const snapshotVisionImage = shouldSendVisionImplant ? (activeHistoryItem?.visionImage ?? visionImage) : null;
+            const snapshotVisionImageNote = shouldSendVisionImplant ? (activeHistoryItem?.visionImageNote ?? visionImageNote) : '';
+            const snapshotVisionImageMode = activeHistoryItem?.visionImageMode ?? visionImageMode;
             const snapshotSubjectType = activeHistoryItem?.subjectType ?? subjectType;
             const snapshotAestheticMode = activeHistoryItem?.aestheticMode ?? aestheticMode;
             const snapshotColorPalette = activeHistoryItem?.colorPalette ?? [...colorPalette];
             const snapshotFaceState = activeHistoryItem?.faceState ?? { ...faceState };
             const snapshotFocusState = activeHistoryItem?.focusState ?? { ...focusState };
+            const snapshotMAxisMixer = activeHistoryItem?.mAxisMixer ?? { ...mAxisMixer };
             const snapshotM7BIntensity = activeHistoryItem?.m7bIntensity ?? m7bIntensity;
 
             const bp = await geminiService.generateBlueprint(
@@ -2326,6 +2509,7 @@ const App: React.FC = () => {
                 snapshotVisionAnalysis,
                 snapshotColorPalette.filter(c => c !== ""),
                 snapshotFocusState,
+                snapshotMAxisMixer,
                 snapshotM7BIntensity
             );
             if (bp) {
@@ -2338,11 +2522,14 @@ const App: React.FC = () => {
                     generationVisionAnalysis: snapshotVisionAnalysis,
                     generationVisionImage: snapshotVisionImage,
                     generationVisionImageNote: snapshotVisionImageNote,
+                    generationVisionImageMode: snapshotVisionImageMode,
+                    generationVisionImplantEnabled: snapshotVisionImplantEnabled,
                     generationSubjectType: snapshotSubjectType,
                     generationAestheticMode: snapshotAestheticMode,
                     generationColorPalette: [...snapshotColorPalette],
                     generationFaceState: { ...snapshotFaceState },
                     generationFocusState: { ...snapshotFocusState },
+                    generationMAxisMixer: { ...snapshotMAxisMixer },
                     generationM7BIntensity: snapshotM7BIntensity
                 };
                 setCachedBlueprints(prev => ({ ...prev, [treatment.id]: blueprintWithSnapshot }));
@@ -2779,26 +2966,33 @@ const App: React.FC = () => {
                                         onFocusStateChange={(locks) => {
                                             setFocusState(prev => ({ ...prev, ...locks }));
                                         }}
+                                        mAxisMixer={mAxisMixer}
+                                        onMAxisMixerChange={setMAxisMixer}
                                         m7bIntensity={m7bIntensity}
                                         onM7BIntensityChange={setM7bIntensity}
                                         customTextSeed={visionInput}
                                         onCustomTextSeedChange={(value) => {
                                             setVisionInput(value);
+                                            setVisionAnalysis('');
                                             setVisionCandidateState({});
                                         }}
                                         onRandomizeSummaryGroup={handleRandomizeSummaryGroup}
                                         visionImage={visionImage}
                                         onVisionImageChange={(value) => {
                                             setVisionImage(value);
+                                            setVisionAnalysis('');
                                             setVisionCandidateState({});
                                         }}
                                         visionImageNote={visionImageNote}
                                         onVisionImageNoteChange={(value) => {
                                             setVisionImageNote(value);
+                                            setVisionAnalysis('');
                                             setVisionCandidateState({});
                                         }}
                                         visionAnalysis={visionAnalysis}
                                         onVisionAnalysisChange={setVisionAnalysis}
+                                        visionImplantEnabled={visionImplantEnabled}
+                                        onVisionImplantEnabledChange={setVisionImplantEnabled}
                                         onAnalyzeImage={handleAnalyzeImage}
                                         isAnalyzingImage={isAnalyzingImage}
                                         onVisionAutoFill={handleVisionAutoFill}
@@ -2853,10 +3047,13 @@ const App: React.FC = () => {
                                         fieldState={generatedTreatments.length > 0 ? narrativeFieldState : {}}
                                         overviewFieldState={generatedTreatments.length > 0 ? (activeHistoryItem?.fieldState || narrativeFieldState) : {}}
                                         visionInput={generatedTreatments.length > 0 ? (activeHistoryItem?.visionInput || '') : ''}
-                                        visionAnalysis={generatedTreatments.length > 0 ? (activeHistoryItem?.visionAnalysis || '') : ''}
+                                        visionAnalysis={generatedTreatments.length > 0 && isVisionImplantPayloadEnabled(activeHistoryItem?.visionImplantEnabled) ? (activeHistoryItem?.visionAnalysis || '') : ''}
+                                        visionImage={generatedTreatments.length > 0 && isVisionImplantPayloadEnabled(activeHistoryItem?.visionImplantEnabled) ? (activeHistoryItem?.visionImage || visionImage) : null}
                                         thinkingXml={thinkingXml}
                                         worldLawConfig={activeHistoryItem?.worldLaw || worldLawConfig}
                                         overviewWorldLawConfig={activeHistoryItem?.worldLaw || worldLawConfig}
+                                        focusState={activeHistoryItem?.focusState || focusState}
+                                        mAxisMixer={activeHistoryItem?.mAxisMixer || mAxisMixer}
                                         m7bIntensity={activeHistoryItem?.m7bIntensity || m7bIntensity}
                                         onToggleTag={handleToggleTag}
                                         onSetTags={handleSetBlockTags}
@@ -2896,7 +3093,9 @@ const App: React.FC = () => {
                                         selectedDriver={selectedDriver || DriverType.NARRATIVE}
                                         worldLaw={activeBlueprint?.generationWorldLaw || activeHistoryItem?.worldLaw || {}}
                                         visionInput={activeBlueprint?.generationVisionInput || activeHistoryItem?.visionInput || ''}
-                                        visionAnalysis={activeBlueprint?.generationVisionAnalysis || activeHistoryItem?.visionAnalysis || ''}
+                                        visionAnalysis={isVisionImplantPayloadEnabled(activeBlueprint?.generationVisionImplantEnabled ?? activeHistoryItem?.visionImplantEnabled)
+                                            ? (activeBlueprint?.generationVisionAnalysis || activeHistoryItem?.visionAnalysis || '')
+                                            : ''}
                                         subjectType={activeBlueprint?.generationSubjectType || activeHistoryItem?.subjectType || subjectType}
                                         aestheticMode={activeBlueprint?.generationAestheticMode || activeHistoryItem?.aestheticMode || aestheticMode}
                                         customLibraryDefs={customLibraryDefs}
@@ -2985,76 +3184,88 @@ const App: React.FC = () => {
                             />
                         )}
 
-                        <TheSkinSidebar
-                            fieldState={narrativeFieldState}
-                            onOpenLibrary={openLibrary}
-                            onRemoveTag={removeTag}
-                            isOpen={isSkinOpen}
-                            onClose={() => setIsSkinOpen(false)}
-                            onRandomize={handleRandomizeSkinOnly}
-                            onReset={handleResetSkinOnly}
-                            lang={lang}
-                            driverType={selectedDriver || DriverType.NARRATIVE}
-                            lockedModules={lockedModules}
-                            onToggleLock={handleToggleLock}
-                            lockedTags={lockedTags}
-                            onToggleTagLock={handleToggleTagLock}
-                            onRandomizeTag={handleRandomizeTag}
-                            getItemDetails={getItemDetails}
-                            onRandomizeBlock={handleRandomizeBlock}
-                            onClearBlock={handleClearBlock}
-                            onUpdateState={updateNarrativeState}
-                            onAddCustomDef={handleAddCustomDef}
-                            onEditCustomDef={handleEditCustomDef}
-                            zIndex={topSidebar === 'skin' ? 70 : 60}
-                            onRandomizeSummaryGroup={handleRandomizeSummaryGroup}
-                            onRandomizeStructureGroup={handleRandomizeStructureGroup}
-                            customTextSeed={visionInput}
-                            onCustomTextSeedChange={(value) => {
-                                setVisionInput(value);
-                                setVisionCandidateState({});
-                            }}
-                        />
+                        {shouldRenderSkinSidebar && (
+                            <TheSkinSidebar
+                                fieldState={narrativeFieldState}
+                                onOpenLibrary={openLibrary}
+                                onRemoveTag={removeTag}
+                                isOpen={isSkinOpen}
+                                onClose={() => setIsSkinOpen(false)}
+                                onRandomize={handleRandomizeSkinOnly}
+                                onReset={handleResetSkinOnly}
+                                lang={lang}
+                                driverType={selectedDriver || DriverType.NARRATIVE}
+                                lockedModules={lockedModules}
+                                onToggleLock={handleToggleLock}
+                                lockedTags={lockedTags}
+                                onToggleTagLock={handleToggleTagLock}
+                                onRandomizeTag={handleRandomizeTag}
+                                getItemDetails={getItemDetails}
+                                onRandomizeBlock={handleRandomizeBlock}
+                                onClearBlock={handleClearBlock}
+                                onUpdateState={updateNarrativeState}
+                                onAddCustomDef={handleAddCustomDef}
+                                onEditCustomDef={handleEditCustomDef}
+                                zIndex={topSidebar === 'skin' ? 70 : 60}
+                                onRandomizeSummaryGroup={handleRandomizeSummaryGroup}
+                                onRandomizeStructureGroup={handleRandomizeStructureGroup}
+                                customTextSeed={visionInput}
+                                onCustomTextSeedChange={(value) => {
+                                    setVisionInput(value);
+                                    setVisionCandidateState({});
+                                }}
+                                focusState={focusState}
+                                onFocusStateChange={(locks) => {
+                                    setFocusState(prev => ({ ...prev, ...locks }));
+                                }}
+                            />
+                        )}
 
-                        <VisionSidebar
-                            isOpen={isVisionOpen}
-                            onClose={() => setIsVisionOpen(false)}
-                            visionInput={visionImageNote}
-                            onVisionInputChange={(value) => {
-                                setVisionImageNote(value);
-                                setVisionCandidateState({});
-                            }}
-                            analysisTextContext={buildVisionTextContext()}
-                            visionImage={visionImage}
-                            onVisionImageChange={(value) => {
-                                setVisionImage(value);
-                                setVisionCandidateState({});
-                            }}
-                            onAutoFill={handleVisionAutoFill}
-                            onGenerateImage={handleVisionImageGenerate}
-                            isAutoFilling={isAutoFilling}
-                            visionStartTime={visionStartTime}
-                            lang={lang}
-                            driverType={selectedDriver || DriverType.NARRATIVE}
-                            visionAnalysis={visionAnalysis}
-                            onVisionAnalysisChange={setVisionAnalysis}
-                            onAnalyzeImage={handleAnalyzeImage}
-                            isAnalyzingImage={isAnalyzingImage}
-                            isAdmin={isAdmin}
-                            zIndex={topSidebar === 'vision' ? 70 : 60}
-                            candidateState={visionCandidateState}
-                            onApplyCandidateState={applyVisionCandidateState}
-                            onClearCandidateState={() => setVisionCandidateState({})}
-                        />
+                        {shouldRenderVisionSidebar && (
+                            <VisionSidebar
+                                isOpen={isVisionOpen}
+                                onClose={() => setIsVisionOpen(false)}
+                                visionInput={visionImageNote}
+                                onVisionInputChange={(value) => {
+                                    setVisionImageNote(value);
+                                    setVisionAnalysis('');
+                                    setVisionCandidateState({});
+                                }}
+                                analysisTextContext={visionImplantEnabled ? buildVisionAnalysisContext() : buildVisionCreativeContext()}
+                                visionImage={visionImage}
+                                onVisionImageChange={(value) => {
+                                    setVisionImage(value);
+                                    setVisionAnalysis('');
+                                    setVisionCandidateState({});
+                                }}
+                                onAutoFill={handleVisionAutoFill}
+                                onGenerateImage={handleVisionImageGenerate}
+                                isAutoFilling={isAutoFilling}
+                                visionStartTime={visionStartTime}
+                                lang={lang}
+                                driverType={selectedDriver || DriverType.NARRATIVE}
+                                visionAnalysis={visionAnalysis}
+                                onVisionAnalysisChange={setVisionAnalysis}
+                                onAnalyzeImage={handleAnalyzeImage}
+                                isAnalyzingImage={isAnalyzingImage}
+                                isAdmin={isAdmin}
+                                zIndex={topSidebar === 'vision' ? 70 : 60}
+                                candidateState={visionCandidateState}
+                                onApplyCandidateState={applyVisionCandidateState}
+                                onClearCandidateState={() => setVisionCandidateState({})}
+                            />
+                        )}
 
-                        <AestheticInputSidebar
-                            isOpen={isAestheticInputOpen}
-                            onClose={() => setIsAestheticInputOpen(false)}
-                            onAnalyzeAndMap={handleAestheticInputMap}
-                            isProcessing={isMappingInput}
-                            lang={lang}
-                            isAdmin={isAdmin}
-                        />
+                        {shouldRenderAestheticInputSidebar && (
+                            <AestheticInputSidebar
+                                isOpen={isAestheticInputOpen}
+                                onClose={() => setIsAestheticInputOpen(false)}
+                                onAnalyzeAndMap={handleAestheticInputMap}
+                                isProcessing={isMappingInput}
+                                lang={lang}
+                                isAdmin={isAdmin}
+                            />
+                        )}
                     </div>
                 )}
 
@@ -3093,10 +3304,7 @@ const App: React.FC = () => {
                         selectedTags={narrativeFieldState[activeBlockId] || []}
                         onToggleTag={(tag) => handleToggleTag(activeBlockId, tag)}
                         onSetTags={(tags) => handleSetBlockTags(activeBlockId, tags)}
-                        onClear={() => {
-                            const newState = { ...narrativeFieldState, [activeBlockId]: [] };
-                            updateNarrativeState(newState);
-                        }}
+                        onClear={() => handleClearBlock(activeBlockId)}
                         lang={lang}
                         driverType={selectedDriver || DriverType.NARRATIVE}
                         onAddCustomDef={handleAddCustomDef}
@@ -3108,6 +3316,9 @@ const App: React.FC = () => {
                         }}
                         initialFaceState={faceState}
                         initialFocusState={focusState}
+                        allSelectedTags={getAllSelectedTags(narrativeFieldState)}
+                        allSelectedFocusUnitMap={getSelectedFocusUnitMap(narrativeFieldState)}
+                        allSelectedFocusBlockMap={getSelectedFocusBlockMap(narrativeFieldState)}
                         customLibraryData={
                             activeBlockId === 'aes_palette_preset'
                                 ? [{ id: 'lib_master', name: '视觉大师预设 (Master Presets)', desc: 'Pre-configured Cinematic Styles', items: MASTER_PRESETS }]
@@ -3164,11 +3375,13 @@ const App: React.FC = () => {
                     lang={lang}
                     fieldState={narrativeFieldState}
                     visionInput={visionInput}
-                    visionImage={visionImage}
+                    visionAnalysis={visionImplantEnabled ? visionAnalysis : ''}
+                    visionImage={visionImplantEnabled ? visionImage : null}
                     worldLawConfig={worldLawConfig}
                     driverType={selectedDriver}
                     faceState={faceState}
                     focusState={focusState}
+                    mAxisMixer={mAxisMixer}
                     m7bIntensity={m7bIntensity}
                     promptVersion={narrativePromptVersion}
                     onPromptVersionChange={setNarrativePromptVersion}

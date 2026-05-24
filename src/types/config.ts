@@ -304,6 +304,13 @@ export interface ModelOption {
 
 export const MODEL_CATALOG: ModelOption[] = [
   {
+    id: 'gemini-3.5-flash',
+    name: 'Gemini 3.5 Flash',
+    provider: 'gemini',
+    type: 'text',
+    canSeeImages: true,
+  },
+  {
     id: 'gemini-3.1-pro-preview',
     name: 'Gemini 3.1 Pro Preview',
     provider: 'gemini',

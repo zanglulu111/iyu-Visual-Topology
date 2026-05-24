@@ -363,7 +363,7 @@ export const MetonymySceneCard: React.FC<MetonymySceneCardProps> = (props) => {
             onDragOver={onDragOver}
             onDrop={onDrop}
             onClick={onSetActive}
-            className={`mist-archive-panel border overflow-hidden transition-all duration-300 ${isActive ? `border-${themeColorBase} ${theme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-zinc-900/25'} shadow-2xl` : `${theme === 'retro' ? 'border-[#8B261D]/30 bg-[var(--bg-header)]' : `border-zinc-800 bg-zinc-900/10 hover:border-${themeColorBase}/50`}`} ${isDragged ? 'opacity-50' : 'opacity-100'} ${isFocused ? 'h-full flex flex-col' : ''}`}
+            className={`mist-archive-panel border overflow-hidden min-h-0 transition-all duration-300 ${isActive ? `border-${themeColorBase} ${theme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-zinc-900/25'} shadow-2xl` : `${theme === 'retro' ? 'border-[#8B261D]/30 bg-[var(--bg-header)]' : `border-zinc-800 bg-zinc-900/10 hover:border-${themeColorBase}/50`}`} ${isDragged ? 'opacity-50' : 'opacity-100'} ${isFocused ? 'h-full min-h-0 flex flex-col' : ''}`}
         >
             {/* Header */}
             <div
@@ -465,7 +465,7 @@ export const MetonymySceneCard: React.FC<MetonymySceneCardProps> = (props) => {
 
             {/* Content Area - Render if EXPANDED */}
             {collapseState === 'EXPANDED' && (
-                <div className={`flex flex-col ${isFocused ? 'flex-1 overflow-hidden' : ''}`}>
+                <div className={`flex flex-col ${isFocused ? 'flex-1 min-h-0 overflow-hidden' : ''}`}>
                     {/* Visual Context Panel (Asset Filter) */}
                     {isPreviewAssetsOpen && (
                         <div className={`${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20' : 'bg-zinc-950/70 border-zinc-800'} border-b p-4 animate-in slide-in-from-top-2 duration-200 shrink-0`}>
@@ -517,8 +517,8 @@ export const MetonymySceneCard: React.FC<MetonymySceneCardProps> = (props) => {
                     )}
 
                     {/* --- TAB CONTENT: SCRIPT --- */}
-                    <div className={`${activeTab === 'SCRIPT' ? (isFocused ? 'flex-1 overflow-hidden flex flex-col' : 'block') : 'hidden'}`}>
-                        <div className={`h-full ${isFocused ? 'overflow-y-auto custom-scrollbar pb-12' : ''}`}>
+                    <div className={`${activeTab === 'SCRIPT' ? (isFocused ? 'flex-1 min-h-0 overflow-hidden flex flex-col' : 'block') : 'hidden'}`}>
+                        <div className={`flex-1 min-h-0 ${isFocused ? 'overflow-y-auto custom-scrollbar pb-12' : ''}`}>
                             <div className={`mist-archive-toolbar flex justify-between items-center px-4 md:px-8 py-5 ${theme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-[#080808]'} z-20 ${isFocused ? `sticky top-0 border-b ${theme === 'retro' ? 'border-[#8B261D]/20' : 'border-zinc-800'}` : 'mb-2'}`}>
                                 <h4 className={`${theme === 'retro' ? 'text-[#8B261D]' : 'text-zinc-400'} font-bold text-xs uppercase tracking-wider flex items-center gap-2`}>
                                     <FileText size={14} /> {language === 'EN' ? "Scriptment" : "文学脚本"}
@@ -664,8 +664,8 @@ export const MetonymySceneCard: React.FC<MetonymySceneCardProps> = (props) => {
                     </div>
 
                     {/* --- TAB CONTENT: STATIC STORYBOARD --- */}
-                    <div className={`${activeTab === 'STATIC' ? (isFocused ? 'flex-1 overflow-hidden flex flex-col' : 'block') : 'hidden'}`}>
-                        <div className={`border-b ${theme === 'retro' ? 'border-[#8B261D]/20' : 'border-zinc-800'} ${isFocused ? 'flex-1 overflow-hidden flex flex-col' : 'overflow-hidden'}`}>
+                    <div className={`${activeTab === 'STATIC' ? (isFocused ? 'flex-1 min-h-0 overflow-hidden flex flex-col' : 'block') : 'hidden'}`}>
+                        <div className={`border-b ${theme === 'retro' ? 'border-[#8B261D]/20' : 'border-zinc-800'} ${isFocused ? 'flex-1 min-h-0 overflow-hidden flex flex-col' : 'overflow-hidden'}`}>
                             <div className={`px-4 py-4 flex justify-between items-center shrink-0 ${theme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-zinc-900/50'}`}>
                                 <div className={`text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 ${theme === 'retro' ? 'text-[#8B261D]' : themeAccent}`}>
                                     <Aperture size={14} /> {language === 'EN' ? "Static Shots Table" : "静态分镜表"}
@@ -690,7 +690,7 @@ export const MetonymySceneCard: React.FC<MetonymySceneCardProps> = (props) => {
                                     <CopyButton text={formatStaticList(section.sutureData?.staticStoryboard || [], storyboardDisplayLang, protocolContent, section.sutureData?.globalTone)} label={language === 'EN' ? "COPY" : "一键复制"} className={btnGrey} theme={theme} />
                                 </div>
                             </div>
-                            <div className={`flex-1 overflow-y-auto custom-scrollbar ${isFocused ? 'pb-12' : ''}`}>
+                            <div className={`flex-1 min-h-0 overflow-y-auto custom-scrollbar ${isFocused ? 'pb-12' : ''}`}>
                                 {protocolContent && (
                                     <div className={`px-4 py-2 border-b ${theme === 'retro' ? 'bg-[var(--bg-header)]/50 border-[#8B261D]/20' : 'bg-zinc-900/50 border-zinc-800'}`}>
                                         <textarea
@@ -713,8 +713,8 @@ export const MetonymySceneCard: React.FC<MetonymySceneCardProps> = (props) => {
                     </div>
 
                     {/* --- TAB CONTENT: DYNAMIC STORYBOARD --- */}
-                    <div className={`${activeTab === 'DYNAMIC' ? (isFocused ? 'flex-1 overflow-hidden flex flex-col' : 'block') : 'hidden'}`}>
-                        <div className={`border-b ${theme === 'retro' ? 'border-[#8B261D]/20' : 'border-zinc-800'} ${isFocused ? 'flex-1 overflow-hidden flex flex-col' : 'overflow-hidden'}`}>
+                    <div className={`${activeTab === 'DYNAMIC' ? (isFocused ? 'flex-1 min-h-0 overflow-hidden flex flex-col' : 'block') : 'hidden'}`}>
+                        <div className={`border-b ${theme === 'retro' ? 'border-[#8B261D]/20' : 'border-zinc-800'} ${isFocused ? 'flex-1 min-h-0 overflow-hidden flex flex-col' : 'overflow-hidden'}`}>
                             <div className={`px-4 py-4 flex justify-between items-center shrink-0 ${theme === 'retro' ? 'bg-[var(--bg-header)]' : 'bg-zinc-900/50'}`}>
                                 <div className={`text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 ${theme === 'retro' ? 'text-[#8B261D]' : themeAccent}`}>
                                     <Video size={14} /> {language === 'EN' ? "Dynamic Storyboard" : "动态分镜表"}
@@ -755,7 +755,7 @@ export const MetonymySceneCard: React.FC<MetonymySceneCardProps> = (props) => {
                                     <CopyButton text={formatDynamicList(section.sutureData?.dynamicStoryboard || [], section.sutureData?.staticStoryboard || [], dynamicDisplayLang)} label={language === 'EN' ? "COPY" : "一键复制"} className={btnGrey} theme={theme} />
                                 </div>
                             </div>
-                            <div className={`overflow-x-auto custom-scrollbar ${isFocused ? 'flex-1 overflow-y-auto pb-12' : ''}`}>
+                            <div className={`overflow-x-auto custom-scrollbar ${isFocused ? 'flex-1 min-h-0 overflow-y-auto pb-12' : ''}`}>
                                 <table className="w-full text-left border-collapse table-fixed">
                                     <thead><tr className={`border-b text-xs font-bold uppercase tracking-wider ${theme === 'retro' ? 'bg-[#F4EFE0] border-[#8B261D]/20 text-[#8B261D]' : 'bg-black/40 border-zinc-800 text-white'}`}>{dynamicCols.map(col => <th key={col.key} className={`p-3 ${col.width} border-r last:border-0 ${theme === 'retro' ? 'border-[#8B261D]/20' : 'border-zinc-800'}`}>{col.label}</th>)}</tr></thead>
                                     <tbody className={`divide-y text-xs font-mono ${theme === 'retro' ? 'divide-[#8B261D]/20 text-black/70' : 'divide-zinc-800 text-zinc-300'}`}>{dynamicDisplayData.length > 0 ? dynamicDisplayData.map((shot, sIdx) => (<tr key={sIdx} className={`transition-colors ${theme === 'retro' ? 'hover:bg-white' : 'hover:bg-white/5'}`}>{dynamicCols.map(col => <td key={col.key} className={`p-3 align-top border-r last:border-0 ${theme === 'retro' ? 'border-[#8B261D]/20' : 'border-zinc-800'}`}>{(shot as any)[col.key]}</td>)}</tr>)) : (<tr><td colSpan={dynamicCols.length} className={`p-8 text-center italic ${theme === 'retro' ? 'text-[#8B261D]/50' : 'text-zinc-600'}`}>No dynamic shots.</td></tr>)}</tbody>

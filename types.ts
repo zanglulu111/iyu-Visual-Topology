@@ -33,7 +33,18 @@ export type ViewMode = 'ENGINE' | 'DIVERGENCE' | 'BIBLE' | 'METONYMY' | 'CANVAS'
 
 export type SubjectType = 'HUMAN' | 'CREATURE';
 export type AestheticMode = 'REALISM' | 'STYLIZED';
-export type M7BResidueIntensity = 'off' | 'implicit' | 'light' | 'strong';
+export type M7BResidueIntensity = 'off' | 'implicit' | 'light' | 'strong' | 'epilogue';
+export type MAxisMixerLevel = 'muted' | 'balanced' | 'amplified';
+export type MAxisMixerSlot =
+  | 'engine_m0'
+  | 'engine_m1'
+  | 'engine_m2'
+  | 'engine_m3'
+  | 'engine_m4'
+  | 'engine_m5'
+  | 'engine_m6'
+  | 'engine_m7a';
+export type MAxisMixerState = Partial<Record<MAxisMixerSlot, MAxisMixerLevel>>;
 
 export type AestheticLogicMode = 'DEFAULT' | 'IDENTITY' | 'ACTION' | 'ATMOSPHERE' | 'LOOK' | 'TECH';
 
@@ -157,6 +168,8 @@ export interface DesireProject {
   visionAnalysis?: string;
   visionImage?: string | null;
   visionImageNote?: string;
+  visionImageMode?: VisionImageUseMode;
+  visionImplantEnabled?: boolean;
   subjectType?: SubjectType;
   aestheticMode?: AestheticMode;
   colorPalette?: string[];
@@ -245,6 +258,7 @@ export type DirectiveFace = 'bright' | 'dark' | 'tension';
 export type FaceState = Record<string, DirectiveFace>;
 export type PromptFocusState = Record<string, boolean>;
 export type RealityAnchorMode = 'strict' | 'inferred' | 'drift';
+export type VisionImageUseMode = 'auto' | 'anchor' | 'reference' | 'partial';
 export type GenreManifestationMode = 'metaphoric' | 'rationalized' | 'literal' | 'phantasmic';
 
 export interface WorldLawConfig {
@@ -611,11 +625,14 @@ export interface CreativeBlueprint {
   generationVisionAnalysis?: string;
   generationVisionImage?: string | null;
   generationVisionImageNote?: string;
+  generationVisionImageMode?: VisionImageUseMode;
+  generationVisionImplantEnabled?: boolean;
   generationSubjectType?: SubjectType;
   generationAestheticMode?: AestheticMode;
   generationColorPalette?: string[];
   generationFaceState?: FaceState;
   generationFocusState?: PromptFocusState;
+  generationMAxisMixer?: MAxisMixerState;
   generationM7BIntensity?: M7BResidueIntensity;
   childBlueprint?: CreativeBlueprint;
   narrative: BlueprintNarrative;
@@ -682,11 +699,14 @@ export interface HistoryItem {
   visionAnalysis?: string;
   visionImage?: string | null;
   visionImageNote?: string;
+  visionImageMode?: VisionImageUseMode;
+  visionImplantEnabled?: boolean;
   subjectType?: SubjectType;
   aestheticMode?: AestheticMode;
   colorPalette?: string[];
   faceState?: FaceState;
   focusState?: PromptFocusState;
+  mAxisMixer?: MAxisMixerState;
   m7bIntensity?: M7BResidueIntensity;
   blueprint: CreativeBlueprint | null;
   metonymyBlueprint?: CreativeBlueprint | null;
@@ -703,11 +723,14 @@ export interface ProjectWorkspaceSnapshot {
   visionAnalysis?: string;
   visionImage?: string | null;
   visionImageNote?: string;
+  visionImageMode?: VisionImageUseMode;
+  visionImplantEnabled?: boolean;
   subjectType?: SubjectType;
   aestheticMode?: AestheticMode;
   colorPalette?: string[];
   faceState?: FaceState;
   focusState?: PromptFocusState;
+  mAxisMixer?: MAxisMixerState;
   m7bIntensity?: M7BResidueIntensity;
   treatments?: CreativeTreatment[];
   activeBlueprint?: CreativeBlueprint | null;

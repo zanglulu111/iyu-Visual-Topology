@@ -3,12 +3,13 @@
 // ============================================================================
 
 // 📦 1. 进口原料仓库：从外部文件借用"图纸"和"词典"
-import { NarrativeFieldState, CreativeTreatment, WorldLawConfig, StyleConfig, FaceState, PromptFocusState, StyleItem, M7BResidueIntensity } from '../types';
+import { NarrativeFieldState, CreativeTreatment, WorldLawConfig, StyleConfig, FaceState, PromptFocusState, StyleItem, MAxisMixerState, M7BResidueIntensity } from '../types';
 import { NARRATIVE_ENGINE_BLOCKS } from '../data/engine_core/narrative_engine';
 import { ALL_SKIN_BLOCKS } from '../data/narrative/skin_libraries';
 import { SV2_DATA } from '../data/engine_sv/SV2'; // 特权词库：决定字数的 SV2 (体量)
 import { SV1_DATA } from '../data/engine_sv/SV1'; // 叙事结构词库
-import { PERSPECTIVES, SENSORY_MODES, STYLE_MATRIX } from '../data/narrative/style_matrix';
+import { DEFAULT_SV1_STRUCTURE_NAME, DEFAULT_SV2_VOLUME_NAME } from '../data/engine_sv/defaults';
+import { STYLE_MATRIX } from '../data/narrative/style_matrix';
 import { DIRECTOR_STYLES } from '../data/narrative/director_styles';
 
 // 📚 源文件引入：各种规则协议 (系统宪法的内容片段)
@@ -40,11 +41,12 @@ import {
   buildBannedWords as v3BuildBannedWords,
   buildSoftAvoidLabels as v3BuildSoftAvoidLabels,
   formatYear,
-  V3_FORMULA,
-  V3_LAWS,
+  buildV3Formula,
+  buildV3Laws,
   buildWorldLawPrompt,
   buildM7BIntensityBrief,
   normalizeM7BIntensity,
+  buildAttentionControllerProtocol,
 } from './promptV3';
 import { buildPromptV4 } from './promptV4';
 import { getWorldLawDisplay } from './worldLaw';
@@ -123,7 +125,7 @@ const buildFormalLawEngine = (
   pitchWordCount?: string
 ): string => {
   const wordCountRule = target === 'PITCH'
-    ? `每个故事概念 (Pitch) ≈ ${pitchWordCount || '500-700'} 字。三个方案必须各自独立、完整且风格互不雷同。`
+    ? `每个故事概念 (Pitch) ≈ ${pitchWordCount || '700-1100'} 字。三个方案必须各自独立、完整且风格互不雷同；字数用于增强顺读、铺垫、动作后果、物件和场域细节，不用于增加支线、人物数量或多重反转。`
     : `正文总量 ≈ ${wordCount} 个中文字符。这是硬性目标，严禁大幅偏离。`;
 
   const structureRule = structureTag && structureTag !== 'Unknown Structure' && structureTag.length > 0
@@ -226,11 +228,12 @@ export const buildNarrativePrompt = (
   archVersion: PromptArchVersion = 'v3',
   faceState?: FaceState,
   focusState?: PromptFocusState,
+  mAxisMixer?: MAxisMixerState,
   m7bIntensity?: M7BResidueIntensity
 ): { text: string, images: string[] } => {
   // ═══ 架构分流：根据版本参数委托给不同的 Prompt 构建器 ═══
-  if (archVersion === 'v4') return buildPromptV4(fieldState, visionInput, visionImage, worldLaw, faceState, focusState, m7bIntensity);
-  if (archVersion === 'v3') return buildPromptV3(fieldState, visionInput, visionImage, worldLaw, faceState, focusState, m7bIntensity);
+  if (archVersion === 'v4') return buildPromptV4(fieldState, visionInput, visionImage, worldLaw, faceState, focusState, mAxisMixer, m7bIntensity);
+  if (archVersion === 'v3') return buildPromptV3(fieldState, visionInput, visionImage, worldLaw, faceState, focusState, mAxisMixer, m7bIntensity);
   if (archVersion === 'v1') return buildPromptV1(fieldState, visionInput, visionImage, worldLaw);
   if (archVersion === 'v2') return buildPromptV2(fieldState, visionInput, visionImage, worldLaw);
   // ═══ Legacy 模式：保持原有逻辑不变 ═══
@@ -280,14 +283,14 @@ ${m0Directive}
   // --- STAGE 1: DURATION STRATEGY (CRITICAL UPDATE) ---
   const volumeTags = getTagsBySuffix('_volume');
   const structureTags = getTagsBySuffix('_structure');
-  const volumeTagRaw = volumeTags.length > 0 ? volumeTags[0] : "";
+  const volumeTagRaw = volumeTags.length > 0 ? volumeTags[0] : DEFAULT_SV2_VOLUME_NAME;
   const volumeDef = SV2_DATA.flatMap(c => c.items).find(v => volumeTagRaw.includes(v.name) || volumeTagRaw === v.id);
-  const structureTagRaw = structureTags.length > 0 ? structureTags[0] : "Unknown Structure";
+  const structureTagRaw = structureTags.length > 0 ? structureTags[0] : DEFAULT_SV1_STRUCTURE_NAME;
 
   let volumeInstruction = "";
 
   if (volumeDef) {
-    const pitchMechanics = volumeDef.patch?.mechanics?.split('\n').find(l => l.includes('三卡大纲')) || volumeDef.def || '';
+    const pitchMechanics = volumeDef.patch?.mechanics || volumeDef.def || '';
     volumeInstruction = `
     ## ⏱️ VOLUME PROTOCOL: ${volumeDef.name}
     **CRITICAL INSTRUCTION FOR AI (核心指令):**
@@ -313,10 +316,10 @@ ${m0Directive}
     `;
   }
 
-  // 提取三卡大纲字数
-  let pitchWordCount = '500-700';
+  // 提取方案输出字数
+  let pitchWordCount = '700-1100';
   if (volumeDef?.patch?.mechanics) {
-    const pitchMatch = volumeDef.patch.mechanics.match(/每卡\s*≈\s*([\d]+-[\d]+)/);
+    const pitchMatch = volumeDef.patch.mechanics.match(/每个 Pitch 建议\s*([\d]+-[\d]+)/);
     if (pitchMatch) pitchWordCount = pitchMatch[1];
   }
 
@@ -346,14 +349,14 @@ ${m0Directive}
   }
 
   // ============================================================================
-  // 📦 步骤 5：世界法则构建（SUR1 类型 × SUR2/SUR3 时空）
+  // 📦 步骤 5：世界法则构建（SUR1 类型 × SUR2 场域 / SUR3 坐标）
   // ============================================================================
   const worldLawDisplay = getWorldLawDisplay(worldLaw);
   const instructions = buildWorldLawPrompt(worldLaw);
   const worldLawConstraint = `${worldLawDisplay.fullLabel}: ${worldLawDisplay.descCN}`;
 
   // ============================================================================
-  // 📦 步骤 6：时空坐标强制推导 (如果你忘了选时代/地点，这里强行推算)
+  // 📦 步骤 6：精确坐标强制推导 (如果你忘了选场域/坐标，这里强行推算)
   // ============================================================================
   // --- ⚠️ CRITICAL FIX: DEFAULT ANCHOR INJECTION FOR 3 CARDS ---
   // If user has NOT selected an Era/Location, force a deduction based on M-Engine.
@@ -371,15 +374,14 @@ ${m0Directive}
 
   if (exactYear || exactCountry) {
     customCoordinates = `
-      ## 📍 PRECISE SPACETIME COORDINATES (HIGHEST PRIORITY)
-      **你必须极其严苛地将故事锚定在以下被锁死的时空坐标内：**
-      *   **Year (时代纪元):** ${exactYear || "未明确"}
-      *   **Location/Country (发生国度):** ${exactCountry || "未明确"}
+      ## 📍 SUR3 PRECISE COORDINATE CALIBRATION
+      **你必须将故事锚定在以下精确坐标内：**
+      *   **Time Anchor (时间锚):** ${exactYear ? formatYear(exactYear) : "未明确"}
+      *   **Space Anchor (空间锚):** ${exactCountry || "未明确"}
       
       **Instruction (执行指令):** 
-      尽你所能去深度检索还原 ${exactCountry || "The World"} 在纪元 ${exactYear || "This Era"} 时的真实客观历史与物理状貌。 
-      在叙事中极具质感地折射出那个特定时空的特殊时代产物、服饰纤维、残酷的政治面貌或是其独有的时代症候。
-      这条具体时空指令具有【绝对最高覆盖权】(OVERRIDES)，它锁定该坐标下可成立的技术、制度、宗教、交通、医疗、阶级与生活材料。与此坐标冲突的 SUR1 类型材料必须按当前世界法则 L1-L5 处理；已被该坐标或用户输入授权的世界材料则必须保留为当前世界现实。
+      SUR3 只固定现实域、时间锚、空间锚和尺度边界，不生成故事类型，也不生成第二套世界观。请还原该坐标下可成立的物理状貌、服饰、政治/制度现实、交通、技术边界、宗教/信念接口、医疗、阶级和生活材料。
+      若空间锚是现代国家名但时间早于该政体成立，只作为今日地理简称处理；若为空间站、异星、异维、虚拟、纳米或身体内部，则按该尺度重写身体、交通、危险和物件边界。与此坐标冲突的 SUR1 类型材料必须按当前世界法则 L1-L5 处理；已被该坐标或用户输入授权的世界材料则必须保留为当前世界现实。
       `;
   }
 
@@ -407,16 +409,16 @@ ${m0Directive}
           ## ⚓ DEFAULT WORLD COORDINATE (${worldLawDisplay.fullLabel})
           **CRITICAL (严重警告):** 用户未明确指定具体年代或发生地。
           **INSTRUCTION (执行指令):**
-          1.  允许由 SUR1 反向生成架空历史、异史、技术分歧或类型化世界。
-          2.  必须说明分歧点、来源、运行方式和代价。
-          3.  类型升维不是把现代奇观硬塞进历史场景。
+          1.  允许推演一个超现实世界：科幻、灵异、魔法、外星、超能力等可以成为真实世界材料。
+          2.  若 SUR1 是奇观本体类型，就让该本体字面成立；若 SUR1 是现实经验类型，就在真实超现实世界中继续讲该类型故事。
+          3.  超现实材料必须服务 SUR1 的主线、阻断升级、高潮选择和结尾落点，不能抢走主控类型。
           `;
     } else {
       defaultAnchorInstruction = `
           ## ⚓ DEFAULT WORLD COORDINATE (${worldLawDisplay.fullLabel})
           **CRITICAL (最高警戒):** 用户未明确指定具体年代或发生地。
           **INSTRUCTION (执行指令):**
-          1.  允许梦、神话、象征、跨时代拼贴和类型奇观接管世界规则。
+          1.  允许梦幻、MV、象征、跨时代拼贴和类型狂想曲接管世界规则。
           2.  狂想不是乱炖；读者仍要能复述这个世界如何运行、故事机关为什么成立。
           3.  类型材料必须服务目标、阻断、升级、高潮选择和代价兑现。
           `;
@@ -440,7 +442,7 @@ ${m0Directive}
 # 本次任务执行区 (TASK EXECUTION)
 Task: 基于上方提供的《迷雾学派》全局宪法 (SYSTEM BIBLE)，根据以下动态注入的 DNA (M0-M7A/M7B 双结项) 和语境 (SUR1-SUR10 + SUR-END)，生成 3 个电影级的故事概念。
 
-## 📍 时空坐标与视觉锚点
+## 📍 精确坐标与视觉锚点
 ${visionAnchorInstruction}
 ${customCoordinates}
 
@@ -487,7 +489,7 @@ ${defaultAnchorInstruction}
 **关键：适配核心逻辑 [${activeWorldLogic}]。**
 **强约束警告：所有生成的路径都必须严格遵守以下世界法则：**
 *   **世界法则:** ${worldLawConstraint}
-**任何违反此法则的生成都将被视为失败。禁止把世界法则误解为主动添加未授权奇观，也禁止让 SUR1 因时空冲突而完全失效。**
+**任何违反此法则的生成都将被视为失败。禁止把世界法则误解为主动添加未授权奇观，也禁止让 SUR1 因坐标冲突而完全失效。**
 
 ### **OPTION 1: [STRUCTURALIST] - 结构主义 (Genre Perfection)**
 *   **Logic:** **经典类型执行。** 世界严格按照 [${activeWorldLogic}] 的规则运行。
@@ -579,7 +581,8 @@ const buildAuthorialRendererProtocol = (
   styleName: string,
   styleDNA: string,
   styleItem?: StyleItem,
-  directorStyle?: { core?: string; def?: string }
+  directorStyle?: { core?: string; def?: string },
+  hasActiveM7B: boolean = true
 ): string => {
   const isDefault = !styleItem && !directorStyle;
   const styleTitle = styleItem?.styleTitle || styleItem?.description || directorStyle?.core || '清晰电影化文学';
@@ -590,14 +593,18 @@ const buildAuthorialRendererProtocol = (
   const styleDNAInstruction = styleDNA ? `\n**风格 DNA（只能抽象使用）:** ${styleDNA}` : '';
 
   const sourceFidelityPreserve = [
-    '保留 SOURCE 指向的主体欲望位置、核心缺失、行动驱力、关键代价与结局方向；如有 M7B，只保留末帧余震，不增设尾声。',
+    hasActiveM7B
+      ? '保留 SOURCE 指向的主体欲望位置、核心缺失、行动驱力、关键代价与结局方向；M7B 只保留末帧余震，不增设尾声。'
+      : '保留 SOURCE 指向的主体欲望位置、核心缺失、行动驱力、关键代价与 M7A 结局方向。',
     '允许为文学完成度重组叙事顺序、改写场景承载方式、增补人物关系与对白，但这些增补必须服务原欲望结构，不得另起一套故事。'
   ];
 
   const basePreserve = styleItem?.preserve || [
     '保留 SOURCE 的核心冲突功能、因果方向与结局倾向；表达方式、叙事视角与场面组织可以重构。',
-    '保留 M0-M7A/M7B 的精神弧线、M7A 意义裁决与 M7B 末帧余震；不得用风格重写覆盖它们，也不得把 M7B 扩写成后日谈。',
-    '保留世界物理法则、精确时空坐标、SUR 表层设定与已选体量/结构约束。'
+    hasActiveM7B
+      ? '保留 M0-M7A/M7B 的精神弧线、M7A 意义裁决与 M7B 当前档位；不得用风格重写覆盖它们，也不得把轻触/强显影档扩写成后日谈。'
+      : '保留 M0-M7A 的精神弧线与 M7A 意义裁决；不得用风格重写覆盖它们。',
+    '保留世界物理法则、SUR3 精确坐标、SUR 表层设定与已选体量/结构约束。'
   ];
   const preserve = [...sourceFidelityPreserve, ...basePreserve];
 
@@ -651,68 +658,73 @@ export const buildNarrativeBiblePrompt = (
   worldLaw?: WorldLawConfig,
   visionAnalysis: string = "",
   focusState?: PromptFocusState,
+  mAxisMixer?: MAxisMixerState,
   m7bIntensity?: M7BResidueIntensity
 ): string => {
 
   // ════════════════════════════════════════════════════════════════════════════
   // ① 身份声明 (SECTION_ROLE)
   // ════════════════════════════════════════════════════════════════════════════
-  const volumeTagRaw = fieldState ? (fieldState['skin_volume']?.[0] || "") : "";
+  const volumeTagRaw = fieldState ? (fieldState['skin_volume']?.[0] || DEFAULT_SV2_VOLUME_NAME) : DEFAULT_SV2_VOLUME_NAME;
   const volumeDef = SV2_DATA.flatMap(c => c.items).find(v => volumeTagRaw.includes(v.name) || volumeTagRaw === v.id);
-  const structureTagRaw = fieldState ? (fieldState['skin_structure']?.[0] || "") : "";
+  const structureTagRaw = fieldState ? (fieldState['skin_structure']?.[0] || DEFAULT_SV1_STRUCTURE_NAME) : DEFAULT_SV1_STRUCTURE_NAME;
+  const activeM7BIntensityForBible = normalizeM7BIntensity(m7bIntensity);
+  const bibleM7BTags = fieldState ? v3GetTagsBySuffix(fieldState, '_m7b') : [];
+  const hasActiveM7BForBible = bibleM7BTags.length > 0 && activeM7BIntensityForBible !== 'off';
+  const bibleFormulaScope = hasActiveM7BForBible ? 'M0-M7A/M7B' : 'M0-M7A';
 
   let bibleStrategy = "";
-  let targetWordCount = "1500";
+  let targetWordCount = "3000";
   let literatureType = "Short Story";
 
   if (volumeDef) {
     const vid = volumeDef.id;
     if (vid.includes('15s')) {
-      targetWordCount = "250";
+      targetWordCount = "500";
       literatureType = "Flash Fiction / Cinematic Prose Poem";
       bibleStrategy = "**MODE: INSTANT IMPACT** — 聚焦单瞬间的无限细节爆发。不写冗长背景。";
     } else if (vid.includes('30s')) {
-      targetWordCount = "400";
+      targetWordCount = "800";
       literatureType = "Flash Fiction / Micro Scene";
       bibleStrategy = "**MODE: MICRO SCENE** — 极短篇幅内完成一次认知/情绪翻转。";
     } else if (vid.includes('60s')) {
-      targetWordCount = "500";
+      targetWordCount = "1000";
       literatureType = "Compact Short Story";
       bibleStrategy = "**MODE: COMPACT NARRATIVE** — 单场景微弧光或循环情绪体。";
     } else if (vid.includes('90s')) {
-      targetWordCount = "700";
+      targetWordCount = "1400";
       literatureType = "Compact Short Story";
       bibleStrategy = "**MODE: COMPACT NARRATIVE** — 紧凑弧光或氛围渐变。";
     } else if (vid.includes('3m')) {
-      targetWordCount = "1000";
+      targetWordCount = "2000";
       literatureType = "Short Film / MV";
       bibleStrategy = "**MODE: SHORT FILM** — 完整短片或概念循环，节奏紧密。";
     } else if (vid.includes('5m')) {
-      targetWordCount = "1500";
+      targetWordCount = "3000";
       literatureType = "Narrative Short Story";
-      bibleStrategy = "**MODE: RICH SHORT** — 对话驱动或散文独白，给人物留呼吸空间。";
+      bibleStrategy = "**MODE: RICH SHORT** — 对话、心理运动与场面细节都要成立，给人物、动作和余味留足展开空间。";
     } else if (vid.includes('10m')) {
-      targetWordCount = "2500";
-      literatureType = "Short Film Script";
+      targetWordCount = "5000";
+      literatureType = "Extended Short Story";
       bibleStrategy = "**MODE: CHARACTER STUDY** — 完整人物弧光，首次允许人物「改变」。";
     } else if (vid.includes('15m')) {
-      targetWordCount = "3500";
-      literatureType = "Drama Short";
+      targetWordCount = "7000";
+      literatureType = "Drama Short Story";
       bibleStrategy = "**MODE: MULTI-LAYER** — 信息驱动或群像交织，允许多层叙事。";
     } else if (vid.includes('30m')) {
-      targetWordCount = "6000";
+      targetWordCount = "12000";
       literatureType = "Novella / Mini-Movie";
       bibleStrategy = "**MODE: MINI MOVIE** — 完整三幕+中点+B线。迷你电影级展开。";
     } else if (vid.includes('45m')) {
-      targetWordCount = "8000";
-      literatureType = "TV Episode Script";
+      targetWordCount = "16000";
+      literatureType = "Episode-Length Literary Story";
       bibleStrategy = "**MODE: EPISODE** — 多线叙事生态：A线闭环+B线悬置+C暗线。";
     } else if (vid.includes('90m') || vid.includes('epic')) {
-      targetWordCount = "12000";
-      literatureType = "Feature Film / Epic Treatment";
+      targetWordCount = "24000";
+      literatureType = "Feature-Length Literary Treatment";
       bibleStrategy = "**MODE: FEATURE FILM** — 全参数工业标准展开，章节式宏大叙事。";
     } else {
-      targetWordCount = "1500";
+      targetWordCount = "3000";
       literatureType = "Short Story";
       bibleStrategy = "**MODE: STANDARD SHORT STORY**";
     }
@@ -752,7 +764,7 @@ export const buildNarrativeBiblePrompt = (
     bibleSvProtocol += `\n\n### SV1 结构协议: ${bibleStructureItem.name}\n**定义:** ${bibleStructureItem.def || ''}\n**核心规则:**\n${bibleStructureItem.core || ''}`;
   }
 
-  const taskSentence = fieldState ? buildTaskSentence(fieldState) : "";
+  const taskSentence = fieldState ? buildTaskSentence(fieldState, hasActiveM7BForBible) : "";
   const taskSentenceSection = taskSentence
     ? `\n**本次表层叙事任务句:** ${taskSentence}\n这句话是表层设定的浓缩提示，不是必须照抄的开场句；必须被转化为场景压力、人物关系与可读的文学行动。`
     : "";
@@ -765,13 +777,13 @@ export const buildNarrativeBiblePrompt = (
 你的任务是：**把这份故事草稿进行作者风格化重写，创作成一篇完整、文学性强、电影感十足的微型小说/短篇小说正文。**
 
 **重写规则：**
-1. **表达可以重构，欲望结构不可篡改**——你可以重组叙事顺序、改变视角、改写开场与结尾的呈现方式、增加对白、增加人物、增加过场与细节；但不得推翻 M0-M7A/M7B 的精神弧线、M7A 的意义裁决、世界法则与表层设定；若有 M7B，只能把它压成末帧余震，不得扩写成新尾声或后日谈。
-2. **SOURCE 是初始参考，不是机械扩写模板**——不要一板一眼拉长原草稿的结构、节奏和表达方式；必须把它当作未加工材料，重新组织成真正成立的文学作品。
+1. **表达可以重构，欲望结构不可篡改**——你可以重组叙事顺序、改变视角、改写开场与结尾的呈现方式、增加对白、增加人物、增加过场与细节；但不得推翻 ${bibleFormulaScope} 的精神弧线、M7A 的意义裁决、世界法则与表层设定${hasActiveM7BForBible ? '；M7B 必须服从当前档位：轻触/强显影停在末帧，后日谈才允许极短尾声。' : '。'}
+2. **SOURCE 是初始参考，不是机械扩写模板**——不要一板一眼拉长原草稿的结构、节奏和表达方式；必须把它当作未加工材料，重新组织成真正成立的文学作品。可以改变开场入口、叙述顺序、场景承载方式、信息释放节奏与局部人物调度，但必须保留 SOURCE 的核心因果、载体功能、高潮选择、代价方向和结尾物态。
 3. **作者风格是叙事机制，不是表层符号**——必须充分调用所选作者的抽象创作机制，作用到句法、时间、视角、心理显影、对白、场景组织、情绪运动和结尾余味；严禁照抄名句、经典桥段、招牌物件、专有意象或烂俗标签。
 4. **电影感小说，不是剧本格式**——正文必须像一篇可以被电影化的小说：空间、光线、声音、动作、停顿和物件都要可感；但严禁写成“内景/外景/镜头1/分镜表”等剧本格式。
-5. **主体档案适配**——故事完成后会进入主体档案页面，作为“主体人物故事”。读者必须能从正文中感到：这个主体是谁、缺什么、被什么欲望驱动、被何种大他者阻断、付出了什么代价、M7A 如何完成结尾；如有 M7B，只在最后一笔留下无法缝合的余震。
+5. **主体档案适配**——故事完成后会进入主体档案页面，作为“主体人物故事”。读者必须能从正文中感到：这个主体是谁、缺什么、被什么欲望驱动、被何种大他者阻断、付出了什么代价、M7A 如何完成结尾${hasActiveM7BForBible ? '；M7B 只在最后一笔留下无法缝合的余震。' : '。'}
 6. 输出一篇 ${literatureType}，目标 ~${targetWordCount} 中文字符。
-7. 输出格式：只输出标题、一句话定位与完整文学正文。不要生成世界观、人物资产、场景资产、道具资产、视觉提示词或画面资产包。
+7. 输出格式：最终响应必须是 STRICT JSON；JSON 只是传输外壳，\`narrative.title\`、\`narrative.logline\`、\`narrative.synopsis\` 分别承载标题、一句话定位与完整文学正文。不得在 JSON 外输出任何内容，不要生成世界观、人物资产、场景资产、道具资产、视觉提示词或画面资产包。
 8. 语言：简体中文。角色名/地名/物品名若需要中英并列，格式为：**中文名 (English Name)**。
 ${taskSentenceSection}
 
@@ -781,7 +793,7 @@ ${bibleSvProtocol}`;
   // ════════════════════════════════════════════════════════════════════════════
   // ② 核心公式 (SECTION_FORMULA) — 复用 V3
   // ════════════════════════════════════════════════════════════════════════════
-  const SECTION_FORMULA = V3_FORMULA;
+  const SECTION_FORMULA = buildV3Formula(hasActiveM7BForBible);
 
   // ════════════════════════════════════════════════════════════════════════════
   // ③ 创作铁律 (SECTION_LAWS) — 复用 V3 + Bible 专属补充
@@ -807,13 +819,13 @@ ${bibleSvProtocol}`;
   }
 
   const styleRule = styleName && styleName !== 'Standard Literary' && styleName.length > 0
-    ? `\nStyle: 调用 [${styleName}] 的作者性渲染机制，重构语言、时间组织、视角距离、场景密度、心理显影、对白和意象系统；严禁改写 M0-M7A/M7B、世界法则、表层设定或结局方向。`
+    ? `\nStyle: 调用 [${styleName}] 的作者性渲染机制，重构语言、时间组织、视角距离、场景密度、心理显影、对白和意象系统；严禁改写 ${bibleFormulaScope}、世界法则、表层设定或结局方向。`
     : '';
 
   const bannedWords = fieldState ? v3BuildBannedWords(fieldState) : "";
-  const softAvoidLabels = fieldState ? v3BuildSoftAvoidLabels(fieldState) : "";
+  const softAvoidLabels = fieldState ? v3BuildSoftAvoidLabels(fieldState, activeM7BIntensityForBible) : "";
 
-  const SECTION_LAWS = `${V3_LAWS}
+  const SECTION_LAWS = `${buildV3Laws(hasActiveM7BForBible)}
 
 **叙事创作形式律法**:
 \`\`\`
@@ -821,7 +833,7 @@ ${bibleSvProtocol}`;
 [LAW_2] STRUCTURE: REQUIRE [${bibleSkeletonArrow}] DENY [机械降神, 无冲突流水账, 虎头蛇尾]${structureRule}
 [LAW_3] VOICE: 极精致的电影化小说 (Show, Don't Tell)。
     DENY [剧本格式(内景/外景/日/夜), 学术论文腔, 鸡汤散文, 网络小说腔]${styleRule}
-[LAW_4] REWRITE_RIGHT: ALLOW [重组叙事顺序, 增补对白, 增补人物, 增补过场, 改变叙述视角, 重写开场与结尾呈现] BUT PRESERVE [M0-M7A/M7B, 世界法则, 表层设定, 主体缺失, 行动驱力, M7A 结局方向, M7B 末帧余震]。
+[LAW_4] REWRITE_RIGHT: ALLOW [改变开场入口, 重组叙事顺序, 调整场景承载方式, 增补对白, 增补人物, 增补过场, 改变叙述视角, 重写开场与结尾呈现] BUT PRESERVE [SOURCE 核心因果, SOURCE 载体功能, SOURCE 高潮选择, SOURCE 代价方向, SOURCE 结尾物态, ${bibleFormulaScope}, 世界法则, 表层设定, 主体缺失, 行动驱力, M7A 结局方向${hasActiveM7BForBible ? ', M7B 末帧余震' : ''}]。
 \`\`\`
 
 **硬禁词（仅正文）**: [ ${bannedWords} ]
@@ -836,25 +848,28 @@ ${bibleSvProtocol}`;
   let SECTION_DIRECTOR = "";
   if (fieldState) {
     const mEntries: (string | null)[] = [
-      buildMDirective(fieldState, ['_m0', '_c0'], 'M0. 精神拓扑', 'engine_m0', undefined, focusState),
-      buildMDirective(fieldState, ['_m1', '_c1'], 'M1. 缺失主体', 'engine_m1', undefined, focusState),
-      buildMDirective(fieldState, '_m2',           'M2. 真实遭遇', 'engine_m2', undefined, focusState),
-      buildMDirective(fieldState, ['_m3', '_c3'],  'M3. 欲望幻想', 'engine_m3', undefined, focusState),
-      buildMDirective(fieldState, ['_m4', '_c4'],  'M4. 大他者阻断', 'engine_m4', undefined, focusState),
-      buildMDirective(fieldState, '_m5',           'M5. 行动驱力', 'engine_m5', undefined, focusState),
-      buildMDirective(fieldState, '_m6',           'M6. 终极代价', 'engine_m6', undefined, focusState),
-      buildMDirective(fieldState, '_m7a',           'M7A. 象征裁决', 'engine_m7a', undefined, focusState),
-      buildMDirective(fieldState, '_m7b',           'M7B. 实在余痕', 'engine_m7b', undefined, focusState, m7bIntensity),
+      buildMDirective(fieldState, ['_m0', '_c0'], 'M0. 精神拓扑', 'engine_m0', undefined, focusState, undefined, mAxisMixer),
+      buildMDirective(fieldState, ['_m1', '_c1'], 'M1. 缺失主体', 'engine_m1', undefined, focusState, undefined, mAxisMixer),
+      buildMDirective(fieldState, '_m2',           'M2. 真实遭遇', 'engine_m2', undefined, focusState, undefined, mAxisMixer),
+      buildMDirective(fieldState, ['_m3', '_c3'],  'M3. 欲望幻想', 'engine_m3', undefined, focusState, undefined, mAxisMixer),
+      buildMDirective(fieldState, ['_m4', '_c4'],  'M4. 大他者阻断', 'engine_m4', undefined, focusState, undefined, mAxisMixer),
+      buildMDirective(fieldState, '_m5',           'M5. 行动驱力', 'engine_m5', undefined, focusState, undefined, mAxisMixer),
+      buildMDirective(fieldState, '_m6',           'M6. 终极代价', 'engine_m6', undefined, focusState, undefined, mAxisMixer),
+      buildMDirective(fieldState, '_m7a',           'M7A. 象征裁决', 'engine_m7a', undefined, focusState, undefined, mAxisMixer),
+      buildMDirective(fieldState, '_m7b',           'M7B. 实在余痕', 'engine_m7b', undefined, focusState, m7bIntensity, mAxisMixer),
     ];
 
     const directorBrief = mEntries.filter(Boolean).join('\n\n');
+    const attentionController = buildAttentionControllerProtocol(fieldState, focusState, mAxisMixer, activeM7BIntensityForBible);
 
     SECTION_DIRECTOR = `## 导演笔记 (DIRECTOR'S BRIEF)
 
 以下是这部电影的创作核心。每一条都是导演对你说的话——不是定义，是指令。
 导演笔记中的具体场景是情感运动的示例载体——提取其拓扑结构（节奏、温度、运动方式），用你自己发明且适配世界物理法则与表层设定的全新场景承载它。严禁复现示例中的具体意象。
 
-**M0 渗透法则**：M0 不是一个独立参数——它是整个故事的操作系统。M1-M7A/M7B 的每一条导演笔记都必须经过 M0 的逻辑改写。
+**M0 渗透法则**：M0 不是一个独立参数——它是整个故事的操作系统。M1-M7A${hasActiveM7BForBible ? '/M7B' : ''} 的每一条导演笔记都必须经过 M0 的逻辑改写。
+
+${attentionController}
 
 ${directorBrief}`;
   }
@@ -870,7 +885,7 @@ ${directorBrief}`;
     const exactYear = v3GetTagsBySuffix(fieldState, '_year_exact')[0] || null;
     const exactCountry = v3GetTagsBySuffix(fieldState, '_country_exact')[0] || null;
     if (exactYear || exactCountry) {
-      skinParts.push(`**SUR3. 精确时空坐标约束**: 严格还原${exactYear ? formatYear(exactYear) : '?'}${exactCountry || '?'}的物理状貌、服饰与政治面貌。覆盖一切模糊标签。`);
+      skinParts.push(`**SUR3. 精确坐标校准**: 当前坐标为【时间锚=${exactYear ? formatYear(exactYear) : '未指定'}；空间锚=${exactCountry || '未指定'}】。它只固定现实域、时间锚、空间锚和尺度边界；严格遵守该坐标的物理状貌、服饰、政治/制度现实、交通、技术边界和文化接口。若空间锚是现代国家名但时间早于该政体成立，只作为今日地理简称处理；若为空间站、异星、异维、虚拟、纳米或身体内部，则按该尺度重写身体、交通、危险和物件边界。`);
     }
   }
 
@@ -888,21 +903,19 @@ ${directorBrief}`;
   // ════════════════════════════════════════════════════════════════════════════
   // ⑥ 风格 (SECTION_STYLE)
   // ════════════════════════════════════════════════════════════════════════════
-  const perspective = PERSPECTIVES.find(p => p.id === styleConfig.perspectiveId);
-  const sensory = SENSORY_MODES.find(s => s.id === styleConfig.sensoryId);
-
-  const hasAuthorialStyle = Boolean(styleItem || directorStyle);
-  const povInstruction = !hasAuthorialStyle && perspective ? `**叙事视点:** ${perspective.name}\n${perspective.prompt}` : "";
-  const sensoryInstruction = !hasAuthorialStyle && sensory ? `**感官侧重:** ${sensory.name}\n${sensory.prompt}` : "";
-  const authorialRendererProtocol = buildAuthorialRendererProtocol(styleName, styleDNA, styleItem, directorStyle);
+  const hasAuthorialStyle = Boolean(styleItem || directorStyle || styleConfig.customStyleName);
+  const authorialRendererProtocol = buildAuthorialRendererProtocol(styleName, styleDNA, styleItem, directorStyle, hasActiveM7BForBible);
+  const rendererM7BClause = hasActiveM7BForBible ? '；M7B 只作为末帧余震约束' : '';
+  const rendererM7BConflictTarget = hasActiveM7BForBible ? 'M7A/M7B' : 'M7A';
+  const rendererM7BConflictRule = hasActiveM7BForBible ? 'M7A 与 M7B 末帧边界' : 'M7A 结局方向';
   const rendererWeightRule = hasAuthorialStyle
-    ? `1. SOURCE 已选故事草稿 > M0-M7A 精神弧线 > 世界法则/SUR > 作者风格；M7B 若已选，只作为末帧余震约束。
+    ? `1. SOURCE 已选故事草稿 > M0-M7A 精神弧线 > 世界法则/SUR > 作者风格${rendererM7BClause}。
 2. 作者风格只能改变叙述方式、句法节奏、时间组织、心理显影、场景密度、象征物件、对白压力与画面化语言。
-3. 如果作者风格与世界法则冲突，以世界法则为准；如果作者风格与 M7A/M7B 冲突，以 M7A 与 M7B 末帧边界为准。
-4. 已选择作者风格时，叙事视点与感官侧重不参与本次生成；作者机制自动统管视角距离、感官秩序与语言节奏。`
-    : `1. SOURCE 已选故事草稿 > M0-M7A 精神弧线 > 世界法则/SUR > 标准文学渲染 > 叙事视点/感官侧重；M7B 若已选，只作为末帧余震约束。
-2. 未选择作者风格时，叙事视点/感官侧重作为轻量渲染器生效，只能改变讲述角度、信息距离与描写优先级。
-3. 如果叙事视点/感官侧重与世界法则或 M7A/M7B 冲突，以世界法则、M7A 与 M7B 末帧边界为准。`;
+3. 如果作者风格与世界法则冲突，以世界法则为准；如果作者风格与 ${rendererM7BConflictTarget} 冲突，以 ${rendererM7BConflictRule} 为准。
+4. 作者机制统管视角距离、感官秩序与语言节奏。`
+    : `1. SOURCE 已选故事草稿 > M0-M7A 精神弧线 > 世界法则/SUR > 标准文学渲染${rendererM7BClause}。
+2. 标准文学渲染负责自然叙述距离、感官秩序、句法节奏、心理显影、场景密度与画面化语言；不得把小说压成剧本镜头表、设定说明或字段填空。
+3. 如果标准文学渲染与世界法则或 ${rendererM7BConflictTarget} 冲突，以世界法则、${rendererM7BConflictRule} 为准。`;
 
 const SECTION_STYLE = `## 作者风格渲染协议 (AUTHORIAL RENDERER — 本次任务的调声中枢)
 
@@ -913,10 +926,7 @@ const SECTION_STYLE = `## 作者风格渲染协议 (AUTHORIAL RENDERER — 本�
 ${authorialRendererProtocol}
 
 **执行权重：**
-${rendererWeightRule}
-
-${povInstruction}
-${sensoryInstruction}`;
+${rendererWeightRule}`;
 
   // ════════════════════════════════════════════════════════════════════════════
   // ⑦ 素材 + 输出格式 (SECTION_OUTPUT)
@@ -941,30 +951,34 @@ ${visionAnalysis.trim()}
 *   **Structure:** ${treatment.structure || "Unspecified"}
 *   **Visual Anchor:** ${sourceVisualAnchor || "Unspecified"}
 *   **Pitch:** ${treatment.pitch}
-${m7bTags.length > 0 ? `*   **M7B 显影强度:** ${buildM7BIntensityBrief(activeM7BIntensity)}` : ''}
+${hasActiveM7B ? `*   **M7B 显影强度:** ${buildM7BIntensityBrief(activeM7BIntensity)}` : ''}
 ${visionAnalysisSection}
 
 ## 内部校验（不要输出）
 在写作前，你必须完成以下内部校验，但最终答案中不要输出校验过程：
 1. 情绪曲线：确认每个 M 参数的导演笔记面向，并让完整正文形成可感的情绪曲线。
 2. M7A 回溯：从 M7A 缝合点反向审视，哪些 M 参数的含义被回溯性重写。
-3. M7B 末帧：若已选 M7B 且显影未关闭，确认它如何压缩到最后一个动作、物件、声音、目光、姿势或身体反应上；不得为它新增尾声、后日谈、时间跳转或解释段。
+  ${hasActiveM7B ? (activeM7BIntensity === 'epilogue'
+  ? '3. M7B 后日谈：确认极短尾声只兑现已完成选择的残留后果，不新增第二结局、第二反转或解释段。'
+  : activeM7BIntensity === 'strong'
+    ? '3. M7B 强显影：确认它作为主线终点核心最后画面之一，多停留但不新增时间跳转或新事件。'
+    : '3. M7B 轻触：确认它只以 1-2 句压缩到最后一个动作、物件、声音、目光、姿势或身体反应上。') : '3. 结尾停点：只确认 M7A 完成后的最后可见动作与情绪余味，不追加独立余痕段。'}
 4. 物理校验：检查每个 SUR 标签是否超出当前物理法则边界，超出的必须降维为可成立的现实/超现实机制。
 5. 作者风格计划：说明该作者风格如何改写时间、视角、心理显影、对白、场景密度与画面化语言，但不复制名句、桥段、招牌物件或专有意象。
 6. SOURCE 重构检查：确认你不是机械扩写 SOURCE，而是把 SOURCE 重构成真正完整的文学作品。
-7. M0 渗透检查：确认 M1-M7A/M7B 的叙事实现都经过 M0 的逻辑改写。
+7. M0 渗透检查：确认 M1-M7A${hasActiveM7B ? '/M7B' : ''} 的叙事实现都经过 M0 的逻辑改写。
 
 ## 文学完成度标准
 - 不是大纲、不是剧情梗概、不是设定说明、不是理论解释。
 - 必须有开场钩子、人物行动、场景推进、对白或心理运动、情绪曲线与结尾余味。
 - 关键欲望转折必须落在可被看见、听见或感到的场面里，不能用抽象总结替代。
 - 结尾余味应贴在主线最后一个场面内完成；不得追加“后来/几天后/多年后/每年”的结尾后结尾。
-- 正文不得出现 M0/M7B/SUR/欲望公式/拉康 等理论标签；理论只能转译为人物行动、物件关系、场景压力与身体反应。
+- 正文不得出现 M0${hasActiveM7B ? '/M7B' : ''}/SUR/欲望公式/拉康 等理论标签；理论只能转译为人物行动、物件关系、场景压力与身体反应。
 
 ## 输出 (STRICT JSON)
-Output ONLY valid JSON. synopsis = 完整文学正文 (NOT summary). 不要输出 context、assets、moodboard、视觉提示词或任何画面资产。
+Output ONLY valid JSON. JSON is a transport wrapper only. \`narrative.synopsis\` must be a continuous, complete literary short story, not a summary, outline, beat sheet, structure label list, or field-by-field expansion. Do not include headings, markdown, scene labels, M/SUR/SV labels, context, assets, moodboard, visual prompts, or image asset packages.
 ${m7aTags.length > 0 ? `M7A [${m7aTags.join('/')}] 回溯性决定整个故事的意义。严禁篡改。` : ''}
-${hasActiveM7B ? `M7B [${m7bTags.join('/')}] 仅按当前显影强度作为末帧余震保留；严禁另起尾声、后日谈、新场景或时间跳转。` : ''}
+${hasActiveM7B ? `M7B [${m7bTags.join('/')}] 仅按当前显影强度执行：${buildM7BIntensityBrief(activeM7BIntensity)} 严禁借余痕新增第二结局、第二反转或解释段。` : ''}
 
 {
   "treatmentId": "${treatment.id}",
@@ -973,7 +987,7 @@ ${hasActiveM7B ? `M7B [${m7bTags.join('/')}] 仅按当前显影强度作为末�
   "narrative": {
     "title": "Story Title (CN + EN)",
     "logline": "A one-sentence hook (CN).",
-    "synopsis": "complete novel text (${targetWordCount} chars)"
+    "synopsis": "完整连续小说正文（约 ${targetWordCount} 中文字符；不得带小标题/结构标签）"
   }
 }`;
 

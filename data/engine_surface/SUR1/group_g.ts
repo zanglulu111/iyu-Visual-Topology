@@ -8,7 +8,7 @@ export const SUR1_GROUP_G: LibraryCategoryDef = {
     {
       id: "mafia",
       name: "黑手党家族", nameEn: "Mafia / Syndicate",
-      def: "以犯罪家族的权力继承、忠诚和背叛为类型核心，教父模式、西西里规矩只作可选参照。",
+      def: "以犯罪家族的权力继承、忠诚和背叛为识别重点，教父模式、西西里规矩只作可选参照。",
       defEn: "Godfather model, family legacy, omertà, betrayal.",
       core: "血缘家族 vs 犯罪家族。在罪恶的泥潭中试图维持某种古老的荣誉与秩序，两者的边界永远在溶解。",
       coreEn: "Blood family vs crime family. Attempting to maintain ancient honor and order in a mire of sin; the boundary between the two is forever dissolving.",
@@ -18,7 +18,7 @@ export const SUR1_GROUP_G: LibraryCategoryDef = {
     {
       id: "yakuza",
       name: "极道任侠", nameEn: "Yakuza / Triad",
-      def: "以日式极道或港式帮会的组织伦理、身份规训和兄弟义理为类型核心；纹身、入会仪式、街头冲突等只作可选类型符号。",
+      def: "以日式极道或港式帮会的组织伦理、身份规训和兄弟义理为识别重点；纹身、入会仪式、街头冲突等只作可选类型符号。",
       defEn: "Japanese yakuza or Hong Kong gang ethics, hierarchy, and brotherhood; tattoos, initiation rituals, and street conflict are optional genre signs.",
       core: "传统的侠义精神 vs 现代资本主义黑帮的逐利本质。旧江湖的规矩与新时代的利益之间的裂缝越来越深。",
       coreEn: "Traditional chivalric spirit vs profit-driven nature of modern capitalist gangs. The rift between old-world codes and new-era interests grows ever deeper.",
@@ -28,7 +28,7 @@ export const SUR1_GROUP_G: LibraryCategoryDef = {
     {
       id: "cartel",
       name: "毒枭犯罪", nameEn: "Cartel / Narco",
-      def: "以毒品网络、跨境权力和腐败秩序为类型核心，边境、残酷暴力等只在结构需要时出现。",
+      def: "以毒品网络、跨境权力和腐败秩序为识别重点，边境、残酷暴力等只在结构需要时出现。",
       defEn: "Latin American cartels, extremely brutal violence, border walls, corruption.",
       core: "绝对的暴力恐怖 vs 国家机器的无力。没有道德底线的博弈场，金钱与暴力是唯一的通货。",
       coreEn: "Absolute violent terror vs the impotence of state machinery. A playing field with no moral bottom line; money and violence are the only currency.",
@@ -38,7 +38,7 @@ export const SUR1_GROUP_G: LibraryCategoryDef = {
     {
       id: "prison_gang",
       name: "监狱帮派", nameEn: "Prison / Hood Gangs",
-      def: "以封闭或底层环境中的帮派生存法则为类型核心，狱帮、街头冲突等按场域需要选用。",
+      def: "以封闭或底层环境中的帮派生存法则为识别重点，狱帮、街头冲突等按场域需要选用。",
       defEn: "Racial segregation, prison gangs, bottom-tier slaughter, inescapable cycle.",
       core: "极端封闭或赤贫环境中的唯一生存法则。帮派是暴力的庇护所，加入是代价，不加入也是代价。",
       coreEn: "The only survival rule in extreme confinement or destitution. The gang is a shelter of violence; joining has a cost, and not joining has a cost too.",
@@ -48,7 +48,7 @@ export const SUR1_GROUP_G: LibraryCategoryDef = {
     {
       id: "vigilante",
       name: "义警私刑", nameEn: "Vigilante",
-      def: "以体制失效后的个人执法和合法性追问为类型核心，复仇或替天行道只作可选动机。",
+      def: "以体制失效后的个人执法和合法性追问为识别重点，复仇或替天行道只作可选动机。",
       defEn: "Personal revenge after system failure, delivering justice, Batman/Punisher model.",
       core: "个体代替法律执行正义的合法性追问。私刑的边界在哪里——屠龙者与恶龙之间的距离有多远。",
       coreEn: "Questioning the legitimacy of individuals executing justice in place of the law. Where is the line of vigilantism — how far is the dragonslayer from becoming the dragon.",
@@ -58,7 +58,7 @@ export const SUR1_GROUP_G: LibraryCategoryDef = {
     {
       id: "police_corruption",
       name: "黑警腐败", nameEn: "Bad Lieutenant / Corruption",
-      def: "以执法体系内部腐败和权力寻租为类型核心，黑白通吃、内部审查等按剧情需要使用。",
+      def: "以执法体系内部腐败和权力寻租为识别重点，黑白通吃、内部审查等按剧情需要使用。",
       defEn: "Playing both sides, degradation of enforcers, internal affairs.",
       core: "权力的寻租与执法者的腐败。法律的守护者与法律的践踏者共存于同一个制服之下。",
       coreEn: "Rent-seeking of power and corruption of law enforcers. The guardian of law and the violator of law coexist beneath the same uniform.",
@@ -68,7 +68,7 @@ export const SUR1_GROUP_G: LibraryCategoryDef = {
     {
       id: "assassin",
       name: "职业杀手", nameEn: "Hitman / Assassin",
-      def: "以杀手行业规则和职业伦理裂缝为类型核心，退休返场、破坏规矩等只作可选引擎。",
+      def: "以杀手行业规则和职业伦理裂缝为识别重点，退休返场、破坏规矩等只作可选引擎。",
       defEn: "Cold professional killers, pulled back after retirement, rules and breaking rules.",
       core: "杀戮作为精确的职业 vs 残存的人性本能。职业规则与情感本能之间的裂隙是永恒的结构性矛盾。",
       coreEn: "Killing as a precise profession vs residual human instinct. The rift between professional rules and emotional instinct is an eternal structural contradiction.",
@@ -78,7 +78,7 @@ export const SUR1_GROUP_G: LibraryCategoryDef = {
     {
       id: "buddy_cop",
       name: "警匪搭档", nameEn: "Buddy Cop",
-      def: "以搭档关系和互补破案节奏为类型核心，斗嘴、插科打诨等只作可选喜剧纹理。",
+      def: "以搭档关系和互补破案节奏为识别重点，斗嘴、插科打诨等只作可选喜剧纹理。",
       defEn: "Mismatched partners, banter, teaming up against crime.",
       core: "两个完全不同的体系被迫共处。性格的对立在对抗共同敌人时转化为互补的化学反应。",
       coreEn: "Two completely different systems forced to coexist. Character opposition transforms into complementary chemistry when facing a common enemy.",
@@ -88,7 +88,7 @@ export const SUR1_GROUP_G: LibraryCategoryDef = {
     {
       id: "true_crime",
       name: "纪实犯罪", nameEn: "True Crime",
-      def: "以真实案件质感和调查纪实语法为类型核心，连环案、世纪大案、庭审实录只作可选素材方向。",
+      def: "以真实案件质感和调查纪实语法为识别重点，连环案、世纪大案、庭审实录只作可选素材方向。",
       defEn: "Adapted from real cases, serial killers, trial records.",
       core: "现实远比虚构更荒诞与残酷。对真实暴力源头的剥洋葱式追问——每揭开一层，都比上一层更令人不适。",
       coreEn: "Reality is far more absurd and cruel than fiction. Peeling the onion of the true source of violence — every layer revealed is more disturbing than the last.",
@@ -98,7 +98,7 @@ export const SUR1_GROUP_G: LibraryCategoryDef = {
     {
       id: "con_artist",
       name: "骗术犯罪", nameEn: "Con Artist / Grifter",
-      def: "以骗局、信息差和心理操控为类型核心，老千、庞氏骗局等只作可选骗术形态。",
+      def: "以骗局、信息差和心理操控为识别重点，老千、庞氏骗局等只作可选骗术形态。",
       defEn: "Scams, grifters, Ponzi schemes, psychological manipulation.",
       core: "信息不对称构成的权力游戏。不用暴力，用智力、魅力与信息差构建精密的幻术陷阱。",
       coreEn: "A power game built on information asymmetry. No violence — using intellect, charm, and information gaps to construct precision illusion traps.",
@@ -108,7 +108,7 @@ export const SUR1_GROUP_G: LibraryCategoryDef = {
     {
       id: "juvenile",
       name: "青少年犯罪", nameEn: "Juvenile Delinquency",
-      def: "以未成年人越轨和青春期破坏力为类型核心，街头、家庭创伤等只按人物需要配置。",
+      def: "以未成年人越轨和青春期破坏力为识别重点，街头、家庭创伤等只按人物需要配置。",
       defEn: "Street punks, rebel without a cause, juvenile offenders, family trauma.",
       core: "青春的迷茫与无处安放的精力转化为破坏力。社会规训 vs 不可驯服的原始冲动之间的断裂。",
       coreEn: "Youthful confusion and restless energy transformed into destructive force. The fracture between social discipline and untameable primal impulse.",
@@ -118,7 +118,7 @@ export const SUR1_GROUP_G: LibraryCategoryDef = {
     {
       id: "cyber_crime",
       name: "暗网犯罪", nameEn: "Cyber Crime",
-      def: "以网络犯罪造成的现实伤害为类型核心，加密货币、诈骗、勒索软件等只作可选案型。",
+      def: "以网络犯罪造成的现实伤害为识别重点，加密货币、诈骗、勒索软件等只作可选案型。",
       defEn: "Crypto theft, cyber scams, ransomware, real-world harm from virtual realms.",
       core: "看不见的数字暴力对现实生活的实体冲击。虚拟世界的匿名性既是武器也是面具——隐私成为最脆弱的奢侈品。",
       coreEn: "Invisible digital violence delivering physical impact on real life. The anonymity of the virtual world is both weapon and mask — privacy becomes the most fragile luxury.",

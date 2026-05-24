@@ -8,7 +8,7 @@ export const SUR1_GROUP_J: LibraryCategoryDef = {
     {
       id: "first_love",
       name: "初恋纯爱", nameEn: "First Love",
-      def: "以第一次爱恋的青涩、克制和成长感为类型核心，校园、暗恋、白色系只作可选气质。",
+      def: "以第一次爱恋的青涩、克制和成长感为识别重点，校园、暗恋、白色系只作可选气质。",
       defEn: "Campus setting, innocent, secret crush, dying without a trace, white color palette.",
       core: "第一次心动 vs 不敢触碰的羞涩。情感的纯度最高而经验值最低，每一个微小的信号都被无限放大。",
       coreEn: "First heartbeat vs the shyness of not daring to touch. Emotional purity at its peak while experience is at its lowest; every tiny signal is infinitely amplified.",
@@ -18,7 +18,7 @@ export const SUR1_GROUP_J: LibraryCategoryDef = {
     {
       id: "tragic",
       name: "悲恋虐恋", nameEn: "Tragic Romance",
-      def: "以爱而不得和关系代价为类型核心，绝症、阶级阻碍、生离死别只作可选阻力。",
+      def: "以爱而不得和关系代价为识别重点，绝症、阶级阻碍、生离死别只作可选阻力。",
       defEn: "Terminal illness, class obstacles, life and death separation, tear-jerker.",
       core: "至死不渝的情感 vs 不可抗拒的外部阻力。爱的强度与阻力的强度成正比——情感的纯度在绝境中被极端提纯。",
       coreEn: "Undying emotion vs irresistible external resistance. The intensity of love is proportional to the intensity of obstacles — emotional purity is extremely refined in dire circumstances.",
@@ -28,7 +28,7 @@ export const SUR1_GROUP_J: LibraryCategoryDef = {
     {
       id: "adult",
       name: "成人爱情", nameEn: "Adult Romance",
-      def: "以成年亲密关系中的责任、欲望和现实压力为类型核心，危机或背叛只作可选矛盾。",
+      def: "以成年亲密关系中的责任、欲望和现实压力为识别重点，危机或背叛只作可选矛盾。",
       defEn: "Midlife crisis, infidelity, complex partnerships, realism.",
       core: "激情消退后的倦怠 vs 寻找新的刺激。成熟关系中的爱同时承载着责任、欺骗、妥协与惯性。",
       coreEn: "Burnout after passion fades vs searching for new thrills. Love in mature relationships simultaneously carries duty, deceit, compromise, and inertia.",
@@ -38,7 +38,7 @@ export const SUR1_GROUP_J: LibraryCategoryDef = {
     {
       id: "fantasy_romance",
       name: "奇幻爱情", nameEn: "Fantasy Romance",
-      def: "以超现实差异下的亲密关系为类型核心，跨物种、跨时空等只作可选奇幻设定。",
+      def: "以超现实差异下的亲密关系为识别重点，跨物种、跨时空等只作可选奇幻设定。",
       defEn: "Human-ghost, human-beast, vampire romance, love transcending species and time.",
       core: "两个不同物种或世界之间的吸引力 vs 物理与生理法则的阻隔。形态的差异考验着情感的本质是否能独立于载体而存在。",
       coreEn: "Attraction between two different species or worlds vs barriers of physical and biological laws. The difference in form tests whether the essence of emotion can exist independently of its vessel.",
@@ -48,7 +48,7 @@ export const SUR1_GROUP_J: LibraryCategoryDef = {
     {
       id: "enemies_to_lovers",
       name: "欢喜冤家", nameEn: "Enemies to Lovers",
-      def: "以敌意、误解到亲密转化为类型核心，斗嘴、傲慢与偏见式结构只作可选模式。",
+      def: "以敌意、误解到亲密转化为识别重点，斗嘴、傲慢与偏见式结构只作可选模式。",
       defEn: "From hating to loving each other, fighting rooster mode, Pride and Prejudice.",
       core: "表面的敌意 vs 潜意识的吸引。对抗本身就是关系的试探——只有势均力敌的对手才值得全力以赴。",
       coreEn: "Surface hostility vs subconscious attraction. Opposition itself is the testing of the relationship — only an evenly matched opponent is worth going all out for.",
@@ -58,7 +58,7 @@ export const SUR1_GROUP_J: LibraryCategoryDef = {
     {
       id: "taboo",
       name: "禁忌之爱", nameEn: "Taboo Romance",
-      def: "以社会禁令和亲密欲望冲突为类型核心，具体禁忌关系只按伦理边界和剧情需要设置。",
+      def: "以社会禁令和亲密欲望冲突为识别重点，具体禁忌关系只按伦理边界和剧情需要设置。",
       defEn: "Teacher-student, borderline incest, socially unacceptable love, sense of immorality.",
       core: "强烈的原始欲望 vs 严厉的社会道德禁令。禁忌线的存在本身既是阻力也是催化剂。",
       coreEn: "Intense primal desire vs strict social moral prohibitions. The very existence of the taboo line is both resistance and catalyst.",
@@ -68,7 +68,7 @@ export const SUR1_GROUP_J: LibraryCategoryDef = {
     {
       id: "period_romance",
       name: "古典爱情", nameEn: "Period Romance",
-      def: "以时代礼法约束下的爱恋和克制表达为类型核心，信物、庄园、宫廷只作可选场域。",
+      def: "以时代礼法约束下的爱恋和克制表达为识别重点，信物、庄园、宫廷只作可选场域。",
       defEn: "Classical etiquette, tokens of love, court or manor background, implicit and restrained.",
       core: "压抑的礼教 vs 汹涌的内心。表达的通道极度狭窄——微小的动作承载着巨大的情感重量。",
       coreEn: "Repressed etiquette vs surging inner heart. The channels of expression are extremely narrow — microscopic actions carry enormous emotional weight.",
@@ -78,7 +78,7 @@ export const SUR1_GROUP_J: LibraryCategoryDef = {
     {
       id: "queer",
       name: "酷儿爱情", nameEn: "Queer Romance",
-      def: "以酷儿亲密关系、自我认同和社会压力为类型核心，觉醒、隐秘相爱等只作可选路径。",
+      def: "以酷儿亲密关系、自我认同和社会压力为识别重点，觉醒、隐秘相爱等只作可选路径。",
       defEn: "Same-sex awakening, social pressure, self-identifications, rainbow tones, secret love.",
       core: "真实的自我欲望 vs 主流规范的压迫。身份认同的渴望与社会能见度之间的落差构成核心张力。",
       coreEn: "True self desire vs oppression of mainstream norms. The gap between the yearning for identity and social visibility constitutes the core tension.",
@@ -88,7 +88,7 @@ export const SUR1_GROUP_J: LibraryCategoryDef = {
     {
       id: "holiday",
       name: "邂逅爱情", nameEn: "Holiday / Encounter Romance",
-      def: "以偶然相遇和时间限制下的亲密升温为类型核心，旅途、异国、假日只作可选场景。",
+      def: "以偶然相遇和时间限制下的亲密升温为识别重点，旅途、异国、假日只作可选场景。",
       defEn: "Brief love during a trip, accidental foreign encounter, countdown romance.",
       core: "有限的时间窗口 vs 无限的浪漫可能。时间的倒计时既放大了每一刻的密度，也悬置了现实的重量。",
       coreEn: "Limited time window vs infinite romantic possibility. The countdown of time amplifies the density of every moment while suspending the weight of reality.",
@@ -98,7 +98,7 @@ export const SUR1_GROUP_J: LibraryCategoryDef = {
     {
       id: "triangle",
       name: "三角恋", nameEn: "Love Triangle",
-      def: "以多方亲密关系中的选择、嫉妒和伦理代价为类型核心，修罗场只作可选场面。",
+      def: "以多方亲密关系中的选择、嫉妒和伦理代价为识别重点，修罗场只作可选场面。",
       defEn: "The dilemma of choice, jealousy, shura field, red vs white rose.",
       core: "欲望的竞争性与选择的不可能性。每一段关系的存在都以另一段关系的受损为代价——三角结构天然不稳定。",
       coreEn: "Competitiveness of desire and the impossibility of choice. Every relationship's existence comes at the cost of another's damage — the triangular structure is inherently unstable.",
@@ -108,7 +108,7 @@ export const SUR1_GROUP_J: LibraryCategoryDef = {
     {
       id: "soulmates",
       name: "灵魂伴侣", nameEn: "Soulmates",
-      def: "以高度精神契合和命定感为类型核心，轮回、柏拉图式表达只作可选气质。",
+      def: "以高度精神契合和命定感为识别重点，轮回、柏拉图式表达只作可选气质。",
       defEn: "Mental sync, destined, crossing reincarnations, transcending body language, platonic.",
       core: "超越肉体和繁衍的极致默契。绝对的精神契合——归属感的强度近乎宿命，辨认彼此的本能先于理性。",
       coreEn: "Supreme tacit understanding transcending flesh and reproduction. Absolute spiritual sync — the intensity of belonging approaches fate; the instinct to recognize each other precedes reason.",
@@ -118,7 +118,7 @@ export const SUR1_GROUP_J: LibraryCategoryDef = {
     {
       id: "fake_dating",
       name: "契约爱情", nameEn: "Fake Dating",
-      def: "以契约关系逐渐转化为真实亲密为类型核心，先婚后爱、假扮情侣只作可选结构。",
+      def: "以契约关系逐渐转化为真实亲密为识别重点，先婚后爱、假扮情侣只作可选结构。",
       defEn: "Marriage first love later, faking couple for benefit, Mary Sue/Idol drama high-freq mode.",
       core: "虚假的契约关系 vs 真实的情感滋生。表演亲密与真实亲密的边界在重复的仪式中逐渐液化。",
       coreEn: "Fake contractual relationship vs real emotional growth. The boundary between performing intimacy and genuine intimacy gradually liquefies through repeated ritual.",

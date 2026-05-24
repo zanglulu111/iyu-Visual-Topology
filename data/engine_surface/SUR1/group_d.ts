@@ -8,7 +8,7 @@ export const SUR1_GROUP_D: LibraryCategoryDef = {
     {
       id: "classic_wuxia",
       name: "传统武侠", nameEn: "Classic Wuxia",
-      def: "以江湖秩序、侠义成长和家国压力为类型核心，名门正派等只作可选结构。",
+      def: "以江湖秩序、侠义成长和家国压力为识别重点，名门正派等只作可选结构。",
       defEn: "Nationalism, orthodox sects, Jianghu rules, epic growth.",
       core: "个人恩怨 vs 家国大义。江湖规矩与自由天性的永恒拉锯，侠义的定义因立场而裂变。",
       coreEn: "Personal grudges vs national duty. The eternal tug-of-war between Jianghu codes and free nature; the definition of chivalry fractures by standpoint.",
@@ -18,7 +18,7 @@ export const SUR1_GROUP_D: LibraryCategoryDef = {
     {
       id: "ronin",
       name: "古龙武侠", nameEn: "Ronin / New Wave",
-      def: "以孤独浪子、快意恩仇和风格化江湖为类型核心，极简对白、视觉奇情只作可选气质。",
+      def: "以孤独浪子、快意恩仇和风格化江湖为识别重点，极简对白、视觉奇情只作可选气质。",
       defEn: "Minimalism, absolute loneliness, instant vengeance, highly stylized visual.",
       core: "绝对的孤独与虚无。出刀只在一瞬间，生与死的界限极度模糊，江湖是一场没有观众的独角戏。",
       coreEn: "Absolute loneliness and nihilism. The blade strikes in an instant; the line between life and death is razor-thin. The Jianghu is a one-man show with no audience.",
@@ -28,7 +28,7 @@ export const SUR1_GROUP_D: LibraryCategoryDef = {
     {
       id: "xianxia",
       name: "仙侠修真", nameEn: "Xianxia / Cultivation",
-      def: "以修行秩序、道法层级和宿命试炼为类型核心，飞升、渡劫、三界等只作可选设定。",
+      def: "以修行秩序、道法层级和宿命试炼为识别重点，飞升、渡劫、三界等只作可选设定。",
       defEn: "Qi and Dao, three realms, ascending tribulations, reincarnations, immortal combat.",
       core: "逆天改命的意志 vs 天道宿命的无情压制。修炼的每一层境界都是对天道秩序的叛逆与赌注。",
       coreEn: "The will to defy heaven vs ruthless suppression by Heaven's Dao. Every cultivation realm is both rebellion against and a wager with the celestial order.",
@@ -38,7 +38,7 @@ export const SUR1_GROUP_D: LibraryCategoryDef = {
     {
       id: "court",
       name: "宫廷权谋", nameEn: "Court Politics",
-      def: "以宫廷权力博弈和制度缝隙为类型核心，夺嫡、后宫、朝堂等只作可选场域。",
+      def: "以宫廷权力博弈和制度缝隙为识别重点，夺嫡、后宫、朝堂等只作可选场域。",
       defEn: "High court, succession wars, harem intrigue, imperial mind games.",
       core: "极度压抑的礼教 vs 极度膨胀的权力欲望。密闭空间内的零和博弈，每一句话都是武器，每一个礼节都是陷阱。",
       coreEn: "Extremely repressed etiquette vs maximally inflated power lust. Zero-sum games in enclosed spaces; every word is a weapon, every courtesy a trap.",
@@ -48,7 +48,7 @@ export const SUR1_GROUP_D: LibraryCategoryDef = {
     {
       id: "historical",
       name: "历史演义", nameEn: "Historical Epic",
-      def: "以历史事件的戏剧化重述为类型核心，战争、帝王将相等只按时代需要取用。",
+      def: "以历史事件的戏剧化重述为识别重点，战争、帝王将相等只按时代需要取用。",
       defEn: "Dramatized true history, war epics, emperors and generals.",
       core: "个体英雄的意志 vs 滚滚历史车轮的惯性。天下大势裹挟一切，个人抉择在巨流中的重量未知。",
       coreEn: "The will of individual heroes vs the inertia of the rolling wheels of history. The grand momentum sweeps all; the weight of personal choice within the great current remains unknown.",
@@ -58,7 +58,7 @@ export const SUR1_GROUP_D: LibraryCategoryDef = {
     {
       id: "period_mystery",
       name: "古装探案", nameEn: "Period Mystery",
-      def: "以古代制度和案件调查结合为类型核心，神探、公案、悬冤昭雪只作可选模式。",
+      def: "以古代制度和案件调查结合为识别重点，神探、公案、悬冤昭雪只作可选模式。",
       defEn: "Suspense deduction in ancient times, legendary detectives, clearing false charges.",
       core: "理性逻辑 vs 封建迷信与官场潜规则。没有现代技术的加持，真相的挖掘全凭智力与胆识。",
       coreEn: "Rational logic vs feudal superstition and bureaucratic corruption. Without modern technology, unearthing truth depends entirely on intellect and courage.",
@@ -68,7 +68,7 @@ export const SUR1_GROUP_D: LibraryCategoryDef = {
     {
       id: "shenmo",
       name: "志怪神魔", nameEn: "Shenmo / Mythic",
-      def: "以民间异闻、妖鬼神魔和因果秩序为类型核心，聊斋、人妖恋等只作可选母题。",
+      def: "以民间异闻、妖鬼神魔和因果秩序为识别重点，聊斋、人妖恋等只作可选母题。",
       defEn: "Strange tales, spirits and demons, folktales, interspecies love, karma.",
       core: "人与异类（妖/鬼）之间的纠葛。跨越物种的情感 vs 礼教秩序对越界者的审判。",
       coreEn: "Entanglement between human and other (spirit/demon). Cross-species emotion vs the judgment of ritual order upon those who transgress boundaries.",
@@ -78,7 +78,7 @@ export const SUR1_GROUP_D: LibraryCategoryDef = {
     {
       id: "alt_history",
       name: "穿越架空", nameEn: "Time Travel / Alt-History",
-      def: "以跨时代错位和架空历史改写为类型核心，现代知识、降维优势等只作可选机制。",
+      def: "以跨时代错位和架空历史改写为识别重点，现代知识、降维优势等只作可选机制。",
       defEn: "Modern person in ancient times, low-dimensional strike with modern knowledge, rewriting history.",
       core: "现代认知 vs 古代制度的剧烈摩擦。信息优势的降维打击与历史惯性的不可撼动之间的拉扯。",
       coreEn: "Modern cognition vs violent friction with ancient institutions. Tension between the dimensional advantage of information superiority and the immovable inertia of history.",
@@ -88,7 +88,7 @@ export const SUR1_GROUP_D: LibraryCategoryDef = {
     {
       id: "republic",
       name: "民国传奇", nameEn: "Republic Era",
-      def: "以民国乱世中的家族、情报或身份漂移为类型核心，军阀、洋场、谍战只作可选场景。",
+      def: "以民国乱世中的家族、情报或身份漂移为识别重点，军阀、洋场、谍战只作可选场景。",
       defEn: "Warlords, foreign concessions, changing fortunes, wartime romance, espionage.",
       core: "新旧时代的剧烈撕裂。东方传统与西方摩登在乱世废墟上碰撞出诡异的交响。",
       coreEn: "Violent tearing between old and new eras. Eastern tradition and Western modernity collide into an eerie symphony on the ruins of wartime.",
@@ -98,7 +98,7 @@ export const SUR1_GROUP_D: LibraryCategoryDef = {
     {
       id: "manor",
       name: "宅斗种田", nameEn: "Manor Drama",
-      def: "以家族内宅或日常经营中的微观权力为类型核心，嫡庶、田产、家长里短只按需要选用。",
+      def: "以家族内宅或日常经营中的微观权力为识别重点，嫡庶、田产、家长里短只按需要选用。",
       defEn: "Ancient domestic life, family feuds, micropolitics of the inner courtyard.",
       core: "家族秩序下的生存内耗。螺蛳壳里做道场——微观政治的空间越小，博弈的精密度越高。",
       coreEn: "Survival attrition under family hierarchy. Grand strategy in a snail's shell — the smaller the space of micropolitics, the higher the precision of the game.",
@@ -108,7 +108,7 @@ export const SUR1_GROUP_D: LibraryCategoryDef = {
     {
       id: "kungfu",
       name: "功夫片", nameEn: "Kung Fu",
-      def: "以身体技击、门派传承和动作展示为类型核心，擂台、民族气节等只作可选语境。",
+      def: "以身体技击、门派传承和动作展示为识别重点，擂台、民族气节等只作可选语境。",
       defEn: "Martial arts technique, ring combat, lineage, national integrity (mostly late Qing).",
       core: "肉体的极限修炼 vs 精神尊严的捍卫。身体本身就是武器、道场与哲学载体。",
       coreEn: "Extreme physical training vs defense of spiritual dignity. The body itself is the weapon, the arena, and the vessel of philosophy.",
@@ -118,7 +118,7 @@ export const SUR1_GROUP_D: LibraryCategoryDef = {
     {
       id: "unofficial",
       name: "戏说野史", nameEn: "Unofficial History",
-      def: "以轻松改写历史和借古讽今为类型核心，野史传闻、民间狂欢等只作可选材料。",
+      def: "以轻松改写历史和借古讽今为识别重点，野史传闻、民间狂欢等只作可选材料。",
       defEn: "Satire via history, light deconstruction, comedic folk narrative not strictly factual.",
       core: "严肃权力的荒诞化解构。历史大人物被剥去光环还原为世俗的凡人，权威与滑稽共存一身。",
       coreEn: "Absurdist deconstruction of serious power. Great historical figures stripped of their halo and revealed as secular mortals; authority and comedy coexist in one person.",

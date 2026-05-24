@@ -8,7 +8,7 @@ export const SUR1_GROUP_A: LibraryCategoryDef = {
     {
       id: "gun_fu",
       name: "枪战动作", nameEn: "Gun Fu / Heroic Bloodshed",
-      def: "以枪战调度、动作节奏和暴力后果为类型核心，双枪、慢动作、西装等只作可选美学符号。",
+      def: "以枪战调度、动作节奏和暴力后果为识别重点，双枪、慢动作、西装等只作可选美学符号。",
       defEn: "John Woo style dual-wielding, slow-mo, blood and suits, romanticized killing.",
       core: "优雅的秩序信条 vs 失控的杀戮泥沼。暴力被仪式化为美学，义气与背叛共生于同一套规矩。",
       coreEn: "Elegant code of honor vs spiraling chaos of killing. Violence ritualized into aesthetics; loyalty and betrayal coexist within the same set of rules.",
@@ -18,7 +18,7 @@ export const SUR1_GROUP_A: LibraryCategoryDef = {
     {
       id: "tactical",
       name: "特工动作", nameEn: "Tactical / Agent",
-      def: "以秘密任务、身份伪装、情报目标和战术执行为类型核心，CQB、高科技装备、全球任务只按需要选用。",
+      def: "以秘密任务、身份伪装、情报目标和战术执行为识别重点，CQB、高科技装备、全球任务只按需要选用。",
       defEn: "Modern military tactics, CQB, high-tech gear, global missions.",
       core: "任务纪律与个人判断之间的拉扯。特工必须在伪装、情报缺口和现场风险中完成目标，计划失控只是常见压力，不是必备剧情。",
       coreEn: "Mission discipline vs personal judgment. The agent must complete the objective through disguise, intelligence gaps, and field risk; a plan going wrong is only a common pressure, not a required plot.",
@@ -28,7 +28,7 @@ export const SUR1_GROUP_A: LibraryCategoryDef = {
     {
       id: "western",
       name: "西部片", nameEn: "Western / Frontier",
-      def: "以边境秩序、法外正义和荒野伦理为类型核心，左轮、赏金猎人、牛仔等只作可选符号。",
+      def: "以边境秩序、法外正义和荒野伦理为识别重点，左轮、赏金猎人、牛仔等只作可选符号。",
       defEn: "Revolvers, wilderness, bounty hunters, outlaw justice, cowboy spirit.",
       core: "入侵的文明秩序 vs 正在消亡的原始荒野。法律与左轮手枪并行的无主之地，每条边界线都是流动的。",
       coreEn: "Invading civilized order vs fading primal wilderness. A no-man's-land where law and revolvers coexist; every border is fluid.",
@@ -38,7 +38,7 @@ export const SUR1_GROUP_A: LibraryCategoryDef = {
     {
       id: "vehicle",
       name: "赛车追逐", nameEn: "Vehicle / Chase",
-      def: "以速度、追逐和载具行动为类型核心，改装车、人车合一等只作可选视觉资源。",
+      def: "以速度、追逐和载具行动为识别重点，改装车、人车合一等只作可选视觉资源。",
       defEn: "Fast & Furious, tuned cars, extreme chases, man-machine unity.",
       core: "人与机器的极限融合，生死只在毫秒之间。速度既是逃离的手段，也是自毁的加速度。",
       coreEn: "Extreme fusion of man and machine; life or death in milliseconds. Speed is both the means of escape and the acceleration toward self-destruction.",
@@ -48,7 +48,7 @@ export const SUR1_GROUP_A: LibraryCategoryDef = {
     {
       id: "disaster",
       name: "灾难求生", nameEn: "Disaster / Survival",
-      def: "以灾变压力下的生存抉择为类型核心，地震、海啸、极端环境等只作可选灾害形态。",
+      def: "以灾变压力下的生存抉择为识别重点，地震、海啸、极端环境等只作可选灾害形态。",
       defEn: "Earthquakes, tsunamis, extreme survival, testing of humanity.",
       core: "人类渺小的意志 vs 自然冷漠的毁灭力量。文明的一切保障在灾变面前归零，生存本身成为唯一议题。",
       coreEn: "Puny human will vs nature's indifferent destructive force. All civilizational safeguards reset to zero before catastrophe; survival itself becomes the sole agenda.",
@@ -58,7 +58,7 @@ export const SUR1_GROUP_A: LibraryCategoryDef = {
     {
       id: "kaiju",
       name: "怪兽片", nameEn: "Kaiju / Monster",
-      def: "以巨大异物对文明秩序的压迫为类型核心，深海恐惧、兵器崇拜等只按设定需要出现。",
+      def: "以巨大异物对文明秩序的压迫为识别重点，深海恐惧、兵器崇拜等只按设定需要出现。",
       defEn: "Humans vs giant creatures, sheer destruction, thalassophobia, weapon worship.",
       core: "人类中心主义的傲慢 vs 远古或宇宙尺度的恐怖。文明的全部火力在绝对体量面前形同蚁噬。",
       coreEn: "Anthropocentric hubris vs terror at ancient or cosmic scale. Civilization's full firepower amounts to ant bites before absolute mass.",
@@ -68,7 +68,7 @@ export const SUR1_GROUP_A: LibraryCategoryDef = {
     {
       id: "war",
       name: "战争史诗", nameEn: "War Epic",
-      def: "以战争环境中的个体命运和历史压力为类型核心，战场、战壕、兄弟连等只作可选场面。",
+      def: "以战争环境中的个体命运和历史压力为识别重点，战场、战壕、兄弟连等只作可选场面。",
       defEn: "Grand battlefields, trenches, band of brothers, brutal reality.",
       core: "脆弱的个体肉身 vs 巨大的历史绞肉机。个人命运在战争的尺度下被极端压缩或极端放大。",
       coreEn: "Fragile individual bodies vs the massive historical meat grinder. Personal fate is either extremely compressed or extremely amplified at the scale of war.",
@@ -78,7 +78,7 @@ export const SUR1_GROUP_A: LibraryCategoryDef = {
     {
       id: "superhero",
       name: "超级英雄", nameEn: "Superhero",
-      def: "以超常力量、责任代价和公共危机为类型核心，起源、蒙面义警、宇宙危机只作可选结构。",
+      def: "以超常力量、责任代价和公共危机为识别重点，起源、蒙面义警、宇宙危机只作可选结构。",
       defEn: "Superpowers, good vs evil, origin stories, cosmic crisis.",
       core: "神性的无限力量 vs 人性的凡人弱点。力量的拥有者与力量的代价永远捆绑。",
       coreEn: "Infinite divine power vs mortal human weakness. The possessor of power is forever bound to its cost.",
@@ -88,7 +88,7 @@ export const SUR1_GROUP_A: LibraryCategoryDef = {
     {
       id: "prison",
       name: "越狱逃亡", nameEn: "Prison Break / Fugitive",
-      def: "以禁锢和逃离之间的结构张力为类型核心，高智商脱逃、洗冤等只作可选动机。",
+      def: "以禁锢和逃离之间的结构张力为识别重点，高智商脱逃、洗冤等只作可选动机。",
       defEn: "Confinement and freedom, high-IQ escape, clearing names, environmental deconstruction.",
       core: "绝对的自由渴望 vs 极致的物理禁锢。每一寸逃离都需要精密的代价计算与不可逆的赌注。",
       coreEn: "Absolute desire for freedom vs extreme physical confinement. Every inch of escape demands precise cost calculation and irreversible stakes.",
@@ -98,7 +98,7 @@ export const SUR1_GROUP_A: LibraryCategoryDef = {
     {
       id: "treasure",
       name: "寻宝探险", nameEn: "Treasure Hunt / Adventure",
-      def: "以未知空间探索和目标争夺为类型核心，古迹、谜题、机关、异域风情只按冒险需要取用。",
+      def: "以未知空间探索和目标争夺为识别重点，古迹、谜题、机关、异域风情只按冒险需要取用。",
       defEn: "Ancient ruins, puzzles, traps, exotic archeology.",
       core: "对未知的贪婪好奇 vs 守护秘密的古老法则。每一道机关背后既是宝藏也是陷阱。",
       coreEn: "Greedy curiosity for the unknown vs ancient laws guarding secrets. Behind every mechanism lies both treasure and trap.",
@@ -108,7 +108,7 @@ export const SUR1_GROUP_A: LibraryCategoryDef = {
     {
       id: "sports",
       name: "体育竞技", nameEn: "Sports / Competition",
-      def: "以竞技目标、训练代价和临场胜负为类型核心，弱者逆袭、团队羁绊、绝杀只作可选模式。",
+      def: "以竞技目标、训练代价和临场胜负为识别重点，弱者逆袭、团队羁绊、绝杀只作可选模式。",
       defEn: "Training montages, underdog comebacks, team bonds, buzzer-beaters.",
       core: "肉体极限的痛苦 vs 精神超越的意志。训练与伤病构成日常的磨损，赛场浓缩一生的赌注。",
       coreEn: "Physical limit agony vs the will to transcend. Training and injury constitute daily attrition; the arena condenses a lifetime's wager.",
@@ -118,7 +118,7 @@ export const SUR1_GROUP_A: LibraryCategoryDef = {
     {
       id: "revenge",
       name: "复仇片", nameEn: "Revenge",
-      def: "以清算旧伤和代价交换为类型核心，以暴制暴、情绪宣泄等只按人物弧线需要出现。",
+      def: "以清算旧伤和代价交换为识别重点，以暴制暴、情绪宣泄等只按人物弧线需要出现。",
       defEn: "Vendettas, eye for an eye, catharsis, costly reckoning.",
       core: "过去的创伤对现在的吞噬。复仇者与仇恨之间的寄生关系——清算的代价与血债本身等量。",
       coreEn: "Past trauma devouring the present. A parasitic relationship between avenger and hatred — the cost of reckoning equals the debt itself.",

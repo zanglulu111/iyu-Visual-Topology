@@ -10,6 +10,7 @@ import { findItemDetails, findItemFull } from './dataRegistry';
 import { NARRATIVE_ENGINE_BLOCKS } from '../data/engine_core/narrative_engine';
 import { ALL_SKIN_BLOCKS } from '../data/narrative/skin_libraries';
 import { SV2_DATA } from '../data/engine_sv/SV2';
+import { DEFAULT_SV1_STRUCTURE_NAME, DEFAULT_SV2_VOLUME_NAME } from '../data/engine_sv/defaults';
 import { getVisionAnchorProtocol } from '../data/engine_core/narrative_protocols';
 import { runMistEngine } from '../engine/mist_calculator';
 import { buildBannedWords as buildHardBannedWords, buildSoftAvoidLabels, buildWorldLawPrompt } from './promptV3';
@@ -104,11 +105,11 @@ const buildWorldLawText = (worldLaw: WorldLawConfig): string => buildWorldLawPro
 const buildVolumeInstruction = (fieldState: NarrativeFieldState): string => {
   const volumeTags = getTagsBySuffix(fieldState, '_volume');
   const structureTags = getTagsBySuffix(fieldState, '_structure');
-  const volumeTagRaw = volumeTags.length > 0 ? volumeTags[0] : "";
+  const volumeTagRaw = volumeTags.length > 0 ? volumeTags[0] : DEFAULT_SV2_VOLUME_NAME;
   const volumeDef = SV2_DATA.flatMap(c => c.items).find(v => volumeTagRaw.includes(v.name) || volumeTagRaw === v.id);
-  const structureTagRaw = structureTags.length > 0 ? structureTags[0] : "未选择";
+  const structureTagRaw = structureTags.length > 0 ? structureTags[0] : DEFAULT_SV1_STRUCTURE_NAME;
 
-  if (!volumeDef) return `**体量**: 标准短篇。**结构**: ${structureTagRaw}`;
+  if (!volumeDef) return `**体量**: ${DEFAULT_SV2_VOLUME_NAME}；每个 Pitch 700-1100 中文字。**结构**: ${structureTagRaw}`;
 
   return `**体量**: ${volumeDef.name}\n${volumeDef.patch?.mechanics || volumeDef.def}\n${volumeDef.patch?.aesthetic ? `**美学约束:** ${volumeDef.patch.aesthetic}` : ''}\n**结构**: ${structureTagRaw}`;
 };
@@ -132,9 +133,9 @@ const buildSpacetimeAnchor = (fieldState: NarrativeFieldState, worldLaw: WorldLa
     } else if (display.level === 3) {
       result += `\n**⚓ 世界坐标推演：${display.fullLabel}**\n→ 未指定时空时，先推演可信世界坐标，再允许局部异常、传闻、仪式、幻觉或象征物承载类型压力。\n→ 局部缝合不得扩展成完整新世界体系。\n`;
     } else if (display.level === 4) {
-      result += `\n**⚓ 世界坐标推演：${display.fullLabel}**\n→ 未指定时空时，允许由 SUR1 反向生成架空历史、异史、技术分歧或类型化世界。\n→ 必须说明分歧点、来源、运行方式和代价。\n`;
+      result += `\n**⚓ 世界坐标推演：${display.fullLabel}**\n→ 未指定时空时，允许推演一个超现实世界：科幻、灵异、魔法、外星、超能力等可以成为真实世界材料。\n→ 若 SUR1 是奇观本体类型，就让该本体字面成立；若 SUR1 是现实经验类型，就在真实超现实世界中继续讲该类型故事，主线、高潮选择和结尾落点仍由 SUR1 决定。\n`;
     } else {
-      result += `\n**⚓ 世界坐标推演：${display.fullLabel}**\n→ 未指定时空时，允许梦、神话、象征和跨时代拼贴接管世界规则。\n→ 故事目标、阻断、升级、高潮选择和代价兑现仍要清楚。\n`;
+      result += `\n**⚓ 世界坐标推演：${display.fullLabel}**\n→ 未指定时空时，允许梦幻、MV、象征、跨时代拼贴和类型狂想曲接管世界规则。\n→ 故事目标、阻断、升级、高潮选择和代价兑现仍要清楚。\n`;
     }
   }
 
@@ -336,7 +337,7 @@ Story = M0 {[(M1↔M2↔M3)/M4]×M5} =>Act M6 -> (M7A◇M7B) ↺ M1'
 ${volumeInst}
 
 ### 形式律法
-[LAW_1] 每个 Pitch ≈ 500-700 字。三个方案风格互不雷同。
+[LAW_1] 每个 Pitch ≈ 700-1100 字。三个方案风格互不雷同；字数用于增强顺读、铺垫、动作后果、物件和场域细节，不用于增加支线、人物数量或多重反转。
 [LAW_2] REQUIRE: 激励事件→上升动作→高潮→余痕收束。DENY: 机械降神、无冲突流水账。
 [LAW_3] 极精致电影化小说。DENY: 剧本格式、学术论文腔、网络小说腔。
 
@@ -599,7 +600,7 @@ ${buildWorldLawText(worldLaw)}
 ${volumeInst}
 
 ### 形式约束
-- 每个 Pitch ≈ 500-700 字。三个方案风格互不雷同。
+- 每个 Pitch ≈ 700-1100 字。三个方案风格互不雷同；字数用于增强顺读、铺垫、动作后果、物件和场域细节，不用于增加支线、人物数量或多重反转。
 - 必须包含：激励事件 → 上升动作 → 高潮 → 余痕收束。
 - 严禁：机械降神、无冲突流水账、剧本格式、学术论文腔。
 - 语言：极具画面感的简体中文。

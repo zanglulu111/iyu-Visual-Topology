@@ -1,5 +1,5 @@
 
-import { NarrativeFieldState, DriverType, SubjectType, NarrativeBlockDef, LibraryCategoryDef, WorldLawConfig, AestheticMode } from '../types';
+import { NarrativeFieldState, DriverType, SubjectType, NarrativeBlockDef, LibraryCategoryDef, WorldLawConfig, AestheticMode, PromptFocusState, MAxisMixerState, MAxisMixerSlot, MAxisMixerLevel, M7BResidueIntensity } from '../types';
 import {
   NARRATIVE_ENGINE_BLOCKS,
   NARRATIVE_ENGINE_LIBRARY,
@@ -22,7 +22,7 @@ import {
   SINGLE_RANDOM_RANGES,
   SURFACE_WEIGHT_CONFIG,
   AES_COLOR_PRESETS,
-  COUNTRY_PRESETS,
+  SUR3_COORDINATE_PRESETS,
   GENRE_CATEGORIES,
   WORLD_MOTIF_CATEGORIES,
   ALL_SKIN_BLOCKS,
@@ -31,6 +31,9 @@ import {
   MASTER_PRESETS_REALISM,
   MASTER_PRESETS_STYLIZED
 } from '../constants';
+import { WORLD_LAW_LEVEL_OPTIONS, patchWorldLawConfig } from './worldLaw';
+import { withDefaultSvSelections } from '../data/engine_sv/defaults';
+import { getFocusUnitKey, isFocusableBlock } from '../utils/focusTerms';
 
 // Constants for Aesthetic Mode Logic
 export const HUMAN_BLOCKS = [
@@ -129,8 +132,426 @@ export const pickRemainingGenderName = (libItems: any[], currentTags: string[] =
     return pool[Math.floor(Math.random() * pool.length)].name;
 };
 
+export const randomizeWorldLawConfig = (currentWorldLaw?: WorldLawConfig): WorldLawConfig => {
+    const currentGravity = currentWorldLaw?.gravity;
+    const available = WORLD_LAW_LEVEL_OPTIONS.filter(option => option.id !== currentGravity);
+    const pool = available.length > 0 ? available : WORLD_LAW_LEVEL_OPTIONS;
+    const picked = pool[Math.floor(Math.random() * pool.length)] || WORLD_LAW_LEVEL_OPTIONS[1];
+    return patchWorldLawConfig(currentWorldLaw, picked.id);
+};
+
 const pickRandom = (blockId: string, count: number, currentTags: string[], lockedTags: string[], libItems: any[]) => {
     return pickRandomWithLocks(currentTags, lockedTags, libItems, count);
+};
+
+const CORE_FORMULA_BLOCK_IDS = [
+    'engine_m0',
+    'engine_m1',
+    'engine_m2',
+    'engine_m3',
+    'engine_m4',
+    'engine_m5',
+    'engine_m6',
+    'engine_m7a',
+    'engine_m7b',
+] as const;
+
+const REQUIRED_CORE_FORMULA_BLOCK_IDS = [
+    'engine_m0',
+    'engine_m1',
+    'engine_m2',
+    'engine_m3',
+    'engine_m4',
+    'engine_m5',
+    'engine_m6',
+    'engine_m7a',
+] as const;
+
+const CORE_FORMULA_RANDOM_MAX_TERMS = 11;
+const M7B_RANDOM_EMPTY_PROBABILITY = 0.4;
+
+type RandomFocusMode = 'global' | 'formula';
+type RandomFocusCategory = 'm' | 'surface';
+
+type RandomFocusCandidate = {
+    unit: string;
+    category: RandomFocusCategory;
+    blockIds: string[];
+    tags: string[];
+    weight: number;
+    isM7B: boolean;
+};
+
+const M_AXIS_MIXER_RANDOM_SLOTS: MAxisMixerSlot[] = [
+    'engine_m0',
+    'engine_m1',
+    'engine_m2',
+    'engine_m3',
+    'engine_m4',
+    'engine_m5',
+    'engine_m6',
+    'engine_m7a',
+];
+
+const FOCUS_M_SLOT_WEIGHT: Record<string, number> = {
+    engine_m0: 0.72,
+    engine_m1: 1,
+    engine_m2: 0.95,
+    engine_m3: 0.95,
+    engine_m4: 1.22,
+    engine_m5: 1.12,
+    engine_m6: 1.22,
+    engine_m7a: 0.72,
+    engine_m7b: 0.22,
+};
+
+const FOCUS_SURFACE_SLOT_WEIGHT: Record<string, number> = {
+    skin_genre: 1.32,
+    skin_era: 1.05,
+    skin_society: 0.95,
+    skin_everything: 1.1,
+    skin_location: 1.16,
+    skin_profession: 1,
+    skin_ideology: 0.92,
+    sur10x: 0.86,
+    skin_ending: 0.78,
+};
+
+const isCoreFormulaBlock = (blockId: string): boolean =>
+    (CORE_FORMULA_BLOCK_IDS as readonly string[]).includes(blockId);
+
+const isRequiredCoreFormulaBlock = (blockId: string): boolean =>
+    (REQUIRED_CORE_FORMULA_BLOCK_IDS as readonly string[]).includes(blockId);
+
+const countPreservedCoreFormulaTags = (
+    fieldState: NarrativeFieldState,
+    lockedModules: Record<string, boolean>,
+    lockedTags: Record<string, string[]>
+): number => CORE_FORMULA_BLOCK_IDS.reduce((total, blockId) => {
+    const current = fieldState[blockId] || [];
+    if (lockedModules[blockId]) return total + current.length;
+    return total + getVisibleLockedTags(fieldState, lockedTags, blockId).length;
+}, 0);
+
+const countFutureRequiredCoreDeficit = (
+    processedCoreBlocks: Set<string>,
+    currentBlockId: string,
+    fieldState: NarrativeFieldState,
+    lockedModules: Record<string, boolean>,
+    lockedTags: Record<string, string[]>
+): number => REQUIRED_CORE_FORMULA_BLOCK_IDS.reduce((total, blockId) => {
+    if (blockId === currentBlockId || processedCoreBlocks.has(blockId) || lockedModules[blockId]) return total;
+    return total + (getVisibleLockedTags(fieldState, lockedTags, blockId).length > 0 ? 0 : 1);
+}, 0);
+
+const clampCoreFormulaNeededCount = (
+    blockId: string,
+    requestedNeeded: number,
+    keptCount: number,
+    coreFormulaTotal: number,
+    processedCoreBlocks: Set<string>,
+    fieldState: NarrativeFieldState,
+    lockedModules: Record<string, boolean>,
+    lockedTags: Record<string, string[]>
+): number => {
+    if (!isCoreFormulaBlock(blockId)) return requestedNeeded;
+    const futureRequiredDeficit = countFutureRequiredCoreDeficit(processedCoreBlocks, blockId, fieldState, lockedModules, lockedTags);
+    const maxAdditional = Math.max(0, CORE_FORMULA_RANDOM_MAX_TERMS - coreFormulaTotal - futureRequiredDeficit);
+    if (!isRequiredCoreFormulaBlock(blockId)) return Math.min(requestedNeeded, maxAdditional);
+
+    const minRequiredAdditional = Math.max(0, 1 - keptCount);
+    return Math.max(minRequiredAdditional, Math.min(requestedNeeded, Math.max(minRequiredAdditional, maxAdditional)));
+};
+
+const pickWeightedCandidate = <T extends { weight: number }>(candidates: T[]): T | null => {
+    if (candidates.length === 0) return null;
+    const total = candidates.reduce((sum, item) => sum + Math.max(0.01, item.weight), 0);
+    let cursor = Math.random() * total;
+    for (const candidate of candidates) {
+        cursor -= Math.max(0.01, candidate.weight);
+        if (cursor <= 0) return candidate;
+    }
+    return candidates[candidates.length - 1] || null;
+};
+
+const pickWeightedMany = <T extends { unit: string; weight: number }>(candidates: T[], count: number, excludedUnits: Set<string> = new Set()): T[] => {
+    const selected: T[] = [];
+    const selectedUnits = new Set(excludedUnits);
+    for (let i = 0; i < count; i++) {
+        const pool = candidates.filter(candidate => !selectedUnits.has(candidate.unit));
+        const picked = pickWeightedCandidate(pool);
+        if (!picked) break;
+        selected.push(picked);
+        selectedUnits.add(picked.unit);
+    }
+    return selected;
+};
+
+const getRandomFocusCandidates = (fieldState: NarrativeFieldState): RandomFocusCandidate[] => {
+    const grouped = new Map<string, RandomFocusCandidate>();
+    Object.entries(fieldState || {}).forEach(([blockId, rawTags]) => {
+        const tags = Array.isArray(rawTags) ? rawTags : (rawTags ? [String(rawTags)] : []);
+        if (!isFocusableBlock(blockId)) return;
+        tags.forEach(tag => {
+            if (!tag) return;
+            const unit = getFocusUnitKey(blockId, tag);
+            const category: RandomFocusCategory = isCoreFormulaBlock(blockId) ? 'm' : 'surface';
+            const slotWeight = category === 'm'
+                ? (FOCUS_M_SLOT_WEIGHT[blockId] || 1)
+                : (FOCUS_SURFACE_SLOT_WEIGHT[blockId] || 0.9);
+            const existing = grouped.get(unit);
+            if (existing) {
+                if (!existing.tags.includes(tag)) existing.tags.push(tag);
+                if (!existing.blockIds.includes(blockId)) existing.blockIds.push(blockId);
+                existing.weight = Math.max(existing.weight, slotWeight);
+                existing.isM7B = existing.isM7B || blockId === 'engine_m7b';
+            } else {
+                grouped.set(unit, {
+                    unit,
+                    category,
+                    blockIds: [blockId],
+                    tags: [tag],
+                    weight: slotWeight,
+                    isM7B: blockId === 'engine_m7b',
+                });
+            }
+        });
+    });
+    return Array.from(grouped.values());
+};
+
+const buildFocusStateFromCandidates = (candidates: RandomFocusCandidate[]): PromptFocusState =>
+    candidates.reduce<PromptFocusState>((acc, candidate) => {
+        candidate.tags.forEach(tag => {
+            acc[tag] = true;
+        });
+        return acc;
+    }, {});
+
+const getPreviouslyFocusedSurfaceCandidates = (
+    candidates: RandomFocusCandidate[],
+    previousFocusState?: PromptFocusState
+): RandomFocusCandidate[] => {
+    if (!previousFocusState) return [];
+    const focusOrder = Object.keys(previousFocusState).filter(tag => previousFocusState[tag]);
+    return candidates
+        .filter(candidate => candidate.category === 'surface' && candidate.tags.some(tag => previousFocusState[tag]))
+        .map(candidate => ({
+            candidate,
+            order: Math.min(...candidate.tags.map(tag => {
+                const idx = focusOrder.indexOf(tag);
+                return idx === -1 ? 999 : idx;
+            })),
+        }))
+        .sort((a, b) => a.order - b.order)
+        .map(item => item.candidate);
+};
+
+export const randomizePromptFocusState = (
+    fieldState: NarrativeFieldState,
+    mode: RandomFocusMode = 'global',
+    previousFocusState?: PromptFocusState
+): PromptFocusState => {
+    const candidates = getRandomFocusCandidates(fieldState);
+    const mCandidates = candidates.filter(candidate => candidate.category === 'm');
+    const primaryMCandidates = mCandidates.filter(candidate => !candidate.isM7B);
+    const surfaceCandidates = candidates.filter(candidate => candidate.category === 'surface');
+    const selected: RandomFocusCandidate[] = [];
+    const selectedUnits = new Set<string>();
+
+    const add = (candidate: RandomFocusCandidate | null) => {
+        if (!candidate || selectedUnits.has(candidate.unit) || selected.length >= 3) return;
+        selected.push(candidate);
+        selectedUnits.add(candidate.unit);
+    };
+
+    if (mode === 'formula') {
+        const preservedSurface = getPreviouslyFocusedSurfaceCandidates(candidates, previousFocusState);
+        const availableSurfaceSlots = Math.min(2, preservedSurface.length);
+        const targetMCount = Math.min(primaryMCandidates.length, availableSurfaceSlots >= 2 ? 1 : (Math.random() < 0.65 ? 2 : 1));
+        pickWeightedMany(primaryMCandidates, Math.max(1, targetMCount), selectedUnits).forEach(add);
+
+        if (selected.length < targetMCount && Math.random() < 0.25) {
+            pickWeightedMany(mCandidates.filter(candidate => candidate.isM7B), 1, selectedUnits).forEach(add);
+        }
+
+        preservedSurface.slice(0, Math.max(0, 3 - selected.length)).forEach(add);
+        return buildFocusStateFromCandidates(selected);
+    }
+
+    const roll = Math.random();
+    const target = roll < 0.45
+        ? { m: 1, surface: 2 }
+        : roll < 0.85
+            ? { m: 2, surface: 1 }
+            : { m: 1, surface: 1 };
+
+    const primaryCategory: RandomFocusCategory =
+        primaryMCandidates.length > 0 && (surfaceCandidates.length === 0 || Math.random() < 0.6)
+            ? 'm'
+            : 'surface';
+    add(pickWeightedCandidate(primaryCategory === 'm' ? primaryMCandidates : surfaceCandidates));
+
+    const remainingMTarget = Math.max(0, target.m - selected.filter(candidate => candidate.category === 'm').length);
+    pickWeightedMany(primaryMCandidates, remainingMTarget, selectedUnits).forEach(add);
+
+    if (selected.filter(candidate => candidate.category === 'm').length < target.m && Math.random() < 0.25) {
+        pickWeightedMany(mCandidates.filter(candidate => candidate.isM7B), 1, selectedUnits).forEach(add);
+    }
+
+    const remainingSurfaceTarget = Math.max(0, target.surface - selected.filter(candidate => candidate.category === 'surface').length);
+    pickWeightedMany(surfaceCandidates, remainingSurfaceTarget, selectedUnits).forEach(add);
+
+    if (selected.length < Math.min(3, candidates.length)) {
+        pickWeightedMany(candidates.filter(candidate => !candidate.isM7B), 3 - selected.length, selectedUnits).forEach(add);
+    }
+
+    return buildFocusStateFromCandidates(selected);
+};
+
+const getFocusedMAxisSlots = (fieldState: NarrativeFieldState, focusState: PromptFocusState): MAxisMixerSlot[] => {
+    const tagToSlot = Object.entries(fieldState || {}).reduce<Record<string, MAxisMixerSlot>>((acc, [blockId, rawTags]) => {
+        if (!M_AXIS_MIXER_RANDOM_SLOTS.includes(blockId as MAxisMixerSlot)) return acc;
+        const tags = Array.isArray(rawTags) ? rawTags : (rawTags ? [String(rawTags)] : []);
+        tags.forEach(tag => {
+            acc[tag] = blockId as MAxisMixerSlot;
+        });
+        return acc;
+    }, {});
+    const ordered = Object.keys(focusState || {})
+        .filter(tag => focusState[tag] && tagToSlot[tag])
+        .map(tag => tagToSlot[tag]);
+    return Array.from(new Set(ordered));
+};
+
+const pickMixerLevel = (slot: MAxisMixerSlot, role: 'main' | 'secondary' | 'background'): MAxisMixerLevel => {
+    const isFrameSlot = slot === 'engine_m0' || slot === 'engine_m7a';
+    const isExternalPressureSlot = slot === 'engine_m4' || slot === 'engine_m5' || slot === 'engine_m6';
+    const weights: Array<{ level: MAxisMixerLevel; weight: number }> = role === 'main'
+        ? [
+            { level: 'amplified', weight: isFrameSlot ? 0.42 : 0.65 },
+            { level: 'balanced', weight: isFrameSlot ? 0.48 : 0.25 },
+            { level: 'muted', weight: 0.1 },
+        ]
+        : role === 'secondary'
+            ? [
+                { level: 'amplified', weight: isFrameSlot ? 0.28 : 0.45 },
+                { level: 'balanced', weight: isFrameSlot ? 0.62 : 0.45 },
+                { level: 'muted', weight: 0.1 },
+            ]
+            : [
+                { level: 'amplified', weight: isFrameSlot ? 0.04 : (isExternalPressureSlot ? 0.14 : 0.1) },
+                { level: 'balanced', weight: isFrameSlot ? 0.84 : (isExternalPressureSlot ? 0.72 : 0.75) },
+                { level: 'muted', weight: isFrameSlot ? 0.12 : 0.15 },
+            ];
+    return pickWeightedCandidate(weights)?.level || 'balanced';
+};
+
+const mixerAmplifiedKeepScore = (slot: MAxisMixerSlot, focusedSlots: MAxisMixerSlot[]): number => {
+    const focusIndex = focusedSlots.indexOf(slot);
+    const focusScore = focusIndex === 0 ? 4 : focusIndex > 0 ? 2.5 : 0;
+    const slotScore = slot === 'engine_m4' || slot === 'engine_m5' || slot === 'engine_m6'
+        ? 1.2
+        : slot === 'engine_m0' || slot === 'engine_m7a'
+            ? -0.8
+            : 0;
+    return focusScore + slotScore + Math.random() * 0.1;
+};
+
+const mixerMutedKeepScore = (slot: MAxisMixerSlot, focusedSlots: MAxisMixerSlot[]): number => {
+    const focusIndex = focusedSlots.indexOf(slot);
+    const focusPenalty = focusIndex === 0 ? -3 : focusIndex > 0 ? -1.5 : 1;
+    const slotScore = slot === 'engine_m1' || slot === 'engine_m2' || slot === 'engine_m3'
+        ? 0.8
+        : slot === 'engine_m0' || slot === 'engine_m7a'
+            ? -0.2
+            : 0;
+    return focusPenalty + slotScore + Math.random() * 0.1;
+};
+
+const pickMixerSlotForAmplified = (
+    levels: Record<MAxisMixerSlot, MAxisMixerLevel>,
+    focusedSlots: MAxisMixerSlot[]
+): MAxisMixerSlot | null => {
+    const candidates = M_AXIS_MIXER_RANDOM_SLOTS
+        .filter(slot => levels[slot] !== 'amplified')
+        .map(slot => ({
+            slot,
+            weight: (focusedSlots[0] === slot ? 4 : focusedSlots.includes(slot) ? 2.5 : 0.8)
+                + (slot === 'engine_m4' || slot === 'engine_m5' || slot === 'engine_m6' ? 1.4 : 0)
+                + (slot === 'engine_m0' || slot === 'engine_m7a' ? -0.35 : 0),
+        }));
+    return pickWeightedCandidate(candidates)?.slot || null;
+};
+
+const pickMixerSlotForMuted = (
+    levels: Record<MAxisMixerSlot, MAxisMixerLevel>,
+    focusedSlots: MAxisMixerSlot[]
+): MAxisMixerSlot | null => {
+    const candidates = M_AXIS_MIXER_RANDOM_SLOTS
+        .filter(slot => levels[slot] !== 'amplified')
+        .map(slot => ({
+            slot,
+            weight: (focusedSlots.includes(slot) ? 0.2 : 1.6)
+                + (slot === 'engine_m1' || slot === 'engine_m2' || slot === 'engine_m3' ? 0.6 : 0)
+                + (slot === 'engine_m0' || slot === 'engine_m7a' ? -0.2 : 0),
+        }));
+    return pickWeightedCandidate(candidates)?.slot || null;
+};
+
+export const randomizeMAxisMixerState = (
+    fieldState: NarrativeFieldState,
+    focusState: PromptFocusState = {}
+): MAxisMixerState => {
+    const focusedSlots = getFocusedMAxisSlots(fieldState, focusState);
+    const levels = M_AXIS_MIXER_RANDOM_SLOTS.reduce<Record<MAxisMixerSlot, MAxisMixerLevel>>((acc, slot) => {
+        const focusIndex = focusedSlots.indexOf(slot);
+        const role = focusIndex === 0 ? 'main' : focusIndex > 0 ? 'secondary' : 'background';
+        acc[slot] = pickMixerLevel(slot, role);
+        return acc;
+    }, {} as Record<MAxisMixerSlot, MAxisMixerLevel>);
+
+    const trimLevel = (
+        targetLevel: MAxisMixerLevel,
+        maxCount: number,
+        getKeepScore: (slot: MAxisMixerSlot, focused: MAxisMixerSlot[]) => number
+    ) => {
+        const slots = M_AXIS_MIXER_RANDOM_SLOTS.filter(slot => levels[slot] === targetLevel);
+        if (slots.length <= maxCount) return;
+        slots
+            .sort((a, b) => getKeepScore(a, focusedSlots) - getKeepScore(b, focusedSlots))
+            .slice(0, slots.length - maxCount)
+            .forEach(slot => {
+                levels[slot] = 'balanced';
+            });
+    };
+
+    trimLevel('amplified', 2, mixerAmplifiedKeepScore);
+    trimLevel('muted', 3, mixerMutedKeepScore);
+
+    if (!M_AXIS_MIXER_RANDOM_SLOTS.some(slot => levels[slot] === 'amplified')) {
+        const slot = pickMixerSlotForAmplified(levels, focusedSlots);
+        if (slot) levels[slot] = 'amplified';
+    }
+
+    if (!M_AXIS_MIXER_RANDOM_SLOTS.some(slot => levels[slot] === 'muted')) {
+        const slot = pickMixerSlotForMuted(levels, focusedSlots);
+        if (slot) levels[slot] = 'muted';
+    }
+
+    return M_AXIS_MIXER_RANDOM_SLOTS.reduce<MAxisMixerState>((acc, slot) => {
+        if (levels[slot] !== 'balanced') acc[slot] = levels[slot];
+        return acc;
+    }, {});
+};
+
+export const randomizeM7BResidueIntensity = (fieldState: NarrativeFieldState): M7BResidueIntensity => {
+    const tags = fieldState.engine_m7b || [];
+    if (tags.length === 0) return 'off';
+    const roll = Math.random();
+    if (roll < 0.6) return 'light';
+    if (roll < 0.9) return 'strong';
+    return 'epilogue';
 };
 
 const isBlockLocked = (id: string, lockedModules: Record<string, boolean>) => {
@@ -630,8 +1051,13 @@ export const generateGlobalRandomState = (
     }
     if (activeEraTag) currentArchetype = getArchetypeFromEra(activeEraTag);
 
-    // ── Step 2: Time/Location (SUR3) ──
+    // ── Step 2: Precise Coordinate (SUR3) ──
     const newState = { ...currentFieldState };
+    const shouldRandomizeYear = !lockedModules['skin_year_exact'] && surfaceParticipants.has('skin_year_exact');
+    const shouldRandomizeSpace = !lockedModules['skin_country_exact'] && surfaceParticipants.has('skin_country_exact');
+    const coordinatePreset = (shouldRandomizeYear || shouldRandomizeSpace)
+        ? SUR3_COORDINATE_PRESETS[Math.floor(Math.random() * SUR3_COORDINATE_PRESETS.length)]
+        : null;
 
     if (!lockedModules['skin_year_exact']) {
         const locks = getVisibleLocks('skin_year_exact');
@@ -639,8 +1065,9 @@ export const generateGlobalRandomState = (
             if (locks.length > 0) {
                 newState['skin_year_exact'] = locks;
             } else {
-                const year = Math.floor(Math.random() * (2050 - (-2000) + 1)) + (-2000);
-                newState['skin_year_exact'] = [year.toString()];
+                newState['skin_year_exact'] = coordinatePreset?.year === null || coordinatePreset?.year === undefined
+                    ? []
+                    : [coordinatePreset.year.toString()];
             }
         } else {
             newState['skin_year_exact'] = locks;
@@ -653,8 +1080,7 @@ export const generateGlobalRandomState = (
             if (locks.length > 0) {
                 newState['skin_country_exact'] = locks;
             } else {
-                const r = COUNTRY_PRESETS[Math.floor(Math.random() * COUNTRY_PRESETS.length)];
-                newState['skin_country_exact'] = [r.cn];
+                newState['skin_country_exact'] = coordinatePreset ? [coordinatePreset.spaceCn] : [];
             }
         } else {
             newState['skin_country_exact'] = locks;
@@ -696,13 +1122,26 @@ export const generateGlobalRandomState = (
             const lockedGenre = getVisibleLocks(genreId);
             const genreCount = Math.max(getRandomCount(genreId), lockedGenre.length); // 1-2, never drop locked terms
             if (lockedGenre.length < genreCount) {
-                const available = genreLib.filter(i => !lockedGenre.includes(i.name));
+                const currentGenreTags = new Set(currentFieldState[genreId] || []);
+                const available = genreLib.filter(i => !lockedGenre.includes(i.name) && !currentGenreTags.has(i.name));
                 const shuffled = [...available].sort(() => 0.5 - Math.random());
                 const needed = genreCount - lockedGenre.length;
-                newState[genreId] = [...lockedGenre, ...shuffled.slice(0, needed).map(i => i.name)];
+                let picked = shuffled.slice(0, needed).map(i => i.name);
+                if (picked.length < needed) {
+                    const fallback = genreLib
+                        .filter(i => !lockedGenre.includes(i.name) && !picked.includes(i.name))
+                        .sort(() => 0.5 - Math.random())
+                        .slice(0, needed - picked.length)
+                        .map(i => i.name);
+                    picked = [...picked, ...fallback];
+                }
+                newState[genreId] = [...lockedGenre, ...picked];
             } else {
                 newState[genreId] = lockedGenre;
             }
+        } else if (!lockedModules[genreId]) {
+            const lockedGenre = getVisibleLocks(genreId);
+            newState[genreId] = lockedGenre;
         }
     }
 
@@ -714,6 +1153,8 @@ export const generateGlobalRandomState = (
     const independentSurfaceBlocks = new Set<string>(['skin_age', 'skin_structure', 'skin_volume']);
 
     // ── Step 6: Main block loop ──
+    let coreFormulaRandomTotal = countPreservedCoreFormulaTags(currentFieldState, lockedModules, lockedTags);
+    const processedCoreBlocks = new Set<string>();
     blocks.forEach(block => {
         if (lockedModules[block.id]) return;
         let isSkinBlock = isCommercial ? COMM_SKIN_BLOCKS.some(b => b.id === block.id) : (isExperimental ? EXPERIMENTAL_SKIN_BLOCKS.some(b => b.id === block.id) : (isTrailer ? TRAILER_SKIN_BLOCKS.some(b => b.id === block.id) : ALL_SKIN_BLOCKS.some(b => b.id === block.id)));
@@ -746,13 +1187,21 @@ export const generateGlobalRandomState = (
         let libId = `${block.id}_lib`;
         let category = library.find(c => c.id === libId);
         if (category && category.items.length > 0) {
+            const locks = getVisibleLocks(block.id);
+            const isCoreBlock = isCoreFormulaBlock(block.id);
+            if (block.id === 'engine_m7b' && locks.length === 0 && Math.random() < M7B_RANDOM_EMPTY_PROBABILITY) {
+                newState[block.id] = [];
+                processedCoreBlocks.add(block.id);
+                return;
+            }
+
             // Use RANDOM_RANGES for count determination
             const count = getRandomCount(block.id);
 
             // For 0-count blocks (0-1 range that rolled 0), clear them
             if (count === 0) {
-                const locks = getVisibleLocks(block.id);
                 newState[block.id] = (newState[block.id] || []).filter(t => locks.includes(t));
+                if (isCoreBlock) processedCoreBlocks.add(block.id);
                 return;
             }
 
@@ -773,9 +1222,9 @@ export const generateGlobalRandomState = (
                 return;
             }
 
-            const locks = getVisibleLocks(block.id);
             const keptTags = (newState[block.id] || []).filter(t => locks.includes(t));
-            const needed = Math.max(0, Math.max(count, keptTags.length) - keptTags.length);
+            let needed = Math.max(0, Math.max(count, keptTags.length) - keptTags.length);
+            needed = clampCoreFormulaNeededCount(block.id, needed, keptTags.length, coreFormulaRandomTotal, processedCoreBlocks, currentFieldState, lockedModules, lockedTags);
             const available = availableItems.filter(i => !keptTags.includes(i.name));
             const selected: string[] = [];
             for (let i = 0; i < needed; i++) {
@@ -785,9 +1234,11 @@ export const generateGlobalRandomState = (
                 available.splice(idx, 1);
             }
             newState[block.id] = [...keptTags, ...selected];
+            if (isCoreBlock) coreFormulaRandomTotal += selected.length;
+            if (isCoreBlock) processedCoreBlocks.add(block.id);
         }
     });
-    return newState;
+    return driverType === DriverType.NARRATIVE ? withDefaultSvSelections(newState) : newState;
 };
 
 export const resetSkinState = (
@@ -815,7 +1266,7 @@ export const resetSkinState = (
             newState[block.id] = (newState[block.id] || []).filter(t => locks.includes(t));
         }
     });
-    return newState;
+    return driverType === DriverType.NARRATIVE ? withDefaultSvSelections(newState) : newState;
 };
 
 export const resetFormulaState = (
@@ -878,7 +1329,7 @@ export const randomizeSkinState = (
             newState[block.id] = globalRandom[block.id] || [];
         }
     });
-    return newState;
+    return driverType === DriverType.NARRATIVE ? withDefaultSvSelections(newState) : newState;
 };
 
 export const randomizeFormulaState = (
@@ -908,6 +1359,8 @@ export const randomizeFormulaState = (
         }
         return false;
      };
+     let coreFormulaRandomTotal = isAesthetic ? 0 : countPreservedCoreFormulaTags(currentFieldState, lockedModules, lockedTags);
+     const processedCoreBlocks = new Set<string>();
 
     if (isAesthetic) {
         if (aestheticMode === 'REALISM') {
@@ -938,6 +1391,14 @@ export const randomizeFormulaState = (
       const category = ENGINE_LIBRARY.find(c => c.id === libId);
 
       if (category && category.items.length > 0) {
+          const locks = getVisibleLockedTags(newState, lockedTags, block.id);
+          const isCoreBlock = !isAesthetic && isCoreFormulaBlock(block.id);
+          if (block.id === 'engine_m7b' && locks.length === 0 && Math.random() < M7B_RANDOM_EMPTY_PROBABILITY) {
+              newState[block.id] = [];
+              processedCoreBlocks.add(block.id);
+              return;
+          }
+
           let count = 1;
           if (isAesthetic) {
               // Aesthetic mode retains its own count logic
@@ -955,17 +1416,17 @@ export const randomizeFormulaState = (
               // Non-aesthetic: use RANDOM_RANGES protocol v2.0
               count = getRandomCount(block.id);
               if (count === 0) {
-                  const locks = getVisibleLockedTags(newState, lockedTags, block.id);
                   newState[block.id] = (newState[block.id] || []).filter(t => locks.includes(t));
+                  if (isCoreBlock) processedCoreBlocks.add(block.id);
                   return;
               }
           }
           let availableItems = category.items;
           if (isAesthetic && block.id === 'aes_eye_shape') availableItems = availableItems.filter(i => i.group === 'A. 美型');
-          const locks = getVisibleLockedTags(newState, lockedTags, block.id);
           const currentTags = newState[block.id] || [];
           const keptTags = currentTags.filter(t => locks.includes(t));
-          const needed = Math.max(0, Math.max(count, keptTags.length) - keptTags.length);
+          let needed = Math.max(0, Math.max(count, keptTags.length) - keptTags.length);
+          needed = clampCoreFormulaNeededCount(block.id, needed, keptTags.length, coreFormulaRandomTotal, processedCoreBlocks, currentFieldState, lockedModules, lockedTags);
           const available = availableItems.filter(i => !currentTags.includes(i.name));
           const selected: string[] = [];
           for (let i = 0; i < needed; i++) {
@@ -975,6 +1436,8 @@ export const randomizeFormulaState = (
              available.splice(idx, 1);
           }
           newState[block.id] = [...keptTags, ...selected];
+          if (isCoreBlock) coreFormulaRandomTotal += selected.length;
+          if (isCoreBlock) processedCoreBlocks.add(block.id);
       }
     });
     return newState;
@@ -1036,5 +1499,5 @@ export const generateGlobalResetState = (
         }
      });
 
-     return newState;
+     return driverType === DriverType.NARRATIVE ? withDefaultSvSelections(newState) : newState;
 };

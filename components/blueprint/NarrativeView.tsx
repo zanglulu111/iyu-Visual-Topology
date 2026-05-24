@@ -1,14 +1,15 @@
 
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import { CreativeBlueprint, BlueprintLanguage, DriverType, VersionHistoryItem } from '../../types';
-import { Star, FileText, PenTool, Palette, Check, Wand2, X, Plus, AlertCircle, Loader2, ArrowDown, ArrowUp, Trash2, RotateCcw, History as HistoryIcon, GitCommit, ListChecks, Zap, RotateCw, ChevronRight } from 'lucide-react';
+import { CreativeBlueprint, BlueprintLanguage, DriverType, VersionHistoryItem, ScreenplaySection, MetonymyStylePreset, MetonymyAssetInput, GlobalVisualTone } from '../../types';
+import { Star, FileText, PenTool, Palette, Check, Wand2, X, Plus, AlertCircle, Loader2, ArrowDown, ArrowUp, Trash2, RotateCcw, History as HistoryIcon, GitCommit, ListChecks, Zap, RotateCw, ChevronRight, Scissors } from 'lucide-react';
 import { CopyButton, SimpleTextRenderer, ProcessingTimer, MarkdownRenderer } from '../SharedBlueprintComponents';
-import { modifyNarrativeWithAI, ModifySectionRequest, ModifyInsertionRequest } from '../../services/geminiService';
-import { buildRefactorPrompt } from '../../services/refactorPrompt';
+import { modifyNarrativeWithAI, ModifySectionRequest, ModifyInsertionRequest, breakdownScript } from '../../services/geminiService';
+import { buildRefactorPrompt, RefactorRewriteScope } from '../../services/refactorPrompt';
 import { STYLE_MATRIX } from '../../data/narrative/style_matrix';
 import { NarrativeLibraryModal } from '../NarrativeLibraryModal';
 import { LibraryCategoryDef } from '../../types';
 import { AdminXRayButton } from '../XRayInspector';
+import { BreakdownConfigModal } from './metonymy/BreakdownConfigModal';
 
 interface NarrativeViewProps {
     blueprint: CreativeBlueprint;
@@ -26,6 +27,14 @@ interface NarrativeViewProps {
 const splitIntoParagraphs = (text: string): string[] => {
     return text.split(/\n\s*\n/).filter(p => p.trim().length > 0);
 };
+
+const createEmptySutureResponse = () => ({
+    literaryScript: "",
+    globalTone: { lighting: "", texture: "", style: "", camera: "", palette: [] },
+    staticStoryboard: [],
+    dynamicStoryboard: [],
+    finalAssets: { characters: [], props: [], scenes: [] }
+});
 
 // Simple text diff helper
 const DiffViewer = ({ oldText, newText }: { oldText: string, newText: string }) => {
@@ -150,6 +159,121 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
     const history = blueprint.versionHistory || [];
     const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
     const [selectedVersion, setSelectedVersion] = useState<VersionHistoryItem | null>(null);
+    const [isBreakdownModalOpen, setIsBreakdownModalOpen] = useState(false);
+    const [isBreakingDown, setIsBreakingDown] = useState(false);
+    const [breakdownStartTime, setBreakdownStartTime] = useState<number | null>(null);
+
+    const getDefaultMetonymyPreset = (): MetonymyStylePreset => ({
+        id: 'original',
+        name: language === 'EN' ? "Original Style" : "原文风格",
+        toneAnalysis: { lighting: "", texture: "", style: "", camera: "", palette: [] },
+        assets: { characters: [], scenes: [], props: [] }
+    });
+
+    const normalizeAssetKey = (type: 'characters' | 'scenes' | 'props', name?: string, nameEn?: string) => {
+        return `${type}:${(name || nameEn || '').trim().toLowerCase()}`;
+    };
+
+    const mapVisualBibleAssetToPresetAsset = (asset: any, type: 'characters' | 'scenes' | 'props'): MetonymyAssetInput => ({
+        id: asset.id || `asset-${type}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        name: asset.name || asset.nameEn || '',
+        nameEn: asset.nameEn,
+        type: type === 'characters' ? 'CHARACTER' : (type === 'scenes' ? 'SCENE' : 'PROP'),
+        imageUrl: asset.imageUrl,
+        analysis: {
+            description: asset.analysis?.description || asset.description || '',
+            descriptionEn: asset.analysis?.descriptionEn || asset.descriptionEn,
+            anchors: asset.analysis?.anchors || asset.anchors || '',
+            anchorsEn: asset.analysis?.anchorsEn || asset.anchorsEn,
+            designPrompt: asset.analysis?.designPrompt || asset.designPrompt,
+            designPromptEn: asset.analysis?.designPromptEn || asset.designPromptEn,
+            conceptPrompt: asset.analysis?.conceptPrompt || asset.conceptPrompt,
+            conceptPromptEn: asset.analysis?.conceptPromptEn || asset.conceptPromptEn
+        }
+    });
+
+    const mergeAssetLists = (
+        existing: MetonymyAssetInput[] = [],
+        incoming: MetonymyAssetInput[] = [],
+        type: 'characters' | 'scenes' | 'props'
+    ) => {
+        const merged = [...existing];
+        const indexByKey = new Map<string, number>();
+        merged.forEach((asset, idx) => indexByKey.set(normalizeAssetKey(type, asset.name, asset.nameEn), idx));
+
+        incoming.forEach(asset => {
+            const key = normalizeAssetKey(type, asset.name, asset.nameEn);
+            if (!key || key === `${type}:`) return;
+
+            const existingIndex = indexByKey.get(key);
+            if (existingIndex === undefined) {
+                indexByKey.set(key, merged.length);
+                merged.push(asset);
+                return;
+            }
+
+            const prev = merged[existingIndex];
+            merged[existingIndex] = {
+                ...prev,
+                name: prev.name || asset.name,
+                nameEn: prev.nameEn || asset.nameEn,
+                imageUrl: prev.imageUrl || asset.imageUrl,
+                analysis: {
+                    ...(prev.analysis || { description: '', anchors: '' }),
+                    description: prev.analysis?.description || asset.analysis?.description || '',
+                    descriptionEn: prev.analysis?.descriptionEn || asset.analysis?.descriptionEn,
+                    anchors: prev.analysis?.anchors || asset.analysis?.anchors || '',
+                    anchorsEn: prev.analysis?.anchorsEn || asset.analysis?.anchorsEn,
+                    designPrompt: prev.analysis?.designPrompt || asset.analysis?.designPrompt,
+                    designPromptEn: prev.analysis?.designPromptEn || asset.analysis?.designPromptEn,
+                    conceptPrompt: prev.analysis?.conceptPrompt || asset.analysis?.conceptPrompt,
+                    conceptPromptEn: prev.analysis?.conceptPromptEn || asset.analysis?.conceptPromptEn
+                }
+            };
+        });
+
+        return merged;
+    };
+
+    const upsertOriginalPresetAssets = (
+        presets: MetonymyStylePreset[],
+        incomingAssets: { characters?: any[]; scenes?: any[]; props?: any[] },
+        toneAnalysis?: GlobalVisualTone
+    ) => {
+        const defaultPreset = getDefaultMetonymyPreset();
+        const basePresets = presets.length > 0 ? [...presets] : [defaultPreset];
+        const originalIndex = basePresets.findIndex(p => p.id === 'original');
+        const originalPreset = originalIndex >= 0 ? basePresets[originalIndex] : defaultPreset;
+
+        const nextOriginal: MetonymyStylePreset = {
+            ...originalPreset,
+            toneAnalysis: toneAnalysis || originalPreset.toneAnalysis,
+            assets: {
+                characters: mergeAssetLists(
+                    originalPreset.assets?.characters || [],
+                    (incomingAssets.characters || []).map(asset => mapVisualBibleAssetToPresetAsset(asset, 'characters')),
+                    'characters'
+                ),
+                scenes: mergeAssetLists(
+                    originalPreset.assets?.scenes || [],
+                    (incomingAssets.scenes || []).map(asset => mapVisualBibleAssetToPresetAsset(asset, 'scenes')),
+                    'scenes'
+                ),
+                props: mergeAssetLists(
+                    originalPreset.assets?.props || [],
+                    (incomingAssets.props || []).map(asset => mapVisualBibleAssetToPresetAsset(asset, 'props')),
+                    'props'
+                )
+            }
+        };
+
+        if (originalIndex >= 0) {
+            basePresets[originalIndex] = nextOriginal;
+            return basePresets;
+        }
+
+        return [nextOriginal, ...basePresets];
+    };
 
     const handleUpdate = (field: string, value: string) => {
         if (field.startsWith('world') || field.startsWith('tone')) {
@@ -168,6 +292,66 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
         if (window.confirm(language === 'EN' ? "Restore this version? Current draft will be overwritten." : "恢复此版本？当前草稿将被覆盖。")) {
             handleUpdate('synopsis', content);
             setIsHistoryModalOpen(false);
+        }
+    };
+
+    const handleSmartBreakdown = async (instruction?: string, targetCount?: number) => {
+        const sourceText = blueprint.narrative?.synopsis || "";
+        if (!sourceText.trim()) return;
+
+        setIsBreakdownModalOpen(false);
+        setIsBreakingDown(true);
+        setBreakdownStartTime(Date.now());
+
+        try {
+            const result = await breakdownScript(sourceText, instruction, targetCount);
+            if (!result?.scenes?.length) {
+                alert(language === 'EN' ? "Breakdown failed. AI returned empty result." : "分场失败。AI 未能返回有效结果。");
+                return;
+            }
+
+            const newSections: ScreenplaySection[] = result.scenes.map((scene, index) => ({
+                id: `scene-${Date.now()}-${index}`,
+                title: scene.title,
+                content: scene.content,
+                breakdownInfo: scene.breakdownInfo,
+                sourceIndices: scene.indices || [],
+                isGlobalSynced: true,
+                sutureDataMap: { original: createEmptySutureResponse() }
+            }));
+
+            const rawMetonymyData = blueprint.metonymyData || {
+                screenplay: [],
+                staticStoryboard: [],
+                dynamicScript: [],
+                stylePresets: []
+            };
+            const currentPresets = rawMetonymyData.stylePresets && rawMetonymyData.stylePresets.length > 0
+                ? rawMetonymyData.stylePresets
+                : [getDefaultMetonymyPreset()];
+            const nextPresets = result.visualBible
+                ? upsertOriginalPresetAssets(currentPresets, result.visualBible.assets || {}, result.visualBible.toneAnalysis)
+                : currentPresets;
+
+            onUpdateBlueprint({
+                ...blueprint,
+                narrative: {
+                    ...blueprint.narrative,
+                    synopsis: sourceText
+                },
+                metonymyData: {
+                    ...rawMetonymyData,
+                    screenplay: newSections,
+                    stylePresets: nextPresets,
+                    activePresetId: rawMetonymyData.activePresetId || 'original'
+                }
+            });
+        } catch (error) {
+            console.error("Narrative breakdown failed", error);
+            alert(language === 'EN' ? "Error during breakdown process." : "分场过程中发生错误。");
+        } finally {
+            setIsBreakingDown(false);
+            setBreakdownStartTime(null);
         }
     };
 
@@ -302,14 +486,28 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
         return { modifyRequests, insertionRequests };
     };
 
+    const getRefactorStyleContext = () => {
+        const sourceStyle = blueprint.styleName || (language === 'EN' ? 'Standard Literary' : '标准文学渲染');
+        const targetStyle = selectedStyle || sourceStyle;
+        const rewriteScope: RefactorRewriteScope = sections.length > 0 && sections.every(section => section.isSelected) ? 'full' : 'partial';
+
+        return {
+            sourceStyle,
+            targetStyle,
+            rewriteScope
+        };
+    };
+
     const getRefactorPrompt = () => {
         const { modifyRequests, insertionRequests } = getRefactorRequests();
+        const styleContext = getRefactorStyleContext();
         return buildRefactorPrompt(
             blueprint.narrative?.synopsis || "",
             modifyRequests,
             insertionRequests,
             overallInstruction,
-            selectedStyle
+            styleContext.targetStyle,
+            styleContext
         );
     };
 
@@ -318,6 +516,7 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
         setRefactorStartTime(Date.now());
 
         const { modifyRequests, insertionRequests } = getRefactorRequests();
+        const styleContext = getRefactorStyleContext();
 
         try {
             const newSynopsis = await modifyNarrativeWithAI(
@@ -325,7 +524,8 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
                 modifyRequests,
                 insertionRequests,
                 overallInstruction,
-                selectedStyle
+                styleContext.targetStyle,
+                styleContext
             );
             if (newSynopsis) {
                 // Save current version to history (Pre-Refactor) and new version (Post-Refactor)
@@ -540,6 +740,17 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
                                     <span>{language === 'EN' ? "AI MODIFY" : "AI 深度修改"}</span>
                                 </button>
 
+                                <button
+                                    onClick={() => setIsBreakdownModalOpen(true)}
+                                    disabled={isBreakingDown || !(blueprint.narrative?.synopsis || "").trim()}
+                                    className="mist-story-header-action"
+                                    title={language === 'EN' ? "Smart Breakdown" : "AI 智能分场"}
+                                >
+                                    {isBreakingDown ? <Loader2 size={14} className="animate-spin" /> : <Scissors size={14} />}
+                                    <span>{language === 'EN' ? "BREAKDOWN" : "智能分场"}</span>
+                                    {isBreakingDown && breakdownStartTime && <ProcessingTimer startTime={breakdownStartTime} />}
+                                </button>
+
                                 <div className="mist-story-view-toggle" role="tablist" aria-label={language === 'EN' ? "Story view mode" : "故事查看模式"}>
                                     <button
                                         type="button"
@@ -593,6 +804,17 @@ export const NarrativeView: React.FC<NarrativeViewProps> = ({
                     )}
                 </div>
             </div>
+
+            <BreakdownConfigModal
+                isOpen={isBreakdownModalOpen}
+                onClose={() => setIsBreakdownModalOpen(false)}
+                onConfirm={handleSmartBreakdown}
+                lang={language === 'EN' ? 'EN' : 'CN'}
+                themeAccent={themeAccent}
+                theme={theme}
+                sourceText={blueprint.narrative?.synopsis || ""}
+                isAdmin={isAdmin}
+            />
 
             {/* VERSION HISTORY MODAL */}
             {isHistoryModalOpen && (

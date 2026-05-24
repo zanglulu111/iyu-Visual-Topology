@@ -8,7 +8,7 @@ export const SUR1_GROUP_H: LibraryCategoryDef = {
     {
       id: "family_drama",
       name: "家庭伦理", nameEn: "Family Drama",
-      def: "以家庭关系中的代际压力和伦理债务为类型核心，遗产、婆媳、原生家庭只作可选矛盾。",
+      def: "以家庭关系中的代际压力和伦理债务为识别重点，遗产、婆媳、原生家庭只作可选矛盾。",
       defEn: "Generational conflict, inheritance battles, in-law dynamics, origin family trauma.",
       core: "血缘既是纽带也是枷锁。最亲近的关系承载着最深的期待，也潜藏着最锐利的伤害可能。",
       coreEn: "Blood is both a bond and a shackle. The closest relationships carry the deepest expectations, and also harbor the sharpest potential for harm.",
@@ -18,7 +18,7 @@ export const SUR1_GROUP_H: LibraryCategoryDef = {
     {
       id: "melodrama",
       name: "通俗情节剧", nameEn: "Melodrama / Soap",
-      def: "以高强度情感和命运误会为类型核心，失忆、绝症、出轨、多角恋等只作可选情节资源。",
+      def: "以高强度情感和命运误会为识别重点，失忆、绝症、出轨、多角恋等只作可选情节资源。",
       defEn: "Hyper-exaggerated emotions, amnesia, terminal illness, infidelity, polyamory, emotionality.",
       core: "命运的过度巧合与情绪的极度放大。理智完全让位于剧烈的情感起伏，戏剧性本身就是目的。",
       coreEn: "Over-coincidences of fate and extreme amplification of emotions. Reason completely yields to violent emotional swings; theatricality itself is the purpose.",
@@ -28,7 +28,7 @@ export const SUR1_GROUP_H: LibraryCategoryDef = {
     {
       id: "social_realism",
       name: "现实主义", nameEn: "Social Realism",
-      def: "以现实处境、阶级压力和社会不公为类型核心，纪实质感服务于人物命运。",
+      def: "以现实处境、阶级压力和社会不公为识别重点，纪实质感服务于人物命运。",
       defEn: "Bottom-rung life, social injustice, class stagnation, documentary feel, Dardenne brothers style.",
       core: "渺小的个体在巨大且冷漠的社会机器中的艰难喘息。生存本身即是搏斗，日常的每一步都是阻力。",
       coreEn: "Tiny individual gasping in a massive, indifferent social machine. Survival itself is a struggle; every step of daily life is resistance.",
@@ -38,7 +38,7 @@ export const SUR1_GROUP_H: LibraryCategoryDef = {
     {
       id: "biographical",
       name: "传记", nameEn: "Biographical",
-      def: "以人物生平和关键选择为类型核心，名人身份、历史节点只按传记重点选用。",
+      def: "以人物生平和关键选择为识别重点，名人身份、历史节点只按传记重点选用。",
       defEn: "Real historical biographies, memoirs, historical turning points.",
       core: "个人命运与时代浪潮的交汇。公众形象与私人真实之间的裂缝——伟大与脆弱共存于同一个人。",
       coreEn: "The intersection of personal fate and the tide of the times. The rift between public image and private truth — greatness and fragility coexist in one person.",
@@ -48,7 +48,7 @@ export const SUR1_GROUP_H: LibraryCategoryDef = {
     {
       id: "politics",
       name: "政治惊悚", nameEn: "Political Thriller",
-      def: "以权力系统中的阴谋、调查和交易为类型核心，竞选、新闻、深层政府只作可选场域。",
+      def: "以权力系统中的阴谋、调查和交易为识别重点，竞选、新闻、深层政府只作可选场域。",
       defEn: "Campaign secrets, journalism, power trading, deep state.",
       core: "光鲜的政治口号背后的肮脏交易。权力的运作逻辑与道德的运作逻辑之间存在结构性的冲突。",
       coreEn: "Dirty deals behind shining political slogans. A structural conflict exists between the operating logic of power and the operating logic of morality.",
@@ -58,7 +58,7 @@ export const SUR1_GROUP_H: LibraryCategoryDef = {
     {
       id: "school_bullying",
       name: "校园霸凌", nameEn: "School & Bullying",
-      def: "以校园小社会中的排挤、权力和青春残酷为类型核心，群体暴力只按冲突需要出现。",
+      def: "以校园小社会中的排挤、权力和青春残酷为识别重点，群体暴力只按冲突需要出现。",
       defEn: "Cruelty of adolescence, micro-society, exclusion, mob violence.",
       core: "校园作为一个微缩的权力社会。群体的秩序 vs 个体的差异——排异机制在封闭系统中被极端放大。",
       coreEn: "The school as a miniature power society. Group order vs individual difference — the exclusion mechanism is extremely amplified in a closed system.",
@@ -68,7 +68,7 @@ export const SUR1_GROUP_H: LibraryCategoryDef = {
     {
       id: "medical",
       name: "医疗伦理", nameEn: "Medical Drama",
-      def: "以医疗场域中的生命抉择和职业伦理为类型核心，医患纠纷、病房百态只作可选案型。",
+      def: "以医疗场域中的生命抉择和职业伦理为识别重点，医患纠纷、病房百态只作可选案型。",
       defEn: "Hospital panorama, doctor-patient disputes, ethical life/death choices, fragility of life.",
       core: "冰冷的医疗技术 vs 滚烫的生命意志。治愈与放弃之间的伦理灰区，生命的价值无法量化。",
       coreEn: "Cold medical technology vs burning will to live. The ethical gray zone between healing and letting go; the value of life cannot be quantified.",
@@ -78,7 +78,7 @@ export const SUR1_GROUP_H: LibraryCategoryDef = {
     {
       id: "lgbt_drama",
       name: "酷儿剧情", nameEn: "Gender & Queer Drama",
-      def: "以性别身份、亲密关系和社会压力为类型核心，平权运动、跨性别议题只作可选方向。",
+      def: "以性别身份、亲密关系和社会压力为识别重点，平权运动、跨性别议题只作可选方向。",
       defEn: "Transgender, gay rights movement, social struggle of identity.",
       core: "真实的内在自我 vs 主流社会规范的压力。身份认同的自由与社会接纳之间的张力场。",
       coreEn: "True inner self vs the pressure of mainstream social norms. The tension field between the freedom of identity and social acceptance.",
@@ -88,7 +88,7 @@ export const SUR1_GROUP_H: LibraryCategoryDef = {
     {
       id: "religious",
       name: "信仰剧情", nameEn: "Religious & Faith",
-      def: "以信仰危机和精神拷问为类型核心，神职人员、原罪、宗教仪式只作可选载体。",
+      def: "以信仰危机和精神拷问为识别重点，神职人员、原罪、宗教仪式只作可选载体。",
       defEn: "Crisis of faith, clergy struggle, probing original sin, Bergmanesque interrogation.",
       core: "对绝对信仰的渴望 vs 上帝的沉默。神性的承诺与人间苦难的现实之间的裂缝。",
       coreEn: "Yearning for absolute faith vs God's silence. The rift between divine promises and the reality of human suffering.",
@@ -98,7 +98,7 @@ export const SUR1_GROUP_H: LibraryCategoryDef = {
     {
       id: "legal_ethics",
       name: "法律伦理", nameEn: "Legal Ethics",
-      def: "以法律、情理和道德判断的冲突为类型核心，具体案件模型只作可选参照。",
+      def: "以法律、情理和道德判断的冲突为识别重点，具体案件模型只作可选参照。",
       defEn: "Conflict of emotion/logic/law, OJ case model, trolley problem manifestation.",
       core: "法理的正义 vs 朴素的道德正义。程序的完美与结果的正义之间存在不可消除的结构性裂缝。",
       coreEn: "Legal justice vs plain moral justice. An irreducible structural rift exists between procedural perfection and outcome justice.",
@@ -108,7 +108,7 @@ export const SUR1_GROUP_H: LibraryCategoryDef = {
     {
       id: "war_trauma",
       name: "创伤治愈", nameEn: "Trauma & Healing",
-      def: "以创伤后的修复、告别和重新生活为类型核心，PTSD、丧亲、战后经验只作可选创伤来源。",
+      def: "以创伤后的修复、告别和重新生活为识别重点，PTSD、丧亲、战后经验只作可选创伤来源。",
       defEn: "PTSD, post-war syndrome, bereavement, a long goodbye.",
       core: "过去的时间被冻结在创伤那一刻。创伤之前的自我与创伤之后的自我之间存在不可弥合的断层。",
       coreEn: "Past time frozen at the moment of trauma. An unbridgeable fault line exists between the self before trauma and the self after.",
@@ -118,7 +118,7 @@ export const SUR1_GROUP_H: LibraryCategoryDef = {
     {
       id: "road_drama",
       name: "公路剧情", nameEn: "Road Trip Drama",
-      def: "以物理旅程推动心理变化为类型核心，寻找自我或寻找他人只作可选目标。",
+      def: "以物理旅程推动心理变化为识别重点，寻找自我或寻找他人只作可选目标。",
       defEn: "Overlap of physical and psychological journeys, finding oneself on the road.",
       core: "逃离凝固的社会网络，在移动的空间中审视破碎的自我。物理旅程与心理旅程的重合。",
       coreEn: "Fleeing rigid social networks, examining shattered fragments of self in a moving space. The overlap of physical journey and psychological journey.",

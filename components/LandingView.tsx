@@ -104,15 +104,22 @@ export const LandingView: React.FC<LandingViewProps> = ({
   onReturnToPortal,
   portalTransition
 }) => {
+  const { theme, toggleTheme } = useTheme();
   const [localMounted, setLocalMounted] = useState(false);
-  // 圆环动画：始终挂载元素，用 key 强制重置动画
   const [ringAnimClass, setRingAnimClass] = useState(showRings ? 'animate-ring-entrance' : 'opacity-0');
   const [ringAnimKey, setRingAnimKey] = useState(0);
   const lastShowRingsRef = useRef(showRings);
+  const ringExitTimer = useRef<number | null>(null);
+  const [shouldRenderRings, setShouldRenderRings] = useState(showRings);
+  const [ringSpinKey, setRingSpinKey] = useState(0);
+  const [selectedProtocol, setSelectedProtocol] = useState<ProtocolType>(
+    (initialProtocol && Object.values(ProtocolType).includes(initialProtocol as any) ? initialProtocol as ProtocolType : ProtocolType.CORE_DRIVERS)
+  );
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   const getThemeTextColor = () => {
     if (theme === 'retro') return 'text-[#8B261D]';
-    if (hoveredDriver === 'NARRATIVE') return 'text-gold-primary';
+    if (hoveredDriver === 'NARRATIVE') return 'text-[#ff4f3f]';
     if (hoveredDriver === 'COMMERCIAL') return 'text-mist-cyan';
     if (hoveredDriver === 'EXPERIMENTAL') return 'text-fuchsia-400';
     if (hoveredDriver === 'AESTHETIC') return 'text-mist-aesthetic';
@@ -122,48 +129,53 @@ export const LandingView: React.FC<LandingViewProps> = ({
 
   useEffect(() => {
     setLocalMounted(true);
+    return () => {
+      if (ringExitTimer.current !== null) {
+        window.clearTimeout(ringExitTimer.current);
+      }
+    };
   }, []);
 
-  // 圆环开关：showRings 变化时切换动画 class 并递增 key 强制重新播放
   useEffect(() => {
     if (!localMounted) return;
 
-    // 如果正在执行页面退出到 Portal 的大转场，强制触发圆环退出动画
-    if (portalTransition === 'to-portal') {
-      if (ringAnimClass !== 'animate-ring-exit') {
-        setRingAnimClass('animate-ring-exit');
+    if (ringExitTimer.current !== null) {
+      window.clearTimeout(ringExitTimer.current);
+      ringExitTimer.current = null;
+    }
+
+    const shouldShowRings = selectedProtocol === ProtocolType.CORE_DRIVERS && showRings && portalTransition !== 'to-portal';
+    if (shouldShowRings) {
+      setShouldRenderRings(true);
+      if (ringAnimClass !== 'animate-ring-entrance' || !lastShowRingsRef.current) {
+        setRingAnimClass('animate-ring-entrance');
         setRingAnimKey(prev => prev + 1);
       }
+      lastShowRingsRef.current = true;
       return;
     }
 
-    // 如果 showRings 没有发生实质性变化（比如从其他页面切换回来时状态已同步），不要重新触发动画
-    if (showRings === lastShowRingsRef.current) return;
-
-    if (showRings) {
-      setRingAnimClass('animate-ring-entrance');
-    } else {
-      setRingAnimClass('animate-ring-exit');
+    if (!shouldRenderRings) {
+      lastShowRingsRef.current = false;
+      return;
     }
-    setRingAnimKey(prev => prev + 1);
-    lastShowRingsRef.current = showRings;
-  }, [showRings, localMounted, portalTransition]);
 
-  const { theme, toggleTheme } = useTheme();
-  const [ringSpinKey, setRingSpinKey] = useState(0);
-  const [selectedProtocol, setSelectedProtocol] = useState<ProtocolType>(
-    (initialProtocol && Object.values(ProtocolType).includes(initialProtocol as any) ? initialProtocol as ProtocolType : ProtocolType.CORE_DRIVERS)
-  );
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  // 当切换到非核心驱动协议时，或是 showRings 关闭时，需要让退出动画有机会执行
-  // 这里我们让 shouldRenderRings 在 exit 状态下也保持 true，直到元素彻底不可见
-  const shouldRenderRings = selectedProtocol === ProtocolType.CORE_DRIVERS && (showRings || ringAnimClass === 'animate-ring-exit');
+    if (ringAnimClass !== 'animate-ring-exit') {
+      setRingAnimClass('animate-ring-exit');
+      setRingAnimKey(prev => prev + 1);
+    }
+    lastShowRingsRef.current = false;
+    ringExitTimer.current = window.setTimeout(() => {
+      setShouldRenderRings(false);
+      ringExitTimer.current = null;
+    }, 1850);
+  }, [showRings, localMounted, portalTransition, selectedProtocol, shouldRenderRings, ringAnimClass]);
 
   const getGlowTheme = useCallback((driverId: DriverType | null) => {
     if (theme === 'retro') return 'shadow-none';
     switch (driverId) {
       case DriverType.COMMERCIAL: return 'shadow-cyan-500/10';
-      case DriverType.NARRATIVE: return 'shadow-yellow-500/10';
+      case DriverType.NARRATIVE: return 'shadow-red-500/10';
       case DriverType.AESTHETIC: return 'shadow-violet-500/10';
       case DriverType.EXPERIMENTAL: return 'shadow-fuchsia-500/10';
       case DriverType.TRAILER: return 'shadow-orange-500/10';
@@ -175,7 +187,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
     if (theme === 'retro') return '#2D2D2D';
     switch (driverId) {
       case DriverType.COMMERCIAL: return 'var(--mist-cyan)';
-      case DriverType.NARRATIVE: return 'var(--mist-gold)';
+      case DriverType.NARRATIVE: return '#ff4f3f';
       case DriverType.AESTHETIC: return 'var(--mist-aesthetic)';
       case DriverType.EXPERIMENTAL: return '#D946EF';
       case DriverType.TRAILER: return 'var(--mist-orange)';
@@ -187,7 +199,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
     if (theme === 'retro') return '#8B261D';
     switch (driverId) {
       case DriverType.COMMERCIAL: return 'var(--mist-cyan)';
-      case DriverType.NARRATIVE: return 'var(--mist-gold)';
+      case DriverType.NARRATIVE: return '#ff4f3f';
       case DriverType.AESTHETIC: return 'var(--mist-aesthetic)';
       case DriverType.EXPERIMENTAL: return '#D946EF';
       case DriverType.TRAILER: return 'var(--mist-orange)';
@@ -208,7 +220,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
     if (theme === 'retro' || !driverId) return '';
     switch (driverId) {
       case DriverType.COMMERCIAL: return '0 0 10px rgba(34,211,238,0.3)';
-      case DriverType.NARRATIVE: return '0 0 10px rgba(212,175,55,0.3)';
+      case DriverType.NARRATIVE: return '0 0 10px rgba(255,79,63,0.3)';
       case DriverType.AESTHETIC: return '0 0 10px rgba(139,92,246,0.32)';
       case DriverType.EXPERIMENTAL: return '0 0 10px rgba(217,70,239,0.3)';
       case DriverType.TRAILER: return '0 0 10px rgba(251,146,60,0.3)';
@@ -220,7 +232,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
     if (theme === 'retro' || !driverId) return '';
     switch (driverId) {
       case DriverType.COMMERCIAL: return 'shadow-[0_8px_30px_-5px_rgba(34,211,238,0.25)]';
-      case DriverType.NARRATIVE: return 'shadow-[0_8px_30px_-5px_rgba(212,175,55,0.25)]';
+      case DriverType.NARRATIVE: return 'shadow-[0_8px_30px_-5px_rgba(255,79,63,0.25)]';
       case DriverType.AESTHETIC: return 'shadow-[0_8px_30px_-5px_rgba(139,92,246,0.28)]';
       case DriverType.EXPERIMENTAL: return 'shadow-[0_8px_30px_-5px_rgba(217,70,239,0.25)]';
       case DriverType.TRAILER: return 'shadow-[0_8px_30px_-5px_rgba(251,146,60,0.25)]';
@@ -375,14 +387,14 @@ export const LandingView: React.FC<LandingViewProps> = ({
           <div className={`absolute inset-0 pointer-events-none transition-shadow duration-1000 opacity-20 shadow-[inset_0_0_150px_rgba(0,0,0,1)] ${getGlowTheme(hoveredDriver)}`}></div>
         )}
 
-        {/* Background Rings - 始终挂载，用 key 强制触发CSS动画 */}
+        {/* Background Rings - keep mounted only through the exit animation. */}
         {shouldRenderRings && (
           <div
             key={`rings-anim-${ringAnimKey}`}
             className={`absolute inset-0 flex items-center justify-end pr-[5%] pointer-events-none z-0 select-none overflow-hidden ${ringAnimClass}`}
           >
             <div className="w-[1000px] h-[1000px] flex items-center justify-center translate-x-1/4">
-              <BorromeanRings centered={true} opacity={theme === 'retro' ? 0.85 : 0.95} driverType={hoveredDriver || undefined} vivid={true} animated={showRings} />
+              <BorromeanRings centered={true} opacity={theme === 'retro' ? 0.85 : 0.95} driverType={hoveredDriver || undefined} vivid={true} animated={showRings && ringAnimClass !== 'animate-ring-exit'} driverAccentMode={!!hoveredDriver} />
             </div>
           </div>
         )}

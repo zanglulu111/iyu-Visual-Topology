@@ -1,5 +1,5 @@
 import React from 'react';
-import { NarrativeFieldState, WorldLawConfig, DriverType, FaceState, PromptFocusState, NarrativePromptVersion, NarrativeBlockDef, LibraryCategoryDef, M7BResidueIntensity } from '../types';
+import { NarrativeFieldState, WorldLawConfig, DriverType, FaceState, PromptFocusState, NarrativePromptVersion, NarrativeBlockDef, LibraryCategoryDef, MAxisMixerState, M7BResidueIntensity } from '../types';
 import { buildNarrativePrompt } from '../services/narrativeGenerator';
 import { appendFantasyTraverseOutputContract } from '../services/geminiService';
 import { XRayInspectorModal, type XRaySourceGroup } from './XRayInspector';
@@ -36,11 +36,13 @@ interface PromptInspectorModalProps {
     lang: 'CN' | 'EN';
     fieldState: NarrativeFieldState;
     visionInput: string;
+    visionAnalysis?: string;
     visionImage: string | null;
     worldLawConfig: WorldLawConfig;
     driverType: DriverType | null;
     faceState: FaceState;
     focusState?: PromptFocusState;
+    mAxisMixer?: MAxisMixerState;
     m7bIntensity?: M7BResidueIntensity;
     promptVersion: NarrativePromptVersion;
     onPromptVersionChange: (version: NarrativePromptVersion) => void;
@@ -124,11 +126,13 @@ export const PromptInspectorModal: React.FC<PromptInspectorModalProps> = ({
     lang,
     fieldState,
     visionInput,
+    visionAnalysis = '',
     visionImage,
     worldLawConfig,
     driverType,
     faceState,
     focusState,
+    mAxisMixer,
     m7bIntensity,
     promptVersion,
     onPromptVersionChange
@@ -143,6 +147,14 @@ export const PromptInspectorModal: React.FC<PromptInspectorModalProps> = ({
     }));
     const engineBlocks = blocks.filter(block => !isSurfaceBlock(block.id));
     const surfaceBlocks = blocks.filter(block => isSurfaceBlock(block.id));
+    const buildVisionGenerationContext = (values: Record<string, unknown>) => {
+        const nextVisionInput = String(values.visionInput ?? '').trim();
+        const nextVisionAnalysis = String(values.visionAnalysis ?? '').trim();
+        const parts: string[] = [];
+        if (nextVisionInput) parts.push(`【最高优先级：创意灵感 / 用户补充】\n${nextVisionInput}`);
+        if (nextVisionAnalysis) parts.push(`【用户确认/可编辑的图片解析结果】\n${nextVisionAnalysis}`);
+        return parts.join('\n\n');
+    };
 
     const getSources = (): XRaySourceGroup[] => [
         {
@@ -205,6 +217,13 @@ export const PromptInspectorModal: React.FC<PromptInspectorModalProps> = ({
                     editable: true
                 },
                 {
+                    id: 'visionAnalysis',
+                    label: lang === 'EN' ? 'Confirmed Image Analysis' : '用户确认/可编辑的图片解析结果',
+                    kind: 'textarea',
+                    value: visionAnalysis || '',
+                    editable: true
+                },
+                {
                     id: 'visionImage',
                     label: lang === 'EN' ? 'Image Seed / Visual Lock' : '图像种子 / 视觉锁定',
                     kind: visionImage ? 'image' : 'text',
@@ -222,12 +241,13 @@ export const PromptInspectorModal: React.FC<PromptInspectorModalProps> = ({
                 ...worldLawConfig,
                 gravity: Number(values.worldLawLevel || worldLawLevel)
             });
-            const nextVisionInput = String(values.visionInput ?? '');
             const nextVisionImage = typeof values.visionImage === 'string' && values.visionImage.trim() ? values.visionImage : null;
+            const hasConfirmedVisionAnalysis = Boolean(String(values.visionAnalysis ?? '').trim());
+            const nextVisionInput = buildVisionGenerationContext(values);
             const nextPromptVersion = values.promptVersion === 'v3' ? 'v3' : 'v4';
             if (nextPromptVersion !== promptVersion) onPromptVersionChange(nextPromptVersion);
 
-            const promptData = buildNarrativePrompt("SHORT", nextFieldState, nextVisionInput, nextVisionImage, nextWorldLaw, nextPromptVersion, faceState, focusState, m7bIntensity);
+            const promptData = buildNarrativePrompt("SHORT", nextFieldState, nextVisionInput, hasConfirmedVisionAnalysis ? null : nextVisionImage, nextWorldLaw, nextPromptVersion, faceState, focusState, mAxisMixer, m7bIntensity);
             return appendFantasyTraverseOutputContract(promptData.text);
         } catch (e) {
             return `提示词生成过程中遇到错误，请检查左侧输入源。\n\n[ERROR DETAILS]\n${e instanceof Error ? e.stack : String(e)}`;

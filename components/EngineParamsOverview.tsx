@@ -47,8 +47,8 @@ const getBlockName = (id: string, language: BlueprintLanguage) => {
     if (block) return language === 'EN' ? block.enName : block.name;
     if (id === 'skin_genre') return language === 'EN' ? 'GENRE' : '类型基因';
     if (id === 'skin_animation_genre') return language === 'EN' ? 'ANIMATION GENRE' : '动画基因';
-    if (id === 'skin_year_exact') return language === 'EN' ? 'YEAR' : '年代';
-    if (id === 'skin_country_exact') return language === 'EN' ? 'COUNTRY' : '国家';
+    if (id === 'skin_year_exact') return language === 'EN' ? 'TIME ANCHOR' : '时间锚';
+    if (id === 'skin_country_exact') return language === 'EN' ? 'SPACE ANCHOR' : '空间锚';
     return id;
 };
 

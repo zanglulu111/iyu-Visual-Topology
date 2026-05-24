@@ -1,4 +1,4 @@
-import { X, Search, Layers, Check, Dice5, Trash2, Plus, Zap, Sparkles, Eye, Heart, Music, Sun, Moon, Cloud, Feather, Globe, Copy, LayoutGrid, Info, Hash, ChevronRight, ArrowLeftRight, Undo2, Redo2, Star } from 'lucide-react';
+import { X, Search, Layers, Check, Dice5, Trash2, Plus, Zap, Sparkles, Eye, Heart, Music, Sun, Moon, Cloud, Feather, Globe, Copy, LayoutGrid, Info, Hash, ChevronRight, ArrowLeftRight, Undo2, Redo2 } from 'lucide-react';
 import React, { useState, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTheme } from '../contexts/ThemeContext';
@@ -21,6 +21,7 @@ import {
     WORLD_MOTIF_CATEGORIES
 } from '../constants';
 import { BlueprintLanguage, DriverType, LibraryCategoryDef } from '../types';
+import { buildTermFocusPatch, clearFocusForTagsPatch, getFocusLimitReason, getFocusUnitKey, isFocusableBlock, MAX_FOCUS_TERMS } from '../utils/focusTerms';
 
 interface NarrativeLibraryModalProps {
     isOpen: boolean;
@@ -40,6 +41,9 @@ interface NarrativeLibraryModalProps {
     onFocusStateChange?: (focusState: PromptFocusState) => void;
     initialFaceState?: Record<string, 'bright' | 'dark' | 'tension'>;
     initialFocusState?: PromptFocusState;
+    allSelectedTags?: string[];
+    allSelectedFocusUnitMap?: Record<string, string>;
+    allSelectedFocusBlockMap?: Record<string, string>;
 }
 
 const iconMap: Record<string, React.ElementType> = {
@@ -82,7 +86,7 @@ const itemTagMatches = (item: any, tag: string) =>
 const itemMatchesAnyTag = (item: any, tags: string[]) => tags.some(tag => itemTagMatches(item, tag));
 
 export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
-    isOpen, onClose, blockId, blockName, selectedTags, onToggleTag, onSetTags, onClear, lang = 'CN', customLibraryData, driverType, onAddCustomDef, scrollToTag, onTempLockChange, onFocusStateChange, initialFaceState, initialFocusState
+    isOpen, onClose, blockId, blockName, selectedTags, onToggleTag, onSetTags, onClear, lang = 'CN', customLibraryData, driverType, onAddCustomDef, scrollToTag, onTempLockChange, onFocusStateChange, initialFaceState, initialFocusState, allSelectedTags, allSelectedFocusUnitMap, allSelectedFocusBlockMap
 }) => {
     const { theme: globalTheme } = useTheme();
     const [searchQuery, setSearchQuery] = useState("");
@@ -104,6 +108,7 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
     const [currentLang, setCurrentLang] = useState<BlueprintLanguage>(lang);
 
     const isEngineLexicon = blockId.startsWith('engine_m');
+    const canFocusTerms = isFocusableBlock(blockId);
     // Content version control: 'academic' shows def+core, 'ai' shows directive
     const [contentVersion, setContentVersion] = useState<'academic' | 'ai'>('ai'); // Default to AI version
     const effectiveContentVersion = isEngineLexicon ? contentVersion : 'academic';
@@ -111,13 +116,28 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
     const [directiveTemp, setDirectiveTemp] = useState<'bright' | 'dark' | 'tension'>('bright');
     const faceState = initialFaceState || {};
     const focusState = initialFocusState || {};
-
+    const selectedFocusTags = allSelectedTags || selectedTags;
+    const focusUnitMap = useMemo(() => {
+        const map: Record<string, string> = { ...(allSelectedFocusUnitMap || {}) };
+        selectedTags.forEach(tag => {
+            map[tag] = getFocusUnitKey(blockId, tag);
+        });
+        return map;
+    }, [allSelectedFocusUnitMap, blockId, selectedTags]);
+    const focusBlockMap = useMemo(() => {
+        const map: Record<string, string> = { ...(allSelectedFocusBlockMap || {}) };
+        selectedTags.forEach(tag => {
+            map[tag] = blockId;
+        });
+        return map;
+    }, [allSelectedFocusBlockMap, blockId, selectedTags]);
     const setFace = (name: string, temp: 'bright' | 'dark' | 'tension') => {
         onTempLockChange?.({ [name]: temp });
     };
 
-    const setFocus = (name: string, focus: boolean) => {
-        onFocusStateChange?.({ [name]: focus });
+    const setTermFocus = (name: string, focus: boolean) => {
+        const patch = buildTermFocusPatch(focusState, blockId, selectedTags, name, focus, selectedFocusTags, focusUnitMap, focusBlockMap);
+        if (patch) onFocusStateChange?.(patch);
     };
 
     useEffect(() => {
@@ -356,7 +376,7 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
         const nameCn = blockId === 'skin_volume' && volumeDuration
             ? `${rawNameCn.split('(')[0].trim()}（${volumeDuration}）`
             : displayCnTag(item.name);
-        const nameEn = getEnglishLabel(item.name, item.nameEn);
+        const nameEn = getEnglishLabel(item.name, item.nameEn) || item.aliasesEn?.[0] || (!containsCjk(rawNameCn) ? rawNameCn.trim() : '');
         return (currentLang === 'EN' ? nameEn : nameCn) || item.id || '';
     };
 
@@ -398,14 +418,19 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
         }
 
         setActiveSlotIndex(Math.max(0, Math.min(limit - 1, nextActiveSlot)));
+        const removedTags = normalizedCurrent.filter(tag => !normalizedNext.includes(tag));
+        const addedTags = normalizedNext.filter(tag => !normalizedCurrent.includes(tag));
 
         if (onSetTags) {
             onSetTags(normalizedNext);
+            const focusClear = clearFocusForTagsPatch(blockId, removedTags);
+            if (removedTags.length > 0) onFocusStateChange?.(focusClear);
             return;
         }
 
-        const removedTags = normalizedCurrent.filter(tag => !normalizedNext.includes(tag));
-        const addedTags = normalizedNext.filter(tag => !normalizedCurrent.includes(tag));
+        if (removedTags.length > 0) {
+            onFocusStateChange?.(clearFocusForTagsPatch(blockId, removedTags));
+        }
         removedTags.forEach(onToggleTag);
         if (removedTags.length > 0 && addedTags.length > 0) {
             setTimeout(() => {
@@ -541,10 +566,10 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
     };
 
     const handleScrollToCard = (tagName: string) => {
-        const item = processedGroups.flatMap(g => g.items || []).find(i => i.name === tagName);
+        const item = processedGroups.flatMap(g => g.items || []).find(i => itemTagMatches(i, tagName));
         if (!item) return;
 
-        const groupContainingTag = processedGroups.find(g => (g.items || []).some(i => i.name === tagName));
+        const groupContainingTag = processedGroups.find(g => (g.items || []).some(i => itemTagMatches(i, tagName)));
 
         if (groupContainingTag && activeTab !== groupContainingTag.id) {
             setActiveTab(groupContainingTag.id);
@@ -676,7 +701,7 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                         );
                                     }
 
-                                    const item = filteredItems.find(i => i.name === tag) || processedGroups.flatMap(g => g.items || []).find(i => i.name === tag);
+                                    const item = filteredItems.find(i => itemTagMatches(i, tag)) || processedGroups.flatMap(g => g.items || []).find(i => itemTagMatches(i, tag));
                                     const displayTag = item ? getLocalizedItemName(item) : displayCnTag(tag);
                                     const isActiveSlot = activeSlotIndex === slotIndex;
 
@@ -821,21 +846,6 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                     <span className="hidden xl:inline">{currentLang === 'EN' ? 'Tension' : '张力'}</span>
                                     <span className="xl:hidden">{currentLang === 'EN' ? 'T' : '张'}</span>
                                 </button>
-                                {isEngineLexicon && (
-                                    <button
-                                        onClick={() => setFocus(blockId, !focusState[blockId])}
-                                        className={`mist-lexicon-face-button flex items-center justify-center gap-1.5 px-3 h-7 rounded-lg text-[10px] font-black uppercase tracking-[0.15em] transition-all ${
-                                            focusState[blockId]
-                                                ? (globalTheme === 'retro' ? 'bg-[#8B261D] text-white' : 'bg-amber-400/20 text-amber-300')
-                                                : (globalTheme === 'retro' ? 'text-[#8B261D]/60 hover:bg-[#8B261D]/5' : 'text-zinc-400 hover:bg-white/10 hover:text-amber-300/60')
-                                        }`}
-                                        title={currentLang === 'EN' ? 'Focus: send core tension' : '重点：发送核心张力'}
-                                    >
-                                        <Star size={12} />
-                                        <span className="hidden xl:inline">{currentLang === 'EN' ? 'Focus' : '重点'}</span>
-                                        <span className="xl:hidden">★</span>
-                                    </button>
-                                )}
                                 </div>
                             </div>
                         )}
@@ -936,7 +946,14 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                 const isPreset = blockId === 'aes_palette_preset';
                                 const itemMechanics = getItemMechanics(item);
                                 const effectiveItemTemp = isSelected ? (faceState[item.name] || directiveTemp) : directiveTemp;
-                                const isFocused = Boolean(focusState[item.name]);
+                                const isFocused = canFocusTerms && Boolean(focusState[item.name]);
+                                const focusLimitReason = getFocusLimitReason(focusState, blockId, item.name, selectedFocusTags, focusUnitMap, focusBlockMap);
+                                const focusLimitReached = !isFocused && Boolean(focusLimitReason);
+                                const focusLimitTitle = focusLimitReason === 'm'
+                                    ? (currentLang === 'EN' ? 'Focus limit: max 2 M-axis terms' : 'M层重点最多2个')
+                                    : focusLimitReason === 'surface'
+                                        ? (currentLang === 'EN' ? 'Focus limit: max 2 SUR/SV focus groups' : 'SUR/SV重点最多2组')
+                                        : (currentLang === 'EN' ? `Focus limit: max ${MAX_FOCUS_TERMS} focus groups` : `重点最多 ${MAX_FOCUS_TERMS} 组`);
                                 const itemName = getLocalizedItemName(item);
                                 const essenceText = getLocalizedText(item, 'essence', 'essenceEn', currentLang);
                                 const defText = getLocalizedText(item, 'def', 'defEn', currentLang);
@@ -953,9 +970,13 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                     <div key={item.id || item.name}
                                         id={`card-${(item.id || item.name).replace(/\s+/g, '_')}`}
                                         onClick={() => {
-                                            const isCurrentlySelected = itemMatchesAnyTag(item, selectedTags);
+                                            const matchedTag = selectedTags.find(tag => itemTagMatches(item, tag));
+                                            if (matchedTag) {
+                                                removeSelectedTag(matchedTag);
+                                                return;
+                                            }
                                             applySlotSelection(item.name);
-                                            if (isEngineLexicon && !isCurrentlySelected && item.directive && typeof item.directive === 'object') {
+                                            if (isEngineLexicon && item.directive && typeof item.directive === 'object') {
                                                 const temps: ('bright' | 'dark' | 'tension')[] = ['bright', 'dark', 'tension'];
                                                 const randomTemp = temps[Math.floor(Math.random() * temps.length)];
                                                 setFace(item.name, randomTemp);
@@ -980,27 +1001,6 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                             <h4 className={`font-serif font-bold ${isPreset ? 'text-base' : 'text-lg md:text-xl'} leading-tight ${isSelected ? (globalTheme === 'retro' ? 'text-[#8B261D]' : themeText) : (globalTheme === 'retro' ? 'text-black/80' : 'text-zinc-100 group-hover:text-white')}`}>{itemName}</h4>
                                             {!isPreset && (
                                                 <div className="flex items-center gap-2 shrink-0 ml-3">
-                                                    {isEngineLexicon && (
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                if (!isSelected && !isFocused) {
-                                                                    applySlotSelection(item.name);
-                                                                }
-                                                                setFocus(item.name, !isFocused);
-                                                            }}
-                                                            className={`mist-lexicon-card-focus-button flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-wider transition-all border ${
-                                                                isFocused
-                                                                    ? (globalTheme === 'retro' ? 'bg-[#8B261D] text-white border-[#8B261D]' : 'bg-amber-400/20 text-amber-300 border-amber-400/40')
-                                                                    : (globalTheme === 'retro' ? 'bg-transparent text-[#8B261D]/50 border-[#8B261D]/20 hover:border-[#8B261D]/50 hover:text-[#8B261D]' : 'bg-transparent text-zinc-500 border-zinc-700 hover:border-amber-400/40 hover:text-amber-300')
-                                                            }`}
-                                                            title={currentLang === 'EN' ? 'Focus this term: send core tension' : '重点此词条：发送核心张力'}
-                                                            aria-label={currentLang === 'EN' ? `Focus ${itemName}` : `重点 ${itemName}`}
-                                                        >
-                                                            <Star size={12} fill={isFocused ? 'currentColor' : 'none'} />
-                                                            <span>{currentLang === 'EN' ? 'Focus' : '重点'}</span>
-                                                        </button>
-                                                    )}
                                                     {isSkinSV && item.core && (
                                                         <button
                                                             onClick={(e) => { e.stopPropagation(); setProtocolOpenId(item.id || item.name); }}
@@ -1024,96 +1024,128 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                             <>
                                                 {(item as any)._groupName && <div className={`mb-2 text-[9px] ${globalTheme === 'retro' ? 'text-[#8B261D]/50 bg-[#8B261D]/5' : 'text-zinc-500 bg-black/20'} font-mono uppercase tracking-wider px-1.5 py-0.5 rounded w-fit`}>{(item as any)._groupName}</div>}
 
-                                                {/* Temperature Control (only show when AI version is selected AND item has directive object) */}
-                                                {effectiveContentVersion === 'ai' && item.directive && typeof item.directive === 'object' && (
+                                                {/* Temperature / Focus Control */}
+                                                {((effectiveContentVersion === 'ai' && item.directive && typeof item.directive === 'object') || canFocusTerms) && (
                                                     <div className="mb-4" onClick={(e) => e.stopPropagation()}>
                                                         <div className="flex gap-2">
-                                                            <button
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    const isCurrentlySelected = itemMatchesAnyTag(item, selectedTags);
-                                                                    const currentTemp = faceState[item.name];
+                                                            {effectiveContentVersion === 'ai' && item.directive && typeof item.directive === 'object' && (
+                                                                <>
+                                                                    <button
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            const isCurrentlySelected = itemMatchesAnyTag(item, selectedTags);
+                                                                            const currentTemp = faceState[item.name];
 
-                                                                    if (isCurrentlySelected && currentTemp === 'bright') {
-                                                                        removeSelectedTag(item.name);
-                                                                    } else {
-                                                                        if (!isCurrentlySelected) {
+                                                                            if (isCurrentlySelected && currentTemp === 'bright') {
+                                                                                removeSelectedTag(item.name);
+                                                                            } else {
+                                                                                if (!isCurrentlySelected) {
+                                                                                    applySlotSelection(item.name);
+                                                                                }
+                                                                                setFace(item.name, 'bright');
+                                                                            }
+                                                                        }}
+                                                                        className={`mist-lexicon-card-face-button is-bright ${isSelected && faceState[item.name] === 'bright' ? 'is-locked' : ''} ${effectiveItemTemp === 'bright' ? 'is-effective' : ''} flex-1 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all relative ${
+                                                                            // Only highlight if selected AND this is the locked temperature
+                                                                            isSelected && faceState[item.name] === 'bright'
+                                                                                ? (globalTheme === 'retro' ? 'bg-[#8B261D] text-white shadow-md' : 'bg-amber-500/30 text-amber-300 border-2 border-amber-500')
+                                                                                : effectiveItemTemp === 'bright'
+                                                                                ? (globalTheme === 'retro' ? 'bg-white/60 text-[#8B261D]/40 border border-[#8B261D]/10' : 'bg-black/10 text-amber-400/40 border border-amber-500/20')
+                                                                                : (globalTheme === 'retro' ? 'bg-white/40 text-[#8B261D]/30 border border-[#8B261D]/10 hover:bg-white/60' : 'bg-black/20 text-zinc-600 border border-white/5 hover:text-amber-400/60 hover:border-amber-500/30')
+                                                                        }`}
+                                                                    >
+                                                                        {currentLang === 'EN' ? 'Bright' : '亮面'}
+                                                                        {/* Checkmark for locked selection */}
+                                                                        {isSelected && faceState[item.name] === 'bright' && (
+                                                                            <span className="ml-1 text-xs">✓</span>
+                                                                        )}
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            const isCurrentlySelected = itemMatchesAnyTag(item, selectedTags);
+                                                                            const currentTemp = faceState[item.name];
+
+                                                                            if (isCurrentlySelected && currentTemp === 'dark') {
+                                                                                removeSelectedTag(item.name);
+                                                                            } else {
+                                                                                if (!isCurrentlySelected) {
+                                                                                    applySlotSelection(item.name);
+                                                                                }
+                                                                                setFace(item.name, 'dark');
+                                                                            }
+                                                                        }}
+                                                                        className={`mist-lexicon-card-face-button is-dark ${isSelected && faceState[item.name] === 'dark' ? 'is-locked' : ''} ${effectiveItemTemp === 'dark' ? 'is-effective' : ''} flex-1 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all relative ${
+                                                                            isSelected && faceState[item.name] === 'dark'
+                                                                                ? (globalTheme === 'retro' ? 'bg-[#8B261D] text-white shadow-md' : 'bg-indigo-500/30 text-indigo-300 border-2 border-indigo-500')
+                                                                                : effectiveItemTemp === 'dark'
+                                                                                ? (globalTheme === 'retro' ? 'bg-white/60 text-[#8B261D]/40 border border-[#8B261D]/10' : 'bg-black/10 text-indigo-400/40 border border-indigo-500/20')
+                                                                                : (globalTheme === 'retro' ? 'bg-white/40 text-[#8B261D]/30 border border-[#8B261D]/10 hover:bg-white/60' : 'bg-black/20 text-zinc-600 border border-white/5 hover:text-indigo-400/60 hover:border-indigo-500/30')
+                                                                        }`}
+                                                                    >
+                                                                        {currentLang === 'EN' ? 'Dark' : '暗面'}
+                                                                        {isSelected && faceState[item.name] === 'dark' && (
+                                                                            <span className="ml-1 text-xs">✓</span>
+                                                                        )}
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            const isCurrentlySelected = itemMatchesAnyTag(item, selectedTags);
+                                                                            const currentTemp = faceState[item.name];
+
+                                                                            if (isCurrentlySelected && currentTemp === 'tension') {
+                                                                                removeSelectedTag(item.name);
+                                                                            } else {
+                                                                                if (!isCurrentlySelected) {
+                                                                                    applySlotSelection(item.name);
+                                                                                }
+                                                                                setFace(item.name, 'tension');
+                                                                            }
+                                                                        }}
+                                                                        className={`mist-lexicon-card-face-button is-tension ${isSelected && faceState[item.name] === 'tension' ? 'is-locked' : ''} ${effectiveItemTemp === 'tension' ? 'is-effective' : ''} flex-1 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all relative ${
+                                                                            isSelected && faceState[item.name] === 'tension'
+                                                                                ? (globalTheme === 'retro' ? 'bg-[#8B261D] text-white shadow-md' : 'bg-violet-500/30 text-violet-300 border-2 border-violet-500')
+                                                                                : effectiveItemTemp === 'tension'
+                                                                                ? (globalTheme === 'retro' ? 'bg-white/60 text-[#8B261D]/40 border border-[#8B261D]/10' : 'bg-black/10 text-violet-400/40 border border-violet-500/20')
+                                                                                : (globalTheme === 'retro' ? 'bg-white/40 text-[#8B261D]/30 border border-[#8B261D]/10 hover:bg-white/60' : 'bg-black/20 text-zinc-600 border border-white/5 hover:text-violet-400/60 hover:border-violet-500/30')
+                                                                        }`}
+                                                                    >
+                                                                        {currentLang === 'EN' ? 'Tension' : '张力'}
+                                                                        {isSelected && faceState[item.name] === 'tension' && (
+                                                                            <span className="ml-1 text-xs">✓</span>
+                                                                        )}
+                                                                    </button>
+                                                                </>
+                                                            )}
+                                                            {canFocusTerms && (
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        if (!isFocused && focusLimitReached) return;
+                                                                        if (!isSelected && !isFocused) {
                                                                             applySlotSelection(item.name);
                                                                         }
-                                                                        setFace(item.name, 'bright');
+                                                                        setTermFocus(item.name, !isFocused);
+                                                                    }}
+                                                                    className={`mist-lexicon-card-focus-button flex-1 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all relative border ${
+                                                                        isFocused
+                                                                            ? (globalTheme === 'retro' ? 'bg-[#8B261D] text-white shadow-md border-[#8B261D]' : 'bg-[rgba(var(--mist-active-accent-rgb),0.12)] text-[var(--mist-active-accent)] border-2 border-[var(--mist-active-accent)]')
+                                                                            : focusLimitReached
+                                                                            ? (globalTheme === 'retro' ? 'bg-white/20 text-[#8B261D]/20 border-[#8B261D]/10 cursor-not-allowed' : 'bg-black/20 text-zinc-700 border-white/5 cursor-not-allowed')
+                                                                            : (globalTheme === 'retro' ? 'bg-white/40 text-[#8B261D]/40 border-[#8B261D]/10 hover:bg-white/60 hover:text-[#8B261D]' : 'bg-black/20 text-zinc-600 border-white/5 hover:text-[var(--mist-active-accent)] hover:border-[var(--mist-active-accent)]/40')
+                                                                    }`}
+                                                                    title={focusLimitReached
+                                                                        ? focusLimitTitle
+                                                                        : (currentLang === 'EN' ? 'Focus this term: global narrative core' : '重点此词条：作为全局叙事核心')
                                                                     }
-                                                                }}
-                                                                className={`mist-lexicon-card-face-button is-bright ${isSelected && faceState[item.name] === 'bright' ? 'is-locked' : ''} ${effectiveItemTemp === 'bright' ? 'is-effective' : ''} flex-1 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all relative ${
-                                                                    // Only highlight if selected AND this is the locked temperature
-                                                                    isSelected && faceState[item.name] === 'bright'
-                                                                        ? (globalTheme === 'retro' ? 'bg-[#8B261D] text-white shadow-md' : 'bg-amber-500/30 text-amber-300 border-2 border-amber-500')
-                                                                        : effectiveItemTemp === 'bright'
-                                                                        ? (globalTheme === 'retro' ? 'bg-white/60 text-[#8B261D]/40 border border-[#8B261D]/10' : 'bg-black/10 text-amber-400/40 border border-amber-500/20')
-                                                                        : (globalTheme === 'retro' ? 'bg-white/40 text-[#8B261D]/30 border border-[#8B261D]/10 hover:bg-white/60' : 'bg-black/20 text-zinc-600 border border-white/5 hover:text-amber-400/60 hover:border-amber-500/30')
-                                                                }`}
-                                                            >
-                                                                {currentLang === 'EN' ? 'Bright' : '亮面'}
-                                                                {/* Checkmark for locked selection */}
-                                                                {isSelected && faceState[item.name] === 'bright' && (
-                                                                    <span className="ml-1 text-xs">✓</span>
-                                                                )}
-                                                            </button>
-                                                            <button
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    const isCurrentlySelected = itemMatchesAnyTag(item, selectedTags);
-                                                                    const currentTemp = faceState[item.name];
-
-                                                                    if (isCurrentlySelected && currentTemp === 'dark') {
-                                                                        removeSelectedTag(item.name);
-                                                                    } else {
-                                                                        if (!isCurrentlySelected) {
-                                                                            applySlotSelection(item.name);
-                                                                        }
-                                                                        setFace(item.name, 'dark');
-                                                                    }
-                                                                }}
-                                                                className={`mist-lexicon-card-face-button is-dark ${isSelected && faceState[item.name] === 'dark' ? 'is-locked' : ''} ${effectiveItemTemp === 'dark' ? 'is-effective' : ''} flex-1 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all relative ${
-                                                                    isSelected && faceState[item.name] === 'dark'
-                                                                        ? (globalTheme === 'retro' ? 'bg-[#8B261D] text-white shadow-md' : 'bg-indigo-500/30 text-indigo-300 border-2 border-indigo-500')
-                                                                        : effectiveItemTemp === 'dark'
-                                                                        ? (globalTheme === 'retro' ? 'bg-white/60 text-[#8B261D]/40 border border-[#8B261D]/10' : 'bg-black/10 text-indigo-400/40 border border-indigo-500/20')
-                                                                        : (globalTheme === 'retro' ? 'bg-white/40 text-[#8B261D]/30 border border-[#8B261D]/10 hover:bg-white/60' : 'bg-black/20 text-zinc-600 border border-white/5 hover:text-indigo-400/60 hover:border-indigo-500/30')
-                                                                }`}
-                                                            >
-                                                                {currentLang === 'EN' ? 'Dark' : '暗面'}
-                                                                {isSelected && faceState[item.name] === 'dark' && (
-                                                                    <span className="ml-1 text-xs">✓</span>
-                                                                )}
-                                                            </button>
-                                                            <button
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    const isCurrentlySelected = itemMatchesAnyTag(item, selectedTags);
-                                                                    const currentTemp = faceState[item.name];
-
-                                                                    if (isCurrentlySelected && currentTemp === 'tension') {
-                                                                        removeSelectedTag(item.name);
-                                                                    } else {
-                                                                        if (!isCurrentlySelected) {
-                                                                            applySlotSelection(item.name);
-                                                                        }
-                                                                        setFace(item.name, 'tension');
-                                                                    }
-                                                                }}
-                                                                className={`mist-lexicon-card-face-button is-tension ${isSelected && faceState[item.name] === 'tension' ? 'is-locked' : ''} ${effectiveItemTemp === 'tension' ? 'is-effective' : ''} flex-1 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all relative ${
-                                                                    isSelected && faceState[item.name] === 'tension'
-                                                                        ? (globalTheme === 'retro' ? 'bg-[#8B261D] text-white shadow-md' : 'bg-violet-500/30 text-violet-300 border-2 border-violet-500')
-                                                                        : effectiveItemTemp === 'tension'
-                                                                        ? (globalTheme === 'retro' ? 'bg-white/60 text-[#8B261D]/40 border border-[#8B261D]/10' : 'bg-black/10 text-violet-400/40 border border-violet-500/20')
-                                                                        : (globalTheme === 'retro' ? 'bg-white/40 text-[#8B261D]/30 border border-[#8B261D]/10 hover:bg-white/60' : 'bg-black/20 text-zinc-600 border border-white/5 hover:text-violet-400/60 hover:border-violet-500/30')
-                                                                }`}
-                                                            >
-                                                                {currentLang === 'EN' ? 'Tension' : '张力'}
-                                                                {isSelected && faceState[item.name] === 'tension' && (
-                                                                    <span className="ml-1 text-xs">✓</span>
-                                                                )}
-                                                            </button>
+                                                                    aria-label={currentLang === 'EN' ? `Focus ${itemName}` : `重点 ${itemName}`}
+                                                                    disabled={focusLimitReached}
+                                                                >
+                                                                    <span>{currentLang === 'EN' ? 'Focus' : '重点'}</span>
+                                                                    {isFocused && <span className="ml-1 text-xs">✓</span>}
+                                                                </button>
+                                                            )}
                                                         </div>
                                                     </div>
                                                 )}

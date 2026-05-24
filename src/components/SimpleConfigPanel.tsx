@@ -196,8 +196,11 @@ export const SimpleConfigPanel: React.FC<SimpleConfigPanelProps> = ({ onClose, d
 
   const handleModeChange = (mode: ProviderMode) => {
     if (!draftKey) return;
+    const isGeminiProxy = draftKey.provider === 'gemini' && mode === 'proxy';
     updateDraftKey({
       mode,
+      apiFormat: isGeminiProxy ? 'openai' : providerToApiFormat(draftKey.provider),
+      modelCoverage: draftKey.provider === 'mixed' || draftKey.provider === 'custom' ? 'all' : 'provider',
       baseUrl: mode === 'proxy' && isKnownOfficialBaseUrl(draftKey.baseUrl)
         ? ''
         : draftKey.baseUrl,

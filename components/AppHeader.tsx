@@ -118,6 +118,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   const mutedControlClass = theme === 'retro' ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white';
   const inactiveControlClass = theme === 'retro' ? 'text-zinc-600 hover:text-black hover:border-black/5' : 'text-zinc-400 hover:text-white';
   const inactiveIconClass = theme === 'retro' ? 'text-zinc-600 group-hover:text-black' : 'text-zinc-400 group-hover:text-white';
+  const getActiveNavClass = (isActive: boolean) => isActive ? `is-active ${getHeaderTitleColor()}` : `${mutedControlClass} font-sans`;
   const headerSeparatorClass = `select-none text-[10px] font-mono font-bold leading-none ${theme === 'retro' ? 'text-zinc-600' : 'text-white/70'}`;
   const renderHeaderSeparator = () => (
     <span className={headerSeparatorClass} aria-hidden="true">-</span>
@@ -189,17 +190,17 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               <>
                 <button
                   onClick={() => setViewMode('ENGINE')}
-                  className={`mist-app-top-nav-button flex items-center gap-2 font-serif font-bold transition-all duration-300 hover:scale-105 active:scale-95 ${viewMode === 'ENGINE' ? getHeaderTitleColor() : `${mutedControlClass} font-sans`}`}
+                  className={`mist-app-top-nav-button flex items-center gap-2 font-serif font-bold transition-all duration-300 hover:scale-105 active:scale-95 ${getActiveNavClass(viewMode === 'ENGINE')}`}
                 >
-                  <Cpu size={14} className={viewMode === 'ENGINE' ? `${getThemeTextColor()} fill-none` : ""} />
+                  <Cpu size={14} className="shrink-0 text-current" />
                   {lang === 'CN' ? "核心引擎" : "CORE ENGINE"}
                 </button>
                 {renderHeaderSeparator()}
                 <button
                   onClick={() => setViewMode('DIVERGENCE')}
-                  className={`mist-app-top-nav-button flex items-center gap-2 transition-all duration-300 hover:scale-105 active:scale-95 ${viewMode === 'DIVERGENCE' ? getHeaderTitleColor() : `${mutedControlClass} font-sans`}`}
+                  className={`mist-app-top-nav-button flex items-center gap-2 transition-all duration-300 hover:scale-105 active:scale-95 ${getActiveNavClass(viewMode === 'DIVERGENCE')}`}
                 >
-                  <GitFork size={14} />
+                  <GitFork size={14} className="shrink-0 text-current" />
                   {lang === 'CN' ? "分歧点" : "THE DIVERGENCE"}
                 </button>
               </>
@@ -209,17 +210,17 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                 {selectedDriver !== DriverType.EXPERIMENTAL && renderHeaderSeparator()}
                 <button
                   onClick={() => setViewMode('BIBLE')}
-                  className={`mist-app-top-nav-button flex items-center gap-2 transition-all duration-300 hover:scale-105 active:scale-95 ${viewMode === 'BIBLE' ? getHeaderTitleColor() : `${mutedControlClass} font-sans`}`}
+                  className={`mist-app-top-nav-button flex items-center gap-2 transition-all duration-300 hover:scale-105 active:scale-95 ${getActiveNavClass(viewMode === 'BIBLE')}`}
                 >
-                  <BookOpen size={14} />
+                  <BookOpen size={14} className="shrink-0 text-current" />
                   {lang === 'CN' ? "叙事创作" : "NARRATIVE WRITING"}
                 </button>
                 {renderHeaderSeparator()}
                 <button
                   onClick={handleOpenMetonymyPage}
-                  className={`mist-app-top-nav-button flex items-center gap-2 transition-all duration-300 hover:scale-105 active:scale-95 ${viewMode === 'METONYMY' ? getHeaderTitleColor() : `${mutedControlClass} font-sans`}`}
+                  className={`mist-app-top-nav-button flex items-center gap-2 transition-all duration-300 hover:scale-105 active:scale-95 ${getActiveNavClass(viewMode === 'METONYMY')}`}
                 >
-                  <Wand2 size={14} />
+                  <Wand2 size={14} className="shrink-0 text-current" />
                   {lang === 'CN' ? "换喻脚本" : "METONYMY SCRIPT"}
                 </button>
               </>
@@ -235,9 +236,9 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             theme === 'retro' ? '' : 'hover:bg-black/30'
           }`}>
             {[
-              ...(openProjects ? [{ icon: FolderOpen, label: activeProjectTitle || (lang === 'CN' ? '项目' : 'PROJECT'), labelCn: activeProjectTitle || '项目', labelEn: activeProjectTitle || 'PROJECT', onClick: openProjects, isActive: isProjectsOpen }] : []),
-              { icon: Settings, label: lang === 'CN' ? '系统配置' : 'SETTINGS', labelCn: '系统配置', labelEn: 'SETTINGS', onClick: openSettings, isActive: false },
-              { icon: HistoryIcon, label: lang === 'CN' ? '欲望档案' : 'ARCHIVE', labelCn: '欲望档案', labelEn: 'ARCHIVE', onClick: openHistory, isActive: isHistoryOpen },
+              ...(openProjects ? [{ icon: FolderOpen, label: lang === 'CN' ? '项目' : 'PROJECT', labelCn: '项目', labelEn: 'PROJECT', onClick: openProjects, isActive: isProjectsOpen }] : []),
+              { icon: Settings, label: lang === 'CN' ? '配置' : 'CONFIG', labelCn: '配置', labelEn: 'CONFIG', onClick: openSettings, isActive: false },
+              { icon: HistoryIcon, label: lang === 'CN' ? '历史' : 'HISTORY', labelCn: '历史', labelEn: 'HISTORY', onClick: openHistory, isActive: isHistoryOpen },
             ].map((item, idx) => (
               <button
                 key={idx}

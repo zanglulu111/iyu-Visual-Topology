@@ -208,20 +208,22 @@ class ConfigService {
   private normalizeKeyEntries(entries: ApiKeyEntry[]): ApiKeyEntry[] {
     const seen = new Set<string>();
     const normalized = entries.map((entry, index) => {
-      const provider = entry.provider || 'custom';
       const id = entry.id || createId('key');
+      const isLegacyGeminiProxy = id === LEGACY_KEY_IDS.gemini && entry.mode === 'proxy';
+      const provider = isLegacyGeminiProxy ? 'gemini' : (entry.provider || 'custom');
+      const apiFormat = isLegacyGeminiProxy ? 'openai' : (entry.apiFormat || providerToApiFormat(provider));
       const next: ApiKeyEntry = {
         id: seen.has(id) ? `${id}_${index}` : id,
         name: entry.name?.trim() || `${providerLabel(provider)} Key`,
         provider,
         mode: entry.mode || (provider === 'gemini' ? 'official' : 'proxy'),
-        apiFormat: entry.apiFormat || providerToApiFormat(provider),
+        apiFormat,
         baseUrl: entry.baseUrl || '',
         apiKey: entry.apiKey || '',
-        modelCoverage: entry.modelCoverage || (provider === 'mixed' || provider === 'custom' ? 'all' : 'provider'),
+        modelCoverage: isLegacyGeminiProxy ? 'provider' : (entry.modelCoverage || (provider === 'mixed' || provider === 'custom' ? 'all' : 'provider')),
         allowedModels: Array.isArray(entry.allowedModels) ? entry.allowedModels : [],
         modelPattern: entry.modelPattern || '',
-        tags: Array.isArray(entry.tags) ? entry.tags : [],
+        tags: Array.from(new Set([...(Array.isArray(entry.tags) ? entry.tags : []), ...(isLegacyGeminiProxy ? ['gemini'] : [])])),
         note: entry.note || '',
         createdAt: entry.createdAt || nowIso(),
         updatedAt: entry.updatedAt || nowIso(),
@@ -252,12 +254,12 @@ class ConfigService {
 
     applyProvider('gemini', {
       name: providers.gemini.mode === 'proxy' ? 'Gemini 兼容网关' : 'Gemini 官方 Key',
-      provider: providers.gemini.mode === 'proxy' ? 'mixed' : 'gemini',
+      provider: 'gemini',
       mode: providers.gemini.mode,
       apiFormat: providers.gemini.mode === 'proxy' ? 'openai' : 'google',
       baseUrl: providers.gemini.baseUrl,
       apiKey: providers.gemini.apiKey,
-      modelCoverage: providers.gemini.mode === 'proxy' ? 'all' : 'provider',
+      modelCoverage: 'provider',
       tags: ['migrated', 'gemini'],
     });
 
@@ -391,14 +393,63 @@ class ConfigService {
   }
 
   private findDefaultKeyIdForModel(model: string, keyEntries: ApiKeyEntry[]): string {
+    const provider = getProviderForModel(model);
+    const providerKeyWithKey = keyEntries.find(entry =>
+      entry.apiKey
+      && this.isProviderAlignedKey(entry, provider)
+      && isApiKeyCompatibleWithModel(entry, model)
+    );
+    if (providerKeyWithKey) return providerKeyWithKey.id;
+
+    const explicitModelKey = keyEntries.find(entry =>
+      entry.apiKey
+      && this.isExplicitModelRoute(entry, model)
+      && isApiKeyCompatibleWithModel(entry, model)
+    );
+    if (explicitModelKey) return explicitModelKey.id;
+
     const compatibleWithKey = keyEntries.find(entry => entry.apiKey && isApiKeyCompatibleWithModel(entry, model));
     if (compatibleWithKey) return compatibleWithKey.id;
 
-    const provider = getProviderForModel(model);
-    return keyEntries.find(entry => entry.id === LEGACY_KEY_IDS[provider])?.id
-      || keyEntries.find(entry => entry.provider === provider)?.id
+    return keyEntries.find(entry => this.isProviderAlignedKey(entry, provider))?.id
       || keyEntries[0]?.id
       || LEGACY_KEY_IDS.gemini;
+  }
+
+  private isProviderAlignedKey(entry: ApiKeyEntry, provider: ProviderId): boolean {
+    return entry.provider === provider
+      || entry.id === LEGACY_KEY_IDS[provider]
+      || entry.tags.includes(provider);
+  }
+
+  private isExplicitModelRoute(entry: ApiKeyEntry, model: string): boolean {
+    if (entry.modelCoverage === 'allowlist') {
+      return entry.allowedModels.includes(model);
+    }
+    if (entry.modelCoverage === 'pattern' && entry.modelPattern) {
+      const escaped = entry.modelPattern
+        .split('*')
+        .map(part => part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+        .join('.*');
+      return new RegExp(`^${escaped}$`, 'i').test(model);
+    }
+    return false;
+  }
+
+  private shouldKeepBoundKeyForModel(entry: ApiKeyEntry, model: string, keyEntries: ApiKeyEntry[]): boolean {
+    if (!isApiKeyCompatibleWithModel(entry, model)) return false;
+
+    const provider = getProviderForModel(model);
+    if (this.isProviderAlignedKey(entry, provider) || this.isExplicitModelRoute(entry, model)) {
+      return true;
+    }
+
+    return !keyEntries.some(candidate =>
+      candidate.id !== entry.id
+      && candidate.apiKey
+      && this.isProviderAlignedKey(candidate, provider)
+      && isApiKeyCompatibleWithModel(candidate, model)
+    );
   }
 
   // ============================================================
@@ -577,11 +628,18 @@ class ConfigService {
         model: DEFAULT_ENGINE_MODELS[engineId],
         keyId: this.findDefaultKeyIdForModel(DEFAULT_ENGINE_MODELS[engineId], config.keyEntries),
       };
+      const nextBinding = { ...current, ...binding };
+      if (binding.model && !binding.keyId) {
+        const currentKey = config.keyEntries.find(entry => entry.id === current.keyId);
+        nextBinding.keyId = currentKey && this.shouldKeepBoundKeyForModel(currentKey, binding.model, config.keyEntries)
+          ? current.keyId
+          : this.findDefaultKeyIdForModel(binding.model, config.keyEntries);
+      }
       return {
         ...profile,
         bindings: {
           ...profile.bindings,
-          [engineId]: { ...current, ...binding },
+          [engineId]: nextBinding,
         },
         updatedAt: nowIso(),
       };
@@ -628,7 +686,7 @@ class ConfigService {
         const key = config.keyEntries.find(entry => entry.id === current.keyId);
         bindings[engineId] = {
           model,
-          keyId: key && isApiKeyCompatibleWithModel(key, model)
+          keyId: key && this.shouldKeepBoundKeyForModel(key, model, config.keyEntries)
             ? current.keyId
             : this.findDefaultKeyIdForModel(model, config.keyEntries),
         };
@@ -655,14 +713,16 @@ class ConfigService {
     const keyId = LEGACY_KEY_IDS[provider];
     const keyEntries = config.keyEntries.map(entry => {
       if (entry.id !== keyId) return entry;
+      const isGeminiProxy = provider === 'gemini' && legacy.mode === 'proxy';
       return {
         ...entry,
-        provider: provider === 'gemini' && legacy.mode === 'proxy' ? 'mixed' : provider,
+        provider,
         mode: legacy.mode,
-        apiFormat: provider === 'gemini' && legacy.mode === 'proxy' ? 'openai' : legacy.apiFormat,
+        apiFormat: isGeminiProxy ? 'openai' : legacy.apiFormat,
         baseUrl: legacy.baseUrl,
         apiKey: legacy.apiKey,
-        modelCoverage: provider === 'gemini' && legacy.mode === 'proxy' ? 'all' : 'provider',
+        modelCoverage: 'provider',
+        tags: Array.from(new Set([...entry.tags, ...(isGeminiProxy ? ['gemini'] : [])])),
         updatedAt: nowIso(),
       } as ApiKeyEntry;
     });
@@ -724,7 +784,7 @@ class ConfigService {
     const active = this.getActiveRouteProfile();
     const current = active.bindings[normalizedId];
     const currentKey = current ? config.keyEntries.find(entry => entry.id === current.keyId) : undefined;
-    const keyId = currentKey && isApiKeyCompatibleWithModel(currentKey, model)
+    const keyId = currentKey && this.shouldKeepBoundKeyForModel(currentKey, model, config.keyEntries)
       ? currentKey.id
       : this.findDefaultKeyIdForModel(model, config.keyEntries);
     this.setEngineBinding(normalizedId, { model, keyId });
@@ -767,7 +827,7 @@ class ConfigService {
     const binding = profile?.bindings[engineId];
     const model = modelOverride || binding?.model || DEFAULT_ENGINE_MODELS[engineId];
     const boundKey = binding ? config.keyEntries.find(entry => entry.id === binding.keyId) : undefined;
-    const key = boundKey && isApiKeyCompatibleWithModel(boundKey, model)
+    const key = boundKey && this.shouldKeepBoundKeyForModel(boundKey, model, config.keyEntries)
       ? boundKey
       : config.keyEntries.find(entry => entry.id === this.findDefaultKeyIdForModel(model, config.keyEntries));
     const provider = key?.provider || getProviderForModel(model);
