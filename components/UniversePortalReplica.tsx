@@ -22,6 +22,36 @@ interface UniversePortalProps {
 type PortalTone = 'gold' | 'cyan' | 'red' | 'purple' | 'orange';
 
 const DESIRE_PORTAL_NUMBER = '03';
+const PORTAL_HERO_POSTER_LIGHT = '/portal-assets/portal-hero-86-light.jpg';
+
+const detectLowPowerPortal = () => {
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') return false;
+  const params = new URLSearchParams(window.location.search);
+  let storedOverride: string | null = null;
+  try {
+    storedOverride = window.localStorage.getItem('mistPortalMotion');
+  } catch {
+    storedOverride = null;
+  }
+  const override = params.get('portalMotion') || storedOverride;
+  if (override === 'full') return false;
+  if (override === 'lite' || params.get('lowPower') === '1') return true;
+
+  const nav = navigator as Navigator & {
+    deviceMemory?: number;
+    connection?: { saveData?: boolean; effectiveType?: string };
+  };
+  const cores = nav.hardwareConcurrency || 8;
+  const memory = nav.deviceMemory || 8;
+  const effectiveType = nav.connection?.effectiveType || '';
+  const ua = nav.userAgent || '';
+  const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+  const oldWindows = /Windows NT (5|6\.)/.test(ua);
+  const lowEndWindows = /Windows/i.test(ua) && (cores <= 4 || memory <= 4);
+  const constrainedNetwork = nav.connection?.saveData || /^(slow-2g|2g|3g)$/.test(effectiveType);
+
+  return reducedMotion || oldWindows || lowEndWindows || memory <= 2 || cores <= 2 || !!constrainedNetwork;
+};
 
 interface PortalCardDef {
   number: string;
@@ -119,10 +149,11 @@ const PortalCard: React.FC<{
   index: number;
   isGlitching: boolean;
   isBreathing: boolean;
+  isLowPower: boolean;
   onHoverStart: (card: PortalCardDef, index: number, rect: DOMRect) => void;
   onHoverEnd: (index: number) => void;
   onCardClick: (card: PortalCardDef, index: number, rect: DOMRect) => void;
-}> = ({ card, isRetro, index, isGlitching, isBreathing, onHoverStart, onHoverEnd, onCardClick }) => {
+}> = ({ card, isRetro, index, isGlitching, isBreathing, isLowPower, onHoverStart, onHoverEnd, onCardClick }) => {
   const accent = toneColor(card.tone, isRetro);
   const mediaRef = useRef<HTMLDivElement | null>(null);
   const handleClick = () => {
@@ -148,20 +179,26 @@ const PortalCard: React.FC<{
           src={card.imageSrc}
           alt=""
           className="mist-card-bg h-full w-full scale-[1.01] object-cover opacity-[0.84] transition-all duration-[980ms] group-hover:scale-[1.035] group-hover:opacity-[0.9]"
+          loading={index < 2 ? 'eager' : 'lazy'}
+          decoding="async"
           draggable="false"
         />
       </div>
       <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-r from-black/40 via-black/18 to-transparent transition-opacity duration-700 group-hover:opacity-95" />
       <div className="pointer-events-none absolute inset-0 z-[2] bg-[radial-gradient(circle_at_74%_38%,rgba(255,255,255,0.16),transparent_34%),linear-gradient(to_bottom,rgba(0,0,0,0.06),transparent_35%,rgba(0,0,0,0.36))]" />
       <div className="pointer-events-none absolute inset-0 z-[3] bg-white/[0.04] opacity-45 transition-opacity duration-500 group-hover:opacity-100" />
-      <div className="mist-card-film-base pointer-events-none absolute inset-0 z-[4] transition-all duration-500" aria-hidden="true" />
-      <img
-        src="/portal-assets/film-card-frame.png"
-        alt=""
-        aria-hidden="true"
-        className="mist-card-film-frame pointer-events-none absolute inset-0 z-[8] h-full w-full object-fill opacity-100 transition-all duration-500"
-        draggable="false"
-      />
+      {!isLowPower && (
+        <>
+          <div className="mist-card-film-base pointer-events-none absolute inset-0 z-[4] transition-all duration-500" aria-hidden="true" />
+          <img
+            src="/portal-assets/film-card-frame.png"
+            alt=""
+            aria-hidden="true"
+            className="mist-card-film-frame pointer-events-none absolute inset-0 z-[8] h-full w-full object-fill opacity-100 transition-all duration-500"
+            draggable="false"
+          />
+        </>
+      )}
       <div className="mist-card-red-splice pointer-events-none absolute z-[11]" aria-hidden="true" />
 
       <div className="mist-card-body relative z-10 h-full px-5 py-6 text-center 2xl:px-8 2xl:py-7">
@@ -203,7 +240,8 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
 }) => {
   const { theme } = useTheme();
   const isRetro = theme === 'retro';
-  const [mistEnabled, setMistEnabled] = useState(true);
+  const [isLowPowerPortal] = useState(() => detectLowPowerPortal());
+  const [mistEnabled, setMistEnabled] = useState(() => !isLowPowerPortal);
   const [isLeavingPortal, setIsLeavingPortal] = useState(false);
   const [isTitleGlitching, setIsTitleGlitching] = useState(false);
   const [isPortalEntering, setIsPortalEntering] = useState(entryMode === 'intro');
@@ -237,11 +275,11 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
 
     const t1 = setTimeout(() => {
       setBootStage('beam');
-    }, 600); // 0.6s: Beam hits the screen
+    }, isLowPowerPortal ? 80 : 600); // 0.6s: Beam hits the screen
 
     const t2 = setTimeout(() => {
       setBootStage('text');
-    }, 1800); // 1.8s: Text starts fading in
+    }, isLowPowerPortal ? 180 : 1800); // 1.8s: Text starts fading in
 
     const t3 = setTimeout(() => {
       setBootStage('ready'); // 3.2s: Cards fade up
@@ -258,7 +296,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
         }
       }, 100);
       */
-    }, 3200);
+    }, isLowPowerPortal ? 420 : 3200);
 
     return () => {
       clearTimeout(t1);
@@ -266,9 +304,10 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
       clearTimeout(t3);
       // bootAudio.pause(); - DISABLED
     };
-  }, [entryMode]);
+  }, [entryMode, isLowPowerPortal]);
 
   useEffect(() => {
+    if (isLowPowerPortal) return;
     let animationFrame = 0;
     let lastClientX = -100;
     let lastClientY = -100;
@@ -304,9 +343,10 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
       cancelAnimationFrame(animationFrame);
       window.removeEventListener('mousemove', handleMouseMove);
     };
-  }, []);
+  }, [isLowPowerPortal]);
 
   useEffect(() => {
+    if (isLowPowerPortal) return;
     const audio = new Audio('/audio/glitch.mp3');
     audio.volume = 0.8;
     audio.loop = true;
@@ -332,9 +372,10 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
         if (timer) clearTimeout(timer);
       });
     };
-  }, []);
+  }, [isLowPowerPortal]);
 
   const startTitleGlitch = () => {
+    if (isLowPowerPortal) return;
     if (titleGlitchActiveRef.current) return;
     titleGlitchActiveRef.current = true;
     cardAudioRefs.current.forEach((cardAudio) => {
@@ -361,6 +402,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
   };
 
   const startCardHover = (card: PortalCardDef, index: number, _rect: DOMRect) => {
+    if (isLowPowerPortal) return;
     setActiveStageMedia(card.imageSrc);
     cardHoverActiveRef.current[index] = true;
     if (cardGlitchTimers.current[index]) {
@@ -474,7 +516,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
       titleEn: 'Subject Archive',
       descCn: '进入梦、档案与主体裂缝',
       descEn: 'The crossroads of psychoanalysis and cinema theory.',
-      imageSrc: '/portal-assets/card-01-89.png',
+      imageSrc: '/portal-assets/card-01-89-light.jpg',
       tone: 'red',
       onClick: goArchive,
     },
@@ -484,7 +526,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
       titleEn: 'Cult Video',
       descCn: '进入光影、症候与实在界',
       descEn: 'How cinema renders unconscious structures visible.',
-      imageSrc: '/portal-assets/card-02-88.png',
+      imageSrc: '/portal-assets/card-02-88-light.jpg',
       tone: 'cyan',
       onClick: goVideo,
     },
@@ -494,7 +536,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
       titleEn: 'Desire Reproduction',
       descCn: '启动欲望再生产，进入视觉生产的符号链',
       descEn: 'Activate desire reproduction. Enter the symbolic chain of visual production.',
-      imageSrc: '/portal-assets/card-03-91.png',
+      imageSrc: '/portal-assets/card-03-91-light.jpg',
       tone: 'red',
       onClick: goEngine,
     },
@@ -504,7 +546,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
       titleEn: 'Mist Dictionary',
       descCn: '迷雾学派理论',
       descEn: 'Symptoms as gazes and sounds beyond representation.',
-      imageSrc: '/portal-assets/card-04-90.png',
+      imageSrc: '/portal-assets/card-04-90-light.jpg',
       tone: 'purple',
       onClick: goDictionary,
     },
@@ -514,7 +556,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
       titleEn: 'Psychoanalysis',
       descCn: '进入罗夏墨迹与潜意识探测',
       descEn: 'Archive research, image archaeology, and field work.',
-      imageSrc: '/portal-assets/card-05-87.png',
+      imageSrc: '/portal-assets/card-05-87-light.jpg',
       tone: 'orange',
       onClick: goRorschach,
     },
@@ -523,14 +565,14 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
   const portalRootStyle = {
     '--portal-mouse-x': '0',
     '--portal-mouse-y': '0',
-    '--portal-mist-opacity': mistEnabled ? 1 : 0,
-    '--portal-film-side-opacity': 1,
+    '--portal-mist-opacity': mistEnabled && !isLowPowerPortal ? 1 : 0,
+    '--portal-film-side-opacity': isLowPowerPortal ? 0 : 1,
   } as React.CSSProperties;
 
   return (
     <div
       ref={portalRootRef}
-      className={`mist-portal-root ${isRetro ? 'is-retro' : 'is-dark'} fixed inset-0 overflow-hidden bg-black text-white ${isPortalEntering ? 'mist-portal-entering' : ''} ${isTitleGlitching ? 'mist-portal-text-system-active' : ''}`}
+      className={`mist-portal-root ${isRetro ? 'is-retro' : 'is-dark'} ${isLowPowerPortal ? 'is-low-power' : ''} fixed inset-0 overflow-hidden bg-black text-white ${isPortalEntering ? 'mist-portal-entering' : ''} ${isTitleGlitching ? 'mist-portal-text-system-active' : ''}`}
       style={portalRootStyle}
     >
       <style>{`
@@ -2696,6 +2738,108 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
           text-shadow: 0 0 12px rgba(166,64,56,0.3);
         }
 
+        .mist-portal-root.is-low-power,
+        .mist-portal-root.is-low-power button,
+        .mist-portal-root.is-low-power a,
+        .mist-portal-root.is-low-power [role="button"] {
+          cursor: auto;
+        }
+
+        .mist-portal-root.is-low-power *,
+        .mist-portal-root.is-low-power *::before,
+        .mist-portal-root.is-low-power *::after {
+          animation-duration: 1ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 80ms !important;
+          will-change: auto !important;
+        }
+
+        .mist-portal-root.is-low-power :where(
+          .mist-portal-custom-cursor,
+          .mist-portal-film-side,
+          .mist-portal-atmosphere-smoke,
+          .mist-portal-particles,
+          .mist-card-film-frame,
+          .mist-card-film-base,
+          .mist-card-hover-field,
+          .mist-card-local-ecg,
+          .mist-card-red-splice,
+          .mist-portal-title-scanline
+        ) {
+          display: none !important;
+        }
+
+        .mist-portal-root.is-low-power :where(
+          .mist-portal-header,
+          .mist-portal-left-copy,
+          .mist-portal-left-copy > div,
+          .mist-portal-stage-wrap,
+          .mist-portal-stage,
+          .mist-portal-footer,
+          .mist-portal-shell,
+          .mist-portal-card
+        ) {
+          transform: none !important;
+          transform-style: flat !important;
+          transition-property: color, background-color, border-color, opacity !important;
+        }
+
+        .mist-portal-root.is-low-power :where(
+          .mist-portal-title,
+          .mist-card-title,
+          .mist-card-title::before,
+          .mist-card-description,
+          .mist-card-description p,
+          .mist-card-bg,
+          .mist-portal-stage img,
+          .mist-portal-stage video
+        ) {
+          filter: none !important;
+        }
+
+        .mist-portal-root.is-low-power .mist-portal-stage {
+          box-shadow: 0 0 18px rgba(0,0,0,0.38);
+          -webkit-mask-image: none;
+          mask-image: none;
+        }
+
+        .mist-portal-root.is-low-power .mist-portal-card {
+          transform: none !important;
+          box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+          background: rgba(0,0,0,0.24);
+        }
+
+        .mist-portal-root.is-low-power .mist-portal-card:hover {
+          transform: none !important;
+          background: rgba(0,0,0,0.42);
+          box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--portal-card-accent) 42%, transparent);
+        }
+
+        .mist-portal-root.is-low-power .mist-card-bg,
+        .mist-portal-root.is-low-power .mist-portal-card:hover .mist-card-bg,
+        .mist-portal-root.is-low-power .mist-portal-card-glitch-active .mist-card-bg {
+          transform: none !important;
+          opacity: 0.82;
+          animation: none !important;
+        }
+
+        .mist-portal-root.is-low-power .mist-card-title,
+        .mist-portal-root.is-low-power .mist-portal-card:hover .mist-card-title,
+        .mist-portal-root.is-low-power .mist-portal-card-glitch-active .mist-card-title {
+          transform: translate3d(-50%, -50%, 0) !important;
+          animation: none !important;
+          color: rgba(255,255,255,0.88);
+          text-shadow: 0 2px 10px rgba(0,0,0,0.78);
+        }
+
+        .mist-portal-root.is-low-power .mist-card-description,
+        .mist-portal-root.is-low-power .mist-portal-card:hover .mist-card-description,
+        .mist-portal-root.is-low-power .mist-portal-card-glitch-active .mist-card-description {
+          opacity: 0;
+          transform: none !important;
+          animation: none !important;
+        }
+
         @media (prefers-reduced-motion: reduce) {
           .mist-portal-title:hover,
           .mist-portal-header,
@@ -3177,21 +3321,25 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
       <div className="mist-portal-film-side mist-portal-film-side-left" />
       <div className="mist-portal-film-side mist-portal-film-side-right" />
 
-      {/* Floating Particles Parallax Layer */}
-      <div
-        className="pointer-events-none absolute inset-[-5%] transition-transform duration-100 ease-linear mist-portal-particles"
-        style={{
-          transform: 'translate3d(calc(var(--portal-mouse-x, 0) * -1.5%), calc(var(--portal-mouse-y, 0) * -1.5%), 0)',
-          background: 'radial-gradient(1px 1px at 15% 25%, rgba(255,255,255,0.4) 100%, transparent), radial-gradient(1.5px 1.5px at 85% 75%, rgba(255,255,255,0.3) 100%, transparent), radial-gradient(2px 2px at 50% 50%, rgba(255,255,255,0.2) 100%, transparent), radial-gradient(1px 1px at 35% 85%, rgba(255,255,255,0.25) 100%, transparent), radial-gradient(1px 1px at 75% 25%, rgba(255,255,255,0.15) 100%, transparent)',
-          backgroundSize: '150% 150%',
-        }}
-      />
+      {!isLowPowerPortal && (
+        <>
+          {/* Floating Particles Parallax Layer */}
+          <div
+            className="pointer-events-none absolute inset-[-5%] transition-transform duration-100 ease-linear mist-portal-particles"
+            style={{
+              transform: 'translate3d(calc(var(--portal-mouse-x, 0) * -1.5%), calc(var(--portal-mouse-y, 0) * -1.5%), 0)',
+              background: 'radial-gradient(1px 1px at 15% 25%, rgba(255,255,255,0.4) 100%, transparent), radial-gradient(1.5px 1.5px at 85% 75%, rgba(255,255,255,0.3) 100%, transparent), radial-gradient(2px 2px at 50% 50%, rgba(255,255,255,0.2) 100%, transparent), radial-gradient(1px 1px at 35% 85%, rgba(255,255,255,0.25) 100%, transparent), radial-gradient(1px 1px at 75% 25%, rgba(255,255,255,0.15) 100%, transparent)',
+              backgroundSize: '150% 150%',
+            }}
+          />
 
-      <div className="mist-portal-atmosphere-smoke">
-        <div className="mist-portal-smoke-shader absolute inset-[-10%]">
-          {mistEnabled && <ShaderBackground theme={isRetro ? 'retro' : 'dark'} enabled={mistEnabled && !isLeavingPortal} maxFps={20} />}
-        </div>
-      </div>
+          <div className="mist-portal-atmosphere-smoke">
+            <div className="mist-portal-smoke-shader absolute inset-[-10%]">
+              {mistEnabled && <ShaderBackground theme={isRetro ? 'retro' : 'dark'} enabled={mistEnabled && !isLeavingPortal} maxFps={16} />}
+            </div>
+          </div>
+        </>
+      )}
 
       <div className="mist-portal-shell relative mx-auto flex h-dvh max-h-dvh w-full max-w-[1900px] flex-col overflow-hidden">
         <header className="mist-portal-header grid h-[34px] shrink-0 items-center gap-[clamp(0.8rem,1.3vw,2.2rem)]">
@@ -3319,20 +3467,31 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
                 }}
               >
               <div className="mist-portal-stage overflow-hidden relative">
-                <video
-                  src="/portal-assets/portal-hero-loop.mp4"
-                  poster="/portal-assets/portal-hero-86.png"
-                  className={`absolute inset-0 h-full w-full object-contain transition-all duration-1000 ${activeStageMedia ? 'opacity-15 blur-md scale-[1.02]' : 'opacity-100 blur-0 scale-100'}`}
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  preload="metadata"
-                  aria-label="Lacanian topology stage"
-                />
+                {isLowPowerPortal ? (
+                  <img
+                    src={PORTAL_HERO_POSTER_LIGHT}
+                    alt=""
+                    className="absolute inset-0 h-full w-full object-contain opacity-100"
+                    decoding="async"
+                    draggable="false"
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <video
+                    src="/portal-assets/portal-hero-loop.mp4"
+                    poster={PORTAL_HERO_POSTER_LIGHT}
+                    className={`absolute inset-0 h-full w-full object-contain transition-all duration-1000 ${activeStageMedia ? 'opacity-15 blur-md scale-[1.02]' : 'opacity-100 blur-0 scale-100'}`}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    preload="metadata"
+                    aria-label="Lacanian topology stage"
+                  />
+                )}
 
                 {/* Dynamic Projected Media */}
-                {portalCards.map((card) => (
+                {!isLowPowerPortal && portalCards.map((card) => (
                   <div
                     key={card.number}
                     className={`absolute inset-0 flex items-center justify-center transition-all duration-[800ms] pointer-events-none mix-blend-screen ${
@@ -3368,6 +3527,7 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
                 isRetro={isRetro}
                 isGlitching={cardGlitchActive[index]}
                 isBreathing={cardBreathActive[index]}
+                isLowPower={isLowPowerPortal}
                 onHoverStart={startCardHover}
                 onHoverEnd={stopCardHover}
                 onCardClick={handleCardClick}

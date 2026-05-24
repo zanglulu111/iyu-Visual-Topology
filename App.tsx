@@ -1,31 +1,8 @@
 import React, { useState, useEffect, useCallback, useReducer, useRef } from 'react';
 import { Cpu } from 'lucide-react';
-import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { NarrativeEngineField } from './components/NarrativeEngineField';
-import { BlueprintEditor } from './components/BlueprintEditor';
-import { AnalysisView } from './components/blueprint/AnalysisView';
-import { HistoryModal } from './components/HistoryModal';
-import { NarrativePathsView } from './components/NarrativePathsView';
-import { ProductManualModal } from './components/ProductManualModal';
-import { SutureModal } from './components/SutureModal';
-import { NarrativeLibraryModal } from './components/NarrativeLibraryModal';
-import { TensionMonitorModal } from './components/TensionMonitorModal';
-import { MetonymyView } from './components/blueprint/MetonymyView';
-import { MistCanvasEngine } from './components/canvas/MistCanvasEngine';
-import { AuthModal } from './components/AuthModal';
-import { UserProfileModal } from './components/UserProfileModal';
-import { AppHeader } from './components/AppHeader';
-import { EngineBottomBar } from './components/EngineBottomBar';
-import { TaskManagerPanel } from './components/TaskManagerPanel';
-import { ProjectSystemModal } from './components/ProjectSystemModal';
-import { LandingView } from './components/LandingView';
 import { UniversePortal } from './components/UniversePortalReplica';
-import { GlobalHomePage } from './components/GlobalHomePage';
-import { VisionSidebar } from './components/VisionSidebar';
-import { TheSkinSidebar } from './components/TheSkinSidebar';
-import { AestheticInputSidebar } from './components/AestheticInputSidebar';
-import { PromptInspectorModal } from './components/PromptInspectorModal';
 import {
     DriverType,
     CreativeTreatment,
@@ -93,17 +70,38 @@ import { buildDesireProjectsFromHistoryItem } from './services/desireArchiveServ
 import { supabaseAuthService, AuthUser } from './services/supabaseAuth';
 import { supabaseDatabase } from './services/supabaseDatabase';
 import { useSettings } from './contexts/SettingsContext';
-import { SimpleConfigPanel } from './src/components/SimpleConfigPanel';
 import { useTheme } from './contexts/ThemeContext';
-import { LacanGraphView } from './components/LacanGraphView';
-import { LacanTopologyView } from './components/LacanTopologyView';
-import { ArchiveDirectoryModal } from './components/ArchiveDirectoryModal';
 import { BorromeanRings } from './components/BorromeanRings';
-import { VideoLibrary } from './components/VideoLibrary';
-import { PhilosophyCodexPage } from './components/PhilosophyCodexPage';
-import { PhilosopherPosterIndexPage } from './components/PhilosopherPosterIndexPage';
-import { MistLexiconLandingPage } from './components/MistLexiconLandingPage';
-import { RorschachView } from './components/RorschachView';
+
+const NarrativeEngineField = React.lazy(() => import('./components/NarrativeEngineField').then(module => ({ default: module.NarrativeEngineField })));
+const BlueprintEditor = React.lazy(() => import('./components/BlueprintEditor').then(module => ({ default: module.BlueprintEditor })));
+const AnalysisView = React.lazy(() => import('./components/blueprint/AnalysisView').then(module => ({ default: module.AnalysisView })));
+const HistoryModal = React.lazy(() => import('./components/HistoryModal').then(module => ({ default: module.HistoryModal })));
+const NarrativePathsView = React.lazy(() => import('./components/NarrativePathsView').then(module => ({ default: module.NarrativePathsView })));
+const NarrativeLibraryModal = React.lazy(() => import('./components/NarrativeLibraryModal').then(module => ({ default: module.NarrativeLibraryModal })));
+const TensionMonitorModal = React.lazy(() => import('./components/TensionMonitorModal').then(module => ({ default: module.TensionMonitorModal })));
+const MetonymyView = React.lazy(() => import('./components/blueprint/MetonymyView').then(module => ({ default: module.MetonymyView })));
+const MistCanvasEngine = React.lazy(() => import('./components/canvas/MistCanvasEngine').then(module => ({ default: module.MistCanvasEngine })));
+const AuthModal = React.lazy(() => import('./components/AuthModal').then(module => ({ default: module.AuthModal })));
+const UserProfileModal = React.lazy(() => import('./components/UserProfileModal').then(module => ({ default: module.UserProfileModal })));
+const AppHeader = React.lazy(() => import('./components/AppHeader').then(module => ({ default: module.AppHeader })));
+const EngineBottomBar = React.lazy(() => import('./components/EngineBottomBar').then(module => ({ default: module.EngineBottomBar })));
+const TaskManagerPanel = React.lazy(() => import('./components/TaskManagerPanel').then(module => ({ default: module.TaskManagerPanel })));
+const ProjectSystemModal = React.lazy(() => import('./components/ProjectSystemModal').then(module => ({ default: module.ProjectSystemModal })));
+const LandingView = React.lazy(() => import('./components/LandingView').then(module => ({ default: module.LandingView })));
+const GlobalHomePage = React.lazy(() => import('./components/GlobalHomePage').then(module => ({ default: module.GlobalHomePage })));
+const VisionSidebar = React.lazy(() => import('./components/VisionSidebar').then(module => ({ default: module.VisionSidebar })));
+const TheSkinSidebar = React.lazy(() => import('./components/TheSkinSidebar').then(module => ({ default: module.TheSkinSidebar })));
+const AestheticInputSidebar = React.lazy(() => import('./components/AestheticInputSidebar').then(module => ({ default: module.AestheticInputSidebar })));
+const PromptInspectorModal = React.lazy(() => import('./components/PromptInspectorModal').then(module => ({ default: module.PromptInspectorModal })));
+const SimpleConfigPanel = React.lazy(() => import('./src/components/SimpleConfigPanel').then(module => ({ default: module.SimpleConfigPanel })));
+const LacanGraphView = React.lazy(() => import('./components/LacanGraphView').then(module => ({ default: module.LacanGraphView })));
+const LacanTopologyView = React.lazy(() => import('./components/LacanTopologyView').then(module => ({ default: module.LacanTopologyView })));
+const ArchiveDirectoryModal = React.lazy(() => import('./components/ArchiveDirectoryModal').then(module => ({ default: module.ArchiveDirectoryModal })));
+const VideoLibrary = React.lazy(() => import('./components/VideoLibrary').then(module => ({ default: module.VideoLibrary })));
+const PhilosopherPosterIndexPage = React.lazy(() => import('./components/PhilosopherPosterIndexPage').then(module => ({ default: module.PhilosopherPosterIndexPage })));
+const MistLexiconLandingPage = React.lazy(() => import('./components/MistLexiconLandingPage').then(module => ({ default: module.MistLexiconLandingPage })));
+const RorschachView = React.lazy(() => import('./components/RorschachView').then(module => ({ default: module.RorschachView })));
 
 const DEFAULT_WORLD_LAW_CONFIG: WorldLawConfig = normalizeWorldLawConfig({ gravity: 2 });
 
@@ -2560,6 +2558,7 @@ const App: React.FC = () => {
         <QueryClientProvider client={queryClient}>
             <div className="relative min-h-screen overflow-hidden bg-[var(--bg-main)] text-zinc-300 font-sans selection:bg-gold-primary/30 selection:text-white transition-colors duration-1000">
                 <div className="relative z-10">
+                <React.Suspense fallback={null}>
                 {location.pathname === '/philosophers' ? (
                     isAdmin ? (
                         <PhilosopherPosterIndexPage
@@ -3295,7 +3294,7 @@ const App: React.FC = () => {
                     />
                 )}
 
-                {activeBlockId && (
+                {activeBlockId && libraryModalOpen && (
                     <NarrativeLibraryModal
                         isOpen={libraryModalOpen}
                         onClose={() => setLibraryModalOpen(false)}
@@ -3329,14 +3328,16 @@ const App: React.FC = () => {
                     />
                 )}
 
-                <TensionMonitorModal
-                    isOpen={isTensionOpen}
-                    onClose={() => setIsTensionOpen(false)}
-                    fieldState={narrativeFieldState}
-                    worldLaw={worldLawConfig}
-                    lang={lang}
-                    selectedDriver={selectedDriver}
-                />
+                {isTensionOpen && (
+                    <TensionMonitorModal
+                        isOpen={isTensionOpen}
+                        onClose={() => setIsTensionOpen(false)}
+                        fieldState={narrativeFieldState}
+                        worldLaw={worldLawConfig}
+                        lang={lang}
+                        selectedDriver={selectedDriver}
+                    />
+                )}
 
                 {/* WorldLawModal integrated into EngineBottomBar */}
                 {isSettingsOpen && (
@@ -3345,47 +3346,56 @@ const App: React.FC = () => {
                     </div>
                 )}
 
-                <AuthModal
-                    isOpen={isAuthOpen}
-                    onClose={() => setIsAuthOpen(false)}
-                    onLogin={(user) => setCurrentUser(user)}
-                    lang={lang}
-                />
-                <UserProfileModal
-                    isOpen={isProfileOpen}
-                    onClose={() => setIsProfileOpen(false)}
-                    currentUser={currentUser}
-                    onProfileUpdate={(updates) => setCurrentUser(prev => ({ ...prev, ...updates }))}
-                    onLogout={async () => {
-                        await supabaseAuthService.signOut();
-                        setIsProfileOpen(false);
-                    }}
-                    lang={lang}
-                />
-                <TaskManagerPanel
-                    isOpen={isTaskManagerOpen}
-                    onClose={() => setIsTaskManagerOpen(false)}
-                    lang={lang}
-                    driverType={selectedDriver}
-                />
+                {isAuthOpen && (
+                    <AuthModal
+                        isOpen={isAuthOpen}
+                        onClose={() => setIsAuthOpen(false)}
+                        onLogin={(user) => setCurrentUser(user)}
+                        lang={lang}
+                    />
+                )}
+                {isProfileOpen && (
+                    <UserProfileModal
+                        isOpen={isProfileOpen}
+                        onClose={() => setIsProfileOpen(false)}
+                        currentUser={currentUser}
+                        onProfileUpdate={(updates) => setCurrentUser(prev => ({ ...prev, ...updates }))}
+                        onLogout={async () => {
+                            await supabaseAuthService.signOut();
+                            setIsProfileOpen(false);
+                        }}
+                        lang={lang}
+                    />
+                )}
+                {isTaskManagerOpen && (
+                    <TaskManagerPanel
+                        isOpen={isTaskManagerOpen}
+                        onClose={() => setIsTaskManagerOpen(false)}
+                        lang={lang}
+                        driverType={selectedDriver}
+                    />
+                )}
 
-                <PromptInspectorModal
-                    isOpen={isPromptInspectorOpen}
-                    onClose={() => setIsPromptInspectorOpen(false)}
-                    lang={lang}
-                    fieldState={narrativeFieldState}
-                    visionInput={visionInput}
-                    visionAnalysis={visionImplantEnabled ? visionAnalysis : ''}
-                    visionImage={visionImplantEnabled ? visionImage : null}
-                    worldLawConfig={worldLawConfig}
-                    driverType={selectedDriver}
-                    faceState={faceState}
-                    focusState={focusState}
-                    mAxisMixer={mAxisMixer}
-                    m7bIntensity={m7bIntensity}
-                    promptVersion={narrativePromptVersion}
-                    onPromptVersionChange={setNarrativePromptVersion}
-                />
+                {isPromptInspectorOpen && (
+                    <PromptInspectorModal
+                        isOpen={isPromptInspectorOpen}
+                        onClose={() => setIsPromptInspectorOpen(false)}
+                        lang={lang}
+                        fieldState={narrativeFieldState}
+                        visionInput={visionInput}
+                        visionAnalysis={visionImplantEnabled ? visionAnalysis : ''}
+                        visionImage={visionImplantEnabled ? visionImage : null}
+                        worldLawConfig={worldLawConfig}
+                        driverType={selectedDriver}
+                        faceState={faceState}
+                        focusState={focusState}
+                        mAxisMixer={mAxisMixer}
+                        m7bIntensity={m7bIntensity}
+                        promptVersion={narrativePromptVersion}
+                        onPromptVersionChange={setNarrativePromptVersion}
+                    />
+                )}
+                </React.Suspense>
                 </div>
             </div>
         </QueryClientProvider>
