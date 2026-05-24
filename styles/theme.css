@@ -2214,8 +2214,9 @@ body.mist-theme-switching::before {
   --labyrinth-page-film-gap: clamp(0.48rem, 0.78vw, 0.82rem);
   min-height: 0;
   height: 100%;
-  width: min(1720px, calc(100vw - clamp(0.75rem, 1.5vw, 1.6rem)));
-  margin: 0 auto;
+  width: 100%;
+  max-width: none;
+  margin: 0;
   padding:
     clamp(0.62rem, 1.2vh, 0.95rem)
     calc(var(--labyrinth-page-film-width) + var(--labyrinth-page-film-gap))
@@ -7255,7 +7256,7 @@ body.mist-theme-switching::before {
   .mist-labyrinth-console {
     --labyrinth-page-film-width: clamp(1.45rem, 6vw, 2.15rem);
     --labyrinth-page-film-gap: 0.38rem;
-    width: calc(100vw - 1.25rem);
+    width: 100%;
     padding-top: 0.6rem;
     padding-bottom: 7.2rem;
   }
@@ -10482,7 +10483,9 @@ body.mist-theme-switching::before {
 :root.retro .mist-labyrinth-engine .mist-labyrinth-console {
   --labyrinth-page-film-width: clamp(1.9rem, 3vw, 3.25rem);
   --labyrinth-page-film-gap: clamp(0.48rem, 0.78vw, 0.82rem);
-  width: min(1720px, calc(100vw - clamp(0.75rem, 1.5vw, 1.6rem))) !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
   padding:
     clamp(0.62rem, 1.2vh, 0.95rem)
     calc(var(--labyrinth-page-film-width) + var(--labyrinth-page-film-gap))
@@ -10891,7 +10894,7 @@ body.mist-theme-switching::before {
   :root.retro .mist-labyrinth-engine .mist-labyrinth-console {
     --labyrinth-page-film-width: clamp(1.45rem, 6vw, 2.15rem);
     --labyrinth-page-film-gap: 0.38rem;
-    width: calc(100vw - 1.25rem) !important;
+    width: 100% !important;
     padding-top: 0.6rem !important;
     padding-bottom: 7.2rem !important;
   }
@@ -13299,7 +13302,9 @@ body.mist-theme-switching::before {
 :root.retro .mist-labyrinth-engine .mist-labyrinth-console {
   --labyrinth-page-film-width: clamp(1.9rem, 3vw, 3.25rem) !important;
   --labyrinth-page-film-gap: clamp(0.48rem, 0.78vw, 0.82rem) !important;
-  width: min(1720px, calc(100vw - clamp(0.75rem, 1.5vw, 1.6rem))) !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
   padding:
     clamp(0.62rem, 1.2vh, 0.95rem)
     calc(var(--labyrinth-page-film-width) + var(--labyrinth-page-film-gap))
