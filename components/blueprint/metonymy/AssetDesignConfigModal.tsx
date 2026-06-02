@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Sparkles, Paintbrush, Camera, Box, Cpu, MessageSquare, ImagePlus, Trash2, Loader2 } from 'lucide-react';
-import { VisualBibleAnalysisHints } from '../../../services/visualBibleGenerator';
+import { buildAssetImageAnalysisPrompt, VisualBibleAnalysisHints } from '../../../services/visualBibleGenerator';
 import { supabaseDatabase } from '../../../services/supabaseDatabase';
 import { AdminXRayButton } from '../../XRayInspector';
 
@@ -131,10 +131,23 @@ export const AssetDesignConfigModal: React.FC<AssetDesignConfigModalProps> = ({
     ];
 
     const currentHints: VisualBibleAnalysisHints = { medium, dialogue, detailImages };
+    const getAssetAnalysisType = (): 'CHARACTER' | 'SCENE' | 'PROP' => {
+        if (assetType === 'characters') return 'CHARACTER';
+        if (assetType === 'scenes') return 'SCENE';
+        return 'PROP';
+    };
+    const getRuntimeAssetDesignPrompt = () => {
+        if (!hasMainImage) {
+            return lang === 'CN'
+                ? '不会发送 AI 请求：当前资产没有主参考图。请先上传资产主图。'
+                : 'No AI request will be sent: this asset has no main reference image. Upload the asset main image first.';
+        }
+        return buildAssetImageAnalysisPrompt(getAssetAnalysisType(), currentHints, assetName);
+    };
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center py-12 px-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className={`w-full max-w-xl max-h-[85vh] ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]' : 'bg-[#0c0c0c] border-zinc-800'} border rounded-xl shadow-2xl flex flex-col overflow-hidden`}>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 py-8 pb-24 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className={`w-full max-w-xl max-h-[calc(100vh-7rem)] ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]' : 'bg-[#0c0c0c] border-zinc-800'} border rounded-xl shadow-2xl flex flex-col overflow-hidden`}>
                 {/* Header */}
                 <div className={`flex items-center justify-between px-6 py-4 border-b ${theme === 'retro' ? 'border-[#8B261D]/20 bg-[var(--bg-header)]' : 'border-zinc-900 bg-zinc-950'} shrink-0`}>
                     <div className="flex flex-col">
@@ -152,7 +165,7 @@ export const AssetDesignConfigModal: React.FC<AssetDesignConfigModalProps> = ({
                 </div>
 
                 {/* Content */}
-                <div className="p-6 space-y-6 overflow-y-auto custom-scrollbar max-h-[70vh]">
+                <div className="min-h-0 flex-1 overflow-y-auto custom-scrollbar p-5 space-y-5">
                     {/* Medium Selection Grid */}
                     <div className="space-y-3">
                         <label className={`text-xs font-bold ${theme === 'retro' ? 'text-black' : 'text-zinc-200'} uppercase tracking-widest px-1`}>
@@ -163,7 +176,7 @@ export const AssetDesignConfigModal: React.FC<AssetDesignConfigModalProps> = ({
                                 <div
                                     key={opt.id}
                                     onClick={() => handleMediumSelect(opt.id as any)}
-                                    className={`p-3 rounded-lg border cursor-pointer transition-all flex gap-3 ${medium === opt.id ? (theme === 'retro' ? 'border-[#8B261D] bg-[#8B261D]/5' : 'border-[var(--mist-active-accent)] bg-[var(--mist-active-accent)]/5') : (theme === 'retro' ? 'border-[#8B261D]/10 bg-[var(--bg-header)]/50 hover:bg-[var(--bg-header)]' : 'border-zinc-800 bg-zinc-900/30 hover:bg-zinc-900/50 hover:border-zinc-700')}`}
+                                    className={`p-2.5 rounded-lg border cursor-pointer transition-all flex gap-3 ${medium === opt.id ? (theme === 'retro' ? 'border-[#8B261D] bg-[#8B261D]/5' : 'border-[var(--mist-active-accent)] bg-[var(--mist-active-accent)]/5') : (theme === 'retro' ? 'border-[#8B261D]/10 bg-[var(--bg-header)]/50 hover:bg-[var(--bg-header)]' : 'border-zinc-800 bg-zinc-900/30 hover:bg-zinc-900/50 hover:border-zinc-700')}`}
                                 >
                                     <div className={`mt-0.5 w-10 h-10 shrink-0 rounded-none flex items-center justify-center border transition-all ${medium === opt.id ? (theme === 'retro' ? 'bg-[#8B261D] text-white border-[#8B261D]' : 'bg-[var(--mist-active-accent)] text-black border-[var(--mist-active-accent)]') : (theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20 text-[#8B261D]/60' : 'bg-black border-zinc-800 text-zinc-500')}`}>
                                         <opt.icon size={16} />
@@ -200,7 +213,7 @@ export const AssetDesignConfigModal: React.FC<AssetDesignConfigModalProps> = ({
 
                         <div className="flex gap-3 overflow-x-auto pb-2 custom-scrollbar">
                             {detailImages.map((img, idx) => (
-                                <div key={idx} className={`w-24 h-24 rounded-lg bg-black border ${theme === 'retro' ? 'border-[#8B261D]/20' : 'border-zinc-800'} group relative overflow-hidden flex-shrink-0`}>
+                                <div key={idx} className={`w-20 h-20 rounded-lg bg-black border ${theme === 'retro' ? 'border-[#8B261D]/20' : 'border-zinc-800'} group relative overflow-hidden flex-shrink-0`}>
                                     <img src={img} className="w-full h-full object-cover" alt="Detail" />
                                     <button
                                         onClick={() => handleDeleteImage(idx)}
@@ -213,7 +226,7 @@ export const AssetDesignConfigModal: React.FC<AssetDesignConfigModalProps> = ({
                             {detailImages.length < 5 && (
                                 <div
                                     onClick={() => !isUploading && fileInputRef.current?.click()}
-                                    className={`w-24 h-24 rounded-lg border border-dashed flex flex-col items-center justify-center gap-1 transition-colors flex-shrink-0 ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20 text-[#8B261D]/40 hover:text-[#8B261D] hover:border-[#8B261D]/40' : 'bg-zinc-900/30 border-zinc-700 text-zinc-500 hover:border-zinc-500 hover:text-zinc-300'} ${isUploading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                                    className={`w-20 h-20 rounded-lg border border-dashed flex flex-col items-center justify-center gap-1 transition-colors flex-shrink-0 ${theme === 'retro' ? 'bg-[var(--bg-header)] border-[#8B261D]/20 text-[#8B261D]/40 hover:text-[#8B261D] hover:border-[#8B261D]/40' : 'bg-zinc-900/30 border-zinc-700 text-zinc-500 hover:border-zinc-500 hover:text-zinc-300'} ${isUploading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                                 >
                                     {isUploading ? (
                                         <>
@@ -278,14 +291,14 @@ export const AssetDesignConfigModal: React.FC<AssetDesignConfigModalProps> = ({
                                 value={dialogue}
                                 onChange={(e) => setDialogue(e.target.value)}
                                 placeholder={lang === 'CN' ? "说明需要注意的特定要求，例如：“手里拿的武器是一把血红色的日本武士刀”、“这只是半身照，下半身穿着中世纪骑士铠甲长靴”。如果留空，系统将根据推演规则执行。" : "Explain specific requirements... e.g. 'The weapon is a blood-red katana' or 'Infer a medieval knight armor for the lower body'."}
-                                className={`w-full h-24 bg-transparent border-none ${theme === 'retro' ? 'text-black placeholder-black/50' : 'text-zinc-200 placeholder-zinc-400'} text-xs focus:ring-0 focus:outline-none focus:ring-offset-0 resize-none custom-scrollbar`}
+                                className={`w-full h-20 bg-transparent border-none ${theme === 'retro' ? 'text-black placeholder-black/50' : 'text-zinc-200 placeholder-zinc-400'} text-xs focus:ring-0 focus:outline-none focus:ring-offset-0 resize-none custom-scrollbar`}
                             />
                         </div>
                     </div>
                 </div>
 
                 {/* Footer */}
-                <div className={`px-6 py-4 border-t ${theme === 'retro' ? 'border-[#8B261D]/20 bg-[var(--bg-header)]' : 'border-zinc-900 bg-black/20'} flex justify-end gap-3`}>
+                <div className={`px-6 py-3 border-t ${theme === 'retro' ? 'border-[#8B261D]/20 bg-[var(--bg-header)]' : 'border-zinc-900 bg-black/20'} flex shrink-0 justify-end gap-3`}>
                     <button
                         onClick={() => onClose(currentHints)}
                         className={`px-4 py-2 text-sm font-bold ${theme === 'retro' ? 'text-black/60 hover:text-black' : 'text-zinc-400 hover:text-white'} transition-colors uppercase tracking-widest`}
@@ -297,13 +310,7 @@ export const AssetDesignConfigModal: React.FC<AssetDesignConfigModalProps> = ({
                             isAdmin={isAdmin}
                             lang={lang}
                             title={lang === 'CN' ? 'X-Ray 资产设计指令' : 'X-Ray Asset Design Prompt'}
-                            payload={{
-                                task: 'Analyze asset image and generate design/concept prompts',
-                                assetName,
-                                assetType,
-                                hasMainImage: Boolean(hasMainImage),
-                                hints: currentHints
-                            }}
+                            getPayload={getRuntimeAssetDesignPrompt}
                         />
                         <button
                             onClick={() => onConfirm(currentHints)}

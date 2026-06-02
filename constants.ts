@@ -4,6 +4,7 @@ import { Briefcase, Film, TestTube, Clapperboard, Music, Palette, Zap, Ghost, Fe
 import { NARRATIVE_ENGINE_BLOCKS, NARRATIVE_ENGINE_LIBRARY } from './data/engine_core/narrative_engine';
 import { COMMERCIAL_ENGINE_BLOCKS, COMMERCIAL_ENGINE_LIBRARY } from './data/aesthetic/commercial_data';
 import { AESTHETIC_ENGINE_BLOCKS, AESTHETIC_ENGINE_LIBRARY } from './data/aesthetic/core';
+import { CONCEPT_ENGINE_BLOCKS, CONCEPT_ENGINE_LIBRARY } from './data/concept_design/core';
 import { TRAILER_ENGINE_BLOCKS, TRAILER_ENGINE_LIBRARY } from './data/aesthetic/trailer_data';
 import { POETIC_ENGINE_BLOCKS, POETIC_ENGINE_LIBRARY } from './data/aesthetic/poetic_data';
 
@@ -17,72 +18,20 @@ import { TRAILER_SKIN_BLOCKS, TRAILER_SKIN_LIBRARY } from './data/aesthetic/trai
 import { ALL_SKIN_BLOCKS, SKIN_LIBRARY } from './data/narrative/skin_libraries';
 import { SUR1_DATA as GENRE_CATEGORIES } from './data/engine_surface/SUR1';
 import { SUR2_DATA as WORLD_MOTIF_CATEGORIES } from './data/engine_surface/SUR2';
+import {
+  SUR3_COORDINATE_PRESETS as SUR3_COORDINATE_LIBRARY_PRESETS,
+  SUR3_DATA,
+  SUR3_SPACE_ANCHOR_PRESETS as SUR3_SPACE_ANCHOR_LIBRARY_PRESETS,
+  getRandomSur3CoordinatePreset
+} from './data/engine_surface/SUR3';
 import { AES_COLOR_PRESETS } from './data/aesthetic_libraries/color_presets';
 import { MASTER_PRESETS, MASTER_PRESETS_REALISM, MASTER_PRESETS_STYLIZED } from './data/aesthetic/master_presets';
 
-export const COUNTRY_PRESETS = [
-  { cn: "中国", en: "China" },
-  { cn: "美国", en: "USA" },
-  { cn: "日本", en: "Japan" },
-  { cn: "英国", en: "UK" },
-  { cn: "法国", en: "France" },
-  { cn: "德国", en: "Germany" },
-  { cn: "俄罗斯", en: "Russia" },
-  { cn: "韩国", en: "South Korea" },
-  { cn: "印度", en: "India" },
-  { cn: "意大利", en: "Italy" },
-  { cn: "西班牙", en: "Spain" },
-  { cn: "巴西", en: "Brazil" },
-  { cn: "墨西哥", en: "Mexico" },
-  { cn: "加拿大", en: "Canada" },
-  { cn: "澳大利亚", en: "Australia" },
-  { cn: "埃及", en: "Egypt" },
-  { cn: "土耳其", en: "Turkey" },
-  { cn: "泰国", en: "Thailand" },
-  { cn: "越南", en: "Vietnam" },
-  { cn: "伊朗", en: "Iran" },
-  { cn: "希腊", en: "Greece" },
-  { cn: "瑞典", en: "Sweden" },
-  { cn: "阿根廷", en: "Argentina" },
-  { cn: "南非", en: "South Africa" }
-];
-
-export const SUR3_SPACE_ANCHOR_PRESETS = [
-  ...COUNTRY_PRESETS,
-  { cn: "南亚河流聚落", en: "South Asian river settlements" },
-  { cn: "日本长崎近海", en: "Nagasaki offshore Japan" },
-  { cn: "黄海海军边界", en: "Yellow Sea naval frontier" },
-  { cn: "上海租界边缘", en: "Shanghai concession edge" },
-  { cn: "东京湾地下物流层", en: "Tokyo Bay underground logistics layer" },
-  { cn: "木星轨道移民环站", en: "Jupiter orbit immigrant ring" },
-  { cn: "火星极地矿业聚落", en: "Martian polar mining settlement" },
-  { cn: "近地轨道碎片带", en: "Low Earth orbit debris belt" },
-  { cn: "人体肺泡内", en: "Inside human lung alveoli" },
-  { cn: "纳米尺度血管通道", en: "Nanoscopic blood-vessel channel" },
-  { cn: "异维折叠城", en: "Folded extra-dimensional city" },
-  { cn: "无固定年代的梦档案", en: "Dream archive with no fixed calendar" },
-];
-
-export const SUR3_COORDINATE_PRESETS = [
-  { year: -1655, spaceCn: "南亚河流聚落", spaceEn: "South Asian river settlements" },
-  { year: -1200, spaceCn: "东地中海海岸城邦", spaceEn: "Eastern Mediterranean coastal city-states" },
-  { year: -500, spaceCn: "波斯帝国驿道", spaceEn: "Persian imperial road" },
-  { year: -221, spaceCn: "秦边郡城门", spaceEn: "Qin frontier commandery gate" },
-  { year: 1830, spaceCn: "日本长崎近海", spaceEn: "Nagasaki offshore Japan" },
-  { year: 1894, spaceCn: "黄海海军边界", spaceEn: "Yellow Sea naval frontier" },
-  { year: 1936, spaceCn: "上海租界边缘", spaceEn: "Shanghai concession edge" },
-  { year: 1968, spaceCn: "布拉格被占领街区", spaceEn: "Occupied Prague streets" },
-  { year: 1997, spaceCn: "香港交接夜", spaceEn: "Hong Kong handover night" },
-  { year: 2026, spaceCn: "首尔当代公寓区", spaceEn: "Contemporary Seoul apartment district" },
-  { year: 2042, spaceCn: "东京湾地下物流层", spaceEn: "Tokyo Bay underground logistics layer" },
-  { year: 2077, spaceCn: "近地轨道碎片带", spaceEn: "Low Earth orbit debris belt" },
-  { year: 2150, spaceCn: "木星轨道移民环站", spaceEn: "Jupiter orbit immigrant ring" },
-  { year: 2290, spaceCn: "火星极地矿业聚落", spaceEn: "Martian polar mining settlement" },
-  { year: 2026, spaceCn: "人体肺泡内", spaceEn: "Inside human lung alveoli" },
-  { year: 2026, spaceCn: "纳米尺度血管通道", spaceEn: "Nanoscopic blood-vessel channel" },
-  { year: null, spaceCn: "异维折叠城", spaceEn: "Folded extra-dimensional city" },
-  { year: null, spaceCn: "无固定年代的梦档案", spaceEn: "Dream archive with no fixed calendar" },
-];
+export const COUNTRY_PRESETS = SUR3_SPACE_ANCHOR_LIBRARY_PRESETS.filter(preset => preset.anchor.scale === 'country');
+export { SUR3_DATA };
+export const SUR3_SPACE_ANCHOR_PRESETS = SUR3_SPACE_ANCHOR_LIBRARY_PRESETS;
+export const SUR3_COORDINATE_PRESETS = SUR3_COORDINATE_LIBRARY_PRESETS;
+export { getRandomSur3CoordinatePreset };
 
 export const AESTHETIC_LOGIC_TEMPLATES: LogicTemplateDef[] = [
   {
@@ -226,6 +175,22 @@ export const DRIVERS: (DriverDef & { nameEn: string; accent: string; retroAccent
     retroAccent: '#5B4B8A'
   },
   {
+    id: DriverType.CONCEPT_DESIGN,
+    name: "迷雾律令",
+    nameEn: "MIST EDICT",
+    englishId: "CONCEPT_DESIGN",
+    coreDriver: "主体律令",
+    coreDriverEn: "Subject Edict",
+    description: "【人物与异种】从身份、情绪核、轮廓、材质和异化逻辑出发，生成可控的角色/生物概念设计图，而不是电影画面。",
+    descriptionEn: "[Characters & Creatures] Generate controlled character and creature concept sheets from identity, emotional core, silhouette, material, and mutation logic.",
+    kpi: "概念可读性",
+    forbidden: "禁止电影场景",
+    iconName: "Dna",
+    gradient: "from-orange-900/40 to-zinc-950",
+    accent: '#FB923C',
+    retroAccent: '#85411B'
+  },
+  {
     id: DriverType.EXPERIMENTAL,
     name: "换喻脚本",
     nameEn: "METONYMIC SCRIPT",
@@ -264,6 +229,7 @@ export const MIDDLE_LAYER_CONFIG: Record<DriverType, LayerConfig> = {
   [DriverType.COMMERCIAL]: { layerName: "营销模块 (Modules)", sectionPrefix: "Module" },
   [DriverType.EXPERIMENTAL]: { layerName: "脚本段落 (Script Blocks)", sectionPrefix: "Block" },
   [DriverType.AESTHETIC]: { layerName: "情绪段落 (Moods)", sectionPrefix: "Mood" },
+  [DriverType.CONCEPT_DESIGN]: { layerName: "概念模块 (Concept Modules)", sectionPrefix: "Concept" },
   [DriverType.TRAILER]: { layerName: "画布节点 (Canvas Nodes)", sectionPrefix: "Node" },
   [DriverType.SUTURE]: { layerName: "缝合节点 (Suture Nodes)", sectionPrefix: "Suture" }
 };
@@ -343,10 +309,79 @@ export const BLOCK_LIMITS: Record<string, number> = {
   'aes_render_real': 1,
   'aes_render_art': 1,
   'aes_render': 1,
+  'cd_subject_kind': 1,
+  'cd_identity_seed': 2,
+  'cd_emotional_core': 1,
+  'cd_negation_logic': 1,
+  'cd_design_sheet': 1,
+  'cd_age': 1,
+  'cd_gender': 1,
+  'cd_ethnicity': 1,
+  'cd_species': 1,
+  'cd_occupation': 1,
+  'cd_persona': 1,
+  'cd_body_type': 2,
+  'cd_hair_color': 2,
+  'cd_hair_style_f': 1,
+  'cd_hair_style_m': 1,
+  'cd_eye_color': 1,
+  'cd_eye_shape': 1,
+  'cd_eye_fx': 1,
+  'cd_face_features': 3,
+  'cd_makeup_style': 2,
+  'cd_expression': 1,
+  'cd_skin_texture': 2,
+  'cd_surface_state': 2,
+  'cd_body_features': 2,
+  'cd_body_markings': 2,
+  'cd_body_damage': 2,
+  'cd_body_modification': 2,
+  'cd_static_pose': 1,
+  'cd_dynamic_action': 1,
+  'cd_human_behavior': 1,
+  'cd_creature_size': 1,
+  'cd_creature_class': 2,
+  'cd_creature_element': 1,
+  'cd_creature_head': 3,
+  'cd_creature_body': 3,
+  'cd_creature_mood': 1,
+  'cd_creature_action': 1,
+  'cd_creature_texture': 3,
+  'cd_costume_logic': 2,
+  'cd_surface_material': 3,
+  'cd_costume_system': 1,
+  'cd_material_evidence': 2,
+  'cd_prop_anchor': 1,
+  'cd_symbol_system': 1,
+  'cd_wear_trace': 1,
+  'cd_palette': 2,
+  'cd_media_photo_soul': 1,
+  'cd_media_photo_quality': 1,
+  'cd_media_photo_eye': 1,
+  'cd_media_photo_craft': 1,
+  'cd_media_photo_format': 1,
+  'cd_media_paint_soul': 1,
+  'cd_media_paint_quality': 1,
+  'cd_media_paint_eye': 1,
+  'cd_media_paint_craft': 1,
+  'cd_media_paint_format': 1,
+  'cd_media_cgi_soul': 1,
+  'cd_media_cgi_quality': 1,
+  'cd_media_cgi_eye': 1,
+  'cd_media_cgi_craft': 1,
+  'cd_media_cgi_format': 1,
+  'cd_media_tangible_soul': 1,
+  'cd_media_tangible_quality': 1,
+  'cd_media_tangible_eye': 1,
+  'cd_media_tangible_craft': 1,
+  'cd_media_tangible_format': 1,
+  'cd_negative_rules': 3,
   'engine_m0': 1, 'engine_m1': 2, 'engine_m2': 2, 'engine_m3': 3, 'engine_m4': 3, 'engine_m5': 3, 'engine_m6': 3, 'engine_m7b': 1, 'engine_m7a': 1,
   // engine_m4x/engine_m5x removed in v3.0
   'comm_c0': 1, 'comm_c1': 1, 'comm_c2': 3, 'comm_c3': 1, 'comm_c4': 3, 'comm_c5': 3, 'comm_c6': 3, 'comm_c7': 3,
   'skin_genre': 2, 'skin_animation_genre': 1, 'skin_location': 2, 'skin_society': 1, 'skin_ideology': 1, 'skin_ending': 1,
+  'skin_year_exact': 1,
+  'skin_country_exact': 1,
   'skin_profession': 2,
   'poe_p0': 1, 'poe_p1': 1, 'poe_p2': 1, 'poe_p3': 1, 'poe_p4': 1
 };
@@ -423,6 +458,8 @@ export {
   EXPERIMENTAL_ENGINE_LIBRARY,
   AESTHETIC_ENGINE_BLOCKS,
   AESTHETIC_ENGINE_LIBRARY,
+  CONCEPT_ENGINE_BLOCKS,
+  CONCEPT_ENGINE_LIBRARY,
   TRAILER_ENGINE_BLOCKS,
   TRAILER_ENGINE_LIBRARY,
   POETIC_ENGINE_BLOCKS,

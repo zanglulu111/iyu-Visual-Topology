@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Globe, Wand2, History as HistoryIcon, Cpu, GitFork, BookOpen, Settings, User as UserIcon, Aperture, Sun, Moon, FolderOpen } from 'lucide-react';
-import { DriverType, User, ViewMode } from '../types';
+import { ConceptDesignWorkspacePage, DriverType, User, ViewMode } from '../types';
 import { useTheme } from '../contexts/ThemeContext';
 
 
@@ -26,6 +26,8 @@ interface AppHeaderProps {
   driverName: string;
   viewMode: ViewMode;
   setViewMode: (mode: ViewMode) => void;
+  conceptWorkspacePage?: ConceptDesignWorkspacePage;
+  setConceptWorkspacePage?: (page: ConceptDesignWorkspacePage) => void;
   handleOpenMetonymyPage: () => void;
   openManual: () => void;
   isManualOpen: boolean;
@@ -42,6 +44,8 @@ interface AppHeaderProps {
   showRings: boolean;
   setShowRings: (show: boolean) => void;
   setInitialProtocol?: (p: string | undefined) => void;
+  onPreloadView?: (mode: ViewMode) => void;
+  onReturnToPortal?: () => void;
   children?: React.ReactNode;
 }
 
@@ -54,6 +58,8 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   driverName,
   viewMode,
   setViewMode,
+  conceptWorkspacePage = 'ENGINE',
+  setConceptWorkspacePage,
   handleOpenMetonymyPage,
   openManual,
   isManualOpen,
@@ -70,13 +76,15 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   showRings,
   setShowRings,
   setInitialProtocol,
+  onPreloadView,
+  onReturnToPortal,
   children,
 }) => {
   const { theme, toggleTheme } = useTheme();
   const [ringSpinKey, setRingSpinKey] = useState(0);
 
   // --- Helper Functions ---
-  const isPortalChrome = viewMode === 'ARCHIVE' || viewMode === 'VIDEO' || viewMode === 'RORSCHACH' || viewMode === 'DICTIONARY';
+  const isPortalChrome = viewMode === 'ARCHIVE' || viewMode === 'VIDEO' || viewMode === 'RORSCHACH' || viewMode === 'DICTIONARY' || viewMode === 'SKILLS';
 
   const getHeaderTitleColor = () => !isPortalChrome && selectedDriver
     ? (theme === 'retro' ? 'text-[var(--text-accent)]' : 'text-[var(--mist-active-accent)]')
@@ -111,6 +119,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
     if (selectedDriver === DriverType.COMMERCIAL) return lang === 'EN' ? "SUTURE ENGINE" : "欲望缝合";
     if (selectedDriver === DriverType.EXPERIMENTAL) return lang === 'EN' ? "METONYMIC SCRIPT" : "换喻脚本";
     if (selectedDriver === DriverType.AESTHETIC) return lang === 'EN' ? "AESTHETIC" : "情绪美学";
+    if (selectedDriver === DriverType.CONCEPT_DESIGN) return lang === 'EN' ? "MIST EDICT" : "迷雾律令";
     if (selectedDriver === DriverType.TRAILER) return lang === 'EN' ? "CANVAS ENGINE" : "迷雾画布";
     return lang === 'EN' ? "NARRATIVE ENGINE" : "爱欲迷宫";
   };
@@ -123,6 +132,15 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   const renderHeaderSeparator = () => (
     <span className={headerSeparatorClass} aria-hidden="true">-</span>
   );
+  const conceptWorkspaceNavItems: Array<{
+    id: ConceptDesignWorkspacePage;
+    icon: React.ElementType;
+    labelCn: string;
+    labelEn: string;
+  }> = [
+    { id: 'ENGINE', icon: Cpu, labelCn: '律令引擎', labelEn: 'EDICT ENGINE' },
+    { id: 'VARIABLES', icon: BookOpen, labelCn: '变量 / 律令', labelEn: 'VARIABLES / EDICT' }
+  ];
 
   return (
     <header className={`mist-app-header h-14 bg-[var(--bg-header)] backdrop-blur-md border-b ${getThemeBorderColor()} flex items-center justify-between px-4 md:px-5 z-50 sticky top-0 shrink-0 transition-all duration-500 animate-page-dissolve`}>
@@ -137,9 +155,9 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
       />
       <div className="flex items-center gap-5">
         {/* Portal-origin pages: ← 入口 button, returns to UniversePortal */}
-        {(viewMode === 'RORSCHACH' || viewMode === 'ARCHIVE' || viewMode === 'VIDEO' || viewMode === 'DICTIONARY') ? (
+        {(viewMode === 'RORSCHACH' || viewMode === 'ARCHIVE' || viewMode === 'VIDEO' || viewMode === 'DICTIONARY' || viewMode === 'SKILLS') ? (
           <button
-            onClick={() => setPage(-1)}
+            onClick={() => onReturnToPortal ? onReturnToPortal() : setPage(-1)}
             className={`mist-app-archive-button text-[9px] font-mono tracking-[0.15em] transition-all duration-300 hover:scale-105 active:scale-95 px-2 py-1 rounded-sm border w-[72px] flex items-center justify-center ${
               theme === 'retro'
                 ? 'text-[var(--text-accent)] border-[var(--border-main)] hover:border-[var(--border-accent)]'
@@ -184,11 +202,39 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           {children}
         </div>
       ) : (
-        !(viewMode === 'ARCHIVE' || viewMode === 'VIDEO' || viewMode === 'TOPOLOGY' || viewMode === 'RSI' || viewMode === 'RORSCHACH' || viewMode === 'ANALYSIS' || viewMode === 'DICTIONARY' || viewMode === 'CANVAS') && (
+          !(viewMode === 'ARCHIVE' || viewMode === 'VIDEO' || viewMode === 'TOPOLOGY' || viewMode === 'RSI' || viewMode === 'RORSCHACH' || viewMode === 'ANALYSIS' || viewMode === 'DICTIONARY' || viewMode === 'SKILLS' || viewMode === 'CANVAS') && (
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden md:flex items-center gap-4 text-[10px] font-bold uppercase tracking-[0.2em]">
+            {selectedDriver === DriverType.CONCEPT_DESIGN ? (
+              <>
+                {conceptWorkspaceNavItems.map((item, index) => {
+                  const Icon = item.icon;
+                  const isActive = viewMode === 'ENGINE' && conceptWorkspacePage === item.id;
+                  return (
+                    <React.Fragment key={item.id}>
+                      {index > 0 && renderHeaderSeparator()}
+                      <button
+                        onMouseEnter={() => onPreloadView?.('ENGINE')}
+                        onFocus={() => onPreloadView?.('ENGINE')}
+                        onClick={() => {
+                          setViewMode('ENGINE');
+                          setConceptWorkspacePage?.(item.id);
+                        }}
+                        className={`mist-app-top-nav-button flex items-center gap-2 transition-all duration-300 hover:scale-105 active:scale-95 ${getActiveNavClass(isActive)}`}
+                      >
+                        <Icon size={14} className="shrink-0 text-current" />
+                        {lang === 'CN' ? item.labelCn : item.labelEn}
+                      </button>
+                    </React.Fragment>
+                  );
+                })}
+              </>
+            ) : (
+              <>
             {selectedDriver !== DriverType.EXPERIMENTAL && (
               <>
                 <button
+                  onMouseEnter={() => onPreloadView?.('ENGINE')}
+                  onFocus={() => onPreloadView?.('ENGINE')}
                   onClick={() => setViewMode('ENGINE')}
                   className={`mist-app-top-nav-button flex items-center gap-2 font-serif font-bold transition-all duration-300 hover:scale-105 active:scale-95 ${getActiveNavClass(viewMode === 'ENGINE')}`}
                 >
@@ -197,6 +243,8 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                 </button>
                 {renderHeaderSeparator()}
                 <button
+                  onMouseEnter={() => onPreloadView?.('DIVERGENCE')}
+                  onFocus={() => onPreloadView?.('DIVERGENCE')}
                   onClick={() => setViewMode('DIVERGENCE')}
                   className={`mist-app-top-nav-button flex items-center gap-2 transition-all duration-300 hover:scale-105 active:scale-95 ${getActiveNavClass(viewMode === 'DIVERGENCE')}`}
                 >
@@ -209,6 +257,8 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               <>
                 {selectedDriver !== DriverType.EXPERIMENTAL && renderHeaderSeparator()}
                 <button
+                  onMouseEnter={() => onPreloadView?.('BIBLE')}
+                  onFocus={() => onPreloadView?.('BIBLE')}
                   onClick={() => setViewMode('BIBLE')}
                   className={`mist-app-top-nav-button flex items-center gap-2 transition-all duration-300 hover:scale-105 active:scale-95 ${getActiveNavClass(viewMode === 'BIBLE')}`}
                 >
@@ -217,6 +267,8 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                 </button>
                 {renderHeaderSeparator()}
                 <button
+                  onMouseEnter={() => onPreloadView?.('METONYMY')}
+                  onFocus={() => onPreloadView?.('METONYMY')}
                   onClick={handleOpenMetonymyPage}
                   className={`mist-app-top-nav-button flex items-center gap-2 transition-all duration-300 hover:scale-105 active:scale-95 ${getActiveNavClass(viewMode === 'METONYMY')}`}
                 >
@@ -225,13 +277,61 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                 </button>
               </>
             )}
+              </>
+            )}
           </div>
         )
       )}
 
+      {!children && selectedDriver === DriverType.CONCEPT_DESIGN && viewMode === 'ENGINE' && (
+        <div className="absolute left-1/2 top-1/2 z-20 flex -translate-x-1/2 -translate-y-1/2 items-center gap-1 rounded-md border border-[var(--border-main)] bg-[var(--bg-header)]/80 p-0.5 backdrop-blur md:hidden">
+          {conceptWorkspaceNavItems.map(item => {
+            const Icon = item.icon;
+            const isActive = conceptWorkspacePage === item.id;
+            return (
+              <button
+                key={item.id}
+                onMouseEnter={() => onPreloadView?.('ENGINE')}
+                onFocus={() => onPreloadView?.('ENGINE')}
+                onClick={() => {
+                  setViewMode('ENGINE');
+                  setConceptWorkspacePage?.(item.id);
+                }}
+                className={`flex h-8 min-w-10 items-center justify-center rounded px-2 transition-all ${
+                  isActive
+                    ? `${getHeaderTitleColor()} bg-[var(--surface-hover)]`
+                    : mutedControlClass
+                }`}
+                title={lang === 'CN' ? item.labelCn : item.labelEn}
+                aria-label={lang === 'CN' ? item.labelCn : item.labelEn}
+              >
+                <Icon size={15} className="shrink-0" />
+              </button>
+            );
+          })}
+        </div>
+      )}
+
       <div className="flex items-center justify-end gap-2 ml-auto">
+        {viewMode === 'SKILLS' && (
+          <div className={`flex items-center p-1 rounded-full transition-all duration-300 border border-transparent bg-transparent ${
+            theme === 'retro' ? '' : 'hover:bg-black/30'
+          }`}>
+            <button
+              onClick={openSettings}
+              className={`flex items-center gap-1.5 transition-all duration-300 group px-3 h-8 rounded-full border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-95 ${inactiveControlClass}`}
+              title={lang === 'CN' ? '系统配置' : 'System Config'}
+            >
+              <Settings size={13} className={`shrink-0 transition-all duration-100 ${inactiveIconClass}`} />
+              <span className={`text-[10px] font-bold uppercase tracking-[0.1em] transition-all duration-100 hidden md:block ${inactiveIconClass}`}>
+                {lang === 'CN' ? '配置' : 'CONFIG'}
+              </span>
+            </button>
+          </div>
+        )}
+
         {/* Navigation Links — ARCHIVE ONLY */}
-        {!(viewMode === 'ARCHIVE' || viewMode === 'VIDEO' || viewMode === 'DICTIONARY' || viewMode === 'RORSCHACH' || viewMode === 'ANALYSIS') && (
+        {!(viewMode === 'ARCHIVE' || viewMode === 'VIDEO' || viewMode === 'DICTIONARY' || viewMode === 'SKILLS' || viewMode === 'RORSCHACH' || viewMode === 'ANALYSIS') && (
           <div className={`flex items-center p-1 rounded-full transition-all duration-300 border border-transparent bg-transparent ${
             theme === 'retro' ? '' : 'hover:bg-black/30'
           }`}>

@@ -1,6 +1,8 @@
 
 import { VisualBibleAnalysisHints } from './services/visualBibleGenerator';
 
+type LocalizedModeText = { bright: string; dark: string; tension: string };
+
 export interface APISettings {
   llm: {
     provider: string; // 'google' | 'openai' | 'custom'
@@ -23,16 +25,63 @@ export enum DriverType {
   NARRATIVE = 'NARRATIVE',
   EXPERIMENTAL = 'EXPERIMENTAL',
   AESTHETIC = 'AESTHETIC',
+  CONCEPT_DESIGN = 'CONCEPT_DESIGN',
   TRAILER = 'TRAILER',
   SUTURE = 'SUTURE'
 }
 
 export type NarrativePromptVersion = 'v3' | 'v4';
 
-export type ViewMode = 'ENGINE' | 'DIVERGENCE' | 'BIBLE' | 'METONYMY' | 'CANVAS' | 'TOPOLOGY' | 'RSI' | 'ARCHIVE' | 'VIDEO' | 'RORSCHACH' | 'ANALYSIS' | 'DICTIONARY';
+export type ViewMode = 'ENGINE' | 'DIVERGENCE' | 'BIBLE' | 'METONYMY' | 'CANVAS' | 'TOPOLOGY' | 'RSI' | 'ARCHIVE' | 'VIDEO' | 'RORSCHACH' | 'ANALYSIS' | 'DICTIONARY' | 'SKILLS';
 
 export type SubjectType = 'HUMAN' | 'CREATURE';
 export type AestheticMode = 'REALISM' | 'STYLIZED';
+export type ConceptDesignSourceMode = 'PRESET' | 'IDEA' | 'ARTICLE' | 'IMAGE';
+export type ConceptDesignPhysicalMediumCategory = 'PAINTING' | 'CGI' | 'PHOTOGRAPHY' | 'TANGIBLE';
+export type ConceptDesignBodyFormMode = 'HUMANOID_DISGUISE' | 'VISIBLE_HYBRID' | 'BEAST_BODY' | 'XENO_BODY';
+export type ConceptDesignWorkspacePage = 'ENGINE' | 'VARIABLES' | 'PROMPT';
+export type ConceptDesignHumanRegister = 'REALISTIC' | 'HISTORICAL' | 'PROFESSIONAL' | 'FASHION' | 'COMBAT' | 'RITUAL' | 'SOCIAL' | 'SCIFI' | 'FANTASY' | 'WASTELAND';
+
+export interface ConceptDesignRuntimeState {
+  sourceMode: ConceptDesignSourceMode;
+  sourceLabel: string;
+  sourceLabelEn: string;
+  generationInstruction: string;
+  finalPrompt: string;
+  variables: {
+    characterSeed: string;
+    ageBodyType: string;
+    timeSpaceScene: string;
+    actionMoment: string;
+    visualMedium: string;
+    style: string;
+    compositionScene: string;
+    lightingAtmosphere: string;
+    otherDetails: string;
+  };
+  sourceInputs: {
+    ideaText: string;
+    articleText: string;
+    targetCharacter: string;
+    imageDataUrl: string;
+    imageName: string;
+    imageGuidance: string;
+  };
+  promptLang: 'CN' | 'EN';
+  originality: boolean;
+  format: string;
+  mediumCategory: ConceptDesignPhysicalMediumCategory;
+  bodyFormMode?: ConceptDesignBodyFormMode;
+  bodyFormLabel?: string;
+  bodyFormLabelEn?: string;
+  humanRegister?: ConceptDesignHumanRegister;
+  humanRegisterLabel?: string;
+  humanRegisterLabelEn?: string;
+  randomMode?: 'PURE' | 'HYBRID' | 'TRANSGRESS' | 'LAW_L1' | 'LAW_L2' | 'LAW_L3' | 'LAW_L4' | 'LAW_L5';
+  randomModeLabel?: string;
+  randomModeLabelEn?: string;
+}
+
 export type M7BResidueIntensity = 'off' | 'implicit' | 'light' | 'strong' | 'epilogue';
 export type MAxisMixerLevel = 'muted' | 'balanced' | 'amplified';
 export type MAxisMixerSlot =
@@ -56,14 +105,14 @@ export interface LibraryItemDef {
   defEn?: string;
   core?: string;
   coreEn?: string;
-  directive?: string | { bright: string; dark: string; tension: string };
-  directiveEn?: string | { bright: string; dark: string; tension: string };
+  directive?: string | LocalizedModeText;
+  directiveEn?: string | LocalizedModeText;
   essence?: string;
   essenceEn?: string;
   reference?: string;
   referenceEn?: string;
-  aliases?: string[];
-  aliasesEn?: string[];
+  aliases?: readonly string[];
+  aliasesEn?: readonly string[];
   reality?: string;
   realityEn?: string;
   group?: string;
@@ -74,9 +123,35 @@ export interface LibraryItemDef {
   flawEn?: string;
   topology?: string;
   topologyEn?: string;
-  skeletons?: string[];
+  skeletons?: readonly string[];
+  tags?: readonly string[];
   logic?: string;
   logicEn?: string;
+  ontologyLevel?: 1 | 2 | 3 | 4 | 5;
+  eras?: readonly string[];
+  affects?: readonly string[];
+  risk?: 'clean' | 'medium' | 'high';
+  controls?: readonly string[];
+  forbids?: readonly string[];
+  absorptionRule?: string;
+  absorptionRuleEn?: string;
+  styleRoute?: string;
+  protocolCategory?: string;
+  protocolCategoryEn?: string;
+  protocolKind?: 'structure' | 'material' | 'symbol' | 'pose' | 'function' | 'prop' | 'costume' | 'wear' | 'face' | 'body' | 'color' | 'composition' | 'cultural_image' | 'ontology';
+  personaCategory?: string;
+  personaCategoryEn?: string;
+  personaSubgroup?: string;
+  personaSubgroupEn?: string;
+  personaKind?: string;
+  personaKindEn?: string;
+  personaStrength?: 'light' | 'medium' | 'strong';
+  isCompoundPersona?: boolean;
+  realityTags?: readonly string[];
+  styleTags?: readonly string[];
+  timeTags?: readonly string[];
+  adminOnly?: boolean;
+  adultOnly?: boolean;
   patch?: {
     mechanics?: string;
     mechanicsEn?: string;
@@ -123,7 +198,7 @@ export type DesireArchiveStage = 'DIVERGENCE_SET' | 'CREATIVE_BIBLE' | 'METONYMY
 
 export type DesireArchiveStatus = 'draft' | 'candidate' | 'selected' | 'promoted' | 'archived';
 
-export type DesireProjectKind = 'DIVERGENCE_BATCH' | 'STORY_PROJECT';
+export type DesireProjectKind = 'DIVERGENCE_BATCH' | 'STORY_PROJECT' | 'EDICT_PROJECT';
 
 export type DesireProjectSourceType = 'ENGINE_GENERATED' | 'CUSTOM_STORY';
 
@@ -174,6 +249,7 @@ export interface DesireProject {
   aestheticMode?: AestheticMode;
   colorPalette?: string[];
   faceState?: FaceState;
+  conceptRuntimeState?: ConceptDesignRuntimeState | null;
   sourceHistoryIds: Array<number | string>;
   sourceDivergenceId?: string;
   sourceCandidateId?: string;
@@ -409,6 +485,37 @@ export interface TrailerData {
   beatSheet: TrailerBeat[];
 }
 
+export interface NarrativeVisualBibleData {
+  positioning: string;
+  mainPosterPrompt: string;
+  seriesPosterPrompt: string;
+  titleLogoPrompt: string;
+  titleCardPrompt: string;
+  socialCoverPrompt: string;
+  visualRules: string;
+}
+
+export type DynamicTrailerDurationPreset = 'highlight' | '30s' | '60s' | '90s';
+
+export interface DynamicTrailerSegment {
+  id: string;
+  time: string;
+  duration: number;
+  purpose: string;
+  sourceAssets: string;
+  firstFramePrompt: string;
+  lastFramePrompt: string;
+  seedancePrompt: string;
+}
+
+export interface DynamicTrailerData {
+  durationPreset: DynamicTrailerDurationPreset;
+  strategy: string;
+  referenceMap: string;
+  assemblyNotes: string;
+  segments: DynamicTrailerSegment[];
+}
+
 export interface AestheticParam {
   label: string;
   value: string;
@@ -641,6 +748,8 @@ export interface CreativeBlueprint {
   experimentalData?: ExperimentalData;
   trailerData?: TrailerData;
   aestheticData?: AestheticData;
+  visualBibleData?: NarrativeVisualBibleData;
+  dynamicTrailerData?: DynamicTrailerData;
   metonymyData?: MetonymyData;
   poeticData?: PoeticData;
   assets: {
@@ -708,6 +817,7 @@ export interface HistoryItem {
   focusState?: PromptFocusState;
   mAxisMixer?: MAxisMixerState;
   m7bIntensity?: M7BResidueIntensity;
+  conceptRuntimeState?: ConceptDesignRuntimeState | null;
   blueprint: CreativeBlueprint | null;
   metonymyBlueprint?: CreativeBlueprint | null;
   treatments: CreativeTreatment[];
@@ -732,6 +842,7 @@ export interface ProjectWorkspaceSnapshot {
   focusState?: PromptFocusState;
   mAxisMixer?: MAxisMixerState;
   m7bIntensity?: M7BResidueIntensity;
+  conceptRuntimeState?: ConceptDesignRuntimeState | null;
   treatments?: CreativeTreatment[];
   activeBlueprint?: CreativeBlueprint | null;
   metonymyBlueprint?: CreativeBlueprint | null;

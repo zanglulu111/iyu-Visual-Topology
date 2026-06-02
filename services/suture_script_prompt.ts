@@ -1169,15 +1169,15 @@ ${montageHeader}
 
 ---
 
-# 📥 输入数据 (INPUT DATA)
+# 📥 输入数据
 
 <GLOBAL_CONTEXT>
-(⚠️ **BACKGROUND INFO ONLY - DO NOT ADAPT EVENTS FROM HERE**)
+(⚠️ **背景信息，仅供理解人物和世界，不得从这里改编事件**)
 "${fullStory.slice(0, 2000)}..."
 </GLOBAL_CONTEXT>
 
 <CURRENT_SCENE_SOURCE>
-(🟢 **TARGET CONTENT - ADAPT ONLY THIS**)
+(🟢 **目标内容，只能改编这里的文字**)
 """
 ${text}
 """
@@ -1185,15 +1185,15 @@ ${text}
 
 ---
 
-# 🎬 1. 导演执行协议 (DIRECTOR EXECUTION PROTOCOL)
+# 🎬 1. 导演执行协议
 **定义：这是你的【总导演 (The Director)】。**
 它决定了影片的**呼吸方式**、**运镜**、**声音**和**剪辑节奏**。
 
-**DIRECTOR: [${directorName}]**
-*   **Style DNA:** ${directorInstruction}
+**导演 (DIRECTOR): [${directorName}]**
+*   **风格 DNA (Style DNA):** ${directorInstruction}
 
 ${config.directorNote ? `
-**⚠️ 导演手记 (DIRECTOR'S NOTE - HIGH PRIORITY OVERRIDE):**
+**⚠️ 导演手记 (Director's Note - High Priority Override):**
 > "${config.directorNote}"
 > **指令:** 这是来自人类导演的直接干预。如果它与预设风格冲突，**必须以本手记为准**。
 ` : ""}
@@ -1202,20 +1202,20 @@ ${config.directorNote ? `
 
 ${soundArchitectureProtocol}
 
-### C. 视觉层裁决 (VISUAL LAYER)
+### C. 视觉层裁决
 *   **主体密度:** ${subjectInstruction}
 *   **空镜留白:** ${atmosphereInstruction}
 ${structureText}
 
-### D. 风格逻辑协议 (STYLE LOGIC PROTOCOL - JSON STRICT)
-**You must process the style through this Anti-Kitsch filter:**
+### D. 风格逻辑协议 (JSON STRICT)
+**你必须先用以下 Anti-Kitsch filter 处理风格：**
 ${STYLE_LOGIC_JSON}
 
 ${visualBibleInstruction}
 
 ${mistProtocol}
 
-# 🔗 连贯性与边界协议 (CONTINUITY & BOUNDARY)
+# 🔗 连贯性与边界协议
 ${continuityInstruction}
 
 ### C. 镜头块结构 (Shot Block Structure) - 关键！
@@ -1294,7 +1294,7 @@ export const buildStyleTransferPrompt = (
 
     const assetContext = `
     ### 🎭 资产强制映射 (ASSET MAPPING)
-    **Use these visual anchors to describe characters and objects in the scene:**
+    **如果场景中出现以下角色/物体，必须使用这些 visual anchors 描述它们：**
     ${assets.characters.map(c => `* **${c.name}**: ${c.anchors} (${c.description})`).join('\n')}
     ${assets.scenes.map(s => `* **${s.name}**: ${s.anchors} (${s.description})`).join('\n')}
     ${assets.props.map(p => `* **${p.name}**: ${p.anchors} (${p.description})`).join('\n')}
@@ -1309,9 +1309,9 @@ export const buildStyleTransferPrompt = (
     `;
 
     return `
-Role: 世界级视觉调色师 & 风格迁移引擎 (Visual Colorist & Style Transfer Engine).
-Task: **视觉皮肤迁移 (Visual Skin Transfer)**.
-Goal: 在不改动导演分镜骨架的前提下，将剧本的**“视觉皮相”**替换为【视觉圣经】定义的色彩、材质、媒介与资产系统。
+角色：世界级视觉调色师 & 风格迁移引擎 (Visual Colorist & Style Transfer Engine)。
+任务：**视觉皮肤迁移 (Visual Skin Transfer)**。
+目标：在不改动导演分镜骨架的前提下，将剧本的**“视觉皮相”**替换为【视觉圣经】定义的色彩、材质、媒介与资产系统。
 
 **关键规则：必须保留原始的 Markdown 结构 (协议头、场景头、镜头块格式)。**
 
@@ -1326,24 +1326,24 @@ Goal: 在不改动导演分镜骨架的前提下，将剧本的**“视觉皮相
 你必须严格基于以下 5 个维度重塑每一行文字：
 
 1.  **🎨 Art & Style (艺术与风格 - 灵魂):** 
-    *   *Directive:* ${tone.style}
-    *   *Action:* 只决定美术语言、色彩组织和物理媒介。不得覆盖原剧本已经确定的镜头构图、导演气息和剪辑节奏。
+    *   *指令 (Directive):* ${tone.style}
+    *   *动作 (Action):* 只决定美术语言、色彩组织和物理媒介。不得覆盖原剧本已经确定的镜头构图、导演气息和剪辑节奏。
 
 2.  **💡 Light & Atmosphere (光影与氛围 - 气氛):**
-    *   *Directive:* ${tone.lighting}
-    *   *Action:* 决定画面的明暗对比 (High/Low Key)、色温 (Temp/Tint) 和空气感 (Fog/Haze)。
+    *   *指令 (Directive):* ${tone.lighting}
+    *   *动作 (Action):* 决定画面的明暗对比 (High/Low Key)、色温 (Temp/Tint) 和空气感 (Fog/Haze)。
 
 3.  **📷 Medium & Format (媒介与格式 - 镜头):**
-    *   *Directive:* ${tone.camera}
-    *   *Action:* 决定画面的物理介质感（胶片/数码/绘画/定格/CGI）和成像特征。不得修改原镜头的景别、构图和角度。
+    *   *指令 (Directive):* ${tone.camera}
+    *   *动作 (Action):* 决定画面的物理介质感（胶片/数码/绘画/定格/CGI）和成像特征。不得修改原镜头的景别、构图和角度。
 
 4.  **🧶 Texture & Character (质感与特征 - 触感):**
-    *   *Directive:* ${tone.texture}
-    *   *Action:* 决定物体表面的微观纹理（颗粒、光泽、粗糙度、瑕疵）。
+    *   *指令 (Directive):* ${tone.texture}
+    *   *动作 (Action):* 决定物体表面的微观纹理（颗粒、光泽、粗糙度、瑕疵）。
 
 5.  **🌈 Color Palette (色板):**
     *   *Hex Codes:* [${tone.palette.join(', ')}]
-    *   *Action:* 强制在描写中使用这些色系。
+    *   *动作 (Action):* 强制在描写中使用这些色系。
 
 **输入 3: 核心资产 (ASSETS)**
 (如果剧本中出现以下人/物，必须使用其特定的视觉描述)
@@ -1351,7 +1351,7 @@ ${assetContext}
 
 ---
 
-**执行指令 (EXECUTION PROTOCOLS):**
+**执行指令:**
 
 1.  **导演骨架锁定 (Director Skeleton Lock):**
     *   保留每个镜头的“拍法”：景别、构图、角度、轴线、运动/静止关系、动作连续性、留白节奏。
@@ -1366,7 +1366,7 @@ ${assetContext}
     *   扫描原剧本中的所有形容词。如果它属于旧风格（如“阴森”、“苍白”），立刻删除或替换为新风格的词汇（如“通透”、“红润”）。
     *   不要扫描并替换动作动词、人物关系、台词意图和镜头语法词。
 
-4.  **格式保持 (Format Preservation - CRITICAL):**
+4.  **格式保持 (Format Preservation - Critical):**
     *   **协议头:** 更新 > **【核心视觉圣经】** 
         > **【艺术与风格】**: ${tone.style}
         > **【光影与氛围】**: ${tone.lighting}

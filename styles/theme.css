@@ -320,6 +320,17 @@ body.mist-theme-switching::before {
   opacity: 1 !important;
 }
 
+.mist-workflow-view {
+  animation: none !important;
+  opacity: 1 !important;
+  contain: layout style;
+}
+
+.mist-workflow-view :where(.animate-page-dissolve) {
+  animation: none !important;
+  opacity: 1 !important;
+}
+
 .mist-commercial-engine .mist-commercial-formula-module,
 .mist-commercial-engine .mist-commercial-formula-line,
 .mist-commercial-engine .mist-commercial-formula-line > span,
@@ -2748,12 +2759,12 @@ body.mist-theme-switching::before {
   align-items: center;
   justify-content: center;
   transform-origin: 54% 50%;
-  animation: mistLabyrinthPanelStageIn 560ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  will-change: transform, opacity, filter, clip-path;
+  animation: none;
+  will-change: auto;
 }
 
 .mist-labyrinth-panel-stage::after {
-  content: "";
+  content: none;
   position: absolute;
   inset: 0;
   pointer-events: none;
@@ -2762,7 +2773,7 @@ body.mist-theme-switching::before {
   background:
     linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.18) 48%, rgba(var(--mist-active-accent-rgb),0.16) 50%, transparent 56%);
   mix-blend-mode: screen;
-  animation: mistLabyrinthPanelScan 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: none;
 }
 
 .mist-labyrinth-panel-stage.is-mixer::after {
@@ -4679,7 +4690,19 @@ body.mist-theme-switching::before {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 0.24rem;
+  gap: 0;
+  overflow: visible;
+}
+
+.mist-labyrinth-world-law-control {
+  position: relative;
+  min-width: 0;
+  max-width: 100%;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  line-height: 1;
 }
 
 .mist-labyrinth-world-law-block {
@@ -4701,6 +4724,79 @@ body.mist-theme-switching::before {
   border: 0;
   background: transparent;
   text-align: left;
+  cursor: pointer;
+  transform-origin: center bottom;
+}
+
+.mist-labyrinth-world-law-main-button.is-locked {
+  cursor: default;
+}
+
+.mist-labyrinth-world-law-main-button:hover .mist-labyrinth-world-law-token,
+.mist-labyrinth-world-law-main-button:focus-visible .mist-labyrinth-world-law-token {
+  border-bottom-color: var(--mist-active-accent);
+}
+
+.mist-labyrinth-world-law-actions {
+  position: absolute;
+  top: calc(100% + 0.02rem);
+  left: 0;
+  z-index: 330;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.25rem;
+  min-width: max-content;
+  padding: 0.25rem;
+  border: 1px solid rgb(39,39,42);
+  border-radius: 0.25rem;
+  background: rgba(0,0,0,0.8);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.32);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease;
+}
+
+.mist-labyrinth-world-law-actions::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  height: 0.35rem;
+}
+
+.mist-labyrinth-world-law-control:hover .mist-labyrinth-world-law-actions,
+.mist-labyrinth-world-law-control:focus-within .mist-labyrinth-world-law-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.mist-labyrinth-world-law-actions button {
+  width: 1.18rem;
+  height: 1.18rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: rgb(161,161,170);
+  border: 1px solid rgb(63,63,70);
+  border-radius: 0.25rem;
+  background: rgb(24,24,27);
+  transition: none;
+}
+
+.mist-labyrinth-world-law-actions button:hover:not(:disabled),
+.mist-labyrinth-world-law-actions button.is-locked {
+  color: var(--labyrinth-ink);
+  border-color: var(--labyrinth-red-soft);
+  background: var(--labyrinth-red-faint);
+  text-shadow: 0 0 10px var(--mist-archive-signal-glow);
+}
+
+.mist-labyrinth-world-law-actions button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
 }
 
 .mist-labyrinth-world-law-random {
@@ -6858,12 +6954,47 @@ body.mist-theme-switching::before {
 }
 
 .mist-labyrinth-time-panel {
-  width: min(36rem, calc(100vw - 2rem));
+  width: min(42rem, calc(100vw - 2rem));
 }
 
 .mist-labyrinth-time-panel .mist-labyrinth-identity-section-head > span {
   font-size: 0.82rem;
   letter-spacing: 0.18em;
+}
+
+.mist-labyrinth-era-token-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.34rem;
+}
+
+.mist-labyrinth-era-token-row button {
+  min-height: 1.82rem;
+  padding: 0 0.68rem;
+  border: 1px solid rgba(255,255,255,0.085);
+  border-radius: 0.3rem;
+  color: rgba(248,248,244,0.58);
+  background: rgba(255,255,255,0.028);
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  transition: color 180ms ease, border-color 180ms ease, background 180ms ease;
+}
+
+.mist-labyrinth-era-token-row button:hover:not(:disabled),
+.mist-labyrinth-era-token-row button.is-active {
+  color: var(--labyrinth-ink);
+  border-color: var(--labyrinth-red-soft);
+  background: var(--labyrinth-red-faint);
+}
+
+.mist-labyrinth-era-token-row button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.mist-labyrinth-era-token-row {
+  margin: -0.16rem 0 0.78rem;
 }
 
 .mist-labyrinth-country-field {
@@ -7024,6 +7155,57 @@ body.mist-theme-switching::before {
   color: var(--labyrinth-ink);
   border-color: var(--labyrinth-red-soft);
   background: var(--labyrinth-red-faint);
+}
+
+.mist-concept-spacetime-modal {
+  --labyrinth-ink: #ffffff;
+  --labyrinth-muted: rgba(255,255,255,0.66);
+  --labyrinth-dim: rgba(255,255,255,0.48);
+  --labyrinth-red: var(--mist-active-accent);
+  --labyrinth-red-soft: rgba(var(--mist-active-accent-rgb), 0.68);
+  --labyrinth-red-faint: rgba(var(--mist-active-accent-rgb), 0.12);
+}
+
+.mist-concept-coordinate-open {
+  min-height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.78rem;
+  border: 1px solid rgba(255,255,255,0.105);
+  border-radius: 0.34rem;
+  color: rgba(248,248,244,0.72);
+  background: rgba(255,255,255,0.032);
+  font-family: Georgia, "Times New Roman", "Noto Serif SC", serif;
+  font-size: 0.98rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  transition: transform 160ms ease, color 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+
+.mist-concept-coordinate-open:hover:not(:disabled),
+.mist-concept-coordinate-open.is-filled {
+  color: var(--labyrinth-ink);
+  border-color: var(--labyrinth-red-soft);
+  background: var(--labyrinth-red-faint);
+}
+
+.mist-concept-coordinate-open:hover:not(:disabled) {
+  transform: scale(1.015);
+}
+
+.mist-concept-coordinate-open:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+:root.retro .mist-concept-spacetime-modal {
+  --labyrinth-ink: #24170f;
+  --labyrinth-muted: rgba(36,23,15,0.64);
+  --labyrinth-dim: rgba(36,23,15,0.46);
+  --labyrinth-red: #85411B;
+  --labyrinth-red-soft: rgba(133,65,27,0.56);
+  --labyrinth-red-faint: rgba(133,65,27,0.09);
 }
 
 @media (max-width: 560px) {
@@ -9263,6 +9445,23 @@ body.mist-theme-switching::before {
   color: var(--aesthetic-ink) !important;
 }
 
+:root.dark .mist-concept-design-engine {
+  --mist-active-accent: var(--mist-orange);
+  --mist-active-accent-rgb: 251, 146, 60;
+  --aesthetic-red: var(--mist-orange);
+  --aesthetic-red-soft: rgba(251, 146, 60, 0.72);
+  --aesthetic-red-faint: rgba(251, 146, 60, 0.1);
+  --mist-archive-red: var(--mist-orange);
+  --mist-archive-red-soft: rgba(251, 146, 60, 0.72);
+  --mist-archive-red-faint: rgba(251, 146, 60, 0.1);
+  --mist-archive-signal-line: rgba(251, 146, 60, 0.045);
+  --mist-archive-signal-line-strong: rgba(251, 146, 60, 0.09);
+  --mist-archive-signal-wash: rgba(251, 146, 60, 0.04);
+  --mist-archive-signal-wash-faint: rgba(251, 146, 60, 0.024);
+  --mist-archive-signal-glow: rgba(251, 146, 60, 0.34);
+  --mist-archive-signal-shadow: rgba(251, 146, 60, 0.16);
+}
+
 :root.dark .mist-aesthetic-engine::before {
   content: "";
   position: absolute;
@@ -9483,6 +9682,498 @@ body.mist-theme-switching::before {
   border-bottom-color: var(--aesthetic-red-soft) !important;
   box-shadow: 0 0 18px var(--mist-archive-signal-shadow) !important;
   text-shadow: 0 0 12px var(--mist-archive-signal-glow) !important;
+}
+
+:root.dark .mist-concept-design-engine button:hover:not(:disabled),
+:root.dark .mist-concept-design-engine button.is-active {
+  color: var(--aesthetic-ink) !important;
+  border-color: rgba(251, 146, 60, 0.72) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.035), rgba(251,146,60,0.055)) !important;
+  box-shadow: 0 0 14px rgba(251,146,60,0.12) !important;
+  text-shadow: none !important;
+}
+
+:root.dark .mist-concept-design-engine button[class*="text-orange-300"],
+:root.dark .mist-concept-design-engine button[class*="text-orange-300"]:hover,
+:root.dark .mist-concept-design-engine button[class*="border-orange-400"] {
+  color: var(--mist-orange) !important;
+  background: transparent !important;
+  border-color: rgba(251,146,60,0.82) !important;
+  box-shadow: none !important;
+}
+
+:root.dark .mist-concept-design-engine .mist-concept-source-module {
+  border-color: rgba(255,255,255,0.08) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.012)),
+    rgba(0,0,0,0.34) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.035) !important;
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+}
+
+:root.dark .mist-concept-design-engine .mist-concept-source-module:hover {
+  border-color: rgba(251,146,60,0.34) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.046), rgba(251,146,60,0.028)),
+    rgba(0,0,0,0.42) !important;
+}
+
+:root.dark .mist-concept-design-engine .mist-aesthetic-action-buttons {
+  border-color: rgba(255,255,255,0.08) !important;
+  background: rgba(0,0,0,0.34) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.025) !important;
+}
+
+:root.dark .mist-concept-design-engine .mist-aesthetic-action-buttons button,
+:root.dark .mist-concept-design-engine .mist-concept-inline-switch button {
+  color: rgba(248,248,244,0.46) !important;
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+:root.dark .mist-concept-design-engine .mist-aesthetic-action-buttons button:hover:not(:disabled),
+:root.dark .mist-concept-design-engine .mist-aesthetic-action-buttons button.is-active {
+  color: var(--mist-orange) !important;
+  border-color: rgba(251,146,60,0.46) !important;
+  background: rgba(251,146,60,0.09) !important;
+  box-shadow: 0 0 14px rgba(251,146,60,0.1) !important;
+}
+
+:root.dark .mist-concept-design-engine .mist-concept-action-copy:hover:not(:disabled),
+:root.dark .mist-concept-design-engine .mist-concept-action-lock:hover:not(:disabled) {
+  transform: scale(1.08);
+}
+
+:root.dark .mist-concept-design-engine .mist-concept-action-random.is-motioning svg {
+  animation: mistIconDiceRoll 520ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:root.dark .mist-concept-design-engine .mist-concept-action-clear.is-motioning svg {
+  animation: mistIconResetSpin 560ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:root.dark .mist-concept-design-engine .mist-concept-inline-switch {
+  border-color: rgba(255,255,255,0.1) !important;
+  background: rgba(0,0,0,0.34) !important;
+}
+
+:root.dark .mist-concept-design-engine .mist-concept-inline-switch button:hover:not(:disabled),
+:root.dark .mist-concept-design-engine .mist-concept-inline-switch button.is-active {
+  color: var(--mist-orange) !important;
+  border-color: transparent !important;
+  background: rgba(251,146,60,0.1) !important;
+  box-shadow: inset 0 -1px 0 rgba(251,146,60,0.74) !important;
+}
+
+:root.dark .mist-concept-design-engine .mist-concept-source-mode-card,
+:root.dark .mist-concept-design-engine .mist-concept-object-route-card,
+:root.dark .mist-concept-design-engine .mist-concept-medium-tile {
+  color: rgba(248,248,244,0.58) !important;
+  border-color: rgba(255,255,255,0.09) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.032), rgba(255,255,255,0.01)),
+    rgba(0,0,0,0.34) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.026) !important;
+}
+
+:root.dark .mist-concept-design-engine .mist-concept-source-mode-card:hover:not(:disabled),
+:root.dark .mist-concept-design-engine .mist-concept-object-route-card:hover:not(:disabled),
+:root.dark .mist-concept-design-engine .mist-concept-medium-tile:hover:not(:disabled) {
+  color: rgba(248,248,244,0.86) !important;
+  border-color: rgba(251,146,60,0.34) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.045), rgba(251,146,60,0.03)),
+    rgba(0,0,0,0.42) !important;
+  transform: scale(1.012);
+  box-shadow: 0 0 16px rgba(251,146,60,0.08), inset 0 1px 0 rgba(255,255,255,0.035) !important;
+}
+
+:root.dark .mist-concept-design-engine .mist-concept-source-mode-card.is-active,
+:root.dark .mist-concept-design-engine .mist-concept-object-route-card.is-active,
+:root.dark .mist-concept-design-engine .mist-concept-medium-tile.is-active {
+  color: var(--mist-orange) !important;
+  border-color: rgba(251,146,60,0.62) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.045), rgba(251,146,60,0.08)),
+    rgba(0,0,0,0.46) !important;
+  box-shadow: inset 0 -1px 0 rgba(251,146,60,0.72), 0 0 18px rgba(251,146,60,0.1) !important;
+}
+
+:root.dark .mist-concept-design-engine .mist-concept-route-chip {
+  border-color: rgba(255,255,255,0.09) !important;
+  color: rgba(248,248,244,0.52) !important;
+  background: rgba(255,255,255,0.025) !important;
+}
+
+:root.dark .mist-concept-design-engine .mist-concept-object-route-card.is-active .mist-concept-route-chip {
+  border-color: rgba(251,146,60,0.28) !important;
+  color: rgba(251,146,60,0.82) !important;
+  background: rgba(251,146,60,0.055) !important;
+}
+
+:root.dark .mist-concept-design-engine .mist-concept-inline-switch button:not(.is-active) svg,
+:root.dark .mist-concept-design-engine .mist-concept-source-mode-button:not(.is-active) svg {
+  color: rgba(248,248,244,0.36) !important;
+}
+
+:root.dark .mist-concept-design-engine .mist-concept-source-mode-toggle {
+  border-color: rgba(255,255,255,0.08) !important;
+  background: rgba(0,0,0,0.28) !important;
+}
+
+:root.dark .mist-concept-design-engine .mist-concept-source-mode-button {
+  color: rgba(248,248,244,0.4) !important;
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  transform-origin: center;
+}
+
+:root.dark .mist-concept-design-engine .mist-concept-source-mode-button:hover:not(:disabled) {
+  color: rgba(255,255,255,0.88) !important;
+  border-color: rgba(251,146,60,0.52) !important;
+  background: rgba(251,146,60,0.055) !important;
+  box-shadow: none !important;
+  transform: scale(1.035);
+}
+
+:root.dark .mist-concept-design-engine .mist-concept-source-mode-button.is-active {
+  color: #ff9a3d !important;
+  border-color: #ff8a1d !important;
+  background: rgba(255,138,29,0.12) !important;
+  box-shadow: inset 0 0 0 1px rgba(255,138,29,0.24), 0 0 0 1px rgba(255,138,29,0.08) !important;
+}
+
+:root.dark .mist-concept-design-engine .mist-concept-source-mode-button.is-active:hover:not(:disabled) {
+  color: #ffae60 !important;
+  border-color: #ff9a3d !important;
+  background: rgba(255,138,29,0.15) !important;
+}
+
+.mist-concept-design-engine .mist-template-workspace-switch,
+.mist-concept-design-engine .mist-template-workspace-switch-button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mist-concept-design-engine .mist-template-workspace-switch-button,
+.mist-concept-design-engine .mist-template-workspace-switch-button:hover:not(:disabled),
+.mist-concept-design-engine .mist-template-workspace-switch-button:active,
+.mist-concept-design-engine .mist-template-workspace-switch-button:focus,
+.mist-concept-design-engine .mist-template-workspace-switch-button:focus-visible {
+  transform: none !important;
+  transition: color 120ms ease, background-color 120ms ease, border-color 120ms ease !important;
+  outline: none !important;
+  outline-offset: 0 !important;
+  box-shadow: none !important;
+  --tw-ring-color: transparent !important;
+  --tw-ring-offset-color: transparent !important;
+  --tw-ring-offset-width: 0px !important;
+  --tw-ring-shadow: 0 0 #0000 !important;
+  --tw-ring-offset-shadow: 0 0 #0000 !important;
+}
+
+:root.dark .mist-concept-design-engine .mist-template-workspace-switch-button.is-active,
+:root.dark .mist-concept-design-engine .mist-template-workspace-switch-button.is-active:hover:not(:disabled),
+:root.dark .mist-concept-design-engine .mist-template-workspace-switch-button.is-active:active,
+:root.dark .mist-concept-design-engine .mist-template-workspace-switch-button.is-active:focus,
+:root.dark .mist-concept-design-engine .mist-template-workspace-switch-button.is-active:focus-visible {
+  color: #ff9a3d !important;
+  border-color: #ff8a1d !important;
+  background: rgba(255,138,29,0.12) !important;
+  box-shadow: none !important;
+}
+
+:root.dark .mist-concept-design-engine .mist-template-workspace-switch-button:not(.is-active):active,
+:root.dark .mist-concept-design-engine .mist-template-workspace-switch-button:not(.is-active):focus,
+:root.dark .mist-concept-design-engine .mist-template-workspace-switch-button:not(.is-active):focus-visible {
+  color: rgba(248,248,244,0.4) !important;
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+:root.dark .mist-concept-design-engine .mist-concept-medium-choice {
+  color: rgba(248,248,244,0.66) !important;
+  border-color: rgba(255,255,255,0.10) !important;
+  background: rgba(255,255,255,0.025) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.025) !important;
+}
+
+:root.dark .mist-concept-design-engine .mist-concept-medium-choice:hover:not(:disabled) {
+  color: rgba(255,255,255,0.88) !important;
+  border-color: rgba(255,138,29,0.48) !important;
+  background: rgba(255,138,29,0.045) !important;
+}
+
+:root.dark .mist-concept-design-engine .mist-concept-medium-choice.is-active {
+  color: #ff9a3d !important;
+  border-color: #ff8a1d !important;
+  background: rgba(255,138,29,0.11) !important;
+  box-shadow: inset 0 0 0 1px rgba(255,138,29,0.22) !important;
+}
+
+:root.dark .mist-concept-design-engine .mist-concept-medium-choice-icon {
+  color: rgba(248,248,244,0.38) !important;
+  border-color: rgba(255,255,255,0.10) !important;
+  background: rgba(0,0,0,0.42) !important;
+}
+
+:root.dark .mist-concept-design-engine .mist-concept-medium-choice.is-active .mist-concept-medium-choice-icon {
+  color: #050505 !important;
+  border-color: #ff8a1d !important;
+  background: #ff8a1d !important;
+}
+
+:root.dark .mist-concept-design-engine .mist-concept-prophecy-slot .mist-labyrinth-hover-token:hover {
+  color: rgba(255,255,255,0.98) !important;
+  border-bottom-color: var(--gold-primary) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+:root.dark .mist-concept-design-engine .mist-concept-prophecy-slot,
+:root.dark .mist-concept-design-engine .mist-concept-slot-item {
+  max-width: 100%;
+  min-width: 0;
+}
+
+:root.dark .mist-concept-design-engine .mist-concept-slot-row {
+  max-width: 100%;
+  min-width: 0;
+  white-space: normal !important;
+}
+
+:root.dark .mist-concept-design-engine .mist-concept-prophecy-slot .mist-labyrinth-hover-token {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  white-space: normal !important;
+}
+
+:root.dark .mist-concept-design-engine .mist-concept-token-remove {
+  color: rgba(248,248,244,0.36) !important;
+}
+
+:root.dark .mist-concept-design-engine .mist-concept-token-remove:hover:not(:disabled) {
+  color: var(--mist-orange) !important;
+}
+
+:root.dark .mist-concept-design-engine .mist-concept-token-popover-inner {
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 0.38rem;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.045), rgba(251,146,60,0.025)),
+    rgba(0,0,0,0.88);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.36), inset 0 1px 0 rgba(255,255,255,0.04);
+  padding: 0.55rem;
+}
+
+:root.dark .mist-concept-design-engine .mist-concept-token-popover-label {
+  margin: 0 0 0.28rem;
+  color: var(--mist-orange);
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+:root.dark .mist-concept-design-engine .mist-concept-token-popover-text {
+  margin: 0;
+  color: rgba(248,248,244,0.68);
+  font-size: 0.68rem;
+  line-height: 1.55;
+}
+
+:root.dark .mist-concept-design-engine .mist-concept-token-popover-actions {
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+:root.dark .mist-concept-design-engine .mist-concept-token-popover-actions button {
+  width: 1.25rem;
+  height: 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  border-radius: 0.25rem;
+  color: rgba(248,248,244,0.48) !important;
+  background: rgba(255,255,255,0.035) !important;
+}
+
+:root.dark .mist-concept-design-engine .mist-concept-token-popover-actions button:hover:not(:disabled),
+:root.dark .mist-concept-design-engine .mist-concept-token-popover-actions button.is-active {
+  color: var(--mist-orange) !important;
+  border-color: rgba(251,146,60,0.48) !important;
+  background: rgba(251,146,60,0.09) !important;
+}
+
+.mist-concept-token-tooltip.mist-labyrinth-tooltip {
+  z-index: 9999 !important;
+}
+
+:root.dark .mist-concept-token-tooltip {
+  width: max-content;
+  max-width: min(20rem, calc(100vw - 2rem));
+  border-color: rgba(244,244,245,0.32);
+  border-radius: 0.75rem;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.035), rgba(251,146,60,0.018)),
+    rgba(8,8,8,0.97);
+  box-shadow: none;
+}
+
+:root.dark .mist-concept-token-tooltip .mist-labyrinth-tooltip-header {
+  border-bottom-color: rgba(255,255,255,0.1);
+  background: transparent;
+}
+
+:root.dark .mist-concept-token-tooltip .mist-labyrinth-tooltip-def {
+  color: rgba(244,244,245,0.96);
+}
+
+:root.dark .mist-concept-token-portal-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border: 1px solid rgb(39,39,42);
+  border-radius: 0.25rem;
+  background: rgba(0,0,0,0.8);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.32);
+  backdrop-filter: blur(12px);
+}
+
+:root.dark .mist-concept-token-portal-actions button {
+  width: 1.18rem;
+  height: 1.18rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid rgb(63,63,70);
+  border-radius: 0.25rem;
+  color: rgb(161,161,170);
+  background: rgb(24,24,27);
+  transition: color 160ms ease, border-color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+:root.dark .mist-concept-token-portal-actions button:hover:not(:disabled) {
+  color: var(--labyrinth-ink);
+  border-color: rgba(251,146,60,0.72);
+  background: rgba(251,146,60,0.1);
+  transform: scale(1.08);
+  text-shadow: 0 0 10px var(--mist-archive-signal-glow);
+}
+
+:root.dark .mist-concept-token-portal-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
+/* Concept engine border pass: replace pale white strokes with dark orange / soft glow strokes. */
+:root.dark .mist-concept-design-engine {
+  --concept-border-dim: rgba(251, 146, 60, 0.16);
+  --concept-border-soft: rgba(251, 146, 60, 0.24);
+  --concept-border-hot: rgba(251, 146, 60, 0.52);
+  --concept-border-glow: rgba(251, 146, 60, 0.10);
+}
+
+:root.dark .mist-concept-design-engine :where(
+  section,
+  aside,
+  article,
+  .mist-concept-source-module,
+  .mist-concept-summary-panel,
+  .mist-concept-template-card,
+  .mist-concept-field-row,
+  .mist-concept-field-cell,
+  .mist-template-prompt-section,
+  .mist-template-skeleton-panel,
+  .mist-template-skeleton-item,
+  .mist-aesthetic-module-header,
+  .mist-aesthetic-action-buttons,
+  .mist-concept-source-mode-toggle,
+  .mist-template-workspace-switch,
+  .mist-concept-inline-switch,
+  .mist-concept-source-mode-card,
+  .mist-concept-object-route-card,
+  .mist-concept-medium-tile,
+  .mist-concept-medium-choice,
+  .mist-concept-medium-choice-icon,
+  .mist-concept-route-chip,
+  .mist-concept-token-popover-inner,
+  .mist-concept-token-popover-actions button,
+  .mist-concept-token-portal-actions,
+  .mist-concept-token-portal-actions button
+) {
+  border-color: var(--concept-border-dim) !important;
+  box-shadow: inset 0 1px 0 rgba(251,146,60,0.045) !important;
+}
+
+:root.dark .mist-concept-design-engine :where(
+  section,
+  aside,
+  article,
+  .mist-concept-source-module,
+  .mist-concept-summary-panel,
+  .mist-concept-template-card,
+  .mist-concept-field-row,
+  .mist-concept-field-cell,
+  .mist-template-prompt-section,
+  .mist-concept-source-mode-card,
+  .mist-concept-object-route-card,
+  .mist-concept-medium-tile,
+  .mist-concept-medium-choice
+):hover {
+  border-color: var(--concept-border-soft) !important;
+  box-shadow: inset 0 1px 0 rgba(251,146,60,0.055), 0 0 18px var(--concept-border-glow) !important;
+}
+
+:root.dark .mist-concept-design-engine :where(
+  button:hover:not(:disabled),
+  button.is-active,
+  .is-active,
+  .mist-concept-source-mode-button:hover:not(:disabled),
+  .mist-concept-source-mode-button.is-active,
+  .mist-template-workspace-switch-button.is-active,
+  .mist-concept-medium-choice.is-active,
+  .mist-concept-source-mode-card.is-active,
+  .mist-concept-object-route-card.is-active,
+  .mist-concept-medium-tile.is-active
+) {
+  border-color: var(--concept-border-hot) !important;
+  box-shadow: 0 0 16px var(--concept-border-glow), inset 0 1px 0 rgba(251,146,60,0.08) !important;
+}
+
+:root.dark .mist-concept-design-engine :where(
+  [class*="border-white"],
+  [class*="border-zinc"],
+  [class*="border-[#"],
+  [class*="border-[var(--border-main)]"]
+) {
+  border-color: var(--concept-border-dim) !important;
+}
+
+:root.dark .mist-concept-design-engine .mist-concept-top-action-button {
+  border-color: rgba(251,146,60,0.34) !important;
+  box-shadow: inset 0 1px 0 rgba(251,146,60,0.055), 0 0 14px rgba(251,146,60,0.055) !important;
+}
+
+:root.dark .mist-concept-design-engine .mist-concept-top-action-button:hover:not(:disabled),
+:root.dark .mist-concept-design-engine .mist-concept-top-action-button.is-active {
+  border-color: rgba(251,146,60,0.62) !important;
+  box-shadow: inset 0 1px 0 rgba(251,146,60,0.10), 0 0 18px rgba(251,146,60,0.14) !important;
+}
+
+:root.dark .mist-concept-design-engine .mist-template-prompt-section pre {
+  font-size: 13px !important;
+  line-height: 1.75rem !important;
 }
 
 :root.dark .mist-aesthetic-engine .mist-aesthetic-compiler-output {
@@ -9739,6 +10430,401 @@ body.mist-theme-switching::before {
   border-color: var(--aesthetic-red-soft) !important;
   box-shadow: none !important;
   text-shadow: none !important;
+}
+
+:root.retro .mist-concept-design-engine .mist-concept-source-module {
+  border-color: rgba(133,65,27,0.14) !important;
+  background: rgba(255,255,255,0.28) !important;
+  box-shadow: none !important;
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+}
+
+:root.retro .mist-concept-design-engine .mist-concept-source-module:hover {
+  border-color: rgba(133,65,27,0.38) !important;
+  background: rgba(255,255,255,0.42) !important;
+}
+
+:root.retro .mist-concept-design-engine .mist-aesthetic-action-buttons,
+:root.retro .mist-concept-design-engine .mist-concept-inline-switch {
+  border-color: rgba(133,65,27,0.18) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+:root.retro .mist-concept-design-engine .mist-aesthetic-action-buttons button,
+:root.retro .mist-concept-design-engine .mist-concept-inline-switch button {
+  color: rgba(133,65,27,0.58) !important;
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+:root.retro .mist-concept-design-engine .mist-aesthetic-action-buttons button:hover:not(:disabled),
+:root.retro .mist-concept-design-engine .mist-aesthetic-action-buttons button.is-active,
+:root.retro .mist-concept-design-engine .mist-concept-inline-switch button:hover:not(:disabled),
+:root.retro .mist-concept-design-engine .mist-concept-inline-switch button.is-active {
+  color: #85411B !important;
+  border-color: rgba(133,65,27,0.38) !important;
+  background: rgba(133,65,27,0.085) !important;
+  box-shadow: none !important;
+}
+
+:root.retro .mist-concept-design-engine .mist-concept-source-mode-card,
+:root.retro .mist-concept-design-engine .mist-concept-object-route-card,
+:root.retro .mist-concept-design-engine .mist-concept-medium-tile {
+  color: rgba(133,65,27,0.62) !important;
+  border-color: rgba(133,65,27,0.15) !important;
+  background: rgba(255,255,255,0.24) !important;
+  box-shadow: none !important;
+}
+
+:root.retro .mist-concept-design-engine .mist-concept-source-mode-card:hover:not(:disabled),
+:root.retro .mist-concept-design-engine .mist-concept-object-route-card:hover:not(:disabled),
+:root.retro .mist-concept-design-engine .mist-concept-medium-tile:hover:not(:disabled) {
+  color: rgba(75,43,20,0.86) !important;
+  border-color: rgba(133,65,27,0.34) !important;
+  background: rgba(255,255,255,0.38) !important;
+  transform: scale(1.012);
+  box-shadow: none !important;
+}
+
+:root.retro .mist-concept-design-engine .mist-concept-source-mode-card.is-active,
+:root.retro .mist-concept-design-engine .mist-concept-object-route-card.is-active,
+:root.retro .mist-concept-design-engine .mist-concept-medium-tile.is-active {
+  color: #85411B !important;
+  border-color: rgba(133,65,27,0.48) !important;
+  background: rgba(133,65,27,0.085) !important;
+  box-shadow: inset 0 -1px 0 rgba(133,65,27,0.46) !important;
+}
+
+:root.retro .mist-concept-design-engine .mist-concept-route-chip {
+  border-color: rgba(133,65,27,0.14) !important;
+  color: rgba(133,65,27,0.58) !important;
+  background: rgba(255,255,255,0.22) !important;
+}
+
+:root.retro .mist-concept-design-engine .mist-concept-object-route-card.is-active .mist-concept-route-chip {
+  border-color: rgba(133,65,27,0.3) !important;
+  color: #85411B !important;
+  background: rgba(133,65,27,0.07) !important;
+}
+
+:root.retro .mist-concept-design-engine .mist-concept-action-copy:hover:not(:disabled),
+:root.retro .mist-concept-design-engine .mist-concept-action-lock:hover:not(:disabled) {
+  transform: scale(1.08);
+}
+
+:root.retro .mist-concept-design-engine .mist-concept-action-random.is-motioning svg {
+  animation: mistIconDiceRoll 520ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:root.retro .mist-concept-design-engine .mist-concept-action-clear.is-motioning svg {
+  animation: mistIconResetSpin 560ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:root.retro .mist-concept-design-engine .mist-concept-inline-switch button:not(.is-active) svg,
+:root.retro .mist-concept-design-engine .mist-concept-source-mode-button:not(.is-active) svg {
+  color: rgba(133,65,27,0.46) !important;
+}
+
+:root.retro .mist-concept-design-engine .mist-concept-source-mode-toggle {
+  border-color: rgba(133,65,27,0.16) !important;
+  background: rgba(255,255,255,0.2) !important;
+  box-shadow: none !important;
+}
+
+:root.retro .mist-concept-design-engine .mist-concept-source-mode-button {
+  color: rgba(133,65,27,0.56) !important;
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  transform-origin: center;
+}
+
+:root.retro .mist-concept-design-engine .mist-concept-source-mode-button:hover:not(:disabled) {
+  color: rgba(75,43,20,0.9) !important;
+  border-color: rgba(139,38,29,0.44) !important;
+  background: rgba(139,38,29,0.055) !important;
+  box-shadow: none !important;
+  transform: scale(1.035);
+}
+
+:root.retro .mist-concept-design-engine .mist-concept-source-mode-button.is-active {
+  color: #8B261D !important;
+  border-color: #8B261D !important;
+  background: rgba(139,38,29,0.095) !important;
+  box-shadow: inset 0 0 0 1px rgba(139,38,29,0.18) !important;
+}
+
+:root.retro .mist-concept-design-engine .mist-concept-source-mode-button.is-active:hover:not(:disabled) {
+  color: #8B261D !important;
+  border-color: #8B261D !important;
+  background: rgba(139,38,29,0.12) !important;
+}
+
+:root.retro .mist-concept-design-engine .mist-template-workspace-switch-button.is-active,
+:root.retro .mist-concept-design-engine .mist-template-workspace-switch-button.is-active:hover:not(:disabled),
+:root.retro .mist-concept-design-engine .mist-template-workspace-switch-button.is-active:active,
+:root.retro .mist-concept-design-engine .mist-template-workspace-switch-button.is-active:focus,
+:root.retro .mist-concept-design-engine .mist-template-workspace-switch-button.is-active:focus-visible {
+  color: #8B261D !important;
+  border-color: #8B261D !important;
+  background: rgba(139,38,29,0.095) !important;
+  box-shadow: none !important;
+}
+
+:root.retro .mist-concept-design-engine .mist-template-workspace-switch-button:not(.is-active):active,
+:root.retro .mist-concept-design-engine .mist-template-workspace-switch-button:not(.is-active):focus,
+:root.retro .mist-concept-design-engine .mist-template-workspace-switch-button:not(.is-active):focus-visible {
+  color: rgba(133,65,27,0.56) !important;
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+:root.dark .mist-concept-design-engine .mist-template-workspace-body,
+:root.dark .mist-concept-design-engine .mist-template-workspace-body *,
+:root.retro .mist-concept-design-engine .mist-template-workspace-body,
+:root.retro .mist-concept-design-engine .mist-template-workspace-body * {
+  animation: none !important;
+  transition-duration: 0ms !important;
+  transition-delay: 0ms !important;
+}
+
+.mist-concept-design-engine .mist-template-workspace-view {
+  animation: none !important;
+  transform: none !important;
+  opacity: 1 !important;
+}
+
+.mist-concept-design-engine .mist-template-skeleton-panel,
+.mist-concept-design-engine .mist-template-skeleton-item,
+.mist-concept-design-engine .mist-template-skeleton-item *,
+.mist-concept-design-engine .mist-template-prompt-section {
+  animation: none !important;
+  transition-duration: 0ms !important;
+  transition-delay: 0ms !important;
+}
+
+.mist-concept-design-engine .mist-template-skeleton-item button,
+.mist-concept-design-engine .mist-template-skeleton-item button:hover,
+.mist-concept-design-engine .mist-template-skeleton-item button:active,
+.mist-concept-design-engine .mist-template-skeleton-item button:focus,
+.mist-concept-design-engine .mist-template-skeleton-item button:focus-visible,
+.mist-concept-design-engine .mist-template-prompt-section,
+.mist-concept-design-engine .mist-template-prompt-section:focus,
+.mist-concept-design-engine .mist-template-prompt-section:focus-visible {
+  transform: none !important;
+  outline: none !important;
+  outline-offset: 0 !important;
+  box-shadow: none !important;
+  --tw-ring-color: transparent !important;
+  --tw-ring-offset-color: transparent !important;
+  --tw-ring-offset-width: 0px !important;
+  --tw-ring-shadow: 0 0 #0000 !important;
+  --tw-ring-offset-shadow: 0 0 #0000 !important;
+}
+
+:root.dark .mist-concept-design-engine .mist-template-workspace-body :where(section, article, div, button, textarea, input, label, pre):focus,
+:root.dark .mist-concept-design-engine .mist-template-workspace-body :where(section, article, div, button, textarea, input, label, pre):focus-visible,
+:root.retro .mist-concept-design-engine .mist-template-workspace-body :where(section, article, div, button, textarea, input, label, pre):focus,
+:root.retro .mist-concept-design-engine .mist-template-workspace-body :where(section, article, div, button, textarea, input, label, pre):focus-visible {
+  outline: none !important;
+  outline-offset: 0 !important;
+  box-shadow: none !important;
+  --tw-ring-color: transparent !important;
+  --tw-ring-offset-color: transparent !important;
+  --tw-ring-offset-width: 0px !important;
+  --tw-ring-shadow: 0 0 #0000 !important;
+  --tw-ring-offset-shadow: 0 0 #0000 !important;
+}
+
+:root.dark .mist-concept-design-engine .mist-template-workspace-switch-button,
+:root.dark .mist-concept-design-engine .mist-template-workspace-switch-button:hover:not(:disabled),
+:root.dark .mist-concept-design-engine .mist-template-workspace-switch-button:active,
+:root.dark .mist-concept-design-engine .mist-template-workspace-switch-button:focus,
+:root.dark .mist-concept-design-engine .mist-template-workspace-switch-button:focus-visible,
+:root.retro .mist-concept-design-engine .mist-template-workspace-switch-button,
+:root.retro .mist-concept-design-engine .mist-template-workspace-switch-button:hover:not(:disabled),
+:root.retro .mist-concept-design-engine .mist-template-workspace-switch-button:active,
+:root.retro .mist-concept-design-engine .mist-template-workspace-switch-button:focus,
+:root.retro .mist-concept-design-engine .mist-template-workspace-switch-button:focus-visible {
+  transform: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+:root.retro .mist-concept-design-engine .mist-concept-medium-choice {
+  color: rgba(133,65,27,0.68) !important;
+  border-color: rgba(139,38,29,0.16) !important;
+  background: rgba(255,248,236,0.42) !important;
+  box-shadow: none !important;
+}
+
+:root.retro .mist-concept-design-engine .mist-concept-medium-choice:hover:not(:disabled) {
+  color: rgba(75,43,20,0.9) !important;
+  border-color: rgba(139,38,29,0.35) !important;
+  background: rgba(255,248,236,0.62) !important;
+}
+
+:root.retro .mist-concept-design-engine .mist-concept-medium-choice.is-active {
+  color: #8B261D !important;
+  border-color: #8B261D !important;
+  background: rgba(139,38,29,0.095) !important;
+  box-shadow: inset 0 0 0 1px rgba(139,38,29,0.16) !important;
+}
+
+:root.retro .mist-concept-design-engine .mist-concept-medium-choice-icon {
+  color: rgba(139,38,29,0.72) !important;
+  border-color: rgba(139,38,29,0.20) !important;
+  background: #F3E8D8 !important;
+}
+
+:root.retro .mist-concept-design-engine .mist-concept-medium-choice.is-active .mist-concept-medium-choice-icon {
+  color: #fff !important;
+  border-color: #8B261D !important;
+  background: #8B261D !important;
+}
+
+:root.retro .mist-concept-design-engine .mist-concept-prophecy-slot .mist-labyrinth-hover-token:hover {
+  color: #24170f !important;
+  border-bottom-color: rgba(133,65,27,0.76) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+:root.retro .mist-concept-design-engine .mist-concept-prophecy-slot,
+:root.retro .mist-concept-design-engine .mist-concept-slot-item {
+  max-width: 100%;
+  min-width: 0;
+}
+
+:root.retro .mist-concept-design-engine .mist-concept-slot-row {
+  max-width: 100%;
+  min-width: 0;
+  white-space: normal !important;
+}
+
+:root.retro .mist-concept-design-engine .mist-concept-prophecy-slot .mist-labyrinth-hover-token {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  white-space: normal !important;
+}
+
+:root.retro .mist-concept-design-engine .mist-concept-token-remove {
+  color: rgba(133,65,27,0.45) !important;
+}
+
+:root.retro .mist-concept-design-engine .mist-concept-token-remove:hover:not(:disabled) {
+  color: #85411B !important;
+}
+
+:root.retro .mist-concept-design-engine .mist-concept-token-popover-inner {
+  border: 1px solid rgba(133,65,27,0.2);
+  border-radius: 0.38rem;
+  background: rgba(239,233,224,0.94);
+  box-shadow: 0 12px 28px rgba(78,49,28,0.14);
+  padding: 0.55rem;
+}
+
+:root.retro .mist-concept-design-engine .mist-concept-token-popover-label {
+  margin: 0 0 0.28rem;
+  color: #85411B;
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+:root.retro .mist-concept-design-engine .mist-concept-token-popover-text {
+  margin: 0;
+  color: rgba(36,23,15,0.68);
+  font-size: 0.68rem;
+  line-height: 1.55;
+}
+
+:root.retro .mist-concept-design-engine .mist-concept-token-popover-actions {
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+:root.retro .mist-concept-design-engine .mist-concept-token-popover-actions button {
+  width: 1.25rem;
+  height: 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(133,65,27,0.16) !important;
+  border-radius: 0.25rem;
+  color: rgba(133,65,27,0.58) !important;
+  background: transparent !important;
+}
+
+:root.retro .mist-concept-design-engine .mist-concept-token-popover-actions button:hover:not(:disabled),
+:root.retro .mist-concept-design-engine .mist-concept-token-popover-actions button.is-active {
+  color: #85411B !important;
+  border-color: rgba(133,65,27,0.4) !important;
+  background: rgba(133,65,27,0.08) !important;
+}
+
+:root.retro .mist-concept-token-tooltip {
+  width: max-content;
+  max-width: min(20rem, calc(100vw - 2rem));
+  border: 1.5px solid rgba(133,65,27,0.28);
+  border-radius: 0.75rem;
+  background: rgba(239,233,224,0.96);
+  box-shadow: none;
+}
+
+:root.retro .mist-concept-token-tooltip .mist-labyrinth-tooltip-header {
+  border-bottom: 1px solid rgba(133,65,27,0.16);
+  background: transparent;
+}
+
+:root.retro .mist-concept-token-tooltip .mist-labyrinth-tooltip-def {
+  color: rgba(36,23,15,0.9);
+}
+
+:root.retro .mist-concept-token-portal-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border: 1px solid rgba(133,65,27,0.2);
+  border-radius: 0.25rem;
+  background: rgba(239,233,224,0.94);
+  box-shadow: 0 8px 20px rgba(78,49,28,0.14);
+  backdrop-filter: blur(12px);
+}
+
+:root.retro .mist-concept-token-portal-actions button {
+  width: 1.18rem;
+  height: 1.18rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid rgba(133,65,27,0.16);
+  border-radius: 0.25rem;
+  color: rgba(133,65,27,0.58);
+  background: transparent;
+  transition: color 160ms ease, border-color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+:root.retro .mist-concept-token-portal-actions button:hover:not(:disabled) {
+  color: #85411B;
+  border-color: rgba(133,65,27,0.4);
+  background: rgba(133,65,27,0.08);
+  transform: scale(1.08);
+}
+
+:root.retro .mist-concept-token-portal-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
 }
 
 :root.dark .mist-aesthetic-engine .mist-aesthetic-polish-actions .mist-aesthetic-polish-inject-button {
@@ -12194,6 +13280,10 @@ body.mist-theme-switching::before {
   --mist-module-accent-faint: var(--mist-archive-red-faint);
   --mist-module-radius: 0.28rem;
   color: var(--mist-module-ink) !important;
+}
+
+.mist-task-manager-panel {
+  z-index: 5000 !important;
 }
 
 :root.retro .mist-task-manager-panel,
@@ -15622,4 +16712,100 @@ button::-moz-focus-inner,
 
 :root:not(.retro) .mist-bible-editor .mist-bible-nav-item.is-active svg {
   color: var(--mist-active-accent, #ff4f3f) !important;
+}
+
+.prompt-skill-library select,
+.prompt-skill-library input,
+.prompt-skill-library textarea,
+.prompt-skill-library button {
+  -webkit-tap-highlight-color: transparent;
+  --tw-ring-color: transparent !important;
+  --tw-ring-offset-color: transparent !important;
+  --tw-ring-offset-width: 0px !important;
+  --tw-ring-shadow: 0 0 #0000 !important;
+  --tw-ring-offset-shadow: 0 0 #0000 !important;
+}
+
+.prompt-skill-library select,
+.prompt-skill-library select:active,
+.prompt-skill-library select:focus,
+.prompt-skill-library select:focus-visible,
+.prompt-skill-library input,
+.prompt-skill-library input:active,
+.prompt-skill-library input:focus,
+.prompt-skill-library input:focus-visible,
+.prompt-skill-library textarea,
+.prompt-skill-library textarea:active,
+.prompt-skill-library textarea:focus,
+.prompt-skill-library textarea:focus-visible,
+.prompt-skill-library button:active,
+.prompt-skill-library button:focus,
+.prompt-skill-library button:focus-visible {
+  outline: none !important;
+  outline-offset: 0 !important;
+  box-shadow: none !important;
+  --tw-ring-color: transparent !important;
+  --tw-ring-offset-color: transparent !important;
+  --tw-ring-offset-width: 0px !important;
+  --tw-ring-shadow: 0 0 #0000 !important;
+  --tw-ring-offset-shadow: 0 0 #0000 !important;
+}
+
+:root:not(.retro) .prompt-skill-library input,
+:root:not(.retro) .prompt-skill-library textarea,
+:root:not(.retro) .prompt-skill-library select {
+  border-color: #27272f;
+}
+
+:root:not(.retro) .prompt-skill-library input:focus,
+:root:not(.retro) .prompt-skill-library textarea:focus,
+:root:not(.retro) .prompt-skill-library select:focus {
+  border-color: rgba(var(--mist-active-accent-rgb), 0.55) !important;
+}
+
+.prompt-skill-library select:-moz-focusring {
+  color: transparent;
+  text-shadow: 0 0 0 currentColor;
+}
+
+.mist-config-panel select,
+.mist-config-panel input,
+.mist-config-panel textarea,
+.mist-config-panel button {
+  -webkit-tap-highlight-color: transparent;
+  --tw-ring-color: transparent !important;
+  --tw-ring-offset-color: transparent !important;
+  --tw-ring-offset-width: 0px !important;
+  --tw-ring-shadow: 0 0 #0000 !important;
+  --tw-ring-offset-shadow: 0 0 #0000 !important;
+}
+
+.mist-config-panel select,
+.mist-config-panel select:active,
+.mist-config-panel select:focus,
+.mist-config-panel select:focus-visible,
+.mist-config-panel input,
+.mist-config-panel input:active,
+.mist-config-panel input:focus,
+.mist-config-panel input:focus-visible,
+.mist-config-panel textarea,
+.mist-config-panel textarea:active,
+.mist-config-panel textarea:focus,
+.mist-config-panel textarea:focus-visible,
+.mist-config-panel button:active,
+.mist-config-panel button:focus,
+.mist-config-panel button:focus-visible {
+  outline: none !important;
+  outline-offset: 0 !important;
+  box-shadow: none !important;
+  --tw-ring-color: transparent !important;
+  --tw-ring-offset-color: transparent !important;
+  --tw-ring-offset-width: 0px !important;
+  --tw-ring-shadow: 0 0 #0000 !important;
+  --tw-ring-offset-shadow: 0 0 #0000 !important;
+}
+
+.mist-config-panel select:-moz-focusring {
+  color: transparent;
+  text-shadow: 0 0 0 currentColor;
 }

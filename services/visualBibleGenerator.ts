@@ -4,6 +4,7 @@ import { runWithTask, getCallerName } from './taskManager';
 import { configService } from '../src/services/configService';
 import { GlobalVisualTone, MetonymyStylePreset, FinalAssetItem } from '../types';
 import { generateContentWithRuntime } from './geminiService';
+import { generatePromptSkillImage } from './promptSkillImageService';
 
 export interface VisualBibleAnalysisHints {
     medium?: 'PAINTING' | 'CGI' | 'PHOTOGRAPHY' | 'tangible';
@@ -11,39 +12,215 @@ export interface VisualBibleAnalysisHints {
     detailImages?: string[]; // Array of base64 images
 }
 
-const cleanAndParseJSON = (text: string) => {
-    try {
-        const firstBrace = text.indexOf('{');
-        const lastBrace = text.lastIndexOf('}');
+const stripJsonFences = (text: string) =>
+    text.replace(/```(?:json)?/gi, "").replace(/```/g, "").trim();
 
-        if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-            const jsonString = text.substring(firstBrace, lastBrace + 1);
-            try {
-                return JSON.parse(jsonString);
-            } catch (innerError) {
-                // If it fails, usually it's due to unescaped newlines. 
-                // A quick fix is to replace REAL newlines with escaped ones, 
-                // but this is risky for structural ones. 
-                // Let's try replacing all newlines EXCEPT ones that look like property boundaries.
-                const fuzzyFixed = jsonString
-                    .replace(/\n(?!\s*"[a-zA-Z0-9_]+"\s*:|\s*})/g, " ") // replace newline with space if not before a key or closing brace
-                    .trim();
-                try {
-                    return JSON.parse(fuzzyFixed);
-                } catch (fuzzyError) {
-                    console.error("JSON parse failed even after fuzzy fix", fuzzyError);
-                    return null;
-                }
-            }
+const extractFirstJsonBlock = (text: string): string => {
+    const firstObject = text.indexOf('{');
+    const firstArray = text.indexOf('[');
+    const starts = [firstObject, firstArray].filter(index => index >= 0);
+    if (!starts.length) return text;
+
+    const start = Math.min(...starts);
+    let objectDepth = 0;
+    let arrayDepth = 0;
+    let inString = false;
+    let escape = false;
+
+    for (let i = start; i < text.length; i++) {
+        const char = text[i];
+        if (escape) {
+            escape = false;
+            continue;
+        }
+        if (char === '\\' && inString) {
+            escape = true;
+            continue;
+        }
+        if (char === '"') {
+            inString = !inString;
+            continue;
+        }
+        if (inString) continue;
+
+        if (char === '{') objectDepth++;
+        if (char === '}') objectDepth--;
+        if (char === '[') arrayDepth++;
+        if (char === ']') arrayDepth--;
+
+        if (i > start && objectDepth === 0 && arrayDepth === 0) {
+            return text.slice(start, i + 1);
+        }
+    }
+
+    return text.slice(start);
+};
+
+const escapeControlCharactersInStrings = (text: string): string => {
+    let output = "";
+    let inString = false;
+    let escape = false;
+
+    for (const char of text) {
+        if (escape) {
+            output += char;
+            escape = false;
+            continue;
+        }
+        if (char === '\\' && inString) {
+            output += char;
+            escape = true;
+            continue;
+        }
+        if (char === '"') {
+            inString = !inString;
+            output += char;
+            continue;
+        }
+        if (inString && char === '\n') {
+            output += "\\n";
+            continue;
+        }
+        if (inString && char === '\r') {
+            output += "\\r";
+            continue;
+        }
+        if (inString && char === '\t') {
+            output += "\\t";
+            continue;
+        }
+        output += char;
+    }
+
+    return output;
+};
+
+const insertLikelyMissingCommas = (text: string): string => {
+    let output = "";
+    let inString = false;
+    let escape = false;
+    let previousSignificant = "";
+
+    for (const char of text) {
+        if (escape) {
+            output += char;
+            escape = false;
+            continue;
+        }
+        if (char === '\\' && inString) {
+            output += char;
+            escape = true;
+            continue;
+        }
+        if (char === '"') {
+            inString = !inString;
+            output += char;
+            previousSignificant = char;
+            continue;
         }
 
-        const cleanText = text.replace(/```json\n|\n```/g, "").replace(/```/g, "").trim();
-        return JSON.parse(cleanText);
-    } catch (e) {
-        console.error("Critical JSON Parse Error", e);
-        return null;
+        if (!inString) {
+            if ((char === '{' || char === '[') && (previousSignificant === '}' || previousSignificant === ']')) {
+                output += ",";
+            }
+            output += char;
+            if (!/\s/.test(char)) previousSignificant = char;
+            continue;
+        }
+
+        output += char;
     }
+
+    return output;
 };
+
+const repairJsonCandidate = (text: string): string =>
+    insertLikelyMissingCommas(escapeControlCharactersInStrings(text))
+        .replace(/,\s*([}\]])/g, "$1")
+        .trim();
+
+const getParseErrorContext = (text: string, error: unknown): string => {
+    const message = error instanceof Error ? error.message : String(error);
+    const positionMatch = message.match(/position\s+(\d+)/);
+    if (!positionMatch) return text.slice(0, 500);
+    const position = Number(positionMatch[1]);
+    const start = Math.max(0, position - 220);
+    const end = Math.min(text.length, position + 220);
+    return text.slice(start, end);
+};
+
+const cleanAndParseJSON = (text: string, options?: { silent?: boolean }) => {
+    const cleaned = stripJsonFences(text);
+    const extracted = extractFirstJsonBlock(cleaned);
+    const candidates = Array.from(new Set([
+        cleaned,
+        extracted,
+        repairJsonCandidate(cleaned),
+        repairJsonCandidate(extracted),
+    ])).filter(Boolean);
+
+    let lastError: unknown = null;
+    let lastCandidate = "";
+
+    for (const candidate of candidates) {
+        try {
+            return JSON.parse(candidate);
+        } catch (error) {
+            lastError = error;
+            lastCandidate = candidate;
+        }
+    }
+
+    if (!options?.silent) {
+        console.error("Visual Bible JSON parse failed", lastError, getParseErrorContext(lastCandidate, lastError));
+    }
+    return null;
+};
+
+const normalizeTextBasedVisualBible = (json: any): { toneAnalysis: GlobalVisualTone, assets: any } | null => {
+    if (!json?.assets || !json?.toneAnalysis) return null;
+
+    ['characters', 'scenes', 'props'].forEach(type => {
+        if (Array.isArray(json.assets[type])) {
+            json.assets[type] = json.assets[type].slice(0, 4).map((a: any) => ({
+                ...a,
+                id: a.id || Date.now().toString() + Math.random().toString(36).slice(2, 7),
+                analysis: {
+                    description: a.analysis?.description || '',
+                    descriptionEn: a.analysis?.descriptionEn || '',
+                    anchors: a.analysis?.anchors || '',
+                    anchorsEn: a.analysis?.anchorsEn || '',
+                    designPrompt: a.analysis?.designPrompt,
+                    designPromptEn: a.analysis?.designPromptEn,
+                    conceptPrompt: a.analysis?.conceptPrompt,
+                    conceptPromptEn: a.analysis?.conceptPromptEn,
+                }
+            }));
+        } else {
+            json.assets[type] = [];
+        }
+    });
+
+    return json;
+};
+
+const buildTextBasedVisualBibleRecoveryPrompt = (sourcePrompt: string, brokenOutput: string): string => `
+你刚才输出的 JSON 被截断或无法解析。请重新生成一个更短、更稳的 JSON。
+
+硬性要求：
+- 只返回 raw JSON object，不要 markdown，不要解释。
+- characters 最多 3 个，scenes 最多 3 个，props 最多 3 个。
+- 不要输出 designPrompt、designPromptEn、conceptPrompt、conceptPromptEn。
+- 每个 description 不超过 80 个中文字符；descriptionEn 不超过 25 个英文词。
+- 每个 anchors / anchorsEn 不超过 6 个短词。
+- 必须闭合所有字符串、数组和对象。
+
+沿用原任务，但把输出压缩到最短：
+${sourcePrompt}
+
+上一轮坏输出末尾片段，仅用于判断失败位置，不要照抄：
+${brokenOutput.slice(-1200)}
+`;
 
 const getMimeTypeFromBase64 = (base64String: string): string => {
     const match = base64String.match(/^data:(.+);base64,/);
@@ -52,6 +229,48 @@ const getMimeTypeFromBase64 = (base64String: string): string => {
 
 const getBase64Data = (base64String: string): string => {
     return base64String.split(',')[1] || base64String;
+};
+
+const fetchImageViaProxy = async (imageUrl: string): Promise<Response> => {
+    const parsed = new URL(imageUrl);
+    return fetch(`/__api_proxy${parsed.pathname}${parsed.search}`, {
+        headers: { 'X-Proxy-Target': parsed.origin }
+    });
+};
+
+const toInlineImageData = async (image: string): Promise<{ mimeType: string; data: string }> => {
+    if (image.startsWith('data:')) {
+        return {
+            mimeType: getMimeTypeFromBase64(image),
+            data: getBase64Data(image)
+        };
+    }
+
+    if (/^https?:\/\//i.test(image)) {
+        let response: Response;
+        try {
+            response = await fetch(image);
+        } catch {
+            response = await fetchImageViaProxy(image);
+        }
+
+        if (!response.ok) {
+            response = await fetchImageViaProxy(image);
+        }
+        if (!response.ok) throw new Error(`Image URL fetch failed: ${response.status}`);
+
+        const blob = await response.blob();
+        const mimeType = blob.type || 'image/jpeg';
+        const dataUrl = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(String(reader.result || ''));
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        });
+        return { mimeType, data: getBase64Data(dataUrl) };
+    }
+
+    return { mimeType: 'image/jpeg', data: image };
 };
 
 async function retryWithBackoff<T>(fn: (signal?: AbortSignal) => Promise<T>, retries = 3, delay = 1000): Promise<T> {
@@ -92,46 +311,45 @@ const handleApiError = (context: string, e: any) => {
     }
 };
 
-// 2.1 Analyze Global Tone from Image (Omni-Visual DNA Map)
-export const analyzeToneImage = async (imageUrl: string, hints?: VisualBibleAnalysisHints): Promise<GlobalVisualTone | null> => {
-    const mimeType = getMimeTypeFromBase64(imageUrl);
-    const imageBytes = getBase64Data(imageUrl);
+const getVisualBibleMediumLabel = (medium?: VisualBibleAnalysisHints['medium']) => {
+    if (medium === 'PAINTING') return '绘画/艺术媒介';
+    if (medium === 'CGI') return '计算生成/数字建模';
+    if (medium === 'PHOTOGRAPHY') return '镜头捕捉/写实摄影';
+    if (medium === 'tangible') return '实体手作/定格媒介';
+    return '';
+};
 
-    const hintText = hints ? `
+const buildToneImageHintText = (hints?: VisualBibleAnalysisHints): string => hints ? `
         # 人工审核预设与约束 (HUMAN HINTS & CONSTRAINTS)
-        ${hints.medium ? `*   **物理媒介 (Physical Medium):** ${hints.medium === 'PAINTING' ? '绘画/艺术媒介' : hints.medium === 'CGI' ? '计算生成/数字建模' : hints.medium === 'PHOTOGRAPHY' ? '镜头捕捉/写实摄影' : '实体手作/定格媒介'}` : ''}
+        ${hints.medium ? `*   **物理媒介 (Physical Medium):** ${getVisualBibleMediumLabel(hints.medium)}` : ''}
         ${hints.dialogue ? `*   **人工引导说明 (Manual Guidance):** ${hints.dialogue}` : ''}
     ` : '';
 
-    const systemInstruction = `
-        You are a world-class film colorist and art director. 
-        Your task is to analyze the provided "Tone Reference Image" and extract its visual DNA.
+const buildAssetImageHintText = (hints?: VisualBibleAnalysisHints): string => hints ? `
+        # 人工审核预设与约束 (HUMAN HINTS & CONSTRAINTS)
+        ${hints.medium ? `*   **物理媒介 (Physical Medium):** ${getVisualBibleMediumLabel(hints.medium)}` : ''}
+        ${hints.dialogue ? `*   **人工引导说明 (Manual Guidance):** ${hints.dialogue}` : ''}
         
-        ${hintText}
-
-        Output a strict JSON object with these fields:
-        {
-          "styleNameCN": "简短风格名 (中) (e.g. 暗黑魂系插画)",
-          "styleNameEN": "Short Style Name (EN) (e.g. Dark Souls Concept Art)",
-          
-          "palette": ["#Hex1", "#Hex2", "#Hex3", "#Hex4", "#Hex5", "#Hex6", "#Hex7"],
-          
-          "style": "中文 (e.g. 暗黑奇幻，厚涂风格)",
-          "styleEn": "EN (e.g. Dark Fantasy, Impasto)",
-
-          "lighting": "中文 (必须包含光比、色温、色调) (e.g. 高反差，3200K暖调，青色偏移)",
-          "lightingEn": "EN (e.g. High Contrast, 3200K Warm, Cyan Tint)",
-          
-          "camera": "中文 (e.g. 数字插画，布面纹理)",
-          "cameraEn": "EN (e.g. Digital Illustration, Canvas Texture)",
-          
-          "texture": "中文 (e.g. 粗糙笔触，油画质感)",
-          "textureEn": "EN (e.g. Heavy Brushstrokes, Painterly)"
-        }
+        # ⚠️ 绝对核心准则 (ABSOLUTE CORE RULES)
+        1. **信息保真：** 必须完全以上传的资产主图${hints.detailImages?.length ? '以及附加的细节参考图' : ''}为绝对标准。
+        2. **禁止擅自“加戏”：** 绝不要增加主图${hints.detailImages?.length ? '或参考图' : ''}里没有的武器、道具、配饰或花纹。严格参考图像内容。
+        3. **推演规则：** 假如主图是半身照，你需要推测出符合其风格的全身图下半身，但绝不要试图给它手里塞一把没出现过的剑，或者头上加一个没出现过的帽子。
+        4. **以图像为主导：** 所有的文字生成必须建立在我们提供的图片基础上，绝不能凭空捏造。
+        5. **主体细节与风格分离：** description 字段（主体细节）**仅仅**负责描述画中资产（角色、场景、道具）本身的视觉外观特征（长相、服装、结构等）。**绝对不要**在 description 字段中说“这是一幅xx作品”、“图为一张xx画作”、“采用了xx风格/材质”。画风和参数的反推只允许放在 technical_details 中。
+    ` : `
+        # ⚠️ 绝对核心准则 (ABSOLUTE CORE RULES)
+        1. **信息保真：** 必须完全以上传的资产主图为绝对标准。
+        2. **禁止擅自“加戏”：** 绝不要增加主图里没有的武器、道具、配饰或花纹。严格参考图像内容。
+        3. **推演规则：** 假如主图是半身照，你需要推测出符合其风格的全身图下半身，但绝不要试图给它手里塞一把没出现过的剑，或者头上加一个没出现过的帽子。
+        4. **以图像为主导：** 所有的文字生成必须建立在我们提供的图片基础上，绝不能凭空捏造。
+        5. **主体细节与风格分离：** description 字段（主体细节）**仅仅**负责描述画中资产（角色、场景、道具）本身的视觉外观特征（长相、服装、结构等）。**绝对不要**在 description 字段中说“这是一幅xx作品”、“图为一张xx画作”、“采用了xx风格/材质”。画风和参数的反推只允许放在 technical_details 中。
     `;
 
-    const tonePrompt = `
-        Role: 资深美术指导 & 调色师 (Senior Art Director & Colorist).
+export const buildToneImageAnalysisPrompt = (hints?: VisualBibleAnalysisHints): string => {
+    const hintText = buildToneImageHintText(hints);
+
+    return `
+        角色：资深美术指导 & 调色师 (Senior Art Director & Colorist)。
 
         # 任务 (Task)
         提取图像的 **"全局视觉基因 (Global Visual DNA)"**。
@@ -172,63 +390,32 @@ export const analyzeToneImage = async (imageUrl: string, hints?: VisualBibleAnal
 
         # 输出格式 (STRICT JSON)
         {
-          "styleNameCN": "简短风格名 (中) (e.g. 暗黑魂系插画)",
-          "styleNameEN": "Short Style Name (EN) (e.g. Dark Souls Concept Art)",
+          "styleNameCN": "简短中文风格名，例如：暗黑魂系插画",
+          "styleNameEN": "简短英文风格名，例如：Dark Souls Concept Art",
           
           "palette": ["#Hex1", "#Hex2", "#Hex3", "#Hex4", "#Hex5", "#Hex6", "#Hex7"],
           
-          "style": "中文 (e.g. 暗黑奇幻，厚涂风格)",
-          "styleEn": "EN (e.g. Dark Fantasy, Impasto)",
+          "style": "中文艺术与风格摘要，例如：暗黑奇幻，厚涂风格",
+          "styleEn": "英文艺术与风格摘要，例如：Dark Fantasy, Impasto",
 
-          "lighting": "中文 (必须包含光比、色温、色调) (e.g. 高反差，3200K暖调，青色偏移)",
-          "lightingEn": "EN (e.g. High Contrast, 3200K Warm, Cyan Tint)",
+          "lighting": "中文光影摘要，必须包含光比、色温、色调，例如：高反差，3200K暖调，青色偏移",
+          "lightingEn": "英文光影摘要，例如：High Contrast, 3200K Warm, Cyan Tint",
           
-          "camera": "中文 (e.g. 数字插画，布面纹理)",
-          "cameraEn": "EN (e.g. Digital Illustration, Canvas Texture)",
+          "camera": "中文媒介与格式摘要，例如：数字插画，布面纹理",
+          "cameraEn": "英文媒介与格式摘要，例如：Digital Illustration, Canvas Texture",
           
-          "texture": "中文 (e.g. 粗糙笔触，油画质感)",
-          "textureEn": "EN (e.g. Heavy Brushstrokes, Painterly)"
+          "texture": "中文质感摘要，例如：粗糙笔触，油画质感",
+          "textureEn": "英文质感摘要，例如：Heavy Brushstrokes, Painterly"
         }
     `;
-    try {
-        const model = configService.getEngineModel('visualBible') || 'gemini-3.1-pro-preview';
-        console.log(`[VisualBible] Analyzing Tone Image with model: ${model}, Hints: ${JSON.stringify(hints)}`);
-        const res = await retryWithBackoff<GenerateContentResponse>(() => generateContentWithRuntime({
-            model: model,
-            contents: { parts: [{ text: tonePrompt }, { inlineData: { mimeType, data: imageBytes } }] },
-            config: { responseMimeType: 'application/json', engineId: 'visualBible' }
-        }));
-
-        return cleanAndParseJSON(res.text || "");
-    } catch (e: any) {
-        handleApiError("Tone Analysis Failed", e);
-        return null;
-    }
 };
 
-export const analyzeAssetImage = async (imageUrl: string, type: 'CHARACTER' | 'SCENE' | 'PROP' | 'OBJECT', hints?: VisualBibleAnalysisHints, assetName?: string): Promise<{ anchors: string, anchorsEn: string, description: string, descriptionEn: string, designPrompt?: string, designPromptEn?: string, conceptPrompt?: string, conceptPromptEn?: string } | null> => {
-    const mimeType = getMimeTypeFromBase64(imageUrl);
-    const imageBytes = getBase64Data(imageUrl);
-
-    const hintText = hints ? `
-        # 人工审核预设与约束 (HUMAN HINTS & CONSTRAINTS)
-        ${hints.medium ? `*   **物理媒介 (Physical Medium):** ${hints.medium === 'PAINTING' ? '绘画/艺术媒介' : hints.medium === 'CGI' ? '计算生成/数字建模' : hints.medium === 'PHOTOGRAPHY' ? '镜头捕捉/写实摄影' : '实体手作/定格媒介'}` : ''}
-        ${hints.dialogue ? `*   **人工引导说明 (Manual Guidance):** ${hints.dialogue}` : ''}
-        
-        # ⚠️ 绝对核心准则 (ABSOLUTE CORE RULES)
-        1. **信息保真：** 必须完全以上传的资产主图${hints.detailImages?.length ? '以及附加的细节参考图' : ''}为绝对标准。
-        2. **禁止擅自“加戏”：** 绝不要增加主图${hints.detailImages?.length ? '或参考图' : ''}里没有的武器、道具、配饰或花纹。严格参考图像内容。
-        3. **推演规则：** 假如主图是半身照，你需要推测出符合其风格的全身图下半身，但绝不要试图给它手里塞一把没出现过的剑，或者头上加一个没出现过的帽子。
-        4. **以图像为主导：** 所有的文字生成必须建立在我们提供的图片基础上，绝不能凭空捏造。
-        5. **主体细节与风格分离：** description 字段（主体细节）**仅仅**负责描述画中资产（角色、场景、道具）本身的视觉外观特征（长相、服装、结构等）。**绝对不要**在 description 字段中说“这是一幅xx作品”、“图为一张xx画作”、“采用了xx风格/材质”。画风和参数的反推只允许放在 technical_details 中。
-    ` : `
-        # ⚠️ 绝对核心准则 (ABSOLUTE CORE RULES)
-        1. **信息保真：** 必须完全以上传的资产主图为绝对标准。
-        2. **禁止擅自“加戏”：** 绝不要增加主图里没有的武器、道具、配饰或花纹。严格参考图像内容。
-        3. **推演规则：** 假如主图是半身照，你需要推测出符合其风格的全身图下半身，但绝不要试图给它手里塞一把没出现过的剑，或者头上加一个没出现过的帽子。
-        4. **以图像为主导：** 所有的文字生成必须建立在我们提供的图片基础上，绝不能凭空捏造。
-        5. **主体细节与风格分离：** description 字段（主体细节）**仅仅**负责描述画中资产（角色、场景、道具）本身的视觉外观特征（长相、服装、结构等）。**绝对不要**在 description 字段中说“这是一幅xx作品”、“图为一张xx画作”、“采用了xx风格/材质”。画风和参数的反推只允许放在 technical_details 中。
-    `;
+export const buildAssetImageAnalysisPrompt = (
+    type: 'CHARACTER' | 'SCENE' | 'PROP' | 'OBJECT',
+    hints?: VisualBibleAnalysisHints,
+    assetName?: string
+): string => {
+    const hintText = buildAssetImageHintText(hints);
 
     let nameInstruction = "";
     if (assetName) {
@@ -240,7 +427,6 @@ export const analyzeAssetImage = async (imageUrl: string, type: 'CHARACTER' | 'S
         `;
     }
 
-    // Dynamic instructions based on asset type
     let typeSpecificInstruction = "";
     if (type === 'SCENE') {
         typeSpecificInstruction = `
@@ -264,97 +450,118 @@ export const analyzeAssetImage = async (imageUrl: string, type: 'CHARACTER' | 'S
     let systemInstruction = "";
     if (type === 'CHARACTER') {
         systemInstruction = `
-      You are an expert concept artist and prompt engineer.
-      Analyze the uploaded image as a CHARACTER reference.
+      角色：资深概念艺术家 & Prompt Engineer。
+      任务：把上传图像作为 CHARACTER reference 进行解析。
       
-      Your goal is to generate a prompt that will recreate this character in a specific "Character Design Sheet" layout, maintaining ABSOLUTE fidelity to the original style, colors, and features.
+      目标：生成能够复现该角色的 Character Design Sheet 指令；必须绝对忠实于原图的风格、颜色与可见特征。
       
-      Output a STRICT JSON object with the following structure:
+      只输出 STRICT JSON object，结构如下：
       {
-        "description": "Visual description in Chinese. ONLY describe physical features and clothing. DO NOT mention art style, medium, or that it is a painting/photo.",
-        "descriptionEn": "Visual description in English. ONLY describe physical features and clothing. DO NOT mention art style, medium, or that it is a painting/photo.",
-        "anchors": "3-5 key tags in Chinese",
-        "anchorsEn": "3-5 key tags in English",
-        "prompt": "<Generate a highly detailed English prompt describing a 16:9 design sheet. You MUST output EXACTLY this structure with the bracketed parts filled in: Create a professional character design sheet with a 16:9 layout. [TOP LEFT CORNER]: Explicitly write the text '--Role: [insert character name if provided, OR if none, a brief descriptive visual title like 'White-haired elder', DO NOT invent proper names]'. [LEFT PANEL (30% Width)]: A vertical column containing 3 distinct portrait formats of the character's face/head (Front, 3/4 Side, Profile angle). [CENTER PANEL (40% Width)]: The top section shows a neat row of full-body views from all angles (Front, 3/4 Front, Side, 3/4 Back, Back). Describe the clothing in extreme detail. **CRITICAL: If the reference is a half-body shot, logically infer the matching lower body (e.g., specific pants or skirt) and apply it completely consistently across ALL views and the action pose. Do not mix skirts and pants.** The bottom section shows an action pose of the character. [RIGHT PANEL (30% Width)]: Show detailed props/accessories. MUST include text labels under each prop explicitly naming it. Also include a vertical color palette strip on the far right. [BOTTOM ROW]: A horizontal strip of 7 square panels showcasing extreme close-up details: 1) [detail 1], 2) [detail 2], etc. MUST include clear text labels under each of the 7 panels explicitly stating what the detail is (e.g., 'leather boots', 'butterfly tattoo'). DO NOT include any other random text on the page. The image MUST use a clean, solid neutral color background. Maintain ABSOLUTELY identical style to the reference image (including the degree of realism, whether it's photography or animation, rendering method, material texture, color grading, and overall aesthetic style). High resolution, 8k.>",
-        "promptCN": "<Generate a Chinese prompt following EXACTLY this structure, substituting only the bracketed parts with specific details. DO NOT include these instructions in your output, START YOUR OUTPUT DIRECTLY WITH '生成一张': 生成一张专业的角色设定图。采用 16:9 布局。排版如下：【左上角】：明确写上文字“--角色：[如果用户有输入资产名称则直接写该名称，如果没有则根据画面拟定一个纯描述性的称呼如‘白发老人’，绝不可乱编姓名]”。【左侧面板 (30%宽度)】：该角色的三个不同形态的脸部特写（正面、3/4侧面、侧脸）。【中央面板 (40%宽度)】：上半部分展示一排的全身各角度视图（正面, 3/4正面, 侧面, 3/4背面, 背面），[在此描写服装。!!强烈注意!!：如果原片只有半身，你必须合理推测下半身穿着（如裙子或裤子的款式），且【必须】保证多视图与下方的动作姿态图中人物的服饰【完全一致】，绝不能多视图穿裤子而动作姿势穿裙子]；下半部分展示同一个角色的一个动作姿态。【右侧面板 (30%宽度)】：[详细列出道具及武器]，且【必须】在道具下方用文字写上名称标注（如‘雪饮狂刀’），并在最右侧边缘附带色卡。【底部排】：水平排列的 7 个特写正方形方块，展示细节：1)[特写1], 2)[特写2]...，且【必须】在每个特写的底下写上该特写的名称标注（例如：‘布鞋’、‘皮鞋’、‘蝴蝶纹身’）。画面中除了明确要求的标注点外，不要有其他的多余文字。使用干净、素色的中性背景。保持与参考图完全一致的风格（包括写实程度、这是摄影还是动画、渲染方式、材质质感、色彩处理和整体美学风格）。高分辨率，8k。>",
-        "conceptPromptEn": "<Generate a highly detailed English prompt describing a 16:9 concept art sheet. You MUST output EXACTLY this structure with the bracketed parts filled in with specific visual details from the image: Create a professional character concept art sheet with a 16:9 layout. [TOP LEFT CORNER]: Explicitly write the text '--Role: [insert character name if any, otherwise leave blank]'. [LEFT PANEL (35% Width)]: A highly detailed character portrait close-up showing [insert face and upper body details]. [RIGHT PANEL (65% Width)]: A 3-view turnaround of the character (Front, Side, Back) showing [insert highly detailed clothing/armor descriptions from the image]. Throughout the sheet, include small text labels pointing to detailed feature names: [list 3-5 specific key accessories/details from the image to be labeled]. The image MUST use a clean, solid neutral color background. Maintain ABSOLUTELY identical style to the reference image (including the degree of realism, whether it's photography or animation, rendering method, material texture, color grading, and overall aesthetic style). High resolution, 8k.>",
-        "conceptPrompt": "<Generate a Chinese prompt following EXACTLY this structure, substituting only the bracketed parts with specific details from the image. DO NOT include these instructions in your output, START YOUR OUTPUT DIRECTLY WITH '生成一张': 生成一张专业的角色概念设定图。采用 16:9 布局。排版如下：【左上角】：明确写上文字“--角色：[如果图中有名字则填写，否则留空]”。【左侧面板 (35%宽度)】：一个极致清晰的角色头部与上半身特写，展示[在此处仔细描写脸部和上半身细节]。【右侧面板 (65%宽度)】：角色的三视图（正面、侧面、背面），展示[在此处仔细描写图中完整的服装外观和材质细节]。在整个画面中，用细微的文字标签旁注标出细节特征的名称：[详细列出原图中3-5个真实存在的显著细节或配饰作为标签标注]。使用干净、素色的中性背景。保持与参考图完全一致的风格（包括写实程度、这是摄影还是动画、渲染方式、材质质感、色彩处理和整体美学风格）。高分辨率，8k。>",
+        "description": "中文视觉描述。只描述身体特征与服装，不要提艺术风格、媒介，也不要说这是一张画或照片。",
+        "descriptionEn": "英文视觉描述。只描述身体特征与服装，不要提艺术风格、媒介，也不要说这是一张画或照片。",
+        "anchors": "3-5 个中文关键标签",
+        "anchorsEn": "3-5 个英文关键标签",
+        "prompt": "<输出英文 prompt：描述一张 16:9 Character Design Sheet。必须包含：左上角文字 --Role: [角色名或纯视觉称呼]；左侧 30% 为正面、3/4 侧面、侧脸三种头像；中央 40% 为正面、3/4 正面、侧面、3/4 背面、背面全身多视图，并严格推断半身图缺失的下半身且全表一致；右侧 30% 展示道具/配饰与文字标签；底部 7 个细节特写方块并附标签；使用干净中性背景；保持与参考图完全一致的写实程度、摄影/动画属性、渲染方式、材质质感、色彩处理和整体美学。High resolution, 8k.>",
+        "promptCN": "<输出中文 prompt：直接从“生成一张”开始，按上述 Character Design Sheet 结构生成中文排版指令；用原图中的具体细节替换所有占位内容；不得添加多余文字；保持与参考图完全一致的风格与特征。>",
+        "conceptPromptEn": "<输出英文 prompt：描述一张 16:9 Character Concept Art Sheet。必须包含：左上角 --Role: [角色名，如无则留空]；左侧 35% 为高细节头像/上半身特写；右侧 65% 为 Front / Side / Back 三视图；标注 3-5 个原图真实存在的关键配饰或细节；中性纯色背景；保持与参考图完全一致的风格、材质、色彩和美学。High resolution, 8k.>",
+        "conceptPrompt": "<输出中文 prompt：直接从“生成一张”开始，按上述角色概念设定图结构生成中文指令；所有占位内容必须替换为原图中的具体视觉细节。>",
         "technical_details": {
-          "lighting": "e.g. Studio lighting",
-          "camera": "e.g. Telephoto",
-          "style": "e.g. Concept Art"
+          "lighting": "例如：Studio lighting",
+          "camera": "例如：Telephoto",
+          "style": "例如：Concept Art"
         }
       }
       `;
     } else if (type === 'SCENE') {
         systemInstruction = `
-      You are an expert concept artist and prompt engineer.
-      Analyze the uploaded image as a SCENE/ENVIRONMENT reference.
+      角色：资深概念艺术家 & Prompt Engineer。
+      任务：把上传图像作为 SCENE / ENVIRONMENT reference 进行解析。
       
-      Determine if the scene is an INTERIOR (inside a building/room) or an EXTERIOR (landscape/outside).
-      Your goal is to generate a prompt that will recreate this scene in a specific "Environment Design Sheet" layout, maintaining ABSOLUTE fidelity to the original style, colors, and features.
+      先判断场景是 INTERIOR（室内/建筑内部）还是 EXTERIOR（室外/景观）。
+      目标：生成能够复现该场景的 Environment Design Sheet 指令；必须绝对忠实于原图的风格、颜色与可见特征。
       
-      If it is an INTERIOR scene, use this layout logic:
+      如果是 INTERIOR scene，使用以下 layout logic:
       "Create a professional Interior Environment Concept Art design sheet for a cinematic scene, with a specific 16:9 layout. The layout is divided as follows: CENTER PANEL (50% Width): A large, highly detailed cinematic wide shot of the interior room showing the complete architectural structure and furniture layout. LEFT PANEL (20% Width): A vertical column showing 3 alternative camera angles with text labels: 1) 'Reverse Angle' (showing the opposite view of the main shot), 2) 'Top-Down View' (layout/floor plan), 3) 'Side View'. TOP ROW (Above Center, 15% Height): 3 thumbnails showing lighting variations of the same room with text labels: 1) 'Daytime / Natural Light', 2) 'Sunset / Golden Hour', 3) 'Night / Artificial Lights'. RIGHT PANEL (10% Width): A vertical color palette strip showing primary, secondary, and accent colors. BOTTOM ROW (20% Height): A horizontal strip of 5 circular or square panels showcasing extreme close-up material details: 1) wall texture/wallpaper, 2) flooring material (e.g., hardwood/marble), 3) upholstery fabric, 4) window curtain drape, 5) an intricate prop/decor detail (e.g., chandelier or vase)."
 
-      If it is an EXTERIOR scene, use this layout logic:
+      如果是 EXTERIOR scene，使用以下 layout logic:
       "Create a professional Exterior Environment Concept Art design sheet for a cinematic landscape, with a specific 16:9 layout. The layout is divided as follows: CENTER PANEL (50% Width): A massive, breathtaking establishing wide shot of the exterior landscape and architecture, showing massive scale and geography. LEFT PANEL (20% Width): A vertical column showing 3 alternative camera angles with text labels: 1) 'Reverse Angle' (looking outward from the architecture), 2) 'Bird's-Eye View' (top-down terrain), 3) 'Side Profile / Close-up view'. TOP ROW (Above Center, 15% Height): 3 thumbnails showing weather and atmospheric variations of the main shot with text labels: 1) 'Clear Sunny Day', 2) 'Moody Atmospheric Fog', 3) 'Dark Stormy Night / Nighttime'. RIGHT PANEL (10% Width): A vertical color palette strip (earth tones, sky colors) and a small human silhouette for scale reference. BOTTOM ROW (20% Height): A horizontal strip of 5 square panels showcasing extreme close-up environmental textures: 1) weathered stone/ruin masonry, 2) climbing vines/moss/foliage, 3) ground terrain (dirt/mud/grass), 4) structural detail (e.g., a broken window or battlement), 5) background elements (e.g., tree bark or distant mountains)."
 
-      Output a STRICT JSON object with the following structure:
+      只输出 STRICT JSON object，结构如下：
       {
-        "description": "Visual description in Chinese. ONLY describe the environment, architecture, and elements. DO NOT mention art style, medium, or that it is a painting/photo.",
-        "descriptionEn": "Visual description in English. ONLY describe the environment, architecture, and elements. DO NOT mention art style, medium, or that it is a painting/photo.",
-        "anchors": "3-5 key tags in Chinese",
-        "anchorsEn": "3-5 key tags in English",
-        "prompt": "<Generate a highly detailed English prompt describing a 16:9 design sheet. You MUST ADAPT the chosen layout (Interior or Exterior) by substituting generic terms with specific details from the image. For example, instead of 'wall texture', write 'cracked cobblestone wall texture'. Must strictly match original style. High res, 8k.>",
+        "description": "中文视觉描述。只描述环境、建筑和画面元素，不要提艺术风格、媒介，也不要说这是一张画或照片。",
+        "descriptionEn": "英文视觉描述。只描述环境、建筑和画面元素，不要提艺术风格、媒介，也不要说这是一张画或照片。",
+        "anchors": "3-5 个中文关键标签",
+        "anchorsEn": "3-5 个英文关键标签",
+        "prompt": "<输出英文 prompt：描述一张 16:9 Environment Design Sheet。必须根据 Interior 或 Exterior layout 替换所有泛称，把 wall texture / ground terrain 等写成原图中的具体元素，例如 cracked cobblestone wall texture。必须严格匹配原图风格。High res, 8k.>",
         "promptCN": "<翻译上方的英文 prompt 为极其详细的中文排版指令。千万不要照抄通用词汇，必须将诸如【墙壁纹理】、【地面材质】等替换为画面中的实际元素细节。画风和特征必须与参考图绝对一致。高分辨率，8k。>",
-        "conceptPromptEn": "<Generate a highly detailed English prompt describing a 16:9 concept art sheet. You MUST output EXACTLY this structure with the bracketed parts filled in: Create a professional Environment Concept Art design sheet with a 16:9 layout. The layout is divided into 4 equal quadrants. [TOP LEFT]: The original main wide shot of the scene showing [insert highly detailed description of the main environment]. [TOP RIGHT]: 'Reverse Angle' showing the opposite view of the main shot, detailing [describe the reverse view]. [BOTTOM LEFT]: 'Top-Down View' (layout/floor plan) if interior, or 'Bird's-Eye View' if exterior, showing [describe the top-down arrangement]. [BOTTOM RIGHT]: 'Side View' showing [describe the side profile view]. Each quadrant MUST have a text label stating its view angle. The image MUST use a clean, solid neutral color background. Maintain ABSOLUTELY identical style to the reference image (including realism, medium, rendering, and overall aesthetic style). High resolution, 8k.>",
-        "conceptPrompt": "<Generate a Chinese prompt following EXACTLY this structure, substituting only the bracketed parts with specific details. DO NOT include these instructions in your output, START YOUR OUTPUT DIRECTLY WITH '生成一张': 生成一张专业的场景概念设定图。采用 16:9 布局。排版清晰地分为四个相等的象限区块（左上、右上、左下、右下）。【左上】：场景的原始主视角全景，展示[在此处仔细描写场景的主视觉环境细节]。【右上】：“反向视角（Reverse Angle）”，展示主视角的相反方向，包含[描写反向视角的细节]。【左下】：若是室内则为“俯视图（Top-Down View/平面图）”，若是室外则为“鸟瞰图（Bird's-Eye View）”，展示[描写俯视的布局安排]。【右下】：“侧视图（Side View）”，展示[描写侧面的轮廓与结构细节]。每个象限区块的下方【必须】包含明确的文字标签，标明该区块的视角视角名称（如‘Reverse Angle’）。使用干净、素色的中性背景。保持与参考图完全一致的风格（包括写实程度、渲染方式、材质质感、色彩处理和整体美学风格）。高分辨率，8k。>",
+        "conceptPromptEn": "<输出英文 prompt：描述一张 16:9 Environment Concept Art Sheet。四等分象限：Top Left 为原始主广角；Top Right 为 Reverse Angle；Bottom Left 室内为 Top-Down View / 室外为 Bird's-Eye View；Bottom Right 为 Side View；每个象限必须有英文视角标签；中性纯色背景；保持与参考图完全一致的 realism、medium、rendering 和整体美学。High resolution, 8k.>",
+        "conceptPrompt": "<输出中文 prompt：直接从“生成一张”开始，描述一张 16:9 专业场景概念设定图。四等分象限：左上原始主视角全景，右上 Reverse Angle，左下室内 Top-Down View / 室外 Bird's-Eye View，右下 Side View；所有占位内容必须替换为原图具体空间细节；每个象限下方必须有视角标签；保持与参考图完全一致的风格、材质、色彩和美学。>",
         "technical_details": {
-          "lighting": "e.g. Atmospheric",
-          "camera": "e.g. Wide angle",
-          "style": "e.g. Concept Art"
+          "lighting": "例如：Atmospheric",
+          "camera": "例如：Wide angle",
+          "style": "例如：Concept Art"
         }
       }
       `;
     } else {
         systemInstruction = `
-      You are an expert concept artist and prompt engineer.
-      Analyze the uploaded image as a PROP/OBJECT reference.
+      角色：资深概念艺术家 & Prompt Engineer。
+      任务：把上传图像作为 PROP / OBJECT reference 进行解析。
       
-      Your goal is to generate a prompt that will recreate this prop in a specific "Industrial Design Sheet" layout, maintaining ABSOLUTE fidelity to the original style, colors, and features.
+      目标：生成能够复现该道具/物体的 Industrial Design Sheet 指令；必须绝对忠实于原图的风格、颜色与可见特征。
       
-      Output a STRICT JSON object with the following structure:
+      只输出 STRICT JSON object，结构如下：
       {
-        "description": "Visual description in Chinese. ONLY describe the object's physical appearance, materials, and structure. DO NOT mention art style, medium, or that it is a painting/photo.",
-        "descriptionEn": "Visual description in English. ONLY describe the object's physical appearance, materials, and structure. DO NOT mention art style, medium, or that it is a painting/photo.",
-        "anchors": "3-5 key tags in Chinese",
-        "anchorsEn": "3-5 key tags in English",
-        "prompt": "<Generate a highly detailed English prompt describing a 16:9 industrial design sheet. You MUST ADAPT the layout by substituting generic terms with specific details from the object in the image. Layout: TOP: Left (50%): 3/4 perspective. Right (50%): Orthographic views. BOTTOM: 4 panels: 1) [specific internal structure/X-ray of the object], 2) [specific extreme close-up of its material], 3) [specific functional demo/assembly], 4) [alternative color/material variant]. Must strictly match original style. High res, 8k.>",
+        "description": "中文视觉描述。只描述物体外观、材料和结构，不要提艺术风格、媒介，也不要说这是一张画或照片。",
+        "descriptionEn": "英文视觉描述。只描述物体外观、材料和结构，不要提艺术风格、媒介，也不要说这是一张画或照片。",
+        "anchors": "3-5 个中文关键标签",
+        "anchorsEn": "3-5 个英文关键标签",
+        "prompt": "<输出英文 prompt：描述一张 16:9 Industrial Design Sheet。必须根据原图物体替换所有泛称。Layout: TOP 左 50% 为 3/4 perspective，右 50% 为 Orthographic views；BOTTOM 四格分别为：1) 该物体的具体 internal structure / X-ray，2) 具体材质 extreme close-up，3) 具体 functional demo / assembly，4) alternative color / material variant。必须严格匹配原图风格。High res, 8k.>",
         "promptCN": "<翻译上方的英文 prompt 为极其详细的中文排版指令。千万不要照抄通用词汇，必须将【内部结构】、【材质特写】等替换为针对该具体物体的详细描述。画风和特征必须与参考图绝对一致。高分辨率，8k。>",
         "technical_details": {
-          "lighting": "e.g. Product lighting",
-          "camera": "e.g. Macro",
-          "style": "e.g. Industrial Design"
+          "lighting": "例如：Product lighting",
+          "camera": "例如：Macro",
+          "style": "例如：Industrial Design"
         }
       }
       `;
     }
 
-    const fullPrompt = `${systemInstruction}\n\n${hintText}\n\n${nameInstruction}\n\n${typeSpecificInstruction}`;
-    let parts: any[] = [{ text: fullPrompt }, { inlineData: { mimeType, data: imageBytes } }];
-    if (hints?.detailImages?.length) {
-        hints.detailImages.forEach(imgBase => {
-            parts.push({
-                inlineData: {
-                    mimeType: getMimeTypeFromBase64(imgBase),
-                    data: getBase64Data(imgBase)
-                }
-            });
-        });
+    return `${systemInstruction}\n\n${hintText}\n\n${nameInstruction}\n\n${typeSpecificInstruction}`;
+};
+
+// 2.1 Analyze Global Tone from Image (Omni-Visual DNA Map)
+export const analyzeToneImage = async (imageUrl: string, hints?: VisualBibleAnalysisHints): Promise<GlobalVisualTone | null> => {
+    const tonePrompt = buildToneImageAnalysisPrompt(hints);
+    try {
+        const inlineImage = await toInlineImageData(imageUrl);
+        const model = configService.getEngineModel('visualBible') || 'gemini-3.1-pro-preview';
+        console.log(`[VisualBible] Analyzing Tone Image with model: ${model}, Hints: ${JSON.stringify(hints)}`);
+        const res = await retryWithBackoff<GenerateContentResponse>(() => generateContentWithRuntime({
+            model: model,
+            contents: { parts: [{ text: tonePrompt }, { inlineData: inlineImage }] },
+            config: { responseMimeType: 'application/json', engineId: 'visualBible' }
+        }));
+
+        return cleanAndParseJSON(res.text || "");
+    } catch (e: any) {
+        handleApiError("Tone Analysis Failed", e);
+        return null;
     }
+};
+
+export const analyzeAssetImage = async (imageUrl: string, type: 'CHARACTER' | 'SCENE' | 'PROP' | 'OBJECT', hints?: VisualBibleAnalysisHints, assetName?: string): Promise<{ anchors: string, anchorsEn: string, description: string, descriptionEn: string, designPrompt?: string, designPromptEn?: string, conceptPrompt?: string, conceptPromptEn?: string } | null> => {
+    const fullPrompt = buildAssetImageAnalysisPrompt(type, hints, assetName);
 
     try {
+        let parts: any[] = [{ text: fullPrompt }, { inlineData: await toInlineImageData(imageUrl) }];
+        if (hints?.detailImages?.length) {
+            const detailParts = await Promise.all(hints.detailImages.map(async imgBase => ({
+                inlineData: await toInlineImageData(imgBase)
+            })));
+            parts = [...parts, ...detailParts];
+        }
+
         const model = configService.getEngineModel('visualBible') || 'gemini-3.1-pro-preview';
         console.log(`[VisualBible] Analyzing Asset Image (${type}) with model: ${model}`);
         const res = await retryWithBackoff<GenerateContentResponse>(() => generateContentWithRuntime({
@@ -504,8 +711,8 @@ export const buildTextBasedVisualBiblePrompt = (text: string, hints?: VisualBibl
     ` : '';
 
     return `
-    Role: 影视资产统筹 & 视觉连续性编辑 (Asset Continuity Supervisor & Visual Bible Editor).
-    Task: 读取 SOURCE TEXT，生成 **“原文事实视觉圣经 (Source-Factual Visual Bible)”**。
+    角色：影视资产统筹 & 视觉连续性编辑 (Asset Continuity Supervisor & Visual Bible Editor)。
+    任务：读取 SOURCE TEXT，生成 **“原文事实视觉圣经 (Source-Factual Visual Bible)”**。
     核心目标：提取全文已经出现或物理必然成立的视觉资产、外貌描述、材质事实和空间事实；不得提前建立最终美术风格、调色、媒介或滤镜。
 
     ${hintText}
@@ -523,6 +730,7 @@ export const buildTextBasedVisualBiblePrompt = (text: string, hints?: VisualBibl
     # 2. 资产提取 (ASSET EXTRACTION)
     识别全文中后续需要保持一致的 **角色 (Characters)**、**场景 (Scenes)** 和 **道具 (Props)**。
     资产必须是故事中已经出现、被明确提及、反复影响叙事，或对视觉连续性重要的对象。
+    **数量上限:** characters 最多 4 个，scenes 最多 4 个，props 最多 4 个。次要或一次性出现的对象不要列入。
 
     # 3. 外貌描述必须回来 (CHARACTER APPEARANCE REQUIRED)
     每个角色资产的 description 必须是“外貌描述”，而不是性格、命运、主题解释。
@@ -533,17 +741,20 @@ export const buildTextBasedVisualBiblePrompt = (text: string, hints?: VisualBibl
     *   当前源文本能确认的姿态/携带物/可见状态
     如果源文本未明示某项，不要编造，写“未明示，需后续资产设计锁定”。
 
-    # 4. 生成提示词边界 (PROMPT BOUNDARY)
-    designPrompt / conceptPrompt 可以生成，但只能是“中性资产设定图提示词”：用于锁定外貌、结构、服装、道具和空间事实。
-    不得把它们写成最终风格提示词，不得加入导演风格、调色、媒介、滤镜或表层美术流派。
+    # 4. 输出长度硬限制 (OUTPUT BUDGET)
+    这是一次“全局原文反推”，不是资产生图提示词生成。
+    **不要输出 designPrompt / designPromptEn / conceptPrompt / conceptPromptEn。**
+    每个 anchors 最多 8 个短词；每个 description 最多 120 个中文字符；每个 descriptionEn 最多 35 个英文词。
+    toneAnalysis 的 style / lighting / camera / texture 每项最多 80 个中文字符，对应英文最多 30 个英文词。
+    如果信息不足，写“未明示，需后续资产设计锁定”，不要展开解释。
 
     # 5. 反比喻具象化 (ANTI-LITERAL METAPHOR)
     修辞比喻只能作为气氛、身体感或动作质感的依据，不能直译成真实道具、颜色、实体或声音来源。
 
-    Source Text:
+    源文本 (Source Text):
     "${text.slice(0, 3000)}"
 
-    # OUTPUT FORMAT (STRICT JSON)
+    # 输出格式 (STRICT JSON)
     {
       "toneAnalysis": {
         "styleNameCN": "原文事实视觉",
@@ -551,31 +762,60 @@ export const buildTextBasedVisualBiblePrompt = (text: string, hints?: VisualBibl
         
         "palette": ["#Hex1", "#Hex2", "#Hex3", "#Hex4", "#Hex5", "#Hex6", "#Hex7"],
 
-        "style": "CN summary of world visual facts only",
-        "styleEn": "EN summary of world visual facts only",
+        "style": "中文世界视觉事实摘要，只写事实层",
+        "styleEn": "英文世界视觉事实摘要，只写事实层",
 
-        "lighting": "CN summary of factual light/weather/time only",
-        "lightingEn": "EN summary of factual light/weather/time only",
+        "lighting": "中文事实光源/天气/时间摘要",
+        "lightingEn": "英文事实光源/天气/时间摘要",
         
-        "camera": "CN summary of observation/camera tendency from story mechanism only",
-        "cameraEn": "EN summary of observation/camera tendency from story mechanism only",
+        "camera": "中文观察倾向/镜头倾向摘要，只来自故事机制",
+        "cameraEn": "英文观察倾向/镜头倾向摘要，只来自故事机制",
 
-        "texture": "CN summary of factual materials and surfaces",
-        "textureEn": "EN summary of factual materials and surfaces"
+        "texture": "中文事实材质与表面摘要",
+        "textureEn": "英文事实材质与表面摘要"
       },
-      "assets": {
+        "assets": {
         "characters": [
-          { "name": "Name(CN)", "nameEn": "Name(EN)", "type": "CHARACTER", "analysis": { "anchors": "CN factual visual keywords", "anchorsEn": "EN factual visual keywords", "description": "CN generated appearance description", "descriptionEn": "EN generated appearance description", "designPrompt": "CN neutral character design prompt based on source facts", "designPromptEn": "EN neutral character design prompt based on source facts", "conceptPrompt": "CN neutral character concept prompt based on source facts", "conceptPromptEn": "EN neutral character concept prompt based on source facts" } }
+          { "name": "中文名", "nameEn": "English Name", "type": "CHARACTER", "analysis": { "anchors": "中文事实视觉关键词", "anchorsEn": "英文事实视觉关键词", "description": "中文紧凑外貌描述", "descriptionEn": "英文紧凑外貌描述" } }
         ],
         "scenes": [
-          { "name": "Name(CN)", "nameEn": "Name(EN)", "type": "SCENE", "analysis": { "anchors": "CN factual visual keywords", "anchorsEn": "EN factual visual keywords", "description": "CN factual environment description", "descriptionEn": "EN factual environment description", "designPrompt": "CN neutral environment design prompt based on source facts", "designPromptEn": "EN neutral environment design prompt based on source facts", "conceptPrompt": "CN neutral environment concept prompt based on source facts", "conceptPromptEn": "EN neutral environment concept prompt based on source facts" } }
+          { "name": "中文名", "nameEn": "English Name", "type": "SCENE", "analysis": { "anchors": "中文事实视觉关键词", "anchorsEn": "英文事实视觉关键词", "description": "中文紧凑环境描述", "descriptionEn": "英文紧凑环境描述" } }
         ],
         "props": [
-          { "name": "Name(CN)", "nameEn": "Name(EN)", "type": "PROP", "analysis": { "anchors": "CN factual visual keywords", "anchorsEn": "EN factual visual keywords", "description": "CN factual prop description", "descriptionEn": "EN factual prop description", "designPrompt": "CN neutral prop design prompt based on source facts", "designPromptEn": "EN neutral prop design prompt based on source facts", "conceptPrompt": "CN neutral prop concept prompt based on source facts", "conceptPromptEn": "EN neutral prop concept prompt based on source facts"  } }
+          { "name": "中文名", "nameEn": "English Name", "type": "PROP", "analysis": { "anchors": "中文事实视觉关键词", "anchorsEn": "英文事实视觉关键词", "description": "中文紧凑道具描述", "descriptionEn": "英文紧凑道具描述" } }
         ]
       }
     }
     `;
+};
+
+export const buildImageBasedVisualBiblePrompt = (
+    preset: MetonymyStylePreset,
+    hints?: VisualBibleAnalysisHints,
+    mode: 'GLOBAL' | 'TONE' = 'GLOBAL'
+): string => {
+    const assets = preset.assets || { characters: [], scenes: [], props: [] };
+    const prompts: string[] = [];
+
+    if (preset.toneImage) {
+        prompts.push(buildToneImageAnalysisPrompt(hints));
+    }
+
+    const appendAssetPrompt = (type: 'CHARACTER' | 'SCENE' | 'PROP', asset: MetonymyStylePreset['assets']['characters'][number]) => {
+        if (!asset.imageUrl) return;
+        const assetHints = asset.designConfig || hints;
+        prompts.push(buildAssetImageAnalysisPrompt(type, assetHints, asset.name));
+    };
+
+    if (mode === 'GLOBAL') {
+        assets.characters.forEach(asset => appendAssetPrompt('CHARACTER', asset));
+        assets.scenes.forEach(asset => appendAssetPrompt('SCENE', asset));
+        assets.props.forEach(asset => appendAssetPrompt('PROP', asset));
+    }
+
+    return prompts.length
+        ? prompts.join('\n\n')
+        : '不会发送 AI 请求：当前预设没有 toneImage，也没有带 imageUrl 的资产。';
 };
 
 export const generateTextBasedVisualBible = async (text: string, hints?: VisualBibleAnalysisHints): Promise<{ toneAnalysis: GlobalVisualTone, assets: any } | null> => {
@@ -587,22 +827,25 @@ export const generateTextBasedVisualBible = async (text: string, hints?: VisualB
         const res = await retryWithBackoff<GenerateContentResponse>(() => generateContentWithRuntime({
             model: model,
             contents: { parts: [{ text: prompt }] },
-            config: { responseMimeType: 'application/json', engineId: 'visualBible' }
+            config: { responseMimeType: 'application/json', maxOutputTokens: 8192, stream: false, engineId: 'visualBible' }
         }));
-        const json = cleanAndParseJSON(res.text || "");
-        if (json && json.assets) {
-            ['characters', 'scenes', 'props'].forEach(type => {
-                if (json.assets[type]) {
-                    json.assets[type] = json.assets[type].map((a: any) => ({
-                        ...a,
-                        id: a.id || Date.now().toString() + Math.random().toString(36).slice(2, 7)
-                    }));
-                } else {
-                    json.assets[type] = [];
-                }
-            });
+
+        const json = normalizeTextBasedVisualBible(cleanAndParseJSON(res.text || "", { silent: true }));
+        if (json) return json;
+
+        console.warn(`[VisualBible] Text-Based Bible JSON invalid (${(res.text || "").length} chars). Retrying with compact recovery prompt.`);
+        const recoveryPrompt = buildTextBasedVisualBibleRecoveryPrompt(prompt, res.text || "");
+        const recoveryRes = await retryWithBackoff<GenerateContentResponse>(() => generateContentWithRuntime({
+            model: model,
+            contents: { parts: [{ text: recoveryPrompt }] },
+            config: { responseMimeType: 'application/json', maxOutputTokens: 4096, stream: false, engineId: 'visualBible' }
+        }), 1, 800);
+        const recoveryJson = normalizeTextBasedVisualBible(cleanAndParseJSON(recoveryRes.text || ""));
+        if (recoveryJson) {
+            return recoveryJson;
         }
-        return json;
+
+        return null;
     } catch (e: any) {
         handleApiError("Text Bible Gen Failed", e);
         return null;
@@ -613,17 +856,23 @@ export async function generateDesignImage(
     prompt: string,
     referenceImage?: string
 ): Promise<string | null> {
-    const model = configService.getEngineModel('imageGen') || 'gemini-3-pro-image-preview';
+    const model = configService.getEngineModel('imageGen') || 'gpt-image-2';
+    if (model.toLowerCase().startsWith('gpt-image')) {
+        const result = await generatePromptSkillImage({
+            prompt,
+            aspectRatio: '16:9',
+            scale: '2k',
+            quality: 'high',
+            model
+        });
+        return result.imageUrl;
+    }
+
     const parts: any[] = [{ text: prompt }];
 
     if (referenceImage) {
-        const mimeType = getMimeTypeFromBase64(referenceImage);
-        const imageBytes = getBase64Data(referenceImage);
         parts.unshift({
-            inlineData: {
-                data: imageBytes,
-                mimeType: mimeType
-            }
+            inlineData: await toInlineImageData(referenceImage)
         });
     }
 

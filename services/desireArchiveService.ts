@@ -1,4 +1,5 @@
 import {
+    ConceptDesignRuntimeState,
     CreativeBlueprint,
     DesireArchiveStage,
     DesireArchiveVersion,
@@ -166,6 +167,35 @@ const buildTreatmentContent = (treatment: NonNullable<HistoryItem['treatments']>
     ].filter(Boolean).join('\n\n');
 };
 
+const getConceptRuntimeTitle = (item: HistoryItem) => {
+    const runtime = item.conceptRuntimeState;
+    const seed = textOr(runtime?.variables?.characterSeed);
+    const source = textOr(runtime?.sourceLabel);
+    return seed || source || item.driverName || '迷雾律令';
+};
+
+const buildConceptRuntimeContent = (item: HistoryItem) => {
+    const runtime = item.conceptRuntimeState;
+    if (!runtime) return '';
+    const variables = runtime.variables || {} as Partial<ConceptDesignRuntimeState['variables']>;
+    return [
+        `# ${getConceptRuntimeTitle(item)}`,
+        `## 编译律令\n\n${textOr(runtime.generationInstruction, '暂无编译律令。')}`,
+        `## 终稿律令\n\n${textOr(runtime.finalPrompt, '暂无终稿律令。')}`,
+        `## 九变量\n\n${[
+            ['角色种子', variables.characterSeed],
+            ['年龄 / 体型', variables.ageBodyType],
+            ['时空场景', variables.timeSpaceScene],
+            ['行动瞬间', variables.actionMoment],
+            ['视觉媒介', variables.visualMedium],
+            ['风格', variables.style],
+            ['构图场景', variables.compositionScene],
+            ['光线氛围', variables.lightingAtmosphere],
+            ['补充细节', variables.otherDetails]
+        ].map(([label, value]) => `- ${label}: ${textOr(value, '未填写')}`).join('\n')}`
+    ].join('\n\n');
+};
+
 const buildArtifact = (
     stage: DesireArchiveStage,
     source: {
@@ -231,6 +261,7 @@ const buildDivergenceProjectFromHistoryItem = (item: HistoryItem): DesireProject
         aestheticMode: item.aestheticMode,
         colorPalette: item.colorPalette,
         faceState: item.faceState,
+        conceptRuntimeState: item.conceptRuntimeState,
         sourceHistoryIds: [sourceId],
         candidateCount: item.treatments.length,
         divergence: buildArtifact('DIVERGENCE_SET', {
@@ -245,6 +276,51 @@ const buildDivergenceProjectFromHistoryItem = (item: HistoryItem): DesireProject
         bibleDrafts: [],
         metonymyScripts: [],
         subjectDossierIds: []
+    };
+};
+
+const buildEdictProjectFromHistoryItem = (item: HistoryItem): DesireProject | null => {
+    if (item.driverId !== DriverType.CONCEPT_DESIGN || !item.conceptRuntimeState) return null;
+
+    const createdAt = item.date;
+    const sourceId = item.id;
+    const runtime = item.conceptRuntimeState;
+
+    return {
+        id: `edict-history-${sourceId}`,
+        projectId: item.projectId,
+        archiveKind: 'EDICT_PROJECT',
+        archiveSource: item.archiveSource,
+        archiveReason: item.archiveReason,
+        sourceType: 'ENGINE_GENERATED',
+        title: `迷雾律令｜${getConceptRuntimeTitle(item)}`,
+        engineType: DriverType.CONCEPT_DESIGN,
+        engineName: item.driverName || '迷雾律令',
+        createdAt,
+        updatedAt: createdAt,
+        fieldState: item.fieldState || {},
+        worldLaw: item.worldLaw,
+        visionInput: item.visionInput,
+        visionAnalysis: item.visionAnalysis,
+        visionImage: item.visionImage,
+        visionImageNote: item.visionImageNote,
+        visionImageMode: item.visionImageMode,
+        visionImplantEnabled: item.visionImplantEnabled,
+        subjectType: item.subjectType,
+        aestheticMode: item.aestheticMode,
+        colorPalette: item.colorPalette,
+        faceState: item.faceState,
+        conceptRuntimeState: runtime,
+        sourceHistoryIds: [sourceId],
+        originalStory: {
+            title: getConceptRuntimeTitle(item),
+            content: buildConceptRuntimeContent(item),
+            source: 'engine'
+        },
+        bibleDrafts: [],
+        metonymyScripts: [],
+        subjectDossierIds: [],
+        notes: textOr(runtime.finalPrompt, runtime.generationInstruction)
     };
 };
 
@@ -289,6 +365,7 @@ const buildStoryProjectFromBlueprint = (
         aestheticMode: item.aestheticMode,
         colorPalette: item.colorPalette,
         faceState: item.faceState,
+        conceptRuntimeState: item.conceptRuntimeState,
         sourceHistoryIds: [sourceId],
         sourceDivergenceId,
         sourceCandidateId: sourceTreatmentId,
@@ -375,6 +452,8 @@ export const buildDesireProjectsFromHistoryItem = (item: HistoryItem): DesirePro
     const projects: DesireProject[] = [];
     const divergenceProject = buildDivergenceProjectFromHistoryItem(item);
     if (divergenceProject) projects.push(divergenceProject);
+    const edictProject = buildEdictProjectFromHistoryItem(item);
+    if (edictProject) projects.push(edictProject);
 
     const bibleBlueprints = item.metonymyBlueprint
         ? []
@@ -435,6 +514,7 @@ export const buildDesireProjectFromHistoryItem = (item: HistoryItem): DesireProj
         aestheticMode: item.aestheticMode,
         colorPalette: item.colorPalette,
         faceState: item.faceState,
+        conceptRuntimeState: item.conceptRuntimeState,
         sourceHistoryIds: [item.id],
         bibleDrafts: [],
         metonymyScripts: [],
@@ -452,6 +532,7 @@ export const mergeDesireProjects = (persisted: DesireProject[], history: History
     persisted.forEach(project => {
         const hasSplitReplacement = !project.archiveKind && project.sourceHistoryIds.some(sourceId => {
             return merged.has(`divergence-history-${sourceId}`)
+                || merged.has(`edict-history-${sourceId}`)
                 || project.bibleDrafts.some(artifact => merged.has(`story-${sourceId}-${artifact.sourceTreatmentId || artifact.blueprint?.treatmentId || 'base'}`))
                 || project.metonymyScripts.some(artifact => merged.has(`story-${sourceId}-${artifact.sourceTreatmentId || artifact.blueprint?.treatmentId || 'base'}`));
         });

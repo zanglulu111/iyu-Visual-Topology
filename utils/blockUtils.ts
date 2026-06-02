@@ -13,6 +13,8 @@ import {
 
 export const getBlockName = (blockId: string, lang: 'CN' | 'EN'): string => {
     if (blockId === 'aes_palette_preset') return lang === 'EN' ? "MASTER VISUAL PRESET" : "视觉集成预设";
+    if (blockId === 'skin_country_exact') return lang === 'EN' ? "Space Anchor" : "空间锚";
+    if (blockId === 'skin_year_exact') return lang === 'EN' ? "Time Anchor" : "时间锚";
     
     const allBlocks = [
         ...NARRATIVE_ENGINE_BLOCKS, 

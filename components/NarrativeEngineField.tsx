@@ -1,13 +1,14 @@
 import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useTheme } from '../contexts/ThemeContext';
-import { NarrativeFieldState, BlueprintLanguage, DriverType, NarrativeBlockDef, LibraryCategoryDef, SubjectType, AestheticMode, AestheticPreset, WorldLawConfig, PromptFocusState, M7BResidueIntensity, MAxisMixerState, MAxisMixerSlot, MAxisMixerLevel, VisionImageUseMode } from '../types';
+import { NarrativeFieldState, BlueprintLanguage, DriverType, NarrativeBlockDef, LibraryCategoryDef, LibraryItemDef, SubjectType, AestheticMode, AestheticPreset, WorldLawConfig, PromptFocusState, M7BResidueIntensity, MAxisMixerState, MAxisMixerSlot, MAxisMixerLevel, VisionImageUseMode, ConceptDesignRuntimeState, ConceptDesignWorkspacePage } from '../types';
 import { ArrowRight, Check, Copy, Dice5, Edit2, Eye, FileText, Ghost, Image as ImageIcon, Loader2, Lock, Plus, Power, RotateCcw, RotateCw, ScanEye, BrainCircuit, Shuffle, Trash2, Unlock, Upload, User, X, Zap, ChevronRight, Star, SlidersHorizontal } from 'lucide-react';
 import { ProphecySlot } from './ProphecySlot';
 import { SkinSlot } from './TheSkinSidebar';
 import { BorromeanRings } from './BorromeanRings';
 import { NarrativeLibraryModal } from './NarrativeLibraryModal';
 import { AestheticEngineField } from './AestheticEngineField';
+import { ConceptDesignEngineField } from './ConceptDesignEngineField';
 import { AdminXRayButton } from './XRayInspector';
 import { supabaseDatabase } from '../services/supabaseDatabase';
 import { buildAutoFillPrompt } from '../services/geminiService';
@@ -35,9 +36,11 @@ import {
     TRAILER_ENGINE_LIBRARY,
     SUR3_COORDINATE_PRESETS,
     SUR3_SPACE_ANCHOR_PRESETS,
+    getRandomSur3CoordinatePreset,
     GENRE_CATEGORIES
 } from '../constants';
-import { getArchetypeFromEra, filterItemsByArchetype, getRandomCount, randomizeMAxisMixerState, randomizeM7BResidueIntensity, randomizePromptFocusState, randomizeWorldLawConfig, weightedSurfaceFilter } from '../services/randomizer';
+import { getArchetypeFromEra, filterItemsByArchetype, getRandomCount, pickRandomItemsForBlock, randomizeMAxisMixerState, randomizeM7BResidueIntensity, randomizePromptFocusState, randomizeWorldLawConfig, weightedSurfaceFilter } from '../services/randomizer';
+import { SUR3_ERAS } from '../data/engine_surface/SUR3';
 import { findItemFull } from '../services/dataRegistry';
 import { getBlockName } from '../utils/blockUtils';
 import { buildTermFocusPatch, clearFocusForTagsPatch, FocusLimitReason, getAllSelectedTags, getFocusLimitReason, getSelectedFocusBlockMap, getSelectedFocusUnitMap, isFocusableBlock, MAX_FOCUS_TERMS } from '../utils/focusTerms';
@@ -63,7 +66,7 @@ export interface NarrativeEngineFieldProps {
     onRandomizeTag: (blockId: string, tag: string) => void;
     isHistoryMode: boolean;
     customLibraryDefs?: Record<string, { def: string; core: string }>;
-    onAddCustomDef?: (name: string, def: string, core: string) => void;
+    onAddCustomDef?: (name: string, def: string, core: string, item?: LibraryItemDef, blockId?: string) => void;
     onEditCustomDef?: (oldName: string, newName: string, def: string, core: string) => void;
     aestheticMode?: AestheticMode;
     onAestheticModeChange?: (mode: AestheticMode) => void;
@@ -99,6 +102,8 @@ export interface NarrativeEngineFieldProps {
     onClearVisionCandidateState?: () => void;
     worldLawConfig?: WorldLawConfig;
     setWorldLawConfig?: (config: WorldLawConfig) => void;
+    onConceptRuntimeChange?: (state: ConceptDesignRuntimeState, persist?: boolean) => void;
+    conceptWorkspacePage?: ConceptDesignWorkspacePage;
     isAdmin?: boolean;
 }
 
@@ -106,6 +111,7 @@ type LabyrinthEnglishFontScheme = 'editorial' | 'modern' | 'cinematic' | 'compac
 type LabyrinthVisionModuleKey = 'description' | 'usage' | 'facts' | 'tension' | 'crossSection' | 'story';
 type LabyrinthVisionResultMode = 'preview' | 'edit';
 type LabyrinthVisionCopyTarget = LabyrinthVisionModuleKey | 'all';
+const LABYRINTH_WORLD_LAW_LOCK_ID = 'world_law';
 
 const LABYRINTH_VISION_MODULES: Array<{ key: LabyrinthVisionModuleKey; cn: string; en: string; aliases: string[] }> = [
     { key: 'description', cn: '画面硬事实', en: 'Hard Visual Facts', aliases: ['画面硬事实', '硬事实', '完整画面描述', '图片反推内容', '图像反推内容', '画面反推内容', 'hard visual facts', 'full image description', 'image reverse content'] },
@@ -159,6 +165,9 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
     const { theme } = useTheme();
     if (props.driverType === DriverType.AESTHETIC) {
         return <AestheticEngineField {...props} aestheticMode={props.aestheticMode || 'REALISM'} onAestheticModeChange={props.onAestheticModeChange || (() => { })} showRings={props.showRings} />;
+    }
+    if (props.driverType === DriverType.CONCEPT_DESIGN) {
+        return <ConceptDesignEngineField {...props} />;
     }
 
     const {
@@ -494,6 +503,8 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
     }
 
     const getLibraryCount = useCallback((blockId: string): number => {
+        if (blockId === 'skin_country_exact') return SUR3_SPACE_ANCHOR_PRESETS.length;
+        if (blockId === 'skin_year_exact') return SUR3_COORDINATE_PRESETS.length;
         let libId = `${blockId}_lib`;
         if (blockId === 'skin_era') libId = 'skin_era_lib';
         let cat = ENGINE_LIBRARY.find(c => c.id === libId);
@@ -609,8 +620,10 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
     const selectedGender = fieldState['skin_gender']?.[0] || '';
     const selectedAge = fieldState['skin_age']?.[0] || '';
     const selectedCountry = fieldState['skin_country_exact']?.[0] || '';
-    const selectedYearTag = fieldState['skin_year_exact']?.[0] || '';
-    const selectedYear = selectedYearTag && Number.isFinite(Number(selectedYearTag)) ? Number(selectedYearTag) : null;
+    const selectedYearTag = fieldState['skin_year_exact']?.[0]?.trim() || '';
+    const selectedYear = /^-?\d+$/.test(selectedYearTag) ? Number(selectedYearTag) : null;
+    const selectedTimeAnchor = selectedYearTag || '';
+    const selectedTimeIsYear = selectedYear !== null;
     const storySummaryBlocks = ['skin_genre', 'skin_era', 'skin_year_exact', 'skin_country_exact', 'skin_society', 'skin_age', 'skin_gender', 'skin_profession', 'sur10x', 'skin_ideology', 'skin_everything', 'skin_location', 'skin_ending'];
     const isValueLocked = (blockId: string, value: string) => Boolean(value && lockedTags[blockId]?.includes(value));
     const isGenderValueLocked = isGenderLocked || isValueLocked('skin_gender', selectedGender);
@@ -1111,6 +1124,13 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
         return lang === 'EN' ? `${year}` : `公元${year}${useSuffix ? '年' : ''}`;
     };
 
+    const formatTimeAnchor = (value: string, useSuffix = false) => {
+        if (!value) return '';
+        const trimmed = value.trim();
+        if (/^-?\d+$/.test(trimmed)) return formatYear(Number(trimmed), useSuffix);
+        return value;
+    };
+
     const TIMELINE_YEAR_MIN = -2000;
     const TIMELINE_YEAR_MAX = 2300;
     const TIMELINE_YEAR_NOW = 2026;
@@ -1119,9 +1139,25 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
         Math.min(TIMELINE_YEAR_MAX, Math.max(TIMELINE_YEAR_MIN, Math.trunc(year)))
     );
 
-    const parseTimelineYearInput = (value: string): number | null => {
+    const normalizeTimeAnchorLabel = (value: string): string => (
+        value.trim().replace(/\s+/g, '').replace(/[_-]+/g, '').replace(/年$/, '').toLowerCase()
+    );
+
+    const isSelectedSur3Era = (era: typeof SUR3_ERAS[number]) => {
+        if (!selectedTimeAnchor) return false;
+        const normalized = normalizeTimeAnchorLabel(selectedTimeAnchor);
+        return [era.id, era.name, era.nameEn].some(label => normalizeTimeAnchorLabel(label) === normalized);
+    };
+
+    const parseTimelineTimeAnchorInput = (value: string): number | string | null => {
         const compact = value.trim().replace(/\s+/g, '').replace(/年$/, '');
         if (!compact) return null;
+
+        const normalized = normalizeTimeAnchorLabel(value);
+        const matchedEra = SUR3_ERAS.find(era => (
+            [era.id, era.name, era.nameEn].some(label => normalizeTimeAnchorLabel(label) === normalized)
+        ));
+        if (matchedEra) return lang === 'EN' ? matchedEra.nameEn : matchedEra.name;
 
         const chineseBC = compact.match(/^公元前(\d{1,5})$/);
         if (chineseBC) return -Number(chineseBC[1]);
@@ -1140,8 +1176,8 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
 
     const commitLabyrinthYearInput = (value: string) => {
         if (isYearValueLocked) return;
-        const parsedYear = parseTimelineYearInput(value);
-        if (parsedYear === null) {
+        const parsedTimeAnchor = parseTimelineTimeAnchorInput(value);
+        if (parsedTimeAnchor === null) {
             if (!value.trim()) {
                 updateLabyrinthTimeLocation(undefined, null);
                 setLabyrinthYearInputDraft(null);
@@ -1152,12 +1188,15 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
             return;
         }
 
-        updateLabyrinthTimeLocation(undefined, clampTimelineYear(parsedYear));
+        updateLabyrinthTimeLocation(
+            undefined,
+            typeof parsedTimeAnchor === 'number' ? clampTimelineYear(parsedTimeAnchor) : parsedTimeAnchor
+        );
         setLabyrinthYearInputDraft(null);
         setLabyrinthYearInputInvalid(false);
     };
 
-    const updateLabyrinthTimeLocation = (country?: string | null, year?: number | null) => {
+    const updateLabyrinthTimeLocation = (country?: string | null, year?: number | string | null) => {
         const nextState = { ...fieldState };
         let changed = false;
 
@@ -1167,7 +1206,11 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
         }
 
         if (year !== undefined && !isYearValueLocked) {
-            nextState['skin_year_exact'] = year === null ? [] : [String(clampTimelineYear(year))];
+            nextState['skin_year_exact'] = year === null
+                ? []
+                : typeof year === 'number'
+                ? [String(clampTimelineYear(year))]
+                : [year];
             setLabyrinthYearInputDraft(null);
             setLabyrinthYearInputInvalid(false);
             changed = true;
@@ -1184,17 +1227,17 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
 
     const handleLabyrinthRandomYear = () => {
         if (isYearValueLocked) return;
-        const randomYear = Math.floor(Math.random() * (TIMELINE_YEAR_MAX - TIMELINE_YEAR_MIN + 1)) + TIMELINE_YEAR_MIN;
-        updateLabyrinthTimeLocation(undefined, randomYear);
+        const preset = getRandomSur3CoordinatePreset(lang === 'EN' ? 'EN' : 'CN');
+        updateLabyrinthTimeLocation(undefined, preset.timeMode === 'era' ? (preset.time || null) : preset.year);
         setLabyrinthYearInputDraft(null);
         setLabyrinthYearInputInvalid(false);
     };
 
     const handleLabyrinthRandomTimeLocation = () => {
-        const preset = SUR3_COORDINATE_PRESETS[Math.floor(Math.random() * SUR3_COORDINATE_PRESETS.length)];
+        const preset = getRandomSur3CoordinatePreset(lang === 'EN' ? 'EN' : 'CN');
         updateLabyrinthTimeLocation(
             isCountryValueLocked ? undefined : (lang === 'EN' ? preset.spaceEn : preset.spaceCn),
-            isYearValueLocked ? undefined : preset.year
+            isYearValueLocked ? undefined : (preset.timeMode === 'era' ? (preset.time || null) : preset.year)
         );
         if (!isYearValueLocked) {
             setLabyrinthYearInputDraft(null);
@@ -1299,12 +1342,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                     if (availableItems.length === 0) availableItems = category.items;
                 }
                 const available = availableItems.filter(i => !keptTags.includes(i.name));
-                for (let i = 0; i < needed; i++) {
-                    if (available.length === 0) break;
-                    const idx = Math.floor(Math.random() * available.length);
-                    selected.push(available[idx].name);
-                    available.splice(idx, 1);
-                }
+                selected.push(...pickRandomItemsForBlock(blockId, available, needed, fieldState).map(item => item.name));
                 newState[blockId] = selected;
             }
         }
@@ -1813,6 +1851,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
         const currentDisplay = getWorldLawDisplay(worldLawConfig, lang);
         const previewOption = WORLD_LAW_LEVEL_OPTIONS.find(option => option.id === labyrinthWorldLawPreview) || null;
         const showWorldLawPopover = isLabyrinthWorldLawExpanded || isLabyrinthWorldLawClosing;
+        const isWorldLawLocked = Boolean(lockedModules[LABYRINTH_WORLD_LAW_LOCK_ID]);
         const previewLabel = previewOption
             ? (lang === 'EN' ? previewOption.en : previewOption.cn)
             : (lang === 'EN' ? currentDisplay.en : currentDisplay.cn);
@@ -1821,18 +1860,20 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
             : (lang === 'EN' ? currentDisplay.descEN : currentDisplay.descCN);
 
         const setLabyrinthWorldLaw = (value: number) => {
+            if (isWorldLawLocked || !setWorldLawConfig) return;
             setWorldLawConfig?.(patchWorldLawConfig(worldLawConfig, value));
             setLabyrinthWorldLawPreview(null);
         };
 
         const randomizeLabyrinthWorldLaw = (event: React.MouseEvent) => {
             event.stopPropagation();
-            if (!setWorldLawConfig) return;
+            if (isWorldLawLocked || !setWorldLawConfig) return;
             setWorldLawConfig(randomizeWorldLawConfig(worldLawConfig));
             setLabyrinthWorldLawPreview(null);
         };
 
         const toggleLabyrinthWorldLaw = () => {
+            if (isWorldLawLocked) return;
             if (labyrinthWorldLawCloseTimer.current !== null) {
                 window.clearTimeout(labyrinthWorldLawCloseTimer.current);
                 labyrinthWorldLawCloseTimer.current = null;
@@ -1853,29 +1894,51 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
             setIsLabyrinthWorldLawExpanded(true);
         };
 
+        const toggleLabyrinthWorldLawLock = (event: React.MouseEvent) => {
+            event.stopPropagation();
+            onToggleLock(LABYRINTH_WORLD_LAW_LOCK_ID);
+        };
+
         return (
-            <div className={`mist-labyrinth-surface-block mist-labyrinth-foundation-block mist-labyrinth-world-law-block is-level-${currentDisplay.gravity} ${showWorldLawPopover ? 'is-expanded' : ''}`}>
+            <div className={`mist-labyrinth-surface-block mist-labyrinth-foundation-block mist-labyrinth-world-law-block is-level-${currentDisplay.gravity} ${showWorldLawPopover ? 'is-expanded' : ''} ${isWorldLawLocked ? 'is-locked' : ''}`}>
                 <span className="mist-labyrinth-surface-label">{lang === 'EN' ? "World Law" : "世界法则"}</span>
                 <div className="mist-labyrinth-world-law-inline">
-                    <button
-                        type="button"
-                        className="mist-labyrinth-world-law-main-button"
-                        onClick={toggleLabyrinthWorldLaw}
-                        aria-expanded={isLabyrinthWorldLawExpanded}
-                        aria-label={lang === 'EN' ? 'Toggle world law options' : '展开或收起世界法则选项'}
-                    >
-                        <b className="mist-labyrinth-world-law-token">{lang === 'EN' ? currentDisplay.en : currentDisplay.cn}</b>
-                    </button>
-                    <button
-                        type="button"
-                        className="mist-labyrinth-world-law-random"
-                        onClick={randomizeLabyrinthWorldLaw}
-                        disabled={!setWorldLawConfig}
-                        title={lang === 'EN' ? 'Randomize world law' : '随机世界法则'}
-                        aria-label={lang === 'EN' ? 'Randomize world law' : '随机世界法则'}
-                    >
-                        <Dice5 size={16} />
-                    </button>
+                    <span className="mist-labyrinth-world-law-control">
+                        <button
+                            type="button"
+                            className={`mist-labyrinth-world-law-main-button mist-labyrinth-hover-token is-filled ${isWorldLawLocked ? 'is-locked' : ''}`}
+                            onClick={toggleLabyrinthWorldLaw}
+                            aria-expanded={isLabyrinthWorldLawExpanded}
+                            aria-disabled={isWorldLawLocked}
+                            aria-label={lang === 'EN' ? 'Toggle world law options' : '展开或收起世界法则选项'}
+                        >
+                            <b className="mist-labyrinth-world-law-token">{lang === 'EN' ? currentDisplay.en : currentDisplay.cn}</b>
+                        </button>
+                        <div className="mist-labyrinth-inline-control-actions mist-labyrinth-world-law-actions">
+                            <button
+                                type="button"
+                                onClick={randomizeLabyrinthWorldLaw}
+                                disabled={isWorldLawLocked || !setWorldLawConfig}
+                                title={lang === 'EN' ? 'Randomize world law' : '随机世界法则'}
+                                aria-label={lang === 'EN' ? 'Randomize world law' : '随机世界法则'}
+                            >
+                                <Dice5 size={10} />
+                            </button>
+                            <button
+                                type="button"
+                                onClick={toggleLabyrinthWorldLawLock}
+                                className={isWorldLawLocked ? 'is-locked' : ''}
+                                title={isWorldLawLocked
+                                    ? (lang === 'EN' ? 'Unlock world law' : '解锁世界法则')
+                                    : (lang === 'EN' ? 'Lock world law' : '锁定世界法则')}
+                                aria-label={isWorldLawLocked
+                                    ? (lang === 'EN' ? 'Unlock world law' : '解锁世界法则')
+                                    : (lang === 'EN' ? 'Lock world law' : '锁定世界法则')}
+                            >
+                                {isWorldLawLocked ? <Lock size={10} /> : <Unlock size={10} />}
+                            </button>
+                        </div>
+                    </span>
                 </div>
 
                 {showWorldLawPopover && (
@@ -1904,7 +1967,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                                                 className={isActive ? 'is-active' : ''}
                                                 onMouseEnter={() => setLabyrinthWorldLawPreview(option.id)}
                                                 onClick={() => setLabyrinthWorldLaw(option.id)}
-                                                disabled={!setWorldLawConfig}
+                                                disabled={isWorldLawLocked || !setWorldLawConfig}
                                                 aria-pressed={isActive}
                                             >
                                                 <b>{label}</b>
@@ -2123,12 +2186,12 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
     };
 
     const renderLabyrinthTimeLocationSlot = () => {
-        const hasTimeOrLocation = selectedYear !== null || selectedCountry !== '';
+        const hasTimeOrLocation = selectedTimeAnchor !== '' || selectedCountry !== '';
         const countryDisplay = selectedCountry ? getPresetText(selectedCountry, SUR3_SPACE_ANCHOR_PRESETS) : '';
-        const displayText = selectedYear !== null
+        const displayText = selectedTimeAnchor
             ? (lang === 'EN'
-                ? `${formatYear(selectedYear)}${countryDisplay ? ` ${countryDisplay}` : ''}`
-                : `${formatYear(selectedYear, true)}${countryDisplay}`)
+                ? `${formatTimeAnchor(selectedTimeAnchor)}${countryDisplay ? ` ${countryDisplay}` : ''}`
+                : `${formatTimeAnchor(selectedTimeAnchor, true)}${countryDisplay}`)
             : (selectedCountry
                 ? `${countryDisplay} (AUTO)`
                 : (lang === 'EN' ? "SUR3. Precise Coordinate" : "SUR3. 精确坐标"));
@@ -2264,12 +2327,12 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
     };
 
     const renderLabyrinthSummaryTimeSlot = () => {
-        const hasTimeOrLocation = selectedYear !== null || selectedCountry !== '';
+        const hasTimeOrLocation = selectedTimeAnchor !== '' || selectedCountry !== '';
         const countryDisplay = selectedCountry ? getPresetText(selectedCountry, SUR3_SPACE_ANCHOR_PRESETS) : '';
-        const displayText = selectedYear !== null
+        const displayText = selectedTimeAnchor
             ? (lang === 'EN'
-                ? `${formatYear(selectedYear)}${countryDisplay ? ` ${countryDisplay}` : ''}`
-                : `${formatYear(selectedYear, true)}${countryDisplay}`)
+                ? `${formatTimeAnchor(selectedTimeAnchor)}${countryDisplay ? ` ${countryDisplay}` : ''}`
+                : `${formatTimeAnchor(selectedTimeAnchor, true)}${countryDisplay}`)
             : (selectedCountry
                 ? `${countryDisplay} (AUTO)`
                 : (lang === 'EN' ? "Precise Coordinate" : "精确坐标"));
@@ -2337,7 +2400,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
     const renderLabyrinthSummarySentence = () => {
         const hasGenre = hasBlockValue(['skin_genre']);
         const hasFrame = hasGenre;
-        const hasTime = selectedYear !== null || selectedCountry !== '';
+        const hasTime = selectedTimeAnchor !== '' || selectedCountry !== '';
         const hasEra = hasBlockValue(['skin_era']);
         const hasSociety = hasBlockValue(['skin_society']);
         const hasIdentity = selectedGender !== '' || selectedAge !== '';
@@ -2452,7 +2515,8 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
 
     const renderLabyrinthTimeModal = () => {
         const currentYear = selectedYear === null ? TIMELINE_YEAR_NOW : clampTimelineYear(selectedYear);
-        const yearInputValue = labyrinthYearInputDraft ?? (selectedYear === null ? '' : String(selectedYear));
+        const yearInputValue = labyrinthYearInputDraft ?? selectedTimeAnchor;
+        const spaceAnchorDisplay = selectedCountry ? getPresetText(selectedCountry, SUR3_SPACE_ANCHOR_PRESETS) : '';
         return (
             <div className="mist-labyrinth-identity-modal">
                 <div className="mist-labyrinth-identity-panel mist-labyrinth-time-panel">
@@ -2478,30 +2542,28 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                                     <button type="button" onClick={() => updateLabyrinthTimeLocation(null, undefined)} disabled={isCountryLocked}><Trash2 size={12} /></button>
                                 </div>
                             </div>
-                            <div className="mist-labyrinth-country-field">
-                                <input
-                                    value={selectedCountry}
-                                    disabled={isCountryLocked}
-                                    placeholder={lang === 'EN' ? "Region / planet / dimension / scale" : "地域 / 星球 / 维度 / 尺度"}
-                                    onChange={(event) => updateLabyrinthTimeLocation(event.target.value, undefined)}
-                                />
-                            </div>
-                            <div className="mist-labyrinth-country-list">
-                                {SUR3_SPACE_ANCHOR_PRESETS.map(country => {
-                                    const label = lang === 'EN' ? country.en : country.cn;
-                                    const isActive = selectedCountry === country.cn || selectedCountry === country.en;
-                                    return (
-                                        <button
-                                            type="button"
-                                            key={country.cn}
-                                            disabled={isCountryLocked}
-                                            className={isActive ? 'is-active' : ''}
-                                            onClick={() => updateLabyrinthTimeLocation(label, undefined)}
-                                        >
-                                            {label}
-                                        </button>
-                                    );
-                                })}
+                            <div className="mist-labyrinth-coordinate-token-row">
+                                {renderLabyrinthInlineControlSlot(
+                                    selectedCountry
+                                        ? formatInlinePlaceholder(spaceAnchorDisplay || selectedCountry)
+                                        : (lang === 'EN' ? 'Space Anchor' : '空间锚'),
+                                    Boolean(selectedCountry),
+                                    isCountryValueLocked,
+                                    () => openLibrary('skin_country_exact'),
+                                    handleLabyrinthRandomCountry,
+                                    () => selectedCountry && onToggleTagLock('skin_country_exact', selectedCountry),
+                                    () => updateLabyrinthTimeLocation(null, undefined),
+                                    {
+                                        ...buildControlDetails(
+                                            'skin_country_exact',
+                                            lang === 'EN' ? 'Choose one space anchor from the SUR3 lexicon.' : '从 SUR3 词库中选择一个空间锚。',
+                                            lang === 'EN' ? '[Lexicon] Click to open the space-anchor library.' : '【词库】点击打开空间锚词库。'
+                                        )
+                                    },
+                                    lang === 'EN' ? 'SUR3. Space Anchor' : 'SUR3.空间锚',
+                                    SUR3_SPACE_ANCHOR_PRESETS.length,
+                                    selectedCountry ? [['skin_country_exact', selectedCountry]] : []
+                                )}
                             </div>
                         </section>
 
@@ -2516,19 +2578,19 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                             </div>
                             <div className="mist-labyrinth-year-readout">
                                 <span className="mist-labyrinth-year-readout-value">
-                                    {selectedYear === null ? (lang === 'EN' ? "AUTO" : "自动") : formatYear(selectedYear, true)}
+                                    {selectedTimeAnchor ? formatTimeAnchor(selectedTimeAnchor, true) : (lang === 'EN' ? "AUTO" : "自动")}
                                 </span>
                                 <input
                                     type="text"
-                                    inputMode="numeric"
+                                    inputMode="text"
                                     value={yearInputValue}
                                     disabled={isYearLocked}
-                                    placeholder="1840 / -221"
-                                    aria-label={lang === 'EN' ? "Manual year input" : "手动输入年份"}
+                                    placeholder={lang === 'EN' ? "1840 / -221 / Future" : "1840 / -221 / 未来"}
+                                    aria-label={lang === 'EN' ? "Manual time anchor input" : "手动输入年份或时代"}
                                     aria-invalid={labyrinthYearInputInvalid}
                                     className={`mist-labyrinth-year-manual-input ${labyrinthYearInputInvalid ? 'is-invalid' : ''}`}
                                     onFocus={() => {
-                                        setLabyrinthYearInputDraft(selectedYear === null ? '' : String(selectedYear));
+                                        setLabyrinthYearInputDraft(selectedTimeAnchor);
                                         setLabyrinthYearInputInvalid(false);
                                     }}
                                     onChange={(event) => {
@@ -2539,13 +2601,29 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                                     onKeyDown={handleLabyrinthYearInputKeyDown}
                                 />
                             </div>
+                            <div className="mist-labyrinth-era-token-row">
+                                {SUR3_ERAS.map(era => {
+                                    const label = lang === 'EN' ? era.nameEn : era.name;
+                                    return (
+                                        <button
+                                            type="button"
+                                            key={era.id}
+                                            disabled={isYearLocked}
+                                            className={isSelectedSur3Era(era) ? 'is-active' : ''}
+                                            onClick={() => updateLabyrinthTimeLocation(undefined, label)}
+                                        >
+                                            {label}
+                                        </button>
+                                    );
+                                })}
+                            </div>
                             <input
                                 type="range"
                                 min={TIMELINE_YEAR_MIN}
                                 max={TIMELINE_YEAR_MAX}
                                 step="1"
                                 value={currentYear}
-                                disabled={isYearLocked}
+                                disabled={isYearLocked || Boolean(selectedTimeAnchor && !selectedTimeIsYear)}
                                 onChange={(event) => updateLabyrinthTimeLocation(undefined, Number(event.target.value))}
                                 className="mist-labyrinth-year-slider"
                             />
@@ -3181,7 +3259,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                 <div className="mist-labyrinth-surface-summary-body">
                     {labyrinthSummaryMode === 'module' ? (
                         !labyrinthSummaryExpanded && !hasBlockValue(['skin_genre', 'skin_era', 'skin_society', 'skin_profession', 'sur10x', 'skin_ideology', 'skin_everything', 'skin_location', 'skin_ending']) &&
-                        selectedYear === null && selectedCountry === '' && selectedGender === '' && selectedAge === '' ? (
+                        selectedTimeAnchor === '' && selectedCountry === '' && selectedGender === '' && selectedAge === '' ? (
                             <div className="mist-labyrinth-surface-sentence mist-labyrinth-summary-sentence is-collapsed">
                                 <span className="mist-labyrinth-surface-sentence-empty">
                                     {lang === 'EN' ? 'Click + to expand preset keywords.' : '点击 + 展开可选预设关键词'}
@@ -3197,7 +3275,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                                 <span className="mist-labyrinth-surface-label">{lang === 'EN' ? "Field" : "背景场域"}</span>
                                 {renderLabyrinthSkinSlot("skin_era", "SUR2. 背景场域", "SUR2. Field")}
                             </div>}
-                            {(labyrinthSummaryExpanded || selectedYear !== null || selectedCountry !== '') && <div className="mist-labyrinth-surface-block mist-labyrinth-surface-static-block">
+                            {(labyrinthSummaryExpanded || selectedTimeAnchor !== '' || selectedCountry !== '') && <div className="mist-labyrinth-surface-block mist-labyrinth-surface-static-block">
                                 <span className="mist-labyrinth-surface-label">{lang === 'EN' ? "Coordinate" : "精确坐标"}</span>
                                 {renderLabyrinthTimeLocationSlot()}
                             </div>}
@@ -3319,7 +3397,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                                 {getMixerAdjustedCount() > 0 && <b>{getMixerAdjustedCount()}</b>}
                             </button>
                         </div>
-                        <div key={labyrinthPanelMode} className={`mist-labyrinth-panel-stage is-${labyrinthPanelMode}`}>
+                        <div className={`mist-labyrinth-panel-stage is-${labyrinthPanelMode}`}>
                             {labyrinthPanelMode === 'formula'
                                 ? renderLabyrinthMainFormula()
                                 : labyrinthPanelMode === 'desire'

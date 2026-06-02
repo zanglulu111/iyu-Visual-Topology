@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { User, ViewMode } from '../types';
 import {
   Globe, User as UserIcon, Moon, Sun, Aperture, BookOpen,
-  Archive, Film, Cpu, ChevronRight, ArrowLeft
+  Archive, Film, Cpu, ChevronRight, ArrowLeft, Library
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { BorromeanRings } from './BorromeanRings';
@@ -21,6 +21,7 @@ interface GlobalHomePageProps {
   showRings: boolean;
   setShowRings: (show: boolean) => void;
   onReturnToPortal?: () => void;
+  onPreloadCoreDrivers?: () => void;
 }
 
 // ─── 动画文字组件 ───────────────────────────────────────────
@@ -53,12 +54,13 @@ interface NavCard {
   descEn: string;
   color: string;
   action: () => void;
+  preload?: () => void;
 }
 
 // ─── 主组件 ────────────────────────────────────────────────
 export const GlobalHomePage: React.FC<GlobalHomePageProps> = ({
   lang, setLang, setPage, setViewMode, setInitialProtocol,
-  currentUser, openAuth, openProfile, showRings, setShowRings, onReturnToPortal
+  currentUser, openAuth, openProfile, showRings, setShowRings, onReturnToPortal, onPreloadCoreDrivers
 }) => {
   const { theme, toggleTheme } = useTheme();
   const isRetro = theme === 'retro';
@@ -95,7 +97,11 @@ export const GlobalHomePage: React.FC<GlobalHomePageProps> = ({
       descCn: '启动欲望再生产，进入视觉生产的符号链。构建你自己的迷雾。',
       descEn: 'Activate desire reproduction. Enter the symbolic chain of visual production.',
       color: '#FFD700',
-      action: () => setPage(0),
+      action: () => {
+        onPreloadCoreDrivers?.();
+        setPage(0);
+      },
+      preload: onPreloadCoreDrivers,
     },
     {
       icon: Archive,
@@ -126,6 +132,15 @@ export const GlobalHomePage: React.FC<GlobalHomePageProps> = ({
       descEn: 'Observe the dynamic evolution of Rorschach inkblots, confront the projection of the unconscious.',
       color: '#a855f7',
       action: () => { setViewMode('RORSCHACH'); setPage(1); },
+    },
+    {
+      icon: Library,
+      titleCn: '技能库',
+      titleEn: 'SKILL LIBRARY',
+      descCn: '管理可调用的小型提示词技能。先从角色身份板开始，把变量拼装成最终可发送 prompt。',
+      descEn: 'Operate callable prompt skills. Start with Character Identity Board and assemble final prompts.',
+      color: '#38bdf8',
+      action: () => { setViewMode('SKILLS'); setPage(1); },
     },
   ];
 
@@ -310,7 +325,7 @@ export const GlobalHomePage: React.FC<GlobalHomePageProps> = ({
           </div>
 
           {/* 导航卡片网格 */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-5">
             {navCards.map((card, i) => {
               const Icon = card.icon;
               const isHovered = hoveredCard === i;
@@ -318,7 +333,11 @@ export const GlobalHomePage: React.FC<GlobalHomePageProps> = ({
                 <button
                   key={i}
                   onClick={card.action}
-                  onMouseEnter={() => setHoveredCard(i)}
+                  onMouseEnter={() => {
+                    setHoveredCard(i);
+                    card.preload?.();
+                  }}
+                  onFocus={() => card.preload?.()}
                   onMouseLeave={() => setHoveredCard(null)}
                   className={`relative group text-left p-6 md:p-8 rounded-sm border transition-all duration-700 hover:-translate-y-2 focus:outline-none ${
                     isRetro

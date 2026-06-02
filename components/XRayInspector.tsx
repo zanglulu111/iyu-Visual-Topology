@@ -41,7 +41,7 @@ export type XRaySourceKind =
     | 'libraryBlock'
     | 'readonly';
 
-type XRayTone = 'director' | 'audio' | 'frame' | 'engine' | 'surface' | 'text' | 'neutral';
+export type XRayTone = 'director' | 'audio' | 'frame' | 'engine' | 'surface' | 'text' | 'neutral';
 
 export interface XRaySourceOption {
     label: string;
@@ -65,6 +65,7 @@ export interface XRaySourceItem {
     inlineOptions?: boolean;
     tone?: XRayTone;
     disabled?: boolean;
+    accentColor?: string;
 }
 
 export interface XRaySourceGroup {
@@ -104,6 +105,30 @@ interface XRayInspectorModalProps {
     getPayload?: () => XRayPayload;
     sources?: XRaySourceGroup[] | (() => XRaySourceGroup[]);
     buildPayload?: (values: XRayDraftValues, groups: XRaySourceGroup[]) => XRayPayload;
+}
+
+export interface XRaySourceConsoleProps {
+    lang?: 'CN' | 'EN';
+    groups: XRaySourceGroup[];
+    values?: XRayDraftValues;
+    query: string;
+    openGroups: Record<string, boolean>;
+    onQueryChange: (query: string) => void;
+    onToggleGroup: (groupId: string) => void;
+    onUpdateValue: (itemId: string, value: unknown) => void;
+    onOpenLibrary?: (item: XRaySourceItem) => void;
+    onUndo?: () => void;
+    onRedo?: () => void;
+    historyPastCount?: number;
+    historyFutureCount?: number;
+    title?: string;
+    searchPlaceholder?: string;
+    className?: string;
+    bodyClassName?: string;
+    activeItemId?: string | null;
+    onItemFocus?: (item: XRaySourceItem, group: XRaySourceGroup) => void;
+    showHistoryControls?: boolean;
+    headerActions?: React.ReactNode;
 }
 
 const formatPayload = (payload: XRayPayload | unknown): string => {
@@ -905,6 +930,336 @@ const TextLineControl: React.FC<{
     );
 };
 
+export const XRaySourceConsole: React.FC<XRaySourceConsoleProps> = ({
+    lang = 'CN',
+    groups,
+    values,
+    query,
+    openGroups,
+    onQueryChange,
+    onToggleGroup,
+    onUpdateValue,
+    onOpenLibrary,
+    onUndo,
+    onRedo,
+    historyPastCount = 0,
+    historyFutureCount = 0,
+    title,
+    searchPlaceholder,
+    className = '',
+    bodyClassName = '',
+    activeItemId = null,
+    onItemFocus,
+    showHistoryControls = true,
+    headerActions
+}) => {
+    const { theme } = useTheme();
+    const draftValues = values || makeValues(groups);
+    const filteredGroups = groups
+        .map(group => {
+            const showAll = openGroups[group.id] ?? false;
+            return {
+                ...group,
+                items: group.items.filter(item => {
+                    const value = draftValues[item.id] ?? item.value;
+                    const needle = `${group.title} ${item.label} ${item.description || ''} ${formatPayload(value)}`.toLowerCase();
+                    if (query.trim()) return needle.includes(query.trim().toLowerCase());
+                    return showAll || !isItemEmpty(item, value);
+                })
+            };
+        })
+        .filter((group, index) => group.items.length > 0 || (!query.trim() && (groups[index]?.items.length || 0) > 0));
+
+    const renderValueControl = (item: XRaySourceItem) => {
+        const kind = item.kind || inferKind(item.value);
+        const value = draftValues[item.id] ?? item.value;
+        const editable = item.editable !== false && kind !== 'readonly';
+        const palette = toneClasses(item.tone, theme);
+        const baseInputClass = `w-full rounded-lg border px-3 py-2 text-xs outline-none transition-colors ${theme === 'retro'
+            ? 'bg-white/70 border-[#8B261D]/15 text-[#3D1A16]'
+            : 'bg-black/40 border-zinc-800 text-zinc-300'
+        } ${palette.focusBorder}`;
+
+        if (kind === 'select' && item.options?.length) {
+            if (item.inlineOptions) {
+                return (
+                    <InlineChoiceControl
+                        item={item}
+                        value={value}
+                        lang={lang}
+                        theme={theme}
+                        onChange={(nextValue) => editable && onUpdateValue(item.id, nextValue)}
+                    />
+                );
+            }
+            return (
+                <ChoiceLineControl
+                    item={item}
+                    value={value}
+                    lang={lang}
+                    theme={theme}
+                    onChange={(nextValue) => editable && onUpdateValue(item.id, nextValue)}
+                />
+            );
+        }
+
+        if (kind === 'toggle') {
+            const boolValue = Boolean(value);
+            return (
+                <div
+                    className={`flex w-full items-center gap-2 rounded-lg border px-2.5 py-1.5 ${theme === 'retro' ? 'bg-white/70 border-[#8B261D]/15 text-[#3D1A16]' : 'bg-black/35 border-zinc-800 text-zinc-300'}`}
+                    style={item.accentColor ? { borderLeftColor: item.accentColor, borderLeftWidth: 4 } : undefined}
+                >
+                    <span className={`min-w-0 flex-1 truncate text-[11px] font-black ${theme === 'retro' ? 'text-[#3D1A16]' : 'text-zinc-200'}`}>
+                        {item.label}
+                    </span>
+                    <button
+                        type="button"
+                        disabled={!editable}
+                        onClick={() => onUpdateValue(item.id, !boolValue)}
+                        className={`flex h-6 shrink-0 items-center gap-1 rounded-full border px-2 text-[8px] font-black uppercase tracking-[0.1em] transition-all disabled:opacity-50 ${boolValue
+                            ? item.accentColor
+                                ? (theme === 'retro' ? 'bg-white text-[#3D1A16]' : 'bg-zinc-950 text-zinc-100')
+                                : palette.selectedOption
+                            : (theme === 'retro' ? 'bg-white border-[#8B261D]/20 text-[#8B261D]/50' : 'bg-zinc-950 border-zinc-800 text-zinc-600')
+                        }`}
+                        style={boolValue && item.accentColor ? { borderColor: item.accentColor, color: item.accentColor } : undefined}
+                        title={boolValue ? (lang === 'EN' ? 'Disable' : '关闭') : (lang === 'EN' ? 'Enable' : '开启')}
+                    >
+                        <ToggleLeft size={12} />
+                        {boolValue ? (lang === 'EN' ? 'On' : '开') : (lang === 'EN' ? 'Off' : '关')}
+                    </button>
+                </div>
+            );
+        }
+
+        if (kind === 'number') {
+            return (
+                <input
+                    type="number"
+                    value={Number(value ?? 0)}
+                    disabled={!editable}
+                    onChange={(e) => onUpdateValue(item.id, Number(e.target.value))}
+                    className={baseInputClass}
+                />
+            );
+        }
+
+        if (kind === 'chips') {
+            const chips = normalizeTagValue(value);
+            return (
+                <div className="space-y-2">
+                    <div className="flex flex-wrap gap-1.5">
+                        {chips.length === 0 ? (
+                            <span className={theme === 'retro' ? 'text-[10px] text-[#8B261D]/40' : 'text-[10px] text-zinc-600'}>{lang === 'EN' ? 'No tags' : '暂无标签'}</span>
+                        ) : chips.map((chip, index) => (
+                            <button
+                                key={`${chip}-${index}`}
+                                type="button"
+                                disabled={!editable}
+                                onClick={() => onUpdateValue(item.id, chips.filter((_, i) => i !== index))}
+                                className={`rounded-full border px-2 py-1 text-[10px] transition-colors disabled:cursor-default ${palette.chip}`}
+                                title={editable ? (lang === 'EN' ? 'Click to remove' : '点击移除') : undefined}
+                            >
+                                {chip}
+                            </button>
+                        ))}
+                    </div>
+                    {editable && (
+                        <textarea
+                            value={chips.join('\n')}
+                            onChange={(e) => onUpdateValue(item.id, e.target.value.split(/[,，\n]/).map(v => v.trim()).filter(Boolean))}
+                            className={`${baseInputClass} min-h-[74px] resize-y font-mono leading-relaxed`}
+                        />
+                    )}
+                </div>
+            );
+        }
+
+        if (kind === 'libraryBlock') {
+            return (
+                <LibraryBlockControl
+                    item={item}
+                    value={value}
+                    lang={lang}
+                    theme={theme}
+                    onChange={(nextValue) => onUpdateValue(item.id, nextValue)}
+                    onOpenLibrary={onOpenLibrary}
+                />
+            );
+        }
+
+        if (kind === 'json') {
+            const textValue = typeof value === 'string' ? value : formatPayload(value);
+            return (
+                <TextLineControl
+                    item={{ ...item, placeholder: item.placeholder || (lang === 'EN' ? 'Structured values' : '结构化参数') }}
+                    value={textValue}
+                    lang={lang}
+                    theme={theme}
+                    multiline
+                    onChange={(nextText) => {
+                        const raw = String(nextText);
+                        try {
+                            onUpdateValue(item.id, JSON.parse(raw));
+                        } catch {
+                            onUpdateValue(item.id, raw);
+                        }
+                    }}
+                />
+            );
+        }
+
+        if (kind === 'image') {
+            const imageUrl = typeof value === 'string' ? value : '';
+            return (
+                <TextLineControl
+                    item={{ ...item, placeholder: item.placeholder || (lang === 'EN' ? 'No image' : '无参考图') }}
+                    value={imageUrl}
+                    lang={lang}
+                    theme={theme}
+                    onChange={(nextValue) => editable && onUpdateValue(item.id, nextValue)}
+                />
+            );
+        }
+
+        if (kind === 'textarea' || (typeof value === 'string' && value.length > 160)) {
+            return (
+                <TextLineControl
+                    item={item}
+                    value={String(value ?? '')}
+                    lang={lang}
+                    theme={theme}
+                    multiline
+                    onChange={(nextValue) => editable && onUpdateValue(item.id, nextValue)}
+                />
+            );
+        }
+
+        if (kind === 'readonly') {
+            return (
+                <pre className={`${baseInputClass} max-h-32 overflow-auto whitespace-pre-wrap break-words font-mono opacity-70`}>
+                    {formatPayload(value)}
+                </pre>
+            );
+        }
+
+        return (
+            <TextLineControl
+                item={item}
+                value={String(value ?? '')}
+                lang={lang}
+                theme={theme}
+                onChange={(nextValue) => editable && onUpdateValue(item.id, nextValue)}
+            />
+        );
+    };
+
+    return (
+        <aside className={`flex min-h-0 flex-col border-r ${theme === 'retro' ? 'bg-[#F2EDDE]/70 border-[#8B261D]/10' : 'bg-[#080808] border-zinc-800'} ${className}`}>
+            <div className={`shrink-0 border-b p-3 ${theme === 'retro' ? 'border-[#8B261D]/10' : 'border-zinc-800'}`}>
+                <div className="mb-3 flex items-center justify-between gap-3">
+                    <div className={`flex min-w-0 items-center gap-2 text-[10px] font-black uppercase tracking-widest ${theme === 'retro' ? 'text-[#8B261D]' : 'text-zinc-400'}`}>
+                        <Database size={13} />
+                        {title || (lang === 'EN' ? 'Input Sources' : '输入源控制台')}
+                    </div>
+                    {(showHistoryControls || headerActions) && (
+                        <div className="flex shrink-0 items-center gap-1">
+                            {headerActions}
+                            {showHistoryControls && (
+                                <>
+                            <button
+                                type="button"
+                                onClick={onUndo}
+                                disabled={!onUndo || historyPastCount === 0}
+                                className={`flex h-7 w-7 items-center justify-center rounded-lg border transition-all disabled:cursor-not-allowed disabled:opacity-35 ${theme === 'retro' ? 'bg-white/70 border-[#8B261D]/15 text-[#8B261D] hover:bg-[#8B261D]/5' : 'bg-black/40 border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-white'}`}
+                                title={lang === 'EN' ? 'Undo' : '撤回'}
+                                aria-label={lang === 'EN' ? 'Undo' : '撤回'}
+                            >
+                                <Undo2 size={13} />
+                            </button>
+                            <button
+                                type="button"
+                                onClick={onRedo}
+                                disabled={!onRedo || historyFutureCount === 0}
+                                className={`flex h-7 w-7 items-center justify-center rounded-lg border transition-all disabled:cursor-not-allowed disabled:opacity-35 ${theme === 'retro' ? 'bg-white/70 border-[#8B261D]/15 text-[#8B261D] hover:bg-[#8B261D]/5' : 'bg-black/40 border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-white'}`}
+                                title={lang === 'EN' ? 'Redo' : '前进'}
+                                aria-label={lang === 'EN' ? 'Redo' : '前进'}
+                            >
+                                <Redo2 size={13} />
+                            </button>
+                                </>
+                            )}
+                        </div>
+                    )}
+                </div>
+                <div className={`flex items-center gap-2 rounded-lg border px-3 py-2 ${theme === 'retro' ? 'bg-white/70 border-[#8B261D]/15' : 'bg-black/40 border-zinc-800'}`}>
+                    <Search size={13} className={theme === 'retro' ? 'text-[#8B261D]/50' : 'text-zinc-600'} />
+                    <input
+                        value={query}
+                        onChange={(e) => onQueryChange(e.target.value)}
+                        placeholder={searchPlaceholder || (lang === 'EN' ? 'Filter sources' : '筛选来源')}
+                        className={`w-full bg-transparent text-xs outline-none ${theme === 'retro' ? 'text-[#3D1A16] placeholder-[#8B261D]/35' : 'text-zinc-300 placeholder-zinc-600'}`}
+                    />
+                </div>
+            </div>
+
+            <div className={`flex-1 overflow-y-auto custom-scrollbar p-2.5 ${bodyClassName}`}>
+                {filteredGroups.map(group => {
+                    const Icon = groupIcon(group.id, group.tone);
+                    const meta = groupMeta(group.id, theme, lang, group.tone);
+                    const showAll = openGroups[group.id] ?? false;
+                    const totalCount = groups.find(sourceGroup => sourceGroup.id === group.id)?.items.length || group.items.length;
+                    const selectedCount = (groups.find(sourceGroup => sourceGroup.id === group.id)?.items || group.items)
+                        .filter(item => !isItemEmpty(item, draftValues[item.id] ?? item.value)).length;
+                    return (
+                        <div key={group.id} className={`mb-3 overflow-hidden rounded-xl border border-l-4 ${theme === 'retro' ? 'bg-white/45 border-[#8B261D]/10' : 'bg-zinc-950/50 border-zinc-800/80'} ${meta.border}`}>
+                            <button
+                                type="button"
+                                onClick={() => onToggleGroup(group.id)}
+                                className={`flex w-full items-center gap-2 px-3 py-3 text-left ${meta.header} ${theme === 'retro' ? 'text-[#3D1A16]' : 'text-zinc-200'}`}
+                            >
+                                {showAll ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                                <span className={`rounded px-1.5 py-0.5 text-[9px] font-black ${meta.badge}`}>{meta.index}</span>
+                                <Icon size={14} className={meta.icon} />
+                                <div className="min-w-0 flex-1">
+                                    <div className="truncate text-xs font-black uppercase tracking-wider">{group.title}</div>
+                                    <div className={`mt-0.5 truncate text-[9px] font-bold uppercase tracking-wider ${theme === 'retro' ? 'text-black/35' : 'text-zinc-600'}`}>{group.description || meta.eyebrow}</div>
+                                </div>
+                                <span className={`rounded-full px-2 py-0.5 text-[9px] font-mono ${meta.badge}`}>
+                                    {selectedCount}/{totalCount}
+                                </span>
+                                <span className={`hidden xl:inline text-[9px] font-bold ${theme === 'retro' ? 'text-[#8B261D]/45' : 'text-zinc-600'}`}>
+                                    {showAll ? (lang === 'EN' ? 'Selected Only' : '收起未选') : (lang === 'EN' ? 'Show Empty' : '展开未选')}
+                                </span>
+                            </button>
+
+                            <div className={`space-y-1.5 border-t p-2 ${theme === 'retro' ? 'border-[#8B261D]/10' : 'border-zinc-800/70'}`}>
+                                {group.items.length === 0 ? (
+                                    <div className={`px-2 py-3 text-center text-[10px] ${theme === 'retro' ? 'text-[#8B261D]/45' : 'text-zinc-600'}`}>
+                                        {lang === 'EN' ? 'No selected values in this section.' : '本组暂无已选参数。'}
+                                    </div>
+                                ) : (
+                                    group.items.map(item => (
+                                        <div
+                                            key={item.id}
+                                            className={activeItemId === item.id ? 'rounded-lg' : undefined}
+                                            style={activeItemId === item.id && item.accentColor ? { boxShadow: `inset 0 0 0 1px ${item.accentColor}` } : undefined}
+                                            onClickCapture={() => onItemFocus?.(item, group)}
+                                        >
+                                            {renderValueControl(item)}
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        </aside>
+    );
+};
+
 const promptToneTextClass = (tone: XRayTone, theme: string, weight: 'font-bold' | 'font-black' = 'font-bold') => {
     if (theme === 'retro') {
         if (tone === 'director' || tone === 'engine') return `${weight} text-[#8B261D]`;
@@ -1370,7 +1725,7 @@ export const XRayInspectorModal: React.FC<XRayInspectorModalProps> = ({
 
     return createPortal(
         <div
-            className={`fixed inset-0 z-[99999] flex items-center justify-center p-1 md:p-2 animate-in fade-in duration-200 ${theme === 'retro' ? 'bg-[#8B261D]/10 backdrop-blur-sm' : 'bg-black/80 backdrop-blur-md'}`}
+            className={`fixed inset-0 z-[100002] flex items-center justify-center p-1 md:p-2 animate-in fade-in duration-200 ${theme === 'retro' ? 'bg-[#8B261D]/10 backdrop-blur-sm' : 'bg-black/80 backdrop-blur-md'}`}
             onClick={onClose}
         >
             <div
@@ -1415,95 +1770,22 @@ export const XRayInspectorModal: React.FC<XRayInspectorModalProps> = ({
                 </div>
 
                 <div className="flex min-h-0 flex-1">
-                    <aside className={`flex w-[30%] min-w-[300px] max-w-[440px] flex-col border-r ${theme === 'retro' ? 'bg-[#F2EDDE]/70 border-[#8B261D]/10' : 'bg-[#080808] border-zinc-800'}`}>
-                        <div className={`shrink-0 border-b p-3 ${theme === 'retro' ? 'border-[#8B261D]/10' : 'border-zinc-800'}`}>
-                            <div className="mb-3 flex items-center justify-between gap-3">
-                                <div className={`flex min-w-0 items-center gap-2 text-[10px] font-black uppercase tracking-widest ${theme === 'retro' ? 'text-[#8B261D]' : 'text-zinc-400'}`}>
-                                    <Database size={13} />
-                                    {lang === 'EN' ? 'Input Sources' : '输入源控制台'}
-                                </div>
-                                <div className="flex shrink-0 items-center gap-1">
-                                    <button
-                                        type="button"
-                                        onClick={handleUndo}
-                                        disabled={historyPast.length === 0}
-                                        className={`flex h-7 w-7 items-center justify-center rounded-lg border transition-all disabled:cursor-not-allowed disabled:opacity-35 ${theme === 'retro' ? 'bg-white/70 border-[#8B261D]/15 text-[#8B261D] hover:bg-[#8B261D]/5' : 'bg-black/40 border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-white'}`}
-                                        title={lang === 'EN' ? 'Undo' : '撤回'}
-                                        aria-label={lang === 'EN' ? 'Undo' : '撤回'}
-                                    >
-                                        <Undo2 size={13} />
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={handleRedo}
-                                        disabled={historyFuture.length === 0}
-                                        className={`flex h-7 w-7 items-center justify-center rounded-lg border transition-all disabled:cursor-not-allowed disabled:opacity-35 ${theme === 'retro' ? 'bg-white/70 border-[#8B261D]/15 text-[#8B261D] hover:bg-[#8B261D]/5' : 'bg-black/40 border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-white'}`}
-                                        title={lang === 'EN' ? 'Redo' : '前进'}
-                                        aria-label={lang === 'EN' ? 'Redo' : '前进'}
-                                    >
-                                        <Redo2 size={13} />
-                                    </button>
-                                </div>
-                            </div>
-                            <div className={`flex items-center gap-2 rounded-lg border px-3 py-2 ${theme === 'retro' ? 'bg-white/70 border-[#8B261D]/15' : 'bg-black/40 border-zinc-800'}`}>
-                                <Search size={13} className={theme === 'retro' ? 'text-[#8B261D]/50' : 'text-zinc-600'} />
-                                <input
-                                    value={query}
-                                    onChange={(e) => setQuery(e.target.value)}
-                                    placeholder={lang === 'EN' ? 'Filter sources' : '筛选来源'}
-                                    className={`w-full bg-transparent text-xs outline-none ${theme === 'retro' ? 'text-[#3D1A16] placeholder-[#8B261D]/35' : 'text-zinc-300 placeholder-zinc-600'}`}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="flex-1 overflow-y-auto custom-scrollbar p-2.5">
-                            {filteredGroups.map(group => {
-                                const Icon = groupIcon(group.id, group.tone);
-                                const meta = groupMeta(group.id, theme, lang, group.tone);
-                                const showAll = openGroups[group.id] ?? false;
-                                const totalCount = sourceGroups.find(sourceGroup => sourceGroup.id === group.id)?.items.length || group.items.length;
-                                const selectedCount = (sourceGroups.find(sourceGroup => sourceGroup.id === group.id)?.items || group.items)
-                                    .filter(item => !isItemEmpty(item, draftValues[item.id] ?? item.value)).length;
-                                return (
-                                    <div key={group.id} className={`mb-3 overflow-hidden rounded-xl border border-l-4 ${theme === 'retro' ? 'bg-white/45 border-[#8B261D]/10' : 'bg-zinc-950/50 border-zinc-800/80'} ${meta.border}`}>
-                                        <button
-                                            type="button"
-                                            onClick={() => setOpenGroups(prev => ({ ...prev, [group.id]: !showAll }))}
-                                            className={`flex w-full items-center gap-2 px-3 py-3 text-left ${meta.header} ${theme === 'retro' ? 'text-[#3D1A16]' : 'text-zinc-200'}`}
-                                        >
-                                            {showAll ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                                            <span className={`rounded px-1.5 py-0.5 text-[9px] font-black ${meta.badge}`}>{meta.index}</span>
-                                            <Icon size={14} className={meta.icon} />
-                                            <div className="min-w-0 flex-1">
-                                                <div className="truncate text-xs font-black uppercase tracking-wider">{group.title}</div>
-                                                <div className={`mt-0.5 truncate text-[9px] font-bold uppercase tracking-wider ${theme === 'retro' ? 'text-black/35' : 'text-zinc-600'}`}>{meta.eyebrow}</div>
-                                            </div>
-                                            <span className={`rounded-full px-2 py-0.5 text-[9px] font-mono ${meta.badge}`}>
-                                                {selectedCount}/{totalCount}
-                                            </span>
-                                            <span className={`hidden xl:inline text-[9px] font-bold ${theme === 'retro' ? 'text-[#8B261D]/45' : 'text-zinc-600'}`}>
-                                                {showAll ? (lang === 'EN' ? 'Selected Only' : '收起未选') : (lang === 'EN' ? 'Show Empty' : '展开未选')}
-                                            </span>
-                                        </button>
-
-                                        <div className={`space-y-1.5 border-t p-2 ${theme === 'retro' ? 'border-[#8B261D]/10' : 'border-zinc-800/70'}`}>
-                                            {group.items.length === 0 ? (
-                                                <div className={`px-2 py-3 text-center text-[10px] ${theme === 'retro' ? 'text-[#8B261D]/45' : 'text-zinc-600'}`}>
-                                                    {lang === 'EN' ? 'No selected values in this section.' : '本组暂无已选参数。'}
-                                                </div>
-                                            ) : (
-                                                group.items.map(item => (
-                                                    <div key={item.id}>
-                                                        {renderValueControl(item)}
-                                                    </div>
-                                                ))
-                                            )}
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </aside>
+                    <XRaySourceConsole
+                        lang={lang}
+                        groups={sourceGroups}
+                        values={draftValues}
+                        query={query}
+                        openGroups={openGroups}
+                        onQueryChange={setQuery}
+                        onToggleGroup={(groupId) => setOpenGroups(prev => ({ ...prev, [groupId]: !(prev[groupId] ?? false) }))}
+                        onUpdateValue={updateValue}
+                        onOpenLibrary={openLibraryForItem}
+                        onUndo={handleUndo}
+                        onRedo={handleRedo}
+                        historyPastCount={historyPast.length}
+                        historyFutureCount={historyFuture.length}
+                        className="w-[30%] min-w-[300px] max-w-[440px]"
+                    />
 
                     <section className="flex min-w-0 flex-1 flex-col">
                         <div className={`flex h-11 shrink-0 items-center justify-between border-b px-5 ${theme === 'retro' ? 'bg-white/50 border-[#8B261D]/10' : 'bg-[#070707] border-zinc-800'}`}>

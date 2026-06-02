@@ -20,6 +20,8 @@ import { AestheticView } from './blueprint/AestheticView';
 import { TrailerView } from './blueprint/TrailerView';
 import { PoeticView } from './blueprint/PoeticView';
 import { MetonymyView } from './blueprint/MetonymyView';
+import { NarrativeVisualBibleView } from './blueprint/NarrativeVisualBibleView';
+import { NarrativeDynamicTrailerView } from './blueprint/NarrativeDynamicTrailerView';
 import { persistence } from '../services/persistence';
 import { globalTaskManager } from '../services/taskManager';
 import { supabaseDatabase } from '../services/supabaseDatabase';
@@ -64,7 +66,7 @@ interface BlueprintEditorProps {
     onSutureOpenChange?: (open: boolean) => void;
     isAdmin?: boolean;
     isTaskManagerOpen?: boolean;
-    setIsTaskManagerOpen?: (open: boolean) => void;
+    setIsTaskManagerOpen?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 // ... (Create Empty Blueprint Functions remain the same)
@@ -330,7 +332,9 @@ export const BlueprintEditor: React.FC<BlueprintEditorProps> = ({
         } else { // Default for Narrative
             menuItems = [
                 { id: 'NARRATIVE', label: language === 'EN' ? "Narrative Writing" : "叙事创作", icon: BookOpen },
-                { id: 'VISUAL_BIBLE', label: language === 'EN' ? "Visual Bible" : "视觉圣经", icon: Eye }
+                { id: 'ASSET_SETTING', label: language === 'EN' ? "Asset Setting" : "资产设定", icon: Box },
+                { id: 'VISUAL_BIBLE', label: language === 'EN' ? "Visual Bible" : "视觉圣经", icon: Eye },
+                { id: 'DYNAMIC_TRAILER', label: language === 'EN' ? "Dynamic Trailer" : "动态预告", icon: Film }
             ];
         }
 
@@ -558,11 +562,11 @@ ${assetsSectionHtml}
     };
 
     const isMetonymyMode = activeTab === 'METONYMY';
-    const isVisualBibleMode = activeTab === 'VISUAL_BIBLE';
-    const mainPaddingClass = isMetonymyMode || isVisualBibleMode ? 'p-0' : 'p-8 md:p-12';
+    const isAssetSettingMode = activeTab === 'ASSETS' || activeTab === 'ASSET_SETTING';
+    const mainPaddingClass = isMetonymyMode || isAssetSettingMode ? 'p-0' : 'p-8 md:p-12';
 
     const renderContent = () => {
-        if (activeTab === 'ASSETS' || activeTab === 'VISUAL_BIBLE') {
+        if (isAssetSettingMode) {
             const metonymyData = effectiveBlueprint.metonymyData || {
                 screenplay: [],
                 staticStoryboard: [],
@@ -614,6 +618,8 @@ ${assetsSectionHtml}
                         onToggleExpand={setIsVisualBibleExpanded}
                         sourceText={effectiveBlueprint.narrative?.synopsis || ""}
                         isAdmin={isAdmin}
+                        title={activeTab === 'ASSET_SETTING' ? (language === 'EN' ? 'Asset Setting' : '资产设定') : undefined}
+                        subtitle={activeTab === 'ASSET_SETTING' ? (language === 'EN' ? 'Character, scene and prop assets for generation' : '角色、场景与道具资产生成规范') : undefined}
                     />
                 </div>
             );
@@ -754,6 +760,32 @@ ${assetsSectionHtml}
                     );
                 }
 
+                if (activeTab === 'VISUAL_BIBLE') {
+                    return (
+                        <NarrativeVisualBibleView
+                            blueprint={effectiveBlueprint}
+                            language={language}
+                            onUpdateBlueprint={updateCurrentBlueprint}
+                            themeAccent={uiConfig.themeAccent}
+                            themeBorder={uiConfig.themeBorder}
+                            theme={effectiveTheme}
+                        />
+                    );
+                }
+
+                if (activeTab === 'DYNAMIC_TRAILER') {
+                    return (
+                        <NarrativeDynamicTrailerView
+                            blueprint={effectiveBlueprint}
+                            language={language}
+                            onUpdateBlueprint={updateCurrentBlueprint}
+                            themeAccent={uiConfig.themeAccent}
+                            themeBorder={uiConfig.themeBorder}
+                            theme={effectiveTheme}
+                        />
+                    );
+                }
+
                 return (
                     <NarrativeView
                         blueprint={effectiveBlueprint}
@@ -849,7 +881,7 @@ ${assetsSectionHtml}
                     </aside>
                 )}
 
-                <main className={`flex-1 ${isMetonymyMode || isVisualBibleMode ? 'overflow-hidden' : 'overflow-y-auto custom-scrollbar'} bg-[var(--bg-main)] ${mainPaddingClass} relative transition-all duration-300`}>
+                <main className={`flex-1 ${isMetonymyMode || isAssetSettingMode ? 'overflow-hidden' : 'overflow-y-auto custom-scrollbar'} bg-[var(--bg-main)] ${mainPaddingClass} relative transition-all duration-300`}>
                     {renderContent()}
                 </main>
             </div>
@@ -955,13 +987,13 @@ ${assetsSectionHtml}
 
                         {/* Tasks / 任务中心 */}
                         <button
-                            onClick={() => setIsTaskManagerOpen?.(!isTaskManagerOpen)}
+                            onClick={() => setIsTaskManagerOpen?.(open => !open)}
                             className={`mist-app-footer-control ${isTaskManagerOpen ? 'is-active' : ''} flex flex-col items-center gap-1.5 shrink-0 min-w-[60px] group transition-all duration-300 relative`}
                         >
                             <div className="relative">
                                 <Activity size={18} className={`transition-colors ${isTaskManagerOpen ? (effectiveTheme === 'retro' ? 'text-[var(--text-accent)]' : uiConfig.themeAccent) : (effectiveTheme === 'retro' ? 'text-[var(--text-muted)] group-hover:text-[var(--text-main)]' : 'text-zinc-400 group-hover:text-white')}`} />
                                 {activeTaskCount > 0 && (
-                                    <span className="mist-task-count-badge absolute -top-1 -right-1 w-3.5 h-3.5 bg-[var(--bg-panel)] border border-[var(--border-main)] rounded-full text-[8px] flex items-center justify-center font-bold text-[var(--text-main)] shadow-none">
+                                    <span className="mist-task-count-badge absolute -top-1 -right-1 w-3.5 h-3.5 bg-[var(--mist-archive-red)] rounded-full text-[8px] flex items-center justify-center font-bold text-white shadow-[0_0_10px_var(--accent-glow)]">
                                         {activeTaskCount}
                                     </span>
                                 )}

@@ -16,6 +16,7 @@ import {
   ApiKeyEntry,
   DEFAULT_CONFIG,
   DEFAULT_ENGINE_MODELS,
+  DEFAULT_KEY_ID,
   DEFAULT_KEY_ENTRIES,
   DEFAULT_ROUTE_PROFILE,
   DEFAULT_ROUTE_PROFILE_ID,
@@ -39,6 +40,8 @@ import {
   isApiKeyCompatibleWithModel,
   providerToApiFormat,
 } from '../types/config';
+
+const IMAGE_GEN_DEFAULT_MODEL = 'gpt-image-2';
 
 function proxyFetch(url: string, options: RequestInit): Promise<Response> {
   if (url.startsWith('http://') || url.startsWith('https://')) {
@@ -136,8 +139,9 @@ class ConfigService {
   private normalizeConfig(config: Partial<APIConfig>): APIConfig {
     const engines = this.normalizeEngines(config.engines || DEFAULT_ENGINE_MODELS);
     const legacyProviders = this.normalizeLegacyProviders(config);
-    const keyEntries = Array.isArray(config.keyEntries) && config.keyEntries.length > 0
-      ? this.normalizeKeyEntries(config.keyEntries)
+    const hasExistingKeyEntries = Array.isArray(config.keyEntries) && config.keyEntries.length > 0;
+    const keyEntries = hasExistingKeyEntries
+      ? this.normalizeKeyEntries(config.keyEntries, false)
       : this.migrateProviderKeys(legacyProviders);
     const routeProfiles = Array.isArray(config.routeProfiles) && config.routeProfiles.length > 0
       ? this.normalizeRouteProfiles(config.routeProfiles, engines, keyEntries)
@@ -205,22 +209,25 @@ class ConfigService {
     };
   }
 
-  private normalizeKeyEntries(entries: ApiKeyEntry[]): ApiKeyEntry[] {
+  private normalizeKeyEntries(entries: ApiKeyEntry[], includeDefault = true): ApiKeyEntry[] {
     const seen = new Set<string>();
     const normalized = entries.map((entry, index) => {
       const id = entry.id || createId('key');
       const isLegacyGeminiProxy = id === LEGACY_KEY_IDS.gemini && entry.mode === 'proxy';
       const provider = isLegacyGeminiProxy ? 'gemini' : (entry.provider || 'custom');
       const apiFormat = isLegacyGeminiProxy ? 'openai' : (entry.apiFormat || providerToApiFormat(provider));
+      const baseUrl = entry.baseUrl || '';
       const next: ApiKeyEntry = {
         id: seen.has(id) ? `${id}_${index}` : id,
         name: entry.name?.trim() || `${providerLabel(provider)} Key`,
         provider,
         mode: entry.mode || (provider === 'gemini' ? 'official' : 'proxy'),
         apiFormat,
-        baseUrl: entry.baseUrl || '',
+        baseUrl,
+        officialBaseUrl: entry.officialBaseUrl ?? (entry.mode === 'official' ? baseUrl : ''),
+        proxyBaseUrl: entry.proxyBaseUrl ?? (entry.mode === 'proxy' ? baseUrl : ''),
         apiKey: entry.apiKey || '',
-        modelCoverage: isLegacyGeminiProxy ? 'provider' : (entry.modelCoverage || (provider === 'mixed' || provider === 'custom' ? 'all' : 'provider')),
+        modelCoverage: entry.modelCoverage || (isLegacyGeminiProxy ? 'provider' : 'allowlist'),
         allowedModels: Array.isArray(entry.allowedModels) ? entry.allowedModels : [],
         modelPattern: entry.modelPattern || '',
         tags: Array.from(new Set([...(Array.isArray(entry.tags) ? entry.tags : []), ...(isLegacyGeminiProxy ? ['gemini'] : [])])),
@@ -233,26 +240,44 @@ class ConfigService {
       };
       seen.add(next.id);
       return next;
-    });
+    }).filter(entry => !this.isEmptyLegacyPlaceholder(entry));
 
-    for (const defaultEntry of DEFAULT_KEY_ENTRIES) {
-      if (!normalized.some(entry => entry.id === defaultEntry.id)) {
-        normalized.push({ ...defaultEntry });
+    if (includeDefault) {
+      for (const defaultEntry of DEFAULT_KEY_ENTRIES) {
+        if (!normalized.some(entry => entry.id === defaultEntry.id)) {
+          normalized.push({ ...defaultEntry });
+        }
       }
     }
 
-    return normalized;
+    return normalized.length > 0 ? normalized : DEFAULT_KEY_ENTRIES.map(entry => ({ ...entry }));
+  }
+
+  private isEmptyLegacyPlaceholder(entry: ApiKeyEntry): boolean {
+    if (!Object.values(LEGACY_KEY_IDS).includes(entry.id)) return false;
+    if (entry.apiKey.trim()) return false;
+    if (entry.mode === 'proxy' && entry.baseUrl.trim()) return false;
+    return true;
   }
 
   private migrateProviderKeys(providers: Record<ProviderId, ProviderConfig>): ApiKeyEntry[] {
-    const migrated = DEFAULT_KEY_ENTRIES.map(entry => ({ ...entry }));
+    const migrated: ApiKeyEntry[] = [];
 
-    const applyProvider = (provider: ProviderId, patch: Partial<ApiKeyEntry>) => {
-      const idx = migrated.findIndex(entry => entry.id === LEGACY_KEY_IDS[provider]);
-      if (idx >= 0) migrated[idx] = { ...migrated[idx], ...patch, updatedAt: nowIso() };
+    const shouldMigrate = (provider: ProviderId) => {
+      const config = providers[provider];
+      return Boolean(config.apiKey || (config.mode === 'proxy' && config.baseUrl));
     };
 
-    applyProvider('gemini', {
+    const addProvider = (provider: ProviderId, patch: Partial<ApiKeyEntry>) => {
+      if (!shouldMigrate(provider)) return;
+      migrated.push(this.createKeyEntry({
+        id: LEGACY_KEY_IDS[provider],
+        ...patch,
+        updatedAt: nowIso(),
+      }));
+    };
+
+    addProvider('gemini', {
       name: providers.gemini.mode === 'proxy' ? 'Gemini 兼容网关' : 'Gemini 官方 Key',
       provider: 'gemini',
       mode: providers.gemini.mode,
@@ -263,7 +288,7 @@ class ConfigService {
       tags: ['migrated', 'gemini'],
     });
 
-    applyProvider('claude', {
+    addProvider('claude', {
       name: 'Claude 网关 Key',
       provider: 'claude',
       mode: providers.claude.mode,
@@ -274,29 +299,29 @@ class ConfigService {
       tags: ['migrated', 'claude'],
     });
 
-    applyProvider('openai', {
+    addProvider('openai', {
       name: providers.openai.mode === 'proxy' ? 'OpenAI 兼容网关' : 'OpenAI 官方 Key',
       provider: providers.openai.mode === 'proxy' ? 'mixed' : 'openai',
       mode: providers.openai.mode,
       apiFormat: 'openai',
       baseUrl: providers.openai.baseUrl,
       apiKey: providers.openai.apiKey,
-      modelCoverage: providers.openai.mode === 'proxy' ? 'all' : 'provider',
+      modelCoverage: providers.openai.mode === 'proxy' ? 'allowlist' : 'provider',
       tags: ['migrated', 'openai'],
     });
 
-    applyProvider('deepseek', {
+    addProvider('deepseek', {
       name: providers.deepseek.mode === 'proxy' ? 'DeepSeek 兼容网关' : 'DeepSeek 官方 Key',
       provider: providers.deepseek.mode === 'proxy' ? 'mixed' : 'deepseek',
       mode: providers.deepseek.mode,
       apiFormat: 'openai',
       baseUrl: providers.deepseek.baseUrl,
       apiKey: providers.deepseek.apiKey,
-      modelCoverage: providers.deepseek.mode === 'proxy' ? 'all' : 'provider',
+      modelCoverage: providers.deepseek.mode === 'proxy' ? 'allowlist' : 'provider',
       tags: ['migrated', 'deepseek'],
     });
 
-    return migrated;
+    return migrated.length > 0 ? migrated : DEFAULT_KEY_ENTRIES.map(entry => ({ ...entry }));
   }
 
   private normalizeRouteProfiles(
@@ -324,8 +349,13 @@ class ConfigService {
     for (const engineId of ENGINE_IDS) {
       const engine = ENGINE_CONFIGS.find(item => item.id === engineId);
       const currentModel = bindings[engineId]?.model || engines[engineId] || DEFAULT_ENGINE_MODELS[engineId];
-      const model = engine?.allowedModels.includes(currentModel) ? currentModel : DEFAULT_ENGINE_MODELS[engineId];
-      const keyId = bindings[engineId]?.keyId || this.findDefaultKeyIdForModel(model, keyEntries);
+      const legacyImageModel = engineId === 'imageGen' && currentModel === 'gemini-3-pro-image-preview';
+      const upgradedModel = legacyImageModel ? IMAGE_GEN_DEFAULT_MODEL : currentModel;
+      const model = engine?.allowedModels.includes(upgradedModel) ? upgradedModel : DEFAULT_ENGINE_MODELS[engineId];
+      const boundKeyId = bindings[engineId]?.keyId;
+      const keyId = boundKeyId && keyEntries.some(entry => entry.id === boundKeyId)
+        ? boundKeyId
+        : this.findDefaultKeyIdForModel(model, keyEntries);
       normalized[engineId] = { keyId, model };
     }
 
@@ -413,7 +443,7 @@ class ConfigService {
 
     return keyEntries.find(entry => this.isProviderAlignedKey(entry, provider))?.id
       || keyEntries[0]?.id
-      || LEGACY_KEY_IDS.gemini;
+      || DEFAULT_KEY_ID;
   }
 
   private isProviderAlignedKey(entry: ApiKeyEntry, provider: ProviderId): boolean {
@@ -434,22 +464,6 @@ class ConfigService {
       return new RegExp(`^${escaped}$`, 'i').test(model);
     }
     return false;
-  }
-
-  private shouldKeepBoundKeyForModel(entry: ApiKeyEntry, model: string, keyEntries: ApiKeyEntry[]): boolean {
-    if (!isApiKeyCompatibleWithModel(entry, model)) return false;
-
-    const provider = getProviderForModel(model);
-    if (this.isProviderAlignedKey(entry, provider) || this.isExplicitModelRoute(entry, model)) {
-      return true;
-    }
-
-    return !keyEntries.some(candidate =>
-      candidate.id !== entry.id
-      && candidate.apiKey
-      && this.isProviderAlignedKey(candidate, provider)
-      && isApiKeyCompatibleWithModel(candidate, model)
-    );
   }
 
   // ============================================================
@@ -501,15 +515,19 @@ class ConfigService {
 
   createKeyEntry(seed: Partial<ApiKeyEntry> = {}): ApiKeyEntry {
     const provider = seed.provider || 'mixed';
+    const mode = seed.mode || (provider === 'gemini' ? 'official' : 'proxy');
+    const baseUrl = seed.baseUrl || '';
     return {
       id: seed.id || createId('key'),
       name: seed.name || `${providerLabel(provider)} Key`,
       provider,
-      mode: seed.mode || (provider === 'gemini' ? 'official' : 'proxy'),
+      mode,
       apiFormat: seed.apiFormat || providerToApiFormat(provider),
-      baseUrl: seed.baseUrl || '',
+      baseUrl,
+      officialBaseUrl: seed.officialBaseUrl ?? (mode === 'official' ? baseUrl : ''),
+      proxyBaseUrl: seed.proxyBaseUrl ?? (mode === 'proxy' ? baseUrl : ''),
       apiKey: seed.apiKey || '',
-      modelCoverage: seed.modelCoverage || (provider === 'mixed' || provider === 'custom' ? 'all' : 'provider'),
+      modelCoverage: seed.modelCoverage || 'allowlist',
       allowedModels: seed.allowedModels || [],
       modelPattern: seed.modelPattern || '',
       tags: seed.tags || [],
@@ -629,12 +647,6 @@ class ConfigService {
         keyId: this.findDefaultKeyIdForModel(DEFAULT_ENGINE_MODELS[engineId], config.keyEntries),
       };
       const nextBinding = { ...current, ...binding };
-      if (binding.model && !binding.keyId) {
-        const currentKey = config.keyEntries.find(entry => entry.id === current.keyId);
-        nextBinding.keyId = currentKey && this.shouldKeepBoundKeyForModel(currentKey, binding.model, config.keyEntries)
-          ? current.keyId
-          : this.findDefaultKeyIdForModel(binding.model, config.keyEntries);
-      }
       return {
         ...profile,
         bindings: {
@@ -661,9 +673,7 @@ class ConfigService {
       for (const engineId of ENGINE_IDS) {
         const current = profile.bindings[engineId];
         if (!current) continue;
-        bindings[engineId] = isApiKeyCompatibleWithModel(key, current.model)
-          ? { ...current, keyId }
-          : current;
+        bindings[engineId] = { ...current, keyId };
       }
       return { ...profile, bindings, updatedAt: nowIso() };
     });
@@ -686,10 +696,29 @@ class ConfigService {
         const key = config.keyEntries.find(entry => entry.id === current.keyId);
         bindings[engineId] = {
           model,
-          keyId: key && this.shouldKeepBoundKeyForModel(key, model, config.keyEntries)
-            ? current.keyId
-            : this.findDefaultKeyIdForModel(model, config.keyEntries),
+          keyId: key ? current.keyId : this.findDefaultKeyIdForModel(model, config.keyEntries),
         };
+      }
+      return { ...profile, bindings: { ...profile.bindings, ...bindings }, updatedAt: nowIso() };
+    });
+
+    const next = this.normalizeConfig({ ...config, routeProfiles });
+    this.saveConfig(next);
+    return this.getConfig();
+  }
+
+  applyKeyModelToCompatibleEngines(keyId: string, model: string, profileId?: string): APIConfig {
+    const config = this.getConfig();
+    const key = config.keyEntries.find(entry => entry.id === keyId);
+    if (!key || !isApiKeyCompatibleWithModel(key, model)) return config;
+
+    const targetProfileId = profileId || config.activeRouteProfileId;
+    const routeProfiles = config.routeProfiles.map(profile => {
+      if (profile.id !== targetProfileId) return profile;
+      const bindings: Partial<EngineRouteBindings> = {};
+      for (const engine of ENGINE_CONFIGS) {
+        if (!engine.allowedModels.includes(model)) continue;
+        bindings[engine.id as EngineId] = { keyId, model };
       }
       return { ...profile, bindings: { ...profile.bindings, ...bindings }, updatedAt: nowIso() };
     });
@@ -784,9 +813,7 @@ class ConfigService {
     const active = this.getActiveRouteProfile();
     const current = active.bindings[normalizedId];
     const currentKey = current ? config.keyEntries.find(entry => entry.id === current.keyId) : undefined;
-    const keyId = currentKey && this.shouldKeepBoundKeyForModel(currentKey, model, config.keyEntries)
-      ? currentKey.id
-      : this.findDefaultKeyIdForModel(model, config.keyEntries);
+    const keyId = currentKey?.id || this.findDefaultKeyIdForModel(model, config.keyEntries);
     this.setEngineBinding(normalizedId, { model, keyId });
   }
 
@@ -827,9 +854,7 @@ class ConfigService {
     const binding = profile?.bindings[engineId];
     const model = modelOverride || binding?.model || DEFAULT_ENGINE_MODELS[engineId];
     const boundKey = binding ? config.keyEntries.find(entry => entry.id === binding.keyId) : undefined;
-    const key = boundKey && this.shouldKeepBoundKeyForModel(boundKey, model, config.keyEntries)
-      ? boundKey
-      : config.keyEntries.find(entry => entry.id === this.findDefaultKeyIdForModel(model, config.keyEntries));
+    const key = boundKey || config.keyEntries.find(entry => entry.id === this.findDefaultKeyIdForModel(model, config.keyEntries));
     const provider = key?.provider || getProviderForModel(model);
     const apiFormat = key?.apiFormat || providerToApiFormat(provider);
     const baseUrl = key ? getEffectiveKeyBaseUrl(key) : '';
@@ -899,6 +924,10 @@ class ConfigService {
     const model = modelHint || this.pickTestModelForKey(key);
     const baseUrl = getEffectiveKeyBaseUrl(key);
 
+    if (!model) {
+      return { success: false, message: '请先为这个 Key 勾选至少一个可用模型，再测试。' };
+    }
+
     if (key.apiFormat !== 'google' && !baseUrl) {
       return { success: false, message: '该 Key 需要 Base URL' };
     }
@@ -933,7 +962,15 @@ class ConfigService {
   }
 
   private pickTestModelForKey(key: ApiKeyEntry): string {
+    const config = this.getConfig();
+    const boundModels = config.routeProfiles
+      .flatMap(profile => Object.values(profile.bindings))
+      .filter((binding): binding is EngineRouteBinding => Boolean(binding && binding.keyId === key.id))
+      .map(binding => binding.model);
+    const boundCompatibleModel = boundModels.find(model => isApiKeyCompatibleWithModel(key, model));
+    if (boundCompatibleModel) return boundCompatibleModel;
     if (key.allowedModels.length > 0) return key.allowedModels[0];
+    if (key.modelCoverage === 'allowlist') return '';
     if (key.provider === 'claude' || key.apiFormat === 'anthropic') return 'claude-opus-4-6';
     if (key.provider === 'deepseek') return 'deepseek-v4-flash';
     if (key.provider === 'gemini' && key.apiFormat === 'google') return 'gemini-3.1-flash-lite-preview';
@@ -1127,7 +1164,7 @@ class ConfigService {
         apiFormat: preset.apiFormat,
         baseUrl: preset.baseUrl,
         apiKey: preset.apiKey,
-        modelCoverage: preset.mode === 'proxy' ? 'all' : 'provider',
+        modelCoverage: preset.mode === 'proxy' ? 'allowlist' : 'provider',
         tags: ['legacy-preset'],
       }));
       existingSignature.add(signature);

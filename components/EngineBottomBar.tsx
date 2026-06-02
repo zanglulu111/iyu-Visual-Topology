@@ -44,7 +44,7 @@ interface EngineBottomBarProps {
     onRandomizeBlock?: (blockId: string) => void;
     onClearBlock?: (blockId: string) => void;
     isTaskManagerOpen: boolean;
-    setIsTaskManagerOpen: (v: boolean) => void;
+    setIsTaskManagerOpen: React.Dispatch<React.SetStateAction<boolean>>;
     isWorldLawOpen: boolean;
     setWorldLawConfig: (config: WorldLawConfig) => void;
     isTensionOpen?: boolean;
@@ -125,6 +125,7 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
         if (selectedDriver === DriverType.COMMERCIAL) return lang === 'EN' ? "SUTURE DESIRE" : "缝合欲望";
         if (selectedDriver === DriverType.EXPERIMENTAL) return lang === 'EN' ? "TRANSLATE STORY" : "转译故事";
         if (selectedDriver === DriverType.AESTHETIC) return lang === 'EN' ? "GENERATE AESTHETIC" : "生成美学";
+        if (selectedDriver === DriverType.CONCEPT_DESIGN) return lang === 'EN' ? "COMPILE EDICT" : "编译律令";
         if (selectedDriver === DriverType.TRAILER) return lang === 'EN' ? "CUT TRAILER" : "剪辑预告";
         return lang === 'EN' ? "GENERATE DIVERGENCES" : "生成分歧点";
     };
@@ -142,7 +143,7 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
 
     return (
         <div
-            className={`mist-app-footer ${selectedDriver === DriverType.AESTHETIC ? 'mist-aesthetic-footer' : ''} fixed bottom-0 left-0 right-0 h-14 bg-[var(--bg-header)] backdrop-blur-md border-t border-[var(--border-main)] flex items-center justify-between px-6 md:px-12 z-40 transition-colors duration-500 animate-page-dissolve`}
+            className={`mist-app-footer ${selectedDriver === DriverType.AESTHETIC || selectedDriver === DriverType.CONCEPT_DESIGN ? 'mist-aesthetic-footer' : ''} fixed bottom-0 left-0 right-0 h-14 bg-[var(--bg-header)] backdrop-blur-md border-t border-[var(--border-main)] flex items-center justify-between px-6 md:px-12 z-40 transition-colors duration-500 animate-page-dissolve`}
             style={{ ['--footer-accent' as any]: getFooterAccentValue() }}
         >
             <div className="flex items-center gap-4 shrink-0 w-[180px] md:w-[240px]">
@@ -154,7 +155,7 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
             <div className={`flex-1 flex justify-center items-center ${isLabyrinthFooter ? 'gap-3 md:gap-5' : 'gap-4 md:gap-6'} mx-4`}>
                 {viewMode !== 'METONYMY' && (
                     <>
-                        {selectedDriver !== DriverType.AESTHETIC && !isLabyrinthFooter && (
+                        {selectedDriver !== DriverType.AESTHETIC && selectedDriver !== DriverType.CONCEPT_DESIGN && !isLabyrinthFooter && (
                             <button onClick={() => setIsSkinOpen(!isSkinOpen)} className={`mist-app-footer-control ${isSkinOpen ? 'is-active' : ''} flex flex-col items-center gap-1.5 shrink-0 min-w-[60px] group transition-all duration-300 hover:scale-105 active:scale-95`} >
                                 <Settings2 size={18} className={isSkinOpen ? getThemeTextColor() : mutedFooterControlClass} />
                                 <span className={`text-[9px] font-bold uppercase tracking-wider transition-colors ${isSkinOpen ? getThemeTextColor() : mutedFooterControlClass}`}>
@@ -166,7 +167,7 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
                             <button onClick={() => setIsVisionOpen(!isVisionOpen)} className={`mist-app-footer-control ${isVisionOpen ? 'is-active' : ''} flex flex-col items-center gap-1.5 shrink-0 min-w-[60px] group transition-all duration-300 hover:scale-105 active:scale-95`} >
                                 <PenTool size={18} className={isVisionOpen ? getThemeTextColor() : mutedFooterControlClass} />
                                 <span className={`text-[9px] font-bold uppercase tracking-wider transition-colors ${isVisionOpen ? getThemeTextColor() : mutedFooterControlClass}`}>
-                                    {lang === 'CN' ? (selectedDriver === DriverType.COMMERCIAL ? "欲望输入" : selectedDriver === DriverType.AESTHETIC ? "反推解码" : "植入症候") : (selectedDriver === DriverType.AESTHETIC ? "Decoding" : "Input")}
+                                    {lang === 'CN' ? (selectedDriver === DriverType.COMMERCIAL ? "欲望输入" : selectedDriver === DriverType.AESTHETIC ? "反推解码" : selectedDriver === DriverType.CONCEPT_DESIGN ? "律令种子" : "植入症候") : (selectedDriver === DriverType.AESTHETIC ? "Decoding" : selectedDriver === DriverType.CONCEPT_DESIGN ? "Seed" : "Input")}
                                 </span>
                             </button>
                         )}
@@ -250,7 +251,7 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
                         </div>
                         )}
 
-                        {setIsTensionOpen && !isLabyrinthFooter && (
+                        {setIsTensionOpen && !isLabyrinthFooter && selectedDriver !== DriverType.CONCEPT_DESIGN && (
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
@@ -266,7 +267,7 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
                         )}
 
                         {!isLabyrinthFooter && <div className="w-px h-8 bg-[var(--border-main)] shrink-0"></div>}
-                        {selectedDriver === DriverType.AESTHETIC && (
+                        {(selectedDriver === DriverType.AESTHETIC || selectedDriver === DriverType.CONCEPT_DESIGN) && (
                             <>
                                 <div className={`flex ${footerSegmentClass} border p-1 shrink-0 transition-all duration-300`}>
                                     <button
@@ -287,15 +288,15 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
                                         <Redo2 size={18} className={futureStatesLength > 0 ? 'text-[var(--text-muted)] group-hover:text-[var(--text-accent)]' : 'text-[var(--text-subtle)]'} />
                                     </button>
                                 </div>
-                                <div className="w-px h-8 bg-[var(--border-main)] shrink-0 mx-2"></div>
-                                <div className={`flex border p-1 shrink-0 transition-all duration-300 ${footerSegmentClass}`}>
+                                {selectedDriver === DriverType.AESTHETIC && <div className="w-px h-8 bg-[var(--border-main)] shrink-0 mx-2"></div>}
+                                {selectedDriver === DriverType.AESTHETIC && <div className={`flex border p-1 shrink-0 transition-all duration-300 ${footerSegmentClass}`}>
                                     <button onClick={() => setSubjectType('HUMAN')} className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 transition-all ${subjectType === 'HUMAN' ? 'text-[var(--text-accent)] bg-[var(--surface-hover)] border-b border-[var(--mist-archive-red)]' : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--surface-hover)]'}`} >
                                         <UserIcon size={12} /> {lang === 'CN' ? "人类" : "Human"}
                                     </button>
                                     <button onClick={() => setSubjectType('CREATURE')} className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 transition-all ${subjectType === 'CREATURE' ? 'text-[var(--text-accent)] bg-[var(--surface-hover)] border-b border-[var(--mist-archive-red)]' : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--surface-hover)]'}`} >
                                         <Ghost size={12} /> {lang === 'CN' ? "异种" : "Creature"}
                                     </button>
-                                </div>
+                                </div>}
                                 <div className="w-px h-8 bg-[var(--border-main)] shrink-0 mx-2"></div>
                                 <button onClick={handleAestheticSmartRandom} className="mist-app-footer-control flex flex-col items-center gap-1.5 group transition-all duration-300 hover:scale-105 active:scale-95 shrink-0 min-w-[60px]" >
                                     <Sparkles size={18} className="text-[var(--text-muted)] group-hover:text-[var(--text-header)] group-hover:rotate-90 transition-transform" />
@@ -332,7 +333,7 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
                             canUndo={pastStatesLength > 0}
                             canRedo={futureStatesLength > 0}
                             getFooterThemeColor={getFooterThemeColor}
-                            theme={useTheme().theme}
+                            theme={theme}
                         />
                     </>
                 )}
@@ -340,7 +341,7 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
                 {viewMode !== 'METONYMY' && <div className="w-px h-8 bg-[var(--border-main)] shrink-0"></div>}
 
                 <button
-                    onClick={() => setIsTaskManagerOpen(!isTaskManagerOpen)}
+                    onClick={() => setIsTaskManagerOpen(open => !open)}
                     className={`mist-app-footer-control ${isTaskManagerOpen ? 'is-active' : ''} flex flex-col items-center gap-1.5 shrink-0 min-w-[60px] group transition-all duration-300 hover:scale-105 active:scale-95`}
                 >
                     <div className="relative">
@@ -370,8 +371,14 @@ export const EngineBottomBar: React.FC<EngineBottomBarProps> = ({
 
                 {viewMode !== 'METONYMY' && (
                     <button
-                        onClick={() => handleTraverseFantasy(false)}
-                        disabled={isGenerating || !hasFieldState}
+                        onClick={() => {
+                            if (selectedDriver === DriverType.CONCEPT_DESIGN) {
+                                window.dispatchEvent(new CustomEvent('mist-concept-design-compile'));
+                                return;
+                            }
+                            handleTraverseFantasy(false);
+                        }}
+                        disabled={isGenerating || (selectedDriver !== DriverType.CONCEPT_DESIGN && !hasFieldState)}
                         className={`mist-traverse-action flex items-center gap-3 px-6 py-3 rounded-lg text-xs font-bold uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(212,175,55,0.2)] hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] disabled:opacity-50 disabled:cursor-not-allowed group min-w-[180px] border hover:scale-105 active:scale-95 ${getFooterButtonStyle()}`}
                         style={{ boxShadow: 'none' }}
                     >

@@ -9,6 +9,8 @@ import {
   EXPERIMENTAL_ENGINE_LIBRARY,
   AESTHETIC_ENGINE_BLOCKS,
   AESTHETIC_ENGINE_LIBRARY,
+  CONCEPT_ENGINE_BLOCKS,
+  CONCEPT_ENGINE_LIBRARY,
   TRAILER_ENGINE_BLOCKS,
   TRAILER_ENGINE_LIBRARY,
   COMM_SKIN_BLOCKS,
@@ -22,7 +24,7 @@ import {
   SINGLE_RANDOM_RANGES,
   SURFACE_WEIGHT_CONFIG,
   AES_COLOR_PRESETS,
-  SUR3_COORDINATE_PRESETS,
+  getRandomSur3CoordinatePreset,
   GENRE_CATEGORIES,
   WORLD_MOTIF_CATEGORIES,
   ALL_SKIN_BLOCKS,
@@ -34,6 +36,9 @@ import {
 import { WORLD_LAW_LEVEL_OPTIONS, patchWorldLawConfig } from './worldLaw';
 import { withDefaultSvSelections } from '../data/engine_sv/defaults';
 import { getFocusUnitKey, isFocusableBlock } from '../utils/focusTerms';
+import { SUR3_ERAS, SUR3_SPACE_ANCHORS } from '../data/engine_surface/SUR3';
+import type { Sur3EraId } from '../data/engine_surface/SUR3';
+import type { Sur6SpaceContainerItem } from '../data/engine_surface/SUR6';
 
 // Constants for Aesthetic Mode Logic
 export const HUMAN_BLOCKS = [
@@ -99,6 +104,125 @@ export const pickRandomWithLocks = (
     const available = libItems.filter(i => !keptTags.includes(i.name));
     const shuffled = [...available].sort(() => 0.5 - Math.random());
     return [...keptTags, ...shuffled.slice(0, Math.min(needed, shuffled.length)).map(i => i.name)];
+};
+
+const pickUniformItems = <T,>(items: T[], count: number): T[] => {
+    const available = [...items];
+    const selected: T[] = [];
+    for (let i = 0; i < count; i++) {
+        if (available.length === 0) break;
+        const idx = Math.floor(Math.random() * available.length);
+        selected.push(available[idx]);
+        available.splice(idx, 1);
+    }
+    return selected;
+};
+
+const pickWeightedItems = <T,>(items: T[], count: number, getWeight: (item: T) => number): T[] => {
+    const available = [...items];
+    const selected: T[] = [];
+    for (let i = 0; i < count; i++) {
+        if (available.length === 0) break;
+        const weights = available.map(item => Math.max(0.05, getWeight(item)));
+        const total = weights.reduce((sum, weight) => sum + weight, 0);
+        let roll = Math.random() * total;
+        let pickedIndex = 0;
+        for (let idx = 0; idx < weights.length; idx++) {
+            roll -= weights[idx];
+            if (roll <= 0) {
+                pickedIndex = idx;
+                break;
+            }
+        }
+        selected.push(available[pickedIndex]);
+        available.splice(pickedIndex, 1);
+    }
+    return selected;
+};
+
+const getSur3EraIdFromTimeAnchor = (value: string): Sur3EraId | null => {
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+
+    const normalized = trimmed.replace(/\s+/g, '').replace(/[_-]+/g, '').replace(/年$/, '').toLowerCase();
+    const matchedEra = SUR3_ERAS.find(era =>
+        [era.id, era.name, era.nameEn].some(label =>
+            label.replace(/\s+/g, '').replace(/[_-]+/g, '').replace(/年$/, '').toLowerCase() === normalized
+        )
+    );
+    if (matchedEra) return matchedEra.id;
+
+    if (/^-?\d+$/.test(trimmed)) {
+        const year = Number(trimmed);
+        return SUR3_ERAS.find(era =>
+            (era.yearRanges || []).some(([start, end]) => year >= start && year <= end)
+        )?.id || null;
+    }
+
+    return null;
+};
+
+const getFallbackEraGroupFromArchetype = (archetype: Archetype): Sur3EraId[] => {
+    if (archetype === 'ANCIENT') return ['primitive', 'mythic', 'slave', 'feudal'];
+    if (archetype === 'FUTURE') return ['near_future', 'future'];
+    return ['modern', 'contemporary'];
+};
+
+const getSelectedSur3Anchor = (fieldState: NarrativeFieldState) => {
+    const value = fieldState['skin_country_exact']?.[0];
+    if (!value) return null;
+    return SUR3_SPACE_ANCHORS.find(anchor => anchor.name === value || anchor.nameEn === value || anchor.id === value) || null;
+};
+
+export const scoreSur6ItemForState = (
+    item: any,
+    fieldState: NarrativeFieldState,
+    archetype: Archetype = getArchetypeFromEra(fieldState['skin_era']?.[0] || '')
+): number => {
+    const sur6Item = item as Partial<Sur6SpaceContainerItem>;
+    if (!sur6Item.spaceClass) return 1;
+
+    let score = sur6Item.weight || 1;
+    const selectedEra = getSur3EraIdFromTimeAnchor(fieldState['skin_year_exact']?.[0] || '');
+
+    if (selectedEra) {
+        if (sur6Item.preferredEras?.includes(selectedEra)) score += 3.2;
+        else if (sur6Item.allowedEras?.includes(selectedEra)) score += 1.2;
+        else score -= 2.6;
+    } else {
+        const fallbackEras = getFallbackEraGroupFromArchetype(archetype);
+        const preferredMatch = fallbackEras.some(era => sur6Item.preferredEras?.includes(era));
+        const allowedMatch = fallbackEras.some(era => sur6Item.allowedEras?.includes(era));
+        if (preferredMatch) score += 1.4;
+        else if (allowedMatch) score += 0.4;
+        else score -= 0.8;
+    }
+
+    const selectedAnchor = getSelectedSur3Anchor(fieldState);
+    if (selectedAnchor && sur6Item.compatibleDomains?.length) {
+        if (sur6Item.compatibleDomains.includes(selectedAnchor.domain)) score += 2.2;
+        else score -= 1.2;
+    }
+
+    if (sur6Item.dissonance === 'safe') score += 0.25;
+    if (sur6Item.dissonance === 'charged') score -= 0.15;
+    if (sur6Item.dissonance === 'wild') score -= 0.55;
+
+    return Math.max(0.05, score);
+};
+
+export const pickRandomItemsForBlock = (
+    blockId: string,
+    items: any[],
+    count: number,
+    fieldState: NarrativeFieldState,
+    excludedTags: string[] = []
+): any[] => {
+    if (!items || items.length === 0 || count <= 0) return [];
+    const excluded = new Set(excludedTags);
+    const available = items.filter(item => !excluded.has(item.name));
+    if (blockId !== 'skin_location') return pickUniformItems(available, count);
+    return pickWeightedItems(available, count, item => scoreSur6ItemForState(item, fieldState));
 };
 
 const getGenderKind = (item: any): 'female' | 'male' | 'nonBinary' | null => {
@@ -705,6 +829,8 @@ export const getSingleRandomTag = (
         fullLibrary = [...COMMERCIAL_ENGINE_LIBRARY, ...COMM_SKIN_LIBRARY];
     } else if (driverType === DriverType.AESTHETIC) {
         fullLibrary = [...AESTHETIC_ENGINE_LIBRARY, ...SKIN_LIBRARY];
+    } else if (driverType === DriverType.CONCEPT_DESIGN) {
+        fullLibrary = [...CONCEPT_ENGINE_LIBRARY];
     } else if (driverType === DriverType.EXPERIMENTAL) {
         fullLibrary = [...EXPERIMENTAL_ENGINE_LIBRARY, ...EXPERIMENTAL_SKIN_LIBRARY];
     } else if (driverType === DriverType.TRAILER) {
@@ -734,7 +860,8 @@ export const getSingleRandomTag = (
             if (availableItems.length === 0) availableItems = category.items;
         }
         const available = availableItems.filter(i => !currentTags.includes(i.name));
-        if (available.length > 0) newTag = available[Math.floor(Math.random() * available.length)].name;
+        const picked = pickRandomItemsForBlock(blockId, available, 1, fieldState, otherTags)[0];
+        if (picked) newTag = picked.name;
     }
     return newTag;
 };
@@ -1013,6 +1140,8 @@ export const generateGlobalRandomState = (
     lockedTags: Record<string, string[]>
 ): NarrativeFieldState => {
     const isAesthetic = driverType === DriverType.AESTHETIC;
+    const isConceptDesign = driverType === DriverType.CONCEPT_DESIGN;
+    if (isConceptDesign) return randomizeFormulaState(driverType, currentFieldState, lockedModules, lockedTags, 'HUMAN', 'STYLIZED');
     if (isAesthetic) return generateAestheticSmartRandom(currentFieldState, 'HUMAN', lockedModules, lockedTags, 'REALISM');
 
     const isCommercial = driverType === DriverType.COMMERCIAL;
@@ -1056,7 +1185,7 @@ export const generateGlobalRandomState = (
     const shouldRandomizeYear = !lockedModules['skin_year_exact'] && surfaceParticipants.has('skin_year_exact');
     const shouldRandomizeSpace = !lockedModules['skin_country_exact'] && surfaceParticipants.has('skin_country_exact');
     const coordinatePreset = (shouldRandomizeYear || shouldRandomizeSpace)
-        ? SUR3_COORDINATE_PRESETS[Math.floor(Math.random() * SUR3_COORDINATE_PRESETS.length)]
+        ? getRandomSur3CoordinatePreset()
         : null;
 
     if (!lockedModules['skin_year_exact']) {
@@ -1065,7 +1194,9 @@ export const generateGlobalRandomState = (
             if (locks.length > 0) {
                 newState['skin_year_exact'] = locks;
             } else {
-                newState['skin_year_exact'] = coordinatePreset?.year === null || coordinatePreset?.year === undefined
+                newState['skin_year_exact'] = coordinatePreset?.timeMode === 'era'
+                    ? [coordinatePreset.time || '']
+                    : coordinatePreset?.year === null || coordinatePreset?.year === undefined
                     ? []
                     : [coordinatePreset.year.toString()];
             }
@@ -1226,13 +1357,7 @@ export const generateGlobalRandomState = (
             let needed = Math.max(0, Math.max(count, keptTags.length) - keptTags.length);
             needed = clampCoreFormulaNeededCount(block.id, needed, keptTags.length, coreFormulaRandomTotal, processedCoreBlocks, currentFieldState, lockedModules, lockedTags);
             const available = availableItems.filter(i => !keptTags.includes(i.name));
-            const selected: string[] = [];
-            for (let i = 0; i < needed; i++) {
-                if (available.length === 0) break;
-                const idx = Math.floor(Math.random() * available.length);
-                selected.push(available[idx].name);
-                available.splice(idx, 1);
-            }
+            const selected = pickRandomItemsForBlock(block.id, available, needed, newState).map(item => item.name);
             newState[block.id] = [...keptTags, ...selected];
             if (isCoreBlock) coreFormulaRandomTotal += selected.length;
             if (isCoreBlock) processedCoreBlocks.add(block.id);
@@ -1281,6 +1406,7 @@ export const resetFormulaState = (
      else if (driverType === DriverType.EXPERIMENTAL) engineBlocks = EXPERIMENTAL_ENGINE_BLOCKS;
      else if (driverType === DriverType.TRAILER) engineBlocks = TRAILER_ENGINE_BLOCKS;
      else if (driverType === DriverType.AESTHETIC) engineBlocks = AESTHETIC_ENGINE_BLOCKS;
+     else if (driverType === DriverType.CONCEPT_DESIGN) engineBlocks = CONCEPT_ENGINE_BLOCKS;
      else engineBlocks = NARRATIVE_ENGINE_BLOCKS;
 
      const newState = { ...currentFieldState };
@@ -1341,8 +1467,9 @@ export const randomizeFormulaState = (
     aestheticMode: AestheticMode
 ): NarrativeFieldState => {
      const isAesthetic = driverType === DriverType.AESTHETIC;
-     let ENGINE_BLOCKS = isAesthetic ? AESTHETIC_ENGINE_BLOCKS : (driverType === DriverType.COMMERCIAL ? COMMERCIAL_ENGINE_BLOCKS : (driverType === DriverType.EXPERIMENTAL ? EXPERIMENTAL_ENGINE_BLOCKS : (driverType === DriverType.TRAILER ? TRAILER_ENGINE_BLOCKS : NARRATIVE_ENGINE_BLOCKS)));
-     let ENGINE_LIBRARY = isAesthetic ? AESTHETIC_ENGINE_LIBRARY : (driverType === DriverType.COMMERCIAL ? COMMERCIAL_ENGINE_LIBRARY : (driverType === DriverType.EXPERIMENTAL ? EXPERIMENTAL_ENGINE_LIBRARY : (driverType === DriverType.TRAILER ? TRAILER_ENGINE_LIBRARY : NARRATIVE_ENGINE_LIBRARY)));
+     const isConceptDesign = driverType === DriverType.CONCEPT_DESIGN;
+     let ENGINE_BLOCKS = isConceptDesign ? CONCEPT_ENGINE_BLOCKS : (isAesthetic ? AESTHETIC_ENGINE_BLOCKS : (driverType === DriverType.COMMERCIAL ? COMMERCIAL_ENGINE_BLOCKS : (driverType === DriverType.EXPERIMENTAL ? EXPERIMENTAL_ENGINE_BLOCKS : (driverType === DriverType.TRAILER ? TRAILER_ENGINE_BLOCKS : NARRATIVE_ENGINE_BLOCKS))));
+     let ENGINE_LIBRARY = isConceptDesign ? CONCEPT_ENGINE_LIBRARY : (isAesthetic ? AESTHETIC_ENGINE_LIBRARY : (driverType === DriverType.COMMERCIAL ? COMMERCIAL_ENGINE_LIBRARY : (driverType === DriverType.EXPERIMENTAL ? EXPERIMENTAL_ENGINE_LIBRARY : (driverType === DriverType.TRAILER ? TRAILER_ENGINE_LIBRARY : NARRATIVE_ENGINE_LIBRARY))));
 
      const newState = { ...currentFieldState };
      const currentEraTags = newState['skin_era'] || [];
@@ -1400,7 +1527,16 @@ export const randomizeFormulaState = (
           }
 
           let count = 1;
-          if (isAesthetic) {
+          if (isConceptDesign) {
+              const limit = BLOCK_LIMITS[block.id] || 1;
+              if (['cd_identity_seed', 'cd_body_type', 'cd_creature_class', 'cd_costume_logic', 'cd_palette'].includes(block.id)) {
+                  count = Math.min(2, limit);
+              } else if (['cd_face_features', 'cd_makeup_style', 'cd_skin_texture', 'cd_surface_state', 'cd_body_features', 'cd_body_markings', 'cd_body_damage', 'cd_body_modification', 'cd_creature_head', 'cd_creature_body', 'cd_creature_texture', 'cd_surface_material', 'cd_negative_rules'].includes(block.id)) {
+                  count = Math.min(3, limit);
+              } else {
+                  count = 1;
+              }
+          } else if (isAesthetic) {
               // Aesthetic mode retains its own count logic
               const limit = BLOCK_LIMITS[block.id] || 1;
               if (block.id === 'aes_skin_texture' || block.id === 'aes_body_features' || block.id === 'aes_face_features') {
@@ -1428,13 +1564,7 @@ export const randomizeFormulaState = (
           let needed = Math.max(0, Math.max(count, keptTags.length) - keptTags.length);
           needed = clampCoreFormulaNeededCount(block.id, needed, keptTags.length, coreFormulaRandomTotal, processedCoreBlocks, currentFieldState, lockedModules, lockedTags);
           const available = availableItems.filter(i => !currentTags.includes(i.name));
-          const selected: string[] = [];
-          for (let i = 0; i < needed; i++) {
-             if (available.length === 0) break;
-             const idx = Math.floor(Math.random() * available.length);
-             selected.push(available[idx].name);
-             available.splice(idx, 1);
-          }
+          const selected = pickRandomItemsForBlock(block.id, available, needed, newState).map(item => item.name);
           newState[block.id] = [...keptTags, ...selected];
           if (isCoreBlock) coreFormulaRandomTotal += selected.length;
           if (isCoreBlock) processedCoreBlocks.add(block.id);
@@ -1459,6 +1589,8 @@ export const generateGlobalResetState = (
          engineBlocks = [...TRAILER_ENGINE_BLOCKS, ...TRAILER_SKIN_BLOCKS];
      } else if (driverType === DriverType.AESTHETIC) {
          engineBlocks = [...AESTHETIC_ENGINE_BLOCKS, ...ALL_SKIN_BLOCKS];
+     } else if (driverType === DriverType.CONCEPT_DESIGN) {
+         engineBlocks = [...CONCEPT_ENGINE_BLOCKS];
      } else {
          engineBlocks = [...NARRATIVE_ENGINE_BLOCKS, ...ALL_SKIN_BLOCKS];
      }
@@ -1491,6 +1623,9 @@ export const generateGlobalResetState = (
             if (globalCategory && lockedModules[globalCategory]) isLocked = true;
             if (HUMAN_BLOCKS.includes(block.id) && lockedModules['SUBJECT']) isLocked = true;
             if (CREATURE_BLOCKS.includes(block.id) && lockedModules['SUBJECT']) isLocked = true;
+        }
+        if (driverType === DriverType.CONCEPT_DESIGN) {
+            if (block.id.startsWith('cd_') && lockedModules['CORE'] && ['cd_subject_kind', 'cd_identity_seed', 'cd_emotional_core', 'cd_negation_logic', 'cd_design_sheet'].includes(block.id)) isLocked = true;
         }
 
         if (!isLocked) {

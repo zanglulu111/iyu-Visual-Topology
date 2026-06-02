@@ -1,7 +1,8 @@
 
 import React, { useState } from 'react';
 import { X, Sparkles, Paintbrush, Camera, Box, Cpu, MessageSquare } from 'lucide-react';
-import { VisualBibleAnalysisHints } from '../../../services/visualBibleGenerator';
+import { MetonymyStylePreset } from '../../../types';
+import { buildImageBasedVisualBiblePrompt, VisualBibleAnalysisHints } from '../../../services/visualBibleGenerator';
 import { AdminXRayButton } from '../../XRayInspector';
 
 interface VisualBibleConfigModalProps {
@@ -15,6 +16,7 @@ interface VisualBibleConfigModalProps {
     hasToneImage?: boolean;
     sourceText?: string;
     mode?: 'GLOBAL' | 'TONE';
+    activePreset?: MetonymyStylePreset;
 }
 
 export const VisualBibleConfigModal: React.FC<VisualBibleConfigModalProps> = ({
@@ -27,7 +29,8 @@ export const VisualBibleConfigModal: React.FC<VisualBibleConfigModalProps> = ({
     isAdmin,
     hasToneImage,
     sourceText = '',
-    mode = 'GLOBAL'
+    mode = 'GLOBAL',
+    activePreset
 }) => {
     const [medium, setMedium] = useState<'PAINTING' | 'CGI' | 'PHOTOGRAPHY' | 'tangible' | undefined>(undefined);
     const [dialogue, setDialogue] = useState('');
@@ -159,12 +162,10 @@ export const VisualBibleConfigModal: React.FC<VisualBibleConfigModalProps> = ({
                             isAdmin={isAdmin}
                             lang={lang}
                             title={lang === 'CN' ? 'X-Ray 视觉反推指令' : 'X-Ray Visual Reverse Prompt'}
-                            payload={{
-                                task: mode === 'TONE' ? 'Analyze tone reference image' : 'Analyze visual bible',
-                                hints: { medium, dialogue },
-                                hasToneImage: Boolean(hasToneImage),
-                                sourceTextPreview: sourceText ? sourceText.slice(0, 4000) : undefined
-                            }}
+                            getPayload={() => activePreset
+                                ? buildImageBasedVisualBiblePrompt(activePreset, { medium, dialogue }, mode)
+                                : `No active preset is mounted for this visual reverse request.\nmode=${mode}\nhasToneImage=${Boolean(hasToneImage)}\nsourceTextPreview=${sourceText.slice(0, 4000)}`
+                            }
                         />
                         <button
                             onClick={() => onConfirm({ medium, dialogue })}

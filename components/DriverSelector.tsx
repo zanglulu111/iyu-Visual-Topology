@@ -7,12 +7,13 @@ import { useTheme } from '../contexts/ThemeContext';
 interface DriverSelectorProps {
     selectedDriver: DriverType | null;
     onSelect: (id: DriverType) => void;
+    onPreload?: (id: DriverType) => void;
     lang: 'CN' | 'EN';
     hoveredDriver: DriverType | null;
     onHover: (id: DriverType | null) => void;
 }
 
-const DriverSelectorComponent: React.FC<DriverSelectorProps> = ({ selectedDriver, onSelect, lang, hoveredDriver, onHover }) => {
+const DriverSelectorComponent: React.FC<DriverSelectorProps> = ({ selectedDriver, onSelect, onPreload, lang, hoveredDriver, onHover }) => {
 
     const { theme } = useTheme();
     const isRetro = theme === 'retro';
@@ -23,6 +24,7 @@ const DriverSelectorComponent: React.FC<DriverSelectorProps> = ({ selectedDriver
             case DriverType.COMMERCIAL: return 'text-mist-cyan';
             case DriverType.NARRATIVE: return 'text-[#ff4f3f]'; // Narrative is archive red
             case DriverType.AESTHETIC: return 'text-mist-aesthetic';
+            case DriverType.CONCEPT_DESIGN: return 'text-mist-orange';
             case DriverType.EXPERIMENTAL: return 'text-fuchsia-400';
             case DriverType.TRAILER: return 'text-mist-orange';
             default: return 'text-gold-primary';
@@ -41,6 +43,7 @@ const DriverSelectorComponent: React.FC<DriverSelectorProps> = ({ selectedDriver
             case DriverType.COMMERCIAL: return 'border-cyan-500';
             case DriverType.NARRATIVE: return 'border-[#ff4f3f]';
             case DriverType.AESTHETIC: return 'border-[var(--mist-aesthetic)]';
+            case DriverType.CONCEPT_DESIGN: return 'border-orange-500';
             case DriverType.EXPERIMENTAL: return 'border-fuchsia-500';
             case DriverType.TRAILER: return 'border-orange-500';
             default: return 'border-[#ff4f3f]';
@@ -52,6 +55,7 @@ const DriverSelectorComponent: React.FC<DriverSelectorProps> = ({ selectedDriver
             case DriverType.COMMERCIAL: return 'mist-commercial-engine-title';
             case DriverType.NARRATIVE: return 'mist-narrative-engine-title';
             case DriverType.AESTHETIC: return 'mist-aesthetic-engine-title';
+            case DriverType.CONCEPT_DESIGN: return 'mist-aesthetic-engine-title';
             case DriverType.EXPERIMENTAL: return 'mist-experimental-engine-title';
             case DriverType.TRAILER: return 'mist-trailer-engine-title';
             default: return '';
@@ -60,7 +64,7 @@ const DriverSelectorComponent: React.FC<DriverSelectorProps> = ({ selectedDriver
 
     return (
         <div className="w-full max-w-[1920px] mx-auto py-4 px-2 relative z-10">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-2">
                 {DRIVERS.map((driver) => {
                     const isHovered = hoveredDriver === driver.id;
                     const active = isHovered;
@@ -71,8 +75,15 @@ const DriverSelectorComponent: React.FC<DriverSelectorProps> = ({ selectedDriver
                     return (
                         <button
                             key={driver.id}
-                            onClick={() => onSelect(driver.id)}
-                            onMouseEnter={() => onHover(driver.id)}
+                            onClick={() => {
+                                onPreload?.(driver.id);
+                                onSelect(driver.id);
+                            }}
+                            onMouseEnter={() => {
+                                onHover(driver.id);
+                                onPreload?.(driver.id);
+                            }}
+                            onFocus={() => onPreload?.(driver.id)}
                             onMouseLeave={() => onHover(null)}
                             aria-pressed={selectedDriver === driver.id}
                             className={`

@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import {
     ScreenplaySection, BlueprintLanguage, FinalAssetItem,
-    GlobalVisualTone, MetonymyStylePreset, StaticShot, DynamicShot
+    GlobalVisualTone, MetonymyStylePreset, StaticShot, DynamicShot, NarrativeFieldState, FinalAssetsData, MetonymyAssetInput
 } from '../../../types';
 import { CopyButton, MarkdownRenderer, ProcessingTimer } from '../../SharedBlueprintComponents';
 import {
@@ -20,6 +20,9 @@ import { AssetCard } from '../../AssetCard';
 import { SceneCollapseState, SceneTabState } from '../MetonymyView';
 import { transformScriptStyle } from '../../../services/geminiService'; // Ensure import
 import { AdminXRayButton } from '../../XRayInspector';
+import { buildSutureStep1Prompt, buildStyleTransferPrompt } from '../../../services/suture_script_prompt';
+import { buildSutureStoryboardRuntimePrompt } from '../../../services/sutureGenerator';
+import { createDefaultSutureConfig } from '../../../services/sutureConfig';
 
 interface MetonymySceneCardProps {
     section: ScreenplaySection;
@@ -68,6 +71,8 @@ interface MetonymySceneCardProps {
     // Global Tone
     globalTone: GlobalVisualTone;
     onUpdateTone: (field: keyof GlobalVisualTone, value: string) => void;
+    fullStory: string;
+    fieldState: NarrativeFieldState;
 
     // Anchors
     anchorImage: string | null;
@@ -160,6 +165,25 @@ const AssetChip: React.FC<{
         );
     };
 
+const emptyTone: GlobalVisualTone = { lighting: "", texture: "", style: "", camera: "", palette: [] };
+
+const mapPresetAssetToFinal = (asset: MetonymyAssetInput): FinalAssetItem => ({
+    id: asset.id,
+    name: asset.name,
+    nameEn: asset.nameEn,
+    type: asset.type,
+    anchors: asset.analysis?.anchors || "",
+    description: asset.analysis?.description || "",
+    imageUrl: asset.imageUrl,
+    analysis: asset.analysis
+});
+
+const mapPresetAssetsToFinal = (preset?: MetonymyStylePreset): FinalAssetsData => ({
+    characters: preset?.assets?.characters?.map(mapPresetAssetToFinal) || [],
+    scenes: preset?.assets?.scenes?.map(mapPresetAssetToFinal) || [],
+    props: preset?.assets?.props?.map(mapPresetAssetToFinal) || []
+});
+
 export const MetonymySceneCard: React.FC<MetonymySceneCardProps> = (props) => {
     const {
         section, index, isActive, collapseState, onToggleState, onSetActive,
@@ -170,7 +194,7 @@ export const MetonymySceneCard: React.FC<MetonymySceneCardProps> = (props) => {
         isGenerating, generationStartTime, onGenerateStatic, onGenerateDynamic,
         anchorImage, isAnchorUploading, onUploadAnchor, onRemoveAnchor, // Updated props
         storyboardDisplayLang, onToggleStoryboardLang, dynamicDisplayLang, onToggleDynamicLang,
-        globalTone,
+        globalTone, fullStory, fieldState,
         themeAccent, themeColorBase, language, theme,
         onDragStart, onDragOver, onDrop, onDragEnd, isDragged, onOpenPreview,
         onGenerateAssetImage, onUpdateSection,
@@ -293,6 +317,65 @@ export const MetonymySceneCard: React.FC<MetonymySceneCardProps> = (props) => {
     };
 
     const isBibleMissing = isOriginalMode;
+
+    const getSceneScriptXRayPayload = () => {
+        if (!mountedPresetId || mountedPresetId === 'original') {
+            return buildSutureStep1Prompt(
+                section.content || "",
+                createDefaultSutureConfig('original'),
+                fullStory,
+                fieldState,
+                index + 1,
+                "",
+                undefined
+            );
+        }
+
+        const baseScript = section.sutureDataMap?.['original']?.literaryScript || "";
+        if (!baseScript) {
+            return language === 'EN'
+                ? 'No runtime prompt will be sent: base script is missing. Generate the Original base script first.'
+                : '不会发送运行时指令：基础剧本缺失。请先生成 Original 基础剧本。';
+        }
+
+        return buildStyleTransferPrompt(
+            baseScript,
+            mountedPreset?.toneAnalysis || emptyTone,
+            mapPresetAssetsToFinal(mountedPreset)
+        );
+    };
+
+    const getDynamicStoryboardXRayPayload = () => {
+        const presetToUseId = section.mountedPresetId || activePresetId || 'original';
+        const runtimeData = section.sutureDataMap?.[presetToUseId] || section.sutureDataMap?.['original'] || section.sutureData;
+        const scriptToUse = runtimeData?.literaryScript || section.content || "";
+        const activeGlobalPreset = presets.find(p => p.id === presetToUseId);
+        const globalContext = {
+            tone: activeGlobalPreset?.toneAnalysis || emptyTone,
+            assets: activeGlobalPreset?.assets || { characters: [], scenes: [], props: [] }
+        };
+
+        const referenceImages: string[] = [];
+        if (activeGlobalPreset?.toneImage) {
+            referenceImages.push(activeGlobalPreset.toneImage);
+        }
+        activeGlobalPreset?.assets?.characters?.forEach(c => {
+            if (c.imageUrl) referenceImages.push(c.imageUrl);
+        });
+        if (anchorImage) {
+            referenceImages.push(anchorImage);
+        }
+
+        return buildSutureStoryboardRuntimePrompt(
+            scriptToUse,
+            fullStory,
+            fieldState || {},
+            runtimeData?.globalTone || globalTone || globalContext.tone,
+            'DYNAMIC',
+            referenceImages,
+            globalContext as any
+        );
+    };
 
     // --- DATA PROCESSING FOR DISPLAY ---
 
@@ -541,14 +624,7 @@ export const MetonymySceneCard: React.FC<MetonymySceneCardProps> = (props) => {
                                         isAdmin={isAdmin}
                                         lang={language === 'EN' ? 'EN' : 'CN'}
                                         title={language === 'EN' ? 'X-Ray Scene Script Prompt' : 'X-Ray 场次剧本指令'}
-                                        payload={{
-                                            action: (!mountedPresetId || mountedPresetId === 'original') ? 'Open base script generation console' : 'Visual bible style transfer',
-                                            sceneTitle: section.title,
-                                            mountedPreset: mountedPreset?.name,
-                                            baseScriptPreview: section.sutureDataMap?.['original']?.literaryScript?.slice(0, 4000),
-                                            targetTone: mountedPreset?.toneAnalysis,
-                                            assets: finalAssets
-                                        }}
+                                        getPayload={getSceneScriptXRayPayload}
                                         className={theme === 'retro' ? 'h-8 w-8 bg-white border-[#8B261D]/20 text-[#8B261D] hover:bg-[#8B261D]/10' : 'h-8 w-8 bg-zinc-900/50 border-zinc-700/50 text-zinc-400 hover:text-white hover:bg-zinc-800'}
                                         iconSize={12}
                                     />
@@ -724,15 +800,7 @@ export const MetonymySceneCard: React.FC<MetonymySceneCardProps> = (props) => {
                                         isAdmin={isAdmin}
                                         lang={language === 'EN' ? 'EN' : 'CN'}
                                         title={language === 'EN' ? 'X-Ray Dynamic Storyboard Prompt' : 'X-Ray 动态分镜指令'}
-                                        payload={{
-                                            action: 'Generate dynamic storyboard from literary script',
-                                            sceneTitle: section.title,
-                                            mountedPreset: mountedPreset?.name,
-                                            scriptPreview: displayContent.slice(0, 5000),
-                                            globalTone,
-                                            finalAssets,
-                                            hasAnchorImage: Boolean(anchorImage)
-                                        }}
+                                        getPayload={getDynamicStoryboardXRayPayload}
                                         disabled={isBibleMissing}
                                         className={theme === 'retro' ? 'h-8 w-8 bg-white border-[#8B261D]/20 text-[#8B261D] hover:bg-[#8B261D]/10' : 'h-8 w-8 bg-zinc-900/50 border-zinc-700/50 text-zinc-400 hover:text-white hover:bg-zinc-800'}
                                         iconSize={12}

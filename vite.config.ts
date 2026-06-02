@@ -55,17 +55,20 @@ function apiProxyPlugin(): Plugin {
 
         const targetUrl = new URL(req.url || '/', targetBase);
         const transport = targetUrl.protocol === 'https:' ? https : http;
+        req.setTimeout(600000);
+        res.setTimeout(600000);
 
         const fwdHeaders: Record<string, string> = {};
         for (const [k, v] of Object.entries(req.headers)) {
-          if (['host', 'origin', 'referer', 'x-proxy-target', 'connection'].includes(k)) continue;
+          if (['host', 'origin', 'referer', 'x-proxy-target', 'connection', 'content-length'].includes(k)) continue;
           if (v) fwdHeaders[k] = Array.isArray(v) ? v[0] : v;
         }
         fwdHeaders['host'] = targetUrl.host;
+        fwdHeaders['connection'] = 'close';
 
         const proxyReq = transport.request(
           targetUrl.href,
-          { method: req.method, headers: fwdHeaders },
+          { method: req.method, headers: fwdHeaders, timeout: 600000, agent: false },
           (proxyRes) => {
             const respHeaders: Record<string, string | string[]> = {};
             for (const [k, v] of Object.entries(proxyRes.headers)) {
@@ -76,6 +79,10 @@ function apiProxyPlugin(): Plugin {
             proxyRes.pipe(res);
           }
         );
+
+        proxyReq.setTimeout(600000, () => {
+          proxyReq.destroy(new Error('Proxy timeout after 600s'));
+        });
 
         proxyReq.on('error', (err) => {
           res.statusCode = 502;

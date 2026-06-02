@@ -32,6 +32,7 @@ interface LandingViewProps {
   setViewMode: (mode: any) => void;
   selectedDriver: DriverType | null;
   onDriverSelect: (id: DriverType) => void;
+  onPreloadDriver?: (id: DriverType) => void;
   hoveredDriver: DriverType | null;
   setHoveredDriver: (id: DriverType | null) => void;
   handleOpenMetonymyPage: () => void;
@@ -76,6 +77,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
   setViewMode,
   selectedDriver,
   onDriverSelect,
+  onPreloadDriver,
   hoveredDriver,
   setHoveredDriver,
   handleOpenMetonymyPage,
@@ -177,6 +179,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
       case DriverType.COMMERCIAL: return 'shadow-cyan-500/10';
       case DriverType.NARRATIVE: return 'shadow-red-500/10';
       case DriverType.AESTHETIC: return 'shadow-violet-500/10';
+      case DriverType.CONCEPT_DESIGN: return 'shadow-orange-500/10';
       case DriverType.EXPERIMENTAL: return 'shadow-fuchsia-500/10';
       case DriverType.TRAILER: return 'shadow-orange-500/10';
       default: return 'shadow-zinc-500/5';
@@ -189,6 +192,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
       case DriverType.COMMERCIAL: return 'var(--mist-cyan)';
       case DriverType.NARRATIVE: return '#ff4f3f';
       case DriverType.AESTHETIC: return 'var(--mist-aesthetic)';
+      case DriverType.CONCEPT_DESIGN: return 'var(--mist-orange)';
       case DriverType.EXPERIMENTAL: return '#D946EF';
       case DriverType.TRAILER: return 'var(--mist-orange)';
       default: return 'rgba(255,255,255,0.8)';
@@ -201,6 +205,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
       case DriverType.COMMERCIAL: return 'var(--mist-cyan)';
       case DriverType.NARRATIVE: return '#ff4f3f';
       case DriverType.AESTHETIC: return 'var(--mist-aesthetic)';
+      case DriverType.CONCEPT_DESIGN: return 'var(--mist-orange)';
       case DriverType.EXPERIMENTAL: return '#D946EF';
       case DriverType.TRAILER: return 'var(--mist-orange)';
       default: return 'var(--border-main)';
@@ -222,6 +227,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
       case DriverType.COMMERCIAL: return '0 0 10px rgba(34,211,238,0.3)';
       case DriverType.NARRATIVE: return '0 0 10px rgba(255,79,63,0.3)';
       case DriverType.AESTHETIC: return '0 0 10px rgba(139,92,246,0.32)';
+      case DriverType.CONCEPT_DESIGN: return '0 0 10px rgba(251,146,60,0.3)';
       case DriverType.EXPERIMENTAL: return '0 0 10px rgba(217,70,239,0.3)';
       case DriverType.TRAILER: return '0 0 10px rgba(251,146,60,0.3)';
       default: return '';
@@ -234,6 +240,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
       case DriverType.COMMERCIAL: return 'shadow-[0_8px_30px_-5px_rgba(34,211,238,0.25)]';
       case DriverType.NARRATIVE: return 'shadow-[0_8px_30px_-5px_rgba(255,79,63,0.25)]';
       case DriverType.AESTHETIC: return 'shadow-[0_8px_30px_-5px_rgba(139,92,246,0.28)]';
+      case DriverType.CONCEPT_DESIGN: return 'shadow-[0_8px_30px_-5px_rgba(251,146,60,0.25)]';
       case DriverType.EXPERIMENTAL: return 'shadow-[0_8px_30px_-5px_rgba(217,70,239,0.25)]';
       case DriverType.TRAILER: return 'shadow-[0_8px_30px_-5px_rgba(251,146,60,0.25)]';
       default: return '';
@@ -541,7 +548,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
                 </div>
 
                 <div className="w-full shrink-0">
-                  <DriverSelector selectedDriver={selectedProtocol === ProtocolType.CORE_DRIVERS ? selectedDriver : null} onSelect={onDriverSelect} lang={lang} hoveredDriver={hoveredDriver} onHover={setHoveredDriver} />
+                  <DriverSelector selectedDriver={selectedProtocol === ProtocolType.CORE_DRIVERS ? selectedDriver : null} onSelect={onDriverSelect} onPreload={onPreloadDriver} lang={lang} hoveredDriver={hoveredDriver} onHover={setHoveredDriver} />
                 </div>
 
                 <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8 px-4 shrink-0 pb-10">

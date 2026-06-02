@@ -23,6 +23,8 @@ interface VisualStyleManagerProps {
     onToggleExpand: (isExpanded: boolean) => void;
     sourceText: string;
     isAdmin?: boolean;
+    title?: string;
+    subtitle?: string;
 }
 
 export const VisualStyleManager: React.FC<VisualStyleManagerProps> = ({
@@ -37,7 +39,9 @@ export const VisualStyleManager: React.FC<VisualStyleManagerProps> = ({
     isExpanded,
     onToggleExpand,
     sourceText,
-    isAdmin
+    isAdmin,
+    title,
+    subtitle
 }) => {
     const [displayLang, setDisplayLang] = useState<'CN' | 'EN'>('CN');
     const [sectionLangs, setSectionLangs] = useState<Record<'characters' | 'scenes' | 'props', 'CN' | 'EN'>>({
@@ -923,10 +927,10 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
                     </div>
                     <div>
                         <h3 className={`text-base font-bold uppercase tracking-widest ${theme === 'retro' ? 'text-black' : 'text-white'}`}>
-                            {lang === 'EN' ? "Core Visual Bible" : "核心视觉圣经"}
+                            {title || (lang === 'EN' ? "Core Visual Bible" : "核心视觉圣经")}
                         </h3>
                         <p className={`text-[11px] font-mono uppercase tracking-[0.2em] mt-1 ${theme === 'retro' ? 'text-[#8B261D]' : 'text-zinc-300'}`}>
-                            {lang === 'EN' ? "Unified Visual Language & Assets Specification" : "统一视觉语言与资产规范"}
+                            {subtitle || (lang === 'EN' ? "Unified Visual Language & Assets Specification" : "统一视觉语言与资产规范")}
                         </p>
                     </div>
                 </div>
@@ -1222,6 +1226,7 @@ ${designPrompt ? `Design Prompt: ${designPrompt}` : ''}`;
                 hasToneImage={Boolean(activePreset.toneImage)}
                 sourceText={sourceText}
                 mode={analysisMode}
+                activePreset={activePreset}
             />
 
             <SourceAnalysisConfigModal

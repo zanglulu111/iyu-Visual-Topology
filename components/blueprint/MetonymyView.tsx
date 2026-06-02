@@ -1412,6 +1412,8 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
 
                                                 globalTone={globalTone}
                                                 onUpdateTone={(field, val) => handleUpdateTone(section.id, field, val)}
+                                                fullStory={blueprint.narrative?.synopsis || ""}
+                                                fieldState={fieldState || {}}
 
                                                 isGenerating={isGenerating}
                                                 generationStartTime={generationStartTime}
@@ -1497,6 +1499,9 @@ export const MetonymyView: React.FC<MetonymyViewProps> = ({
                 totalSourceText={sourceText}
                 presets={currentPresets}
                 activePresetId={currentSections.find(s => s.id === activeSectionId)?.mountedPresetId || currentActivePresetId || 'original'}
+                fieldState={fieldState || {}}
+                partIndex={activeSectionIndex || 1}
+                previousContext=""
                 isAdmin={isAdmin}
             />
             <PreviewContentModal isOpen={isPreviewOpen} onClose={() => setIsPreviewOpen(false)} content={previewContent} title={previewTitle} themeAccent={themeAccent} lang={language} theme={theme} />

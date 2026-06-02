@@ -47,8 +47,8 @@ export const buildSutureStep2Prompt = (
   if (visualAnchorImage) {
       visualAnchorProtocol = `
       ## 👁️ 视觉锚点协议 (SCENE ANCHOR - HIGH PRIORITY)
-      **CRITICAL:** I have provided a **Reference Image** for this specific scene.
-      Use this to ground the environment details.
+      **关键要求:** 本场次提供了 **Reference Image**。
+      必须以它作为环境、空间和视觉细节的锚点。
       `;
   }
 
@@ -63,21 +63,21 @@ export const buildSutureStep2Prompt = (
 
       assetInjection = `
       **ASSET DICTIONARY (Character/Object Replacement):**
-      If the script mentions these assets, describe them using their Visual Anchors:
-      ${globalStyleContext.assets.characters.map(c => `* "${c.name}" -> Visually: ${c.anchors}`).join('\n')}
-      ${globalStyleContext.assets.scenes.map(s => `* "${s.name}" -> Visually: ${s.anchors}`).join('\n')}
-      ${globalStyleContext.assets.props.map(p => `* "${p.name}" -> Visually: ${p.anchors}`).join('\n')}
+      如果剧本中提到以下资产，必须使用它们的 Visual Anchors 进行视觉描述：
+      ${globalStyleContext.assets.characters.map(c => `* "${c.name}" -> 视觉锚点: ${c.anchors}`).join('\n')}
+      ${globalStyleContext.assets.scenes.map(s => `* "${s.name}" -> 视觉锚点: ${s.anchors}`).join('\n')}
+      ${globalStyleContext.assets.props.map(p => `* "${p.name}" -> 视觉锚点: ${p.anchors}`).join('\n')}
       `;
 
       visualBibleInstruction = `
 ### 👁️ 视觉圣经强制协议 (VISUAL BIBLE PROTOCOL)
-**Global Tone:** ${styleKeywords}
+**全局视觉基调 (Global Tone):** ${styleKeywords}
 ${assetInjection}
       `;
   }
 
   if (target === 'STATIC') {
-      roleInstruction = `**Role: 世界级摄影指导 (DOP) & 美术总监 (Art Director)。**`;
+      roleInstruction = `**角色：世界级摄影指导 (DOP) & 美术总监 (Art Director)。**`;
       targetInstruction = `
       **任务目标：生成【静态分镜表 (Static Storyboard)】。**
       
@@ -92,17 +92,17 @@ ${assetInjection}
       jsonOutputInstruction = `
       1. **staticStoryboard**: 数组对象。每个对象包含：
         *   *id*: 镜号 (如 "#1-1-1", 必须与剧本一致)。
-        *   *shotSize*: **景别 (Size)**. (e.g., ECU, CU, MCU, MS, LS, ELS). **MUST NOT BE EMPTY.**
-        *   *composition*: **构图 (Comp)**. (e.g., Center, Rule of Thirds, Low Angle). **MUST NOT BE EMPTY.**
-        *   *angle*: **角度 (Angle)**. (e.g., Low, High, Eye Level). **MUST NOT BE EMPTY.**
+        *   *shotSize*: **景别 (Size)**，例如 ECU, CU, MCU, MS, LS, ELS。**不得为空。**
+        *   *composition*: **构图 (Comp)**，例如 Center, Rule of Thirds, Low Angle。**不得为空。**
+        *   *angle*: **角度 (Angle)**，例如 Low, High, Eye Level。**不得为空。**
         *   *visualDesc*: **画面美术描述 (中文)**. 必须包含 **【资产名】** 和 **详细的材质/光影描述**。这部分必须体现“视觉对位”的结果，用参考图的风格去描述剧本的事件。
-        *   *visualDescEn*: **High-Fidelity Visual Prompt (English)**. Must include specific texture adjectives, lighting terms, and asset anchors from the Bible. (e.g. "Close up of Odo's rough fingers touching dry bread, texture of crust, rim lighting, dust particles, [Texture Keyword]").
+        *   *visualDescEn*: **High-Fidelity Visual Prompt (English)**. 必须包含具体 texture adjectives、lighting terms，以及来自视觉圣经的 asset anchors。
         *   *sound*: **音效/音乐 (中文)**。仅包含非对白的声音信息。
         *   *dialogue*: **台词/语音/字幕 (中文)**。**必须1:1完整保留剧本中的所有台词和字幕(Text Card)。严禁删减，严禁使用省略号(...)。如果原剧本有字幕卡，也在此处写明。**
-        *   *dialogueEn*: **Dialogue (English)**. Translated dialogue.
+        *   *dialogueEn*: **Dialogue (English)**. 英文翻译台词。
       `;
   } else if (target === 'DYNAMIC') {
-      roleInstruction = `**Role: 资深执行导演 & 分镜师 (Senior Director & Storyboard Artist)。**`;
+      roleInstruction = `**角色：资深执行导演 & 分镜师 (Senior Director & Storyboard Artist)。**`;
       targetInstruction = `
       **任务目标：生成【动态分镜表 (Dynamic Storyboard)】。**
       **绝对要求：**
@@ -137,11 +137,11 @@ ${assetInjection}
         *   *visualAction*: (String - 中文) **动态视觉流**。必须包含：人物动作 + 运镜方式 + 环境氛围 + 画面变化。写成一段流畅的描述。
         *   *sound*: (String - 中文) 音效/音乐。例如："沉重的雷声，背景有低沉的管弦乐。" 如果无声，填 "无"。
         *   *dialogue*: (String - 中文) 自然语言格式的台词。例如："【对白】奥多大喊：停下！" 如果无台词，填 "无"。
-        *   *dialogueEn*: (String - English) Natural language dialogue. e.g., "[Dialogue] Odo shouts: Stop!" If none, fill "None".
+        *   *dialogueEn*: (String - English) 英文自然语言台词，例如 "[Dialogue] Odo shouts: Stop!"。如果无台词，填 "None"。
       `;
   } else {
       // ALL (Fallback)
-      roleInstruction = `**Role: 全能电影视觉导演。**`;
+      roleInstruction = `**角色：全能电影视觉导演。**`;
       targetInstruction = `**任务：必须同时生成 [staticStoryboard] 和 [dynamicStoryboard] 两个数组。**`;
       jsonOutputInstruction = `
       1. **staticStoryboard**: [包含所有静态摄影参数，见上文定义]
@@ -207,7 +207,7 @@ ${dynamicVisualInjection}
     *   如果片例名称与当前故事时代/地点/物件不一致，完全忽略片例的具象元素。
 
 6.  **双语要求 (强制 - 静态)：**
-    *   所有带 'En' 后缀的字段必须 provide 高质量的英文翻译。
+    *   所有带 'En' 后缀的字段必须提供高质量英文翻译。
 
 # 📦 7. 输出格式 (STRICT JSON)
 
@@ -215,5 +215,40 @@ ${dynamicVisualInjection}
 ${jsonOutputInstruction}
 
 # START JSON:
-`;
+  `;
+};
+
+export const buildSutureStoryboardRuntimePrompt = (
+  script: string,
+  fullStory: string,
+  fieldState: NarrativeFieldState,
+  globalTone: GlobalVisualTone,
+  target: 'STATIC' | 'DYNAMIC',
+  referenceImages: string[] = [],
+  globalStyleContext?: { tone: GlobalVisualTone, assets: FinalAssetsData }
+): string => {
+  let styleOverridePrompt = "";
+  if (globalStyleContext) {
+    styleOverridePrompt = `
+        ### 📐 全局摄影协议 (GLOBAL CINEMATOGRAPHY PROTOCOL - STRICT)
+        **已附加视觉参考:** 本次请求附带 ${referenceImages.length} 张图像。
+        **一致性强制规则:**
+        1.  **TONE:** 所有镜头必须遵循第一张参考图及文字描述中的风格: "${globalStyleContext.tone.styleEn} + ${globalStyleContext.tone.lightingEn}".
+        2.  **ANCHORS:** 描述具体资产时，必须包含它们的 "High-Weight Anchors"，并匹配已附加的人物参考图。
+            *   ${globalStyleContext.assets.characters.map(c => `如果 ${c.nameEn || c.name} 出现 -> 加入: "${c.anchors}"`).join('\n            *   ')}
+        `;
+  }
+
+  const hasImages = referenceImages.length > 0;
+  const basePrompt = buildSutureStep2Prompt(
+    script,
+    fullStory,
+    fieldState,
+    globalStyleContext?.tone || globalTone,
+    target,
+    hasImages,
+    globalStyleContext
+  );
+
+  return basePrompt + "\n" + styleOverridePrompt;
 };

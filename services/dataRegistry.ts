@@ -25,6 +25,7 @@ import { TRAILER_SKIN_LIBRARY } from '../data/aesthetic/trailer_skin';
 
 // Aesthetic Main
 import { AESTHETIC_ENGINE_LIBRARY } from '../data/aesthetic/core';
+import { CONCEPT_ENGINE_LIBRARY } from '../data/concept_design/core';
 
 // 1. Master Collection of ALL Libraries
 // This allows us to search by Library ID globally
@@ -37,7 +38,8 @@ const ALL_LIBRARIES_COLLECTION: LibraryCategoryDef[][] = [
     POETIC_ENGINE_LIBRARY,
     TRAILER_ENGINE_LIBRARY,
     TRAILER_SKIN_LIBRARY,
-    AESTHETIC_ENGINE_LIBRARY
+    AESTHETIC_ENGINE_LIBRARY,
+    CONCEPT_ENGINE_LIBRARY
 ];
 
 // Cache for quick BlockID -> Library Items lookup
@@ -87,7 +89,8 @@ const buildLibMap = () => {
         'COMMERCIAL': [...COMMERCIAL_ENGINE_LIBRARY, ...COMM_SKIN_LIBRARY],
         'EXPERIMENTAL': [...POETIC_ENGINE_LIBRARY, ...EXPERIMENTAL_SKIN_LIBRARY],
         'TRAILER': [...TRAILER_ENGINE_LIBRARY, ...TRAILER_SKIN_LIBRARY],
-        'AESTHETIC': [...AESTHETIC_ENGINE_LIBRARY, ...SKIN_LIBRARY, ...COMMERCIAL_ENGINE_LIBRARY]
+        'AESTHETIC': [...AESTHETIC_ENGINE_LIBRARY, ...SKIN_LIBRARY, ...COMMERCIAL_ENGINE_LIBRARY],
+        'CONCEPT_DESIGN': [...CONCEPT_ENGINE_LIBRARY, ...AESTHETIC_ENGINE_LIBRARY]
     };
     return _libMap;
 };

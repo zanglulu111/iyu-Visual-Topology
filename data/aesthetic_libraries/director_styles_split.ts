@@ -30,7 +30,23 @@ export const DIRECTOR_STYLE_ITEMS: LibraryItemDef[] = [
   // ==========================================
   // 2. 东方作者 (Eastern Auteurs - 20)
   // ==========================================
-  { id: "aut_wkw", name: "王家卫 (Wong Kar-wai)", group: "2. 东方作者", def: "Step-printing, motion blur, neon rain.", core: "代表作:《花样年华》, 风格: 暧昧时间与都市流光。" },
+  {
+    id: "aut_wkw",
+    name: "王家卫 (Wong Kar-wai)",
+    nameEn: "Wong Kar-wai Visual Grammar",
+    group: "2. 东方作者",
+    groupEn: "2. Eastern Auteurs",
+    def: "王家卫式电影语法不是复刻具体电影，而是提取都市孤独、暧昧时间感、遮挡构图、玻璃/镜面反射、浅景深、慢门拖影、潮湿空气和霓虹色彩关系。它只控制光线、色彩、构图、镜头距离、空间情绪和被观看关系，不改写人物身份。",
+    defEn: "Wong Kar-wai visual grammar does not replicate a specific film. It extracts urban loneliness, ambiguous time, occluded framing, glass/mirror reflections, shallow depth of field, step-print motion smear, humid air, and neon color relationships. It controls lighting, color, composition, lens distance, spatial mood, and the act of being seen, without rewriting the character identity.",
+    core: "协议：只取电影语法，不取演员脸、具体电影场景、台词梗、片名文字或香港都市符号堆砌。若与主体协议或时空坐标冲突，王家卫风格只能折译为光线、色彩、反射、遮挡、慢速情绪和空间孤独感。",
+    coreEn: "Protocol: extract cinematic grammar only, not actor faces, specific film scenes, quote-memes, title text, or piles of Hong Kong iconography. If it conflicts with subject protocol or time-space coordinates, translate it only into light, color, reflection, occlusion, slow emotion, and spatial loneliness.",
+    ontologyLevel: 1,
+    risk: "medium",
+    affects: ["lighting", "color", "composition", "lens", "mood", "space"],
+    controls: ["neon_color_relation", "glass_reflection", "occluded_framing", "shallow_depth", "slow_emotion", "urban_loneliness"],
+    forbids: ["复制具体电影画面", "生成已知演员脸", "片名文字", "台词梗堆砌", "把人物身份改写成香港电影角色", "普通赛博霓虹化"],
+    absorptionRule: "若与主体身份、时空坐标或造型协议冲突，王家卫风格只作为拍摄语法和空间情绪存在，转译为光线、色彩、反射、遮挡、镜头距离和慢速情绪，不改变人物身份、服装结构或本体设定。"
+  },
   { id: "aut_kurosawa", name: "黑泽明 (Akira Kurosawa)", group: "2. 东方作者", def: "Telephoto compression, dynamic weather.", core: "代表作:《乱》, 风格: 几何调度与武士宿命。" },
   { id: "aut_ozu", name: "小津安二郎 (Yasujirō Ozu)", group: "2. 东方作者", def: "Tatami shot, red teapot, still frames.", core: "代表作:《东京物语》, 风格: 榻榻米视角与物哀留白。" },
   { id: "aut_yang", name: "杨德昌 (Edward Yang)", group: "2. 东方作者", def: "Fixed shots, city architecture, reflection.", core: "代表作:《一一》, 风格: 都市手术刀与虚无解剖。" },

@@ -49,7 +49,8 @@ const titleChromaticShadow =
 const textChromaticShadow =
   '-0.7px 0 0 rgba(212, 93, 82, 0.56), 0.7px 0 0 rgba(94, 207, 220, 0.42)';
 
-
+const TITLE_GLITCH_AUDIO_SRC = '/audio/glitch-title.mp3';
+const TITLE_GLITCH_VOLUME = 1;
 
 const toneColor = (tone: PortalTone, isRetro: boolean) => {
   if (isRetro) {
@@ -318,9 +319,9 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
 
   useEffect(() => {
     const audio = new Audio();
-    audio.preload = 'none';
-    audio.src = '/audio/glitch.mp3';
-    audio.volume = 0.8;
+    audio.preload = 'auto';
+    audio.src = TITLE_GLITCH_AUDIO_SRC;
+    audio.volume = TITLE_GLITCH_VOLUME;
     audio.loop = true;
     glitchAudioRef.current = audio;
 
@@ -358,10 +359,9 @@ export const UniversePortal: React.FC<UniversePortalProps> = ({
     });
     setIsTitleGlitching(true);
     if (glitchAudioRef.current) {
-      if (glitchAudioRef.current.paused) {
-        glitchAudioRef.current.currentTime = 0;
-        glitchAudioRef.current.play().catch(() => {});
-      }
+      glitchAudioRef.current.volume = TITLE_GLITCH_VOLUME;
+      glitchAudioRef.current.currentTime = 0;
+      glitchAudioRef.current.play().catch(() => {});
     }
   };
 

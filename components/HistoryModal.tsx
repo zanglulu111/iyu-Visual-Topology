@@ -13,6 +13,7 @@ import {
     Trash2,
     UploadCloud,
     Wand2,
+    ScrollText,
     X
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
@@ -21,6 +22,7 @@ import {
     DesireArchiveStage,
     DesireArchiveVersion,
     DesireProject,
+    DriverType,
     HistoryItem,
     SubjectDossier
 } from '../types';
@@ -31,7 +33,7 @@ import {
 } from '../services/desireArchiveService';
 import { EngineParamsOverview } from './EngineParamsOverview';
 
-type ArchiveRoot = 'DIVERGENCE' | 'WORKSPACE';
+type ArchiveRoot = 'DIVERGENCE' | 'WORKSPACE' | 'EDICT';
 type StageFilter = DesireArchiveStage;
 
 interface HistoryModalProps {
@@ -160,8 +162,14 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({ history, onRestore, 
         return projects.filter(project => project.archiveKind === 'STORY_PROJECT' || project.bibleDrafts.length > 0 || project.metonymyScripts.length > 0 || !!project.originalStory);
     }, [projects]);
 
+    const edictProjects = useMemo(() => {
+        return projects.filter(project => project.archiveKind === 'EDICT_PROJECT' || (project.engineType === 'CONCEPT_DESIGN' && !!project.conceptRuntimeState));
+    }, [projects]);
+
     const activeProjectList = selectedRoot === 'DIVERGENCE'
         ? divergenceProjects
+        : selectedRoot === 'EDICT'
+            ? edictProjects
         : storyProjects;
 
     const filteredProjects = useMemo(() => {
@@ -221,6 +229,31 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({ history, onRestore, 
             if (!hydrated) {
                 setNotice(lang === 'CN' ? '恢复失败：未找到完整档案' : 'Restore failed: full archive not found');
                 setTimeout(() => setNotice(null), 2200);
+                return;
+            }
+
+            if (selectedRoot === 'EDICT') {
+                onRestore({
+                    ...hydrated,
+                    type: 'NARRATIVE',
+                    driverId: hydrated.driverId || selectedProject?.engineType || DriverType.CONCEPT_DESIGN,
+                    driverName: hydrated.driverName || selectedProject?.engineName || '迷雾律令',
+                    blueprint: null,
+                    fieldState: selectedProject?.fieldState || hydrated.fieldState,
+                    worldLaw: selectedProject?.worldLaw || hydrated.worldLaw,
+                    visionInput: selectedProject?.visionInput ?? hydrated.visionInput,
+                    visionAnalysis: selectedProject?.visionAnalysis ?? hydrated.visionAnalysis,
+                    visionImage: selectedProject?.visionImage ?? hydrated.visionImage,
+                    visionImageNote: selectedProject?.visionImageNote ?? hydrated.visionImageNote,
+                    visionImageMode: selectedProject?.visionImageMode ?? hydrated.visionImageMode,
+                    visionImplantEnabled: selectedProject?.visionImplantEnabled ?? hydrated.visionImplantEnabled,
+                    subjectType: selectedProject?.subjectType || hydrated.subjectType,
+                    aestheticMode: selectedProject?.aestheticMode || hydrated.aestheticMode,
+                    colorPalette: selectedProject?.colorPalette || hydrated.colorPalette,
+                    faceState: selectedProject?.faceState || hydrated.faceState,
+                    conceptRuntimeState: selectedProject?.conceptRuntimeState || hydrated.conceptRuntimeState || null,
+                    treatments: []
+                });
                 return;
             }
 
@@ -423,7 +456,9 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({ history, onRestore, 
         const targetProjects = activeProjectList;
         const targetLabel = selectedRoot === 'DIVERGENCE'
             ? (lang === 'CN' ? '分歧点档案' : 'divergence archives')
-            : (lang === 'CN' ? '故事工作台档案' : 'story workspace archives');
+            : selectedRoot === 'EDICT'
+                ? (lang === 'CN' ? '迷雾律令档案' : 'Mist Edict archives')
+                : (lang === 'CN' ? '故事工作台档案' : 'story workspace archives');
 
         const ok = window.confirm(
             lang === 'CN'
@@ -472,6 +507,107 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({ history, onRestore, 
     const getFullStoryText = (artifact: DesireArchiveVersion | null) => {
         if (!artifact) return '';
         return artifact.blueprint?.narrative?.synopsis || artifact.content || artifact.summary || '';
+    };
+
+    const getSearchPlaceholder = () => {
+        if (selectedRoot === 'DIVERGENCE') return lang === 'CN' ? '检索分歧点' : 'Search divergence';
+        if (selectedRoot === 'EDICT') return lang === 'CN' ? '检索迷雾律令' : 'Search Mist Edict';
+        return lang === 'CN' ? '检索故事工作台' : 'Search story workspace';
+    };
+
+    const getEmptyLabel = () => {
+        if (selectedRoot === 'DIVERGENCE') return lang === 'CN' ? '还没有分歧点档案。' : 'No divergence archives yet.';
+        if (selectedRoot === 'EDICT') return lang === 'CN' ? '还没有迷雾律令档案。' : 'No Mist Edict archives yet.';
+        return lang === 'CN' ? '还没有故事工作台档案。' : 'No story workspace archives yet.';
+    };
+
+    const getClearTitle = () => {
+        if (selectedRoot === 'DIVERGENCE') return lang === 'CN' ? '清空全部分歧点档案' : 'Clear all divergence archives';
+        if (selectedRoot === 'EDICT') return lang === 'CN' ? '清空全部迷雾律令档案' : 'Clear all Mist Edict archives';
+        return lang === 'CN' ? '清空全部故事工作台档案' : 'Clear all story workspace archives';
+    };
+
+    const getActiveCountLabel = () => {
+        if (selectedRoot === 'DIVERGENCE') return lang === 'CN' ? `${divergenceProjects.length} 个分歧点` : `${divergenceProjects.length} Divergence`;
+        if (selectedRoot === 'EDICT') return lang === 'CN' ? `${edictProjects.length} 个迷雾律令` : `${edictProjects.length} Mist Edict`;
+        return lang === 'CN' ? `${storyProjects.length} 个故事工作台` : `${storyProjects.length} Workspace`;
+    };
+
+    const getProjectHeaderLabel = () => {
+        if (selectedRoot === 'DIVERGENCE') return lang === 'CN' ? '分歧点档案' : 'Divergence Batch';
+        if (selectedRoot === 'EDICT') return lang === 'CN' ? '迷雾律令档案' : 'Mist Edict Archive';
+        return lang === 'CN' ? '故事工作台' : 'Story Workspace';
+    };
+
+    const renderEdictRuntime = (project: DesireProject) => {
+        const runtime = project.conceptRuntimeState;
+        if (!runtime) {
+            return (
+                <div className="h-full flex items-center justify-center text-zinc-600 text-xs text-center px-8">
+                    {lang === 'CN' ? '这个档案没有保存迷雾律令运行态。' : 'This archive has no Mist Edict runtime state.'}
+                </div>
+            );
+        }
+
+        const variableRows = [
+            [lang === 'CN' ? '角色种子' : 'Character Seed', runtime.variables.characterSeed],
+            [lang === 'CN' ? '年龄 / 体型' : 'Age / Body', runtime.variables.ageBodyType],
+            [lang === 'CN' ? '时空场景' : 'Time / Scene', runtime.variables.timeSpaceScene],
+            [lang === 'CN' ? '行动瞬间' : 'Action Moment', runtime.variables.actionMoment],
+            [lang === 'CN' ? '视觉媒介' : 'Visual Medium', runtime.variables.visualMedium],
+            [lang === 'CN' ? '风格' : 'Style', runtime.variables.style],
+            [lang === 'CN' ? '构图场景' : 'Composition', runtime.variables.compositionScene],
+            [lang === 'CN' ? '光线氛围' : 'Lighting', runtime.variables.lightingAtmosphere],
+            [lang === 'CN' ? '补充细节' : 'Other Details', runtime.variables.otherDetails]
+        ];
+
+        return (
+            <div>
+                {renderParamsOverview(project)}
+                <div className="grid gap-5 xl:grid-cols-[minmax(280px,0.82fr)_minmax(0,1.18fr)]">
+                    <section className="mist-archive-panel border p-5">
+                        <div className="flex items-center gap-2 text-[var(--mist-archive-red)] mb-4">
+                            <ScrollText size={16} />
+                            <span className="text-[10px] font-bold uppercase tracking-[0.22em]">
+                                {lang === 'CN' ? '九变量律令' : 'Nine-Variable Edict'}
+                            </span>
+                        </div>
+                        <h1 className="font-serif text-4xl text-white font-bold mb-4">{project.title}</h1>
+                        <div className="flex flex-wrap gap-2 mb-6">
+                            <span className="text-[9px] font-mono border border-[var(--mist-archive-red-soft)] text-[var(--mist-archive-red)] px-2 py-1 uppercase">
+                                {runtime.sourceLabel || (lang === 'CN' ? '迷雾律令' : 'Mist Edict')}
+                            </span>
+                            <span className="text-[9px] font-mono border border-zinc-800 text-zinc-500 px-2 py-1 uppercase">{runtime.format}</span>
+                            <span className="text-[9px] font-mono border border-zinc-800 text-zinc-500 px-2 py-1 uppercase">{runtime.promptLang}</span>
+                        </div>
+                        <div className="space-y-3">
+                            {variableRows.map(([label, value]) => (
+                                <div key={label} className="border-l-2 border-[var(--mist-archive-red-soft)] pl-4">
+                                    <div className="text-[9px] font-mono uppercase tracking-[0.18em] text-[var(--mist-archive-red)]">{label}</div>
+                                    <p className="mt-1 text-sm leading-7 text-zinc-300 whitespace-pre-wrap">{value || (lang === 'CN' ? '未填写' : 'Empty')}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                    <section className="space-y-5">
+                        <article className="mist-archive-panel border p-6">
+                            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500 mb-4">
+                                <FileText size={14} />
+                                {lang === 'CN' ? '编译律令' : 'Compile Edict'}
+                            </div>
+                            <div className="text-sm text-zinc-300 leading-8 whitespace-pre-wrap">{runtime.generationInstruction || (lang === 'CN' ? '暂无编译律令。' : 'No compile edict yet.')}</div>
+                        </article>
+                        <article className="mist-archive-panel border p-6">
+                            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500 mb-4">
+                                <FileText size={14} />
+                                {lang === 'CN' ? '终稿律令' : 'Final Edict'}
+                            </div>
+                            <div className="text-sm text-zinc-300 leading-8 whitespace-pre-wrap">{runtime.finalPrompt || (lang === 'CN' ? '暂无终稿律令。' : 'No final edict yet.')}</div>
+                        </article>
+                    </section>
+                </div>
+            </div>
+        );
     };
 
     const renderParamsOverview = (project: DesireProject) => (
@@ -529,13 +665,20 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({ history, onRestore, 
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-2 mb-4">
+                        <div className="grid grid-cols-3 gap-2 mb-4">
                             <button
                                 type="button"
                                 onClick={() => setSelectedRoot('DIVERGENCE')}
                                 className={`mist-archive-button h-9 border text-[10px] font-bold uppercase tracking-widest ${selectedRoot === 'DIVERGENCE' ? 'is-active' : ''}`}
                             >
                                 {lang === 'CN' ? `分歧点 ${divergenceProjects.length}` : `Divergence ${divergenceProjects.length}`}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setSelectedRoot('EDICT')}
+                                className={`mist-archive-button h-9 border text-[10px] font-bold uppercase tracking-widest ${selectedRoot === 'EDICT' ? 'is-active' : ''}`}
+                            >
+                                {lang === 'CN' ? `迷雾律令 ${edictProjects.length}` : `Mist Edict ${edictProjects.length}`}
                             </button>
                             <button
                                 type="button"
@@ -551,9 +694,7 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({ history, onRestore, 
                             <input
                                 value={query}
                                 onChange={event => setQuery(event.target.value)}
-                                placeholder={selectedRoot === 'DIVERGENCE'
-                                    ? (lang === 'CN' ? '检索分歧点' : 'Search divergence')
-                                    : (lang === 'CN' ? '检索故事工作台' : 'Search story workspace')}
+                                placeholder={getSearchPlaceholder()}
                                 className="bg-transparent border-0 outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 text-xs flex-1 text-zinc-200 placeholder:text-zinc-600"
                                 style={{ outline: 'none', boxShadow: 'none' }}
                             />
@@ -563,9 +704,7 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({ history, onRestore, 
                     <div className="flex-1 overflow-y-auto custom-scrollbar">
                         {filteredProjects.length === 0 ? (
                             <div className="p-8 text-center text-zinc-600 text-xs">
-                                {selectedRoot === 'DIVERGENCE'
-                                    ? (lang === 'CN' ? '还没有分歧点档案。' : 'No divergence archives yet.')
-                                    : (lang === 'CN' ? '还没有故事工作台档案。' : 'No story workspace archives yet.')}
+                                {getEmptyLabel()}
                             </div>
                         ) : filteredProjects.map(project => {
                             const isActive = selectedProject?.id === project.id;
@@ -607,6 +746,11 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({ history, onRestore, 
                                                         : `STO ${project.bibleDrafts.length} / SCR ${project.metonymyScripts.length}`}
                                                 </span>
                                             )}
+                                            {selectedRoot === 'EDICT' && (
+                                                <span className="ml-auto">
+                                                    {lang === 'CN' ? '律令运行态' : 'EDICT'}
+                                                </span>
+                                            )}
                                         </div>
                                     </button>
                                     <button
@@ -628,16 +772,12 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({ history, onRestore, 
                             onClick={handleClearArchive}
                             disabled={activeProjectList.length === 0}
                             className="text-zinc-600 hover:text-[var(--mist-archive-red)] transition-colors p-2 disabled:opacity-30 disabled:cursor-not-allowed"
-                            title={selectedRoot === 'DIVERGENCE'
-                                ? (lang === 'CN' ? '清空全部分歧点档案' : 'Clear all divergence archives')
-                                : (lang === 'CN' ? '清空全部故事工作台档案' : 'Clear all story workspace archives')}
+                            title={getClearTitle()}
                         >
                             <Trash2 size={16} />
                         </button>
                         <span className="text-[9px] font-mono text-zinc-600">
-                            {selectedRoot === 'DIVERGENCE'
-                                ? (lang === 'CN' ? `${divergenceProjects.length} 个分歧点` : `${divergenceProjects.length} Divergence`)
-                                : (lang === 'CN' ? `${storyProjects.length} 个故事工作台` : `${storyProjects.length} Workspace`)}
+                            {getActiveCountLabel()}
                         </span>
                     </div>
                 </aside>
@@ -648,9 +788,7 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({ history, onRestore, 
                             <div className={`h-20 border-b ${theme === 'retro' ? 'border-[#8B261D]/20 bg-[#F4EFE0]' : 'border-zinc-800 bg-[#0b0b0b]'} pl-7 pr-5 flex items-center justify-between gap-6 shrink-0`}>
                                 <div className="min-w-0">
                                     <div className="text-[9px] font-mono uppercase tracking-[0.24em] text-[var(--mist-archive-red)] mb-1">
-                                        {selectedRoot === 'DIVERGENCE'
-                                            ? (lang === 'CN' ? '分歧点档案' : 'Divergence Batch')
-                                            : (lang === 'CN' ? '故事工作台' : 'Story Workspace')}
+                                        {getProjectHeaderLabel()}
                                     </div>
                                     <h2 className={`font-serif text-2xl font-bold truncate ${theme === 'retro' ? 'text-[#3E110D]' : 'text-white'}`}>{selectedProject.title}</h2>
                                 </div>
@@ -735,6 +873,8 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({ history, onRestore, 
                                             )}
                                         </div>
                                     </div>
+                                ) : selectedRoot === 'EDICT' ? (
+                                    renderEdictRuntime(selectedProject)
                                 ) : activeArtifacts.length === 0 ? (
                                     <div className="h-full flex items-center justify-center text-zinc-600 text-xs text-center px-8">
                                         {lang === 'CN' ? '这一阶段还没有保存版本。' : 'No saved versions in this stage.'}

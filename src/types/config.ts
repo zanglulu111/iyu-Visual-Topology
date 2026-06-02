@@ -36,6 +36,8 @@ export interface ApiKeyEntry {
   mode: ProviderMode;
   apiFormat: ApiFormat;
   baseUrl: string;
+  officialBaseUrl?: string;
+  proxyBaseUrl?: string;
   apiKey: string;
   modelCoverage: ModelCoverageMode;
   allowedModels: string[];
@@ -91,6 +93,8 @@ export const LEGACY_KEY_IDS: Record<ProviderId, string> = {
   openai: 'key_openai_primary',
   deepseek: 'key_deepseek_primary',
 };
+
+export const DEFAULT_KEY_ID = 'key_default_gateway';
 
 // ============================================================
 // 引擎模型映射
@@ -174,7 +178,7 @@ export const DEFAULT_ENGINE_MODELS: EngineModelConfig = {
   psychoAnalysis: 'gemini-3.1-flash-lite-preview',
   visualBible: 'gemini-3.1-pro-preview',
   visualSeed: 'gemini-3-pro-image-preview',
-  imageGen: 'gemini-3-pro-image-preview',
+  imageGen: 'gpt-image-2',
 };
 
 export const ENGINE_IDS = Object.keys(DEFAULT_ENGINE_MODELS) as EngineId[];
@@ -184,58 +188,18 @@ const DEFAULT_CREATED_AT = '2026-01-01T00:00:00.000Z';
 
 export const DEFAULT_KEY_ENTRIES: ApiKeyEntry[] = [
   {
-    id: LEGACY_KEY_IDS.gemini,
-    name: 'Gemini 官方 Key',
-    provider: 'gemini',
-    mode: 'official',
-    apiFormat: 'google',
-    baseUrl: '',
-    apiKey: '',
-    modelCoverage: 'provider',
-    allowedModels: [],
-    tags: ['default'],
-    createdAt: DEFAULT_CREATED_AT,
-    updatedAt: DEFAULT_CREATED_AT,
-  },
-  {
-    id: LEGACY_KEY_IDS.claude,
-    name: 'Claude 网关 Key',
-    provider: 'claude',
+    id: DEFAULT_KEY_ID,
+    name: '默认 API Key',
+    provider: 'mixed',
     mode: 'proxy',
-    apiFormat: 'anthropic',
+    apiFormat: 'openai',
     baseUrl: '',
+    officialBaseUrl: OFFICIAL_BASE_URLS.openai,
+    proxyBaseUrl: '',
     apiKey: '',
-    modelCoverage: 'provider',
+    modelCoverage: 'allowlist',
     allowedModels: [],
     tags: ['default'],
-    createdAt: DEFAULT_CREATED_AT,
-    updatedAt: DEFAULT_CREATED_AT,
-  },
-  {
-    id: LEGACY_KEY_IDS.openai,
-    name: 'OpenAI 官方 Key',
-    provider: 'openai',
-    mode: 'official',
-    apiFormat: 'openai',
-    baseUrl: OFFICIAL_BASE_URLS.openai,
-    apiKey: '',
-    modelCoverage: 'provider',
-    allowedModels: [],
-    tags: ['default'],
-    createdAt: DEFAULT_CREATED_AT,
-    updatedAt: DEFAULT_CREATED_AT,
-  },
-  {
-    id: LEGACY_KEY_IDS.deepseek,
-    name: 'DeepSeek 官方 Key',
-    provider: 'deepseek',
-    mode: 'official',
-    apiFormat: 'openai',
-    baseUrl: OFFICIAL_BASE_URLS.deepseek,
-    apiKey: '',
-    modelCoverage: 'provider',
-    allowedModels: [],
-    tags: ['default', 'domestic'],
     createdAt: DEFAULT_CREATED_AT,
     updatedAt: DEFAULT_CREATED_AT,
   },
@@ -248,12 +212,12 @@ export const DEFAULT_ROUTE_PROFILE: RouteProfile = {
   createdAt: DEFAULT_CREATED_AT,
   updatedAt: DEFAULT_CREATED_AT,
   bindings: {
-    coreEngine: { keyId: LEGACY_KEY_IDS.gemini, model: DEFAULT_ENGINE_MODELS.coreEngine },
-    metonymyEngine: { keyId: LEGACY_KEY_IDS.gemini, model: DEFAULT_ENGINE_MODELS.metonymyEngine },
-    psychoAnalysis: { keyId: LEGACY_KEY_IDS.gemini, model: DEFAULT_ENGINE_MODELS.psychoAnalysis },
-    visualBible: { keyId: LEGACY_KEY_IDS.gemini, model: DEFAULT_ENGINE_MODELS.visualBible },
-    visualSeed: { keyId: LEGACY_KEY_IDS.gemini, model: DEFAULT_ENGINE_MODELS.visualSeed },
-    imageGen: { keyId: LEGACY_KEY_IDS.gemini, model: DEFAULT_ENGINE_MODELS.imageGen },
+    coreEngine: { keyId: DEFAULT_KEY_ID, model: DEFAULT_ENGINE_MODELS.coreEngine },
+    metonymyEngine: { keyId: DEFAULT_KEY_ID, model: DEFAULT_ENGINE_MODELS.metonymyEngine },
+    psychoAnalysis: { keyId: DEFAULT_KEY_ID, model: DEFAULT_ENGINE_MODELS.psychoAnalysis },
+    visualBible: { keyId: DEFAULT_KEY_ID, model: DEFAULT_ENGINE_MODELS.visualBible },
+    visualSeed: { keyId: DEFAULT_KEY_ID, model: DEFAULT_ENGINE_MODELS.visualSeed },
+    imageGen: { keyId: DEFAULT_KEY_ID, model: DEFAULT_ENGINE_MODELS.imageGen },
   },
 };
 
@@ -370,6 +334,13 @@ export const MODEL_CATALOG: ModelOption[] = [
     name: 'Gemini 3 Flash Image Preview',
     provider: 'gemini',
     type: 'image',
+  },
+  {
+    id: 'gpt-image-2',
+    name: 'GPT Image 2',
+    provider: 'openai',
+    type: 'image',
+    note: 'Image generation model for final visual asset prompts.',
   },
 ];
 
@@ -490,6 +461,14 @@ export function getOpenAIChatCompletionsUrl(baseUrl: string): string {
   return `${cleanBaseUrl}/v1/chat/completions`;
 }
 
+export function getOpenAIImagesGenerationsUrl(baseUrl: string): string {
+  const cleanBaseUrl = baseUrl.trim().replace(/\/+$/, '');
+  if (!cleanBaseUrl) return '';
+  if (/\/images\/generations$/i.test(cleanBaseUrl)) return cleanBaseUrl;
+  if (/\/v\d+$/i.test(cleanBaseUrl)) return `${cleanBaseUrl}/images/generations`;
+  return `${cleanBaseUrl}/v1/images/generations`;
+}
+
 export function getAnthropicMessagesUrl(baseUrl: string): string {
   const cleanBaseUrl = baseUrl.trim().replace(/\/+$/, '');
   if (!cleanBaseUrl) return '';
@@ -514,9 +493,9 @@ export function maskApiKey(apiKey: string): string {
 }
 
 export function isApiKeyCompatibleWithModel(entry: ApiKeyEntry, modelId: string): boolean {
-  if (entry.modelCoverage === 'all' || entry.provider === 'mixed') return true;
+  if (entry.modelCoverage === 'all') return true;
   if (entry.modelCoverage === 'allowlist') {
-    return entry.allowedModels.length === 0 || entry.allowedModels.includes(modelId);
+    return entry.allowedModels.includes(modelId);
   }
   if (entry.modelCoverage === 'pattern' && entry.modelPattern) {
     const escaped = entry.modelPattern
@@ -525,6 +504,7 @@ export function isApiKeyCompatibleWithModel(entry: ApiKeyEntry, modelId: string)
       .join('.*');
     return new RegExp(`^${escaped}$`, 'i').test(modelId);
   }
+  if (entry.provider === 'mixed') return true;
   if (entry.provider === 'custom') return true;
   return getProviderForModel(modelId) === entry.provider;
 }

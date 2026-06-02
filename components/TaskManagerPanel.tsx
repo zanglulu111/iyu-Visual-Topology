@@ -92,7 +92,7 @@ export const TaskManagerPanel: React.FC<TaskManagerPanelProps> = ({ isOpen, onCl
 
     return (
         <div
-            className={`mist-task-manager-panel mist-archive-modal fixed bottom-24 right-8 w-[380px] max-h-[520px] h-[65vh] ${theme === 'retro' ? 'bg-[#F9F7F1] border-[#8B261D]' : 'bg-[#050505] border-white/10 backdrop-blur-xl'} border rounded-2xl ${modeAccent.shadow} z-[120] flex flex-col transform transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) ${isOpen ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-12 scale-95 opacity-0 pointer-events-none'}`}
+            className={`mist-task-manager-panel mist-archive-modal fixed bottom-24 right-8 w-[380px] max-h-[520px] h-[65vh] ${theme === 'retro' ? 'bg-[#F9F7F1] border-[#8B261D]' : 'bg-[#050505] border-white/10 backdrop-blur-xl'} border rounded-2xl ${modeAccent.shadow} z-[5000] flex flex-col transform transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) ${isOpen ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-12 scale-95 opacity-0 pointer-events-none'}`}
             style={{
                 backgroundImage: theme === 'retro' ? 'none' : `radial-gradient(circle at 100% 0%, ${modeAccent.glow}, transparent 40%), radial-gradient(circle at 0% 100%, rgba(255,255,255,0.03), transparent 40%)`
             }}

@@ -4,7 +4,7 @@ import { configService } from "../src/services/configService";
 import { EngineId, getOpenAIChatCompletionsUrl, getProviderForModel } from "../src/types/config";
 import { SutureConfig, NarrativeFieldState, CreativeTreatment, StyleConfig, WorldLawConfig, CreativeBlueprint, DriverType, SubjectType, SutureResponse, FinalAssetsData, FinalAssetItem, GlobalVisualTone, AssetView, MetonymyStylePreset, MetonymyAssetInput, APISettings, FaceState, PromptFocusState, NarrativePromptVersion, NarrativeBlockDef, LibraryCategoryDef, MAxisMixerState, M7BResidueIntensity } from "../types";
 import { buildSutureStep1Prompt, buildStyleTransferPrompt } from "./suture_script_prompt";
-import { buildSutureStep2Prompt } from "./sutureGenerator";
+import { buildSutureStoryboardRuntimePrompt } from "./sutureGenerator";
 import { buildNarrativePrompt, buildNarrativeBiblePrompt } from "./narrativeGenerator";
 import { buildCommercialPrompt, buildCommercialBiblePrompt } from "./commercialGenerator";
 import { buildExperimentalPrompt, buildExperimentalBiblePrompt } from "./experimentalGenerator";
@@ -36,6 +36,7 @@ import {
 import { buildRefactorPrompt, type RefactorPromptOptions } from "./refactorPrompt";
 import { buildScriptBreakdownPrompt } from "./scriptBreakdownGenerator";
 import { runWithTask } from "./taskManager";
+import { generatePromptSkillImage } from "./promptSkillImageService";
 
 export const FANTASY_TRAVERSE_OUTPUT_CONTRACT = `
 
@@ -118,14 +119,46 @@ class OpenAIAdapter {
                     messages.unshift({ role: 'system', content: params.config.systemInstruction });
                 }
 
+                const wantsJson = params.config?.responseMimeType === 'application/json';
+                if (wantsJson) {
+                    const jsonInstruction = [
+                        'You must respond with valid JSON only.',
+                        'Do not include markdown fences, comments, explanations, XML tags, or prose outside the JSON.',
+                        'Use double-quoted property names and string values.',
+                        'Escape any quotation marks that appear inside string values.',
+                        'Every array element and object property must be separated by a comma.'
+                    ].join(' ');
+                    const systemIndex = messages.findIndex(message => message.role === 'system');
+                    if (systemIndex >= 0) {
+                        messages[systemIndex] = {
+                            ...messages[systemIndex],
+                            content: `${messages[systemIndex].content}\n\n${jsonInstruction}`
+                        };
+                    } else {
+                        messages.unshift({ role: 'system', content: jsonInstruction });
+                    }
+                }
+
                 const fetchUrl = getOpenAIChatCompletionsUrl(this.baseUrl);
                 const maxTokens = params.config?.maxOutputTokens || 32768;
                 // Long-form narrative tasks still need a complete parsable payload at the end,
                 // but streaming keeps proxy gateways from waiting silently for the full body.
-                const shouldStream = params.config?.stream === false ? false : true;
+                const shouldStream = params.config?.stream === false
+                    ? false
+                    : wantsJson && maxTokens <= 8192
+                        ? false
+                        : true;
 
                 console.log(`[ProxyStream] Calling: ${fetchUrl} with model: ${model}, max_tokens: ${maxTokens}, stream=${shouldStream}`);
                 const startTime = Date.now();
+
+                const requestBody: any = {
+                    model: model,
+                    messages: messages,
+                    temperature: params.config?.temperature ?? (wantsJson ? 0.2 : 0.7),
+                    max_tokens: maxTokens,
+                    stream: shouldStream
+                };
 
                 const response = await proxyFetch(fetchUrl, {
                     method: 'POST',
@@ -134,13 +167,7 @@ class OpenAIAdapter {
                         'Authorization': `Bearer ${this.apiKey}`,
                         'X-Requested-With': 'XMLHttpRequest'
                     },
-                    body: JSON.stringify({
-                        model: model,
-                        messages: messages,
-                        temperature: params.config?.temperature || 0.7,
-                        max_tokens: maxTokens,
-                        stream: shouldStream
-                    })
+                    body: JSON.stringify(requestBody)
                 });
 
                 const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
@@ -540,7 +567,7 @@ export const testConnection = async (section: 'llm' | 'image'): Promise<boolean>
         const engineId = section === 'llm' ? 'coreEngine' : 'imageGen';
         const model = configService.getEngineModel(engineId);
         const response = await getAI().models.generateContent({
-            model: model || (section === 'llm' ? 'gemini-3.1-flash-lite-preview' : 'gemini-3-pro-image-preview'),
+            model: model || (section === 'llm' ? 'gemini-3.1-flash-lite-preview' : 'gpt-image-2'),
             contents: { parts: [{ text: "ping" }] },
             config: { maxOutputTokens: 5, engineId }
         });
@@ -1175,29 +1202,15 @@ export const generateSutureStoryboard = async (
     globalStyleContext?: { tone: GlobalVisualTone, assets: FinalAssetsData }
 ) => {
 
-    let styleOverridePrompt = "";
-    if (globalStyleContext) {
-        styleOverridePrompt = `
-        ### 📐 GLOBAL CINEMATOGRAPHY PROTOCOL (STRICT)
-        **Visual Reference Attached:** I have attached ${referenceImages.length} images.
-        **Consistency Enforcement:**
-        1.  **TONE:** All shots must adhere to the style in the first attached image and text description: "${globalStyleContext.tone.styleEn} + ${globalStyleContext.tone.lightingEn}".
-        2.  **ANCHORS:** When describing specific assets, YOU MUST INCLUDE their "High-Weight Anchors" and match the attached character reference images.
-            *   ${globalStyleContext.assets.characters.map(c => `IF ${c.nameEn} appears -> ADD: "${c.anchors}"`).join('\n            *   ')}
-        `;
-    }
-
-    const hasImages = referenceImages.length > 0;
-    const basePrompt = buildSutureStep2Prompt(
+    const finalPrompt = buildSutureStoryboardRuntimePrompt(
         sutureData.literaryScript,
         fullStory,
         fieldState,
-        globalStyleContext?.tone || sutureData.globalTone,
+        sutureData.globalTone,
         target,
-        hasImages,
+        referenceImages,
         globalStyleContext
     );
-    const finalPrompt = basePrompt + "\n" + styleOverridePrompt;
 
     const parts: any[] = [{ text: finalPrompt }];
     referenceImages.forEach(img => {
@@ -1479,8 +1492,19 @@ export const modifyNarrativeWithAI = async (
 
 export const generateAssetImage = async (prompt: string): Promise<string | null> => {
     try {
-        const model = configService.getEngineModel('imageGen') || 'gemini-3-pro-image-preview';
+        const model = configService.getEngineModel('imageGen') || 'gpt-image-2';
         console.log(`[ImageGen] Generating Asset Image with model: ${model}`);
+        if (model.toLowerCase().startsWith('gpt-image')) {
+            const result = await generatePromptSkillImage({
+                prompt,
+                aspectRatio: '16:9',
+                scale: '2k',
+                quality: 'high',
+                model
+            });
+            return result.imageUrl;
+        }
+
         const response = await retryWithBackoff<GenerateContentResponse>(() => getAI().models.generateContent({
             model: model,
             contents: { parts: [{ text: prompt }] },

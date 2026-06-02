@@ -21,7 +21,7 @@ interface FooterActionsProps {
 export const FooterActions: React.FC<FooterActionsProps> = ({ 
   selectedDriver, lang, handleGlobalRandomize, handleGlobalReset, handleRandomizeFormulaOnly, handleResetFormulaOnly, handleUndo, handleRedo, canUndo, canRedo, getFooterThemeColor, theme
 }) => {
-    if (selectedDriver === DriverType.AESTHETIC) return null;
+    if (selectedDriver === DriverType.AESTHETIC || selectedDriver === DriverType.CONCEPT_DESIGN) return null;
 
     const controlClass = 'mist-app-footer-control flex flex-col items-center gap-1.5 group transition-all duration-300 shrink-0 min-w-[60px] hover:scale-105 active:scale-95';
     const controlIconClass = 'transition-colors text-[var(--text-muted)] group-hover:text-[var(--text-header)]';

@@ -13,8 +13,8 @@ import {
   EXPERIMENTAL_SKIN_LIBRARY,
   TRAILER_SKIN_BLOCKS,
   TRAILER_SKIN_LIBRARY,
-  SUR3_COORDINATE_PRESETS,
   SUR3_SPACE_ANCHOR_PRESETS,
+  getRandomSur3CoordinatePreset,
   SKIN_LIBRARY,
   ALL_SKIN_BLOCKS,
   GENRE_CATEGORIES,
@@ -521,7 +521,8 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
 
   // ... (rest of the component logic for Time/Location state and effects)
   // New State for Timeline
-  const [selectedYear, setSelectedYear] = useState<number | null>(null);
+  const [selectedTimeAnchor, setSelectedTimeAnchor] = useState<string>("");
+  const selectedYear = /^-?\d+$/.test(selectedTimeAnchor.trim()) ? Number(selectedTimeAnchor.trim()) : null;
   const [selectedCountry, setSelectedCountry] = useState<string>("");
   const [contextData, setContextData] = useState<any>(null);
 
@@ -633,7 +634,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
   const hasBlockValue = (ids: string[]) => ids.some(id => (fieldState[id] || []).length > 0);
 
   // Pre-compute last visible fragment for sentence closing
-  const _fA = summaryExpanded || hasBlockValue(['skin_era']) || selectedYear !== null || selectedCountry !== '';
+  const _fA = summaryExpanded || hasBlockValue(['skin_era']) || selectedTimeAnchor !== '' || selectedCountry !== '';
   const _fB = summaryExpanded || hasBlockValue(['skin_society']);
   const _fC = summaryExpanded || selectedAge !== '' || selectedGender !== '' || hasBlockValue(['skin_profession']);
   const _fD = summaryExpanded || hasBlockValue(['sur10x', 'skin_ideology']);
@@ -687,10 +688,10 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
 
     // Sync Year
     if (yearTag) {
-      setSelectedYear(parseInt(yearTag));
+      setSelectedTimeAnchor(yearTag);
     } else {
       if (fieldState['skin_year_exact'] && fieldState['skin_year_exact'].length === 0) {
-        setSelectedYear(null);
+        setSelectedTimeAnchor("");
       }
     }
 
@@ -735,7 +736,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
         let newState = { ...fieldState };
         let hasChanges = false;
 
-        if (selectedYear === null) {
+        if (!selectedTimeAnchor) {
           if (fieldState['skin_year_exact'] && fieldState['skin_year_exact'].length === 0) {
             // No change needed if already empty
           } else if (fieldState['skin_year_exact'] && fieldState['skin_year_exact'].length > 0) {
@@ -743,8 +744,8 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
             hasChanges = true;
           }
         } else {
-          if (fieldState['skin_year_exact']?.[0] !== selectedYear.toString()) {
-            newState['skin_year_exact'] = [selectedYear.toString()];
+          if (fieldState['skin_year_exact']?.[0] !== selectedTimeAnchor) {
+            newState['skin_year_exact'] = [selectedTimeAnchor];
             hasChanges = true;
           }
         }
@@ -765,7 +766,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
       }
     }, 500);
     return () => clearTimeout(timer);
-  }, [selectedYear, selectedCountry]);
+  }, [selectedTimeAnchor, selectedCountry]);
 
   if (isAesthetic) return null;
 
@@ -830,8 +831,8 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
 
   const handleRandomYear = () => {
     if (isYearLocked) return;
-    const randomYear = Math.floor(Math.random() * (2300 - (-2000) + 1)) + (-2000);
-    setSelectedYear(randomYear);
+    const preset = getRandomSur3CoordinatePreset(lang === 'EN' ? 'EN' : 'CN');
+    setSelectedTimeAnchor(preset.timeMode === 'era' ? (preset.time || '') : (preset.year === null ? '' : String(preset.year)));
   };
 
   const handleToggleLockYear = () => {
@@ -840,19 +841,19 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
 
   const handleResetYear = () => {
     if (isYearLocked) return;
-    setSelectedYear(null);
+    setSelectedTimeAnchor("");
   };
 
   const handleSetNow = () => {
     if (isYearLocked) return;
-    setSelectedYear(2026);
+    setSelectedTimeAnchor("2026");
   };
 
   // Global Controls for the Modal
   const handleGlobalRandomizeCoordinates = () => {
-    const preset = SUR3_COORDINATE_PRESETS[Math.floor(Math.random() * SUR3_COORDINATE_PRESETS.length)];
+    const preset = getRandomSur3CoordinatePreset(lang === 'EN' ? 'EN' : 'CN');
     if (!isCountryLocked) setSelectedCountry(lang === 'EN' ? preset.spaceEn : preset.spaceCn);
-    if (!isYearLocked) setSelectedYear(preset.year);
+    if (!isYearLocked) setSelectedTimeAnchor(preset.timeMode === 'era' ? (preset.time || '') : (preset.year === null ? '' : String(preset.year)));
   };
 
   const handleGlobalResetCoordinates = () => {
@@ -949,15 +950,22 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
     return lang === 'EN' ? `${year}` : `公元${year}${useSuffix ? '年' : ''}`;
   };
 
+  const formatTimeAnchor = (value: string, useSuffix = false) => {
+    if (!value) return "";
+    const trimmed = value.trim();
+    if (/^-?\d+$/.test(trimmed)) return formatYear(Number(trimmed), useSuffix);
+    return value;
+  };
+
   // Specialized Renderer for Time/Location Slot in Sidebar
   const renderTimeLocationSlot = () => {
-    const hasTimeOrLoc = selectedYear !== null || selectedCountry !== "";
+    const hasTimeOrLoc = selectedTimeAnchor !== "" || selectedCountry !== "";
     const countryPreset = selectedCountry ? SUR3_SPACE_ANCHOR_PRESETS.find(p => p.cn === selectedCountry || p.en === selectedCountry) : null;
     const countryDisplay = countryPreset ? (lang === 'EN' ? countryPreset.en : countryPreset.cn) : selectedCountry;
-    const displayText = selectedYear !== null
+    const displayText = selectedTimeAnchor
       ? (lang === 'EN'
-        ? `${formatYear(selectedYear)}${countryDisplay ? ' ' + countryDisplay : ''}`
-        : `${formatYear(selectedYear, true)}${countryDisplay}`)
+        ? `${formatTimeAnchor(selectedTimeAnchor)}${countryDisplay ? ' ' + countryDisplay : ''}`
+        : `${formatTimeAnchor(selectedTimeAnchor, true)}${countryDisplay}`)
       : (selectedCountry ? `${countryDisplay} (AUTO)` : (lang === 'EN' ? "Precise Coordinate" : "精确坐标"));
 
     const isLocked = isCountryLocked && isYearLocked;
@@ -1086,7 +1094,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
 
               <div className="flex gap-2 items-center">
                 <span className={`text-xl font-serif font-black ${isYearLocked ? (theme === 'retro' ? 'text-[var(--text-muted)]/50' : 'text-zinc-500') : iconColor}`}>
-                  {selectedYear === null ? (lang === 'EN' ? "AUTO" : "自动") : formatYear(selectedYear, true)}
+                  {selectedTimeAnchor ? formatTimeAnchor(selectedTimeAnchor, true) : (lang === 'EN' ? "AUTO" : "自动")}
                 </span>
                 <div className="flex gap-1 ml-2">
                   <button onClick={handleRandomYear} disabled={isYearLocked} className={`p-1 rounded text-zinc-500 hover:text-white transition-all ${isYearLocked ? 'opacity-30 cursor-not-allowed' : ''}`}><Dice5 size={10} /></button>
@@ -1102,19 +1110,19 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
               max="2300"
               step="1"
               value={selectedYear ?? 2026}
-              disabled={isYearLocked}
-              onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+              disabled={isYearLocked || Boolean(selectedTimeAnchor && selectedYear === null)}
+              onChange={(e) => setSelectedTimeAnchor(String(parseInt(e.target.value)))}
               className={`w-full h-1.5 ${theme === 'retro' ? 'bg-[var(--bg-panel)]' : 'bg-zinc-800'} rounded-lg appearance-none cursor-pointer ${isYearLocked ? 'cursor-not-allowed accent-zinc-600' : (theme === 'retro' ? 'accent-[var(--text-accent)] hover:accent-[var(--text-main)]' : 'accent-white hover:accent-[var(--mist-active-accent)]')}`}
             />
 
             <div className={`flex justify-between items-center text-[9px] ${theme === 'retro' ? 'text-[var(--text-muted)]' : 'text-zinc-600'} font-mono`}>
               <span>-2000</span>
               <div className="flex gap-1">
-                <button onClick={() => !isYearLocked && setSelectedYear((prev) => (prev ?? 2026) - 10)} className={`px-2 py-1 ${theme === 'retro' ? 'bg-[var(--bg-panel)] text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'} rounded`}>-10</button>
-                <button onClick={() => !isYearLocked && setSelectedYear((prev) => (prev ?? 2026) - 1)} className={`px-2 py-1 ${theme === 'retro' ? 'bg-[var(--bg-panel)] text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'} rounded`}>-1</button>
+                <button onClick={() => !isYearLocked && setSelectedTimeAnchor(String((selectedYear ?? 2026) - 10))} className={`px-2 py-1 ${theme === 'retro' ? 'bg-[var(--bg-panel)] text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'} rounded`}>-10</button>
+                <button onClick={() => !isYearLocked && setSelectedTimeAnchor(String((selectedYear ?? 2026) - 1))} className={`px-2 py-1 ${theme === 'retro' ? 'bg-[var(--bg-panel)] text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'} rounded`}>-1</button>
                 <button onClick={handleSetNow} className={`px-2 py-1 ${theme === 'retro' ? 'bg-[var(--text-accent)]/10 text-[var(--text-accent)] font-bold' : 'bg-zinc-800 text-[var(--mist-active-accent)] hover:bg-zinc-700 font-bold'} rounded`}>Now</button>
-                <button onClick={() => !isYearLocked && setSelectedYear((prev) => (prev ?? 2026) + 1)} className={`px-2 py-1 ${theme === 'retro' ? 'bg-[var(--bg-panel)] text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'} rounded`}>+1</button>
-                <button onClick={() => !isYearLocked && setSelectedYear((prev) => (prev ?? 2026) + 10)} className={`px-2 py-1 ${theme === 'retro' ? 'bg-[var(--bg-panel)] text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'} rounded`}>+10</button>
+                <button onClick={() => !isYearLocked && setSelectedTimeAnchor(String((selectedYear ?? 2026) + 1))} className={`px-2 py-1 ${theme === 'retro' ? 'bg-[var(--bg-panel)] text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'} rounded`}>+1</button>
+                <button onClick={() => !isYearLocked && setSelectedTimeAnchor(String((selectedYear ?? 2026) + 10))} className={`px-2 py-1 ${theme === 'retro' ? 'bg-[var(--bg-panel)] text-[var(--text-muted)] hover:text-[var(--text-main)]' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'} rounded`}>+10</button>
               </div>
               <span>2300</span>
             </div>
@@ -1430,7 +1438,7 @@ export const TheSkinSidebar: React.FC<TheSkinSidebarProps> = ({
 
                 {/* Fragment A: SUR3+SUR2 — World Setting (smart grammar) */}
                 {(() => {
-                  const hasTime = selectedYear !== null || selectedCountry !== '';
+                  const hasTime = selectedTimeAnchor !== '' || selectedCountry !== '';
                   const hasEra = hasBlockValue(['skin_era']);
                   const showFragment = summaryExpanded || hasTime || hasEra;
                   if (!showFragment) return null;

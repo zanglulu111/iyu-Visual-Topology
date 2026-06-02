@@ -4,7 +4,7 @@
 // 目标：降低结构过载、结项倒推、三案同构和记录媒介塌缩。
 // ============================================================================
 
-import { NarrativeFieldState, WorldLawConfig, FaceState, PromptFocusState, MAxisMixerState, M7BResidueIntensity } from '../types';
+import { LibraryItemDef, NarrativeFieldState, WorldLawConfig, FaceState, PromptFocusState, MAxisMixerState, M7BResidueIntensity } from '../types';
 import { SV1_DATA } from '../data/engine_sv/SV1';
 import { SV2_DATA } from '../data/engine_sv/SV2';
 import { DEFAULT_SV1_STRUCTURE_NAME, DEFAULT_SV2_VOLUME_NAME } from '../data/engine_sv/defaults';
@@ -25,7 +25,7 @@ import {
   buildAttentionControllerProtocol,
 } from './promptV3';
 
-const pickDefinition = <T extends { id: string; name: string; aliases?: string[] }>(items: T[], raw: string): T | undefined => {
+const pickDefinition = <T extends Pick<LibraryItemDef, 'id' | 'name' | 'aliases' | 'def' | 'core' | 'skeletons'>>(items: readonly T[], raw: string): T | undefined => {
   if (!raw) return undefined;
   return items.find(item => raw.includes(item.name) || raw === item.id || item.aliases?.some(alias => raw.includes(alias)));
 };
@@ -37,7 +37,7 @@ const DEFAULT_SV1_SKELETONS = [
   'resolution_余痕收束',
 ];
 
-const buildJsonShape = (keys: string[]): string => keys.map(key => `"${key}": "..."`).join(', ');
+const buildJsonShape = (keys: readonly string[]): string => keys.map(key => `"${key}": "..."`).join(', ');
 
 const getSkeletonLabel = (key: string): string => {
   const parts = key.split('_');

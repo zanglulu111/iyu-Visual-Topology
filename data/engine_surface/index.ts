@@ -1,5 +1,6 @@
 export { SUR1_DATA } from './SUR1';
 export { SUR2_DATA } from './SUR2';
+export { SUR3_DATA } from './SUR3';
 export { SUR4_DATA } from './SUR4';
 export { SUR5_DATA } from './SUR5';
 export { SUR6_DATA } from './SUR6';

@@ -23,6 +23,8 @@ import {
     M7BResidueIntensity,
     NarrativePromptVersion,
     VisionImageUseMode,
+    ConceptDesignRuntimeState,
+    ConceptDesignWorkspacePage,
     MistProject,
     ProjectWorkspaceSnapshot,
     ArchiveSource,
@@ -30,14 +32,14 @@ import {
 } from './types';
 import {
     DRIVERS,
-    NARRATIVE_ENGINE_BLOCKS, COMMERCIAL_ENGINE_BLOCKS, EXPERIMENTAL_ENGINE_BLOCKS, AESTHETIC_ENGINE_BLOCKS, TRAILER_ENGINE_BLOCKS,
+    NARRATIVE_ENGINE_BLOCKS, COMMERCIAL_ENGINE_BLOCKS, EXPERIMENTAL_ENGINE_BLOCKS, AESTHETIC_ENGINE_BLOCKS, CONCEPT_ENGINE_BLOCKS, TRAILER_ENGINE_BLOCKS,
     ALL_SKIN_BLOCKS, COMM_SKIN_BLOCKS, EXPERIMENTAL_SKIN_BLOCKS, TRAILER_SKIN_BLOCKS,
     BLOCK_LIMITS,
     RANDOM_RANGES,
     AES_COLOR_PRESETS,
-    NARRATIVE_ENGINE_LIBRARY, COMMERCIAL_ENGINE_LIBRARY, EXPERIMENTAL_ENGINE_LIBRARY, AESTHETIC_ENGINE_LIBRARY, TRAILER_ENGINE_LIBRARY,
+    NARRATIVE_ENGINE_LIBRARY, COMMERCIAL_ENGINE_LIBRARY, EXPERIMENTAL_ENGINE_LIBRARY, AESTHETIC_ENGINE_LIBRARY, CONCEPT_ENGINE_LIBRARY, TRAILER_ENGINE_LIBRARY,
     COMM_SKIN_LIBRARY, EXPERIMENTAL_SKIN_LIBRARY, TRAILER_SKIN_LIBRARY, SKIN_LIBRARY, GENRE_CATEGORIES, WORLD_MOTIF_CATEGORIES,
-    COUNTRY_PRESETS
+    getRandomSur3CoordinatePreset
 } from './constants';
 import { MASTER_PRESETS } from './data/aesthetic/master_presets';
 import * as geminiService from './services/geminiService';
@@ -58,10 +60,11 @@ const queryClient = new QueryClient({
 });
 
 const isNoShiftEntryDriver = (driver: DriverType | null) =>
-    driver === DriverType.COMMERCIAL || driver === DriverType.SUTURE || driver === DriverType.AESTHETIC || driver === DriverType.NARRATIVE || driver === DriverType.TRAILER || driver === DriverType.EXPERIMENTAL;
+    driver === DriverType.COMMERCIAL || driver === DriverType.SUTURE || driver === DriverType.AESTHETIC || driver === DriverType.CONCEPT_DESIGN || driver === DriverType.NARRATIVE || driver === DriverType.TRAILER || driver === DriverType.EXPERIMENTAL;
 import { supabase } from './services/supabaseAuth';
 import { generateGlobalDump } from './utils/exportUtils';
 import { generateAestheticPrompt } from './utils/promptUtils';
+import { generateConceptDesignPrompt } from './utils/conceptDesignPrompt';
 import { getBlockName } from './utils/blockUtils';
 import { findItemDetails, findItemFull } from './services/dataRegistry';
 import { generateAestheticReverse } from './services/aestheticReverseService';
@@ -72,24 +75,68 @@ import { supabaseDatabase } from './services/supabaseDatabase';
 import { useSettings } from './contexts/SettingsContext';
 import { useTheme } from './contexts/ThemeContext';
 import { BorromeanRings } from './components/BorromeanRings';
+import { TaskManagerPanel } from './components/TaskManagerPanel';
 
-const NarrativeEngineField = React.lazy(() => import('./components/NarrativeEngineField').then(module => ({ default: module.NarrativeEngineField })));
-const BlueprintEditor = React.lazy(() => import('./components/BlueprintEditor').then(module => ({ default: module.BlueprintEditor })));
+const loadNarrativeEngineField = () => import('./components/NarrativeEngineField').then(module => ({ default: module.NarrativeEngineField }));
+const loadBlueprintEditor = () => import('./components/BlueprintEditor').then(module => ({ default: module.BlueprintEditor }));
+const loadNarrativePathsView = () => import('./components/NarrativePathsView').then(module => ({ default: module.NarrativePathsView }));
+const loadMetonymyView = () => import('./components/blueprint/MetonymyView').then(module => ({ default: module.MetonymyView }));
+const loadAppHeader = () => import('./components/AppHeader').then(module => ({ default: module.AppHeader }));
+const loadEngineBottomBar = () => import('./components/EngineBottomBar').then(module => ({ default: module.EngineBottomBar }));
+const loadLandingView = () => import('./components/LandingView').then(module => ({ default: module.LandingView }));
+const loadGlobalHomePage = () => import('./components/GlobalHomePage').then(module => ({ default: module.GlobalHomePage }));
+
+const WORKFLOW_VIEW_MODES = new Set<ViewMode>(['ENGINE', 'DIVERGENCE', 'BIBLE', 'METONYMY']);
+
+const getDriverEntryViewMode = (id: DriverType): ViewMode => (
+    id === DriverType.TRAILER ? 'CANVAS' : id === DriverType.EXPERIMENTAL ? 'METONYMY' : 'ENGINE'
+);
+
+const preloadNarrativeWorkflowViews = () => {
+    void loadAppHeader();
+    void loadEngineBottomBar();
+    void loadNarrativeEngineField();
+    void loadNarrativePathsView();
+    void loadBlueprintEditor();
+    void loadMetonymyView();
+};
+
+const preloadWorkflowViewMode = (mode: ViewMode) => {
+    void loadAppHeader();
+    if (mode === 'ENGINE') {
+        void loadEngineBottomBar();
+        void loadNarrativeEngineField();
+    } else if (mode === 'DIVERGENCE') {
+        void loadNarrativePathsView();
+    } else if (mode === 'BIBLE') {
+        void loadBlueprintEditor();
+    } else if (mode === 'METONYMY') {
+        void loadEngineBottomBar();
+        void loadMetonymyView();
+    }
+};
+
+const preloadCoreDriverLanding = () => {
+    void loadLandingView();
+    preloadWorkflowViewMode('ENGINE');
+};
+
+const NarrativeEngineField = React.lazy(loadNarrativeEngineField);
+const BlueprintEditor = React.lazy(loadBlueprintEditor);
 const AnalysisView = React.lazy(() => import('./components/blueprint/AnalysisView').then(module => ({ default: module.AnalysisView })));
 const HistoryModal = React.lazy(() => import('./components/HistoryModal').then(module => ({ default: module.HistoryModal })));
-const NarrativePathsView = React.lazy(() => import('./components/NarrativePathsView').then(module => ({ default: module.NarrativePathsView })));
+const NarrativePathsView = React.lazy(loadNarrativePathsView);
 const NarrativeLibraryModal = React.lazy(() => import('./components/NarrativeLibraryModal').then(module => ({ default: module.NarrativeLibraryModal })));
 const TensionMonitorModal = React.lazy(() => import('./components/TensionMonitorModal').then(module => ({ default: module.TensionMonitorModal })));
-const MetonymyView = React.lazy(() => import('./components/blueprint/MetonymyView').then(module => ({ default: module.MetonymyView })));
+const MetonymyView = React.lazy(loadMetonymyView);
 const MistCanvasEngine = React.lazy(() => import('./components/canvas/MistCanvasEngine').then(module => ({ default: module.MistCanvasEngine })));
 const AuthModal = React.lazy(() => import('./components/AuthModal').then(module => ({ default: module.AuthModal })));
 const UserProfileModal = React.lazy(() => import('./components/UserProfileModal').then(module => ({ default: module.UserProfileModal })));
-const AppHeader = React.lazy(() => import('./components/AppHeader').then(module => ({ default: module.AppHeader })));
-const EngineBottomBar = React.lazy(() => import('./components/EngineBottomBar').then(module => ({ default: module.EngineBottomBar })));
-const TaskManagerPanel = React.lazy(() => import('./components/TaskManagerPanel').then(module => ({ default: module.TaskManagerPanel })));
+const AppHeader = React.lazy(loadAppHeader);
+const EngineBottomBar = React.lazy(loadEngineBottomBar);
 const ProjectSystemModal = React.lazy(() => import('./components/ProjectSystemModal').then(module => ({ default: module.ProjectSystemModal })));
-const LandingView = React.lazy(() => import('./components/LandingView').then(module => ({ default: module.LandingView })));
-const GlobalHomePage = React.lazy(() => import('./components/GlobalHomePage').then(module => ({ default: module.GlobalHomePage })));
+const LandingView = React.lazy(loadLandingView);
+const GlobalHomePage = React.lazy(loadGlobalHomePage);
 const VisionSidebar = React.lazy(() => import('./components/VisionSidebar').then(module => ({ default: module.VisionSidebar })));
 const TheSkinSidebar = React.lazy(() => import('./components/TheSkinSidebar').then(module => ({ default: module.TheSkinSidebar })));
 const AestheticInputSidebar = React.lazy(() => import('./components/AestheticInputSidebar').then(module => ({ default: module.AestheticInputSidebar })));
@@ -102,8 +149,11 @@ const VideoLibrary = React.lazy(() => import('./components/VideoLibrary').then(m
 const PhilosopherPosterIndexPage = React.lazy(() => import('./components/PhilosopherPosterIndexPage').then(module => ({ default: module.PhilosopherPosterIndexPage })));
 const MistLexiconLandingPage = React.lazy(() => import('./components/MistLexiconLandingPage').then(module => ({ default: module.MistLexiconLandingPage })));
 const RorschachView = React.lazy(() => import('./components/RorschachView').then(module => ({ default: module.RorschachView })));
+const PromptSkillLibrary = React.lazy(() => import('./components/PromptSkillLibrary').then(module => ({ default: module.PromptSkillLibrary })));
+const PromptArchivePage = React.lazy(() => import('./components/PromptArchivePage').then(module => ({ default: module.default })));
 
 const DEFAULT_WORLD_LAW_CONFIG: WorldLawConfig = normalizeWorldLawConfig({ gravity: 2 });
+const WORLD_LAW_LOCK_ID = 'world_law';
 
 const shouldApplyNarrativeSvDefaults = (driver: DriverType | null | undefined) => (
     !driver || driver === DriverType.NARRATIVE
@@ -229,6 +279,7 @@ const App: React.FC = () => {
     const [portalTransition, setPortalTransition] = useState<'to-engine' | 'to-portal' | null>(null);
     const [lang, setLang] = useState<'CN' | 'EN'>('CN');
     const [viewMode, setViewMode] = useState<ViewMode>('ENGINE');
+    const [conceptWorkspacePage, setConceptWorkspacePage] = useState<ConceptDesignWorkspacePage>('ENGINE');
     const [selectedDriver, setSelectedDriver] = useState<DriverType | null>(null);
     const [initialProtocol, setInitialProtocol] = useState<string | undefined>(undefined);
     const [hideSidebar, setHideSidebar] = useState(false);
@@ -239,7 +290,6 @@ const App: React.FC = () => {
     const [lockedTags, setLockedTags] = useState<Record<string, string[]>>({});
     const [undoRedoState, undoRedoDispatch] = useReducer(undoRedoReducer, { past: [], present: withDefaultSvSelections({} as NarrativeFieldState), future: [] });
     const narrativeFieldState = undoRedoState.present;
-    const [savedFieldStates, setSavedFieldStates] = useState<Record<string, NarrativeFieldState>>({});
     const [faceState, setFaceState] = useState<FaceState>({});
     const [focusState, setFocusState] = useState<PromptFocusState>({});
     const [mAxisMixer, setMAxisMixer] = useState<MAxisMixerState>({});
@@ -249,6 +299,38 @@ const App: React.FC = () => {
     const [ringAnimClass, setRingAnimClass] = useState(showRings ? 'animate-ring-entrance' : 'opacity-0');
     const [ringAnimKey, setRingAnimKey] = useState(0);
     const lastShowRingsRef = useRef(showRings);
+
+    useEffect(() => {
+        const win = window as Window & {
+            requestIdleCallback?: (callback: IdleRequestCallback, options?: IdleRequestOptions) => number;
+            cancelIdleCallback?: (handle: number) => void;
+        };
+
+        if (portalTransition === 'to-engine' || page === 0) {
+            preloadCoreDriverLanding();
+
+            const preloadRest = () => preloadNarrativeWorkflowViews();
+            if (win.requestIdleCallback) {
+                const idleId = win.requestIdleCallback(preloadRest, { timeout: 900 });
+                return () => win.cancelIdleCallback?.(idleId);
+            }
+
+            const timer = window.setTimeout(preloadRest, 240);
+            return () => window.clearTimeout(timer);
+        }
+
+        if (page !== 1 && !WORKFLOW_VIEW_MODES.has(viewMode)) return;
+
+        const preload = () => preloadNarrativeWorkflowViews();
+
+        if (win.requestIdleCallback) {
+            const idleId = win.requestIdleCallback(preload, { timeout: 1200 });
+            return () => win.cancelIdleCallback?.(idleId);
+        }
+
+        const timer = window.setTimeout(preload, 120);
+        return () => window.clearTimeout(timer);
+    }, [page, viewMode, portalTransition]);
 
     useEffect(() => {
         // Handle page transition exit animation
@@ -341,16 +423,6 @@ const App: React.FC = () => {
             document.documentElement.style.setProperty('--mist-archive-signal-shadow', `rgba(${rgb}, 0.18)`);
         }
     }, [selectedDriver, theme]);
-
-    // Sync savedFieldStates whenever the present state changes
-    useEffect(() => {
-        if (selectedDriver) {
-            setSavedFieldStates(prev => {
-                if (prev[selectedDriver] === undoRedoState.present) return prev;
-                return { ...prev, [selectedDriver]: undoRedoState.present };
-            });
-        }
-    }, [undoRedoState.present, selectedDriver]);
 
     useEffect(() => {
         return () => clearPortalTransitionTimers();
@@ -488,6 +560,8 @@ const App: React.FC = () => {
     const [globalCopied, setGlobalCopied] = useState(false);
     const [isTaskManagerOpen, setIsTaskManagerOpen] = useState(false);
     const [isTensionOpen, setIsTensionOpen] = useState(false);
+    const [conceptRuntimeState, setConceptRuntimeState] = useState<ConceptDesignRuntimeState | null>(null);
+    const lastConceptArchiveSignatureRef = useRef<string>('');
 
     useEffect(() => {
         if (isSettingsOpen) {
@@ -646,6 +720,7 @@ const App: React.FC = () => {
         focusState: { ...focusState },
         mAxisMixer: { ...mAxisMixer },
         m7bIntensity,
+        conceptRuntimeState,
         treatments: generatedTreatments,
         activeBlueprint,
         metonymyBlueprint,
@@ -735,6 +810,7 @@ const App: React.FC = () => {
         setFocusState((snapshot as any).focusState || {});
         setMAxisMixer(snapshot.mAxisMixer || {});
         setM7bIntensity(snapshot.m7bIntensity || 'light');
+        setConceptRuntimeState(snapshot.conceptRuntimeState || null);
         setGeneratedTreatments(snapshot.treatments || []);
         setActiveBlueprint(snapshot.activeBlueprint || null);
         setMetonymyBlueprint(snapshot.metonymyBlueprint || null);
@@ -850,6 +926,9 @@ const App: React.FC = () => {
         const snapshotFocusState = primaryBlueprint?.generationFocusState ?? activeHistoryItem?.focusState ?? { ...focusState };
         const snapshotMAxisMixer = primaryBlueprint?.generationMAxisMixer ?? activeHistoryItem?.mAxisMixer ?? { ...mAxisMixer };
         const snapshotM7BIntensity = primaryBlueprint?.generationM7BIntensity ?? activeHistoryItem?.m7bIntensity ?? m7bIntensity;
+        const snapshotConceptRuntimeState = (selectedDriver === DriverType.CONCEPT_DESIGN || activeHistoryItem?.driverId === DriverType.CONCEPT_DESIGN)
+            ? (conceptRuntimeState || activeHistoryItem?.conceptRuntimeState || null)
+            : null;
         const snapshotTreatments = activeHistoryItem?.treatments?.length ? activeHistoryItem.treatments : generatedTreatments;
         const savedBlueprints = bibleBlueprint
             ? { ...(activeHistoryItem?.savedBlueprints || {}), [bibleBlueprint.treatmentId]: bibleBlueprint }
@@ -879,6 +958,7 @@ const App: React.FC = () => {
             focusState: { ...snapshotFocusState },
             mAxisMixer: { ...snapshotMAxisMixer },
             m7bIntensity: snapshotM7BIntensity,
+            conceptRuntimeState: snapshotConceptRuntimeState,
             blueprint: primaryBlueprint,
             metonymyBlueprint: scriptBlueprint,
             treatments: snapshotTreatments,
@@ -919,6 +999,64 @@ const App: React.FC = () => {
             }
         );
         return nextItem;
+    };
+
+    const handleConceptRuntimeChange = (state: ConceptDesignRuntimeState, persist = false) => {
+        setConceptRuntimeState(state);
+        if (!persist || selectedDriver !== DriverType.CONCEPT_DESIGN) return;
+
+        const signature = [
+            state.sourceMode,
+            state.sourceLabel,
+            state.variables.characterSeed,
+            state.finalPrompt
+        ].join('|');
+        if (lastConceptArchiveSignatureRef.current === signature) return;
+        lastConceptArchiveSignatureRef.current = signature;
+
+        const now = new Date().toISOString();
+        const newItem: HistoryItem = {
+            id: Date.now(),
+            projectId: activeProjectId || undefined,
+            archiveSource: 'AI_SNAPSHOT',
+            archiveReason: 'STORY_GENERATED',
+            date: now,
+            type: 'NARRATIVE',
+            driverId: DriverType.CONCEPT_DESIGN,
+            driverName: lang === 'CN' ? '迷雾律令' : 'MIST EDICT',
+            fieldState: { ...narrativeFieldState },
+            worldLaw: normalizeWorldLawConfig(worldLawConfig),
+            visionInput,
+            visionAnalysis,
+            visionImage,
+            visionImageNote,
+            visionImageMode,
+            visionImplantEnabled,
+            subjectType,
+            aestheticMode,
+            colorPalette: [...colorPalette],
+            faceState: { ...faceState },
+            focusState: { ...focusState },
+            mAxisMixer: { ...mAxisMixer },
+            m7bIntensity,
+            conceptRuntimeState: state,
+            blueprint: null,
+            treatments: [],
+            savedBlueprints: {}
+        };
+        addHistoryItem(newItem);
+        setActiveHistoryItem(newItem);
+        saveProjectShell(
+            {
+                activeHistoryId: newItem.id,
+                title: inferProjectTitle(state.variables.characterSeed || state.sourceLabel || '迷雾律令'),
+                lastSavedAt: now
+            },
+            {
+                activeHistoryItem: newItem,
+                conceptRuntimeState: state
+            }
+        );
     };
 
     const openAuth = () => { setIsAuthOpen(true); closeAllModals(); };
@@ -978,18 +1116,28 @@ const App: React.FC = () => {
     };
 
     const handleViewChange = (viewMode: ViewMode) => {
-        setIsTaskManagerOpen(false);
-        if (viewMode === 'DICTIONARY') {
-            setCodexDictionary('MIST');
-            setCodexSection('CONCEPTS');
-            setCodexDetailTab('DEFINITION');
+        preloadWorkflowViewMode(viewMode);
+        const applyViewChange = () => {
+            setIsTaskManagerOpen(false);
+            if (viewMode === 'DICTIONARY') {
+                setCodexDictionary('MIST');
+                setCodexSection('CONCEPTS');
+                setCodexDetailTab('DEFINITION');
+            }
+            setViewMode(viewMode);
+            if (viewMode === 'DIVERGENCE' || viewMode === 'BIBLE' || viewMode === 'METONYMY' || viewMode === 'CANVAS' || viewMode === 'TOPOLOGY') {
+                setIsVisionOpen(false);
+                setIsSkinOpen(false);
+                setIsAestheticInputOpen(false);
+            }
+        };
+
+        if (WORKFLOW_VIEW_MODES.has(viewMode)) {
+            React.startTransition(applyViewChange);
+            return;
         }
-        setViewMode(viewMode);
-        if (viewMode === 'DIVERGENCE' || viewMode === 'BIBLE' || viewMode === 'METONYMY' || viewMode === 'CANVAS' || viewMode === 'TOPOLOGY') {
-            setIsVisionOpen(false);
-            setIsSkinOpen(false);
-            setIsAestheticInputOpen(false);
-        }
+
+        applyViewChange();
     };
 
     const clearPortalTransitionTimers = () => {
@@ -1002,8 +1150,11 @@ const App: React.FC = () => {
     };
 
     const beginPortalToEngineTransition = () => {
+        preloadCoreDriverLanding();
         clearPortalTransitionTimers();
-        setPortalTransition('to-engine');
+        React.startTransition(() => {
+            setPortalTransition('to-engine');
+        });
         portalTransitionTimersRef.current[0] = window.setTimeout(() => {
             setPage(0);
             setViewMode('ENGINE');
@@ -1103,55 +1254,83 @@ const App: React.FC = () => {
         }
     };
 
-    const handleDriverSelect = (id: DriverType) => {
-        setIsTaskManagerOpen(false);
-        setSelectedDriver(id);
-        setPage(1);
-        setViewMode(id === DriverType.TRAILER ? 'CANVAS' : id === DriverType.EXPERIMENTAL ? 'METONYMY' : 'ENGINE');
-        setLockedModules({});
-        setLockedTags({});
-        const newFieldState = normalizeNarrativeFieldState(savedFieldStates[id] || {}, id);
-        undoRedoDispatch({ type: 'SET', state: newFieldState });
-        setActiveHistoryItem(null);
-        setGeneratedTreatments([]);
-        setActiveBlueprint(null);
-        setCachedBlueprints({});
-        setWorldLawConfig(DEFAULT_WORLD_LAW_CONFIG);
+    const preloadDriverSelection = (id: DriverType) => {
+        const nextViewMode = getDriverEntryViewMode(id);
+        preloadWorkflowViewMode(nextViewMode);
+        if (nextViewMode === 'ENGINE') {
+            preloadCoreDriverLanding();
+        }
+    };
 
-        // All modes: close sidebars by default as per user request
-        setIsSkinOpen(false);
-        setIsVisionOpen(false);
-        setIsAestheticInputOpen(false);
-        if (id === DriverType.AESTHETIC) {
-            // Ensure palette is clean for new aesthetic session
+    const handleDriverSelect = (id: DriverType) => {
+        const nextViewMode = getDriverEntryViewMode(id);
+        preloadDriverSelection(id);
+        const applyDriverSelection = () => {
+            setIsTaskManagerOpen(false);
+            setSelectedDriver(id);
+            setPage(1);
+            setViewMode(nextViewMode);
+            setConceptWorkspacePage('ENGINE');
+            setLockedModules({});
+            setLockedTags({});
+            undoRedoDispatch({ type: 'SET', state: normalizeNarrativeFieldState({}, id) });
+            setActiveHistoryItem(null);
+            setGeneratedTreatments([]);
+            setActiveBlueprint(null);
+            setMetonymyBlueprint(null);
+            setCachedBlueprints({});
+            setWorldLawConfig(DEFAULT_WORLD_LAW_CONFIG);
+            setVisionInput('');
+            setVisionAnalysis('');
+            setVisionImage(null);
+            setVisionImageNote('');
+            setVisionImageMode('auto');
+            setVisionImplantEnabled(true);
+            setVisionCandidateState({});
+            setFaceState({});
+            setFocusState({});
+            setMAxisMixer({});
+            setM7bIntensity('light');
             setColorPalette(Array(7).fill(""));
+
+            // All modes: close sidebars by default as per user request
+            setIsSkinOpen(false);
+            setIsVisionOpen(false);
+            setIsAestheticInputOpen(false);
+            if (id === DriverType.EXPERIMENTAL) {
+                const customBlueprint: CreativeBlueprint = {
+                    treatmentId: `custom_story_${Date.now()}`,
+                    driverType: DriverType.EXPERIMENTAL,
+                    styleName: lang === 'EN' ? 'Story Translation Mode' : '故事转译模式',
+                    narrative: {
+                        title: lang === 'EN' ? 'Custom Story' : '自定义故事',
+                        logline: lang === 'EN' ? 'Paste a complete story and translate it into a screenplay.' : '粘贴完整故事，并转译为电影脚本。',
+                        synopsis: ''
+                    },
+                    context: {
+                        world: '',
+                        tone: '',
+                        colorPalette: [],
+                        moodboard: { prompt: '', images: [], selectedImageId: null }
+                    },
+                    assets: { characters: [], locations: [], props: [] },
+                    metonymyData: {
+                        screenplay: [],
+                        staticStoryboard: [],
+                        dynamicScript: []
+                    }
+                };
+                setMetonymyBlueprint(customBlueprint);
+            }
+            closeAllModals();
+        };
+
+        if (WORKFLOW_VIEW_MODES.has(nextViewMode)) {
+            React.startTransition(applyDriverSelection);
+            return;
         }
-        if (id === DriverType.EXPERIMENTAL) {
-            const customBlueprint: CreativeBlueprint = {
-                treatmentId: `custom_story_${Date.now()}`,
-                driverType: DriverType.EXPERIMENTAL,
-                styleName: lang === 'EN' ? 'Story Translation Mode' : '故事转译模式',
-                narrative: {
-                    title: lang === 'EN' ? 'Custom Story' : '自定义故事',
-                    logline: lang === 'EN' ? 'Paste a complete story and translate it into a screenplay.' : '粘贴完整故事，并转译为电影脚本。',
-                    synopsis: ''
-                },
-                context: {
-                    world: '',
-                    tone: '',
-                    colorPalette: [],
-                    moodboard: { prompt: '', images: [], selectedImageId: null }
-                },
-                assets: { characters: [], locations: [], props: [] },
-                metonymyData: {
-                    screenplay: [],
-                    staticStoryboard: [],
-                    dynamicScript: []
-                }
-            };
-            setMetonymyBlueprint(customBlueprint);
-        }
-        closeAllModals();
+
+        applyDriverSelection();
     };
 
     const getDriverName = () => {
@@ -1356,10 +1535,17 @@ const App: React.FC = () => {
 
     const handleGlobalRandomize = () => {
         if (!selectedDriver) return;
+        if (selectedDriver === DriverType.CONCEPT_DESIGN) {
+            const newState = randomizerService.randomizeFormulaState(selectedDriver, narrativeFieldState, lockedModules, lockedTags, subjectType, aestheticMode);
+            updateNarrativeState(newState);
+            return;
+        }
         const newState = randomizerService.generateGlobalRandomState(selectedDriver, narrativeFieldState, lockedModules, lockedTags);
         updateNarrativeState(newState);
         randomizeNarrativeGenerationControls(newState, 'global');
-        setWorldLawConfig(prev => randomizerService.randomizeWorldLawConfig(prev));
+        if (!lockedModules[WORLD_LAW_LOCK_ID]) {
+            setWorldLawConfig(prev => randomizerService.randomizeWorldLawConfig(prev));
+        }
         ensureFacesForTags(Object.values(newState).flat());
     };
 
@@ -1414,7 +1600,9 @@ const App: React.FC = () => {
     };
 
     const handleCopyAestheticPrompt = () => {
-        const prompt = generateAestheticPrompt(narrativeFieldState, subjectType, lang, customLibraryDefs);
+        const prompt = selectedDriver === DriverType.CONCEPT_DESIGN
+            ? (conceptRuntimeState?.generationInstruction || generateConceptDesignPrompt(narrativeFieldState, lang))
+            : generateAestheticPrompt(narrativeFieldState, subjectType, lang, customLibraryDefs);
         navigator.clipboard.writeText(prompt);
         setPromptCopied(true);
         setTimeout(() => setPromptCopied(false), 2000);
@@ -1539,6 +1727,7 @@ const App: React.FC = () => {
         let fullLibrary: any[] = [];
         if (selectedDriver === DriverType.COMMERCIAL) fullLibrary = [...COMMERCIAL_ENGINE_LIBRARY, ...COMM_SKIN_LIBRARY];
         else if (selectedDriver === DriverType.AESTHETIC) fullLibrary = [...AESTHETIC_ENGINE_LIBRARY, ...SKIN_LIBRARY];
+        else if (selectedDriver === DriverType.CONCEPT_DESIGN) fullLibrary = [...CONCEPT_ENGINE_LIBRARY];
         else if (selectedDriver === DriverType.EXPERIMENTAL) fullLibrary = [...EXPERIMENTAL_ENGINE_LIBRARY, ...EXPERIMENTAL_SKIN_LIBRARY];
         else if (selectedDriver === DriverType.TRAILER) fullLibrary = [...TRAILER_ENGINE_LIBRARY, ...TRAILER_SKIN_LIBRARY];
         else fullLibrary = [...NARRATIVE_ENGINE_LIBRARY, ...SKIN_LIBRARY, ...GENRE_CATEGORIES, ...WORLD_MOTIF_CATEGORIES];
@@ -1606,13 +1795,7 @@ const App: React.FC = () => {
             const targetCount = getSingleRandomTargetCount(blockId, keptTags.length, count);
             const needed = Math.max(0, targetCount - keptTags.length);
             const available = availableItems.filter(i => !keptTags.includes(i.name));
-            const selected: string[] = [];
-            for (let i = 0; i < needed; i++) {
-                if (available.length === 0) break;
-                const idx = Math.floor(Math.random() * available.length);
-                selected.push(available[idx].name);
-                available.splice(idx, 1);
-            }
+            const selected = randomizerService.pickRandomItemsForBlock(blockId, available, needed, newState).map(item => item.name);
             newState[blockId] = [...keptTags, ...selected];
             updateNarrativeState(newState);
             pruneTagLocksToVisibleState([blockId], newState);
@@ -1628,6 +1811,42 @@ const App: React.FC = () => {
         // For each participating block, randomize it individually
         const summaryBlocks = ['skin_genre', 'skin_era', 'skin_society', 'skin_age', 'skin_gender', 'skin_profession', 'sur10x', 'skin_ideology', 'skin_everything', 'skin_location', 'skin_ending'];
         const newState = { ...narrativeFieldState };
+        const shouldRandomizeYear = participants.has('skin_year_exact') && !lockedModules['skin_year_exact'];
+        const shouldRandomizeSpace = participants.has('skin_country_exact') && !lockedModules['skin_country_exact'];
+        const coordinatePreset = (shouldRandomizeYear || shouldRandomizeSpace)
+            ? getRandomSur3CoordinatePreset()
+            : null;
+
+        if (!lockedModules['skin_year_exact']) {
+            const locks = getVisibleLockedTags('skin_year_exact');
+            const keptTags = (newState['skin_year_exact'] || []).filter(t => locks.includes(t));
+            if (participants.has('skin_year_exact')) {
+                if (keptTags.length > 0) {
+                    newState['skin_year_exact'] = keptTags;
+                } else {
+                    newState['skin_year_exact'] = coordinatePreset?.timeMode === 'era'
+                        ? [coordinatePreset.time || '']
+                        : coordinatePreset?.year === null || coordinatePreset?.year === undefined
+                        ? []
+                        : [coordinatePreset.year.toString()];
+                }
+            } else {
+                newState['skin_year_exact'] = keptTags;
+            }
+        }
+        if (!lockedModules['skin_country_exact']) {
+            const locks = getVisibleLockedTags('skin_country_exact');
+            const keptTags = (newState['skin_country_exact'] || []).filter(t => locks.includes(t));
+            if (participants.has('skin_country_exact')) {
+                if (keptTags.length > 0) {
+                    newState['skin_country_exact'] = keptTags;
+                } else {
+                    newState['skin_country_exact'] = coordinatePreset ? [coordinatePreset.spaceCn] : [];
+                }
+            } else {
+                newState['skin_country_exact'] = keptTags;
+            }
+        }
 
         summaryBlocks.forEach(blockId => {
             if (lockedModules[blockId]) return;
@@ -1735,46 +1954,10 @@ const App: React.FC = () => {
                 const keptTags = (newState[blockId] || []).filter(t => locks.includes(t));
                 const needed = Math.max(0, targetCount - keptTags.length);
                 const available = availableItems.filter(i => !keptTags.includes(i.name));
-                const selected: string[] = [];
-                for (let i = 0; i < needed; i++) {
-                    if (available.length === 0) break;
-                    const idx = Math.floor(Math.random() * available.length);
-                    selected.push(available[idx].name);
-                    available.splice(idx, 1);
-                }
+                const selected = randomizerService.pickRandomItemsForBlock(blockId, available, needed, newState).map(item => item.name);
                 newState[blockId] = [...keptTags, ...selected];
             }
         });
-
-        // Also handle SUR3 coordinates if they passed the filter
-        if (!lockedModules['skin_year_exact']) {
-            const locks = getVisibleLockedTags('skin_year_exact');
-            const keptTags = (newState['skin_year_exact'] || []).filter(t => locks.includes(t));
-            if (participants.has('skin_year_exact')) {
-                if (keptTags.length > 0) {
-                    newState['skin_year_exact'] = keptTags;
-                } else {
-                    const year = Math.floor(Math.random() * (2050 - (-2000) + 1)) + (-2000);
-                    newState['skin_year_exact'] = [year.toString()];
-                }
-            } else {
-                newState['skin_year_exact'] = keptTags;
-            }
-        }
-        if (!lockedModules['skin_country_exact']) {
-            const locks = getVisibleLockedTags('skin_country_exact');
-            const keptTags = (newState['skin_country_exact'] || []).filter(t => locks.includes(t));
-            if (participants.has('skin_country_exact')) {
-                if (keptTags.length > 0) {
-                    newState['skin_country_exact'] = keptTags;
-                } else {
-                    const r = COUNTRY_PRESETS[Math.floor(Math.random() * COUNTRY_PRESETS.length)];
-                    newState['skin_country_exact'] = [r.cn];
-                }
-            } else {
-                newState['skin_country_exact'] = keptTags;
-            }
-        }
 
         pruneTagLocksToVisibleState([...summaryBlocks, 'skin_year_exact', 'skin_country_exact'], newState);
         updateNarrativeState(newState);
@@ -2071,7 +2254,6 @@ const App: React.FC = () => {
             setIsVisionOpen(false);
             setIsAestheticInputOpen(false);
         } else {
-            if (selectedDriver) setSavedFieldStates(prev => ({ ...prev, [selectedDriver]: narrativeFieldState }));
             setPage(0);
             setActiveHistoryItem(null);
             closeAllModals();
@@ -2094,6 +2276,7 @@ const App: React.FC = () => {
             if (selectedDriver === DriverType.COMMERCIAL) return lang === 'EN' ? "SUTURE DESIRE" : "缝合欲望";
             if (selectedDriver === DriverType.EXPERIMENTAL) return lang === 'EN' ? "TRANSLATE STORY" : "转译故事";
             if (selectedDriver === DriverType.AESTHETIC) return lang === 'EN' ? "GENERATE AESTHETIC" : "生成美学";
+            if (selectedDriver === DriverType.CONCEPT_DESIGN) return lang === 'EN' ? "COMPILE EDICT" : "编译律令";
             if (selectedDriver === DriverType.TRAILER) return lang === 'EN' ? "CUT TRAILER" : "剪辑预告";
             return lang === 'EN' ? "GENERATE DIVERGENCES" : "生成分歧点";
         })();
@@ -2153,6 +2336,7 @@ const App: React.FC = () => {
                     focusState: { ...focusState },
                     mAxisMixer: { ...mAxisMixer },
                     m7bIntensity,
+                    conceptRuntimeState: selectedDriver === DriverType.CONCEPT_DESIGN ? conceptRuntimeState : null,
                     blueprint: null,
                     treatments: treatmentsWithIds,
                     savedBlueprints: {}
@@ -2208,6 +2392,7 @@ const App: React.FC = () => {
     };
 
     const handleOpenMetonymyPage = () => {
+        preloadWorkflowViewMode('METONYMY');
         const sourceBlueprint = activeBlueprint || null;
         const nextBlueprint = sourceBlueprint
             ? {
@@ -2284,6 +2469,9 @@ const App: React.FC = () => {
         const snapshotFocusState = (blueprint as any).generationFocusState ?? activeHistoryItem?.focusState ?? { ...focusState };
         const snapshotMAxisMixer = blueprint.generationMAxisMixer ?? activeHistoryItem?.mAxisMixer ?? { ...mAxisMixer };
         const snapshotM7BIntensity = blueprint.generationM7BIntensity ?? activeHistoryItem?.m7bIntensity ?? m7bIntensity;
+        const snapshotConceptRuntimeState = (selectedDriver === DriverType.CONCEPT_DESIGN || blueprint.driverType === DriverType.CONCEPT_DESIGN || activeHistoryItem?.driverId === DriverType.CONCEPT_DESIGN)
+            ? (conceptRuntimeState || activeHistoryItem?.conceptRuntimeState || null)
+            : null;
         const snapshotTreatments = activeHistoryItem?.treatments?.length ? activeHistoryItem.treatments : generatedTreatments;
 
         if (isMetonymy) {
@@ -2312,6 +2500,7 @@ const App: React.FC = () => {
                 focusState: { ...snapshotFocusState },
                 mAxisMixer: { ...snapshotMAxisMixer },
                 m7bIntensity: snapshotM7BIntensity,
+                conceptRuntimeState: snapshotConceptRuntimeState,
                 blueprint: storyBlueprintForItem || blueprint,
                 metonymyBlueprint: blueprint,
                 treatments: snapshotTreatments,
@@ -2359,6 +2548,7 @@ const App: React.FC = () => {
                 focusState: { ...snapshotFocusState },
                 mAxisMixer: { ...snapshotMAxisMixer },
                 m7bIntensity: snapshotM7BIntensity,
+                conceptRuntimeState: snapshotConceptRuntimeState,
                 blueprint,
                 treatments: snapshotTreatments,
                 savedBlueprints: { ...(activeHistoryItem?.savedBlueprints || {}), [blueprint.treatmentId]: blueprint }
@@ -2402,6 +2592,7 @@ const App: React.FC = () => {
             focusState: item.focusState || (item.blueprint as any)?.generationFocusState,
             mAxisMixer: item.mAxisMixer || item.blueprint?.generationMAxisMixer,
             m7bIntensity: item.m7bIntensity || item.blueprint?.generationM7BIntensity,
+            conceptRuntimeState: item.conceptRuntimeState || null,
             metonymyBlueprint: item.metonymyBlueprint || null,
             treatments: item.treatments || [],
             savedBlueprints: item.savedBlueprints || {}
@@ -2430,6 +2621,7 @@ const App: React.FC = () => {
         if ((normalizedItem as any).focusState) setFocusState((normalizedItem as any).focusState);
         setMAxisMixer(normalizedItem.mAxisMixer || {});
         setM7bIntensity(normalizedItem.m7bIntensity || 'light');
+        setConceptRuntimeState(normalizedItem.conceptRuntimeState || null);
 
         if (normalizedItem.type === 'METONYMY') {
             if (normalizedItem.blueprint) setMetonymyBlueprint(normalizedItem.blueprint);
@@ -2559,7 +2751,43 @@ const App: React.FC = () => {
             <div className="relative min-h-screen overflow-hidden bg-[var(--bg-main)] text-zinc-300 font-sans selection:bg-gold-primary/30 selection:text-white transition-colors duration-1000">
                 <div className="relative z-10">
                 <React.Suspense fallback={null}>
-                {location.pathname === '/philosophers' ? (
+                {location.pathname === '/prompt-archive' ? (
+                    <div className="h-screen w-screen overflow-hidden animate-page-dissolve">
+                        <PromptArchivePage
+                            lang={lang}
+                            onClose={() => navigate('/')}
+                        />
+                    </div>
+                ) : location.pathname === '/skills' ? (
+                    <div className="h-screen w-screen overflow-hidden animate-page-dissolve flex flex-col">
+                        <AppHeader
+                            page={page}
+                            lang={lang}
+                            setLang={setLang}
+                            setPage={setPage}
+                            selectedDriver={selectedDriver}
+                            driverName={lang === 'CN' ? '迷雾学派：技能库' : 'MIST: SKILL LIBRARY'}
+                            viewMode="SKILLS"
+                            setViewMode={handleViewChange}
+                            handleOpenMetonymyPage={handleOpenMetonymyPage}
+                            openManual={openManual}
+                            isManualOpen={isManualOpen}
+                            openHistory={openHistory}
+                            isHistoryOpen={isHistoryOpen}
+                            openSettings={openSettings}
+                            openAuth={openAuth}
+                            openProfile={() => setIsProfileOpen(true)}
+                            onLogout={() => supabaseAuthService.signOut()}
+                            currentUser={currentUser}
+                            showRings={showRings}
+                            setShowRings={setShowRings}
+                            onReturnToPortal={() => navigate('/')}
+                        />
+                        <div className="flex-1 overflow-hidden relative">
+                            <PromptSkillLibrary lang={lang} />
+                        </div>
+                    </div>
+                ) : location.pathname === '/philosophers' ? (
                     isAdmin ? (
                         <PhilosopherPosterIndexPage
                             lang={lang}
@@ -2618,6 +2846,7 @@ const App: React.FC = () => {
                                     portalTransition={portalTransition}
                                     selectedDriver={selectedDriver}
                                     onDriverSelect={handleDriverSelect}
+                                    onPreloadDriver={preloadDriverSelection}
                                     hoveredDriver={hoveredDriver}
                                     setHoveredDriver={setHoveredDriver}
                                     handleOpenMetonymyPage={() => {
@@ -2663,6 +2892,7 @@ const App: React.FC = () => {
                         showRings={showRings}
                         setShowRings={setShowRings}
                         onReturnToPortal={beginEngineToPortalTransition}
+                        onPreloadCoreDrivers={preloadCoreDriverLanding}
                     />
                 ) : viewMode === 'DICTIONARY' ? (
                     <div className="h-screen w-screen overflow-hidden animate-page-dissolve">
@@ -2726,6 +2956,7 @@ const App: React.FC = () => {
                             currentUser={currentUser}
                             showRings={showRings}
                             setShowRings={setShowRings}
+                            onReturnToPortal={beginEngineToPortalTransition}
                         />
                         <div className="flex-1 overflow-hidden relative">
                             <div
@@ -2767,6 +2998,7 @@ const App: React.FC = () => {
                             currentUser={currentUser}
                             showRings={showRings}
                             setShowRings={setShowRings}
+                            onReturnToPortal={beginEngineToPortalTransition}
                         />
                         <div className="flex-1 overflow-hidden relative">
                             <div
@@ -2786,6 +3018,35 @@ const App: React.FC = () => {
                                 showRings={showRings}
                                 setShowRings={setShowRings}
                             />
+                        </div>
+                    </div>
+                ) : viewMode === 'SKILLS' ? (
+                    <div className="h-screen w-screen overflow-hidden animate-page-dissolve flex flex-col">
+                        <AppHeader
+                            page={page}
+                            lang={lang}
+                            setLang={setLang}
+                            setPage={setPage}
+                            selectedDriver={selectedDriver}
+                            driverName={lang === 'CN' ? '迷雾学派：技能库' : 'MIST: SKILL LIBRARY'}
+                            viewMode={viewMode}
+                            setViewMode={handleViewChange}
+                            handleOpenMetonymyPage={handleOpenMetonymyPage}
+                            openManual={openManual}
+                            isManualOpen={isManualOpen}
+                            openHistory={openHistory}
+                            isHistoryOpen={isHistoryOpen}
+                            openSettings={openSettings}
+                            openAuth={openAuth}
+                            openProfile={() => setIsProfileOpen(true)}
+                            onLogout={() => supabaseAuthService.signOut()}
+                            currentUser={currentUser}
+                            showRings={showRings}
+                            setShowRings={setShowRings}
+                            onReturnToPortal={beginEngineToPortalTransition}
+                        />
+                        <div className="flex-1 overflow-hidden relative">
+                            <PromptSkillLibrary lang={lang} />
                         </div>
                     </div>
                 ) : viewMode === 'RSI' ? (
@@ -2830,6 +3091,7 @@ const App: React.FC = () => {
                             currentUser={currentUser}
                             showRings={showRings}
                             setShowRings={setShowRings}
+                            onReturnToPortal={beginEngineToPortalTransition}
                         />
                         <div className="flex-1 overflow-hidden relative">
                             <RorschachView
@@ -2902,6 +3164,8 @@ const App: React.FC = () => {
                                 driverName={getDriverName()}
                                 viewMode={viewMode}
                                 setViewMode={handleViewChange}
+                                conceptWorkspacePage={conceptWorkspacePage}
+                                setConceptWorkspacePage={setConceptWorkspacePage}
                                 handleOpenMetonymyPage={handleOpenMetonymyPage}
                                 openManual={openManual}
                                 isManualOpen={isManualOpen}
@@ -2918,11 +3182,12 @@ const App: React.FC = () => {
                                 showRings={showRings}
                                 setShowRings={setShowRings}
                                 setInitialProtocol={setInitialProtocol}
+                                onPreloadView={preloadWorkflowViewMode}
                             />
                         )}
 
                         <main
-                            className="mist-app-content-layer flex-1 overflow-hidden relative bg-transparent transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)"
+                            className="mist-app-content-layer flex-1 overflow-hidden relative bg-transparent transition-colors duration-300"
                         >
                             {viewMode === 'ENGINE' && selectedDriver && (
                                 <div
@@ -3001,6 +3266,8 @@ const App: React.FC = () => {
                                         onClearVisionCandidateState={() => setVisionCandidateState({})}
                                         worldLawConfig={worldLawConfig}
                                         setWorldLawConfig={setWorldLawConfig}
+                                        onConceptRuntimeChange={handleConceptRuntimeChange}
+                                        conceptWorkspacePage={conceptWorkspacePage}
                                         isAdmin={isAdmin}
                                     />
                                 </div>
@@ -3027,7 +3294,7 @@ const App: React.FC = () => {
                                 </div>
                             )}
                             {viewMode === 'DIVERGENCE' && (
-                                <div className="w-full h-full animate-page-dissolve">
+                                <div className="mist-engine-simple-entry mist-no-shift-entry mist-workflow-view w-full h-full">
                                     <NarrativePathsView
                                         treatments={generatedTreatments}
                                         onSelect={handleBibleGenerate}
@@ -3062,7 +3329,7 @@ const App: React.FC = () => {
                                 </div>
                             )}
                             {viewMode === 'BIBLE' && (
-                                <div className="w-full h-full animate-page-dissolve">
+                                <div className="mist-engine-simple-entry mist-no-shift-entry mist-workflow-view w-full h-full">
                                     <BlueprintEditor
                                         blueprint={activeBlueprint}
                                         theme={theme}
@@ -3108,7 +3375,7 @@ const App: React.FC = () => {
                             )}
                             {/* MetonymyView integrated into main layout to share EngineBottomBar */}
                             {viewMode === 'METONYMY' && metonymyBlueprint && (
-                                <div key="engine-open-metonymy" className="mist-engine-simple-entry mist-no-shift-entry w-full h-full">
+                                <div key="engine-open-metonymy" className="mist-engine-simple-entry mist-no-shift-entry mist-workflow-view w-full h-full">
                                     <MetonymyView
                                         blueprint={metonymyBlueprint}
                                         language={lang}
@@ -3367,14 +3634,12 @@ const App: React.FC = () => {
                         lang={lang}
                     />
                 )}
-                {isTaskManagerOpen && (
-                    <TaskManagerPanel
-                        isOpen={isTaskManagerOpen}
-                        onClose={() => setIsTaskManagerOpen(false)}
-                        lang={lang}
-                        driverType={selectedDriver}
-                    />
-                )}
+                <TaskManagerPanel
+                    isOpen={isTaskManagerOpen}
+                    onClose={() => setIsTaskManagerOpen(false)}
+                    lang={lang}
+                    driverType={selectedDriver}
+                />
 
                 {isPromptInspectorOpen && (
                     <PromptInspectorModal
@@ -3393,6 +3658,7 @@ const App: React.FC = () => {
                         m7bIntensity={m7bIntensity}
                         promptVersion={narrativePromptVersion}
                         onPromptVersionChange={setNarrativePromptVersion}
+                        conceptRuntimeState={conceptRuntimeState}
                     />
                 )}
                 </React.Suspense>

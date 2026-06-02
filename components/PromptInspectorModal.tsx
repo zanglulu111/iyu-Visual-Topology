@@ -1,5 +1,5 @@
 import React from 'react';
-import { NarrativeFieldState, WorldLawConfig, DriverType, FaceState, PromptFocusState, NarrativePromptVersion, NarrativeBlockDef, LibraryCategoryDef, MAxisMixerState, M7BResidueIntensity } from '../types';
+import { ConceptDesignRuntimeState, NarrativeFieldState, WorldLawConfig, DriverType, FaceState, PromptFocusState, NarrativePromptVersion, NarrativeBlockDef, LibraryCategoryDef, MAxisMixerState, M7BResidueIntensity } from '../types';
 import { buildNarrativePrompt } from '../services/narrativeGenerator';
 import { appendFantasyTraverseOutputContract } from '../services/geminiService';
 import { XRayInspectorModal, type XRaySourceGroup } from './XRayInspector';
@@ -13,6 +13,8 @@ import {
     AESTHETIC_ENGINE_LIBRARY,
     ALL_SKIN_BLOCKS,
     BLOCK_LIMITS,
+    CONCEPT_ENGINE_BLOCKS,
+    CONCEPT_ENGINE_LIBRARY,
     COMMERCIAL_ENGINE_BLOCKS,
     COMMERCIAL_ENGINE_LIBRARY,
     COMM_SKIN_BLOCKS,
@@ -46,6 +48,7 @@ interface PromptInspectorModalProps {
     m7bIntensity?: M7BResidueIntensity;
     promptVersion: NarrativePromptVersion;
     onPromptVersionChange: (version: NarrativePromptVersion) => void;
+    conceptRuntimeState?: ConceptDesignRuntimeState | null;
 }
 
 const getDriverBlocksAndLibrary = (driverType: DriverType | null): { blocks: NarrativeBlockDef[]; library: LibraryCategoryDef[] } => {
@@ -56,6 +59,8 @@ const getDriverBlocksAndLibrary = (driverType: DriverType | null): { blocks: Nar
             return { blocks: [...EXPERIMENTAL_ENGINE_BLOCKS, ...EXPERIMENTAL_SKIN_BLOCKS], library: [...EXPERIMENTAL_ENGINE_LIBRARY, ...EXPERIMENTAL_SKIN_LIBRARY] };
         case DriverType.AESTHETIC:
             return { blocks: [...AESTHETIC_ENGINE_BLOCKS, ...ALL_SKIN_BLOCKS], library: [...AESTHETIC_ENGINE_LIBRARY, ...SKIN_LIBRARY] };
+        case DriverType.CONCEPT_DESIGN:
+            return { blocks: CONCEPT_ENGINE_BLOCKS, library: CONCEPT_ENGINE_LIBRARY };
         case DriverType.TRAILER:
             return { blocks: [...TRAILER_ENGINE_BLOCKS, ...TRAILER_SKIN_BLOCKS], library: [...TRAILER_ENGINE_LIBRARY, ...TRAILER_SKIN_LIBRARY] };
         default:
@@ -135,7 +140,8 @@ export const PromptInspectorModal: React.FC<PromptInspectorModalProps> = ({
     mAxisMixer,
     m7bIntensity,
     promptVersion,
-    onPromptVersionChange
+    onPromptVersionChange,
+    conceptRuntimeState
 }) => {
     const activeDriver = driverType || DriverType.NARRATIVE;
     const { blocks, library } = getDriverBlocksAndLibrary(activeDriver);
@@ -156,7 +162,90 @@ export const PromptInspectorModal: React.FC<PromptInspectorModalProps> = ({
         return parts.join('\n\n');
     };
 
-    const getSources = (): XRaySourceGroup[] => [
+    const getConceptSources = (): XRaySourceGroup[] => {
+        const runtime = conceptRuntimeState;
+        const sourceLabel = runtime
+            ? (lang === 'EN' ? runtime.sourceLabelEn : runtime.sourceLabel)
+            : (lang === 'EN' ? 'Creative Preset' : '创意预设');
+        const generationTitle = lang === 'EN'
+            ? 'Variable Translation Instruction'
+            : '五变量转译指令';
+        const finalTitle = lang === 'EN'
+            ? 'Assembled Final Image Prompt'
+            : '拼装后的完整成图指令';
+        const generationLabel = (() => {
+            if (!runtime) return lang === 'EN' ? 'Five-variable AI request' : '五变量 AI 请求';
+            if (runtime.sourceMode === 'PRESET') return lang === 'EN' ? 'Five-variable translation request: Lexicon Preset' : '五变量转译请求：创意预设';
+            if (runtime.sourceMode === 'IDEA') return lang === 'EN' ? 'Five-variable translation request: Idea Elements' : '五变量转译请求：灵感元素';
+            if (runtime.sourceMode === 'ARTICLE') return lang === 'EN' ? 'Five-variable translation request: Article Extraction' : '五变量转译请求：文章抽取';
+            if (runtime.sourceMode === 'IMAGE') return lang === 'EN' ? 'Five-variable translation request: Image Feedback' : '五变量转译请求：图片反馈';
+            return lang === 'EN' ? 'Five-variable AI request' : '五变量 AI 请求';
+        })();
+        return [
+            {
+                id: 'concept-generation',
+                title: generationTitle,
+                description: lang === 'EN'
+                    ? 'Upper half: this is the actual instruction sent to the five-variable generation AI.'
+                    : '上半部分：这是实际发送给五变量生成 AI 的指令。',
+                tone: 'engine',
+                items: [
+                    {
+                        id: 'conceptSourceMode',
+                        label: lang === 'EN' ? 'Current Mode' : '当前模式',
+                        kind: 'text',
+                        value: sourceLabel,
+                        editable: false,
+                        alwaysShow: true
+                    },
+                    {
+                        id: 'conceptPhysicalMedium',
+                        label: lang === 'EN' ? 'Physical Medium' : '物理媒介',
+                        kind: 'text',
+                        value: runtime?.mediumCategory || '',
+                        editable: false,
+                        alwaysShow: true
+                    },
+                    {
+                        id: 'conceptGenerationInstruction',
+                        label: generationLabel,
+                        kind: 'textarea',
+                        value: runtime?.generationInstruction || '',
+                        editable: true,
+                        alwaysShow: true
+                    }
+                ]
+            },
+            {
+                id: 'concept-final-prompt',
+                title: finalTitle,
+                description: lang === 'EN'
+                    ? 'Lower half: assembled from the current five variables and local template; shown for complete inspection, not sent to the five-variable generation step.'
+                    : '下半部分：由当前五变量与本地模板拼装而成；用于完整透视，不发送给五变量生成步骤。',
+                tone: 'director',
+                items: [
+                    {
+                        id: 'conceptVariables',
+                        label: lang === 'EN' ? 'Current Five Variables' : '当前五变量',
+                        kind: 'json',
+                        value: runtime?.variables || {},
+                        editable: false,
+                        alwaysShow: true
+                    },
+                    {
+                        id: 'conceptFinalPrompt',
+                        label: lang === 'EN' ? 'Final assembled prompt' : '最终拼装提示词',
+                        kind: 'textarea',
+                        value: runtime?.finalPrompt || '',
+                        editable: true,
+                        alwaysShow: true
+                    }
+                ]
+            }
+        ];
+    };
+
+    const getSources = (): XRaySourceGroup[] => activeDriver === DriverType.CONCEPT_DESIGN ? getConceptSources() : [
         {
             id: 'engine-params',
             title: lang === 'EN' ? 'Engine Parameters' : '引擎参数',
@@ -234,7 +323,17 @@ export const PromptInspectorModal: React.FC<PromptInspectorModalProps> = ({
         }
     ];
 
+    const buildConceptPayload = (values: Record<string, unknown>) => {
+        const instruction = String(values.conceptGenerationInstruction || '').trim();
+        const finalPrompt = String(values.conceptFinalPrompt || '').trim();
+        return [
+            instruction,
+            finalPrompt ? `\n\n---\n\n${lang === 'EN' ? 'FINAL PROMPT / CURRENT OUTPUT' : '最终提示词 / 当前输出'}\n${finalPrompt}` : ''
+        ].filter(Boolean).join('');
+    };
+
     const buildPayload = (values: Record<string, unknown>) => {
+        if (activeDriver === DriverType.CONCEPT_DESIGN) return buildConceptPayload(values);
         try {
             const nextFieldState = collectFieldState(values, blocks, fieldState);
             const nextWorldLaw: WorldLawConfig = normalizeWorldLawConfig({
@@ -253,13 +352,16 @@ export const PromptInspectorModal: React.FC<PromptInspectorModalProps> = ({
             return `提示词生成过程中遇到错误，请检查左侧输入源。\n\n[ERROR DETAILS]\n${e instanceof Error ? e.stack : String(e)}`;
         }
     };
+    const inspectorTitle = activeDriver === DriverType.CONCEPT_DESIGN
+        ? (lang === 'CN' ? '五变量转译指令透视' : 'Five-Variable Translation Inspector')
+        : (lang === 'CN' ? 'X-Ray 叙事创作指令透视' : 'Narrative Prompt Inspector');
 
     return (
         <XRayInspectorModal
             isOpen={isOpen}
             onClose={onClose}
             lang={lang}
-            title={lang === 'CN' ? 'X-Ray 指令透视仪' : 'X-Ray Prompt Inspector'}
+            title={inspectorTitle}
             sources={getSources}
             buildPayload={buildPayload}
         />

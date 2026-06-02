@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { NarrativeFieldState, BlueprintLanguage, DriverType, NarrativeBlockDef, PromptFocusState } from '../types';
 import { DRIVERS } from '../constants';
@@ -56,6 +56,7 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
     const { theme } = useTheme();
     const isRetro = theme === 'retro';
     const isCommercial = driverType === DriverType.COMMERCIAL;
+    const isConceptDesign = driverType === DriverType.CONCEPT_DESIGN;
     const rawTags = fieldState[blockId];
     const tags = Array.isArray(rawTags) ? rawTags : (rawTags ? [String(rawTags)] : []);
     const blockDef = ENGINE_BLOCKS?.find(b => b.id === blockId);
@@ -64,34 +65,122 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
     const selectedFocusTags = getAllSelectedTags(fieldState);
     const focusUnitMap = getSelectedFocusUnitMap(fieldState);
     const focusBlockMap = getSelectedFocusBlockMap(fieldState);
+    const hoverCloseTimer = useRef<number | null>(null);
+    const hoverSourceRef = useRef<HTMLElement | null>(null);
+    const hoverBoundsRef = useRef<{ left: number; right: number; top: number; bottom: number } | null>(null);
 
     const [hoveredPortal, setHoveredPortal] = useState<{
         pos: { top: number; left: number };
+        actionPos?: { top: number; left: number };
         details: any;
         showAbove?: boolean;
+        tag?: string;
+        empty?: boolean;
+        isLocked?: boolean;
+        focused?: boolean;
+        focusDisabled?: boolean;
+        focusTitle?: string;
     } | null>(null);
 
-    const handleMouseEnter = (e: React.MouseEvent, details: any) => {
+    const handleMouseEnter = (e: React.MouseEvent, details: any, meta?: {
+        tag?: string;
+        empty?: boolean;
+        isLocked?: boolean;
+        focused?: boolean;
+        focusDisabled?: boolean;
+        focusTitle?: string;
+    }) => {
         if (!details) return;
+        if (hoverCloseTimer.current) window.clearTimeout(hoverCloseTimer.current);
+        hoverSourceRef.current = e.currentTarget as HTMLElement;
         const rect = e.currentTarget.getBoundingClientRect();
+        hoverBoundsRef.current = {
+            left: Math.max(0, rect.left - 18),
+            right: Math.min(window.innerWidth, rect.right + 180),
+            top: Math.max(0, rect.top - 120),
+            bottom: Math.min(window.innerHeight, rect.bottom + 56)
+        };
 
-        // Better positioning: if it's in the lower half of the screen, show above.
-        // If it's in the upper half, show below.
-        const showAbove = tooltipPlacement === 'above' ? true : rect.top > window.innerHeight / 2;
+        // Concept-design tokens use the Labyrinth formula pattern:
+        // explanation above the token, quick actions below the token.
+        const showAbove = isConceptDesign || tooltipPlacement === 'above' ? true : rect.top > window.innerHeight / 2;
 
         setHoveredPortal({
             pos: {
                 top: showAbove ? rect.top - 8 : rect.bottom + 8,
                 left: Math.max(16, Math.min(rect.left, window.innerWidth - 360))
             },
+            actionPos: {
+                top: rect.bottom + 5,
+                left: Math.max(16, Math.min(rect.left, window.innerWidth - 220))
+            },
             details,
-            showAbove
+            showAbove,
+            ...meta
         });
     };
 
     const handleMouseLeave = () => {
+        if (hoverCloseTimer.current) window.clearTimeout(hoverCloseTimer.current);
+        hoverCloseTimer.current = window.setTimeout(() => setHoveredPortal(null), isConceptDesign ? 140 : 0);
+    };
+
+    const closeHoverPortal = () => {
+        if (hoverCloseTimer.current) window.clearTimeout(hoverCloseTimer.current);
+        hoverCloseTimer.current = null;
+        hoverSourceRef.current = null;
+        hoverBoundsRef.current = null;
         setHoveredPortal(null);
     };
+
+    useEffect(() => {
+        return () => {
+            if (hoverCloseTimer.current) window.clearTimeout(hoverCloseTimer.current);
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!hoveredPortal || !isConceptDesign) return;
+
+        const close = () => closeHoverPortal();
+        const handlePointerMove = (event: PointerEvent) => {
+            const target = event.target as Node | null;
+            const source = hoverSourceRef.current;
+            const actionEl = target instanceof Element
+                ? target.closest('.mist-concept-token-portal-actions')
+                : null;
+
+            if ((source && target && source.contains(target)) || actionEl) return;
+
+            const nextElement = document.elementFromPoint(event.clientX, event.clientY);
+            if (nextElement?.closest('.mist-concept-token-portal-actions')) return;
+            if (source && nextElement && source.contains(nextElement)) return;
+            const bounds = hoverBoundsRef.current;
+            if (
+                bounds &&
+                event.clientX >= bounds.left &&
+                event.clientX <= bounds.right &&
+                event.clientY >= bounds.top &&
+                event.clientY <= bounds.bottom
+            ) return;
+
+            closeHoverPortal();
+        };
+
+        window.addEventListener('scroll', close, true);
+        window.addEventListener('wheel', close, { passive: true, capture: true });
+        window.addEventListener('blur', close);
+        document.addEventListener('pointerdown', close, true);
+        document.addEventListener('pointermove', handlePointerMove, true);
+
+        return () => {
+            window.removeEventListener('scroll', close, true);
+            window.removeEventListener('wheel', close, true);
+            window.removeEventListener('blur', close);
+            document.removeEventListener('pointerdown', close, true);
+            document.removeEventListener('pointermove', handlePointerMove, true);
+        };
+    }, [hoveredPortal, isConceptDesign]);
 
     const displayPlaceholder = lang === 'EN' ? placeholderEN : placeholderCN;
     const prefix = hideAffixes ? "" : (lang === 'EN' ? prefixEN : prefixCN);
@@ -99,7 +188,7 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
 
     let accentColor = 'text-[var(--text-header)] border-white/70';
     let labelColor = 'text-[var(--text-header)]';
-    let containerClass = `inline-flex flex-wrap items-baseline gap-1.5 md:gap-2 mx-1.5 md:mx-2 relative group/slot align-middle ${isCommercial ? 'mist-commercial-prophecy-slot' : ''}`;
+    let containerClass = `inline-flex flex-wrap items-baseline gap-1.5 md:gap-2 mx-1.5 md:mx-2 relative group/slot align-middle ${isCommercial ? 'mist-commercial-prophecy-slot' : ''} ${isConceptDesign ? 'mist-concept-prophecy-slot' : ''}`;
     let editAccent = 'text-[var(--text-main)] border-[var(--border-main)] focus:border-[var(--mist-active-accent)]';
 
     const driverDef = DRIVERS.find(d => d.id === driverType);
@@ -197,15 +286,20 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
                         : (isTiny
                             ? `mist-prophecy-slot-active border ${accentColor} ${isRetro ? 'bg-[var(--bg-card)]' : 'bg-zinc-900/70'} px-2 py-0.5 shadow-sm ${theme === 'retro' ? '' : 'hover:bg-zinc-800'}`
                             : `mist-prophecy-slot-active border-b ${accentColor} px-0.5 ${theme === 'retro' ? 'hover:bg-transparent' : 'hover:bg-white/10'}`);
-
                     return (
                         <div
                             key={tag}
-                            className="flex flex-col items-start relative group/item align-top"
-                            onMouseEnter={(e) => details && handleMouseEnter(e, details)}
+                            className={`flex flex-col items-start relative group/item align-top ${isConceptDesign ? 'mist-concept-slot-item' : ''}`}
+                            onMouseEnter={(e) => details && handleMouseEnter(e, details, {
+                                tag,
+                                isLocked: Boolean(isTagLocked),
+                                focused: Boolean(isFocusedTag),
+                                focusDisabled: Boolean(isFocusDisabled),
+                                focusTitle: focusLimitTitle
+                            })}
                             onMouseLeave={handleMouseLeave}
                         >
-                            <div className="flex items-center whitespace-nowrap">
+                            <div className={`flex items-center whitespace-nowrap ${isConceptDesign ? 'mist-concept-slot-row' : ''}`}>
                                 <span
                                     className={`mist-labyrinth-hover-token transition-all duration-300 hover:z-50 align-top ${activeAccent} ${isFocusedTag ? 'mist-token-focused' : ''} ${textSize} font-serif font-bold ${isTagLocked ? 'cursor-not-allowed' : (isRetro ? 'cursor-pointer text-black' : 'cursor-pointer text-white')} tracking-wide whitespace-nowrap inline-block`}
                                     onClick={() => !isTagLocked && onOpenLibrary(blockId, tag)}
@@ -230,8 +324,8 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
                                 {idx < tags.length - 1 && <span className="text-zinc-600 font-serif text-sm ml-0.5 mr-1 select-none font-bold">,</span>}
                             </div>
 
-                            {!isTiny && (
-                                <div className={`absolute top-[calc(100%+3px)] left-0 flex items-center gap-1 z-10 opacity-0 group-hover/item:opacity-100 transition-all duration-300 ${isRetro ? 'bg-[var(--bg-panel)]/80 backdrop-blur' : 'bg-black/80 backdrop-blur'} rounded p-1 border shadow-md ${isRetro ? 'border-[var(--border-main)]/40' : 'border-zinc-800'}`}>
+	                            {!isConceptDesign && !isTiny && (
+		                                <div className={`absolute top-[calc(100%+3px)] left-0 flex items-center gap-1 z-10 opacity-0 group-hover/item:opacity-100 transition-all duration-300 ${isRetro ? 'bg-[var(--bg-panel)]/80 backdrop-blur' : 'bg-black/80 backdrop-blur'} rounded p-1 border shadow-md ${isRetro ? 'border-[var(--border-main)]/40' : 'border-zinc-800'}`}>
                                     <button onClick={(e) => { e.stopPropagation(); onRandomizeTag?.(blockId, tag); }} disabled={isTagLocked} className={`flex items-center justify-center p-0.5 ${isRetro ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--border-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors ${isTagLocked ? 'opacity-30 cursor-not-allowed' : ''}`}>
                                         <Dice5 size={10} />
                                     </button>
@@ -247,7 +341,7 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
                                         >
                                             <Star size={10} className={isFocusedTag ? 'fill-current' : ''} />
                                         </button>
-                                    )}
+	                            )}
                                 </div>
                             )}
 
@@ -272,17 +366,18 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
                         defEn: blockDef.descriptionEn,
                         core: "",
                         coreEn: ""
-                    })}
+                    }, { empty: true, isLocked: Boolean(isBlockLocked) })}
                     onMouseLeave={handleMouseLeave}
                 >
                     <div
                         onClick={() => !isBlockLocked && onOpenLibrary(blockId)}
-                        className="flex items-center"
+                        className={`flex items-center ${isConceptDesign ? 'mist-concept-slot-row' : ''}`}
                     >
                         <span className={`mist-labyrinth-hover-token mist-prophecy-slot-empty ${textSize} font-serif font-bold px-0.5 tracking-wide whitespace-nowrap transition-all duration-300 hover:z-50 inline-block ${theme === 'retro' ? 'text-zinc-500 hover:text-black' : 'text-zinc-500 hover:text-white'} ${isTiny ? 'border border-dashed border-zinc-700 px-2 py-0.5 hover:border-zinc-500' : 'border-b border-zinc-800 hover:border-zinc-600'} transition-all`}>
                             {isTiny ? displayPlaceholder : (isSmall ? `[${displayPlaceholder}]` : `[ ${displayPlaceholder} ]`)}
                         </span>
                     </div>
+                    {!isConceptDesign && (
                     <div className={`absolute top-[calc(100%+3px)] left-0 flex items-center gap-1 z-10 opacity-0 group-hover/item:opacity-100 transition-all duration-300 ${isRetro ? 'bg-[var(--bg-panel)]/80 backdrop-blur' : 'bg-black/80 backdrop-blur'} rounded p-1 border shadow-md ${isRetro ? 'border-[var(--border-main)]/40' : 'border-zinc-800'}`}>
                         <button onClick={(e) => { e.stopPropagation(); onRandomizeBlock(blockId); }} disabled={isBlockLocked} className={`flex items-center justify-center p-0.5 ${isRetro ? 'bg-[var(--bg-panel)] border-[var(--border-main)]/40 text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--border-main)]' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white'} border rounded transition-colors`}>
                             <Dice5 size={10} />
@@ -294,6 +389,7 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
                             <Edit2 size={10} />
                         </button>
                     </div>
+                    )}
 
                 </div>
             )}
@@ -355,7 +451,7 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
             )}
             {hoveredPortal && !editingTag && !isCreatingNew && createPortal(
                 <div
-                    className={`mist-labyrinth-tooltip fixed z-[9999] pointer-events-none ${hoveredPortal.showAbove ? '-translate-y-full' : ''}`}
+                    className={`${isConceptDesign ? 'mist-labyrinth-tooltip mist-concept-token-tooltip' : 'mist-labyrinth-tooltip'} fixed z-[9999] pointer-events-none ${hoveredPortal.showAbove ? '-translate-y-full' : ''}`}
                     style={{
                         top: hoveredPortal.pos.top,
                         left: hoveredPortal.pos.left
@@ -370,6 +466,66 @@ export const ProphecySlot: React.FC<ProphecySlotProps> = ({
                     <div className="mist-labyrinth-tooltip-def">
                         {lang === 'EN' && hoveredPortal.details.defEn ? hoveredPortal.details.defEn : hoveredPortal.details.def}
                     </div>
+                </div>,
+                document.body
+            )}
+            {isConceptDesign && hoveredPortal && !editingTag && !isCreatingNew && hoveredPortal.actionPos && createPortal(
+                <div
+                    className="mist-concept-token-portal-actions fixed z-[10000]"
+                    style={{
+                        top: hoveredPortal.actionPos.top,
+                        left: hoveredPortal.actionPos.left
+                    }}
+                    onMouseEnter={() => {
+                        if (hoverCloseTimer.current) window.clearTimeout(hoverCloseTimer.current);
+                    }}
+                    onMouseLeave={handleMouseLeave}
+                >
+                    {hoveredPortal.empty ? (
+                        <>
+                            <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); onRandomizeBlock(blockId); }}
+                                disabled={hoveredPortal.isLocked}
+                                title={lang === 'EN' ? 'Randomize' : '随机'}
+                            >
+                                <Dice5 size={10} />
+                            </button>
+                            <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); onToggleLockBlock(blockId); }}
+                                title={hoveredPortal.isLocked ? (lang === 'EN' ? 'Unlock' : '解锁') : (lang === 'EN' ? 'Lock' : '锁定')}
+                            >
+                                {hoveredPortal.isLocked ? <Lock size={10} /> : <Unlock size={10} />}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleCreateClick}
+                                disabled={hoveredPortal.isLocked}
+                                title={lang === 'EN' ? 'Edit' : '编辑'}
+                            >
+                                <Edit2 size={10} />
+                            </button>
+                        </>
+                    ) : hoveredPortal.tag ? (
+                        <>
+                            <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); if (isBlockLocked) onToggleLockBlock(blockId); else onToggleTagLock?.(blockId, hoveredPortal.tag!); }}
+                                title={hoveredPortal.isLocked ? (lang === 'EN' ? 'Unlock' : '解锁') : (lang === 'EN' ? 'Lock' : '锁定')}
+                            >
+                                {hoveredPortal.isLocked ? <Lock size={10} /> : <Unlock size={10} />}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); onRandomizeTag?.(blockId, hoveredPortal.tag!); }}
+                                disabled={hoveredPortal.isLocked}
+                                title={lang === 'EN' ? 'Randomize' : '随机'}
+                            >
+                                <Dice5 size={10} />
+                            </button>
+                        </>
+                    ) : null}
                 </div>,
                 document.body
             )}

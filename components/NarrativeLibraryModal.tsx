@@ -1,8 +1,10 @@
-import { X, Search, Layers, Check, Dice5, Trash2, Plus, Zap, Sparkles, Eye, Heart, Music, Sun, Moon, Cloud, Feather, Globe, Copy, LayoutGrid, Info, Hash, ChevronRight, ArrowLeftRight, Undo2, Redo2 } from 'lucide-react';
+import { X, Search, Layers, Check, Dice5, Trash2, Plus, Zap, Sparkles, Eye, Heart, Music, Sun, Moon, Cloud, Feather, Globe, Copy, LayoutGrid, Info, Hash, ChevronRight, ArrowLeftRight, Undo2, Redo2, Loader2, Terminal } from 'lucide-react';
 import React, { useState, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTheme } from '../contexts/ThemeContext';
-import { PromptFocusState } from '../types';
+import { PromptFocusState, LibraryItemDef } from '../types';
+import { generateLexiconItemDraft } from '../services/promptSkillService';
+import { runWithTask } from '../services/taskManager';
 import {
     NARRATIVE_ENGINE_BLOCKS,
     NARRATIVE_ENGINE_LIBRARY,
@@ -10,11 +12,14 @@ import {
     EXPERIMENTAL_ENGINE_BLOCKS, EXPERIMENTAL_ENGINE_LIBRARY, EXPERIMENTAL_SKIN_BLOCKS, EXPERIMENTAL_SKIN_LIBRARY,
     AESTHETIC_ENGINE_BLOCKS,
     AESTHETIC_ENGINE_LIBRARY,
+    CONCEPT_ENGINE_BLOCKS,
+    CONCEPT_ENGINE_LIBRARY,
     TRAILER_ENGINE_BLOCKS, TRAILER_ENGINE_LIBRARY, TRAILER_SKIN_BLOCKS, TRAILER_SKIN_LIBRARY,
     POETIC_ENGINE_LIBRARY,
     BLOCK_LIMITS,
     GENRE_SUPER_GROUPS,
     AES_COLOR_PRESETS,
+    SUR3_DATA,
     ALL_SKIN_BLOCKS,
     SKIN_LIBRARY,
     GENRE_CATEGORIES,
@@ -22,6 +27,7 @@ import {
 } from '../constants';
 import { BlueprintLanguage, DriverType, LibraryCategoryDef } from '../types';
 import { buildTermFocusPatch, clearFocusForTagsPatch, getFocusLimitReason, getFocusUnitKey, isFocusableBlock, MAX_FOCUS_TERMS } from '../utils/focusTerms';
+import { XRayInspectorModal, type XRaySourceGroup } from './XRayInspector';
 
 interface NarrativeLibraryModalProps {
     isOpen: boolean;
@@ -35,7 +41,7 @@ interface NarrativeLibraryModalProps {
     lang?: BlueprintLanguage;
     customLibraryData?: LibraryCategoryDef[];
     driverType?: DriverType;
-    onAddCustomDef?: (name: string, def: string, core: string) => void;
+    onAddCustomDef?: (name: string, def: string, core: string, item?: LibraryItemDef, blockId?: string) => void;
     scrollToTag?: string;
     onTempLockChange?: (itemTempLock: Record<string, 'bright' | 'dark' | 'tension'>) => void;
     onFocusStateChange?: (focusState: PromptFocusState) => void;
@@ -44,6 +50,7 @@ interface NarrativeLibraryModalProps {
     allSelectedTags?: string[];
     allSelectedFocusUnitMap?: Record<string, string>;
     allSelectedFocusBlockMap?: Record<string, string>;
+    isAdmin?: boolean;
 }
 
 const iconMap: Record<string, React.ElementType> = {
@@ -86,7 +93,7 @@ const itemTagMatches = (item: any, tag: string) =>
 const itemMatchesAnyTag = (item: any, tags: string[]) => tags.some(tag => itemTagMatches(item, tag));
 
 export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
-    isOpen, onClose, blockId, blockName, selectedTags, onToggleTag, onSetTags, onClear, lang = 'CN', customLibraryData, driverType, onAddCustomDef, scrollToTag, onTempLockChange, onFocusStateChange, initialFaceState, initialFocusState, allSelectedTags, allSelectedFocusUnitMap, allSelectedFocusBlockMap
+    isOpen, onClose, blockId, blockName, selectedTags, onToggleTag, onSetTags, onClear, lang = 'CN', customLibraryData, driverType, onAddCustomDef, scrollToTag, onTempLockChange, onFocusStateChange, initialFaceState, initialFocusState, allSelectedTags, allSelectedFocusUnitMap, allSelectedFocusBlockMap, isAdmin = false
 }) => {
     const { theme: globalTheme } = useTheme();
     const [searchQuery, setSearchQuery] = useState("");
@@ -95,11 +102,20 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
     const [customInputName, setCustomInputName] = useState("");
     const [customInputDef, setCustomInputDef] = useState("");
     const [customInputCore, setCustomInputCore] = useState("");
+    const [customInputNote, setCustomInputNote] = useState("");
+    const [customDraft, setCustomDraft] = useState<LibraryItemDef | null>(null);
+    const [isGeneratingCustomDraft, setIsGeneratingCustomDraft] = useState(false);
+    const [showCustomDraftPrompt, setShowCustomDraftPrompt] = useState(false);
     const [activeSuperGroup, setActiveSuperGroup] = useState<string | null>(null);
+    const [activePersonaCategory, setActivePersonaCategory] = useState<string | null>(null);
+    const [activeProtocolCategory, setActiveProtocolCategory] = useState<string | null>(null);
     const [copiedItemId, setCopiedItemId] = useState<string | null>(null);
     const [useAltGroup, setUseAltGroup] = useState(false);
     const [protocolOpenId, setProtocolOpenId] = useState<string | null>(null);
     const isSkinSV = blockId === 'skin_structure' || blockId === 'skin_volume';
+    const isPersonaLibrary = blockId === 'cd_persona';
+    const isStyleProtocolLibrary = blockId === 'cd_style_protocol_primary' || blockId === 'cd_style_protocol_secondary';
+    const useTwoLevelSidebar = isPersonaLibrary || isStyleProtocolLibrary;
     const limit = BLOCK_LIMITS[blockId] || 1;
     const [activeSlotIndex, setActiveSlotIndex] = useState(0);
     const [selectionPast, setSelectionPast] = useState<string[][]>([]);
@@ -181,6 +197,8 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
         } else if (driverType === DriverType.AESTHETIC) {
             // FIXED: AESTHETIC mode needs to search across multiple libraries
             allLibs = [...AESTHETIC_ENGINE_LIBRARY, ...SKIN_LIBRARY, ...COMMERCIAL_ENGINE_LIBRARY];
+        } else if (driverType === DriverType.CONCEPT_DESIGN) {
+            allLibs = [...CONCEPT_ENGINE_LIBRARY, ...AESTHETIC_ENGINE_LIBRARY];
         } else {
             allLibs = [...NARRATIVE_ENGINE_LIBRARY, ...SKIN_LIBRARY, ...GENRE_CATEGORIES];
         }
@@ -191,6 +209,10 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
 
         if (blockId === 'skin_animation_genre' || blockId === 'skin_era') {
             return WORLD_MOTIF_CATEGORIES;
+        }
+
+        if (blockId === 'skin_country_exact' || blockId === 'cd_space_anchor_exact') {
+            return SUR3_DATA;
         }
 
         const libId = `${blockId}_lib`;
@@ -212,9 +234,11 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                 ? EXPERIMENTAL_ENGINE_BLOCKS
                 : driverType === DriverType.AESTHETIC
                     ? AESTHETIC_ENGINE_BLOCKS
-                    : driverType === DriverType.TRAILER
-                        ? TRAILER_ENGINE_BLOCKS
-                        : NARRATIVE_ENGINE_BLOCKS;
+                    : driverType === DriverType.CONCEPT_DESIGN
+                        ? CONCEPT_ENGINE_BLOCKS
+                        : driverType === DriverType.TRAILER
+                            ? TRAILER_ENGINE_BLOCKS
+                            : NARRATIVE_ENGINE_BLOCKS;
         const block = [...engineBlocks, ...skinBlocks].find(item => item.id === blockId);
         if (block) return getLocalizedLabel(block.name, block.enName, currentLang) || block.id;
 
@@ -223,6 +247,110 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
 
         return getLocalizedLabel(blockName, undefined, currentLang) || blockId;
     }, [blockId, blockName, currentLang, driverType, libraryData]);
+
+    const personaCategoryOptions = useMemo(() => {
+        if (!isPersonaLibrary) return [];
+        const canSeeItem = (item: any) => isAdmin || !item?.adminOnly;
+        const categoryMap = new Map<string, { id: string; name: string; count: number }>();
+        libraryData.flatMap(cat => cat.items || []).filter(canSeeItem).forEach((item: any) => {
+            const id = String(item.personaCategory || (currentLang === 'EN' ? 'Uncategorized Persona' : '未分类人设'));
+            const name = currentLang === 'EN'
+                ? String(item.personaCategoryEn || item.personaCategory || 'Uncategorized Persona')
+                : String(item.personaCategory || '未分类人设');
+            const existing = categoryMap.get(id);
+            if (existing) {
+                existing.count += 1;
+            } else {
+                categoryMap.set(id, { id, name, count: 1 });
+            }
+        });
+        return Array.from(categoryMap.values());
+    }, [currentLang, isAdmin, isPersonaLibrary, libraryData]);
+
+    const protocolCategoryOptions = useMemo(() => {
+        if (!isStyleProtocolLibrary) return [];
+        const canSeeItem = (item: any) => isAdmin || !item?.adminOnly;
+        const categoryMap = new Map<string, { id: string; name: string; count: number }>();
+        libraryData.flatMap(cat => cat.items || []).filter(canSeeItem).forEach((item: any) => {
+            const fallbackName = item.group || (currentLang === 'EN' ? 'Uncategorized Protocol' : '未分类协议');
+            const fallbackNameEn = item.groupEn || item.group || 'Uncategorized Protocol';
+            const id = String(item.protocolCategory || fallbackName);
+            const name = currentLang === 'EN'
+                ? String(item.protocolCategoryEn || item.protocolCategory || fallbackNameEn)
+                : String(item.protocolCategory || fallbackName);
+            const existing = categoryMap.get(id);
+            if (existing) {
+                existing.count += 1;
+            } else {
+                categoryMap.set(id, { id, name, count: 1 });
+            }
+        });
+        return Array.from(categoryMap.values());
+    }, [currentLang, isAdmin, isStyleProtocolLibrary, libraryData]);
+
+    const activePersonaCategoryId = isPersonaLibrary
+        ? (activePersonaCategory && personaCategoryOptions.some(item => item.id === activePersonaCategory)
+            ? activePersonaCategory
+            : personaCategoryOptions[0]?.id || null)
+        : null;
+
+    const activeProtocolCategoryId = isStyleProtocolLibrary
+        ? (activeProtocolCategory && protocolCategoryOptions.some(item => item.id === activeProtocolCategory)
+            ? activeProtocolCategory
+            : protocolCategoryOptions[0]?.id || null)
+        : null;
+
+    const fullPersonaGroups = useMemo(() => {
+        if (!isPersonaLibrary) return [];
+        const formatName = (name: string, en?: string) => {
+            if (!name && !en) return "";
+            return getLocalizedLabel(name, en, currentLang) || name;
+        };
+        const canSeeItem = (item: any) => isAdmin || !item?.adminOnly;
+        const category = libraryData[0];
+        if (!category) return [];
+        const groupedItems: Record<string, any[]> = {};
+        (category.items || []).filter(canSeeItem).forEach((item: any) => {
+            const groupKey = useAltGroup && item.altGroup ? item.altGroup : (item.group || '');
+            const key = groupKey || (currentLang === 'EN' ? 'General' : '通用');
+            if (!groupedItems[key]) groupedItems[key] = [];
+            groupedItems[key].push(item);
+        });
+        return Object.keys(groupedItems).map(groupName => {
+            const firstItem = groupedItems[groupName].find(i => useAltGroup && i.altGroupEn ? true : i.groupEn);
+            const enName = useAltGroup && firstItem?.altGroupEn ? firstItem.altGroupEn : firstItem?.groupEn;
+            return {
+                id: groupName,
+                name: formatName(groupName, enName) || (currentLang === 'EN' ? 'Group' : groupName),
+                items: groupedItems[groupName]
+            };
+        }).sort((a, b) => a.id.localeCompare(b.id));
+    }, [currentLang, isAdmin, isPersonaLibrary, libraryData, useAltGroup]);
+
+    const fullProtocolGroups = useMemo(() => {
+        if (!isStyleProtocolLibrary) return [];
+        const formatName = (name: string, en?: string) => {
+            if (!name && !en) return "";
+            return getLocalizedLabel(name, en, currentLang) || name;
+        };
+        const canSeeItem = (item: any) => isAdmin || !item?.adminOnly;
+        const groupedItems: Record<string, any[]> = {};
+        libraryData.flatMap(cat => cat.items || []).filter(canSeeItem).forEach((item: any) => {
+            const groupKey = useAltGroup && item.altGroup ? item.altGroup : (item.group || '');
+            const key = groupKey || (currentLang === 'EN' ? 'General' : '通用');
+            if (!groupedItems[key]) groupedItems[key] = [];
+            groupedItems[key].push(item);
+        });
+        return Object.keys(groupedItems).map(groupName => {
+            const firstItem = groupedItems[groupName].find(i => useAltGroup && i.altGroupEn ? true : i.groupEn);
+            const enName = useAltGroup && firstItem?.altGroupEn ? firstItem.altGroupEn : firstItem?.groupEn;
+            return {
+                id: groupName,
+                name: formatName(groupName, enName) || (currentLang === 'EN' ? 'Group' : groupName),
+                items: groupedItems[groupName]
+            };
+        }).sort((a, b) => a.id.localeCompare(b.id));
+    }, [currentLang, isAdmin, isStyleProtocolLibrary, libraryData, useAltGroup]);
 
     // Super group functionality removed to simplify genre selection
     /*
@@ -239,7 +367,11 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
             return getLocalizedLabel(name, en, currentLang) || name;
         };
 
-        let filteredLibraryData = libraryData;
+        const canSeeItem = (item: any) => isAdmin || !item?.adminOnly;
+        let filteredLibraryData = libraryData.map(cat => ({
+            ...cat,
+            items: (cat.items || []).filter(canSeeItem)
+        }));
 
         // Filter by super group removed for simplicity
         /*
@@ -260,8 +392,13 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
         } else if (filteredLibraryData.length === 1) {
             const cat = filteredLibraryData[0];
             const groupedItems: Record<string, any[]> = {};
+            const sourceItems = isPersonaLibrary && activePersonaCategoryId
+                ? (cat.items || []).filter((item: any) => String(item.personaCategory || (currentLang === 'EN' ? 'Uncategorized Persona' : '未分类人设')) === activePersonaCategoryId)
+                : isStyleProtocolLibrary && activeProtocolCategoryId
+                    ? (cat.items || []).filter((item: any) => String(item.protocolCategory || item.group || (currentLang === 'EN' ? 'Uncategorized Protocol' : '未分类协议')) === activeProtocolCategoryId)
+                    : (cat.items || []);
 
-            (cat.items || []).forEach(item => {
+            sourceItems.forEach(item => {
                 const groupKey = useAltGroup && item.altGroup ? item.altGroup : (item.group || '');
                 if (groupKey) {
                     if (!groupedItems[groupKey]) groupedItems[groupKey] = [];
@@ -297,7 +434,29 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
             name: currentLang === 'EN' ? "General" : "通用",
             items: []
         }];
-    }, [libraryData, currentLang, blockId, activeSuperGroup, useAltGroup]);
+    }, [libraryData, currentLang, blockId, activeSuperGroup, useAltGroup, isAdmin, isPersonaLibrary, activePersonaCategoryId, isStyleProtocolLibrary, activeProtocolCategoryId]);
+
+    useEffect(() => {
+        if (!isPersonaLibrary) {
+            if (activePersonaCategory) setActivePersonaCategory(null);
+            return;
+        }
+        if (personaCategoryOptions.length === 0) return;
+        if (!activePersonaCategory || !personaCategoryOptions.some(item => item.id === activePersonaCategory)) {
+            setActivePersonaCategory(personaCategoryOptions[0].id);
+        }
+    }, [activePersonaCategory, isPersonaLibrary, personaCategoryOptions]);
+
+    useEffect(() => {
+        if (!isStyleProtocolLibrary) {
+            if (activeProtocolCategory) setActiveProtocolCategory(null);
+            return;
+        }
+        if (protocolCategoryOptions.length === 0) return;
+        if (!activeProtocolCategory || !protocolCategoryOptions.some(item => item.id === activeProtocolCategory)) {
+            setActiveProtocolCategory(protocolCategoryOptions[0].id);
+        }
+    }, [activeProtocolCategory, isStyleProtocolLibrary, protocolCategoryOptions]);
 
     useEffect(() => {
         if (processedGroups.length > 0) {
@@ -359,14 +518,300 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
         );
     }, [processedGroups]);
 
+    const activeGroupForCustom = useMemo(() => {
+        if (searchQuery) return null;
+        const group = processedGroups.find(item => item.id === activeTab) || processedGroups[0];
+        return group ? { group: group.id, groupName: group.name } : null;
+    }, [activeTab, processedGroups, searchQuery]);
+
+    const buildCustomItemBase = (name: string, def = customInputDef, core = customInputCore): LibraryItemDef => {
+        const cleanName = name.trim();
+        const fallbackId = cleanName
+            .toLowerCase()
+            .replace(/['"`]/g, '')
+            .replace(/[^a-z0-9\u3400-\u9fff]+/g, '_')
+            .replace(/^_+|_+$/g, '')
+            .slice(0, 64) || `custom_${Date.now()}`;
+        const activeCategory = isPersonaLibrary
+            ? personaCategoryOptions.find(item => item.id === activePersonaCategoryId)
+            : null;
+        const activeProtocol = isStyleProtocolLibrary
+            ? protocolCategoryOptions.find(item => item.id === activeProtocolCategoryId)
+            : null;
+
+        return {
+            id: `custom_${blockId}_${fallbackId}`,
+            name: cleanName,
+            def: def.trim(),
+            core: core.trim() || undefined,
+            group: activeGroupForCustom?.group || activeGroupForCustom?.groupName || (currentLang === 'EN' ? 'Custom' : '自定义'),
+            groupEn: activeGroupForCustom?.groupName || 'Custom',
+            tags: ['custom', blockId],
+            ontologyLevel: 1,
+            risk: 'clean',
+            ...(activeCategory ? {
+                personaCategory: activeCategory.id,
+                personaCategoryEn: activeCategory.name,
+                personaSubgroup: activeGroupForCustom?.group || activeGroupForCustom?.groupName,
+                personaSubgroupEn: activeGroupForCustom?.groupName,
+                personaKind: cleanName,
+                personaKindEn: cleanName,
+                personaStrength: 'medium' as const,
+                isCompoundPersona: true
+            } : {}),
+            ...(activeProtocol ? {
+                protocolCategory: activeProtocol.id,
+                protocolCategoryEn: activeProtocol.name
+            } : {})
+        };
+    };
+
+    const resetCustomComposer = () => {
+        setCustomInputName("");
+        setCustomInputDef("");
+        setCustomInputCore("");
+        setCustomInputNote("");
+        setCustomDraft(null);
+        setShowCustomDraftPrompt(false);
+        setShowCustomInput(false);
+    };
+
+    const getCustomLexiconGuide = (guideLang: BlueprintLanguage = currentLang) => {
+        const targetName = blockDisplayName;
+        if (blockId === 'cd_persona') {
+            return guideLang === 'EN'
+                ? `Write a persona tag for character / subject concept design.
+The definition must contain five functions:
+1. First-read identity: what the viewer immediately recognizes this character as. This is not merely an occupation or story role.
+2. Character archetype / motif: the cultural or visual archetype being activated.
+3. Core tension: one clear contradiction that prevents the persona from becoming flat.
+4. Visible evidence: where the persona should appear on the body, face, posture, costume structure, materials, props, symbols, grooming, wear marks, or gaze.
+5. Boundary control: what the prompt must not become.
+
+Write for visual character design, not plot. Do not write backstory, world lore, a mood-only label, a pure outfit list, or a pile of props. Avoid template sentences like "built from..." or "constructed by...".`
+                : `写角色 / 主体概念设计用的人设标签。
+定义必须同时完成五个功能：
+1. 第一识别身份：观者第一眼认出这个角色“是什么人”。这不是单纯职业名，也不是故事职位。
+2. 人物母题：这个词条调用的角色原型、文化母题或视觉母题。
+3. 核心张力：必须有一个清楚矛盾，让人设不变平。
+4. 可视化证据：说明人设应优先落在脸、身体、姿态、服装结构、材料、道具、符号、妆发、磨损、眼神或社会接口中的哪些位置。
+5. 边界控制：说明不要生成成什么。
+
+这是造型人设，不是故事人设。不要写背景故事、世界观设定、纯情绪标签、纯服装清单或物件堆叠。避免“以……构成人设”这类模板句。`;
+        }
+        if (blockId === 'cd_occupation') {
+            return guideLang === 'EN'
+                ? 'Write an occupation term. Focus on job role, workflow, institution, tools, posture, labor traces, and era adaptation.'
+                : '写职业身份词条。重点是岗位、流程、机构权限、工具、姿态、劳动痕迹和时代适配。';
+        }
+        if (isStyleProtocolLibrary) {
+            return guideLang === 'EN'
+                ? 'Write a character / subject form protocol. Focus on global design grammar, silhouette, materials, body boundary, clothing translation, and conflict absorption.'
+                : '写角色 / 主体造型协议。重点是全局设计语法、剪影、材料、身体边界、服装转译和冲突吸收。';
+        }
+        if (blockId === 'cd_field_preset') {
+            return guideLang === 'EN'
+                ? 'Write a field preset. Focus on institution, space, objects, danger, group behavior, and downgrade rule across eras.'
+                : '写场域预设。重点是制度、空间、物件、危险、群体行为和跨时代降级规则。';
+        }
+        if (blockId.includes('media') || blockId.startsWith('aes_')) {
+            return guideLang === 'EN'
+                ? 'Write a visual-style or medium term. Focus on concrete imaging language, material evidence, viewing relation, and prompt-ready constraints.'
+                : '写视觉风格或媒介词条。重点是具体成像语言、材料证据、观看关系和可执行约束。';
+        }
+        return guideLang === 'EN'
+            ? `Write a formal lexicon item for ${targetName}. Keep it precise, visual, and prompt-ready.`
+            : `为「${targetName}」写正式词库条目。保持精确、可视化、可进入提示词。`;
+    };
+
+    const getCustomDraftContext = () => {
+        const activeCategory = isPersonaLibrary
+            ? personaCategoryOptions.find(item => item.id === activePersonaCategoryId)?.name
+            : isStyleProtocolLibrary
+                ? protocolCategoryOptions.find(item => item.id === activeProtocolCategoryId)?.name
+                : '';
+        const activeGroup = activeGroupForCustom?.groupName || activeGroupForCustom?.group || '';
+        return {
+            activeCategory: activeCategory || '当前词库区块分类',
+            activeGroup: activeGroup || '当前可见分组',
+            writingGuide: getCustomLexiconGuide('CN'),
+            termName: customInputName.trim(),
+            adminNote: customInputNote.trim() || '无'
+        };
+    };
+
+    const buildCustomDraftPromptFromValues = (values?: Record<string, unknown>) => {
+        const context = getCustomDraftContext();
+        const activeCategory = String(values?.customDraftCategory ?? context.activeCategory).trim() || '当前词库区块分类';
+        const activeGroup = String(values?.customDraftGroup ?? context.activeGroup).trim() || '当前可见分组';
+        const writingGuide = String(values?.customDraftGuide ?? context.writingGuide).trim();
+        const termName = String(values?.customDraftName ?? context.termName).trim();
+        const adminNote = String(values?.customDraftNote ?? context.adminNote).trim() || '无';
+        return `你是一个角色提示词模板引擎的词库编辑器。
+
+当前词库区块：
+- blockId：${blockId}
+- blockName：${blockDisplayName}
+- 分类：${activeCategory}
+- 子分组：${activeGroup}
+
+生成目标由当前词库区块决定。不要擅自改写为其他目标类型。
+
+写作指南：
+${writingGuide}
+
+用户要生成的词条名称：
+${termName}
+
+管理员补充要求：
+${adminNote}
+
+只返回 JSON，不要输出 Markdown，不要输出解释。
+必须符合以下结构：
+{
+  "id": "lower_snake_case_english_id",
+  "name": "中文名",
+  "nameEn": "English Name",
+  "group": "${activeGroup || '自定义'}",
+  "groupEn": "English subgroup name",
+  "def": "中文定义。必须是完整但精简的正式词库定义，不要用'以...构成人设'这种模板句。",
+  "defEn": "English definition.",
+  "core": "中文核心规则或边界，可选但推荐。",
+  "coreEn": "English core rule or boundary.",
+  "ontologyLevel": 1,
+  "risk": "clean",
+  "eras": ["contemporary", "timeless"],
+  "affects": ["costume", "pose", "prop"],
+  "tags": ["short_tag"],
+  "absorptionRule": "中文，说明冲突时如何被当前词条吸收或降级。",
+  "absorptionRuleEn": "English absorption rule."
+}
+
+如果 blockId 是 cd_persona，还必须包含 personaCategory、personaCategoryEn、personaSubgroup、personaSubgroupEn、personaKind、personaKindEn、personaStrength、isCompoundPersona。
+如果 blockId 是 cd_persona，def 必须按“第一识别身份 + 人物母题 + 核心张力 + 可视化证据 + 边界控制”的逻辑写成一段自然定义；不要写成故事梗概，不要写成职业说明，不要写成服装/道具清单，不要只靠词条标题撑概念。
+如果 blockId 是风格协议区块，还必须包含 protocolCategory、protocolCategoryEn、protocolKind。`;
+    };
+
+    const buildCustomDraftPrompt = () => buildCustomDraftPromptFromValues();
+
+    const getCustomDraftSources = (): XRaySourceGroup[] => {
+        const context = getCustomDraftContext();
+        return [
+            {
+                id: 'lexicon-generation',
+                title: currentLang === 'EN' ? 'Lexicon Generation Instruction' : '词条生成指令',
+                description: currentLang === 'EN'
+                    ? 'This is the actual instruction sent when generating a formal lexicon item.'
+                    : '这是点击“AI生成正式词条”时实际发送给 AI 的指令。',
+                tone: 'engine',
+                items: [
+                    {
+                        id: 'customDraftBlock',
+                        label: currentLang === 'EN' ? 'Current Block' : '当前区块',
+                        kind: 'text',
+                        value: `${blockDisplayName} (${blockId})`,
+                        editable: false,
+                        alwaysShow: true
+                    },
+                    {
+                        id: 'customDraftCategory',
+                        label: currentLang === 'EN' ? 'Category' : '分类',
+                        kind: 'text',
+                        value: context.activeCategory,
+                        editable: true,
+                        alwaysShow: true
+                    },
+                    {
+                        id: 'customDraftGroup',
+                        label: currentLang === 'EN' ? 'Subgroup' : '子分组',
+                        kind: 'text',
+                        value: context.activeGroup,
+                        editable: true,
+                        alwaysShow: true
+                    },
+                    {
+                        id: 'customDraftName',
+                        label: currentLang === 'EN' ? 'Term Name' : '词条名称',
+                        kind: 'text',
+                        value: context.termName,
+                        editable: true,
+                        alwaysShow: true
+                    },
+                    {
+                        id: 'customDraftNote',
+                        label: currentLang === 'EN' ? 'Admin Note' : '管理员补充',
+                        kind: 'textarea',
+                        value: context.adminNote,
+                        editable: true,
+                        alwaysShow: true
+                    }
+                ]
+            },
+            {
+                id: 'lexicon-output-contract',
+                title: currentLang === 'EN' ? 'Writing Guide & Output Contract' : '写作指南与输出契约',
+                description: currentLang === 'EN'
+                    ? 'Local constraints that shape the JSON lexicon item.'
+                    : '本地模板约束，用于规定词条的写法和 JSON 输出结构。',
+                tone: 'director',
+                items: [
+                    {
+                        id: 'customDraftGuide',
+                        label: currentLang === 'EN' ? 'Writing Guide' : '写作指南',
+                        kind: 'textarea',
+                        value: context.writingGuide,
+                        editable: true,
+                        alwaysShow: true
+                    }
+                ]
+            }
+        ];
+    };
+
+    const handleGenerateCustomDraft = async () => {
+        if (!customInputName.trim() || isGeneratingCustomDraft) return;
+        setIsGeneratingCustomDraft(true);
+        try {
+            const draft = await runWithTask(
+                currentLang === 'EN' ? 'Generate Lexicon Term' : '生成正式词条',
+                async () => generateLexiconItemDraft(buildCustomDraftPrompt())
+            );
+            if (!draft) {
+                alert(currentLang === 'EN' ? 'AI did not return a valid lexicon item.' : 'AI 没有返回可解析的正式词条。');
+                return;
+            }
+            const base = buildCustomItemBase(draft.name || customInputName.trim(), draft.def || '', draft.core || '');
+            setCustomDraft({
+                ...base,
+                ...draft,
+                id: draft.id?.startsWith('custom_') ? draft.id : `custom_${blockId}_${draft.id || base.id}`,
+                group: draft.group || base.group,
+                groupEn: draft.groupEn || base.groupEn,
+                personaCategory: draft.personaCategory || base.personaCategory,
+                personaCategoryEn: draft.personaCategoryEn || base.personaCategoryEn,
+                personaSubgroup: draft.personaSubgroup || base.personaSubgroup,
+                personaSubgroupEn: draft.personaSubgroupEn || base.personaSubgroupEn,
+                personaKind: draft.personaKind || draft.name || base.personaKind,
+                personaKindEn: draft.personaKindEn || draft.nameEn || base.personaKindEn,
+                protocolCategory: draft.protocolCategory || base.protocolCategory,
+                protocolCategoryEn: draft.protocolCategoryEn || base.protocolCategoryEn
+            });
+        } catch (error: any) {
+            if (error?.message !== 'AbortError') {
+                console.error(error);
+                alert(error?.message || (currentLang === 'EN' ? 'Failed to generate lexicon item.' : '生成正式词条失败。'));
+            }
+        } finally {
+            setIsGeneratingCustomDraft(false);
+        }
+    };
+
     const handleAddCustom = () => {
         if (customInputName && onAddCustomDef) {
-            onAddCustomDef(customInputName, customInputDef, customInputCore);
-            applySlotSelection(customInputName);
-            setCustomInputName("");
-            setCustomInputDef("");
-            setCustomInputCore("");
-            setShowCustomInput(false);
+            const item = customDraft || buildCustomItemBase(customInputName);
+            onAddCustomDef(item.name, item.def || customInputDef, item.core || customInputCore, item, blockId);
+            applySlotSelection(item.name);
+            resetCustomComposer();
         }
     };
 
@@ -566,10 +1011,25 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
     };
 
     const handleScrollToCard = (tagName: string) => {
-        const item = processedGroups.flatMap(g => g.items || []).find(i => itemTagMatches(i, tagName));
+        const lookupGroups = isPersonaLibrary ? fullPersonaGroups : isStyleProtocolLibrary ? fullProtocolGroups : processedGroups;
+        const item = lookupGroups.flatMap(g => g.items || []).find(i => itemTagMatches(i, tagName));
         if (!item) return;
 
-        const groupContainingTag = processedGroups.find(g => (g.items || []).some(i => itemTagMatches(i, tagName)));
+        const groupContainingTag = lookupGroups.find(g => (g.items || []).some(i => itemTagMatches(i, tagName)));
+
+        if (isPersonaLibrary) {
+            const itemCategory = String(item.personaCategory || (currentLang === 'EN' ? 'Uncategorized Persona' : '未分类人设'));
+            if (itemCategory && activePersonaCategoryId !== itemCategory) {
+                setActivePersonaCategory(itemCategory);
+            }
+        }
+
+        if (isStyleProtocolLibrary) {
+            const itemCategory = String(item.protocolCategory || item.group || (currentLang === 'EN' ? 'Uncategorized Protocol' : '未分类协议'));
+            if (itemCategory && activeProtocolCategoryId !== itemCategory) {
+                setActiveProtocolCategory(itemCategory);
+            }
+        }
 
         if (groupContainingTag && activeTab !== groupContainingTag.id) {
             setActiveTab(groupContainingTag.id);
@@ -898,7 +1358,8 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                     </div>
                 </div>
                 <div className="flex-1 flex overflow-hidden flex-col md:flex-row">
-                    <div className={`w-full md:w-64 border-r border-dashed ${globalTheme === 'retro' ? 'border-[#8B261D]/10 bg-[#FAF8F4]' : `bg-black/60`} flex flex-col shrink-0 overflow-y-auto custom-scrollbar`} style={globalTheme !== 'retro' ? { borderColor: `${themeHex}1a` } : {}}>
+                    <div className={`w-full ${useTwoLevelSidebar ? 'md:w-[34rem]' : 'md:w-64'} border-r border-dashed ${globalTheme === 'retro' ? 'border-[#8B261D]/10 bg-[#FAF8F4]' : `bg-black/60`} flex shrink-0 overflow-hidden`} style={globalTheme !== 'retro' ? { borderColor: `${themeHex}1a` } : {}}>
+                        <div className={`flex flex-col shrink-0 overflow-y-auto custom-scrollbar ${useTwoLevelSidebar ? 'w-64 border-r border-dashed' : 'w-full'} ${globalTheme === 'retro' ? 'border-[#8B261D]/10' : 'border-white/5'}`}>
                         {/* Alt-group toggle for M5 Four Discourses view */}
                         {(() => {
                             const hasAltGroups = libraryData.length === 1 && (libraryData[0].items || []).some(i => i.altGroup);
@@ -921,7 +1382,73 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                 </div>
                             );
                         })()}
-                        <div className="p-2 space-y-1">
+                        {useTwoLevelSidebar && (isPersonaLibrary ? personaCategoryOptions : protocolCategoryOptions).length > 0 && (
+                            <div className={`p-2 ${globalTheme === 'retro' ? 'bg-white/35' : 'bg-black/20'}`}>
+                                <div className={`mb-2 flex items-center justify-between px-1 text-[9px] font-black uppercase tracking-[0.18em] ${globalTheme === 'retro' ? 'text-[#8B261D]/65' : 'text-zinc-500'}`}>
+                                    <span>
+                                        {isPersonaLibrary
+                                            ? (currentLang === 'EN' ? 'L1 Persona' : '一级人设')
+                                            : (currentLang === 'EN' ? 'L1 Protocol' : '一级协议')
+                                        }
+                                    </span>
+                                    <span className="font-mono">{(isPersonaLibrary ? personaCategoryOptions : protocolCategoryOptions).length}</span>
+                                </div>
+                                <div className="space-y-1">
+                                    {(isPersonaLibrary ? personaCategoryOptions : protocolCategoryOptions).map(category => {
+                                        const isActive = isPersonaLibrary ? activePersonaCategoryId === category.id : activeProtocolCategoryId === category.id;
+                                        return (
+                                            <button
+                                                key={category.id}
+                                                type="button"
+                                                onClick={() => {
+                                                    if (isPersonaLibrary) {
+                                                        setActivePersonaCategory(category.id);
+                                                    } else {
+                                                        setActiveProtocolCategory(category.id);
+                                                    }
+                                                    setActiveTab(null);
+                                                    setSearchQuery("");
+                                                }}
+                                                className={`w-full rounded-lg border px-2.5 py-2.5 text-left transition-all duration-200 ${
+                                                    isActive
+                                                        ? (globalTheme === 'retro' ? 'border-[#8B261D] bg-[#8B261D] text-white shadow-sm' : `border-[var(--mist-active-accent)] bg-[rgba(var(--mist-active-accent-rgb),0.12)] text-[var(--mist-active-accent)]`)
+                                                        : (globalTheme === 'retro' ? 'border-[#8B261D]/12 bg-white/45 text-[#3D1A16]/72 hover:border-[#8B261D]/35 hover:text-[#8B261D]' : 'border-white/8 bg-zinc-950/40 text-zinc-400 hover:border-white/20 hover:text-zinc-100')
+                                                }`}
+                                            >
+                                                <div className="flex items-center justify-between gap-2">
+                                                    <span className="truncate text-[12px] font-black tracking-[0.06em]">{category.name}</span>
+                                                    <span className={`shrink-0 rounded-full px-1.5 py-0.5 font-mono text-[9px] ${isActive ? 'bg-white/18' : (globalTheme === 'retro' ? 'bg-[#8B261D]/8 text-[#8B261D]/60' : 'bg-white/5 text-zinc-500')}`}>
+                                                        {category.count}
+                                                    </span>
+                                                </div>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+                        {!useTwoLevelSidebar && (
+                            <div className="p-2 space-y-1">
+                                {processedGroups.map(group => {
+                                    const groupItemNames = new Set((group.items || []).map(i => i.name));
+                                    const selectedCount = selectedTags.filter(tag => groupItemNames.has(tag)).length;
+                                    const isActive = activeTab === group.id && !searchQuery;
+                                    return (
+                                        <button key={group.id} onClick={() => { setActiveTab(group.id); setSearchQuery(""); }} className={`w-full text-left px-3 py-3 rounded-lg text-sm font-bold uppercase tracking-wider transition-all flex items-center justify-between group ${isActive ? (globalTheme === 'retro' ? `bg-[#F9F7F1] border-l-2 border-[#8B261D] text-[#8B261D] shadow-sm` : `bg-zinc-800 border-l-2 ${themeBorder.replace('/50', '')} ${themeText}`) : (globalTheme === 'retro' ? 'text-[#3D1A16]/70 hover:text-[#8B261D] hover:bg-white/50' : 'text-zinc-200 hover:text-white hover:bg-zinc-900/50')}`}><span className="truncate pr-2">{group.name} <span className="opacity-40 text-[10px] ml-1 font-normal">({group.items?.length || 0})</span></span>{selectedCount > 0 && <span className={`flex items-center justify-center min-w-[18px] h-[18px] text-[10px] font-bold rounded-full ${isActive ? (globalTheme === 'retro' ? 'bg-[#8B261D] text-white' : 'bg-white text-black') : (globalTheme === 'retro' ? 'bg-[#8B261D]/10 text-[#8B261D]' : 'bg-zinc-700 text-zinc-100')}`}>{selectedCount}</span>}</button>
+                                    );
+                                })}
+                            </div>
+                        )}
+                        </div>
+                        {useTwoLevelSidebar && (
+                        <div className="flex w-72 shrink-0 flex-col overflow-y-auto custom-scrollbar">
+                            <div className={`px-3 pt-3 pb-1 text-[9px] font-black uppercase tracking-[0.18em] ${globalTheme === 'retro' ? 'text-[#8B261D]/65' : 'text-zinc-500'}`}>
+                                {isPersonaLibrary
+                                    ? (currentLang === 'EN' ? 'Subgroups' : '二级分类')
+                                    : (currentLang === 'EN' ? 'Design Families' : '二级家族')
+                                }
+                            </div>
+                            <div className="p-2 space-y-1">
                             {processedGroups.map(group => {
                                 const groupItemNames = new Set((group.items || []).map(i => i.name));
                                 const selectedCount = selectedTags.filter(tag => groupItemNames.has(tag)).length;
@@ -930,7 +1457,9 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                                     <button key={group.id} onClick={() => { setActiveTab(group.id); setSearchQuery(""); }} className={`w-full text-left px-3 py-3 rounded-lg text-sm font-bold uppercase tracking-wider transition-all flex items-center justify-between group ${isActive ? (globalTheme === 'retro' ? `bg-[#F9F7F1] border-l-2 border-[#8B261D] text-[#8B261D] shadow-sm` : `bg-zinc-800 border-l-2 ${themeBorder.replace('/50', '')} ${themeText}`) : (globalTheme === 'retro' ? 'text-[#3D1A16]/70 hover:text-[#8B261D] hover:bg-white/50' : 'text-zinc-200 hover:text-white hover:bg-zinc-900/50')}`}><span className="truncate pr-2">{group.name} <span className="opacity-40 text-[10px] ml-1 font-normal">({group.items?.length || 0})</span></span>{selectedCount > 0 && <span className={`flex items-center justify-center min-w-[18px] h-[18px] text-[10px] font-bold rounded-full ${isActive ? (globalTheme === 'retro' ? 'bg-[#8B261D] text-white' : 'bg-white text-black') : (globalTheme === 'retro' ? 'bg-[#8B261D]/10 text-[#8B261D]' : 'bg-zinc-700 text-zinc-100')}`}>{selectedCount}</span>}</button>
                                 );
                             })}
+                            </div>
                         </div>
+                        )}
                     </div>
                     <div className={`flex-1 overflow-y-auto custom-scrollbar p-4 md:p-8 ${globalTheme === 'retro' ? 'bg-white' : 'bg-[#050505]'}`}>
 
@@ -1242,17 +1771,105 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                 {onAddCustomDef && (
                     <div className={`p-4 border-t ${globalTheme === 'retro' ? 'border-[#8B261D]/10 bg-[#F5F2EA]' : `bg-[#0c0c0c]`} shrink-0`} style={globalTheme !== 'retro' ? { borderColor: `${themeHex}1a` } : {}}>
                         {!showCustomInput ? (
-                            <button onClick={() => setShowCustomInput(true)} className={`w-full py-3 rounded-lg border border-dashed ${globalTheme === 'retro' ? 'border-[#8B261D]/30 text-[#8B261D]/50 hover:bg-white/40' : `text-zinc-500 hover:text-white hover:bg-zinc-900`} transition-all text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2`} style={globalTheme !== 'retro' ? { borderColor: `${themeHex}1a` } : {}}><Plus size={14} /> {currentLang === 'EN' ? "Add Custom Item" : "添加自定义条目"}</button>
+                            <button onClick={() => setShowCustomInput(true)} className={`w-full py-3 rounded-lg border border-dashed ${globalTheme === 'retro' ? 'border-[#8B261D]/30 text-[#8B261D]/50 hover:bg-white/40' : `text-zinc-500 hover:text-white hover:bg-zinc-900`} transition-all text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2`} style={globalTheme !== 'retro' ? { borderColor: `${themeHex}1a` } : {}}><Plus size={14} /> {currentLang === 'EN' ? "Custom term / AI term draft" : "自定义词条 / AI正式词条草稿"}</button>
                         ) : (
                             <div className={`space-y-3 p-4 rounded-xl border ${globalTheme === 'retro' ? 'bg-[#F2EDDE] border-[#8B261D]/20 shadow-sm' : 'bg-zinc-900 border-zinc-700'}`}>
+                                <div className="flex flex-wrap items-start justify-between gap-3">
+                                    <div>
+                                        <div className={`text-xs font-black uppercase tracking-[0.18em] ${globalTheme === 'retro' ? 'text-[#8B261D]' : themeText}`}>
+                                            {currentLang === 'EN' ? 'Current target' : '当前位置生成目标'}
+                                        </div>
+                                        <div className={`mt-1 text-[11px] leading-relaxed ${globalTheme === 'retro' ? 'text-[#3D1A16]/65' : 'text-zinc-400'}`}>
+                                            {blockDisplayName}
+                                            {activeGroupForCustom?.groupName ? ` / ${activeGroupForCustom.groupName}` : ''}
+                                        </div>
+                                    </div>
+                                    {isAdmin && (
+                                        <span
+                                            className="rounded-full border px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.16em]"
+                                            style={{
+                                                borderColor: 'rgba(var(--mist-active-accent-rgb), 0.62)',
+                                                backgroundColor: 'rgba(var(--mist-active-accent-rgb), 0.08)',
+                                                color: 'var(--mist-active-accent)'
+                                            }}
+                                        >
+                                            {currentLang === 'EN' ? 'Admin generator enabled' : '管理员生成可用'}
+                                        </span>
+                                    )}
+                                </div>
                                 <div className="flex flex-col md:flex-row gap-4">
                                     <input value={customInputName} onChange={e => setCustomInputName(e.target.value)} placeholder={currentLang === 'EN' ? "Name (e.g. My Concept)" : "名称 (如: 我的概念)"} className={`mist-lexicon-custom-input flex-1 ${globalTheme === 'retro' ? 'bg-[#F9F7F1] border-black/10 text-black placeholder-black/30' : 'bg-black border-zinc-700 text-white placeholder-zinc-600'} border rounded px-3 py-2 text-sm focus:outline-none focus:border-[#8B261D]`} />
                                     <input value={customInputCore} onChange={e => setCustomInputCore(e.target.value)} placeholder={currentLang === 'EN' ? "Core Logic" : "核心逻辑"} className={`mist-lexicon-custom-input flex-1 ${globalTheme === 'retro' ? 'bg-[#F9F7F1] border-black/10 text-black placeholder-black/30' : 'bg-black border-zinc-700 text-white placeholder-zinc-600'} border rounded px-3 py-2 text-sm focus:outline-none focus:border-[#8B261D]`} />
                                 </div>
                                 <input value={customInputDef} onChange={e => setCustomInputDef(e.target.value)} placeholder={currentLang === 'EN' ? "Definition" : "详细定义"} className={`mist-lexicon-custom-input w-full ${globalTheme === 'retro' ? 'bg-[#F9F7F1] border-black/10 text-black placeholder-black/30' : 'bg-black border-zinc-700 text-white placeholder-zinc-600'} border rounded px-3 py-2 text-sm focus:outline-none focus:border-[#8B261D]`} />
+                                {isAdmin && (
+                                    <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-start">
+                                        <textarea
+                                            value={customInputNote}
+                                            onChange={e => setCustomInputNote(e.target.value)}
+                                            placeholder={currentLang === 'EN' ? "Admin note for AI generation, optional" : "管理员补充要求，可选。例如：偏黑色电影，不要太甜美"}
+                                            rows={2}
+                                            className={`mist-lexicon-custom-input w-full resize-none ${globalTheme === 'retro' ? 'bg-[#F9F7F1] border-black/10 text-black placeholder-black/30' : 'bg-black border-zinc-700 text-white placeholder-zinc-600'} border rounded px-3 py-2 text-sm focus:outline-none focus:border-[#8B261D]`}
+                                        />
+                                        <div className="flex shrink-0 items-center gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowCustomDraftPrompt(true)}
+                                                disabled={!customInputName.trim()}
+                                                className="flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-300 group border shrink-0 hover:scale-105 active:scale-95 bg-[var(--bg-panel)]/50 border-[var(--border-main)] hover:bg-[var(--bg-panel)] hover:border-[var(--border-accent)] text-[var(--text-muted)] hover:text-[var(--text-main)] disabled:opacity-50 disabled:cursor-not-allowed"
+                                                title={currentLang === 'EN' ? 'Inspect generation instruction' : '透视生成指令'}
+                                                aria-label={currentLang === 'EN' ? 'Inspect generation instruction' : '透视生成指令'}
+                                            >
+                                                <Terminal size={18} className="group-hover:animate-pulse" />
+                                            </button>
+                                            <button
+                                                onClick={handleGenerateCustomDraft}
+                                                disabled={!customInputName.trim() || isGeneratingCustomDraft}
+                                                className="mist-traverse-action mist-app-primary-action flex items-center gap-3 px-6 py-3 rounded-lg text-xs font-bold uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(212,175,55,0.2)] hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] disabled:opacity-50 disabled:cursor-not-allowed group min-w-[180px] border hover:scale-105 active:scale-95"
+                                                style={{ boxShadow: 'none' }}
+                                            >
+                                                {isGeneratingCustomDraft ? <Loader2 size={16} className="animate-spin" /> : <Zap size={16} className="group-hover:scale-110 transition-transform" />}
+                                                <span className="tabular-nums w-full text-center">
+                                                    {isGeneratingCustomDraft
+                                                        ? (currentLang === 'EN' ? 'Generating...' : '生成中...')
+                                                        : (currentLang === 'EN' ? 'AI generate' : 'AI生成正式词条')
+                                                    }
+                                                </span>
+                                                {!isGeneratingCustomDraft && <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />}
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                                {customDraft && (
+                                    <div className={`rounded-lg border p-3 ${globalTheme === 'retro' ? 'border-[#8B261D]/18 bg-white/45' : 'border-white/10 bg-black/35'}`}>
+                                        <div className={`mb-2 flex items-center justify-between gap-3 text-[10px] font-black uppercase tracking-[0.16em] ${globalTheme === 'retro' ? 'text-[#8B261D]/75' : 'text-zinc-500'}`}>
+                                            <span>{currentLang === 'EN' ? 'AI draft preview' : 'AI草稿预览'}</span>
+                                            <span>{customDraft.id}</span>
+                                        </div>
+                                        <div className={`font-serif text-lg font-black ${globalTheme === 'retro' ? 'text-[#3D1A16]' : 'text-white'}`}>
+                                            {currentLang === 'EN' ? (customDraft.nameEn || customDraft.name) : customDraft.name}
+                                        </div>
+                                        <p className={`mt-2 text-sm leading-7 ${globalTheme === 'retro' ? 'text-[#3D1A16]/78' : 'text-zinc-200'}`}>
+                                            {currentLang === 'EN' ? (customDraft.defEn || customDraft.def) : customDraft.def}
+                                        </p>
+                                        {(customDraft.core || customDraft.coreEn || customDraft.absorptionRule || customDraft.absorptionRuleEn) && (
+                                            <p className={`mt-2 border-t pt-2 text-xs leading-6 ${globalTheme === 'retro' ? 'border-[#8B261D]/12 text-[#8B261D]/75' : 'border-white/10 text-zinc-400'}`}>
+                                                {currentLang === 'EN'
+                                                    ? (customDraft.coreEn || customDraft.absorptionRuleEn || customDraft.core || customDraft.absorptionRule)
+                                                    : (customDraft.core || customDraft.absorptionRule || customDraft.coreEn || customDraft.absorptionRuleEn)
+                                                }
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
                                 <div className="flex justify-end gap-2">
-                                    <button onClick={() => setShowCustomInput(false)} className={`px-4 py-2 text-xs font-bold ${globalTheme === 'retro' ? 'text-[#8B261D]/50' : 'text-zinc-500'} hover:opacity-80`}>{currentLang === 'EN' ? "Cancel" : "取消"}</button>
-                                    <button onClick={handleAddCustom} disabled={!customInputName} className={`px-6 py-2 text-xs font-bold ${globalTheme === 'retro' ? 'bg-[#8B261D] text-white' : 'bg-white text-black'} rounded hover:opacity-90 disabled:opacity-50`}>{currentLang === 'EN' ? "Add & Select" : "添加并选择"}</button>
+                                    <button onClick={resetCustomComposer} className={`px-4 py-2 text-xs font-bold ${globalTheme === 'retro' ? 'text-[#8B261D]/50' : 'text-zinc-500'} hover:opacity-80`}>{currentLang === 'EN' ? "Cancel" : "取消"}</button>
+                                    <button onClick={handleAddCustom} disabled={!customInputName && !customDraft} className={`px-6 py-2 text-xs font-bold ${globalTheme === 'retro' ? 'bg-[#8B261D] text-white' : 'bg-white text-black'} rounded hover:opacity-90 disabled:opacity-50`}>
+                                        {customDraft
+                                            ? (currentLang === 'EN' ? "Import & Select" : "导入并选择")
+                                            : (currentLang === 'EN' ? "Add & Select" : "添加并选择")
+                                        }
+                                    </button>
                                 </div>
                             </div>
                         )}
@@ -1305,5 +1922,13 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                 </div>
             );
         })()}
+        <XRayInspectorModal
+            isOpen={showCustomDraftPrompt}
+            onClose={() => setShowCustomDraftPrompt(false)}
+            lang={currentLang === 'EN' ? 'EN' : 'CN'}
+            title={currentLang === 'EN' ? 'Lexicon Generation X-Ray' : '词条生成指令透视仪'}
+            sources={getCustomDraftSources}
+            buildPayload={(values) => buildCustomDraftPromptFromValues(values)}
+        />
     </>, document.body);
 }

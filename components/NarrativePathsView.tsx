@@ -43,7 +43,7 @@ interface NarrativePathsViewProps {
     onAddCustomDef?: (name: string, def: string, core: string) => void;
     isAdmin?: boolean;
     isTaskManagerOpen?: boolean;
-    setIsTaskManagerOpen?: (open: boolean) => void;
+    setIsTaskManagerOpen?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const countNarrativeUnits = (text: string): number => {
@@ -874,7 +874,7 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
 
                     <button
                         className={`mist-app-footer-control ${isTaskManagerOpen ? 'is-active' : ''} flex flex-col items-center gap-1.5 shrink-0 min-w-[60px] relative`}
-                        onClick={() => setIsTaskManagerOpen?.(!isTaskManagerOpen)}
+                        onClick={() => setIsTaskManagerOpen?.(open => !open)}
                     >
                         <div className="relative">
                             {/* Breathing Light */}
@@ -886,7 +886,7 @@ export const NarrativePathsView: React.FC<NarrativePathsViewProps> = ({
                             )}
                             <Activity size={18} className={`relative z-10 transition-colors ${isTaskManagerOpen ? getThemeColor() : (theme === 'retro' ? 'text-[var(--text-muted)] group-hover:text-[var(--text-main)]' : 'text-zinc-400 group-hover:text-white')}`} />
                             {activeTaskCount > 0 && (
-                                <span className={`mist-task-count-badge absolute -top-1 -right-1 w-4 h-4 bg-[var(--bg-panel)] border border-[var(--border-main)] ${getThemeColor()} rounded-full text-[9px] flex items-center justify-center font-bold shadow-none z-20 leading-none`}>
+                                <span className="mist-task-count-badge absolute -top-1 -right-1 w-4 h-4 bg-[var(--mist-archive-red)] rounded-full text-[9px] flex items-center justify-center font-bold text-white shadow-[0_0_10px_var(--accent-glow)] z-20 leading-none">
                                     {activeTaskCount}
                                 </span>
                             )}

@@ -712,6 +712,7 @@ ${boundaryRule}`);
 /** 从已选 SUR 参数构建动态任务句式——与左侧边栏「故事摘要」完全对齐 */
 /** 年份格式化：匹配侧边栏前端显示（-125 → 公元前125年，2024 → 公元2024年） */
 export const formatYear = (yearStr: string): string => {
+  if (!/^-?\d+$/.test(String(yearStr).trim())) return yearStr;
   const num = parseInt(yearStr, 10);
   if (isNaN(num)) return yearStr;
   if (num < 0) return `公元前${Math.abs(num)}年`;
@@ -1744,7 +1745,7 @@ ${surFusionRule}
 ${optionalSections.join('\n\n')}`;
 };
 
-const buildJsonShape = (keys: string[]): string => keys.map(s => `"${s}": "..."`).join(', ');
+const buildJsonShape = (keys: readonly string[]): string => keys.map(s => `"${s}": "..."`).join(', ');
 
 type Sv2CapacityBrief = {
   runtimeLabel: string;

@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { X, Wand2, Play, Eraser, Volume2, Video, Sliders, FileText, Check, Copy, Monitor, Film, Zap, ChevronRight, ChevronDown, BookOpen, Save, FilePlus, Aperture, Clapperboard, LayoutGrid, Mic2, Crosshair } from 'lucide-react';
-import { SutureConfig, SutureControlVersion, DensityLevel, BlueprintLanguage, DriverType, LibraryCategoryDef, MetonymyStylePreset } from '../types';
+import { SutureConfig, SutureControlVersion, DensityLevel, BlueprintLanguage, DriverType, LibraryCategoryDef, MetonymyStylePreset, NarrativeFieldState, GlobalVisualTone, FinalAssetsData } from '../types';
 import { DIALOGUE_STYLES, VOICEOVER_STYLES, MONOLOGUE_STYLES, VISUAL_STYLES, FILM_CASES, SCENE_MODES, SCENE_FUNCTIONS, SHOT_BUDGETS, SOUND_ARCHITECTURES } from '../data/suture/styles';
 import { MONTAGE_STYLES } from '../data/suture/montage';
 import { NarrativeLibraryModal } from './NarrativeLibraryModal';
@@ -8,6 +8,7 @@ import { ProcessingTimer } from './SharedBlueprintComponents';
 import { useTheme } from '../contexts/ThemeContext';
 import { AdminXRayButton, type XRaySourceGroup } from './XRayInspector';
 import { buildSutureStep1Prompt } from '../services/suture_script_prompt';
+import { createDefaultSutureConfig } from '../services/sutureConfig';
 
 interface SutureModalProps {
     isOpen: boolean;
@@ -26,6 +27,10 @@ interface SutureModalProps {
     generationStartTime?: number | null;
     presets?: MetonymyStylePreset[];
     activePresetId?: string;
+    fieldState?: NarrativeFieldState;
+    partIndex?: number;
+    previousContext?: string;
+    globalStyleContext?: { tone: GlobalVisualTone, assets: FinalAssetsData };
     isAdmin?: boolean;
 }
 
@@ -146,31 +151,16 @@ export const SutureModal: React.FC<SutureModalProps> = ({
     generationStartTime,
     presets,
     activePresetId,
+    fieldState,
+    partIndex = 1,
+    previousContext = "",
+    globalStyleContext,
     isAdmin
 }) => {
     const { theme: globalTheme } = useTheme();
     const [sourceText, setSourceText] = useState("");
     const [resultText, setResultText] = useState("");
-    const [config, setConfig] = useState<SutureConfig>({
-        controlVersion: 'v2',
-        sceneMode: 'AUTO',
-        sceneFunction: 'AUTO',
-        shotBudget: 'AUTO',
-        soundArchitecture: 'AUTO',
-        dialogueDensity: 'AUTO',
-        dialogueStyle: 'dial_default',
-        voiceoverDensity: 'AUTO',
-        voiceoverStyle: 'vo_default',
-        monologueDensity: 'AUTO',
-        monologueStyle: 'mono_default',
-        visualStyle: 'vis_wkw',
-        filmCaseId: 'filmcase_none',
-        shotDensity: 'SHOTS_12',
-        subjectFocus: 'AUTO',
-        emptyShot: 'AUTO',
-        montageId: 'montage_none',
-        targetPresetId: activePresetId || 'original',
-    });
+    const [config, setConfig] = useState<SutureConfig>(() => createDefaultSutureConfig(activePresetId || 'original'));
 
     const [copied, setCopied] = useState(false);
     const [saved, setSaved] = useState(false);
@@ -184,8 +174,9 @@ export const SutureModal: React.FC<SutureModalProps> = ({
     useEffect(() => {
         if (isOpen) {
             setSourceText(initialContent || "");
+            setConfig(prev => ({ ...prev, targetPresetId: activePresetId || 'original' }));
         }
-    }, [isOpen, initialContent]);
+    }, [isOpen, initialContent, activePresetId]);
 
     const getTheme = () => {
         if (globalTheme === 'retro') {
@@ -635,9 +626,10 @@ export const SutureModal: React.FC<SutureModalProps> = ({
                                             String(values.sourceText || ''),
                                             buildSandboxConfig(values),
                                             String(values.totalSourceText || ''),
-                                            undefined,
-                                            1,
-                                            ''
+                                            fieldState,
+                                            partIndex,
+                                            previousContext,
+                                            globalStyleContext
                                         )}
                                         disabled={!sourceText}
                                     />
