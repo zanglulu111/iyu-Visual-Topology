@@ -21,6 +21,7 @@ const WHEEL_GESTURE_IDLE_MS = 260;
 const WHEEL_AXIS_SWITCH_RATIO = 2.35;
 const WHEEL_SCROLL_MULTIPLIER = 1.18;
 const WHEEL_SMALL_GESTURE_HOLD_MS = 260;
+const ARCHIVE_FALLBACK_IMAGE = '/portal-assets/subject-archive-lower-1777901002241-light.webp';
 
 const categoryMeta: Record<ArchiveCategory, {
     labelCn: string;
@@ -129,7 +130,7 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
                 category: dossier.category,
                 summaryCn: dossier.summary,
                 summaryEn: dossier.summaryEn || dossier.summary,
-                imageUrl: dossier.imageUrl || '/portal-assets/subject-archive-lower-1777901002241.png',
+                imageUrl: dossier.imageUrl || ARCHIVE_FALLBACK_IMAGE,
                 date: (dossier.publishedAt || dossier.updatedAt || dossier.createdAt).slice(0, 10),
                 sourceDossier: dossier,
                 content: {
@@ -570,7 +571,7 @@ export const ArchiveDirectoryModal: React.FC<ArchiveDirectoryModalProps> = ({
                     z-index: 0;
                     inset: -8% -16% -4% -8%;
                     opacity: 0.94;
-                    background: url('/portal-assets/subject-archive-lower-1777901002241.png') left bottom / min(78vw, 80rem) auto no-repeat;
+                    background: url('/portal-assets/subject-archive-lower-1777901002241-light.webp') left bottom / min(78vw, 80rem) auto no-repeat;
                     filter: saturate(1.04) contrast(1.08) brightness(0.98);
                     -webkit-mask-image: radial-gradient(ellipse 68% 58% at 27% 86%, #000 0%, #000 36%, rgba(0,0,0,0.74) 50%, rgba(0,0,0,0.24) 66%, transparent 88%);
                     mask-image: radial-gradient(ellipse 68% 58% at 27% 86%, #000 0%, #000 36%, rgba(0,0,0,0.74) 50%, rgba(0,0,0,0.24) 66%, transparent 88%);

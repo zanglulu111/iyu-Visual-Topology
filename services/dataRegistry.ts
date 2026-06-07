@@ -90,7 +90,7 @@ const buildLibMap = () => {
         'EXPERIMENTAL': [...POETIC_ENGINE_LIBRARY, ...EXPERIMENTAL_SKIN_LIBRARY],
         'TRAILER': [...TRAILER_ENGINE_LIBRARY, ...TRAILER_SKIN_LIBRARY],
         'AESTHETIC': [...AESTHETIC_ENGINE_LIBRARY, ...SKIN_LIBRARY, ...COMMERCIAL_ENGINE_LIBRARY],
-        'CONCEPT_DESIGN': [...CONCEPT_ENGINE_LIBRARY, ...AESTHETIC_ENGINE_LIBRARY]
+        'CONCEPT_DESIGN': [...CONCEPT_ENGINE_LIBRARY]
     };
     return _libMap;
 };
@@ -229,6 +229,7 @@ export const findItemFull = (tagName: string, blockId?: string) => {
         else if (blockId.startsWith('exp_') || blockId.startsWith('poe_')) targetLibs = libMap['EXPERIMENTAL'];
         else if (blockId.startsWith('trl_')) targetLibs = libMap['TRAILER'];
         else if (blockId.startsWith('aes_')) targetLibs = libMap['AESTHETIC'];
+        else if (blockId.startsWith('cd_')) targetLibs = libMap['CONCEPT_DESIGN'];
         else if (blockId.startsWith('skin_') || blockId.startsWith('engine_')) targetLibs = libMap['NARRATIVE'];
         
         if (targetLibs.length > 0) {

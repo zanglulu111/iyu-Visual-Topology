@@ -3,7 +3,7 @@ import { makeStyleProtocolItems, StyleProtocolFamily, StyleProtocolSeed } from '
 const ROUTE = 'FUNCTION';
 const ROUTE_NAME = '职业功能';
 const ROUTE_NAME_EN = 'Functional System';
-const ERAS = ['modern', 'contemporary', 'near_future', 'timeless'];
+const ERAS = ['industrial', 'modern', 'contemporary', 'near_future', 'timeless'];
 const FORBIDS = ['无功能装饰堆叠', '职业证据缺失', '真实机构 logo', '纯奇观化', '让职业变成不可读的随机制服'];
 
 const s = (
@@ -149,7 +149,7 @@ const families: StyleProtocolFamily[] = [
       s('safety_color_hierarchy', '安全色等级', 'Safety-Color Hierarchy', 'symbol', '高可视色只服务安全等级', 'high-visibility color serving safety rank only', ['橙黄反光', '安全背心', '黑灰底', '警示条', '功能边缘'], ['orange-yellow reflectors', 'safety vest', 'black-grey base', 'warning strip', 'functional edge'], '鲜艳色彩必须解释为安全功能。', 'Bright colors must be explained as safety function.'),
       s('repair_patch_history', '维修补丁历史', 'Repair-Patch History', 'material', '修补和替换件记录长期使用', 'repairs and replacements recording long-term use', ['补丁', '替换扣', '缝线', '磨白布边', '旧标签'], ['patch', 'replacement buckle', 'stitching', 'faded cloth edge', 'old label'], '废土和时间元素优先变成维修历史。', 'Translate wasteland and time elements into repair history.'),
       s('machine_operator_focus', '机器操作员专注', 'Machine-Operator Focus', 'pose', '操作姿态和防护小件说明机器关系', 'operating posture and protective details explaining machine relation', ['耳罩', '护目镜', '手按控制', '直视仪表', '稳定站姿'], ['ear protection', 'goggles', 'hand on control', 'watching gauge', 'stable stance'], '技术和权力元素优先转成机器操作关系。', 'Translate tech and power into machine-operation relation.'),
-      s('industrial_cyber_restraint', '工业赛博克制', 'Industrial Cyber Restraint', 'ontology', '机械接口只作为维修和工业证据', 'mechanical interfaces only as repair and industrial evidence', ['小接口', '维护盖板', '线缆束', '螺丝', '工服遮挡'], ['small port', 'maintenance panel', 'cable bundle', 'screws', 'covered by workwear'], '赛博元素必须工业维护化，不扩散成全身机甲。', 'Industrial-maintenance translate cyber elements, avoiding full-body mecha.', { ontologyLevel: 4, risk: 'high', eras: ['contemporary', 'near_future', 'far_future'] }),
+      s('industrial_cyber_restraint', '工业赛博克制', 'Industrial Cyber Restraint', 'ontology', '机械接口只作为维修和工业证据', 'mechanical interfaces only as repair and industrial evidence', ['小接口', '维护盖板', '线缆束', '螺丝', '工服遮挡'], ['small port', 'maintenance panel', 'cable bundle', 'screws', 'covered by workwear'], '赛博元素必须工业维护化，不扩散成全身机甲。', 'Industrial-maintenance translate cyber elements, avoiding full-body mecha.', { ontologyLevel: 4, risk: 'high', eras: ['industrial', 'contemporary', 'near_future', 'far_future'] }),
       s('end_of_shift_worker', '下班工人疲态', 'End-of-Shift Worker', 'cultural_image', '工作结束后的身体疲惫和真实损耗', 'post-shift fatigue and real wear', ['塌肩', '脏手套', '安全帽手持', '外套敞开', '疲惫眼神'], ['slumped shoulders', 'dirty gloves', 'helmet in hand', 'open jacket', 'tired gaze'], '情绪和劳动元素优先转成下班工人疲态。', 'Translate emotion and labor into end-of-shift worker fatigue.')
     ]
   },

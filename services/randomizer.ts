@@ -36,7 +36,7 @@ import {
 import { WORLD_LAW_LEVEL_OPTIONS, patchWorldLawConfig } from './worldLaw';
 import { withDefaultSvSelections } from '../data/engine_sv/defaults';
 import { getFocusUnitKey, isFocusableBlock } from '../utils/focusTerms';
-import { SUR3_ERAS, SUR3_SPACE_ANCHORS } from '../data/engine_surface/SUR3';
+import { getSur3EraByLooseName, getSur3EraIdsForYear, sur3EraSetsIntersect, SUR3_SPACE_ANCHORS } from '../data/engine_surface/SUR3';
 import type { Sur3EraId } from '../data/engine_surface/SUR3';
 import type { Sur6SpaceContainerItem } from '../data/engine_surface/SUR6';
 
@@ -144,28 +144,21 @@ const getSur3EraIdFromTimeAnchor = (value: string): Sur3EraId | null => {
     const trimmed = value.trim();
     if (!trimmed) return null;
 
-    const normalized = trimmed.replace(/\s+/g, '').replace(/[_-]+/g, '').replace(/年$/, '').toLowerCase();
-    const matchedEra = SUR3_ERAS.find(era =>
-        [era.id, era.name, era.nameEn].some(label =>
-            label.replace(/\s+/g, '').replace(/[_-]+/g, '').replace(/年$/, '').toLowerCase() === normalized
-        )
-    );
+    const matchedEra = getSur3EraByLooseName(trimmed);
     if (matchedEra) return matchedEra.id;
 
     if (/^-?\d+$/.test(trimmed)) {
         const year = Number(trimmed);
-        return SUR3_ERAS.find(era =>
-            (era.yearRanges || []).some(([start, end]) => year >= start && year <= end)
-        )?.id || null;
+        return getSur3EraIdsForYear(year)[0] || null;
     }
 
     return null;
 };
 
 const getFallbackEraGroupFromArchetype = (archetype: Archetype): Sur3EraId[] => {
-    if (archetype === 'ANCIENT') return ['primitive', 'mythic', 'slave', 'feudal'];
-    if (archetype === 'FUTURE') return ['near_future', 'future'];
-    return ['modern', 'contemporary'];
+    if (archetype === 'ANCIENT') return ['primitive', 'mythic', 'slave', 'feudal', 'early_modern'];
+    if (archetype === 'FUTURE') return ['near_future', 'far_future', 'future'];
+    return ['industrial', 'modern', 'contemporary'];
 };
 
 const getSelectedSur3Anchor = (fieldState: NarrativeFieldState) => {
@@ -186,13 +179,13 @@ export const scoreSur6ItemForState = (
     const selectedEra = getSur3EraIdFromTimeAnchor(fieldState['skin_year_exact']?.[0] || '');
 
     if (selectedEra) {
-        if (sur6Item.preferredEras?.includes(selectedEra)) score += 3.2;
-        else if (sur6Item.allowedEras?.includes(selectedEra)) score += 1.2;
+        if (sur3EraSetsIntersect(sur6Item.preferredEras || [], [selectedEra])) score += 3.2;
+        else if (sur3EraSetsIntersect(sur6Item.allowedEras || [], [selectedEra])) score += 1.2;
         else score -= 2.6;
     } else {
         const fallbackEras = getFallbackEraGroupFromArchetype(archetype);
-        const preferredMatch = fallbackEras.some(era => sur6Item.preferredEras?.includes(era));
-        const allowedMatch = fallbackEras.some(era => sur6Item.allowedEras?.includes(era));
+        const preferredMatch = sur3EraSetsIntersect(sur6Item.preferredEras || [], fallbackEras);
+        const allowedMatch = sur3EraSetsIntersect(sur6Item.allowedEras || [], fallbackEras);
         if (preferredMatch) score += 1.4;
         else if (allowedMatch) score += 0.4;
         else score -= 0.8;

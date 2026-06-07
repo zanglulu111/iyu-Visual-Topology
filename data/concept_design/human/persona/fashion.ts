@@ -1,4 +1,12 @@
-import { PersonaEra, PersonaTerm } from './types';
+import {
+  cleanPersonaEras,
+  PersonaCategoryFit,
+  personaEraModeFor,
+  PersonaEra,
+  personaFit,
+  personaRealityTagsFor,
+  PersonaTerm
+} from './types';
 
 type FashionPersonaSeed = {
   id: string;
@@ -17,20 +25,204 @@ type FashionPersonaSeed = {
   forbids?: string[];
   absorptionRule?: string;
   absorptionRuleEn?: string;
+  eraMode?: PersonaTerm['eraMode'];
+  realityTags?: string[];
+  categoryFit?: PersonaTerm['categoryFit'];
 };
 
 const baseControls = ['costume', 'material', 'silhouette', 'pose', 'hair', 'makeup', 'symbol'];
 const defaultForbids = ['随机战术装备堆叠', '无解释身体异形化', '脏乱废土拼贴', '让服装品牌标志抢走原创角色身份'];
-const modernEras: PersonaEra[] = ['modern', 'contemporary', 'timeless'];
-const contemporaryEras: PersonaEra[] = ['contemporary', 'near_future', 'timeless'];
-const futureEras: PersonaEra[] = ['near_future', 'far_future', 'timeless'];
+const modernEras: PersonaEra[] = ['modern', 'contemporary'];
+const contemporaryEras: PersonaEra[] = ['contemporary', 'near_future'];
+const futureEras: PersonaEra[] = ['near_future', 'far_future'];
+
+const fashionFit = (group: string): PersonaCategoryFit => {
+  if (group.startsWith('A.')) return personaFit('weak', {
+    strong: ['fashion_idol'],
+    usable: ['boudoir_aesthetic', 'romance', 'urban_life', 'real_professional'],
+    fusion: ['surreal', 'cyberpunk', 'dark_fantasy'],
+    weak: ['wuxia', 'xianxia', 'wasteland']
+  });
+  if (group.startsWith('B.')) return personaFit('weak', {
+    strong: ['fashion_idol'],
+    usable: ['romance', 'urban_life', 'boudoir_aesthetic', 'real_professional'],
+    fusion: ['court', 'surreal', 'dark_fantasy'],
+    weak: ['wuxia', 'xianxia', 'wasteland']
+  });
+  if (group.startsWith('C.')) return personaFit('weak', {
+    strong: ['fashion_idol', 'real_professional'],
+    usable: ['urban_life', 'workplace', 'romance'],
+    fusion: ['surreal', 'cyberpunk'],
+    weak: ['historical', 'wuxia', 'xianxia']
+  });
+  if (group.startsWith('D.')) return personaFit('weak', {
+    strong: ['fashion_idol'],
+    usable: ['urban_life', 'court', 'romance'],
+    fusion: ['cyberpunk', 'dark_fantasy', 'surreal'],
+    weak: ['wasteland', 'wuxia', 'xianxia']
+  });
+  if (group.startsWith('E.')) return personaFit('weak', {
+    strong: ['fashion_idol'],
+    usable: ['urban_life', 'romance', 'real_professional'],
+    fusion: ['surreal', 'cyberpunk'],
+    weak: ['court', 'war_military', 'wasteland']
+  });
+  if (group.startsWith('F.')) return personaFit('weak', {
+    strong: ['fashion_idol', 'urban_life'],
+    usable: ['romance', 'boudoir_aesthetic'],
+    fusion: ['noir_crime', 'surreal'],
+    weak: ['wuxia', 'xianxia', 'war_military']
+  });
+  if (group.startsWith('G.')) return personaFit('weak', {
+    strong: ['fashion_idol'],
+    usable: ['court', 'historical', 'romance', 'urban_life'],
+    fusion: ['dark_fantasy'],
+    weak: ['wasteland', 'cyberpunk', 'science_fiction']
+  });
+  if (group.startsWith('H.')) return personaFit('weak', {
+    strong: ['fashion_idol', 'surreal'],
+    usable: ['urban_life', 'boudoir_aesthetic'],
+    fusion: ['cyberpunk', 'dark_fantasy', 'science_fiction'],
+    weak: ['court', 'wuxia', 'xianxia']
+  });
+  if (group.startsWith('I.')) return personaFit('weak', {
+    strong: ['fashion_idol', 'religious_ritual', 'dark_fantasy'],
+    usable: ['court', 'romance', 'boudoir_aesthetic'],
+    fusion: ['surreal', 'horror'],
+    weak: ['real_professional', 'urban_life']
+  });
+  return personaFit('weak', {
+    strong: ['real_professional', 'workplace'],
+    usable: ['fashion_idol', 'urban_life'],
+    fusion: ['romance', 'surreal'],
+    weak: ['wuxia', 'xianxia', 'wasteland']
+  });
+};
+
+const fashionFitOverrides: Record<string, PersonaCategoryFit> = {
+  balenciaga_dystopian_model: personaFit('weak', {
+    strong: ['fashion_idol'],
+    usable: ['urban_life'],
+    fusion: ['wasteland', 'cyberpunk', 'surreal'],
+    weak: ['court', 'wuxia', 'xianxia']
+  }),
+  rick_owens_cultist: personaFit('weak', {
+    strong: ['fashion_idol'],
+    usable: ['dark_fantasy', 'urban_life', 'boudoir_aesthetic'],
+    fusion: ['religious_ritual', 'surreal'],
+    weak: ['court', 'wuxia', 'xianxia']
+  }),
+  mcqueen_savage_muse: personaFit('weak', {
+    strong: ['fashion_idol'],
+    usable: ['dark_fantasy', 'boudoir_aesthetic'],
+    fusion: ['body_horror', 'fantasy', 'surreal'],
+    weak: ['court', 'real_professional', 'wasteland']
+  }),
+  vivienne_westwood_punk_aristocrat: personaFit('weak', {
+    strong: ['fashion_idol'],
+    usable: ['court', 'historical', 'urban_life'],
+    fusion: ['dark_fantasy', 'noir_crime'],
+    weak: ['xianxia', 'wasteland', 'science_fiction']
+  }),
+  schiaparelli_surreal_muse: personaFit('weak', {
+    strong: ['fashion_idol', 'surreal'],
+    usable: ['court', 'boudoir_aesthetic'],
+    fusion: ['dark_fantasy'],
+    weak: ['real_professional', 'wasteland', 'wuxia']
+  }),
+  digital_avatar_model: personaFit('weak', {
+    strong: ['fashion_idol'],
+    usable: ['cyberpunk', 'science_fiction', 'posthuman'],
+    fusion: ['surreal'],
+    weak: ['court', 'historical', 'wasteland']
+  }),
+  chaebol_heiress: personaFit('weak', {
+    strong: ['fashion_idol', 'urban_life'],
+    usable: ['court', 'romance', 'workplace'],
+    fusion: ['noir_crime'],
+    weak: ['wuxia', 'xianxia', 'wasteland']
+  }),
+  old_money_debutante: personaFit('weak', {
+    strong: ['fashion_idol', 'court'],
+    usable: ['historical', 'romance', 'urban_life'],
+    fusion: ['dark_fantasy'],
+    weak: ['wasteland', 'cyberpunk', 'xianxia']
+  }),
+  equestrian_socialite: personaFit('weak', {
+    strong: ['fashion_idol'],
+    usable: ['court', 'historical', 'romance', 'adventure'],
+    fusion: ['dark_fantasy'],
+    weak: ['cyberpunk', 'wasteland', 'xianxia']
+  }),
+  anti_fashion_art_student: personaFit('weak', {
+    strong: ['fashion_idol', 'urban_life'],
+    usable: ['surreal', 'real_professional'],
+    fusion: ['cyberpunk'],
+    weak: ['court', 'wuxia', 'xianxia']
+  }),
+  deconstructed_office_lady: personaFit('weak', {
+    strong: ['fashion_idol', 'workplace'],
+    usable: ['urban_life', 'real_professional'],
+    fusion: ['surreal'],
+    weak: ['court', 'wuxia', 'xianxia']
+  }),
+  deadstock_fabric_designer: personaFit('weak', {
+    strong: ['real_professional', 'fashion_idol'],
+    usable: ['workplace', 'ecological', 'urban_life'],
+    fusion: ['surreal'],
+    weak: ['court', 'wuxia', 'xianxia']
+  }),
+  runway_performance_artist: personaFit('weak', {
+    strong: ['fashion_idol', 'surreal'],
+    usable: ['urban_life'],
+    fusion: ['abstract'],
+    weak: ['court', 'workplace', 'wuxia']
+  }),
+  religious_vestment_couture_model: personaFit('weak', {
+    strong: ['fashion_idol', 'religious_ritual'],
+    usable: ['court', 'dark_fantasy'],
+    fusion: ['surreal'],
+    weak: ['real_professional', 'urban_life', 'wasteland']
+  }),
+  mourning_lace_countess: personaFit('weak', {
+    strong: ['fashion_idol', 'court'],
+    usable: ['dark_fantasy', 'historical', 'romance'],
+    fusion: ['religious_ritual', 'horror'],
+    weak: ['real_professional', 'urban_life', 'wasteland']
+  }),
+  latex_nun_couture: personaFit('weak', {
+    strong: ['fashion_idol', 'boudoir_aesthetic'],
+    usable: ['religious_ritual', 'dark_fantasy'],
+    fusion: ['surreal', 'horror'],
+    weak: ['real_professional', 'urban_life', 'wasteland']
+  }),
+  cathedral_runway_bride: personaFit('weak', {
+    strong: ['fashion_idol', 'religious_ritual', 'romance'],
+    usable: ['court'],
+    fusion: ['dark_fantasy', 'surreal'],
+    weak: ['real_professional', 'urban_life', 'wasteland']
+  }),
+  vampire_couture_socialite: personaFit('weak', {
+    strong: ['dark_fantasy', 'fashion_idol'],
+    usable: ['horror', 'court', 'boudoir_aesthetic'],
+    fusion: ['romance'],
+    weak: ['real_professional', 'urban_life', 'workplace']
+  }),
+  baroque_saint_model: personaFit('weak', {
+    strong: ['fashion_idol', 'religious_ritual', 'surreal'],
+    usable: ['court', 'historical'],
+    fusion: ['dark_fantasy'],
+    weak: ['real_professional', 'urban_life', 'wasteland']
+  })
+};
 
 const fp = (seed: FashionPersonaSeed): PersonaTerm => {
   const ontologyLevel = seed.ontologyLevel ?? 1;
-  const eras = seed.eras ?? modernEras;
+  const eras = cleanPersonaEras(seed.eras ?? modernEras);
   const risk = seed.risk ?? (ontologyLevel >= 4 ? 'medium' : 'clean');
   const controls = Array.from(new Set([...baseControls, ...(seed.controls || [])]));
   const styleTags = Array.from(new Set(['fashion', 'couture', ...(seed.styleTags || []), ...(seed.tags || [])]));
+  const eraMode = personaEraModeFor(eras, seed.eraMode);
   return {
     id: `cd_persona_fashion_${seed.id}`,
     name: seed.name,
@@ -48,6 +240,7 @@ const fp = (seed: FashionPersonaSeed): PersonaTerm => {
     personaStrength: ontologyLevel >= 4 ? 'strong' : ontologyLevel >= 2 ? 'medium' : 'light',
     isCompoundPersona: true,
     ontologyLevel,
+    eraMode,
     eras,
     risk,
     affects: controls,
@@ -56,14 +249,15 @@ const fp = (seed: FashionPersonaSeed): PersonaTerm => {
     absorptionRule: seed.absorptionRule || `外来元素优先折译为“${seed.name}”的服装结构、妆发、姿态、道具、社交位置或媒体图像，不要直接堆成无关职业或怪物器官。`,
     absorptionRuleEn: seed.absorptionRuleEn || `Translate outside elements into the clothing structure, hair/makeup, posture, props, social position, or media image of "${seed.nameEn}"; do not stack them as unrelated jobs or monster organs.`,
     tags: Array.from(new Set(['persona', 'fashion', 'compound_persona', ...(seed.tags || [])])),
-    realityTags: ontologyLevel <= 1 ? ['realist_safe'] : ontologyLevel <= 3 ? ['stylized_boundary'] : ['nonreal_ontology'],
+    realityTags: seed.realityTags || personaRealityTagsFor(ontologyLevel, ['fashion', 'costume']),
+    categoryFit: seed.categoryFit || fashionFitOverrides[seed.id] || fashionFit(seed.group),
     styleTags,
     timeTags: eras
   };
 };
 
 const seeds: FashionPersonaSeed[] = [
-  { id: 'nineties_supermodel', name: '90年代超模', nameEn: '1990s Supermodel', group: 'A. 高定秀场人物', groupEn: 'A. Couture Runway Figures', def: '第一识别是90年代杂志时代的冷脸超模。造型入口：长腿、硬颧骨和极简高定让她像从胶片封面和旧式T台灯光里走出。母题：商业神话化的身体职业。张力：完美可售卖与拒绝亲和之间的冷距离。视觉证据：拉长比例、烟熏后台妆、窄而锋利的服装线和不取悦镜头的表情。边界：避免普通漂亮模特或现代网红。', defEn: 'First read: a cold 1990s magazine-era supermodel. Styling entry: long legs, hard cheekbones, and minimal couture as if stepping out of film covers and old runway light. Motif: the commercially mythologized professional body. Tension: sellable perfection held at a cold distance from approachability. Visual evidence: elongated proportion, backstage smoky makeup, narrow sharp clothing, and a face that does not please the camera. Boundary: avoid a generic pretty model or modern influencer.', tags: ['supermodel', 'runway', '90s'], eras: ['modern', 'timeless'] },
+  { id: 'nineties_supermodel', name: '90年代超模', nameEn: '1990s Supermodel', group: 'A. 高定秀场人物', groupEn: 'A. Couture Runway Figures', def: '第一识别是90年代杂志时代的冷脸超模。造型入口：长腿、硬颧骨和极简高定让她像从胶片封面和旧式T台灯光里走出。母题：商业神话化的身体职业。张力：完美可售卖与拒绝亲和之间的冷距离。视觉证据：拉长比例、烟熏后台妆、窄而锋利的服装线和不取悦镜头的表情。边界：避免普通漂亮模特或现代网红。', defEn: 'First read: a cold 1990s magazine-era supermodel. Styling entry: long legs, hard cheekbones, and minimal couture as if stepping out of film covers and old runway light. Motif: the commercially mythologized professional body. Tension: sellable perfection held at a cold distance from approachability. Visual evidence: elongated proportion, backstage smoky makeup, narrow sharp clothing, and a face that does not please the camera. Boundary: avoid a generic pretty model or modern influencer.', tags: ['supermodel', 'runway', '90s'], eras: ['modern'] },
   { id: 'couture_muse', name: '高定缪斯', nameEn: 'Couture Muse', group: 'A. 高定秀场人物', groupEn: 'A. Couture Runway Figures', def: '第一识别是被高定系统选中的活体缪斯，不是单纯穿漂亮衣服的人。造型入口：被高定系统选中的活体缪斯，不是单纯穿漂亮衣服的人。母题：设计师欲望的身体载体。张力：主体存在感被服装压过，却仍要保留一个安静、难以替代的人格中心。视觉证据：夸张衣量、实验剪裁、非日常站姿和近乎空白的表情。边界：避免把她写成普通礼服模特或品牌展示架。', defEn: 'First read: a living muse chosen by a couture system, not merely someone in beautiful clothes. Styling entry: a living muse chosen by a couture system, not merely someone in beautiful clothes. Motif: the body-carrier of a designer’s desire. Tension: the garment may overpower the subject while a quiet, irreplaceable personhood still remains. Visual evidence: extreme volume, experimental cut, non-daily stance, and an almost blank expression. Boundary: avoid reduce her to a generic gown model or brand mannequin.', tags: ['muse', 'couture', 'designer'] },
   { id: 'runway_finale_gown_model', name: '压轴礼服模特', nameEn: 'Finale Gown Runway Model', group: 'A. 高定秀场人物', groupEn: 'A. Couture Runway Figures', def: '第一识别是秀场最后一套礼服的仪式中心。造型入口：秀场最后一套礼服的仪式中心。母题：被全场凝视托起的压轴身体。张力：她必须像胜利者一样出现，却几乎被礼服重量、拖尾和珠绣反光拖住。视觉证据：巨大裙摆、慢而稳的步伐、被压低的肩颈和全场观看压力。边界：避免只写成漂亮婚纱或普通礼服展示。', defEn: 'First read: the ritual center of the final runway gown. Styling entry: the ritual center of the final runway gown. Motif: a finale body lifted by the room’s gaze. Tension: she must appear victorious while almost being held back by gown weight, train, and beadwork reflection. Visual evidence: enormous skirt mass, slow steady walk, lowered neck-shoulder line, and the pressure of being watched. Boundary: avoid making it merely a pretty bridal or generic gown display.', tags: ['finale', 'gown', 'runway'] },
   { id: 'avant_garde_runway_alien', name: '先锋异脸秀场模特', nameEn: 'Avant-Garde Alien-Face Runway Model', group: 'A. 高定秀场人物', groupEn: 'A. Couture Runway Figures', def: '第一识别是被秀场美学异化的人形模特，而不是怪物。造型入口：被秀场美学异化的人形模特，而不是怪物。母题：“高定把人脸改造成外星界面”。张力：非人感必须来自时装语言，同时身体仍保持可读的人类模特结构。视觉证据：冷白底妆、拉长眼型、雕塑服装、机械台步和材料反光。边界：避免生成真实外星器官或失控异形身体。', defEn: 'First read: a humanoid model alienated by runway aesthetics, not a monster. Styling entry: a humanoid model alienated by runway aesthetics, not a monster. Motif: couture turning the face into an alien interface. Tension: nonhuman feeling must come from fashion language while the body remains a readable human model base. Visual evidence: pale makeup, elongated eyes, sculptural clothing, mechanical walk, and material reflection. Boundary: avoid generate real alien organs or uncontrolled creature anatomy.', ontologyLevel: 2, eras: contemporaryEras, risk: 'medium', tags: ['avant_garde', 'alien_makeup', 'runway'] },
@@ -99,13 +293,13 @@ const seeds: FashionPersonaSeed[] = [
   { id: 'chanel_socialite', name: '香奈儿名媛', nameEn: 'Chanel Socialite', group: 'D. 奢侈品牌人格', groupEn: 'D. Luxury Brand Personas', def: '第一识别是把经典上流克制穿成日常制服的虚构奢侈名媛。造型入口：把经典上流克制穿成日常制服的虚构奢侈名媛。母题：被礼仪和品牌语法长期训练过的社交身体。张力：她看似柔和礼貌，实际用距离感维持阶层边界。视觉证据：粗花呢套装、珍珠、菱格纹包感、山茶花式配饰、挺直背部和小幅度手势。边界：避免使用真实logo，也不要写成普通富家女孩。', defEn: 'First read: a fictional luxury socialite wearing classic upper-class restraint as a daily uniform. Styling entry: a fictional luxury socialite wearing classic upper-class restraint as a daily uniform. Motif: a social body trained for years by etiquette and brand grammar. Tension: she appears soft and polite while using distance to maintain class borders. Visual evidence: tweed suit, pearls, quilted-bag feeling, camellia-like accessory, straight back, and small gestures. Boundary: avoid use real logos or make her a generic rich girl.', tags: ['chanel', 'tweed', 'socialite'] },
   { id: 'dior_princess', name: '迪奥公主', nameEn: 'Dior Princess', group: 'D. 奢侈品牌人格', groupEn: 'D. Luxury Brand Personas', def: '第一识别是被花朵、腰线和柔光保护起来的浪漫高定公主。造型入口：被花朵、腰线和柔光保护起来的浪漫高定公主。母题：温室式贵族少女。张力：甜美必须被工艺和阶层距离托住，不能滑向廉价可爱。视觉证据：花朵刺绣、收腰大裙、柔软妆面、被呵护出的慢动作和不直接接近人的眼神。边界：避免写成童话公主或普通甜妹礼服。', defEn: 'First read: a romantic couture princess protected by flowers, waistline, and soft light. Styling entry: a romantic couture princess protected by flowers, waistline, and soft light. Motif: a greenhouse aristocratic girl. Tension: sweetness must be held by craft and class distance, never cheap cuteness. Visual evidence: floral embroidery, cinched full skirt, soft makeup, sheltered slow movement, and eyes that do not fully invite approach. Boundary: avoid making her a fairy-tale princess or generic sweet gown girl.', tags: ['dior', 'princess', 'romantic'] },
   { id: 'gucci_geek_heir', name: '古驰怪咖继承人', nameEn: 'Gucci Geek Heir', group: 'D. 奢侈品牌人格', groupEn: 'D. Luxury Brand Personas', def: '第一识别是把书呆子怪趣味穿成继承资产的奢侈怪咖。造型入口：把书呆子怪趣味穿成继承资产的奢侈怪咖。母题：旧书、奇怪家具和过量图案里长大的富家继承人。张力：品味故意不协调，却明显有钱、有知识、有收藏癖支撑。视觉证据：复古大眼镜、撞色图案、丰盛层次、怪异配饰和自信到不解释的站姿。边界：避免写成普通宅男宅女或随机花哨潮人。', defEn: 'First read: a luxury eccentric wearing nerdy weird taste as inherited capital. Styling entry: a luxury eccentric wearing nerdy weird taste as inherited capital. Motif: a wealthy heir raised among old books, strange furniture, and excessive pattern. Tension: deliberate mismatch supported by money, knowledge, and collecting instinct. Visual evidence: oversized vintage glasses, clashing patterns, abundant layers, odd accessories, and a posture confident enough not to explain. Boundary: avoid making a generic nerd or random flashy street dresser.', tags: ['gucci', 'geek', 'eccentric'] },
-  { id: 'balenciaga_dystopian_model', name: '巴黎世家末世模特', nameEn: 'Balenciaga Dystopian Model', group: 'D. 奢侈品牌人格', groupEn: 'D. Luxury Brand Personas', def: '第一识别是被奢侈工业包装成末世废墟感的巨型廓形模特。造型入口：被奢侈工业包装成末世废墟感的巨型廓形模特。母题：商业化灾难美学里的空脸身体。张力：她像幸存者，却没有真正求生的脏乱，只剩昂贵、沉重、压低人的造型压力。视觉证据：巨大外套、泥地秀场感、空表情、厚重鞋、身体被衣服吞下的比例。边界：避免写成真实灾民或科幻战士。', defEn: 'First read: an oversized-silhouette model packaged by luxury industry as dystopian ruin. Styling entry: an oversized-silhouette model packaged by luxury industry as dystopian ruin. Motif: a blank-faced body inside commercial disaster aesthetics. Tension: she resembles a survivor without real survival dirt, leaving only expensive, heavy, body-suppressing styling pressure. Visual evidence: enormous outerwear, mud-runway feeling, empty expression, heavy shoes, and a proportion swallowed by clothing. Boundary: avoid making a real disaster victim or sci-fi soldier.', ontologyLevel: 2, risk: 'medium', tags: ['balenciaga', 'dystopian', 'oversized'] },
-  { id: 'rick_owens_cultist', name: 'Rick Owens黑袍信徒', nameEn: 'Rick Owens Black-Robed Devotee', group: 'D. 奢侈品牌人格', groupEn: 'D. Luxury Brand Personas', def: '第一识别是把黑色垂坠和身体纪律穿成地下仪式的人。造型入口：把黑色垂坠和身体纪律穿成地下仪式的人。母题：健身房、神殿和秀场混合出的严肃时装信徒。张力：他像异教成员，却所有神秘感都来自比例、肌肉控制和布料重量。视觉证据：黑色层叠、厚底靴、苍白皮肤、长线条、低头姿态和雕塑般身体秩序。边界：避免写成普通哥特或真正宗教角色。', defEn: 'First read: a figure wearing black drape and body discipline as underground ritual. Styling entry: a figure wearing black drape and body discipline as underground ritual. Motif: a severe fashion devotee born from gym, temple, and runway at once. Tension: cult-like presence whose mystery comes only from proportion, muscle control, and textile weight. Visual evidence: black layers, platform boots, pale skin, long lines, lowered head, and sculptural bodily order. Boundary: avoid making ordinary goth or a real religious figure.', ontologyLevel: 2, risk: 'medium', tags: ['rick_owens', 'black_layers', 'cult'] },
-  { id: 'mcqueen_savage_muse', name: '麦昆野性缪斯', nameEn: 'McQueen Savage Muse', group: 'D. 奢侈品牌人格', groupEn: 'D. Luxury Brand Personas', def: '第一识别是介于美、受伤和攻击性之间的野性高定缪斯。造型入口：介于美、受伤和攻击性之间的野性高定缪斯。母题：被自然残酷美和精密工艺共同制成的活标本。张力：她可以带动物性和危险感，但必须始终保持高定精度。视觉证据：羽毛、骨感配饰、尖锐廓形、脆弱眼神、戏剧姿态和像伤口一样精确的剪裁。边界：避免写成野兽女孩或普通暗黑模特。', defEn: 'First read: a savage couture muse between beauty, injury, and aggression. Styling entry: a savage couture muse between beauty, injury, and aggression. Motif: a living specimen produced by cruel nature and exact craft together. Tension: animality and danger are allowed only while couture precision remains intact. Visual evidence: feathers, bone-like accessories, sharp silhouette, vulnerable eyes, dramatic posture, and cuts as precise as wounds. Boundary: avoid making her a beast girl or generic dark model.', ontologyLevel: 2, risk: 'medium', tags: ['mcqueen', 'savage', 'muse'] },
+  { id: 'balenciaga_dystopian_model', name: '巴黎世家末世模特', nameEn: 'Balenciaga Dystopian Model', group: 'D. 奢侈品牌人格', groupEn: 'D. Luxury Brand Personas', def: '第一识别是被奢侈工业包装成末世废墟感的巨型廓形模特。造型入口：被奢侈工业包装成末世废墟感的巨型廓形模特。母题：商业化灾难美学里的空脸身体。张力：她像幸存者，却没有真正求生的脏乱，只剩昂贵、沉重、压低人的造型压力。视觉证据：巨大外套、泥地秀场感、空表情、厚重鞋、身体被衣服吞下的比例。边界：避免写成真实灾民或科幻战士。', defEn: 'First read: an oversized-silhouette model packaged by luxury industry as dystopian ruin. Styling entry: an oversized-silhouette model packaged by luxury industry as dystopian ruin. Motif: a blank-faced body inside commercial disaster aesthetics. Tension: she resembles a survivor without real survival dirt, leaving only expensive, heavy, body-suppressing styling pressure. Visual evidence: enormous outerwear, mud-runway feeling, empty expression, heavy shoes, and a proportion swallowed by clothing. Boundary: avoid making a real disaster victim or sci-fi soldier.', ontologyLevel: 2, risk: 'medium', tags: ['balenciaga', 'dystopian', 'oversized'], categoryFit: personaFit('weak', { strong: ['fashion_idol'], usable: ['urban_life'], fusion: ['wasteland', 'cyberpunk', 'surreal'], weak: ['court', 'wuxia', 'xianxia'] }) },
+  { id: 'rick_owens_cultist', name: 'Rick Owens黑袍信徒', nameEn: 'Rick Owens Black-Robed Devotee', group: 'D. 奢侈品牌人格', groupEn: 'D. Luxury Brand Personas', def: '第一识别是把黑色垂坠和身体纪律穿成地下仪式的人。造型入口：把黑色垂坠和身体纪律穿成地下仪式的人。母题：健身房、神殿和秀场混合出的严肃时装信徒。张力：他像异教成员，却所有神秘感都来自比例、肌肉控制和布料重量。视觉证据：黑色层叠、厚底靴、苍白皮肤、长线条、低头姿态和雕塑般身体秩序。边界：避免写成普通哥特或真正宗教角色。', defEn: 'First read: a figure wearing black drape and body discipline as underground ritual. Styling entry: a figure wearing black drape and body discipline as underground ritual. Motif: a severe fashion devotee born from gym, temple, and runway at once. Tension: cult-like presence whose mystery comes only from proportion, muscle control, and textile weight. Visual evidence: black layers, platform boots, pale skin, long lines, lowered head, and sculptural bodily order. Boundary: avoid making ordinary goth or a real religious figure.', ontologyLevel: 2, risk: 'medium', tags: ['rick_owens', 'black_layers', 'cult'], categoryFit: personaFit('weak', { strong: ['fashion_idol'], usable: ['dark_fantasy', 'urban_life', 'boudoir_aesthetic'], fusion: ['religious_ritual', 'surreal'], weak: ['court', 'wuxia', 'xianxia'] }) },
+  { id: 'mcqueen_savage_muse', name: '麦昆野性缪斯', nameEn: 'McQueen Savage Muse', group: 'D. 奢侈品牌人格', groupEn: 'D. Luxury Brand Personas', def: '第一识别是介于美、受伤和攻击性之间的野性高定缪斯。造型入口：介于美、受伤和攻击性之间的野性高定缪斯。母题：被自然残酷美和精密工艺共同制成的活标本。张力：她可以带动物性和危险感，但必须始终保持高定精度。视觉证据：羽毛、骨感配饰、尖锐廓形、脆弱眼神、戏剧姿态和像伤口一样精确的剪裁。边界：避免写成野兽女孩或普通暗黑模特。', defEn: 'First read: a savage couture muse between beauty, injury, and aggression. Styling entry: a savage couture muse between beauty, injury, and aggression. Motif: a living specimen produced by cruel nature and exact craft together. Tension: animality and danger are allowed only while couture precision remains intact. Visual evidence: feathers, bone-like accessories, sharp silhouette, vulnerable eyes, dramatic posture, and cuts as precise as wounds. Boundary: avoid making her a beast girl or generic dark model.', ontologyLevel: 2, risk: 'medium', tags: ['mcqueen', 'savage', 'muse'], categoryFit: personaFit('weak', { strong: ['fashion_idol'], usable: ['dark_fantasy', 'boudoir_aesthetic'], fusion: ['body_horror', 'fantasy', 'surreal'], weak: ['court', 'real_professional', 'wasteland'] }) },
   { id: 'prada_intellectual', name: '普拉达知性怪人', nameEn: 'Prada Intellectual Oddball', group: 'D. 奢侈品牌人格', groupEn: 'D. Luxury Brand Personas', def: '第一识别是故意拒绝讨好性感的知性时装怪人。造型入口：故意拒绝讨好性感的知性时装怪人。母题：聪明、别扭、克制的反漂亮身体。张力：她看似不追求好看，却通过比例、尼龙材质和冷静态度显得更高级。视觉证据：实用包、尼龙、丑美学配色、平静表情、略硬的站姿和不解释的知识分子气。边界：避免写成普通办公室知性或随便穿错衣服。', defEn: 'First read: an intellectual fashion oddball deliberately refusing pleasing sexiness. Styling entry: an intellectual fashion oddball deliberately refusing pleasing sexiness. Motif: a smart, awkward, restrained anti-pretty body. Tension: she seems not to seek beauty but becomes refined through proportion, nylon material, and calm attitude. Visual evidence: practical bag, nylon, ugly-chic palette, quiet face, slightly stiff stance, and unexplained intellectual air. Boundary: avoid making a generic office intellectual or accidental bad dresser.', tags: ['prada', 'intellectual', 'nylon'] },
   { id: 'margiela_masked_model', name: 'Margiela面具模特', nameEn: 'Margiela Masked Model', group: 'D. 奢侈品牌人格', groupEn: 'D. Luxury Brand Personas', def: '第一识别是脸被撤走、服装结构被推到前台的匿名模特。造型入口：脸被撤走、服装结构被推到前台的匿名模特。母题：身份退场后的解构载体。张力：角色不靠五官成立，而靠轮廓、线迹和被消隐的自我感成立。视觉证据：遮脸面具、白色线迹、反穿衣片、标签残影、空白姿态和不寻求表情的身体。边界：避免写成怪物面具或神秘刺客。', defEn: 'First read: an anonymous model whose face is removed so garment structure steps forward. Styling entry: an anonymous model whose face is removed so garment structure steps forward. Motif: a deconstructed carrier after identity exits. Tension: the character cannot rely on features, only on silhouette, stitches, and erased selfhood. Visual evidence: face covering, white stitches, inside-out garment pieces, label residue, blank posture, and a body not seeking expression. Boundary: avoid making a monster mask or mysterious assassin.', ontologyLevel: 2, risk: 'medium', tags: ['margiela', 'mask', 'deconstruction'] },
-  { id: 'vivienne_westwood_punk_aristocrat', name: '西太后朋克贵族', nameEn: 'Vivienne Westwood Punk Aristocrat', group: 'D. 奢侈品牌人格', groupEn: 'D. Luxury Brand Personas', def: '第一识别是懂礼仪却故意拆礼仪的英伦朋克贵族。造型入口：懂礼仪却故意拆礼仪的英伦朋克贵族。母题：把王室残影、束身衣和街头叛逆拧在一起的反传统身体。张力：她既有阶层遗产，又把遗产穿成挑衅。视觉证据：格纹、束身衣、珍珠、歪斜王冠、裙撑、破坏性配饰和挑衅站姿。边界：避免写成普通朋克女孩或规整宫廷贵族。', defEn: 'First read: a British punk aristocrat who knows etiquette and deliberately breaks it. Styling entry: a British punk aristocrat who knows etiquette and deliberately breaks it. Motif: an anti-tradition body twisting royal residue, corsetry, and street rebellion together. Tension: she has class inheritance but wears it as provocation. Visual evidence: tartan, corset, pearls, tilted crown, crinoline, destructive accessories, and challenging stance. Boundary: avoid making a generic punk girl or proper court noble.', tags: ['westwood', 'punk', 'aristocrat'] },
-  { id: 'schiaparelli_surreal_muse', name: 'Schiaparelli超现实缪斯', nameEn: 'Schiaparelli Surreal Muse', group: 'D. 奢侈品牌人格', groupEn: 'D. Luxury Brand Personas', def: '第一识别是把梦境符号穿成高级珠宝的超现实缪斯。造型入口：把梦境符号穿成高级珠宝的超现实缪斯。母题：优雅礼服表面长出荒诞视觉谜题的人。张力：异常必须昂贵、清晰、可控，不能滑成怪物身体。视觉证据：金色身体部件珠宝、眼睛符号、黑丝绒、静止表情和像谜语一样贴在衣服上的装饰。边界：避免生成真实异形器官。', defEn: 'First read: a surreal muse wearing dream symbols as high jewelry. Styling entry: a surreal muse wearing dream symbols as high jewelry. Motif: a person whose elegant gown surface carries absurd visual riddles. Tension: abnormality must stay expensive, clear, and controlled, never becoming monster anatomy. Visual evidence: gold body-part jewelry, eye symbols, black velvet, still expression, and riddle-like decorations attached to clothing. Boundary: avoid generate real anomalous organs.', ontologyLevel: 2, risk: 'medium', tags: ['schiaparelli', 'surreal', 'gold'] },
+  { id: 'vivienne_westwood_punk_aristocrat', name: '西太后朋克贵族', nameEn: 'Vivienne Westwood Punk Aristocrat', group: 'D. 奢侈品牌人格', groupEn: 'D. Luxury Brand Personas', def: '第一识别是懂礼仪却故意拆礼仪的英伦朋克贵族。造型入口：懂礼仪却故意拆礼仪的英伦朋克贵族。母题：把王室残影、束身衣和街头叛逆拧在一起的反传统身体。张力：她既有阶层遗产，又把遗产穿成挑衅。视觉证据：格纹、束身衣、珍珠、歪斜王冠、裙撑、破坏性配饰和挑衅站姿。边界：避免写成普通朋克女孩或规整宫廷贵族。', defEn: 'First read: a British punk aristocrat who knows etiquette and deliberately breaks it. Styling entry: a British punk aristocrat who knows etiquette and deliberately breaks it. Motif: an anti-tradition body twisting royal residue, corsetry, and street rebellion together. Tension: she has class inheritance but wears it as provocation. Visual evidence: tartan, corset, pearls, tilted crown, crinoline, destructive accessories, and challenging stance. Boundary: avoid making a generic punk girl or proper court noble.', tags: ['westwood', 'punk', 'aristocrat'], categoryFit: personaFit('weak', { strong: ['fashion_idol'], usable: ['court', 'historical', 'urban_life'], fusion: ['dark_fantasy', 'noir_crime'], weak: ['xianxia', 'wasteland', 'science_fiction'] }) },
+  { id: 'schiaparelli_surreal_muse', name: 'Schiaparelli超现实缪斯', nameEn: 'Schiaparelli Surreal Muse', group: 'D. 奢侈品牌人格', groupEn: 'D. Luxury Brand Personas', def: '第一识别是把梦境符号穿成高级珠宝的超现实缪斯。造型入口：把梦境符号穿成高级珠宝的超现实缪斯。母题：优雅礼服表面长出荒诞视觉谜题的人。张力：异常必须昂贵、清晰、可控，不能滑成怪物身体。视觉证据：金色身体部件珠宝、眼睛符号、黑丝绒、静止表情和像谜语一样贴在衣服上的装饰。边界：避免生成真实异形器官。', defEn: 'First read: a surreal muse wearing dream symbols as high jewelry. Styling entry: a surreal muse wearing dream symbols as high jewelry. Motif: a person whose elegant gown surface carries absurd visual riddles. Tension: abnormality must stay expensive, clear, and controlled, never becoming monster anatomy. Visual evidence: gold body-part jewelry, eye symbols, black velvet, still expression, and riddle-like decorations attached to clothing. Boundary: avoid generate real anomalous organs.', ontologyLevel: 2, risk: 'medium', tags: ['schiaparelli', 'surreal', 'gold'], categoryFit: personaFit('weak', { strong: ['fashion_idol', 'surreal'], usable: ['court', 'boudoir_aesthetic'], fusion: ['dark_fantasy'], weak: ['real_professional', 'wasteland', 'wuxia'] }) },
 
   { id: 'victorias_secret_angel', name: '维秘超模', nameEn: 'Victoria’s Secret Angel', group: 'E. 超模 / 模特工业', groupEn: 'E. Supermodel / Model Industry', def: '第一识别是商业舞台上高饱和、成人化、广告化的性感超模。造型入口：商业舞台上高饱和、成人化、广告化的性感超模。母题：被观众、灯光和品牌共同制造的健康魅力身体。张力：她必须显得轻松自信，但身体每个角度都经过训练。视觉证据：蓬松卷发、闪粉皮肤、长线条、舞台翅膀式装饰、控制过的笑容和强走台姿态。边界：避免写成未成年甜美或普通泳装写真。', defEn: 'First read: an adult, advertising-coded supermodel of high-saturation stage glamour. Styling entry: an adult, advertising-coded supermodel of high-saturation stage glamour. Motif: a healthy allure body produced by audience, lights, and brand. Tension: she must look effortless while every angle is trained. Visual evidence: voluminous waves, glittered skin, long lines, stage-wing-like decoration, controlled smile, and powerful runway walk. Boundary: avoid making it youthful sweetness or a generic swimsuit portrait.', risk: 'medium', tags: ['victorias_secret', 'supermodel', 'commercial_glamour'] },
   { id: 'model_off_duty', name: '模特下班感', nameEn: 'Model Off-Duty', group: 'E. 超模 / 模特工业', groupEn: 'E. Supermodel / Model Industry', def: '第一识别是刚离开后台、职业比例还没有关闭的下班模特。造型入口：刚离开后台、职业比例还没有关闭的下班模特。母题：被街拍系统捕捉的非正式明星身体。张力：穿得像随便出门，却仍然像被摄影机选中。视觉证据：牛仔裤、白背心、墨镜、低调名牌包、未完全卸掉的妆发和天然拉长的站姿。边界：避免写成普通休闲女孩或过度摆拍潮人。', defEn: 'First read: an off-duty model just leaving backstage, professional proportions not fully switched off. Styling entry: an off-duty model just leaving backstage, professional proportions not fully switched off. Motif: an informal star body caught by street-snap systems. Tension: she seems casually dressed yet still looks chosen by a camera. Visual evidence: jeans, white tank, sunglasses, understated designer bag, not-fully-removed hair and makeup, and naturally elongated stance. Boundary: avoid making a normal casual girl or over-posed influencer.', tags: ['off_duty', 'model', 'street_snap'] },

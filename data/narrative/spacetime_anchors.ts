@@ -9,7 +9,6 @@ import {
   SUR2_GROUP_F,
   SUR2_GROUP_G,
   SUR2_GROUP_H,
-  SUR2_GROUP_I,
   SUR2_GROUP_J
 } from '../engine_surface/SUR2';
 
@@ -22,6 +21,5 @@ export const NARRATIVE_ERA_CATEGORIES: LibraryCategoryDef[] = [
   SUR2_GROUP_F,
   SUR2_GROUP_G,
   SUR2_GROUP_H,
-  SUR2_GROUP_I,
   SUR2_GROUP_J
 ];

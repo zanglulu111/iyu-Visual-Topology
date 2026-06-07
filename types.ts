@@ -37,7 +37,7 @@ export type ViewMode = 'ENGINE' | 'DIVERGENCE' | 'BIBLE' | 'METONYMY' | 'CANVAS'
 export type SubjectType = 'HUMAN' | 'CREATURE';
 export type AestheticMode = 'REALISM' | 'STYLIZED';
 export type ConceptDesignSourceMode = 'PRESET' | 'IDEA' | 'ARTICLE' | 'IMAGE';
-export type ConceptDesignPhysicalMediumCategory = 'PAINTING' | 'CGI' | 'PHOTOGRAPHY' | 'TANGIBLE';
+export type ConceptDesignPhysicalMediumCategory = 'PAINTING' | 'CGI' | 'PHOTOGRAPHY' | 'TANGIBLE' | 'ALL';
 export type ConceptDesignBodyFormMode = 'HUMANOID_DISGUISE' | 'VISIBLE_HYBRID' | 'BEAST_BODY' | 'XENO_BODY';
 export type ConceptDesignWorkspacePage = 'ENGINE' | 'VARIABLES' | 'PROMPT';
 export type ConceptDesignHumanRegister = 'REALISTIC' | 'HISTORICAL' | 'PROFESSIONAL' | 'FASHION' | 'COMBAT' | 'RITUAL' | 'SOCIAL' | 'SCIFI' | 'FANTASY' | 'WASTELAND';
@@ -97,6 +97,40 @@ export type MAxisMixerState = Partial<Record<MAxisMixerSlot, MAxisMixerLevel>>;
 
 export type AestheticLogicMode = 'DEFAULT' | 'IDENTITY' | 'ACTION' | 'ATMOSPHERE' | 'LOOK' | 'TECH';
 
+export type FramingProfileGoal =
+  | 'subject'
+  | 'portrait'
+  | 'space'
+  | 'action'
+  | 'fashion'
+  | 'documentary'
+  | 'object'
+  | 'abstract';
+
+export type FramingProfileDistance =
+  | 'none'
+  | 'macro'
+  | 'close'
+  | 'medium'
+  | 'full'
+  | 'wide'
+  | 'extreme_wide';
+
+export type FramingProfileSubjectReadability = 'high' | 'medium' | 'low';
+export type FramingProfileDistortion = 'none' | 'mild' | 'strong' | 'extreme';
+export type FramingProfileMotion = 'still' | 'natural' | 'fast' | 'blurred' | 'experimental';
+export type FramingProfileOpticalRisk = 'none' | 'low' | 'medium' | 'high';
+
+export interface FramingProfile {
+  goals: readonly FramingProfileGoal[];
+  distance: FramingProfileDistance;
+  subjectReadability: FramingProfileSubjectReadability;
+  distortion: FramingProfileDistortion;
+  motion: FramingProfileMotion;
+  opticalRisk: FramingProfileOpticalRisk;
+  multiSubject: boolean;
+}
+
 export interface LibraryItemDef {
   id: string;
   name: string;
@@ -129,12 +163,47 @@ export interface LibraryItemDef {
   logicEn?: string;
   ontologyLevel?: 1 | 2 | 3 | 4 | 5;
   eras?: readonly string[];
+  eraStrictness?: 'hard' | 'soft' | 'none';
+  anachronismRisk?: 'low' | 'medium' | 'high';
+  eraTranslation?: string;
+  eraTranslationEn?: string;
+  mediaEra?: readonly string[];
+  styleEra?: readonly string[];
+  typeTags?: readonly string[];
+  eraTags?: readonly string[];
+  sceneClassTags?: readonly string[];
+  sceneTags?: readonly string[];
+  commonLevel?: 0 | 1 | 2;
+  genreTags?: readonly string[];
+  compatibleTypeTags?: readonly string[];
+  excludeGenreTags?: readonly string[];
+  genreStrictness?: 'hard' | 'soft' | 'none';
+  genreRole?: readonly string[];
+  genreTranslation?: string;
+  genreTranslationEn?: string;
+  cultureTags?: readonly string[];
+  cultureStrictness?: 'hard' | 'soft' | 'none';
+  cultureRole?: readonly string[];
+  cultureTranslation?: string;
+  cultureTranslationEn?: string;
+  spaceTags?: readonly string[];
+  spaceScale?: string;
+  publicFilterTags?: readonly string[];
+  nativeTags?: readonly string[];
+  evidenceTags?: readonly string[];
+  compatibleGenres?: readonly string[];
+  compatibleEras?: readonly string[];
+  compatibleCultures?: readonly string[];
+  compatibleSpaces?: readonly string[];
+  conflictTags?: readonly string[];
+  riskTags?: readonly string[];
   affects?: readonly string[];
   risk?: 'clean' | 'medium' | 'high';
   controls?: readonly string[];
   forbids?: readonly string[];
   absorptionRule?: string;
   absorptionRuleEn?: string;
+  framingProfile?: FramingProfile;
   styleRoute?: string;
   protocolCategory?: string;
   protocolCategoryEn?: string;
@@ -148,6 +217,15 @@ export interface LibraryItemDef {
   personaStrength?: 'light' | 'medium' | 'strong';
   isCompoundPersona?: boolean;
   realityTags?: readonly string[];
+  eraMode?: 'specific' | 'universal';
+  categoryFit?: {
+    unlisted?: 'none' | 'usable' | 'weak' | 'exclude';
+    strong?: readonly string[];
+    usable?: readonly string[];
+    fusion?: readonly string[];
+    weak?: readonly string[];
+    exclude?: readonly string[];
+  };
   styleTags?: readonly string[];
   timeTags?: readonly string[];
   adminOnly?: boolean;

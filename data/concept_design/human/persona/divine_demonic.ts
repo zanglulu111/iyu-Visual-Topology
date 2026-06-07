@@ -1,19 +1,434 @@
-import { buildExplicitPersonaTerms, ExplicitPersonaSeed, PersonaEra } from './types';
+import { buildExplicitPersonaTerms, ExplicitPersonaSeed, PersonaCategoryFit, PersonaEra, personaFit } from './types';
 
-const mythic: PersonaEra[] = ['feudal', 'modern', 'contemporary', 'timeless', 'mythic'];
-const timeless: PersonaEra[] = ['timeless', 'mythic'];
+const mythic: PersonaEra[] = ['feudal', 'modern', 'contemporary', 'mythic'];
+const industrialMythic: PersonaEra[] = ['industrial', 'modern', 'contemporary', 'mythic'];
+const mythicOnly: PersonaEra[] = ['mythic'];
+
+const divineFit = (group: string) => {
+  if (group.startsWith('A.')) return personaFit('weak', {
+    strong: ['mythic_epic', 'fantasy', 'religious_ritual'],
+    usable: ['xianxia', 'court', 'historical'],
+    fusion: ['romance', 'dark_fantasy'],
+    weak: ['science_fiction', 'cyberpunk', 'urban_life']
+  });
+  if (group.startsWith('B.')) return personaFit('weak', {
+    strong: ['religious_ritual', 'mythic_epic', 'dark_fantasy'],
+    usable: ['fantasy', 'horror'],
+    fusion: ['science_fiction', 'surreal'],
+    weak: ['urban_life', 'fashion_idol', 'real_professional']
+  });
+  if (group.startsWith('C.')) return personaFit('weak', {
+    strong: ['dark_fantasy', 'horror', 'religious_ritual'],
+    usable: ['fantasy', 'court'],
+    fusion: ['romance', 'boudoir_aesthetic'],
+    weak: ['urban_life', 'real_professional', 'workplace']
+  });
+  if (group.startsWith('D.')) return personaFit('weak', {
+    strong: ['religious_ritual', 'mythic_epic'],
+    usable: ['institutional', 'court', 'historical'],
+    fusion: ['science_fiction', 'cyberpunk'],
+    weak: ['urban_life', 'workplace', 'fashion_idol']
+  });
+  if (group.startsWith('E.')) return personaFit('weak', {
+    strong: ['mythic_epic', 'religious_ritual', 'fantasy'],
+    usable: ['dark_fantasy', 'romance'],
+    fusion: ['surreal', 'horror'],
+    weak: ['real_professional', 'urban_life', 'workplace']
+  });
+  if (group.startsWith('F.')) return personaFit('weak', {
+    strong: ['mythic_epic', 'ecological', 'fantasy'],
+    usable: ['xianxia', 'adventure'],
+    fusion: ['surreal', 'dark_fantasy'],
+    weak: ['cyberpunk', 'urban_life', 'workplace']
+  });
+  if (group.startsWith('G.')) return personaFit('weak', {
+    strong: ['xianxia', 'religious_ritual', 'mythic_epic'],
+    usable: ['wuxia', 'historical', 'fantasy'],
+    fusion: ['dark_fantasy'],
+    weak: ['science_fiction', 'cyberpunk', 'real_professional']
+  });
+  if (group.startsWith('H.')) return personaFit('weak', {
+    strong: ['urban_life', 'surreal', 'religious_ritual'],
+    usable: ['science_fiction', 'cyberpunk', 'fashion_idol'],
+    fusion: ['mythic_epic', 'dark_fantasy'],
+    weak: ['historical', 'wuxia', 'court']
+  });
+  if (group.startsWith('I.')) return personaFit('weak', {
+    strong: ['cosmic_horror', 'science_fiction', 'religious_ritual'],
+    usable: ['space_opera', 'mythic_epic', 'surreal'],
+    fusion: ['fantasy', 'posthuman'],
+    weak: ['wuxia', 'urban_life', 'court']
+  });
+  return personaFit('weak', {
+    strong: ['dark_fantasy', 'religious_ritual', 'mythic_epic'],
+    usable: ['horror', 'fantasy', 'surreal'],
+    fusion: ['romance', 'court'],
+    weak: ['urban_life', 'real_professional', 'workplace']
+  });
+};
+
+const divineFitOverrides: Record<string, PersonaCategoryFit> = {
+  war_god_cadet: personaFit('weak', {
+    strong: ['mythic_epic', 'war_military', 'fantasy'],
+    usable: ['religious_ritual', 'adventure'],
+    fusion: ['dark_fantasy'],
+    weak: ['cyberpunk', 'urban_life', 'fashion_idol']
+  }),
+  thunder_child_monk: personaFit('weak', {
+    strong: ['mythic_epic', 'religious_ritual', 'fantasy'],
+    usable: ['xianxia', 'wuxia'],
+    fusion: ['dark_fantasy'],
+    weak: ['science_fiction', 'cyberpunk', 'fashion_idol']
+  }),
+  harvest_god_widow: personaFit('weak', {
+    strong: ['mythic_epic', 'ecological', 'romance'],
+    usable: ['fantasy', 'religious_ritual'],
+    fusion: ['dark_fantasy'],
+    weak: ['science_fiction', 'cyberpunk', 'urban_life']
+  }),
+  river_deity_scholar: personaFit('weak', {
+    strong: ['mythic_epic', 'xianxia', 'historical'],
+    usable: ['fantasy', 'religious_ritual', 'court'],
+    fusion: ['romance', 'dark_fantasy'],
+    weak: ['science_fiction', 'cyberpunk', 'wasteland']
+  }),
+  mountain_god_orphan: personaFit('weak', {
+    strong: ['mythic_epic', 'ecological', 'fantasy'],
+    usable: ['religious_ritual', 'xianxia'],
+    fusion: ['dark_fantasy'],
+    weak: ['science_fiction', 'cyberpunk', 'fashion_idol']
+  }),
+  fallen_angel_soldier: personaFit('weak', {
+    strong: ['religious_ritual', 'war_military', 'dark_fantasy'],
+    usable: ['mythic_epic', 'fantasy', 'horror'],
+    fusion: ['science_fiction'],
+    weak: ['urban_life', 'fashion_idol', 'real_professional']
+  }),
+  stigmata_schoolgirl: personaFit('weak', {
+    strong: ['religious_ritual', 'urban_life', 'dark_fantasy'],
+    usable: ['institutional', 'horror', 'fantasy'],
+    fusion: ['surreal'],
+    weak: ['war_military', 'wuxia', 'court']
+  }),
+  choirboy_oracle: personaFit('weak', {
+    strong: ['religious_ritual', 'institutional', 'mythic_epic'],
+    usable: ['fantasy', 'horror'],
+    fusion: ['surreal'],
+    weak: ['cyberpunk', 'war_military', 'wasteland']
+  }),
+  plague_saint_nurse: personaFit('weak', {
+    strong: ['religious_ritual', 'medical', 'dark_fantasy'],
+    usable: ['horror', 'real_professional', 'fantasy'],
+    fusion: ['body_horror'],
+    weak: ['cyberpunk', 'fashion_idol', 'wuxia']
+  }),
+  martyr_bride: personaFit('weak', {
+    strong: ['religious_ritual', 'romance', 'dark_fantasy'],
+    usable: ['mythic_epic', 'horror', 'fantasy'],
+    fusion: ['surreal'],
+    weak: ['cyberpunk', 'war_military', 'workplace']
+  }),
+  silver_halo_detective: personaFit('weak', {
+    strong: ['religious_ritual', 'noir_crime', 'urban_life'],
+    usable: ['horror', 'dark_fantasy', 'real_professional'],
+    fusion: ['surreal', 'science_fiction'],
+    weak: ['wuxia', 'court', 'war_military']
+  }),
+  demon_contract_lawyer: personaFit('weak', {
+    strong: ['dark_fantasy', 'real_professional', 'religious_ritual'],
+    usable: ['horror', 'court', 'institutional'],
+    fusion: ['romance', 'boudoir_aesthetic'],
+    weak: ['wuxia', 'wasteland', 'war_military']
+  }),
+  succubus_socialite: personaFit('weak', {
+    strong: ['dark_fantasy', 'court', 'boudoir_aesthetic'],
+    usable: ['horror', 'fashion_idol', 'romance'],
+    fusion: ['urban_life'],
+    weak: ['war_military', 'wuxia', 'workplace']
+  }),
+  incubus_lounge_singer: personaFit('weak', {
+    strong: ['dark_fantasy', 'fashion_idol', 'boudoir_aesthetic'],
+    usable: ['horror', 'urban_life', 'romance'],
+    fusion: ['noir_crime'],
+    weak: ['war_military', 'wuxia', 'workplace']
+  }),
+  hell_tax_collector: personaFit('weak', {
+    strong: ['dark_fantasy', 'institutional', 'real_professional'],
+    usable: ['horror', 'court', 'religious_ritual'],
+    fusion: ['surreal'],
+    weak: ['romance', 'fashion_idol', 'war_military']
+  }),
+  crossroads_dealer: personaFit('weak', {
+    strong: ['dark_fantasy', 'noir_crime', 'horror'],
+    usable: ['urban_life', 'religious_ritual'],
+    fusion: ['romance', 'surreal'],
+    weak: ['court', 'wuxia', 'workplace']
+  }),
+  infernal_tailor: personaFit('weak', {
+    strong: ['dark_fantasy', 'real_professional', 'fashion_idol'],
+    usable: ['horror', 'court', 'boudoir_aesthetic'],
+    fusion: ['surreal'],
+    weak: ['war_military', 'wuxia', 'wasteland']
+  }),
+  goat_horn_preacher: personaFit('weak', {
+    strong: ['dark_fantasy', 'religious_ritual', 'horror'],
+    usable: ['fantasy', 'urban_life'],
+    fusion: ['surreal'],
+    weak: ['fashion_idol', 'war_military', 'workplace']
+  }),
+  false_god_idol: personaFit('weak', {
+    strong: ['religious_ritual', 'fashion_idol', 'mythic_epic'],
+    usable: ['institutional', 'urban_life', 'fantasy'],
+    fusion: ['cyberpunk', 'science_fiction'],
+    weak: ['wuxia', 'wasteland', 'war_military']
+  }),
+  miracle_factory_priest: personaFit('weak', {
+    strong: ['religious_ritual', 'workplace', 'institutional'],
+    usable: ['mythic_epic', 'science_fiction', 'historical'],
+    fusion: ['cyberpunk', 'dark_fantasy'],
+    weak: ['fashion_idol', 'wuxia', 'romance']
+  }),
+  oracle_corporate_prophet: personaFit('weak', {
+    strong: ['religious_ritual', 'science_fiction', 'workplace'],
+    usable: ['cyberpunk', 'institutional', 'real_professional'],
+    fusion: ['surreal', 'mythic_epic'],
+    weak: ['historical', 'wuxia', 'court']
+  }),
+  relic_body_curator: personaFit('weak', {
+    strong: ['religious_ritual', 'institutional', 'real_professional'],
+    usable: ['mythic_epic', 'horror', 'historical'],
+    fusion: ['body_horror', 'science_fiction'],
+    weak: ['fashion_idol', 'wuxia', 'romance']
+  }),
+  blessing_saleswoman: personaFit('weak', {
+    strong: ['religious_ritual', 'real_professional', 'urban_life'],
+    usable: ['institutional', 'fantasy'],
+    fusion: ['surreal', 'dark_fantasy'],
+    weak: ['war_military', 'wuxia', 'court']
+  }),
+  idolatry_model: personaFit('weak', {
+    strong: ['religious_ritual', 'fashion_idol', 'urban_life'],
+    usable: ['mythic_epic', 'boudoir_aesthetic'],
+    fusion: ['surreal', 'cyberpunk'],
+    weak: ['war_military', 'wuxia', 'workplace']
+  }),
+  god_machine_bishop: personaFit('weak', {
+    strong: ['religious_ritual', 'science_fiction', 'posthuman'],
+    usable: ['cyberpunk', 'institutional', 'mythic_epic'],
+    fusion: ['cosmic_horror', 'surreal'],
+    weak: ['historical', 'wuxia', 'romance']
+  }),
+  sacrificial_princess: personaFit('weak', {
+    strong: ['mythic_epic', 'religious_ritual', 'court'],
+    usable: ['romance', 'dark_fantasy', 'fantasy'],
+    fusion: ['horror'],
+    weak: ['workplace', 'cyberpunk', 'wasteland']
+  }),
+  fate_thread_seamstress: personaFit('weak', {
+    strong: ['mythic_epic', 'religious_ritual', 'real_professional'],
+    usable: ['fantasy', 'fashion_idol'],
+    fusion: ['surreal', 'dark_fantasy'],
+    weak: ['war_military', 'wuxia', 'workplace']
+  }),
+  doom_bride: personaFit('weak', {
+    strong: ['mythic_epic', 'religious_ritual', 'romance'],
+    usable: ['dark_fantasy', 'horror', 'fantasy'],
+    fusion: ['surreal'],
+    weak: ['workplace', 'cyberpunk', 'wuxia']
+  }),
+  curse_bearing_mother: personaFit('weak', {
+    strong: ['mythic_epic', 'religious_ritual', 'romance'],
+    usable: ['dark_fantasy', 'horror', 'fantasy'],
+    fusion: ['surreal'],
+    weak: ['workplace', 'cyberpunk', 'fashion_idol']
+  }),
+  sacrificial_lamb_actor: personaFit('weak', {
+    strong: ['mythic_epic', 'religious_ritual', 'fashion_idol'],
+    usable: ['dark_fantasy', 'horror', 'urban_life'],
+    fusion: ['surreal'],
+    weak: ['workplace', 'wuxia', 'court']
+  }),
+  end_times_mailman: personaFit('weak', {
+    strong: ['mythic_epic', 'religious_ritual', 'real_professional'],
+    usable: ['dark_fantasy', 'urban_life', 'fantasy'],
+    fusion: ['surreal', 'horror'],
+    weak: ['fashion_idol', 'wuxia', 'court']
+  }),
+  storm_halo_pilot: personaFit('weak', {
+    strong: ['mythic_epic', 'ecological', 'adventure'],
+    usable: ['science_fiction', 'war_military', 'fantasy'],
+    fusion: ['surreal'],
+    weak: ['workplace', 'fashion_idol', 'court']
+  }),
+  volcano_bride: personaFit('weak', {
+    strong: ['mythic_epic', 'ecological', 'romance'],
+    usable: ['fantasy', 'religious_ritual'],
+    fusion: ['dark_fantasy', 'surreal'],
+    weak: ['cyberpunk', 'workplace', 'war_military']
+  }),
+  desert_sun_monk: personaFit('weak', {
+    strong: ['mythic_epic', 'ecological', 'religious_ritual'],
+    usable: ['fantasy', 'xianxia', 'adventure'],
+    fusion: ['dark_fantasy'],
+    weak: ['cyberpunk', 'urban_life', 'fashion_idol']
+  }),
+  river_mouth_priestess: personaFit('weak', {
+    strong: ['mythic_epic', 'ecological', 'religious_ritual'],
+    usable: ['fantasy', 'xianxia'],
+    fusion: ['romance', 'dark_fantasy'],
+    weak: ['cyberpunk', 'workplace', 'war_military']
+  }),
+  eclipse_dancer: personaFit('weak', {
+    strong: ['mythic_epic', 'ecological', 'fashion_idol'],
+    usable: ['religious_ritual', 'fantasy'],
+    fusion: ['surreal', 'dark_fantasy'],
+    weak: ['cyberpunk', 'workplace', 'war_military']
+  }),
+  city_god_clerk: personaFit('weak', {
+    strong: ['xianxia', 'religious_ritual', 'institutional'],
+    usable: ['wuxia', 'historical', 'fantasy'],
+    fusion: ['dark_fantasy', 'urban_life'],
+    weak: ['science_fiction', 'cyberpunk', 'fashion_idol']
+  }),
+  fortune_god_accountant: personaFit('weak', {
+    strong: ['xianxia', 'religious_ritual', 'real_professional'],
+    usable: ['historical', 'fantasy', 'urban_life'],
+    fusion: ['dark_fantasy'],
+    weak: ['war_military', 'cyberpunk', 'fashion_idol']
+  }),
+  underworld_bailiff: personaFit('weak', {
+    strong: ['xianxia', 'religious_ritual', 'institutional'],
+    usable: ['wuxia', 'historical', 'dark_fantasy'],
+    fusion: ['horror'],
+    weak: ['science_fiction', 'cyberpunk', 'fashion_idol']
+  }),
+  peach_blossom_fairy_bride: personaFit('weak', {
+    strong: ['xianxia', 'romance', 'mythic_epic'],
+    usable: ['religious_ritual', 'fantasy', 'historical'],
+    fusion: ['dark_fantasy'],
+    weak: ['science_fiction', 'cyberpunk', 'wasteland']
+  }),
+  subway_station_god: personaFit('weak', {
+    strong: ['urban_life', 'surreal', 'religious_ritual'],
+    usable: ['real_professional', 'science_fiction'],
+    fusion: ['mythic_epic', 'dark_fantasy'],
+    weak: ['historical', 'wuxia', 'court']
+  }),
+  mall_temple_idol: personaFit('weak', {
+    strong: ['urban_life', 'fashion_idol', 'religious_ritual'],
+    usable: ['surreal', 'science_fiction'],
+    fusion: ['mythic_epic', 'cyberpunk'],
+    weak: ['historical', 'wuxia', 'court']
+  }),
+  wifi_signal_saint: personaFit('weak', {
+    strong: ['urban_life', 'science_fiction', 'religious_ritual'],
+    usable: ['cyberpunk', 'surreal'],
+    fusion: ['mythic_epic', 'posthuman'],
+    weak: ['historical', 'wuxia', 'court']
+  }),
+  atm_fortune_spirit: personaFit('weak', {
+    strong: ['urban_life', 'surreal', 'religious_ritual'],
+    usable: ['science_fiction', 'real_professional'],
+    fusion: ['cyberpunk', 'mythic_epic'],
+    weak: ['historical', 'wuxia', 'court']
+  }),
+  social_media_prayer_girl: personaFit('weak', {
+    strong: ['urban_life', 'fashion_idol', 'religious_ritual'],
+    usable: ['science_fiction', 'surreal'],
+    fusion: ['cyberpunk', 'mythic_epic'],
+    weak: ['historical', 'wuxia', 'court']
+  }),
+  airport_limbo_angel: personaFit('weak', {
+    strong: ['urban_life', 'surreal', 'religious_ritual'],
+    usable: ['real_professional', 'science_fiction'],
+    fusion: ['mythic_epic', 'dark_fantasy'],
+    weak: ['historical', 'wuxia', 'court']
+  }),
+  office_cubicle_deity: personaFit('weak', {
+    strong: ['urban_life', 'workplace', 'surreal'],
+    usable: ['religious_ritual', 'science_fiction', 'real_professional'],
+    fusion: ['mythic_epic', 'dark_fantasy'],
+    weak: ['historical', 'wuxia', 'court']
+  }),
+  star_womb_priestess: personaFit('weak', {
+    strong: ['cosmic_horror', 'religious_ritual', 'science_fiction'],
+    usable: ['space_opera', 'mythic_epic', 'body_horror'],
+    fusion: ['fantasy', 'posthuman'],
+    weak: ['wuxia', 'urban_life', 'court']
+  }),
+  nebula_choir_girl: personaFit('weak', {
+    strong: ['cosmic_horror', 'religious_ritual', 'fashion_idol'],
+    usable: ['science_fiction', 'space_opera', 'surreal'],
+    fusion: ['mythic_epic'],
+    weak: ['wuxia', 'urban_life', 'court']
+  }),
+  asteroid_shrine_keeper: personaFit('weak', {
+    strong: ['cosmic_horror', 'religious_ritual', 'real_professional'],
+    usable: ['science_fiction', 'space_opera', 'workplace'],
+    fusion: ['wasteland', 'posthuman'],
+    weak: ['wuxia', 'urban_life', 'court']
+  }),
+  cosmic_martyr_pilot: personaFit('weak', {
+    strong: ['cosmic_horror', 'science_fiction', 'war_military'],
+    usable: ['religious_ritual', 'space_opera', 'adventure'],
+    fusion: ['mythic_epic'],
+    weak: ['wuxia', 'urban_life', 'court']
+  }),
+  planetary_oracle_queen: personaFit('weak', {
+    strong: ['cosmic_horror', 'science_fiction', 'court'],
+    usable: ['religious_ritual', 'space_opera', 'mythic_epic'],
+    fusion: ['fantasy', 'posthuman'],
+    weak: ['wuxia', 'urban_life', 'workplace']
+  }),
+  solar_cult_astronaut: personaFit('weak', {
+    strong: ['science_fiction', 'religious_ritual', 'space_opera'],
+    usable: ['cosmic_horror', 'adventure', 'real_professional'],
+    fusion: ['mythic_epic', 'posthuman'],
+    weak: ['wuxia', 'court', 'historical']
+  }),
+  broken_halo_nun: personaFit('weak', {
+    strong: ['dark_fantasy', 'religious_ritual', 'horror'],
+    usable: ['fantasy', 'surreal'],
+    fusion: ['romance'],
+    weak: ['urban_life', 'real_professional', 'workplace']
+  }),
+  blasphemy_court_jester: personaFit('weak', {
+    strong: ['dark_fantasy', 'court', 'religious_ritual'],
+    usable: ['horror', 'fantasy', 'surreal'],
+    fusion: ['romance'],
+    weak: ['urban_life', 'real_professional', 'workplace']
+  }),
+  failed_prophet_teacher: personaFit('weak', {
+    strong: ['dark_fantasy', 'religious_ritual', 'real_professional'],
+    usable: ['horror', 'fantasy', 'institutional'],
+    fusion: ['surreal'],
+    weak: ['urban_life', 'fashion_idol', 'wuxia']
+  }),
+  sacrilege_fashion_muse: personaFit('weak', {
+    strong: ['dark_fantasy', 'fashion_idol', 'religious_ritual'],
+    usable: ['horror', 'boudoir_aesthetic', 'surreal'],
+    fusion: ['urban_life'],
+    weak: ['war_military', 'wuxia', 'workplace']
+  }),
+  burned_scripture_librarian: personaFit('weak', {
+    strong: ['dark_fantasy', 'religious_ritual', 'institutional'],
+    usable: ['horror', 'real_professional', 'fantasy'],
+    fusion: ['surreal'],
+    weak: ['fashion_idol', 'wuxia', 'war_military']
+  })
+};
 
 const seeds: ExplicitPersonaSeed[] = [
-  { id: "demigod_heir", name: "半神继承人", nameEn: "Demigod Heir", group: "A. 半神 / 神子 / 神裔", groupEn: "A. Demigod / Divine Child / God-Blood", def: "第一识别是半神继承人。造型入口：人类礼服被神性血统撑出异常比例，额骨或肩线带轻微发光纹，继承信物贴近身体核心。母题：神圣血统被压进继承制度，而不是直接变成神。张力：他/她必须一半像被家族训练的继承人，一半像身体还不能完全容纳神力。视觉证据：家徽圣符、半透明脉络、礼仪手套、过亮瞳孔和被随从保持距离的站位。边界：避免普通王子公主、全能神明或空泛发光美人。", defEn: "First read: Demigod Heir. Styling entry: human formalwear strained by divine blood, faint glowing bone or shoulder lines, and an inherited token close to the body core. The identity is divine lineage pressed into succession, not a full god. Visual evidence: heraldic sacred mark, translucent veins, etiquette gloves, too-bright pupils, and attendants keeping distance. Boundary: avoid generic prince, full deity, or vague glowing beauty.", ontologyLevel: 4, eras: timeless, tags: ["demigod", "heir", "bloodline"] },
-  { id: "sun_god_bastard", name: "太阳神私生子", nameEn: "Sun-God Bastard", group: "A. 半神 / 神子 / 神裔", groupEn: "A. Demigod / Divine Child / God-Blood", def: "第一识别是太阳神私生子。造型入口：晒裂金肤、未被承认的神纹、破损白衣、刺眼瞳光和像被正午光线追赶的孤立站姿。母题：神圣血缘没有获得合法位置，只留下过强的光和污名。张力：太阳性要带灼伤、骄傲和排斥感，不要只是阳光少年。视觉证据：肩颈金色晒痕、烧焦衣边、私生纹章被遮住一半、眼周高光和不进入阴影的身体。边界：避免阿波罗式直译或普通金发英雄。", defEn: "First read: Sun-God Bastard. Styling entry: sun-cracked golden skin, unacknowledged divine mark, damaged white clothes, blinding pupils, and isolated stance chased by noon light. Sacred blood lacks legitimacy and appears as excessive light and stigma. Visual evidence: golden burn marks, singed hems, half-hidden bastard crest, hard eye highlights, and a body refusing shadow. Boundary: avoid direct Apollo copy or generic golden hero.", ontologyLevel: 4, eras: timeless, tags: ["sun", "bastard", "demigod"] },
-  { id: "sea_god_daughter", name: "海神之女", nameEn: "Sea-God Daughter", group: "A. 半神 / 神子 / 神裔", groupEn: "A. Demigod / Divine Child / God-Blood", def: "第一识别是海神之女。造型入口：湿光发丝、盐晶耳饰、潮汐纹披肩、略带鳞感的锁骨边缘和站在陆地上仍像听见海潮的侧脸。母题：海洋血统被装进人形礼仪。张力：她不能只是美人鱼或蓝色公主，必须显出陆地生活对她身体的不适配。视觉证据：水线裙摆、珍珠封扣、脚踝潮痕、贝壳权杖和避开干燥空气的手。边界：避免童话人鱼、海妖诱惑或普通海蓝色装扮。", defEn: "First read: Sea-God Daughter. Styling entry: wet-shine hair, salt-crystal earrings, tidal shawl, slight scale texture near the clavicle, and a profile still hearing the sea on land. Ocean blood is forced into humanoid etiquette. Visual evidence: waterline hem, pearl clasps, ankle tide marks, shell scepter, and hands avoiding dry air. Boundary: avoid fairy-tale mermaid, siren seduction, or generic blue styling.", ontologyLevel: 4, eras: timeless, tags: ["sea", "daughter", "demigod"] },
-  { id: "war_god_cadet", name: "战神少年兵", nameEn: "War-God Cadet", group: "A. 半神 / 神子 / 神裔", groupEn: "A. Demigod / Divine Child / God-Blood", def: "第一识别是战神少年兵。造型入口：训练甲、未成熟的肌肉、过早出现的战纹、握武器时异常稳定的手和被战争神性提前征召的眼。母题：少年身体被战神谱系压进军训秩序。张力：他/她不是热血小战士，而是过早被神性暴力占用的人形。视觉证据：训练护臂、血红护符、磨破靴、额角细裂光和压住冲动的下颌线。边界：避免未成年化消费、超级英雄少年或普通军校生。", defEn: "First read: War-God Cadet. Styling entry: training armor, not-yet-mature muscle, early war marks, unnaturally steady weapon hand, and eyes drafted too soon by war divinity. A young body is pressed into divine military order. Visual evidence: training bracers, blood-red charm, worn boots, fine light cracks at the brow, and jaw holding back impulse. Boundary: avoid child-coded consumption, superhero teen, or generic cadet.", ontologyLevel: 4, eras: timeless, tags: ["war_god", "cadet", "demigod"] },
-  { id: "moon_blood_princess", name: "月血公主", nameEn: "Moon-Blood Princess", group: "A. 半神 / 神子 / 神裔", groupEn: "A. Demigod / Divine Child / God-Blood", def: "第一识别是月血公主。造型入口：银白礼服、月相额饰、冷色皮肤、半透明血管和只在夜光下显现的王室纹路。母题：继承权与潮汐、周期和冷距离绑定。张力：她的高贵要安静、周期性、难以靠近，不是梦幻少女。视觉证据：月相冠、银线袖口、苍白唇色、夜光裙摆和像计算时间一样抬眼的表情。边界：避免月亮仙女、普通银色公主或吸血鬼化。", defEn: "First read: Moon-Blood Princess. Styling entry: silver-white formalwear, moon-phase forehead ornament, cool skin, translucent veins, and royal markings visible only under night light. Succession is bound to tides, cycles, and distance. Visual evidence: moon-phase crown, silver cuffs, pale lips, luminous hem, and eyes rising as if counting time. Boundary: avoid moon fairy, generic silver princess, or vampire framing.", ontologyLevel: 4, eras: timeless, tags: ["moon", "princess", "bloodline"] },
-  { id: "thunder_child_monk", name: "雷神之子僧侣", nameEn: "Thunder-Child Monk", group: "A. 半神 / 神子 / 神裔", groupEn: "A. Demigod / Divine Child / God-Blood", def: "第一识别是雷神之子僧侣。造型入口：粗布僧衣被金属线加固、剃发边缘带电痕、手腕缠雷纹绳结和努力把暴烈神力压进静坐纪律的身体。母题：雷霆血统被修行强行降噪。张力：安静必须像压住爆裂，不是天然慈悲。视觉证据：焦黑念珠、皮肤电弧细纹、沉重木屐、闭眼呼吸和衣角被静电撑开。边界：避免普通武僧、雷电法师或随机特效。", defEn: "First read: Thunder-Child Monk. Styling entry: coarse monk robe reinforced with metal thread, electric burn at shaved hairline, thunder-knot wrist cord, and a body forcing violent divinity into sitting discipline. Thunder blood is deliberately quieted. Visual evidence: charred beads, fine lightning lines on skin, heavy wooden sandals, closed breathing, and static-lifted hem. Boundary: avoid generic warrior monk, lightning mage, or random effects.", ontologyLevel: 4, eras: timeless, tags: ["thunder", "monk", "demigod"] },
-  { id: "harvest_god_widow", name: "丰饶神寡妇", nameEn: "Harvest-God Widow", group: "A. 半神 / 神子 / 神裔", groupEn: "A. Demigod / Divine Child / God-Blood", def: "第一识别是丰饶神寡妇。造型入口：丧服里缝着谷穗金线、成熟身体线条、手中干枯花束和仍被土地索取的温柔疲惫。母题：丰饶不是喜庆，而是生产、失去和周期继续。张力：她要同时像丧偶者和丰收象征。视觉证据：黑纱、麦穗冠、泥土指甲、乳白或金色护符和低头抚摸腹部或谷物的手。边界：避免田园女神、性感寡妇或普通农妇。", defEn: "First read: Harvest-God Widow. Styling entry: mourning dress sewn with wheat-gold thread, mature body line, dried bouquet, and tender fatigue still claimed by the land. Fertility is production, loss, and continuing cycles. Visual evidence: black veil, wheat crown, soil under nails, milky or golden charm, and a hand touching grain or abdomen. Boundary: avoid pastoral goddess, sexy widow, or generic farm woman.", ontologyLevel: 4, eras: timeless, tags: ["harvest", "widow", "fertility"] },
+  { id: "demigod_heir", name: "半神继承人", nameEn: "Demigod Heir", group: "A. 半神 / 神子 / 神裔", groupEn: "A. Demigod / Divine Child / God-Blood", def: "第一识别是半神继承人。造型入口：人类礼服被神性血统撑出异常比例，额骨或肩线带轻微发光纹，继承信物贴近身体核心。母题：神圣血统被压进继承制度，而不是直接变成神。张力：他/她必须一半像被家族训练的继承人，一半像身体还不能完全容纳神力。视觉证据：家徽圣符、半透明脉络、礼仪手套、过亮瞳孔和被随从保持距离的站位。边界：避免普通王子公主、全能神明或空泛发光美人。", defEn: "First read: Demigod Heir. Styling entry: human formalwear strained by divine blood, faint glowing bone or shoulder lines, and an inherited token close to the body core. The identity is divine lineage pressed into succession, not a full god. Visual evidence: heraldic sacred mark, translucent veins, etiquette gloves, too-bright pupils, and attendants keeping distance. Boundary: avoid generic prince, full deity, or vague glowing beauty.", ontologyLevel: 4, eras: mythicOnly, tags: ["demigod", "heir", "bloodline"] },
+  { id: "sun_god_bastard", name: "太阳神私生子", nameEn: "Sun-God Bastard", group: "A. 半神 / 神子 / 神裔", groupEn: "A. Demigod / Divine Child / God-Blood", def: "第一识别是太阳神私生子。造型入口：晒裂金肤、未被承认的神纹、破损白衣、刺眼瞳光和像被正午光线追赶的孤立站姿。母题：神圣血缘没有获得合法位置，只留下过强的光和污名。张力：太阳性要带灼伤、骄傲和排斥感，不要只是阳光少年。视觉证据：肩颈金色晒痕、烧焦衣边、私生纹章被遮住一半、眼周高光和不进入阴影的身体。边界：避免阿波罗式直译或普通金发英雄。", defEn: "First read: Sun-God Bastard. Styling entry: sun-cracked golden skin, unacknowledged divine mark, damaged white clothes, blinding pupils, and isolated stance chased by noon light. Sacred blood lacks legitimacy and appears as excessive light and stigma. Visual evidence: golden burn marks, singed hems, half-hidden bastard crest, hard eye highlights, and a body refusing shadow. Boundary: avoid direct Apollo copy or generic golden hero.", ontologyLevel: 4, eras: mythicOnly, tags: ["sun", "bastard", "demigod"] },
+  { id: "sea_god_daughter", name: "海神之女", nameEn: "Sea-God Daughter", group: "A. 半神 / 神子 / 神裔", groupEn: "A. Demigod / Divine Child / God-Blood", def: "第一识别是海神之女。造型入口：湿光发丝、盐晶耳饰、潮汐纹披肩、略带鳞感的锁骨边缘和站在陆地上仍像听见海潮的侧脸。母题：海洋血统被装进人形礼仪。张力：她不能只是美人鱼或蓝色公主，必须显出陆地生活对她身体的不适配。视觉证据：水线裙摆、珍珠封扣、脚踝潮痕、贝壳权杖和避开干燥空气的手。边界：避免童话人鱼、海妖诱惑或普通海蓝色装扮。", defEn: "First read: Sea-God Daughter. Styling entry: wet-shine hair, salt-crystal earrings, tidal shawl, slight scale texture near the clavicle, and a profile still hearing the sea on land. Ocean blood is forced into humanoid etiquette. Visual evidence: waterline hem, pearl clasps, ankle tide marks, shell scepter, and hands avoiding dry air. Boundary: avoid fairy-tale mermaid, siren seduction, or generic blue styling.", ontologyLevel: 4, eras: mythicOnly, tags: ["sea", "daughter", "demigod"] },
+  { id: "war_god_cadet", name: "战神少年兵", nameEn: "War-God Cadet", group: "A. 半神 / 神子 / 神裔", groupEn: "A. Demigod / Divine Child / God-Blood", def: "第一识别是战神少年兵。造型入口：训练甲、未成熟的肌肉、过早出现的战纹、握武器时异常稳定的手和被战争神性提前征召的眼。母题：少年身体被战神谱系压进军训秩序。张力：他/她不是热血小战士，而是过早被神性暴力占用的人形。视觉证据：训练护臂、血红护符、磨破靴、额角细裂光和压住冲动的下颌线。边界：避免未成年化消费、超级英雄少年或普通军校生。", defEn: "First read: War-God Cadet. Styling entry: training armor, not-yet-mature muscle, early war marks, unnaturally steady weapon hand, and eyes drafted too soon by war divinity. A young body is pressed into divine military order. Visual evidence: training bracers, blood-red charm, worn boots, fine light cracks at the brow, and jaw holding back impulse. Boundary: avoid child-coded consumption, superhero teen, or generic cadet.", ontologyLevel: 4, eras: mythicOnly, tags: ["war_god", "cadet", "demigod"] },
+  { id: "moon_blood_princess", name: "月血公主", nameEn: "Moon-Blood Princess", group: "A. 半神 / 神子 / 神裔", groupEn: "A. Demigod / Divine Child / God-Blood", def: "第一识别是月血公主。造型入口：银白礼服、月相额饰、冷色皮肤、半透明血管和只在夜光下显现的王室纹路。母题：继承权与潮汐、周期和冷距离绑定。张力：她的高贵要安静、周期性、难以靠近，不是梦幻少女。视觉证据：月相冠、银线袖口、苍白唇色、夜光裙摆和像计算时间一样抬眼的表情。边界：避免月亮仙女、普通银色公主或吸血鬼化。", defEn: "First read: Moon-Blood Princess. Styling entry: silver-white formalwear, moon-phase forehead ornament, cool skin, translucent veins, and royal markings visible only under night light. Succession is bound to tides, cycles, and distance. Visual evidence: moon-phase crown, silver cuffs, pale lips, luminous hem, and eyes rising as if counting time. Boundary: avoid moon fairy, generic silver princess, or vampire framing.", ontologyLevel: 4, eras: mythicOnly, tags: ["moon", "princess", "bloodline"] },
+  { id: "thunder_child_monk", name: "雷神之子僧侣", nameEn: "Thunder-Child Monk", group: "A. 半神 / 神子 / 神裔", groupEn: "A. Demigod / Divine Child / God-Blood", def: "第一识别是雷神之子僧侣。造型入口：粗布僧衣被金属线加固、剃发边缘带电痕、手腕缠雷纹绳结和努力把暴烈神力压进静坐纪律的身体。母题：雷霆血统被修行强行降噪。张力：安静必须像压住爆裂，不是天然慈悲。视觉证据：焦黑念珠、皮肤电弧细纹、沉重木屐、闭眼呼吸和衣角被静电撑开。边界：避免普通武僧、雷电法师或随机特效。", defEn: "First read: Thunder-Child Monk. Styling entry: coarse monk robe reinforced with metal thread, electric burn at shaved hairline, thunder-knot wrist cord, and a body forcing violent divinity into sitting discipline. Thunder blood is deliberately quieted. Visual evidence: charred beads, fine lightning lines on skin, heavy wooden sandals, closed breathing, and static-lifted hem. Boundary: avoid generic warrior monk, lightning mage, or random effects.", ontologyLevel: 4, eras: mythicOnly, tags: ["thunder", "monk", "demigod"] },
+  { id: "harvest_god_widow", name: "丰饶神寡妇", nameEn: "Harvest-God Widow", group: "A. 半神 / 神子 / 神裔", groupEn: "A. Demigod / Divine Child / God-Blood", def: "第一识别是丰饶神寡妇。造型入口：丧服里缝着谷穗金线、成熟身体线条、手中干枯花束和仍被土地索取的温柔疲惫。母题：丰饶不是喜庆，而是生产、失去和周期继续。张力：她要同时像丧偶者和丰收象征。视觉证据：黑纱、麦穗冠、泥土指甲、乳白或金色护符和低头抚摸腹部或谷物的手。边界：避免田园女神、性感寡妇或普通农妇。", defEn: "First read: Harvest-God Widow. Styling entry: mourning dress sewn with wheat-gold thread, mature body line, dried bouquet, and tender fatigue still claimed by the land. Fertility is production, loss, and continuing cycles. Visual evidence: black veil, wheat crown, soil under nails, milky or golden charm, and a hand touching grain or abdomen. Boundary: avoid pastoral goddess, sexy widow, or generic farm woman.", ontologyLevel: 4, eras: mythicOnly, tags: ["harvest", "widow", "fertility"] },
   { id: "river_deity_scholar", name: "河神书生", nameEn: "River-Deity Scholar", group: "A. 半神 / 神子 / 神裔", groupEn: "A. Demigod / Divine Child / God-Blood", def: "第一识别是河神书生。造型入口：湿润长衫、水渍书卷、袖口浮藻纹、温和但不可测的眼和像水流一样避开正面冲突的站姿。母题：水域神性被折进文人礼法。张力：他不是古风书生，而是用温顺外表隐藏河道权力。视觉证据：水纹腰带、墨迹晕开、木舟令牌、发尾潮气和指尖滴水。边界：避免仙侠书生、水鬼或普通河边文人。", defEn: "First read: River-Deity Scholar. Styling entry: damp scholar robe, water-stained scrolls, algae-pattern cuffs, gentle unreadable eyes, and a stance avoiding confrontation like current. River divinity is folded into literati etiquette. Visual evidence: water-pattern belt, bleeding ink, boat token, damp hair ends, and dripping fingertips. Boundary: avoid xianxia scholar, water ghost, or generic riverside poet.", ontologyLevel: 4, eras: mythic, tags: ["river", "scholar", "deity"] },
   { id: "mountain_god_orphan", name: "山神孤儿", nameEn: "Mountain-God Orphan", group: "A. 半神 / 神子 / 神裔", groupEn: "A. Demigod / Divine Child / God-Blood", def: "第一识别是山神孤儿。造型入口：粗毛披肩、石粉皮肤、野草绳结、沉默宽站姿和被山民供养又被山神遗留的矛盾孤独。母题：山的神性不是宏伟，而是重量、沉默和不易移动。张力：孩子气或孤儿感必须被岩石般的身体稳定压住。视觉证据：石纹胎记、木牌供物、磨破草鞋、肩上尘土和像听见远处回声的侧耳。边界：避免野孩子、山妖或可爱神童。", defEn: "First read: Mountain-God Orphan. Styling entry: coarse fur shawl, stone-dusted skin, wild-grass knots, silent wide stance, and loneliness of a child both fed by villagers and left by the mountain. Mountain divinity is weight and silence. Visual evidence: stone birthmark, offering tag, worn straw shoes, dusted shoulders, and an ear turned to distant echo. Boundary: avoid wild child, mountain monster, or cute prodigy.", ontologyLevel: 4, eras: mythic, tags: ["mountain", "orphan", "deity"] },
-  { id: "forgotten_minor_god", name: "被遗忘的小神", nameEn: "Forgotten Minor God", group: "A. 半神 / 神子 / 神裔", groupEn: "A. Demigod / Divine Child / God-Blood", def: "第一识别是被遗忘的小神。造型入口：褪色神衣、缺角小神龛饰物、尘封供物、过时礼冠和仍保持神明姿态却无人回应的眼。母题：神性在失去信众后缩小成可怜的仪式残留。张力：他/她要有神格，不是可怜流浪者；衰微也必须有旧权威痕迹。视觉证据：破损光环、干枯花、掉漆符牌、灰尘边缘和等待祭拜的正坐。边界：避免普通乞丐、萌化小神或全能神明。", defEn: "First read: Forgotten Minor God. Styling entry: faded divine clothes, chipped shrine ornament, dusty offerings, outdated crown, and eyes keeping god posture with no answer. Divinity shrinks into ritual residue after losing worshippers. Visual evidence: broken halo, dried flowers, flaking plaque, dust edges, and seated posture waiting for prayer. Boundary: avoid generic beggar, cute minor god, or full deity.", ontologyLevel: 5, eras: timeless, tags: ["forgotten", "minor_god", "decay"] },
+  { id: "forgotten_minor_god", name: "被遗忘的小神", nameEn: "Forgotten Minor God", group: "A. 半神 / 神子 / 神裔", groupEn: "A. Demigod / Divine Child / God-Blood", def: "第一识别是被遗忘的小神。造型入口：褪色神衣、缺角小神龛饰物、尘封供物、过时礼冠和仍保持神明姿态却无人回应的眼。母题：神性在失去信众后缩小成可怜的仪式残留。张力：他/她要有神格，不是可怜流浪者；衰微也必须有旧权威痕迹。视觉证据：破损光环、干枯花、掉漆符牌、灰尘边缘和等待祭拜的正坐。边界：避免普通乞丐、萌化小神或全能神明。", defEn: "First read: Forgotten Minor God. Styling entry: faded divine clothes, chipped shrine ornament, dusty offerings, outdated crown, and eyes keeping god posture with no answer. Divinity shrinks into ritual residue after losing worshippers. Visual evidence: broken halo, dried flowers, flaking plaque, dust edges, and seated posture waiting for prayer. Boundary: avoid generic beggar, cute minor god, or full deity.", ontologyLevel: 5, eras: mythicOnly, tags: ["forgotten", "minor_god", "decay"] },
 
   { id: "fallen_angel_soldier", name: "堕天使士兵", nameEn: "Fallen Angel Soldier", group: "B. 天使 / 圣徒 / 神罚", groupEn: "B. Angel / Saint / Divine Punishment", def: "第一识别是堕天使士兵。造型入口：破损军装、折断翼骨、暗淡光环、纪律站姿和仍不肯放下武器的沉默。母题：天使身份被战争和驱逐弄脏。张力：堕落不是邪恶化，而是神圣军纪失去归属后的残余。视觉证据：羽毛灰尘、烧焦肩章、断翼绑带、失准圣徽和看向上方却得不到命令的眼。边界：避免黑翼帅哥、恶魔士兵或普通天使。", defEn: "First read: Fallen Angel Soldier. Styling entry: damaged uniform, broken wing bones, dim halo, disciplined stance, and silence refusing to drop the weapon. Fallenness is sacred military order losing belonging. Visual evidence: dusty feathers, burned epaulettes, bound wing break, misaligned holy badge, and eyes looking upward for orders. Boundary: avoid cool black-wing figure, demon soldier, or generic angel.", ontologyLevel: 4, eras: mythic, tags: ["fallen_angel", "soldier", "punishment"] },
   { id: "burning_wing_saint", name: "燃翼圣徒", nameEn: "Burning-Wing Saint", group: "B. 天使 / 圣徒 / 神罚", groupEn: "B. Angel / Saint / Divine Punishment", def: "第一识别是燃翼圣徒。造型入口：白袍边缘被火光吞噬、翅根像刑罚一样燃烧、面部平静到近乎失真。母题：圣性不是光洁祝福，而是持续承受神罚后的公开身体。张力：火焰必须像惩罚和证明，不是华丽特效。视觉证据：焦黑羽轴、红金裂光、烧穿袖口、祈祷手势和没有逃离姿态的站位。边界：避免火焰天使、凤凰化或普通殉道者。", defEn: "First read: Burning-Wing Saint. Styling entry: white robe edges eaten by flame, wing roots burning like punishment, and a face calm to distortion. Sanctity is public endurance of divine penalty. Visual evidence: charred feather shafts, red-gold cracks, burned cuffs, prayer hands, and stance refusing escape. Boundary: avoid fire angel, phoenix treatment, or generic martyr.", ontologyLevel: 5, eras: mythic, risk: "high", tags: ["burning_wing", "saint", "stigmata"] },
@@ -39,14 +454,14 @@ const seeds: ExplicitPersonaSeed[] = [
 
   { id: "living_icon_girl", name: "活圣像少女", nameEn: "Living Icon Girl", group: "D. 神官 / 伪神 / 活圣像", groupEn: "D. Priesthood / False God / Living Icon", def: "第一识别是活圣像少女。造型入口：平面化金色背景感、固定正面姿态、过白皮肤、细密圣物边框和像被画面钉住的安静眼。母题：人形身体被改造成供人观看和祈祷的图像。张力：她不是神本人，而是被圣像制度占用的活体。视觉证据：金箔裂纹、僵硬手势、边框饰片、供花和不自然的正面性。边界：避免普通圣女、偶像少女或复制宗教图像。", defEn: "First read: Living Icon Girl. Styling entry: flattened gold-background feeling, fixed frontal posture, too-white skin, sacred frame ornaments, and quiet eyes pinned by image. A human body is turned into an object of viewing and prayer. Visual evidence: gold-leaf cracks, stiff hands, frame pieces, offerings, and unnatural frontality. Boundary: avoid generic holy girl, idol, or direct religious image copy.", ontologyLevel: 5, eras: mythic, risk: "high", tags: ["living_icon", "saint", "image"] },
   { id: "false_god_idol", name: "伪神偶像", nameEn: "False-God Idol", group: "D. 神官 / 伪神 / 活圣像", groupEn: "D. Priesthood / False God / Living Icon", def: "第一识别是伪神偶像。造型入口：舞台服和祭服混合、人工光环、粉丝应援物像供品、完美营业笑和被崇拜系统推高的身体。母题：偶像工业制造出可消费的神格。张力：神圣感要有人工痕迹、商业流程和崇拜压力。视觉证据：LED光环、麦克风圣杖、供台式舞台、应援灯海和笑容后的疲惫眼。边界：避免真实宗教冒犯、普通偶像或全能神。", defEn: "First read: False-God Idol. Styling entry: stagewear mixed with vestment, artificial halo, fan goods as offerings, perfect service smile, and a body elevated by worship machinery. Idol industry manufactures consumable divinity. Visual evidence: LED halo, microphone-scepter, altar-like stage, fan-light sea, and tired eyes behind the smile. Boundary: avoid religious offense, generic idol, or full deity.", ontologyLevel: 5, eras: mythic, risk: "high", tags: ["false_god", "idol", "worship"] },
-  { id: "miracle_factory_priest", name: "奇迹工厂神父", nameEn: "Miracle-Factory Priest", group: "D. 神官 / 伪神 / 活圣像", groupEn: "D. Priesthood / False God / Living Icon", def: "第一识别是奇迹工厂神父。造型入口：神父黑衣外罩生产围裙、流水线圣物、检验章和把奇迹当成批量产品审核的疲惫手势。母题：神圣被工业流程标准化。张力：他要像神职人员，也像质检员；奇迹越多越不神秘。视觉证据：圣水瓶批号、印章、传送带、白手套和检查瑕疵的俯身。边界：避免普通神父、工厂主管或纯讽刺漫画。", defEn: "First read: Miracle-Factory Priest. Styling entry: priest black clothes under production apron, assembly-line relics, inspection stamp, and tired hands auditing miracles as products. Sacredness is standardized by industry. Visual evidence: batch-coded holy water, stamps, conveyor belt, white gloves, and bending to inspect flaws. Boundary: avoid generic priest, factory manager, or pure satire cartoon.", ontologyLevel: 4, eras: mythic, tags: ["miracle", "factory", "priest"] },
-  { id: "oracle_corporate_prophet", name: "神谕企业先知", nameEn: "Oracle Corporate Prophet", group: "D. 神官 / 伪神 / 活圣像", groupEn: "D. Priesthood / False God / Living Icon", def: "第一识别是神谕企业先知。造型入口：企业西装、透明神谕屏、额头光标、发布会台阶和把商业预测说成命运的稳定口吻。母题：先知职能被企业战略和数据话术接管。张力：他/她的神秘性必须有会议室、指标和权力接口。视觉证据：预测图表、冷光徽章、双手按讲台、投资人灯光和不眨眼的凝视。边界：避免普通CEO、赛博神棍或抽象AI。", defEn: "First read: Oracle Corporate Prophet. Styling entry: corporate suit, transparent oracle screen, forehead cursor, keynote steps, and steady tone speaking business forecasts as fate. Prophecy is taken over by strategy and data rhetoric. Visual evidence: prediction charts, cold badge, hands on podium, investor lights, and unblinking gaze. Boundary: avoid generic CEO, cyber charlatan, or abstract AI.", ontologyLevel: 4, eras: ["near_future", "far_future", "timeless"], tags: ["oracle", "corporate", "prophet"] },
+  { id: "miracle_factory_priest", name: "奇迹工厂神父", nameEn: "Miracle-Factory Priest", group: "D. 神官 / 伪神 / 活圣像", groupEn: "D. Priesthood / False God / Living Icon", def: "第一识别是奇迹工厂神父。造型入口：神父黑衣外罩生产围裙、流水线圣物、检验章和把奇迹当成批量产品审核的疲惫手势。母题：神圣被工业流程标准化。张力：他要像神职人员，也像质检员；奇迹越多越不神秘。视觉证据：圣水瓶批号、印章、传送带、白手套和检查瑕疵的俯身。边界：避免普通神父、工厂主管或纯讽刺漫画。", defEn: "First read: Miracle-Factory Priest. Styling entry: priest black clothes under production apron, assembly-line relics, inspection stamp, and tired hands auditing miracles as products. Sacredness is standardized by industry. Visual evidence: batch-coded holy water, stamps, conveyor belt, white gloves, and bending to inspect flaws. Boundary: avoid generic priest, factory manager, or pure satire cartoon.", ontologyLevel: 4, eras: industrialMythic, tags: ["miracle", "factory", "priest"] },
+  { id: "oracle_corporate_prophet", name: "神谕企业先知", nameEn: "Oracle Corporate Prophet", group: "D. 神官 / 伪神 / 活圣像", groupEn: "D. Priesthood / False God / Living Icon", def: "第一识别是神谕企业先知。造型入口：企业西装、透明神谕屏、额头光标、发布会台阶和把商业预测说成命运的稳定口吻。母题：先知职能被企业战略和数据话术接管。张力：他/她的神秘性必须有会议室、指标和权力接口。视觉证据：预测图表、冷光徽章、双手按讲台、投资人灯光和不眨眼的凝视。边界：避免普通CEO、赛博神棍或抽象AI。", defEn: "First read: Oracle Corporate Prophet. Styling entry: corporate suit, transparent oracle screen, forehead cursor, keynote steps, and steady tone speaking business forecasts as fate. Prophecy is taken over by strategy and data rhetoric. Visual evidence: prediction charts, cold badge, hands on podium, investor lights, and unblinking gaze. Boundary: avoid generic CEO, cyber charlatan, or abstract AI.", ontologyLevel: 4, eras: ["near_future", "far_future"], tags: ["oracle", "corporate", "prophet"] },
   { id: "golden_mask_pope", name: "金面具教皇", nameEn: "Golden-Mask Pope", group: "D. 神官 / 伪神 / 活圣像", groupEn: "D. Priesthood / False God / Living Icon", def: "第一识别是金面具教皇。造型入口：巨大金面具、厚重法衣、权杖、看不见表情的脸和被制度替代个人意志的正坐。母题：最高神职把人隐藏在权威外壳后。张力：威严来自遮蔽和重量，不是慈祥面孔。视觉证据：金属面具、层叠织锦、戒指、长椅阴影和双手缓慢抬起的仪式节奏。边界：避免现实宗教影射、普通国王或面具怪人。", defEn: "First read: Golden-Mask Pope. Styling entry: huge golden mask, heavy vestments, staff, unreadable face, and seated posture where institution replaces person. Highest priesthood hides the human behind authority shell. Visual evidence: metal mask, layered brocade, rings, throne shadow, and slow ritual hands. Boundary: avoid real religious reference, generic king, or mask monster.", ontologyLevel: 4, eras: mythic, tags: ["pope", "mask", "authority"] },
   { id: "relic_body_curator", name: "圣遗物身体馆长", nameEn: "Relic-Body Curator", group: "D. 神官 / 伪神 / 活圣像", groupEn: "D. Priesthood / False God / Living Icon", def: "第一识别是圣遗物身体馆长。造型入口：博物馆手套、圣物盒、身体部位图谱、冷静讲解姿态和把神圣残片归档收藏的专业距离。母题：圣遗物从信仰对象变成可管理的身体档案。张力：敬畏与馆藏管理必须并存。视觉证据：玻璃柜、标签卡、银镊子、暗色长袍和不直接触碰圣物的手。边界：避免普通馆员、盗墓者或血腥身体展示。", defEn: "First read: Relic-Body Curator. Styling entry: museum gloves, relic boxes, body-part diagrams, calm explaining posture, and professional distance archiving sacred remains. Relics become managed body archives. Visual evidence: glass cases, label cards, silver tweezers, dark robe, and hands not touching directly. Boundary: avoid generic curator, tomb robber, or gore body display.", ontologyLevel: 4, eras: mythic, risk: "medium", tags: ["relic", "curator", "body"] },
   { id: "blessing_saleswoman", name: "祝福推销员", nameEn: "Blessing Saleswoman", group: "D. 神官 / 伪神 / 活圣像", groupEn: "D. Priesthood / False God / Living Icon", def: "第一识别是祝福推销员。造型入口：干净套装、便携圣物箱、价目表式祝福卡、职业笑容和把庇护变成可购买服务的展示手势。母题：神圣经济进入日常销售流程。张力：她要亲切、实用、稍微可疑，而不是神职人员。视觉证据：样品护符、收据、折叠桌、试用祝福印章和看顾客预算的眼。边界：避免普通销售、骗子脸谱或宗教冒犯。", defEn: "First read: Blessing Saleswoman. Styling entry: clean suit, portable relic case, price-list blessing cards, professional smile, and hands displaying protection as purchasable service. Sacred economy enters sales workflow. Visual evidence: sample amulets, receipts, folding table, trial blessing stamp, and eyes reading customer budget. Boundary: avoid generic salesperson, scam caricature, or religious offense.", ontologyLevel: 3, eras: mythic, tags: ["blessing", "sales", "sacred_economy"] },
   { id: "idolatry_model", name: "偶像崇拜模特", nameEn: "Idolatry Model", group: "D. 神官 / 伪神 / 活圣像", groupEn: "D. Priesthood / False God / Living Icon", def: "第一识别是偶像崇拜模特。造型入口：极度对称妆发、金属祭台姿态、身体像商品展示又像供像、眼神空白而被观看。母题：美貌被推到崇拜对象和消费对象之间。张力：模特职业性和神像静止感要同时存在。视觉证据：高光皮肤、对称饰品、献花、展示台边缘和不主动回应观众的脸。边界：避免普通时装模特、宗教复制或物化露骨。", defEn: "First read: Idolatry Model. Styling entry: extremely symmetrical hair and makeup, metallic altar pose, a body displayed as both product and icon, and blank watched eyes. Beauty sits between worship object and commodity. Visual evidence: highlighted skin, symmetrical ornaments, offerings, display-platform edge, and face not responding to viewers. Boundary: avoid generic fashion model, religious copy, or explicit objectification.", ontologyLevel: 3, eras: mythic, tags: ["idolatry", "model", "beauty"] },
   { id: "temple_child_medium", name: "神庙童媒", nameEn: "Temple Child Medium", group: "D. 神官 / 伪神 / 活圣像", groupEn: "D. Priesthood / False God / Living Icon", def: "第一识别是神庙童媒。造型入口：宽大神庙衣、护身绳、被成人围出的仪式空间、失焦眼神和身体太小却承受过多神谕的紧张。母题：媒介身体被共同体放在神与人之间。张力：必须克制呈现，不消费儿童脆弱；重点在仪式位置和保护边界。视觉证据：红绳、供桌、低矮坐垫、旁观成人的手和突然僵住的肩。边界：避免恐怖童灵、可爱神童或伤害展示。", defEn: "First read: Temple Child Medium. Styling entry: oversized temple garment, protective cords, ritual space made by adults, unfocused eyes, and a small body carrying too much oracle tension. The body mediates between deity and community. Visual evidence: red cords, offering table, low cushion, adults hands nearby, and suddenly stiff shoulders. Boundary: avoid horror child spirit, cute prodigy, or harm spectacle.", ontologyLevel: 4, eras: mythic, tags: ["medium", "temple", "oracle"] },
-  { id: "god_machine_bishop", name: "神机主教", nameEn: "God-Machine Bishop", group: "D. 神官 / 伪神 / 活圣像", groupEn: "D. Priesthood / False God / Living Icon", def: "第一识别是神机主教。造型入口：主教法衣嵌入机械接口、齿轮圣徽、冷光神经线、仪式手套和把机器秩序解释成天命的严肃脸。母题：神圣权威与机械系统合成新的教会身体。张力：机械不能抢走神职，必须服务神谕、仪式和控制。视觉证据：金属牧杖、数据经文、接口领口、发光法冠和缓慢开合的机械手。边界：避免机甲主教、普通机器人或抽象AI神。", defEn: "First read: God-Machine Bishop. Styling entry: bishop vestment embedded with mechanical ports, gear sigil, cold neural lines, ritual gloves, and serious face explaining machine order as destiny. Sacred authority fuses with system machinery. Visual evidence: metal crozier, data scripture, ported collar, glowing mitre, and slow mechanical hand. Boundary: avoid mecha bishop, generic robot, or abstract AI god.", ontologyLevel: 5, eras: ["near_future", "far_future", "timeless"], risk: "high", tags: ["god_machine", "bishop", "mechanical_divinity"] },
+  { id: "god_machine_bishop", name: "神机主教", nameEn: "God-Machine Bishop", group: "D. 神官 / 伪神 / 活圣像", groupEn: "D. Priesthood / False God / Living Icon", def: "第一识别是神机主教。造型入口：主教法衣嵌入机械接口、齿轮圣徽、冷光神经线、仪式手套和把机器秩序解释成天命的严肃脸。母题：神圣权威与机械系统合成新的教会身体。张力：机械不能抢走神职，必须服务神谕、仪式和控制。视觉证据：金属牧杖、数据经文、接口领口、发光法冠和缓慢开合的机械手。边界：避免机甲主教、普通机器人或抽象AI神。", defEn: "First read: God-Machine Bishop. Styling entry: bishop vestment embedded with mechanical ports, gear sigil, cold neural lines, ritual gloves, and serious face explaining machine order as destiny. Sacred authority fuses with system machinery. Visual evidence: metal crozier, data scripture, ported collar, glowing mitre, and slow mechanical hand. Boundary: avoid mecha bishop, generic robot, or abstract AI god.", ontologyLevel: 5, eras: ["near_future", "far_future"], risk: "high", tags: ["god_machine", "bishop", "mechanical_divinity"] },
 
   { id: "prophecy_marked_boy", name: "预言标记少年", nameEn: "Prophecy-Marked Boy", group: "E. 预言 / 命运 / 祭品", groupEn: "E. Prophecy / Fate / Sacrifice", def: "第一识别是预言标记少年。造型入口：额头或锁骨上的预言印、普通衣物被护符打断、被众人看穿未来的紧张眼神。母题：身体在还没有行动前就被命运命名。张力：标记要像负担，不是超能力徽章。视觉证据：护符绳、旧预言纸、被触摸到发白的印记、避开人群的肩和紧握衣角的手。边界：避免救世主爽感或儿童奇观。", defEn: "First read: Prophecy-Marked Boy. Styling entry: prophecy mark on brow or collarbone, ordinary clothes interrupted by charms, and anxious eyes watched as future. The body is named by fate before action. Visual evidence: charm cord, old prophecy paper, over-touched pale mark, shoulders avoiding crowds, and hand gripping fabric. Boundary: avoid savior fantasy or child spectacle.", ontologyLevel: 4, eras: mythic, tags: ["prophecy", "marked", "fate"] },
   { id: "sacrificial_princess", name: "献祭公主", nameEn: "Sacrificial Princess", group: "E. 预言 / 命运 / 祭品", groupEn: "E. Prophecy / Fate / Sacrifice", def: "第一识别是献祭公主。造型入口：王室礼服被祭祀绳结束住、花冠、空白表情和被培养成献祭对象的礼仪站姿。母题：继承身份被转化为共同体交换物。张力：她要保留王族教育和主体尊严，不能只是受害者。视觉证据：祭台阶、白花、金色束带、王徽被遮挡和稳定到令人不安的眼。边界：避免苦难猎奇、童话公主或献祭场面血腥化。", defEn: "First read: Sacrificial Princess. Styling entry: royal dress bound by ritual cords, flower crown, blank expression, and etiquette posture trained for sacrifice. Succession becomes communal exchange object. Visual evidence: altar steps, white flowers, golden binding, obscured royal crest, and disturbingly steady eyes. Boundary: avoid misery spectacle, fairy princess, or gore sacrifice scene.", ontologyLevel: 4, eras: mythic, risk: "medium", tags: ["sacrifice", "princess", "fate"] },
@@ -92,16 +507,16 @@ const seeds: ExplicitPersonaSeed[] = [
   { id: "office_cubicle_deity", name: "格子间神明", nameEn: "Office-Cubicle Deity", group: "H. 现代神话 / 都市神性", groupEn: "H. Modern Myth / Urban Divinity", def: "第一识别是格子间神明。造型入口：普通衬衫、工位隔板、便利贴供品、咖啡杯光环和在低矮办公桌后接受小愿望的麻木表情。母题：办公室焦虑把神明压缩到工位尺度。张力：神性必须庸常、疲惫、非常小。视觉证据：键盘、工牌、便签祈愿、台灯、线缆和隔板后伸出的手。边界：避免普通白领或宏大神像。", defEn: "First read: Office-Cubicle Deity. Styling entry: ordinary shirt, cubicle panels, sticky-note offerings, coffee-cup halo, and numb expression receiving tiny wishes behind a low desk. Office anxiety compresses divinity to workstation scale. Visual evidence: keyboard, ID card, sticky prayers, desk lamp, cables, and hand reaching over a partition. Boundary: avoid generic office worker or grand idol.", ontologyLevel: 4, eras: mythic, tags: ["office", "deity", "cubicle"] },
   { id: "parking_lot_psychopomp", name: "停车场引魂人", nameEn: "Parking-Lot Psychopomp", group: "H. 现代神话 / 都市神性", groupEn: "H. Modern Myth / Urban Divinity", def: "第一识别是停车场引魂人。造型入口：反光背心、停车票、昏黄灯管、车钥匙串和在地下停车场引导迷失灵魂的低声手势。母题：冥界引路职能被转译进现代灰色空间。张力：他/她要像普通停车场工作人员，却掌握离开与迷路的边界。视觉证据：车位编号、收费机、油渍地面、手电筒和指向出口的手。边界：避免死神、保安或恐怖停车场。", defEn: "First read: Parking-Lot Psychopomp. Styling entry: reflective vest, parking ticket, yellow tube lights, key ring, and low gestures guiding lost souls in an underground lot. Psychopomp function enters modern grey space. Visual evidence: parking numbers, payment machine, oil-stained floor, flashlight, and hand pointing to exit. Boundary: avoid grim reaper, security guard, or horror parking lot.", ontologyLevel: 4, eras: mythic, tags: ["parking_lot", "psychopomp", "urban"] },
 
-  { id: "star_womb_priestess", name: "星胎女祭司", nameEn: "Star-Womb Priestess", group: "I. 宇宙神性 / 异星圣徒", groupEn: "I. Cosmic Divinity / Alien Saint", def: "第一识别是星胎女祭司。造型入口：腹部星云纹、深色祭服、悬浮护符、缓慢托腹手势和像孕育天体而非生命个体的庄重表情。母题：宇宙生育被仪式化为星体孵化。张力：神圣孕育要抽象、庄严、非露骨。视觉证据：星尘光点、圆形腹饰、轨道线、低垂头纱和围绕身体运行的小型符号。边界：避免怀孕猎奇、外星女王或普通祭司。", defEn: "First read: Star-Womb Priestess. Styling entry: nebula mark over the abdomen, dark vestment, floating charms, slow hands holding the belly, and solemn expression gestating celestial bodies rather than an individual life. Cosmic fertility becomes star incubation. Visual evidence: stardust points, circular abdominal ornament, orbital lines, low veil, and small symbols orbiting the body. Boundary: avoid pregnancy spectacle, alien queen, or generic priestess.", ontologyLevel: 5, eras: ["far_future", "timeless"], risk: "high", tags: ["star_womb", "priestess", "cosmic"] },
-  { id: "black_hole_monk", name: "黑洞僧侣", nameEn: "Black-Hole Monk", group: "I. 宇宙神性 / 异星圣徒", groupEn: "I. Cosmic Divinity / Alien Saint", def: "第一识别是黑洞僧侣。造型入口：吸光黑袍、扭曲边缘光、极慢步伐、无声面孔和像把一切目光拉向身体中心的静坐。母题：黑洞被折译成禁欲、引力和吞没语言的修行。张力：不可知感要通过光线和姿态，不要怪物化。视觉证据：暗环、弯曲星点、沉重袖摆、低头合掌和周围空间轻微塌陷感。边界：避免太空怪物、黑衣僧人或随意宇宙特效。", defEn: "First read: Black-Hole Monk. Styling entry: light-absorbing black robe, distorted rim light, extremely slow steps, silent face, and seated posture pulling all gaze inward. Black hole becomes ascetic gravity. Visual evidence: dark ring, bent star points, heavy sleeves, bowed hands, and slight spatial collapse around the body. Boundary: avoid space monster, generic black monk, or random cosmic effects.", ontologyLevel: 5, eras: ["far_future", "timeless"], risk: "high", tags: ["black_hole", "monk", "cosmic"] },
-  { id: "nebula_choir_girl", name: "星云唱诗女孩", nameEn: "Nebula Choir Girl", group: "I. 宇宙神性 / 异星圣徒", groupEn: "I. Cosmic Divinity / Alien Saint", def: "第一识别是星云唱诗女孩。造型入口：透明唱诗袍、星云色喉光、合唱站位、漂浮发丝和声音像气体云缓慢扩散的表情。母题：宇宙尘埃被转译成儿童合唱般的纯净声场。张力：纯净不能可爱化，必须有宇宙尺度的疏离。视觉证据：星尘领口、乐谱光点、半透明袖子、远距离队列和张口时扩散的彩雾。边界：避免普通唱诗班、星空少女或儿童消费。", defEn: "First read: Nebula Choir Girl. Styling entry: translucent choir robe, nebula throat light, choir formation, floating hair, and expression with voice spreading like gas cloud. Cosmic dust becomes a pure but distant choral field. Visual evidence: stardust collar, score-like light points, translucent sleeves, distant formation, and colored mist from the mouth. Boundary: avoid generic choir, starry girl, or child consumption.", ontologyLevel: 5, eras: ["far_future", "timeless"], risk: "high", tags: ["nebula", "choir", "cosmic"] },
-  { id: "comet_marked_herald", name: "彗星标记者", nameEn: "Comet-Marked Herald", group: "I. 宇宙神性 / 异星圣徒", groupEn: "I. Cosmic Divinity / Alien Saint", def: "第一识别是彗星标记者。造型入口：额头拖尾光痕、旅行披风、星图卷轴、急促步伐和像只在周期到来时出现的信使眼神。母题：彗星周期被拟人成带来消息的身体。张力：他/她要有短暂停留和不可挽留感。视觉证据：尾迹纹样、冰尘、信使杖、破风衣摆和看向远方轨道的脸。边界：避免普通信使、流星魔法或科幻侦察员。", defEn: "First read: Comet-Marked Herald. Styling entry: comet-tail mark on brow, travel cloak, star-map scroll, hurried steps, and eyes of a messenger appearing only on schedule. Comet periodicity becomes a body carrying news. Visual evidence: tail motifs, ice dust, herald staff, wind-broken hem, and face toward distant orbit. Boundary: avoid generic messenger, meteor magic, or sci-fi scout.", ontologyLevel: 4, eras: ["far_future", "timeless"], tags: ["comet", "herald", "cosmic"] },
-  { id: "void_baptized_child", name: "虚空受洗儿童", nameEn: "Void-Baptized Child", group: "I. 宇宙神性 / 异星圣徒", groupEn: "I. Cosmic Divinity / Alien Saint", def: "第一识别是虚空受洗儿童。造型入口：黑色洗礼水痕、过大的白袍、无声眼神、成人环绕保护和像刚从无物中被交还的身体。母题：虚空仪式把儿童身体放在宇宙空洞与共同体之间。张力：必须克制保护，不把儿童脆弱奇观化。视觉证据：黑水滴、白布、护身符、扶住肩膀的手和不投影子的脚边。边界：避免恐怖儿童、邪教献祭或虚空怪物。", defEn: "First read: Void-Baptized Child. Styling entry: black baptism marks, oversized white robe, silent eyes, adults around for protection, and a body returned from nothingness. Void ritual places a child between cosmic emptiness and community. Visual evidence: black water drops, white cloth, protective charms, hands supporting shoulders, and feet casting no shadow. Boundary: avoid horror child, cult sacrifice, or void monster.", ontologyLevel: 5, eras: ["far_future", "timeless"], risk: "high", tags: ["void", "baptism", "child"] },
-  { id: "galactic_relic_bearer", name: "银河圣遗物持有者", nameEn: "Galactic Relic Bearer", group: "I. 宇宙神性 / 异星圣徒", groupEn: "I. Cosmic Divinity / Alien Saint", def: "第一识别是银河圣遗物持有者。造型入口：深空旅行服、密封圣匣、星系纹披带、双手托举过重物件的姿态和被遗物反光照亮的脸。母题：圣遗物尺度从教堂扩展到星系。张力：他/她不是冒险者，而是承载不可理解重量的保管人。视觉证据：密封盒、轨道印章、星图锁、磨损肩带和不敢低头看的眼。边界：避免普通寻宝者、太空骑士或魔法宝物展示。", defEn: "First read: Galactic Relic Bearer. Styling entry: deep-space travel clothes, sealed reliquary, galaxy-pattern sash, hands carrying something too heavy, and face lit by relic reflection. Relic scale expands to galaxies. Visual evidence: sealed case, orbital seals, star-map lock, worn shoulder strap, and eyes afraid to look down. Boundary: avoid generic treasure hunter, space knight, or magic item display.", ontologyLevel: 5, eras: ["far_future", "timeless"], risk: "high", tags: ["relic", "galactic", "bearer"] },
-  { id: "asteroid_shrine_keeper", name: "小行星神龛守", nameEn: "Asteroid Shrine Keeper", group: "I. 宇宙神性 / 异星圣徒", groupEn: "I. Cosmic Divinity / Alien Saint", def: "第一识别是小行星神龛守。造型入口：耐压旧袍、微型神龛、锚钩、矿尘和在孤立小行星上维护信仰角落的固执身体。母题：太空边地把神圣缩成维护工作。张力：神性要小、冷、贫乏，但不能消失。视觉证据：真空封条、供灯、岩尘、修补手套和系住身体的安全绳。边界：避免太空和尚、矿工或宏大神殿。", defEn: "First read: Asteroid Shrine Keeper. Styling entry: old pressure robe, tiny shrine, anchor hook, ore dust, and stubborn body maintaining a faith corner on an isolated asteroid. Sacredness shrinks into maintenance labor. Visual evidence: vacuum seals, offering lamp, rock dust, patched gloves, and safety tether. Boundary: avoid space monk, miner, or grand temple.", ontologyLevel: 4, eras: ["far_future", "timeless"], tags: ["asteroid", "shrine", "keeper"] },
-  { id: "cosmic_martyr_pilot", name: "宇宙殉道飞行员", nameEn: "Cosmic Martyr Pilot", group: "I. 宇宙神性 / 异星圣徒", groupEn: "I. Cosmic Divinity / Alien Saint", def: "第一识别是宇宙殉道飞行员。造型入口：飞行服、圣痕式烧蚀痕、舱门光、氧气面罩和像已经接受不会返航的平静眼神。母题：飞行任务被神圣化为自我献祭。张力：他/她仍是飞行员，殉道感来自返航概率、舱体伤痕和身体承受。视觉证据：烧蚀肩章、航线十字、紧急拉环、星光裂窗和手按胸口的动作。边界：避免普通英雄飞行员或宗教殉道图。", defEn: "First read: Cosmic Martyr Pilot. Styling entry: flight suit, stigmata-like ablation marks, hatch light, oxygen mask, and calm eyes accepting no return. Mission becomes sacred self-sacrifice. Visual evidence: burned epaulettes, cross-like trajectory, emergency pull ring, cracked starlit window, and hand on chest. Boundary: avoid generic hero pilot or religious martyr painting.", ontologyLevel: 5, eras: ["far_future", "timeless"], risk: "high", tags: ["cosmic", "martyr", "pilot"] },
-  { id: "planetary_oracle_queen", name: "行星神谕女王", nameEn: "Planetary Oracle Queen", group: "I. 宇宙神性 / 异星圣徒", groupEn: "I. Cosmic Divinity / Alien Saint", def: "第一识别是行星神谕女王。造型入口：行星环王冠、深色王袍、轨道式披肩、眼中多重昼夜和以整颗星球为身体外延的静止姿态。母题：统治权和天体预言合为一体。张力：她的女王感必须来自尺度和不可接近，不是普通王权。视觉证据：行星投影、轨道珠串、星云王座、缓慢抬手和脚下地表纹。边界：避免太空女皇、星空女神或AI统治者。", defEn: "First read: Planetary Oracle Queen. Styling entry: planetary-ring crown, dark royal robe, orbital shawl, multiple day-night cycles in the eyes, and still posture extending into an entire planet. Rule and celestial prophecy become one. Visual evidence: planet projection, orbital beads, nebula throne, slow raised hand, and surface patterns underfoot. Boundary: avoid space empress, star goddess, or AI ruler.", ontologyLevel: 5, eras: ["far_future", "timeless"], risk: "high", tags: ["planetary", "oracle", "queen"] },
-  { id: "solar_cult_astronaut", name: "太阳教宇航员", nameEn: "Solar-Cult Astronaut", group: "I. 宇宙神性 / 异星圣徒", groupEn: "I. Cosmic Divinity / Alien Saint", def: "第一识别是太阳教宇航员。造型入口：宇航服被太阳徽纹改造、金色遮阳面罩、祈祷姿势的手套和把太空任务当成朝圣的直立身体。母题：现代航天流程被太阳崇拜重新解释。张力：宇航员身份必须清楚，宗教性通过徽章、姿态和光线侵入。视觉证据：任务臂章、太阳纹氧气管、金面罩反光、舱外绳和面向恒星的静止。边界：避免普通宇航员、太阳神或邪教太空人。", defEn: "First read: Solar-Cult Astronaut. Styling entry: spacesuit altered with solar emblems, gold visor, prayer-like gloves, and upright body treating mission as pilgrimage. Aerospace workflow is reinterpreted by solar worship. Visual evidence: mission patch, sun-pattern oxygen hose, gold visor reflection, EVA tether, and stillness facing the star. Boundary: avoid generic astronaut, sun god, or cult spaceman.", ontologyLevel: 4, eras: ["near_future", "far_future", "timeless"], tags: ["solar_cult", "astronaut", "cosmic"] },
+  { id: "star_womb_priestess", name: "星胎女祭司", nameEn: "Star-Womb Priestess", group: "I. 宇宙神性 / 异星圣徒", groupEn: "I. Cosmic Divinity / Alien Saint", def: "第一识别是星胎女祭司。造型入口：腹部星云纹、深色祭服、悬浮护符、缓慢托腹手势和像孕育天体而非生命个体的庄重表情。母题：宇宙生育被仪式化为星体孵化。张力：神圣孕育要抽象、庄严、非露骨。视觉证据：星尘光点、圆形腹饰、轨道线、低垂头纱和围绕身体运行的小型符号。边界：避免怀孕猎奇、外星女王或普通祭司。", defEn: "First read: Star-Womb Priestess. Styling entry: nebula mark over the abdomen, dark vestment, floating charms, slow hands holding the belly, and solemn expression gestating celestial bodies rather than an individual life. Cosmic fertility becomes star incubation. Visual evidence: stardust points, circular abdominal ornament, orbital lines, low veil, and small symbols orbiting the body. Boundary: avoid pregnancy spectacle, alien queen, or generic priestess.", ontologyLevel: 5, eras: ["far_future"], risk: "high", tags: ["star_womb", "priestess", "cosmic"] },
+  { id: "black_hole_monk", name: "黑洞僧侣", nameEn: "Black-Hole Monk", group: "I. 宇宙神性 / 异星圣徒", groupEn: "I. Cosmic Divinity / Alien Saint", def: "第一识别是黑洞僧侣。造型入口：吸光黑袍、扭曲边缘光、极慢步伐、无声面孔和像把一切目光拉向身体中心的静坐。母题：黑洞被折译成禁欲、引力和吞没语言的修行。张力：不可知感要通过光线和姿态，不要怪物化。视觉证据：暗环、弯曲星点、沉重袖摆、低头合掌和周围空间轻微塌陷感。边界：避免太空怪物、黑衣僧人或随意宇宙特效。", defEn: "First read: Black-Hole Monk. Styling entry: light-absorbing black robe, distorted rim light, extremely slow steps, silent face, and seated posture pulling all gaze inward. Black hole becomes ascetic gravity. Visual evidence: dark ring, bent star points, heavy sleeves, bowed hands, and slight spatial collapse around the body. Boundary: avoid space monster, generic black monk, or random cosmic effects.", ontologyLevel: 5, eras: ["far_future"], risk: "high", tags: ["black_hole", "monk", "cosmic"] },
+  { id: "nebula_choir_girl", name: "星云唱诗女孩", nameEn: "Nebula Choir Girl", group: "I. 宇宙神性 / 异星圣徒", groupEn: "I. Cosmic Divinity / Alien Saint", def: "第一识别是星云唱诗女孩。造型入口：透明唱诗袍、星云色喉光、合唱站位、漂浮发丝和声音像气体云缓慢扩散的表情。母题：宇宙尘埃被转译成儿童合唱般的纯净声场。张力：纯净不能可爱化，必须有宇宙尺度的疏离。视觉证据：星尘领口、乐谱光点、半透明袖子、远距离队列和张口时扩散的彩雾。边界：避免普通唱诗班、星空少女或儿童消费。", defEn: "First read: Nebula Choir Girl. Styling entry: translucent choir robe, nebula throat light, choir formation, floating hair, and expression with voice spreading like gas cloud. Cosmic dust becomes a pure but distant choral field. Visual evidence: stardust collar, score-like light points, translucent sleeves, distant formation, and colored mist from the mouth. Boundary: avoid generic choir, starry girl, or child consumption.", ontologyLevel: 5, eras: ["far_future"], risk: "high", tags: ["nebula", "choir", "cosmic"] },
+  { id: "comet_marked_herald", name: "彗星标记者", nameEn: "Comet-Marked Herald", group: "I. 宇宙神性 / 异星圣徒", groupEn: "I. Cosmic Divinity / Alien Saint", def: "第一识别是彗星标记者。造型入口：额头拖尾光痕、旅行披风、星图卷轴、急促步伐和像只在周期到来时出现的信使眼神。母题：彗星周期被拟人成带来消息的身体。张力：他/她要有短暂停留和不可挽留感。视觉证据：尾迹纹样、冰尘、信使杖、破风衣摆和看向远方轨道的脸。边界：避免普通信使、流星魔法或科幻侦察员。", defEn: "First read: Comet-Marked Herald. Styling entry: comet-tail mark on brow, travel cloak, star-map scroll, hurried steps, and eyes of a messenger appearing only on schedule. Comet periodicity becomes a body carrying news. Visual evidence: tail motifs, ice dust, herald staff, wind-broken hem, and face toward distant orbit. Boundary: avoid generic messenger, meteor magic, or sci-fi scout.", ontologyLevel: 4, eras: ["far_future"], tags: ["comet", "herald", "cosmic"] },
+  { id: "void_baptized_child", name: "虚空受洗儿童", nameEn: "Void-Baptized Child", group: "I. 宇宙神性 / 异星圣徒", groupEn: "I. Cosmic Divinity / Alien Saint", def: "第一识别是虚空受洗儿童。造型入口：黑色洗礼水痕、过大的白袍、无声眼神、成人环绕保护和像刚从无物中被交还的身体。母题：虚空仪式把儿童身体放在宇宙空洞与共同体之间。张力：必须克制保护，不把儿童脆弱奇观化。视觉证据：黑水滴、白布、护身符、扶住肩膀的手和不投影子的脚边。边界：避免恐怖儿童、邪教献祭或虚空怪物。", defEn: "First read: Void-Baptized Child. Styling entry: black baptism marks, oversized white robe, silent eyes, adults around for protection, and a body returned from nothingness. Void ritual places a child between cosmic emptiness and community. Visual evidence: black water drops, white cloth, protective charms, hands supporting shoulders, and feet casting no shadow. Boundary: avoid horror child, cult sacrifice, or void monster.", ontologyLevel: 5, eras: ["far_future"], risk: "high", tags: ["void", "baptism", "child"] },
+  { id: "galactic_relic_bearer", name: "银河圣遗物持有者", nameEn: "Galactic Relic Bearer", group: "I. 宇宙神性 / 异星圣徒", groupEn: "I. Cosmic Divinity / Alien Saint", def: "第一识别是银河圣遗物持有者。造型入口：深空旅行服、密封圣匣、星系纹披带、双手托举过重物件的姿态和被遗物反光照亮的脸。母题：圣遗物尺度从教堂扩展到星系。张力：他/她不是冒险者，而是承载不可理解重量的保管人。视觉证据：密封盒、轨道印章、星图锁、磨损肩带和不敢低头看的眼。边界：避免普通寻宝者、太空骑士或魔法宝物展示。", defEn: "First read: Galactic Relic Bearer. Styling entry: deep-space travel clothes, sealed reliquary, galaxy-pattern sash, hands carrying something too heavy, and face lit by relic reflection. Relic scale expands to galaxies. Visual evidence: sealed case, orbital seals, star-map lock, worn shoulder strap, and eyes afraid to look down. Boundary: avoid generic treasure hunter, space knight, or magic item display.", ontologyLevel: 5, eras: ["far_future"], risk: "high", tags: ["relic", "galactic", "bearer"] },
+  { id: "asteroid_shrine_keeper", name: "小行星神龛守", nameEn: "Asteroid Shrine Keeper", group: "I. 宇宙神性 / 异星圣徒", groupEn: "I. Cosmic Divinity / Alien Saint", def: "第一识别是小行星神龛守。造型入口：耐压旧袍、微型神龛、锚钩、矿尘和在孤立小行星上维护信仰角落的固执身体。母题：太空边地把神圣缩成维护工作。张力：神性要小、冷、贫乏，但不能消失。视觉证据：真空封条、供灯、岩尘、修补手套和系住身体的安全绳。边界：避免太空和尚、矿工或宏大神殿。", defEn: "First read: Asteroid Shrine Keeper. Styling entry: old pressure robe, tiny shrine, anchor hook, ore dust, and stubborn body maintaining a faith corner on an isolated asteroid. Sacredness shrinks into maintenance labor. Visual evidence: vacuum seals, offering lamp, rock dust, patched gloves, and safety tether. Boundary: avoid space monk, miner, or grand temple.", ontologyLevel: 4, eras: ["far_future"], tags: ["asteroid", "shrine", "keeper"] },
+  { id: "cosmic_martyr_pilot", name: "宇宙殉道飞行员", nameEn: "Cosmic Martyr Pilot", group: "I. 宇宙神性 / 异星圣徒", groupEn: "I. Cosmic Divinity / Alien Saint", def: "第一识别是宇宙殉道飞行员。造型入口：飞行服、圣痕式烧蚀痕、舱门光、氧气面罩和像已经接受不会返航的平静眼神。母题：飞行任务被神圣化为自我献祭。张力：他/她仍是飞行员，殉道感来自返航概率、舱体伤痕和身体承受。视觉证据：烧蚀肩章、航线十字、紧急拉环、星光裂窗和手按胸口的动作。边界：避免普通英雄飞行员或宗教殉道图。", defEn: "First read: Cosmic Martyr Pilot. Styling entry: flight suit, stigmata-like ablation marks, hatch light, oxygen mask, and calm eyes accepting no return. Mission becomes sacred self-sacrifice. Visual evidence: burned epaulettes, cross-like trajectory, emergency pull ring, cracked starlit window, and hand on chest. Boundary: avoid generic hero pilot or religious martyr painting.", ontologyLevel: 5, eras: ["far_future"], risk: "high", tags: ["cosmic", "martyr", "pilot"] },
+  { id: "planetary_oracle_queen", name: "行星神谕女王", nameEn: "Planetary Oracle Queen", group: "I. 宇宙神性 / 异星圣徒", groupEn: "I. Cosmic Divinity / Alien Saint", def: "第一识别是行星神谕女王。造型入口：行星环王冠、深色王袍、轨道式披肩、眼中多重昼夜和以整颗星球为身体外延的静止姿态。母题：统治权和天体预言合为一体。张力：她的女王感必须来自尺度和不可接近，不是普通王权。视觉证据：行星投影、轨道珠串、星云王座、缓慢抬手和脚下地表纹。边界：避免太空女皇、星空女神或AI统治者。", defEn: "First read: Planetary Oracle Queen. Styling entry: planetary-ring crown, dark royal robe, orbital shawl, multiple day-night cycles in the eyes, and still posture extending into an entire planet. Rule and celestial prophecy become one. Visual evidence: planet projection, orbital beads, nebula throne, slow raised hand, and surface patterns underfoot. Boundary: avoid space empress, star goddess, or AI ruler.", ontologyLevel: 5, eras: ["far_future"], risk: "high", tags: ["planetary", "oracle", "queen"] },
+  { id: "solar_cult_astronaut", name: "太阳教宇航员", nameEn: "Solar-Cult Astronaut", group: "I. 宇宙神性 / 异星圣徒", groupEn: "I. Cosmic Divinity / Alien Saint", def: "第一识别是太阳教宇航员。造型入口：宇航服被太阳徽纹改造、金色遮阳面罩、祈祷姿势的手套和把太空任务当成朝圣的直立身体。母题：现代航天流程被太阳崇拜重新解释。张力：宇航员身份必须清楚，宗教性通过徽章、姿态和光线侵入。视觉证据：任务臂章、太阳纹氧气管、金面罩反光、舱外绳和面向恒星的静止。边界：避免普通宇航员、太阳神或邪教太空人。", defEn: "First read: Solar-Cult Astronaut. Styling entry: spacesuit altered with solar emblems, gold visor, prayer-like gloves, and upright body treating mission as pilgrimage. Aerospace workflow is reinterpreted by solar worship. Visual evidence: mission patch, sun-pattern oxygen hose, gold visor reflection, EVA tether, and stillness facing the star. Boundary: avoid generic astronaut, sun god, or cult spaceman.", ontologyLevel: 4, eras: ["near_future", "far_future"], tags: ["solar_cult", "astronaut", "cosmic"] },
 
   { id: "anti_messiah_boy", name: "反弥赛亚少年", nameEn: "Anti-Messiah Boy", group: "J. 反神圣 / 异端救世", groupEn: "J. Anti-Sacred / Heretical Salvation", def: "第一识别是反弥赛亚少年。造型入口：倒置光环、普通衣物被黑色圣痕打断、平静到不合年龄的脸和被众人既期待又恐惧的站位。母题：救世结构被反向占用。张力：他不能只是邪恶少年，必须像一个被错误预言推到中心的人。视觉证据：反向圣符、被擦掉的祝福字、围观距离、暗光眼和不主动伸手的姿态。边界：避免儿童恶魔、普通反派或宗教直译。", defEn: "First read: Anti-Messiah Boy. Styling entry: inverted halo, ordinary clothes interrupted by black stigmata, too-calm face, and placement feared and expected by crowds. Salvation structure is occupied in reverse. Visual evidence: reversed holy sign, erased blessing text, crowd distance, dark-lit eyes, and hands not reaching first. Boundary: avoid demon child, generic villain, or direct religious copy.", ontologyLevel: 5, eras: mythic, risk: "high", tags: ["anti_messiah", "boy", "heresy"] },
   { id: "heretic_savior_girl", name: "异端救世少女", nameEn: "Heretic Savior Girl", group: "J. 反神圣 / 异端救世", groupEn: "J. Anti-Sacred / Heretical Salvation", def: "第一识别是异端救世少女。造型入口：被改写的圣袍、手写禁书页、灼痕光环和坚持用错误方式救人的倔强眼神。母题：救世冲动脱离正统制度后变成危险温柔。张力：她要像救世者，也像被正统追捕的破坏者。视觉证据：缝补圣符、烧焦书页、手臂护符、奔跑后的衣摆和仍向人伸出的手。边界：避免魔法少女、圣女或叛逆少女泛化。", defEn: "First read: Heretic Savior Girl. Styling entry: rewritten vestment, handwritten forbidden pages, burn-mark halo, and stubborn eyes saving people the wrong way. Salvation leaves orthodoxy and becomes dangerous tenderness. Visual evidence: patched holy signs, scorched pages, arm charms, running hem, and a hand still reaching outward. Boundary: avoid magical girl, saint girl, or generic rebel girl.", ontologyLevel: 5, eras: mythic, risk: "high", tags: ["heretic", "savior", "girl"] },
@@ -114,6 +529,11 @@ const seeds: ExplicitPersonaSeed[] = [
   { id: "burned_scripture_librarian", name: "焚经图书管理员", nameEn: "Burned-Scripture Librarian", group: "J. 反神圣 / 异端救世", groupEn: "J. Anti-Sacred / Heretical Salvation", def: "第一识别是焚经图书管理员。造型入口：灰烬边书页、图书馆制服、封存箱、烟痕手套和知道哪些经文必须被保存也必须被烧毁的冷静脸。母题：知识管理进入异端审查和记忆保护的矛盾。张力：他/她不是焚书者，而是保存与删除之间的守门人。视觉证据：焦黑书脊、目录卡、灰尘光、封条和轻轻合上书页的手。边界：避免普通图书管理员、纵火者或审查官脸谱。", defEn: "First read: Burned-Scripture Librarian. Styling entry: ash-edged pages, library uniform, sealed boxes, smoke-marked gloves, and calm face knowing which scriptures must be saved and burned. Knowledge management enters the contradiction of heresy control and memory protection. Visual evidence: charred spines, catalog cards, dusty light, seals, and hand gently closing a book. Boundary: avoid generic librarian, arsonist, or censor caricature.", ontologyLevel: 4, eras: mythic, risk: "medium", tags: ["scripture", "librarian", "heresy"] },
   { id: "unholy_child_saint", name: "不洁圣童", nameEn: "Unholy Child Saint", group: "J. 反神圣 / 异端救世", groupEn: "J. Anti-Sacred / Heretical Salvation", def: "第一识别是不洁圣童。造型入口：白衣被黑色祝福痕污染、护符过多、成人保护性围绕和明明被称为圣却无法被触碰的安静。母题：圣洁与污染被错误地放在同一个儿童身体上。张力：必须保护儿童呈现，重点在共同体恐惧和隔离，不制造猎奇伤害。视觉证据：黑白对比绳结、隔离线、供花、低头小手和远处祈祷者。边界：避免恐怖儿童、邪恶童子或苦难消费。", defEn: "First read: Unholy Child Saint. Styling entry: white clothes stained by black blessing marks, too many charms, protective adults around, and quiet presence called holy yet untouchable. Purity and pollution are wrongly placed in one child body. Visual evidence: black-white cords, isolation line, offerings, lowered small hands, and distant prayer figures. Boundary: avoid horror child, evil-child trope, or suffering consumption.", ontologyLevel: 5, eras: mythic, risk: "high", tags: ["unholy", "child_saint", "pollution"] }
 ];
+
+const seedsWithFit: ExplicitPersonaSeed[] = seeds.map(seed => ({
+  ...seed,
+  categoryFit: seed.categoryFit || divineFitOverrides[seed.id] || divineFit(seed.group)
+}));
 
 export const CD_PERSONA_DIVINE_DEMONIC = buildExplicitPersonaTerms({
   categoryId: 'divine_demonic',
@@ -130,4 +550,4 @@ export const CD_PERSONA_DIVINE_DEMONIC = buildExplicitPersonaTerms({
   absorptionFocus: '神圣谱系、契约痕迹、仪式服制、神罚标记、身体圣像化或异端身份',
   absorptionFocusEn: 'sacred lineage, contract traces, ritual costume, divine-punishment marks, body-as-icon, or heretical identity',
   appendVisualEvidence: false
-}, seeds);
+}, seedsWithFit);

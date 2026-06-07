@@ -1,4 +1,12 @@
-import { PersonaEra, PersonaTerm } from './types';
+import {
+  cleanPersonaEras,
+  PersonaCategoryFit,
+  personaEraModeFor,
+  PersonaEra,
+  personaFit,
+  personaRealityTagsFor,
+  PersonaTerm
+} from './types';
 
 type PersonaSeed = {
   id: string;
@@ -17,19 +25,365 @@ type PersonaSeed = {
   forbids?: string[];
   absorptionRule?: string;
   absorptionRuleEn?: string;
+  eraMode?: PersonaTerm['eraMode'];
+  realityTags?: string[];
+  categoryFit?: PersonaTerm['categoryFit'];
 };
 
 const baseControls = ['costume', 'body', 'interface', 'prop', 'material', 'symbol', 'pose'];
 const defaultForbids = ['无解释中世纪化', '纯田园自然化', '随机宗教圣物抢走技术逻辑', '把所有细节都变成霓虹赛博'];
-const nearFutureEras: PersonaEra[] = ['near_future', 'far_future', 'timeless'];
-const contemporaryFutureEras: PersonaEra[] = ['contemporary', 'near_future', 'far_future', 'timeless'];
-const industrialFutureEras: PersonaEra[] = ['industrial', 'modern', 'near_future', 'timeless'];
+const nearFutureEras: PersonaEra[] = ['near_future', 'far_future'];
+const contemporaryFutureEras: PersonaEra[] = ['contemporary', 'near_future', 'far_future'];
+const industrialFutureEras: PersonaEra[] = ['industrial', 'modern', 'near_future'];
+
+const scifiFit = (group: string): PersonaCategoryFit => {
+  if (group.startsWith('A.')) return personaFit('weak', {
+    strong: ['cyberpunk', 'science_fiction'],
+    usable: ['urban_life', 'noir_crime', 'fashion_idol'],
+    fusion: ['posthuman', 'biopunk'],
+    weak: ['court', 'wuxia', 'xianxia']
+  });
+  if (group.startsWith('B.')) return personaFit('weak', {
+    strong: ['biopunk', 'science_fiction'],
+    usable: ['medical', 'posthuman', 'body_horror'],
+    fusion: ['horror', 'cyberpunk'],
+    weak: ['romance', 'court', 'wuxia']
+  });
+  if (group.startsWith('C.')) return personaFit('weak', {
+    strong: ['science_fiction', 'space_opera'],
+    usable: ['war_military', 'adventure', 'posthuman'],
+    fusion: ['cyberpunk', 'court'],
+    weak: ['urban_life', 'wuxia', 'historical']
+  });
+  if (group.startsWith('D.')) return personaFit('weak', {
+    strong: ['posthuman', 'science_fiction'],
+    usable: ['cyberpunk', 'romance', 'real_professional'],
+    fusion: ['biopunk', 'surreal'],
+    weak: ['historical', 'court', 'wuxia']
+  });
+  if (group.startsWith('E.')) return personaFit('weak', {
+    strong: ['science_fiction', 'cyberpunk'],
+    usable: ['real_professional', 'institutional', 'posthuman'],
+    fusion: ['religious_ritual', 'surreal'],
+    weak: ['wuxia', 'xianxia', 'historical']
+  });
+  if (group.startsWith('F.')) return personaFit('weak', {
+    strong: ['science_fiction', 'war_military'],
+    usable: ['space_opera', 'posthuman'],
+    fusion: ['cyberpunk', 'wasteland'],
+    weak: ['romance', 'court', 'urban_life']
+  });
+  if (group.startsWith('G.')) return personaFit('weak', {
+    strong: ['posthuman', 'science_fiction'],
+    usable: ['cyberpunk', 'biopunk', 'body_horror'],
+    fusion: ['surreal'],
+    weak: ['romance', 'historical', 'court']
+  });
+  if (group.startsWith('H.')) return personaFit('weak', {
+    strong: ['science_fiction'],
+    usable: ['historical', 'adventure', 'space_opera'],
+    fusion: ['fashion_idol', 'surreal'],
+    weak: ['wuxia', 'xianxia', 'wasteland']
+  });
+  if (group.startsWith('I.')) return personaFit('weak', {
+    strong: ['science_fiction', 'war_military'],
+    usable: ['historical', 'wasteland', 'adventure'],
+    fusion: ['cyberpunk'],
+    weak: ['romance', 'fashion_idol', 'xianxia']
+  });
+  return personaFit('weak', {
+    strong: ['science_fiction', 'surreal'],
+    usable: ['cyberpunk', 'posthuman', 'urban_life'],
+    fusion: ['cosmic_horror', 'horror'],
+    weak: ['historical', 'court', 'wuxia']
+  });
+};
+
+const scifiFitOverrides: Record<string, PersonaCategoryFit> = {
+  cyber_yakuza_accountant: personaFit('weak', {
+    strong: ['cyberpunk', 'noir_crime', 'science_fiction'],
+    usable: ['urban_life', 'workplace'],
+    fusion: ['posthuman'],
+    weak: ['court', 'wuxia', 'xianxia']
+  }),
+  rain_alley_noodle_runner: personaFit('weak', {
+    strong: ['cyberpunk', 'urban_life'],
+    usable: ['science_fiction', 'workplace'],
+    fusion: ['noir_crime', 'wasteland'],
+    weak: ['court', 'wuxia', 'xianxia']
+  }),
+  augmented_night_market_doctor: personaFit('weak', {
+    strong: ['cyberpunk', 'medical', 'science_fiction'],
+    usable: ['urban_life', 'noir_crime'],
+    fusion: ['biopunk', 'body_horror'],
+    weak: ['court', 'wuxia', 'xianxia']
+  }),
+  neon_idol_bodyguard: personaFit('weak', {
+    strong: ['cyberpunk', 'science_fiction', 'fashion_idol'],
+    usable: ['urban_life', 'real_professional'],
+    fusion: ['noir_crime', 'romance'],
+    weak: ['court', 'wuxia', 'xianxia']
+  }),
+  metro_ghost_detective: personaFit('weak', {
+    strong: ['cyberpunk', 'noir_crime', 'science_fiction'],
+    usable: ['urban_life', 'surreal'],
+    fusion: ['horror', 'posthuman'],
+    weak: ['court', 'wuxia', 'xianxia']
+  }),
+  synthetic_skin_aesthetician: personaFit('weak', {
+    strong: ['biopunk', 'medical', 'real_professional'],
+    usable: ['science_fiction', 'fashion_idol', 'urban_life'],
+    fusion: ['body_horror'],
+    weak: ['court', 'wuxia', 'xianxia']
+  }),
+  plague_vaccine_influencer: personaFit('weak', {
+    strong: ['biopunk', 'medical', 'science_fiction'],
+    usable: ['urban_life', 'fashion_idol'],
+    fusion: ['horror', 'body_horror'],
+    weak: ['court', 'wuxia', 'romance']
+  }),
+  lab_grown_pop_star: personaFit('weak', {
+    strong: ['biopunk', 'science_fiction', 'fashion_idol'],
+    usable: ['posthuman', 'urban_life'],
+    fusion: ['body_horror', 'cyberpunk'],
+    weak: ['court', 'wuxia', 'war_military']
+  }),
+  biohazard_cleanroom_monk: personaFit('weak', {
+    strong: ['biopunk', 'science_fiction', 'religious_ritual'],
+    usable: ['medical', 'posthuman'],
+    fusion: ['horror', 'body_horror'],
+    weak: ['romance', 'court', 'wuxia']
+  }),
+  generation_ship_teacher: personaFit('weak', {
+    strong: ['science_fiction', 'space_opera'],
+    usable: ['real_professional', 'institutional', 'adventure'],
+    fusion: ['posthuman'],
+    weak: ['wuxia', 'xianxia', 'historical']
+  }),
+  fleet_navigator_priest: personaFit('weak', {
+    strong: ['science_fiction', 'space_opera', 'religious_ritual'],
+    usable: ['war_military', 'adventure'],
+    fusion: ['surreal', 'cosmic_horror'],
+    weak: ['urban_life', 'wuxia', 'historical']
+  }),
+  space_elevator_attendant: personaFit('weak', {
+    strong: ['science_fiction', 'space_opera'],
+    usable: ['real_professional', 'workplace', 'adventure'],
+    fusion: ['cyberpunk'],
+    weak: ['wuxia', 'xianxia', 'historical']
+  }),
+  colony_water_union_leader: personaFit('weak', {
+    strong: ['science_fiction', 'space_opera'],
+    usable: ['real_professional', 'workplace', 'adventure'],
+    fusion: ['wasteland', 'cyberpunk'],
+    weak: ['wuxia', 'xianxia', 'historical']
+  }),
+  zero_g_ballet_athlete: personaFit('weak', {
+    strong: ['science_fiction', 'space_opera'],
+    usable: ['fashion_idol', 'adventure', 'posthuman'],
+    fusion: ['surreal'],
+    weak: ['wuxia', 'xianxia', 'wasteland']
+  }),
+  android_rights_lawyer: personaFit('weak', {
+    strong: ['posthuman', 'science_fiction', 'real_professional'],
+    usable: ['institutional', 'workplace', 'cyberpunk'],
+    fusion: ['surreal'],
+    weak: ['historical', 'court', 'wuxia']
+  }),
+  factory_made_nun: personaFit('weak', {
+    strong: ['posthuman', 'science_fiction', 'religious_ritual'],
+    usable: ['institutional', 'cyberpunk'],
+    fusion: ['surreal', 'dark_fantasy'],
+    weak: ['historical', 'wuxia', 'romance']
+  }),
+  synthetic_pop_idol_backup: personaFit('weak', {
+    strong: ['posthuman', 'science_fiction', 'fashion_idol'],
+    usable: ['urban_life', 'cyberpunk'],
+    fusion: ['romance', 'surreal'],
+    weak: ['historical', 'court', 'wuxia']
+  }),
+  emotion_patch_bride: personaFit('weak', {
+    strong: ['posthuman', 'science_fiction', 'romance'],
+    usable: ['cyberpunk', 'urban_life'],
+    fusion: ['biopunk', 'surreal'],
+    weak: ['historical', 'court', 'wuxia']
+  }),
+  courtroom_testimony_android: personaFit('weak', {
+    strong: ['posthuman', 'science_fiction', 'institutional'],
+    usable: ['real_professional', 'noir_crime', 'cyberpunk'],
+    fusion: ['surreal'],
+    weak: ['historical', 'court', 'wuxia']
+  }),
+  algorithm_temple_ceo: personaFit('weak', {
+    strong: ['science_fiction', 'cyberpunk', 'workplace'],
+    usable: ['real_professional', 'institutional', 'religious_ritual'],
+    fusion: ['posthuman', 'surreal'],
+    weak: ['wuxia', 'xianxia', 'historical']
+  }),
+  data_confession_priest: personaFit('weak', {
+    strong: ['science_fiction', 'religious_ritual'],
+    usable: ['cyberpunk', 'posthuman', 'institutional'],
+    fusion: ['surreal', 'cosmic_horror'],
+    weak: ['wuxia', 'historical', 'romance']
+  }),
+  predictive_policing_analyst: personaFit('weak', {
+    strong: ['science_fiction', 'cyberpunk', 'institutional'],
+    usable: ['real_professional', 'noir_crime', 'workplace'],
+    fusion: ['surreal'],
+    weak: ['wuxia', 'xianxia', 'historical']
+  }),
+  cloud_memory_funeral_director: personaFit('weak', {
+    strong: ['science_fiction', 'real_professional'],
+    usable: ['religious_ritual', 'institutional', 'posthuman'],
+    fusion: ['cyberpunk', 'surreal'],
+    weak: ['wuxia', 'xianxia', 'historical']
+  }),
+  ai_hr_recruiter: personaFit('weak', {
+    strong: ['science_fiction', 'real_professional', 'workplace'],
+    usable: ['institutional', 'cyberpunk', 'posthuman'],
+    fusion: ['surreal'],
+    weak: ['wuxia', 'xianxia', 'historical']
+  }),
+  black_box_auditor: personaFit('weak', {
+    strong: ['science_fiction', 'real_professional', 'institutional'],
+    usable: ['workplace', 'cyberpunk', 'posthuman'],
+    fusion: ['surreal'],
+    weak: ['wuxia', 'xianxia', 'historical']
+  }),
+  synthetic_afterlife_consultant: personaFit('weak', {
+    strong: ['science_fiction', 'posthuman', 'religious_ritual'],
+    usable: ['real_professional', 'institutional'],
+    fusion: ['cyberpunk', 'surreal'],
+    weak: ['wuxia', 'historical', 'romance']
+  }),
+  idol_mecha_pilot: personaFit('weak', {
+    strong: ['science_fiction', 'war_military', 'fashion_idol'],
+    usable: ['space_opera', 'posthuman'],
+    fusion: ['cyberpunk', 'romance'],
+    weak: ['court', 'urban_life', 'xianxia']
+  }),
+  frontline_mecha_medic: personaFit('weak', {
+    strong: ['science_fiction', 'war_military', 'medical'],
+    usable: ['space_opera', 'posthuman'],
+    fusion: ['cyberpunk', 'wasteland'],
+    weak: ['romance', 'court', 'urban_life']
+  }),
+  aristocratic_mecha_heir: personaFit('weak', {
+    strong: ['science_fiction', 'space_opera', 'court'],
+    usable: ['war_military', 'posthuman'],
+    fusion: ['cyberpunk'],
+    weak: ['urban_life', 'wuxia', 'historical']
+  }),
+  posthuman_couture_elite: personaFit('weak', {
+    strong: ['posthuman', 'science_fiction', 'fashion_idol'],
+    usable: ['cyberpunk', 'biopunk', 'court'],
+    fusion: ['surreal'],
+    weak: ['historical', 'wuxia', 'wasteland']
+  }),
+  gene_optimized_soldier: personaFit('weak', {
+    strong: ['posthuman', 'science_fiction', 'war_military'],
+    usable: ['biopunk', 'cyberpunk'],
+    fusion: ['body_horror'],
+    weak: ['romance', 'historical', 'court']
+  }),
+  limb_subscription_worker: personaFit('weak', {
+    strong: ['posthuman', 'science_fiction', 'workplace'],
+    usable: ['cyberpunk', 'real_professional', 'biopunk'],
+    fusion: ['body_horror', 'surreal'],
+    weak: ['romance', 'historical', 'court']
+  }),
+  transhuman_cult_leader: personaFit('weak', {
+    strong: ['posthuman', 'science_fiction', 'religious_ritual'],
+    usable: ['biopunk', 'cyberpunk'],
+    fusion: ['surreal', 'body_horror'],
+    weak: ['romance', 'historical', 'court']
+  }),
+  space_age_stewardess: personaFit('weak', {
+    strong: ['science_fiction'],
+    usable: ['real_professional', 'fashion_idol', 'space_opera', 'historical'],
+    fusion: ['surreal'],
+    weak: ['wuxia', 'xianxia', 'wasteland']
+  }),
+  atomic_diner_waitress: personaFit('weak', {
+    strong: ['science_fiction'],
+    usable: ['urban_life', 'real_professional', 'historical'],
+    fusion: ['fashion_idol', 'surreal'],
+    weak: ['wuxia', 'xianxia', 'wasteland']
+  }),
+  raygun_private_eye: personaFit('weak', {
+    strong: ['science_fiction', 'noir_crime'],
+    usable: ['historical', 'adventure'],
+    fusion: ['space_opera'],
+    weak: ['wuxia', 'xianxia', 'wasteland']
+  }),
+  dieselpunk_airship_captain: personaFit('weak', {
+    strong: ['science_fiction', 'adventure'],
+    usable: ['historical', 'war_military'],
+    fusion: ['space_opera'],
+    weak: ['romance', 'fashion_idol', 'xianxia']
+  }),
+  factory_war_engineer: personaFit('weak', {
+    strong: ['science_fiction', 'war_military', 'real_professional'],
+    usable: ['historical', 'workplace'],
+    fusion: ['wasteland'],
+    weak: ['romance', 'fashion_idol', 'xianxia']
+  }),
+  smog_city_nurse: personaFit('weak', {
+    strong: ['science_fiction', 'medical'],
+    usable: ['historical', 'real_professional', 'urban_life'],
+    fusion: ['wasteland', 'horror'],
+    weak: ['romance', 'fashion_idol', 'xianxia']
+  }),
+  clockwork_cabaret_magician: personaFit('weak', {
+    strong: ['science_fiction', 'fashion_idol'],
+    usable: ['historical', 'urban_life', 'surreal'],
+    fusion: ['adventure'],
+    weak: ['wuxia', 'xianxia', 'wasteland']
+  }),
+  metaverse_real_estate_agent: personaFit('weak', {
+    strong: ['science_fiction', 'urban_life', 'real_professional'],
+    usable: ['workplace', 'cyberpunk', 'surreal'],
+    fusion: ['posthuman'],
+    weak: ['historical', 'court', 'wuxia']
+  }),
+  glitch_streamer_girl: personaFit('weak', {
+    strong: ['science_fiction', 'urban_life', 'fashion_idol'],
+    usable: ['cyberpunk', 'surreal'],
+    fusion: ['posthuman'],
+    weak: ['historical', 'court', 'wuxia']
+  }),
+  digital_ghost_exorcist: personaFit('weak', {
+    strong: ['science_fiction', 'cyberpunk'],
+    usable: ['religious_ritual', 'surreal', 'horror'],
+    fusion: ['posthuman', 'cosmic_horror'],
+    weak: ['historical', 'court', 'wuxia']
+  }),
+  avatar_skin_tailor: personaFit('weak', {
+    strong: ['science_fiction', 'fashion_idol', 'workplace'],
+    usable: ['cyberpunk', 'posthuman', 'urban_life'],
+    fusion: ['surreal'],
+    weak: ['historical', 'court', 'wuxia']
+  }),
+  algorithmic_dating_prince: personaFit('weak', {
+    strong: ['science_fiction', 'romance', 'urban_life'],
+    usable: ['posthuman', 'fashion_idol'],
+    fusion: ['surreal'],
+    weak: ['historical', 'wuxia', 'wasteland']
+  }),
+  deepfake_scandal_actress: personaFit('weak', {
+    strong: ['science_fiction', 'urban_life', 'fashion_idol'],
+    usable: ['cyberpunk', 'posthuman'],
+    fusion: ['noir_crime', 'surreal'],
+    weak: ['historical', 'court', 'wuxia']
+  })
+};
 
 const sp = (seed: PersonaSeed): PersonaTerm => {
   const ontologyLevel = seed.ontologyLevel ?? 3;
-  const eras = seed.eras ?? nearFutureEras;
+  const eras = cleanPersonaEras(seed.eras ?? nearFutureEras);
   const risk = seed.risk ?? (ontologyLevel >= 4 ? 'medium' : 'clean');
   const controls = Array.from(new Set([...baseControls, ...(seed.controls || [])]));
+  const eraMode = personaEraModeFor(eras, seed.eraMode);
   return {
     id: `cd_persona_scifi_${seed.id}`,
     name: seed.name,
@@ -47,6 +401,7 @@ const sp = (seed: PersonaSeed): PersonaTerm => {
     personaStrength: ontologyLevel >= 4 ? 'strong' : ontologyLevel >= 2 ? 'medium' : 'light',
     isCompoundPersona: true,
     ontologyLevel,
+    eraMode,
     eras,
     risk,
     affects: controls,
@@ -55,7 +410,8 @@ const sp = (seed: PersonaSeed): PersonaTerm => {
     absorptionRule: seed.absorptionRule || `外来元素优先折译为“${seed.name}”的技术制度、接口位置、材料来源、职业装置、身体边界或组织编号，不要堆成无关赛博杂烩。`,
     absorptionRuleEn: seed.absorptionRuleEn || `Translate outside elements into the technical system, interface placement, material source, occupational apparatus, body boundary, or organizational serial of "${seed.nameEn}"; do not turn them into unrelated cyber clutter.`,
     tags: Array.from(new Set(['persona', 'scifi', 'technology', 'compound_persona', ...(seed.tags || [])])),
-    realityTags: ontologyLevel <= 1 ? ['realist_safe'] : ontologyLevel <= 3 ? ['stylized_boundary'] : ['nonreal_ontology'],
+    realityTags: seed.realityTags || personaRealityTagsFor(ontologyLevel, ['scifi', 'technology']),
+    categoryFit: seed.categoryFit || scifiFitOverrides[seed.id] || scifiFit(seed.group),
     styleTags: Array.from(new Set(['scifi', 'technology', ...(seed.styleTags || []), ...(seed.tags || [])])),
     timeTags: eras
   };
@@ -99,7 +455,7 @@ const seeds: PersonaSeed[] = [
   { id: "replicant_runaway_model", name: "逃亡复制人模特", nameEn: "Runaway Replicant Model", group: "D. 仿生人 / 合成人社会", groupEn: "D. Android / Synthetic Society", def: "第一识别是逃亡复制人模特。造型入口：完美容貌、损坏序列号、雨夜外套、临时剪短的发和逃离商品身份后的冷艳警觉。母题：被制造成观看对象的身体开始躲避观看。张力：美必须带库存损坏和逃亡痕迹，不是未来时尚大片。视觉证据：模特证件划痕、湿衣摆、遮住编号的围巾、路灯反光和回头确认的眼。边界：避免普通超模或无社会关系的人造人。", defEn: "First read: Runaway Replicant Model. Styling entry: perfect face, damaged serial code, rain coat, hastily cut hair, and alert beauty after escaping commodity status. A body made to be watched begins avoiding watchfulness. Visual evidence: scratched model ID, wet hem, scarf hiding code, streetlight reflection, and backward glance. Boundary: avoid generic supermodel or synthetic doll without society.", ontologyLevel: 4, risk: "medium", tags: ["replicant", "model", "runaway"] },
   { id: "synthetic_child_therapist", name: "合成儿童治疗师", nameEn: "Synthetic Child Therapist", group: "D. 仿生人 / 合成人社会", groupEn: "D. Android / Synthetic Society", def: "第一识别是合成儿童治疗师。造型入口：柔软毛衣、情绪识别眼、玩具箱、圆润无威胁的外形和被制造出来安抚家庭的温柔动作。母题：治疗关系被设计成可购买的陪伴人格。张力：温柔越准确，越要有一点非人的校准感。视觉证据：表情反馈灯、儿童画、软垫椅、治疗记录和等待拥抱却不过界的手。边界：避免真实儿童化、普通心理师或可爱机器人玩具。", defEn: "First read: Synthetic Child Therapist. Styling entry: soft sweater, emotion-recognition eyes, toy box, nonthreatening shape, and manufactured gentleness soothing families. Care becomes a purchasable companion persona. Visual evidence: feedback LEDs, child drawings, padded chair, therapy notes, and hands waiting without crossing boundaries. Boundary: avoid real-child framing, generic therapist, or cute robot toy.", ontologyLevel: 4, tags: ["synthetic", "therapist", "childcare"] },
   { id: "android_rights_lawyer", name: "仿生人权律师", nameEn: "Android-Rights Lawyer", group: "D. 仿生人 / 合成人社会", groupEn: "D. Android / Synthetic Society", def: "第一识别是仿生人权律师。造型入口：深色西装、接口证据袋、法庭文件、冷静眼镜和替非自然出生者争取主体性的直立姿态。母题：制造编号被带进法庭，变成身份权利问题。张力：他/她必须像律师，技术痕迹只是证据而不是装饰。视觉证据：案卷、损坏端口照片、证人席、权限胸牌和压住情绪的嘴角。边界：避免普通精英律师或科幻政客。", defEn: "First read: Android-Rights Lawyer. Styling entry: dark suit, interface evidence bag, court files, calm glasses, and upright posture fighting for non-born personhood. Manufacturing serials become legal identity. Visual evidence: case folder, damaged-port photo, witness stand, access badge, and controlled mouth line. Boundary: avoid generic elite lawyer or sci-fi politician.", ontologyLevel: 3, tags: ["android_rights", "lawyer", "court"] },
-  { id: "factory_made_nun", name: "工厂制造修女", nameEn: "Factory-Made Nun", group: "D. 仿生人 / 合成人社会", groupEn: "D. Android / Synthetic Society", def: "第一识别是工厂制造修女。造型入口：黑白修女服、颈部接口、祈祷程序提示灯、整齐到不自然的手势和机器服从神圣纪律的矛盾。母题：宗教服从被复制为工业流程。张力：神圣性和制造性必须互相牵制，不能只是一台穿修女服的机器人。视觉证据：维护标签、念珠接口、工厂封条、低头祈祷角度和无误步伐。边界：避免普通修女、机甲圣职或哥特玩偶。", defEn: "First read: Factory-Made Nun. Styling entry: black-white habit, neck interface, prayer-routine indicator, unnaturally tidy gestures, and machine obedience to sacred discipline. Religious obedience is copied as industrial process. Visual evidence: maintenance label, rosary port, factory seal, prayer angle, and flawless steps. Boundary: avoid generic nun, mecha clergy, or gothic doll.", ontologyLevel: 4, risk: "medium", tags: ["android", "nun", "factory"] },
+  { id: "factory_made_nun", name: "工厂制造修女", nameEn: "Factory-Made Nun", group: "D. 仿生人 / 合成人社会", groupEn: "D. Android / Synthetic Society", eras: ["industrial", "near_future", "far_future"], def: "第一识别是工厂制造修女。造型入口：黑白修女服、颈部接口、祈祷程序提示灯、整齐到不自然的手势和机器服从神圣纪律的矛盾。母题：宗教服从被复制为工业流程。张力：神圣性和制造性必须互相牵制，不能只是一台穿修女服的机器人。视觉证据：维护标签、念珠接口、工厂封条、低头祈祷角度和无误步伐。边界：避免普通修女、机甲圣职或哥特玩偶。", defEn: "First read: Factory-Made Nun. Styling entry: black-white habit, neck interface, prayer-routine indicator, unnaturally tidy gestures, and machine obedience to sacred discipline. Religious obedience is copied as industrial process. Visual evidence: maintenance label, rosary port, factory seal, prayer angle, and flawless steps. Boundary: avoid generic nun, mecha clergy, or gothic doll.", ontologyLevel: 4, risk: "medium", tags: ["android", "nun", "factory"] },
   { id: "synthetic_pop_idol_backup", name: "合成偶像替身", nameEn: "Synthetic Pop-Idol Double", group: "D. 仿生人 / 合成人社会", groupEn: "D. Android / Synthetic Society", def: "第一识别是合成偶像替身。造型入口：复制妆容、备用舞台服、身份锁码、和真人原型差半拍的笑容以及承受粉丝凝视的替代身体。母题：娱乐工业把人格备份成可上台的库存。张力：相似感要精确但不安，不能变成普通双胞胎。视觉证据：后台编号、同款耳返、替换通告、粉丝灯牌和同步练习姿势。边界：避免普通偶像、克隆噱头或机器人歌手。", defEn: "First read: Synthetic Pop-Idol Double. Styling entry: copied makeup, backup stage outfit, identity lock code, a smile half a beat off the human original, and a substitute body bearing fan gaze. Entertainment turns persona into inventory. Visual evidence: backstage serial, matching in-ear monitor, replacement notice, fan lights, and synchronized practice pose. Boundary: avoid generic idol or clone gimmick.", ontologyLevel: 4, risk: "medium", tags: ["synthetic", "idol", "double"] },
   { id: "maintenance_android_elder", name: "老旧维修仿生人", nameEn: "Aged Maintenance Android", group: "D. 仿生人 / 合成人社会", groupEn: "D. Android / Synthetic Society", def: "第一识别是老旧维修仿生人。造型入口：磨损外壳、工具箱、过时语音模块、慢但稳定的动作和被城市遗忘后仍继续修东西的耐心。母题：维修机器自己也进入老化和维护周期。张力：老态来自版本淘汰、划痕和服务记忆，不是人类衰老。视觉证据：旧接口、补丁金属、备用螺丝、磨白制服和听不清指令的微停顿。边界：避免普通老人、废弃机器人或温情玩具。", defEn: "First read: Aged Maintenance Android. Styling entry: worn casing, toolbox, obsolete voice module, slow steady motion, and patience continuing repair after the city forgets it. The repair machine itself enters aging cycles. Visual evidence: old ports, patched metal, spare screws, faded uniform, and small pauses after unclear commands. Boundary: avoid generic elder, junk robot, or sentimental toy.", ontologyLevel: 4, tags: ["maintenance", "android", "aged"] },
   { id: "emotion_patch_bride", name: "情绪补丁新娘", nameEn: "Emotion-Patch Bride", group: "D. 仿生人 / 合成人社会", groupEn: "D. Android / Synthetic Society", def: "第一识别是情绪补丁新娘。造型入口：白纱、表情校准贴片、合同婚姻文件、完美但延迟的羞怯和被编程出来的亲密距离。母题：婚礼情感被修补、授权和播放。张力：浪漫必须带合同冷感，不能只是未来新娘。视觉证据：校准贴、戒指扫描、婚纱内侧接口、签名板和笑容加载般的停顿。边界：避免普通新娘、恐怖娃娃或露骨情欲。", defEn: "First read: Emotion-Patch Bride. Styling entry: white veil, expression-calibration patches, marriage contract, perfect delayed shyness, and programmed intimacy distance. Wedding emotion is patched and authorized. Visual evidence: calibration patches, ring scan, dress interior port, signature board, and a smile that seems to load. Boundary: avoid generic bride, horror doll, or explicit desire.", ontologyLevel: 4, risk: "medium", tags: ["android", "bride", "emotion_patch"] },
@@ -139,27 +495,27 @@ const seeds: PersonaSeed[] = [
   { id: "emotion_suppressed_diplomat", name: "情绪抑制外交官", nameEn: "Emotion-Suppressed Diplomat", group: "G. 后人类 / 身体升级", groupEn: "G. Posthuman / Body Upgrade", def: "第一识别是情绪抑制外交官。造型入口：无波表情、颈侧药泵、礼服、谈判文件和把感情调低以服务协议的稳定眼神。母题：政治身体通过药物和接口控制情绪幅度。张力：优雅来自被压住的反应，而不是天生冷酷。视觉证据：药泵灯、签字笔、压平衣领、翻译耳机和几乎不动的嘴角。边界：避免普通外交官或冷面反派。", defEn: "First read: Emotion-Suppressed Diplomat. Styling entry: flat expression, neck drug pump, formal dress, negotiation files, and steady eyes with emotions turned down for protocol. Political body regulates affect through medicine and interface. Visual evidence: pump light, signing pen, flattened collar, interpreter earpiece, and nearly still mouth. Boundary: avoid generic diplomat or cold villain.", ontologyLevel: 4, tags: ["emotion_suppression", "diplomat", "posthuman"] },
   { id: "transhuman_cult_leader", name: "超人类教团领袖", nameEn: "Transhuman Cult Leader", group: "G. 后人类 / 身体升级", groupEn: "G. Posthuman / Body Upgrade", def: "第一识别是超人类教团领袖。造型入口：改造圣痕、透明长袍、追随者目光、升级接口和把身体优化说成救赎的平静微笑。母题：超人类技术被包装成宗教出路。张力：神圣感必须和医疗改造、阶层操控、追随者依赖纠缠。视觉证据：皮下线路、讲坛、捐献名单、发光疤痕和向外张开的双手。边界：避免普通邪教、机器人教主或纯神棍。", defEn: "First read: Transhuman Cult Leader. Styling entry: modified stigmata, transparent robe, follower gaze, upgrade ports, and calm smile preaching optimization as salvation. Transhuman technology becomes religious escape. Visual evidence: subdermal lines, lectern, donation list, glowing scars, and open hands. Boundary: avoid generic cult leader, robot preacher, or charlatan.", ontologyLevel: 5, risk: "high", tags: ["transhuman", "cult", "leader"] },
 
-  { id: "space_age_stewardess", name: "太空时代空姐", nameEn: "Space-Age Stewardess", group: "H. 复古未来 / 太空时代", groupEn: "H. Retrofuture / Space Age", def: "第一识别是太空时代空姐。造型入口：圆形头盔、亮面制服、短手套、固定微笑和上世纪想象中轨道旅行的服务姿态。母题：旧未来把宇宙旅行想象成航空消费升级。张力：她的未来感要乐观、商品化、展览式，不要变成硬科幻乘务员。视觉证据：铬色餐车、圆窗、浅色塑料扣、登机牌和广告海报式站姿。边界：避免现代空姐或真实宇航服。", defEn: "First read: Space-Age Stewardess. Styling entry: bubble helmet, glossy uniform, short gloves, fixed smile, and service posture from last centurys orbital fantasy. Space travel is imagined as upgraded air travel. Visual evidence: chrome cart, round window, pale plastic buckle, boarding pass, and advertisement-poster stance. Boundary: avoid modern flight attendant or real spacesuit.", ontologyLevel: 2, eras: ["modern", "near_future", "timeless"], tags: ["space_age", "stewardess", "retro"] },
-  { id: "atomic_diner_waitress", name: "原子餐厅女侍", nameEn: "Atomic Diner Waitress", group: "H. 复古未来 / 太空时代", groupEn: "H. Retrofuture / Space Age", def: "第一识别是原子餐厅女侍。造型入口：铬色托盘、圆形霓虹、复古制服、泡泡字胸牌和把未来当成家常消费出售的明亮笑容。母题：原子时代乐观主义落进餐厅服务。张力：未来感应当像商品广告和日常便利，不要变成现代赛博。视觉证据：弧形吧台、奶昔杯、火箭菜单、亮面地砖和轻快递餐手势。边界：避免普通复古餐厅或科幻酒吧。", defEn: "First read: Atomic Diner Waitress. Styling entry: chrome tray, round neon, retro uniform, bubble-letter name tag, and bright smile selling future as daily consumption. Atomic optimism enters diner service. Visual evidence: curved counter, milkshake glass, rocket menu, glossy tiles, and quick serving gesture. Boundary: avoid generic retro diner or sci-fi bar.", ontologyLevel: 2, eras: ["modern", "timeless"], tags: ["atomic", "diner", "retro"] },
-  { id: "raygun_private_eye", name: "射线枪私家侦探", nameEn: "Raygun Private Eye", group: "H. 复古未来 / 太空时代", groupEn: "H. Retrofuture / Space Age", def: "第一识别是射线枪私家侦探。造型入口：风衣、铬色射线枪、圆形仪表、帽檐阴影和把黑色电影套进太空时代的怀疑眼神。母题：侦探类型片被旧未来道具轻微扭曲。张力：他/她要像老派私探，但证据来自过时的未来机器。视觉证据：射线枪皮套、烟雾灯、复古通讯器、案件照片和靠在模型城市旁的姿态。边界：避免现代枪手或硬科幻探员。", defEn: "First read: Raygun Private Eye. Styling entry: trench coat, chrome raygun, round dials, hat shadow, and noir suspicion folded into space-age fantasy. Detective genre is bent by old-future props. Visual evidence: raygun holster, smoky light, retro communicator, case photos, and leaning near model city. Boundary: avoid modern gunman or hard sci-fi agent.", ontologyLevel: 2, eras: ["modern", "timeless"], risk: "medium", tags: ["raygun", "detective", "retrofuture"] },
-  { id: "bubble_helmet_pop_princess", name: "泡泡头盔流行公主", nameEn: "Bubble-Helmet Pop Princess", group: "H. 复古未来 / 太空时代", groupEn: "H. Retrofuture / Space Age", def: "第一识别是泡泡头盔流行公主。造型入口：亮色迷你裙、透明头盔、唱片封面姿态、夸张睫毛和可爱旧未来的塑料光泽。母题：太空时代被流行音乐包装成少女消费图像。张力：可爱要带年代感和展示性，不要变成现代偶像。视觉证据：星星贴纸、圆形麦克风、亮面靴、粉彩背景和手托头盔的姿势。边界：避免普通流行歌手或科幻公主。", defEn: "First read: Bubble-Helmet Pop Princess. Styling entry: bright miniskirt, transparent helmet, record-cover pose, dramatic lashes, and plastic shine of cute old futurity. Space age becomes pop consumer image. Visual evidence: star stickers, round microphone, glossy boots, pastel backdrop, and hands holding the helmet. Boundary: avoid generic pop singer or sci-fi princess.", ontologyLevel: 2, eras: ["modern", "timeless"], tags: ["pop", "bubble_helmet", "retro"] },
-  { id: "world_fair_inventor", name: "世界博览会发明家", nameEn: "World-Fair Inventor", group: "H. 复古未来 / 太空时代", groupEn: "H. Retrofuture / Space Age", def: "第一识别是世界博览会发明家。造型入口：白西装、圆顶机器、模型城市、夸张演示手势和向公众展示美好未来的自信笑。母题：未来被做成展馆里的消费承诺。张力：发明感要公开、乐观、表演化，而不是孤独科学家。视觉证据：展台灯、说明牌、圆形按钮、观众剪影和指向模型的手杖。边界：避免现代创业者或疯狂博士。", defEn: "First read: World-Fair Inventor. Styling entry: white suit, domed machine, model city, theatrical demo gesture, and confident smile presenting a better future. Future becomes exhibition promise. Visual evidence: booth lights, explanation placard, round buttons, audience silhouettes, and cane pointing at the model. Boundary: avoid modern founder or mad scientist.", ontologyLevel: 2, eras: ["modern", "timeless"], tags: ["world_fair", "inventor", "retro"] },
-  { id: "retro_robot_repair_boy", name: "复古机器人维修少年", nameEn: "Retro Robot Repair Boy", group: "H. 复古未来 / 太空时代", groupEn: "H. Retrofuture / Space Age", def: "第一识别是复古机器人维修少年。造型入口：背带裤、工具箱、圆眼机器人、家庭车库灯和把未来玩具当朋友修理的认真表情。母题：旧未来的机器人仍像家用电器和儿童伙伴。张力：童真要被工具、零件和年代广告感支撑。视觉证据：圆形螺丝、说明书、油布、车库架子和蹲在机器人脚边的姿势。边界：避免现代机器人少年或真实儿童冒险片。", defEn: "First read: Retro Robot Repair Boy. Styling entry: overalls, toolbox, round-eyed robot, garage light, and serious expression repairing a future toy friend. Old-future robots feel like appliances and companions. Visual evidence: round screws, manual, oil cloth, garage shelves, and crouch beside robot feet. Boundary: avoid modern robot kid or child adventure film.", ontologyLevel: 2, eras: ["modern", "timeless"], tags: ["robot", "repair", "retro"] },
-  { id: "chrome_lounge_singer", name: "铬色太空酒廊歌手", nameEn: "Chrome Space-Lounge Singer", group: "H. 复古未来 / 太空时代", groupEn: "H. Retrofuture / Space Age", def: "第一识别是铬色太空酒廊歌手。造型入口：银色礼服、老式麦克风、星际酒廊、卷发光泽和把宇宙唱成爵士夜的慵懒站姿。母题：太空旅行被想象成夜生活和消费优雅。张力：她/他要像复古酒廊明星，不是未来歌姬。视觉证据：圆形舞台、铬色吧台、鸡尾酒杯、星图装饰和半闭眼唱腔。边界：避免现代夜店歌手或科幻偶像。", defEn: "First read: Chrome Space-Lounge Singer. Styling entry: silver gown, vintage microphone, interstellar lounge, glossy curls, and languid posture singing the cosmos as jazz night. Space travel becomes nightlife elegance. Visual evidence: round stage, chrome bar, cocktail glass, star-map decor, and half-closed singing eyes. Boundary: avoid modern club singer or sci-fi idol.", ontologyLevel: 2, eras: ["modern", "timeless"], tags: ["lounge", "singer", "retro"] },
-  { id: "utopian_city_planner", name: "乌托邦城市规划师", nameEn: "Utopian City Planner", group: "H. 复古未来 / 太空时代", groupEn: "H. Retrofuture / Space Age", def: "第一识别是乌托邦城市规划师。造型入口：建筑模型、圆形眼镜、浅色西装、干净指示棒和相信城市能解决一切的旧未来信念。母题：规划图纸把社会问题改写成弧形道路和透明穹顶。张力：乐观要略显天真，不能变成现代建筑师。视觉证据：模型社区、交通剖面图、蓝色网格、展览桌和俯身讲解姿态。边界：避免普通规划师或赛博城市设计师。", defEn: "First read: Utopian City Planner. Styling entry: architecture model, round glasses, pale suit, clean pointer, and old-future belief that cities can solve everything. Plans turn social problems into curves and domes. Visual evidence: model community, transit section, blue grid, exhibition table, and leaning explanation pose. Boundary: avoid generic planner or cyber city designer.", ontologyLevel: 1, eras: ["modern", "timeless"], tags: ["utopia", "planner", "city"] },
-  { id: "retro_moon_pageant_queen", name: "复古月球选美皇后", nameEn: "Retro Moon Pageant Queen", group: "H. 复古未来 / 太空时代", groupEn: "H. Retrofuture / Space Age", def: "第一识别是复古月球选美皇后。造型入口：皇冠、月球绶带、亮片礼服、泡泡头盔和把太空殖民包装成选美盛典的灿烂笑容。母题：殖民宣传被娱乐化成美丽和荣誉。张力：她必须像宣传海报上的胜利符号，而不是普通选美佳丽。视觉证据：月面背景板、星形奖杯、白手套、过亮舞台灯和固定挥手姿态。边界：避免现代选美或真正月球宇航员。", defEn: "First read: Retro Moon Pageant Queen. Styling entry: crown, Moon sash, sequin gown, bubble helmet, and radiant smile packaging space colonization as pageant. Colonization propaganda becomes beauty and honor. Visual evidence: moon backdrop, star trophy, white gloves, bright stage lights, and fixed waving pose. Boundary: avoid modern pageant queen or real astronaut.", ontologyLevel: 2, eras: ["modern", "timeless"], tags: ["pageant", "moon", "retro"] },
-  { id: "analog_computer_oracle", name: "模拟计算机女预言家", nameEn: "Analog-Computer Oracle", group: "H. 复古未来 / 太空时代", groupEn: "H. Retrofuture / Space Age", def: "第一识别是模拟计算机女预言家。造型入口：穿孔纸带、白手套、巨大面板、整齐盘发和把运算结果说成命运的庄重表情。母题：早期计算机被展演成理性预言机器。张力：神秘感必须来自机械运算、纸带和仪表，不要变成魔法。视觉证据：灯泡矩阵、旋钮、打孔纸卷、读数夹板和轻触开关的手。边界：避免普通预言家或现代数据科学家。", defEn: "First read: Analog-Computer Oracle. Styling entry: punch tape, white gloves, giant panel, neat updo, and solemn expression speaking computation as destiny. Early computers become rational prophecy machines. Visual evidence: bulb matrix, dials, paper rolls, reading clipboard, and hand touching a switch. Boundary: avoid generic oracle or modern data scientist.", ontologyLevel: 2, eras: ["modern", "timeless"], tags: ["analog", "oracle", "computer"] },
+  { id: "space_age_stewardess", name: "太空时代空姐", nameEn: "Space-Age Stewardess", group: "H. 复古未来 / 太空时代", groupEn: "H. Retrofuture / Space Age", def: "第一识别是太空时代空姐。造型入口：圆形头盔、亮面制服、短手套、固定微笑和上世纪想象中轨道旅行的服务姿态。母题：旧未来把宇宙旅行想象成航空消费升级。张力：她的未来感要乐观、商品化、展览式，不要变成硬科幻乘务员。视觉证据：铬色餐车、圆窗、浅色塑料扣、登机牌和广告海报式站姿。边界：避免现代空姐或真实宇航服。", defEn: "First read: Space-Age Stewardess. Styling entry: bubble helmet, glossy uniform, short gloves, fixed smile, and service posture from last centurys orbital fantasy. Space travel is imagined as upgraded air travel. Visual evidence: chrome cart, round window, pale plastic buckle, boarding pass, and advertisement-poster stance. Boundary: avoid modern flight attendant or real spacesuit.", ontologyLevel: 2, eras: ["modern", "near_future"], tags: ["space_age", "stewardess", "retro"] },
+  { id: "atomic_diner_waitress", name: "原子餐厅女侍", nameEn: "Atomic Diner Waitress", group: "H. 复古未来 / 太空时代", groupEn: "H. Retrofuture / Space Age", def: "第一识别是原子餐厅女侍。造型入口：铬色托盘、圆形霓虹、复古制服、泡泡字胸牌和把未来当成家常消费出售的明亮笑容。母题：原子时代乐观主义落进餐厅服务。张力：未来感应当像商品广告和日常便利，不要变成现代赛博。视觉证据：弧形吧台、奶昔杯、火箭菜单、亮面地砖和轻快递餐手势。边界：避免普通复古餐厅或科幻酒吧。", defEn: "First read: Atomic Diner Waitress. Styling entry: chrome tray, round neon, retro uniform, bubble-letter name tag, and bright smile selling future as daily consumption. Atomic optimism enters diner service. Visual evidence: curved counter, milkshake glass, rocket menu, glossy tiles, and quick serving gesture. Boundary: avoid generic retro diner or sci-fi bar.", ontologyLevel: 2, eras: ["modern"], tags: ["atomic", "diner", "retro"] },
+  { id: "raygun_private_eye", name: "射线枪私家侦探", nameEn: "Raygun Private Eye", group: "H. 复古未来 / 太空时代", groupEn: "H. Retrofuture / Space Age", def: "第一识别是射线枪私家侦探。造型入口：风衣、铬色射线枪、圆形仪表、帽檐阴影和把黑色电影套进太空时代的怀疑眼神。母题：侦探类型片被旧未来道具轻微扭曲。张力：他/她要像老派私探，但证据来自过时的未来机器。视觉证据：射线枪皮套、烟雾灯、复古通讯器、案件照片和靠在模型城市旁的姿态。边界：避免现代枪手或硬科幻探员。", defEn: "First read: Raygun Private Eye. Styling entry: trench coat, chrome raygun, round dials, hat shadow, and noir suspicion folded into space-age fantasy. Detective genre is bent by old-future props. Visual evidence: raygun holster, smoky light, retro communicator, case photos, and leaning near model city. Boundary: avoid modern gunman or hard sci-fi agent.", ontologyLevel: 2, eras: ["modern"], risk: "medium", tags: ["raygun", "detective", "retrofuture"] },
+  { id: "bubble_helmet_pop_princess", name: "泡泡头盔流行公主", nameEn: "Bubble-Helmet Pop Princess", group: "H. 复古未来 / 太空时代", groupEn: "H. Retrofuture / Space Age", def: "第一识别是泡泡头盔流行公主。造型入口：亮色迷你裙、透明头盔、唱片封面姿态、夸张睫毛和可爱旧未来的塑料光泽。母题：太空时代被流行音乐包装成少女消费图像。张力：可爱要带年代感和展示性，不要变成现代偶像。视觉证据：星星贴纸、圆形麦克风、亮面靴、粉彩背景和手托头盔的姿势。边界：避免普通流行歌手或科幻公主。", defEn: "First read: Bubble-Helmet Pop Princess. Styling entry: bright miniskirt, transparent helmet, record-cover pose, dramatic lashes, and plastic shine of cute old futurity. Space age becomes pop consumer image. Visual evidence: star stickers, round microphone, glossy boots, pastel backdrop, and hands holding the helmet. Boundary: avoid generic pop singer or sci-fi princess.", ontologyLevel: 2, eras: ["modern"], tags: ["pop", "bubble_helmet", "retro"] },
+  { id: "world_fair_inventor", name: "世界博览会发明家", nameEn: "World-Fair Inventor", group: "H. 复古未来 / 太空时代", groupEn: "H. Retrofuture / Space Age", def: "第一识别是世界博览会发明家。造型入口：白西装、圆顶机器、模型城市、夸张演示手势和向公众展示美好未来的自信笑。母题：未来被做成展馆里的消费承诺。张力：发明感要公开、乐观、表演化，而不是孤独科学家。视觉证据：展台灯、说明牌、圆形按钮、观众剪影和指向模型的手杖。边界：避免现代创业者或疯狂博士。", defEn: "First read: World-Fair Inventor. Styling entry: white suit, domed machine, model city, theatrical demo gesture, and confident smile presenting a better future. Future becomes exhibition promise. Visual evidence: booth lights, explanation placard, round buttons, audience silhouettes, and cane pointing at the model. Boundary: avoid modern founder or mad scientist.", ontologyLevel: 2, eras: ["modern"], tags: ["world_fair", "inventor", "retro"] },
+  { id: "retro_robot_repair_boy", name: "复古机器人维修少年", nameEn: "Retro Robot Repair Boy", group: "H. 复古未来 / 太空时代", groupEn: "H. Retrofuture / Space Age", def: "第一识别是复古机器人维修少年。造型入口：背带裤、工具箱、圆眼机器人、家庭车库灯和把未来玩具当朋友修理的认真表情。母题：旧未来的机器人仍像家用电器和儿童伙伴。张力：童真要被工具、零件和年代广告感支撑。视觉证据：圆形螺丝、说明书、油布、车库架子和蹲在机器人脚边的姿势。边界：避免现代机器人少年或真实儿童冒险片。", defEn: "First read: Retro Robot Repair Boy. Styling entry: overalls, toolbox, round-eyed robot, garage light, and serious expression repairing a future toy friend. Old-future robots feel like appliances and companions. Visual evidence: round screws, manual, oil cloth, garage shelves, and crouch beside robot feet. Boundary: avoid modern robot kid or child adventure film.", ontologyLevel: 2, eras: ["modern"], tags: ["robot", "repair", "retro"] },
+  { id: "chrome_lounge_singer", name: "铬色太空酒廊歌手", nameEn: "Chrome Space-Lounge Singer", group: "H. 复古未来 / 太空时代", groupEn: "H. Retrofuture / Space Age", def: "第一识别是铬色太空酒廊歌手。造型入口：银色礼服、老式麦克风、星际酒廊、卷发光泽和把宇宙唱成爵士夜的慵懒站姿。母题：太空旅行被想象成夜生活和消费优雅。张力：她/他要像复古酒廊明星，不是未来歌姬。视觉证据：圆形舞台、铬色吧台、鸡尾酒杯、星图装饰和半闭眼唱腔。边界：避免现代夜店歌手或科幻偶像。", defEn: "First read: Chrome Space-Lounge Singer. Styling entry: silver gown, vintage microphone, interstellar lounge, glossy curls, and languid posture singing the cosmos as jazz night. Space travel becomes nightlife elegance. Visual evidence: round stage, chrome bar, cocktail glass, star-map decor, and half-closed singing eyes. Boundary: avoid modern club singer or sci-fi idol.", ontologyLevel: 2, eras: ["modern"], tags: ["lounge", "singer", "retro"] },
+  { id: "utopian_city_planner", name: "乌托邦城市规划师", nameEn: "Utopian City Planner", group: "H. 复古未来 / 太空时代", groupEn: "H. Retrofuture / Space Age", def: "第一识别是乌托邦城市规划师。造型入口：建筑模型、圆形眼镜、浅色西装、干净指示棒和相信城市能解决一切的旧未来信念。母题：规划图纸把社会问题改写成弧形道路和透明穹顶。张力：乐观要略显天真，不能变成现代建筑师。视觉证据：模型社区、交通剖面图、蓝色网格、展览桌和俯身讲解姿态。边界：避免普通规划师或赛博城市设计师。", defEn: "First read: Utopian City Planner. Styling entry: architecture model, round glasses, pale suit, clean pointer, and old-future belief that cities can solve everything. Plans turn social problems into curves and domes. Visual evidence: model community, transit section, blue grid, exhibition table, and leaning explanation pose. Boundary: avoid generic planner or cyber city designer.", ontologyLevel: 1, eras: ["modern"], tags: ["utopia", "planner", "city"] },
+  { id: "retro_moon_pageant_queen", name: "复古月球选美皇后", nameEn: "Retro Moon Pageant Queen", group: "H. 复古未来 / 太空时代", groupEn: "H. Retrofuture / Space Age", def: "第一识别是复古月球选美皇后。造型入口：皇冠、月球绶带、亮片礼服、泡泡头盔和把太空殖民包装成选美盛典的灿烂笑容。母题：殖民宣传被娱乐化成美丽和荣誉。张力：她必须像宣传海报上的胜利符号，而不是普通选美佳丽。视觉证据：月面背景板、星形奖杯、白手套、过亮舞台灯和固定挥手姿态。边界：避免现代选美或真正月球宇航员。", defEn: "First read: Retro Moon Pageant Queen. Styling entry: crown, Moon sash, sequin gown, bubble helmet, and radiant smile packaging space colonization as pageant. Colonization propaganda becomes beauty and honor. Visual evidence: moon backdrop, star trophy, white gloves, bright stage lights, and fixed waving pose. Boundary: avoid modern pageant queen or real astronaut.", ontologyLevel: 2, eras: ["modern"], tags: ["pageant", "moon", "retro"] },
+  { id: "analog_computer_oracle", name: "模拟计算机女预言家", nameEn: "Analog-Computer Oracle", group: "H. 复古未来 / 太空时代", groupEn: "H. Retrofuture / Space Age", def: "第一识别是模拟计算机女预言家。造型入口：穿孔纸带、白手套、巨大面板、整齐盘发和把运算结果说成命运的庄重表情。母题：早期计算机被展演成理性预言机器。张力：神秘感必须来自机械运算、纸带和仪表，不要变成魔法。视觉证据：灯泡矩阵、旋钮、打孔纸卷、读数夹板和轻触开关的手。边界：避免普通预言家或现代数据科学家。", defEn: "First read: Analog-Computer Oracle. Styling entry: punch tape, white gloves, giant panel, neat updo, and solemn expression speaking computation as destiny. Early computers become rational prophecy machines. Visual evidence: bulb matrix, dials, paper rolls, reading clipboard, and hand touching a switch. Boundary: avoid generic oracle or modern data scientist.", ontologyLevel: 2, eras: ["modern"], tags: ["analog", "oracle", "computer"] },
 
   { id: "dieselpunk_airship_captain", name: "柴油朋克飞艇船长", nameEn: "Dieselpunk Airship Captain", group: "I. 柴油朋克 / 工业技术", groupEn: "I. Dieselpunk / Industrial Tech", def: "第一识别是柴油朋克飞艇船长。造型入口：皮革长外套、飞行帽、铆钉甲板、厚重望远镜和在工业天空航线上指挥的粗粝站姿。母题：天空航行保留了海军、工厂和战争机器的重量。张力：浪漫冒险要被油污、噪声和机械制度压住。视觉证据：缆绳、黄铜仪表、风镜、铆钉手套和远处飞艇影。边界：避免普通飞行员或蒸汽朋克装饰。", defEn: "First read: Dieselpunk Airship Captain. Styling entry: leather long coat, flight cap, riveted deck, heavy spyglass, and rough command posture on industrial sky routes. Air travel keeps naval and factory weight. Visual evidence: cables, brass dials, goggles, riveted gloves, and airship silhouette. Boundary: avoid generic pilot or steampunk decoration.", ontologyLevel: 2, eras: industrialFutureEras, tags: ["dieselpunk", "airship", "captain"] },
   { id: "factory_war_engineer", name: "军工厂工程师", nameEn: "War-Factory Engineer", group: "I. 柴油朋克 / 工业技术", groupEn: "I. Dieselpunk / Industrial Tech", def: "第一识别是军工厂工程师。造型入口：油污工作服、蓝图、机械臂吊、钢尺和把战争拆成生产流程的冷硬眼神。母题：武器不是英雄道具，而是流水线、误差和加班的结果。张力：专业性要和工业暴力绑定。视觉证据：机床、编号零件、护目镜、烧伤袖口和盯着公差表的姿态。边界：避免普通工程师或战争军官。", defEn: "First read: War-Factory Engineer. Styling entry: oily coveralls, blueprints, crane arms, steel ruler, and hard eyes breaking war into production workflow. Weapons are made of assembly lines and tolerances. Visual evidence: machine tools, numbered parts, goggles, burned cuffs, and gaze fixed on tolerance charts. Boundary: avoid generic engineer or war officer.", ontologyLevel: 2, eras: industrialFutureEras, tags: ["factory", "engineer", "war"] },
-  { id: "trench_radio_operator", name: "战壕无线电员", nameEn: "Trench Radio Operator", group: "I. 柴油朋克 / 工业技术", groupEn: "I. Dieselpunk / Industrial Tech", def: "第一识别是战壕无线电员。造型入口：厚重耳机、线圈背包、泥泞军装、紧贴耳机的手和把混乱战场连成声音网络的紧张专注。母题：通讯技术在泥土和炮火中维持战争神经。张力：他/她不是冲锋者，而是把身体贴在噪声里的节点。视觉证据：电线卷、信号本、泥点、防水布和听到断讯时僵住的眼。边界：避免普通士兵或无线电爱好者。", defEn: "First read: Trench Radio Operator. Styling entry: heavy headset, coil backpack, muddy uniform, hand pressed to ear, and tense focus linking battlefield chaos into sound network. Communication technology keeps war nerves alive. Visual evidence: cable roll, signal notebook, mud, tarp, and eyes freezing at lost signal. Boundary: avoid generic soldier or radio hobbyist.", ontologyLevel: 2, eras: ["industrial", "modern", "timeless"], risk: "medium", tags: ["radio", "trench", "operator"] },
-  { id: "armored_train_conductor", name: "装甲列车乘务长", nameEn: "Armored-Train Conductor", group: "I. 柴油朋克 / 工业技术", groupEn: "I. Dieselpunk / Industrial Tech", def: "第一识别是装甲列车乘务长。造型入口：黑色制服、怀表、钢板车厢、票夹和在移动堡垒里维持秩序的严厉礼貌。母题：铁路服务和军事防护合成一套移动制度。张力：他/她像乘务长，也像守门军官。视觉证据：铆钉车门、车厢编号、煤烟、检票钳和挡住通道的站姿。边界：避免普通列车员或装甲士兵。", defEn: "First read: Armored-Train Conductor. Styling entry: black uniform, pocket watch, steel-plated carriage, ticket punch, and strict politeness maintaining order inside a moving fortress. Rail service fuses with military protection. Visual evidence: riveted door, carriage code, coal smoke, punch pliers, and blocking stance. Boundary: avoid generic conductor or armored soldier.", ontologyLevel: 2, eras: ["industrial", "modern", "timeless"], tags: ["armored_train", "conductor", "dieselpunk"] },
+  { id: "trench_radio_operator", name: "战壕无线电员", nameEn: "Trench Radio Operator", group: "I. 柴油朋克 / 工业技术", groupEn: "I. Dieselpunk / Industrial Tech", def: "第一识别是战壕无线电员。造型入口：厚重耳机、线圈背包、泥泞军装、紧贴耳机的手和把混乱战场连成声音网络的紧张专注。母题：通讯技术在泥土和炮火中维持战争神经。张力：他/她不是冲锋者，而是把身体贴在噪声里的节点。视觉证据：电线卷、信号本、泥点、防水布和听到断讯时僵住的眼。边界：避免普通士兵或无线电爱好者。", defEn: "First read: Trench Radio Operator. Styling entry: heavy headset, coil backpack, muddy uniform, hand pressed to ear, and tense focus linking battlefield chaos into sound network. Communication technology keeps war nerves alive. Visual evidence: cable roll, signal notebook, mud, tarp, and eyes freezing at lost signal. Boundary: avoid generic soldier or radio hobbyist.", ontologyLevel: 2, eras: ["industrial", "modern"], risk: "medium", tags: ["radio", "trench", "operator"] },
+  { id: "armored_train_conductor", name: "装甲列车乘务长", nameEn: "Armored-Train Conductor", group: "I. 柴油朋克 / 工业技术", groupEn: "I. Dieselpunk / Industrial Tech", def: "第一识别是装甲列车乘务长。造型入口：黑色制服、怀表、钢板车厢、票夹和在移动堡垒里维持秩序的严厉礼貌。母题：铁路服务和军事防护合成一套移动制度。张力：他/她像乘务长，也像守门军官。视觉证据：铆钉车门、车厢编号、煤烟、检票钳和挡住通道的站姿。边界：避免普通列车员或装甲士兵。", defEn: "First read: Armored-Train Conductor. Styling entry: black uniform, pocket watch, steel-plated carriage, ticket punch, and strict politeness maintaining order inside a moving fortress. Rail service fuses with military protection. Visual evidence: riveted door, carriage code, coal smoke, punch pliers, and blocking stance. Boundary: avoid generic conductor or armored soldier.", ontologyLevel: 2, eras: ["industrial", "modern"], tags: ["armored_train", "conductor", "dieselpunk"] },
   { id: "oilfield_prophet_mechanic", name: "油田预言机械师", nameEn: "Oilfield Prophet Mechanic", group: "I. 柴油朋克 / 工业技术", groupEn: "I. Dieselpunk / Industrial Tech", def: "第一识别是油田预言机械师。造型入口：机油手套、井架、护目镜、沾油围巾和从机器噪声中听见未来的边缘神秘表情。母题：工业噪声被长期劳动者误读成预兆。张力：神秘感必须埋在油污、设备和疲劳里。视觉证据：钻井管、压力表、黑油痕、破笔记本和侧耳听机器的姿势。边界：避免普通机械师或真正神棍。", defEn: "First read: Oilfield Prophet Mechanic. Styling entry: oil gloves, derrick, goggles, stained scarf, and fringe-mystic expression hearing future inside machine noise. Prophecy grows from labor fatigue and engines. Visual evidence: drill pipe, pressure gauge, black oil marks, torn notebook, and head tilted to listen. Boundary: avoid generic mechanic or pure mystic.", ontologyLevel: 3, eras: industrialFutureEras, tags: ["oilfield", "mechanic", "prophet"] },
-  { id: "pulp_rocket_commander", name: "纸浆科幻火箭指挥官", nameEn: "Pulp Rocket Commander", group: "I. 柴油朋克 / 工业技术", groupEn: "I. Dieselpunk / Industrial Tech", def: "第一识别是纸浆科幻火箭指挥官。造型入口：军帽、金属肩章、火箭徽章、夸张披风和旧杂志封面式向前指挥姿态。母题：早期科幻把军事冒险和火箭技术做成英雄图像。张力：夸张可以保留，但必须有印刷年代感和机械重量。视觉证据：铆钉火箭、红色警报灯、指挥手套、纸浆封面构图和粗黑阴影。边界：避免现代太空军官或超级英雄。", defEn: "First read: Pulp Rocket Commander. Styling entry: officer cap, metal epaulets, rocket badge, dramatic cape, and old magazine-cover command gesture. Early sci-fi turns rocket technology into heroic adventure. Visual evidence: riveted rocket, red alarm light, command gloves, pulp-cover framing, and heavy black shadows. Boundary: avoid modern space officer or superhero.", ontologyLevel: 2, eras: ["modern", "timeless"], tags: ["pulp", "rocket", "commander"] },
+  { id: "pulp_rocket_commander", name: "纸浆科幻火箭指挥官", nameEn: "Pulp Rocket Commander", group: "I. 柴油朋克 / 工业技术", groupEn: "I. Dieselpunk / Industrial Tech", def: "第一识别是纸浆科幻火箭指挥官。造型入口：军帽、金属肩章、火箭徽章、夸张披风和旧杂志封面式向前指挥姿态。母题：早期科幻把军事冒险和火箭技术做成英雄图像。张力：夸张可以保留，但必须有印刷年代感和机械重量。视觉证据：铆钉火箭、红色警报灯、指挥手套、纸浆封面构图和粗黑阴影。边界：避免现代太空军官或超级英雄。", defEn: "First read: Pulp Rocket Commander. Styling entry: officer cap, metal epaulets, rocket badge, dramatic cape, and old magazine-cover command gesture. Early sci-fi turns rocket technology into heroic adventure. Visual evidence: riveted rocket, red alarm light, command gloves, pulp-cover framing, and heavy black shadows. Boundary: avoid modern space officer or superhero.", ontologyLevel: 2, eras: ["industrial", "modern"], tags: ["pulp", "rocket", "commander"] },
   { id: "industrial_exosuit_loader", name: "工业外骨骼装卸工", nameEn: "Industrial Exosuit Loader", group: "I. 柴油朋克 / 工业技术", groupEn: "I. Dieselpunk / Industrial Tech", def: "第一识别是工业外骨骼装卸工。造型入口：液压外骨骼、黄色安全漆、货运编号、汗湿工作服和把身体变成机械劳力的前倾重心。母题：外骨骼不是超能力，而是提高劳动负载的工厂工具。张力：机械增强要带疲劳、噪声和事故风险。视觉证据：液压管、吊钩、磨损安全帽、货箱条码和手掌压力痕。边界：避免战斗外骨骼或酷炫机器人装。", defEn: "First read: Industrial Exosuit Loader. Styling entry: hydraulic exosuit, yellow safety paint, freight codes, sweat-soaked workwear, and forward lean turning body into mechanical labor. Exosuit is factory tool, not superpower. Visual evidence: hydraulic hoses, hook, worn hardhat, cargo barcode, and palm pressure marks. Boundary: avoid combat exosuit or cool robot armor.", ontologyLevel: 3, eras: industrialFutureEras, tags: ["exosuit", "loader", "industrial"] },
-  { id: "smog_city_nurse", name: "烟雾城市护士", nameEn: "Smog-City Nurse", group: "I. 柴油朋克 / 工业技术", groupEn: "I. Dieselpunk / Industrial Tech", def: "第一识别是烟雾城市护士。造型入口：防毒面具、护士制服、煤灰边缘、药箱和照护工业病人后的疲惫温柔。母题：工业城市把护理工作推向污染边界。张力：护士身份要被烟尘、公共卫生和低资源环境改变。视觉证据：口罩滤芯、煤灰袖口、咳嗽记录、搪瓷药盘和在黄雾里扶人的手。边界：避免普通护士或灾难片防护员。", defEn: "First read: Smog-City Nurse. Styling entry: gas mask, nurse uniform, coal-ash edges, medicine case, and tired gentleness caring for industrial patients. Nursing moves to pollution boundaries. Visual evidence: filter canister, ash cuffs, cough records, enamel tray, and a hand supporting someone in yellow fog. Boundary: avoid generic nurse or disaster worker.", ontologyLevel: 2, eras: ["industrial", "modern", "timeless"], tags: ["smog", "nurse", "industrial"] },
-  { id: "clockwork_cabaret_magician", name: "发条歌舞厅魔术师", nameEn: "Clockwork Cabaret Magician", group: "I. 柴油朋克 / 工业技术", groupEn: "I. Dieselpunk / Industrial Tech", def: "第一识别是发条歌舞厅魔术师。造型入口：燕尾服、黄铜机关、舞台手套、机械道具箱和把工业技术伪装成舞台魔法的狡黠眼神。母题：机械装置被夜生活包装成奇观。张力：魔术感要靠齿轮、机关和表演节奏，不要真的变成法术。视觉证据：发条钥匙、活动暗格、聚光灯、羽毛帽和展示空手的姿态。边界：避免普通魔术师或蒸汽朋克杂耍。", defEn: "First read: Clockwork Cabaret Magician. Styling entry: tailcoat, brass mechanisms, stage gloves, mechanical prop case, and sly eyes disguising industrial tech as stage magic. Machinery becomes nightlife spectacle. Visual evidence: winding key, hidden compartment, spotlight, feathered hat, and empty-hand reveal. Boundary: avoid generic magician or steampunk circus act.", ontologyLevel: 3, eras: ["industrial", "modern", "timeless"], tags: ["clockwork", "cabaret", "magician"] },
-  { id: "bunker_switchboard_girl", name: "地堡总机女孩", nameEn: "Bunker Switchboard Girl", group: "I. 柴油朋克 / 工业技术", groupEn: "I. Dieselpunk / Industrial Tech", def: "第一识别是地堡总机女孩。造型入口：耳麦、插线板、制服裙、地下灯光和在通讯网络中维持战争神经的快速手指。母题：年轻身体被放进巨大的地下信息机器。张力：她不能只是复古接线员，必须带战时压力和封闭空间感。视觉证据：密集插线、编号标签、地图墙、咖啡杯、疲惫眼和手背墨迹。边界：避免普通电话接线员或可爱复古女郎。", defEn: "First read: Bunker Switchboard Girl. Styling entry: headset, plugboard, uniform skirt, underground light, and fast fingers maintaining war nerves through communications. A young body sits inside a huge information machine. Visual evidence: dense cables, numbered tags, map wall, coffee cup, tired eyes, and ink on hand. Boundary: avoid generic phone operator or cute retro girl.", ontologyLevel: 2, eras: ["industrial", "modern", "timeless"], tags: ["switchboard", "bunker", "operator"] },
+  { id: "smog_city_nurse", name: "烟雾城市护士", nameEn: "Smog-City Nurse", group: "I. 柴油朋克 / 工业技术", groupEn: "I. Dieselpunk / Industrial Tech", def: "第一识别是烟雾城市护士。造型入口：防毒面具、护士制服、煤灰边缘、药箱和照护工业病人后的疲惫温柔。母题：工业城市把护理工作推向污染边界。张力：护士身份要被烟尘、公共卫生和低资源环境改变。视觉证据：口罩滤芯、煤灰袖口、咳嗽记录、搪瓷药盘和在黄雾里扶人的手。边界：避免普通护士或灾难片防护员。", defEn: "First read: Smog-City Nurse. Styling entry: gas mask, nurse uniform, coal-ash edges, medicine case, and tired gentleness caring for industrial patients. Nursing moves to pollution boundaries. Visual evidence: filter canister, ash cuffs, cough records, enamel tray, and a hand supporting someone in yellow fog. Boundary: avoid generic nurse or disaster worker.", ontologyLevel: 2, eras: ["industrial", "modern"], tags: ["smog", "nurse", "industrial"] },
+  { id: "clockwork_cabaret_magician", name: "发条歌舞厅魔术师", nameEn: "Clockwork Cabaret Magician", group: "I. 柴油朋克 / 工业技术", groupEn: "I. Dieselpunk / Industrial Tech", def: "第一识别是发条歌舞厅魔术师。造型入口：燕尾服、黄铜机关、舞台手套、机械道具箱和把工业技术伪装成舞台魔法的狡黠眼神。母题：机械装置被夜生活包装成奇观。张力：魔术感要靠齿轮、机关和表演节奏，不要真的变成法术。视觉证据：发条钥匙、活动暗格、聚光灯、羽毛帽和展示空手的姿态。边界：避免普通魔术师或蒸汽朋克杂耍。", defEn: "First read: Clockwork Cabaret Magician. Styling entry: tailcoat, brass mechanisms, stage gloves, mechanical prop case, and sly eyes disguising industrial tech as stage magic. Machinery becomes nightlife spectacle. Visual evidence: winding key, hidden compartment, spotlight, feathered hat, and empty-hand reveal. Boundary: avoid generic magician or steampunk circus act.", ontologyLevel: 3, eras: ["industrial", "modern"], tags: ["clockwork", "cabaret", "magician"] },
+  { id: "bunker_switchboard_girl", name: "地堡总机女孩", nameEn: "Bunker Switchboard Girl", group: "I. 柴油朋克 / 工业技术", groupEn: "I. Dieselpunk / Industrial Tech", def: "第一识别是地堡总机女孩。造型入口：耳麦、插线板、制服裙、地下灯光和在通讯网络中维持战争神经的快速手指。母题：年轻身体被放进巨大的地下信息机器。张力：她不能只是复古接线员，必须带战时压力和封闭空间感。视觉证据：密集插线、编号标签、地图墙、咖啡杯、疲惫眼和手背墨迹。边界：避免普通电话接线员或可爱复古女郎。", defEn: "First read: Bunker Switchboard Girl. Styling entry: headset, plugboard, uniform skirt, underground light, and fast fingers maintaining war nerves through communications. A young body sits inside a huge information machine. Visual evidence: dense cables, numbered tags, map wall, coffee cup, tired eyes, and ink on hand. Boundary: avoid generic phone operator or cute retro girl.", ontologyLevel: 2, eras: ["industrial", "modern"], tags: ["switchboard", "bunker", "operator"] },
 
   { id: "vr_nightclub_avatar", name: "VR夜店化身", nameEn: "VR Nightclub Avatar", group: "J. 虚拟世界 / 网络居民", groupEn: "J. Virtual World / Network Resident", def: "第一识别是VR夜店化身。造型入口：发光皮肤、可编辑服装、漂浮配饰、过度流畅的舞姿和把社交身体彻底界面化的自我展示。母题：夜生活从场所变成可换皮肤的身份界面。张力：性感和虚拟性要通过可编辑边界、权限和故障显影。视觉证据：菜单悬窗、皮肤滑块、用户名水印、粒子耳环和脚下无真实阴影。边界：避免普通夜店潮人或游戏皮肤。", defEn: "First read: VR Nightclub Avatar. Styling entry: glowing skin, editable clothing, floating accessories, too-smooth dance, and self-display turning the social body into interface. Nightlife becomes a swappable identity layer. Visual evidence: menu windows, skin sliders, username watermark, particle earrings, and no real floor shadow. Boundary: avoid generic club fashion or game skin.", ontologyLevel: 4, risk: "medium", eras: contemporaryFutureEras, tags: ["vr", "nightclub", "avatar"] },
   { id: "metaverse_real_estate_agent", name: "元宇宙地产经纪", nameEn: "Metaverse Real-Estate Agent", group: "J. 虚拟世界 / 网络居民", groupEn: "J. Virtual World / Network Resident", def: "第一识别是元宇宙地产经纪。造型入口：虚拟西装、地块投影、销售笑容、漂浮合同和贩卖不存在空间时的职业热情。母题：网络财产把空白界面包装成资产。张力：荒诞感要通过真实销售流程和虚拟物权同时出现。视觉证据：地块编号、价格曲线、手势放大模型、虚拟名片和过度标准的微笑。边界：避免普通房产中介或未来白领。", defEn: "First read: Metaverse Real-Estate Agent. Styling entry: virtual suit, land projection, sales smile, floating contract, and professional enthusiasm selling nonexistent space. Network property packages blank interface as asset. Visual evidence: plot code, price curve, hand-enlarged model, virtual business card, and overly standard smile. Boundary: avoid generic realtor or future office worker.", ontologyLevel: 3, eras: contemporaryFutureEras, tags: ["metaverse", "real_estate", "agent"] },

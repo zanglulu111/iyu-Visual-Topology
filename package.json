@@ -8,6 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "tsc --noEmit",
+    "export:concept-lexicon": "node scripts/export-concept-lexicon.cjs",
     "codex:build": "node scripts/codex-convert.cjs",
     "codex:watch": "node scripts/codex-convert.cjs --watch",
     "codex:import": "node scripts/codex-convert.cjs --import"

@@ -37,11 +37,11 @@ export const AESTHETIC_ENGINE_BLOCKS: NarrativeBlockDef[] = [
   // Realism Blocks
   { id: "aes_director_style", name: "实拍导演风格", enName: "DIRECTOR STYLE", description: "电影导演视听语言特征。", tags: [] },
   { id: "aes_photo_style", name: "摄影摄像流派", enName: "PHOTO STYLE", description: "影像记录流派与专业摄影风格。", tags: [] },
-  { id: "aes_art_style", name: "艺术流派", enName: "ART STYLE", description: "经典艺术史流派与美术构成。", tags: [] },
+  { id: "aes_art_style", name: "艺术流派", enName: "ART STYLE", description: "经典与全球艺术史流派、艺术家和图像语言。", tags: [] },
   
   // Stylized Blocks (Split)
   { id: "aes_anim_director", name: "动画导演风格", enName: "ANIMATION DIRECTOR", description: "知名动画导演与工作室风格。", tags: [] },
-  { id: "aes_art_movement", name: "美术/艺术风格", enName: "ART MOVEMENT", description: "插画、游戏美术与特定艺术流派。", tags: [] },
+  { id: "aes_art_movement", name: "美术插画", enName: "ILLUSTRATION", description: "插画、游戏美术、概念美术与商业美术。", tags: [] },
   
   { id: "aes_poster_style", name: "海报风格", enName: "POSTER STYLE", description: "平面构成、排版与视觉设计美学。", tags: [] },
 
@@ -61,7 +61,7 @@ export const AESTHETIC_ENGINE_BLOCKS: NarrativeBlockDef[] = [
   { id: "aes_canvas_texture", name: "画布质感", enName: "CANVAS TEXTURE", description: "Paper, screen tone, noise.", tags: [] },
 
   // --- LAYER 1.2: THE EYE ---
-  { id: "aes_image_focus", name: "构图类别", enName: "IMAGE CATEGORY", description: "肖像、风景、静物或建筑。", tags: [] },
+  { id: "aes_image_focus", name: "画面焦点", enName: "IMAGE FOCUS", description: "画面第一阅读重心：脸、全身、动作、环境、物件或形式。", tags: [] },
   { id: "aes_shot_size", name: "景别", enName: "SHOT SIZE", description: "拍摄距离。", tags: [] },
   { id: "aes_visual_balance", name: "视觉平衡", enName: "VISUAL BALANCE", description: "重心、对称性与负空间。", tags: [] },
   { id: "aes_perspective", name: "透视", enName: "PERSPECTIVE", description: "空间的几何深度与消失点逻辑。", tags: [] },
@@ -134,11 +134,11 @@ export const AESTHETIC_ENGINE_LIBRARY: LibraryCategoryDef[] = [
   // --- New Soul Blocks ---
   { id: "aes_director_style_lib", name: "实拍导演风格", nameEn: "DIRECTOR STYLE", desc: "Cinema Directing Auteurs.", items: DIRECTOR_STYLE_ITEMS },
   { id: "aes_photo_style_lib", name: "摄影摄像流派", nameEn: "PHOTO STYLE", desc: "Photography Schools & Styles.", items: PHOTO_STYLE_ITEMS },
-  { id: "aes_art_style_lib", name: "艺术流派", nameEn: "ART STYLE", desc: "Historical Art Movements.", items: ART_STYLE_ITEMS },
+  { id: "aes_art_style_lib", name: "艺术流派", nameEn: "ART STYLE", desc: "Historical and global art movements.", items: ART_STYLE_ITEMS },
 
   // --- SPLIT STYLIZED BLOCKS ---
   { id: "aes_anim_director_lib", name: "动画导演风格", nameEn: "ANIMATION DIRECTOR", desc: "Animation Directors & Studios.", items: ANIMATION_DIRECTORS_LIB },
-  { id: "aes_art_movement_lib", name: "美术/艺术风格", nameEn: "ART MOVEMENT", desc: "Art Styles, Games & Illustration.", items: ART_MOVEMENTS_LIB },
+  { id: "aes_art_movement_lib", name: "美术插画", nameEn: "ILLUSTRATION", desc: "Illustration, game art, concept art, and commercial art direction.", items: ART_MOVEMENTS_LIB },
 
   // --- New Fixed Module Libraries (Realism) ---
   { id: "aes_camera_system_lib", name: "摄影机系统", nameEn: "CAMERA SYSTEM", desc: "Camera sensor and format.", items: AES_CAMERA_SYSTEM },
@@ -153,7 +153,7 @@ export const AESTHETIC_ENGINE_LIBRARY: LibraryCategoryDef[] = [
   { id: "aes_line_quality_lib", name: "线条质量", nameEn: "LINE QUALITY", desc: "Outline style.", items: AES_LINE_QUALITY },
   { id: "aes_canvas_texture_lib", name: "画布质感", nameEn: "CANVAS TEXTURE", desc: "Surface texture.", items: AES_CANVAS_TEXTURE },
 
-  { id: "aes_image_focus_lib", name: "构图类别", nameEn: "IMAGE CATEGORY", desc: "Essential composition archetypes.", items: AES_IMAGE_FOCUS },
+  { id: "aes_image_focus_lib", name: "画面焦点", nameEn: "IMAGE FOCUS", desc: "Primary reading focus for the image: face, body, action, environment, object, or form.", items: AES_IMAGE_FOCUS },
   { id: "aes_visual_balance_lib", name: "视觉平衡", nameEn: "VISUAL BALANCE", desc: "Weight and symmetry.", items: AES_VISUAL_BALANCE },
   { id: "aes_shot_size_lib", name: "景别", nameEn: "SHOT SIZE", desc: "Camera distance.", items: AES_SHOT_SIZE },
   { id: "aes_perspective_lib", name: "透视", nameEn: "PERSPECTIVE", desc: "Geometric depth.", items: AES_PERSPECTIVE },

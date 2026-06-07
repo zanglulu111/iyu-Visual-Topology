@@ -1,6 +1,31 @@
-import { ConceptBaseItem, ALL_REAL_ERAS, HUMAN_REAL_SCOPE, HUMANOID_SCOPE, UNIVERSAL_HUMAN_SCOPE } from './types';
+import { ConceptBaseItem, ConceptBodyFunction, ALL_REAL_ERAS, HUMAN_REAL_SCOPE, HUMANOID_SCOPE, UNIVERSAL_HUMAN_SCOPE } from './types';
 
-export const CD_BODY_SILHOUETTE: ConceptBaseItem[] = [
+const withBodyFunction = (items: ConceptBaseItem[]): ConceptBaseItem[] => items.map(item => {
+  const group = item.group || '';
+  const id = item.id;
+  const bodyFunction: ConceptBodyFunction = group.startsWith('A.')
+    ? 'ELEGANT'
+    : group.startsWith('B.')
+      ? 'CURVE'
+      : group.startsWith('C.')
+        ? 'GLAMOUR'
+        : id.includes('soldier') || id.includes('combat')
+          ? 'COMBAT'
+          : id.includes('worker') || id.includes('craftsman')
+            ? 'LABOR'
+            : group.startsWith('D.')
+              ? 'ATHLETIC'
+              : group.startsWith('E.')
+                ? 'POWER'
+                : id.includes('small_frame')
+                  ? 'SMALL_FRAME'
+                  : id.includes('large_frame') || id.includes('top_heavy') || id.includes('bottom_weighted')
+                    ? 'LARGE_FRAME'
+                    : 'BOUNDARY';
+  return { ...item, bodyFunction };
+});
+
+export const CD_BODY_SILHOUETTE: ConceptBaseItem[] = withBodyFunction([
   { id: 'cd_body_slender_vertical', name: '修长纵向线', nameEn: 'Slender Vertical Line', group: 'A. 优雅纵向', groupEn: 'A. Elegant Verticality', def: '身体视觉重心被拉成长线，适合冷感、礼制、时尚或克制人物。', defEn: 'The body reads as a long vertical line, suited to cool, ceremonial, fashion, or restrained characters.', subjectScope: UNIVERSAL_HUMAN_SCOPE, ontologyLevel: 1, eras: ALL_REAL_ERAS, affects: ['silhouette', 'pose', 'costume'], risk: 'clean' },
   { id: 'cd_body_willow_thin', name: '柳条式纤细', nameEn: 'Willow-Thin', group: 'A. 优雅纵向', groupEn: 'A. Elegant Verticality', def: '纤细但不虚弱，像柔韧枝条一样有弹性和细长节奏。', defEn: 'Thin but not weak, elastic and elongated like a flexible branch.', subjectScope: UNIVERSAL_HUMAN_SCOPE, ontologyLevel: 1, eras: ALL_REAL_ERAS, affects: ['silhouette', 'body', 'pose'], risk: 'clean' },
   { id: 'cd_body_tall_narrow', name: '高窄体态', nameEn: 'Tall and Narrow', group: 'A. 优雅纵向', groupEn: 'A. Elegant Verticality', def: '身高感明显，横向体积小，适合形成疏离、禁欲或超模式轮廓。', defEn: 'Clearly tall with little lateral volume, good for distant, austere, or model-like silhouettes.', subjectScope: UNIVERSAL_HUMAN_SCOPE, ontologyLevel: 1, eras: ALL_REAL_ERAS, affects: ['silhouette', 'costume', 'pose'], risk: 'clean' },
@@ -43,4 +68,4 @@ export const CD_BODY_SILHOUETTE: ConceptBaseItem[] = [
   { id: 'cd_body_jointed_doll', name: '关节偶人感', nameEn: 'Jointed Doll Presence', group: 'G. 类人边界', groupEn: 'G. Humanoid Boundary', def: '身体像可动偶或人偶，不直接等于机械人，适合暧昧类人。', defEn: 'Body feels like an articulated doll or puppet, not directly a robot, suited to ambiguous humanoids.', subjectScope: HUMANOID_SCOPE, ontologyLevel: 3, eras: ['early_modern', 'industrial', 'modern', 'contemporary', 'timeless', 'mythic'], affects: ['body', 'pose', 'material'], risk: 'medium' },
   { id: 'cd_body_uncanny_perfect', name: '过度完美体态', nameEn: 'Uncannily Perfect Body', group: 'G. 类人边界', groupEn: 'G. Humanoid Boundary', def: '身体比例过于干净、对称和无生活痕迹，产生轻微非人感。', defEn: 'Body is too clean, symmetrical, and unworn, creating slight non-human unease.', subjectScope: HUMANOID_SCOPE, ontologyLevel: 2, eras: ['timeless', 'near_future', 'far_future'], affects: ['silhouette', 'skin', 'pose'], risk: 'medium' },
   { id: 'cd_body_hyper_feminine_stance', name: '超女性化站姿线', nameEn: 'Hyper-Feminine Stance Line', group: 'C. 性感体态', groupEn: 'C. Glamour Body', def: '站姿把胸、腰、胯和腿线推向强女性化展示，但仍通过姿态与服装控制在角色设计尺度。', defEn: 'Stance pushes bust, waist, hips, and legs toward a strongly feminine display while keeping it within character-design framing through pose and clothing.', subjectScope: HUMAN_REAL_SCOPE, ontologyLevel: 1, eras: ['modern', 'contemporary', 'near_future', 'timeless'], affects: ['silhouette', 'body', 'costume', 'pose'], risk: 'medium' },
-];
+]);

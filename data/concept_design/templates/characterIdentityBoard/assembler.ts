@@ -30,123 +30,147 @@ const joinBlocks = (blocks: string[]) => blocks.filter(block => block.trim()).jo
 
 const ruleTitle = (id: string, lang: CharacterIdentityBoardLanguage) => {
   const titles: Record<string, { cn: string; en: string }> = {
-    styleCostumeConflict: { cn: '风格 / 服装裁决', en: 'Style / Costume Judgment' },
-    actionMotif: { cn: '动作母题裁决', en: 'Action Motif Judgment' },
-    originality: { cn: '原创 / 版权规则', en: 'Originality / Copyright' },
-    bodyFormControl: { cn: '本体形态规则', en: 'Body Form Control' },
-    authenticity: { cn: '角色真实感规则', en: 'Character Authenticity' },
-    mediumControl: { cn: '媒介一致性规则', en: 'Medium Consistency' },
-    boardContent: { cn: '指令目标', en: 'Directive Goal' },
-    formatSpec: { cn: '格式要求', en: 'Format Requirements' },
-    layout: { cn: '版式规则', en: 'Layout Rules' },
-    background: { cn: '背景规则', en: 'Background Rules' },
-    priority: { cn: '优先级规则', en: 'Priority Rules' }
+    originality: { cn: '协议 / 原创版权规则', en: 'Protocol / Originality Copyright' },
+    bodyFormControl: { cn: '协议 / 本体形态规则', en: 'Protocol / Body Form Control' },
+    authenticity: { cn: '协议 / 角色真实感规则', en: 'Protocol / Character Authenticity' },
+    mediumControl: { cn: '协议 / 媒介一致性规则', en: 'Protocol / Medium Consistency' },
+    boardContent: { cn: '目标 / 身份板内容', en: 'Target / Board Content' },
+    formatSpec: { cn: '输出 / 格式要求', en: 'Output / Format Requirements' },
+    layout: { cn: '输出 / 版式规则', en: 'Output / Layout Rules' },
+    background: { cn: '输出 / 背景规则', en: 'Output / Background Rules' },
+    priority: { cn: '注意 / 优先级', en: 'Attention / Priority' }
   };
   const found = titles[id];
   if (!found) return lang === 'CN' ? id : id;
   return lang === 'CN' ? found.cn : found.en;
 };
 
-const sectionPalette = [
-  '#F97316',
-  '#22C55E',
-  '#38BDF8',
-  '#A78BFA',
-  '#F43F5E',
-  '#EAB308',
-  '#14B8A6',
-  '#FB7185',
-  '#60A5FA',
-  '#C084FC',
-  '#84CC16',
-  '#F59E0B'
-];
+const sectionCategoryColors = {
+  target: '#F97316',
+  object: '#38BDF8',
+  source: '#A78BFA',
+  protocol: '#22C55E',
+  output: '#EAB308',
+  attention: '#F43F5E'
+};
+
+const getSectionColor = (sectionId: string) => {
+  if (sectionId === 'objective' || sectionId === 'assembly_boardContent') return sectionCategoryColors.target;
+  if (sectionId.startsWith('object_')) return sectionCategoryColors.object;
+  if (sectionId.startsWith('source_') || sectionId.startsWith('assembly_source')) return sectionCategoryColors.source;
+  if (sectionId.startsWith('translation_')) return sectionCategoryColors.protocol;
+  if (sectionId === 'auto_invention' || sectionId === 'assembly_priority') return sectionCategoryColors.attention;
+  if (sectionId.startsWith('assembly_')) return sectionCategoryColors.output;
+  return sectionCategoryColors.protocol;
+};
+
+const buildObjectVariableSections = (
+  variables: CharacterIdentityBoardVariables,
+  otherDetails: string,
+  lang: CharacterIdentityBoardLanguage
+): Array<Omit<CharacterIdentityBoardPromptSection, 'color'>> => {
+  const slots = [
+    {
+      id: 'character_seed',
+      title: '对象 / C01 主体身份',
+      titleEn: 'Object / C01 Subject Identity',
+      labelCn: '[CHARACTER SEED / 角色种子]',
+      labelEn: '[CHARACTER SEED]',
+      value: variables.characterSeed
+    },
+    {
+      id: 'age_body_type',
+      title: '对象 / C02 本体身体',
+      titleEn: 'Object / C02 Body Ontology',
+      labelCn: '[AGE / BODY TYPE / 年龄与身体类型]',
+      labelEn: '[AGE / BODY TYPE]',
+      value: variables.ageBodyType
+    },
+    {
+      id: 'time_space_scene',
+      title: '对象 / C03 时空场域',
+      titleEn: 'Object / C03 Time-Space Field',
+      labelCn: '[TIME-SPACE FIELD / 时空场域]',
+      labelEn: '[TIME-SPACE FIELD]',
+      value: variables.timeSpaceScene
+    },
+    {
+      id: 'action_moment',
+      title: '对象 / C04 行动事件',
+      titleEn: 'Object / C04 Action Moment',
+      labelCn: '[ACTION MOMENT / 画面事件]',
+      labelEn: '[ACTION MOMENT]',
+      value: variables.actionMoment
+    },
+    {
+      id: 'visual_medium',
+      title: '对象 / C05 视觉媒介',
+      titleEn: 'Object / C05 Visual Medium',
+      labelCn: '[VISUAL MEDIUM / 视觉媒介]',
+      labelEn: '[VISUAL MEDIUM]',
+      value: variables.visualMedium
+    },
+    {
+      id: 'style',
+      title: '对象 / C06 审美风格',
+      titleEn: 'Object / C06 Aesthetic Style',
+      labelCn: '[STYLE / 审美方向]',
+      labelEn: '[STYLE]',
+      value: variables.style
+    },
+    {
+      id: 'palette_strategy',
+      title: '对象 / C07 色彩策略',
+      titleEn: 'Object / C07 Palette Strategy',
+      labelCn: '[PALETTE STRATEGY / 色彩策略]',
+      labelEn: '[PALETTE STRATEGY]',
+      value: variables.paletteStrategy
+    },
+    {
+      id: 'composition_scene',
+      title: '对象 / C08 取景构图',
+      titleEn: 'Object / C08 Framing & Composition',
+      labelCn: '[COMPOSITION SCENE / 构图场景]',
+      labelEn: '[COMPOSITION SCENE]',
+      value: variables.compositionScene
+    },
+    {
+      id: 'lighting_atmosphere',
+      title: '对象 / C09 光影氛围',
+      titleEn: 'Object / C09 Lighting Atmosphere',
+      labelCn: '[LIGHTING ATMOSPHERE / 光影氛围]',
+      labelEn: '[LIGHTING ATMOSPHERE]',
+      value: variables.lightingAtmosphere
+    },
+    {
+      id: 'other_details',
+      title: '对象 / C10 设计证据',
+      titleEn: 'Object / C10 Design Evidence',
+      labelCn: '[DESIGN EVIDENCE / 设计证据]',
+      labelEn: '[DESIGN EVIDENCE]',
+      value: otherDetails
+    }
+  ];
+  return slots.map(slot => ({
+    id: `object_${slot.id}`,
+    title: slot.title,
+    titleEn: slot.titleEn,
+    text: `${lang === 'CN' ? slot.labelCn : slot.labelEn}:\n${slot.value.trim()}`
+  }));
+};
 
 export const buildCharacterIdentityBoardPromptSections = (payload: CharacterIdentityBoardTranslatedPayload): CharacterIdentityBoardPromptSection[] => {
   const { lang, variables, ruleBlocks } = payload;
   const sections: Array<Omit<CharacterIdentityBoardPromptSection, 'color'>> = [];
 
-  if (lang === 'CN') {
-    sections.push(
-      {
-        id: 'objective',
-        title: '指令目标',
-        titleEn: 'Objective',
-        text: payload.intent
-      },
-      {
-        id: 'five_variables',
-        title: '九变量模块',
-        titleEn: 'Nine Variables',
-        text: `[CHARACTER SEED / 角色种子]:
-${variables.characterSeed.trim()}
+  sections.push({
+    id: 'objective',
+    title: '目标 / 总指令',
+    titleEn: 'Target / Main Objective',
+    text: payload.intent
+  });
 
-[AGE / BODY TYPE / 年龄与身体类型]:
-${variables.ageBodyType.trim()}
-
-[TIME-SPACE FIELD / 时空场域]:
-${variables.timeSpaceScene.trim()}
-
-[ACTION MOMENT / 画面事件]:
-${variables.actionMoment.trim()}
-
-[VISUAL MEDIUM / 视觉媒介]:
-${variables.visualMedium.trim()}
-
-[STYLE / 审美方向]:
-${variables.style.trim()}
-
-[COMPOSITION SCENE / 构图场景]:
-${variables.compositionScene.trim()}
-
-[LIGHTING ATMOSPHERE / 光影氛围]:
-${variables.lightingAtmosphere.trim()}
-
-[OTHER DETAILS - OPTIONAL / 补充细节]:
-${payload.otherDetails}`
-      }
-    );
-  } else {
-    sections.push(
-      {
-        id: 'objective',
-        title: '指令目标',
-        titleEn: 'Objective',
-        text: payload.intent
-      },
-      {
-        id: 'five_variables',
-        title: '九变量模块',
-        titleEn: 'Nine Variables',
-        text: `[CHARACTER SEED]:
-${variables.characterSeed.trim()}
-
-[AGE / BODY TYPE]:
-${variables.ageBodyType.trim()}
-
-[TIME-SPACE FIELD]:
-${variables.timeSpaceScene.trim()}
-
-[ACTION MOMENT]:
-${variables.actionMoment.trim()}
-
-[VISUAL MEDIUM]:
-${variables.visualMedium.trim()}
-
-[STYLE]:
-${variables.style.trim()}
-
-[COMPOSITION SCENE]:
-${variables.compositionScene.trim()}
-
-[LIGHTING ATMOSPHERE]:
-${variables.lightingAtmosphere.trim()}
-
-[OTHER DETAILS - OPTIONAL]:
-${payload.otherDetails}`
-      }
-    );
-  }
+  sections.push(...buildObjectVariableSections(variables, payload.otherDetails, lang));
 
   ruleBlocks
     .filter(block => block.layer === 'translation' && block.text.trim())
@@ -161,8 +185,8 @@ ${payload.otherDetails}`
 
   sections.push({
     id: 'auto_invention',
-    title: '自动补全要求',
-    titleEn: 'Auto Invention Request',
+    title: '注意 / 自动补全',
+    titleEn: 'Attention / Auto Invention',
     text: lang === 'CN'
       ? `请自行发明其余内容：
 角色姓名、别名或称号、角色职责、性格特征、情绪基调、视觉主题、服装设计或身体设计、色彩 palette、标志性道具或标志性生物特征、可识别剪影、姿态语言、简短身份备注。`
@@ -181,9 +205,9 @@ character name, alias or title, role, personality traits, emotional tone, visual
       });
     });
 
-  return sections.map((section, index) => ({
+  return sections.map((section) => ({
     ...section,
-    color: sectionPalette[index % sectionPalette.length]
+    color: getSectionColor(section.id)
   }));
 };
 

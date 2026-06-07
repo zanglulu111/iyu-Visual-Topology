@@ -2,6 +2,10 @@ import {
   ALL_REAL_ERAS,
   ConceptBaseItem,
   ConceptEra,
+  ConceptGenderCoding,
+  ConceptGroomingIntensity,
+  ConceptMakeupRegister,
+  ConceptAgeWear,
   ConceptSubjectScope,
   HUMAN_REAL_SCOPE,
   HUMANOID_SCOPE,
@@ -39,6 +43,49 @@ const makeItems = (prefix: string, rows: VisibleBodyRow[], defaultAffects: strin
     affects,
     risk
   }));
+
+const getMakeupMeta = (item: ConceptBaseItem): {
+  makeupRegister: ConceptMakeupRegister;
+  groomingIntensity: ConceptGroomingIntensity;
+  genderCoding: ConceptGenderCoding;
+} => {
+  const group = item.group || '';
+  const id = item.id;
+  if (id.includes('no_makeup')) return { makeupRegister: 'RESTRAINED', groomingIntensity: 'LIGHT', genderCoding: 'UNIVERSAL' };
+  if (id.includes('clean_base') || id.includes('matte_makeup') || id.includes('nude_lip')) {
+    return { makeupRegister: 'RESTRAINED', groomingIntensity: 'LIGHT', genderCoding: 'UNIVERSAL' };
+  }
+  if (group.startsWith('A.') || group.startsWith('B.')) {
+    return { makeupRegister: 'BEAUTY', groomingIntensity: id.includes('red_lip') || id.includes('smokey_eye') || id.includes('cat_eyeliner') ? 'MEDIUM' : 'LIGHT', genderCoding: 'FEMININE' };
+  }
+  if (group.startsWith('C.')) {
+    const isStage = id.includes('idol_stage') || id.includes('goth') || id.includes('avant_garde') || id.includes('editorial') || id.includes('runway');
+    return { makeupRegister: isStage ? 'STAGE' : 'EDITORIAL', groomingIntensity: 'STRONG', genderCoding: 'ANDROGYNOUS' };
+  }
+  if (group.startsWith('D.')) return { makeupRegister: 'RITUAL', groomingIntensity: 'STRONG', genderCoding: 'UNIVERSAL' };
+  if (group.startsWith('X.')) return { makeupRegister: item.risk === 'medium' ? 'TECH' : 'BOUNDARY', groomingIntensity: item.risk === 'high' ? 'EXTREME' : 'STRONG', genderCoding: 'ANDROGYNOUS' };
+  return { makeupRegister: 'BEAUTY', groomingIntensity: 'MEDIUM', genderCoding: 'FEMININE' };
+};
+
+const withMakeupMeta = (items: ConceptBaseItem[]): ConceptBaseItem[] =>
+  items.map(item => ({ ...item, ...getMakeupMeta(item) }));
+
+const withBodyEvidenceMeta = (items: ConceptBaseItem[]): ConceptBaseItem[] => items.map(item => {
+  const group = item.group || '';
+  const id = item.id;
+  const evidenceTags = new Set<string>([...(item.affects || [])]);
+  let ageWear: ConceptAgeWear | undefined;
+  if (id.includes('visible_pores') || id.includes('fine_texture') || id.includes('soft_skin') || id.includes('well_kept')) ageWear = 'WELL_KEPT';
+  if (id.includes('rough') || id.includes('weathered') || id.includes('calloused') || id.includes('sun_spots')) ageWear = 'WEATHERED';
+  if (id.includes('fine_lines') || id.includes('under_eye') || id.includes('sleepless')) ageWear = 'LIVED_IN';
+  if (id.includes('deep_wrinkles')) ageWear = 'WEATHERED';
+  if (group.includes('医疗') || group.includes('Medical')) evidenceTags.add('medical');
+  if (group.includes('技术') || group.includes('Tech') || group.includes('赛博') || group.includes('Cybernetics')) evidenceTags.add('technology');
+  if (group.includes('神秘') || group.includes('Mystic') || group.includes('仪式') || group.includes('Ritual')) evidenceTags.add('ritual');
+  if (group.includes('损伤') || group.includes('Damage') || group.includes('新伤')) evidenceTags.add('combat');
+  if (group.includes('现实') || group.includes('Real')) evidenceTags.add('realistic');
+  return { ...item, ...(ageWear ? { ageWear } : {}), evidenceTags: Array.from(evidenceTags) };
+});
 
 const FACE_FEATURE_ROWS: VisibleBodyRow[] = [
   ['oval_face', '鹅蛋脸', 'Oval Face', 'A. 脸型轮廓', 'A. Face Shape', '脸型均衡柔顺，适合现实、古典、明星和身份板主视图。', 'Balanced soft face outline suited to realistic, classical, star-like, and identity-board views.'],
@@ -562,10 +609,10 @@ const BODY_MODIFICATION_EXTRA_ROWS: VisibleBodyRow[] = [
 ];
 
 export const CD_FACE_FEATURES = makeItems('face', FACE_FEATURE_ROWS, ['face']);
-export const CD_MAKEUP_STYLE = makeItems('makeup', [...MAKEUP_ROWS, ...MAKEUP_EXTRA_ROWS], ['face', 'style']);
-export const CD_SKIN_MATERIAL = makeItems('skin', SKIN_MATERIAL_ROWS, ['skin', 'material']);
-export const CD_SURFACE_STATE = makeItems('surface_state', SURFACE_STATE_ROWS, ['skin', 'surface', 'state']);
-export const CD_BODY_FEATURES = makeItems('body', BODY_FEATURE_ROWS, ['body']);
-export const CD_BODY_MARKINGS = makeItems('body_mark', [...BODY_MARKING_ROWS, ...BODY_MARKING_EXTRA_ROWS], ['body', 'symbol']);
-export const CD_BODY_DAMAGE = makeItems('body_damage', [...BODY_DAMAGE_ROWS, ...BODY_DAMAGE_EXTRA_ROWS], ['body', 'damage']);
-export const CD_BODY_MODIFICATION = makeItems('body_mod', [...BODY_MODIFICATION_ROWS, ...BODY_MODIFICATION_EXTRA_ROWS], ['body', 'modification']);
+export const CD_MAKEUP_STYLE = withMakeupMeta(makeItems('makeup', [...MAKEUP_ROWS, ...MAKEUP_EXTRA_ROWS], ['face', 'style']));
+export const CD_SKIN_MATERIAL = withBodyEvidenceMeta(makeItems('skin', SKIN_MATERIAL_ROWS, ['skin', 'material']));
+export const CD_SURFACE_STATE = withBodyEvidenceMeta(makeItems('surface_state', SURFACE_STATE_ROWS, ['skin', 'surface', 'state']));
+export const CD_BODY_FEATURES = withBodyEvidenceMeta(makeItems('body', BODY_FEATURE_ROWS, ['body']));
+export const CD_BODY_MARKINGS = withBodyEvidenceMeta(makeItems('body_mark', [...BODY_MARKING_ROWS, ...BODY_MARKING_EXTRA_ROWS], ['body', 'symbol']));
+export const CD_BODY_DAMAGE = withBodyEvidenceMeta(makeItems('body_damage', [...BODY_DAMAGE_ROWS, ...BODY_DAMAGE_EXTRA_ROWS], ['body', 'damage']));
+export const CD_BODY_MODIFICATION = withBodyEvidenceMeta(makeItems('body_mod', [...BODY_MODIFICATION_ROWS, ...BODY_MODIFICATION_EXTRA_ROWS], ['body', 'modification']));

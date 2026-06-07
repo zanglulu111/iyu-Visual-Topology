@@ -16,6 +16,10 @@ type CostumeExecutionRow = [
   forbids?: string[]
 ];
 
+type CostumeExecutionAxisPatch = Pick<ConceptBaseItem, 'eraMode' | 'eras' | 'ontologyLevel' | 'realityTags' | 'categoryFit'>;
+type CostumeCategoryFit = NonNullable<ConceptBaseItem['categoryFit']>;
+
+const REAL_ERAS: ConceptEra[] = ['primitive', 'slave', 'feudal', 'early_modern', 'industrial', 'modern', 'contemporary', 'near_future', 'far_future'];
 const ALL_REAL_ERAS: ConceptEra[] = ['primitive', 'slave', 'feudal', 'early_modern', 'industrial', 'modern', 'contemporary', 'near_future', 'far_future', 'timeless'];
 const HISTORICAL_ERAS: ConceptEra[] = ['slave', 'feudal', 'early_modern', 'industrial', 'timeless'];
 const INDUSTRIAL_PLUS_ERAS: ConceptEra[] = ['industrial', 'modern', 'contemporary', 'near_future', 'far_future', 'timeless'];
@@ -24,6 +28,146 @@ const CONTEMPORARY_PLUS_ERAS: ConceptEra[] = ['contemporary', 'near_future', 'fa
 const FUTURE_ERAS: ConceptEra[] = ['near_future', 'far_future'];
 const MYTHIC_ERAS: ConceptEra[] = ['feudal', 'early_modern', 'timeless', 'mythic'];
 const WASTELAND_ERAS: ConceptEra[] = ['near_future', 'far_future', 'timeless'];
+
+const costumeFit = (
+  unlisted: CostumeCategoryFit['unlisted'],
+  strong: string[] = [],
+  usable: string[] = [],
+  fusion: string[] = [],
+  weak: string[] = [],
+  exclude: string[] = []
+): CostumeCategoryFit => ({ unlisted, strong, usable, fusion, weak, exclude });
+
+const costumeAxis = (
+  eraMode: CostumeExecutionAxisPatch['eraMode'],
+  eras: ConceptEra[],
+  ontologyLevel: NonNullable<CostumeExecutionAxisPatch['ontologyLevel']>,
+  realityTags: string[],
+  categoryFit: CostumeCategoryFit
+): CostumeExecutionAxisPatch => ({ eraMode, eras, ontologyLevel, realityTags, categoryFit });
+
+const realisticCostume = ['physical', 'realistic', 'costume_evidence'];
+const stylizedCostume = ['physical', 'stylized', 'semi_real', 'costume_evidence'];
+const techCostume = ['physical', 'stylized', 'semi_surreal', 'technological', 'costume_evidence'];
+const surrealCostume = ['non_realist', 'surreal', 'symbolic', 'costume_evidence'];
+const abstractCostume = ['abstract', 'surreal', 'symbolic', 'costume_evidence'];
+
+const institutionalFit = costumeFit('none', ['real_professional'], ['urban_life', 'war_military'], ['science_fiction', 'cyberpunk'], ['xianxia', 'fantasy']);
+const ritualFit = costumeFit('none', ['religious_ritual'], ['xianxia', 'dark_fantasy', 'historical', 'mythic_epic', 'court'], ['fantasy', 'surreal'], ['urban_life', 'real_professional']);
+const restraintFit = costumeFit('none', ['real_professional'], ['fashion_idol', 'boudoir_aesthetic', 'horror', 'body_horror'], ['science_fiction', 'dark_fantasy'], ['court']);
+const mobileFit = costumeFit('usable', ['adventure'], ['wasteland', 'ecological', 'real_professional', 'historical'], ['wuxia', 'xianxia'], []);
+const hiddenFunctionFit = costumeFit('none', ['wuxia', 'noir_crime'], ['war_military', 'historical', 'adventure'], ['fashion_idol', 'science_fiction'], ['romance', 'urban_life']);
+const silhouetteFit = costumeFit('usable', ['fashion_idol'], ['court', 'historical', 'boudoir_aesthetic', 'romance'], ['surreal', 'fantasy'], ['war_military']);
+const techFit = costumeFit('none', ['science_fiction'], ['cyberpunk', 'posthuman', 'real_professional'], ['biopunk', 'wasteland'], ['historical', 'wuxia']);
+const livingFit = costumeFit('none', ['body_horror'], ['biopunk', 'fantasy', 'dark_fantasy', 'ecological', 'posthuman'], ['xianxia', 'surreal'], ['real_professional', 'urban_life']);
+const boudoirFit = costumeFit('none', ['boudoir_aesthetic'], ['fashion_idol', 'romance'], ['surreal', 'dark_fantasy'], ['war_military', 'real_professional']);
+
+const COSTUME_EXECUTION_AXIS: Record<string, CostumeExecutionAxisPatch> = {
+  uniform: costumeAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticCostume, institutionalFit),
+  rank_tab_placement: costumeAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticCostume, institutionalFit),
+  workplace_color_block: costumeAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticCostume, institutionalFit),
+  standardized_cut: costumeAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticCostume, institutionalFit),
+  security_pass_slot: costumeAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticCostume, institutionalFit),
+  utility_pocket_grid: costumeAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticCostume, institutionalFit),
+  inspection_ready_closure: costumeAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticCostume, institutionalFit),
+  service_apron_frame: costumeAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticCostume, costumeFit('none', ['real_professional'], ['urban_life', 'historical'], ['wasteland'], ['xianxia'])),
+  training_uniform_softened: costumeAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticCostume, costumeFit('none', ['real_professional', 'war_military'], ['urban_life', 'adventure'], ['science_fiction'], ['court'])),
+
+  ritual: costumeAxis('specific', ['feudal', 'early_modern', 'timeless', 'mythic'], 1, stylizedCostume, ritualFit),
+  veil_threshold: costumeAxis('specific', ['slave', 'feudal', 'early_modern', 'modern', 'contemporary', 'timeless', 'mythic'], 1, stylizedCostume, costumeFit('weak', ['religious_ritual'], ['xianxia', 'dark_fantasy', 'court', 'boudoir_aesthetic'], ['surreal', 'fantasy'], ['war_military'])),
+  cord_knot_hierarchy: costumeAxis('specific', ['slave', 'feudal', 'early_modern', 'timeless', 'mythic'], 1, stylizedCostume, ritualFit),
+  relic_pouch_mount: costumeAxis('specific', ['slave', 'feudal', 'early_modern', 'timeless', 'mythic'], 1, stylizedCostume, costumeFit('none', ['religious_ritual'], ['wuxia', 'xianxia', 'dark_fantasy', 'historical'], ['fantasy'], ['urban_life'])),
+  procession_drape: costumeAxis('specific', ['slave', 'feudal', 'early_modern', 'industrial', 'timeless', 'mythic'], 1, stylizedCostume, ritualFit),
+  penitent_wrap: costumeAxis('specific', ['slave', 'feudal', 'early_modern', 'timeless', 'mythic'], 1, stylizedCostume, costumeFit('none', ['religious_ritual'], ['dark_fantasy', 'historical', 'horror'], ['xianxia', 'surreal'], ['urban_life'])),
+  ceremonial_fastener: costumeAxis('specific', ['slave', 'feudal', 'early_modern', 'timeless', 'mythic'], 1, stylizedCostume, ritualFit),
+  oracle_layering: costumeAxis('specific', ['feudal', 'early_modern', 'timeless', 'mythic'], 2, ['physical', 'stylized', 'semi_real', 'ritual', 'costume_evidence'], ritualFit),
+  sealed_garment_edge: costumeAxis('specific', ['feudal', 'early_modern', 'timeless', 'mythic'], 2, ['physical', 'stylized', 'semi_real', 'ritual', 'costume_evidence'], ritualFit),
+
+  binding: costumeAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticCostume, restraintFit),
+  corset_discipline: costumeAxis('specific', ['early_modern', 'industrial', 'modern', 'contemporary'], 1, realisticCostume, costumeFit('none', ['fashion_idol', 'boudoir_aesthetic'], ['court', 'historical'], ['dark_fantasy'], ['war_military'])),
+  medical_brace_frame: costumeAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticCostume, costumeFit('none', ['real_professional'], ['biopunk', 'urban_life'], ['science_fiction'], ['xianxia', 'court'])),
+  collar_control_point: costumeAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future', 'timeless', 'mythic'], 2, stylizedCostume, costumeFit('none', ['boudoir_aesthetic'], ['religious_ritual', 'science_fiction', 'dark_fantasy', 'fashion_idol'], ['xianxia', 'surreal'], ['romance'])),
+  harness_body_map: costumeAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticCostume, costumeFit('weak', ['fashion_idol'], ['war_military', 'adventure', 'science_fiction', 'boudoir_aesthetic'], ['wasteland'], ['court'])),
+  leg_strap_support: costumeAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticCostume, costumeFit('weak', ['adventure', 'war_military'], ['fashion_idol', 'wasteland'], ['science_fiction'], ['court'])),
+  containment_clamp: costumeAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 2, stylizedCostume, costumeFit('none', ['real_professional', 'horror'], ['science_fiction', 'body_horror'], ['dark_fantasy', 'biopunk'], ['romance', 'court'])),
+  posture_splint: costumeAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 2, stylizedCostume, costumeFit('none', ['real_professional'], ['fashion_idol', 'horror'], ['science_fiction', 'dark_fantasy'], ['wuxia'])),
+  soft_restraint_ribbon: costumeAxis('universal', REAL_ERAS, 1, realisticCostume, costumeFit('usable', ['boudoir_aesthetic', 'fashion_idol'], ['romance', 'dark_fantasy'], ['surreal'], ['war_military'])),
+
+  nomad: costumeAxis('universal', REAL_ERAS, 1, realisticCostume, mobileFit),
+  balanced_pack_frame: costumeAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticCostume, mobileFit),
+  weather_shell_layer: costumeAxis('universal', REAL_ERAS, 1, realisticCostume, mobileFit),
+  water_loop_mount: costumeAxis('universal', REAL_ERAS, 1, realisticCostume, mobileFit),
+  bedroll_strap_logic: costumeAxis('universal', REAL_ERAS, 1, realisticCostume, mobileFit),
+  quick_access_pouch: costumeAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticCostume, costumeFit('usable', ['real_professional', 'adventure'], ['wasteland', 'urban_life', 'historical'], ['wuxia', 'xianxia'], [])),
+  travel_dust_flap: costumeAxis('universal', REAL_ERAS, 1, realisticCostume, costumeFit('usable', ['adventure', 'wasteland'], ['wuxia', 'historical', 'ecological'], ['xianxia'], [])),
+  modular_carry_rings: costumeAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticCostume, mobileFit),
+  foldable_shelter_cloth: costumeAxis('universal', REAL_ERAS, 1, realisticCostume, costumeFit('usable', ['adventure', 'ecological', 'wasteland'], ['historical', 'wuxia'], ['xianxia', 'fantasy'], [])),
+
+  weapon: costumeAxis('specific', ['feudal', 'early_modern', 'industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticCostume, hiddenFunctionFit),
+  sleeve_hidden_slot: costumeAxis('specific', ['slave', 'feudal', 'early_modern', 'industrial'], 1, realisticCostume, hiddenFunctionFit),
+  belt_mechanism: costumeAxis('specific', ['slave', 'feudal', 'early_modern', 'industrial'], 1, realisticCostume, hiddenFunctionFit),
+  ornament_as_tool: costumeAxis('specific', ['slave', 'feudal', 'early_modern', 'industrial'], 1, realisticCostume, costumeFit('none', ['wuxia', 'noir_crime'], ['historical', 'court', 'adventure'], ['fashion_idol', 'science_fiction'], ['urban_life'])),
+  folded_blade_line: costumeAxis('specific', ['slave', 'feudal', 'early_modern', 'industrial'], 1, realisticCostume, hiddenFunctionFit),
+  tool_belt_disguise: costumeAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticCostume, costumeFit('none', ['real_professional', 'noir_crime'], ['adventure', 'war_military'], ['fashion_idol', 'science_fiction'], ['xianxia'])),
+  inner_layer_storage: costumeAxis('specific', ['slave', 'feudal', 'early_modern', 'industrial'], 1, realisticCostume, costumeFit('weak', ['noir_crime', 'wuxia'], ['historical', 'romance', 'adventure'], ['dark_fantasy'], [])),
+  breakaway_closure: costumeAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 2, stylizedCostume, costumeFit('none', ['fashion_idol', 'adventure'], ['noir_crime', 'war_military'], ['science_fiction', 'surreal'], ['court'])),
+  silent_fastening: costumeAxis('universal', REAL_ERAS, 1, realisticCostume, costumeFit('usable', ['noir_crime', 'wuxia'], ['war_military', 'adventure', 'historical'], ['science_fiction'], ['romance'])),
+
+  couture_architecture: costumeAxis('specific', ['early_modern', 'industrial', 'modern', 'contemporary'], 1, realisticCostume, silhouetteFit),
+  runway_volume_control: costumeAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticCostume, silhouetteFit),
+  asymmetric_drape: costumeAxis('universal', REAL_ERAS, 1, realisticCostume, silhouetteFit),
+  high_collar_frame: costumeAxis('specific', ['slave', 'feudal', 'early_modern', 'industrial'], 1, realisticCostume, costumeFit('usable', ['court', 'historical'], ['fashion_idol', 'wuxia', 'religious_ritual'], ['science_fiction'], [])),
+  shoulder_extension: costumeAxis('specific', ['slave', 'feudal', 'early_modern', 'industrial'], 1, realisticCostume, costumeFit('usable', ['court', 'war_military'], ['historical', 'fashion_idol', 'dark_fantasy'], ['science_fiction'], [])),
+  transparent_layer_control: costumeAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticCostume, costumeFit('none', ['fashion_idol', 'boudoir_aesthetic'], ['romance', 'surreal'], ['science_fiction'], ['war_military'])),
+  tailored_negative_space: costumeAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticCostume, costumeFit('none', ['fashion_idol', 'boudoir_aesthetic'], ['romance'], ['surreal', 'science_fiction'], ['war_military'])),
+  headwear_silhouette_lock: costumeAxis('universal', REAL_ERAS, 1, realisticCostume, costumeFit('usable', ['court', 'fashion_idol'], ['wuxia', 'xianxia', 'historical', 'religious_ritual'], ['science_fiction', 'fantasy'], [])),
+  footwear_posture_rule: costumeAxis('specific', ['slave', 'feudal', 'early_modern', 'industrial'], 1, realisticCostume, costumeFit('usable', ['fashion_idol'], ['court', 'historical', 'wuxia'], ['science_fiction'], [])),
+
+  tech_wearable_bus: costumeAxis('specific', ['near_future', 'far_future'], 3, techCostume, techFit),
+  soft_exosuit_assist: costumeAxis('specific', ['contemporary', 'near_future', 'far_future'], 4, techCostume, techFit),
+  sealed_pressure_seam: costumeAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 3, techCostume, costumeFit('none', ['science_fiction'], ['real_professional', 'posthuman', 'wasteland'], ['cyberpunk', 'biopunk'], ['historical'])),
+  data_tag_garment: costumeAxis('specific', ['near_future', 'far_future'], 3, techCostume, techFit),
+  modular_panel_clothing: costumeAxis('specific', ['near_future', 'far_future'], 3, techCostume, techFit),
+  breathing_interface_cloth: costumeAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 3, techCostume, costumeFit('none', ['science_fiction'], ['real_professional', 'wasteland', 'posthuman'], ['biopunk'], ['court', 'historical'])),
+  biotech_sample_sling: costumeAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 3, techCostume, costumeFit('none', ['biopunk', 'real_professional'], ['science_fiction', 'posthuman'], ['horror'], ['wuxia', 'court'])),
+  light_emitting_trim: costumeAxis('specific', ['near_future', 'far_future'], 4, techCostume, costumeFit('none', ['science_fiction', 'cyberpunk'], ['posthuman', 'fashion_idol'], ['surreal'], ['historical', 'wuxia'])),
+  interface_glove_route: costumeAxis('specific', ['near_future', 'far_future'], 3, techCostume, techFit),
+
+  biomass: costumeAxis('specific', ['far_future', 'timeless', 'mythic'], 4, surrealCostume, livingFit),
+  organic_armor_growth: costumeAxis('specific', ['far_future', 'timeless', 'mythic'], 4, surrealCostume, livingFit),
+  hair_as_garment: costumeAxis('specific', ['far_future', 'timeless', 'mythic'], 3, ['stylized', 'semi_surreal', 'surreal', 'costume_evidence'], costumeFit('none', ['fantasy', 'surreal'], ['body_horror', 'xianxia', 'dark_fantasy', 'fashion_idol'], ['posthuman', 'biopunk'], ['real_professional'])),
+  parasite_harness: costumeAxis('specific', ['far_future', 'timeless', 'mythic'], 5, abstractCostume, livingFit),
+  fungal_cloak_edge: costumeAxis('specific', ['far_future', 'timeless', 'mythic'], 4, surrealCostume, livingFit),
+  plant_woven_outerwear: costumeAxis('specific', ['far_future', 'timeless', 'mythic'], 4, surrealCostume, costumeFit('none', ['ecological', 'fantasy'], ['xianxia', 'biopunk', 'dark_fantasy'], ['surreal', 'posthuman'], ['real_professional'])),
+  bone_reliquary_wear: costumeAxis('specific', ['far_future', 'timeless', 'mythic'], 4, surrealCostume, costumeFit('none', ['dark_fantasy', 'religious_ritual'], ['body_horror', 'mythic_epic', 'fantasy'], ['xianxia', 'surreal'], ['urban_life'])),
+  shadow_cloth_edge: costumeAxis('specific', ['far_future', 'timeless', 'mythic'], 5, abstractCostume, costumeFit('none', ['surreal', 'dark_fantasy'], ['body_horror', 'fantasy'], ['xianxia', 'abstract'], ['real_professional'])),
+  shell_mantle_joint: costumeAxis('specific', ['far_future', 'timeless', 'mythic'], 4, surrealCostume, livingFit),
+
+  coverage_nude_baseline: costumeAxis('universal', REAL_ERAS, 1, realisticCostume, boudoirFit),
+  coverage_body_jewelry_only: costumeAxis('specific', ['slave', 'feudal', 'early_modern', 'modern', 'contemporary', 'timeless', 'mythic'], 1, realisticCostume, boudoirFit),
+  coverage_strategic_drape: costumeAxis('universal', REAL_ERAS, 1, realisticCostume, boudoirFit),
+  coverage_sheer_veil_body: costumeAxis('specific', ['slave', 'feudal', 'early_modern', 'modern', 'contemporary', 'timeless', 'mythic'], 1, realisticCostume, boudoirFit),
+  coverage_wet_cling_layer: costumeAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future'], 1, realisticCostume, boudoirFit),
+  coverage_transparent_shell: costumeAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 3, techCostume, costumeFit('none', ['boudoir_aesthetic'], ['fashion_idol', 'science_fiction'], ['surreal'], ['historical', 'wuxia'])),
+  coverage_lingerie_structure: costumeAxis('specific', ['industrial', 'modern', 'contemporary'], 1, realisticCostume, boudoirFit),
+  coverage_bodysuit_second_skin: costumeAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticCostume, costumeFit('none', ['fashion_idol', 'boudoir_aesthetic'], ['science_fiction', 'posthuman'], ['surreal'], ['historical'])),
+  coverage_cutout_map: costumeAxis('specific', ['modern', 'contemporary', 'near_future'], 1, realisticCostume, boudoirFit),
+  coverage_slit_tension: costumeAxis('specific', ['slave', 'feudal', 'early_modern', 'modern', 'contemporary'], 1, realisticCostume, boudoirFit),
+  coverage_open_back: costumeAxis('specific', ['early_modern', 'modern', 'contemporary'], 1, realisticCostume, boudoirFit),
+  coverage_bare_shoulder_collar: costumeAxis('specific', ['slave', 'feudal', 'early_modern', 'modern', 'contemporary'], 1, realisticCostume, boudoirFit),
+  coverage_bare_midriff: costumeAxis('specific', ['modern', 'contemporary', 'near_future'], 1, realisticCostume, boudoirFit),
+  coverage_leg_emphasis: costumeAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future'], 1, realisticCostume, boudoirFit),
+  coverage_stocking_fetish_line: costumeAxis('specific', ['industrial', 'modern', 'contemporary'], 1, realisticCostume, boudoirFit),
+  coverage_glove_touch_fetish: costumeAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future'], 1, realisticCostume, boudoirFit),
+  coverage_collar_leash_code: costumeAxis('specific', ['modern', 'contemporary', 'near_future'], 2, stylizedCostume, boudoirFit),
+  coverage_harness_erotic_grid: costumeAxis('specific', ['modern', 'contemporary', 'near_future'], 1, realisticCostume, boudoirFit),
+  coverage_latex_total_surface: costumeAxis('specific', ['modern', 'contemporary', 'near_future'], 1, realisticCostume, boudoirFit),
+  coverage_masked_modesty: costumeAxis('specific', ['slave', 'feudal', 'early_modern', 'modern', 'contemporary', 'near_future', 'timeless', 'mythic'], 2, stylizedCostume, boudoirFit),
+  coverage_wrapped_mummy_erotic: costumeAxis('specific', ['primitive', 'slave', 'feudal', 'early_modern', 'modern', 'contemporary', 'timeless', 'mythic'], 2, stylizedCostume, boudoirFit),
+  coverage_cage_crinoline_body: costumeAxis('specific', ['early_modern', 'industrial', 'modern', 'contemporary'], 1, realisticCostume, boudoirFit),
+  coverage_modest_total_wrap: costumeAxis('universal', REAL_ERAS, 1, realisticCostume, costumeFit('usable', ['boudoir_aesthetic', 'religious_ritual'], ['romance', 'fashion_idol', 'historical'], ['dark_fantasy'], ['war_military'])),
+  coverage_armored_chastity: costumeAxis('specific', ['feudal', 'early_modern', 'industrial', 'modern', 'contemporary', 'near_future', 'timeless', 'mythic'], 2, stylizedCostume, costumeFit('none', ['boudoir_aesthetic', 'religious_ritual'], ['dark_fantasy', 'court'], ['science_fiction'], ['urban_life']))
+};
 
 const COSTUME_EXECUTION_ROWS: CostumeExecutionRow[] = [
   ['uniform', '制度制服残片', 'Institutional Uniform Remnants', 'A. 制度制服接口', 'A. Institutional Uniform Interface', '用制服残片、等级位置、岗位色和标准剪裁承接身份制度；若与造型协议冲突，制服只提供结构落点，不推翻主造型。', 'Use uniform remnants, rank placement, workplace color, and standard cut to carry institutional identity; if it conflicts with the form protocol, the uniform provides structure without overriding the primary form system.', 1, INDUSTRIAL_PLUS_ERAS, 'clean', ['costume', 'symbol', 'occupation'], ['uniform', 'rank', 'silhouette']],
@@ -132,6 +276,20 @@ const COSTUME_EXECUTION_ROWS: CostumeExecutionRow[] = [
   ['coverage_armored_chastity', '贞洁装甲', 'Chastity Armor', 'X. 遮蔽/显性欲望', 'X. Coverage / Explicit Desire', '身体被硬质装甲、锁扣、封条和不可触达结构保护，欲望转化为禁令。', 'Body is protected by hard armor, locks, seals, and untouchable structures, turning desire into prohibition.', 2, ['feudal', 'early_modern', 'industrial', 'modern', 'contemporary', 'near_future', 'timeless', 'mythic'], 'high', ['costume', 'symbol', 'body'], ['chastity_armor'], ['minor-coded subject', 'explicit sex act', 'non-consensual scene']]
 ];
 
+const buildEvidenceTags = (group: string, affects: readonly string[], controls: readonly string[]): string[] => {
+  const tags = new Set<string>([...affects, ...controls]);
+  if (group.startsWith('A.')) tags.add('institution');
+  if (group.startsWith('B.')) tags.add('ritual');
+  if (group.startsWith('C.')) tags.add('medical');
+  if (group.startsWith('D.')) tags.add('survival');
+  if (group.startsWith('E.')) tags.add('combat');
+  if (group.startsWith('G.')) tags.add('technology');
+  if (group.startsWith('H.')) tags.add('hazard');
+  if (group.startsWith('I.')) tags.add('space');
+  if (group.startsWith('X.')) tags.add('glamour');
+  return Array.from(tags);
+};
+
 export const CD_COSTUME_EXECUTION: ConceptBaseItem[] = COSTUME_EXECUTION_ROWS.map(([
   key,
   name,
@@ -146,18 +304,23 @@ export const CD_COSTUME_EXECUTION: ConceptBaseItem[] = COSTUME_EXECUTION_ROWS.ma
   affects = ['costume'],
   controls = ['costume'],
   forbids = []
-]) => ({
-  id: `cd_costume_${key}`,
-  name,
-  nameEn,
-  group,
-  groupEn,
-  def,
-  defEn,
-  ontologyLevel,
-  eras,
-  risk,
-  affects,
-  controls,
-  forbids
-}));
+]) => {
+  const axisPatch = COSTUME_EXECUTION_AXIS[key];
+  return {
+    id: `cd_costume_${key}`,
+    name,
+    nameEn,
+    group,
+    groupEn,
+    def,
+    defEn,
+    ontologyLevel,
+    eras,
+    risk,
+    affects,
+    controls,
+    evidenceTags: buildEvidenceTags(group, affects, controls),
+    forbids,
+    ...axisPatch
+  };
+});

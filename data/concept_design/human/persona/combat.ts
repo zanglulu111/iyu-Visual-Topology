@@ -1,4 +1,12 @@
-import { PersonaEra, PersonaTerm } from './types';
+import {
+  cleanPersonaEras,
+  PersonaCategoryFit,
+  personaEraModeFor,
+  PersonaEra,
+  personaFit,
+  personaRealityTagsFor,
+  PersonaTerm
+} from './types';
 
 type PersonaSeed = {
   id: string;
@@ -17,20 +25,240 @@ type PersonaSeed = {
   forbids?: string[];
   absorptionRule?: string;
   absorptionRuleEn?: string;
+  eraMode?: PersonaTerm['eraMode'];
+  realityTags?: string[];
+  categoryFit?: PersonaTerm['categoryFit'];
 };
 
 const baseControls = ['gear', 'prop', 'pose', 'wear_trace', 'symbol', 'silhouette', 'weapon'];
 const defaultForbids = ['纯时尚无功能化', '无解释可爱化', '复杂战场背景喧宾夺主', '随机礼服化抢走战斗身份'];
-const modernCombatEras: PersonaEra[] = ['modern', 'contemporary', 'near_future', 'timeless'];
-const feudalEras: PersonaEra[] = ['feudal', 'early_modern', 'timeless', 'mythic'];
-const industrialModernEras: PersonaEra[] = ['industrial', 'modern', 'contemporary', 'timeless'];
-const futureEras: PersonaEra[] = ['near_future', 'far_future', 'timeless'];
+const modernCombatEras: PersonaEra[] = ['modern', 'contemporary', 'near_future'];
+const feudalEras: PersonaEra[] = ['feudal', 'early_modern', 'mythic'];
+const industrialModernEras: PersonaEra[] = ['industrial', 'modern', 'contemporary'];
+const futureEras: PersonaEra[] = ['near_future', 'far_future'];
+
+const combatFit = (group: string): PersonaCategoryFit => {
+  if (group.startsWith('A.')) return personaFit('weak', {
+    strong: ['war_military', 'real_professional'],
+    usable: ['noir_crime', 'urban_life', 'adventure'],
+    fusion: ['cyberpunk', 'science_fiction'],
+    weak: ['romance', 'fashion_idol', 'xianxia']
+  });
+  if (group.startsWith('B.')) return personaFit('weak', {
+    strong: ['wuxia'],
+    usable: ['xianxia', 'historical', 'adventure'],
+    fusion: ['dark_fantasy', 'romance'],
+    weak: ['cyberpunk', 'real_professional', 'fashion_idol']
+  });
+  if (group.startsWith('C.')) return personaFit('weak', {
+    strong: ['historical', 'war_military'],
+    usable: ['wuxia', 'court', 'adventure'],
+    fusion: ['dark_fantasy', 'xianxia'],
+    weak: ['urban_life', 'cyberpunk', 'fashion_idol']
+  });
+  if (group.startsWith('D.')) return personaFit('weak', {
+    strong: ['noir_crime', 'urban_life'],
+    usable: ['war_military', 'adventure'],
+    fusion: ['cyberpunk', 'dark_fantasy'],
+    weak: ['court', 'xianxia', 'romance']
+  });
+  if (group.startsWith('E.')) return personaFit('weak', {
+    strong: ['court', 'noir_crime'],
+    usable: ['historical', 'wuxia', 'war_military'],
+    fusion: ['dark_fantasy', 'xianxia'],
+    weak: ['urban_life', 'fashion_idol', 'wasteland']
+  });
+  if (group.startsWith('F.')) return personaFit('weak', {
+    strong: ['urban_life'],
+    usable: ['noir_crime', 'war_military', 'adventure'],
+    fusion: ['wuxia', 'wasteland'],
+    weak: ['court', 'romance', 'xianxia']
+  });
+  if (group.startsWith('G.')) return personaFit('weak', {
+    strong: ['war_military', 'historical'],
+    usable: ['court', 'adventure'],
+    fusion: ['science_fiction', 'dark_fantasy'],
+    weak: ['romance', 'fashion_idol', 'urban_life']
+  });
+  if (group.startsWith('H.')) return personaFit('weak', {
+    strong: ['science_fiction', 'cyberpunk', 'posthuman'],
+    usable: ['war_military', 'wasteland'],
+    fusion: ['biopunk', 'body_horror'],
+    weak: ['court', 'wuxia', 'romance']
+  });
+  if (group.startsWith('I.')) return personaFit('weak', {
+    strong: ['religious_ritual', 'war_military'],
+    usable: ['dark_fantasy', 'mythic_epic', 'court'],
+    fusion: ['xianxia', 'wuxia'],
+    weak: ['urban_life', 'cyberpunk', 'fashion_idol']
+  });
+  return personaFit('weak', {
+    strong: ['war_military'],
+    usable: ['wasteland', 'urban_life', 'noir_crime', 'surreal'],
+    fusion: ['dark_fantasy', 'science_fiction'],
+    weak: ['fashion_idol', 'romance', 'court']
+  });
+};
+
+const combatFitOverrides: Record<string, PersonaCategoryFit> = {
+  swat_breacher: personaFit('weak', {
+    strong: ['war_military', 'real_professional', 'institutional'],
+    usable: ['urban_life', 'noir_crime'],
+    fusion: ['cyberpunk', 'science_fiction'],
+    weak: ['romance', 'fashion_idol', 'xianxia']
+  }),
+  combat_medic_operator: personaFit('weak', {
+    strong: ['war_military', 'real_professional', 'medical'],
+    usable: ['institutional', 'adventure'],
+    fusion: ['cyberpunk', 'science_fiction'],
+    weak: ['romance', 'fashion_idol', 'xianxia']
+  }),
+  urban_undercover_agent: personaFit('weak', {
+    strong: ['noir_crime', 'urban_life', 'real_professional'],
+    usable: ['war_military', 'institutional'],
+    fusion: ['cyberpunk', 'science_fiction'],
+    weak: ['romance', 'fashion_idol', 'xianxia']
+  }),
+  tactical_drone_pilot: personaFit('weak', {
+    strong: ['war_military', 'real_professional'],
+    usable: ['science_fiction', 'cyberpunk', 'institutional'],
+    fusion: ['posthuman'],
+    weak: ['romance', 'fashion_idol', 'xianxia']
+  }),
+  kendo_dojo_master: personaFit('weak', {
+    strong: ['real_professional', 'workplace'],
+    usable: ['historical', 'war_military', 'wuxia', 'adventure'],
+    fusion: ['dark_fantasy'],
+    weak: ['urban_life', 'cyberpunk', 'fashion_idol']
+  }),
+  sword_polisher: personaFit('weak', {
+    strong: ['real_professional', 'workplace'],
+    usable: ['historical', 'court', 'wuxia'],
+    fusion: ['dark_fantasy', 'xianxia'],
+    weak: ['urban_life', 'cyberpunk', 'fashion_idol']
+  }),
+  cyber_samurai_retainer: personaFit('weak', {
+    strong: ['science_fiction', 'cyberpunk', 'posthuman'],
+    usable: ['war_military', 'wuxia', 'court'],
+    fusion: ['dark_fantasy', 'xianxia'],
+    weak: ['romance', 'fashion_idol']
+  }),
+  nightclub_bodyguard: personaFit('weak', {
+    strong: ['real_professional', 'workplace', 'urban_life'],
+    usable: ['noir_crime', 'adventure'],
+    fusion: ['cyberpunk', 'dark_fantasy'],
+    weak: ['court', 'xianxia', 'romance']
+  }),
+  getaway_driver: personaFit('weak', {
+    strong: ['noir_crime', 'urban_life'],
+    usable: ['real_professional', 'adventure'],
+    fusion: ['cyberpunk'],
+    weak: ['court', 'xianxia', 'romance']
+  }),
+  noir_femme_fatale_assassin: personaFit('weak', {
+    strong: ['noir_crime'],
+    usable: ['urban_life', 'fashion_idol', 'romance'],
+    fusion: ['dark_fantasy', 'surreal'],
+    weak: ['court', 'xianxia', 'wasteland']
+  }),
+  diplomatic_spy: personaFit('weak', {
+    strong: ['noir_crime', 'court'],
+    usable: ['historical', 'war_military', 'real_professional', 'workplace'],
+    fusion: ['dark_fantasy', 'xianxia'],
+    weak: ['fashion_idol', 'wasteland']
+  }),
+  cipher_clerk_spy: personaFit('weak', {
+    strong: ['real_professional', 'workplace', 'noir_crime'],
+    usable: ['war_military', 'historical', 'institutional'],
+    fusion: ['cyberpunk', 'science_fiction'],
+    weak: ['fashion_idol', 'wasteland', 'romance']
+  }),
+  resistance_messenger: personaFit('weak', {
+    strong: ['war_military', 'noir_crime'],
+    usable: ['historical', 'urban_life', 'adventure'],
+    fusion: ['wasteland', 'dark_fantasy'],
+    weak: ['fashion_idol', 'court']
+  }),
+  spy_school_handler: personaFit('weak', {
+    strong: ['real_professional', 'workplace', 'noir_crime'],
+    usable: ['war_military', 'institutional'],
+    fusion: ['cyberpunk', 'science_fiction'],
+    weak: ['fashion_idol', 'wasteland', 'romance']
+  }),
+  ritual_duelist: personaFit('weak', {
+    strong: ['adventure', 'war_military'],
+    usable: ['wuxia', 'historical', 'court', 'religious_ritual'],
+    fusion: ['dark_fantasy', 'xianxia'],
+    weak: ['romance', 'fashion_idol']
+  }),
+  imperial_officer: personaFit('weak', {
+    strong: ['war_military', 'historical'],
+    usable: ['court', 'institutional', 'real_professional'],
+    fusion: ['science_fiction', 'dark_fantasy'],
+    weak: ['romance', 'fashion_idol', 'urban_life']
+  }),
+  military_nurse_wartime: personaFit('weak', {
+    strong: ['war_military', 'medical', 'real_professional'],
+    usable: ['historical', 'institutional'],
+    fusion: ['science_fiction', 'dark_fantasy'],
+    weak: ['romance', 'fashion_idol', 'urban_life']
+  }),
+  space_empire_officer: personaFit('weak', {
+    strong: ['science_fiction', 'space_opera', 'war_military'],
+    usable: ['court', 'posthuman'],
+    fusion: ['cyberpunk', 'dark_fantasy'],
+    weak: ['romance', 'fashion_idol', 'urban_life']
+  }),
+  holy_knight: personaFit('weak', {
+    strong: ['religious_ritual', 'war_military', 'mythic_epic'],
+    usable: ['dark_fantasy', 'fantasy', 'court'],
+    fusion: ['xianxia', 'wuxia'],
+    weak: ['urban_life', 'cyberpunk', 'fashion_idol']
+  }),
+  witch_hunter: personaFit('weak', {
+    strong: ['religious_ritual', 'dark_fantasy'],
+    usable: ['war_military', 'historical', 'horror'],
+    fusion: ['wuxia', 'xianxia'],
+    weak: ['urban_life', 'cyberpunk', 'fashion_idol']
+  }),
+  battle_nun: personaFit('weak', {
+    strong: ['religious_ritual', 'war_military'],
+    usable: ['dark_fantasy', 'mythic_epic', 'court'],
+    fusion: ['xianxia', 'wuxia', 'science_fiction'],
+    weak: ['urban_life', 'cyberpunk', 'fashion_idol']
+  }),
+  disabled_veteran_mechanic: personaFit('weak', {
+    strong: ['war_military', 'real_professional', 'workplace'],
+    usable: ['wasteland', 'urban_life', 'medical'],
+    fusion: ['science_fiction', 'dark_fantasy'],
+    weak: ['fashion_idol', 'romance', 'court']
+  }),
+  war_correspondent_survivor: personaFit('weak', {
+    strong: ['real_professional', 'war_military'],
+    usable: ['urban_life', 'wasteland', 'noir_crime'],
+    fusion: ['dark_fantasy', 'science_fiction'],
+    weak: ['fashion_idol', 'romance', 'court']
+  }),
+  mine_clearance_worker: personaFit('weak', {
+    strong: ['real_professional', 'war_military'],
+    usable: ['wasteland', 'medical', 'ecological'],
+    fusion: ['science_fiction'],
+    weak: ['fashion_idol', 'romance', 'court']
+  }),
+  veteran_bartender: personaFit('weak', {
+    strong: ['urban_life', 'real_professional', 'workplace'],
+    usable: ['war_military', 'noir_crime', 'romance'],
+    fusion: ['wasteland', 'dark_fantasy'],
+    weak: ['fashion_idol', 'court']
+  })
+};
 
 const cp = (seed: PersonaSeed): PersonaTerm => {
   const ontologyLevel = seed.ontologyLevel ?? 1;
-  const eras = seed.eras ?? modernCombatEras;
+  const eras = cleanPersonaEras(seed.eras ?? modernCombatEras);
   const risk = seed.risk ?? (ontologyLevel >= 4 ? 'medium' : 'clean');
   const controls = Array.from(new Set([...baseControls, ...(seed.controls || [])]));
+  const eraMode = personaEraModeFor(eras, seed.eraMode);
   return {
     id: `cd_persona_combat_${seed.id}`,
     name: seed.name,
@@ -48,6 +276,7 @@ const cp = (seed: PersonaSeed): PersonaTerm => {
     personaStrength: ontologyLevel >= 4 ? 'strong' : ontologyLevel >= 2 ? 'medium' : 'light',
     isCompoundPersona: true,
     ontologyLevel,
+    eraMode,
     eras,
     risk,
     affects: controls,
@@ -56,7 +285,8 @@ const cp = (seed: PersonaSeed): PersonaTerm => {
     absorptionRule: seed.absorptionRule || `外来元素优先折译为“${seed.name}”的战斗功能、制服/装具、训练痕迹、危险处置姿态、道具流程或制度位置，不要直接堆成无关服装奇观或武器清单。`,
     absorptionRuleEn: seed.absorptionRuleEn || `Translate outside elements into the combat function, uniform/gear, training traces, danger-handling posture, prop workflow, or institutional position of "${seed.nameEn}"; do not stack them into unrelated costume spectacle or weapon lists.`,
     tags: Array.from(new Set(['persona', 'combat', 'armed', 'compound_persona', ...(seed.tags || [])])),
-    realityTags: ontologyLevel <= 1 ? ['realist_safe'] : ontologyLevel <= 3 ? ['stylized_boundary'] : ['nonreal_ontology'],
+    realityTags: seed.realityTags || personaRealityTagsFor(ontologyLevel, ['combat', 'armed']),
+    categoryFit: seed.categoryFit || combatFitOverrides[seed.id] || combatFit(seed.group),
     styleTags: Array.from(new Set(['combat', 'armed', ...(seed.styleTags || []), ...(seed.tags || [])])),
     timeTags: eras
   };
@@ -90,7 +320,7 @@ const seeds: PersonaSeed[] = [
   { id: 'onna_musha', name: '女武者', nameEn: 'Onna-Musha', group: 'C. 武士 / 家臣 / 东亚战斗礼法', groupEn: 'C. Samurai / Retainer / East Asian Martial Etiquette', def: '第一识别是礼法内部拥有战斗权限的女武者。造型入口：薙刀、束发、护甲裙摆、冷静面部和稳定手腕。母题：被家族、宅邸和战事共同要求的女性战斗身体。张力：她不能只显得美或勇，要显出长期训练和被礼法观看的克制。视觉证据：薙刀握距、裙甲层次、束发绳、微微下沉的站姿和没有求助感的眼。边界：避免女战士Cos或柔弱贵族小姐。', defEn: 'First read: an onna-musha with combat authority inside etiquette. Styling entry: naginata, tied hair, armor skirt, calm face, and stable wrists. Motif: a female combat body required by family, household, and war. Tension: she cannot simply look beautiful or brave; she must show training under etiquette’s gaze. Visual evidence: naginata grip spacing, skirt-armor layers, hair cord, slightly lowered stance, and eyes without appeal for help. Boundary: avoid female warrior cosplay or fragile noblewoman tropes.', eras: feudalEras, tags: ['onna_musha', 'naginata', 'samurai'] },
   { id: 'ninja_courier', name: '忍者信使', nameEn: 'Ninja Courier', group: 'C. 武士 / 家臣 / 东亚战斗礼法', groupEn: 'C. Samurai / Retainer / East Asian Martial Etiquette', def: '第一识别是把速度和保密当成身份的忍者信使。造型入口：深色轻装、卷轴、绑腿、短外套和贴地移动的低姿态。母题：信息比武器更危险。张力：他不是炫技刺客，身体价值在于能把消息完整带到。视觉证据：封蜡卷轴、防水布包、鞋底磨损、半蹲等待、避光侧脸和随时转向的脚尖。边界：避免全黑漫画忍者或杀戮主角。', defEn: 'First read: a ninja courier whose identity is speed and secrecy. Styling entry: dark light gear, scroll, leg wraps, short jacket, and low movement close to the ground. Motif: information more dangerous than weapons. Tension: he is not a flashy assassin; the body’s value is delivering the message intact. Visual evidence: wax-sealed scroll, waterproof pouch, worn soles, half-crouched waiting, face kept out of light, and toes ready to turn. Boundary: avoid all-black comic ninja or killing-protagonist framing.', eras: feudalEras, tags: ['ninja', 'courier', 'stealth'] },
   { id: 'ashigaru_foot_soldier', name: '足轻步兵', nameEn: 'Ashigaru Foot Soldier', group: 'C. 武士 / 家臣 / 东亚战斗礼法', groupEn: 'C. Samurai / Retainer / East Asian Martial Etiquette', def: '第一识别是战争底层被临时武装起来的足轻步兵。造型入口：简易甲、长枪、草鞋、疲惫站姿和被队列磨出来的身体。母题：大名战争里最低成本的军事身体。张力：他不是英雄，而是被制度推到前线的普通人。视觉证据：粗绳系甲、泥点、握枪手茧、歪斜头盔、跟随队列的视线和想保持体面的紧张。边界：避免威风武士或无脸杂兵。', defEn: 'First read: an ashigaru foot soldier, a lower-class body temporarily armed by war. Styling entry: simple armor, spear, straw sandals, tired stance, and a body shaped by formation. Motif: the lowest-cost military body in daimyo warfare. Tension: he is not a hero but an ordinary person pushed forward by institution. Visual evidence: rough armor cords, mud spots, spear-hand calluses, tilted helmet, eyes following the line, and tense effort to keep dignity. Boundary: avoid imposing samurai or faceless extras.', eras: feudalEras, tags: ['ashigaru', 'foot_soldier', 'spear'] },
-  { id: 'kendo_dojo_master', name: '剑道馆师范', nameEn: 'Kendo Dojo Master', group: 'C. 武士 / 家臣 / 东亚战斗礼法', groupEn: 'C. Samurai / Retainer / East Asian Martial Etiquette', def: '第一识别是把武士礼法现代化为道场训练的剑道馆师范。造型入口：剑道服、竹刀、护具、跪坐姿态和安静到严厉的表情。母题：战斗被转化成教育、重复和礼节。张力：他不需要实战血气，压迫力来自规矩和身体控制。视觉证据：竹刀握痕、护具磨损、道场木地板、坐姿轴线、纠正学生时极小的手势。边界：避免古代武士或体育教练平面化。', defEn: 'First read: a kendo dojo master modernizing samurai etiquette into training. Styling entry: kendo uniform, bamboo sword, armor, seiza posture, and a quiet severe expression. Motif: combat transformed into education, repetition, and manners. Tension: he needs no battlefield heat; pressure comes from rules and body control. Visual evidence: shinai grip wear, marked armor, dojo wood floor, seated axis, and tiny hand gestures correcting students. Boundary: avoid ancient samurai or flat sports-coach treatment.', eras: ['modern', 'contemporary', 'timeless'], tags: ['kendo', 'dojo', 'master'] },
+  { id: 'kendo_dojo_master', name: '剑道馆师范', nameEn: 'Kendo Dojo Master', group: 'C. 武士 / 家臣 / 东亚战斗礼法', groupEn: 'C. Samurai / Retainer / East Asian Martial Etiquette', def: '第一识别是把武士礼法现代化为道场训练的剑道馆师范。造型入口：剑道服、竹刀、护具、跪坐姿态和安静到严厉的表情。母题：战斗被转化成教育、重复和礼节。张力：他不需要实战血气，压迫力来自规矩和身体控制。视觉证据：竹刀握痕、护具磨损、道场木地板、坐姿轴线、纠正学生时极小的手势。边界：避免古代武士或体育教练平面化。', defEn: 'First read: a kendo dojo master modernizing samurai etiquette into training. Styling entry: kendo uniform, bamboo sword, armor, seiza posture, and a quiet severe expression. Motif: combat transformed into education, repetition, and manners. Tension: he needs no battlefield heat; pressure comes from rules and body control. Visual evidence: shinai grip wear, marked armor, dojo wood floor, seated axis, and tiny hand gestures correcting students. Boundary: avoid ancient samurai or flat sports-coach treatment.', eras: ['modern', 'contemporary'], tags: ['kendo', 'dojo', 'master'] },
   { id: 'yakuza_swordsman', name: '极道刀客', nameEn: 'Yakuza Swordsman', group: 'C. 武士 / 家臣 / 东亚战斗礼法', groupEn: 'C. Samurai / Retainer / East Asian Martial Etiquette', def: '第一识别是现代黑帮身体里残留古典武士姿态的极道刀客。造型入口：西装、纹身边缘、短刀、夜街和过分礼貌的站距。母题：义理被城市暴力重新包装。张力：他不是古代武士复活，而是在现代地下秩序里表演旧式尊严。视觉证据：衬衫下纹身露边、刀袋、夜店后门、整理袖口、低声道歉前的危险沉默。边界：避免写成普通黑帮打手或赛博武士。', defEn: 'First read: a yakuza swordsman carrying classical samurai residue inside a modern gang body. Styling entry: suit, tattoo edges, short blade, night street, and excessively polite spacing. Motif: obligation repackaged by urban violence. Tension: he is not an ancient samurai reborn, but performs old-style dignity inside modern underground order. Visual evidence: tattoo edges under shirt, blade pouch, nightclub back door, adjusted cuffs, and dangerous silence before a low apology. Boundary: avoid generic gang enforcer or cyber samurai treatment.', eras: industrialModernEras, risk: 'medium', tags: ['yakuza', 'swordsman', 'gang'] },
   { id: 'imperial_palace_guard', name: '皇宫近卫', nameEn: 'Imperial Palace Guard', group: 'C. 武士 / 家臣 / 东亚战斗礼法', groupEn: 'C. Samurai / Retainer / East Asian Martial Etiquette', def: '第一识别是宫门礼制和暴力职责重合的皇宫近卫。造型入口：仪仗服、长柄武器、宫门站姿、白布细节和被规定好的距离。母题：把危险摆成秩序景观。张力：他必须像装饰一样静止，却随时能转为护卫力量。视觉证据：长柄武器垂直线、衣摆对称、宫门阴影、白手套、抬眼瞬间和不离岗位的脚。边界：避免普通仪仗队或幻想骑士。', defEn: 'First read: an imperial palace guard where court ceremony overlaps violent duty. Styling entry: ceremonial guard dress, polearm, palace-gate stance, white-cloth details, and prescribed distance. Motif: danger arranged as an order spectacle. Tension: he must stand like decoration while remaining able to become guard force instantly. Visual evidence: vertical polearm line, symmetrical hem, gate shadow, white gloves, sudden eye lift, and feet never leaving the post. Boundary: avoid generic parade guard or fantasy knight treatment.', eras: feudalEras, tags: ['palace_guard', 'imperial', 'ritual'] },
   { id: 'sword_polisher', name: '刀剑研磨师', nameEn: 'Sword Polisher', group: 'C. 武士 / 家臣 / 东亚战斗礼法', groupEn: 'C. Samurai / Retainer / East Asian Martial Etiquette', def: '第一识别是通过手艺维护杀器尊严的刀剑研磨师。造型入口：白布、磨石、刀身反光、安静手部和不沾血的职业距离。母题：暴力的维护者而非执行者。张力：他不战斗，却比任何人都清楚刀的身份和历史。视觉证据：布面油痕、磨石水光、刀刃映脸、低头检查角度、干净袖口和过分慎重的呼吸。边界：避免写成铁匠或剑客。', defEn: 'First read: a sword polisher maintaining the dignity of killing tools through craft. Styling entry: white cloth, whetstone, blade reflection, quiet hands, and professional distance from blood. Motif: maintainer of violence rather than executor. Tension: he does not fight, yet knows the blade’s identity and history more than anyone. Visual evidence: oil marks on cloth, wet stone shine, face reflected in blade, lowered angle-checking gaze, clean cuffs, and overly careful breath. Boundary: avoid blacksmith or swordsman treatment.', eras: feudalEras, tags: ['sword_polisher', 'craft', 'blade'] },
@@ -110,12 +340,12 @@ const seeds: PersonaSeed[] = [
   { id: 'court_shadow_agent', name: '宫廷密探', nameEn: 'Court Shadow Agent', group: 'E. 宫廷 / 密探 / 谍报', groupEn: 'E. Court / Spy / Intelligence', def: '第一识别是把危险藏在礼制衣层里的宫廷密探。造型入口：礼制外观、袖中暗器、腰牌、窄门廊等待和克制眼神。母题：暴力通过信息和礼仪发生。张力：他越像普通侍从，越要让袖口、视线和站位透露任务。视觉证据：暗袋、密信折痕、腰牌反光、低声汇报、半步退后的姿态和不直接看人的眼。边界：避免大场面刺杀或普通宫廷美人。', defEn: 'First read: a court shadow agent hiding danger inside ritual dress layers. Styling entry: ceremonial appearance, sleeve weapons, waist token, narrow-corridor waiting, and restrained eyes. Motif: violence happening through information and etiquette. Tension: the more he resembles an attendant, the more cuffs, gaze, and placement must reveal the mission. Visual evidence: hidden pocket, folded secret letter, waist-token shine, low report, half-step backward posture, and eyes that do not look directly. Boundary: avoid large assassination scenes or generic court beauty.', eras: feudalEras, risk: 'medium', tags: ['court', 'spy', 'shadow'] },
   { id: 'imperial_secret_police', name: '帝国秘密警察', nameEn: 'Imperial Secret Police', group: 'E. 宫廷 / 密探 / 谍报', groupEn: 'E. Court / Spy / Intelligence', def: '第一识别是替君主观看所有人的帝国秘密警察。造型入口：深色官服、令牌、审讯记录、窄袖和文件压出的冷脸。母题：国家权力进入私人恐惧。张力：他不需要公开暴力，记录、传唤和沉默已经足够压迫。视觉证据：封口档案、令牌边缘、墨迹手指、门外等待、问话时停顿过长的眼。边界：避免普通侦探或大反派夸张化。', defEn: 'First read: imperial secret police watching everyone on behalf of the ruler. Styling entry: dark official uniform, token, interrogation records, narrow sleeves, and a cold face pressed by files. Motif: state power entering private fear. Tension: he needs no open violence; records, summons, and silence already pressure enough. Visual evidence: sealed files, token edge, ink-stained fingers, waiting outside doors, and eyes pausing too long during questions. Boundary: avoid generic detective or exaggerated villain treatment.', eras: feudalEras, risk: 'medium', tags: ['secret_police', 'imperial', 'spy'] },
   { id: 'royal_poisoner', name: '王室毒师', nameEn: 'Royal Poisoner', group: 'E. 宫廷 / 密探 / 谍报', groupEn: 'E. Court / Spy / Intelligence', def: '第一识别是把杀意放进宴会流程的王室毒师。造型入口：小药瓶、细手套、礼服袖口、低声谈话和永远干净的指尖。母题：宫廷亲密关系里的隐形死亡。张力：他必须像医师、侍酒人或顾问一样可信。视觉证据：瓶塞蜡印、银勺、酒杯边缘、袖口内袋、观察吞咽的眼和不留下痕迹的手。边界：避免毒雾魔法或外露怪异毒体。', defEn: 'First read: a royal poisoner placing murder inside banquet workflow. Styling entry: tiny vials, fine gloves, formal cuffs, low conversation, and fingertips always clean. Motif: invisible death inside court intimacy. Tension: he must appear as credible as a physician, wine servant, or advisor. Visual evidence: waxed vial stoppers, silver spoon, goblet edge, inner cuff pocket, eyes watching swallowing, and hands leaving no trace. Boundary: avoid poison-cloud magic or exposed monstrous toxic bodies.', eras: feudalEras, risk: 'medium', tags: ['poisoner', 'royal', 'court'] },
-  { id: 'diplomatic_spy', name: '外交间谍', nameEn: 'Diplomatic Spy', group: 'E. 宫廷 / 密探 / 谍报', groupEn: 'E. Court / Spy / Intelligence', def: '第一识别是把外语、礼服和微笑变成情报工具的外交间谍。造型入口：礼服、密信、翻译手册、酒会胸牌和不露痕迹的社交站位。母题：宴会里的国家边界移动。张力：她越优雅，越要显出正在筛选信息、记住人名和隐藏立场。视觉证据：折叠便条、手套捏杯脚、耳语距离、双语文件、礼貌微笑下不笑的眼。边界：避免普通外交官或艳谍模板。', defEn: 'First read: a diplomatic spy turning languages, formalwear, and smile into intelligence tools. Styling entry: formalwear, secret letters, translation notes, reception badge, and social placement without traces. Motif: national borders moving inside a banquet. Tension: the more elegant she is, the more she must read as filtering information, remembering names, and hiding position. Visual evidence: folded note, gloved hand on glass stem, whisper distance, bilingual papers, and eyes not smiling under a polite smile. Boundary: avoid generic diplomat or seductive-spy template.', eras: ['early_modern', 'industrial', 'modern', 'timeless'], risk: 'medium', tags: ['diplomatic', 'spy', 'intelligence'] },
+  { id: 'diplomatic_spy', name: '外交间谍', nameEn: 'Diplomatic Spy', group: 'E. 宫廷 / 密探 / 谍报', groupEn: 'E. Court / Spy / Intelligence', def: '第一识别是把外语、礼服和微笑变成情报工具的外交间谍。造型入口：礼服、密信、翻译手册、酒会胸牌和不露痕迹的社交站位。母题：宴会里的国家边界移动。张力：她越优雅，越要显出正在筛选信息、记住人名和隐藏立场。视觉证据：折叠便条、手套捏杯脚、耳语距离、双语文件、礼貌微笑下不笑的眼。边界：避免普通外交官或艳谍模板。', defEn: 'First read: a diplomatic spy turning languages, formalwear, and smile into intelligence tools. Styling entry: formalwear, secret letters, translation notes, reception badge, and social placement without traces. Motif: national borders moving inside a banquet. Tension: the more elegant she is, the more she must read as filtering information, remembering names, and hiding position. Visual evidence: folded note, gloved hand on glass stem, whisper distance, bilingual papers, and eyes not smiling under a polite smile. Boundary: avoid generic diplomat or seductive-spy template.', eras: ['early_modern', 'industrial', 'modern'], risk: 'medium', tags: ['diplomatic', 'spy', 'intelligence'] },
   { id: 'palace_eunuch_informant', name: '宫廷内侍情报人', nameEn: 'Palace Eunuch Informant', group: 'E. 宫廷 / 密探 / 谍报', groupEn: 'E. Court / Spy / Intelligence', def: '第一识别是因低姿态而能听见所有秘密的宫廷内侍情报人。造型入口：内侍服、拂尘、低头姿态、软底鞋和熟悉宫内路线的脚步。母题：被忽视的位置变成情报权力。张力：他看似无害服务者，却掌握流言、寝宫动线和谁害怕谁。视觉证据：拂尘柄、袖中纸条、回廊阴影、半弯背、只在无人时抬起的眼。边界：避免喜剧化太监形象或普通仆人。', defEn: 'First read: a palace eunuch informant who hears everything because of a lowered posture. Styling entry: attendant dress, whisk, lowered body, soft shoes, and steps familiar with palace routes. Motif: an ignored position becoming intelligence power. Tension: he appears harmless, yet knows gossip, chamber routes, and who fears whom. Visual evidence: whisk handle, paper hidden in sleeve, corridor shadow, half-bent back, and eyes lifting only when nobody watches. Boundary: avoid comic eunuch stereotypes or generic servant treatment.', eras: feudalEras, risk: 'medium', tags: ['palace', 'informant', 'court'] },
-  { id: 'cipher_clerk_spy', name: '密码文书间谍', nameEn: 'Cipher-Clerk Spy', group: 'E. 宫廷 / 密探 / 谍报', groupEn: 'E. Court / Spy / Intelligence', def: '第一识别是把文字前线化的密码文书间谍。造型入口：密电纸、眼镜、灰色制服、文件夹和长时间坐姿。母题：战争藏在表格、代码和抄写错误里。张力：他看似文弱，真正危险是能让一句话抵达或消失。视觉证据：打字机或终端、铅笔痕、烧毁纸角、疲惫眼、袖口墨迹和听见门响时停住的手。边界：避免战场士兵或普通办公室职员。', defEn: 'First read: a cipher-clerk spy turning text into a front line. Styling entry: cipher papers, glasses, grey uniform, folders, and long seated posture. Motif: war hidden in forms, code, and transcription errors. Tension: he appears frail, but danger lies in making a sentence arrive or vanish. Visual evidence: typewriter or terminal, pencil marks, burned paper edge, tired eyes, inked cuffs, and hands freezing when the door opens. Boundary: avoid battlefield soldier or generic office clerk treatment.', eras: ['industrial', 'modern', 'contemporary', 'timeless'], tags: ['cipher', 'clerk', 'spy'] },
-  { id: 'resistance_messenger', name: '抵抗组织信使', nameEn: 'Resistance Messenger', group: 'E. 宫廷 / 密探 / 谍报', groupEn: 'E. Court / Spy / Intelligence', def: '第一识别是把日常路线变成秘密通道的抵抗组织信使。造型入口：旧外套、藏信、快速步伐、紧张眼神和看似普通的布包。母题：城市生活表面下的反抗物流。张力：她不是战士，却可能因为一张纸改变整条街的命运。视觉证据：鞋底磨损、缝进衣里的纸条、路口停顿、假装买东西的手和听见巡逻声时变硬的脸。边界：避免英雄冲锋或完整谍战剧情。', defEn: 'First read: a resistance messenger turning daily routes into secret passages. Styling entry: old coat, hidden letter, fast steps, tense gaze, and an ordinary cloth bag. Motif: resistance logistics beneath urban daily life. Tension: she is not a fighter, yet one paper may change the fate of a street. Visual evidence: worn soles, paper sewn into clothing, pause at intersections, hand pretending to shop, and face hardening at patrol sounds. Boundary: avoid heroic charges or full spy-thriller plotting.', eras: ['industrial', 'modern', 'contemporary', 'timeless'], risk: 'medium', tags: ['resistance', 'messenger', 'spy'] },
+  { id: 'cipher_clerk_spy', name: '密码文书间谍', nameEn: 'Cipher-Clerk Spy', group: 'E. 宫廷 / 密探 / 谍报', groupEn: 'E. Court / Spy / Intelligence', def: '第一识别是把文字前线化的密码文书间谍。造型入口：密电纸、眼镜、灰色制服、文件夹和长时间坐姿。母题：战争藏在表格、代码和抄写错误里。张力：他看似文弱，真正危险是能让一句话抵达或消失。视觉证据：打字机或终端、铅笔痕、烧毁纸角、疲惫眼、袖口墨迹和听见门响时停住的手。边界：避免战场士兵或普通办公室职员。', defEn: 'First read: a cipher-clerk spy turning text into a front line. Styling entry: cipher papers, glasses, grey uniform, folders, and long seated posture. Motif: war hidden in forms, code, and transcription errors. Tension: he appears frail, but danger lies in making a sentence arrive or vanish. Visual evidence: typewriter or terminal, pencil marks, burned paper edge, tired eyes, inked cuffs, and hands freezing when the door opens. Boundary: avoid battlefield soldier or generic office clerk treatment.', eras: ['industrial', 'modern', 'contemporary'], tags: ['cipher', 'clerk', 'spy'] },
+  { id: 'resistance_messenger', name: '抵抗组织信使', nameEn: 'Resistance Messenger', group: 'E. 宫廷 / 密探 / 谍报', groupEn: 'E. Court / Spy / Intelligence', def: '第一识别是把日常路线变成秘密通道的抵抗组织信使。造型入口：旧外套、藏信、快速步伐、紧张眼神和看似普通的布包。母题：城市生活表面下的反抗物流。张力：她不是战士，却可能因为一张纸改变整条街的命运。视觉证据：鞋底磨损、缝进衣里的纸条、路口停顿、假装买东西的手和听见巡逻声时变硬的脸。边界：避免英雄冲锋或完整谍战剧情。', defEn: 'First read: a resistance messenger turning daily routes into secret passages. Styling entry: old coat, hidden letter, fast steps, tense gaze, and an ordinary cloth bag. Motif: resistance logistics beneath urban daily life. Tension: she is not a fighter, yet one paper may change the fate of a street. Visual evidence: worn soles, paper sewn into clothing, pause at intersections, hand pretending to shop, and face hardening at patrol sounds. Boundary: avoid heroic charges or full spy-thriller plotting.', eras: ['industrial', 'modern', 'contemporary'], risk: 'medium', tags: ['resistance', 'messenger', 'spy'] },
   { id: 'courtesan_informant', name: '情报花魁', nameEn: 'Courtesan Informant', group: 'E. 宫廷 / 密探 / 谍报', groupEn: 'E. Court / Spy / Intelligence', def: '第一识别是在欲望场里收集秘密的情报花魁。造型入口：华丽衣饰、发簪、酒杯、微笑和被训练过的倾听姿态。母题：美、服务和信息交换重叠。张力：她被观看，却不能只是被动装饰；真正主动权在记住谁说了什么。视觉证据：发簪暗格、酒杯边缘、袖口香气、半垂眼、转移话题的笑和独自整理情报的手。边界：避免色情化或普通艺伎/歌姬。', defEn: 'First read: a courtesan informant collecting secrets inside a field of desire. Styling entry: ornate dress, hairpin, wine cup, smile, and trained listening posture. Motif: beauty, service, and information exchange overlapping. Tension: she is watched, but cannot be passive decoration; control lies in remembering who said what. Visual evidence: hidden hairpin compartment, cup edge, scented cuff, lowered eyes, a smile changing the topic, and hands arranging information alone. Boundary: avoid eroticization or generic geisha/singer treatment.', eras: feudalEras, risk: 'medium', tags: ['courtesan', 'informant', 'court'] },
-  { id: 'spy_school_handler', name: '间谍学校教官', nameEn: 'Spy-School Handler', group: 'E. 宫廷 / 密探 / 谍报', groupEn: 'E. Court / Spy / Intelligence', def: '第一识别是把人格训练成工具的间谍学校教官。造型入口：黑板、训练档案、冷静眼神、灰色套装和不提高音量的控制感。母题：伪装技术的制度化教育。张力：他不像战斗教官，压力来自拆解学员表情、记忆和道德边界。视觉证据：学员档案、假身份卡、观察镜、粉笔字、停在学员肩后的手和像评分一样看人的眼。边界：避免普通老师或动作片教官。', defEn: 'First read: a spy-school handler training personality into a tool. Styling entry: blackboard, training files, calm gaze, grey suit, and control without raising the voice. Motif: institutional education of disguise technique. Tension: he is not a combat instructor; pressure comes from dismantling students’ expressions, memory, and moral limits. Visual evidence: trainee files, false identity cards, observation glass, chalk writing, hand paused behind a student’s shoulder, and eyes that grade people. Boundary: avoid generic teacher or action-movie instructor.', eras: ['modern', 'contemporary', 'near_future', 'timeless'], risk: 'medium', tags: ['spy_school', 'handler', 'training'] },
+  { id: 'spy_school_handler', name: '间谍学校教官', nameEn: 'Spy-School Handler', group: 'E. 宫廷 / 密探 / 谍报', groupEn: 'E. Court / Spy / Intelligence', def: '第一识别是把人格训练成工具的间谍学校教官。造型入口：黑板、训练档案、冷静眼神、灰色套装和不提高音量的控制感。母题：伪装技术的制度化教育。张力：他不像战斗教官，压力来自拆解学员表情、记忆和道德边界。视觉证据：学员档案、假身份卡、观察镜、粉笔字、停在学员肩后的手和像评分一样看人的眼。边界：避免普通老师或动作片教官。', defEn: 'First read: a spy-school handler training personality into a tool. Styling entry: blackboard, training files, calm gaze, grey suit, and control without raising the voice. Motif: institutional education of disguise technique. Tension: he is not a combat instructor; pressure comes from dismantling students’ expressions, memory, and moral limits. Visual evidence: trainee files, false identity cards, observation glass, chalk writing, hand paused behind a student’s shoulder, and eyes that grade people. Boundary: avoid generic teacher or action-movie instructor.', eras: ['modern', 'contemporary', 'near_future'], risk: 'medium', tags: ['spy_school', 'handler', 'training'] },
   { id: 'future_memory_agent', name: '未来记忆特工', nameEn: 'Future Memory Agent', group: 'E. 宫廷 / 密探 / 谍报', groupEn: 'E. Court / Spy / Intelligence', def: '第一识别是把身份本身做成伪装材料的未来记忆特工。造型入口：神经接口、空白证件、冷光记录器和像刚忘记什么的平静脸。母题：记忆成为谍报战场。张力：他不是单纯黑客，危险在于连自己也可能是任务的一部分。视觉证据：颈后端口、无名证卡、记忆备份芯片、空白笔记、凝滞眼神和触碰太阳穴的习惯。边界：避免机器人化或普通赛博特工。', defEn: 'First read: a future memory agent using identity itself as disguise material. Styling entry: neural interface, blank ID, cold recording device, and a calm face as if something was just forgotten. Motif: memory becoming the battlefield of intelligence. Tension: he is not a simple hacker; danger lies in the possibility that even he is part of the mission. Visual evidence: neck port, nameless ID card, memory-backup chip, blank notebook, suspended gaze, and habit of touching the temple. Boundary: avoid robotization or generic cyber spy treatment.', ontologyLevel: 4, eras: futureEras, risk: 'medium', tags: ['memory_agent', 'future', 'spy'] },
 
   { id: 'underground_boxer', name: '地下拳手', nameEn: 'Underground Boxer', group: 'F. 地下格斗 / 身体暴力', groupEn: 'F. Underground Fighting / Bodily Violence', def: '第一识别是在简陋场地里靠身体吃饭的地下拳手。造型入口：绷带、淤青、汗水、旧训练裤和贴身压迫的站距。母题：规则边缘里的肉身技术。张力：他不是健身模特，身体必须有使用痕迹和赛前经济压力。视觉证据：裂开的护齿、擂台尘、肩颈汗痕、低重心、眼角肿胀和盯着对手胸口的眼。边界：避免超能力斗法或性感搏击摆拍。', defEn: 'First read: an underground boxer whose body earns money in a crude venue. Styling entry: wraps, bruises, sweat, old training shorts, and close-pressure spacing. Motif: bodily technique at the edge of rules. Tension: he is not a fitness model; the body must show use marks and pre-fight economic pressure. Visual evidence: cracked mouthguard, ring dust, sweat at shoulders and neck, low center of gravity, swollen eye corner, and eyes fixed on the opponent’s chest. Boundary: avoid superpower duels or sexy fight posing.', eras: industrialModernEras, risk: 'medium', tags: ['underground', 'boxer', 'fight'] },
@@ -127,7 +357,7 @@ const seeds: PersonaSeed[] = [
   { id: 'fight_club_referee', name: '地下拳赛裁判', nameEn: 'Fight-Club Referee', group: 'F. 地下格斗 / 身体暴力', groupEn: 'F. Underground Fighting / Bodily Violence', def: '第一识别是让非法比赛仍然有规则可循的地下拳赛裁判。造型入口：黑衬衫、哨子、现金赌注、粗暴手势和能让两边都停下的嗓音。母题：混乱暴力里的临时秩序。张力：他不是公正象征，而是保证比赛能继续赚钱的人。视觉证据：手里现金、腕表、汗湿领口、推开选手的手掌、围观者让开的空间和判断是否叫停的眼。边界：避免正规体育裁判或黑帮老大。', defEn: 'First read: a fight-club referee making illegal matches still follow rules. Styling entry: black shirt, whistle, cash bets, rough gestures, and a voice that can stop both sides. Motif: temporary order inside chaotic violence. Tension: he is not a symbol of justice but the person ensuring the match can continue making money. Visual evidence: cash in hand, watch, sweaty collar, palm pushing fighters apart, crowd space opening for him, and eyes deciding whether to stop it. Boundary: avoid official sports referee or gang boss treatment.', risk: 'medium', tags: ['fight_club', 'referee', 'underground'] },
   { id: 'pro_wrestling_heel', name: '摔角反派选手', nameEn: 'Pro-Wrestling Heel', group: 'F. 地下格斗 / 身体暴力', groupEn: 'F. Underground Fighting / Bodily Violence', def: '第一识别是把暴力演成观众情绪机器的摔角反派选手。造型入口：夸张披风、油亮身体、嘲讽表情、麦克风和故意过大的动作。母题：被编排的恶意。张力：他必须让人讨厌，但讨厌本身是一种职业表演。视觉证据：夸张入场服、护腕、指向观众的手、挑衅笑、假装失控的摔打姿态和等待嘘声的停顿。边界：避免真实恶棍或普通格斗选手。', defEn: 'First read: a pro-wrestling heel turning violence into an audience-emotion machine. Styling entry: exaggerated robe, oiled body, mocking expression, microphone, and deliberately oversized motion. Motif: choreographed malice. Tension: he must be hated, but being hated is his professional performance. Visual evidence: excessive entrance gear, wrist tape, hand pointing at the crowd, provocative grin, staged out-of-control slam posture, and pause waiting for boos. Boundary: avoid real villain or ordinary fighter treatment.', ontologyLevel: 2, risk: 'medium', tags: ['wrestling', 'heel', 'performance'] },
   { id: 'cybernetic_prizefighter', name: '义体拳赛选手', nameEn: 'Cybernetic Prizefighter', group: 'F. 地下格斗 / 身体暴力', groupEn: 'F. Underground Fighting / Bodily Violence', def: '第一识别是身体被竞技资本改造成机器的义体拳赛选手。造型入口：机械义肢、皮肤接口、竞技短裤、赛事编号和维修痕。母题：肉身技术与硬件升级的交易。张力：未来感必须落在比赛规则和身体代价上，不是单纯赛博酷装。视觉证据：关节液压声、接口红痕、赞助贴片、拳套改造、赛前校准动作和看向自己手臂的陌生眼神。边界：避免完整机器人或机甲战士。', defEn: 'First read: a cybernetic prizefighter whose body is remade by competition capital. Styling entry: prosthetic limbs, skin interfaces, fight shorts, event serial, and maintenance marks. Motif: a transaction between bodily technique and hardware upgrade. Tension: futurism must land in contest rules and body cost, not simply cyber coolwear. Visual evidence: hydraulic joints, red interface marks, sponsor patches, modified gloves, pre-fight calibration, and an estranged gaze toward his own arm. Boundary: avoid full robot or mecha warrior treatment.', ontologyLevel: 4, eras: futureEras, risk: 'medium', tags: ['cybernetic', 'prizefighter', 'future'] },
-  { id: 'ritual_duelist', name: '仪式决斗者', nameEn: 'Ritual Duelist', group: 'F. 地下格斗 / 身体暴力', groupEn: 'F. Underground Fighting / Bodily Violence', def: '第一识别是把个人冲突交给公开仪式处理的仪式决斗者。造型入口：白色绷带、圆形场地、刀或拳、沉默观众和被规定好的起手姿。母题：战斗被礼法化后的身体。张力：他不是随意打架，每一个动作都要像已经被传统批准。视觉证据：绷带结、场地边线、见证人距离、低头致意、手停在武器前和开战前的寂静。边界：避免乱斗、竞技赛事或魔法仪式喧宾夺主。', defEn: 'First read: a ritual duelist handing personal conflict to public ceremony. Styling entry: white wraps, circular arena, blade or fists, silent witnesses, and a prescribed starting posture. Motif: combat after being formalized by etiquette. Tension: he is not simply fighting; every movement should feel already authorized by tradition. Visual evidence: wrap knots, arena boundary line, witness distance, lowered greeting, hand paused before weapon, and silence before opening. Boundary: avoid brawls, sports events, or magic ritual overpowering the duel.', ontologyLevel: 2, eras: ['feudal', 'early_modern', 'modern', 'timeless'], risk: 'medium', tags: ['ritual', 'duelist', 'fight'] },
+  { id: 'ritual_duelist', name: '仪式决斗者', nameEn: 'Ritual Duelist', group: 'F. 地下格斗 / 身体暴力', groupEn: 'F. Underground Fighting / Bodily Violence', def: '第一识别是把个人冲突交给公开仪式处理的仪式决斗者。造型入口：白色绷带、圆形场地、刀或拳、沉默观众和被规定好的起手姿。母题：战斗被礼法化后的身体。张力：他不是随意打架，每一个动作都要像已经被传统批准。视觉证据：绷带结、场地边线、见证人距离、低头致意、手停在武器前和开战前的寂静。边界：避免乱斗、竞技赛事或魔法仪式喧宾夺主。', defEn: 'First read: a ritual duelist handing personal conflict to public ceremony. Styling entry: white wraps, circular arena, blade or fists, silent witnesses, and a prescribed starting posture. Motif: combat after being formalized by etiquette. Tension: he is not simply fighting; every movement should feel already authorized by tradition. Visual evidence: wrap knots, arena boundary line, witness distance, lowered greeting, hand paused before weapon, and silence before opening. Boundary: avoid brawls, sports events, or magic ritual overpowering the duel.', ontologyLevel: 2, eras: ['feudal', 'early_modern', 'modern'], risk: 'medium', tags: ['ritual', 'duelist', 'fight'] },
 
   { id: 'imperial_officer', name: '帝国军官', nameEn: 'Imperial Officer', group: 'G. 军事帝国 / 制服等级', groupEn: 'G. Military Empire / Uniform Rank', def: '第一识别是把国家暴力穿成制服秩序的帝国军官。造型入口：硬肩制服、等级徽章、手套、挺直站姿和冷硬下颌。母题：命令链里的可见权力。张力：个人魅力必须让位于等级、纪律和国家图像。视觉证据：肩章、勋带盒、腰带线、白手套、文件夹和看人时先确认军阶的眼。边界：避免普通军装Cos或霸总军官。', defEn: 'First read: an imperial officer wearing state violence as uniform order. Styling entry: hard-shoulder uniform, rank insignia, gloves, upright stance, and hard jaw. Motif: visible power inside the chain of command. Tension: personal charisma must yield to rank, discipline, and state image. Visual evidence: epaulettes, medal case, belt line, white gloves, folder, and eyes checking rank before people. Boundary: avoid generic military cosplay or CEO-soldier tropes.', eras: industrialModernEras, risk: 'medium', tags: ['imperial', 'officer', 'military'] },
   { id: 'military_academy_cadet', name: '军校生', nameEn: 'Military Academy Cadet', group: 'G. 军事帝国 / 制服等级', groupEn: 'G. Military Empire / Uniform Rank', def: '第一识别是即将被制度完全塑形的军校生。造型入口：新制服、书包或佩剑、紧张端正姿态和还没磨掉的年轻脸。母题：纪律正在进入身体。张力：他想显得成熟，但肩背、手指和眼神仍透露训练初期的不安。视觉证据：过新纽扣、整齐床铺感、军校徽章、攥紧背带、站姿过直和听见口令时迅速收住的表情。边界：避免普通学生或成熟军官。', defEn: 'First read: a military academy cadet about to be fully shaped by institution. Styling entry: new uniform, book bag or saber, tense upright posture, and a young face not yet worn down. Motif: discipline entering the body. Tension: he wants to look mature, but shoulders, fingers, and eyes still reveal early-training unease. Visual evidence: too-new buttons, barracks-neatness, academy badge, clenched strap, overstraight stance, and expression snapping into place at commands. Boundary: avoid ordinary student or mature officer treatment.', tags: ['cadet', 'academy', 'military'] },
@@ -154,8 +384,8 @@ const seeds: PersonaSeed[] = [
   { id: 'holy_knight', name: '圣骑士', nameEn: 'Holy Knight', group: 'I. 圣骑士 / 神圣武装 / 誓言', groupEn: 'I. Holy Knight / Sacred Arms / Vow', def: '第一识别是以誓言约束武力的圣骑士。造型入口：圣徽、重甲、仪式武器、披风和像在审判自己一样的站姿。母题：暴力被信仰制度合法化。张力：他不能只是发光战士，必须让道德压力、戒律和保护职责同时压在身体上。视觉证据：磨旧圣徽、祈祷痕、重甲绑带、剑柄封印、低头前的停顿和不轻易攻击的手。边界：避免泛光明骑士或西幻特效堆叠。', defEn: 'First read: a holy knight whose force is bound by vows. Styling entry: sacred emblem, heavy armor, ritual weapon, cloak, and a stance as if judging himself. Motif: violence legitimized by faith institution. Tension: he cannot be merely a glowing warrior; moral pressure, discipline, and protection duty must press on the body together. Visual evidence: worn holy mark, prayer traces, heavy armor straps, sealed sword grip, pause before lowering the head, and hands not attacking easily. Boundary: avoid generic shining knight or fantasy VFX piles.', ontologyLevel: 2, eras: feudalEras, tags: ['holy_knight', 'paladin', 'sacred'] },
   { id: 'temple_guardian', name: '神殿守卫', nameEn: 'Temple Guardian', group: 'I. 圣骑士 / 神圣武装 / 誓言', groupEn: 'I. Holy Knight / Sacred Arms / Vow', def: '第一识别是守住神圣禁区边界的神殿守卫。造型入口：神殿甲、长矛、圣纹、静止站姿和像石柱一样的身体。母题：宗教空间用武装维持不可进入性。张力：他不需要主动进攻，压力来自“你不能再往前”的存在感。视觉证据：长矛垂直线、门槛阴影、圣纹护甲、双脚固定、面无表情和看守入口的视线。边界：避免普通宫殿侍卫或怪物守门人。', defEn: 'First read: a temple guardian holding the boundary of sacred forbidden space. Styling entry: temple armor, spear, holy marks, still stance, and a body like a stone pillar. Motif: religious space maintaining inaccessibility through arms. Tension: he need not attack; pressure comes from the feeling that you cannot step further. Visual evidence: vertical spear line, threshold shadow, sigil armor, fixed feet, expressionless face, and gaze guarding the entrance. Boundary: avoid generic palace guard or monster gatekeeper.', ontologyLevel: 2, eras: feudalEras, tags: ['temple', 'guardian', 'sacred'] },
   { id: 'crusader_penitent', name: '忏悔十字军', nameEn: 'Penitent Crusader', group: 'I. 圣骑士 / 神圣武装 / 誓言', groupEn: 'I. Holy Knight / Sacred Arms / Vow', def: '第一识别是把罪感转化成远征暴力的忏悔十字军。造型入口：十字披风、旧甲、祈祷姿态、尘土和长途行军后的疲惫。母题：赎罪与征服混在同一套服制里。张力：他相信自己在补偿罪，但身体证据必须显示这种补偿也制造新的暴力。视觉证据：磨破十字布、膝盖泥痕、旧伤、挂在胸前的祷词和不敢完全抬起的眼。边界：避免圣战浪漫化或普通骑士。', defEn: 'First read: a penitent crusader converting guilt into expeditionary violence. Styling entry: cross cloak, old armor, prayer posture, dust, and fatigue after long march. Motif: atonement and conquest mixed inside one costume system. Tension: he believes he is compensating for sin, but body evidence must show that compensation also creates new violence. Visual evidence: worn cross cloth, mud on knees, old wounds, prayer text at chest, and eyes not fully lifting. Boundary: avoid romanticizing crusade or generic knight treatment.', ontologyLevel: 2, eras: feudalEras, risk: 'medium', tags: ['crusader', 'penitent', 'holy'] },
-  { id: 'witch_hunter', name: '猎巫人', nameEn: 'Witch Hunter', group: 'I. 圣骑士 / 神圣武装 / 誓言', groupEn: 'I. Holy Knight / Sacred Arms / Vow', def: '第一识别是把恐惧制度化为正义的猎巫人。造型入口：黑帽、圣书、银器、调查记录和过分确信的表情。母题：信仰恐惧通过职业流程执行。张力：他不应像怪物猎人，而是像一个相信自己有权审判他人的人。视觉证据：封口证词、银针盒、烧焦纸边、长外套、审视手腕或颈部标记的眼。边界：避免魔幻英雄化或恐怖猎奇。', defEn: 'First read: a witch hunter institutionalizing fear as justice. Styling entry: black hat, holy book, silver tools, investigation records, and an overly certain expression. Motif: faith-based fear executed through occupational workflow. Tension: he should not read as a monster hunter, but as someone convinced he has the right to judge others. Visual evidence: sealed testimonies, silver-needle case, burned paper edge, long coat, and eyes inspecting wrist or neck marks. Boundary: avoid fantasy heroization or horror spectacle.', ontologyLevel: 2, eras: ['feudal', 'early_modern', 'timeless'], risk: 'medium', tags: ['witch_hunter', 'holy', 'fear'] },
-  { id: 'battle_nun', name: '战斗修女', nameEn: 'Battle Nun', group: 'I. 圣骑士 / 神圣武装 / 誓言', groupEn: 'I. Holy Knight / Sacred Arms / Vow', def: '第一识别是把禁欲纪律训练成战斗身体的战斗修女。造型入口：修女头巾、轻甲、念珠、短武器和覆盖性衣层。母题：宗教遮蔽结构与武装行动合体。张力：她不能变成性感战斗装，力量来自收束、戒律和精准动作。视觉证据：头巾边缘、甲片藏在法衣下、念珠绕腕、短刃护套、合掌后转入警戒的手。边界：避免色情化、喜剧化宗教符号或纯女战士。', defEn: 'First read: a battle nun training ascetic discipline into combat body. Styling entry: nun habit, light armor, rosary, short weapon, and covering garment layers. Motif: religious concealment structure fused with armed action. Tension: she must not become sexy battlewear; power comes from restraint, discipline, and precise movement. Visual evidence: habit edge, armor plates under vestment, rosary around wrist, short blade sheath, and hands moving from prayer to guard. Boundary: avoid eroticization, comic religious symbols, or pure female warrior treatment.', ontologyLevel: 2, eras: ['early_modern', 'modern', 'timeless', 'mythic'], tags: ['battle_nun', 'sacred', 'fighter'] },
+  { id: 'witch_hunter', name: '猎巫人', nameEn: 'Witch Hunter', group: 'I. 圣骑士 / 神圣武装 / 誓言', groupEn: 'I. Holy Knight / Sacred Arms / Vow', def: '第一识别是把恐惧制度化为正义的猎巫人。造型入口：黑帽、圣书、银器、调查记录和过分确信的表情。母题：信仰恐惧通过职业流程执行。张力：他不应像怪物猎人，而是像一个相信自己有权审判他人的人。视觉证据：封口证词、银针盒、烧焦纸边、长外套、审视手腕或颈部标记的眼。边界：避免魔幻英雄化或恐怖猎奇。', defEn: 'First read: a witch hunter institutionalizing fear as justice. Styling entry: black hat, holy book, silver tools, investigation records, and an overly certain expression. Motif: faith-based fear executed through occupational workflow. Tension: he should not read as a monster hunter, but as someone convinced he has the right to judge others. Visual evidence: sealed testimonies, silver-needle case, burned paper edge, long coat, and eyes inspecting wrist or neck marks. Boundary: avoid fantasy heroization or horror spectacle.', ontologyLevel: 2, eras: ['feudal', 'early_modern'], risk: 'medium', tags: ['witch_hunter', 'holy', 'fear'] },
+  { id: 'battle_nun', name: '战斗修女', nameEn: 'Battle Nun', group: 'I. 圣骑士 / 神圣武装 / 誓言', groupEn: 'I. Holy Knight / Sacred Arms / Vow', def: '第一识别是把禁欲纪律训练成战斗身体的战斗修女。造型入口：修女头巾、轻甲、念珠、短武器和覆盖性衣层。母题：宗教遮蔽结构与武装行动合体。张力：她不能变成性感战斗装，力量来自收束、戒律和精准动作。视觉证据：头巾边缘、甲片藏在法衣下、念珠绕腕、短刃护套、合掌后转入警戒的手。边界：避免色情化、喜剧化宗教符号或纯女战士。', defEn: 'First read: a battle nun training ascetic discipline into combat body. Styling entry: nun habit, light armor, rosary, short weapon, and covering garment layers. Motif: religious concealment structure fused with armed action. Tension: she must not become sexy battlewear; power comes from restraint, discipline, and precise movement. Visual evidence: habit edge, armor plates under vestment, rosary around wrist, short blade sheath, and hands moving from prayer to guard. Boundary: avoid eroticization, comic religious symbols, or pure female warrior treatment.', ontologyLevel: 2, eras: ['feudal', 'early_modern', 'modern', 'mythic'], tags: ['battle_nun', 'sacred', 'fighter'] },
   { id: 'sun_order_champion', name: '太阳骑士团冠军', nameEn: 'Sun-Order Champion', group: 'I. 圣骑士 / 神圣武装 / 誓言', groupEn: 'I. Holy Knight / Sacred Arms / Vow', def: '第一识别是被太阳骑士团推为公开正义图像的冠军。造型入口：金色甲片、太阳纹章、宽阔站姿、明亮披风和承受众目睽睽的脸。母题：神圣武装成为公共象征。张力：高亮度不能只是漂亮，必须带来被期待永远正确的压力。视觉证据：日轮徽记、抛光甲面、仪式剑、广场式站位、被光照得无法隐藏疲惫的眼。边界：避免普通金甲英雄或太阳神本体。', defEn: 'First read: a Sun-Order champion made into a public image of justice. Styling entry: gold armor plates, sun emblem, broad stance, bright cloak, and a face under public gaze. Motif: sacred arms becoming public symbol. Tension: brightness cannot be merely pretty; it must carry the pressure of being expected to always be right. Visual evidence: sun-disc crest, polished armor, ritual sword, plaza-like placement, and eyes too illuminated to hide fatigue. Boundary: avoid generic gold-armored hero or actual sun deity.', ontologyLevel: 3, eras: feudalEras, tags: ['sun_order', 'champion', 'holy'] },
   { id: 'relic_blade_keeper', name: '圣遗物剑守', nameEn: 'Relic-Blade Keeper', group: 'I. 圣骑士 / 神圣武装 / 誓言', groupEn: 'I. Holy Knight / Sacred Arms / Vow', def: '第一识别是用一生守护封印武器的圣遗物剑守。造型入口：封印剑匣、白手套、祭衣甲片、护送姿态和不让剑完全露出的动作。母题：武器因被保护而获得神圣性。张力：他不是挥剑者，而是让危险永远处在“未开启”状态的人。视觉证据：蜡封、锁链、剑匣磨损、双手托举、护卫距离和看向封印而非敌人的眼。边界：避免普通剑士或神器炫耀。', defEn: 'First read: a relic-blade keeper guarding a sealed weapon for life. Styling entry: sealed sword case, white gloves, vestment armor plates, escort posture, and movements that never fully reveal the blade. Motif: a weapon made sacred by being protected. Tension: he is not the sword wielder, but the person keeping danger forever “unopened.” Visual evidence: wax seals, chains, worn case, two-handed carrying, guard distance, and eyes looking at the seal rather than enemies. Boundary: avoid generic swordsman or relic showoff.', ontologyLevel: 3, eras: feudalEras, tags: ['relic', 'blade', 'keeper'] },
   { id: 'fallen_paladin', name: '堕落圣骑士', nameEn: 'Fallen Paladin', group: 'I. 圣骑士 / 神圣武装 / 誓言', groupEn: 'I. Holy Knight / Sacred Arms / Vow', def: '第一识别是信仰崩塌后仍穿着誓言残片的堕落圣骑士。造型入口：破裂圣徽、黑化甲片、沉默忏悔、旧披风和不再被修复的划痕。母题：神圣制度失败后的暴力残留。张力：他不能只是黑暗版圣骑士，必须保留曾经相信过的证据。视觉证据：断裂徽章、未擦净祈祷刻痕、低垂剑尖、灰尘甲面和不敢碰圣物的手。边界：避免纯反派化或恶魔化。', defEn: 'First read: a fallen paladin still wearing fragments of old vows after faith collapse. Styling entry: cracked holy emblem, darkened armor plates, silent repentance, old cloak, and scratches no longer repaired. Motif: violence residue after a sacred system fails. Tension: he cannot be merely a dark paladin; evidence of former belief must remain. Visual evidence: broken crest, prayer engravings not fully cleaned, lowered sword tip, dusty armor, and hands afraid to touch relics. Boundary: avoid pure villainization or demonization.', ontologyLevel: 3, eras: feudalEras, risk: 'medium', tags: ['fallen_paladin', 'faith', 'armor'] },
@@ -170,7 +400,7 @@ const seeds: PersonaSeed[] = [
   { id: 'refugee_militia_leader', name: '难民民兵首领', nameEn: 'Refugee Militia Leader', group: 'J. 退役者 / 幸存者 / 战后残留', groupEn: 'J. Veteran / Survivor / Postwar Residue', def: '第一识别是在失去国家后组织自卫的难民民兵首领。造型入口：混杂装备、围巾、临时臂章、补丁地图和睡眠不足的领导脸。母题：流离失所者临时建立防护秩序。张力：他不是正规军长官，权威来自别人还愿意跟着他走。视觉证据：不同来源的护具、手绘路线、物资袋、临时哨位、压低声音安排撤离的手势。边界：避免战争领袖浪漫化或无组织暴民。', defEn: 'First read: a refugee militia leader organizing self-defense after losing the state. Styling entry: mixed gear, scarf, improvised armband, patched map, and a sleep-deprived leadership face. Motif: displaced people building temporary protection order. Tension: he is not a regular army commander; authority comes from others still choosing to follow him. Visual evidence: gear from different sources, hand-drawn routes, supply bags, temporary lookout post, and low gestures arranging evacuation. Boundary: avoid romanticized war leader or disorganized mob treatment.', risk: 'medium', tags: ['refugee', 'militia', 'leader'] },
   { id: 'mine_clearance_worker', name: '排雷工人', nameEn: 'Mine-Clearance Worker', group: 'J. 退役者 / 幸存者 / 战后残留', groupEn: 'J. Veteran / Survivor / Postwar Residue', def: '第一识别是在战后土地上慢速挽救未来的排雷工人。造型入口：防爆面罩、探测器、标记旗、厚手套和极慢的脚步。母题：战争结束后仍然需要被拆除的危险。张力：英雄性来自慢、准和不出错，而不是冲锋。视觉证据：红色标记旗、泥土剥开痕、探测器线圈、面罩反光、蹲下前的停顿和只看地面的眼。边界：避免爆破动作场面或普通工程工人。', defEn: 'First read: a mine-clearance worker slowly saving the future on postwar land. Styling entry: blast visor, detector, marker flags, thick gloves, and extremely slow steps. Motif: danger that still needs removal after war ends. Tension: heroism comes from slowness, precision, and no mistakes, not charging forward. Visual evidence: red flags, peeled soil marks, detector coil, visor reflection, pause before kneeling, and eyes looking only at the ground. Boundary: avoid explosion action scenes or generic engineer treatment.', risk: 'medium', tags: ['mine_clearance', 'worker', 'postwar'] },
   { id: 'veteran_bartender', name: '退役军人酒保', nameEn: 'Veteran Bartender', group: 'J. 退役者 / 幸存者 / 战后残留', groupEn: 'J. Veteran / Survivor / Postwar Residue', def: '第一识别是把沉默服务给陌生人的退役军人酒保。造型入口：卷袖衬衫、旧军牌、吧台毛巾、稳手和不主动讲过去的脸。母题：战后训练被转入夜间服务劳动。张力：他看似平凡，但站位、警觉和处理冲突的方式仍有旧系统痕迹。视觉证据：擦杯动作、军牌藏在领口、听到争吵时抬眼、吧台下旧照片和替客人留出沉默的姿态。边界：避免硬汉酒保模板或战场回忆戏。', defEn: 'First read: a veteran bartender offering silence as service to strangers. Styling entry: rolled sleeves, old dog tag, bar towel, steady hands, and a face that does not volunteer the past. Motif: postwar training shifted into night service labor. Tension: he seems ordinary, yet placement, alertness, and conflict handling still carry old system traces. Visual evidence: glass-wiping motion, dog tag hidden at collar, eyes lifting at argument, old photo under the bar, and posture leaving customers room for silence. Boundary: avoid tough bartender cliché or battlefield flashback drama.', tags: ['veteran', 'bartender', 'civilian'] },
-  { id: 'old_general_in_exile', name: '流亡老将军', nameEn: 'Old General in Exile', group: 'J. 退役者 / 幸存者 / 战后残留', groupEn: 'J. Veteran / Survivor / Postwar Residue', def: '第一识别是失去军队后仍带着权力残影的流亡老将军。造型入口：旧制服、勋章盒、地图、衰老身体和被迫低调的旅居外套。母题：组织权力消失后剩下的个人仪态。张力：他曾经能调动军队，现在只能整理旧地图和等待消息。视觉证据：发黄战图、勋章盒未打开、颤抖手指、矜持坐姿、旧制服袖口和仍然像在听报告的眼。边界：避免复辟英雄或普通老人。', defEn: 'First read: an old general in exile carrying residue of power after losing his army. Styling entry: old uniform, medal box, maps, aging body, and forced low-profile travel coat. Motif: personal bearing left after organizational power disappears. Tension: he once moved armies; now he can only arrange old maps and wait for news. Visual evidence: yellowed war map, unopened medal case, trembling fingers, dignified seated posture, old uniform cuffs, and eyes still listening for reports. Boundary: avoid restoration hero or generic old man treatment.', eras: ['industrial', 'modern', 'contemporary', 'timeless'], tags: ['old_general', 'exile', 'veteran'] },
+  { id: 'old_general_in_exile', name: '流亡老将军', nameEn: 'Old General in Exile', group: 'J. 退役者 / 幸存者 / 战后残留', groupEn: 'J. Veteran / Survivor / Postwar Residue', def: '第一识别是失去军队后仍带着权力残影的流亡老将军。造型入口：旧制服、勋章盒、地图、衰老身体和被迫低调的旅居外套。母题：组织权力消失后剩下的个人仪态。张力：他曾经能调动军队，现在只能整理旧地图和等待消息。视觉证据：发黄战图、勋章盒未打开、颤抖手指、矜持坐姿、旧制服袖口和仍然像在听报告的眼。边界：避免复辟英雄或普通老人。', defEn: 'First read: an old general in exile carrying residue of power after losing his army. Styling entry: old uniform, medal box, maps, aging body, and forced low-profile travel coat. Motif: personal bearing left after organizational power disappears. Tension: he once moved armies; now he can only arrange old maps and wait for news. Visual evidence: yellowed war map, unopened medal case, trembling fingers, dignified seated posture, old uniform cuffs, and eyes still listening for reports. Boundary: avoid restoration hero or generic old man treatment.', eras: ['industrial', 'modern', 'contemporary'], tags: ['old_general', 'exile', 'veteran'] },
   { id: 'android_war_survivor', name: '仿生战争幸存者', nameEn: 'Android War Survivor', group: 'J. 退役者 / 幸存者 / 战后残留', groupEn: 'J. Veteran / Survivor / Postwar Residue', def: '第一识别是从战争资产转为自由个体的仿生战争幸存者。造型入口：破损合成人皮、旧军号、记忆故障、维修补丁和像在学习日常表情的脸。母题：非人造物也携带战后残留。张力：他不能只是酷机器人，核心是被制造来战斗后如何成为自己。视觉证据：露出的机械层、退役编号、断续记忆日志、替换零件色差、触摸旧伤位置的手和过度认真地模仿平静的眼。边界：避免机甲化或纯科幻敌兵。', defEn: 'First read: an android war survivor becoming a free individual after being a war asset. Styling entry: damaged synthetic skin, old military number, memory glitches, repair patches, and a face learning daily expressions. Motif: postwar residue carried by a nonhuman construct. Tension: he cannot be just a cool robot; the core is how something made for fighting becomes itself. Visual evidence: exposed mechanical layer, retirement serial, broken memory logs, mismatched replacement parts, hand touching old damage, and eyes too carefully imitating calm. Boundary: avoid mecha treatment or pure sci-fi enemy soldier.', ontologyLevel: 4, eras: futureEras, risk: 'medium', tags: ['android', 'war_survivor', 'future'] }
 ];
 

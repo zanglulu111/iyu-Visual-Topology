@@ -13,6 +13,7 @@ interface ArchiveContentProps {
 }
 
 const ITEMS_PER_PAGE = 12;
+const ARCHIVE_FALLBACK_IMAGE = '/portal-assets/subject-archive-lower-1777901002241-light.webp';
 
 const AnimatedText = ({ cn, en, lang, className = "", hClass = "h-5" }: { cn: React.ReactNode, en: React.ReactNode, lang: 'CN' | 'EN', className?: string, hClass?: string }) => (
   <div className={`overflow-hidden relative flex items-start ${hClass}`}>
@@ -109,7 +110,7 @@ export const ArchiveContent: React.FC<ArchiveContentProps> = ({ lang }) => {
             category: dossier.category,
             summaryCn: dossier.summary,
             summaryEn: dossier.summaryEn || dossier.summary,
-            imageUrl: dossier.imageUrl || '/portal-assets/subject-archive-lower-1777901002241.png',
+            imageUrl: dossier.imageUrl || ARCHIVE_FALLBACK_IMAGE,
             date: (dossier.publishedAt || dossier.updatedAt).slice(0, 10),
             sourceDossier: dossier,
             content: {

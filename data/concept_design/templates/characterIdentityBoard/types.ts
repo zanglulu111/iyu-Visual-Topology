@@ -1,8 +1,24 @@
 export type CharacterIdentityBoardLanguage = 'CN' | 'EN';
-export type CharacterIdentityBoardMediumCategory = 'PAINTING' | 'CGI' | 'PHOTOGRAPHY' | 'TANGIBLE';
+export type CharacterIdentityBoardMediumCategory = 'PAINTING' | 'CGI' | 'PHOTOGRAPHY' | 'TANGIBLE' | 'ALL';
 export type CharacterIdentityBoardFormat = '16:9' | '9:16' | '4:3' | '3:4' | '3:2' | '2:3' | '21:9' | '1:1';
 export type CharacterIdentityBoardWorldLawMode = 'LAW_L1' | 'LAW_L2' | 'LAW_L3' | 'LAW_L4' | 'LAW_L5';
 export type CharacterIdentityBoardBodyFormMode = 'HUMANOID_DISGUISE' | 'VISIBLE_HYBRID' | 'BEAST_BODY' | 'XENO_BODY';
+export type CharacterIdentityBoardTargetMode =
+  | 'CHARACTER_BOARD'
+  | 'THREE_VIEW'
+  | 'PORTRAIT_HALF'
+  | 'FILM_STILL'
+  | 'AD_POSTER'
+  | 'FASHION_COVER'
+  | 'PRODUCT_OBJECT'
+  | 'SCENE_LANDSCAPE'
+  | 'CREATURE_BODY'
+  | 'ABSTRACT_ART'
+  | 'GRID_BOARD'
+  | 'PERFORMANCE_STORYBOARD'
+  | 'VIDEO_STORYBOARD'
+  | 'CHARACTER_BOARD_BACKUP'
+  | 'CUSTOM';
 
 export type CharacterIdentityBoardVariables = {
   characterSeed: string;
@@ -11,6 +27,7 @@ export type CharacterIdentityBoardVariables = {
   actionMoment: string;
   visualMedium: string;
   style: string;
+  paletteStrategy: string;
   compositionScene: string;
   lightingAtmosphere: string;
   otherDetails: string;
@@ -20,6 +37,14 @@ export type CharacterIdentityBoardOptions = {
   originality: boolean;
   format: CharacterIdentityBoardFormat;
   mediumCategory: CharacterIdentityBoardMediumCategory;
+  primaryStyleReference?: string;
+  targetMode?: CharacterIdentityBoardTargetMode;
+  gridLayout?: string;
+  gridVariationAxis?: string;
+  gridContentObject?: string;
+  gridNumbering?: boolean;
+  gridTitleMode?: 'NONE' | 'PLAIN' | 'ARTISTIC';
+  gridBorderMode?: boolean;
   worldLawMode?: CharacterIdentityBoardWorldLawMode;
   bodyFormMode?: CharacterIdentityBoardBodyFormMode;
   backgroundMode?: 'OFF_WHITE' | 'PURE_WHITE' | 'BLACK' | 'GREEN_SCREEN' | 'TRANSPARENT';
@@ -33,6 +58,7 @@ export type CharacterIdentityBoardMaterialSlotId =
   | 'actionMoment'
   | 'visualMedium'
   | 'style'
+  | 'paletteStrategy'
   | 'compositionScene'
   | 'lightingAtmosphere'
   | 'otherDetails';

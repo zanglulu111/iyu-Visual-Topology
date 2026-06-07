@@ -1,10 +1,299 @@
-import { buildExplicitPersonaTerms, ExplicitPersonaSeed, PersonaEra } from './types';
+import { buildExplicitPersonaTerms, ExplicitPersonaSeed, PersonaCategoryFit, PersonaEra, personaFit } from './types';
 
 type Row = [string, string, string, string, string, (1 | 2 | 3 | 4 | 5)?, PersonaEra[]?, string[]?];
 type Group = { group: string; groupEn: string; rows: Row[] };
 
-const modern: PersonaEra[] = ['modern', 'contemporary', 'timeless'];
-const contemporary: PersonaEra[] = ['contemporary', 'near_future', 'timeless'];
+const modern: PersonaEra[] = ['modern', 'contemporary'];
+const contemporary: PersonaEra[] = ['contemporary', 'near_future'];
+const industrialModern: PersonaEra[] = ['industrial', 'modern', 'contemporary'];
+
+const socialFit = (group: string): PersonaCategoryFit => {
+  if (group.startsWith('A.')) return personaFit('weak', {
+    strong: ['urban_life'],
+    usable: ['romance', 'real_professional', 'workplace'],
+    fusion: ['surreal', 'horror'],
+    weak: ['wuxia', 'xianxia', 'court']
+  });
+  if (group.startsWith('B.')) return personaFit('weak', {
+    strong: ['urban_life', 'workplace'],
+    usable: ['real_professional', 'romance'],
+    fusion: ['cyberpunk', 'surreal'],
+    weak: ['wuxia', 'xianxia', 'court']
+  });
+  if (group.startsWith('C.')) return personaFit('weak', {
+    strong: ['romance', 'urban_life'],
+    usable: ['real_professional', 'workplace'],
+    fusion: ['surreal', 'dark_fantasy'],
+    weak: ['war_military', 'wasteland', 'cyberpunk']
+  });
+  if (group.startsWith('D.')) return personaFit('weak', {
+    strong: ['urban_life', 'fashion_idol'],
+    usable: ['romance', 'boudoir_aesthetic'],
+    fusion: ['noir_crime', 'surreal'],
+    weak: ['wuxia', 'xianxia', 'wasteland']
+  });
+  if (group.startsWith('E.')) return personaFit('weak', {
+    strong: ['urban_life'],
+    usable: ['wasteland', 'horror', 'noir_crime'],
+    fusion: ['surreal', 'post_apocalyptic'],
+    weak: ['fashion_idol', 'court', 'romance']
+  });
+  if (group.startsWith('F.')) return personaFit('weak', {
+    strong: ['urban_life', 'workplace'],
+    usable: ['real_professional', 'noir_crime'],
+    fusion: ['cyberpunk', 'surreal'],
+    weak: ['court', 'xianxia', 'romance']
+  });
+  if (group.startsWith('G.')) return personaFit('weak', {
+    strong: ['urban_life'],
+    usable: ['adventure', 'romance', 'real_professional'],
+    fusion: ['historical', 'wasteland'],
+    weak: ['court', 'xianxia', 'fashion_idol']
+  });
+  if (group.startsWith('H.')) return personaFit('weak', {
+    strong: ['urban_life'],
+    usable: ['romance', 'real_professional', 'historical'],
+    fusion: ['surreal'],
+    weak: ['cyberpunk', 'court', 'xianxia']
+  });
+  if (group.startsWith('I.')) return personaFit('weak', {
+    strong: ['urban_life'],
+    usable: ['fashion_idol', 'romance'],
+    fusion: ['surreal', 'cyberpunk'],
+    weak: ['court', 'war_military', 'xianxia']
+  });
+  return personaFit('weak', {
+    strong: ['urban_life'],
+    usable: ['romance', 'real_professional', 'historical'],
+    fusion: ['horror', 'surreal'],
+    weak: ['fashion_idol', 'wasteland', 'cyberpunk']
+  });
+};
+
+const socialFitOverrides: Record<string, PersonaCategoryFit> = {
+  balcony_smoker_white_collar: personaFit('weak', {
+    strong: ['urban_life', 'workplace'],
+    usable: ['real_professional'],
+    fusion: ['surreal', 'noir_crime'],
+    weak: ['wuxia', 'xianxia', 'court']
+  }),
+  instant_noodle_programmer: personaFit('weak', {
+    strong: ['urban_life', 'workplace', 'real_professional'],
+    usable: ['science_fiction'],
+    fusion: ['cyberpunk', 'surreal'],
+    weak: ['wuxia', 'xianxia', 'court']
+  }),
+  tiny_room_streamer: personaFit('weak', {
+    strong: ['urban_life'],
+    usable: ['fashion_idol', 'real_professional'],
+    fusion: ['cyberpunk', 'surreal'],
+    weak: ['court', 'wuxia', 'xianxia']
+  }),
+  new_mother_sleepless: personaFit('weak', {
+    strong: ['urban_life', 'romance'],
+    usable: ['medical'],
+    fusion: ['surreal', 'horror'],
+    weak: ['war_military', 'wasteland', 'cyberpunk']
+  }),
+  single_father_cook: personaFit('weak', {
+    strong: ['urban_life', 'romance'],
+    usable: ['real_professional', 'workplace'],
+    fusion: ['surreal'],
+    weak: ['war_military', 'wasteland', 'cyberpunk']
+  }),
+  school_gate_parent: personaFit('weak', {
+    strong: ['urban_life', 'institutional'],
+    usable: ['romance'],
+    fusion: ['surreal'],
+    weak: ['war_military', 'wasteland', 'cyberpunk']
+  }),
+  divorce_court_woman: personaFit('weak', {
+    strong: ['urban_life', 'romance', 'institutional'],
+    usable: ['noir_crime'],
+    fusion: ['surreal', 'dark_fantasy'],
+    weak: ['war_military', 'wasteland', 'cyberpunk']
+  }),
+  caregiver_daughter: personaFit('weak', {
+    strong: ['urban_life', 'romance'],
+    usable: ['medical'],
+    fusion: ['surreal'],
+    weak: ['war_military', 'wasteland', 'cyberpunk']
+  }),
+  crypto_new_money_youth: personaFit('weak', {
+    strong: ['urban_life', 'fashion_idol'],
+    usable: ['cyberpunk', 'science_fiction'],
+    fusion: ['surreal', 'noir_crime'],
+    weak: ['wuxia', 'xianxia', 'court']
+  }),
+  plastic_surgery_socialite: personaFit('weak', {
+    strong: ['urban_life', 'fashion_idol'],
+    usable: ['boudoir_aesthetic', 'medical'],
+    fusion: ['surreal', 'body_horror'],
+    weak: ['wuxia', 'xianxia', 'wasteland']
+  }),
+  underpass_sleeper: personaFit('weak', {
+    strong: ['urban_life'],
+    usable: ['wasteland', 'post_apocalyptic'],
+    fusion: ['horror', 'surreal'],
+    weak: ['fashion_idol', 'court', 'romance']
+  }),
+  bottle_collecting_grandpa: personaFit('weak', {
+    strong: ['urban_life'],
+    usable: ['wasteland'],
+    fusion: ['surreal'],
+    weak: ['fashion_idol', 'court', 'romance']
+  }),
+  night_market_vendor: personaFit('weak', {
+    strong: ['urban_life', 'real_professional'],
+    usable: ['romance', 'workplace'],
+    fusion: ['noir_crime', 'surreal'],
+    weak: ['fashion_idol', 'court', 'xianxia']
+  }),
+  temporary_worker_youth: personaFit('weak', {
+    strong: ['urban_life', 'workplace', 'real_professional'],
+    usable: ['wasteland'],
+    fusion: ['surreal'],
+    weak: ['fashion_idol', 'court', 'romance']
+  }),
+  migrant_construction_worker: personaFit('weak', {
+    strong: ['urban_life', 'workplace', 'real_professional'],
+    usable: ['wasteland'],
+    fusion: ['surreal'],
+    weak: ['fashion_idol', 'court', 'romance']
+  }),
+  pawnshop_regular: personaFit('weak', {
+    strong: ['urban_life', 'noir_crime'],
+    usable: ['wasteland'],
+    fusion: ['surreal'],
+    weak: ['fashion_idol', 'court', 'romance']
+  }),
+  twenty_four_hour_nurse_aide: personaFit('weak', {
+    strong: ['urban_life', 'workplace', 'medical'],
+    usable: ['real_professional'],
+    fusion: ['surreal', 'horror'],
+    weak: ['court', 'xianxia', 'romance']
+  }),
+  karaoke_front_desk_girl: personaFit('weak', {
+    strong: ['urban_life', 'workplace'],
+    usable: ['real_professional', 'fashion_idol', 'boudoir_aesthetic'],
+    fusion: ['noir_crime', 'surreal'],
+    weak: ['court', 'xianxia', 'wuxia']
+  }),
+  late_shift_taxi_driver: personaFit('weak', {
+    strong: ['urban_life', 'workplace', 'real_professional'],
+    usable: ['noir_crime'],
+    fusion: ['cyberpunk', 'surreal'],
+    weak: ['court', 'xianxia', 'romance']
+  }),
+  security_camera_operator: personaFit('weak', {
+    strong: ['urban_life', 'workplace', 'real_professional'],
+    usable: ['noir_crime', 'institutional'],
+    fusion: ['cyberpunk', 'surreal'],
+    weak: ['court', 'xianxia', 'romance']
+  }),
+  language_school_student: personaFit('weak', {
+    strong: ['urban_life', 'institutional'],
+    usable: ['adventure', 'romance'],
+    fusion: ['historical', 'surreal'],
+    weak: ['court', 'xianxia', 'fashion_idol']
+  }),
+  train_station_couple: personaFit('weak', {
+    strong: ['urban_life', 'romance'],
+    usable: ['adventure'],
+    fusion: ['historical', 'surreal'],
+    weak: ['court', 'xianxia', 'fashion_idol']
+  }),
+  overseas_chinatown_barber: personaFit('weak', {
+    strong: ['urban_life', 'real_professional'],
+    usable: ['historical', 'romance'],
+    fusion: ['noir_crime', 'wasteland'],
+    weak: ['court', 'xianxia', 'fashion_idol']
+  }),
+  seasonal_farm_worker: personaFit('weak', {
+    strong: ['urban_life', 'real_professional', 'ecological'],
+    usable: ['adventure', 'historical'],
+    fusion: ['wasteland'],
+    weak: ['court', 'xianxia', 'fashion_idol']
+  }),
+  wedding_studio_assistant: personaFit('weak', {
+    strong: ['urban_life', 'real_professional', 'romance'],
+    usable: ['workplace', 'fashion_idol'],
+    fusion: ['surreal'],
+    weak: ['cyberpunk', 'court', 'xianxia']
+  }),
+  township_cadre_youth: personaFit('weak', {
+    strong: ['urban_life', 'real_professional', 'institutional'],
+    usable: ['workplace', 'historical'],
+    fusion: ['surreal'],
+    weak: ['cyberpunk', 'court', 'xianxia']
+  }),
+  school_uniform_repeater: personaFit('weak', {
+    strong: ['urban_life', 'institutional'],
+    usable: ['romance'],
+    fusion: ['surreal'],
+    weak: ['cyberpunk', 'court', 'xianxia']
+  }),
+  art_school_student: personaFit('weak', {
+    strong: ['urban_life', 'institutional'],
+    usable: ['fashion_idol', 'romance', 'abstract'],
+    fusion: ['surreal'],
+    weak: ['court', 'war_military', 'xianxia']
+  }),
+  exam_cram_girl: personaFit('weak', {
+    strong: ['urban_life', 'institutional'],
+    usable: ['romance'],
+    fusion: ['surreal'],
+    weak: ['court', 'war_military', 'xianxia']
+  }),
+  skatepark_highschooler: personaFit('weak', {
+    strong: ['urban_life', 'adventure'],
+    usable: ['fashion_idol', 'romance'],
+    fusion: ['surreal'],
+    weak: ['court', 'war_military', 'xianxia']
+  }),
+  campus_radio_host: personaFit('weak', {
+    strong: ['urban_life', 'institutional'],
+    usable: ['real_professional', 'fashion_idol', 'romance'],
+    fusion: ['surreal'],
+    weak: ['court', 'war_military', 'xianxia']
+  }),
+  student_union_host: personaFit('weak', {
+    strong: ['urban_life', 'institutional'],
+    usable: ['real_professional', 'workplace'],
+    fusion: ['surreal'],
+    weak: ['court', 'war_military', 'xianxia']
+  }),
+  retired_factory_master: personaFit('weak', {
+    strong: ['urban_life', 'real_professional'],
+    usable: ['workplace', 'historical'],
+    fusion: ['surreal'],
+    weak: ['fashion_idol', 'wasteland', 'cyberpunk']
+  }),
+  retired_teacher_elder: personaFit('weak', {
+    strong: ['urban_life', 'real_professional'],
+    usable: ['institutional', 'historical'],
+    fusion: ['surreal'],
+    weak: ['fashion_idol', 'wasteland', 'cyberpunk']
+  }),
+  senior_travel_group_leader: personaFit('weak', {
+    strong: ['urban_life'],
+    usable: ['real_professional', 'adventure'],
+    fusion: ['surreal'],
+    weak: ['fashion_idol', 'wasteland', 'cyberpunk']
+  }),
+  hospital_corridor_elder: personaFit('weak', {
+    strong: ['urban_life', 'medical'],
+    usable: ['romance'],
+    fusion: ['horror', 'surreal'],
+    weak: ['fashion_idol', 'wasteland', 'cyberpunk']
+  }),
+  community_choir_grandmother: personaFit('weak', {
+    strong: ['urban_life'],
+    usable: ['religious_ritual', 'institutional'],
+    fusion: ['surreal'],
+    weak: ['fashion_idol', 'wasteland', 'cyberpunk']
+  })
+};
 
 const toSeeds = (groups: Group[]): ExplicitPersonaSeed[] => groups.flatMap(({ group, groupEn, rows }) => rows.map(([id, name, nameEn, def, defEn, ontologyLevel = 1, eras = modern, tags = []]) => ({
   id,
@@ -16,7 +305,8 @@ const toSeeds = (groups: Group[]): ExplicitPersonaSeed[] => groups.flatMap(({ gr
   defEn,
   ontologyLevel,
   eras,
-  tags
+  tags,
+  categoryFit: socialFitOverrides[id] || socialFit(group)
 })));
 
 const groups: Group[] = [
@@ -130,7 +420,7 @@ const groups: Group[] = [
   ] },
   { group: 'J. 老年 / 退休 / 社区日常', groupEn: 'J. Elderly / Retirement / Community Daily Life', rows: [
     ['park_dancing_auntie', '广场舞阿姨', 'Park-Dancing Auntie', '第一识别是广场舞阿姨。造型入口：亮色运动外套、小音箱、舒适鞋、队形站位和把公共广场变成社交舞台的身体。母题：退休后的活力通过社区节奏和群体秩序展开。张力：热闹要有年龄身体的真实节制。视觉证据：音箱、丝巾、队形手势、保温杯、广场灯和与同伴互相看节拍的眼。边界：避免滑稽化或健身广告。', 'First read: Park-Dancing Auntie. Styling entry: bright sport jacket, portable speaker, comfortable shoes, formation placement, and body turning public square into social stage. Motif: post-retirement vitality unfolds through community rhythm and group order. Tension: liveliness needs real restraint of an aging body. Visual evidence: speaker, scarf, formation hands, thermos, plaza lights, and eyes checking rhythm with peers. Boundary: avoid comic treatment or fitness ad.'],
-    ['retired_factory_master', '退休工厂师傅', 'Retired Factory Master', '第一识别是退休工厂师傅。造型入口：旧工装、工具箱、搪瓷杯、厚手掌和离开生产线后仍保持标准动作的身体。母题：工厂纪律在退休后继续留在手和站姿里。张力：老去不是软化，而是技能被时间沉淀。视觉证据：旧厂徽、扳手、手茧、工作帽、保养过的外套和看年轻人操作时忍不住纠正的眼。边界：避免怀旧工人海报。', 'First read: Retired Factory Master. Styling entry: old workwear, toolbox, enamel cup, thick palms, and body keeping standard motions after leaving the line. Motif: factory discipline remains in hands and stance after retirement. Tension: aging is not softening but skill sedimented by time. Visual evidence: old factory badge, wrench, calluses, work cap, maintained coat, and eyes correcting younger workers. Boundary: avoid nostalgic worker poster.'],
+    ['retired_factory_master', '退休工厂师傅', 'Retired Factory Master', '第一识别是退休工厂师傅。造型入口：旧工装、工具箱、搪瓷杯、厚手掌和离开生产线后仍保持标准动作的身体。母题：工厂纪律在退休后继续留在手和站姿里。张力：老去不是软化，而是技能被时间沉淀。视觉证据：旧厂徽、扳手、手茧、工作帽、保养过的外套和看年轻人操作时忍不住纠正的眼。边界：避免怀旧工人海报。', 'First read: Retired Factory Master. Styling entry: old workwear, toolbox, enamel cup, thick palms, and body keeping standard motions after leaving the line. Motif: factory discipline remains in hands and stance after retirement. Tension: aging is not softening but skill sedimented by time. Visual evidence: old factory badge, wrench, calluses, work cap, maintained coat, and eyes correcting younger workers. Boundary: avoid nostalgic worker poster.', 1, industrialModern],
     ['community_gate_grandpa', '小区门口大爷', 'Community-Gate Grandpa', '第一识别是小区门口大爷。造型入口：折叠椅、保温杯、门禁岗亭、旧夹克和观察小区来往的安静权威。母题：他通过门口位置维持微小社区秩序。张力：普通老人要有地方性权力。视觉证据：棋盘、小区卡、报纸、钥匙串、坐姿和能认出每个住户的眼。边界：避免慈祥老人模板。', 'First read: Community-Gate Grandpa. Styling entry: folding chair, thermos, gate booth, old jacket, and quiet authority watching community traffic. Motif: a small community order is maintained through the gate position. Tension: an ordinary elder holds local power. Visual evidence: chessboard, community card, newspaper, keys, seated posture, and eyes recognizing every resident. Boundary: avoid kindly elder template.'],
     ['old_photo_widow', '旧照片寡妇', 'Old-Photo Widow', '第一识别是旧照片寡妇。造型入口：旧照片、深色开衫、相框、安静坐姿和把伴侣缺席整理成日常的手。母题：失去通过物件保养和空间习惯持续存在。张力：悲伤要克制，不做哭戏。视觉证据：相册、眼镜、整洁桌布、旧戒指痕、慢慢擦相框的手和看向照片旁边空处的眼。边界：避免苦情戏或鬼故事。', 'First read: Old-Photo Widow. Styling entry: old photo, dark cardigan, frame, quiet seated posture, and hands arranging a partners absence into daily life. Motif: loss persists through object care and spatial habit. Tension: grief must stay restrained, not a crying scene. Visual evidence: album, glasses, tidy tablecloth, old ring mark, hands wiping frame slowly, and eyes looking beside the photo. Boundary: avoid melodrama or ghost story.'],
     ['morning_market_grandma', '早市奶奶', 'Morning-Market Grandma', '第一识别是早市奶奶。造型入口：菜篮、旧棉衣、零钱袋、早晨冷气和熟练挑选食材的手。母题：早市是她维持家庭和社区节奏的日常路线。张力：年纪要和生活能力并存。视觉证据：蔬菜水珠、塑料袋、舒适鞋、围巾、讨价还价手势和认识摊主的笑。边界：避免怀旧旅游照。', 'First read: Morning-Market Grandma. Styling entry: market basket, old padded coat, coin pouch, morning chill, and hands skilled at choosing ingredients. Motif: the morning market is her daily route for maintaining family and community rhythm. Tension: age and life competence coexist. Visual evidence: vegetable droplets, plastic bags, comfortable shoes, scarf, bargaining hands, and smile familiar with vendors. Boundary: avoid nostalgia tourism photo.'],
@@ -156,5 +446,6 @@ export const CD_PERSONA_SOCIAL_LIFE = buildExplicitPersonaTerms({
   visualEvidenceEn: 'daily clothing, life objects, class markers, fatigue traces, spatial habits, and social posture',
   absorptionFocus: '生活阶层、日常物件、社会关系、消费习惯、居住处境或身体疲惫',
   absorptionFocusEn: 'life class, daily objects, social relations, consumption habits, housing condition, or bodily fatigue',
-  appendVisualEvidence: false
+  appendVisualEvidence: false,
+  realityTags: ['persona_evidence', 'physical', 'realistic', 'daily_life', 'social']
 }, toSeeds(groups));

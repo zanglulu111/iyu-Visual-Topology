@@ -5,10 +5,14 @@ export type Sur3EraId =
   | 'mythic'
   | 'slave'
   | 'feudal'
+  | 'early_modern'
+  | 'industrial'
   | 'modern'
   | 'contemporary'
   | 'near_future'
-  | 'future';
+  | 'far_future'
+  | 'future'
+  | 'timeless';
 
 export type Sur3TimeMode = 'year_or_era' | 'era_preferred' | 'era_only';
 
@@ -70,10 +74,14 @@ export const SUR3_ERA_IDS: Sur3EraId[] = [
   'mythic',
   'slave',
   'feudal',
+  'early_modern',
+  'industrial',
   'modern',
   'contemporary',
   'near_future',
+  'far_future',
   'future',
+  'timeless',
 ];
 
 export const sur3Anchor = (item: Sur3SpaceAnchorItem): Sur3SpaceAnchorItem => item;

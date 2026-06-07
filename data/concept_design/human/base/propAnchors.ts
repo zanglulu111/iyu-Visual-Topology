@@ -16,6 +16,10 @@ type PropAnchorRow = [
   forbids?: string[]
 ];
 
+type PropAnchorAxisPatch = Pick<ConceptBaseItem, 'eraMode' | 'eras' | 'ontologyLevel' | 'realityTags' | 'categoryFit'>;
+type PropCategoryFit = NonNullable<ConceptBaseItem['categoryFit']>;
+
+const REAL_ERAS: ConceptEra[] = ['primitive', 'slave', 'feudal', 'early_modern', 'industrial', 'modern', 'contemporary', 'near_future', 'far_future'];
 const ALL_PLAUSIBLE_ERAS: ConceptEra[] = ['primitive', 'slave', 'feudal', 'early_modern', 'industrial', 'modern', 'contemporary', 'near_future', 'far_future', 'timeless'];
 const PREMODERN_ERAS: ConceptEra[] = ['primitive', 'slave', 'feudal', 'early_modern', 'timeless'];
 const HISTORICAL_ERAS: ConceptEra[] = ['slave', 'feudal', 'early_modern', 'industrial', 'timeless'];
@@ -25,6 +29,168 @@ const CONTEMPORARY_PLUS_ERAS: ConceptEra[] = ['contemporary', 'near_future', 'fa
 const FUTURE_ERAS: ConceptEra[] = ['near_future', 'far_future'];
 const MYTHIC_ERAS: ConceptEra[] = ['feudal', 'early_modern', 'timeless', 'mythic'];
 const WASTELAND_ERAS: ConceptEra[] = ['near_future', 'far_future', 'timeless'];
+
+const propFit = (
+  unlisted: PropCategoryFit['unlisted'],
+  strong: string[] = [],
+  usable: string[] = [],
+  fusion: string[] = [],
+  weak: string[] = [],
+  exclude: string[] = []
+): PropCategoryFit => ({ unlisted, strong, usable, fusion, weak, exclude });
+
+const propAxis = (
+  eraMode: PropAnchorAxisPatch['eraMode'],
+  eras: ConceptEra[],
+  ontologyLevel: NonNullable<PropAnchorAxisPatch['ontologyLevel']>,
+  realityTags: string[],
+  categoryFit: PropCategoryFit
+): PropAnchorAxisPatch => ({ eraMode, eras, ontologyLevel, realityTags, categoryFit });
+
+const realisticProp = ['physical', 'realistic', 'prop_evidence'];
+const stylizedProp = ['physical', 'stylized', 'semi_real', 'prop_evidence'];
+const techProp = ['physical', 'stylized', 'semi_surreal', 'technological', 'prop_evidence'];
+const ritualProp = ['physical', 'stylized', 'semi_real', 'ritual', 'prop_evidence'];
+const surrealProp = ['non_realist', 'surreal', 'symbolic', 'prop_evidence'];
+
+const everydayFit = propFit('weak', ['urban_life'], ['real_professional', 'romance', 'noir_crime', 'fashion_idol'], ['surreal'], ['mythic_epic', 'xianxia']);
+const professionalFit = propFit('none', ['real_professional'], ['urban_life', 'fashion_idol', 'noir_crime'], ['biopunk'], ['xianxia', 'mythic_epic']);
+const historicalFit = propFit('none', ['historical', 'court'], ['wuxia', 'romance', 'religious_ritual'], ['dark_fantasy', 'xianxia'], ['cyberpunk', 'science_fiction']);
+const weaponFit = propFit('none', ['war_military'], ['wuxia', 'adventure', 'wasteland', 'historical'], ['dark_fantasy', 'science_fiction'], ['romance']);
+const ritualFit = propFit('none', ['religious_ritual'], ['dark_fantasy', 'xianxia', 'mythic_epic', 'historical'], ['horror', 'fantasy', 'surreal'], ['urban_life']);
+const fashionFit = propFit('none', ['fashion_idol'], ['urban_life', 'romance', 'boudoir_aesthetic'], ['noir_crime', 'surreal'], ['war_military']);
+const techFit = propFit('none', ['science_fiction'], ['cyberpunk', 'posthuman', 'biopunk', 'real_professional'], ['wasteland', 'horror'], ['historical', 'wuxia']);
+const survivalFit = propFit('none', ['wasteland'], ['adventure', 'ecological', 'war_military'], ['science_fiction', 'biopunk'], ['court', 'romance']);
+
+const PROP_ANCHOR_AXIS: Record<string, PropAnchorAxisPatch> = {
+  id_badge_lanyard: propAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, propFit('none', ['real_professional'], ['urban_life', 'war_military'], ['science_fiction'], ['xianxia'])),
+  folded_receipts: propAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, everydayFit),
+  key_ring_bundle: propAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, propFit('weak', ['urban_life'], ['romance', 'real_professional', 'noir_crime'], ['wasteland'], ['xianxia'])),
+  cloth_tote: propAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, everydayFit),
+  worn_wallet: propAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, everydayFit),
+  paper_notebook: propAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, propFit('weak', ['real_professional', 'urban_life'], ['romance', 'noir_crime'], ['wuxia', 'xianxia'], [])),
+  ballpoint_pen: propAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, propFit('weak', ['real_professional', 'urban_life'], ['noir_crime'], [], ['xianxia'])),
+  umbrella_compact: propAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, propFit('weak', ['urban_life'], ['romance', 'real_professional', 'fashion_idol'], ['noir_crime'], ['war_military'])),
+  paper_coffee_cup: propAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, propFit('weak', ['urban_life'], ['real_professional', 'romance'], ['noir_crime'], ['xianxia', 'historical'])),
+  cigarette_case: propAxis('specific', ['industrial', 'modern', 'contemporary'], 1, realisticProp, propFit('none', ['noir_crime'], ['urban_life', 'boudoir_aesthetic', 'fashion_idol'], ['romance'], ['xianxia'])),
+  mobile_phone: propAxis('specific', ['contemporary', 'near_future', 'far_future'], 1, realisticProp, propFit('none', ['urban_life'], ['real_professional', 'fashion_idol'], ['science_fiction', 'cyberpunk'], ['historical', 'wuxia'])),
+  corded_headphones: propAxis('specific', ['modern', 'contemporary', 'near_future'], 1, realisticProp, propFit('none', ['urban_life', 'fashion_idol'], ['romance'], ['cyberpunk'], ['historical'])),
+  plastic_water_bottle: propAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, propFit('weak', ['urban_life'], ['real_professional', 'adventure'], ['wasteland'], ['historical'])),
+  medicine_blister_pack: propAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, propFit('none', ['real_professional'], ['urban_life', 'horror'], ['biopunk'], ['wuxia'])),
+  old_photograph: propAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, propFit('weak', ['romance'], ['noir_crime', 'urban_life', 'historical'], ['dark_fantasy'], [])),
+
+  stethoscope: propAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, professionalFit),
+  medical_clipboard: propAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, professionalFit),
+  syringe_case: propAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, propFit('none', ['real_professional'], ['biopunk'], ['horror'], ['wuxia'])),
+  tailor_tape: propAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, propFit('none', ['real_professional', 'fashion_idol'], ['urban_life'], ['court'], ['war_military'])),
+  fitting_pin_cushion: propAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, propFit('none', ['fashion_idol', 'real_professional'], ['urban_life'], ['court'], ['war_military'])),
+  camera_body: propAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, propFit('none', ['real_professional'], ['urban_life', 'fashion_idol', 'noir_crime'], ['science_fiction'], ['xianxia'])),
+  tool_roll: propAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, propFit('none', ['real_professional'], ['adventure', 'wasteland'], ['biopunk'], ['court'])),
+  wrench_spanner: propAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, propFit('none', ['real_professional'], ['wasteland', 'adventure'], ['science_fiction'], ['xianxia'])),
+  chef_knife_roll: propAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, propFit('none', ['real_professional'], ['urban_life'], ['noir_crime'], ['xianxia'])),
+  archive_folder: propAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, propFit('none', ['real_professional', 'noir_crime'], ['urban_life', 'historical'], ['dark_fantasy'], ['xianxia'])),
+  law_book: propAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, propFit('none', ['real_professional'], ['historical', 'court'], ['dark_fantasy'], ['xianxia'])),
+  teacher_pointer: propAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, professionalFit),
+  makeup_brush_roll: propAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, propFit('none', ['fashion_idol', 'real_professional'], ['boudoir_aesthetic', 'urban_life'], ['surreal'], ['war_military'])),
+  tattoo_machine: propAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, propFit('none', ['real_professional', 'urban_life'], ['fashion_idol', 'boudoir_aesthetic'], ['body_horror'], ['historical'])),
+  microphone_handheld: propAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, propFit('none', ['fashion_idol'], ['real_professional', 'urban_life'], ['surreal'], ['historical'])),
+
+  wax_sealed_letter: propAxis('specific', ['slave', 'feudal', 'early_modern', 'industrial'], 1, realisticProp, historicalFit),
+  signet_ring: propAxis('specific', ['slave', 'feudal', 'early_modern', 'industrial'], 1, realisticProp, historicalFit),
+  jade_token: propAxis('specific', ['slave', 'feudal', 'early_modern', 'timeless'], 1, realisticProp, propFit('none', ['wuxia', 'historical'], ['court', 'xianxia'], ['dark_fantasy'], ['cyberpunk'])),
+  folding_fan: propAxis('specific', ['feudal', 'early_modern', 'industrial'], 1, realisticProp, propFit('none', ['historical', 'court'], ['wuxia', 'romance', 'fashion_idol'], ['xianxia'], ['science_fiction'])),
+  ledger_book: propAxis('specific', ['feudal', 'early_modern', 'industrial'], 1, realisticProp, historicalFit),
+  abacus: propAxis('specific', ['feudal', 'early_modern', 'industrial'], 1, realisticProp, propFit('none', ['historical'], ['court', 'wuxia', 'real_professional'], ['xianxia'], ['cyberpunk'])),
+  scroll_tube: propAxis('specific', ['slave', 'feudal', 'early_modern', 'industrial'], 1, realisticProp, historicalFit),
+  ink_stone_brush: propAxis('specific', ['slave', 'feudal', 'early_modern', 'timeless'], 1, realisticProp, propFit('none', ['historical', 'wuxia'], ['court', 'religious_ritual', 'xianxia'], ['dark_fantasy'], ['cyberpunk'])),
+  court_tablet: propAxis('specific', ['slave', 'feudal'], 1, realisticProp, propFit('none', ['court', 'historical'], ['religious_ritual'], ['xianxia'], ['urban_life', 'cyberpunk'])),
+  heraldic_banner: propAxis('specific', ['slave', 'feudal', 'early_modern', 'industrial'], 1, realisticProp, historicalFit),
+  ceremonial_cup: propAxis('specific', ['slave', 'feudal', 'early_modern', 'industrial'], 1, realisticProp, propFit('none', ['court', 'religious_ritual'], ['historical', 'romance'], ['dark_fantasy'], ['cyberpunk'])),
+  old_map: propAxis('specific', ['slave', 'feudal', 'early_modern', 'industrial'], 1, realisticProp, propFit('none', ['adventure', 'historical'], ['wuxia', 'war_military', 'court'], ['xianxia'], ['urban_life'])),
+  pocket_watch: propAxis('specific', ['industrial', 'modern'], 1, realisticProp, propFit('none', ['historical', 'noir_crime'], ['court', 'romance'], ['science_fiction'], ['xianxia'])),
+  opera_glasses: propAxis('specific', ['industrial', 'modern'], 1, realisticProp, propFit('none', ['court', 'fashion_idol'], ['historical', 'romance'], ['noir_crime'], ['wuxia'])),
+  mourning_locket: propAxis('specific', ['early_modern', 'industrial', 'modern'], 1, realisticProp, propFit('none', ['romance', 'historical'], ['court', 'dark_fantasy'], ['horror'], ['cyberpunk'])),
+
+  short_sword: propAxis('specific', ['slave', 'feudal', 'early_modern', 'industrial'], 1, realisticProp, propFit('none', ['wuxia', 'war_military'], ['historical', 'dark_fantasy', 'adventure'], ['xianxia'], ['urban_life'])),
+  long_sword_scabbard: propAxis('specific', ['slave', 'feudal', 'early_modern', 'industrial'], 1, realisticProp, propFit('none', ['wuxia', 'war_military'], ['historical', 'fantasy', 'dark_fantasy'], ['xianxia'], ['urban_life'])),
+  bow_quiver: propAxis('specific', ['primitive', 'slave', 'feudal', 'early_modern'], 1, realisticProp, propFit('none', ['adventure', 'war_military'], ['wuxia', 'fantasy', 'ecological'], ['xianxia'], ['urban_life'])),
+  spear_polearm: propAxis('specific', ['slave', 'feudal', 'early_modern', 'industrial'], 1, realisticProp, propFit('none', ['war_military', 'wuxia'], ['historical', 'fantasy', 'religious_ritual'], ['xianxia'], ['urban_life'])),
+  shield_round: propAxis('specific', ['primitive', 'slave', 'feudal', 'early_modern', 'industrial'], 1, realisticProp, weaponFit),
+  pistol_period: propAxis('specific', ['early_modern', 'industrial', 'modern'], 1, realisticProp, propFit('none', ['war_military', 'noir_crime'], ['historical', 'wasteland'], ['science_fiction'], ['wuxia', 'xianxia'])),
+  rifle_service: propAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, weaponFit),
+  combat_knife: propAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, weaponFit),
+  body_armor_plate: propAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, propFit('none', ['war_military'], ['wasteland', 'science_fiction'], ['cyberpunk'], ['wuxia', 'historical'])),
+  gas_mask: propAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 2, stylizedProp, propFit('none', ['war_military', 'wasteland'], ['real_professional', 'horror'], ['science_fiction', 'cyberpunk'], ['court'])),
+  radio_handset: propAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, propFit('none', ['war_military'], ['real_professional', 'adventure', 'wasteland'], ['science_fiction'], ['historical'])),
+  flare_signal: propAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, propFit('none', ['adventure', 'war_military'], ['wasteland', 'ecological'], ['science_fiction'], ['court'])),
+  tactical_medkit: propAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, propFit('none', ['war_military', 'real_professional'], ['wasteland'], ['science_fiction'], ['wuxia'])),
+  handcuffs_restraints: propAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, propFit('none', ['real_professional', 'noir_crime'], ['war_military', 'boudoir_aesthetic'], ['horror'], ['xianxia'])),
+  helmet_visored: propAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, propFit('none', ['war_military'], ['real_professional', 'wasteland', 'science_fiction'], ['cyberpunk'], ['court'])),
+
+  prayer_beads: propAxis('universal', REAL_ERAS, 1, ritualProp, ritualFit),
+  reliquary_box: propAxis('specific', ['feudal', 'early_modern', 'timeless', 'mythic'], 2, ritualProp, ritualFit),
+  censer_chain: propAxis('specific', ['feudal', 'early_modern', 'timeless', 'mythic'], 1, ritualProp, ritualFit),
+  ritual_bell: propAxis('specific', ['feudal', 'early_modern', 'timeless', 'mythic'], 2, ritualProp, ritualFit),
+  sealed_charm: propAxis('specific', ['feudal', 'early_modern', 'timeless', 'mythic'], 2, ritualProp, propFit('none', ['religious_ritual', 'xianxia'], ['dark_fantasy', 'wuxia', 'mythic_epic'], ['horror', 'surreal'], ['urban_life'])),
+  ritual_knife: propAxis('specific', ['feudal', 'early_modern', 'timeless', 'mythic'], 2, ritualProp, ritualFit),
+  offering_bowl: propAxis('universal', REAL_ERAS, 1, ritualProp, ritualFit),
+  wax_seal_bundle: propAxis('specific', ['slave', 'feudal', 'early_modern', 'industrial'], 1, realisticProp, propFit('none', ['religious_ritual', 'historical'], ['court', 'dark_fantasy'], ['xianxia'], ['urban_life'])),
+  altar_candle: propAxis('universal', REAL_ERAS, 1, ritualProp, ritualFit),
+  bone_totem: propAxis('specific', ['feudal', 'early_modern', 'timeless', 'mythic'], 2, ritualProp, propFit('none', ['religious_ritual', 'dark_fantasy'], ['mythic_epic', 'horror', 'fantasy'], ['xianxia', 'surreal'], ['urban_life'])),
+  spirit_mask_carried: propAxis('specific', ['feudal', 'early_modern', 'timeless', 'mythic'], 2, ritualProp, ritualFit),
+  divination_cards: propAxis('specific', ['early_modern', 'industrial', 'modern', 'contemporary', 'timeless', 'mythic'], 2, ritualProp, propFit('none', ['religious_ritual'], ['dark_fantasy', 'romance', 'horror'], ['surreal', 'xianxia'], ['war_military'])),
+  small_skull_relic: propAxis('specific', ['feudal', 'early_modern', 'timeless', 'mythic'], 2, ritualProp, propFit('none', ['dark_fantasy', 'religious_ritual'], ['horror', 'mythic_epic'], ['surreal'], ['urban_life'])),
+  holy_text_book: propAxis('universal', REAL_ERAS, 1, ritualProp, ritualFit),
+  sealed_black_box: propAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future', 'timeless', 'mythic'], 3, surrealProp, propFit('none', ['horror', 'surreal'], ['dark_fantasy', 'science_fiction', 'religious_ritual'], ['xianxia'], ['urban_life'])),
+
+  statement_handbag: propAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, fashionFit),
+  sunglasses_case: propAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, fashionFit),
+  garment_hanger_tag: propAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, fashionFit),
+  lookbook_folder: propAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, fashionFit),
+  press_pass: propAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, propFit('none', ['real_professional', 'fashion_idol'], ['urban_life'], ['noir_crime'], ['xianxia'])),
+  compact_mirror: propAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, fashionFit),
+  lipstick_tube: propAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, propFit('none', ['fashion_idol', 'boudoir_aesthetic'], ['romance', 'urban_life'], ['noir_crime'], ['war_military'])),
+  perfume_bottle: propAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, propFit('none', ['fashion_idol', 'boudoir_aesthetic'], ['romance', 'urban_life'], ['surreal'], ['war_military'])),
+  runway_number_card: propAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, fashionFit),
+  ring_light_phone_mount: propAxis('specific', ['contemporary', 'near_future', 'far_future'], 1, realisticProp, propFit('none', ['fashion_idol', 'urban_life'], ['real_professional', 'boudoir_aesthetic'], ['cyberpunk'], ['historical'])),
+  vinyl_record: propAxis('specific', ['industrial', 'modern', 'contemporary'], 1, realisticProp, propFit('none', ['fashion_idol', 'urban_life'], ['romance', 'noir_crime'], ['surreal'], ['wuxia'])),
+  cassette_player: propAxis('specific', ['modern', 'contemporary'], 1, realisticProp, propFit('none', ['fashion_idol', 'urban_life'], ['romance', 'noir_crime'], ['surreal'], ['historical'])),
+  magazine_stack: propAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, fashionFit),
+  champagne_flute: propAxis('specific', ['industrial', 'modern', 'contemporary'], 1, realisticProp, propFit('none', ['fashion_idol', 'boudoir_aesthetic'], ['romance', 'court', 'urban_life'], ['noir_crime'], ['war_military'])),
+  clutch_invitation: propAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, fashionFit),
+
+  wrist_terminal: propAxis('specific', ['near_future', 'far_future'], 4, techProp, techFit),
+  smart_glasses_hud: propAxis('specific', ['near_future', 'far_future'], 3, techProp, techFit),
+  sensor_patch_pack: propAxis('specific', ['contemporary', 'near_future', 'far_future'], 3, techProp, propFit('none', ['science_fiction', 'real_professional'], ['biopunk', 'posthuman'], ['cyberpunk'], ['historical'])),
+  sample_capsule: propAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 3, techProp, propFit('none', ['biopunk', 'real_professional'], ['science_fiction', 'posthuman'], ['horror'], ['wuxia'])),
+  data_shard: propAxis('specific', ['near_future', 'far_future'], 4, techProp, techFit),
+  portable_power_cell: propAxis('specific', ['near_future', 'far_future'], 3, techProp, techFit),
+  drone_companion_small: propAxis('specific', ['near_future', 'far_future'], 4, techProp, techFit),
+  oxygen_rebreather: propAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 3, techProp, propFit('none', ['science_fiction'], ['wasteland', 'real_professional', 'posthuman'], ['biopunk'], ['historical'])),
+  holo_projector_puck: propAxis('specific', ['near_future', 'far_future'], 4, techProp, propFit('none', ['science_fiction', 'cyberpunk'], ['posthuman'], ['surreal'], ['historical', 'wuxia'])),
+  cyberdeck_slab: propAxis('specific', ['near_future', 'far_future'], 4, techProp, propFit('none', ['cyberpunk'], ['science_fiction', 'posthuman'], ['noir_crime'], ['historical'])),
+  biometric_scanner: propAxis('specific', ['contemporary', 'near_future', 'far_future'], 3, techProp, propFit('none', ['science_fiction', 'real_professional'], ['cyberpunk', 'posthuman'], ['biopunk'], ['historical'])),
+  exo_tool_module: propAxis('specific', ['near_future', 'far_future'], 4, techProp, techFit),
+  cryo_tag: propAxis('specific', ['near_future', 'far_future'], 4, techProp, techFit),
+  lab_containment_case: propAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 3, techProp, propFit('none', ['biopunk', 'real_professional'], ['science_fiction', 'horror'], ['posthuman'], ['wuxia'])),
+  ai_oracle_cube: propAxis('specific', ['far_future'], 5, surrealProp, propFit('none', ['science_fiction', 'posthuman'], ['cyberpunk', 'surreal'], ['religious_ritual'], ['historical', 'wuxia'])),
+
+  patched_water_filter: propAxis('specific', ['near_future', 'far_future'], 1, realisticProp, survivalFit),
+  ration_tin: propAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, survivalFit),
+  salvage_hook: propAxis('specific', ['near_future', 'far_future'], 1, realisticProp, survivalFit),
+  crowbar_pry_tool: propAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, propFit('none', ['wasteland'], ['adventure', 'noir_crime', 'war_military'], ['horror'], ['court'])),
+  solar_charger_scrap: propAxis('specific', ['contemporary', 'near_future', 'far_future'], 2, stylizedProp, propFit('none', ['wasteland'], ['science_fiction', 'ecological'], ['adventure'], ['historical'])),
+  gasoline_can: propAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, survivalFit),
+  bedroll_bundle: propAxis('universal', REAL_ERAS, 1, realisticProp, propFit('usable', ['adventure', 'wasteland'], ['ecological', 'war_military', 'historical'], ['wuxia'], [])),
+  patched_canteen: propAxis('universal', REAL_ERAS, 1, realisticProp, propFit('usable', ['adventure', 'wasteland'], ['war_military', 'ecological', 'historical'], ['wuxia'], [])),
+  roadside_toolbox: propAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, propFit('none', ['wasteland', 'real_professional'], ['adventure', 'urban_life'], ['science_fiction'], ['court'])),
+  seed_packet: propAxis('universal', REAL_ERAS, 1, realisticProp, propFit('usable', ['ecological'], ['wasteland', 'adventure', 'urban_life'], ['science_fiction'], [])),
+  filter_mask_canister: propAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 2, stylizedProp, survivalFit),
+  hand_crank_radio: propAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, propFit('none', ['wasteland'], ['war_military', 'adventure'], ['science_fiction'], ['historical'])),
+  repair_tape_roll: propAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticProp, propFit('weak', ['wasteland'], ['real_professional', 'adventure', 'urban_life'], ['science_fiction'], [])),
+  scrap_map_board: propAxis('specific', ['near_future', 'far_future'], 1, realisticProp, survivalFit),
+  animal_trap_snare: propAxis('universal', REAL_ERAS, 1, realisticProp, propFit('usable', ['adventure', 'ecological'], ['wasteland', 'historical'], ['dark_fantasy'], ['urban_life']))
+};
 
 const PROP_ROWS: PropAnchorRow[] = [
   ['id_badge_lanyard', '挂绳身份牌', 'Lanyard ID Badge', 'A. 现实随身物', 'A. Everyday Carry', '机构身份牌、挂绳、照片和色条说明岗位，不自动引入科幻界面。', 'Institutional badge, lanyard, photo, and color strip explain role without adding sci-fi interface.', 1, MODERN_PLUS_ERAS, 'clean', ['prop', 'symbol', 'occupation'], ['identity', 'institution'], ['hologram UI']],
@@ -156,6 +322,19 @@ const PROP_ROWS: PropAnchorRow[] = [
   ['animal_trap_snare', '捕兽套索', 'Animal Snare Trap', 'H. 废土/生存道具', 'H. Wasteland / Survival Objects', '套索、捕兽夹或绳结说明狩猎、生存和野外技能。', 'Snare, trap, or knot indicates hunting, survival, and wilderness skill.', 1, ALL_PLAUSIBLE_ERAS, 'medium', ['prop', 'survival']]
 ];
 
+const buildEvidenceTags = (group: string, affects: readonly string[], controls: readonly string[]): string[] => {
+  const tags = new Set<string>([...affects, ...controls]);
+  if (group.startsWith('A.')) tags.add('medical');
+  if (group.startsWith('B.')) tags.add('knowledge');
+  if (group.startsWith('C.')) tags.add('institution');
+  if (group.startsWith('D.')) tags.add('combat');
+  if (group.startsWith('E.')) tags.add('ritual');
+  if (group.startsWith('F.')) tags.add('technology');
+  if (group.startsWith('G.')) tags.add('space');
+  if (group.startsWith('H.')) tags.add('survival');
+  return Array.from(tags);
+};
+
 export const CD_PROP_ANCHORS: ConceptBaseItem[] = PROP_ROWS.map(([
   key,
   name,
@@ -170,18 +349,23 @@ export const CD_PROP_ANCHORS: ConceptBaseItem[] = PROP_ROWS.map(([
   affects = ['prop'],
   controls = ['prop'],
   forbids = []
-]) => ({
-  id: `cd_prop_${key}`,
-  name,
-  nameEn,
-  group,
-  groupEn,
-  def,
-  defEn,
-  ontologyLevel,
-  eras,
-  risk,
-  affects,
-  controls,
-  forbids
-}));
+]) => {
+  const axisPatch = PROP_ANCHOR_AXIS[key];
+  return {
+    id: `cd_prop_${key}`,
+    name,
+    nameEn,
+    group,
+    groupEn,
+    def,
+    defEn,
+    ontologyLevel,
+    eras,
+    risk,
+    affects,
+    controls,
+    evidenceTags: buildEvidenceTags(group, affects, controls),
+    forbids,
+    ...axisPatch
+  };
+});

@@ -26,6 +26,13 @@ import {
     WORLD_MOTIF_CATEGORIES
 } from '../constants';
 import { BlueprintLanguage, DriverType, LibraryCategoryDef } from '../types';
+import {
+    blockUsesSimpleHardAxis,
+    getConceptSimpleAxisMatch,
+    simpleAxisSortScore,
+    type ConceptCategoryFitLevel,
+    type ConceptSimpleAxisFilterTags
+} from '../data/concept_design/filter/simpleAxisFilter';
 import { buildTermFocusPatch, clearFocusForTagsPatch, getFocusLimitReason, getFocusUnitKey, isFocusableBlock, MAX_FOCUS_TERMS } from '../utils/focusTerms';
 import { XRayInspectorModal, type XRaySourceGroup } from './XRayInspector';
 
@@ -51,6 +58,15 @@ interface NarrativeLibraryModalProps {
     allSelectedFocusUnitMap?: Record<string, string>;
     allSelectedFocusBlockMap?: Record<string, string>;
     isAdmin?: boolean;
+    keywordFilterTags?: ConceptSimpleAxisFilterTags;
+    keywordFilterEnabled?: boolean;
+    keywordAxisLevelFilter?: {
+        mode?: 'INTERSECTION' | 'UNION' | 'LAYERED' | 'SOFT_SORT';
+        order?: Array<'category' | 'era' | 'reality'>;
+        categoryLevels?: Exclude<ConceptCategoryFitLevel, 'neutral'>[];
+        eraLevels?: Array<'hit' | 'universal' | 'miss'>;
+        realityLevels?: Array<'hit' | 'allowed' | 'miss'>;
+    };
 }
 
 const iconMap: Record<string, React.ElementType> = {
@@ -79,6 +95,17 @@ const getLocalizedLabel = (name: string | undefined, nameEn: string | undefined,
     return displayCnTag(name);
 };
 
+const stripLibraryGroupPrefix = (value: unknown) => String(value || '')
+    .replace(/^\s*(?:\d+(?:\.\d+)*|[A-Za-z]\d*(?:\.\d+)*|[IVXLCDM]+|[一二三四五六七八九十]+)[.．、]\s*/u, '')
+    .trim();
+
+const getDisplayGroupName = (name: string, en: string | undefined, lang: BlueprintLanguage) => {
+    const cleanedName = stripLibraryGroupPrefix(name);
+    const cleanedEn = stripLibraryGroupPrefix(en);
+    if (lang === 'EN') return cleanedEn || getEnglishLabel(cleanedName, cleanedEn) || cleanedName;
+    return displayCnTag(cleanedName);
+};
+
 const getLocalizedText = (item: any, cnKey: string, enKey: string, lang: BlueprintLanguage) => {
     const text = lang === 'EN' ? item?.[enKey] : item?.[cnKey];
     return typeof text === 'string' ? text.trim() : text;
@@ -92,8 +119,21 @@ const itemTagMatches = (item: any, tag: string) =>
 
 const itemMatchesAnyTag = (item: any, tags: string[]) => tags.some(tag => itemTagMatches(item, tag));
 
+const metaList = (item: LibraryItemDef, key: string) => {
+    const value = (item as unknown as Record<string, unknown>)[key];
+    if (Array.isArray(value)) return value.map(String);
+    if (typeof value === 'string') return [value];
+    return [];
+};
+
+const intersects = (a: readonly string[] = [], b: readonly string[] = []) => {
+    if (!a.length || !b.length) return false;
+    const set = new Set(a.map(value => value.toLowerCase()));
+    return b.some(value => set.has(value.toLowerCase()));
+};
+
 export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
-    isOpen, onClose, blockId, blockName, selectedTags, onToggleTag, onSetTags, onClear, lang = 'CN', customLibraryData, driverType, onAddCustomDef, scrollToTag, onTempLockChange, onFocusStateChange, initialFaceState, initialFocusState, allSelectedTags, allSelectedFocusUnitMap, allSelectedFocusBlockMap, isAdmin = false
+    isOpen, onClose, blockId, blockName, selectedTags, onToggleTag, onSetTags, onClear, lang = 'CN', customLibraryData, driverType, onAddCustomDef, scrollToTag, onTempLockChange, onFocusStateChange, initialFaceState, initialFocusState, allSelectedTags, allSelectedFocusUnitMap, allSelectedFocusBlockMap, isAdmin = false, keywordFilterTags, keywordFilterEnabled = true, keywordAxisLevelFilter
 }) => {
     const { theme: globalTheme } = useTheme();
     const [searchQuery, setSearchQuery] = useState("");
@@ -120,11 +160,129 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
     const [activeSlotIndex, setActiveSlotIndex] = useState(0);
     const [selectionPast, setSelectionPast] = useState<string[][]>([]);
     const [selectionFuture, setSelectionFuture] = useState<string[][]>([]);
+    const [hideKeywordUnmatched, setHideKeywordUnmatched] = useState(false);
 
     const [currentLang, setCurrentLang] = useState<BlueprintLanguage>(lang);
 
     const isEngineLexicon = blockId.startsWith('engine_m');
     const canFocusTerms = isFocusableBlock(blockId);
+    const keywordFilterActive = Boolean(keywordFilterEnabled && blockUsesSimpleHardAxis(blockId) && keywordFilterTags && Object.values(keywordFilterTags).some(values => (values || []).length > 0));
+    useEffect(() => {
+        if (keywordAxisLevelFilter?.mode === 'SOFT_SORT') {
+            setHideKeywordUnmatched(false);
+            return;
+        }
+        if (keywordFilterActive) setHideKeywordUnmatched(true);
+    }, [keywordFilterActive, blockId, keywordAxisLevelFilter?.mode]);
+    const isMajorSceneKeywordBlock = [
+        'cd_field_preset',
+        'cd_scene_real',
+        'cd_scene_surreal',
+        'cd_scene_abstract',
+        'cd_spacetime_coordinate',
+        'cd_space_anchor_exact',
+        'cd_atmosphere',
+        'cd_particles',
+        'cd_light_type'
+    ].includes(blockId);
+    const isOntologySubjectKeywordBlock = [
+        'cd_species',
+        'cd_eye_fx',
+        'cd_body_features',
+        'cd_body_markings',
+        'cd_body_damage',
+        'cd_body_modification',
+        'cd_creature_class',
+        'cd_creature_element',
+        'cd_creature_head',
+        'cd_creature_body',
+        'cd_creature_texture'
+    ].includes(blockId);
+    const isGroomingKeywordBlock = [
+        'cd_hair_color',
+        'cd_hair_style_f',
+        'cd_hair_style_m',
+        'cd_beard_style',
+        'cd_makeup_style'
+    ].includes(blockId);
+    const isFaceIdentityKeywordBlock = [
+        'cd_age',
+        'cd_eye_color',
+        'cd_eye_shape',
+        'cd_face_features'
+    ].includes(blockId);
+    const isBodyIdentityKeywordBlock = [
+        'cd_body_type'
+    ].includes(blockId);
+    const isBodyEvidenceKeywordBlock = [
+        'cd_skin_texture',
+        'cd_surface_state'
+    ].includes(blockId);
+    const isOccupationKeywordBlock = [
+        'cd_occupation'
+    ].includes(blockId);
+    const isPersonaKeywordBlock = [
+        'cd_persona'
+    ].includes(blockId);
+    const isSubjectKeywordBlock =
+        isOntologySubjectKeywordBlock ||
+        isGroomingKeywordBlock ||
+        isFaceIdentityKeywordBlock ||
+        isBodyIdentityKeywordBlock ||
+        isBodyEvidenceKeywordBlock ||
+        isOccupationKeywordBlock ||
+        isPersonaKeywordBlock;
+    const getAdjustedKeywordMatchScore = (item: LibraryItemDef) => {
+        if (!keywordFilterTags) return 0;
+        return getConceptSimpleAxisMatch(item, keywordFilterTags).score;
+    };
+    const getKeywordMatchScore = (item: LibraryItemDef) => {
+        return getAdjustedKeywordMatchScore(item);
+    };
+    const getKeywordAffinitySortScore = (item: LibraryItemDef) => {
+        if (!keywordFilterTags) return 0;
+        return simpleAxisSortScore(getConceptSimpleAxisMatch(item, keywordFilterTags));
+    };
+    const getKeywordAxisLevels = (item: LibraryItemDef) => {
+        const match = getConceptSimpleAxisMatch(item, keywordFilterTags || {});
+        const eraLevel: 'hit' | 'universal' | 'miss' = match.matchedEra.length > 0
+            ? 'hit'
+            : ((item as any).eraMode === 'universal' || match.itemEraTags.length === 0)
+                ? 'universal'
+                : 'miss';
+        const realityLevel: 'hit' | 'allowed' | 'miss' = match.matchedReality.length > 0
+            ? 'hit'
+            : match.realityScore >= 0
+                ? 'allowed'
+                : 'miss';
+        return { match, eraLevel, realityLevel };
+    };
+    const itemMatchesKeywordFilter = (item: LibraryItemDef) => {
+        if (!keywordFilterActive) return true;
+        if (keywordAxisLevelFilter?.mode === 'SOFT_SORT' || keywordAxisLevelFilter?.mode === 'LAYERED') return true;
+        const { match, eraLevel, realityLevel } = getKeywordAxisLevels(item);
+        const categoryLevels = keywordAxisLevelFilter?.categoryLevels || (['strong', 'usable', 'fusion'] as Exclude<ConceptCategoryFitLevel, 'neutral'>[]);
+        const eraLevels = keywordAxisLevelFilter?.eraLevels || (['hit', 'universal'] as Array<'hit' | 'universal' | 'miss'>);
+        const realityLevels = keywordAxisLevelFilter?.realityLevels || (['hit', 'allowed'] as Array<'hit' | 'allowed' | 'miss'>);
+        const categoryActive = Boolean((keywordFilterTags?.categoryTags || []).length);
+        const eraActive = Boolean((keywordFilterTags?.eraTags || []).length);
+        const realityActive = Boolean((keywordFilterTags?.realityTags || []).length);
+        const checks = [
+            { key: 'category' as const, active: categoryActive, pass: categoryLevels.includes(match.categoryFitLevel as Exclude<ConceptCategoryFitLevel, 'neutral'>) },
+            { key: 'era' as const, active: eraActive, pass: eraLevels.includes(eraLevel) },
+            { key: 'reality' as const, active: realityActive, pass: realityLevels.includes(realityLevel) }
+        ];
+        const activeChecks = checks.filter(check => check.active);
+        if (activeChecks.length === 0) return true;
+        if (keywordAxisLevelFilter?.mode === 'UNION') return activeChecks.some(check => check.pass);
+        return activeChecks.every(check => check.pass);
+    };
+    const orderItemsByKeywordFilter = (items: LibraryItemDef[]) => {
+        if (!keywordFilterActive) return items;
+        return [...items]
+            .filter(item => !hideKeywordUnmatched || itemMatchesKeywordFilter(item))
+            .sort((a, b) => getKeywordAffinitySortScore(b) - getKeywordAffinitySortScore(a));
+    };
     // Content version control: 'academic' shows def+core, 'ai' shows directive
     const [contentVersion, setContentVersion] = useState<'academic' | 'ai'>('ai'); // Default to AI version
     const effectiveContentVersion = isEngineLexicon ? contentVersion : 'academic';
@@ -198,7 +356,7 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
             // FIXED: AESTHETIC mode needs to search across multiple libraries
             allLibs = [...AESTHETIC_ENGINE_LIBRARY, ...SKIN_LIBRARY, ...COMMERCIAL_ENGINE_LIBRARY];
         } else if (driverType === DriverType.CONCEPT_DESIGN) {
-            allLibs = [...CONCEPT_ENGINE_LIBRARY, ...AESTHETIC_ENGINE_LIBRARY];
+            allLibs = [...CONCEPT_ENGINE_LIBRARY];
         } else {
             allLibs = [...NARRATIVE_ENGINE_LIBRARY, ...SKIN_LIBRARY, ...GENRE_CATEGORIES];
         }
@@ -261,7 +419,7 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
             if (existing) {
                 existing.count += 1;
             } else {
-                categoryMap.set(id, { id, name, count: 1 });
+                categoryMap.set(id, { id, name: getDisplayGroupName(name, undefined, currentLang) || name, count: 1 });
             }
         });
         return Array.from(categoryMap.values());
@@ -282,7 +440,7 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
             if (existing) {
                 existing.count += 1;
             } else {
-                categoryMap.set(id, { id, name, count: 1 });
+                categoryMap.set(id, { id, name: getDisplayGroupName(name, undefined, currentLang) || name, count: 1 });
             }
         });
         return Array.from(categoryMap.values());
@@ -304,7 +462,7 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
         if (!isPersonaLibrary) return [];
         const formatName = (name: string, en?: string) => {
             if (!name && !en) return "";
-            return getLocalizedLabel(name, en, currentLang) || name;
+            return getDisplayGroupName(name, en, currentLang) || name;
         };
         const canSeeItem = (item: any) => isAdmin || !item?.adminOnly;
         const category = libraryData[0];
@@ -324,14 +482,14 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                 name: formatName(groupName, enName) || (currentLang === 'EN' ? 'Group' : groupName),
                 items: groupedItems[groupName]
             };
-        }).sort((a, b) => a.id.localeCompare(b.id));
+        });
     }, [currentLang, isAdmin, isPersonaLibrary, libraryData, useAltGroup]);
 
     const fullProtocolGroups = useMemo(() => {
         if (!isStyleProtocolLibrary) return [];
         const formatName = (name: string, en?: string) => {
             if (!name && !en) return "";
-            return getLocalizedLabel(name, en, currentLang) || name;
+            return getDisplayGroupName(name, en, currentLang) || name;
         };
         const canSeeItem = (item: any) => isAdmin || !item?.adminOnly;
         const groupedItems: Record<string, any[]> = {};
@@ -349,7 +507,7 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                 name: formatName(groupName, enName) || (currentLang === 'EN' ? 'Group' : groupName),
                 items: groupedItems[groupName]
             };
-        }).sort((a, b) => a.id.localeCompare(b.id));
+        });
     }, [currentLang, isAdmin, isStyleProtocolLibrary, libraryData, useAltGroup]);
 
     // Super group functionality removed to simplify genre selection
@@ -364,7 +522,7 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
     const processedGroups = useMemo(() => {
         const formatName = (name: string, en?: string) => {
             if (!name && !en) return "";
-            return getLocalizedLabel(name, en, currentLang) || name;
+            return getDisplayGroupName(name, en, currentLang) || name;
         };
 
         const canSeeItem = (item: any) => isAdmin || !item?.adminOnly;
@@ -418,7 +576,7 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                     name: formatName(groupName, enName) || (currentLang === 'EN' ? 'Group' : groupName),
                     items: groupedItems[groupName]
                 };
-            }).sort((a, b) => a.id.localeCompare(b.id));
+            });
 
             if (groups.length === 0) {
                 return [{
@@ -485,7 +643,7 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                 ? GENRE_CATEGORIES.map(cat => ({ id: cat.id, name: cat.name, items: cat.items }))
                 : processedGroups;
 
-            return searchSource.flatMap(group =>
+            return orderItemsByKeywordFilter(searchSource.flatMap(group =>
                 (group.items || []).filter(item =>
                     item.name.toLowerCase().includes(lowerQuery) ||
                     (item.nameEn && item.nameEn.toLowerCase().includes(lowerQuery)) ||
@@ -497,13 +655,13 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                     (item.essenceEn && item.essenceEn.toLowerCase().includes(lowerQuery)) ||
                     (item.reality && item.reality.toLowerCase().includes(lowerQuery))
                 ).map(item => ({ ...item, _groupName: group.name }))
-            );
+            ));
         }
         if (!activeTab) return [];
         const group = processedGroups.find(g => g.id === activeTab);
         if (!group) return [];
-        return group.items || [];
-    }, [activeTab, processedGroups, searchQuery, blockId, currentLang]);
+        return orderItemsByKeywordFilter(group.items || []);
+    }, [activeTab, processedGroups, searchQuery, blockId, currentLang, keywordFilterTags, hideKeywordUnmatched]);
 
     const allCurrentLibraryItems = useMemo(() => {
         const seen = new Set<string>();
@@ -944,7 +1102,10 @@ ${adminNote}
     const handleRandomize = () => {
         if (allCurrentLibraryItems.length === 0) return;
         const targetIndex = getTargetSlotIndex();
-        const candidateItems = allCurrentLibraryItems.filter(item => !itemMatchesAnyTag(item, selectedTags));
+        const recommendedItems = keywordFilterActive
+            ? allCurrentLibraryItems.filter(item => itemMatchesKeywordFilter(item))
+            : allCurrentLibraryItems;
+        const candidateItems = recommendedItems.filter(item => !itemMatchesAnyTag(item, selectedTags));
         if (candidateItems.length === 0) return;
         const randomItem = candidateItems[Math.floor(Math.random() * candidateItems.length)];
         if (randomItem) {
@@ -1312,6 +1473,20 @@ ${adminNote}
 
                         <div className={`mist-lexicon-action-stack shrink-0 flex flex-col rounded-xl border backdrop-blur-sm overflow-hidden ${globalTheme === 'retro' ? 'bg-white border-[#8B261D]/10 shadow-sm' : 'bg-white/5 border-white/5'}`}>
                             <div className={`flex items-center p-1 gap-0.5 border-b ${globalTheme === 'retro' ? 'border-[#8B261D]/10' : 'border-white/5'}`}>
+                                {keywordFilterActive && (
+                                    <button
+                                        onClick={() => setHideKeywordUnmatched(prev => !prev)}
+                                        className={`mist-lexicon-action-button flex items-center gap-1.5 px-3 h-8 rounded-lg text-[10px] font-black uppercase tracking-[0.16em] transition-all active:scale-95 ${hideKeywordUnmatched
+                                            ? (globalTheme === 'retro' ? 'bg-[#8B261D] text-white' : `${themeText} bg-zinc-800`)
+                                            : (globalTheme === 'retro' ? 'text-[#8B261D]' : 'text-zinc-400 hover:bg-white/10 hover:text-white')
+                                        }`}
+                                        title={currentLang === 'EN' ? 'Show matched only' : '只看符合'}
+                                    >
+                                        <Eye size={14} />
+                                        <span className="hidden xl:inline">{currentLang === 'EN' ? 'FIT' : '符合'}</span>
+                                    </button>
+                                )}
+
                                 <button
                                     onClick={handleRandomize}
                                     className={`mist-lexicon-action-button flex items-center gap-1.5 px-3 h-8 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] transition-all ${globalTheme === 'retro' ? 'text-[#8B261D]' : `${themeText} hover:bg-white/10`} active:scale-95`}
@@ -1463,14 +1638,17 @@ ${adminNote}
                     </div>
                     <div className={`flex-1 overflow-y-auto custom-scrollbar p-4 md:p-8 ${globalTheme === 'retro' ? 'bg-white' : 'bg-[#050505]'}`}>
 
-                        {searchQuery && (
+                        {(searchQuery || keywordFilterActive) && (
                             <div className="mb-4 text-xs text-zinc-500 font-mono uppercase tracking-widest flex items-center gap-2">
-                                <Search size={12} /><span>{currentLang === 'EN' ? "Search Results" : "搜索结果"} ({filteredItems.length})</span>
+                                <Search size={12} /><span>{keywordFilterActive ? (currentLang === 'EN' ? 'Matched Results' : '符合结果') : (currentLang === 'EN' ? "Search Results" : "搜索结果")} ({filteredItems.length})</span>
                             </div>
                         )}
                         <div className={blockId === 'aes_palette_preset' ? "flex flex-col gap-2 pb-20" : "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 md:gap-5 pb-20"}>
                             {filteredItems.map(item => {
                                 const isSelected = itemMatchesAnyTag(item, selectedTags);
+                                const keywordAxisMatch = keywordFilterTags ? getConceptSimpleAxisMatch(item, keywordFilterTags) : null;
+                                const isKeywordMatched = keywordFilterActive && itemMatchesKeywordFilter(item);
+                                const isKeywordSoftMatched = false;
                                 const isCopied = copiedItemId === (item.id || item.name);
                                 const isPreset = blockId === 'aes_palette_preset';
                                 const itemMechanics = getItemMechanics(item);
@@ -1511,7 +1689,7 @@ ${adminNote}
                                                 setFace(item.name, randomTemp);
                                             }
                                         }}
-                                        className={`mist-lexicon-item-card ${isSelected ? 'is-selected' : 'is-unselected'} relative flex ${isPreset ? 'flex-row items-center py-2 px-4' : 'flex-col p-5 md:p-6'} text-left rounded-xl border-2 transition-all duration-200 group h-full cursor-pointer hover:scale-[1.02] ${isSelected ? (globalTheme === 'retro' ? `bg-white border-[#8B261D] shadow-sm` : `${themeText} bg-zinc-900 ${themeBorder.replace('/50', '')}`) : (globalTheme === 'retro' ? 'bg-white/60 border-black/5 text-black hover:border-[#8B261D]/40' : 'bg-zinc-900/40 border-zinc-800 text-zinc-300 hover:bg-zinc-900 hover:border-zinc-500 hover:text-zinc-100')}`}>
+                                        className={`mist-lexicon-item-card ${isSelected ? 'is-selected' : 'is-unselected'} ${isKeywordMatched ? 'is-keyword-matched' : ''} relative flex ${isPreset ? 'flex-row items-center py-2 px-4' : 'flex-col p-5 md:p-6'} text-left rounded-xl border-2 transition-all duration-200 group h-full cursor-pointer hover:scale-[1.02] ${isSelected ? (globalTheme === 'retro' ? `bg-white border-[#8B261D] shadow-sm` : `${themeText} bg-zinc-900 ${themeBorder.replace('/50', '')}`) : isKeywordMatched ? (globalTheme === 'retro' ? 'bg-white/75 border-[#8B261D]/24 text-black hover:border-[#8B261D]/50' : 'bg-zinc-900/60 border-[var(--mist-active-accent)]/35 text-zinc-200 hover:bg-zinc-900 hover:border-[var(--mist-active-accent)]/60') : isKeywordSoftMatched ? (globalTheme === 'retro' ? 'bg-white/55 border-[#8B261D]/12 text-black/75 hover:border-[#8B261D]/30' : 'bg-zinc-900/45 border-zinc-800 text-zinc-400 hover:bg-zinc-900/75 hover:border-zinc-600 hover:text-zinc-200') : (globalTheme === 'retro' ? 'bg-white/45 border-black/5 text-black/65 hover:border-[#8B261D]/30' : 'bg-zinc-950/35 border-zinc-900 text-zinc-500 hover:bg-zinc-900/70 hover:border-zinc-700 hover:text-zinc-300')}`}>
 
                                         {isPreset && (item as any).colors && (
                                             <div className="flex items-center gap-3 mr-6 shrink-0">
@@ -1551,7 +1729,19 @@ ${adminNote}
 
                                         {!isPreset && (
                                             <>
-                                                {(item as any)._groupName && <div className={`mb-2 text-[9px] ${globalTheme === 'retro' ? 'text-[#8B261D]/50 bg-[#8B261D]/5' : 'text-zinc-500 bg-black/20'} font-mono uppercase tracking-wider px-1.5 py-0.5 rounded w-fit`}>{(item as any)._groupName}</div>}
+                                                <div className="mb-2 flex flex-wrap items-center gap-1.5">
+                                                    {(item as any)._groupName && <div className={`text-[9px] ${globalTheme === 'retro' ? 'text-[#8B261D]/50 bg-[#8B261D]/5' : 'text-zinc-500 bg-black/20'} font-mono uppercase tracking-wider px-1.5 py-0.5 rounded w-fit`}>{(item as any)._groupName}</div>}
+                                                    {isKeywordMatched && (
+                                                        <div className={`text-[9px] font-black uppercase tracking-[0.14em] px-1.5 py-0.5 rounded w-fit ${globalTheme === 'retro' ? 'bg-[#8B261D]/10 text-[#8B261D]' : 'bg-[var(--mist-active-accent)]/12 text-[var(--mist-active-accent)]'}`}>
+                                                            {currentLang === 'EN' ? 'FIT' : '符合'}
+                                                        </div>
+                                                    )}
+                                                    {isKeywordSoftMatched && (
+                                                        <div className={`text-[9px] font-black uppercase tracking-[0.14em] px-1.5 py-0.5 rounded w-fit ${globalTheme === 'retro' ? 'bg-[#8B261D]/5 text-[#8B261D]/60' : 'bg-white/5 text-zinc-500'}`}>
+                                                            {currentLang === 'EN' ? 'FUSION' : '融合'}
+                                                        </div>
+                                                    )}
+                                                </div>
 
                                                 {/* Temperature / Focus Control */}
                                                 {((effectiveContentVersion === 'ai' && item.directive && typeof item.directive === 'object') || canFocusTerms) && (

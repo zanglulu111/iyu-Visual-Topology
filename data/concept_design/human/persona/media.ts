@@ -1,10 +1,226 @@
-import { buildExplicitPersonaTerms, ExplicitPersonaSeed, PersonaEra } from './types';
+import { buildExplicitPersonaTerms, ExplicitPersonaSeed, PersonaCategoryFit, PersonaEra, personaFit } from './types';
 
 type Row = [string, string, string, string, string, (1 | 2 | 3 | 4 | 5)?, PersonaEra[]?, string[]?];
 type Group = { group: string; groupEn: string; rows: Row[] };
 
-const modern: PersonaEra[] = ['modern', 'contemporary', 'timeless'];
-const contemporary: PersonaEra[] = ['contemporary', 'near_future', 'timeless'];
+const modern: PersonaEra[] = ['modern', 'contemporary'];
+const contemporary: PersonaEra[] = ['contemporary', 'near_future'];
+
+const mediaFit = (group: string): PersonaCategoryFit => {
+  if (group.startsWith('A.')) return personaFit('weak', {
+    strong: ['fashion_idol'],
+    usable: ['romance', 'noir_crime', 'wuxia', 'urban_life'],
+    fusion: ['horror', 'surreal'],
+    weak: ['court', 'wasteland', 'science_fiction']
+  });
+  if (group.startsWith('B.')) return personaFit('weak', {
+    strong: ['urban_life', 'real_professional'],
+    usable: ['fashion_idol', 'romance'],
+    fusion: ['surreal'],
+    weak: ['wuxia', 'xianxia', 'court']
+  });
+  if (group.startsWith('C.')) return personaFit('weak', {
+    strong: ['urban_life', 'fashion_idol'],
+    usable: ['romance', 'boudoir_aesthetic'],
+    fusion: ['noir_crime', 'surreal'],
+    weak: ['historical', 'court', 'wuxia']
+  });
+  if (group.startsWith('D.')) return personaFit('weak', {
+    strong: ['boudoir_aesthetic'],
+    usable: ['fashion_idol', 'urban_life', 'romance'],
+    fusion: ['noir_crime', 'surreal'],
+    weak: ['war_military', 'wuxia', 'xianxia', 'court']
+  });
+  if (group.startsWith('E.')) return personaFit('weak', {
+    strong: ['real_professional', 'urban_life'],
+    usable: ['noir_crime', 'war_military', 'historical'],
+    fusion: ['horror', 'wasteland'],
+    weak: ['fashion_idol', 'romance', 'xianxia']
+  });
+  if (group.startsWith('F.')) return personaFit('weak', {
+    strong: ['urban_life', 'fashion_idol'],
+    usable: ['romance', 'real_professional', 'boudoir_aesthetic'],
+    fusion: ['cyberpunk', 'surreal'],
+    weak: ['historical', 'court', 'wuxia']
+  });
+  if (group.startsWith('G.')) return personaFit('weak', {
+    strong: ['fashion_idol', 'urban_life'],
+    usable: ['romance', 'real_professional'],
+    fusion: ['cyberpunk', 'surreal'],
+    weak: ['historical', 'court', 'wuxia']
+  });
+  if (group.startsWith('H.')) return personaFit('weak', {
+    strong: ['fashion_idol', 'urban_life'],
+    usable: ['real_professional', 'romance'],
+    fusion: ['cyberpunk', 'surreal'],
+    weak: ['wasteland', 'xianxia', 'war_military']
+  });
+  if (group.startsWith('I.')) return personaFit('weak', {
+    strong: ['real_professional', 'urban_life'],
+    usable: ['romance', 'fashion_idol'],
+    fusion: ['noir_crime', 'surreal'],
+    weak: ['wuxia', 'xianxia', 'court']
+  });
+  return personaFit('weak', {
+    strong: ['horror', 'surreal', 'fashion_idol'],
+    usable: ['urban_life', 'noir_crime'],
+    fusion: ['dark_fantasy', 'romance'],
+    weak: ['court', 'xianxia', 'wasteland']
+  });
+};
+
+const mediaFitOverrides: Record<string, PersonaCategoryFit> = {
+  kungfu_movie_hero: personaFit('weak', {
+    strong: ['wuxia', 'fashion_idol'],
+    usable: ['adventure', 'urban_life'],
+    fusion: ['historical'],
+    weak: ['court', 'science_fiction', 'wasteland']
+  }),
+  cult_horror_scream_queen: personaFit('weak', {
+    strong: ['horror', 'fashion_idol'],
+    usable: ['urban_life', 'noir_crime'],
+    fusion: ['dark_fantasy', 'surreal'],
+    weak: ['court', 'wuxia', 'xianxia']
+  }),
+  blockbuster_action_star: personaFit('weak', {
+    strong: ['fashion_idol', 'adventure'],
+    usable: ['urban_life', 'war_military'],
+    fusion: ['science_fiction', 'cyberpunk'],
+    weak: ['court', 'xianxia', 'wasteland']
+  }),
+  survival_show_winner: personaFit('weak', {
+    strong: ['urban_life', 'adventure'],
+    usable: ['fashion_idol', 'wasteland'],
+    fusion: ['post_apocalyptic', 'surreal'],
+    weak: ['court', 'wuxia', 'xianxia']
+  }),
+  erotic_thriller_actress: personaFit('weak', {
+    strong: ['boudoir_aesthetic', 'noir_crime'],
+    usable: ['fashion_idol', 'urban_life', 'romance'],
+    fusion: ['horror', 'surreal'],
+    weak: ['war_military', 'wuxia', 'xianxia', 'court']
+  }),
+  desire_industry_survivor: personaFit('weak', {
+    strong: ['boudoir_aesthetic', 'urban_life'],
+    usable: ['romance', 'noir_crime'],
+    fusion: ['horror', 'surreal'],
+    weak: ['war_military', 'wuxia', 'xianxia', 'court']
+  }),
+  war_correspondent: personaFit('weak', {
+    strong: ['real_professional', 'war_military'],
+    usable: ['urban_life', 'historical'],
+    fusion: ['horror', 'wasteland'],
+    weak: ['fashion_idol', 'romance', 'xianxia']
+  }),
+  crime_scene_reporter: personaFit('weak', {
+    strong: ['real_professional', 'noir_crime'],
+    usable: ['urban_life'],
+    fusion: ['horror', 'surreal'],
+    weak: ['fashion_idol', 'romance', 'xianxia']
+  }),
+  celebrity_paparazzo: personaFit('weak', {
+    strong: ['real_professional', 'urban_life', 'noir_crime'],
+    usable: ['fashion_idol'],
+    fusion: ['surreal'],
+    weak: ['court', 'wuxia', 'xianxia']
+  }),
+  disaster_live_reporter: personaFit('weak', {
+    strong: ['real_professional', 'urban_life'],
+    usable: ['wasteland', 'post_apocalyptic'],
+    fusion: ['horror', 'surreal'],
+    weak: ['fashion_idol', 'romance', 'xianxia']
+  }),
+  courtroom_media_analyst: personaFit('weak', {
+    strong: ['real_professional', 'noir_crime'],
+    usable: ['urban_life', 'institutional'],
+    fusion: ['surreal'],
+    weak: ['fashion_idol', 'wuxia', 'xianxia']
+  }),
+  sports_sideline_reporter: personaFit('weak', {
+    strong: ['real_professional', 'urban_life'],
+    usable: ['adventure', 'war_military'],
+    fusion: ['surreal'],
+    weak: ['court', 'wuxia', 'xianxia']
+  }),
+  virtual_filter_influencer: personaFit('weak', {
+    strong: ['fashion_idol', 'urban_life'],
+    usable: ['cyberpunk', 'science_fiction', 'posthuman'],
+    fusion: ['surreal'],
+    weak: ['historical', 'court', 'wuxia']
+  }),
+  vocal_room_ghost: personaFit('weak', {
+    strong: ['fashion_idol', 'surreal'],
+    usable: ['urban_life', 'horror'],
+    fusion: ['dark_fantasy'],
+    weak: ['court', 'wuxia', 'war_military']
+  }),
+  tech_launch_presenter: personaFit('weak', {
+    strong: ['real_professional', 'science_fiction'],
+    usable: ['fashion_idol', 'urban_life', 'cyberpunk'],
+    fusion: ['posthuman', 'surreal'],
+    weak: ['wasteland', 'xianxia', 'war_military']
+  }),
+  podcast_true_crime_host: personaFit('weak', {
+    strong: ['real_professional', 'noir_crime'],
+    usable: ['urban_life', 'horror'],
+    fusion: ['surreal'],
+    weak: ['wuxia', 'xianxia', 'court']
+  }),
+  radio_love_advisor: personaFit('weak', {
+    strong: ['real_professional', 'romance'],
+    usable: ['urban_life'],
+    fusion: ['surreal'],
+    weak: ['wuxia', 'xianxia', 'court']
+  }),
+  pirate_radio_dj: personaFit('weak', {
+    strong: ['urban_life', 'fashion_idol'],
+    usable: ['real_professional', 'noir_crime'],
+    fusion: ['cyberpunk', 'surreal'],
+    weak: ['court', 'wuxia', 'xianxia']
+  }),
+  comic_con_cosplayer: personaFit('weak', {
+    strong: ['fashion_idol', 'urban_life'],
+    usable: ['fantasy', 'science_fiction', 'cyberpunk'],
+    fusion: ['surreal', 'dark_fantasy'],
+    weak: ['court', 'wasteland', 'war_military']
+  }),
+  fan_club_president: personaFit('weak', {
+    strong: ['urban_life', 'institutional'],
+    usable: ['fashion_idol', 'real_professional'],
+    fusion: ['surreal'],
+    weak: ['horror', 'court', 'xianxia']
+  }),
+  midnight_movie_usher: personaFit('weak', {
+    strong: ['real_professional', 'urban_life'],
+    usable: ['horror', 'surreal'],
+    fusion: ['dark_fantasy'],
+    weak: ['court', 'xianxia', 'wasteland']
+  }),
+  collector_vhs_critic: personaFit('weak', {
+    strong: ['urban_life', 'real_professional'],
+    usable: ['horror', 'surreal'],
+    fusion: ['noir_crime'],
+    weak: ['court', 'xianxia', 'wasteland']
+  }),
+  stunt_double_survivor: personaFit('weak', {
+    strong: ['real_professional', 'adventure'],
+    usable: ['fashion_idol', 'urban_life'],
+    fusion: ['war_military', 'horror'],
+    weak: ['court', 'xianxia', 'wasteland']
+  }),
+  forgotten_child_star: personaFit('weak', {
+    strong: ['fashion_idol', 'urban_life'],
+    usable: ['romance'],
+    fusion: ['surreal', 'horror'],
+    weak: ['court', 'xianxia', 'wasteland']
+  }),
+  remake_franchise_actor: personaFit('weak', {
+    strong: ['fashion_idol', 'urban_life'],
+    usable: ['science_fiction', 'fantasy', 'adventure'],
+    fusion: ['surreal'],
+    weak: ['court', 'wasteland', 'xianxia']
+  })
+};
 
 const toSeeds = (groups: Group[]): ExplicitPersonaSeed[] => groups.flatMap(({ group, groupEn, rows }) => rows.map(([id, name, nameEn, def, defEn, ontologyLevel = 1, eras = modern, tags = []]) => ({
   id,
@@ -16,7 +232,8 @@ const toSeeds = (groups: Group[]): ExplicitPersonaSeed[] => groups.flatMap(({ gr
   defEn,
   ontologyLevel,
   eras,
-  tags
+  tags,
+  categoryFit: mediaFitOverrides[id] || mediaFit(group)
 })));
 
 const groups: Group[] = [
@@ -27,7 +244,7 @@ const groups: Group[] = [
     ['kungfu_movie_hero', '功夫片男主角', 'Kung Fu Movie Hero', '第一识别是功夫片男主角。造型入口：练功服、布鞋、绑腕、清楚中轴和蓄力站姿。母题：功夫片男主角的身份来自身体结构，而不是武器堆叠。张力：平静外表下必须能读出下一秒爆发的力线。视觉证据：扎紧袖口、磨损布鞋、腕部缠带、重心下沉、手指张力和干净的身体轴线。边界：避免写成盔甲武士、现代特工或具体功夫明星。', 'First read: Kung Fu Movie Hero. Styling entry: training clothes, cloth shoes, wrist wraps, clear centerline, and coiled stance. Motif: identity comes from body structure rather than weapon stacking. Tension: the calm surface must reveal force lines ready to erupt. Visual evidence: tied sleeves, worn cloth shoes, wrist wraps, lowered center of gravity, tense fingers, and clean body axis. Boundary: avoid an armored warrior, modern agent, or specific kung fu celebrity.'],
     ['teen_movie_queen', '青春片女王', 'Teen Movie Queen', '第一识别是青春片女王。造型入口：校园夹克、柔亮头发、唇彩、课本或手包和被同龄人观看的站姿。母题：青春片女王是校园社交秩序的可见中心。张力：甜美要带一点统治感，不能只剩清纯。视觉证据：亮发、校队夹克或开衫、唇彩反光、课本抱姿、同伴围绕的动线和习惯被注视的下巴角度。边界：避免未成年化表达，保持成年人扮演青春片类型的安全边界。', 'First read: Teen Movie Queen. Styling entry: campus jacket, glossy hair, lip gloss, books or handbag, and a stance watched by peers. Motif: she is the visible center of campus social order. Tension: sweetness needs a trace of dominance, not purity alone. Visual evidence: glossy hair, varsity jacket or cardigan, lip gloss shine, books held to the body, peer circulation, and a chin angle used to being watched. Boundary: avoid minor-coded treatment; keep it as an adult performer carrying a teen-film type.'],
     ['method_actor', '方法派男演员', 'Method Actor', '第一识别是方法派男演员。造型入口：皱西装、未整理胡茬、沉默眼神和角色残留的身体紧张。母题：方法派男演员把职业表演训练变成面部疲劳和身体滞留。张力：他像刚从角色里出来，但还没有完全回到本人。视觉证据：松掉领口、旧外套、胡茬、眼袋、手指无意识动作和不愿摆正的肩。边界：避免写成普通忧郁男人或具体名演员。', 'First read: Method Actor. Styling entry: wrinkled suit, untrimmed stubble, silent eyes, and residual role tension. Motif: performance training becomes facial fatigue and bodily residue. Tension: he seems to have left the role but not fully returned to himself. Visual evidence: loosened collar, old jacket, stubble, eye bags, unconscious finger movement, and shoulders refusing to square up. Boundary: avoid a generic melancholy man or specific famous actor.'],
-    ['silent_film_diva', '默片女伶', 'Silent Film Diva', '第一识别是默片女伶。造型入口：深色眼妆、精确卷发、夸张手势、长手套和高对比面部。母题：默片女伶把声音缺席转成面部、手势和轮廓的巨大表演。张力：表情可以戏剧化，但必须保持古早银幕的精密控制。视觉证据：深眼线、唇弓、卷发、长手套、停顿手势和像被黑白胶片压扁的正面脸。边界：避免做成普通复古派对造型。', 'First read: Silent Film Diva. Styling entry: dark eye makeup, precise curls, exaggerated hands, long gloves, and high-contrast face. Motif: the absence of voice turns face, hands, and silhouette into large performance. Tension: expression may be theatrical but must stay precisely controlled by early screen language. Visual evidence: heavy eyeliner, cupid bow lips, curls, long gloves, paused hand gestures, and a frontal face flattened by black-and-white film. Boundary: avoid a generic retro party look.', 1, ['modern', 'timeless']],
+    ['silent_film_diva', '默片女伶', 'Silent Film Diva', '第一识别是默片女伶。造型入口：深色眼妆、精确卷发、夸张手势、长手套和高对比面部。母题：默片女伶把声音缺席转成面部、手势和轮廓的巨大表演。张力：表情可以戏剧化，但必须保持古早银幕的精密控制。视觉证据：深眼线、唇弓、卷发、长手套、停顿手势和像被黑白胶片压扁的正面脸。边界：避免做成普通复古派对造型。', 'First read: Silent Film Diva. Styling entry: dark eye makeup, precise curls, exaggerated hands, long gloves, and high-contrast face. Motif: the absence of voice turns face, hands, and silhouette into large performance. Tension: expression may be theatrical but must stay precisely controlled by early screen language. Visual evidence: heavy eyeliner, cupid bow lips, curls, long gloves, paused hand gestures, and a frontal face flattened by black-and-white film. Boundary: avoid a generic retro party look.', 1, ['modern']],
     ['festival_circuit_muse', '电影节缪斯', 'Festival-Circuit Muse', '第一识别是电影节缪斯。造型入口：极简礼服、湿润红毯光、疏离微笑和不完全属于商业片的姿态。母题：她是艺术电影、红毯和评论话语共同制造的冷感对象。张力：高贵感不能太品牌化，要有作者电影里的不稳定。视觉证据：无装饰礼服、微湿发光、细跟鞋、远离人群的站位和像听不见闪光灯的眼。边界：避免写成普通礼服明星或商业大片女主。', 'First read: Festival-Circuit Muse. Styling entry: minimal gown, damp red-carpet light, distant smile, and posture not fully commercial. Motif: art cinema, red carpet, and critical discourse make her a cool object. Tension: elegance must not become too branded; it needs auteur-film instability. Visual evidence: undecorated gown, moist shine, thin heels, isolated placement, and eyes that seem not to hear flashbulbs. Boundary: avoid a generic gown celebrity or blockbuster heroine.'],
     ['cult_horror_scream_queen', '邪典恐怖尖叫女王', 'Cult Horror Scream Queen', '第一识别是邪典恐怖尖叫女王。造型入口：凌乱发丝、撕裂衣边、惊恐眼神、血色小道具和海报式尖叫轮廓。母题：她把受害者、幸存者和邪典海报图像压在同一张脸上。张力：恐惧要有表演性，但不能变成廉价血腥。视觉证据：湿乱发、撕破衣角、瞳孔放大、手抓衣襟、B级片色光和过度清晰的尖叫口型。边界：避免复制具体恐怖片角色或做成猎奇伤害展示。', 'First read: Cult Horror Scream Queen. Styling entry: messy hair, torn hems, terrified eyes, small blood-colored props, and poster-like scream silhouette. Motif: victim, survivor, and cult-poster image are pressed into one face. Tension: fear needs performance, not cheap gore. Visual evidence: wet messy hair, torn fabric edge, enlarged pupils, hand clutching clothes, B-movie color light, and an overly clear scream mouth shape. Boundary: avoid copying a specific horror character or turning it into sensational injury display.', 2],
     ['blockbuster_action_star', '商业大片动作明星', 'Blockbuster Action Star', '第一识别是商业大片动作明星。造型入口：贴身战术化夹克、划痕脸、明星级发型和稳定英雄站姿。母题：动作明星把危险包装成可销售的英雄身体。张力：身体要像真的受过训练，但发型和脸仍被大片工业保护。视觉证据：战术夹克、轻度擦伤、干净轮廓、宽站姿、手套或耳麦和朝海报中心站定的身体。边界：避免写成真实军警或具体超级英雄。', 'First read: Blockbuster Action Star. Styling entry: fitted tacticalized jacket, scratched face, star-level hair, and stable hero stance. Motif: danger is packaged as a sellable heroic body. Tension: the body should feel trained while hair and face remain protected by blockbuster industry. Visual evidence: tactical jacket, light scratches, clean silhouette, wide stance, gloves or earpiece, and body planted at poster center. Boundary: avoid a real soldier, police figure, or specific superhero.']
@@ -156,5 +373,12 @@ export const CD_PERSONA_MEDIA = buildExplicitPersonaTerms({
   visualEvidenceEn: 'camera persona, hair and makeup, clothing, stage or set props, public symbols, and media posture',
   absorptionFocus: '镜头身份、公众形象、妆发造型、媒体道具、片场制度或明星工业位置',
   absorptionFocusEn: 'camera identity, public image, hair and makeup, media props, production system, or celebrity-industry position',
-  appendVisualEvidence: false
+  appendVisualEvidence: false,
+  realityTags: ['persona_evidence', 'physical', 'realistic', 'media', 'public_image'],
+  categoryFit: personaFit('weak', {
+    strong: ['fashion_idol', 'urban_life'],
+    usable: ['romance', 'real_professional', 'noir_crime', 'boudoir_aesthetic'],
+    fusion: ['surreal', 'horror', 'cyberpunk'],
+    weak: ['wuxia', 'xianxia', 'wasteland']
+  })
 }, toSeeds(groups));

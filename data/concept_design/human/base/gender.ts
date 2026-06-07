@@ -1,6 +1,16 @@
-import { ConceptBaseItem, ALL_REAL_ERAS, UNIVERSAL_HUMAN_SCOPE } from './types';
+import { ConceptBaseItem, ConceptGenderSignal, ALL_REAL_ERAS, UNIVERSAL_HUMAN_SCOPE } from './types';
 
-export const CD_GENDER_AURA: ConceptBaseItem[] = [
+const withGenderSignal = (items: ConceptBaseItem[]): ConceptBaseItem[] => items.map(item => {
+  const group = item.group || '';
+  const genderSignal: ConceptGenderSignal = group.startsWith('A.')
+    ? 'FEMININE'
+    : group.startsWith('B.')
+      ? 'MASCULINE'
+      : 'ANDROGYNOUS';
+  return { ...item, genderSignal, genderCoding: genderSignal };
+});
+
+export const CD_GENDER_AURA: ConceptBaseItem[] = withGenderSignal([
   { id: 'cd_gender_feminine_soft', name: '柔和女性气质', nameEn: 'Soft Feminine', group: 'A. 女性化呈现', groupEn: 'A. Feminine Presentation', def: '线条、表情和姿态偏柔和，但不强制甜美或幼态。', defEn: 'Softer lines, expression, and posture without forcing sweetness or childishness.', subjectScope: UNIVERSAL_HUMAN_SCOPE, ontologyLevel: 1, eras: ALL_REAL_ERAS, affects: ['face', 'body', 'pose', 'costume'], risk: 'clean' },
   { id: 'cd_gender_feminine_sharp', name: '锋利女性气质', nameEn: 'Sharp Feminine', group: 'A. 女性化呈现', groupEn: 'A. Feminine Presentation', def: '女性化但棱角更强，强调控制感、判断力和清晰边界。', defEn: 'Feminine but sharper, emphasizing control, judgment, and clear boundaries.', subjectScope: UNIVERSAL_HUMAN_SCOPE, ontologyLevel: 1, eras: ALL_REAL_ERAS, affects: ['face', 'body', 'pose', 'costume'], risk: 'clean' },
   { id: 'cd_gender_feminine_mature', name: '成熟女性气质', nameEn: 'Mature Feminine', group: 'A. 女性化呈现', groupEn: 'A. Feminine Presentation', def: '女性化呈现更稳定、低噪声，带社会经验和自我管理感。', defEn: 'Stable, low-noise feminine presentation with social experience and self-command.', subjectScope: UNIVERSAL_HUMAN_SCOPE, ontologyLevel: 1, eras: ALL_REAL_ERAS, affects: ['face', 'body', 'pose', 'costume'], risk: 'clean' },
@@ -15,4 +25,4 @@ export const CD_GENDER_AURA: ConceptBaseItem[] = [
   { id: 'cd_gender_androgynous_elastic', name: '流动中性', nameEn: 'Fluid Androgynous', group: 'C. 中性/混合呈现', groupEn: 'C. Androgynous / Mixed', def: '男性化和女性化信号可同时出现，但保持清晰主体而非混乱拼贴。', defEn: 'Masculine and feminine cues may coexist while keeping a clear subject, not chaotic collage.', subjectScope: UNIVERSAL_HUMAN_SCOPE, ontologyLevel: 1, eras: ALL_REAL_ERAS, affects: ['face', 'body', 'costume', 'pose'], risk: 'clean' },
   { id: 'cd_gender_boyish', name: '少年感', nameEn: 'Boyish', group: 'C. 中性/混合呈现', groupEn: 'C. Androgynous / Mixed', def: '偏轻、偏直线、偏运动或未定型的性别气质，但仍必须保持成年语境。', defEn: 'Lighter, straighter, sporty, or not-yet-set gender aura while staying in an adult context.', subjectScope: UNIVERSAL_HUMAN_SCOPE, ontologyLevel: 1, eras: ALL_REAL_ERAS, affects: ['face', 'body', 'pose'], risk: 'clean' },
   { id: 'cd_gender_gamine', name: '伶俐中性', nameEn: 'Gamine Androgynous', group: 'C. 中性/混合呈现', groupEn: 'C. Androgynous / Mixed', def: '小骨架、敏捷感、聪明的表情和轻快比例构成的中性魅力。', defEn: 'Small frame, agility, clever expression, and brisk proportion forming androgynous charm.', subjectScope: UNIVERSAL_HUMAN_SCOPE, ontologyLevel: 1, eras: ALL_REAL_ERAS, affects: ['face', 'body', 'pose'], risk: 'clean' },
-];
+]);

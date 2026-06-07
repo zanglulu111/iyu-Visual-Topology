@@ -89,7 +89,7 @@ export const ArchiveDetailModal: React.FC<ArchiveDetailModalProps> = ({
             meta: lang === 'CN' ? '第14区 / 主体进入' : 'Zone 14 / Subject entry',
             title: lang === 'CN' ? '没有天空的长廊' : 'The corridor without sky',
             paragraphs: content.story.slice(0, 2),
-            image: '/portal-assets/subject-archive-lower-1777901002241.png',
+            image: '/portal-assets/subject-archive-lower-1777901002241-light.webp',
             caption: lang === 'CN' ? '插图 / 第14区环境建立' : 'Illustration / Zone 14 environment'
         },
         {
@@ -115,7 +115,7 @@ export const ArchiveDetailModal: React.FC<ArchiveDetailModalProps> = ({
             meta: lang === 'CN' ? '强酸池 / 无尽水平线' : 'Acid pool / Endless horizon',
             title: lang === 'CN' ? '芯片落入强酸池' : 'The chip falls into acid',
             paragraphs: content.story.slice(6),
-            image: '/portal-reference-56.png',
+            image: '/portal-reference-56-light.webp',
             caption: lang === 'CN' ? '插图 / 黑暗与水平线转场' : 'Illustration / Darkness and horizon transition'
         }
     ].filter(chapter => chapter.paragraphs.length > 0);
@@ -124,7 +124,7 @@ export const ArchiveDetailModal: React.FC<ArchiveDetailModalProps> = ({
         {
             title: lang === 'CN' ? '第14区 / 混凝土迷宫' : 'Zone 14 / Concrete maze',
             label: 'Environment',
-            image: '/portal-assets/subject-archive-lower-1777901002241.png',
+            image: '/portal-assets/subject-archive-lower-1777901002241-light.webp',
             text: lang === 'CN' ? '故事主空间。黑箱、楼板、投影与失效的监控感。' : 'Primary story space: black box, concrete slabs, projection, failed surveillance.'
         },
         {
@@ -142,7 +142,7 @@ export const ArchiveDetailModal: React.FC<ArchiveDetailModalProps> = ({
         {
             title: lang === 'CN' ? '分镜卡片' : 'Storyboard cards',
             label: 'Media',
-            image: '/portal-assets/card-03-91.png',
+            image: '/portal-assets/card-03-91-light.jpg',
             text: lang === 'CN' ? '后续分镜、漫画、道具图、海报都归入资产页。' : 'Storyboards, comics, props, and posters live on the assets page.'
         }
     ];
@@ -800,7 +800,7 @@ export const ArchiveDetailModal: React.FC<ArchiveDetailModalProps> = ({
                         <div className="l-assets-grid">
                             {assetItems.map(item => (
                                 <div key={item.title} className="l-asset-card">
-                                    <img src={item.image} alt={item.title} onError={e => e.currentTarget.src = '/portal-assets/subject-archive-lower-1777901002241.png'} />
+                                    <img src={item.image} alt={item.title} onError={e => e.currentTarget.src = '/portal-assets/subject-archive-lower-1777901002241-light.webp'} />
                                     <div className="l-asset-info">
                                         <div className="l-asset-label">{item.label}</div>
                                         <h4>{item.title}</h4>

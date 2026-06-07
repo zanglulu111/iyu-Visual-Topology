@@ -35,9 +35,9 @@ const ALL_DOMAIN_LIKE: Sur3Domain[] = [
   'future_megastructure',
 ];
 
-const allEras: Sur3EraId[] = ['primitive', 'mythic', 'slave', 'feudal', 'modern', 'contemporary', 'near_future', 'future'];
-const feudalForward: Sur3EraId[] = ['feudal', 'modern', 'contemporary', 'near_future', 'future'];
-const modernForward: Sur3EraId[] = ['modern', 'contemporary', 'near_future', 'future'];
+const allEras: Sur3EraId[] = ['primitive', 'mythic', 'slave', 'feudal', 'early_modern', 'industrial', 'modern', 'contemporary', 'near_future', 'far_future', 'future', 'timeless'];
+const feudalForward: Sur3EraId[] = ['feudal', 'early_modern', 'industrial', 'modern', 'contemporary', 'near_future', 'far_future', 'future'];
+const modernForward: Sur3EraId[] = ['industrial', 'modern', 'contemporary', 'near_future', 'far_future', 'future'];
 
 const SUR6_GROUP_PROFILES: Record<string, Sur6GroupProfile> = {
   loc_power_ritual: {

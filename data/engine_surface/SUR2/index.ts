@@ -7,7 +7,6 @@ import { SUR2_GROUP_E } from './group_e';
 import { SUR2_GROUP_F } from './group_f';
 import { SUR2_GROUP_G } from './group_g';
 import { SUR2_GROUP_H } from './group_h';
-import { SUR2_GROUP_I } from './group_i';
 import { SUR2_GROUP_J } from './group_j';
 
 export const SUR2_DATA: LibraryCategoryDef[] = [
@@ -19,7 +18,6 @@ export const SUR2_DATA: LibraryCategoryDef[] = [
   SUR2_GROUP_F,
   SUR2_GROUP_G,
   SUR2_GROUP_H,
-  SUR2_GROUP_I,
   SUR2_GROUP_J
 ];
 
@@ -33,6 +31,5 @@ export {
   SUR2_GROUP_F,
   SUR2_GROUP_G,
   SUR2_GROUP_H,
-  SUR2_GROUP_I,
   SUR2_GROUP_J
 };

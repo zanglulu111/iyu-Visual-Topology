@@ -25,6 +25,59 @@ const fallbackOtherDetails = (lang: CharacterIdentityBoardLanguage) => lang === 
   ? '没有额外细节。只根据角色种子、身体类型、视觉媒介与风格自然发明必要内容。'
   : 'No extra details. Invent only what naturally follows from the character seed, body type, visual medium, and style.';
 
+const mediumBaseLabel = (
+  lang: CharacterIdentityBoardLanguage,
+  category: CharacterIdentityBoardOptions['mediumCategory']
+) => {
+  const labels: Record<CharacterIdentityBoardOptions['mediumCategory'], { cn: string; en: string }> = {
+    PAINTING: {
+      cn: '绘画 / 二维艺术媒介',
+      en: 'painting / 2D art medium'
+    },
+    PHOTOGRAPHY: {
+      cn: '真实相机摄影 / 真人实拍质感',
+      en: 'real-camera photography / live-action photographic texture'
+    },
+    CGI: {
+      cn: 'CGI / 3D 数字建模渲染',
+      en: 'CGI / 3D digital model rendering'
+    },
+    TANGIBLE: {
+      cn: '实体手作 / 实物模型摄影',
+      en: 'tangible craft / physical model photography'
+    },
+    ALL: {
+      cn: '融合媒介 / 跨风格混合',
+      en: 'mixed media / cross-style fusion'
+    }
+  };
+  return lang === 'CN' ? labels[category].cn : labels[category].en;
+};
+
+const buildTargetIntent = (
+  lang: CharacterIdentityBoardLanguage,
+  options: CharacterIdentityBoardOptions
+) => {
+  const mediumBase = mediumBaseLabel(lang, options.mediumCategory);
+  const styleReference = options.primaryStyleReference?.trim();
+  if (lang === 'CN') {
+    const mediumStyleLock = styleReference
+      ? `以「${mediumBase}」为不可改写的媒介硬底座，并吸收「${styleReference}」的视觉气质`
+      : `以「${mediumBase}」为不可改写的媒介硬底座`;
+    if (options.targetMode === 'GRID_BOARD') {
+      return `${options.originality ? '创造一组完全原创、版权安全的概念变体' : '根据用户提供的方向创建一组概念变体'}，${mediumStyleLock}，并将其呈现为一张 12-cell concept exploration grid。`;
+    }
+    return `${options.originality ? '创造一个完全原创、版权安全的角色' : '根据用户提供的角色方向创建一个角色'}，${mediumStyleLock}，并将其呈现为一张 CHARACTER IDENTITY BOARD。`;
+  }
+  const mediumStyleLock = styleReference
+    ? `use "${mediumBase}" as the non-rewritable medium base while absorbing the visual temperament of "${styleReference}"`
+    : `use "${mediumBase}" as the non-rewritable medium base`;
+  if (options.targetMode === 'GRID_BOARD') {
+    return `${options.originality ? 'Create a fully original, copyright-safe set of concept variants' : 'Create a set of concept variants from the user-provided direction'}, ${mediumStyleLock}, and present them as a 12-cell concept exploration grid.`;
+  }
+  return `${options.originality ? 'Create a fully original, copyright-safe character' : 'Create a character from the user-provided direction'}, ${mediumStyleLock}, and present it as a CHARACTER IDENTITY BOARD.`;
+};
+
 const WORLD_LAW_LABELS: Record<CharacterIdentityBoardWorldLawMode, { name: string; nameEn: string; maxLiteralLevel: 1 | 2 | 3 | 4 | 5 }> = {
   LAW_L1: { name: 'L1 写实锁定', nameEn: 'L1 Realist Lock', maxLiteralLevel: 1 },
   LAW_L2: { name: 'L2 同构折译', nameEn: 'L2 Equivalent Translation', maxLiteralLevel: 2 },
@@ -285,6 +338,143 @@ const buildBackgroundRule = (lang: CharacterIdentityBoardLanguage, mode: Charact
   return lang === 'CN' ? `Background：\n${cn[mode]}` : `Background:\n${en[mode]}`;
 };
 
+const fixedGridBoardRuleBlocks = (
+  lang: CharacterIdentityBoardLanguage,
+  options: CharacterIdentityBoardOptions,
+  originalityRule: string
+): CharacterIdentityBoardRuleBlock[] => {
+  const translationRules = fixedRuleBlocks(lang, options, originalityRule).filter(block => block.layer === 'translation');
+  const gridLayout = options.gridLayout || '3x4';
+  const cellCount = gridLayout
+    .split('x')
+    .map(part => Number(part.trim()))
+    .filter(Number.isFinite)
+    .reduce((total, value) => total * value, 1);
+  const gridLabel = `${cellCount}-cell`;
+  const contentObject = options.gridContentObject || (lang === 'CN' ? '角色 / 主体' : 'character / subject');
+  const variationAxis = options.gridVariationAxis || (lang === 'CN' ? '概念变体' : 'concept variants');
+  const titleRule = options.gridTitleMode === 'ARTISTIC'
+    ? (lang === 'CN' ? '允许一个短艺术化标题；标题必须服务主题，不要抢画面。' : 'Allow one short artistic title; it must serve the theme and not dominate the image.')
+    : options.gridTitleMode === 'PLAIN'
+      ? (lang === 'CN' ? '允许一个简短普通标题，清楚标注宫格主题。' : 'Allow one short plain title that clearly labels the grid theme.')
+      : (lang === 'CN' ? '不要添加大标题。' : 'Do not add a large title.');
+  const numberingRule = options.gridNumbering
+    ? (lang === 'CN' ? '每个格子允许小编号，编号必须克制、清楚、不遮挡主体。' : 'Each cell may have a small number; numbering must be restrained, clear, and not cover the subject.')
+    : (lang === 'CN' ? '不要给每个格子加编号。' : 'Do not number each cell.');
+  const borderRule = options.gridBorderMode
+    ? (lang === 'CN' ? '使用细边框或清楚分隔线，让每格边界明确。' : 'Use thin borders or clear separators so each cell boundary is readable.')
+    : (lang === 'CN' ? '不要使用明显重边框；用留白和间距分隔格子。' : 'Do not use heavy visible borders; separate cells with whitespace and spacing.');
+  if (lang === 'CN') {
+    return [
+      ...translationRules,
+      {
+        id: 'boardContent',
+        layer: 'assembly',
+        fixed: true,
+        text: `创建一张 ${gridLabel} concept exploration grid。
+
+宫格内容：
+宫格布局：${gridLayout}
+内容对象：${contentObject}
+变化轴：${variationAxis}
+
+所有格子围绕同一个核心主题、同一个对象方向和同一个视觉媒介展开。每个格子都是一个可读的变化样本，不是互不相关的主题。
+
+每格必须保留：
+核心身份 / 核心主题、同一物理媒介、同一世界法则、同一风格底线。
+
+每格必须产生明显差异：
+沿着“${variationAxis}”产生变化；剪影、姿态、材料、配色、服装结构、道具、构图、身份方向或局部本体证据可以作为辅助差异，但不要偏离变化轴。`
+      },
+      {
+        id: 'formatSpec',
+        layer: 'assembly',
+        fixed: true,
+        text: buildFormatSpecRule(lang, options)
+      },
+      {
+        id: 'layout',
+        layer: 'assembly',
+        fixed: true,
+        text: `Layout：
+默认使用 ${gridLayout} 网格。
+所有格子尺寸一致、边界清楚、留白干净、阅读顺序明确。
+${numberingRule}
+${titleRule}
+${borderRule}
+不要把格子挤成杂乱拼贴；不要让主体互相重叠；不要出现复杂长文本说明。`
+      },
+      {
+        id: 'background',
+        layer: 'assembly',
+        fixed: true,
+        text: buildBackgroundRule(lang, options.backgroundMode)
+      },
+      {
+        id: 'priority',
+        layer: 'assembly',
+        fixed: true,
+        text: `优先级：
+同一主题一致性、沿着“${variationAxis}”形成的清楚差异、准确执行 [VISUAL MEDIUM]、满足 [STYLE] 中的艺术需求、配色与材料可读、每格构图清楚、${options.originality ? '原创概念探索、' : ''}不要生成互不相关的角色 / 物件 / 场景。`
+      }
+    ];
+  }
+
+  return [
+    ...translationRules,
+    {
+      id: 'boardContent',
+      layer: 'assembly',
+      fixed: true,
+      text: `Create a ${gridLabel} concept exploration grid.
+
+Grid content:
+Grid layout: ${gridLayout}
+Content object: ${contentObject}
+Variation axis: ${variationAxis}
+
+All cells are built around the same core theme, subject direction, and visual medium. Each cell is a readable variation sample, not an unrelated theme.
+
+Every cell must preserve:
+the core identity / core theme, the same physical medium, the same world law, and the same style floor.
+
+Every cell must create visible variation:
+vary along "${variationAxis}". Silhouette, pose, material, palette, outfit structure, prop, composition, identity direction, or local ontology evidence may support the difference, but do not drift away from the variation axis.`
+    },
+    {
+      id: 'formatSpec',
+      layer: 'assembly',
+      fixed: true,
+      text: buildFormatSpecRule(lang, options)
+    },
+    {
+      id: 'layout',
+      layer: 'assembly',
+      fixed: true,
+      text: `Layout:
+use a ${gridLayout} grid.
+All cells have equal size, clear boundaries, clean whitespace, and readable order.
+${numberingRule}
+${titleRule}
+${borderRule}
+Do not crush cells into a cluttered collage; do not overlap subjects between cells; do not add long text blocks.`
+    },
+    {
+      id: 'background',
+      layer: 'assembly',
+      fixed: true,
+      text: buildBackgroundRule(lang, options.backgroundMode)
+    },
+    {
+      id: 'priority',
+      layer: 'assembly',
+      fixed: true,
+      text: `Prioritize:
+same-theme consistency, clear differences along "${variationAxis}", accurate execution of [VISUAL MEDIUM], the art-direction needs in [STYLE], readable palette and material, clear composition in every cell, ${options.originality ? 'original concept exploration, ' : ''}do not generate unrelated characters / objects / scenes.`
+    }
+  ];
+};
+
 const fixedRuleBlocks = (
   lang: CharacterIdentityBoardLanguage,
   options: CharacterIdentityBoardOptions,
@@ -430,13 +620,15 @@ export const translateCharacterIdentityBoardMaterials = ({
     actionMoment: values.actionMoment || '',
     visualMedium: values.visualMedium || '',
     style: values.style || '',
+    paletteStrategy: values.paletteStrategy || '',
     compositionScene: values.compositionScene || '',
     lightingAtmosphere: values.lightingAtmosphere || '',
     otherDetails
   };
-  const intent = lang === 'CN'
-    ? `${options.originality ? '创造一个完全原创、版权安全的角色' : '根据用户提供的角色方向创建一个角色'}，并将其呈现为一张严格符合媒介的 CHARACTER IDENTITY BOARD。`
-    : `${options.originality ? 'Create a fully original, copyright-safe character' : 'Create a character from the user-provided direction'} and present them as a medium-accurate CHARACTER IDENTITY BOARD.`;
+  const intent = buildTargetIntent(lang, options);
+  const targetRuleBlocks = options.targetMode === 'GRID_BOARD'
+    ? fixedGridBoardRuleBlocks(lang, options, buildOriginalityRule(lang, options.originality))
+    : fixedRuleBlocks(lang, options, buildOriginalityRule(lang, options.originality));
 
   return {
     intent,
@@ -456,9 +648,7 @@ export const translateCharacterIdentityBoardMaterials = ({
         fixed: false,
         text: ''
       },
-      { id: 'styleCostumeConflict', layer: 'translation', fixed: false, text: protocols.styleCostumeConflict },
-      { id: 'actionMotif', layer: 'translation', fixed: false, text: protocols.actionMotif },
-      ...fixedRuleBlocks(lang, options, buildOriginalityRule(lang, options.originality))
+      ...targetRuleBlocks
     ],
     options,
     lang

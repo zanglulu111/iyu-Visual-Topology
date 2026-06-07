@@ -12,10 +12,46 @@ import {
   AES_CREATURE_TEXTURE
 } from '../aesthetic_libraries/subject_creature';
 import { AES_COLOR_PRESETS } from '../aesthetic_libraries/color_presets';
+import {
+  AES_ANGLE,
+  AES_DEPTH,
+  AES_FOCAL_LENGTH,
+  AES_IMAGE_FOCUS,
+  AES_LENS_FX,
+  AES_OPTICAL_FORMAT,
+  AES_PERSPECTIVE,
+  AES_SHOT_SIZE,
+  AES_SHUTTER,
+  AES_VISUAL_BALANCE
+} from '../aesthetic_libraries/layer1_lens';
+import {
+  AES_ART_MEDIUM,
+  AES_BASE_TONE,
+  AES_CAMERA_SYSTEM,
+  AES_CANVAS_TEXTURE,
+  AES_COLOR_SCIENCE,
+  AES_LENS_SERIES,
+  AES_LINE_QUALITY,
+  AES_PHYSICAL_GRAIN,
+  AES_TEXTURE_RENDER
+} from '../aesthetic_libraries/layer1_1_fixed';
+import { AES_RENDER_ART, AES_RENDER_REAL } from '../aesthetic_libraries/layer5_tech';
+import { DIRECTOR_STYLE_ITEMS } from '../aesthetic_libraries/director_styles_split';
+import { PHOTO_STYLE_ITEMS } from '../aesthetic_libraries/photography_styles_split';
+import { ART_STYLE_ITEMS } from '../aesthetic_libraries/art_styles_split';
+import { ANIMATION_DIRECTORS_LIB, ART_MOVEMENTS_LIB } from '../aesthetic_libraries/stylized_references';
 import { SUR2_DATA } from '../engine_surface/SUR2';
-import { SUR3_SPACE_ANCHORS } from '../engine_surface/SUR3';
+import { SUR3_COORDINATE_PRESETS, SUR3_SPACE_ANCHORS } from '../engine_surface/SUR3';
 import { CONCEPT_MEDIA_STYLE_LIBRARIES } from './mediaStyle';
+import { CD_SHOT_PRESETS } from './shotPresets';
 import { STYLE_PROTOCOL_ITEMS } from './style_protocols';
+import { CD_ATMOSPHERE, CD_PARTICLES } from './field/environment_state';
+import { withFieldPresetMeta } from './field/fieldPresetMeta';
+import { CD_LIGHT_DIRECTION, CD_LIGHT_MOOD, CD_LIGHT_SHAPE, CD_LIGHT_TYPE } from './field/lighting';
+import { withLightingMeta } from './field/lightingMeta';
+import { CD_SCENE_ABSTRACT } from './field/space_abstract';
+import { CD_SCENE_REAL } from './field/space_real';
+import { CD_SCENE_SURREAL } from './field/space_surreal';
 import {
   CD_ADULT_GLAMOUR_BODY,
   CD_BEARD_STYLE,
@@ -49,6 +85,16 @@ import {
   CD_SURFACE_STATE
 } from './human/base';
 import { CD_PERSONA_LIBRARY } from './human/persona';
+import { withFaceAxisMeta } from './human/faceAxisMeta';
+import { withFaceExpressionAxisMeta } from './human/faceExpressionAxisMeta';
+import { withGroomingAxisMeta } from './human/groomingAxisMeta';
+import { withAppearanceThreeAxisMeta } from './human/appearanceThreeAxisMeta';
+import { withPersonaAxisMeta } from './human/personaAxisMeta';
+import { withSubjectAxisMeta } from './human/subjectAxisMeta';
+import { withVisibleBodyCoreAxisMeta } from './human/visibleBodyCoreAxisMeta';
+import { withVisibleBodyAxisMeta } from './human/visibleBodyAxisMeta';
+import { withActionAxisMeta } from './human/actionAxisMeta';
+import { withDesignEvidenceAxisMeta } from './human/designEvidenceAxisMeta';
 export { CONCEPT_STYLE_PROTOCOL_LIBRARIES, CONCEPT_STYLE_PROTOCOL_ROUTES } from './style_protocols';
 export {
   CONCEPT_ATOM_MODULE_REGISTRY,
@@ -74,6 +120,356 @@ const textFromLibraryText = (value: LibraryItemDef['def'] | LibraryItemDef['dire
   if (typeof value === 'string') return value;
   return [value.bright, value.dark, value.tension].filter(Boolean).join(' / ');
 };
+
+const genreMatchers: Array<[tag: string, keys: readonly string[]]> = [
+  ['real_professional', ['职业', '工牌', '医院', '医生', '护士', '教师', '工程', '维修', 'office', 'doctor', 'nurse', 'engineer', 'worker', 'institutional', 'workflow']],
+  ['urban_life', ['都市', '城市', '街头', '夜场', '酒吧', '咖啡', '地铁', '快递', 'street', 'urban', 'city', 'bar', 'cafe', 'subway']],
+  ['noir_crime', ['侦探', '黑帮', '警探', '罪案', '走私', '地下', 'assassin', 'detective', 'noir', 'crime', 'mafia', 'smuggler']],
+  ['wuxia', ['武侠', '江湖', '门派', '弟子', '剑客', '侠客', '游侠', 'wuxia', 'jianghu', 'sect', 'martial']],
+  ['xianxia', ['仙侠', '修仙', '灵根', '符箓', '飞剑', '法器', 'xianxia', 'cultivation', 'immortal', 'talisman']],
+  ['fantasy', ['奇幻', '魔法', '王国', '骑士', '龙', '精灵', 'fantasy', 'magic', 'kingdom', 'knight', 'dragon', 'elf']],
+  ['dark_fantasy', ['黑暗', '诅咒', '恶魔', '墓穴', '神殿', '禁忌', 'dark fantasy', 'curse', 'demon', 'tomb', 'temple', 'taboo']],
+  ['mythic_epic', ['神话', '史诗', '诸神', '圣物', '祭坛', 'mythic', 'epic', 'deity', 'relic', 'altar']],
+  ['religious_ritual', ['宗教', '祭司', '修士', '修女', '神圣', '封印', '神殿', '寺庙', '教堂', 'priest', 'monk', 'nun', 'chaplain', 'sacred', 'seal', 'temple', 'church']],
+  ['war_military', ['战争', '军队', '士兵', '佣兵', '护甲', '战斗', 'battlefield', 'military', 'soldier', 'mercenary', 'armor', 'combat']],
+  ['science_fiction', ['科幻', '实验室', '机器人', '义体', '全息', '未来', 'sci-fi', 'science', 'robot', 'android', 'hologram', 'future']],
+  ['cyberpunk', ['赛博', '义体', '接口', '霓虹', '黑客', '数据', 'cyber', 'interface', 'neon', 'hacker', 'data']],
+  ['space_opera', ['太空', '宇宙', '星舰', '殖民地', '空间站', '异星', 'outer space', 'cosmic', 'starship', 'colony', 'space station', 'alien planet']],
+  ['biopunk', ['生物', '菌丝', '突变', '实验体', '样本', '隔离', 'bio', 'mycelium', 'mutation', 'specimen', 'quarantine']],
+  ['wasteland', ['废土', '末世', '拾荒', '污染', '修补', '荒原', 'wasteland', 'post-apocalyptic', 'scavenger', 'pollution', 'survival']],
+  ['horror', ['恐怖', '鬼', '尸', '疫病', '噩梦', '惊悚', 'horror', 'ghost', 'undead', 'plague', 'nightmare', 'thriller']],
+  ['surreal', ['超现实', '梦境', '阈限', '虚空', '镜像', '抽象', 'surreal', 'dream', 'liminal', 'void', 'mirror', 'abstract']],
+  ['fashion_idol', ['时尚', '偶像', '秀场', '模特', '高定', '明星', 'fashion', 'idol', 'runway', 'model', 'couture']],
+  ['historical', ['历史', '古代', '宫廷', '帝国', '贵族', '王朝', 'historical', 'ancient', 'court', 'empire', 'aristocracy', 'dynasty']],
+  ['romance', ['爱情', '恋人', '亲密', '告白', 'romance', 'lover', 'intimate', 'confession']],
+  ['ecological', ['森林', '湿地', '生态', '自然', '植物', '水下', 'forest', 'wetland', 'ecology', 'natural', 'plant', 'underwater']]
+];
+
+const cultureMatchers: Array<[tag: string, keys: readonly string[]]> = [
+  ['chinese_jianghu', ['江湖', '门派', '锦衣卫', '飞鱼服', '绣春刀', '武侠', 'wuxia', 'sect']],
+  ['east_asian_historical', ['东亚', '古风', '衙门', '庙祝', '祠堂', '明朝', '唐代', '宋代', '汉服', 'hanfu']],
+  ['east_asian_modern', ['东京', '首尔', '东亚都市', '便利店', '地铁', '霓虹街', 'japanese urban', 'tokyo', 'seoul']],
+  ['japanese_urban', ['日本', '东京', '涉谷', '新宿', 'jk', '便利店', 'japanese', 'tokyo', 'shibuya']],
+  ['western_court', ['英伦', '欧洲宫廷', '维多利亚', '贵族', '纹章', '骑士', 'western court', 'victorian', 'aristocracy', 'heraldry']],
+  ['western_modern', ['欧美', '美式', '英伦现代', 'western', 'american', 'european modern']],
+  ['global_corporate', ['企业', '公司', '办公', '工牌', '商务', '全球化', 'corporate', 'office', 'badge', 'business']],
+  ['institutional_modern', ['医院', '学校', '法院', '银行', '警局', '档案', 'hospital', 'school', 'court', 'bank', 'police', 'archive']],
+  ['imperial_bureaucracy', ['帝国', '官僚', '宫廷', '监察', '衙门', '官服', 'imperial', 'bureaucracy', 'court']],
+  ['religious_order', ['宗教', '祭司', '修士', '修女', '神殿', '寺庙', '教堂', 'priest', 'monk', 'nun', 'chaplain', 'temple', 'church', 'shrine']],
+  ['mountain_monastery', ['山门', '山寺', '修行', '寺院', '道观', 'monastery', 'mountain temple']],
+  ['frontier_town', ['边境', '边陲', '驿站', '荒镇', 'frontier', 'outpost']],
+  ['cyber_megacity', ['赛博都市', '巨型城市', '霓虹', '全息广告', 'cyber', 'megacity', 'neon']],
+  ['posthuman_city', ['后人类', '义体城市', '数据社会', 'posthuman', 'interface society']],
+  ['postapocalyptic_wasteland', ['废土', '末世', '拾荒', '避难所', '荒原', 'wasteland', 'post-apocalyptic', 'shelter']],
+  ['industrial_ruin', ['工厂', '工业废墟', '矿井', '船厂', 'factory', 'industrial ruin', 'mine', 'shipyard']],
+  ['biotech_lab', ['生物实验室', '培养皿', '样本', '隔离', 'biotech', 'specimen', 'quarantine']],
+  ['ecological_wild', ['森林', '湿地', '生态', '洞穴', '雨林', 'forest', 'wetland', 'ecology', 'cave', 'jungle']],
+  ['space_colony', ['太空殖民', '空间站', '星舰', '殖民地', 'space colony', 'space station', 'starship']],
+  ['alien_ecology', ['异星', '外星生态', 'alien planet', 'alien ecology']],
+  ['dream_psychic', ['梦境', '阈限', '心理空间', '镜像', 'dream', 'liminal', 'psychic', 'mirror']],
+  ['symbolic_stage', ['舞台', '剧场', '仪式台', '抽象空间', 'stage', 'theater', 'symbolic']]
+];
+
+const spaceMatchers: Array<[tag: string, keys: readonly string[]]> = [
+  ['interior', ['室内', '房间', '内景', 'interior', 'room']],
+  ['street', ['街道', '巷', '路边', '街头', 'street', 'alley', 'roadside']],
+  ['city', ['城市', '都市', '城区', 'city', 'urban']],
+  ['office', ['办公室', '办公', 'office']],
+  ['hospital', ['医院', '病房', '急诊', '手术室', 'hospital', 'ward', 'emergency room']],
+  ['lab', ['实验室', '洁净室', '样本室', 'lab', 'laboratory', 'cleanroom']],
+  ['factory', ['工厂', '车间', '厂房', 'factory', 'workshop']],
+  ['school', ['学校', '教室', '校园', 'school', 'classroom', 'campus']],
+  ['palace', ['宫殿', '宫廷', '王宫', 'palace', 'court']],
+  ['temple', ['神殿', '寺庙', '祭坛', '道观', 'temple', 'altar', 'shrine']],
+  ['archive', ['档案', '书库', '图书馆', 'archive', 'library']],
+  ['prison', ['牢狱', '监狱', '囚室', 'prison', 'cell']],
+  ['market', ['市场', '集市', '摊位', 'market', 'bazaar']],
+  ['bar', ['酒吧', '夜店', 'club', 'bar']],
+  ['subway', ['地铁', '地下站', 'subway', 'metro']],
+  ['mountain', ['山', '山林', '悬崖', 'mountain', 'cliff']],
+  ['forest', ['森林', '林地', 'forest', 'woods']],
+  ['wetland', ['湿地', '沼泽', 'wetland', 'swamp']],
+  ['desert', ['沙漠', '荒漠', 'desert']],
+  ['cave', ['洞穴', '地窟', 'cave', 'cavern']],
+  ['ruin', ['废墟', '遗迹', 'ruin', 'relic site']],
+  ['battlefield', ['战场', '前线', 'battlefield', 'frontline']],
+  ['road', ['公路', '道路', 'road', 'highway']],
+  ['space_station', ['空间站', '太空站', 'space station']],
+  ['spaceship', ['星舰', '飞船', 'spaceship', 'starship']],
+  ['alien_planet', ['异星', '外星地表', 'alien planet']],
+  ['cosmic', ['宇宙', '星云', '深空', 'cosmic', 'nebula', 'deep space']],
+  ['abstract', ['抽象', '虚空', 'void', 'abstract']],
+  ['liminal', ['阈限', '过渡空间', 'liminal', 'threshold']]
+];
+
+const genreRoleByBlock: Record<string, string[]> = {
+  cd_occupation: ['identity', 'institution'],
+  cd_persona: ['identity', 'persona'],
+  cd_style_protocol_primary: ['form_protocol'],
+  cd_style_protocol_secondary: ['form_protocol'],
+  cd_costume_logic: ['costume'],
+  cd_costume_system: ['costume'],
+  cd_prop_anchor: ['prop'],
+  cd_symbol_system: ['symbol', 'institution'],
+  cd_body_modification: ['body', 'technology'],
+  cd_body_features: ['body', 'ontology'],
+  cd_body_markings: ['body', 'symbol'],
+  cd_creature_class: ['creature'],
+  cd_creature_element: ['creature', 'ontology'],
+  cd_creature_head: ['creature', 'body'],
+  cd_creature_body: ['creature', 'body'],
+  cd_creature_texture: ['creature', 'material'],
+  cd_field_preset: ['field'],
+  cd_scene_real: ['field', 'scene'],
+  cd_scene_surreal: ['field', 'scene'],
+  cd_scene_abstract: ['field', 'scene'],
+  cd_atmosphere: ['field_detail'],
+  cd_particles: ['field_detail'],
+  cd_light_type: ['light_source']
+};
+
+const cultureRoleByBlock: Record<string, string[]> = {
+  cd_occupation: ['institution', 'labor_system'],
+  cd_persona: ['identity', 'social_code'],
+  cd_style_protocol_primary: ['costume', 'symbol'],
+  cd_style_protocol_secondary: ['costume', 'symbol'],
+  cd_costume_logic: ['costume'],
+  cd_costume_system: ['costume'],
+  cd_prop_anchor: ['prop'],
+  cd_symbol_system: ['symbol', 'language_sign', 'institution'],
+  cd_body_markings: ['body_mark', 'ritual'],
+  cd_body_modification: ['technology', 'body_interface'],
+  cd_creature_class: ['creature_ecology'],
+  cd_creature_element: ['creature_ecology'],
+  cd_creature_head: ['creature_ecology'],
+  cd_creature_body: ['creature_ecology'],
+  cd_creature_texture: ['creature_ecology'],
+  cd_spacetime_coordinate: ['coordinate'],
+  cd_space_anchor_exact: ['coordinate', 'space'],
+  cd_field_preset: ['field', 'institution', 'architecture'],
+  cd_scene_real: ['space', 'architecture'],
+  cd_scene_surreal: ['space', 'symbolic_field'],
+  cd_scene_abstract: ['space', 'symbolic_field'],
+  cd_atmosphere: ['environment'],
+  cd_particles: ['environment'],
+  cd_light_type: ['light_source']
+};
+
+const matchSemanticTags = (item: LibraryItemDef, matchers: Array<[string, readonly string[]]>): string[] => {
+  const sourceParts = [
+    item.name,
+    item.nameEn,
+    item.group,
+    item.groupEn,
+    item.def,
+    item.defEn,
+    item.core,
+    item.coreEn
+  ].filter(Boolean).map(value => String(value).toLowerCase());
+  const text = sourceParts.join(' ');
+  const hasKey = (key: string) => {
+    const normalizedKey = key.toLowerCase();
+    if (/^[a-z0-9][a-z0-9_\s-]*[a-z0-9]$/i.test(normalizedKey)) {
+      const escaped = normalizedKey.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+');
+      return new RegExp(`(^|[^a-z0-9])${escaped}([^a-z0-9]|$)`, 'i').test(text);
+    }
+    return text.includes(normalizedKey);
+  };
+  return matchers
+    .filter(([, keys]) => keys.some(hasKey))
+    .map(([tag]) => tag);
+};
+
+const deriveGenreTags = (item: LibraryItemDef): string[] => {
+  return matchSemanticTags(item, genreMatchers);
+};
+
+const withGenreAxisMeta = (
+  blockId: string,
+  item: LibraryItemDef,
+  fallbackStrictness: LibraryItemDef['genreStrictness'] = 'soft',
+  options: { deriveSemanticTags?: boolean } = {}
+): LibraryItemDef => {
+  const shouldDeriveSemanticTags = options.deriveSemanticTags !== false;
+  const excludedGenreTags = new Set((item.excludeGenreTags || []).map(value => value.toLowerCase()));
+  const genreTags = [...new Set([...(item.genreTags || []), ...(shouldDeriveSemanticTags ? deriveGenreTags(item) : [])])]
+    .filter(value => !excludedGenreTags.has(value.toLowerCase()));
+  const genreRole = [...new Set([...(item.genreRole || []), ...(genreRoleByBlock[blockId] || [])])];
+  const cultureTags = [...new Set([...(item.cultureTags || []), ...(shouldDeriveSemanticTags ? matchSemanticTags(item, cultureMatchers) : [])])];
+  const cultureRole = [...new Set([...(item.cultureRole || []), ...(cultureRoleByBlock[blockId] || [])])];
+  const spaceTags = [...new Set([...(item.spaceTags || []), ...(shouldDeriveSemanticTags ? matchSemanticTags(item, spaceMatchers) : [])])];
+  if (genreTags.length === 0 && genreRole.length === 0 && cultureTags.length === 0 && cultureRole.length === 0 && spaceTags.length === 0) return item;
+  return {
+    ...item,
+    ...(genreTags.length > 0 ? { genreTags } : {}),
+    genreRole,
+    ...(item.genreStrictness || genreTags.length > 0 ? { genreStrictness: item.genreStrictness || fallbackStrictness } : {}),
+    genreTranslation: item.genreTranslation || '若类型不完全匹配，优先把它折译为身份证据、服装接口、道具功能、局部制度痕迹或场景压力，不强行替换本次画面的主类型。',
+    genreTranslationEn: item.genreTranslationEn || 'If the genre does not fully match, translate it first into identity evidence, costume interface, prop function, local institutional trace, or scene pressure instead of replacing the main genre.',
+    ...(cultureTags.length > 0 ? { cultureTags } : {}),
+    cultureRole,
+    ...(item.cultureStrictness || cultureTags.length > 0 ? { cultureStrictness: item.cultureStrictness || fallbackStrictness } : {}),
+    cultureTranslation: item.cultureTranslation || '若文化场域不完全匹配，优先保留制度关系、服装轮廓、纹章/文字、礼仪动作、道具功能或建筑材料，不硬搬原文化符号。',
+    cultureTranslationEn: item.cultureTranslationEn || 'If the cultural field does not fully match, keep institutional relations, costume silhouette, heraldry/text, ritual gesture, prop function, or architectural material instead of copying the original cultural sign literally.',
+    ...(spaceTags.length > 0 ? { spaceTags } : {})
+  };
+};
+
+const withGenreAxisForBlock = (blockId: string, items: LibraryItemDef[], strictness: LibraryItemDef['genreStrictness'] = 'soft') => (
+  items.map(item => withGenreAxisMeta(blockId, item, strictness))
+);
+
+const withManualGenreAxisForBlock = (blockId: string, items: LibraryItemDef[], strictness: LibraryItemDef['genreStrictness'] = 'soft') => (
+  items.map(item => withGenreAxisMeta(blockId, item, strictness, { deriveSemanticTags: false }))
+);
+
+const mergeAxisDefaults = (item: LibraryItemDef, patch: Partial<LibraryItemDef>): LibraryItemDef => ({
+  ...item,
+  ...patch,
+  compatibleEras: [...new Set([...(item.compatibleEras || []), ...(item.eras || []), ...(patch.compatibleEras || [])])],
+  realityTags: [...new Set([...(item.realityTags || []), ...(patch.realityTags || [])])],
+  tags: [...new Set([...(item.tags || []), ...(patch.tags || [])])]
+});
+
+const creatureAxisDefaultsByBlock: Record<string, Partial<LibraryItemDef>> = {
+  cd_creature_size: {
+    compatibleEras: ['timeless'],
+    realityTags: ['creature_scale', 'non_realist'],
+    ontologyLevel: 3,
+    tags: ['creature_axis']
+  },
+  cd_creature_class: {
+    compatibleEras: ['primitive', 'mythic', 'feudal', 'near_future', 'far_future', 'timeless'],
+    realityTags: ['biological', 'creature', 'non_realist'],
+    ontologyLevel: 4,
+    tags: ['creature_axis']
+  },
+  cd_creature_element: {
+    compatibleEras: ['mythic', 'near_future', 'far_future', 'timeless'],
+    realityTags: ['elemental', 'magical', 'speculative', 'non_realist'],
+    ontologyLevel: 4,
+    tags: ['creature_axis']
+  },
+  cd_creature_head: {
+    compatibleEras: ['mythic', 'near_future', 'far_future', 'timeless'],
+    realityTags: ['biological', 'creature', 'body_mutation', 'non_realist'],
+    ontologyLevel: 4,
+    tags: ['creature_axis']
+  },
+  cd_creature_body: {
+    compatibleEras: ['primitive', 'mythic', 'near_future', 'far_future', 'timeless'],
+    realityTags: ['biological', 'creature', 'body_mutation', 'non_realist'],
+    ontologyLevel: 4,
+    tags: ['creature_axis']
+  },
+  cd_creature_mood: {
+    compatibleEras: ['timeless'],
+    realityTags: ['creature_behavior', 'biological'],
+    ontologyLevel: 2,
+    tags: ['creature_axis']
+  },
+  cd_creature_action: {
+    compatibleEras: ['timeless'],
+    realityTags: ['creature_behavior', 'biological'],
+    ontologyLevel: 2,
+    tags: ['creature_axis']
+  },
+  cd_creature_texture: {
+    compatibleEras: ['primitive', 'mythic', 'near_future', 'far_future', 'timeless'],
+    realityTags: ['biological', 'creature_material', 'physical_texture'],
+    ontologyLevel: 3,
+    tags: ['creature_axis']
+  }
+};
+
+const withCreatureAxisDefaults = (blockId: string, items: LibraryItemDef[]) => (
+  items.map(item => mergeAxisDefaults(item, creatureAxisDefaultsByBlock[blockId] || {}))
+);
+
+const universalHumanStateAxis: Partial<LibraryItemDef> = {
+  compatibleEras: ['timeless'],
+  realityTags: ['reality_neutral'],
+  ontologyLevel: 1,
+  tags: ['simple_axis_universal']
+};
+
+const physicalMaterialAxis: Partial<LibraryItemDef> = {
+  compatibleEras: ['primitive', 'slave', 'feudal', 'early_modern', 'industrial', 'modern', 'contemporary', 'near_future', 'far_future', 'timeless'],
+  realityTags: ['physical', 'physical_texture'],
+  ontologyLevel: 1,
+  tags: ['simple_axis_material']
+};
+
+const withSimpleAxisDefaults = (items: LibraryItemDef[], patch: Partial<LibraryItemDef>) => (
+  items.map(item => mergeAxisDefaults(item, patch))
+);
+
+const identityAnchorAxisPatchById: Record<string, Partial<LibraryItemDef>> = {
+  cd_anchor_jinyiwei: {
+    compatibleEras: ['feudal', 'early_modern'],
+    realityTags: ['historical', 'physical', 'imperial_order'],
+    ontologyLevel: 1
+  },
+  cd_anchor_court_assassin: {
+    compatibleEras: ['slave', 'feudal', 'early_modern', 'timeless'],
+    realityTags: ['historical', 'physical', 'court_order'],
+    ontologyLevel: 1
+  },
+  cd_anchor_fashion_model: {
+    compatibleEras: ['industrial', 'modern', 'contemporary', 'near_future'],
+    realityTags: ['realistic', 'social', 'fashion_system'],
+    ontologyLevel: 1
+  },
+  cd_anchor_stylist: {
+    compatibleEras: ['industrial', 'modern', 'contemporary', 'near_future'],
+    realityTags: ['realistic', 'social', 'fashion_system', 'professional'],
+    ontologyLevel: 1
+  },
+  cd_anchor_doctor: {
+    compatibleEras: ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'],
+    realityTags: ['realistic', 'medical_institution', 'professional'],
+    ontologyLevel: 1
+  },
+  cd_anchor_mechanic: {
+    compatibleEras: ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'],
+    realityTags: ['realistic', 'mechanical', 'professional'],
+    ontologyLevel: 1
+  },
+  cd_anchor_priest: {
+    compatibleEras: ['slave', 'feudal', 'early_modern', 'industrial', 'modern', 'contemporary', 'mythic', 'timeless'],
+    realityTags: ['stylized', 'religious', 'ritual_social_order'],
+    ontologyLevel: 2
+  },
+  cd_anchor_mercenary: {
+    compatibleEras: ['feudal', 'early_modern', 'industrial', 'modern', 'contemporary', 'near_future', 'far_future'],
+    realityTags: ['realistic', 'military', 'professional'],
+    ontologyLevel: 1
+  },
+  cd_anchor_space_worker: {
+    compatibleEras: ['near_future', 'far_future'],
+    realityTags: ['speculative', 'technological', 'space_labor'],
+    ontologyLevel: 3
+  },
+  cd_anchor_biotech_subject: {
+    compatibleEras: ['modern', 'contemporary', 'near_future', 'far_future'],
+    realityTags: ['speculative', 'biological', 'medical_institution'],
+    ontologyLevel: 3
+  },
+  cd_anchor_wuxia_disciple: {
+    compatibleEras: ['feudal', 'early_modern', 'mythic'],
+    realityTags: ['stylized', 'historical', 'martial_order'],
+    ontologyLevel: 2
+  },
+  cd_anchor_scavenger: {
+    compatibleEras: ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'],
+    realityTags: ['realistic', 'survival', 'postapocalyptic_material'],
+    ontologyLevel: 1
+  }
+};
+
+const withIdentityAnchorAxis = (items: LibraryItemDef[]) => (
+  items.map(item => mergeAxisDefaults(item, identityAnchorAxisPatchById[item.id || ''] || {}))
+);
 
 export const CONCEPT_ENGINE_BLOCKS: NarrativeBlockDef[] = [
   { id: 'cd_spacetime_coordinate', name: '时空坐标', enName: 'TIME-SPACE', description: '时间轴、地理/文明坐标、技术边界和物理现实底座。', tags: [] },
@@ -101,7 +497,7 @@ export const CONCEPT_ENGINE_BLOCKS: NarrativeBlockDef[] = [
   { id: 'cd_social_aesthetic', name: '国家/社会审美接口', enName: 'SOCIAL AESTHETIC', description: '意识形态编码：国家、媒体、阶层、妆发、平台和社会自我呈现。', tags: [] },
   { id: 'cd_species', name: '幻想种族', enName: 'SPECIES', description: '非现实种族原型。', tags: [] },
   { id: 'cd_occupation', name: '职业身份', enName: 'OCCUPATION', description: '岗位、劳动流程、机构权限、工具和职业姿态。', tags: [] },
-  { id: 'cd_persona', name: '人设标签', enName: 'PERSONA', description: '亚文化与气质标签。', tags: [] },
+  { id: 'cd_persona', name: '人设符号', enName: 'PERSONA SIGN', description: '亚文化、气质标签和可识别的人物符号。', tags: [] },
 
   { id: 'cd_body_type', name: '轮廓体态', enName: 'SILHOUETTE', description: '第一眼的形体识别。', tags: [] },
   { id: 'cd_hair_color', name: '发色', enName: 'HAIR COLOR', description: '发色或毛发色彩。', tags: [] },
@@ -141,26 +537,56 @@ export const CONCEPT_ENGINE_BLOCKS: NarrativeBlockDef[] = [
   { id: 'cd_symbol_system', name: '符号系统', enName: 'SYMBOL SYSTEM', description: '服装、道具、机构、阵营、媒体和世界制度里的外部可读标识。', tags: [] },
   { id: 'cd_wear_trace', name: '损耗痕迹', enName: 'WEAR TRACE', description: '磨损、修补、污渍、战损或维护痕迹。', tags: [] },
   { id: 'cd_palette', name: '配色方案', enName: 'PALETTE', description: '角色资产配色。', tags: [] },
+
+  { id: 'cd_director_style', name: '实拍导演风格', enName: 'DIRECTOR STYLE', description: '实拍影像的作者级观看方式，只作为风格参考，不替代主体内容。', tags: [] },
+  { id: 'cd_photo_style', name: '摄影摄像流派', enName: 'PHOTO STYLE', description: '摄影、摄像和纪实观看流派。', tags: [] },
+  { id: 'cd_art_style', name: '艺术流派', enName: 'ART STYLE', description: '艺术史、绘画流派和艺术家视觉语言。', tags: [] },
+  { id: 'cd_anim_director', name: '动画导演风格', enName: 'ANIMATION DIRECTOR', description: '动画导演、工作室和动画图像语法。', tags: [] },
+  { id: 'cd_art_movement', name: '美术插画', enName: 'ILLUSTRATION', description: '插画、漫画、游戏美术、概念美术和商业美术。', tags: [] },
+  { id: 'cd_camera_system', name: '摄影机系统', enName: 'CAMERA SYSTEM', description: '摄影媒介下的机身、传感器、动态范围和捕捉方式。', tags: [] },
+  { id: 'cd_lens_series', name: '镜头系列', enName: 'LENS SERIES', description: '摄影媒介下的镜头味道、散景、锐度和边缘特性。', tags: [] },
+  { id: 'cd_optical_format', name: '光学格式', enName: 'OPTICAL FORMAT', description: '摄影媒介下的画幅、传感器和比例基准。', tags: [] },
+  { id: 'cd_texture_render', name: '画面质感', enName: 'VISUAL TEXTURE', description: '影像表面、锐度、扩散、压缩、洁净度和渲染基准。', tags: [] },
+  { id: 'cd_physical_grain', name: '物理颗粒', enName: 'PHYSICAL GRAIN', description: '胶片颗粒、数码噪点、录像噪声和材料化影像颗粒。', tags: [] },
+  { id: 'cd_base_tone', name: '显影协议', enName: 'COLOR PROFILE', description: '底层反差、饱和度、动态范围和显影倾向。', tags: [] },
+  { id: 'cd_color_science', name: '色彩科学', enName: 'COLOR SCIENCE', description: '胶片型号、LUT、Log、HDR 或色彩系统参考。', tags: [] },
+  { id: 'cd_art_medium', name: '创作介质', enName: 'ART MEDIUM', description: '绘画媒介、上色方式和图像生成介质。', tags: [] },
+  { id: 'cd_line_quality', name: '线条质量', enName: 'LINE QUALITY', description: '线条粗细、边缘、勾线、笔触和漫画化线性特征。', tags: [] },
+  { id: 'cd_canvas_texture', name: '画布质感', enName: 'CANVAS TEXTURE', description: '纸面、画布、网点、印刷和底材肌理。', tags: [] },
   { id: 'cd_media_photo_soul', name: '摄影魂', enName: 'PHOTO SOUL', description: '摄影媒介下的作者/流派级视觉协议。', tags: [] },
   { id: 'cd_media_photo_quality', name: '摄影 L1.1 质', enName: 'PHOTO L1.1 QUALITY', description: '摄影捕捉质感、光色和影像材料。', tags: [] },
-  { id: 'cd_media_photo_eye', name: '摄影 L1.2 眼', enName: 'PHOTO L1.2 EYE', description: '摄影视角、景别和身份板观看方式。', tags: [] },
+  { id: 'cd_media_photo_eye', name: '摄影旧眼', enName: 'PHOTO LEGACY EYE', description: '旧摄影观看参数，当前主入口已迁移到“拍摄协议预设”。', tags: [] },
   { id: 'cd_media_photo_craft', name: '摄影工艺', enName: 'PHOTO CRAFT', description: '冲印、扫描、修图和影像制作痕迹。', tags: [] },
   { id: 'cd_media_photo_format', name: '摄影展示格式', enName: 'PHOTO FORMAT', description: '摄影身份板或档案页展示方式。', tags: [] },
   { id: 'cd_media_paint_soul', name: '绘画魂', enName: 'PAINT SOUL', description: '绘画媒介下的作者/流派级视觉协议。', tags: [] },
   { id: 'cd_media_paint_quality', name: '绘画 L1.1 质', enName: 'PAINT L1.1 QUALITY', description: '绘画介质、线条、笔触和上色系统。', tags: [] },
-  { id: 'cd_media_paint_eye', name: '绘画 L1.2 眼', enName: 'PAINT L1.2 EYE', description: '绘画设定图视角、三视图和局部拆解方式。', tags: [] },
+  { id: 'cd_media_paint_eye', name: '绘画旧眼', enName: 'PAINT LEGACY EYE', description: '旧绘画观看参数，当前主入口已迁移到“拍摄协议预设”。', tags: [] },
   { id: 'cd_media_paint_craft', name: '绘画工艺', enName: 'PAINT CRAFT', description: '扫描、印刷、纸面、硬边阴影和笔触工艺。', tags: [] },
   { id: 'cd_media_paint_format', name: '绘画展示格式', enName: 'PAINT FORMAT', description: '绘画概念设计图展示方式。', tags: [] },
-  { id: 'cd_media_cgi_soul', name: 'CGI魂', enName: 'CGI SOUL', description: 'CGI 媒介下的渲染管线与资产风格。', tags: [] },
-  { id: 'cd_media_cgi_quality', name: 'CGI L1.1 质', enName: 'CGI L1.1 QUALITY', description: 'CGI 材质、模型、皮肤和渲染质量。', tags: [] },
-  { id: 'cd_media_cgi_eye', name: 'CGI L1.2 眼', enName: 'CGI L1.2 EYE', description: '3D 资产视角、turntable 和正交展示。', tags: [] },
-  { id: 'cd_media_cgi_craft', name: 'CGI工艺', enName: 'CGI CRAFT', description: '渲染器、灰模、线框和资产制作痕迹。', tags: [] },
-  { id: 'cd_media_cgi_format', name: 'CGI展示格式', enName: 'CGI FORMAT', description: 'CGI 角色资产板展示方式。', tags: [] },
-  { id: 'cd_media_tangible_soul', name: '实体魂', enName: 'TANGIBLE SOUL', description: '实体媒介下的手作、定格、雕塑和特效协议。', tags: [] },
-  { id: 'cd_media_tangible_quality', name: '实体 L1.1 质', enName: 'TANGIBLE L1.1 QUALITY', description: '实体材料、表面和手工质感。', tags: [] },
-  { id: 'cd_media_tangible_eye', name: '实体 L1.2 眼', enName: 'TANGIBLE L1.2 EYE', description: '实体模型摄影视角和微缩展示。', tags: [] },
-  { id: 'cd_media_tangible_craft', name: '实体工艺', enName: 'TANGIBLE CRAFT', description: '接缝、涂装、关节和制作痕迹。', tags: [] },
-  { id: 'cd_media_tangible_format', name: '实体展示格式', enName: 'TANGIBLE FORMAT', description: '实体模型身份板展示方式。', tags: [] },
+  { id: 'cd_media_cgi_soul', name: 'CGI风格', enName: 'CGI STYLE', description: 'CGI 媒介下的通用视觉风格。', tags: [] },
+  { id: 'cd_media_tangible_soul', name: '实体风格', enName: 'TANGIBLE STYLE', description: '实体媒介下的通用手作、定格、雕塑、模型和特效风格。', tags: [] },
+  { id: 'cd_shot_preset', name: '拍摄协议预设', enName: 'SHOOTING PROTOCOL PRESET', description: '模板式拍摄方案：控制画面如何被观看、主体站在哪里、场景如何接入、姿态和空间如何组织。', tags: [] },
+  { id: 'cd_framing_focus', name: '画面焦点', enName: 'IMAGE FOCUS', description: '画面第一阅读重心：脸、身体、动作、环境、物件或形式。', tags: [] },
+  { id: 'cd_framing_shot_size', name: '景别', enName: 'SHOT SIZE', description: '主体与观看距离。', tags: [] },
+  { id: 'cd_framing_balance', name: '视觉平衡', enName: 'VISUAL BALANCE', description: '重心、对称性、负空间和画面秩序。', tags: [] },
+  { id: 'cd_framing_perspective', name: '透视', enName: 'PERSPECTIVE', description: '空间几何、消失点和深度关系。', tags: [] },
+  { id: 'cd_framing_angle', name: '拍摄角度', enName: 'CAMERA ANGLE', description: '观看高度、仰俯关系和镜头姿态。', tags: [] },
+  { id: 'cd_framing_focal_length', name: '焦段', enName: 'FOCAL LENGTH', description: '视野范围、压缩感和空间畸变。', tags: [] },
+  { id: 'cd_framing_depth', name: '景深/焦点', enName: 'DEPTH OF FIELD', description: '焦点范围、背景虚化和空间可读性。', tags: [] },
+  { id: 'cd_framing_shutter', name: '快门', enName: 'SHUTTER', description: '动态凝固、拖影和运动模糊。', tags: [] },
+  { id: 'cd_framing_lens_fx', name: '光学特效', enName: 'OPTICAL FX', description: '滤镜、眩光、漏光、折射、色散和光学瑕疵。', tags: [] },
+  { id: 'cd_scene_real', name: '现实场景', enName: 'REAL SCENE', description: '可信物理场域和现实空间类型。', tags: [] },
+  { id: 'cd_scene_surreal', name: '超现实场景', enName: 'SURREAL SCENE', description: '梦、神话、错位和非现实空间。', tags: [] },
+  { id: 'cd_scene_abstract', name: '抽象场景', enName: 'ABSTRACT SCENE', description: '心理空间、图形空间和抽象背景。', tags: [] },
+  { id: 'cd_atmosphere', name: '天气/大气', enName: 'ATMOSPHERE', description: '空气、天气、湿度、雾、烟、温度和宏观环境质感。', tags: [] },
+  { id: 'cd_particles', name: '粒子', enName: 'PARTICLES', description: '尘埃、粉末、火星、雨点、雪粒和悬浮物。', tags: [] },
+  { id: 'cd_light_mood', name: '光影基调', enName: 'LIGHTING MOOD', description: '总体明暗、冷暖、压迫感和光影观看关系。', tags: [] },
+  { id: 'cd_light_type', name: '光源锚点', enName: 'LIGHT SOURCE ANCHOR', description: '画面主要由什么发光，以及这个发光来源在哪些时空中可以直接成立。', tags: [] },
+  { id: 'cd_light_direction', name: '光投射方向', enName: 'LIGHT DIRECTION', description: '光源坐标、方向和投射关系。', tags: [] },
+  { id: 'cd_light_shape', name: '光投影形状', enName: 'LIGHT SHAPE', description: '光斑、切光、阴影纹理和投影形态。', tags: [] },
+  { id: 'cd_color_palette', name: '美术配色', enName: 'COLOR PALETTE', description: '画面整体配色关系。', tags: [] },
+  { id: 'cd_render_real', name: '画质增强(写实)', enName: 'QUALITY REAL', description: '摄影、写实和真实材质的画质增强。', tags: [] },
+  { id: 'cd_render_art', name: '画质增强(美术)', enName: 'QUALITY ART', description: '插画、绘画、动画和风格化图像的画质增强。', tags: [] },
   { id: 'cd_negative_rules', name: '禁用项', enName: 'NEGATIVE RULES', description: '防止回到电影镜头和复杂场景。', tags: [] },
   { id: 'cd_custom_seed', name: '自定义种子', enName: 'CUSTOM SEED', description: '追加主体设定。', tags: [] },
 ];
@@ -204,27 +630,107 @@ const fieldStyleItems: LibraryItemDef[] = [
   { id: 'cd_field_style_wasteland_salvage', name: '废土拾荒 (wasteland salvage)', group: '末世 / Wasteland', def: '把所有细节推向拼接衣层、拾荒工具、尘土、日晒褪色、水袋和反复修补。', defEn: 'push all details toward patched layers, salvage tools, dust, sun fading, water bags, and repeated repairs' },
 ];
 
-const spacetimeCoordinateItems: LibraryItemDef[] = SUR3_SPACE_ANCHORS.map(anchor => ({
-  id: `cd_st_${anchor.id}`,
+const formatSur3CoordinateTime = (preset: typeof SUR3_COORDINATE_PRESETS[number]): string => {
+  if (preset.timeMode === 'year' && typeof preset.year === 'number') {
+    return preset.year < 0 ? `公元前${Math.abs(preset.year)}年` : `公元${preset.year}年`;
+  }
+  return preset.time || '自动时代';
+};
+
+const coordinateCategoryFit: NonNullable<LibraryItemDef['categoryFit']> = {
+  unlisted: 'usable',
+  strong: [],
+  usable: [],
+  fusion: [],
+  weak: [],
+  exclude: []
+};
+
+const getCoordinateOntologyLevel = (domain: string): 1 | 2 | 3 | 4 | 5 => {
+  if (domain === 'extra_dimension') return 5;
+  if (domain === 'mythic_cosmos') return 4;
+  if (domain === 'outer_space' || domain === 'virtual_data' || domain === 'micro_body' || domain === 'future_megastructure') return 3;
+  return 1;
+};
+
+const getCoordinateRealityTags = (domain: string, scale: string): string[] => {
+  const base = [domain, scale];
+  if (domain === 'extra_dimension') return ['abstract', 'nonreal', ...base];
+  if (domain === 'mythic_cosmos') return ['nonreal', 'semi_surreal', ...base];
+  if (domain === 'virtual_data') return ['semi_surreal', 'stylized', ...base];
+  if (domain === 'outer_space' || domain === 'micro_body' || domain === 'future_megastructure') return ['semi_surreal', ...base];
+  return ['realistic', ...base];
+};
+
+const spacetimeCoordinateItems: LibraryItemDef[] = SUR3_COORDINATE_PRESETS.map((preset, index) => {
+  const anchor = preset.anchor;
+  const timeLabel = formatSur3CoordinateTime(preset);
+  const eras = preset.eraId ? [preset.eraId] : anchor.allowedEras;
+  return {
+    id: `cd_st_${anchor.id}_${preset.timeMode}_${preset.eraId || preset.year || index}`,
+    name: `${timeLabel}${anchor.name}`,
+    nameEn: `${preset.timeMode === 'year' && typeof preset.year === 'number' ? preset.year : preset.time || 'Auto Era'} ${anchor.nameEn || anchor.name}`,
+    group: anchor.domain,
+    def: `SUR3 精确时空坐标。时间：${timeLabel}；空间：${anchor.name}；尺度：${anchor.scale}；时间模式：${anchor.timeMode}；允许时代：${anchor.allowedEras.join(' / ')}。它固定现实域、时间轴、空间锚、技术边界和文化接口，不直接替代主体身份。`,
+    defEn: `SUR3 precise time-space coordinate. Time: ${preset.timeMode === 'year' && typeof preset.year === 'number' ? preset.year : preset.time || 'auto era'}; space: ${anchor.nameEn || anchor.name}; scale: ${anchor.scale}; time mode: ${anchor.timeMode}; allowed eras: ${anchor.allowedEras.join(' / ')}. It fixes reality domain, timeline, spatial anchor, technology boundary, and cultural interface without replacing subject identity.`,
+    ontologyLevel: getCoordinateOntologyLevel(anchor.domain),
+    eraMode: eras.includes('timeless') ? 'universal' : 'specific',
+    eras,
+    categoryFit: coordinateCategoryFit,
+    timeTags: [
+      preset.timeMode,
+      ...(preset.eraId ? [preset.eraId] : []),
+      ...(typeof preset.year === 'number' ? [preset.year < 0 ? 'ancient_year' : preset.year >= 2100 ? 'future_year' : 'historical_or_modern_year'] : [])
+    ],
+    realityTags: getCoordinateRealityTags(anchor.domain, anchor.scale),
+    compatibleEras: anchor.allowedEras,
+    controls: ['reality domain', 'timeline', 'space anchor', 'technology boundary', 'cultural interface'],
+    forbids: ['replacing subject identity', 'replacing visual style', 'replacing shot protocol'],
+    randomAxis: 'spacetime_coordinate',
+    randomDominance: 'hard_coordinate',
+    coordinateSpaceCn: preset.spaceCn,
+    coordinateSpaceEn: preset.spaceEn,
+    coordinateTime: preset.time,
+    coordinateYear: preset.year,
+    coordinateEraId: preset.eraId,
+    coordinateTimeMode: preset.timeMode,
+    source: 'SUR3'
+  } as LibraryItemDef;
+});
+
+const spaceAnchorItems: LibraryItemDef[] = SUR3_SPACE_ANCHORS.map(anchor => ({
+  id: `cd_space_${anchor.id}`,
   name: `${anchor.name} (${anchor.nameEn || anchor.name})`,
   nameEn: anchor.nameEn || anchor.name,
   group: anchor.domain,
-  def: `SUR3 时空锚点。尺度：${anchor.scale}；时间模式：${anchor.timeMode}；允许时代：${anchor.allowedEras.join(' / ')}。它只固定现实域、空间锚、技术边界和文化接口，不直接替代身份锚点。`,
-  defEn: `SUR3 coordinate anchor. Scale: ${anchor.scale}; time mode: ${anchor.timeMode}; allowed eras: ${anchor.allowedEras.join(' / ')}. It fixes reality domain, space anchor, technology boundary, and cultural interface without replacing the identity anchor.`
+  def: `SUR3 空间锚点。尺度：${anchor.scale}；时间模式：${anchor.timeMode}；允许时代：${anchor.allowedEras.join(' / ')}。它只固定空间与现实域，不直接替代时间锚点、身份锚点或场景预设。`,
+  defEn: `SUR3 space anchor. Scale: ${anchor.scale}; time mode: ${anchor.timeMode}; allowed eras: ${anchor.allowedEras.join(' / ')}. It only fixes space and reality domain without replacing time anchor, identity anchor, or scene preset.`,
+  eras: anchor.allowedEras,
+  realityTags: [anchor.domain, anchor.scale],
+  controls: ['space anchor', 'reality domain', 'technology boundary'],
+  forbids: ['replacing time anchor', 'replacing subject identity', 'replacing scene preset'],
+  randomAxis: 'space_anchor',
+  randomDominance: 'hard_coordinate',
+  source: 'SUR3'
 }));
 
 const fieldPresetItems: LibraryItemDef[] = SUR2_DATA.flatMap(group =>
-  group.items.map(item => ({
+  group.items.map(item => withFieldPresetMeta({
     ...item,
     id: `cd_fp_${item.id}`,
     group: group.name,
     groupEn: group.nameEn || group.name,
-    def: textFromLibraryText(item.directive || item.def),
-    defEn: textFromLibraryText(item.directiveEn || item.defEn || item.directive || item.def)
-  }))
+    def: textFromLibraryText(item.def),
+    defEn: textFromLibraryText(item.defEn || item.def)
+  }, group))
 );
 
 const styleProtocolItems: LibraryItemDef[] = STYLE_PROTOCOL_ITEMS;
+
+const lightMoodItems: LibraryItemDef[] = CD_LIGHT_MOOD.map(item => withLightingMeta(item, 'MOOD'));
+const lightTypeItems: LibraryItemDef[] = CD_LIGHT_TYPE.map(item => withLightingMeta(item, 'TYPE'));
+const lightDirectionItems: LibraryItemDef[] = CD_LIGHT_DIRECTION.map(item => withLightingMeta(item, 'DIRECTION'));
+const lightShapeItems: LibraryItemDef[] = CD_LIGHT_SHAPE.map(item => withLightingMeta(item, 'SHAPE'));
 
 const fusionRuleItems: LibraryItemDef[] = [
   { id: 'cd_world_law_l1', name: 'L1 写实锁定 (realist lock)', group: 'A. 世界法则', def: '彻底写实。时空坐标锁死现实边界；造型协议只能保留设计压力、剪影倾向、材料偏好和身份气质，并落成当前坐标真实可发生的服制、工具、工艺、姿态、磨损或社会标记。禁止真实超自然、真实科幻奇观、真实魔法、真实义体、真实外星材料、跨时代技术和无法解释的异常本体。', defEn: 'Fully realist. The time-space coordinate locks the real boundary; form protocols may only keep design pressure, silhouette tendency, material preference, and identity mood, then become plausible clothing, tools, craft, posture, wear, or social marks inside the current coordinate. No literal supernatural, sci-fi spectacle, magic, prosthetic miracles, alien material, cross-era technology, or unexplained ontology.' },
@@ -386,66 +892,103 @@ const negativeRuleItems: LibraryItemDef[] = [
 ];
 
 export const CONCEPT_ENGINE_LIBRARY: LibraryCategoryDef[] = [
-  { id: 'cd_spacetime_coordinate_lib', name: '时空坐标', nameEn: 'TIME-SPACE', desc: 'SUR3 coordinate anchors for era, place, reality domain, and technology boundary.', items: spacetimeCoordinateItems },
-  { id: 'cd_space_anchor_exact_lib', name: '空间锚点', nameEn: 'SPACE ANCHOR', desc: 'SUR3 space anchors for precise coordinate selection.', items: spacetimeCoordinateItems },
+  { id: 'cd_spacetime_coordinate_lib', name: '时空坐标', nameEn: 'TIME-SPACE', desc: 'SUR3 coordinate anchors for era, place, reality domain, and technology boundary.', items: withGenreAxisForBlock('cd_spacetime_coordinate', spacetimeCoordinateItems, 'hard') },
+  { id: 'cd_space_anchor_exact_lib', name: '空间锚点', nameEn: 'SPACE ANCHOR', desc: 'SUR3 space anchors for precise coordinate selection.', items: withGenreAxisForBlock('cd_space_anchor_exact', spaceAnchorItems, 'soft') },
   { id: 'cd_field_preset_lib', name: '场域预设', nameEn: 'FIELD PRESET', desc: 'SUR2 world-field presets translated into character-design constraints.', items: fieldPresetItems },
   { id: 'cd_style_protocol_primary_lib', name: '主造型协议', nameEn: 'PRIMARY FORM PROTOCOL', desc: 'Primary character / subject form protocol as a global concept-design system.', items: styleProtocolItems },
   { id: 'cd_style_protocol_secondary_lib', name: '副造型协议', nameEn: 'SECONDARY FORM PROTOCOL', desc: 'Secondary character / subject form protocol for fusion and controlled dissonance.', items: styleProtocolItems },
   { id: 'cd_fusion_rule_lib', name: '世界法则', nameEn: 'WORLD LAW', desc: 'Ontology permission level for conflicts across time-space, form protocol, identity, and visible details.', items: fusionRuleItems },
-  { id: 'cd_identity_anchor_lib', name: '身份锚点', nameEn: 'IDENTITY ANCHOR', desc: 'Core persona, occupation, role, or function anchor.', items: identityAnchorItems },
-  { id: 'cd_field_register_lib', name: '世界场域', nameEn: 'WORLD FIELD', desc: 'Global world/cultural field.', items: fieldRegisterItems },
+  { id: 'cd_identity_anchor_lib', name: '身份锚点', nameEn: 'IDENTITY ANCHOR', desc: 'Core persona, occupation, role, or function anchor.', items: withIdentityAnchorAxis(withGenreAxisForBlock('cd_persona', identityAnchorItems, 'hard')) },
+  { id: 'cd_field_register_lib', name: '世界场域', nameEn: 'WORLD FIELD', desc: 'Global world/cultural field.', items: withGenreAxisForBlock('cd_field_preset', fieldRegisterItems, 'hard') },
   { id: 'cd_field_style_primary_lib', name: '主场域风格', nameEn: 'PRIMARY FIELD STYLE', desc: 'Primary semantic style vector.', items: fieldStyleItems },
   { id: 'cd_field_style_secondary_lib', name: '副场域风格', nameEn: 'SECONDARY FIELD STYLE', desc: 'Secondary semantic style vector.', items: fieldStyleItems },
   { id: 'cd_subject_kind_lib', name: '生成对象', nameEn: 'SUBJECT KIND', desc: 'Concept target type.', items: subjectKindItems },
-  { id: 'cd_world_register_lib', name: '世界归属', nameEn: 'WORLD REGISTER', desc: 'Human world register.', items: worldRegisterItems },
-  { id: 'cd_identity_seed_lib', name: '身份核心', nameEn: 'IDENTITY CORE', desc: 'Identity and function.', items: identitySeedItems },
-  { id: 'cd_emotional_core_lib', name: '情绪核', nameEn: 'EMOTIONAL CORE', desc: 'Internal emotional drive and desire ideology.', items: CD_EMOTIONAL_CORE },
+  { id: 'cd_world_register_lib', name: '世界归属', nameEn: 'WORLD REGISTER', desc: 'Human world register.', items: withGenreAxisForBlock('cd_field_preset', worldRegisterItems, 'hard') },
+  { id: 'cd_identity_seed_lib', name: '身份核心', nameEn: 'IDENTITY CORE', desc: 'Identity and function.', items: withGenreAxisForBlock('cd_persona', identitySeedItems, 'hard') },
+  { id: 'cd_emotional_core_lib', name: '情绪核', nameEn: 'EMOTIONAL CORE', desc: 'Internal emotional drive and desire ideology.', items: withAppearanceThreeAxisMeta('cd_emotional_core', CD_EMOTIONAL_CORE) },
   { id: 'cd_negation_logic_lib', name: '异化逻辑', nameEn: 'NEGATION LOGIC', desc: 'Transformation logic.', items: negationLogicItems },
   { id: 'cd_design_translation_lib', name: '设计转译', nameEn: 'DESIGN TRANSLATION', desc: 'Human-first design translation.', items: designTranslationItems },
   { id: 'cd_design_sheet_lib', name: '图版格式', nameEn: 'SHEET FORMAT', desc: 'Design sheet format.', items: designSheetItems },
-  { id: 'cd_age_lib', name: '年龄质感', nameEn: 'AGE TEXTURE', desc: 'Clean age texture for human and humanoid concept design.', items: CD_AGE_TEXTURE },
-  { id: 'cd_gender_lib', name: '性别气质', nameEn: 'GENDER AURA', desc: 'Gender presentation as readable design aura, not biography.', items: CD_GENDER_AURA },
+  { id: 'cd_age_lib', name: '年龄质感', nameEn: 'AGE TEXTURE', desc: 'Clean age texture for human and humanoid concept design.', items: withAppearanceThreeAxisMeta('cd_age', CD_AGE_TEXTURE) },
+  { id: 'cd_gender_lib', name: '性别气质', nameEn: 'GENDER AURA', desc: 'Gender presentation as readable design aura, not biography.', items: withAppearanceThreeAxisMeta('cd_gender', CD_GENDER_AURA) },
   { id: 'cd_ethnicity_lib', name: '现实血统', nameEn: 'REAL HERITAGE', desc: 'Real bodily heritage: facial structure, skin range, and hair range, separated from national ideology and aesthetic coding.', items: CD_REAL_ETHNICITY },
   { id: 'cd_social_aesthetic_lib', name: '国家/社会审美接口', nameEn: 'SOCIAL AESTHETIC INTERFACE', desc: 'Ideological and social-aesthetic coding: nation, media, class, grooming, platform, and public self-presentation.', items: CD_SOCIAL_AESTHETIC_INTERFACE },
-  { id: 'cd_species_lib', name: '幻想种族', nameEn: 'SPECIES', desc: 'Fantasy species.', items: AES_SPECIES },
+  { id: 'cd_species_lib', name: '幻想种族', nameEn: 'SPECIES', desc: 'Fantasy species.', items: withSubjectAxisMeta('cd_species', AES_SPECIES) },
   { id: 'cd_occupation_lib', name: '职业身份', nameEn: 'OCCUPATION', desc: 'Clean occupation functions: workflow, institution, tools, labor posture, and access permissions.', items: CD_OCCUPATION },
-  { id: 'cd_persona_lib', name: '人设标签', nameEn: 'PERSONA', desc: 'Compound persona packages with ontology, era, risk, and style tags.', items: CD_PERSONA_LIBRARY },
-  { id: 'cd_body_type_lib', name: '轮廓体态', nameEn: 'BODY SILHOUETTE', desc: 'Aesthetic body silhouette and posture logic for concept design.', items: [...CD_BODY_SILHOUETTE, ...CD_ADULT_GLAMOUR_BODY] },
-  { id: 'cd_hair_color_lib', name: '发色', nameEn: 'HAIR COLOR', desc: 'Hair color.', items: CD_HAIR_COLOR },
-  { id: 'cd_hair_style_f_lib', name: '发型-女式', nameEn: 'HAIRSTYLE FEM', desc: 'Feminine hairstyle.', items: CD_HAIR_STYLE_FEM },
-  { id: 'cd_hair_style_m_lib', name: '发型-男式', nameEn: 'HAIRSTYLE MASC', desc: 'Masculine hairstyle.', items: CD_HAIR_STYLE_MASC },
-  { id: 'cd_beard_style_lib', name: '胡子', nameEn: 'BEARD', desc: 'Facial hair and beard style.', items: CD_BEARD_STYLE },
-  { id: 'cd_eye_color_lib', name: '瞳色', nameEn: 'EYE COLOR', desc: 'Eye color.', items: CD_EYE_COLOR },
-  { id: 'cd_eye_shape_lib', name: '眼型', nameEn: 'EYE SHAPE', desc: 'Eye shape.', items: CD_EYE_SHAPE },
-  { id: 'cd_eye_fx_lib', name: '眼部异变', nameEn: 'EYE MUTATION', desc: 'Eye mutation.', items: CD_EYE_MUTATION },
-  { id: 'cd_face_features_lib', name: '面部特征', nameEn: 'FACE FEATURES', desc: 'Stable facial recognition structure.', items: CD_FACE_FEATURES },
-  { id: 'cd_makeup_style_lib', name: '妆容修饰', nameEn: 'MAKEUP', desc: 'Makeup, face paint, and stylized facial adornment.', items: CD_MAKEUP_STYLE },
-  { id: 'cd_expression_lib', name: '面部表情', nameEn: 'EXPRESSION', desc: 'Visible facial expression and desire-coded face state.', items: CD_EXPRESSION },
-  { id: 'cd_skin_texture_lib', name: '皮肤本体', nameEn: 'SKIN MATERIAL', desc: 'Intrinsic skin texture, marks, and boundary material.', items: CD_SKIN_MATERIAL },
-  { id: 'cd_surface_state_lib', name: '表面附着', nameEn: 'SURFACE STATE', desc: 'Sweat, rain, dust, grease, blood, powder, and other temporary coatings.', items: CD_SURFACE_STATE },
-  { id: 'cd_body_features_lib', name: '异形结构', nameEn: 'ANOMALOUS STRUCTURE', desc: 'Extra heads, multiple limbs, discontinuous bodies, anomalous lower bodies, and humanoid boundary skeletons.', items: CD_BODY_FEATURES },
-  { id: 'cd_body_markings_lib', name: '身体标记', nameEn: 'BODY MARKINGS', desc: 'Marks written onto the body: tattoos, brands, scarification, ritual paint, body inscriptions.', items: CD_BODY_MARKINGS },
-  { id: 'cd_body_damage_lib', name: '身体损伤', nameEn: 'BODY DAMAGE', desc: 'Scars, fresh injury, medical repair, and loss.', items: CD_BODY_DAMAGE },
-  { id: 'cd_body_modification_lib', name: '身体改造', nameEn: 'BODY MODIFICATION', desc: 'Prosthetics, cybernetics, biological boundary traits, and symbiosis.', items: CD_BODY_MODIFICATION },
-  { id: 'cd_static_pose_lib', name: '姿态语言', nameEn: 'POSE LANGUAGE', desc: 'Concept-design-safe static pose motifs with ontology, era, and risk metadata.', items: CD_STATIC_POSE },
-  { id: 'cd_dynamic_action_lib', name: '动态动作', nameEn: 'DYNAMIC ACTION', desc: 'Concept-design-safe dynamic action motifs with ontology, era, and risk metadata.', items: CD_DYNAMIC_ACTION },
-  { id: 'cd_human_behavior_lib', name: '人类行为', nameEn: 'HUMAN BEHAVIOR', desc: 'Cleaned classic image-behavior motifs for original character identity boards.', items: CD_HUMAN_BEHAVIOR },
-  { id: 'cd_creature_size_lib', name: '异种量级', nameEn: 'CREATURE SCALE', desc: 'Creature scale.', items: AES_CREATURE_SIZE },
-  { id: 'cd_creature_class_lib', name: '异种纲目', nameEn: 'CREATURE TAXONOMY', desc: 'Creature taxonomy.', items: AES_CREATURE_CLASS },
-  { id: 'cd_creature_element_lib', name: '元素属性', nameEn: 'ELEMENTAL TRAIT', desc: 'Elemental trait.', items: AES_CREATURE_ELEMENT },
-  { id: 'cd_creature_head_lib', name: '头部结构', nameEn: 'HEAD STRUCTURE', desc: 'Head structure.', items: AES_CREATURE_HEAD },
-  { id: 'cd_creature_body_lib', name: '身体部件', nameEn: 'BODY PARTS', desc: 'Body parts.', items: AES_CREATURE_BODY },
-  { id: 'cd_creature_mood_lib', name: '异种情绪', nameEn: 'CREATURE MOOD', desc: 'Creature mood.', items: AES_CREATURE_MOOD },
-  { id: 'cd_creature_action_lib', name: '异种行为', nameEn: 'CREATURE BEHAVIOR', desc: 'Creature behavior.', items: AES_CREATURE_ACTION },
-  { id: 'cd_creature_texture_lib', name: '异种材质', nameEn: 'CREATURE MATERIAL', desc: 'Creature material.', items: AES_CREATURE_TEXTURE },
-  { id: 'cd_costume_logic_lib', name: '服装执行逻辑', nameEn: 'COSTUME EXECUTION', desc: 'Costume as the execution layer: how clothing and wearable gear become the body-world interface under the selected form protocol.', items: costumeLogicItems },
-  { id: 'cd_surface_material_lib', name: '表面材料', nameEn: 'SURFACE MATERIAL', desc: 'Surface material.', items: surfaceMaterialItems },
-  { id: 'cd_costume_system_lib', name: '服装系统', nameEn: 'COSTUME SYSTEM', desc: 'The costume subsystem: it gives clothing a concrete wearable structure while obeying the global form protocol.', items: costumeSystemItems },
-  { id: 'cd_material_evidence_lib', name: '材料证据', nameEn: 'MATERIAL EVIDENCE', desc: 'Material evidence and craft logic.', items: materialEvidenceItems },
-  { id: 'cd_prop_anchor_lib', name: '道具锚点', nameEn: 'PROP ANCHOR', desc: 'One functional prop anchor.', items: propAnchorItems },
-  { id: 'cd_symbol_system_lib', name: '符号系统', nameEn: 'SYMBOL SYSTEM', desc: 'External readable signs on clothing, props, institutions, factions, media, and world systems.', items: symbolSystemItems },
-  { id: 'cd_wear_trace_lib', name: '损耗痕迹', nameEn: 'WEAR TRACE', desc: 'Wear, maintenance, repair, and damage traces.', items: wearTraceItems },
+  { id: 'cd_persona_lib', name: '人设符号', nameEn: 'PERSONA SIGN', desc: 'Compound persona packages with ontology, era, risk, and style tags.', items: withPersonaAxisMeta('cd_persona', withManualGenreAxisForBlock('cd_persona', CD_PERSONA_LIBRARY, 'hard')) },
+  { id: 'cd_body_type_lib', name: '轮廓体态', nameEn: 'BODY SILHOUETTE', desc: 'Aesthetic body silhouette and posture logic for concept design.', items: withAppearanceThreeAxisMeta('cd_body_type', [...CD_BODY_SILHOUETTE, ...CD_ADULT_GLAMOUR_BODY]) },
+  { id: 'cd_hair_color_lib', name: '发色', nameEn: 'HAIR COLOR', desc: 'Hair color.', items: withGroomingAxisMeta('cd_hair_color', CD_HAIR_COLOR) },
+  { id: 'cd_hair_style_f_lib', name: '发型-女式', nameEn: 'HAIRSTYLE FEM', desc: 'Feminine hairstyle.', items: withGroomingAxisMeta('cd_hair_style_f', CD_HAIR_STYLE_FEM) },
+  { id: 'cd_hair_style_m_lib', name: '发型-男式', nameEn: 'HAIRSTYLE MASC', desc: 'Masculine hairstyle.', items: withGroomingAxisMeta('cd_hair_style_m', CD_HAIR_STYLE_MASC) },
+  { id: 'cd_beard_style_lib', name: '胡子', nameEn: 'BEARD', desc: 'Facial hair and beard style.', items: withAppearanceThreeAxisMeta('cd_beard_style', CD_BEARD_STYLE) },
+  { id: 'cd_eye_color_lib', name: '瞳色', nameEn: 'EYE COLOR', desc: 'Eye color.', items: withAppearanceThreeAxisMeta('cd_eye_color', CD_EYE_COLOR) },
+  { id: 'cd_eye_shape_lib', name: '眼型', nameEn: 'EYE SHAPE', desc: 'Eye shape.', items: withAppearanceThreeAxisMeta('cd_eye_shape', CD_EYE_SHAPE) },
+  { id: 'cd_eye_fx_lib', name: '眼部异变', nameEn: 'EYE MUTATION', desc: 'Eye mutation.', items: withAppearanceThreeAxisMeta('cd_eye_fx', CD_EYE_MUTATION) },
+  { id: 'cd_face_features_lib', name: '面部特征', nameEn: 'FACE FEATURES', desc: 'Stable facial recognition structure.', items: withFaceExpressionAxisMeta('FACE_FEATURE', withFaceAxisMeta('cd_face_features', CD_FACE_FEATURES)) },
+  { id: 'cd_makeup_style_lib', name: '妆容修饰', nameEn: 'MAKEUP', desc: 'Makeup, face paint, and stylized facial adornment.', items: withFaceExpressionAxisMeta('MAKEUP', withGroomingAxisMeta('cd_makeup_style', CD_MAKEUP_STYLE)) },
+  { id: 'cd_expression_lib', name: '面部表情', nameEn: 'EXPRESSION', desc: 'Visible facial expression and desire-coded face state.', items: withFaceExpressionAxisMeta('EXPRESSION', withSimpleAxisDefaults(CD_EXPRESSION, universalHumanStateAxis)) },
+  { id: 'cd_skin_texture_lib', name: '皮肤本体', nameEn: 'SKIN MATERIAL', desc: 'Intrinsic skin texture, marks, and boundary material.', items: withVisibleBodyCoreAxisMeta('SKIN', withVisibleBodyAxisMeta('cd_skin_texture', CD_SKIN_MATERIAL)) },
+  { id: 'cd_surface_state_lib', name: '表面附着', nameEn: 'SURFACE STATE', desc: 'Sweat, rain, dust, grease, blood, powder, and other temporary coatings.', items: withVisibleBodyCoreAxisMeta('SURFACE', withVisibleBodyAxisMeta('cd_surface_state', CD_SURFACE_STATE)) },
+  { id: 'cd_body_features_lib', name: '异形结构', nameEn: 'ANOMALOUS STRUCTURE', desc: 'Extra heads, multiple limbs, discontinuous bodies, anomalous lower bodies, and humanoid boundary skeletons.', items: withVisibleBodyCoreAxisMeta('BODY_FEATURE', withGenreAxisForBlock('cd_body_features', withVisibleBodyAxisMeta('cd_body_features', CD_BODY_FEATURES), 'soft')) },
+  { id: 'cd_body_markings_lib', name: '身体标记', nameEn: 'BODY MARKINGS', desc: 'Marks written onto the body: tattoos, brands, scarification, ritual paint, body inscriptions.', items: withVisibleBodyCoreAxisMeta('BODY_MARKING', withGenreAxisForBlock('cd_body_markings', withVisibleBodyAxisMeta('cd_body_markings', CD_BODY_MARKINGS), 'soft')) },
+  { id: 'cd_body_damage_lib', name: '身体损伤', nameEn: 'BODY DAMAGE', desc: 'Scars, fresh injury, medical repair, and loss.', items: withVisibleBodyCoreAxisMeta('BODY_DAMAGE', withVisibleBodyAxisMeta('cd_body_damage', CD_BODY_DAMAGE)) },
+  { id: 'cd_body_modification_lib', name: '身体改造', nameEn: 'BODY MODIFICATION', desc: 'Prosthetics, cybernetics, biological boundary traits, and symbiosis.', items: withVisibleBodyCoreAxisMeta('BODY_MODIFICATION', withGenreAxisForBlock('cd_body_modification', withVisibleBodyAxisMeta('cd_body_modification', withSubjectAxisMeta('cd_body_modification', CD_BODY_MODIFICATION)), 'soft')) },
+  { id: 'cd_static_pose_lib', name: '姿态语言', nameEn: 'POSE LANGUAGE', desc: 'Concept-design-safe static pose motifs with ontology, era, and risk metadata.', items: withActionAxisMeta('STATIC', CD_STATIC_POSE) },
+  { id: 'cd_dynamic_action_lib', name: '动态动作', nameEn: 'DYNAMIC ACTION', desc: 'Concept-design-safe dynamic action motifs with ontology, era, and risk metadata.', items: withActionAxisMeta('DYNAMIC', CD_DYNAMIC_ACTION) },
+  { id: 'cd_human_behavior_lib', name: '人类行为', nameEn: 'HUMAN BEHAVIOR', desc: 'Cleaned classic image-behavior motifs for original character identity boards.', items: withActionAxisMeta('BEHAVIOR', CD_HUMAN_BEHAVIOR) },
+  { id: 'cd_creature_size_lib', name: '异种量级', nameEn: 'CREATURE SCALE', desc: 'Creature scale.', items: withCreatureAxisDefaults('cd_creature_size', AES_CREATURE_SIZE) },
+  { id: 'cd_creature_class_lib', name: '异种纲目', nameEn: 'CREATURE TAXONOMY', desc: 'Creature taxonomy.', items: withCreatureAxisDefaults('cd_creature_class', withGenreAxisForBlock('cd_creature_class', AES_CREATURE_CLASS, 'soft')) },
+  { id: 'cd_creature_element_lib', name: '元素属性', nameEn: 'ELEMENTAL TRAIT', desc: 'Elemental trait.', items: withCreatureAxisDefaults('cd_creature_element', withGenreAxisForBlock('cd_creature_element', AES_CREATURE_ELEMENT, 'soft')) },
+  { id: 'cd_creature_head_lib', name: '头部结构', nameEn: 'HEAD STRUCTURE', desc: 'Head structure.', items: withCreatureAxisDefaults('cd_creature_head', withGenreAxisForBlock('cd_creature_head', AES_CREATURE_HEAD, 'soft')) },
+  { id: 'cd_creature_body_lib', name: '身体部件', nameEn: 'BODY PARTS', desc: 'Body parts.', items: withCreatureAxisDefaults('cd_creature_body', withGenreAxisForBlock('cd_creature_body', AES_CREATURE_BODY, 'soft')) },
+  { id: 'cd_creature_mood_lib', name: '异种情绪', nameEn: 'CREATURE MOOD', desc: 'Creature mood.', items: withCreatureAxisDefaults('cd_creature_mood', AES_CREATURE_MOOD) },
+  { id: 'cd_creature_action_lib', name: '异种行为', nameEn: 'CREATURE BEHAVIOR', desc: 'Creature behavior.', items: withCreatureAxisDefaults('cd_creature_action', AES_CREATURE_ACTION) },
+  { id: 'cd_creature_texture_lib', name: '异种材质', nameEn: 'CREATURE MATERIAL', desc: 'Creature material.', items: withCreatureAxisDefaults('cd_creature_texture', withGenreAxisForBlock('cd_creature_texture', AES_CREATURE_TEXTURE, 'soft')) },
+  { id: 'cd_costume_logic_lib', name: '服装执行逻辑', nameEn: 'COSTUME EXECUTION', desc: 'Costume as the execution layer: how clothing and wearable gear become the body-world interface under the selected form protocol.', items: withDesignEvidenceAxisMeta('COSTUME', withGenreAxisForBlock('cd_costume_logic', costumeLogicItems, 'soft')) },
+  { id: 'cd_surface_material_lib', name: '表面材料', nameEn: 'SURFACE MATERIAL', desc: 'Surface material.', items: withSimpleAxisDefaults(surfaceMaterialItems, physicalMaterialAxis) },
+  { id: 'cd_costume_system_lib', name: '服装系统', nameEn: 'COSTUME SYSTEM', desc: 'The costume subsystem: it gives clothing a concrete wearable structure while obeying the global form protocol.', items: withSimpleAxisDefaults(withGenreAxisForBlock('cd_costume_system', costumeSystemItems, 'soft'), physicalMaterialAxis) },
+  { id: 'cd_material_evidence_lib', name: '材料证据', nameEn: 'MATERIAL EVIDENCE', desc: 'Material evidence and craft logic.', items: withSimpleAxisDefaults(withGenreAxisForBlock('cd_costume_logic', materialEvidenceItems, 'soft'), physicalMaterialAxis) },
+  { id: 'cd_prop_anchor_lib', name: '道具锚点', nameEn: 'PROP ANCHOR', desc: 'One functional prop anchor.', items: withDesignEvidenceAxisMeta('PROP', withGenreAxisForBlock('cd_prop_anchor', propAnchorItems, 'soft')) },
+  { id: 'cd_symbol_system_lib', name: '符号系统', nameEn: 'SYMBOL SYSTEM', desc: 'External readable signs on clothing, props, institutions, factions, media, and world systems.', items: withDesignEvidenceAxisMeta('SYMBOL', withGenreAxisForBlock('cd_symbol_system', symbolSystemItems, 'soft')) },
+  { id: 'cd_wear_trace_lib', name: '损耗痕迹', nameEn: 'WEAR TRACE', desc: 'Wear, maintenance, repair, and damage traces.', items: withSimpleAxisDefaults(wearTraceItems, physicalMaterialAxis) },
   { id: 'cd_palette_lib', name: '配色方案', nameEn: 'PALETTE', desc: 'Color palette.', items: AES_COLOR_PRESETS },
+  { id: 'cd_director_style_lib', name: '实拍导演风格', nameEn: 'DIRECTOR STYLE', desc: 'Live-action director references registered under Concept Design.', items: DIRECTOR_STYLE_ITEMS },
+  { id: 'cd_photo_style_lib', name: '摄影摄像流派', nameEn: 'PHOTO STYLE', desc: 'Photography and cinematography styles registered under Concept Design.', items: PHOTO_STYLE_ITEMS },
+  { id: 'cd_art_style_lib', name: '艺术流派', nameEn: 'ART STYLE', desc: 'Art history and artist-movement references registered under Concept Design.', items: ART_STYLE_ITEMS },
+  { id: 'cd_anim_director_lib', name: '动画导演风格', nameEn: 'ANIMATION DIRECTOR', desc: 'Animation director and studio references registered under Concept Design.', items: ANIMATION_DIRECTORS_LIB },
+  { id: 'cd_art_movement_lib', name: '美术插画', nameEn: 'ILLUSTRATION', desc: 'Illustration, manga, game art, concept art, and commercial art references registered under Concept Design.', items: ART_MOVEMENTS_LIB },
+  { id: 'cd_camera_system_lib', name: '摄影机系统', nameEn: 'CAMERA SYSTEM', desc: 'Camera sensor and format.', items: AES_CAMERA_SYSTEM },
+  { id: 'cd_lens_series_lib', name: '镜头系列', nameEn: 'LENS SERIES', desc: 'Optical characteristics.', items: AES_LENS_SERIES },
+  { id: 'cd_optical_format_lib', name: '光学格式', nameEn: 'OPTICAL FORMAT', desc: 'Aspect ratio and capture format.', items: AES_OPTICAL_FORMAT },
+  { id: 'cd_texture_render_lib', name: '画面质感', nameEn: 'VISUAL TEXTURE', desc: 'Image surface and render texture.', items: AES_TEXTURE_RENDER },
+  { id: 'cd_physical_grain_lib', name: '物理颗粒', nameEn: 'PHYSICAL GRAIN', desc: 'Grain, noise, and capture artifacts.', items: AES_PHYSICAL_GRAIN },
+  { id: 'cd_base_tone_lib', name: '显影协议', nameEn: 'COLOR PROFILE', desc: 'Base contrast, saturation, and dynamic range.', items: AES_BASE_TONE },
+  { id: 'cd_color_science_lib', name: '色彩科学', nameEn: 'COLOR SCIENCE', desc: 'Film stock, LUT, log, and color system references.', items: AES_COLOR_SCIENCE },
+  { id: 'cd_art_medium_lib', name: '创作介质', nameEn: 'ART MEDIUM', desc: 'Art medium and rendering medium.', items: AES_ART_MEDIUM },
+  { id: 'cd_line_quality_lib', name: '线条质量', nameEn: 'LINE QUALITY', desc: 'Linework and edge language.', items: AES_LINE_QUALITY },
+  { id: 'cd_canvas_texture_lib', name: '画布质感', nameEn: 'CANVAS TEXTURE', desc: 'Canvas, paper, print, and surface texture.', items: AES_CANVAS_TEXTURE },
+  { id: 'cd_shot_preset_lib', name: '拍摄协议预设', nameEn: 'SHOOTING PROTOCOL PRESET', desc: 'Template-style shooting protocols for film frames, posters, covers, street shots, social snapshots, object displays, scene setups, and abstract viewing relations.', items: CD_SHOT_PRESETS },
+  { id: 'cd_framing_focus_lib', name: '画面焦点', nameEn: 'IMAGE FOCUS', desc: 'Primary reading focus.', items: AES_IMAGE_FOCUS },
+  { id: 'cd_framing_shot_size_lib', name: '景别', nameEn: 'SHOT SIZE', desc: 'Camera distance and subject scale.', items: AES_SHOT_SIZE },
+  { id: 'cd_framing_balance_lib', name: '视觉平衡', nameEn: 'VISUAL BALANCE', desc: 'Composition weight and balance.', items: AES_VISUAL_BALANCE },
+  { id: 'cd_framing_perspective_lib', name: '透视', nameEn: 'PERSPECTIVE', desc: 'Perspective and spatial geometry.', items: AES_PERSPECTIVE },
+  { id: 'cd_framing_angle_lib', name: '拍摄角度', nameEn: 'CAMERA ANGLE', desc: 'Camera angle and viewing height.', items: AES_ANGLE },
+  { id: 'cd_framing_focal_length_lib', name: '焦段', nameEn: 'FOCAL LENGTH', desc: 'Field of view and compression.', items: AES_FOCAL_LENGTH },
+  { id: 'cd_framing_depth_lib', name: '景深/焦点', nameEn: 'DEPTH OF FIELD', desc: 'Focus range and background separation.', items: AES_DEPTH },
+  { id: 'cd_framing_shutter_lib', name: '快门', nameEn: 'SHUTTER', desc: 'Motion blur and freeze behavior.', items: AES_SHUTTER },
+  { id: 'cd_framing_lens_fx_lib', name: '光学特效', nameEn: 'OPTICAL FX', desc: 'Optical filters, refraction, flares, and lens artifacts.', items: AES_LENS_FX },
+  { id: 'cd_scene_real_lib', name: '现实场景', nameEn: 'REAL SCENE', desc: 'Physical and realistic scene presets.', items: withManualGenreAxisForBlock('cd_scene_real', CD_SCENE_REAL, 'hard') },
+  { id: 'cd_scene_surreal_lib', name: '超现实场景', nameEn: 'SURREAL SCENE', desc: 'Surreal, dream, myth, and impossible scene presets.', items: withManualGenreAxisForBlock('cd_scene_surreal', CD_SCENE_SURREAL, 'hard') },
+  { id: 'cd_scene_abstract_lib', name: '抽象场景', nameEn: 'ABSTRACT SCENE', desc: 'Abstract, psychological, and graphic scene presets.', items: withManualGenreAxisForBlock('cd_scene_abstract', CD_SCENE_ABSTRACT, 'soft') },
+  { id: 'cd_atmosphere_lib', name: '天气/大气', nameEn: 'ATMOSPHERE', desc: 'Weather and air medium.', items: withManualGenreAxisForBlock('cd_atmosphere', CD_ATMOSPHERE, 'soft') },
+  { id: 'cd_particles_lib', name: '粒子', nameEn: 'PARTICLES', desc: 'Suspended particles and atmospheric detail.', items: withManualGenreAxisForBlock('cd_particles', CD_PARTICLES, 'soft') },
+  { id: 'cd_light_mood_lib', name: '光影基调', nameEn: 'LIGHTING MOOD', desc: 'Lighting mood and contrast preset pack.', items: lightMoodItems },
+  { id: 'cd_light_type_lib', name: '光源锚点', nameEn: 'LIGHT SOURCE ANCHOR', desc: 'Light source anchors with spacetime legality and reality anchors.', items: withManualGenreAxisForBlock('cd_light_type', lightTypeItems, 'soft') },
+  { id: 'cd_light_direction_lib', name: '光投射方向', nameEn: 'LIGHT DIRECTION', desc: 'Light position and direction with random safety metadata.', items: lightDirectionItems },
+  { id: 'cd_light_shape_lib', name: '光投影形状', nameEn: 'LIGHT SHAPE', desc: 'Light shape and shadow texture with projection metadata.', items: lightShapeItems },
+  { id: 'cd_color_palette_lib', name: '美术配色', nameEn: 'COLOR PALETTE', desc: 'Whole-image color palette.', items: AES_COLOR_PRESETS },
+  { id: 'cd_render_real_lib', name: '画质增强(写实)', nameEn: 'QUALITY REAL', desc: 'Quality boosters for photography and realistic rendering.', items: AES_RENDER_REAL },
+  { id: 'cd_render_art_lib', name: '画质增强(美术)', nameEn: 'QUALITY ART', desc: 'Quality boosters for illustration, painting, and stylized rendering.', items: AES_RENDER_ART },
   ...CONCEPT_MEDIA_STYLE_LIBRARIES,
   { id: 'cd_negative_rules_lib', name: '禁用项', nameEn: 'NEGATIVE RULES', desc: 'Negative constraints.', items: negativeRuleItems },
 ];

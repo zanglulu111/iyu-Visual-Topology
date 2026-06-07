@@ -1,6 +1,9 @@
 import {
   ConceptBaseItem,
   ConceptEra,
+  ConceptGenderCoding,
+  ConceptBeardRegister,
+  ConceptGroomingIntensity,
   ConceptSubjectScope,
   ALL_REAL_ERAS,
   HUMAN_REAL_SCOPE,
@@ -39,6 +42,30 @@ const makeItems = (prefix: string, rows: AppearanceRow[], defaultAffects: string
     affects,
     risk
   }));
+
+const withGenderCoding = (items: ConceptBaseItem[], genderCoding: ConceptGenderCoding): ConceptBaseItem[] =>
+  items.map(item => ({ ...item, genderCoding }));
+
+const getBeardMeta = (item: ConceptBaseItem): {
+  beardRegister: ConceptBeardRegister;
+  groomingIntensity: ConceptGroomingIntensity;
+  genderCoding: ConceptGenderCoding;
+} => {
+  const group = item.group || '';
+  const id = item.id;
+  if (id.includes('clean_shaven')) return { beardRegister: 'NONE', groomingIntensity: 'NONE', genderCoding: 'UNIVERSAL' };
+  if (id.includes('light_stubble') || id.includes('designer_stubble') || id.includes('mask_shadow_stubble')) {
+    return { beardRegister: 'LIGHT', groomingIntensity: 'LIGHT', genderCoding: 'MASCULINE' };
+  }
+  if (group.startsWith('A.')) return { beardRegister: 'LIGHT', groomingIntensity: 'MEDIUM', genderCoding: 'MASCULINE' };
+  if (group.startsWith('B.') || group.startsWith('C.')) return { beardRegister: 'MATURE', groomingIntensity: 'MEDIUM', genderCoding: 'MASCULINE' };
+  if (group.startsWith('D.')) return { beardRegister: 'HISTORICAL', groomingIntensity: 'STRONG', genderCoding: 'MASCULINE' };
+  if (group.startsWith('E.')) return { beardRegister: 'FASHION', groomingIntensity: item.risk === 'medium' ? 'STRONG' : 'MEDIUM', genderCoding: 'MASCULINE' };
+  return { beardRegister: 'SURREAL', groomingIntensity: item.risk === 'high' ? 'EXTREME' : 'STRONG', genderCoding: 'MASCULINE' };
+};
+
+const withBeardMeta = (items: ConceptBaseItem[]): ConceptBaseItem[] =>
+  items.map(item => ({ ...item, ...getBeardMeta(item) }));
 
 const HAIR_COLOR_ROWS: AppearanceRow[] = [
   ['soft_black', '柔和黑发', 'Soft Black Hair', 'A. 自然发色', 'A. Natural Hair Color', '自然黑发，边缘柔和，适合现实、历史和当代人物。', 'Natural black hair with soft edges, suitable for real, historical, and contemporary characters.'],
@@ -183,7 +210,7 @@ const HAIR_STYLE_MASC_ROWS: AppearanceRow[] = [
   ['ming_topknot', '明式束发', 'Ming-Style Bound Hair', 'G. 历史/地域男发', 'G. Historical / Regional', '传统束发或冠帽接口，适合明代官员、士人、锦衣卫或侠客。', 'Traditional bound hair or cap interface, suited to Ming officials, scholars, guards, or swordsmen.', 1, ['feudal', 'timeless']],
   ['daoist_topknot', '道士发髻', 'Daoist Topknot', 'G. 历史/地域男发', 'G. Historical / Regional', '头顶发髻与道冠接口，适合道人、方士、隐士或奇幻修行者。', 'Topknot with Daoist crown interface, suited to priests, occultists, hermits, or fantasy cultivators.', 1, ['feudal', 'early_modern', 'timeless', 'mythic']],
   ['viking_braids', '维京编发', 'Viking Braids', 'G. 历史/地域男发', 'G. Historical / Regional', '粗辫、剃边和战斗感发束，适合北欧、海盗、战士或奇幻角色。', 'Heavy braids, shaved sides, and warrior hair bundles, suited to Nordic, pirate, warrior, or fantasy characters.', 1, ['feudal', 'timeless', 'mythic']],
-  ['regency_waves', '摄政时期卷发', 'Regency Waves', 'G. 历史/地域男发', 'G. Historical / Regional', '自然卷曲短发，适合贵族、诗人、军官或旧时代浪漫人物。', 'Naturally curled short hair suited to aristocrats, poets, officers, or old-world romantic figures.', 1, ['industrial', 'timeless']],
+  ['regency_waves', '摄政时期卷发', 'Regency Waves', 'G. 历史/地域男发', 'G. Historical / Regional', '自然卷曲短发，适合贵族、诗人、军官或旧时代浪漫人物。', 'Naturally curled short hair suited to aristocrats, poets, officers, or old-world romantic figures.', 1, ['early_modern', 'timeless']],
   ['western_long_hair', '西部牛仔长发', 'Western Long Hair', 'G. 历史/地域男发', 'G. Historical / Regional', '帽檐下的中长乱发，适合牛仔、猎人、荒野和边境人物。', 'Messy medium-long hair under a hat brim, suited to cowboys, hunters, wilderness, and frontier figures.', 1, ['industrial', 'modern', 'timeless']],
   ['helmet_crop', '头盔适配短发', 'Helmet Crop', 'H. 功能/战斗男发', 'H. Functional / Combat', '方便头盔、耳机或护具的短发，适合军警、骑手和太空工人。', 'Short hair compatible with helmets, headsets, or protection, suited to officers, riders, and space workers.', 1, MODERN_ERAS],
   ['sweat_pushed_back', '汗湿后推发', 'Sweat-Pushed-Back Hair', 'H. 功能/战斗男发', 'H. Functional / Combat', '训练或战斗后用手向后推开的湿发，强调身体活动痕迹。', 'Wet hair pushed back by hand after training or combat, emphasizing physical activity traces.', 1, MODERN_ERAS],
@@ -385,10 +412,10 @@ const BEARD_STYLE_ROWS: AppearanceRow[] = [
   ['water_beard', '水流胡须', 'Water-Stream Beard', 'F. 类人/超现实胡', 'F. Humanoid / Surreal Beard', '胡须像流动水丝，适合海神、江河神、元素师或水生类人。', 'Beard resembles flowing water threads, suited to sea gods, river spirits, elementalists, or aquatic humanoids.', 5, ['timeless', 'mythic', 'far_future'], HUMANOID_SCOPE, 'high', ['beard', 'symbol']]
 ];
 
-export const CD_HAIR_COLOR = makeItems('hair', HAIR_COLOR_ROWS, ['hair']);
-export const CD_HAIR_STYLE_FEM = makeItems('hair_f', HAIR_STYLE_FEM_ROWS, ['hair', 'silhouette']);
-export const CD_HAIR_STYLE_MASC = makeItems('hair_m', HAIR_STYLE_MASC_ROWS, ['hair', 'silhouette']);
+export const CD_HAIR_COLOR = withGenderCoding(makeItems('hair', HAIR_COLOR_ROWS, ['hair']), 'UNIVERSAL');
+export const CD_HAIR_STYLE_FEM = withGenderCoding(makeItems('hair_f', HAIR_STYLE_FEM_ROWS, ['hair', 'silhouette']), 'FEMININE');
+export const CD_HAIR_STYLE_MASC = withGenderCoding(makeItems('hair_m', HAIR_STYLE_MASC_ROWS, ['hair', 'silhouette']), 'MASCULINE');
 export const CD_EYE_COLOR = makeItems('eye', EYE_COLOR_ROWS, ['eyes']);
 export const CD_EYE_SHAPE = makeItems('eye_shape', EYE_SHAPE_ROWS, ['eyes', 'face']);
 export const CD_EYE_MUTATION = makeItems('eye_fx', EYE_MUTATION_ROWS, ['eyes', 'face', 'body']);
-export const CD_BEARD_STYLE = makeItems('beard', BEARD_STYLE_ROWS, ['beard', 'face']);
+export const CD_BEARD_STYLE = withBeardMeta(makeItems('beard', BEARD_STYLE_ROWS, ['beard', 'face']));

@@ -16809,3 +16809,17 @@ button::-moz-focus-inner,
   color: transparent;
   text-shadow: 0 0 0 currentColor;
 }
+
+:root.dark .mist-concept-design-engine .mist-concept-param-module-count,
+:root.dark .mist-concept-design-engine .mist-aesthetic-module-header:hover .mist-concept-param-module-count,
+:root.dark .mist-concept-design-engine .mist-concept-param-module-count:hover {
+  color: rgb(113 113 122) !important;
+  text-shadow: none !important;
+}
+
+:root.retro .mist-concept-design-engine .mist-concept-param-module-count,
+:root.retro .mist-concept-design-engine .mist-aesthetic-module-header:hover .mist-concept-param-module-count,
+:root.retro .mist-concept-design-engine .mist-concept-param-module-count:hover {
+  color: rgba(133, 65, 27, 0.70) !important;
+  text-shadow: none !important;
+}

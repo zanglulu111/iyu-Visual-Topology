@@ -17,6 +17,7 @@ type OccupationRow = [
 const ALL_PLAUSIBLE_ERAS: ConceptEra[] = ['primitive', 'slave', 'feudal', 'early_modern', 'industrial', 'modern', 'contemporary', 'near_future', 'far_future', 'timeless'];
 const PREMODERN_ERAS: ConceptEra[] = ['primitive', 'slave', 'feudal', 'early_modern', 'timeless'];
 const HISTORICAL_PLUS_ERAS: ConceptEra[] = ['slave', 'feudal', 'early_modern', 'industrial', 'modern', 'timeless'];
+const RITUAL_HISTORICAL_ERAS: ConceptEra[] = ['slave', 'feudal', 'early_modern', 'industrial', 'modern', 'timeless', 'mythic'];
 const INDUSTRIAL_PLUS_ERAS: ConceptEra[] = ['industrial', 'modern', 'contemporary', 'near_future', 'far_future', 'timeless'];
 const MODERN_PLUS_ERAS: ConceptEra[] = ['modern', 'contemporary', 'near_future', 'far_future', 'timeless'];
 const CONTEMPORARY_PLUS_ERAS: ConceptEra[] = ['contemporary', 'near_future', 'far_future', 'timeless'];
@@ -165,18 +166,18 @@ const OCCUPATION_ROWS: OccupationRow[] = [
   ['caravan_master', '商队领队', 'Caravan Master', 'K. 历史/礼制/传统职业', 'K. Historical / Ritualized Traditional Work', '地图、货单、骆驼/马具和路线判断构成长途贸易职能。', 'Map, cargo list, camel or horse tack, and route judgment define long-distance trade function.', 1, HISTORICAL_PLUS_ERAS, 'clean', ['occupation', 'commerce', 'movement']],
   ['harbor_master', '港务官', 'Harbor Master', 'K. 历史/礼制/传统职业', 'K. Historical / Ritualized Traditional Work', '船籍簿、旗语、码头印章和泊位调度构成港口管理身份。', 'Ship registry, signal flags, dock seal, and berth coordination define harbor administration.', 1, HISTORICAL_PLUS_ERAS, 'clean', ['occupation', 'ocean', 'institution']],
 
-  ['priest', '祭司', 'Priest', 'L. 宗教/仪式/神秘服务', 'L. Religion / Ritual / Esoteric Service', '法衣、圣物、祝祷手势和公共信仰流程构成宗教职能。', 'Vestments, relics, blessing gestures, and public belief workflow define religious function.', 1, HISTORICAL_PLUS_ERAS, 'clean', ['occupation', 'ritual', 'symbol']],
-  ['monk', '修士', 'Monk', 'L. 宗教/仪式/神秘服务', 'L. Religion / Ritual / Esoteric Service', '素袍、念珠、抄写或清扫动作和纪律生活构成修行身份。', 'Plain robe, beads, copying or sweeping action, and disciplined life define monastic identity.', 1, HISTORICAL_PLUS_ERAS, 'clean', ['occupation', 'ritual', 'pose']],
-  ['nun', '修女', 'Nun', 'L. 宗教/仪式/神秘服务', 'L. Religion / Ritual / Esoteric Service', '头巾、简衣、照护/祈祷流程和克制表情构成宗教劳动。', 'Veil, plain dress, care or prayer workflow, and restrained expression define religious labor.', 1, HISTORICAL_PLUS_ERAS, 'clean', ['occupation', 'ritual', 'care']],
-  ['temple_attendant', '庙祝', 'Temple Attendant', 'L. 宗教/仪式/神秘服务', 'L. Religion / Ritual / Esoteric Service', '香炉、签筒、扫帚、供品和场所维护构成寺庙服务身份。', 'Incense burner, lots, broom, offerings, and site maintenance define temple service identity.', 1, HISTORICAL_PLUS_ERAS, 'clean', ['occupation', 'ritual', 'service']],
-  ['ritual_musician', '仪式乐工', 'Ritual Musician', 'L. 宗教/仪式/神秘服务', 'L. Religion / Ritual / Esoteric Service', '鼓、铃、号角、队列节奏和仪式时间管理构成职能。', 'Drum, bell, horn, procession rhythm, and ritual timekeeping define the function.', 1, HISTORICAL_PLUS_ERAS, 'clean', ['occupation', 'ritual', 'performance']],
+  ['priest', '祭司', 'Priest', 'L. 宗教/仪式/神秘服务', 'L. Religion / Ritual / Esoteric Service', '法衣、圣物、祝祷手势和公共信仰流程构成宗教职能。', 'Vestments, relics, blessing gestures, and public belief workflow define religious function.', 1, RITUAL_HISTORICAL_ERAS, 'clean', ['occupation', 'ritual', 'symbol']],
+  ['monk', '修士', 'Monk', 'L. 宗教/仪式/神秘服务', 'L. Religion / Ritual / Esoteric Service', '素袍、念珠、抄写或清扫动作和纪律生活构成修行身份。', 'Plain robe, beads, copying or sweeping action, and disciplined life define monastic identity.', 1, RITUAL_HISTORICAL_ERAS, 'clean', ['occupation', 'ritual', 'pose']],
+  ['nun', '修女', 'Nun', 'L. 宗教/仪式/神秘服务', 'L. Religion / Ritual / Esoteric Service', '头巾、简衣、照护/祈祷流程和克制表情构成宗教劳动。', 'Veil, plain dress, care or prayer workflow, and restrained expression define religious labor.', 1, RITUAL_HISTORICAL_ERAS, 'clean', ['occupation', 'ritual', 'care']],
+  ['temple_attendant', '庙祝', 'Temple Attendant', 'L. 宗教/仪式/神秘服务', 'L. Religion / Ritual / Esoteric Service', '香炉、签筒、扫帚、供品和场所维护构成寺庙服务身份。', 'Incense burner, lots, broom, offerings, and site maintenance define temple service identity.', 1, RITUAL_HISTORICAL_ERAS, 'clean', ['occupation', 'ritual', 'service']],
+  ['ritual_musician', '仪式乐工', 'Ritual Musician', 'L. 宗教/仪式/神秘服务', 'L. Religion / Ritual / Esoteric Service', '鼓、铃、号角、队列节奏和仪式时间管理构成职能。', 'Drum, bell, horn, procession rhythm, and ritual timekeeping define the function.', 1, RITUAL_HISTORICAL_ERAS, 'clean', ['occupation', 'ritual', 'performance']],
   ['exorcist', '驱邪师', 'Exorcist', 'L. 宗教/仪式/神秘服务', 'L. Religion / Ritual / Esoteric Service', '符纸、圣水、绳结、见证人距离和危险控制构成仪式职能。', 'Talismans, holy water, knots, witness distance, and danger control define ritual function.', 2, ['feudal', 'early_modern', 'modern', 'contemporary', 'timeless', 'mythic'], 'high', ['occupation', 'ritual', 'risk']],
-  ['diviner', '占卜师', 'Diviner', 'L. 宗教/仪式/神秘服务', 'L. Religion / Ritual / Esoteric Service', '卦盘、纸牌、骨片、记录本和解释姿态构成预测服务。', 'Oracle board, cards, bones, notebook, and interpretive posture define divination service.', 2, HISTORICAL_PLUS_ERAS, 'medium', ['occupation', 'ritual', 'prop']],
-  ['funeral_priest', '丧仪司祭', 'Funeral Priest', 'L. 宗教/仪式/神秘服务', 'L. Religion / Ritual / Esoteric Service', '黑袍、祷文、花束、骨灰盒和安抚手势构成丧仪职能。', 'Black robe, prayer text, flowers, urn, and soothing gesture define funeral ritual function.', 1, HISTORICAL_PLUS_ERAS, 'medium', ['occupation', 'ritual', 'death']],
-  ['pilgrim_guide', '朝圣向导', 'Pilgrimage Guide', 'L. 宗教/仪式/神秘服务', 'L. Religion / Ritual / Esoteric Service', '路标、护符、行囊和路线纪律构成宗教旅行服务。', 'Waymarks, amulets, pack, and route discipline define religious travel service.', 1, HISTORICAL_PLUS_ERAS, 'clean', ['occupation', 'ritual', 'movement']],
-  ['relic_keeper', '圣物保管人', 'Relic Keeper', 'L. 宗教/仪式/神秘服务', 'L. Religion / Ritual / Esoteric Service', '锁匣、钥匙、清单、布套和不可触碰距离构成圣物管理。', 'Locked casket, keys, inventory, cloth cover, and untouchable distance define relic management.', 1, HISTORICAL_PLUS_ERAS, 'medium', ['occupation', 'ritual', 'institution']],
+  ['diviner', '占卜师', 'Diviner', 'L. 宗教/仪式/神秘服务', 'L. Religion / Ritual / Esoteric Service', '卦盘、纸牌、骨片、记录本和解释姿态构成预测服务。', 'Oracle board, cards, bones, notebook, and interpretive posture define divination service.', 2, RITUAL_HISTORICAL_ERAS, 'medium', ['occupation', 'ritual', 'prop']],
+  ['funeral_priest', '丧仪司祭', 'Funeral Priest', 'L. 宗教/仪式/神秘服务', 'L. Religion / Ritual / Esoteric Service', '黑袍、祷文、花束、骨灰盒和安抚手势构成丧仪职能。', 'Black robe, prayer text, flowers, urn, and soothing gesture define funeral ritual function.', 1, RITUAL_HISTORICAL_ERAS, 'medium', ['occupation', 'ritual', 'death']],
+  ['pilgrim_guide', '朝圣向导', 'Pilgrimage Guide', 'L. 宗教/仪式/神秘服务', 'L. Religion / Ritual / Esoteric Service', '路标、护符、行囊和路线纪律构成宗教旅行服务。', 'Waymarks, amulets, pack, and route discipline define religious travel service.', 1, RITUAL_HISTORICAL_ERAS, 'clean', ['occupation', 'ritual', 'movement']],
+  ['relic_keeper', '圣物保管人', 'Relic Keeper', 'L. 宗教/仪式/神秘服务', 'L. Religion / Ritual / Esoteric Service', '锁匣、钥匙、清单、布套和不可触碰距离构成圣物管理。', 'Locked casket, keys, inventory, cloth cover, and untouchable distance define relic management.', 1, RITUAL_HISTORICAL_ERAS, 'medium', ['occupation', 'ritual', 'institution']],
   ['choir_director', '唱诗班指挥', 'Choir Director', 'L. 宗教/仪式/神秘服务', 'L. Religion / Ritual / Esoteric Service', '乐谱、手势、礼服和集体声音管理构成仪式音乐身份。', 'Score, hand gestures, formal dress, and collective voice management define ritual music identity.', 1, INDUSTRIAL_PLUS_ERAS, 'clean', ['occupation', 'performance', 'ritual']],
-  ['shrine_caretaker', '神龛看护人', 'Shrine Caretaker', 'L. 宗教/仪式/神秘服务', 'L. Religion / Ritual / Esoteric Service', '布巾、油灯、供桌、清洁动作和日常维护构成小型圣所职业。', 'Cloth, oil lamp, offering table, cleaning action, and daily maintenance define small shrine work.', 1, HISTORICAL_PLUS_ERAS, 'clean', ['occupation', 'ritual', 'service']],
+  ['shrine_caretaker', '神龛看护人', 'Shrine Caretaker', 'L. 宗教/仪式/神秘服务', 'L. Religion / Ritual / Esoteric Service', '布巾、油灯、供桌、清洁动作和日常维护构成小型圣所职业。', 'Cloth, oil lamp, offering table, cleaning action, and daily maintenance define small shrine work.', 1, RITUAL_HISTORICAL_ERAS, 'clean', ['occupation', 'ritual', 'service']],
 
   ['software_engineer', '软件工程师', 'Software Engineer', 'M. 科技/信息/未来维护', 'M. Technology / Information / Future Maintenance', '电脑、代码界面、耳机、咖啡和长时间调试构成技术劳动。', 'Laptop, code interface, headphones, coffee, and long debugging hours define technical labor.', 1, CONTEMPORARY_PLUS_ERAS, 'clean', ['occupation', 'technology', 'workflow']],
   ['network_admin', '网络管理员', 'Network Administrator', 'M. 科技/信息/未来维护', 'M. Technology / Information / Future Maintenance', '机柜、线缆标签、笔记本和故障排查流程构成信息基础设施职能。', 'Server rack, cable labels, laptop, and troubleshooting workflow define information infrastructure work.', 1, CONTEMPORARY_PLUS_ERAS, 'clean', ['occupation', 'technology', 'tool']],
@@ -283,6 +284,193 @@ const OCCUPATION_ROWS: OccupationRow[] = [
   ['astral_cartographer', '星界制图师', 'Astral Cartographer', 'T. 奇幻/魔法制度职业', 'T. Fantasy / Magical Institutional Work', '星盘、透明地图、测量链和非现实空间标注构成奇幻测绘职能。', 'Astrolabe, translucent map, measuring chain, and nonreal spatial notation define fantasy mapping function.', 5, ['mythic', 'timeless'], 'high', ['occupation', 'magic', 'space']]
 ];
 
+type OccupationCategoryFit = NonNullable<ConceptBaseItem['categoryFit']>;
+type OccupationAxisPatch = Pick<ConceptBaseItem, 'eraMode' | 'eras' | 'ontologyLevel' | 'realityTags' | 'categoryFit'>;
+
+const uniq = <T extends string>(values: readonly T[]): T[] => Array.from(new Set(values.filter(Boolean)));
+
+const occupationFit = (
+  unlisted: NonNullable<OccupationCategoryFit['unlisted']>,
+  strong: string[] = [],
+  usable: string[] = [],
+  fusion: string[] = [],
+  weak: string[] = [],
+  exclude: string[] = []
+): OccupationCategoryFit => ({ unlisted, strong: uniq(strong), usable: uniq(usable), fusion: uniq(fusion), weak: uniq(weak), exclude: uniq(exclude) });
+
+const occupationAxis = (
+  eras: ConceptEra[],
+  ontologyLevel: NonNullable<ConceptBaseItem['ontologyLevel']>,
+  realityTags: string[],
+  categoryFit: OccupationCategoryFit
+): OccupationAxisPatch => ({
+  eraMode: 'specific',
+  eras: uniq(eras.filter(era => era !== 'timeless')),
+  ontologyLevel,
+  realityTags: uniq(realityTags),
+  categoryFit
+});
+
+const occupationReality = ['realistic', 'physical', 'human_occupation', 'workflow'];
+const medicalReality = [...occupationReality, 'medical'];
+const knowledgeReality = [...occupationReality, 'knowledge_work'];
+const institutionReality = [...occupationReality, 'institutional'];
+const industrialReality = [...occupationReality, 'industrial_labor'];
+const serviceReality = [...occupationReality, 'service_labor'];
+const mediaReality = [...occupationReality, 'media_fashion'];
+const securityReality = [...occupationReality, 'security'];
+const commerceReality = [...occupationReality, 'commerce'];
+const ecologyReality = [...occupationReality, 'ecological_labor'];
+const grayLaborReality = [...occupationReality, 'informal_labor'];
+const historicalReality = [...occupationReality, 'historical_labor'];
+const ritualReality = ['realistic', 'physical', 'stylized', 'ritual', 'human_occupation', 'workflow'];
+const techReality = ['realistic', 'physical', 'technological', 'human_occupation', 'workflow'];
+const futureTechReality = ['semi_surreal', 'technological', 'speculative', 'human_occupation', 'workflow'];
+const transportReality = [...occupationReality, 'transport'];
+const publicReality = [...occupationReality, 'public_institution'];
+const domesticReality = [...occupationReality, 'domestic_service'];
+const bodyTrainingReality = [...occupationReality, 'body_training'];
+const hazardReality = ['realistic', 'physical', 'hazard', 'human_occupation', 'workflow'];
+const spaceReality = ['semi_surreal', 'technological', 'space', 'human_occupation', 'workflow'];
+const magicReality = ['non_realist', 'mythic', 'magical', 'human_occupation', 'workflow'];
+
+const groupCategoryFit: Record<string, OccupationCategoryFit> = {
+  A: occupationFit('none', ['real_professional'], ['urban_life'], ['science_fiction', 'biopunk', 'body_horror', 'noir_crime'], ['historical', 'court', 'wuxia', 'xianxia']),
+  B: occupationFit('none', ['real_professional'], ['urban_life', 'historical', 'adventure', 'science_fiction'], ['cyberpunk', 'surreal', 'abstract', 'biopunk'], ['wuxia', 'xianxia']),
+  C: occupationFit('none', ['real_professional'], ['urban_life', 'noir_crime', 'court', 'historical'], ['cyberpunk', 'science_fiction', 'dark_fantasy'], ['wuxia', 'xianxia']),
+  D: occupationFit('none', ['real_professional'], ['urban_life', 'adventure', 'wasteland', 'war_military'], ['science_fiction', 'cyberpunk', 'biopunk'], ['court', 'romance', 'xianxia']),
+  E: occupationFit('none', ['real_professional', 'urban_life'], ['romance', 'fashion_idol', 'noir_crime'], ['cyberpunk', 'wasteland'], ['wuxia', 'xianxia', 'court']),
+  F: occupationFit('none', ['fashion_idol', 'real_professional'], ['urban_life', 'romance', 'boudoir_aesthetic'], ['surreal', 'cyberpunk', 'abstract'], ['wuxia', 'xianxia', 'court']),
+  G: occupationFit('none', ['war_military', 'real_professional'], ['noir_crime', 'adventure', 'wuxia', 'historical', 'wasteland'], ['cyberpunk', 'science_fiction'], ['romance', 'fashion_idol']),
+  H: occupationFit('none', ['real_professional', 'urban_life'], ['noir_crime', 'fashion_idol', 'romance', 'court', 'historical'], ['cyberpunk', 'science_fiction'], ['wuxia', 'xianxia']),
+  I: occupationFit('none', ['ecological', 'adventure'], ['real_professional', 'historical', 'wasteland'], ['fantasy', 'xianxia', 'science_fiction'], ['cyberpunk', 'court']),
+  J: occupationFit('none', ['noir_crime', 'urban_life'], ['adventure', 'wasteland', 'historical', 'real_professional'], ['cyberpunk', 'wuxia', 'dark_fantasy'], ['romance', 'court']),
+  K: occupationFit('none', ['historical'], ['court', 'wuxia', 'adventure', 'real_professional', 'romance'], ['fantasy', 'dark_fantasy', 'xianxia'], ['cyberpunk', 'science_fiction', 'urban_life']),
+  L: occupationFit('none', ['religious_ritual'], ['historical', 'court', 'xianxia', 'mythic_epic', 'dark_fantasy', 'horror'], ['fantasy', 'surreal', 'wuxia'], ['urban_life', 'real_professional']),
+  M: occupationFit('none', ['science_fiction', 'cyberpunk', 'real_professional'], ['posthuman', 'biopunk', 'urban_life', 'war_military'], ['body_horror', 'surreal', 'fashion_idol'], ['historical', 'court', 'wuxia', 'xianxia']),
+  N: occupationFit('none', ['real_professional', 'urban_life'], ['adventure', 'science_fiction', 'noir_crime', 'romance', 'wasteland', 'historical'], ['cyberpunk'], ['xianxia', 'court']),
+  O: occupationFit('none', ['real_professional', 'urban_life'], ['court', 'historical', 'noir_crime', 'war_military', 'romance'], ['cyberpunk', 'science_fiction', 'dark_fantasy'], ['xianxia']),
+  P: occupationFit('none', ['real_professional', 'urban_life'], ['romance', 'court', 'historical', 'boudoir_aesthetic'], ['noir_crime', 'dark_fantasy'], ['war_military', 'science_fiction']),
+  Q: occupationFit('none', ['real_professional', 'urban_life'], ['fashion_idol', 'war_military', 'adventure', 'wuxia', 'romance'], ['cyberpunk', 'wasteland'], ['court']),
+  R: occupationFit('none', ['real_professional'], ['horror', 'body_horror', 'noir_crime', 'wasteland', 'urban_life', 'dark_fantasy'], ['biopunk', 'science_fiction', 'religious_ritual'], ['romance', 'court', 'wuxia']),
+  S: occupationFit('none', ['science_fiction', 'posthuman'], ['adventure', 'wasteland', 'real_professional', 'biopunk', 'ecological', 'war_military'], ['cyberpunk', 'surreal'], ['historical', 'wuxia', 'court']),
+  T: occupationFit('none', ['fantasy', 'xianxia'], ['dark_fantasy', 'mythic_epic', 'religious_ritual', 'adventure', 'court'], ['science_fiction', 'biopunk', 'surreal', 'wuxia'], ['real_professional', 'urban_life', 'cyberpunk'])
+};
+
+const groupRealityTags: Record<string, string[]> = {
+  A: medicalReality,
+  B: knowledgeReality,
+  C: institutionReality,
+  D: industrialReality,
+  E: serviceReality,
+  F: mediaReality,
+  G: securityReality,
+  H: commerceReality,
+  I: ecologyReality,
+  J: grayLaborReality,
+  K: historicalReality,
+  L: ritualReality,
+  M: techReality,
+  N: transportReality,
+  O: publicReality,
+  P: domesticReality,
+  Q: bodyTrainingReality,
+  R: hazardReality,
+  S: spaceReality,
+  T: magicReality
+};
+
+const occupationCategoryOverrides: Record<string, OccupationCategoryFit> = {
+  forensic_pathologist: occupationFit('none', ['real_professional'], ['noir_crime', 'body_horror', 'horror'], ['dark_fantasy', 'biopunk'], ['romance', 'wuxia']),
+  aesthetic_clinician: occupationFit('none', ['real_professional', 'fashion_idol'], ['urban_life', 'boudoir_aesthetic'], ['biopunk', 'science_fiction'], ['historical', 'wuxia']),
+  archivist: occupationFit('none', ['real_professional'], ['historical', 'horror', 'surreal'], ['dark_fantasy', 'abstract'], ['fashion_idol']),
+  astronomer: occupationFit('none', ['real_professional', 'science_fiction'], ['surreal', 'abstract', 'adventure'], ['dark_fantasy', 'mythic_epic'], ['romance']),
+  data_analyst: occupationFit('none', ['real_professional', 'cyberpunk'], ['science_fiction', 'posthuman', 'abstract', 'urban_life'], ['surreal'], ['historical', 'wuxia']),
+  journalist: occupationFit('none', ['real_professional', 'urban_life'], ['noir_crime', 'adventure', 'war_military'], ['cyberpunk'], ['xianxia']),
+  lawyer: occupationFit('none', ['real_professional'], ['noir_crime', 'court', 'urban_life'], ['dark_fantasy'], ['xianxia']),
+  court_clerk: occupationFit('none', ['real_professional'], ['court', 'historical'], ['dark_fantasy'], ['cyberpunk']),
+  mechanic: occupationFit('none', ['real_professional'], ['wasteland', 'adventure', 'urban_life'], ['science_fiction', 'cyberpunk'], ['court']),
+  miner: occupationFit('none', ['real_professional'], ['adventure', 'wasteland', 'ecological'], ['dark_fantasy', 'science_fiction'], ['romance']),
+  bartender: occupationFit('none', ['urban_life', 'real_professional'], ['noir_crime', 'romance', 'boudoir_aesthetic'], ['cyberpunk'], ['xianxia']),
+  tailor: occupationFit('none', ['historical', 'urban_life'], ['fashion_idol', 'court', 'real_professional'], ['wuxia'], ['science_fiction']),
+  actor: occupationFit('none', ['fashion_idol'], ['urban_life', 'romance', 'real_professional'], ['surreal', 'noir_crime'], ['wuxia']),
+  model: occupationFit('none', ['fashion_idol'], ['boudoir_aesthetic', 'urban_life', 'real_professional'], ['surreal', 'cyberpunk'], ['wuxia', 'xianxia']),
+  police_officer: occupationFit('none', ['real_professional', 'war_military'], ['noir_crime', 'urban_life'], ['cyberpunk'], ['romance']),
+  soldier: occupationFit('none', ['war_military'], ['historical', 'wuxia', 'adventure', 'real_professional'], ['science_fiction', 'wasteland'], ['romance']),
+  hired_guard: occupationFit('none', ['war_military', 'wuxia'], ['adventure', 'historical', 'noir_crime'], ['wasteland'], ['romance']),
+  stock_broker: occupationFit('none', ['real_professional', 'urban_life'], ['noir_crime'], ['cyberpunk'], ['wuxia']),
+  luxury_sales_associate: occupationFit('none', ['fashion_idol', 'urban_life'], ['real_professional', 'boudoir_aesthetic'], ['noir_crime'], ['wuxia']),
+  farmer: occupationFit('none', ['ecological'], ['real_professional', 'historical', 'adventure'], ['wasteland', 'science_fiction'], ['cyberpunk']),
+  hunter: occupationFit('none', ['adventure', 'ecological'], ['wasteland', 'historical', 'wuxia'], ['dark_fantasy'], ['urban_life']),
+  black_market_doctor: occupationFit('none', ['noir_crime'], ['real_professional', 'body_horror', 'biopunk', 'horror'], ['wasteland', 'dark_fantasy'], ['romance']),
+  information_broker: occupationFit('none', ['noir_crime'], ['cyberpunk', 'urban_life'], ['science_fiction'], ['romance']),
+  court_official: occupationFit('none', ['historical', 'court'], ['real_professional'], ['dark_fantasy', 'wuxia'], ['cyberpunk']),
+  blacksmith: occupationFit('none', ['historical'], ['wuxia', 'fantasy', 'adventure'], ['xianxia', 'dark_fantasy'], ['urban_life']),
+  calligrapher: occupationFit('none', ['historical'], ['wuxia', 'court', 'xianxia'], ['surreal'], ['cyberpunk']),
+  caravan_master: occupationFit('none', ['historical', 'adventure'], ['wuxia', 'court'], ['fantasy'], ['urban_life']),
+  monk: occupationFit('none', ['religious_ritual'], ['wuxia', 'xianxia', 'mythic_epic', 'historical'], ['fantasy', 'dark_fantasy'], ['urban_life']),
+  exorcist: occupationFit('none', ['religious_ritual'], ['dark_fantasy', 'horror', 'xianxia'], ['fantasy', 'surreal'], ['real_professional']),
+  diviner: occupationFit('none', ['religious_ritual'], ['xianxia', 'surreal', 'dark_fantasy', 'mythic_epic'], ['horror', 'abstract'], ['real_professional']),
+  relic_keeper: occupationFit('none', ['religious_ritual'], ['dark_fantasy', 'xianxia', 'horror', 'mythic_epic'], ['fantasy', 'surreal'], ['urban_life']),
+  robotics_technician: occupationFit('none', ['science_fiction', 'real_professional'], ['cyberpunk', 'posthuman'], ['biopunk'], ['historical', 'wuxia']),
+  biotech_technician: occupationFit('none', ['science_fiction', 'biopunk'], ['real_professional', 'body_horror', 'posthuman'], ['horror'], ['wuxia']),
+  prosthetics_engineer: occupationFit('none', ['real_professional', 'posthuman'], ['science_fiction', 'biopunk', 'cyberpunk'], ['body_horror'], ['historical']),
+  cryonics_attendant: occupationFit('none', ['science_fiction', 'posthuman'], ['real_professional', 'biopunk'], ['body_horror', 'surreal'], ['historical']),
+  flight_attendant: occupationFit('none', ['real_professional', 'urban_life'], ['romance', 'fashion_idol'], ['science_fiction'], ['wuxia']),
+  diplomat: occupationFit('none', ['real_professional'], ['court', 'historical', 'urban_life', 'noir_crime'], ['science_fiction'], ['xianxia']),
+  protocol_officer: occupationFit('none', ['real_professional', 'court'], ['historical', 'religious_ritual'], ['dark_fantasy'], ['wuxia']),
+  butler: occupationFit('none', ['historical', 'court'], ['real_professional', 'urban_life', 'romance'], ['dark_fantasy', 'noir_crime'], ['science_fiction']),
+  estate_manager: occupationFit('none', ['historical', 'court'], ['real_professional'], ['dark_fantasy'], ['cyberpunk']),
+  martial_arts_coach: occupationFit('none', ['wuxia'], ['real_professional', 'war_military', 'historical'], ['xianxia'], ['romance']),
+  e_sports_player: occupationFit('none', ['urban_life', 'fashion_idol'], ['real_professional', 'cyberpunk'], ['science_fiction'], ['historical']),
+  funeral_director: occupationFit('none', ['real_professional'], ['religious_ritual', 'dark_fantasy', 'horror', 'urban_life'], ['noir_crime'], ['romance']),
+  mortuary_technician: occupationFit('none', ['real_professional'], ['body_horror', 'horror', 'dark_fantasy'], ['biopunk'], ['romance']),
+  hazmat_worker: occupationFit('none', ['real_professional'], ['wasteland', 'body_horror', 'biopunk'], ['science_fiction', 'horror'], ['romance']),
+  quarantine_officer: occupationFit('none', ['real_professional'], ['wasteland', 'biopunk', 'body_horror'], ['science_fiction', 'horror'], ['romance']),
+  astronaut: occupationFit('none', ['science_fiction'], ['posthuman', 'adventure', 'real_professional'], ['surreal'], ['historical', 'wuxia']),
+  asteroid_miner: occupationFit('none', ['science_fiction'], ['wasteland', 'adventure', 'real_professional'], ['posthuman'], ['court']),
+  colony_farmer: occupationFit('none', ['science_fiction'], ['ecological', 'real_professional', 'wasteland'], ['posthuman'], ['historical']),
+  life_support_technician: occupationFit('none', ['science_fiction'], ['posthuman', 'wasteland', 'real_professional'], ['biopunk'], ['historical']),
+  apprentice_mage: occupationFit('none', ['fantasy'], ['xianxia', 'mythic_epic'], ['wuxia'], ['real_professional']),
+  court_wizard: occupationFit('none', ['fantasy', 'court'], ['xianxia', 'mythic_epic', 'dark_fantasy'], ['religious_ritual'], ['urban_life']),
+  alchemist: occupationFit('none', ['fantasy'], ['dark_fantasy', 'xianxia', 'mythic_epic', 'biopunk'], ['science_fiction'], ['real_professional']),
+  portal_attendant: occupationFit('none', ['fantasy'], ['science_fiction', 'xianxia'], ['surreal'], ['real_professional']),
+  astral_cartographer: occupationFit('none', ['fantasy', 'xianxia'], ['surreal', 'mythic_epic'], ['science_fiction', 'abstract'], ['real_professional'])
+};
+
+const occupationRealityOverrides: Record<string, string[]> = {
+  fortune_stall_reader: [...ritualReality, 'street_service'],
+  exorcist: [...ritualReality, 'semi_surreal'],
+  diviner: [...ritualReality, 'semi_surreal'],
+  relic_keeper: [...ritualReality, 'semi_surreal'],
+  robotics_technician: futureTechReality,
+  drone_operator: futureTechReality,
+  biotech_technician: futureTechReality,
+  prosthetics_engineer: futureTechReality,
+  vr_environment_builder: futureTechReality,
+  ai_alignment_auditor: futureTechReality,
+  cryonics_attendant: futureTechReality,
+  hologram_stage_tech: futureTechReality,
+  nanotech_cleanroom_worker: futureTechReality
+};
+
+const getGroupLetter = (group: string) => group.slice(0, 1);
+
+const getOccupationAxisPatch = (
+  key: string,
+  group: string,
+  eras: ConceptEra[],
+  ontologyLevel: ConceptBaseItem['ontologyLevel']
+): OccupationAxisPatch => {
+  const groupLetter = getGroupLetter(group);
+  return occupationAxis(
+    eras,
+    (ontologyLevel || 1) as NonNullable<ConceptBaseItem['ontologyLevel']>,
+    occupationRealityOverrides[key] || groupRealityTags[groupLetter] || occupationReality,
+    occupationCategoryOverrides[key] || groupCategoryFit[groupLetter] || occupationFit('none', ['real_professional'])
+  );
+};
+
 export const CD_OCCUPATION: ConceptBaseItem[] = OCCUPATION_ROWS.map(([
   key,
   name,
@@ -295,20 +483,21 @@ export const CD_OCCUPATION: ConceptBaseItem[] = OCCUPATION_ROWS.map(([
   eras,
   risk,
   affects = ['occupation']
-]) => ({
-  id: `cd_occ_${key}`,
-  name,
-  nameEn,
-  group,
-  groupEn,
-  def,
-  defEn,
-  subjectScope: HUMAN_REAL_SCOPE,
-  ontologyLevel,
-  eras,
-  affects,
-  risk,
-  controls: ['occupation', 'workflow', 'tool', 'institution'],
-  forbids: ['species identity', 'copyrighted character prototype', 'unexplained style takeover'],
-  absorptionRule: '职业身份只提供岗位、劳动流程、机构权限、工具和姿态。若与时空坐标或造型协议冲突，优先把职业转译为对应时代/造型系统下的等价工作流程，不直接生成完整人设。'
-}));
+]) => {
+  return {
+    id: `cd_occ_${key}`,
+    name,
+    nameEn,
+    group,
+    groupEn,
+    def,
+    defEn,
+    subjectScope: HUMAN_REAL_SCOPE,
+    affects,
+    risk,
+    controls: ['occupation', 'workflow', 'tool', 'institution'],
+    forbids: ['species identity', 'copyrighted character prototype', 'unexplained style takeover'],
+    absorptionRule: '职业身份只提供岗位、劳动流程、机构权限、工具和姿态。若与时空坐标或造型协议冲突，优先把职业转译为对应时代/造型系统下的等价工作流程，不直接生成完整人设。',
+    ...getOccupationAxisPatch(key, group, eras, ontologyLevel)
+  };
+});

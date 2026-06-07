@@ -1,8 +1,198 @@
-import { ConceptBaseItem } from '../base/types';
+import { ConceptBaseItem, ConceptEra } from '../base/types';
+
+type DynamicActionAxisPatch = Pick<ConceptBaseItem, 'eraMode' | 'eras' | 'ontologyLevel' | 'realityTags' | 'categoryFit'>;
+
+const cf = (
+  unlisted: NonNullable<ConceptBaseItem['categoryFit']>['unlisted'],
+  strong: readonly string[] = [],
+  usable: readonly string[] = [],
+  fusion: readonly string[] = [],
+  weak: readonly string[] = [],
+  exclude: readonly string[] = []
+): NonNullable<ConceptBaseItem['categoryFit']> => ({ unlisted, strong, usable, fusion, weak, exclude });
+
+const axis = (
+  eras: readonly ConceptEra[],
+  ontologyLevel: 1 | 2 | 3 | 4 | 5,
+  realityTags: readonly string[],
+  categoryFit: NonNullable<ConceptBaseItem['categoryFit']>,
+  eraMode: 'specific' | 'universal' = 'specific'
+): DynamicActionAxisPatch => ({ eraMode, eras, ontologyLevel, realityTags, categoryFit });
+
+const era = {
+  ancient: ['slave', 'feudal'] as const,
+  feudal: ['feudal'] as const,
+  early: ['early_modern'] as const,
+  industrial: ['industrial'] as const,
+  modern: ['modern'] as const,
+  contemporary: ['contemporary'] as const,
+  modernNow: ['modern', 'contemporary'] as const,
+  industrialNow: ['industrial', 'modern', 'contemporary'] as const,
+  future: ['near_future', 'far_future'] as const,
+  near: ['near_future'] as const,
+  far: ['far_future'] as const,
+  mythic: ['mythic'] as const,
+  timeless: ['timeless'] as const,
+  all: ['primitive', 'slave', 'feudal', 'early_modern', 'industrial', 'modern', 'contemporary', 'near_future', 'far_future'] as const
+};
+
+const fit = {
+  movement: cf('usable', ['adventure'], ['urban_life', 'war_military', 'wuxia', 'science_fiction'], ['xianxia', 'cyberpunk', 'wasteland'], ['romance', 'court']),
+  urbanMovement: cf('weak', ['urban_life', 'adventure'], ['noir_crime', 'science_fiction', 'cyberpunk'], ['wuxia', 'wasteland'], ['historical', 'court', 'xianxia']),
+  wuxiaMovement: cf('weak', ['wuxia', 'adventure'], ['historical', 'xianxia'], ['fantasy', 'war_military'], ['urban_life', 'real_professional', 'cyberpunk']),
+  vehicleMovement: cf('none', ['urban_life', 'noir_crime', 'adventure'], ['science_fiction', 'cyberpunk'], ['wasteland'], ['historical', 'court', 'wuxia', 'xianxia']),
+  fantasyMovement: cf('none', ['fantasy', 'xianxia'], ['mythic_epic', 'adventure'], ['surreal', 'science_fiction'], ['real_professional', 'urban_life']),
+  combatMelee: cf('weak', ['war_military', 'wuxia'], ['adventure', 'dark_fantasy', 'historical'], ['xianxia', 'fantasy', 'wasteland'], ['romance', 'fashion_idol']),
+  combatGun: cf('none', ['war_military', 'noir_crime'], ['science_fiction', 'cyberpunk', 'wasteland'], ['adventure'], ['historical', 'court', 'wuxia', 'xianxia', 'romance']),
+  combatWeapon: cf('weak', ['war_military', 'wuxia'], ['historical', 'adventure', 'dark_fantasy'], ['xianxia', 'fantasy'], ['romance', 'urban_life']),
+  combatOccult: cf('none', ['fantasy', 'xianxia', 'dark_fantasy'], ['mythic_epic', 'religious_ritual', 'war_military'], ['science_fiction', 'surreal'], ['real_professional', 'urban_life']),
+  violenceHorror: cf('none', ['horror', 'body_horror'], ['dark_fantasy', 'war_military'], ['wasteland', 'surreal'], ['romance', 'fashion_idol', 'court']),
+  emotion: cf('usable', ['romance'], ['urban_life', 'horror', 'noir_crime'], ['dark_fantasy', 'surreal', 'fashion_idol'], ['war_military']),
+  emotionDark: cf('usable', ['horror', 'romance'], ['dark_fantasy', 'urban_life', 'noir_crime'], ['surreal', 'body_horror'], ['fashion_idol']),
+  emotionIntimate: cf('usable', ['romance', 'boudoir_aesthetic'], ['fashion_idol', 'urban_life'], ['noir_crime', 'surreal'], ['war_military']),
+  emotionAggressive: cf('usable', ['noir_crime', 'war_military'], ['urban_life', 'horror'], ['wuxia', 'wasteland'], ['romance', 'court']),
+  environment: cf('usable', ['adventure', 'ecological'], ['urban_life', 'wasteland', 'real_professional'], ['fantasy', 'wuxia', 'science_fiction'], ['court']),
+  environmentUrban: cf('weak', ['urban_life', 'adventure'], ['noir_crime', 'real_professional'], ['cyberpunk', 'wasteland'], ['historical', 'court', 'xianxia']),
+  environmentHistorical: cf('usable', ['historical', 'adventure'], ['wuxia', 'war_military', 'ecological'], ['xianxia', 'dark_fantasy'], ['cyberpunk']),
+  fantasyPower: cf('none', ['xianxia', 'fantasy'], ['mythic_epic', 'dark_fantasy', 'religious_ritual'], ['science_fiction', 'surreal'], ['real_professional', 'urban_life']),
+  sciFiPower: cf('none', ['science_fiction', 'cyberpunk', 'posthuman'], ['biopunk'], ['fantasy', 'surreal', 'horror'], ['historical', 'court', 'wuxia']),
+  darkPower: cf('none', ['dark_fantasy', 'horror'], ['body_horror', 'religious_ritual', 'fantasy'], ['xianxia', 'surreal'], ['urban_life', 'romance']),
+  abstractAction: cf('none', ['abstract', 'surreal'], ['horror', 'body_horror', 'fashion_idol'], ['science_fiction', 'fantasy', 'romance'], ['real_professional', 'war_military']),
+  abstractTech: cf('none', ['abstract', 'science_fiction', 'cyberpunk'], ['surreal', 'posthuman'], ['horror', 'fashion_idol'], ['historical', 'court', 'wuxia']),
+  abstractInk: cf('weak', ['abstract'], ['wuxia', 'xianxia', 'historical'], ['surreal', 'fantasy'], ['science_fiction', 'cyberpunk'])
+};
+
+const DYNAMIC_ACTION_AXIS: Record<string, DynamicActionAxisPatch> = {
+  cd_dynamic_act_dyn_sprint_blur: axis(era.all, 1, ['realistic', 'physical', 'sprint', 'motion_blur'], fit.movement, 'universal'),
+  cd_dynamic_act_dyn_leap_roof: axis(era.modernNow, 2, ['stylized', 'physical', 'rooftop_leap', 'urban_gap'], fit.urbanMovement),
+  cd_dynamic_act_dyn_freefall: axis(era.timeless, 4, ['nonreal', 'freefall', 'void_motion', 'gravity_loss'], fit.abstractAction),
+  cd_dynamic_act_dyn_parkour_roll: axis(era.modernNow, 1, ['realistic', 'physical', 'parkour_roll', 'impact_recovery'], fit.urbanMovement),
+  cd_dynamic_act_dyn_wall_run: axis(era.all, 3, ['semi_surreal', 'physical', 'wall_run', 'gravity_defiance'], fit.wuxiaMovement, 'universal'),
+  cd_dynamic_act_dyn_slide_sparks: axis(era.industrialNow, 2, ['stylized', 'physical', 'slide_action', 'metal_sparks'], fit.urbanMovement),
+  cd_dynamic_act_dyn_dive_water: axis(era.all, 1, ['realistic', 'physical', 'high_dive', 'water_entry'], fit.environment, 'universal'),
+  cd_dynamic_act_dyn_motorcycle_lean: axis(era.industrialNow, 1, ['realistic', 'physical', 'motorcycle_lean', 'vehicle_motion'], fit.vehicleMovement),
+  cd_dynamic_act_dyn_car_drift: axis(era.industrialNow, 1, ['realistic', 'physical', 'car_drift', 'vehicle_motion'], fit.vehicleMovement),
+  cd_dynamic_act_dyn_flight_super: axis(era.timeless, 4, ['nonreal', 'supersonic_flight', 'superhuman_motion'], fit.fantasyMovement),
+  cd_dynamic_act_dyn_swim_deep: axis(era.all, 1, ['realistic', 'physical', 'deep_swim', 'underwater_motion'], fit.environment, 'universal'),
+  cd_dynamic_act_dyn_crawl_mud: axis(era.all, 1, ['realistic', 'physical', 'mud_crawl', 'survival_motion'], fit.environment, 'universal'),
+  cd_dynamic_act_dyn_swing_rope: axis(era.all, 1, ['realistic', 'physical', 'rope_swing', 'pendulum_motion'], fit.environment, 'universal'),
+  cd_dynamic_act_dyn_climb_mountain: axis(era.all, 1, ['realistic', 'physical', 'mountain_climb', 'vertical_motion'], fit.environment, 'universal'),
+  cd_dynamic_act_dyn_chase_crowd: axis(era.ancient, 1, ['realistic', 'physical', 'crowd_chase', 'pursuit_motion'], fit.movement, 'universal'),
+  cd_dynamic_act_dyn_backflip: axis(era.all, 1, ['realistic', 'physical', 'backflip', 'acrobatic_motion'], fit.movement, 'universal'),
+  cd_dynamic_act_dyn_teleport_dash: axis(era.timeless, 4, ['nonreal', 'teleport_dash', 'instant_motion'], fit.fantasyMovement),
+  cd_dynamic_act_dyn_skate_trick: axis(era.modernNow, 1, ['realistic', 'physical', 'skate_trick', 'urban_sport'], fit.urbanMovement),
+  cd_dynamic_act_dyn_horse_gallop: axis(era.ancient, 1, ['realistic', 'physical', 'horse_gallop', 'mounted_motion'], fit.environmentHistorical),
+  cd_dynamic_act_dyn_levitate_rise: axis(era.timeless, 4, ['nonreal', 'levitation_rise', 'gravity_break'], fit.fantasyMovement),
+
+  cd_dynamic_act_dyn_punch_impact: axis(era.all, 1, ['realistic', 'physical', 'punch_impact', 'melee_combat'], fit.combatMelee, 'universal'),
+  cd_dynamic_act_dyn_kick_high: axis(era.all, 1, ['realistic', 'physical', 'flying_kick', 'martial_motion'], fit.combatMelee, 'universal'),
+  cd_dynamic_act_dyn_sword_slash: axis(era.ancient, 1, ['realistic', 'physical', 'sword_slash', 'blade_combat'], fit.combatWeapon),
+  cd_dynamic_act_dyn_gun_recoil: axis(era.industrialNow, 1, ['realistic', 'physical', 'gun_recoil', 'firearm_action'], fit.combatGun),
+  cd_dynamic_act_dyn_dodge_matrix: axis(era.future, 3, ['semi_surreal', 'physical', 'bullet_dodge', 'hyper_reflex'], fit.sciFiPower),
+  cd_dynamic_act_dyn_block_shield: axis(era.ancient, 1, ['realistic', 'physical', 'shield_block', 'defensive_combat'], fit.combatWeapon),
+  cd_dynamic_act_dyn_strangle_hold: axis(era.all, 2, ['stylized', 'physical', 'strangle_hold', 'close_combat'], fit.violenceHorror, 'universal'),
+  cd_dynamic_act_dyn_throw_knife: axis(era.ancient, 1, ['realistic', 'physical', 'knife_throw', 'projectile_combat'], fit.combatWeapon),
+  cd_dynamic_act_dyn_whip_crack: axis(era.ancient, 1, ['realistic', 'physical', 'whip_crack', 'flexible_weapon'], fit.combatWeapon),
+  cd_dynamic_act_dyn_tackle_rugby: axis(era.industrialNow, 1, ['realistic', 'physical', 'body_tackle', 'impact_collision'], fit.combatMelee),
+  cd_dynamic_act_dyn_dual_wield: axis(era.industrialNow, 2, ['stylized', 'physical', 'dual_wield_guns', 'firearm_action'], fit.combatGun),
+  cd_dynamic_act_dyn_axe_swing: axis(era.ancient, 1, ['realistic', 'physical', 'axe_swing', 'heavy_weapon'], fit.combatWeapon),
+  cd_dynamic_act_dyn_archery_loose: axis(era.ancient, 1, ['realistic', 'physical', 'archery_release', 'bow_combat'], fit.combatWeapon),
+  cd_dynamic_act_dyn_knee_strike: axis(era.all, 1, ['realistic', 'physical', 'knee_strike', 'melee_combat'], fit.combatMelee, 'universal'),
+  cd_dynamic_act_dyn_headbutt: axis(era.all, 1, ['realistic', 'physical', 'headbutt', 'brutal_contact'], fit.combatMelee, 'universal'),
+  cd_dynamic_act_dyn_grapple_struggle: axis(era.all, 1, ['realistic', 'physical', 'grappling', 'ground_combat'], fit.combatMelee, 'universal'),
+  cd_dynamic_act_dyn_spell_cast: axis(era.timeless, 4, ['nonreal', 'spell_blast', 'magic_action'], fit.combatOccult),
+  cd_dynamic_act_dyn_reloading_fast: axis(era.industrialNow, 1, ['realistic', 'physical', 'fast_reload', 'firearm_handling'], fit.combatGun),
+  cd_dynamic_act_dyn_blood_spit: axis(era.all, 2, ['stylized', 'physical', 'blood_spit', 'injured_counterattack'], fit.violenceHorror, 'universal'),
+  cd_dynamic_act_dyn_execution: axis(era.ancient, 2, ['stylized', 'physical', 'execution_pose', 'lethal_power'], fit.violenceHorror, 'universal'),
+
+  cd_dynamic_act_dyn_scream_sky: axis(era.all, 1, ['realistic', 'physical', 'sky_scream', 'emotional_outburst'], fit.emotion, 'universal'),
+  cd_dynamic_act_dyn_laugh_manic: axis(era.all, 2, ['stylized', 'physical', 'manic_laugh', 'unstable_emotion'], fit.emotionDark, 'universal'),
+  cd_dynamic_act_dyn_cry_collapse: axis(era.all, 1, ['realistic', 'physical', 'crying_collapse', 'grief_body'], fit.emotion, 'universal'),
+  cd_dynamic_act_dyn_fear_cower: axis(era.all, 1, ['realistic', 'physical', 'fear_cower', 'defensive_emotion'], fit.emotionDark, 'universal'),
+  cd_dynamic_act_dyn_reach_desperate: axis(era.all, 1, ['realistic', 'physical', 'desperate_reach', 'need_gesture'], fit.emotion, 'universal'),
+  cd_dynamic_act_dyn_hug_tight: axis(era.all, 1, ['realistic', 'physical', 'tight_hug', 'relationship_action'], fit.emotionIntimate, 'universal'),
+  cd_dynamic_act_dyn_shatter_mirror: axis(era.ancient, 2, ['stylized', 'physical', 'mirror_shatter', 'rage_action'], fit.emotionAggressive, 'universal'),
+  cd_dynamic_act_dyn_tear_clothes: axis(era.all, 2, ['stylized', 'physical', 'tear_clothes', 'distress_action'], fit.emotionDark, 'universal'),
+  cd_dynamic_act_dyn_vomit_visceral: axis(era.all, 2, ['realistic', 'physical', 'vomit_action', 'body_distress'], fit.violenceHorror, 'universal'),
+  cd_dynamic_act_dyn_kiss_passion: axis(era.all, 1, ['realistic', 'physical', 'passionate_kiss', 'intimate_action'], fit.emotionIntimate, 'universal'),
+  cd_dynamic_act_dyn_dance_trance: axis(era.all, 2, ['stylized', 'physical', 'trance_dance', 'ecstatic_motion'], fit.emotion, 'universal'),
+  cd_dynamic_act_dyn_shiver_cold: axis(era.all, 1, ['realistic', 'physical', 'cold_shiver', 'weather_response'], fit.emotion, 'universal'),
+  cd_dynamic_act_dyn_faint_swoon: axis(era.all, 1, ['realistic', 'physical', 'fainting_body', 'collapse_action'], fit.emotion, 'universal'),
+  cd_dynamic_act_dyn_slap_face: axis(era.all, 1, ['realistic', 'physical', 'face_slap', 'anger_action'], fit.emotionAggressive, 'universal'),
+  cd_dynamic_act_dyn_shake_fist: axis(era.all, 1, ['realistic', 'physical', 'fist_shake', 'anger_gesture'], fit.emotionAggressive, 'universal'),
+  cd_dynamic_act_dyn_panic_breath: axis(era.all, 1, ['realistic', 'physical', 'panic_breath', 'fear_body'], fit.emotionDark, 'universal'),
+  cd_dynamic_act_dyn_celebrate_jump: axis(era.all, 1, ['realistic', 'physical', 'celebration_jump', 'victory_emotion'], fit.emotion, 'universal'),
+  cd_dynamic_act_dyn_drag_body: axis(era.all, 2, ['stylized', 'physical', 'drag_body', 'disturbing_action'], fit.violenceHorror, 'universal'),
+  cd_dynamic_act_dyn_throw_object: axis(era.all, 1, ['realistic', 'physical', 'throw_object', 'anger_release'], fit.emotionAggressive, 'universal'),
+  cd_dynamic_act_dyn_hair_pull_stress: axis(era.all, 1, ['realistic', 'physical', 'hair_pull_stress', 'distress_body'], fit.emotionDark, 'universal'),
+
+  cd_dynamic_act_dyn_rain_walk: axis(era.all, 1, ['realistic', 'physical', 'rain_walk', 'weather_interaction'], fit.environment, 'universal'),
+  cd_dynamic_act_dyn_wade_water: axis(era.all, 1, ['realistic', 'physical', 'wading_water', 'water_resistance'], fit.environment, 'universal'),
+  cd_dynamic_act_dyn_push_wind: axis(era.all, 1, ['realistic', 'physical', 'walking_against_wind', 'weather_resistance'], fit.environment, 'universal'),
+  cd_dynamic_act_dyn_climb_rubble: axis(era.ancient, 1, ['realistic', 'physical', 'rubble_climb', 'ruin_navigation'], fit.environment, 'universal'),
+  cd_dynamic_act_dyn_break_glass: axis(era.industrialNow, 2, ['stylized', 'physical', 'break_glass', 'impact_transition'], fit.environmentUrban),
+  cd_dynamic_act_dyn_splash_puddle: axis(era.all, 1, ['realistic', 'physical', 'puddle_splash', 'water_contact'], fit.environment, 'universal'),
+  cd_dynamic_act_dyn_part_curtains: axis(era.ancient, 1, ['realistic', 'physical', 'part_curtains', 'threshold_gesture'], fit.environmentHistorical, 'universal'),
+  cd_dynamic_act_dyn_dig_earth: axis(era.all, 1, ['realistic', 'physical', 'digging_earth', 'manual_labor'], fit.environment, 'universal'),
+  cd_dynamic_act_dyn_swim_underwater: axis(era.all, 1, ['realistic', 'physical', 'underwater_swim', 'water_motion'], fit.environment, 'universal'),
+  cd_dynamic_act_dyn_slide_snow: axis(era.all, 1, ['realistic', 'physical', 'snow_slide', 'cold_surface_motion'], fit.environment, 'universal'),
+  cd_dynamic_act_dyn_push_door: axis(era.ancient, 1, ['realistic', 'physical', 'push_heavy_door', 'threshold_force'], fit.environmentHistorical, 'universal'),
+  cd_dynamic_act_dyn_lift_rock: axis(era.all, 1, ['realistic', 'physical', 'lift_rock', 'heavy_labor'], fit.environment, 'universal'),
+  cd_dynamic_act_dyn_cut_vines: axis(era.all, 1, ['realistic', 'physical', 'cut_vines', 'path_clearing'], fit.environment, 'universal'),
+  cd_dynamic_act_dyn_balance_beam: axis(era.all, 1, ['realistic', 'physical', 'balance_beam', 'careful_movement'], fit.environment, 'universal'),
+  cd_dynamic_act_dyn_hide_corner: axis(era.all, 1, ['realistic', 'physical', 'hide_corner', 'stealth_action'], fit.environmentUrban, 'universal'),
+  cd_dynamic_act_dyn_drag_coffin: axis(era.ancient, 2, ['stylized', 'physical', 'drag_coffin', 'death_object_action'], fit.violenceHorror),
+  cd_dynamic_act_dyn_climb_ladder: axis(era.ancient, 1, ['realistic', 'physical', 'ladder_climb', 'vertical_tool_motion'], fit.environment, 'universal'),
+  cd_dynamic_act_dyn_crawl_vent: axis(era.industrialNow, 1, ['realistic', 'physical', 'vent_crawl', 'confined_motion'], fit.environmentUrban),
+  cd_dynamic_act_dyn_kick_door: axis(era.ancient, 1, ['realistic', 'physical', 'kick_door', 'entry_force'], fit.environmentUrban, 'universal'),
+  cd_dynamic_act_dyn_fall_sand: axis(era.all, 2, ['stylized', 'physical', 'quicksand_fall', 'terrain_trap'], fit.environment, 'universal'),
+
+  cd_dynamic_act_dyn_levitate_meditate: axis(era.timeless, 4, ['nonreal', 'levitating_meditation', 'spiritual_power'], fit.fantasyPower),
+  cd_dynamic_act_dyn_summon_beast: axis(era.mythic, 4, ['nonreal', 'summon_beast', 'contract_magic'], fit.fantasyPower),
+  cd_dynamic_act_dyn_transform_wolf: axis(era.timeless, 4, ['nonreal', 'wolf_transformation', 'body_shift'], fit.darkPower),
+  cd_dynamic_act_dyn_teleport_blink: axis(era.timeless, 4, ['nonreal', 'blink_teleport', 'instant_displacement'], fit.fantasyPower),
+  cd_dynamic_act_dyn_control_fire: axis(era.timeless, 4, ['nonreal', 'fire_control', 'elemental_power'], fit.fantasyPower),
+  cd_dynamic_act_dyn_water_bend: axis(era.timeless, 4, ['nonreal', 'water_bending', 'elemental_power'], fit.fantasyPower),
+  cd_dynamic_act_dyn_eye_laser: axis(era.future, 4, ['nonreal', 'eye_laser', 'energy_projection'], fit.sciFiPower),
+  cd_dynamic_act_dyn_grow_wings: axis(era.mythic, 4, ['nonreal', 'wing_growth', 'body_transformation'], fit.fantasyPower),
+  cd_dynamic_act_dyn_time_stop: axis(era.timeless, 5, ['abstract', 'time_stop', 'temporal_power'], fit.fantasyPower),
+  cd_dynamic_act_dyn_invisible_fade: axis(era.timeless, 4, ['nonreal', 'invisibility_fade', 'body_absence'], fit.fantasyPower),
+  cd_dynamic_act_dyn_clone_split: axis(era.timeless, 4, ['nonreal', 'clone_split', 'body_multiplication'], fit.fantasyPower),
+  cd_dynamic_act_dyn_force_push: axis(era.timeless, 4, ['nonreal', 'force_push', 'invisible_energy'], fit.fantasyPower),
+  cd_dynamic_act_dyn_absorb_soul: axis(era.mythic, 5, ['nonreal', 'soul_absorption', 'dark_ritual_power'], fit.darkPower),
+  cd_dynamic_act_dyn_phase_wall: axis(era.timeless, 4, ['nonreal', 'phase_wall', 'matter_intangibility'], fit.fantasyPower),
+  cd_dynamic_act_dyn_create_portal: axis(era.timeless, 4, ['nonreal', 'portal_creation', 'space_threshold'], fit.fantasyPower),
+  cd_dynamic_act_dyn_lightning_strike: axis(era.mythic, 4, ['nonreal', 'lightning_summon', 'elemental_power'], fit.fantasyPower),
+  cd_dynamic_act_dyn_stone_skin: axis(era.mythic, 4, ['nonreal', 'stone_skin', 'body_transformation'], fit.fantasyPower),
+  cd_dynamic_act_dyn_shadow_meld: axis(era.timeless, 4, ['nonreal', 'shadow_meld', 'dark_power'], fit.darkPower),
+  cd_dynamic_act_dyn_gravity_flip: axis(era.timeless, 5, ['abstract', 'gravity_flip', 'physics_break'], fit.fantasyPower),
+  cd_dynamic_act_dyn_necromancy: axis(era.mythic, 5, ['nonreal', 'necromancy', 'death_magic'], fit.darkPower),
+
+  cd_dynamic_act_dyn_melt_dali: axis(era.timeless, 5, ['abstract', 'melting_body', 'dali_surreal_motion'], fit.abstractAction),
+  cd_dynamic_act_dyn_shatter_glass: axis(era.timeless, 4, ['abstract', 'glass_shatter_body', 'fragment_motion'], fit.abstractAction),
+  cd_dynamic_act_dyn_stretch_limb: axis(era.timeless, 5, ['abstract', 'stretched_limb', 'proportion_break'], fit.abstractAction),
+  cd_dynamic_act_dyn_pixel_dissolve: axis(era.future, 5, ['abstract', 'pixel_dissolve', 'digital_disintegration'], fit.abstractTech),
+  cd_dynamic_act_dyn_head_explode_flower: axis(era.timeless, 5, ['abstract', 'flower_head_burst', 'symbolic_body_break'], fit.abstractAction),
+  cd_dynamic_act_dyn_face_peel: axis(era.timeless, 5, ['nonreal', 'face_peel', 'identity_unmasking'], fit.abstractAction),
+  cd_dynamic_act_dyn_float_void: axis(era.timeless, 5, ['abstract', 'void_float', 'gravity_absence'], fit.abstractAction),
+  cd_dynamic_act_dyn_multiple_exposure: axis(era.modernNow, 4, ['abstract', 'multiple_exposure', 'motion_layers'], fit.abstractAction),
+  cd_dynamic_act_dyn_glitch_twitch: axis(era.future, 5, ['abstract', 'glitch_twitch', 'digital_body_error'], fit.abstractTech),
+  cd_dynamic_act_dyn_smoke_form: axis(era.timeless, 5, ['abstract', 'smoke_body', 'form_dissolution'], fit.abstractAction),
+  cd_dynamic_act_dyn_geometric_morph: axis(era.timeless, 5, ['abstract', 'geometric_morph', 'shape_transformation'], fit.abstractAction),
+  cd_dynamic_act_dyn_mirror_reflection: axis(era.ancient, 4, ['abstract', 'mirror_shatter', 'reflection_break'], fit.abstractAction, 'universal'),
+  cd_dynamic_act_dyn_ink_spill: axis(era.timeless, 4, ['abstract', 'ink_spill', 'eastern_abstraction'], fit.abstractInk),
+  cd_dynamic_act_dyn_wire_unravel: axis(era.industrialNow, 5, ['abstract', 'wire_unravel', 'body_deconstruction'], fit.abstractAction),
+  cd_dynamic_act_dyn_balloon_float: axis(era.timeless, 4, ['nonreal', 'balloon_float', 'light_gravity'], fit.abstractAction),
+  cd_dynamic_act_dyn_inside_out: axis(era.timeless, 5, ['nonreal', 'inside_out_body', 'body_horror'], fit.abstractAction),
+  cd_dynamic_act_dyn_silence_scream: axis(era.timeless, 5, ['abstract', 'silent_scream', 'symbolic_emotion'], fit.abstractAction),
+  cd_dynamic_act_dyn_shadow_puppet: axis(era.ancient, 4, ['abstract', 'shadow_puppet', 'silhouette_performance'], fit.abstractInk, 'universal'),
+  cd_dynamic_act_dyn_color_drip: axis(era.timeless, 5, ['abstract', 'color_drip', 'paint_motion'], fit.abstractAction),
+  cd_dynamic_act_dyn_static_noise: axis(era.modernNow, 5, ['abstract', 'static_noise', 'screen_signal_body'], fit.abstractTech)
+};
 
 // 动态动作 / CD_DYNAMIC_ACTION
 // 独立于情绪美学旧词库；每个词条都显式携带时空、超现实、风险与动作裁决参数。
-export const CD_DYNAMIC_ACTION: ConceptBaseItem[] = [
+const CD_DYNAMIC_ACTION_ITEMS: ConceptBaseItem[] = [
   {
     id: 'cd_dynamic_act_dyn_sprint_blur',
     name: '极速冲刺',
@@ -4383,3 +4573,8 @@ export const CD_DYNAMIC_ACTION: ConceptBaseItem[] = [
     ]
   }
 ];
+
+export const CD_DYNAMIC_ACTION: ConceptBaseItem[] = CD_DYNAMIC_ACTION_ITEMS.map(item => ({
+  ...item,
+  ...DYNAMIC_ACTION_AXIS[item.id]
+}));

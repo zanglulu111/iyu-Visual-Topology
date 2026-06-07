@@ -6,10 +6,28 @@ import { SUR3_GROUP_E } from './group_e_mythic_extra';
 import { SUR3_GROUP_F } from './group_f_outer_space';
 import { SUR3_GROUP_G } from './group_g_virtual_micro';
 import { SUR3_GROUP_H } from './group_h_future_systems';
-import { SUR3_ERAS, SUR3_ERA_LABEL_BY_ID, SUR3_ERA_EN_LABEL_BY_ID, getSur3EraByName } from './eras';
+import {
+  SUR3_ERAS,
+  SUR3_ERA_LABEL_BY_ID,
+  SUR3_ERA_EN_LABEL_BY_ID,
+  expandSur3EraIds,
+  getSur3EraByLooseName,
+  getSur3EraByName,
+  getSur3EraIdsForYear,
+  sur3EraSetsIntersect,
+} from './eras';
 import { Sur3CoordinatePreset, Sur3EraId, Sur3SpaceAnchorItem } from './_shared';
 
-export { SUR3_ERAS, SUR3_ERA_LABEL_BY_ID, SUR3_ERA_EN_LABEL_BY_ID, getSur3EraByName };
+export {
+  SUR3_ERAS,
+  SUR3_ERA_LABEL_BY_ID,
+  SUR3_ERA_EN_LABEL_BY_ID,
+  expandSur3EraIds,
+  getSur3EraByLooseName,
+  getSur3EraByName,
+  getSur3EraIdsForYear,
+  sur3EraSetsIntersect,
+};
 export type { Sur3CoordinatePreset, Sur3EraId, Sur3SpaceAnchorItem, Sur3TimeMode, Sur3Domain, Sur3Scale } from './_shared';
 
 export const SUR3_DATA = [
@@ -58,7 +76,8 @@ const eraToTimeLabel = (era: Sur3EraId, lang: 'CN' | 'EN'): string =>
   lang === 'EN' ? SUR3_ERA_EN_LABEL_BY_ID[era] : SUR3_ERA_LABEL_BY_ID[era];
 
 const getEraYearRanges = (era: Sur3EraId): Array<[number, number]> => (
-  SUR3_ERAS.find(item => item.id === era)?.yearRanges || []
+  expandSur3EraIds([era])
+    .flatMap(eraId => SUR3_ERAS.find(item => item.id === eraId)?.yearRanges || [])
 );
 
 const pickCompatibleYear = (anchor: Sur3SpaceAnchorItem): number => {

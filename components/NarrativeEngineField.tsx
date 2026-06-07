@@ -103,6 +103,7 @@ export interface NarrativeEngineFieldProps {
     worldLawConfig?: WorldLawConfig;
     setWorldLawConfig?: (config: WorldLawConfig) => void;
     onConceptRuntimeChange?: (state: ConceptDesignRuntimeState, persist?: boolean) => void;
+    onConceptGlobalRandomizeReady?: (handler: (() => void) | null) => void;
     conceptWorkspacePage?: ConceptDesignWorkspacePage;
     isAdmin?: boolean;
 }
@@ -1132,8 +1133,9 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
     };
 
     const TIMELINE_YEAR_MIN = -2000;
-    const TIMELINE_YEAR_MAX = 2300;
+    const TIMELINE_YEAR_MAX = 3000;
     const TIMELINE_YEAR_NOW = 2026;
+    const selectableSur3Eras = SUR3_ERAS.filter(era => era.id !== 'future');
 
     const clampTimelineYear = (year: number) => (
         Math.min(TIMELINE_YEAR_MAX, Math.max(TIMELINE_YEAR_MIN, Math.trunc(year)))
@@ -2602,7 +2604,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                                 />
                             </div>
                             <div className="mist-labyrinth-era-token-row">
-                                {SUR3_ERAS.map(era => {
+                                {selectableSur3Eras.map(era => {
                                     const label = lang === 'EN' ? era.nameEn : era.name;
                                     return (
                                         <button
@@ -2636,7 +2638,7 @@ export const NarrativeEngineField: React.FC<NarrativeEngineFieldProps> = (props)
                                     <button type="button" onClick={() => updateLabyrinthTimeLocation(undefined, currentYear + 1)}>+1</button>
                                     <button type="button" onClick={() => updateLabyrinthTimeLocation(undefined, currentYear + 10)}>+10</button>
                                 </div>
-                                <span>2300</span>
+                                <span>3000</span>
                             </div>
                         </section>
                     </div>

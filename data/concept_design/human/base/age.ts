@@ -1,6 +1,39 @@
-import { ConceptBaseItem, ALL_REAL_ERAS, UNIVERSAL_HUMAN_SCOPE } from './types';
+import { ConceptAgeBand, ConceptAgeWear, ConceptBaseItem, ALL_REAL_ERAS, UNIVERSAL_HUMAN_SCOPE } from './types';
 
-export const CD_AGE_TEXTURE: ConceptBaseItem[] = [
+const withAgeMeta = (items: ConceptBaseItem[]): ConceptBaseItem[] => items.map(item => {
+  const id = item.id;
+  const ageBand: ConceptAgeBand | undefined = id.includes('late_teen')
+    ? 'LATE_TEEN'
+    : id.includes('young_adult') || id.includes('mature_youth')
+      ? 'YOUNG_ADULT'
+      : id.includes('early_middle')
+        ? 'MATURE_ADULT'
+        : id.includes('middle') || id.includes('late_middle')
+          ? 'MIDDLE_AGED'
+          : id.includes('elder')
+            ? 'ELDER'
+            : id.includes('timeless_adult')
+              ? 'TIMELESS_ADULT'
+              : undefined;
+  const ageWear: ConceptAgeWear = id.includes('fresh')
+    ? 'FRESH'
+    : id.includes('lived_in')
+      ? 'LIVED_IN'
+      : id.includes('weathered')
+        ? 'WEATHERED'
+        : id.includes('well_kept')
+          ? 'WELL_KEPT'
+          : id.includes('sleepless')
+            ? 'SLEEPLESS'
+            : id.includes('disciplined')
+              ? 'DISCIPLINED'
+              : id.includes('prematurely_aged')
+                ? 'PREMATURELY_WORN'
+                : 'NEUTRAL';
+  return { ...item, ...(ageBand ? { ageBand } : {}), ageWear };
+});
+
+export const CD_AGE_TEXTURE: ConceptBaseItem[] = withAgeMeta([
   { id: 'cd_age_late_teen', name: '少年末期', nameEn: 'Late Teen', group: 'A. 年龄阶段', groupEn: 'A. Age Stage', def: '接近成年但仍带未完全定型的骨相和身体轻盈感。', defEn: 'Nearly adult, with not-yet-set facial structure and bodily lightness.', subjectScope: UNIVERSAL_HUMAN_SCOPE, ontologyLevel: 1, eras: ALL_REAL_ERAS, affects: ['face', 'body', 'pose'], risk: 'clean' },
   { id: 'cd_age_young_adult', name: '青年', nameEn: 'Young Adult', group: 'A. 年龄阶段', groupEn: 'A. Age Stage', def: '20到30岁左右，体态完整、恢复力强、身份尚有可塑性。', defEn: 'Roughly 20s to early 30s, fully formed body, strong recovery, identity still flexible.', subjectScope: UNIVERSAL_HUMAN_SCOPE, ontologyLevel: 1, eras: ALL_REAL_ERAS, affects: ['face', 'body', 'pose'], risk: 'clean' },
   { id: 'cd_age_mature_youth', name: '成熟青年', nameEn: 'Mature Young Adult', group: 'A. 年龄阶段', groupEn: 'A. Age Stage', def: '青年身体中带有更稳定的判断力、职业痕迹和自我管理感。', defEn: 'A young adult body with steadier judgment, work traces, and self-control.', subjectScope: UNIVERSAL_HUMAN_SCOPE, ontologyLevel: 1, eras: ALL_REAL_ERAS, affects: ['face', 'body', 'pose'], risk: 'clean' },
@@ -18,4 +51,4 @@ export const CD_AGE_TEXTURE: ConceptBaseItem[] = [
   { id: 'cd_age_disciplined', name: '高度自律感', nameEn: 'Disciplined', group: 'B. 时间质感', groupEn: 'B. Time Texture', def: '年龄被训练、饮食、职业要求或礼仪管理成克制状态。', defEn: 'Age presentation controlled by training, diet, profession, or etiquette.', subjectScope: UNIVERSAL_HUMAN_SCOPE, ontologyLevel: 1, eras: ALL_REAL_ERAS, affects: ['body', 'pose', 'costume'], risk: 'clean' },
   { id: 'cd_age_prematurely_aged', name: '早熟衰耗感', nameEn: 'Prematurely Worn', group: 'B. 时间质感', groupEn: 'B. Time Texture', def: '实际年龄不高，但压力、贫困、危险或责任让面部更早变重。', defEn: 'Not old in years, but stress, poverty, danger, or responsibility makes the face feel older.', subjectScope: UNIVERSAL_HUMAN_SCOPE, ontologyLevel: 1, eras: ALL_REAL_ERAS, affects: ['face', 'skin', 'pose'], risk: 'clean' },
   { id: 'cd_age_timeless_adult', name: '无龄成年人', nameEn: 'Timeless Adult', group: 'C. 设计年龄', groupEn: 'C. Designed Age', def: '明确是成年人，但具体年龄被造型、表情和风格压低到暧昧状态。', defEn: 'Clearly adult, while exact age remains ambiguous through styling, expression, and mood.', subjectScope: UNIVERSAL_HUMAN_SCOPE, ontologyLevel: 1, eras: ['timeless'], affects: ['face', 'costume', 'pose'], risk: 'clean' },
-];
+]);

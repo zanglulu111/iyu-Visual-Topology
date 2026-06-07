@@ -160,20 +160,46 @@ class OpenAIAdapter {
                     stream: shouldStream
                 };
 
-                const response = await proxyFetch(fetchUrl, {
+                if (wantsJson) {
+                    requestBody.response_format = { type: 'json_object' };
+                }
+
+                const makeRequest = (body: any) => proxyFetch(fetchUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${this.apiKey}`,
                         'X-Requested-With': 'XMLHttpRequest'
                     },
-                    body: JSON.stringify(requestBody)
+                    body: JSON.stringify(body)
                 });
 
+                let response = await makeRequest(requestBody);
                 const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
 
                 if (!response.ok) {
                     const err = await response.text();
+                    const responseFormatRejected = wantsJson
+                        && requestBody.response_format
+                        && [400, 404, 422].includes(response.status)
+                        && /response_format|json_object|json schema|unsupported|not supported|unknown parameter|invalid/i.test(err);
+                    if (responseFormatRejected) {
+                        console.warn(`[ProxyStream] response_format rejected by gateway, retrying without response_format. Detail: ${err.substring(0, 180)}`);
+                        const retryBody = { ...requestBody };
+                        delete retryBody.response_format;
+                        response = await makeRequest(retryBody);
+                        if (response.ok) {
+                            // Continue with the successful retry response.
+                        } else {
+                            const retryErr = await response.text();
+                            let errMsg = `Proxy Error: ${response.status} (耗时 ${elapsed}s)`;
+                            if ([502, 504, 524].includes(response.status)) {
+                                errMsg = `代理返回 ${response.status}（耗时 ${elapsed}s）。\n上游模型或中转网关没有及时返回，常见原因是模型过慢、输出过长，或代理超时。\n请切换到更稳定的核心文本模型，或检查代理超时设置（V3 长叙事建议 ≥ 180-300 秒）。\n\n请求地址: ${fetchUrl}\n模型: ${model}`;
+                                throw new Error(errMsg);
+                            }
+                            throw new Error(`${errMsg}\nDetail: ${retryErr.substring(0, 200)}`);
+                        }
+                    } else {
                     let errMsg = `Proxy Error: ${response.status} (耗时 ${elapsed}s)`;
                     if ([502, 504, 524].includes(response.status)) {
                         errMsg = `代理返回 ${response.status}（耗时 ${elapsed}s）。\n上游模型或中转网关没有及时返回，常见原因是模型过慢、输出过长，或代理超时。\n请切换到更稳定的核心文本模型，或检查代理超时设置（V3 长叙事建议 ≥ 180-300 秒）。\n\n请求地址: ${fetchUrl}\n模型: ${model}`;
@@ -186,6 +212,7 @@ class OpenAIAdapter {
                         errMsg = `代理地址错误：返回了 HTML 页面而非 API 响应。\n请检查您的 Base URL 是否正确。\n当前请求地址: ${fetchUrl}\n\n常见的 Base URL 格式: https://your-proxy.com/v1`;
                     }
                     throw new Error(`${errMsg}\nDetail: ${err.substring(0, 200)}`);
+                    }
                 }
 
                 // ═══ 流式读取 SSE ═══
@@ -228,8 +255,9 @@ class OpenAIAdapter {
                     if (!text.trim()) {
                         throw new Error(`代理响应中没有可用文本。\n当前请求地址: ${fetchUrl}\n返回内容预览: ${responseText.substring(0, 300)}`);
                     }
+                    const finishReason = data?.choices?.[0]?.finish_reason || data?.finish_reason || data?.stop_reason || 'unknown';
                     const totalElapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-                    console.log(`[ProxyStream] Fallback JSON response (${totalElapsed}s), ${text.length} chars`);
+                    console.log(`[ProxyStream] Fallback JSON response (${totalElapsed}s), ${text.length} chars, finish_reason=${finishReason}`);
                     return {
                         text: text,
                         candidates: [{ content: { parts: [{ text: text }] } }]

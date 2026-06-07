@@ -1,7 +1,577 @@
-import { buildExplicitPersonaTerms, ExplicitPersonaSeed, PersonaEra } from './types';
+import { buildExplicitPersonaTerms, ExplicitPersonaSeed, PersonaCategoryFit, PersonaEra, personaFit } from './types';
 
-const folk: PersonaEra[] = ['feudal', 'early_modern', 'modern', 'contemporary', 'timeless', 'mythic'];
-const modern: PersonaEra[] = ['modern', 'contemporary', 'timeless'];
+const folk: PersonaEra[] = ['feudal', 'early_modern', 'modern', 'contemporary', 'mythic'];
+const modern: PersonaEra[] = ['modern', 'contemporary'];
+
+const yokaiFit = (group: string) => {
+  if (group.startsWith('A.')) return personaFit('weak', {
+    strong: ['fantasy', 'xianxia', 'urban_life'],
+    usable: ['wuxia', 'romance', 'dark_fantasy'],
+    fusion: ['fashion_idol', 'boudoir_aesthetic'],
+    weak: ['science_fiction', 'cyberpunk', 'war_military']
+  });
+  if (group.startsWith('B.')) return personaFit('weak', {
+    strong: ['dark_fantasy', 'fantasy', 'horror'],
+    usable: ['wuxia', 'urban_life', 'adventure'],
+    fusion: ['romance', 'noir_crime'],
+    weak: ['science_fiction', 'court', 'workplace']
+  });
+  if (group.startsWith('C.')) return personaFit('weak', {
+    strong: ['fantasy', 'urban_life', 'fashion_idol'],
+    usable: ['romance', 'xianxia'],
+    fusion: ['surreal', 'dark_fantasy'],
+    weak: ['war_military', 'court', 'science_fiction']
+  });
+  if (group.startsWith('D.')) return personaFit('weak', {
+    strong: ['dark_fantasy', 'fantasy', 'body_horror'],
+    usable: ['mythic_epic', 'religious_ritual'],
+    fusion: ['xianxia', 'surreal'],
+    weak: ['urban_life', 'fashion_idol', 'workplace']
+  });
+  if (group.startsWith('E.')) return personaFit('weak', {
+    strong: ['fantasy', 'mythic_epic', 'adventure'],
+    usable: ['xianxia', 'ecological', 'religious_ritual'],
+    fusion: ['romance', 'surreal'],
+    weak: ['cyberpunk', 'workplace', 'real_professional']
+  });
+  if (group.startsWith('F.')) return personaFit('weak', {
+    strong: ['fantasy', 'ecological', 'mythic_epic'],
+    usable: ['romance', 'adventure', 'dark_fantasy'],
+    fusion: ['xianxia', 'surreal'],
+    weak: ['wasteland', 'workplace', 'cyberpunk']
+  });
+  if (group.startsWith('G.')) return personaFit('weak', {
+    strong: ['body_horror', 'dark_fantasy', 'fantasy'],
+    usable: ['ecological', 'horror'],
+    fusion: ['surreal', 'xianxia'],
+    weak: ['romance', 'court', 'fashion_idol']
+  });
+  if (group.startsWith('H.')) return personaFit('weak', {
+    strong: ['ecological', 'fantasy', 'mythic_epic'],
+    usable: ['xianxia', 'adventure', 'religious_ritual'],
+    fusion: ['dark_fantasy', 'surreal'],
+    weak: ['cyberpunk', 'workplace', 'war_military']
+  });
+  if (group.startsWith('I.')) return personaFit('weak', {
+    strong: ['urban_life', 'horror', 'surreal'],
+    usable: ['noir_crime', 'fashion_idol', 'cyberpunk'],
+    fusion: ['fantasy', 'science_fiction'],
+    weak: ['court', 'wuxia', 'historical']
+  });
+  return personaFit('weak', {
+    strong: ['fantasy', 'urban_life', 'institutional'],
+    usable: ['noir_crime', 'romance', 'court'],
+    fusion: ['wuxia', 'science_fiction'],
+    weak: ['war_military', 'wasteland', 'space_opera']
+  });
+};
+
+const yokaiFitOverrides: Record<string, PersonaCategoryFit> = {
+  fox_immortal_courtesan: personaFit('weak', {
+    strong: ['fantasy', 'xianxia', 'fashion_idol'],
+    usable: ['romance', 'boudoir_aesthetic', 'historical'],
+    fusion: ['dark_fantasy'],
+    weak: ['science_fiction', 'cyberpunk', 'war_military']
+  }),
+  nine_tailed_socialite: personaFit('weak', {
+    strong: ['fantasy', 'urban_life', 'fashion_idol'],
+    usable: ['romance', 'boudoir_aesthetic', 'court'],
+    fusion: ['dark_fantasy'],
+    weak: ['science_fiction', 'war_military', 'wasteland']
+  }),
+  tanuki_teahouse_owner: personaFit('weak', {
+    strong: ['fantasy', 'urban_life', 'real_professional'],
+    usable: ['xianxia', 'workplace', 'romance'],
+    fusion: ['dark_fantasy'],
+    weak: ['science_fiction', 'cyberpunk', 'war_military']
+  }),
+  fox_spirit_schoolgirl: personaFit('weak', {
+    strong: ['fantasy', 'urban_life', 'institutional'],
+    usable: ['romance', 'xianxia'],
+    fusion: ['dark_fantasy', 'surreal'],
+    weak: ['science_fiction', 'war_military', 'court']
+  }),
+  shapeshifter_actor: personaFit('weak', {
+    strong: ['fantasy', 'fashion_idol', 'urban_life'],
+    usable: ['xianxia', 'surreal', 'real_professional'],
+    fusion: ['dark_fantasy'],
+    weak: ['war_military', 'wasteland', 'court']
+  }),
+  fox_bride_in_red: personaFit('weak', {
+    strong: ['fantasy', 'xianxia', 'romance'],
+    usable: ['historical', 'dark_fantasy', 'religious_ritual'],
+    fusion: ['horror'],
+    weak: ['science_fiction', 'cyberpunk', 'war_military']
+  }),
+  tanuki_debt_collector: personaFit('weak', {
+    strong: ['fantasy', 'urban_life', 'noir_crime'],
+    usable: ['xianxia', 'real_professional', 'workplace'],
+    fusion: ['dark_fantasy'],
+    weak: ['science_fiction', 'court', 'war_military']
+  }),
+  fox_monk_tempter: personaFit('weak', {
+    strong: ['fantasy', 'religious_ritual', 'xianxia'],
+    usable: ['romance', 'boudoir_aesthetic', 'dark_fantasy'],
+    fusion: ['horror'],
+    weak: ['science_fiction', 'cyberpunk', 'workplace']
+  }),
+  white_fox_doctor: personaFit('weak', {
+    strong: ['fantasy', 'medical', 'real_professional'],
+    usable: ['xianxia', 'urban_life', 'religious_ritual'],
+    fusion: ['dark_fantasy'],
+    weak: ['war_military', 'cyberpunk', 'court']
+  }),
+  urban_fox_influencer: personaFit('weak', {
+    strong: ['fantasy', 'urban_life', 'fashion_idol'],
+    usable: ['romance', 'boudoir_aesthetic'],
+    fusion: ['cyberpunk', 'surreal'],
+    weak: ['war_military', 'court', 'historical']
+  }),
+  werewolf_biker: personaFit('weak', {
+    strong: ['dark_fantasy', 'urban_life', 'horror'],
+    usable: ['adventure', 'noir_crime'],
+    fusion: ['romance'],
+    weak: ['science_fiction', 'court', 'workplace']
+  }),
+  hound_spirit_detective: personaFit('weak', {
+    strong: ['dark_fantasy', 'noir_crime', 'real_professional'],
+    usable: ['urban_life', 'horror', 'fantasy'],
+    fusion: ['wuxia'],
+    weak: ['science_fiction', 'court', 'fashion_idol']
+  }),
+  wolf_girl_scout: personaFit('weak', {
+    strong: ['fantasy', 'adventure', 'ecological'],
+    usable: ['wuxia', 'dark_fantasy'],
+    fusion: ['romance'],
+    weak: ['science_fiction', 'court', 'workplace']
+  }),
+  werewolf_duke: personaFit('weak', {
+    strong: ['dark_fantasy', 'court', 'horror'],
+    usable: ['fantasy', 'romance', 'adventure'],
+    fusion: ['noir_crime'],
+    weak: ['science_fiction', 'workplace', 'wuxia']
+  }),
+  stray_dog_shaman: personaFit('weak', {
+    strong: ['dark_fantasy', 'religious_ritual', 'urban_life'],
+    usable: ['fantasy', 'ecological', 'horror'],
+    fusion: ['wuxia'],
+    weak: ['science_fiction', 'court', 'fashion_idol']
+  }),
+  cerberus_gate_boy: personaFit('weak', {
+    strong: ['dark_fantasy', 'horror', 'institutional'],
+    usable: ['fantasy', 'mythic_epic'],
+    fusion: ['surreal'],
+    weak: ['science_fiction', 'court', 'fashion_idol']
+  }),
+  wolf_mask_wedding_guest: personaFit('weak', {
+    strong: ['dark_fantasy', 'horror', 'romance'],
+    usable: ['fantasy', 'noir_crime'],
+    fusion: ['surreal'],
+    weak: ['science_fiction', 'workplace', 'wuxia']
+  }),
+  police_dog_possessed_officer: personaFit('weak', {
+    strong: ['dark_fantasy', 'real_professional', 'urban_life'],
+    usable: ['horror', 'noir_crime', 'institutional'],
+    fusion: ['surreal'],
+    weak: ['court', 'wuxia', 'fashion_idol']
+  }),
+  cat_yokai_waitress: personaFit('weak', {
+    strong: ['fantasy', 'urban_life', 'real_professional'],
+    usable: ['fashion_idol', 'romance', 'workplace'],
+    fusion: ['surreal', 'dark_fantasy'],
+    weak: ['war_military', 'court', 'science_fiction']
+  }),
+  bakeneko_old_lady: personaFit('weak', {
+    strong: ['fantasy', 'urban_life', 'horror'],
+    usable: ['dark_fantasy', 'surreal'],
+    fusion: ['xianxia'],
+    weak: ['war_military', 'court', 'fashion_idol']
+  }),
+  rabbit_moon_maiden: personaFit('weak', {
+    strong: ['fantasy', 'xianxia', 'romance'],
+    usable: ['mythic_epic', 'fashion_idol'],
+    fusion: ['surreal'],
+    weak: ['war_military', 'cyberpunk', 'workplace']
+  }),
+  cat_ear_idol: personaFit('weak', {
+    strong: ['fantasy', 'urban_life', 'fashion_idol'],
+    usable: ['romance', 'surreal'],
+    fusion: ['cyberpunk'],
+    weak: ['war_military', 'court', 'historical']
+  }),
+  black_cat_witch_boy: personaFit('weak', {
+    strong: ['fantasy', 'dark_fantasy', 'horror'],
+    usable: ['urban_life', 'religious_ritual'],
+    fusion: ['surreal'],
+    weak: ['war_military', 'court', 'science_fiction']
+  }),
+  rabbit_mask_courier: personaFit('weak', {
+    strong: ['fantasy', 'adventure', 'urban_life'],
+    usable: ['real_professional', 'xianxia', 'noir_crime'],
+    fusion: ['surreal'],
+    weak: ['war_military', 'court', 'science_fiction']
+  }),
+  cat_spirit_librarian: personaFit('weak', {
+    strong: ['fantasy', 'institutional', 'real_professional'],
+    usable: ['urban_life', 'xianxia'],
+    fusion: ['surreal', 'dark_fantasy'],
+    weak: ['war_military', 'court', 'cyberpunk']
+  }),
+  lucky_cat_shopkeeper: personaFit('weak', {
+    strong: ['fantasy', 'urban_life', 'real_professional'],
+    usable: ['workplace', 'xianxia', 'romance'],
+    fusion: ['surreal'],
+    weak: ['war_military', 'court', 'science_fiction']
+  }),
+  hare_foot_dancer: personaFit('weak', {
+    strong: ['fantasy', 'fashion_idol', 'adventure'],
+    usable: ['urban_life', 'romance'],
+    fusion: ['surreal'],
+    weak: ['war_military', 'court', 'science_fiction']
+  }),
+  neon_catgirl_streamer: personaFit('weak', {
+    strong: ['urban_life', 'fashion_idol', 'fantasy'],
+    usable: ['cyberpunk', 'science_fiction'],
+    fusion: ['surreal'],
+    weak: ['war_military', 'court', 'historical']
+  }),
+  snake_woman_scholar: personaFit('weak', {
+    strong: ['dark_fantasy', 'fantasy', 'institutional'],
+    usable: ['body_horror', 'mythic_epic', 'xianxia'],
+    fusion: ['surreal'],
+    weak: ['urban_life', 'fashion_idol', 'workplace']
+  }),
+  medusa_priestess: personaFit('weak', {
+    strong: ['dark_fantasy', 'religious_ritual', 'mythic_epic'],
+    usable: ['fantasy', 'body_horror', 'horror'],
+    fusion: ['surreal'],
+    weak: ['urban_life', 'fashion_idol', 'workplace']
+  }),
+  white_snake_bride: personaFit('weak', {
+    strong: ['fantasy', 'xianxia', 'romance'],
+    usable: ['body_horror', 'mythic_epic', 'religious_ritual'],
+    fusion: ['dark_fantasy'],
+    weak: ['urban_life', 'fashion_idol', 'workplace']
+  }),
+  lizard_court_bodyguard: personaFit('weak', {
+    strong: ['dark_fantasy', 'court', 'war_military'],
+    usable: ['fantasy', 'body_horror', 'mythic_epic'],
+    fusion: ['xianxia'],
+    weak: ['urban_life', 'fashion_idol', 'workplace']
+  }),
+  serpent_eye_dancer: personaFit('weak', {
+    strong: ['dark_fantasy', 'fashion_idol', 'body_horror'],
+    usable: ['fantasy', 'mythic_epic', 'boudoir_aesthetic'],
+    fusion: ['surreal', 'xianxia'],
+    weak: ['war_military', 'workplace', 'science_fiction']
+  }),
+  python_market_mother: personaFit('weak', {
+    strong: ['dark_fantasy', 'urban_life', 'body_horror'],
+    usable: ['fantasy', 'romance', 'mythic_epic'],
+    fusion: ['xianxia'],
+    weak: ['fashion_idol', 'workplace', 'science_fiction']
+  }),
+  scaled_swimmer_boy: personaFit('weak', {
+    strong: ['fantasy', 'urban_life', 'body_horror'],
+    usable: ['adventure', 'ecological'],
+    fusion: ['xianxia'],
+    weak: ['court', 'workplace', 'fashion_idol']
+  }),
+  viper_assassin_girl: personaFit('weak', {
+    strong: ['dark_fantasy', 'noir_crime', 'body_horror'],
+    usable: ['fantasy', 'wuxia', 'adventure'],
+    fusion: ['xianxia'],
+    weak: ['urban_life', 'court', 'workplace']
+  }),
+  snake_doctor_apothecary: personaFit('weak', {
+    strong: ['dark_fantasy', 'medical', 'body_horror'],
+    usable: ['fantasy', 'real_professional', 'xianxia'],
+    fusion: ['surreal'],
+    weak: ['court', 'fashion_idol', 'war_military']
+  }),
+  crow_mask_messenger: personaFit('weak', {
+    strong: ['fantasy', 'adventure', 'real_professional'],
+    usable: ['mythic_epic', 'ecological', 'religious_ritual'],
+    fusion: ['surreal', 'dark_fantasy'],
+    weak: ['cyberpunk', 'workplace', 'court']
+  }),
+  crane_wife: personaFit('weak', {
+    strong: ['fantasy', 'romance', 'mythic_epic'],
+    usable: ['ecological', 'xianxia'],
+    fusion: ['surreal', 'dark_fantasy'],
+    weak: ['cyberpunk', 'workplace', 'war_military']
+  }),
+  harpy_ballet_dancer: personaFit('weak', {
+    strong: ['fantasy', 'fashion_idol', 'mythic_epic'],
+    usable: ['ecological', 'adventure'],
+    fusion: ['surreal', 'dark_fantasy'],
+    weak: ['cyberpunk', 'workplace', 'war_military']
+  }),
+  owl_teacher_spirit: personaFit('weak', {
+    strong: ['fantasy', 'institutional', 'ecological'],
+    usable: ['real_professional', 'mythic_epic', 'xianxia'],
+    fusion: ['surreal'],
+    weak: ['cyberpunk', 'war_military', 'fashion_idol']
+  }),
+  peacock_courtier: personaFit('weak', {
+    strong: ['fantasy', 'court', 'fashion_idol'],
+    usable: ['mythic_epic', 'ecological', 'romance'],
+    fusion: ['surreal'],
+    weak: ['cyberpunk', 'workplace', 'war_military']
+  }),
+  sparrow_street_girl: personaFit('weak', {
+    strong: ['fantasy', 'urban_life', 'ecological'],
+    usable: ['adventure', 'romance'],
+    fusion: ['surreal'],
+    weak: ['court', 'cyberpunk', 'war_military']
+  }),
+  raven_funeral_singer: personaFit('weak', {
+    strong: ['fantasy', 'religious_ritual', 'fashion_idol'],
+    usable: ['mythic_epic', 'dark_fantasy', 'horror'],
+    fusion: ['surreal', 'romance'],
+    weak: ['cyberpunk', 'workplace', 'war_military']
+  }),
+  swallow_roof_bride: personaFit('weak', {
+    strong: ['fantasy', 'romance', 'ecological'],
+    usable: ['mythic_epic', 'xianxia'],
+    fusion: ['surreal'],
+    weak: ['cyberpunk', 'workplace', 'war_military']
+  }),
+  phoenix_halfblood_actor: personaFit('weak', {
+    strong: ['fantasy', 'mythic_epic', 'fashion_idol'],
+    usable: ['real_professional', 'xianxia'],
+    fusion: ['surreal', 'dark_fantasy'],
+    weak: ['cyberpunk', 'workplace', 'war_military']
+  }),
+  mermaid_singer: personaFit('weak', {
+    strong: ['fantasy', 'ecological', 'fashion_idol'],
+    usable: ['romance', 'mythic_epic', 'adventure'],
+    fusion: ['xianxia', 'surreal'],
+    weak: ['wasteland', 'workplace', 'cyberpunk']
+  }),
+  shark_teeth_boxer: personaFit('weak', {
+    strong: ['fantasy', 'adventure', 'ecological'],
+    usable: ['urban_life', 'war_military', 'body_horror'],
+    fusion: ['dark_fantasy'],
+    weak: ['court', 'romance', 'workplace']
+  }),
+  eel_girl_electrician: personaFit('weak', {
+    strong: ['fantasy', 'real_professional', 'ecological'],
+    usable: ['workplace', 'urban_life', 'science_fiction'],
+    fusion: ['xianxia', 'surreal'],
+    weak: ['court', 'romance', 'war_military']
+  }),
+  jellyfish_veil_bride: personaFit('weak', {
+    strong: ['fantasy', 'ecological', 'romance'],
+    usable: ['mythic_epic', 'surreal'],
+    fusion: ['xianxia', 'dark_fantasy'],
+    weak: ['wasteland', 'workplace', 'cyberpunk']
+  }),
+  octopus_bar_owner: personaFit('weak', {
+    strong: ['fantasy', 'urban_life', 'real_professional'],
+    usable: ['ecological', 'noir_crime'],
+    fusion: ['surreal', 'dark_fantasy'],
+    weak: ['wasteland', 'court', 'war_military']
+  }),
+  whale_bone_monk: personaFit('weak', {
+    strong: ['fantasy', 'ecological', 'religious_ritual'],
+    usable: ['mythic_epic', 'adventure'],
+    fusion: ['xianxia', 'dark_fantasy'],
+    weak: ['cyberpunk', 'workplace', 'fashion_idol']
+  }),
+  seaweed_hair_schoolgirl: personaFit('weak', {
+    strong: ['fantasy', 'urban_life', 'ecological'],
+    usable: ['romance', 'surreal'],
+    fusion: ['xianxia', 'dark_fantasy'],
+    weak: ['wasteland', 'workplace', 'cyberpunk']
+  }),
+  spider_lily_geisha: personaFit('weak', {
+    strong: ['body_horror', 'dark_fantasy', 'fashion_idol'],
+    usable: ['fantasy', 'horror', 'boudoir_aesthetic'],
+    fusion: ['surreal', 'xianxia'],
+    weak: ['romance', 'court', 'war_military']
+  }),
+  mantis_assassin: personaFit('weak', {
+    strong: ['body_horror', 'dark_fantasy', 'noir_crime'],
+    usable: ['fantasy', 'horror', 'adventure'],
+    fusion: ['xianxia'],
+    weak: ['romance', 'court', 'fashion_idol']
+  }),
+  beetle_armor_guard: personaFit('weak', {
+    strong: ['body_horror', 'dark_fantasy', 'war_military'],
+    usable: ['fantasy', 'ecological', 'horror'],
+    fusion: ['xianxia'],
+    weak: ['romance', 'fashion_idol', 'urban_life']
+  }),
+  bee_hive_priestess: personaFit('weak', {
+    strong: ['body_horror', 'ecological', 'religious_ritual'],
+    usable: ['dark_fantasy', 'fantasy', 'horror'],
+    fusion: ['surreal'],
+    weak: ['romance', 'court', 'fashion_idol']
+  }),
+  butterfly_funeral_dancer: personaFit('weak', {
+    strong: ['body_horror', 'dark_fantasy', 'fashion_idol'],
+    usable: ['ecological', 'religious_ritual', 'horror'],
+    fusion: ['surreal', 'romance'],
+    weak: ['court', 'war_military', 'cyberpunk']
+  }),
+  ant_colony_worker_girl: personaFit('weak', {
+    strong: ['body_horror', 'ecological', 'workplace'],
+    usable: ['dark_fantasy', 'fantasy', 'horror'],
+    fusion: ['surreal'],
+    weak: ['romance', 'court', 'fashion_idol']
+  }),
+  dragonfly_courier: personaFit('weak', {
+    strong: ['body_horror', 'ecological', 'adventure'],
+    usable: ['fantasy', 'real_professional'],
+    fusion: ['xianxia', 'surreal'],
+    weak: ['romance', 'court', 'fashion_idol']
+  }),
+  scorpion_tail_bouncer: personaFit('weak', {
+    strong: ['body_horror', 'dark_fantasy', 'real_professional'],
+    usable: ['horror', 'urban_life', 'noir_crime'],
+    fusion: ['fantasy'],
+    weak: ['romance', 'court', 'fashion_idol']
+  }),
+  flower_demon_bride: personaFit('weak', {
+    strong: ['ecological', 'fantasy', 'romance'],
+    usable: ['xianxia', 'mythic_epic'],
+    fusion: ['dark_fantasy', 'surreal'],
+    weak: ['cyberpunk', 'workplace', 'war_military']
+  }),
+  bamboo_forest_scholar: personaFit('weak', {
+    strong: ['ecological', 'fantasy', 'historical'],
+    usable: ['xianxia', 'institutional'],
+    fusion: ['dark_fantasy', 'surreal'],
+    weak: ['cyberpunk', 'workplace', 'war_military']
+  }),
+  deer_horn_miko: personaFit('weak', {
+    strong: ['ecological', 'fantasy', 'religious_ritual'],
+    usable: ['xianxia', 'mythic_epic'],
+    fusion: ['dark_fantasy', 'surreal'],
+    weak: ['cyberpunk', 'workplace', 'war_military']
+  }),
+  vine_arm_gardener: personaFit('weak', {
+    strong: ['ecological', 'fantasy', 'real_professional'],
+    usable: ['workplace', 'xianxia'],
+    fusion: ['dark_fantasy', 'surreal'],
+    weak: ['cyberpunk', 'war_military', 'court']
+  }),
+  autumn_leaf_courtesan: personaFit('weak', {
+    strong: ['ecological', 'fantasy', 'fashion_idol'],
+    usable: ['romance', 'boudoir_aesthetic', 'xianxia'],
+    fusion: ['dark_fantasy', 'surreal'],
+    weak: ['cyberpunk', 'workplace', 'war_military']
+  }),
+  rock_spirit_miner: personaFit('weak', {
+    strong: ['ecological', 'fantasy', 'real_professional'],
+    usable: ['workplace', 'mythic_epic'],
+    fusion: ['dark_fantasy', 'wasteland'],
+    weak: ['cyberpunk', 'fashion_idol', 'war_military']
+  }),
+  convenience_store_yokai: personaFit('weak', {
+    strong: ['urban_life', 'workplace', 'surreal'],
+    usable: ['horror', 'real_professional'],
+    fusion: ['fantasy', 'science_fiction'],
+    weak: ['court', 'wuxia', 'historical']
+  }),
+  school_rooftop_spirit: personaFit('weak', {
+    strong: ['urban_life', 'horror', 'institutional'],
+    usable: ['surreal', 'fashion_idol'],
+    fusion: ['fantasy'],
+    weak: ['court', 'wuxia', 'historical']
+  }),
+  last_train_monster_boy: personaFit('weak', {
+    strong: ['urban_life', 'horror', 'surreal'],
+    usable: ['adventure', 'noir_crime'],
+    fusion: ['fantasy', 'science_fiction'],
+    weak: ['court', 'wuxia', 'historical']
+  }),
+  internet_forum_yokai: personaFit('weak', {
+    strong: ['urban_life', 'surreal', 'cyberpunk'],
+    usable: ['horror', 'science_fiction'],
+    fusion: ['fantasy'],
+    weak: ['court', 'wuxia', 'historical']
+  }),
+  karaoke_room_spirit: personaFit('weak', {
+    strong: ['urban_life', 'horror', 'fashion_idol'],
+    usable: ['surreal', 'noir_crime'],
+    fusion: ['fantasy'],
+    weak: ['court', 'wuxia', 'historical']
+  }),
+  vending_machine_girl: personaFit('weak', {
+    strong: ['urban_life', 'surreal', 'science_fiction'],
+    usable: ['fashion_idol', 'cyberpunk'],
+    fusion: ['fantasy'],
+    weak: ['court', 'wuxia', 'historical']
+  }),
+  security_camera_ghost: personaFit('weak', {
+    strong: ['urban_life', 'horror', 'science_fiction'],
+    usable: ['surreal', 'cyberpunk', 'noir_crime'],
+    fusion: ['fantasy'],
+    weak: ['court', 'wuxia', 'historical']
+  }),
+  abandoned_mall_yokai: personaFit('weak', {
+    strong: ['urban_life', 'horror', 'fashion_idol'],
+    usable: ['surreal', 'noir_crime'],
+    fusion: ['fantasy', 'wasteland'],
+    weak: ['court', 'wuxia', 'historical']
+  }),
+  half_yokai_detective: personaFit('weak', {
+    strong: ['fantasy', 'noir_crime', 'real_professional'],
+    usable: ['urban_life', 'institutional'],
+    fusion: ['wuxia', 'science_fiction'],
+    weak: ['war_military', 'wasteland', 'space_opera']
+  }),
+  monster_blood_heir: personaFit('weak', {
+    strong: ['fantasy', 'court', 'dark_fantasy'],
+    usable: ['romance', 'urban_life', 'institutional'],
+    fusion: ['wuxia'],
+    weak: ['war_military', 'wasteland', 'space_opera']
+  }),
+  beast_marked_bride: personaFit('weak', {
+    strong: ['fantasy', 'romance', 'urban_life'],
+    usable: ['dark_fantasy', 'court'],
+    fusion: ['wuxia', 'surreal'],
+    weak: ['war_military', 'wasteland', 'space_opera']
+  }),
+  human_school_yokai_transfer: personaFit('weak', {
+    strong: ['fantasy', 'urban_life', 'institutional'],
+    usable: ['romance', 'surreal'],
+    fusion: ['science_fiction'],
+    weak: ['war_military', 'wasteland', 'court']
+  }),
+  folk_monster_lawyer: personaFit('weak', {
+    strong: ['fantasy', 'real_professional', 'institutional'],
+    usable: ['urban_life', 'noir_crime'],
+    fusion: ['wuxia', 'science_fiction'],
+    weak: ['war_military', 'wasteland', 'space_opera']
+  }),
+  masked_beast_noble: personaFit('weak', {
+    strong: ['fantasy', 'court', 'dark_fantasy'],
+    usable: ['romance', 'institutional'],
+    fusion: ['wuxia'],
+    weak: ['war_military', 'wasteland', 'space_opera']
+  }),
+  animal_spirit_medium: personaFit('weak', {
+    strong: ['fantasy', 'religious_ritual', 'surreal'],
+    usable: ['urban_life', 'dark_fantasy'],
+    fusion: ['wuxia', 'science_fiction'],
+    weak: ['war_military', 'wasteland', 'fashion_idol']
+  }),
+  yokai_family_housewife: personaFit('weak', {
+    strong: ['fantasy', 'urban_life', 'romance'],
+    usable: ['workplace', 'surreal'],
+    fusion: ['science_fiction'],
+    weak: ['war_military', 'wasteland', 'space_opera']
+  }),
+  monster_passport_clerk: personaFit('weak', {
+    strong: ['fantasy', 'institutional', 'real_professional'],
+    usable: ['urban_life', 'workplace'],
+    fusion: ['science_fiction', 'wuxia'],
+    weak: ['war_military', 'wasteland', 'space_opera']
+  })
+};
 
 const seeds: ExplicitPersonaSeed[] = [
   { id: "fox_immortal_courtesan", name: "狐仙花魁", nameEn: "Fox Immortal Courtesan", group: "A. 狐 / 狸 / 变形精怪", groupEn: "A. Fox / Tanuki / Shapeshifter", def: "第一识别是把狐性藏进花魁礼仪的狐仙。造型入口：高耸发髻、狐尾式衣摆、香粉、细长眼线和在敬酒时露出捕猎耐心的侧脸。民俗异征必须落在耳影、尾影、袖中护符和被观看关系里。避免普通性感狐女或纯艺伎造型。", defEn: "First read: a fox immortal hiding fox nature inside courtesan etiquette. Styling entry: tall hair, tail-like hem, powder, long eyeliner, and a patient predatory profile while pouring wine. Folk tells should land in ear shadow, tail silhouette, sleeve charms, and gaze economy. Avoid generic sexy fox woman or geisha styling.", ontologyLevel: 4, risk: "medium", tags: ["fox", "courtesan", "immortal"] },
@@ -38,7 +608,7 @@ const seeds: ExplicitPersonaSeed[] = [
   { id: "neon_catgirl_streamer", name: "霓虹猫娘主播", nameEn: "Neon Catgirl Streamer", group: "C. 猫 / 兔 / 小兽灵", groupEn: "C. Cat / Rabbit / Small Beast Spirit", def: "第一识别是把猫性、直播和虚拟人格叠在一起的霓虹主播。造型入口：猫耳耳机、补光屏、假尾或真尾的不确定性、弹幕反光和营业动作中偶尔失控的猫眼。重点是屏幕人格与非人异征的缝隙。避免普通宅向猫娘。", defEn: "First read: a neon streamer layering cat nature, livestream, and virtual persona. Styling entry: cat-ear headset, ring light, uncertain fake-or-real tail, chat reflections, and cat eyes slipping through performance. Focus on gaps between screen persona and inhuman tells. Avoid generic otaku catgirl.", ontologyLevel: 3, eras: modern, risk: "medium", tags: ["catgirl", "streamer", "neon"] },
 
   { id: "snake_woman_scholar", name: "蛇女书生", nameEn: "Snake-Woman Scholar", group: "D. 蛇 / 蜥 / 鳞片人形", groupEn: "D. Snake / Lizard / Scaled Humanoid", def: "第一识别是把蛇性藏进书卷礼法的蛇女书生。造型入口：青白长衫、竖瞳、鳞纹袖口、冷慢眨眼和不发出脚步声的行走。重点是文雅与捕食耐心的冲突。避免普通蛇妖美女。", defEn: "First read: a snake-woman scholar hiding serpent nature in literati etiquette. Styling entry: pale robe, slit pupils, scale-pattern cuffs, slow cold blinking, and steps without sound. Focus on refined manners versus predatory patience. Avoid generic snake beauty.", ontologyLevel: 4, risk: "medium", tags: ["snake", "scholar", "scaled"] },
-  { id: "medusa_priestess", name: "美杜莎祭司", nameEn: "Medusa Priestess", group: "D. 蛇 / 蜥 / 鳞片人形", groupEn: "D. Snake / Lizard / Scaled Humanoid", def: "第一识别是把直视变成禁忌仪式的美杜莎祭司。造型入口：蛇发冠、蒙眼薄纱、石化圣物、挺直颈线和让信众避开目光的正面性。蛇发可结构化为头冠、发辫或活体小蛇。避免恐怖怪物或神话直译。", defEn: "First read: a Medusa priestess turning direct gaze into taboo ritual. Styling entry: serpent crown, eye veil, petrified relics, upright neck, and frontality making worshippers avoid her eyes. Serpent hair can be headpiece, braids, or small living snakes. Avoid horror monster or direct myth copy.", ontologyLevel: 4, eras: ['slave', 'feudal', 'timeless', 'mythic'], risk: "medium", tags: ["medusa", "priestess", "gaze"] },
+  { id: "medusa_priestess", name: "美杜莎祭司", nameEn: "Medusa Priestess", group: "D. 蛇 / 蜥 / 鳞片人形", groupEn: "D. Snake / Lizard / Scaled Humanoid", def: "第一识别是把直视变成禁忌仪式的美杜莎祭司。造型入口：蛇发冠、蒙眼薄纱、石化圣物、挺直颈线和让信众避开目光的正面性。蛇发可结构化为头冠、发辫或活体小蛇。避免恐怖怪物或神话直译。", defEn: "First read: a Medusa priestess turning direct gaze into taboo ritual. Styling entry: serpent crown, eye veil, petrified relics, upright neck, and frontality making worshippers avoid her eyes. Serpent hair can be headpiece, braids, or small living snakes. Avoid horror monster or direct myth copy.", ontologyLevel: 4, eras: ['slave', 'feudal', 'mythic'], risk: "medium", tags: ["medusa", "priestess", "gaze"] },
   { id: "white_snake_bride", name: "白蛇新娘", nameEn: "White-Snake Bride", group: "D. 蛇 / 蜥 / 鳞片人形", groupEn: "D. Snake / Lizard / Scaled Humanoid", def: "第一识别是把蛇身秘密压进婚礼服制的白蛇新娘。造型入口：白衣、银鳞暗纹、冷润皮肤、过慢呼吸和像在适应人类婚俗的手。张力来自人形礼仪与非人身体记忆。避免普通白衣新娘或性感蛇女。", defEn: "First read: a white-snake bride pressing serpent secrecy into wedding dress. Styling entry: white clothing, silver scale patterns, cool moist skin, slow breathing, and hands adapting to human marriage customs. Tension comes from human ritual versus nonhuman body memory. Avoid generic white bride or sexy snake woman.", ontologyLevel: 4, risk: "medium", tags: ["white_snake", "bride", "wedding"] },
   { id: "lizard_court_bodyguard", name: "蜥蜴宫廷保镖", nameEn: "Lizard Court Bodyguard", group: "D. 蛇 / 蜥 / 鳞片人形", groupEn: "D. Snake / Lizard / Scaled Humanoid", def: "第一识别是以冷血耐心守护宫廷边界的蜥蜴保镖。造型入口：硬挺制服、颈侧鳞片、护臂、无表情侧脸和长时间不动的站姿。异征服务于警戒、耐热、贴墙和突然爆发。避免普通侍卫或完整爬行动物化。", defEn: "First read: a lizard court bodyguard guarding palace boundaries with cold-blooded patience. Styling entry: stiff uniform, neck scales, bracers, expressionless profile, and long still stance. Tells serve vigilance, heat tolerance, wall-clinging, and sudden burst. Avoid generic guard or full reptile form.", ontologyLevel: 4, tags: ["lizard", "bodyguard", "court"] },
   { id: "serpent_eye_dancer", name: "蛇瞳舞者", nameEn: "Serpent-Eyed Dancer", group: "D. 蛇 / 蜥 / 鳞片人形", groupEn: "D. Snake / Lizard / Scaled Humanoid", def: "第一识别是以眼神先于身体移动的蛇瞳舞者。造型入口：竖瞳、缠绕腰饰、裸露但克制的肩颈线和像蛇盘绕一样的重心转移。性感必须来自动作控制和危险距离。避免露骨艳舞或蛇女Cosplay。", defEn: "First read: a serpent-eyed dancer whose gaze moves before the body. Styling entry: slit pupils, wrapped waist ornament, restrained exposed neck-shoulder line, and weight shifting like a coil. Sensuality must come from movement control and dangerous distance. Avoid explicit dance or snake-woman cosplay.", ontologyLevel: 4, risk: "medium", tags: ["serpent_eye", "dancer", "movement"] },
@@ -115,6 +685,11 @@ const seeds: ExplicitPersonaSeed[] = [
   { id: "monster_passport_clerk", name: "怪物护照职员", nameEn: "Monster Passport Clerk", group: "J. 混血 / 伪装 / 边界身份", groupEn: "J. Half-Blood / Disguise / Boundary Identity", def: "第一识别是负责把怪物身份翻译成人类证件的护照职员。造型入口：窗口制服、印章、照片规范表、疲惫眼镜和面对角、尾、鳞片仍要求正面免冠的职业冷静。重点是行政制度与非人身体冲突。避免普通公务员。", defEn: "First read: a passport clerk translating monster identity into human documents. Styling entry: window uniform, stamps, photo guidelines, tired glasses, and professional calm asking horns, tails, and scales to meet frontal-photo rules. Focus on bureaucracy versus nonhuman bodies. Avoid generic civil servant.", ontologyLevel: 4, risk: "medium", tags: ["monster_passport", "clerk", "bureaucracy"] }
 ];
 
+const seedsWithFit: ExplicitPersonaSeed[] = seeds.map(seed => ({
+  ...seed,
+  categoryFit: seed.categoryFit || yokaiFitOverrides[seed.id] || yokaiFit(seed.group)
+}));
+
 export const CD_PERSONA_YOKAI_BEAST = buildExplicitPersonaTerms({
   categoryId: 'yokai_beast',
   categoryName: '妖怪 / 民俗精怪 / 兽化人设',
@@ -130,4 +705,4 @@ export const CD_PERSONA_YOKAI_BEAST = buildExplicitPersonaTerms({
   absorptionFocus: '民俗来源、动物性特征、人间伪装、怪谈规则、服制符号或身体边界',
   absorptionFocusEn: 'folk origin, animal traits, human disguise, legend rules, costume symbols, or body boundary',
   appendVisualEvidence: false
-}, seeds);
+}, seedsWithFit);

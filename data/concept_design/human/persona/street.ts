@@ -1,4 +1,12 @@
-import { PersonaEra, PersonaTerm } from './types';
+import {
+  cleanPersonaEras,
+  PersonaCategoryFit,
+  personaEraModeFor,
+  PersonaEra,
+  personaFit,
+  personaRealityTagsFor,
+  PersonaTerm
+} from './types';
 
 type PersonaSeed = {
   id: string;
@@ -17,19 +25,239 @@ type PersonaSeed = {
   forbids?: string[];
   absorptionRule?: string;
   absorptionRuleEn?: string;
+  eraMode?: PersonaTerm['eraMode'];
+  realityTags?: string[];
+  categoryFit?: PersonaTerm['categoryFit'];
 };
 
 const baseControls = ['costume', 'prop', 'wear_trace', 'pose', 'symbol', 'hair', 'makeup'];
 const defaultForbids = ['宫廷礼制过度覆盖', '无解释高魔法器官', '随机战术装备堆叠', '纯白摄影棚贵族化'];
-const modernEras: PersonaEra[] = ['modern', 'contemporary', 'timeless'];
-const contemporaryEras: PersonaEra[] = ['contemporary', 'near_future', 'timeless'];
-const industrialModernEras: PersonaEra[] = ['industrial', 'modern', 'contemporary', 'timeless'];
+const modernEras: PersonaEra[] = ['modern', 'contemporary'];
+const contemporaryEras: PersonaEra[] = ['contemporary', 'near_future'];
+const industrialModernEras: PersonaEra[] = ['industrial', 'modern', 'contemporary'];
+
+const streetFit = (group: string): PersonaCategoryFit => {
+  if (group.startsWith('A.')) return personaFit('weak', {
+    strong: ['urban_life', 'fashion_idol'],
+    usable: ['noir_crime', 'romance', 'adventure'],
+    fusion: ['cyberpunk', 'wasteland'],
+    weak: ['court', 'historical', 'xianxia']
+  });
+  if (group.startsWith('B.')) return personaFit('weak', {
+    strong: ['urban_life', 'adventure'],
+    usable: ['fashion_idol', 'romance'],
+    fusion: ['wasteland', 'cyberpunk'],
+    weak: ['court', 'xianxia', 'religious_ritual']
+  });
+  if (group.startsWith('C.')) return personaFit('weak', {
+    strong: ['urban_life', 'cyberpunk'],
+    usable: ['fashion_idol', 'noir_crime', 'real_professional'],
+    fusion: ['science_fiction', 'wasteland'],
+    weak: ['court', 'historical', 'xianxia']
+  });
+  if (group.startsWith('D.')) return personaFit('weak', {
+    strong: ['fashion_idol', 'urban_life'],
+    usable: ['romance', 'boudoir_aesthetic'],
+    fusion: ['surreal', 'cyberpunk'],
+    weak: ['war_military', 'court', 'wasteland']
+  });
+  if (group.startsWith('E.')) return personaFit('weak', {
+    strong: ['urban_life', 'fashion_idol'],
+    usable: ['boudoir_aesthetic', 'romance', 'noir_crime'],
+    fusion: ['surreal', 'cyberpunk'],
+    weak: ['court', 'wuxia', 'xianxia']
+  });
+  if (group.startsWith('F.')) return personaFit('weak', {
+    strong: ['urban_life'],
+    usable: ['fashion_idol', 'real_professional', 'noir_crime'],
+    fusion: ['surreal', 'cyberpunk'],
+    weak: ['court', 'historical', 'xianxia']
+  });
+  if (group.startsWith('G.')) return personaFit('weak', {
+    strong: ['fashion_idol', 'urban_life'],
+    usable: ['romance'],
+    fusion: ['cyberpunk', 'surreal'],
+    weak: ['court', 'wasteland', 'war_military']
+  });
+  if (group.startsWith('H.')) return personaFit('weak', {
+    strong: ['urban_life', 'adventure'],
+    usable: ['noir_crime', 'fashion_idol'],
+    fusion: ['wasteland', 'cyberpunk'],
+    weak: ['court', 'xianxia', 'romance']
+  });
+  if (group.startsWith('I.')) return personaFit('weak', {
+    strong: ['urban_life'],
+    usable: ['fashion_idol', 'noir_crime', 'romance'],
+    fusion: ['dark_fantasy', 'horror', 'surreal'],
+    weak: ['court', 'xianxia', 'war_military']
+  });
+  return personaFit('weak', {
+    strong: ['urban_life', 'cyberpunk', 'surreal'],
+    usable: ['fashion_idol', 'science_fiction'],
+    fusion: ['posthuman', 'horror'],
+    weak: ['historical', 'court', 'wuxia']
+  });
+};
+
+const streetFitOverrides: Record<string, PersonaCategoryFit> = {
+  drill_crew_member: personaFit('weak', {
+    strong: ['urban_life'],
+    usable: ['noir_crime', 'fashion_idol'],
+    fusion: ['wasteland'],
+    weak: ['court', 'historical', 'xianxia']
+  }),
+  luxury_hiphop_heir: personaFit('weak', {
+    strong: ['urban_life', 'fashion_idol'],
+    usable: ['court', 'romance'],
+    fusion: ['noir_crime'],
+    weak: ['wuxia', 'xianxia', 'wasteland']
+  }),
+  night_skate_courier: personaFit('weak', {
+    strong: ['urban_life', 'real_professional'],
+    usable: ['workplace', 'adventure'],
+    fusion: ['noir_crime', 'cyberpunk'],
+    weak: ['court', 'xianxia', 'religious_ritual']
+  }),
+  black_mask_delivery_rider: personaFit('weak', {
+    strong: ['urban_life', 'real_professional', 'workplace'],
+    usable: ['adventure'],
+    fusion: ['cyberpunk', 'wasteland'],
+    weak: ['court', 'historical', 'xianxia']
+  }),
+  night_train_platform_waiter: personaFit('weak', {
+    strong: ['urban_life'],
+    usable: ['noir_crime', 'romance'],
+    fusion: ['cyberpunk', 'surreal'],
+    weak: ['court', 'historical', 'xianxia']
+  }),
+  helmeted_moped_girl: personaFit('weak', {
+    strong: ['urban_life'],
+    usable: ['adventure', 'fashion_idol', 'romance'],
+    fusion: ['cyberpunk'],
+    weak: ['court', 'historical', 'xianxia']
+  }),
+  mall_goth_girl: personaFit('weak', {
+    strong: ['urban_life', 'fashion_idol'],
+    usable: ['dark_fantasy', 'horror', 'romance'],
+    fusion: ['surreal'],
+    weak: ['court', 'war_military', 'wasteland']
+  }),
+  cyber_egirl: personaFit('weak', {
+    strong: ['fashion_idol', 'urban_life', 'cyberpunk'],
+    usable: ['romance', 'boudoir_aesthetic'],
+    fusion: ['surreal', 'science_fiction'],
+    weak: ['court', 'war_military', 'wasteland']
+  }),
+  cyber_rave_android_fan: personaFit('weak', {
+    strong: ['urban_life', 'fashion_idol', 'cyberpunk'],
+    usable: ['science_fiction'],
+    fusion: ['posthuman', 'surreal'],
+    weak: ['court', 'wuxia', 'xianxia']
+  }),
+  mural_community_artist: personaFit('weak', {
+    strong: ['urban_life', 'real_professional'],
+    usable: ['ecological', 'workplace', 'fashion_idol'],
+    fusion: ['surreal'],
+    weak: ['court', 'historical', 'xianxia']
+  }),
+  augmented_reality_tagger: personaFit('weak', {
+    strong: ['urban_life', 'cyberpunk'],
+    usable: ['science_fiction', 'fashion_idol'],
+    fusion: ['surreal'],
+    weak: ['court', 'historical', 'xianxia']
+  }),
+  streetwear_reseller: personaFit('weak', {
+    strong: ['fashion_idol', 'urban_life'],
+    usable: ['real_professional', 'workplace'],
+    fusion: ['noir_crime', 'cyberpunk'],
+    weak: ['court', 'wasteland', 'war_military']
+  }),
+  sneaker_customizer: personaFit('weak', {
+    strong: ['real_professional', 'fashion_idol'],
+    usable: ['workplace', 'urban_life'],
+    fusion: ['surreal'],
+    weak: ['court', 'wasteland', 'war_military']
+  }),
+  kicks_store_clerk: personaFit('weak', {
+    strong: ['real_professional', 'workplace'],
+    usable: ['fashion_idol', 'urban_life'],
+    fusion: ['romance'],
+    weak: ['court', 'wasteland', 'war_military']
+  }),
+  chopper_garage_mechanic: personaFit('weak', {
+    strong: ['real_professional', 'workplace'],
+    usable: ['urban_life', 'adventure', 'noir_crime'],
+    fusion: ['wasteland'],
+    weak: ['court', 'xianxia', 'romance']
+  }),
+  desert_motorcycle_nomad: personaFit('weak', {
+    strong: ['adventure'],
+    usable: ['urban_life', 'ecological', 'wasteland'],
+    fusion: ['post_apocalyptic'],
+    weak: ['court', 'xianxia', 'romance']
+  }),
+  biker_bar_waitress: personaFit('weak', {
+    strong: ['real_professional', 'workplace', 'urban_life'],
+    usable: ['noir_crime', 'romance'],
+    fusion: ['wasteland'],
+    weak: ['court', 'xianxia', 'war_military']
+  }),
+  motorcycle_courier: personaFit('weak', {
+    strong: ['real_professional', 'workplace', 'adventure'],
+    usable: ['urban_life'],
+    fusion: ['cyberpunk', 'wasteland'],
+    weak: ['court', 'xianxia', 'romance']
+  }),
+  goth_record_store_clerk: personaFit('weak', {
+    strong: ['real_professional', 'workplace'],
+    usable: ['urban_life', 'fashion_idol', 'dark_fantasy', 'horror'],
+    fusion: ['surreal'],
+    weak: ['court', 'xianxia', 'war_military']
+  }),
+  alt_barista: personaFit('weak', {
+    strong: ['real_professional', 'workplace'],
+    usable: ['urban_life', 'fashion_idol', 'romance'],
+    fusion: ['surreal'],
+    weak: ['court', 'xianxia', 'war_military']
+  }),
+  crypto_party_bro: personaFit('weak', {
+    strong: ['urban_life'],
+    usable: ['fashion_idol', 'workplace', 'noir_crime'],
+    fusion: ['cyberpunk'],
+    weak: ['historical', 'court', 'wuxia']
+  }),
+  hacker_space_girl: personaFit('weak', {
+    strong: ['urban_life', 'real_professional'],
+    usable: ['workplace', 'science_fiction', 'cyberpunk'],
+    fusion: ['posthuman'],
+    weak: ['historical', 'court', 'wuxia']
+  }),
+  esports_substitute_player: personaFit('weak', {
+    strong: ['real_professional', 'workplace', 'urban_life'],
+    usable: ['fashion_idol', 'science_fiction'],
+    fusion: ['cyberpunk'],
+    weak: ['historical', 'court', 'wuxia']
+  }),
+  vtuber_fan_shrine_keeper: personaFit('weak', {
+    strong: ['urban_life'],
+    usable: ['fashion_idol', 'religious_ritual', 'cyberpunk'],
+    fusion: ['surreal'],
+    weak: ['historical', 'court', 'wuxia']
+  }),
+  digital_ritual_chatroom_admin: personaFit('weak', {
+    strong: ['urban_life', 'surreal'],
+    usable: ['cyberpunk', 'science_fiction', 'religious_ritual'],
+    fusion: ['posthuman', 'horror'],
+    weak: ['historical', 'court', 'wuxia']
+  })
+};
 
 const sp = (seed: PersonaSeed): PersonaTerm => {
   const ontologyLevel = seed.ontologyLevel ?? 1;
-  const eras = seed.eras ?? modernEras;
+  const eras = cleanPersonaEras(seed.eras ?? modernEras);
   const risk = seed.risk ?? (ontologyLevel >= 4 ? 'medium' : 'clean');
   const controls = Array.from(new Set([...baseControls, ...(seed.controls || [])]));
+  const eraMode = personaEraModeFor(eras, seed.eraMode);
   return {
     id: `cd_persona_street_${seed.id}`,
     name: seed.name,
@@ -47,6 +275,7 @@ const sp = (seed: PersonaSeed): PersonaTerm => {
     personaStrength: ontologyLevel >= 4 ? 'strong' : ontologyLevel >= 2 ? 'medium' : 'light',
     isCompoundPersona: true,
     ontologyLevel,
+    eraMode,
     eras,
     risk,
     affects: controls,
@@ -55,14 +284,15 @@ const sp = (seed: PersonaSeed): PersonaTerm => {
     absorptionRule: seed.absorptionRule || `外来元素优先折译为“${seed.name}”的穿搭制度、社群标记、道具、姿态、街区位置或消费痕迹，不要直接变成无关职业或怪物器官。`,
     absorptionRuleEn: seed.absorptionRuleEn || `Translate outside elements into the outfit system, group marks, props, posture, street position, or consumption traces of "${seed.nameEn}"; do not turn them into unrelated jobs or monster organs.`,
     tags: Array.from(new Set(['persona', 'street', 'subculture', 'compound_persona', ...(seed.tags || [])])),
-    realityTags: ontologyLevel <= 1 ? ['realist_safe'] : ontologyLevel <= 3 ? ['stylized_boundary'] : ['nonreal_ontology'],
+    realityTags: seed.realityTags || personaRealityTagsFor(ontologyLevel, ['street', 'subculture']),
+    categoryFit: seed.categoryFit || streetFitOverrides[seed.id] || streetFit(seed.group),
     styleTags: Array.from(new Set(['street', 'subculture', ...(seed.styleTags || []), ...(seed.tags || [])])),
     timeTags: eras
   };
 };
 
 const seeds: PersonaSeed[] = [
-  { id: 'nineties_gangsta_rapper', name: '90年代匪帮说唱歌手', nameEn: '1990s Gangsta Rapper', group: 'A. 嘻哈 / 说唱街区', groupEn: 'A. Hip-Hop / Rap Block', def: '第一识别是90年代街区影像里的强硬说唱身体。造型入口：90年代街区影像里的强硬说唱身体。母题：把街区威慑和音乐身份穿成公共形象的人。张力：表演性的压迫感与真实街头防御姿态并存。视觉证据：宽大球衣、金链、棒球帽、硬挺下巴、低角度站姿和少而重的手势。边界：避免写成持械黑帮或普通复古歌手。', defEn: 'First read: a hard rap body from 1990s block imagery. Styling entry: a hard rap body from 1990s block imagery. Motif: someone wearing neighborhood intimidation and music identity as a public image. Tension: between performative pressure and real street-defense posture. Visual evidence: oversized jersey, gold chain, cap, hard jaw, low-angle stance, and few heavy gestures. Boundary: avoid turn him into an armed gangster or generic retro singer.', tags: ['hiphop', 'gangsta_rap', '90s'], eras: ['modern', 'timeless'] },
+  { id: 'nineties_gangsta_rapper', name: '90年代匪帮说唱歌手', nameEn: '1990s Gangsta Rapper', group: 'A. 嘻哈 / 说唱街区', groupEn: 'A. Hip-Hop / Rap Block', def: '第一识别是90年代街区影像里的强硬说唱身体。造型入口：90年代街区影像里的强硬说唱身体。母题：把街区威慑和音乐身份穿成公共形象的人。张力：表演性的压迫感与真实街头防御姿态并存。视觉证据：宽大球衣、金链、棒球帽、硬挺下巴、低角度站姿和少而重的手势。边界：避免写成持械黑帮或普通复古歌手。', defEn: 'First read: a hard rap body from 1990s block imagery. Styling entry: a hard rap body from 1990s block imagery. Motif: someone wearing neighborhood intimidation and music identity as a public image. Tension: between performative pressure and real street-defense posture. Visual evidence: oversized jersey, gold chain, cap, hard jaw, low-angle stance, and few heavy gestures. Boundary: avoid turn him into an armed gangster or generic retro singer.', tags: ['hiphop', 'gangsta_rap', '90s'], eras: ['modern'] },
   { id: 'east_coast_boom_bap_mc', name: '东海岸Boom Bap MC', nameEn: 'East-Coast Boom-Bap MC', group: 'A. 嘻哈 / 说唱街区', groupEn: 'A. Hip-Hop / Rap Block', def: '第一识别是地下录音室和砖墙街角之间的东海岸MC。造型入口：地下录音室和砖墙街角之间的东海岸MC。母题：用歌词、黑胶和城市冷硬感建立权威的说唱者。张力：低调穿着下仍有强烈节拍控制。视觉证据：连帽衫、厚靴、深色外套、压低帽檐、麦克风或黑胶包、前倾身体。边界：避免给明星光泽或舞台偶像化。', defEn: 'First read: an East-Coast MC between basement studio and brick corner. Styling entry: an East-Coast MC between basement studio and brick corner. Motif: a rapper building authority through lyrics, vinyl, and cold city texture. Tension: strong rhythm control beneath low-profile clothing. Visual evidence: hoodie, heavy boots, dark outerwear, lowered brim, mic or vinyl bag, and forward-leaning body. Boundary: avoid add celebrity gloss or idol-stage polish.', tags: ['boom_bap', 'east_coast', 'mc'] },
   { id: 'west_coast_lowrider_rapper', name: '西海岸低趴车说唱客', nameEn: 'West-Coast Lowrider Rapper', group: 'A. 嘻哈 / 说唱街区', groupEn: 'A. Hip-Hop / Rap Block', def: '第一识别是阳光街区和低趴车文化里的西海岸说唱客。造型入口：阳光街区和低趴车文化里的西海岸说唱客。母题：把松弛、炫耀和地方性危险混在一起的街头表演者。张力：身体看似慢，却始终在占据空间。视觉证据：格纹衬衫、白背心、墨镜、低裤线、放松肩膀、手腕金属反光和低速展示姿态。边界：避免写成普通海滩潮人。', defEn: 'First read: a West-Coast rapper inside sunny block and lowrider culture. Styling entry: a West-Coast rapper inside sunny block and lowrider culture. Motif: a street performer mixing ease, display, and local danger. Tension: the body looks slow while constantly claiming space. Visual evidence: plaid shirt, white tank, sunglasses, low pant line, relaxed shoulders, wrist metal, and slow-display posture. Boundary: avoid making him a generic beach streetwear figure.', tags: ['west_coast', 'lowrider', 'rap'] },
   { id: 'trap_rapper', name: 'Trap说唱歌手', nameEn: 'Trap Rapper', group: 'A. 嘻哈 / 说唱街区', groupEn: 'A. Hip-Hop / Rap Block', def: '第一识别是当代夜生活和手机镜头里的Trap说唱歌手。造型入口：当代夜生活和手机镜头里的Trap说唱歌手。母题：把创伤、财富和炫耀压缩成面部与珠宝的人。张力：服装很亮，身体却显得被夜晚和屏幕耗空。视觉证据：面部纹身、厚珠宝、设计师运动套装、疲惫眼神、懒散姿态和精准占画面的手势。边界：避免写成单纯富二代或危险罪犯。', defEn: 'First read: a trap rapper inside contemporary nightlife and phone-camera culture. Styling entry: a trap rapper inside contemporary nightlife and phone-camera culture. Motif: someone compressing pain, wealth, and flex into face and jewelry. Tension: the clothing shines while the body feels emptied by night and screens. Visual evidence: face tattoos, heavy jewelry, designer sportswear, tired eyes, lazy posture, and frame-claiming hands. Boundary: avoid making him merely a rich kid or dangerous criminal.', risk: 'medium', tags: ['trap', 'rapper', 'tattoo'] },
@@ -93,10 +323,10 @@ const seeds: PersonaSeed[] = [
   { id: 'night_train_platform_waiter', name: '夜班站台等待者', nameEn: 'Night-Train Platform Waiter', group: 'C. 机能 / 都市夜行', groupEn: 'C. Techwear / Urban Night Movement', def: '第一识别是被夜班站台冷风固定住的等待者。造型入口：被夜班站台冷风固定住的等待者。母题：城市交通缝隙里的停滞身体。张力：他没有戏剧动作，却被屏幕光、轨道方向和等待时间压出强烈状态。视觉证据：长外套、耳机、票卡、缩起肩膀、手插口袋、脚尖朝轨道和被手机光切开的脸。边界：避免写成复杂剧情人物或旅行游客。', defEn: 'First read: a waiter on a night-train platform held still by cold wind. Styling entry: a waiter on a night-train platform held still by cold wind. Motif: a stalled body inside a gap of urban transit. Tension: there is no dramatic action, yet screen light, track direction, and waiting time create strong presence. Visual evidence: long coat, headphones, transit card, hunched shoulders, hands in pockets, toes toward the track, and a face cut by phone light. Boundary: avoid making a complex story character or tourist traveler.', eras: contemporaryEras, tags: ['platform', 'night', 'urban'] },
   { id: 'helmeted_moped_girl', name: '头盔机车女孩', nameEn: 'Helmeted Moped Girl', group: 'C. 机能 / 都市夜行', groupEn: 'C. Techwear / Urban Night Movement', def: '第一识别是靠小型机车获得街口机动性的头盔女孩。造型入口：靠小型机车获得街口机动性的头盔女孩。母题：日常城市里的轻速度身体。张力：她不是重机骑士，却随时能拧钥匙离开。视觉证据：半盔、短夹克、钥匙扣、贴纸小机车、被头盔压过的发梢、微外撇站姿和握着钥匙的手。边界：避免写成硬派机车党或性感骑士海报。', defEn: 'First read: a helmeted girl whose small moped gives her street-corner mobility. Styling entry: a helmeted girl whose small moped gives her street-corner mobility. Motif: a light-speed body inside everyday city life. Tension: she is not a heavy biker, yet can turn the key and leave at any second. Visual evidence: half helmet, cropped jacket, keychain, stickered moped, helmet-flattened hair ends, slightly angled stance, and key-holding hand. Boundary: avoid making her a hard biker-gang member or sexy rider poster.', tags: ['moped', 'helmet', 'girl'] },
   { id: 'urban_explorer', name: '城市废墟探索者', nameEn: 'Urban Explorer', group: 'C. 机能 / 都市夜行', groupEn: 'C. Techwear / Urban Night Movement', def: '第一识别是偷偷进入城市废弃空间的探索者。造型入口：偷偷进入城市废弃空间的探索者。母题：边缘空间里的低声行动身体。张力：他携带装备，却必须保持不显眼、不英雄化。视觉证据：头灯、手套、轻背包、耐磨裤、灰尘鞋底、贴近扶手和墙边的姿态。边界：避免写成冒险英雄、废土幸存者或大型探险队。', defEn: 'First read: an urban explorer sneaking into abandoned city spaces. Styling entry: an urban explorer sneaking into abandoned city spaces. Motif: a quiet action body inside marginal space. Tension: he carries gear but must remain inconspicuous and unheroic. Visual evidence: headlamp, gloves, light backpack, abrasion-resistant pants, dusty soles, and posture close to railings and walls. Boundary: avoid making him an adventure hero, wasteland survivor, or large expedition member.', risk: 'medium', tags: ['urban_explorer', 'ruin', 'gear'] },
-  { id: 'near_future_subway_girl', name: '近未来地铁少女', nameEn: 'Near-Future Subway Girl', group: 'C. 机能 / 都市夜行', groupEn: 'C. Techwear / Urban Night Movement', def: '第一识别是被公共交通系统轻微改造过的近未来地铁女孩。造型入口：被公共交通系统轻微改造过的近未来地铁女孩。母题：日常生活中的贴身赛博身体。张力：未来感很小，却已经改变妆面、配饰和站姿。视觉证据：透明雨衣、电子耳饰、地铁卡、冷色屏幕反光、干净鞋底、站台等待姿态和贴身发光小物。边界：避免写成全息装甲、机器人或宏大赛博城市主角。', defEn: 'First read: a near-future subway girl subtly altered by public transit systems. Styling entry: a near-future subway girl subtly altered by public transit systems. Motif: a close-to-body cyber figure inside daily life. Tension: the future feeling is small, yet it has changed makeup, accessories, and stance. Visual evidence: transparent raincoat, electronic earrings, transit card, cool screen reflections, clean soles, platform waiting posture, and small wearable lights. Boundary: avoid making her holographic armor, a robot, or a grand cyberpunk city protagonist.', ontologyLevel: 3, eras: ['near_future', 'timeless'], risk: 'medium', tags: ['near_future', 'subway', 'girl'] },
+  { id: 'near_future_subway_girl', name: '近未来地铁少女', nameEn: 'Near-Future Subway Girl', group: 'C. 机能 / 都市夜行', groupEn: 'C. Techwear / Urban Night Movement', def: '第一识别是被公共交通系统轻微改造过的近未来地铁女孩。造型入口：被公共交通系统轻微改造过的近未来地铁女孩。母题：日常生活中的贴身赛博身体。张力：未来感很小，却已经改变妆面、配饰和站姿。视觉证据：透明雨衣、电子耳饰、地铁卡、冷色屏幕反光、干净鞋底、站台等待姿态和贴身发光小物。边界：避免写成全息装甲、机器人或宏大赛博城市主角。', defEn: 'First read: a near-future subway girl subtly altered by public transit systems. Styling entry: a near-future subway girl subtly altered by public transit systems. Motif: a close-to-body cyber figure inside daily life. Tension: the future feeling is small, yet it has changed makeup, accessories, and stance. Visual evidence: transparent raincoat, electronic earrings, transit card, cool screen reflections, clean soles, platform waiting posture, and small wearable lights. Boundary: avoid making her holographic armor, a robot, or a grand cyberpunk city protagonist.', ontologyLevel: 3, eras: ['near_future'], risk: 'medium', tags: ['near_future', 'subway', 'girl'] },
 
   { id: 'y2k_mcbing_girl', name: 'Y2K McBling辣妹', nameEn: 'Y2K McBling Girl', group: 'D. Y2K / 辣妹 / 网络甜心', groupEn: 'D. Y2K / Gyaru / Internet Babe', def: '第一识别是把千禧年代的亮钻、低腰和手机挂饰穿成炫耀身体的Y2K辣妹。造型入口：把千禧年代的亮钻、低腰和手机挂饰穿成炫耀身体的Y2K辣妹。母题：早期数码社交里的高反光女性形象。张力：她像随时被闪光灯和镜面自拍捕捉，每个小物都要求被看见。视觉证据：低腰裤、亮钻腰带、翻盖手机、粉色塑料包、高光唇妆、长甲和抢眼腰线。边界：避免写成普通复古女孩或现代极简网红。', defEn: 'First read: a Y2K McBling girl wearing rhinestones, low-rise waist, and phone charms as a display body. Styling entry: a Y2K McBling girl wearing rhinestones, low-rise waist, and phone charms as a display body. Motif: a high-reflection female image from early digital social culture. Tension: she seems constantly caught by flash and mirror selfies, every small object asking to be seen. Visual evidence: low-rise pants, rhinestone belt, flip phone, pink plastic bag, glossy lips, long nails, and prominent waistline. Boundary: avoid making a generic retro girl or modern minimalist influencer.', tags: ['y2k', 'mcbing', 'girl'] },
-  { id: 'shibuya_gyaru', name: '涩谷辣妹', nameEn: 'Shibuya Gyaru', group: 'D. Y2K / 辣妹 / 网络甜心', groupEn: 'D. Y2K / Gyaru / Internet Babe', def: '第一识别是亮、吵、主动社交的涩谷辣妹。造型入口：亮、吵、主动社交的涩谷辣妹。母题：街拍文化里外放自信的女性身体。张力：妆发和配饰很重，但身体姿态必须轻快、张扬、像一直在和朋友与镜头互动。视觉证据：晒黑妆、漂发、长甲、厚睫毛、手机挂饰、抬高下巴和外放手势。边界：避免写成温柔日系少女或单纯夜店装。', defEn: 'First read: a bright, loud, actively social Shibuya gyaru. Styling entry: a bright, loud, actively social Shibuya gyaru. Motif: an outwardly confident female body inside street-snap culture. Tension: makeup and accessories are heavy while posture remains quick, open, and constantly interacting with friends and camera. Visual evidence: tan makeup, bleached hair, long nails, heavy lashes, phone charms, raised chin, and open gestures. Boundary: avoid making a soft Japanese girl or simple clubwear look.', eras: ['modern', 'contemporary', 'timeless'], tags: ['gyaru', 'shibuya', 'japan'] },
+  { id: 'shibuya_gyaru', name: '涩谷辣妹', nameEn: 'Shibuya Gyaru', group: 'D. Y2K / 辣妹 / 网络甜心', groupEn: 'D. Y2K / Gyaru / Internet Babe', def: '第一识别是亮、吵、主动社交的涩谷辣妹。造型入口：亮、吵、主动社交的涩谷辣妹。母题：街拍文化里外放自信的女性身体。张力：妆发和配饰很重，但身体姿态必须轻快、张扬、像一直在和朋友与镜头互动。视觉证据：晒黑妆、漂发、长甲、厚睫毛、手机挂饰、抬高下巴和外放手势。边界：避免写成温柔日系少女或单纯夜店装。', defEn: 'First read: a bright, loud, actively social Shibuya gyaru. Styling entry: a bright, loud, actively social Shibuya gyaru. Motif: an outwardly confident female body inside street-snap culture. Tension: makeup and accessories are heavy while posture remains quick, open, and constantly interacting with friends and camera. Visual evidence: tan makeup, bleached hair, long nails, heavy lashes, phone charms, raised chin, and open gestures. Boundary: avoid making a soft Japanese girl or simple clubwear look.', eras: ['modern', 'contemporary'], tags: ['gyaru', 'shibuya', 'japan'] },
   { id: 'harajuku_decora_kid', name: '原宿Decora青年', nameEn: 'Harajuku Decora Kid', group: 'D. Y2K / 辣妹 / 网络甜心', groupEn: 'D. Y2K / Gyaru / Internet Babe', def: '第一识别是把身体变成可爱小物展示架的原宿Decora青年。造型入口：把身体变成可爱小物展示架的原宿Decora青年。母题：过量装饰密度带来的自我发明。张力：可爱不是幼态身体，而是头发、胸口、包带和手腕被物件占满。视觉证据：彩色发夹、塑料玩具、叠戴项链、糖果色袜子、密集小物和被装饰重量轻微牵住的姿态。边界：避免写成儿童角色或随机彩色堆砌。', defEn: 'First read: a Harajuku Decora kid turning the body into a cute trinket display rack. Styling entry: a Harajuku Decora kid turning the body into a cute trinket display rack. Motif: self-invention through excessive decoration density. Tension: cuteness comes not from infantilized body but from hair, chest, bag straps, and wrists filled with objects. Visual evidence: colorful hair clips, plastic toys, stacked necklaces, candy socks, dense trinkets, and posture slightly pulled by decoration weight. Boundary: avoid making a child character or random color pile.', ontologyLevel: 2, tags: ['harajuku', 'decora', 'cute'] },
   { id: 'mall_goth_girl', name: '商场哥特女孩', nameEn: 'Mall Goth Girl', group: 'D. Y2K / 辣妹 / 网络甜心', groupEn: 'D. Y2K / Gyaru / Internet Babe', def: '第一识别是带着零售气味和青春期冷脸的商场哥特女孩。造型入口：带着零售气味和青春期冷脸的商场哥特女孩。母题：购物中心里的可购买黑暗感。张力：她想显得不可接近，但廉价银饰、塑料袋和过重眼妆仍暴露出青春与消费环境。视觉证据：黑眼线、链条裤、乐队T恤、厚底鞋、廉价银饰、购物中心灯光和故作冷淡的站姿。边界：避免写成真正恐怖哥特或高级黑暗名媛。', defEn: 'First read: a mall goth girl with retail smell and adolescent cold face. Styling entry: a mall goth girl with retail smell and adolescent cold face. Motif: purchasable darkness inside a shopping mall. Tension: she wants to seem inaccessible while cheap silver, plastic bags, and heavy eye makeup reveal youth and consumer setting. Visual evidence: black eyeliner, chain pants, band tee, platform shoes, cheap silver jewelry, mall light, and deliberately cold stance. Boundary: avoid making real horror goth or refined dark socialite.', tags: ['mall_goth', 'girl', 'youth'] },
   { id: 'scene_kid', name: 'Scene Kid', nameEn: 'Scene Kid', group: 'D. Y2K / 辣妹 / 网络甜心', groupEn: 'D. Y2K / Gyaru / Internet Babe', def: '第一识别是头像先于本人存在的早期社交网络Scene Kid。造型入口：头像先于本人存在的早期社交网络Scene Kid。母题：自拍角度、头发体积和夸张表情制造出来的网络身体。张力：身份更像个人主页视觉，而不是生活里的稳定形象。视觉证据：斜刘海遮眼、霓虹挑染、紧身裤、图案T恤、过高自拍角度和过度表情管理。边界：避免写成普通emo青年或现代精修网红。', defEn: 'First read: a Scene Kid whose avatar seems to exist before the person. Styling entry: a Scene Kid whose avatar seems to exist before the person. Motif: an early social-network body made from selfie angle, hair volume, and exaggerated expression. Tension: identity feels more like a profile-page visual than a stable daily self. Visual evidence: side bangs covering one eye, neon streaks, skinny jeans, graphic tee, high selfie angle, and over-managed expression. Boundary: avoid making a generic emo youth or modern polished influencer.', tags: ['scene_kid', 'emo_pop', 'internet'] },
@@ -108,11 +338,11 @@ const seeds: PersonaSeed[] = [
 
   { id: 'warehouse_raver', name: '仓库Raver', nameEn: 'Warehouse Raver', group: 'E. 夜店 / Rave / 派对地下', groupEn: 'E. Club / Rave / Underground Party', def: '第一识别是身体被低频节拍推着向前的仓库Raver。造型入口：身体被低频节拍推着向前的仓库Raver。母题：为长时间跳舞而存在的地下派对身体。张力：衣服不为漂亮而为耐受服务：透气、脏、贴汗、能动。视觉证据：汗湿背心、腕带、宽裤、湿发、前倾肩颈、膝盖弹性和被音乐压出的表情。边界：避免写成普通夜店自拍或舞台歌手。', defEn: 'First read: a warehouse raver whose body is pushed forward by bass. Styling entry: a warehouse raver whose body is pushed forward by bass. Motif: an underground party body built for hours of dancing. Tension: clothing serves endurance rather than prettiness: breathable, dirty, sweat-stuck, able to move. Visual evidence: sweaty tank, wristband, wide pants, wet hair, forward neck-shoulders, elastic knees, and a face pressed by sound. Boundary: avoid making a normal club selfie or stage singer.', risk: 'medium', tags: ['rave', 'warehouse', 'club'] },
   { id: 'berlin_club_door_girl', name: '柏林夜店门口女孩', nameEn: 'Berlin Club Door Girl', group: 'E. 夜店 / Rave / 派对地下', groupEn: 'E. Club / Rave / Underground Party', def: '第一识别是站在夜店门口、用沉默和冷脸筛选他人的柏林式女孩。造型入口：站在夜店门口、用沉默和冷脸筛选他人的柏林式女孩。母题：门口权力的亚文化身体。张力：她不是华丽夜店装扮，而是用全黑材质、极简首饰和拒绝解释的眼神制造门槛。视觉证据：全黑穿搭、冷脸、沉默站姿、极简银饰、手臂抱起和不被取悦的表情。边界：避免写成夜店女郎或保安。', defEn: 'First read: a Berlin club-door girl screening others through silence and cold face. Styling entry: a Berlin club-door girl screening others through silence and cold face. Motif: a subcultural body of door power. Tension: she is not glamorous clubwear but creates a threshold through all-black materials, minimal jewelry, and eyes that refuse explanation. Visual evidence: all-black outfit, cold face, silent stance, minimal silver jewelry, crossed arms, and an unpleased expression. Boundary: avoid making a club hostess or security guard.', tags: ['berlin_club', 'door', 'girl'] },
-  { id: 'industrial_techno_dancer', name: '工业Techno舞者', nameEn: 'Industrial Techno Dancer', group: 'E. 夜店 / Rave / 派对地下', groupEn: 'E. Club / Rave / Underground Party', def: '第一识别是像机器重复动作一样跳舞的工业Techno舞者。造型入口：像机器重复动作一样跳舞的工业Techno舞者。母题：身体被节拍切成短促单元的地下舞池人。张力：他不服务观众表情，只服务重复、硬度和低光下的节奏。视觉证据：黑色网眼、厚底靴、金属耳饰、剃短发或湿发、微弯膝盖、短促手臂和无表情脸。边界：避免写成普通舞者或机器人。', defEn: 'First read: an industrial techno dancer moving like repeated machine action. Styling entry: an industrial techno dancer moving like repeated machine action. Motif: an underground dancefloor body cut into short units by beat. Tension: the face serves no audience, only repetition, hardness, and rhythm in low light. Visual evidence: black mesh, platform boots, metal earrings, shaved or wet hair, slightly bent knees, clipped arms, and expressionless face. Boundary: avoid making a generic dancer or robot.', ontologyLevel: 2, tags: ['industrial', 'techno', 'dancer'] },
+  { id: 'industrial_techno_dancer', name: '工业Techno舞者', nameEn: 'Industrial Techno Dancer', group: 'E. 夜店 / Rave / 派对地下', groupEn: 'E. Club / Rave / Underground Party', def: '第一识别是像机器重复动作一样跳舞的工业Techno舞者。造型入口：像机器重复动作一样跳舞的工业Techno舞者。母题：身体被节拍切成短促单元的地下舞池人。张力：他不服务观众表情，只服务重复、硬度和低光下的节奏。视觉证据：黑色网眼、厚底靴、金属耳饰、剃短发或湿发、微弯膝盖、短促手臂和无表情脸。边界：避免写成普通舞者或机器人。', defEn: 'First read: an industrial techno dancer moving like repeated machine action. Styling entry: an industrial techno dancer moving like repeated machine action. Motif: an underground dancefloor body cut into short units by beat. Tension: the face serves no audience, only repetition, hardness, and rhythm in low light. Visual evidence: black mesh, platform boots, metal earrings, shaved or wet hair, slightly bent knees, clipped arms, and expressionless face. Boundary: avoid making a generic dancer or robot.', ontologyLevel: 2, eras: industrialModernEras, tags: ['industrial', 'techno', 'dancer'] },
   { id: 'afterparty_socialite', name: 'Afterparty社交玩家', nameEn: 'Afterparty Social Player', group: 'E. 夜店 / Rave / 派对地下', groupEn: 'E. Club / Rave / Underground Party', def: '第一识别是凌晨后半场仍不肯离开的Afterparty社交玩家。造型入口：凌晨后半场仍不肯离开的Afterparty社交玩家。母题：被夜晚磨损但还在运转的社交身体。张力：精致已经皱掉，魅力却来自继续留在场内的疲惫坚持。视觉证据：凌晨墨镜、皱掉的闪片衣、松开发型、手机消息、疲惫笑容和仍在寻找下一场对话的站姿。边界：避免写成刚入场的派对新人。', defEn: 'First read: an afterparty social player refusing to leave in the late hours. Styling entry: an afterparty social player refusing to leave in the late hours. Motif: a social body worn by night but still operating. Tension: polish is wrinkled, while charm comes from tired persistence in the room. Visual evidence: dawn sunglasses, wrinkled sequins, loosened hair, phone messages, tired smile, and posture still seeking the next conversation. Boundary: avoid making a fresh party newcomer.', risk: 'medium', tags: ['afterparty', 'social', 'nightlife'] },
   { id: 'drag_ballroom_kid', name: 'Ballroom青年', nameEn: 'Ballroom Kid', group: 'E. 夜店 / Rave / 派对地下', groupEn: 'E. Club / Rave / Underground Party', def: '第一识别是把身份作为类别提交给舞池评判的Ballroom青年。造型入口：Vogue手势、夸张肩线和正面评判站姿。母题：自造贵族感和表演化身份。张力：姿态既是舞蹈也是宣告，下巴、手腕、髋部都在说“我属于这个类别”。视觉证据：Vogue手势、夸张肩线、亮片或紧身面料、正面评判站姿和像被掌声雕刻过的身体角度。边界：避免普通派对舞者。', defEn: 'First read: a Ballroom kid submitting identity as a category to the floor. Styling entry: Vogue hands, exaggerated shoulders, and judged frontal stance. Motif: self-made aristocracy and performed identity. Tension: posture is both dance and declaration, with chin, wrist, and hips saying “I belong to this category.” Visual evidence: Vogue hands, exaggerated shoulders, sequins or body-hugging fabric, judged frontal stance, and body angles shaped by applause. Boundary: avoid a normal party dancer.', tags: ['ballroom', 'vogue', 'chosen_family'] },
   { id: 'goa_trance_nomad', name: 'Goa Trance游牧者', nameEn: 'Goa Trance Nomad', group: 'E. 夜店 / Rave / 派对地下', groupEn: 'E. Club / Rave / Underground Party', def: '第一识别是带着户外电子节奏和旅行痕迹的Goa Trance游牧者。造型入口：带着户外电子节奏和旅行痕迹的Goa Trance游牧者。母题：太阳、手工饰物和流动布料组成的节庆身体。张力：他像四处移动，却所有物件都能随节拍一起晃动。视觉证据：宽松布料、荧光纹样、赤脚或凉鞋、旅行饰物、晒旧皮肤、手工痕迹和流动站姿。边界：避免写成普通背包客或舞台DJ。', defEn: 'First read: a Goa Trance nomad carrying outdoor electronic rhythm and travel traces. Styling entry: a Goa Trance nomad carrying outdoor electronic rhythm and travel traces. Motif: a festival body made from sun, handmade objects, and flowing cloth. Tension: he seems always moving while every object can sway with rhythm. Visual evidence: loose textiles, fluorescent patterns, bare feet or sandals, travel jewelry, sun-aged skin, handmade traces, and flowing stance. Boundary: avoid making a normal backpacker or stage DJ.', ontologyLevel: 2, risk: 'medium', tags: ['goa_trance', 'nomad', 'festival'] },
-  { id: 'cyber_rave_android_fan', name: '赛博Rave仿生粉丝', nameEn: 'Cyber-Rave Android Fan', group: 'E. 夜店 / Rave / 派对地下', groupEn: 'E. Club / Rave / Underground Party', def: '第一识别是把仿生感穿成派对妆面的赛博Rave粉丝。造型入口：把仿生感穿成派对妆面的赛博Rave粉丝。母题：非人感被LED、银色皮肤妆和透明材料轻度制造的夜生活身体。张力：他像仿生人粉丝，但身体仍是人。视觉证据：LED饰品、银色皮肤妆、透明塑料、发光线缆、僵硬可爱的表情和略机械的舞池站姿。边界：避免变成真正机器人或战斗赛博角色。', defEn: 'First read: a cyber-rave fan wearing android feeling as party makeup. Styling entry: a cyber-rave fan wearing android feeling as party makeup. Motif: a nightlife body where nonhuman feeling is lightly produced by LEDs, silver skin makeup, and transparent materials. Tension: they resemble an android fan while remaining human. Visual evidence: LED accessories, silver skin makeup, transparent plastic, glowing cables, stiff-cute expression, and slightly mechanical dancefloor stance. Boundary: avoid turn into a real robot or combat cyber character.', ontologyLevel: 3, eras: ['near_future', 'timeless'], risk: 'medium', tags: ['cyber_rave', 'android_makeup', 'party'] },
+  { id: 'cyber_rave_android_fan', name: '赛博Rave仿生粉丝', nameEn: 'Cyber-Rave Android Fan', group: 'E. 夜店 / Rave / 派对地下', groupEn: 'E. Club / Rave / Underground Party', def: '第一识别是把仿生感穿成派对妆面的赛博Rave粉丝。造型入口：把仿生感穿成派对妆面的赛博Rave粉丝。母题：非人感被LED、银色皮肤妆和透明材料轻度制造的夜生活身体。张力：他像仿生人粉丝，但身体仍是人。视觉证据：LED饰品、银色皮肤妆、透明塑料、发光线缆、僵硬可爱的表情和略机械的舞池站姿。边界：避免变成真正机器人或战斗赛博角色。', defEn: 'First read: a cyber-rave fan wearing android feeling as party makeup. Styling entry: a cyber-rave fan wearing android feeling as party makeup. Motif: a nightlife body where nonhuman feeling is lightly produced by LEDs, silver skin makeup, and transparent materials. Tension: they resemble an android fan while remaining human. Visual evidence: LED accessories, silver skin makeup, transparent plastic, glowing cables, stiff-cute expression, and slightly mechanical dancefloor stance. Boundary: avoid turn into a real robot or combat cyber character.', ontologyLevel: 3, eras: ['near_future'], risk: 'medium', tags: ['cyber_rave', 'android_makeup', 'party'] },
   { id: 'club_kid_90s', name: '90年代Club Kid', nameEn: '1990s Club Kid', group: 'E. 夜店 / Rave / 派对地下', groupEn: 'E. Club / Rave / Underground Party', def: '第一识别是把自己发明成夜生活造型事件的90年代Club Kid。造型入口：把自己发明成夜生活造型事件的90年代Club Kid。母题：派对制服被怪诞妆容、玩具配饰和过量色块主动设计出来。张力：造型可以荒唐，但不是随机乱穿。视觉证据：怪诞妆容、夸张头饰、玩具配饰、过量色块、戏剧站姿和“我就是今晚事件”的表情。边界：避免写成普通小丑或随机狂欢者。', defEn: 'First read: a 1990s Club Kid inventing themselves as a nightlife styling event. Styling entry: a 1990s Club Kid inventing themselves as a nightlife styling event. Motif: a party uniform deliberately built from bizarre makeup, toy accessories, and excessive color blocks. Tension: the look may be absurd but not random. Visual evidence: bizarre makeup, exaggerated headpiece, toy accessories, excessive color, theatrical stance, and a face saying “I am tonight’s event”. Boundary: avoid making a generic clown or random reveler.', ontologyLevel: 2, risk: 'medium', tags: ['club_kid', '90s', 'nightlife'] },
   { id: 'kandi_raver', name: 'Kandi Raver', nameEn: 'Kandi Raver', group: 'E. 夜店 / Rave / 派对地下', groupEn: 'E. Club / Rave / Underground Party', def: '第一识别是把友好交换仪式直接戴在手腕和胸口的Kandi Raver。造型入口：把友好交换仪式直接戴在手腕和胸口的Kandi Raver。母题：糖果色社群亲密感。张力：天真符号很多，但身体仍属于成人Rave环境和长时间跳舞。视觉证据：彩珠手链、荧光色、微笑符号、短上衣、交换手势、腕部堆叠和明亮到过量的色彩。边界：避免写成儿童化可爱或普通节日游客。', defEn: 'First read: a Kandi Raver wearing friendly exchange ritual directly on wrists and chest. Styling entry: a Kandi Raver wearing friendly exchange ritual directly on wrists and chest. Motif: candy-colored community intimacy. Tension: innocent symbols are abundant while the body still belongs to adult rave space and long dancing. Visual evidence: beaded bracelets, neon colors, smile symbols, cropped top, exchange gesture, wrist stacking, and brightness pushed to excess. Boundary: avoid making infantilized cuteness or generic festival tourist.', ontologyLevel: 2, tags: ['kandi', 'raver', 'neon'] },
   { id: 'nightlife_photographer', name: '夜生活摄影师', nameEn: 'Nightlife Photographer', group: 'E. 夜店 / Rave / 派对地下', groupEn: 'E. Club / Rave / Underground Party', def: '第一识别是比所有参与者都更清醒、在闪光灯边缘工作的夜生活摄影师。造型入口：比所有参与者都更清醒、在闪光灯边缘工作的夜生活摄影师。母题：人群中的职业旁观者。张力：他进入派对却不完全属于派对，身体永远侧身挤过人群寻找下一张脸。视觉证据：闪光灯相机、黑衣、相机腕带、半眯眼、手指贴着快门和被闪光灯反复切亮的脸。边界：避免写成派对主角或普通摄影爱好者。', defEn: 'First read: a nightlife photographer more sober than the participants, working at the edge of flash. Styling entry: a nightlife photographer more sober than the participants, working at the edge of flash. Motif: a professional observer inside the crowd. Tension: he enters the party without fully belonging to it, body always slipping sideways for the next face. Visual evidence: flash camera, black clothing, camera wrist strap, narrowed eyes, finger on shutter, and a face repeatedly cut by flash. Boundary: avoid making a party protagonist or casual photography hobbyist.', tags: ['nightlife', 'photographer', 'flash'] },
@@ -126,7 +356,7 @@ const seeds: PersonaSeed[] = [
   { id: 'street_calligrapher', name: '街头书法写手', nameEn: 'Street Calligraphy Writer', group: 'F. 涂鸦 / 街头艺术', groupEn: 'F. Graffiti / Street Art', def: '第一识别是把传统腕力和笔画节奏带到城市表面的街头书法写手。造型入口：把传统腕力和笔画节奏带到城市表面的街头书法写手。母题：古典训练与街头墙面的碰撞。张力：他不是安静书斋里的书法家，而是用站距、肩膀和大号笔刷占据墙面的人。视觉证据：大号笔刷、墨迹袖口、宽站距、发力手腕、传统字形训练和贴近墙面的身体张力。边界：避免写成古装文人或普通涂鸦喷漆者。', defEn: 'First read: a street calligraphy writer bringing traditional wrist force and stroke rhythm onto urban surfaces. Styling entry: a street calligraphy writer bringing traditional wrist force and stroke rhythm onto urban surfaces. Motif: the collision of classical training and street wall. Tension: he is not a quiet study-room calligrapher but someone occupying the wall through stance, shoulder, and large brush. Visual evidence: large brush, inked cuffs, wide stance, forceful wrist, trained letterforms, and body tension near the wall. Boundary: avoid making an ancient scholar or normal spray graffiti writer.', tags: ['calligraphy', 'street_art', 'brush'] },
   { id: 'sticker_slap_collector', name: '贴纸轰炸收藏者', nameEn: 'Sticker-Slap Collector', group: 'F. 涂鸦 / 街头艺术', groupEn: 'F. Graffiti / Street Art', def: '第一识别是用贴纸本、口袋和快速手部动作占领城市小表面的贴纸轰炸收藏者。造型入口：用贴纸本、口袋和快速手部动作占领城市小表面的贴纸轰炸收藏者。母题：收藏癖和街头占位欲合并的身体。张力：他不需要大墙，只需要任何可贴的小面积。视觉证据：贴纸本、塞满口袋的贴纸、包身小图像、指甲边胶痕、快速手势和寻找电线杆或标牌边角的眼神。边界：避免写成普通文具收藏者。', defEn: 'First read: a sticker-slap collector claiming small urban surfaces through sticker book, pockets, and fast hands. Styling entry: a sticker-slap collector claiming small urban surfaces through sticker book, pockets, and fast hands. Motif: collecting obsession fused with street occupation. Tension: he does not need a large wall, only any tiny place that can be claimed. Visual evidence: sticker book, pockets full of stickers, tiny images on bag, adhesive near nails, fast hand gesture, and eyes hunting poles or sign corners. Boundary: avoid making a normal stationery collector.', tags: ['sticker', 'collector', 'street'] },
   { id: 'sketchbook_graffiti_girl', name: '黑本涂鸦女孩', nameEn: 'Blackbook Graffiti Girl', group: 'F. 涂鸦 / 街头艺术', groupEn: 'F. Graffiti / Street Art', def: '第一识别是风格野心还停留在黑本和马克笔里的涂鸦女孩。造型入口：风格野心还停留在黑本和马克笔里的涂鸦女孩。母题：尚未上墙的字母训练身体。张力：她外表更内收安静，但眼睛一直在收集城市表面，手已经练熟了笔画。视觉证据：黑本草图、马克笔、彩色手指、背包侧袋笔、安静观察和把墙面当练习对象的眼神。边界：避免写成成熟涂鸦大师或普通画画女孩。', defEn: 'First read: a blackbook graffiti girl whose style ambition still lives in sketches and markers. Styling entry: a blackbook graffiti girl whose style ambition still lives in sketches and markers. Motif: a letter-training body before the wall. Tension: she looks inward and quiet while her eyes collect city surfaces and her hand already knows the strokes. Visual evidence: blackbook sketches, markers, colored fingers, pens in side pocket, quiet watching, and eyes treating walls as future practice. Boundary: avoid making a mature graffiti master or generic drawing girl.', tags: ['blackbook', 'graffiti_girl', 'sketch'] },
-  { id: 'augmented_reality_tagger', name: 'AR涂鸦写手', nameEn: 'AR Graffiti Writer', group: 'F. 涂鸦 / 街头艺术', groupEn: 'F. Graffiti / Street Art', def: '第一识别是把街头写手警觉姿态带进近未来界面的AR涂鸦写手。造型入口：把街头写手警觉姿态带进近未来界面的AR涂鸦写手。母题：城市表面被数字层叠重新占领。张力：AR感只来自设备、屏幕反光和可见叠层，人物仍保留包、帽和街头警惕。视觉证据：手机扫描姿态、透明屏幕反光、数字贴纸界面、空墙前手势、斜挎包和随时确认周围的眼神。边界：避免写成全息法师或纯科技工程师。', defEn: 'First read: an AR graffiti writer bringing street-writer alertness into near-future interface. Styling entry: an AR graffiti writer bringing street-writer alertness into near-future interface. Motif: urban surface reclaimed through digital overlay. Tension: AR feeling comes only from device, screen reflection, and visible layers while the person keeps bag, cap, and street caution. Visual evidence: phone-scanning posture, transparent screen reflection, digital sticker interface, gestures before a blank wall, sling bag, and eyes checking surroundings. Boundary: avoid making a hologram mage or pure tech engineer.', ontologyLevel: 3, eras: ['near_future', 'timeless'], risk: 'medium', tags: ['ar', 'graffiti', 'digital'] },
+  { id: 'augmented_reality_tagger', name: 'AR涂鸦写手', nameEn: 'AR Graffiti Writer', group: 'F. 涂鸦 / 街头艺术', groupEn: 'F. Graffiti / Street Art', def: '第一识别是把街头写手警觉姿态带进近未来界面的AR涂鸦写手。造型入口：把街头写手警觉姿态带进近未来界面的AR涂鸦写手。母题：城市表面被数字层叠重新占领。张力：AR感只来自设备、屏幕反光和可见叠层，人物仍保留包、帽和街头警惕。视觉证据：手机扫描姿态、透明屏幕反光、数字贴纸界面、空墙前手势、斜挎包和随时确认周围的眼神。边界：避免写成全息法师或纯科技工程师。', defEn: 'First read: an AR graffiti writer bringing street-writer alertness into near-future interface. Styling entry: an AR graffiti writer bringing street-writer alertness into near-future interface. Motif: urban surface reclaimed through digital overlay. Tension: AR feeling comes only from device, screen reflection, and visible layers while the person keeps bag, cap, and street caution. Visual evidence: phone-scanning posture, transparent screen reflection, digital sticker interface, gestures before a blank wall, sling bag, and eyes checking surroundings. Boundary: avoid making a hologram mage or pure tech engineer.', ontologyLevel: 3, eras: ['near_future'], risk: 'medium', tags: ['ar', 'graffiti', 'digital'] },
 
   { id: 'sneakerhead_collector', name: '球鞋收藏玩家', nameEn: 'Sneakerhead Collector', group: 'G. 球鞋 / 潮流消费', groupEn: 'G. Sneakers / Hype Consumption', def: '第一识别是把脚和保存状态看得比脸更重要的球鞋收藏玩家。造型入口：把脚和保存状态看得比脸更重要的球鞋收藏玩家。母题：限量商品改变身体重心的收藏者。张力：他看似穿鞋，实际像在保护一件易损资产。视觉证据：限量球鞋、干净鞋面、鞋盒墙、抽签截图、低头检查鞋尖和走路时避免弄脏的姿态。边界：避免写成普通爱鞋青年或职业运动员。', defEn: 'First read: a sneakerhead collector who treats feet and preservation as more important than face. Styling entry: a sneakerhead collector who treats feet and preservation as more important than face. Motif: a collector whose body center is altered by limited goods. Tension: he seems to wear shoes while actually protecting a fragile asset. Visual evidence: limited sneakers, clean uppers, shoebox wall, raffle screenshots, checking the toe box, and walking as if avoiding dirt. Boundary: avoid making a generic shoe lover or athlete.', tags: ['sneakerhead', 'collector', 'hype'] },
   { id: 'hypebeast_drop_hunter', name: 'Drop抢购潮流玩家', nameEn: 'Drop-Hunting Hypebeast', group: 'G. 球鞋 / 潮流消费', groupEn: 'G. Sneakers / Hype Consumption', def: '第一识别是被发售时间、排队和库存刷新支配的Drop抢购潮流玩家。造型入口：被发售时间、排队和库存刷新支配的Drop抢购潮流玩家。母题：消费仪式里的紧张等待身体。张力：服装是战利品，但姿态永远还在等待下一次确认。视觉证据：排队手环、联名外套、购物袋、手机倒计时、紧张眼神、刷新动作和冷风里抱臂的站姿。边界：避免复制真实logo，也不要写成普通购物者。', defEn: 'First read: a drop-hunting hypebeast ruled by release time, queue, and stock refresh. Styling entry: a drop-hunting hypebeast ruled by release time, queue, and stock refresh. Motif: a tense waiting body inside consumption ritual. Tension: clothing is trophy while posture is still waiting for the next confirmation. Visual evidence: queue wristband, collaboration jacket, shopping bags, phone countdown, tense eyes, refresh gesture, and arms crossed in cold air. Boundary: avoid copy real logos or make a normal shopper.', tags: ['hypebeast', 'drop', 'queue'] },
@@ -142,7 +372,7 @@ const seeds: PersonaSeed[] = [
   { id: 'outlaw_biker', name: '机车帮派成员', nameEn: 'Outlaw Biker', group: 'H. 机车 / 叛逆公路', groupEn: 'H. Biker / Rebel Road', def: '第一识别是用皮革、补丁和占地姿态建立公路帮派轮廓的机车成员。造型入口：用皮革、补丁和占地姿态建立公路帮派轮廓的机车成员。母题：厚重材料和路面威慑感组成的身体。张力：他可以有危险气息，但不应变成军装或战术兵。视觉证据：皮革背心、胸前补丁、油污、粗靴、车钥匙、外扩手臂和站得很占地方的重心。边界：避免生成武器堆叠或军警身份。', defEn: 'First read: an outlaw biker building road-gang silhouette through leather, patches, and space-claiming posture. Styling entry: an outlaw biker building road-gang silhouette through leather, patches, and space-claiming posture. Motif: a body made of heavy material and road intimidation. Tension: danger may be present but should not become military or tactical gear. Visual evidence: leather vest, chest patches, oil stains, heavy boots, keys, wide arms, and weight that takes up space. Boundary: avoid generate weapon stacking or police/military identity.', eras: industrialModernEras, risk: 'medium', tags: ['biker', 'outlaw', 'road'] },
   { id: 'cafe_racer_girl', name: 'Cafe Racer女孩', nameEn: 'Cafe-Racer Girl', group: 'H. 机车 / 叛逆公路', groupEn: 'H. Biker / Rebel Road', def: '第一识别是把速度压成干净短线条的Cafe Racer女孩。造型入口：把速度压成干净短线条的Cafe Racer女孩。母题：利落、复古和轻叛逆的街口机车身体。张力：她不粗暴，反而用紧肩线、短腰线和头盔手势制造冷静速度感。视觉证据：短皮衣、半盔、复古机车手套、修身牛仔、手边头盔和像随时能启动的紧凑站姿。边界：避免写成重机帮派女郎。', defEn: 'First read: a cafe-racer girl compressing speed into clean short lines. Styling entry: a cafe-racer girl compressing speed into clean short lines. Motif: a neat, retro, lightly rebellious street-corner riding body. Tension: she is not rough but creates calm speed through tight shoulders, short waistline, and helmet gesture. Visual evidence: cropped leather jacket, half helmet, vintage riding gloves, slim denim, helmet held at side, and compact stance ready to start. Boundary: avoid making a heavy biker-gang girl.', eras: industrialModernEras, tags: ['cafe_racer', 'girl', 'motorcycle'] },
   { id: 'punk_biker_chick', name: '朋克机车女郎', nameEn: 'Punk Biker Chick', group: 'H. 机车 / 叛逆公路', groupEn: 'H. Biker / Rebel Road', def: '第一识别是把铆钉、彩发和皮革边缘都变成刺的朋克机车女郎。造型入口：把铆钉、彩发和皮革边缘都变成刺的朋克机车女郎。母题：公路叛逆与朋克攻击性合并的身体。张力：她的危险感来自轮廓尖锐和怒气眼神，而不是武器。视觉证据：铆钉皮衣、彩色头发、破损牛仔、重靴、前倾下巴、撕裂布料和像会刮伤人的站姿。边界：避免写成性感机车海报或战斗角色。', defEn: 'First read: a punk biker chick turning studs, colored hair, and leather edges into spikes. Styling entry: a punk biker chick turning studs, colored hair, and leather edges into spikes. Motif: road rebellion fused with punk aggression. Tension: danger comes from sharp silhouette and angry eyes, not weapons. Visual evidence: studded leather, colored hair, ripped denim, heavy boots, forward chin, torn fabric, and a stance that seems to scratch. Boundary: avoid making a sexy biker poster or combat character.', eras: industrialModernEras, risk: 'medium', tags: ['punk', 'biker', 'chick'] },
-  { id: 'bosozoku_youth', name: '暴走族青年', nameEn: 'Bosozoku Youth', group: 'H. 机车 / 叛逆公路', groupEn: 'H. Biker / Rebel Road', def: '第一识别是把制服穿成挑衅仪式的暴走族青年。造型入口：把制服穿成挑衅仪式的暴走族青年。母题：年轻人过量姿态和改装机车文化合成的街头身体。张力：刺绣大字和夸张坐姿很高调，但仍要落在服装与车队符号上。视觉证据：特攻服、醒目刺绣、宽大衣摆、改装摩托、夸张坐姿和过分外放的年轻自信。边界：避免写成军装角色或真实暴力场面。', defEn: 'First read: a bosozoku youth wearing uniform as a provocation ritual. Styling entry: a bosozoku youth wearing uniform as a provocation ritual. Motif: a street body made from excessive youth posture and modified motorcycle culture. Tension: large embroidery and exaggerated sitting are loud but must remain clothing and convoy signs. Visual evidence: tokko-fuku coat, bold embroidery, wide coat tails, modified bike, exaggerated seated pose, and overly outward young confidence. Boundary: avoid making a military uniform character or real violence scene.', eras: ['modern', 'contemporary', 'timeless'], risk: 'medium', tags: ['bosozoku', 'japan', 'bike'] },
+  { id: 'bosozoku_youth', name: '暴走族青年', nameEn: 'Bosozoku Youth', group: 'H. 机车 / 叛逆公路', groupEn: 'H. Biker / Rebel Road', def: '第一识别是把制服穿成挑衅仪式的暴走族青年。造型入口：把制服穿成挑衅仪式的暴走族青年。母题：年轻人过量姿态和改装机车文化合成的街头身体。张力：刺绣大字和夸张坐姿很高调，但仍要落在服装与车队符号上。视觉证据：特攻服、醒目刺绣、宽大衣摆、改装摩托、夸张坐姿和过分外放的年轻自信。边界：避免写成军装角色或真实暴力场面。', defEn: 'First read: a bosozoku youth wearing uniform as a provocation ritual. Styling entry: a bosozoku youth wearing uniform as a provocation ritual. Motif: a street body made from excessive youth posture and modified motorcycle culture. Tension: large embroidery and exaggerated sitting are loud but must remain clothing and convoy signs. Visual evidence: tokko-fuku coat, bold embroidery, wide coat tails, modified bike, exaggerated seated pose, and overly outward young confidence. Boundary: avoid making a military uniform character or real violence scene.', eras: ['modern', 'contemporary'], risk: 'medium', tags: ['bosozoku', 'japan', 'bike'] },
   { id: 'chopper_garage_mechanic', name: 'Chopper车库技师', nameEn: 'Chopper Garage Mechanic', group: 'H. 机车 / 叛逆公路', groupEn: 'H. Biker / Rebel Road', def: '第一识别是围着改装车架工作、由劳动痕迹成立的Chopper车库技师。造型入口：围着改装车架工作、由劳动痕迹成立的Chopper车库技师。母题：手作机车文化里的粗糙工匠身体。张力：造型不靠摆酷，而靠油污、工具和长期接触机器的手。视觉证据：油污背心、工具腰带、黑指节、粗糙手部、旧衣料、低光车库和身体围着机器转的站姿。边界：避免写成普通修车工或机车模特。', defEn: 'First read: a chopper garage mechanic defined by labor traces around a custom frame. Styling entry: a chopper garage mechanic defined by labor traces around a custom frame. Motif: a rough craft body inside handmade motorcycle culture. Tension: the look does not pose as cool but comes from grease, tools, and hands long in contact with machines. Visual evidence: greasy vest, tool belt, black knuckles, rough hands, old fabric, low garage light, and posture orbiting the machine. Boundary: avoid making a generic mechanic or motorcycle model.', eras: industrialModernEras, tags: ['chopper', 'mechanic', 'garage'] },
   { id: 'desert_motorcycle_nomad', name: '沙漠机车游牧者', nameEn: 'Desert Motorcycle Nomad', group: 'H. 机车 / 叛逆公路', groupEn: 'H. Biker / Rebel Road', def: '第一识别是被风沙、太阳和长路磨过的沙漠机车游牧者。造型入口：被风沙、太阳和长路磨过的沙漠机车游牧者。母题：荒路环境改写身体和衣料后的移动者。张力：他不是末世战士，而是长期路途让一切变干、褪色、有压痕。视觉证据：防尘镜、围巾、晒伤皮肤、褪色皮革、绑在车上的水袋、眼周压痕和干硬布料。边界：避免写成废土战斗角色。', defEn: 'First read: a desert motorcycle nomad worn by sand, sun, and long road. Styling entry: a desert motorcycle nomad worn by sand, sun, and long road. Motif: a mover whose body and fabric are rewritten by harsh route. Tension: he is not a wasteland warrior, but long travel has made everything dry, faded, and marked. Visual evidence: dust goggles, scarf, sunburned skin, faded leather, water bag tied to bike, pressure marks around eyes, and stiff fabric. Boundary: avoid making a wasteland combat character.', eras: industrialModernEras, tags: ['desert', 'motorcycle', 'nomad'] },
   { id: 'biker_bar_waitress', name: '机车酒吧女招待', nameEn: 'Biker-Bar Waitress', group: 'H. 机车 / 叛逆公路', groupEn: 'H. Biker / Rebel Road', def: '第一识别是靠近机车圈但不属于帮派的酒吧女招待。造型入口：靠近机车圈但不属于帮派的酒吧女招待。母题：服务业疲惫与公路空间熟悉感合成的日常身体。张力：她说话少、站得稳，身体知道这里的规矩但不穿帮派身份。视觉证据：旧围裙、靴子、托盘、烟味头发、熟客式眼神、手腕疲惫和稳定站姿。边界：避免写成机车帮成员或性感酒吧招牌。', defEn: 'First read: a biker-bar waitress near biker circles but not part of the gang. Styling entry: a biker-bar waitress near biker circles but not part of the gang. Motif: a daily body made from service fatigue and familiarity with road spaces. Tension: she speaks little and stands steady, knowing the room’s rules without wearing gang identity. Visual evidence: old apron, boots, tray, smoke-scented hair, regular-customer gaze, tired wrists, and stable stance. Boundary: avoid making a biker-gang member or sexy bar sign.', eras: industrialModernEras, risk: 'medium', tags: ['biker_bar', 'waitress', 'road'] },
@@ -162,7 +392,7 @@ const seeds: PersonaSeed[] = [
   { id: 'post_internet_sad_boy', name: '后互联网Sad Boy', nameEn: 'Post-Internet Sad Boy', group: 'I. 朋克 / Emo / 反主流青年', groupEn: 'I. Punk / Emo / Anti-Mainstream Youth', def: '第一识别是被屏幕生活压低肩膀、眼神和衣服颜色的后互联网Sad Boy。造型入口：被屏幕生活压低肩膀、眼神和衣服颜色的后互联网Sad Boy。母题：表情包式自嘲与真实疲惫混在一起的网络忧郁身体。张力：他像在开玩笑，但碎屏手机和自拍脸显示疲惫是真的。视觉证据：宽松帽衫、碎屏手机、耳机线、疲惫自拍脸、灰暗配色、塌肩和像刚发完动态的眼神。边界：避免写成长篇悲伤故事。', defEn: 'First read: a post-internet sad boy whose shoulders, gaze, and clothing color are lowered by screen life. Styling entry: a post-internet sad boy whose shoulders, gaze, and clothing color are lowered by screen life. Motif: an internet-melancholy body mixing meme-like self-mockery with real fatigue. Tension: he seems to joke, but the cracked phone and selfie face show tiredness is real. Visual evidence: oversized hoodie, cracked phone, earbud wires, tired selfie face, gray palette, slumped shoulders, and eyes like he just posted something. Boundary: avoid making a long tragic story.', ontologyLevel: 2, eras: contemporaryEras, tags: ['sad_boy', 'post_internet', 'meme'] },
 
   { id: 'glitchcore_streamer', name: 'Glitchcore主播', nameEn: 'Glitchcore Streamer', group: 'J. 网络 / 故障 / 数字亚文化', groupEn: 'J. Internet / Glitch / Digital Subculture', def: '第一识别是把故障感做进妆面、屏幕边框和姿态断裂里的Glitchcore主播。造型入口：把故障感做进妆面、屏幕边框和姿态断裂里的Glitchcore主播。母题：直播界面持续干扰身体形象。张力：画面可以卡顿、错位，但人物不能溶解成抽象噪声。视觉证据：RGB错位妆、耳机、直播灯、碎片贴纸、卡顿式表情、断裂手势和屏幕反光。边界：避免生成纯故障图案或真实机械身体。', defEn: 'First read: a glitchcore streamer putting glitch into makeup, screen border, and broken posture. Styling entry: a glitchcore streamer putting glitch into makeup, screen border, and broken posture. Motif: a body image continuously disturbed by streaming interface. Tension: the image may stutter and split while the person must not dissolve into abstract noise. Visual evidence: RGB-split makeup, headset, stream light, fragment stickers, stuttering expression, broken gestures, and screen reflection. Boundary: avoid generate pure glitch pattern or real mechanical body.', ontologyLevel: 3, eras: contemporaryEras, risk: 'medium', tags: ['glitchcore', 'streamer', 'digital'] },
-  { id: 'vaporwave_mall_ghost', name: 'Vaporwave商场幽灵', nameEn: 'Vaporwave Mall Ghost', group: 'J. 网络 / 故障 / 数字亚文化', groupEn: 'J. Internet / Glitch / Digital Subculture', def: '第一识别是像被复古商场光和消费记忆褪色处理过的Vaporwave商场幽灵。造型入口：像被复古商场光和消费记忆褪色处理过的Vaporwave商场幽灵。母题：空旷、重复和低饱和消费感制造出的轻幽灵身体。张力：幽灵感来自褪色和空间感，不来自恐怖怪物。视觉证据：粉紫运动装、复古商场色光、雕像图案、低饱和脸、半透明消费感和像被空间吞轻的站姿。边界：避免生成鬼怪器官或惊悚表情。', defEn: 'First read: a vaporwave mall ghost faded by retro mall light and consumer memory. Styling entry: a vaporwave mall ghost faded by retro mall light and consumer memory. Motif: a lightly ghostly body produced by emptiness, repetition, and low-saturation consumer mood. Tension: ghostliness comes from fading and space, not horror-monster anatomy. Visual evidence: pink-purple sportswear, retro mall light, statue motifs, low-saturation face, translucent consumer feeling, and stance made light by space. Boundary: avoid generate ghost organs or horror expression.', ontologyLevel: 3, eras: ['modern', 'contemporary', 'timeless'], risk: 'medium', tags: ['vaporwave', 'mall', 'ghost'] },
+  { id: 'vaporwave_mall_ghost', name: 'Vaporwave商场幽灵', nameEn: 'Vaporwave Mall Ghost', group: 'J. 网络 / 故障 / 数字亚文化', groupEn: 'J. Internet / Glitch / Digital Subculture', def: '第一识别是像被复古商场光和消费记忆褪色处理过的Vaporwave商场幽灵。造型入口：像被复古商场光和消费记忆褪色处理过的Vaporwave商场幽灵。母题：空旷、重复和低饱和消费感制造出的轻幽灵身体。张力：幽灵感来自褪色和空间感，不来自恐怖怪物。视觉证据：粉紫运动装、复古商场色光、雕像图案、低饱和脸、半透明消费感和像被空间吞轻的站姿。边界：避免生成鬼怪器官或惊悚表情。', defEn: 'First read: a vaporwave mall ghost faded by retro mall light and consumer memory. Styling entry: a vaporwave mall ghost faded by retro mall light and consumer memory. Motif: a lightly ghostly body produced by emptiness, repetition, and low-saturation consumer mood. Tension: ghostliness comes from fading and space, not horror-monster anatomy. Visual evidence: pink-purple sportswear, retro mall light, statue motifs, low-saturation face, translucent consumer feeling, and stance made light by space. Boundary: avoid generate ghost organs or horror expression.', ontologyLevel: 3, eras: ['modern', 'contemporary'], risk: 'medium', tags: ['vaporwave', 'mall', 'ghost'] },
   { id: 'liminal_space_teen', name: '阈限空间少年', nameEn: 'Liminal-Space Teen', group: 'J. 网络 / 故障 / 数字亚文化', groupEn: 'J. Internet / Glitch / Digital Subculture', def: '第一识别是被空走廊和不确定站位吞轻的阈限空间少年。造型入口：被空走廊和不确定站位吞轻的阈限空间少年。母题：空间比故事更强的网络不安感。张力：他不需要复杂背景，只要像不知道自己该不该出现在这里。视觉证据：校服外套、空走廊色温、模糊表情、过干净鞋底、停顿姿态和犹豫脚尖方向。边界：避免写成完整校园剧情或恐怖怪物。', defEn: 'First read: a liminal-space teen made light by empty corridors and uncertain placement. Styling entry: a liminal-space teen made light by empty corridors and uncertain placement. Motif: internet unease where space is stronger than story. Tension: he needs no complex background, only the feeling of not knowing whether he should be here. Visual evidence: school jacket, empty-corridor color temperature, blurred expression, too-clean soles, paused posture, and hesitant toe direction. Boundary: avoid making a full school plot or horror monster.', ontologyLevel: 3, eras: contemporaryEras, risk: 'medium', tags: ['liminal_space', 'teen', 'internet'] },
   { id: 'weirdcore_avatar_kid', name: 'Weirdcore头像青年', nameEn: 'Weirdcore Avatar Kid', group: 'J. 网络 / 故障 / 数字亚文化', groupEn: 'J. Internet / Glitch / Digital Subculture', def: '第一识别是像从Weirdcore头像里长出来的青年。造型入口：像从Weirdcore头像里长出来的青年。母题：不安可爱与低清图像符号合成的人形界面。张力：异常只能作为图案、贴纸和面部符号出现，人物仍要保持清楚人形。视觉证据：错位眼睛图案、低清印花、玩具色配饰、不安的可爱表情、头像式正面性和略微不对称的装饰。边界：避免变成真实多眼怪物。', defEn: 'First read: a youth who seems grown out of a weirdcore avatar. Styling entry: a youth who seems grown out of a weirdcore avatar. Motif: a humanoid interface made from uneasy cuteness and low-res image signs. Tension: anomaly may appear only as pattern, sticker, and facial sign while the figure stays clearly human. Visual evidence: displaced eye motifs, low-res prints, toy-colored accessories, uneasy cute expression, avatar-like frontality, and slightly mismatched decoration. Boundary: avoid turn into a real many-eyed monster.', ontologyLevel: 3, eras: contemporaryEras, risk: 'medium', tags: ['weirdcore', 'avatar', 'internet'] },
   { id: 'crypto_party_bro', name: 'Crypto派对青年', nameEn: 'Crypto Party Bro', group: 'J. 网络 / 故障 / 数字亚文化', groupEn: 'J. Internet / Glitch / Digital Subculture', def: '第一识别是把金融词汇、行情界面和派对社交穿成自信的Crypto派对青年。造型入口：把金融词汇、行情界面和派对社交穿成自信的Crypto派对青年。母题：投机泡沫里的社交身体。张力：衣服很贵、笑容很亮，但眼神和姿态有一种空洞轻浮。视觉证据：昂贵球鞋、派对腕带、手机行情界面、过亮笑容、展示屏幕的手势和像随时谈收益的身体角度。边界：避免写成真正金融精英。', defEn: 'First read: a crypto party bro wearing financial language, market screens, and party sociality as confidence. Styling entry: a crypto party bro wearing financial language, market screens, and party sociality as confidence. Motif: a social body inside speculation bubbles. Tension: clothes are expensive and smile is bright, yet eyes and posture feel hollow and shallow. Visual evidence: expensive sneakers, party wristband, market screen on phone, too-bright smile, gesture showing the screen, and body angle ready to talk gains. Boundary: avoid making a real finance elite.', risk: 'medium', tags: ['crypto', 'party', 'bro'] },

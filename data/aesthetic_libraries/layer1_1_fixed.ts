@@ -5,6 +5,27 @@ import { LibraryItemDef } from '../../types';
 // LAYER 1.1: 固定参数与基准 (FIXED MODULES)
 // =============================================================================
 
+const extractNameEn = (name: string) => name.match(/\(([^()]+)\)\s*$/)?.[1]?.trim();
+const extractNameCn = (name: string) => name.split('(')[0].trim();
+const enrichVisualMaterialItem = (scope: string, tags: readonly string[]) => (item: LibraryItemDef): LibraryItemDef => {
+    const nameCn = extractNameCn(item.name);
+    const nameEn = item.nameEn || extractNameEn(item.name);
+    const nextTags = Array.from(new Set([
+        scope,
+        ...tags,
+        ...(item.tags || []),
+        ...item.id.split('_').filter(Boolean)
+    ]));
+    return {
+        ...item,
+        nameEn,
+        def: item.def || item.core || '',
+        defEn: item.defEn || item.coreEn || item.core || '',
+        aliases: item.aliases || [nameCn, nameEn].filter(Boolean) as string[],
+        tags: nextTags
+    };
+};
+
 // ======================= REALISM MODE LIBRARIES =======================
 
 // 1. 摄影机系统 (Camera System)
@@ -103,7 +124,7 @@ export const AES_BASE_TONE: LibraryItemDef[] = [
     { id: "dp_muted_matte", name: "哑光高级灰 (Muted Matte)", group: "D. 特殊渲染", def: "Medium-low contrast, low saturation. Matte finish, urban tones.", core: "【中低对比度 · 低饱和度】参考：莫兰迪色系、北欧家居。色彩不鲜艳但有质感，高级灰，情绪内敛。" },
     { id: "dp_hdr", name: "高动态均衡 (High Dynamic HDR)", group: "D. 特殊渲染", def: "Low contrast, high saturation. Equalized shadows and highlights.", core: "【低对比度 · 高饱和度】参考：房地产广告、风景大片。阴影和高光都有细节，甚至显得由于过于清晰而“假”。" },
     { id: "dp_cross", name: "交叉冲洗 (Cross Process)", group: "D. 特殊渲染", def: "High contrast, shifted saturation. Color shift chemistry.", core: "【高对比度 · 偏色饱和度】参考：LOMO摄影、《天使爱美丽》。正片负冲，暗部偏绿/黄，高亮偏红，迷幻的不真实感。" }
-];
+].map(enrichVisualMaterialItem('base_tone', ['contrast', 'saturation', 'dynamic_range']));
 
 // 4. 色彩科学 (Color Science)
 export const AES_COLOR_SCIENCE: LibraryItemDef[] = [
@@ -145,126 +166,126 @@ export const AES_COLOR_SCIENCE: LibraryItemDef[] = [
     { id: "cs_arri_logc", name: "ARRI LogC (ARRI LogC)", group: "2. 数码配置", def: "", core: "参考：顶级电影。极其柔和的高光滚落，肤色还原最接近胶片。" },
     { id: "cs_canon_log", name: "Canon Log (Canon Log)", group: "2. 数码配置", def: "", core: "参考：独立电影。肤色偏暖，讨喜，适合人像。" },
     { id: "cs_gopro_flat", name: "GoPro Flat (GoPro Flat)", group: "2. 数码配置", def: "", core: "参考：极限运动。低对比度，保留高光细节，典型的运动相机质感。" }
-];
+].map(enrichVisualMaterialItem('color_science', ['film_stock', 'lut', 'color_pipeline']));
 
 // 7.1 画面质感 (Texture - Surface/Render Style)
 export const AES_TEXTURE_RENDER: LibraryItemDef[] = [
-    // A. 胶片与模拟协议
-    { id: "tx_r_organic", name: "有机电影感 (Organic Film)", group: "A. 胶片与模拟协议", def: "", core: "参考：胶片重映。画面带有生命的呼吸感，非完美的随机性，色彩层级丰富。" },
-    { id: "tx_r_halation", name: "高光红晕 (Highlight Halation)", group: "A. 胶片与模拟协议", def: "", core: "参考：CineStill。强光源周围出现的红色光晕扩散，胶片特有的化学反应。" },
-    { id: "tx_r_diffusion", name: "胶片弥散 (Film Diffusion)", group: "A. 胶片与模拟协议", def: "", core: "参考：老电影。光线在乳剂层内的散射，导致锐度降低，质感柔和。" },
-    { id: "tx_r_rolloff", name: "高光柔和卷收 (Soft Highlight Roll-off)", group: "A. 胶片与模拟协议", def: "", core: "参考：ARRI画面。高光部分不会死白，而是平滑过渡到白色的优雅曲线。" },
-    { id: "tx_r_distressed", name: "物理磨损质感 (Distressed Celluloid)", group: "A. 胶片与模拟协议", def: "", core: "参考：《恐怖星球》。划痕、灰尘、霉斑、断片，模拟老旧胶片的物理损伤。" },
-    { id: "tx_r_silver", name: "银盐堆叠质感 (Silver Halide Texture)", group: "A. 胶片与模拟协议", def: "", core: "参考：暗房冲印。黑白照片中银盐颗粒堆积产生的独特厚重感与金属光泽。" },
+    // A. 胶片与模拟表面
+    { id: "tx_r_organic", name: "有机胶片表面 (Organic Film Surface)", group: "A. 胶片与模拟表面", def: "", core: "非完全均匀的乳剂层、轻微亮度漂移和自然随机纹理，让画面保留胶片材料感。" },
+    { id: "tx_r_halation", name: "高光晕染 (Highlight Halation)", group: "A. 胶片与模拟表面", def: "", core: "强光边缘产生柔和红橙或白色晕圈，只影响亮部扩散，不改变主体和场景。" },
+    { id: "tx_r_diffusion", name: "柔化弥散 (Optical Diffusion)", group: "A. 胶片与模拟表面", def: "", core: "降低硬锐边缘，让高光轻微扩散，形成柔和但仍可读的摄影表面。" },
+    { id: "tx_r_rolloff", name: "高光柔和卷收 (Soft Highlight Roll-off)", group: "A. 胶片与模拟表面", def: "", core: "高光从细节过渡到白场时保持层次，避免死白断裂。" },
+    { id: "tx_r_distressed", name: "底片磨损表面 (Distressed Celluloid)", group: "A. 胶片与模拟表面", def: "", core: "可见划痕、灰尘、霉斑或片基损耗，只作为影像表层痕迹使用。" },
+    { id: "tx_r_silver", name: "银盐密度 (Silver Halide Density)", group: "A. 胶片与模拟表面", def: "", core: "黑白影像中银盐颗粒形成厚重密度、暗部层次和轻微金属感。" },
 
-    // B. 数码与现代协议
-    { id: "tx_r_clinical", name: "冷峻工业锐度 (Clinical Sharpness)", group: "B. 数码与现代协议", def: "", core: "参考：大卫·芬奇。每一个像素都清晰可见，毫发毕现，没有任何模糊的冷酷感。" },
-    { id: "tx_r_pristine", name: "极致纯净渲染 (Pristine Digital)", group: "B. 数码与现代协议", def: "", core: "参考：《遗落战境》。毫无噪点，画面如蒸馏水般纯净，典型的科幻未来感。" },
-    { id: "tx_r_antihalo", name: "防光晕涂层 (Anti-Halation)", group: "B. 数码与现代协议", def: "", core: "参考：现代数码相机。高光边缘锋利，没有溢出，精准的光电转换。" },
-    { id: "tx_r_micro", name: "超高微反差 (Ultra Micro-Contrast)", group: "B. 数码与现代协议", def: "", core: "参考：徕卡镜头。在相近色调中依然保持极高的纹理辨识度，立体感强。" },
-    { id: "tx_r_smooth", name: "数码平滑协议 (Smooth Digital Finish)", group: "B. 数码与现代协议", def: "", core: "参考：美颜应用。像塑料或陶瓷一样光滑的表面处理，去除了所有高频细节。" },
-    { id: "tx_r_hdr", name: "高动态还原 (HDR Rendering)", group: "B. 数码与现代协议", def: "", core: "参考：人眼视觉。同时保留极亮与极暗的细节，超越传统媒介的宽容度。" },
+    // B. 数码与后期表面
+    { id: "tx_r_clinical", name: "临床级锐度 (Clinical Sharpness)", group: "B. 数码与后期表面", def: "", core: "边缘、毛孔和材料细节被高解析保留，画面干净、冷静、少弥散。" },
+    { id: "tx_r_pristine", name: "无噪纯净面 (Pristine Digital Finish)", group: "B. 数码与后期表面", def: "", core: "噪点和脏污被压到最低，暗部平滑，整体呈现高洁净数字完成度。" },
+    { id: "tx_r_antihalo", name: "防光晕锐边 (Anti-Halation Edge)", group: "B. 数码与后期表面", def: "", core: "高光边界保持清楚，减少溢光、紫边和乳剂式扩散。" },
+    { id: "tx_r_micro", name: "高微反差 (High Micro-Contrast)", group: "B. 数码与后期表面", def: "", core: "相近明度中的纹理仍然分明，增强皮肤、布料和硬表面的立体细节。" },
+    { id: "tx_r_smooth", name: "平滑数码修饰 (Smooth Digital Finish)", group: "B. 数码与后期表面", def: "", core: "弱化高频瑕疵和粗颗粒，让表面更光洁，但仍保留基本材质边界。" },
+    { id: "tx_r_hdr", name: "高动态细节 (High Dynamic Detail)", group: "B. 数码与后期表面", def: "", core: "亮部和暗部同时保留信息，适合强调现代数码宽容度。" },
 
-    // C. 物理表面质感
-    { id: "tx_r_matte", name: "哑光磨砂面 (Matte Surface)", group: "C. 物理表面质感", def: "", core: "参考：高级灰涂料。不反光，吸光材质，质感沉稳、低调、内敛。" },
-    { id: "tx_r_glossy", name: "湿润高光泽 (Glossy / Wet Look)", group: "C. 物理表面质感", def: "", core: "参考：唇釉、跑车漆。像液体一样流动的高光，充满欲望与诱惑力。" },
-    { id: "tx_r_velvet", name: "丝滑织物感 (Velvety Fabric)", group: "C. 物理表面质感", def: "", core: "参考：天鹅绒。在光线切线方向产生的高光，柔软、奢华、吸光。" },
-    { id: "tx_r_metal", name: "金属冷硬质感 (Metallic Texture)", group: "C. 物理表面质感", def: "", core: "参考：拉丝钢。冰冷、坚硬、带有各向异性的反光特性。" },
-    { id: "tx_r_rough", name: "粗糙颗粒表面 (Rough / Gritty Surface)", group: "C. 物理表面质感", def: "", core: "参考：砂纸、混凝土。充满摩擦力，未打磨的原始质感。" },
-    { id: "tx_r_glass", name: "玻璃通透感 (Glassy / Translucent)", group: "C. 物理表面质感", def: "", core: "参考：水晶。光线可以穿穿透，带有折射与焦散效果，清澈。" },
+    // C. 可见材料表面
+    { id: "tx_r_matte", name: "哑光磨砂面 (Matte Surface)", group: "C. 可见材料表面", def: "", core: "反射被压低，表面吸光，呈现干燥、低亮度、克制的材料触感。" },
+    { id: "tx_r_glossy", name: "湿润高光面 (Glossy / Wet Surface)", group: "C. 可见材料表面", def: "", core: "表面有连续高光、油膜或水膜反射，只强化既有材料的光泽。" },
+    { id: "tx_r_velvet", name: "丝绒吸光面 (Velvety Surface)", group: "C. 可见材料表面", def: "", core: "切线方向出现柔软高光，正面吸光，适合织物、皮肤或暗色材料。" },
+    { id: "tx_r_metal", name: "金属各向异性 (Anisotropic Metal)", group: "C. 可见材料表面", def: "", core: "拉丝、刮痕和方向性反射清楚，只作为现有金属表面的光学证据。" },
+    { id: "tx_r_rough", name: "粗糙颗粒面 (Rough / Gritty Surface)", group: "C. 可见材料表面", def: "", core: "表面有摩擦、孔洞、砂砾或未打磨颗粒，增强材料重量。" },
+    { id: "tx_r_glass", name: "透明折射面 (Glassy / Translucent Surface)", group: "C. 可见材料表面", def: "", core: "透明材料出现折射、边缘厚度、高光和轻微焦散，不新增玻璃道具。" },
 
-    // D. 特殊艺术协议
-    { id: "tx_r_bleach", name: "跳银金属感 (Bleach Bypass Texture)", group: "D. 特殊艺术协议", def: "", core: "参考：《拯救大兵瑞恩》。高反差，低饱和，像金属一样的皮肤质感，残酷。" },
-    { id: "tx_r_faded", name: "复古褪色质感 (Faded Vintage)", group: "D. 特殊艺术协议", def: "", core: "参考：旧照片。黑色部分发灰，色彩偏移，像是经过了时间的氧化。" },
-    { id: "tx_r_lofi", name: "低保真模拟 (Lo-Fi Analog)", group: "D. 特殊艺术协议", def: "", core: "参考：VHS录像带。模糊、色度干扰、扫描线，充满信号丢失的怀旧感。" },
-    { id: "tx_r_dreamy", name: "柔焦梦幻感 (Dreamy Soft-Focus)", group: "D. 特殊艺术协议", def: "", core: "参考：好莱坞黄金时代女星。用丝袜或凡士林模糊镜头，产生发光的天使感。" },
-    { id: "tx_r_stark", name: "高对比硬核感 (Stark High-Contrast)", group: "D. 特殊艺术协议", def: "", core: "参考：《罪恶之城》。只有黑与白，没有中间灰，漫画般的强烈视觉冲击。" },
-    { id: "tx_r_neutral", name: "中性真实还原 (Neutral Authenticity)", group: "D. 特殊艺术协议", def: "", core: "参考：博物馆档案。没有任何风格化倾向，绝对客观的物体记录。" },
-    { id: "tx_r_pixel_glitch", name: "像素破碎 (Pixel Glitch)", group: "D. 特殊艺术协议", def: "", core: "参考：故障艺术。数据损坏导致的像素块、色块偏移。" },
-    { id: "tx_r_raytracing", name: "光线追踪 (Ray Tracing)", group: "D. 特殊艺术协议", def: "", core: "参考：高端渲染。物理精确的光线反射、折射与阴影，极致真实。" }
-];
+    // D. 影像损耗与信号表面
+    { id: "tx_r_bleach", name: "跳银影像面 (Bleach Bypass Texture)", group: "D. 影像损耗与信号表面", def: "", core: "低饱和、高反差和银质暗部并存，强调冲印处理后的硬质影像表层。" },
+    { id: "tx_r_faded", name: "褪色氧化面 (Faded Vintage Surface)", group: "D. 影像损耗与信号表面", def: "", core: "黑位抬高、颜色偏移、纸面或底片像被时间氧化。" },
+    { id: "tx_r_lofi", name: "低保真模拟信号 (Lo-Fi Analog Signal)", group: "D. 影像损耗与信号表面", def: "", core: "扫描线、色度拖影、模糊边缘和磁带式信号丢失成为画面表层。" },
+    { id: "tx_r_dreamy", name: "柔焦发光面 (Dreamy Soft-Focus Surface)", group: "D. 影像损耗与信号表面", def: "", core: "焦内保持可读，高光和边缘轻微发光，形成柔化的摄影表面。" },
+    { id: "tx_r_stark", name: "硬黑白影像面 (Stark High-Contrast Surface)", group: "D. 影像损耗与信号表面", def: "", core: "压缩中间调，让黑白关系更图形化，但不改变构图主题。" },
+    { id: "tx_r_neutral", name: "中性记录面 (Neutral Authentic Surface)", group: "D. 影像损耗与信号表面", def: "", core: "降低风格化后期，保留客观记录、档案扫描或标准拍摄的可读表面。" },
+    { id: "tx_r_pixel_glitch", name: "像素损坏面 (Pixel Glitch Surface)", group: "D. 影像损耗与信号表面", def: "", core: "局部像素块、色块错位或压缩损坏，只作为数字信号瑕疵使用。" },
+    { id: "tx_r_compression", name: "压缩伪影面 (Compression Artifact Surface)", group: "D. 影像损耗与信号表面", def: "", core: "低码率导致块状伪影、细节糊化和边缘噪声，适合记录媒介质感。" }
+].map(enrichVisualMaterialItem('texture_render', ['surface', 'render_texture', 'material_feel']));
 
 // 7.2 物理颗粒 (Grain - Noise/Film Artifacts)
 export const AES_PHYSICAL_GRAIN: LibraryItemDef[] = [
-    { id: "gr_denoised", name: "极致纯净 (Denoised/Pristine)", group: "G2. 物理颗粒", def: "", core: "参考：Pixar动画。完全没有噪点，顺滑如丝，数字化的完美。" },
-    { id: "gr_micro35", name: "微细 35mm (Micro 35mm Grain)", group: "G2. 物理颗粒", def: "", core: "参考：大卫·芬奇。几乎不可见但提供纹理的极细颗粒，现代胶片感。" },
-    { id: "gr_fine35", name: "细腻 35mm (Fine 35mm Grain)", group: "G2. 物理颗粒", def: "", core: "参考：诺兰IMAX。标准的、高质量的电影颗粒，清晰且有机。" },
-    { id: "gr_std35", name: "标准 35mm (Standard 35mm Grain)", group: "G2. 物理颗粒", def: "", core: "参考：90年代好莱坞。明显的胶片质感，充满活力的随机噪点。" },
-    { id: "gr_organic", name: "有机呼吸感 (Organic Breathing Grain)", group: "G2. 物理颗粒", def: "", core: "参考：独立电影。颗粒似乎在画面中游动，赋予静止画面生命力。" },
-    { id: "gr_std16", name: "标准 16mm (Standard 16mm Grain)", group: "G2. 物理颗粒", def: "", core: "参考：《卡罗尔》。较粗的颗粒，边缘柔和，带有明显的胶片特征。" },
-    { id: "gr_rough16", name: "粗糙 16mm (Rough 16mm Grain)", group: "G2. 物理颗粒", def: "", core: "参考：《德州电锯杀人狂》。非常明显的颗粒，画面粗砺，带有纪录片感。" },
-    { id: "gr_8mm", name: "颗粒感 8mm (Gritty 8mm Look)", group: "G2. 物理颗粒", def: "", core: "参考：家庭录像。巨大的颗粒块，细节丢失，极度怀旧与私密。" },
-    { id: "gr_silver", name: "银盐结晶 (Silver Halide Crystals)", group: "G2. 物理颗粒", def: "", core: "参考：手工黑白照片。不规则的、锐利的晶体结构感，非数字噪点。" },
-    { id: "gr_iso100", name: "ISO 100 低噪点 (ISO 100 Low Noise)", group: "G2. 物理颗粒", def: "", core: "参考：日光下的风景照。极其干净，只有在暗部有微弱纹理。" },
-    { id: "gr_iso800", name: "ISO 800 胶片噪点 (ISO 800 Film Noise)", group: "G2. 物理颗粒", def: "", core: "参考：室内自然光。可见的颗粒结构，增加了画面的锐度和质感。" },
-    { id: "gr_iso3200", name: "ISO 3200 强噪点 (ISO 3200 High Noise)", group: "G2. 物理颗粒", def: "", core: "参考：夜间新闻摄影。画面充满噪点，细节被淹没，充满紧迫感。" },
-    { id: "gr_digital", name: "数码传感器噪点 (Digital Sensor Noise)", group: "G2. 物理颗粒", def: "", core: "参考：手机夜拍。带有彩色杂讯（Color Noise）的非有机噪点，数字感。" },
-    { id: "gr_vhs", name: "复古 VHS 噪点 (Retro VHS Noise)", group: "G2. 物理颗粒", def: "", core: "参考：老录像带。横向的磁带干扰线，雪花点，信号丢失的伪影。" },
-    { id: "gr_static", name: "电视雪花/静电 (TV Static/Noise)", group: "G2. 物理颗粒", def: "", core: "参考：无信号频道。剧烈的黑白闪烁点，覆盖整个画面，混乱。" },
-    { id: "gr_dust", name: "物理灰尘划痕 (Physical Dust & Scratches)", group: "G2. 物理颗粒", def: "", core: "参考：老电影放映。随机出现的黑点和白线，胶片物理损伤的痕迹。" },
-    { id: "gr_line_jitter", name: "线条颤动 (Line Jitter)", group: "G2. 物理颗粒", def: "", core: "参考：手绘动画。线条边缘的随机抖动，充满生命力。" }
-];
+    { id: "gr_denoised", name: "无颗粒纯净 (Denoised / Pristine)", group: "物理颗粒", def: "", core: "几乎不可见噪点，暗部平滑，适合高洁净数字摄影或精修表面。" },
+    { id: "gr_micro35", name: "微细 35mm 颗粒 (Micro 35mm Grain)", group: "物理颗粒", def: "", core: "极细、均匀、几乎隐形的胶片颗粒，只增加轻微有机纹理。" },
+    { id: "gr_fine35", name: "细腻 35mm 颗粒 (Fine 35mm Grain)", group: "物理颗粒", def: "", core: "清楚但克制的电影颗粒，保留细节和肤色层次。" },
+    { id: "gr_std35", name: "标准 35mm 颗粒 (Standard 35mm Grain)", group: "物理颗粒", def: "", core: "中等强度随机颗粒，能被直接看见，但不吞没主体细节。" },
+    { id: "gr_organic", name: "游动式胶片颗粒 (Organic Breathing Grain)", group: "物理颗粒", def: "", core: "颗粒分布带有轻微随机游动感，让静态画面更像真实底片。" },
+    { id: "gr_std16", name: "标准 16mm 颗粒 (Standard 16mm Grain)", group: "物理颗粒", def: "", core: "颗粒比 35mm 更粗，边缘更柔，带有小画幅胶片质感。" },
+    { id: "gr_rough16", name: "粗糙 16mm 颗粒 (Rough 16mm Grain)", group: "物理颗粒", def: "", core: "颗粒明显、暗部粗砺、局部细节被纹理压住。" },
+    { id: "gr_8mm", name: "8mm 粗颗粒 (Gritty 8mm Grain)", group: "物理颗粒", def: "", core: "大颗粒、低解析、轻微边缘损耗，强调小格式模拟影像。" },
+    { id: "gr_silver", name: "银盐结晶 (Silver Halide Crystals)", group: "物理颗粒", def: "", core: "黑白照片中锐利、不规则的银盐颗粒结构，区别于数码噪点。" },
+    { id: "gr_iso100", name: "ISO 100 低噪点 (ISO 100 Low Noise)", group: "物理颗粒", def: "", core: "暗部只有极轻微纹理，整体干净、细节完整。" },
+    { id: "gr_iso800", name: "ISO 800 可见噪点 (ISO 800 Visible Noise)", group: "物理颗粒", def: "", core: "中等感光噪点，室内和暗部区域有清楚颗粒。" },
+    { id: "gr_iso3200", name: "ISO 3200 强噪点 (ISO 3200 High Noise)", group: "物理颗粒", def: "", core: "高感噪点明显，暗部细节被颗粒和色噪部分吞没。" },
+    { id: "gr_digital", name: "数码传感器噪点 (Digital Sensor Noise)", group: "物理颗粒", def: "", core: "彩色杂讯、暗部斑点和传感器噪声，呈现非胶片的电子质感。" },
+    { id: "gr_vhs", name: "VHS 磁带噪点 (VHS Tape Noise)", group: "物理颗粒", def: "", core: "横向磁带干扰、色度拖影和雪花点作为模拟录像噪声。" },
+    { id: "gr_static", name: "电视静电噪点 (TV Static Noise)", group: "物理颗粒", def: "", core: "高密度黑白闪烁点或雪花，只作为信号层噪声使用。" },
+    { id: "gr_dust", name: "灰尘划痕颗粒 (Dust & Scratches)", group: "物理颗粒", def: "", core: "底片或扫描表面出现随机黑点、白线、细小污迹和物理损耗。" },
+    { id: "gr_macroblock", name: "压缩块噪点 (Compression Macroblocks)", group: "物理颗粒", def: "", core: "低码率压缩形成方块、边缘破碎和细节糊化，偏数字记录感。" }
+].map(enrichVisualMaterialItem('physical_grain', ['grain', 'noise', 'artifact']));
 
 // 5. 创作介质 (Art Medium)
 export const AES_ART_MEDIUM: LibraryItemDef[] = [
-    { id: "am_digital", name: "数字绘画 (Digital Painting)", group: "A. 介质", def: "", core: "Clean, precise, layered." },
-    { id: "am_watercolor", name: "水彩 (Watercolor)", group: "A. 介质", def: "", core: "Transparent, bleeding, organic." },
-    { id: "am_oil", name: "油画 (Oil Paint)", group: "A. 介质", def: "", core: "Textured, blended, heavy." },
-    { id: "am_ink", name: "水墨/墨水 (Ink Wash)", group: "A. 介质", def: "", core: "High contrast, flow, calligraphy." },
-    { id: "am_pencil", name: "铅笔/素描 (Pencil)", group: "A. 介质", def: "", core: "Rough, graphite texture, sketch." },
-    { id: "am_vector", name: "矢量艺术 (Vector Art)", group: "A. 介质", def: "", core: "Infinite scale, sharp shapes." },
-    { id: "am_pastel", name: "粉笔/蜡笔 (Pastel/Crayon)", group: "A. 介质", def: "", core: "Soft, grainy, childhood." },
-    { id: "am_acrylic", name: "丙烯 (Acrylic)", group: "A. 介质", def: "", core: "Bright, flat, plastic." },
-    { id: "am_charcoal", name: "炭笔 (Charcoal)", group: "A. 介质", def: "", core: "Smudged, dark, expressive." },
-    { id: "am_marker", name: "马克笔 (Marker)", group: "A. 介质", def: "", core: "Bold, streaky, vibrant." },
-    { id: "am_pixel", name: "像素 (Pixel Art)", group: "A. 介质", def: "", core: "Blocky, retro, limited resolution." },
-    { id: "am_3d_render", name: "3D渲染 (3D Render)", group: "A. 介质", def: "", core: "Calculated, lit, modelled." },
-    { id: "am_collage", name: "拼贴 (Collage)", group: "A. 介质", def: "", core: "Mixed media, cut-out, layered." },
-    { id: "am_spray", name: "喷漆 (Spray Paint)", group: "A. 介质", def: "", core: "Soft edges, drips, street." },
-    { id: "am_cel", name: "赛璐璐 (Cel Shaded)", group: "A. 介质", def: "", core: "Hard shadows, anime style." },
-    { id: "am_pencil_sketch", name: "铅笔素描 (Pencil Sketch)", group: "A. 介质", def: "", core: "Rough, graphite texture, sketch." },
-    { id: "am_mixed", name: "混合媒介 (Mixed Media)", group: "A. 介质", def: "", core: "Combines photos, paint, and digital elements." },
-    { id: "am_cutout", name: "剪纸拼贴 (Cutout Collage)", group: "A. 介质", def: "", core: "Sharp edges, layered paper texture." },
-    { id: "am_impasto", name: "油画笔触 (Oil Impasto)", group: "A. 介质", def: "", core: "Thick, visible paint strokes, 3D texture." },
-    { id: "am_digital_paint", name: "数字厚涂 (Digital Painting)", group: "A. 介质", def: "", core: "Smooth digital blending, high detail." }
-];
+    { id: "am_digital", name: "数字绘画 (Digital Painting)", group: "A. 绘制介质", def: "", core: "分层、可控边缘、可精修的数字绘制介质，不指定题材。" },
+    { id: "am_digital_paint", name: "数字厚涂 (Digital Impasto)", group: "A. 绘制介质", def: "", core: "用数字笔刷模拟厚重颜料、块面塑形和可见笔触。" },
+    { id: "am_watercolor", name: "水彩 (Watercolor)", group: "A. 绘制介质", def: "", core: "透明叠色、纸面渗化、水痕边缘和轻薄颜料层。" },
+    { id: "am_oil", name: "油画 (Oil Paint)", group: "A. 绘制介质", def: "", core: "厚重颜料、湿画湿混色、可见刷痕和缓慢融合的色层。" },
+    { id: "am_impasto", name: "厚涂油彩 (Oil Impasto)", group: "A. 绘制介质", def: "", core: "颜料堆积明显，笔触高度和刮刀痕参与画面肌理。" },
+    { id: "am_acrylic", name: "丙烯 (Acrylic)", group: "A. 绘制介质", def: "", core: "干燥快、色面较平、边缘清楚，具有塑性颜料质感。" },
+    { id: "am_gouache", name: "不透明水粉 (Gouache)", group: "A. 绘制介质", def: "", core: "不透明颜料层、哑光表面、可覆盖修正的平涂质感。" },
+    { id: "am_ink", name: "墨水 / 水墨 (Ink Wash)", group: "B. 线性与纸本介质", def: "", core: "墨色浓淡、渗化、留白和笔锋成为主要绘制证据。" },
+    { id: "am_pencil", name: "铅笔 (Pencil)", group: "B. 线性与纸本介质", def: "", core: "石墨颗粒、排线、擦痕和纸面摩擦清楚可见。" },
+    { id: "am_pencil_sketch", name: "铅笔素描 (Pencil Sketch)", group: "B. 线性与纸本介质", def: "", core: "保留结构线、修正线和未完成草图痕迹。" },
+    { id: "am_charcoal", name: "炭笔 (Charcoal)", group: "B. 线性与纸本介质", def: "", core: "深黑粉尘、擦抹边缘和粗糙灰阶层次。" },
+    { id: "am_marker", name: "马克笔 (Marker)", group: "B. 线性与纸本介质", def: "", core: "笔触边界、叠色条纹、酒精墨水扩散和快速设计稿质感。" },
+    { id: "am_pastel", name: "粉彩 / 蜡笔 (Pastel / Crayon)", group: "B. 线性与纸本介质", def: "", core: "粉质颗粒、柔软擦抹和蜡质断续线条。" },
+    { id: "am_vector", name: "矢量图形 (Vector Art)", group: "C. 图形与印刷介质", def: "", core: "贝塞尔曲线、干净色块、无笔触噪声和高精度边缘。" },
+    { id: "am_pixel", name: "像素绘制 (Pixel Art)", group: "C. 图形与印刷介质", def: "", core: "低分辨率格点、有限调色板和手工像素边缘。" },
+    { id: "am_cel", name: "赛璐璐绘制 (Cel Animation Paint)", group: "C. 图形与印刷介质", def: "", core: "平涂色块、硬边阴影和透明片动画绘制感，不调用具体动画题材。" },
+    { id: "am_collage", name: "拼贴 (Collage)", group: "D. 混合材料介质", def: "", core: "纸片、照片、颜料或印刷片段以可见层叠边缘组合。" },
+    { id: "am_cutout", name: "剪纸拼贴 (Cutout Collage)", group: "D. 混合材料介质", def: "", core: "清楚剪切边、纸张厚度、投影和层叠关系。" },
+    { id: "am_spray", name: "喷漆 (Spray Paint)", group: "D. 混合材料介质", def: "", core: "雾化边缘、喷点、遮罩边和流挂痕迹。" },
+    { id: "am_mixed", name: "混合媒介 (Mixed Media)", group: "D. 混合材料介质", def: "", core: "多种材料并置，但只作为表面工艺，不改变主体和世界设定。" }
+].map(enrichVisualMaterialItem('art_medium', ['painting_medium', 'drawing_medium', 'surface_method']));
 
 // 6. 线条质量 (Line Quality)
 export const AES_LINE_QUALITY: LibraryItemDef[] = [
-    { id: "lq_no_line", name: "无线绘 (Lineless)", group: "B. 线条", def: "", core: "Defined by shapes and colors." },
-    { id: "lq_thin", name: "细轮廓 (Thin Outlines)", group: "B. 线条", def: "", core: "Delicate, precise, technical." },
-    { id: "lq_thick", name: "粗轮廓 (Thick Outlines)", group: "B. 线条", def: "", core: "Bold, pop-art, sticker-like." },
-    { id: "lq_sketchy", name: "草图线 (Sketchy)", group: "B. 线条", def: "", core: "Messy, multiple passes, energetic." },
-    { id: "lq_clean", name: "干净线稿 (Clean Lineart)", group: "B. 线条", def: "", core: "Consistent weight, smooth." },
-    { id: "lq_brush", name: "毛笔触感 (Brush Stroke)", group: "B. 线条", def: "", core: "Variable width, tapered, organic." },
-    { id: "lq_jitter", name: "颤抖线 (Jittery)", group: "B. 线条", def: "", core: "Hand-drawn animation feel." },
-    { id: "lq_dotted", name: "虚线 (Dotted/Dashed)", group: "B. 线条", def: "", core: "Technical, blueprint style." },
-    { id: "lq_chalk", name: "粉笔线 (Chalky)", group: "B. 线条", def: "", core: "Rough, textured edges." },
-    { id: "lq_ink_bleed", name: "晕染线 (Ink Bleed)", group: "B. 线条", def: "", core: "Spreading into paper, soft." },
-    { id: "lq_vector", name: "矢量线 (Vector)", group: "B. 线条", def: "", core: "Mathematically perfect curves." },
-    { id: "lq_rough", name: "粗糙线 (Rough)", group: "B. 线条", def: "", core: "Textured, pencil on rough paper." },
-    { id: "lq_smooth", name: "圆滑线 (Smooth Lines)", group: "B. 线条", def: "", core: "Polished, vector-like curves." },
-    { id: "lq_no_shadow", name: "无影 (No Shadow)", group: "B. 线条", def: "", core: "Flat lighting, purely line driven." }
-];
+    { id: "lq_no_line", name: "无线绘 (Lineless)", group: "B. 线条质量", def: "", core: "主体主要由色块、明暗和边缘控制定义，不使用明确勾线。" },
+    { id: "lq_thin", name: "细轮廓 (Thin Outlines)", group: "B. 线条质量", def: "", core: "线条轻薄、精确、克制，适合保留细节而不压住色面。" },
+    { id: "lq_thick", name: "粗轮廓 (Thick Outlines)", group: "B. 线条质量", def: "", core: "轮廓线宽重，强化剪影和图形可读性。" },
+    { id: "lq_sketchy", name: "草图线 (Sketchy)", group: "B. 线条质量", def: "", core: "多次试探线、修正线和未清理笔迹保留在画面中。" },
+    { id: "lq_clean", name: "干净线稿 (Clean Lineart)", group: "B. 线条质量", def: "", core: "线宽稳定、闭合清楚、结构可读，适合设定图或插画完成稿。" },
+    { id: "lq_brush", name: "毛笔线 (Brush Stroke)", group: "B. 线条质量", def: "", core: "线条有粗细变化、收锋和墨色压力差。" },
+    { id: "lq_jitter", name: "轻微抖线 (Jittery Line)", group: "B. 线条质量", def: "", core: "线边有手绘抖动和微小偏移，增加人工绘制痕迹。" },
+    { id: "lq_dotted", name: "虚线 / 断线 (Dotted / Dashed)", group: "B. 线条质量", def: "", core: "用断续线、点线或工程线表现边界与结构。" },
+    { id: "lq_chalk", name: "粉质线 (Chalky Line)", group: "B. 线条质量", def: "", core: "线边粗糙、粉化，带有纸面颗粒摩擦。" },
+    { id: "lq_ink_bleed", name: "晕染墨线 (Ink Bleed Line)", group: "B. 线条质量", def: "", core: "线条沿纸纤维扩散，边缘柔软且不完全可控。" },
+    { id: "lq_vector", name: "矢量线 (Vector Line)", group: "B. 线条质量", def: "", core: "曲线数学化、边缘绝对干净，几乎没有手绘噪声。" },
+    { id: "lq_rough", name: "粗糙线 (Rough Line)", group: "B. 线条质量", def: "", core: "线条断裂、颗粒明显，像在粗纸或干笔上留下。" },
+    { id: "lq_smooth", name: "圆滑线 (Smooth Line)", group: "B. 线条质量", def: "", core: "线条流畅、连续、少毛边，偏抛光完成稿。" },
+    { id: "lq_hatching", name: "排线阴影 (Hatching)", group: "B. 线条质量", def: "", core: "用平行线、交叉线或密度变化塑造明暗和体积。" }
+].map(enrichVisualMaterialItem('line_quality', ['linework', 'edge_control', 'drawing_trace']));
 
 // 7. 画布质感 (Canvas Texture)
 export const AES_CANVAS_TEXTURE: LibraryItemDef[] = [
-    { id: "ct_smooth", name: "平滑纸 (Smooth Paper)", group: "C. 纹理", def: "", core: "Digital standard, clean." },
-    { id: "ct_watercolor", name: "水彩纸 (Watercolor Paper)", group: "C. 纹理", def: "", core: "Bumpy, absorbent, grain." },
-    { id: "ct_canvas", name: "油画布 (Canvas)", group: "C. 纹理", def: "", core: "Woven grid pattern." },
-    { id: "ct_kraft", name: "牛皮纸 (Kraft Paper)", group: "C. 纹理", def: "", core: "Brown, fibrous, recycled." },
-    { id: "ct_halftone", name: "半调 (Halftone)", group: "C. 纹理", def: "", core: "Comic book dots, manga style." },
-    { id: "ct_noise", name: "噪点 (Digital Noise)", group: "C. 纹理", def: "", core: "Grainy overlay, film look." },
-    { id: "ct_grunge", name: "脏迹 (Grunge)", group: "C. 纹理", def: "", core: "Scratches, stains, aged." },
-    { id: "ct_screen", name: "网点纸 (Screen Tone)", group: "C. 纹理", def: "", core: "Manga shading dots." },
-    { id: "ct_wood", name: "木纹 (Wood Grain)", group: "C. 纹理", def: "", core: "Organic lines, painted on wood." },
-    { id: "ct_stone", name: "岩石 (Stone)", group: "C. 纹理", def: "", core: "Rough, pitted, fresco style." },
-    { id: "ct_fabric", name: "织物 (Fabric)", group: "C. 纹理", def: "", core: "Thread patterns, cloth." },
-    { id: "ct_crumpled", name: "褶皱纸 (Crumpled Paper)", group: "C. 纹理", def: "", core: "Creases, shadows, 3D surface." },
-    { id: "ct_cardboard", name: "粗糙纸板 (Cardboard)", group: "C. 纹理", def: "", core: "Rough fiber texture." },
-    { id: "ct_parchment", name: "羊皮纸 (Parchment)", group: "C. 纹理", def: "", core: "Yellowed, organic animal skin texture." },
-    { id: "ct_paper_texture", name: "纸张纹理 (Paper Texture)", group: "C. 纹理", def: "", core: "Generic fibrous paper surface." }
-];
+    { id: "ct_smooth", name: "平滑纸 (Smooth Paper)", group: "C. 承载表面", def: "", core: "纸面或数字底面平整干净，几乎没有纤维噪声。" },
+    { id: "ct_watercolor", name: "冷压水彩纸 (Cold-Press Watercolor Paper)", group: "C. 承载表面", def: "", core: "表面有凹凸纸纹、吸水渗化和颜料沉积边。" },
+    { id: "ct_canvas", name: "亚麻画布 (Linen Canvas)", group: "C. 承载表面", def: "", core: "可见经纬编织纹理，颜料附着在布面凸起上。" },
+    { id: "ct_kraft", name: "牛皮纸 (Kraft Paper)", group: "C. 承载表面", def: "", core: "棕色纸基、纤维感强，适合草图、拼贴或材料实验。" },
+    { id: "ct_halftone", name: "印刷半调 (Halftone Print)", group: "D. 印刷与扫描表面", def: "", core: "规则网点用密度变化形成明暗，呈现印刷复制质感。" },
+    { id: "ct_screen", name: "漫画网点 (Screen Tone)", group: "D. 印刷与扫描表面", def: "", core: "点阵、线网或刮网纹理用于灰阶和阴影表达。" },
+    { id: "ct_noise", name: "扫描噪点 (Scan Noise)", group: "D. 印刷与扫描表面", def: "", core: "扫描产生轻微灰雾、边缘杂点和纸面数字化痕迹。" },
+    { id: "ct_grunge", name: "污迹划痕 (Stains & Scratches)", group: "D. 印刷与扫描表面", def: "", core: "表面有污点、磨损、刮痕或旧纸斑驳，只作为承载层痕迹。" },
+    { id: "ct_wood", name: "木板底面 (Wood Panel Surface)", group: "E. 特殊承载表面", def: "", core: "木纹、年轮和硬质底板纹理作为绘画承载面。" },
+    { id: "ct_stone", name: "石壁底面 (Stone / Fresco Surface)", group: "E. 特殊承载表面", def: "", core: "粗糙孔洞、矿物斑点和壁画式不平整表面。" },
+    { id: "ct_fabric", name: "织物底面 (Fabric Surface)", group: "E. 特殊承载表面", def: "", core: "线头、布纹、纤维方向和轻微起伏成为画面底纹。" },
+    { id: "ct_crumpled", name: "褶皱纸 (Crumpled Paper)", group: "E. 特殊承载表面", def: "", core: "纸面折痕、压痕和阴影让承载面具有立体起伏。" },
+    { id: "ct_cardboard", name: "粗纸板 (Rough Cardboard)", group: "E. 特殊承载表面", def: "", core: "纸板纤维粗、吸色不均，边缘有厚度和磨损。" },
+    { id: "ct_parchment", name: "羊皮纸 (Parchment)", group: "E. 特殊承载表面", def: "", core: "泛黄、半透明、纤维和斑点形成古旧纸本质感。" },
+    { id: "ct_paper_texture", name: "通用纸纤维 (Generic Paper Fiber)", group: "E. 特殊承载表面", def: "", core: "轻微纸纤维、细小纹理和自然纸面不均匀。" }
+].map(enrichVisualMaterialItem('canvas_texture', ['support_surface', 'paper', 'substrate']));
 
 // --- 8. 光学格式 (OPTICAL FORMAT) - Same as Realism for compatibility ---
 export const AES_OPTICAL_FORMAT: LibraryItemDef[] = [

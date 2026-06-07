@@ -258,8 +258,8 @@ export const CONCEPT_MODULE_REGISTRY: ConceptModuleRegistryEntry[] = [
   },
   {
     id: 'cd_persona',
-    name: '人设标签',
-    nameEn: 'Persona',
+    name: '人设符号',
+    nameEn: 'Persona Sign',
     layer: 'protocols',
     family: 'identity',
     slot: 'persona_protocol',
@@ -309,7 +309,7 @@ export const CONCEPT_MODULE_REGISTRY: ConceptModuleRegistryEntry[] = [
     family: 'legacy_identity',
     slot: 'identity_protocol',
     dataKind: 'governing_protocol',
-    role: '旧版本身份协议，后续应并入身份锚点或人设标签。',
+    role: '旧版本身份协议，后续应并入身份锚点或人设符号。',
     randomPolicy: 'multi',
     compilePolicy: 'governing_package',
     templateRoutes: allRoutes,
@@ -377,7 +377,7 @@ export const CONCEPT_MODULE_REGISTRY: ConceptModuleRegistryEntry[] = [
     status: 'background'
   },
   {
-    id: 'aes_color_palette',
+    id: 'cd_color_palette',
     name: '美术配色',
     nameEn: 'Color Palette',
     layer: 'atoms',
@@ -388,11 +388,11 @@ export const CONCEPT_MODULE_REGISTRY: ConceptModuleRegistryEntry[] = [
     randomPolicy: 'single',
     compilePolicy: 'detail_atom',
     templateRoutes: visualRoutes,
-    source: 'aesthetic',
+    source: 'concept_design',
     status: 'active'
   },
   {
-    id: 'aes_director_style',
+    id: 'cd_director_style',
     name: '实拍导演风格',
     nameEn: 'Director Style',
     layer: 'protocols',
@@ -403,11 +403,11 @@ export const CONCEPT_MODULE_REGISTRY: ConceptModuleRegistryEntry[] = [
     randomPolicy: 'multi',
     compilePolicy: 'governing_package',
     templateRoutes: visualRoutes,
-    source: 'aesthetic',
+    source: 'concept_design',
     status: 'active'
   },
   {
-    id: 'aes_photo_style',
+    id: 'cd_photo_style',
     name: '摄影流派',
     nameEn: 'Photo Style',
     layer: 'protocols',
@@ -418,26 +418,26 @@ export const CONCEPT_MODULE_REGISTRY: ConceptModuleRegistryEntry[] = [
     randomPolicy: 'multi',
     compilePolicy: 'governing_package',
     templateRoutes: visualRoutes,
-    source: 'aesthetic',
+    source: 'concept_design',
     status: 'active'
   },
   {
-    id: 'aes_art_style',
-    name: '绘画风格',
+    id: 'cd_art_style',
+    name: '艺术流派',
     nameEn: 'Art Style',
     layer: 'protocols',
     family: 'soul',
     slot: 'paint_school',
     dataKind: 'governing_protocol',
-    role: '绘画/插画路线的作者、画派和图像风格协议。',
+    role: '艺术史流派、艺术家风格和全球图像语言协议，只控制形式、笔触、色彩、构图和材质。',
     randomPolicy: 'multi',
     compilePolicy: 'governing_package',
     templateRoutes: visualRoutes,
-    source: 'aesthetic',
+    source: 'concept_design',
     status: 'active'
   },
   {
-    id: 'aes_anim_director',
+    id: 'cd_anim_director',
     name: '动画导演',
     nameEn: 'Animation Director',
     layer: 'protocols',
@@ -448,41 +448,26 @@ export const CONCEPT_MODULE_REGISTRY: ConceptModuleRegistryEntry[] = [
     randomPolicy: 'multi',
     compilePolicy: 'governing_package',
     templateRoutes: visualRoutes,
-    source: 'aesthetic',
+    source: 'concept_design',
     status: 'active'
   },
   {
-    id: 'aes_art_movement',
-    name: '艺术运动',
-    nameEn: 'Art Movement',
+    id: 'cd_art_movement',
+    name: '美术插画',
+    nameEn: 'Illustration',
     layer: 'protocols',
     family: 'soul',
-    slot: 'art_movement',
+    slot: 'illustration_style',
     dataKind: 'governing_protocol',
-    role: '更抽象的艺术史运动、图像秩序和形式协议。',
+    role: '插画、游戏美术、概念美术、商业美术和图像生产美学协议。',
     randomPolicy: 'multi',
     compilePolicy: 'governing_package',
     templateRoutes: visualRoutes,
-    source: 'aesthetic',
+    source: 'concept_design',
     status: 'active'
   },
   {
-    id: 'aes_poster_style',
-    name: '平面设计风格',
-    nameEn: 'Poster Style',
-    layer: 'protocols',
-    family: 'soul',
-    slot: 'graphic_system',
-    dataKind: 'governing_protocol',
-    role: '版式、平面设计和视觉系统协议，可影响身份板、海报、资料页。',
-    randomPolicy: 'multi',
-    compilePolicy: 'governing_package',
-    templateRoutes: ['identity_board', 'detail_sheet', 'poster'],
-    source: 'aesthetic',
-    status: 'active'
-  },
-  {
-    id: 'aes_camera_system',
+    id: 'cd_camera_system',
     name: '机身系统',
     nameEn: 'Camera System',
     layer: 'atoms',
@@ -493,11 +478,11 @@ export const CONCEPT_MODULE_REGISTRY: ConceptModuleRegistryEntry[] = [
     randomPolicy: 'single',
     compilePolicy: 'detail_atom',
     templateRoutes: ['portrait', 'cinematic_frame', 'reference_extraction'],
-    source: 'aesthetic',
+    source: 'concept_design',
     status: 'active'
   },
   {
-    id: 'aes_lens_series',
+    id: 'cd_lens_series',
     name: '镜头系列',
     nameEn: 'Lens Series',
     layer: 'atoms',
@@ -508,11 +493,11 @@ export const CONCEPT_MODULE_REGISTRY: ConceptModuleRegistryEntry[] = [
     randomPolicy: 'single',
     compilePolicy: 'detail_atom',
     templateRoutes: ['portrait', 'cinematic_frame'],
-    source: 'aesthetic',
+    source: 'concept_design',
     status: 'active'
   },
   {
-    id: 'aes_optical_format',
+    id: 'cd_optical_format',
     name: '光学规格',
     nameEn: 'Optical Format',
     layer: 'atoms',
@@ -523,11 +508,11 @@ export const CONCEPT_MODULE_REGISTRY: ConceptModuleRegistryEntry[] = [
     randomPolicy: 'single',
     compilePolicy: 'detail_atom',
     templateRoutes: ['portrait', 'cinematic_frame'],
-    source: 'aesthetic',
+    source: 'concept_design',
     status: 'active'
   },
   {
-    id: 'aes_texture_render',
+    id: 'cd_texture_render',
     name: '质感渲染',
     nameEn: 'Texture Render',
     layer: 'atoms',
@@ -538,11 +523,11 @@ export const CONCEPT_MODULE_REGISTRY: ConceptModuleRegistryEntry[] = [
     randomPolicy: 'single',
     compilePolicy: 'detail_atom',
     templateRoutes: visualRoutes,
-    source: 'aesthetic',
+    source: 'concept_design',
     status: 'active'
   },
   {
-    id: 'aes_physical_grain',
+    id: 'cd_physical_grain',
     name: '物理颗粒',
     nameEn: 'Physical Grain',
     layer: 'atoms',
@@ -553,11 +538,11 @@ export const CONCEPT_MODULE_REGISTRY: ConceptModuleRegistryEntry[] = [
     randomPolicy: 'single',
     compilePolicy: 'detail_atom',
     templateRoutes: visualRoutes,
-    source: 'aesthetic',
+    source: 'concept_design',
     status: 'active'
   },
   {
-    id: 'aes_base_tone',
+    id: 'cd_base_tone',
     name: '底片基调',
     nameEn: 'Base Tone',
     layer: 'atoms',
@@ -568,11 +553,11 @@ export const CONCEPT_MODULE_REGISTRY: ConceptModuleRegistryEntry[] = [
     randomPolicy: 'single',
     compilePolicy: 'detail_atom',
     templateRoutes: visualRoutes,
-    source: 'aesthetic',
+    source: 'concept_design',
     status: 'active'
   },
   {
-    id: 'aes_color_science',
+    id: 'cd_color_science',
     name: '色彩科学',
     nameEn: 'Color Science',
     layer: 'atoms',
@@ -583,11 +568,11 @@ export const CONCEPT_MODULE_REGISTRY: ConceptModuleRegistryEntry[] = [
     randomPolicy: 'single',
     compilePolicy: 'detail_atom',
     templateRoutes: visualRoutes,
-    source: 'aesthetic',
+    source: 'concept_design',
     status: 'active'
   },
   {
-    id: 'aes_art_medium',
+    id: 'cd_art_medium',
     name: '艺术媒介',
     nameEn: 'Art Medium',
     layer: 'protocols',
@@ -598,11 +583,11 @@ export const CONCEPT_MODULE_REGISTRY: ConceptModuleRegistryEntry[] = [
     randomPolicy: 'single',
     compilePolicy: 'governing_context',
     templateRoutes: visualRoutes,
-    source: 'aesthetic',
+    source: 'concept_design',
     status: 'active'
   },
   {
-    id: 'aes_line_quality',
+    id: 'cd_line_quality',
     name: '线条质量',
     nameEn: 'Line Quality',
     layer: 'atoms',
@@ -613,11 +598,11 @@ export const CONCEPT_MODULE_REGISTRY: ConceptModuleRegistryEntry[] = [
     randomPolicy: 'single',
     compilePolicy: 'detail_atom',
     templateRoutes: visualRoutes,
-    source: 'aesthetic',
+    source: 'concept_design',
     status: 'active'
   },
   {
-    id: 'aes_canvas_texture',
+    id: 'cd_canvas_texture',
     name: '画布质感',
     nameEn: 'Canvas Texture',
     layer: 'atoms',
@@ -628,26 +613,26 @@ export const CONCEPT_MODULE_REGISTRY: ConceptModuleRegistryEntry[] = [
     randomPolicy: 'single',
     compilePolicy: 'detail_atom',
     templateRoutes: visualRoutes,
-    source: 'aesthetic',
+    source: 'concept_design',
     status: 'active'
   },
   {
-    id: 'aes_image_focus',
-    name: '构图类别',
-    nameEn: 'Image Category',
+    id: 'cd_framing_focus',
+    name: '画面焦点',
+    nameEn: 'Image Focus',
     layer: 'templates',
     family: 'eye',
     slot: 'image_focus',
     dataKind: 'template_route',
-    role: '图像任务类型：肖像、身份板、场景、静物等。后续应由模板路由接管。',
-    randomPolicy: 'template_only',
-    compilePolicy: 'template_contract',
+    role: '画面第一阅读重心：脸、全身、动作、环境、物件、材质或形式。它是取景细项，不替代拍摄协议预设。',
+    randomPolicy: 'single',
+    compilePolicy: 'presentation_atom',
     templateRoutes: allRoutes,
-    source: 'aesthetic',
+    source: 'concept_design',
     status: 'active'
   },
   {
-    id: 'aes_shot_size',
+    id: 'cd_framing_shot_size',
     name: '景别',
     nameEn: 'Shot Size',
     layer: 'atoms',
@@ -658,11 +643,11 @@ export const CONCEPT_MODULE_REGISTRY: ConceptModuleRegistryEntry[] = [
     randomPolicy: 'single',
     compilePolicy: 'presentation_atom',
     templateRoutes: visualRoutes,
-    source: 'aesthetic',
+    source: 'concept_design',
     status: 'active'
   },
   {
-    id: 'aes_visual_balance',
+    id: 'cd_framing_balance',
     name: '视觉平衡',
     nameEn: 'Visual Balance',
     layer: 'atoms',
@@ -673,11 +658,11 @@ export const CONCEPT_MODULE_REGISTRY: ConceptModuleRegistryEntry[] = [
     randomPolicy: 'single',
     compilePolicy: 'presentation_atom',
     templateRoutes: visualRoutes,
-    source: 'aesthetic',
+    source: 'concept_design',
     status: 'active'
   },
   {
-    id: 'aes_perspective',
+    id: 'cd_framing_perspective',
     name: '透视',
     nameEn: 'Perspective',
     layer: 'atoms',
@@ -688,11 +673,11 @@ export const CONCEPT_MODULE_REGISTRY: ConceptModuleRegistryEntry[] = [
     randomPolicy: 'single',
     compilePolicy: 'presentation_atom',
     templateRoutes: visualRoutes,
-    source: 'aesthetic',
+    source: 'concept_design',
     status: 'active'
   },
   {
-    id: 'aes_angle',
+    id: 'cd_framing_angle',
     name: '拍摄角度',
     nameEn: 'Camera Angle',
     layer: 'atoms',
@@ -703,11 +688,11 @@ export const CONCEPT_MODULE_REGISTRY: ConceptModuleRegistryEntry[] = [
     randomPolicy: 'single',
     compilePolicy: 'presentation_atom',
     templateRoutes: ['portrait', 'poster', 'cinematic_frame'],
-    source: 'aesthetic',
+    source: 'concept_design',
     status: 'active'
   },
   {
-    id: 'aes_focal_length',
+    id: 'cd_framing_focal_length',
     name: '焦段',
     nameEn: 'Focal Length',
     layer: 'atoms',
@@ -718,11 +703,11 @@ export const CONCEPT_MODULE_REGISTRY: ConceptModuleRegistryEntry[] = [
     randomPolicy: 'single',
     compilePolicy: 'presentation_atom',
     templateRoutes: ['portrait', 'cinematic_frame'],
-    source: 'aesthetic',
+    source: 'concept_design',
     status: 'active'
   },
   {
-    id: 'aes_depth',
+    id: 'cd_framing_depth',
     name: '景深/焦点',
     nameEn: 'Depth of Field',
     layer: 'atoms',
@@ -733,11 +718,11 @@ export const CONCEPT_MODULE_REGISTRY: ConceptModuleRegistryEntry[] = [
     randomPolicy: 'single',
     compilePolicy: 'presentation_atom',
     templateRoutes: ['portrait', 'cinematic_frame', 'poster'],
-    source: 'aesthetic',
+    source: 'concept_design',
     status: 'active'
   },
   {
-    id: 'aes_shutter',
+    id: 'cd_framing_shutter',
     name: '快门',
     nameEn: 'Shutter',
     layer: 'atoms',
@@ -748,11 +733,11 @@ export const CONCEPT_MODULE_REGISTRY: ConceptModuleRegistryEntry[] = [
     randomPolicy: 'single',
     compilePolicy: 'presentation_atom',
     templateRoutes: ['cinematic_frame', 'poster'],
-    source: 'aesthetic',
+    source: 'concept_design',
     status: 'active'
   },
   {
-    id: 'aes_lens_fx',
+    id: 'cd_framing_lens_fx',
     name: '光学特效',
     nameEn: 'Optical FX',
     layer: 'atoms',
@@ -763,11 +748,26 @@ export const CONCEPT_MODULE_REGISTRY: ConceptModuleRegistryEntry[] = [
     randomPolicy: 'multi',
     compilePolicy: 'presentation_atom',
     templateRoutes: visualRoutes,
-    source: 'aesthetic',
+    source: 'concept_design',
     status: 'active'
   },
   {
-    id: 'aes_scene_real',
+    id: 'cd_shot_preset',
+    name: '拍摄协议预设',
+    nameEn: 'Shooting Protocol Preset',
+    layer: 'templates',
+    family: 'eye',
+    slot: 'shot_preset',
+    dataKind: 'template_route',
+    role: '模板式拍摄方案库：控制图像体裁、观看关系、主体位置、场景接口、姿态接口和画面组织。它可作为 C03/C04/C08/C10 的拍摄层软补丁，但不替代主体身份、正式时空、物理媒介或输出模板。',
+    randomPolicy: 'single',
+    compilePolicy: 'presentation_atom',
+    templateRoutes: allRoutes,
+    source: 'concept_design',
+    status: 'active'
+  },
+  {
+    id: 'cd_scene_real',
     name: '现实场景',
     nameEn: 'Real Scene',
     layer: 'protocols',
@@ -778,11 +778,11 @@ export const CONCEPT_MODULE_REGISTRY: ConceptModuleRegistryEntry[] = [
     randomPolicy: 'single',
     compilePolicy: 'governing_context',
     templateRoutes: ['portrait', 'poster', 'cinematic_frame'],
-    source: 'aesthetic',
+    source: 'concept_design',
     status: 'active'
   },
   {
-    id: 'aes_scene_surreal',
+    id: 'cd_scene_surreal',
     name: '超现实场景',
     nameEn: 'Surreal Scene',
     layer: 'protocols',
@@ -793,11 +793,11 @@ export const CONCEPT_MODULE_REGISTRY: ConceptModuleRegistryEntry[] = [
     randomPolicy: 'single',
     compilePolicy: 'governing_context',
     templateRoutes: ['poster', 'cinematic_frame'],
-    source: 'aesthetic',
+    source: 'concept_design',
     status: 'active'
   },
   {
-    id: 'aes_scene_abstract',
+    id: 'cd_scene_abstract',
     name: '抽象场景',
     nameEn: 'Abstract Scene',
     layer: 'protocols',
@@ -808,11 +808,11 @@ export const CONCEPT_MODULE_REGISTRY: ConceptModuleRegistryEntry[] = [
     randomPolicy: 'single',
     compilePolicy: 'governing_context',
     templateRoutes: ['poster', 'cinematic_frame'],
-    source: 'aesthetic',
+    source: 'concept_design',
     status: 'active'
   },
   {
-    id: 'aes_atmosphere',
+    id: 'cd_atmosphere',
     name: '天气/大气',
     nameEn: 'Atmosphere',
     layer: 'atoms',
@@ -823,11 +823,11 @@ export const CONCEPT_MODULE_REGISTRY: ConceptModuleRegistryEntry[] = [
     randomPolicy: 'single',
     compilePolicy: 'detail_atom',
     templateRoutes: ['portrait', 'poster', 'cinematic_frame'],
-    source: 'aesthetic',
+    source: 'concept_design',
     status: 'active'
   },
   {
-    id: 'aes_particles',
+    id: 'cd_particles',
     name: '粒子',
     nameEn: 'Particles',
     layer: 'atoms',
@@ -838,11 +838,11 @@ export const CONCEPT_MODULE_REGISTRY: ConceptModuleRegistryEntry[] = [
     randomPolicy: 'multi',
     compilePolicy: 'detail_atom',
     templateRoutes: ['poster', 'cinematic_frame'],
-    source: 'aesthetic',
+    source: 'concept_design',
     status: 'active'
   },
   {
-    id: 'aes_light_mood',
+    id: 'cd_light_mood',
     name: '光影基调',
     nameEn: 'Lighting Mood',
     layer: 'atoms',
@@ -853,26 +853,26 @@ export const CONCEPT_MODULE_REGISTRY: ConceptModuleRegistryEntry[] = [
     randomPolicy: 'single',
     compilePolicy: 'detail_atom',
     templateRoutes: ['portrait', 'poster', 'cinematic_frame'],
-    source: 'aesthetic',
+    source: 'concept_design',
     status: 'active'
   },
   {
-    id: 'aes_light_type',
-    name: '照明类型',
-    nameEn: 'Lighting Type',
+    id: 'cd_light_type',
+    name: '光源锚点',
+    nameEn: 'Light Source Anchor',
     layer: 'atoms',
     family: 'light',
     slot: 'source_type',
     dataKind: 'functional_atom',
-    role: '物理光源类型。',
+    role: '画面主要发光来源，以及它在当前时空中是否能直接成立。',
     randomPolicy: 'multi',
     compilePolicy: 'detail_atom',
     templateRoutes: ['portrait', 'poster', 'cinematic_frame'],
-    source: 'aesthetic',
+    source: 'concept_design',
     status: 'active'
   },
   {
-    id: 'aes_light_direction',
+    id: 'cd_light_direction',
     name: '光投射方向',
     nameEn: 'Light Direction',
     layer: 'atoms',
@@ -883,11 +883,11 @@ export const CONCEPT_MODULE_REGISTRY: ConceptModuleRegistryEntry[] = [
     randomPolicy: 'single',
     compilePolicy: 'detail_atom',
     templateRoutes: ['portrait', 'poster', 'cinematic_frame'],
-    source: 'aesthetic',
+    source: 'concept_design',
     status: 'active'
   },
   {
-    id: 'aes_light_shape',
+    id: 'cd_light_shape',
     name: '光投影形状',
     nameEn: 'Light Shape',
     layer: 'atoms',
@@ -898,11 +898,11 @@ export const CONCEPT_MODULE_REGISTRY: ConceptModuleRegistryEntry[] = [
     randomPolicy: 'single',
     compilePolicy: 'detail_atom',
     templateRoutes: ['portrait', 'poster', 'cinematic_frame'],
-    source: 'aesthetic',
+    source: 'concept_design',
     status: 'active'
   },
   {
-    id: 'aes_render_real',
+    id: 'cd_render_real',
     name: '画质增强(写实)',
     nameEn: 'Quality Real',
     layer: 'atoms',
@@ -913,11 +913,11 @@ export const CONCEPT_MODULE_REGISTRY: ConceptModuleRegistryEntry[] = [
     randomPolicy: 'single',
     compilePolicy: 'detail_atom',
     templateRoutes: visualRoutes,
-    source: 'aesthetic',
+    source: 'concept_design',
     status: 'active'
   },
   {
-    id: 'aes_render_art',
+    id: 'cd_render_art',
     name: '画质增强(美术)',
     nameEn: 'Quality Art',
     layer: 'atoms',
@@ -928,7 +928,7 @@ export const CONCEPT_MODULE_REGISTRY: ConceptModuleRegistryEntry[] = [
     randomPolicy: 'single',
     compilePolicy: 'detail_atom',
     templateRoutes: visualRoutes,
-    source: 'aesthetic',
+    source: 'concept_design',
     status: 'active'
   }
 ];
@@ -1033,16 +1033,8 @@ export const CONCEPT_BACKGROUND_MEDIA_MODULE_REGISTRY: ConceptModuleRegistryEntr
   mediaBackground('cd_media_paint_eye', '绘画 L1.2 眼', 'Paint Eye', 'media_paint', 'eye'),
   mediaBackground('cd_media_paint_craft', '绘画工艺', 'Paint Craft', 'media_paint', 'craft'),
   mediaBackground('cd_media_paint_format', '绘画展示格式', 'Paint Format', 'media_paint', 'format'),
-  mediaBackground('cd_media_cgi_soul', 'CGI魂', 'CGI Soul', 'media_cgi', 'soul'),
-  mediaBackground('cd_media_cgi_quality', 'CGI L1.1 质', 'CGI Quality', 'media_cgi', 'quality'),
-  mediaBackground('cd_media_cgi_eye', 'CGI L1.2 眼', 'CGI Eye', 'media_cgi', 'eye'),
-  mediaBackground('cd_media_cgi_craft', 'CGI工艺', 'CGI Craft', 'media_cgi', 'craft'),
-  mediaBackground('cd_media_cgi_format', 'CGI展示格式', 'CGI Format', 'media_cgi', 'format'),
-  mediaBackground('cd_media_tangible_soul', '实体魂', 'Tangible Soul', 'media_tangible', 'soul'),
-  mediaBackground('cd_media_tangible_quality', '实体 L1.1 质', 'Tangible Quality', 'media_tangible', 'quality'),
-  mediaBackground('cd_media_tangible_eye', '实体 L1.2 眼', 'Tangible Eye', 'media_tangible', 'eye'),
-  mediaBackground('cd_media_tangible_craft', '实体工艺', 'Tangible Craft', 'media_tangible', 'craft'),
-  mediaBackground('cd_media_tangible_format', '实体展示格式', 'Tangible Format', 'media_tangible', 'format')
+  mediaBackground('cd_media_cgi_soul', 'CGI风格', 'CGI Style', 'media_cgi', 'soul'),
+  mediaBackground('cd_media_tangible_soul', '实体风格', 'Tangible Style', 'media_tangible', 'soul'),
 ];
 
 export const CONCEPT_MAPPING_PRESET_REGISTRY: ConceptModuleRegistryEntry[] = [];

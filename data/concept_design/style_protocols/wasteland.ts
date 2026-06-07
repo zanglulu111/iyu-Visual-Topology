@@ -3,7 +3,7 @@ import { makeStyleProtocolItems, StyleProtocolFamily, StyleProtocolSeed } from '
 const ROUTE = 'WASTELAND';
 const ROUTE_NAME = '废土拼接';
 const ROUTE_NAME_EN = 'Wasteland Patchwork';
-const ERAS = ['modern', 'contemporary', 'near_future', 'timeless'];
+const ERAS = ['industrial', 'modern', 'contemporary', 'near_future', 'timeless'];
 const FORBIDS = ['无来源脏乱', '杂物堆', '高级光洁材质主导', '真实政治组织标识', '血腥猎奇', '废土背景抢走人物'];
 
 const s = (

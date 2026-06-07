@@ -299,6 +299,7 @@ const App: React.FC = () => {
     const [ringAnimClass, setRingAnimClass] = useState(showRings ? 'animate-ring-entrance' : 'opacity-0');
     const [ringAnimKey, setRingAnimKey] = useState(0);
     const lastShowRingsRef = useRef(showRings);
+    const conceptGlobalRandomizeRef = useRef<(() => void) | null>(null);
 
     useEffect(() => {
         const win = window as Window & {
@@ -562,6 +563,7 @@ const App: React.FC = () => {
     const [isTensionOpen, setIsTensionOpen] = useState(false);
     const [conceptRuntimeState, setConceptRuntimeState] = useState<ConceptDesignRuntimeState | null>(null);
     const lastConceptArchiveSignatureRef = useRef<string>('');
+    const lastConceptRuntimeSignatureRef = useRef<string>('');
 
     useEffect(() => {
         if (isSettingsOpen) {
@@ -1001,8 +1003,27 @@ const App: React.FC = () => {
         return nextItem;
     };
 
-    const handleConceptRuntimeChange = (state: ConceptDesignRuntimeState, persist = false) => {
-        setConceptRuntimeState(state);
+    const handleConceptRuntimeChange = useCallback((state: ConceptDesignRuntimeState, persist = false) => {
+        const runtimeSignature = [
+            state.sourceMode,
+            state.sourceLabel,
+            state.promptLang,
+            state.format,
+            state.mediumCategory,
+            state.bodyFormMode || '',
+            state.humanRegister || '',
+            state.randomMode || '',
+            state.generationInstruction,
+            state.finalPrompt,
+            JSON.stringify(state.variables),
+            JSON.stringify(state.sourceInputs)
+        ].join('|');
+
+        if (lastConceptRuntimeSignatureRef.current !== runtimeSignature) {
+            lastConceptRuntimeSignatureRef.current = runtimeSignature;
+            setConceptRuntimeState(state);
+        }
+
         if (!persist || selectedDriver !== DriverType.CONCEPT_DESIGN) return;
 
         const signature = [
@@ -1057,7 +1078,26 @@ const App: React.FC = () => {
                 conceptRuntimeState: state
             }
         );
-    };
+    }, [
+        activeProjectId,
+        aestheticMode,
+        colorPalette,
+        faceState,
+        focusState,
+        lang,
+        m7bIntensity,
+        mAxisMixer,
+        narrativeFieldState,
+        selectedDriver,
+        subjectType,
+        visionAnalysis,
+        visionImage,
+        visionImageMode,
+        visionImageNote,
+        visionImplantEnabled,
+        visionInput,
+        worldLawConfig
+    ]);
 
     const openAuth = () => { setIsAuthOpen(true); closeAllModals(); };
     const closeAllModals = () => {
@@ -1471,6 +1511,10 @@ const App: React.FC = () => {
     };
 
     const handleAestheticSmartRandom = () => {
+        if (selectedDriver === DriverType.CONCEPT_DESIGN) {
+            conceptGlobalRandomizeRef.current?.();
+            return;
+        }
         if (selectedDriver !== DriverType.AESTHETIC) return;
         const newState = randomizerService.generateAestheticSmartRandom(narrativeFieldState, subjectType, lockedModules, lockedTags, aestheticMode);
 
@@ -3267,6 +3311,9 @@ const App: React.FC = () => {
                                         worldLawConfig={worldLawConfig}
                                         setWorldLawConfig={setWorldLawConfig}
                                         onConceptRuntimeChange={handleConceptRuntimeChange}
+                                        onConceptGlobalRandomizeReady={(handler) => {
+                                            conceptGlobalRandomizeRef.current = handler;
+                                        }}
                                         conceptWorkspacePage={conceptWorkspacePage}
                                         isAdmin={isAdmin}
                                     />

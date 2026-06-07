@@ -16,6 +16,10 @@ type SymbolSystemRow = [
   forbids?: string[]
 ];
 
+type SymbolSystemAxisPatch = Pick<ConceptBaseItem, 'eraMode' | 'eras' | 'ontologyLevel' | 'realityTags' | 'categoryFit'>;
+type SymbolCategoryFit = NonNullable<ConceptBaseItem['categoryFit']>;
+
+const REAL_ERAS: ConceptEra[] = ['primitive', 'slave', 'feudal', 'early_modern', 'industrial', 'modern', 'contemporary', 'near_future', 'far_future'];
 const ALL_ERAS: ConceptEra[] = ['primitive', 'slave', 'feudal', 'early_modern', 'industrial', 'modern', 'contemporary', 'near_future', 'far_future', 'timeless'];
 const PREMODERN_ERAS: ConceptEra[] = ['primitive', 'slave', 'feudal', 'early_modern', 'timeless'];
 const HISTORICAL_ERAS: ConceptEra[] = ['slave', 'feudal', 'early_modern', 'industrial', 'timeless'];
@@ -25,6 +29,120 @@ const CONTEMPORARY_PLUS_ERAS: ConceptEra[] = ['contemporary', 'near_future', 'fa
 const FUTURE_ERAS: ConceptEra[] = ['near_future', 'far_future'];
 const MYTHIC_ERAS: ConceptEra[] = ['feudal', 'early_modern', 'timeless', 'mythic'];
 const WASTELAND_ERAS: ConceptEra[] = ['near_future', 'far_future', 'timeless'];
+
+const symbolFit = (
+  unlisted: SymbolCategoryFit['unlisted'],
+  strong: string[] = [],
+  usable: string[] = [],
+  fusion: string[] = [],
+  weak: string[] = [],
+  exclude: string[] = []
+): SymbolCategoryFit => ({ unlisted, strong, usable, fusion, weak, exclude });
+
+const symbolAxis = (
+  eraMode: SymbolSystemAxisPatch['eraMode'],
+  eras: ConceptEra[],
+  ontologyLevel: NonNullable<SymbolSystemAxisPatch['ontologyLevel']>,
+  realityTags: string[],
+  categoryFit: SymbolCategoryFit
+): SymbolSystemAxisPatch => ({ eraMode, eras, ontologyLevel, realityTags, categoryFit });
+
+const realisticSymbol = ['physical', 'realistic', 'symbol_evidence'];
+const stylizedSymbol = ['physical', 'stylized', 'semi_real', 'symbol_evidence'];
+const techSymbol = ['physical', 'stylized', 'semi_surreal', 'technological', 'symbol_evidence'];
+const ritualSymbol = ['physical', 'stylized', 'semi_real', 'ritual', 'symbol_evidence'];
+const surrealSymbol = ['non_realist', 'surreal', 'symbolic', 'symbol_evidence'];
+
+const institutionFit = symbolFit('none', ['real_professional'], ['urban_life', 'war_military'], ['cyberpunk', 'science_fiction'], ['xianxia']);
+const occupationalFit = symbolFit('none', ['real_professional'], ['urban_life', 'fashion_idol', 'noir_crime'], ['science_fiction'], ['xianxia']);
+const historicalFit = symbolFit('none', ['historical', 'court'], ['wuxia', 'religious_ritual', 'romance'], ['dark_fantasy', 'xianxia'], ['cyberpunk', 'science_fiction']);
+const armedFit = symbolFit('none', ['war_military'], ['wasteland', 'real_professional', 'adventure'], ['science_fiction', 'cyberpunk'], ['romance']);
+const ritualFit = symbolFit('none', ['religious_ritual'], ['dark_fantasy', 'xianxia', 'mythic_epic', 'historical'], ['horror', 'surreal'], ['urban_life']);
+const mediaFit = symbolFit('none', ['fashion_idol'], ['urban_life', 'boudoir_aesthetic', 'romance'], ['noir_crime', 'surreal'], ['war_military']);
+const techFit = symbolFit('none', ['science_fiction'], ['cyberpunk', 'posthuman', 'biopunk'], ['religious_ritual', 'wasteland'], ['historical']);
+const survivalFit = symbolFit('none', ['wasteland'], ['adventure', 'ecological', 'war_military'], ['science_fiction'], ['court']);
+
+const SYMBOL_SYSTEM_AXIS: Record<string, SymbolSystemAxisPatch> = {
+  name_patch: symbolAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticSymbol, institutionFit),
+  department_color_strip: symbolAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticSymbol, institutionFit),
+  access_level_badge: symbolAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticSymbol, institutionFit),
+  visitor_sticker: symbolAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticSymbol, symbolFit('none', ['real_professional', 'urban_life'], ['noir_crime'], ['science_fiction'], ['historical'])),
+  queue_number_tag: symbolAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticSymbol, symbolFit('none', ['urban_life'], ['real_professional'], ['surreal'], ['xianxia'])),
+  school_house_badge: symbolAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticSymbol, symbolFit('none', ['urban_life'], ['real_professional', 'fashion_idol'], ['fantasy'], ['war_military'])),
+  hospital_department_mark: symbolAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticSymbol, symbolFit('none', ['real_professional'], ['urban_life', 'biopunk'], ['science_fiction'], ['wuxia'])),
+  union_pin: symbolAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticSymbol, symbolFit('none', ['real_professional'], ['urban_life', 'war_military'], ['wasteland'], ['xianxia'])),
+  municipal_service_mark: symbolAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticSymbol, institutionFit),
+
+  tool_shadow_label: symbolAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticSymbol, occupationalFit),
+  sample_batch_code: symbolAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticSymbol, symbolFit('none', ['real_professional'], ['biopunk', 'science_fiction'], ['horror'], ['wuxia'])),
+  archive_spine_label: symbolAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticSymbol, occupationalFit),
+  inspection_stamp: symbolAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticSymbol, occupationalFit),
+  laundry_mark: symbolAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticSymbol, symbolFit('none', ['real_professional'], ['urban_life', 'fashion_idol'], [], ['xianxia'])),
+  price_tag_cutoff: symbolAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticSymbol, symbolFit('none', ['urban_life', 'fashion_idol'], ['real_professional'], ['romance'], ['historical'])),
+  maintenance_sticker: symbolAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticSymbol, occupationalFit),
+  hazard_handwritten_note: symbolAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticSymbol, symbolFit('weak', ['real_professional'], ['wasteland', 'war_military', 'adventure'], ['horror'], [])),
+  shift_schedule_card: symbolAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticSymbol, occupationalFit),
+
+  family_crest_patch: symbolAxis('specific', ['slave', 'feudal', 'early_modern', 'industrial'], 1, realisticSymbol, historicalFit),
+  heraldic_beast: symbolAxis('specific', ['slave', 'feudal', 'early_modern', 'industrial'], 1, realisticSymbol, historicalFit),
+  court_rank_embroidery: symbolAxis('specific', ['feudal', 'early_modern', 'timeless'], 1, realisticSymbol, symbolFit('none', ['court', 'historical'], ['wuxia', 'religious_ritual'], ['xianxia'], ['cyberpunk'])),
+  seal_imprint_motif: symbolAxis('specific', ['slave', 'feudal', 'early_modern', 'industrial'], 1, realisticSymbol, historicalFit),
+  guild_mark: symbolAxis('specific', ['slave', 'feudal', 'early_modern', 'industrial'], 1, realisticSymbol, historicalFit),
+  pilgrim_badge: symbolAxis('specific', ['slave', 'feudal', 'early_modern', 'industrial'], 1, realisticSymbol, symbolFit('none', ['religious_ritual', 'historical'], ['adventure', 'court'], ['dark_fantasy'], ['cyberpunk'])),
+  mourning_rosette: symbolAxis('specific', ['early_modern', 'industrial', 'modern'], 1, realisticSymbol, symbolFit('none', ['historical', 'romance'], ['court', 'dark_fantasy'], ['horror'], ['science_fiction'])),
+  dynastic_color_pair: symbolAxis('specific', ['slave', 'feudal', 'early_modern', 'industrial'], 1, realisticSymbol, historicalFit),
+  court_tab_marker: symbolAxis('specific', ['slave', 'feudal', 'early_modern', 'industrial'], 1, realisticSymbol, historicalFit),
+
+  rank_insignia_tab: symbolAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticSymbol, armedFit),
+  unit_patch: symbolAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticSymbol, armedFit),
+  kill_tally_mark: symbolAxis('universal', REAL_ERAS, 1, realisticSymbol, symbolFit('usable', ['war_military'], ['wasteland', 'wuxia', 'adventure', 'dark_fantasy'], ['horror'], ['romance'])),
+  warning_chevron: symbolAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticSymbol, armedFit),
+  ammunition_color_code: symbolAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticSymbol, armedFit),
+  riot_shield_label: symbolAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticSymbol, armedFit),
+  field_medic_cross: symbolAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticSymbol, symbolFit('none', ['war_military', 'real_professional'], ['wasteland', 'adventure'], ['science_fiction'], ['wuxia'])),
+  targeting_marker: symbolAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 2, stylizedSymbol, armedFit),
+  hazmat_warning_label: symbolAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 2, stylizedSymbol, symbolFit('none', ['real_professional', 'wasteland'], ['war_military', 'horror', 'biopunk'], ['science_fiction'], ['court'])),
+
+  sacred_geometry_patch: symbolAxis('specific', ['feudal', 'early_modern', 'timeless', 'mythic'], 2, ritualSymbol, ritualFit),
+  talisman_paper_strip: symbolAxis('specific', ['feudal', 'early_modern', 'timeless', 'mythic'], 2, ritualSymbol, symbolFit('none', ['religious_ritual', 'xianxia'], ['dark_fantasy', 'wuxia', 'mythic_epic'], ['horror', 'surreal'], ['urban_life'])),
+  wax_seal_mark: symbolAxis('specific', ['slave', 'feudal', 'early_modern', 'industrial'], 1, realisticSymbol, symbolFit('none', ['religious_ritual', 'historical'], ['court', 'dark_fantasy'], ['xianxia'], ['urban_life'])),
+  prayer_abbreviation: symbolAxis('specific', ['feudal', 'early_modern', 'timeless', 'mythic'], 1, ritualSymbol, ritualFit),
+  forbidden_object_tag: symbolAxis('specific', ['feudal', 'early_modern', 'timeless', 'mythic'], 2, ritualSymbol, ritualFit),
+  monastic_rank_cord: symbolAxis('specific', ['feudal', 'early_modern', 'timeless', 'mythic'], 1, ritualSymbol, ritualFit),
+  astrology_grid_mark: symbolAxis('specific', ['feudal', 'early_modern', 'timeless', 'mythic'], 2, ritualSymbol, ritualFit),
+  procession_banner_glyph: symbolAxis('specific', ['feudal', 'early_modern', 'timeless', 'mythic'], 1, ritualSymbol, ritualFit),
+  curse_seal_label: symbolAxis('specific', ['far_future', 'timeless', 'mythic'], 3, surrealSymbol, symbolFit('none', ['dark_fantasy', 'religious_ritual'], ['horror', 'xianxia', 'surreal'], ['body_horror'], ['urban_life'])),
+
+  brandless_graphic_mark: symbolAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticSymbol, mediaFit),
+  runway_collection_code: symbolAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticSymbol, mediaFit),
+  magazine_cover_grid: symbolAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticSymbol, mediaFit),
+  club_stamp_wristband: symbolAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticSymbol, symbolFit('none', ['urban_life', 'fashion_idol'], ['boudoir_aesthetic', 'romance'], ['noir_crime'], ['historical'])),
+  subculture_patch_cluster: symbolAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticSymbol, mediaFit),
+  sticker_bomb_surface: symbolAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticSymbol, mediaFit),
+  fanclub_badge: symbolAxis('specific', ['contemporary', 'near_future', 'far_future'], 1, realisticSymbol, mediaFit),
+  press_label_strip: symbolAxis('specific', ['contemporary', 'near_future', 'far_future'], 1, realisticSymbol, symbolFit('none', ['real_professional', 'fashion_idol'], ['urban_life'], ['cyberpunk'], ['historical'])),
+  graffiti_tag_motif: symbolAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 1, realisticSymbol, symbolFit('none', ['urban_life', 'fashion_idol'], ['noir_crime', 'wasteland'], ['surreal'], ['court'])),
+
+  qr_serial_label: symbolAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 2, techSymbol, techFit),
+  hud_status_glyph: symbolAxis('specific', ['near_future', 'far_future'], 4, techSymbol, techFit),
+  lab_subject_label: symbolAxis('specific', ['modern', 'contemporary', 'near_future', 'far_future'], 3, techSymbol, symbolFit('none', ['real_professional', 'biopunk'], ['science_fiction', 'posthuman'], ['horror'], ['wuxia'])),
+  colony_id_code: symbolAxis('specific', ['near_future', 'far_future'], 3, techSymbol, techFit),
+  circuit_panel_icon: symbolAxis('specific', ['near_future', 'far_future'], 3, techSymbol, techFit),
+  biometric_lock_mark: symbolAxis('specific', ['contemporary', 'near_future', 'far_future'], 3, techSymbol, techFit),
+  ai_corporate_sigil: symbolAxis('specific', ['near_future', 'far_future'], 4, techSymbol, techFit),
+  holographic_pass_mark: symbolAxis('specific', ['near_future', 'far_future'], 4, techSymbol, techFit),
+  biohazard_colony_label: symbolAxis('specific', ['near_future', 'far_future'], 3, techSymbol, symbolFit('none', ['biopunk', 'science_fiction'], ['posthuman', 'wasteland'], ['horror'], ['historical'])),
+
+  ration_token_mark: symbolAxis('specific', ['near_future', 'far_future'], 1, realisticSymbol, survivalFit),
+  handpainted_warning: symbolAxis('specific', ['near_future', 'far_future'], 1, realisticSymbol, survivalFit),
+  scavenger_clan_mark: symbolAxis('specific', ['near_future', 'far_future'], 1, realisticSymbol, survivalFit),
+  repair_tally_code: symbolAxis('specific', ['near_future', 'far_future'], 1, realisticSymbol, survivalFit),
+  water_right_mark: symbolAxis('specific', ['near_future', 'far_future'], 1, realisticSymbol, survivalFit),
+  salvage_route_arrow: symbolAxis('specific', ['near_future', 'far_future'], 1, realisticSymbol, survivalFit),
+  radiation_faded_label: symbolAxis('specific', ['near_future', 'far_future'], 2, stylizedSymbol, survivalFit),
+  shelter_number_stencil: symbolAxis('specific', ['near_future', 'far_future'], 1, realisticSymbol, survivalFit),
+  reclaimed_factory_label: symbolAxis('specific', ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'], 1, realisticSymbol, symbolFit('none', ['wasteland'], ['real_professional', 'war_military'], ['science_fiction'], ['court']))
+};
 
 const SYMBOL_ROWS: SymbolSystemRow[] = [
   ['name_patch', '姓名贴', 'Name Patch', 'A. 现实/机构符号', 'A. Real / Institutional Signs', '衣服、胸牌或工具包上的姓名贴，说明现实身份和岗位。', 'Name patch on clothing, badge, or tool bag, explaining real identity and role.', 1, INDUSTRIAL_PLUS_ERAS, 'clean', ['symbol', 'occupation']],
@@ -108,6 +226,18 @@ const SYMBOL_ROWS: SymbolSystemRow[] = [
   ['reclaimed_factory_label', '再利用工厂标签', 'Reclaimed Factory Label', 'H. 废土/生存符号', 'H. Wasteland / Survival Signs', '旧工业标签被缝在衣物或装备上，说明材料来源。', 'Old industrial label sewn onto clothing or gear, explaining material source.', 1, ['industrial', 'modern', 'contemporary', 'near_future', 'far_future', 'timeless'], 'clean', ['symbol', 'material']]
 ];
 
+const buildEvidenceTags = (group: string, affects: readonly string[], controls: readonly string[]): string[] => {
+  const tags = new Set<string>([...affects, ...controls]);
+  if (group.startsWith('A.') || group.startsWith('B.')) tags.add('institution');
+  if (group.startsWith('C.')) tags.add('historical');
+  if (group.startsWith('D.')) tags.add('combat');
+  if (group.startsWith('E.')) tags.add('ritual');
+  if (group.startsWith('F.')) tags.add('media');
+  if (group.startsWith('G.')) tags.add('technology');
+  if (group.startsWith('H.')) tags.add('survival');
+  return Array.from(tags);
+};
+
 export const CD_SYMBOL_SYSTEMS: ConceptBaseItem[] = SYMBOL_ROWS.map(([
   key,
   name,
@@ -122,18 +252,23 @@ export const CD_SYMBOL_SYSTEMS: ConceptBaseItem[] = SYMBOL_ROWS.map(([
   affects = ['symbol'],
   controls = ['symbol'],
   forbids = []
-]) => ({
-  id: `cd_sym_${key}`,
-  name,
-  nameEn,
-  group,
-  groupEn,
-  def,
-  defEn,
-  ontologyLevel,
-  eras,
-  risk,
-  affects,
-  controls,
-  forbids
-}));
+]) => {
+  const axisPatch = SYMBOL_SYSTEM_AXIS[key];
+  return {
+    id: `cd_sym_${key}`,
+    name,
+    nameEn,
+    group,
+    groupEn,
+    def,
+    defEn,
+    ontologyLevel,
+    eras,
+    risk,
+    affects,
+    controls,
+    evidenceTags: buildEvidenceTags(group, affects, controls),
+    forbids,
+    ...axisPatch
+  };
+});

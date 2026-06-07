@@ -1,8 +1,362 @@
-import { buildExplicitPersonaTerms, ExplicitPersonaSeed, PersonaEra } from './types';
+import { buildExplicitPersonaTerms, ExplicitPersonaSeed, PersonaCategoryFit, PersonaEra, personaFit } from './types';
 
-const mythic: PersonaEra[] = ['feudal', 'timeless', 'mythic'];
-const eastern: PersonaEra[] = ['feudal', 'early_modern', 'modern', 'contemporary', 'timeless', 'mythic'];
-const modernMythic: PersonaEra[] = ['modern', 'contemporary', 'near_future', 'timeless', 'mythic'];
+const mythic: PersonaEra[] = ['feudal', 'mythic'];
+const eastern: PersonaEra[] = ['feudal', 'early_modern', 'modern', 'contemporary', 'mythic'];
+const modernMythic: PersonaEra[] = ['modern', 'contemporary', 'near_future', 'mythic'];
+
+const fantasyFit = (group: string) => {
+  if (group.startsWith('A.')) return personaFit('weak', {
+    strong: ['fantasy', 'mythic_epic'],
+    usable: ['xianxia', 'religious_ritual', 'adventure'],
+    fusion: ['dark_fantasy', 'surreal'],
+    weak: ['urban_life', 'cyberpunk', 'real_professional']
+  });
+  if (group.startsWith('B.')) return personaFit('weak', {
+    strong: ['fantasy', 'adventure'],
+    usable: ['dark_fantasy', 'wuxia', 'xianxia'],
+    fusion: ['horror', 'romance'],
+    weak: ['real_professional', 'cyberpunk', 'court']
+  });
+  if (group.startsWith('C.')) return personaFit('weak', {
+    strong: ['fantasy', 'ecological'],
+    usable: ['mythic_epic', 'court', 'romance'],
+    fusion: ['xianxia', 'dark_fantasy'],
+    weak: ['urban_life', 'cyberpunk', 'wasteland']
+  });
+  if (group.startsWith('D.')) return personaFit('weak', {
+    strong: ['fantasy', 'mythic_epic'],
+    usable: ['adventure', 'war_military', 'dark_fantasy'],
+    fusion: ['body_horror', 'xianxia'],
+    weak: ['urban_life', 'romance', 'real_professional']
+  });
+  if (group.startsWith('E.')) return personaFit('weak', {
+    strong: ['fantasy', 'mythic_epic'],
+    usable: ['xianxia', 'historical', 'religious_ritual'],
+    fusion: ['urban_life', 'surreal'],
+    weak: ['cyberpunk', 'war_military', 'wasteland']
+  });
+  if (group.startsWith('F.')) return personaFit('weak', {
+    strong: ['fantasy', 'ecological'],
+    usable: ['romance', 'mythic_epic', 'dark_fantasy'],
+    fusion: ['surreal'],
+    weak: ['war_military', 'cyberpunk', 'real_professional']
+  });
+  if (group.startsWith('G.')) return personaFit('weak', {
+    strong: ['dark_fantasy', 'horror', 'fantasy'],
+    usable: ['religious_ritual', 'body_horror'],
+    fusion: ['surreal', 'xianxia'],
+    weak: ['romance', 'urban_life', 'fashion_idol']
+  });
+  if (group.startsWith('H.')) return personaFit('weak', {
+    strong: ['mythic_epic', 'fantasy'],
+    usable: ['adventure', 'war_military', 'xianxia'],
+    fusion: ['dark_fantasy', 'romance'],
+    weak: ['urban_life', 'cyberpunk', 'real_professional']
+  });
+  if (group.startsWith('I.')) return personaFit('weak', {
+    strong: ['fantasy', 'ecological'],
+    usable: ['adventure', 'body_horror', 'dark_fantasy'],
+    fusion: ['xianxia', 'surreal'],
+    weak: ['real_professional', 'urban_life', 'court']
+  });
+  return personaFit('weak', {
+    strong: ['dark_fantasy', 'fantasy', 'court'],
+    usable: ['horror', 'romance', 'mythic_epic'],
+    fusion: ['surreal'],
+    weak: ['urban_life', 'cyberpunk', 'wasteland']
+  });
+};
+
+const fantasyFitOverrides: Record<string, PersonaCategoryFit> = {
+  wand_shop_heir: personaFit('weak', {
+    strong: ['fantasy', 'real_professional', 'workplace'],
+    usable: ['mythic_epic', 'urban_life'],
+    fusion: ['dark_fantasy'],
+    weak: ['cyberpunk', 'war_military', 'wasteland']
+  }),
+  spell_exam_top_student: personaFit('weak', {
+    strong: ['fantasy', 'institutional'],
+    usable: ['mythic_epic', 'urban_life', 'adventure'],
+    fusion: ['xianxia', 'surreal'],
+    weak: ['cyberpunk', 'war_military', 'wasteland']
+  }),
+  summoning_circle_prefect: personaFit('weak', {
+    strong: ['fantasy', 'institutional'],
+    usable: ['mythic_epic', 'adventure'],
+    fusion: ['dark_fantasy', 'horror'],
+    weak: ['cyberpunk', 'fashion_idol', 'wasteland']
+  }),
+  dream_divination_teacher: personaFit('weak', {
+    strong: ['fantasy', 'real_professional', 'institutional'],
+    usable: ['mythic_epic', 'religious_ritual'],
+    fusion: ['surreal', 'dark_fantasy'],
+    weak: ['cyberpunk', 'war_military', 'wasteland']
+  }),
+  battle_mage_cadet: personaFit('weak', {
+    strong: ['fantasy', 'war_military', 'institutional'],
+    usable: ['mythic_epic', 'adventure'],
+    fusion: ['dark_fantasy', 'xianxia'],
+    weak: ['urban_life', 'fashion_idol', 'romance']
+  }),
+  cursed_dormitory_warden: personaFit('weak', {
+    strong: ['fantasy', 'institutional', 'horror'],
+    usable: ['dark_fantasy', 'real_professional'],
+    fusion: ['surreal'],
+    weak: ['cyberpunk', 'wasteland', 'fashion_idol']
+  }),
+  tavern_rogue_girl: personaFit('weak', {
+    strong: ['fantasy', 'adventure', 'noir_crime'],
+    usable: ['urban_life', 'dark_fantasy'],
+    fusion: ['romance'],
+    weak: ['court', 'cyberpunk', 'real_professional']
+  }),
+  shield_sister_paladin: personaFit('weak', {
+    strong: ['fantasy', 'religious_ritual', 'war_military'],
+    usable: ['adventure', 'dark_fantasy'],
+    fusion: ['xianxia'],
+    weak: ['cyberpunk', 'urban_life', 'fashion_idol']
+  }),
+  healing_potion_peddler: personaFit('weak', {
+    strong: ['fantasy', 'medical', 'real_professional'],
+    usable: ['adventure', 'urban_life'],
+    fusion: ['dark_fantasy'],
+    weak: ['court', 'cyberpunk', 'war_military']
+  }),
+  monster_loot_appraiser: personaFit('weak', {
+    strong: ['fantasy', 'real_professional', 'adventure'],
+    usable: ['urban_life', 'noir_crime'],
+    fusion: ['dark_fantasy'],
+    weak: ['court', 'cyberpunk', 'romance']
+  }),
+  retired_dragon_slayer_innkeeper: personaFit('weak', {
+    strong: ['fantasy', 'adventure', 'real_professional'],
+    usable: ['urban_life', 'mythic_epic'],
+    fusion: ['romance', 'dark_fantasy'],
+    weak: ['court', 'cyberpunk', 'fashion_idol']
+  }),
+  moonlit_elven_diplomat: personaFit('weak', {
+    strong: ['fantasy', 'court', 'real_professional'],
+    usable: ['ecological', 'romance', 'mythic_epic'],
+    fusion: ['dark_fantasy'],
+    weak: ['cyberpunk', 'wasteland', 'war_military']
+  }),
+  moss_crowned_healer: personaFit('weak', {
+    strong: ['fantasy', 'ecological', 'medical'],
+    usable: ['mythic_epic', 'court'],
+    fusion: ['xianxia', 'dark_fantasy'],
+    weak: ['cyberpunk', 'wasteland', 'war_military']
+  }),
+  half_fae_courtier: personaFit('weak', {
+    strong: ['fantasy', 'court', 'ecological'],
+    usable: ['romance', 'mythic_epic'],
+    fusion: ['dark_fantasy', 'surreal'],
+    weak: ['cyberpunk', 'wasteland', 'war_military']
+  }),
+  autumn_court_assassin: personaFit('weak', {
+    strong: ['fantasy', 'court', 'noir_crime'],
+    usable: ['ecological', 'adventure', 'dark_fantasy'],
+    fusion: ['romance'],
+    weak: ['cyberpunk', 'wasteland', 'real_professional']
+  }),
+  ancient_tree_librarian: personaFit('weak', {
+    strong: ['fantasy', 'ecological', 'institutional'],
+    usable: ['mythic_epic', 'real_professional'],
+    fusion: ['xianxia', 'surreal'],
+    weak: ['cyberpunk', 'wasteland', 'war_military']
+  }),
+  winter_elven_executioner: personaFit('weak', {
+    strong: ['fantasy', 'court', 'war_military'],
+    usable: ['ecological', 'dark_fantasy'],
+    fusion: ['horror'],
+    weak: ['urban_life', 'cyberpunk', 'romance']
+  }),
+  wyvern_stable_girl: personaFit('weak', {
+    strong: ['fantasy', 'real_professional', 'ecological'],
+    usable: ['adventure', 'mythic_epic'],
+    fusion: ['war_military'],
+    weak: ['court', 'cyberpunk', 'romance']
+  }),
+  sea_serpent_harpooner: personaFit('weak', {
+    strong: ['fantasy', 'adventure', 'ecological'],
+    usable: ['mythic_epic', 'war_military'],
+    fusion: ['dark_fantasy'],
+    weak: ['court', 'urban_life', 'fashion_idol']
+  }),
+  griffin_knight_groom: personaFit('weak', {
+    strong: ['fantasy', 'war_military', 'adventure'],
+    usable: ['mythic_epic', 'real_professional'],
+    fusion: ['court'],
+    weak: ['urban_life', 'cyberpunk', 'romance']
+  }),
+  phoenix_ash_priestess: personaFit('weak', {
+    strong: ['fantasy', 'religious_ritual', 'mythic_epic'],
+    usable: ['dark_fantasy', 'adventure'],
+    fusion: ['xianxia'],
+    weak: ['urban_life', 'cyberpunk', 'real_professional']
+  }),
+  chimera_breeder: personaFit('weak', {
+    strong: ['fantasy', 'biopunk', 'body_horror'],
+    usable: ['ecological', 'real_professional', 'adventure'],
+    fusion: ['dark_fantasy'],
+    weak: ['court', 'romance', 'urban_life']
+  }),
+  manticore_poison_apothecary: personaFit('weak', {
+    strong: ['fantasy', 'medical', 'body_horror'],
+    usable: ['dark_fantasy', 'real_professional', 'noir_crime'],
+    fusion: ['biopunk'],
+    weak: ['court', 'romance', 'cyberpunk']
+  }),
+  dragon_egg_smuggler: personaFit('weak', {
+    strong: ['fantasy', 'noir_crime', 'adventure'],
+    usable: ['mythic_epic', 'dark_fantasy'],
+    fusion: ['war_military'],
+    weak: ['court', 'romance', 'real_professional']
+  }),
+  fox_spirit_courtesan: personaFit('weak', {
+    strong: ['fantasy', 'historical', 'fashion_idol'],
+    usable: ['xianxia', 'romance', 'boudoir_aesthetic'],
+    fusion: ['surreal', 'dark_fantasy'],
+    weak: ['cyberpunk', 'war_military', 'wasteland']
+  }),
+  shushan_sword_immortal: personaFit('weak', {
+    strong: ['xianxia', 'fantasy', 'wuxia'],
+    usable: ['mythic_epic', 'religious_ritual', 'historical'],
+    fusion: ['dark_fantasy'],
+    weak: ['cyberpunk', 'urban_life', 'wasteland']
+  }),
+  wandering_daoist_exorcist: personaFit('weak', {
+    strong: ['xianxia', 'religious_ritual', 'wuxia'],
+    usable: ['fantasy', 'historical', 'horror'],
+    fusion: ['dark_fantasy'],
+    weak: ['cyberpunk', 'fashion_idol', 'wasteland']
+  }),
+  jiangshi_bride: personaFit('weak', {
+    strong: ['fantasy', 'horror', 'romance'],
+    usable: ['xianxia', 'historical', 'religious_ritual'],
+    fusion: ['dark_fantasy'],
+    weak: ['cyberpunk', 'war_military', 'wasteland']
+  }),
+  faceless_noh_actor: personaFit('weak', {
+    strong: ['fantasy', 'historical', 'fashion_idol'],
+    usable: ['religious_ritual', 'surreal', 'horror'],
+    fusion: ['dark_fantasy'],
+    weak: ['cyberpunk', 'war_military', 'wasteland']
+  }),
+  celtic_fae_bride: personaFit('weak', {
+    strong: ['fantasy', 'ecological', 'romance'],
+    usable: ['mythic_epic', 'dark_fantasy'],
+    fusion: ['surreal'],
+    weak: ['war_military', 'cyberpunk', 'real_professional']
+  }),
+  thorn_court_lawyer: personaFit('weak', {
+    strong: ['fantasy', 'court', 'real_professional'],
+    usable: ['ecological', 'romance'],
+    fusion: ['dark_fantasy', 'surreal'],
+    weak: ['war_military', 'cyberpunk', 'wasteland']
+  }),
+  forest_debt_collector: personaFit('weak', {
+    strong: ['fantasy', 'noir_crime', 'ecological'],
+    usable: ['court', 'real_professional'],
+    fusion: ['dark_fantasy', 'surreal'],
+    weak: ['war_military', 'cyberpunk', 'romance']
+  }),
+  moon_milk_nurse: personaFit('weak', {
+    strong: ['fantasy', 'medical', 'ecological'],
+    usable: ['romance', 'mythic_epic'],
+    fusion: ['surreal', 'dark_fantasy'],
+    weak: ['war_military', 'cyberpunk', 'wasteland']
+  }),
+  blood_contract_notary: personaFit('weak', {
+    strong: ['dark_fantasy', 'real_professional', 'religious_ritual'],
+    usable: ['horror', 'fantasy', 'institutional'],
+    fusion: ['surreal'],
+    weak: ['romance', 'urban_life', 'fashion_idol']
+  }),
+  necromancer_medical_student: personaFit('weak', {
+    strong: ['dark_fantasy', 'medical', 'horror'],
+    usable: ['body_horror', 'fantasy', 'institutional'],
+    fusion: ['surreal'],
+    weak: ['romance', 'fashion_idol', 'court']
+  }),
+  graveyard_perfumer: personaFit('weak', {
+    strong: ['dark_fantasy', 'horror', 'real_professional'],
+    usable: ['fashion_idol', 'body_horror'],
+    fusion: ['surreal', 'romance'],
+    weak: ['war_military', 'cyberpunk', 'wasteland']
+  }),
+  curse_removal_surgeon: personaFit('weak', {
+    strong: ['dark_fantasy', 'medical', 'body_horror'],
+    usable: ['horror', 'fantasy', 'real_professional'],
+    fusion: ['surreal'],
+    weak: ['romance', 'fashion_idol', 'court']
+  }),
+  demonology_court_expert: personaFit('weak', {
+    strong: ['dark_fantasy', 'court', 'real_professional'],
+    usable: ['horror', 'religious_ritual', 'fantasy'],
+    fusion: ['surreal'],
+    weak: ['romance', 'urban_life', 'fashion_idol']
+  }),
+  forbidden_star_astronomer: personaFit('weak', {
+    strong: ['dark_fantasy', 'real_professional', 'cosmic_horror'],
+    usable: ['horror', 'fantasy', 'science_fiction'],
+    fusion: ['surreal'],
+    weak: ['romance', 'fashion_idol', 'court']
+  }),
+  sacrificial_tailor: personaFit('weak', {
+    strong: ['dark_fantasy', 'religious_ritual', 'real_professional'],
+    usable: ['horror', 'fashion_idol', 'fantasy'],
+    fusion: ['body_horror'],
+    weak: ['romance', 'urban_life', 'cyberpunk']
+  }),
+  underworld_bride_heroine: personaFit('weak', {
+    strong: ['mythic_epic', 'fantasy', 'romance'],
+    usable: ['dark_fantasy', 'adventure'],
+    fusion: ['horror'],
+    weak: ['urban_life', 'cyberpunk', 'real_professional']
+  }),
+  prophecy_refusing_queen: personaFit('weak', {
+    strong: ['mythic_epic', 'fantasy', 'court'],
+    usable: ['adventure', 'romance', 'war_military'],
+    fusion: ['dark_fantasy'],
+    weak: ['urban_life', 'cyberpunk', 'real_professional']
+  }),
+  wolf_cub_tamer: personaFit('weak', {
+    strong: ['fantasy', 'ecological', 'real_professional'],
+    usable: ['adventure', 'dark_fantasy'],
+    fusion: ['xianxia'],
+    weak: ['court', 'cyberpunk', 'urban_life']
+  }),
+  kraken_orphan_caretaker: personaFit('weak', {
+    strong: ['fantasy', 'ecological', 'medical'],
+    usable: ['real_professional', 'adventure', 'body_horror'],
+    fusion: ['dark_fantasy'],
+    weak: ['court', 'cyberpunk', 'romance']
+  }),
+  monster_school_teacher: personaFit('weak', {
+    strong: ['fantasy', 'institutional', 'real_professional'],
+    usable: ['ecological', 'adventure'],
+    fusion: ['surreal', 'dark_fantasy'],
+    weak: ['court', 'cyberpunk', 'war_military']
+  }),
+  haunted_manor_governess: personaFit('weak', {
+    strong: ['dark_fantasy', 'real_professional', 'horror'],
+    usable: ['court', 'institutional', 'fantasy'],
+    fusion: ['romance'],
+    weak: ['cyberpunk', 'wasteland', 'war_military']
+  }),
+  immortal_family_butler: personaFit('weak', {
+    strong: ['dark_fantasy', 'court', 'real_professional'],
+    usable: ['horror', 'fantasy'],
+    fusion: ['surreal'],
+    weak: ['urban_life', 'cyberpunk', 'wasteland']
+  }),
+  bloodline_curse_lawyer: personaFit('weak', {
+    strong: ['dark_fantasy', 'real_professional', 'court'],
+    usable: ['horror', 'institutional', 'fantasy'],
+    fusion: ['surreal'],
+    weak: ['urban_life', 'cyberpunk', 'wasteland']
+  })
+};
 
 const seeds: ExplicitPersonaSeed[] = [
   { id: "white_robed_wizard", name: "白袍巫师", nameEn: "White-Robed Wizard", group: "A. 魔法学院 / 法师秩序", groupEn: "A. Magic Academy / Mage Order", def: "第一识别是学院长者式白袍巫师。造型入口：洗旧白袍、长杖、书页灰尘、温和但不可违抗的眼神和被学生让出道路的站位。母题：知识权威被穿成洁净、克制、可传承的身体。视觉证据：袖口墨迹、古书皮扣、木杖磨痕、银白发丝和课堂式抬手。边界：避免普通魔法老人或只靠发光法杖成立。", defEn: "First read: an academy elder white-robed wizard. Styling entry: worn white robe, long staff, book dust, gentle but unquestionable eyes, and students making way. Knowledge authority is worn as clean restraint and lineage. Visual evidence: inked cuffs, old book straps, staff wear, silver hair, and a teaching hand gesture. Boundary: avoid generic old mage or glowing-staff shorthand.", ontologyLevel: 3, tags: ["wizard", "academy", "white_robe"] },
@@ -116,6 +470,11 @@ const seeds: ExplicitPersonaSeed[] = [
   { id: "last_heir_of_sunken_castle", name: "沉没城堡末裔", nameEn: "Last Heir of the Sunken Castle", group: "J. 诅咒贵族 / 衰败王朝", groupEn: "J. Cursed Nobility / Decayed Dynasty", def: "第一识别是从水下王朝幸存下来的沉没城堡末裔。造型入口：湿重礼服、盐痕王冠、家族钥匙、苍白皮肤和像仍听见水压的迟缓动作。母题：王朝衰败被海水封存成身体气质。视觉证据：海盐结晶、锈钥匙、湿发、藻绿色暗纹和双手托着王冠不敢戴上的姿态。边界：避免普通海底王子或溺亡鬼魂。", defEn: "First read: the last heir surviving an underwater dynasty. Styling entry: wet heavy formalwear, salt-stained crown, family key, pale skin, and slow movements as if still hearing water pressure. Dynastic decay is sealed into the body by seawater. Visual evidence: salt crystals, rust key, wet hair, algae-green pattern, and hands holding the crown without wearing it. Boundary: avoid generic underwater prince or drowned ghost.", ontologyLevel: 4, risk: "medium", tags: ["sunken_castle", "heir", "noble"] }
 ];
 
+const seedsWithFit: ExplicitPersonaSeed[] = seeds.map(seed => ({
+  ...seed,
+  categoryFit: seed.categoryFit || fantasyFitOverrides[seed.id] || fantasyFit(seed.group)
+}));
+
 export const CD_PERSONA_FANTASY = buildExplicitPersonaTerms({
   categoryId: 'fantasy',
   categoryName: '奇幻 / 神话异世界 / 魔法人设',
@@ -131,4 +490,4 @@ export const CD_PERSONA_FANTASY = buildExplicitPersonaTerms({
   absorptionFocus: '服制制度、血统标记、法器器物、纹章、身体异征或世界规则',
   absorptionFocusEn: 'costume system, lineage marks, artifacts, heraldry, bodily tells, or world rules',
   appendVisualEvidence: false
-}, seeds);
+}, seedsWithFit);

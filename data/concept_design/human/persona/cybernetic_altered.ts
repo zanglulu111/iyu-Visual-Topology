@@ -1,70 +1,515 @@
-import { buildExplicitPersonaTerms, ExplicitPersonaSeed, PersonaEra } from './types';
+import {
+  cleanPersonaEras,
+  PersonaCategoryFit,
+  personaEraModeFor,
+  PersonaEra,
+  personaFit,
+  personaRealityTagsFor,
+  PersonaTerm
+} from './types';
 
-type Row = [string, string, string, (1 | 2 | 3 | 4 | 5)?, PersonaEra[]?, string[]?];
-type Group = { group: string; groupEn: string; rows: Row[] };
+type PersonaSeed = {
+  id: string;
+  name: string;
+  nameEn: string;
+  group: string;
+  groupEn: string;
+  def: string;
+  defEn: string;
+  ontologyLevel?: 1 | 2 | 3 | 4 | 5;
+  eras?: PersonaEra[];
+  risk?: 'clean' | 'medium' | 'high';
+  tags?: string[];
+  styleTags?: string[];
+  controls?: string[];
+  forbids?: string[];
+  absorptionRule?: string;
+  absorptionRuleEn?: string;
+  eraMode?: PersonaTerm['eraMode'];
+  realityTags?: string[];
+  categoryFit?: PersonaTerm['categoryFit'];
+};
 
-const future: PersonaEra[] = ['near_future', 'far_future', 'timeless'];
-const contemporary: PersonaEra[] = ['contemporary', 'near_future', 'far_future', 'timeless'];
+const futureEras: PersonaEra[] = ['near_future', 'far_future'];
+const contemporaryEras: PersonaEra[] = ['contemporary', 'near_future', 'far_future'];
+const industrialEras: PersonaEra[] = ['industrial', 'modern', 'contemporary', 'near_future'];
+const industrialLaborEras: PersonaEra[] = ['industrial', 'modern', 'contemporary', 'near_future', 'far_future'];
+const baseControls = ['body', 'interface', 'material', 'costume', 'prop', 'symbol', 'pose', 'maintenance', 'serial_code'];
+const defaultForbids = ['无解释民俗妖怪化', '随机神圣光环抢走机械逻辑', '纯血肉感染化', '把机械化写成普通赛博装饰'];
 
-const toSeeds = (groups: Group[]): ExplicitPersonaSeed[] => groups.flatMap(({ group, groupEn, rows }) => rows.map(([id, name, nameEn, ontologyLevel = 4, eras = future, tags = []]) => ({
-  id,
-  name,
-  nameEn,
-  group,
-  groupEn,
-  def: `以${name}为核心锚点，强调人形身体与机械构造、义体接口、仿生身份或工业材料之间的边界。`,
-  defEn: `A compound persona anchored in ${nameEn}, shaped by the boundary between humanoid body and machine structure, prosthetic interface, synthetic identity, or industrial material.`,
-  ontologyLevel,
-  eras,
-  risk: ontologyLevel >= 4 ? 'medium' : 'clean',
-  tags
-})));
+const cyberFit = (group: string): PersonaCategoryFit => {
+  if (group.startsWith('A.')) return personaFit('weak', {
+    strong: ['science_fiction', 'cyberpunk', 'posthuman'],
+    usable: ['real_professional', 'urban_life', 'medical'],
+    fusion: ['noir_crime', 'fashion_idol'],
+    weak: ['wuxia', 'xianxia', 'court']
+  });
+  if (group.startsWith('B.')) return personaFit('weak', {
+    strong: ['science_fiction', 'religious_ritual', 'posthuman'],
+    usable: ['cyberpunk', 'institutional'],
+    fusion: ['dark_fantasy', 'surreal'],
+    weak: ['wuxia', 'historical', 'romance']
+  });
+  if (group.startsWith('C.')) return personaFit('weak', {
+    strong: ['science_fiction', 'posthuman', 'cyberpunk'],
+    usable: ['urban_life', 'romance', 'fashion_idol'],
+    fusion: ['body_horror', 'surreal'],
+    weak: ['historical', 'wuxia', 'xianxia']
+  });
+  if (group.startsWith('D.')) return personaFit('weak', {
+    strong: ['cyberpunk', 'science_fiction', 'noir_crime'],
+    usable: ['urban_life', 'real_professional', 'workplace'],
+    fusion: ['fashion_idol', 'wasteland'],
+    weak: ['court', 'xianxia', 'mythic_epic']
+  });
+  if (group.startsWith('E.')) return personaFit('weak', {
+    strong: ['science_fiction', 'war_military', 'cyberpunk'],
+    usable: ['posthuman', 'wasteland', 'adventure'],
+    fusion: ['body_horror', 'space_opera'],
+    weak: ['romance', 'court', 'urban_life']
+  });
+  if (group.startsWith('F.')) return personaFit('weak', {
+    strong: ['science_fiction', 'real_professional', 'workplace'],
+    usable: ['cyberpunk', 'wasteland'],
+    fusion: ['post_apocalyptic', 'body_horror'],
+    weak: ['court', 'romance', 'xianxia']
+  });
+  if (group.startsWith('G.')) return personaFit('weak', {
+    strong: ['science_fiction', 'urban_life', 'romance'],
+    usable: ['posthuman', 'workplace', 'fashion_idol'],
+    fusion: ['surreal', 'body_horror'],
+    weak: ['war_military', 'wasteland', 'court']
+  });
+  if (group.startsWith('H.')) return personaFit('weak', {
+    strong: ['science_fiction', 'fashion_idol', 'posthuman'],
+    usable: ['cyberpunk', 'urban_life', 'boudoir_aesthetic'],
+    fusion: ['surreal'],
+    weak: ['war_military', 'historical', 'wuxia']
+  });
+  if (group.startsWith('I.')) return personaFit('weak', {
+    strong: ['science_fiction', 'cyberpunk', 'wasteland'],
+    usable: ['post_apocalyptic', 'horror', 'body_horror'],
+    fusion: ['surreal', 'romance'],
+    weak: ['court', 'fashion_idol']
+  });
+  return personaFit('weak', {
+    strong: ['posthuman', 'science_fiction', 'cyberpunk'],
+    usable: ['surreal', 'romance', 'institutional'],
+    fusion: ['court', 'cosmic_horror'],
+    weak: ['wuxia', 'historical', 'mythic_epic']
+  });
+};
 
-const groups: Group[] = [
-  { group: 'A. 义体 / 身体改造', groupEn: 'A. Prosthetic / Body Modification', rows: [
-    ['prosthetic_arm_boxer', '义体手臂拳手', 'Prosthetic-Arm Boxer'], ['mechanical_eye_detective', '机械眼侦探', 'Mechanical-Eye Detective'], ['chrome_leg_dancer', '铬腿舞者', 'Chrome-Leg Dancer'], ['spine_port_courier', '脊柱接口信使', 'Spine-Port Courier'], ['prosthetic_hand_pianist', '义手钢琴家', 'Prosthetic-Hand Pianist'], ['cybernetic_clinic_girl', '义体诊所女孩', 'Cybernetic Clinic Girl'], ['replacement_lung_runner', '替换肺跑者', 'Replacement-Lung Runner'], ['neural_jack_student', '神经插口学生', 'Neural-Jack Student'], ['modded_skull_bouncer', '改造颅骨保镖', 'Modded-Skull Bouncer'], ['exoskeleton_worker', '外骨骼工人', 'Exoskeleton Worker', 3]
-  ] },
-  { group: 'B. 机械宗教 / 技术圣职', groupEn: 'B. Machine Religion / Technical Clergy', rows: [
-    ['mechanical_nun', '机械修女', 'Mechanical Nun'], ['servo_monk', '伺服僧侣', 'Servo Monk'], ['circuit_priestess', '电路女祭司', 'Circuit Priestess'], ['data_relic_bishop', '数据圣遗物主教', 'Data-Relic Bishop'], ['oil_chapel_acolyte', '机油礼拜堂侍童', 'Oil-Chapel Acolyte'], ['robotic_confessor', '机械忏悔神父', 'Robotic Confessor'], ['chrome_halo_saint', '铬光环圣徒', 'Chrome-Halo Saint'], ['maintenance_temple_guard', '维护神殿守卫', 'Maintenance-Temple Guard'], ['machine_choir_girl', '机械唱诗女孩', 'Machine-Choir Girl'], ['holy_interface_martyr', '神圣接口殉道者', 'Holy-Interface Martyr']
-  ] },
-  { group: 'C. 仿生人 / 合成人', groupEn: 'C. Android / Synthetic Human', rows: [
-    ['android_idol', '仿生偶像', 'Android Idol'], ['synthetic_maid', '合成人女仆', 'Synthetic Maid'], ['replicant_schoolboy', '复制人男学生', 'Replicant Schoolboy'], ['domestic_android_mother', '家政仿生母亲', 'Domestic Android Mother'], ['synthetic_actor_double', '合成演员替身', 'Synthetic Actor Double'], ['android_court_witness', '仿生人法庭证人', 'Android Court Witness'], ['factory_born_bride', '工厂出生新娘', 'Factory-Born Bride'], ['emotion_patch_android', '情绪补丁仿生人', 'Emotion-Patch Android'], ['obsolete_robot_companion', '过时陪伴机器人', 'Obsolete Companion Robot'], ['serial_number_prince', '序列号王子', 'Serial-Number Prince']
-  ] },
-  { group: 'D. 赛博职业 / 技术街头', groupEn: 'D. Cyber Profession / Technical Street', rows: [
-    ['cyber_swordsman', '赛博剑客', 'Cyber Swordsman'], ['hologram_bartender', '全息酒保', 'Hologram Bartender', 3], ['implant_black_market_doctor', '植入体黑市医生', 'Implant Black-Market Doctor'], ['drone_swarm_policeman', '无人机蜂群警察', 'Drone-Swarm Policeman'], ['neon_interface_girl', '霓虹接口女孩', 'Neon Interface Girl'], ['data_cable_hairdresser', '数据线理发师', 'Data-Cable Hairdresser'], ['augmented_pickpocket', '增强扒手', 'Augmented Pickpocket'], ['firewall_bodyguard', '防火墙保镖', 'Firewall Bodyguard'], ['retinal_advertising_model', '视网膜广告模特', 'Retinal-Advertising Model'], ['prosthetic_repair_apprentice', '义体维修学徒', 'Prosthetic-Repair Apprentice']
-  ] },
-  { group: 'E. 战斗改造 / 军用人形', groupEn: 'E. Combat Augmentation / Military Humanoid', rows: [
-    ['cyborg_soldier', '半机械士兵', 'Cyborg Soldier'], ['weapon_arm_veteran', '武器臂老兵', 'Weapon-Arm Veteran'], ['combat_android_girl', '战斗仿生少女', 'Combat Android Girl'], ['tactical_exosuit_commander', '战术外骨骼指挥官', 'Tactical Exosuit Commander'], ['drone_link_sniper', '无人机链接狙击手', 'Drone-Link Sniper'], ['subdermal_armor_bodyguard', '皮下护甲保镖', 'Subdermal-Armor Bodyguard'], ['memory_wiped_assassin', '记忆清洗刺客', 'Memory-Wiped Assassin'], ['riot_control_cyborg', '防暴义体警员', 'Riot-Control Cyborg'], ['battlefield_repair_medic', '战场维修医疗兵', 'Battlefield Repair Medic'], ['mecha_sync_infantry', '机甲同步步兵', 'Mecha-Sync Infantry']
-  ] },
-  { group: 'F. 工业身体 / 劳动机械化', groupEn: 'F. Industrial Body / Mechanized Labor', rows: [
-    ['factory_arm_worker', '工厂机械臂女工', 'Factory-Arm Worker'], ['mining_cyborg', '矿井义体工', 'Mining Cyborg'], ['warehouse_exosuit_girl', '仓库外骨骼女孩', 'Warehouse Exosuit Girl'], ['dock_loader_machine_body', '码头装卸机械身体', 'Dock Loader Machine Body'], ['railway_maintenance_cyborg', '铁路维修义体工', 'Railway Maintenance Cyborg'], ['construction_crane_spine_man', '塔吊脊柱工人', 'Crane-Spine Worker'], ['assembly_line_android', '流水线仿生人', 'Assembly-Line Android'], ['boiler_room_machinist', '锅炉房机械师', 'Boiler-Room Machinist', 3], ['rusted_factory_mother', '锈蚀工厂母亲', 'Rusted Factory Mother'], ['hydraulic_leg_courier', '液压腿快递员', 'Hydraulic-Leg Courier']
-  ] },
-  { group: 'G. 家庭 / 亲密机器', groupEn: 'G. Domestic / Intimate Machine', rows: [
-    ['robot_boyfriend', '机器人男友', 'Robot Boyfriend'], ['mechanical_babysitter', '机械保姆', 'Mechanical Babysitter'], ['synthetic_housewife', '合成家庭主妇', 'Synthetic Housewife'], ['prosthetic_wedding_bride', '义体婚礼新娘', 'Prosthetic Wedding Bride'], ['android_grandmother', '仿生祖母', 'Android Grandmother'], ['emotion_service_companion', '情绪服务陪伴者', 'Emotion-Service Companion'], ['home_care_robot_nurse', '家用护理机器人护士', 'Home-Care Robot Nurse'], ['divorce_court_android', '离婚庭仿生人', 'Divorce-Court Android'], ['replacement_child_robot', '替代儿童机器人', 'Replacement Child Robot'], ['smart_home_medium', '智能家居灵媒', 'Smart-Home Medium', 4, contemporary]
-  ] },
-  { group: 'H. 表演 / 美学机械化', groupEn: 'H. Performance / Aesthetic Mechanization', rows: [
-    ['clockwork_ballerina', '发条芭蕾舞者', 'Clockwork Ballerina'], ['chrome_runway_model', '铬面秀场模特', 'Chrome Runway Model'], ['robot_pop_diva', '机器人流行天后', 'Robot Pop Diva'], ['mechanical_geisha', '机械艺伎', 'Mechanical Geisha'], ['automaton_magician', '自动人偶魔术师', 'Automaton Magician'], ['cyber_circus_acrobat', '赛博马戏杂技演员', 'Cyber-Circus Acrobat'], ['laser_harp_musician', '激光竖琴乐手', 'Laser-Harp Musician'], ['prosthetic_beauty_pageant', '义体选美皇后', 'Prosthetic Beauty Queen'], ['hologram_backup_dancer', '全息伴舞者', 'Hologram Backup Dancer', 3], ['mechanized_drag_queen', '机械化变装皇后', 'Mechanized Drag Queen']
-  ] },
-  { group: 'I. 失控 / 废弃 / 残次机体', groupEn: 'I. Runaway / Abandoned / Defective Body', rows: [
-    ['runaway_android_child', '逃亡仿生儿童', 'Runaway Android Child'], ['defective_combat_doll', '残次战斗人偶', 'Defective Combat Doll'], ['scrapyard_cyborg', '废铁场半机械人', 'Scrapyard Cyborg'], ['factory_reject_girl', '工厂退货女孩', 'Factory-Reject Girl'], ['memory_loop_widow', '记忆循环寡妇', 'Memory-Loop Widow'], ['malfunctioning_priest', '故障机械神父', 'Malfunctioning Machine Priest'], ['obsolete_idol_robot', '过气偶像机器人', 'Obsolete Idol Robot'], ['broken_voice_android', '破音仿生人', 'Broken-Voice Android'], ['abandoned_lunar_maid', '废弃月球女仆', 'Abandoned Lunar Maid', 4, ['near_future', 'far_future', 'timeless']], ['rust_heart_boy', '锈心少年', 'Rust-Heart Boy']
-  ] },
-  { group: 'J. 后人类 / 身份上传', groupEn: 'J. Posthuman / Uploaded Identity', rows: [
-    ['uploaded_aristocrat', '上传意识贵族', 'Uploaded Aristocrat', 5], ['body_subscription_worker', '身体订阅工人', 'Body-Subscription Worker'], ['cloud_mind_schoolgirl', '云端意识女学生', 'Cloud-Mind Schoolgirl', 5], ['avatar_body_broker', '化身身体掮客', 'Avatar-Body Broker', 4], ['digital_soul_bride', '数字灵魂新娘', 'Digital-Soul Bride', 5], ['backup_body_detective', '备用身体侦探', 'Backup-Body Detective', 4], ['synthetic_afterlife_priest', '合成来世祭司', 'Synthetic Afterlife Priest', 5], ['identity_patch_smuggler', '身份补丁走私者', 'Identity-Patch Smuggler', 4], ['posthuman_child_heir', '后人类儿童继承人', 'Posthuman Child Heir', 5], ['quantum_body_refugee', '量子身体难民', 'Quantum-Body Refugee', 5]
-  ] }
+const cyberFitOverrides: Record<string, PersonaCategoryFit> = {
+  prosthetic_arm_boxer: personaFit('weak', {
+    strong: ['science_fiction', 'posthuman'],
+    usable: ['cyberpunk', 'urban_life', 'adventure'],
+    fusion: ['war_military'],
+    weak: ['court', 'wuxia', 'xianxia']
+  }),
+  mechanical_eye_detective: personaFit('weak', {
+    strong: ['science_fiction', 'cyberpunk', 'noir_crime'],
+    usable: ['posthuman', 'real_professional'],
+    fusion: ['body_horror'],
+    weak: ['court', 'wuxia', 'xianxia']
+  }),
+  chrome_leg_dancer: personaFit('weak', {
+    strong: ['science_fiction', 'posthuman', 'fashion_idol'],
+    usable: ['urban_life', 'cyberpunk'],
+    fusion: ['surreal'],
+    weak: ['war_military', 'court', 'xianxia']
+  }),
+  prosthetic_hand_pianist: personaFit('weak', {
+    strong: ['science_fiction', 'posthuman'],
+    usable: ['fashion_idol', 'urban_life'],
+    fusion: ['surreal', 'romance'],
+    weak: ['war_military', 'wasteland', 'court']
+  }),
+  cybernetic_clinic_girl: personaFit('weak', {
+    strong: ['science_fiction', 'medical', 'posthuman'],
+    usable: ['cyberpunk', 'urban_life'],
+    fusion: ['body_horror'],
+    weak: ['court', 'wuxia', 'romance']
+  }),
+  replacement_lung_runner: personaFit('weak', {
+    strong: ['science_fiction', 'medical', 'posthuman'],
+    usable: ['adventure', 'urban_life'],
+    fusion: ['biopunk', 'body_horror'],
+    weak: ['court', 'wuxia', 'romance']
+  }),
+  neural_jack_student: personaFit('weak', {
+    strong: ['science_fiction', 'posthuman', 'urban_life'],
+    usable: ['institutional', 'cyberpunk'],
+    fusion: ['body_horror'],
+    weak: ['court', 'wuxia', 'wasteland']
+  }),
+  exoskeleton_worker: personaFit('weak', {
+    strong: ['science_fiction', 'real_professional', 'workplace'],
+    usable: ['cyberpunk'],
+    fusion: ['wasteland', 'post_apocalyptic'],
+    weak: ['court', 'romance', 'xianxia']
+  }),
+  mechanical_nun: personaFit('weak', {
+    strong: ['science_fiction', 'religious_ritual', 'posthuman'],
+    usable: ['cyberpunk', 'institutional'],
+    fusion: ['dark_fantasy', 'surreal'],
+    weak: ['wuxia', 'historical', 'romance']
+  }),
+  robotic_confessor: personaFit('weak', {
+    strong: ['science_fiction', 'religious_ritual', 'posthuman'],
+    usable: ['cyberpunk', 'institutional'],
+    fusion: ['surreal', 'cosmic_horror'],
+    weak: ['wuxia', 'historical', 'romance']
+  }),
+  chrome_halo_saint: personaFit('weak', {
+    strong: ['science_fiction', 'religious_ritual', 'posthuman'],
+    usable: ['fashion_idol', 'cyberpunk'],
+    fusion: ['surreal', 'dark_fantasy'],
+    weak: ['wuxia', 'historical', 'wasteland']
+  }),
+  android_idol: personaFit('weak', {
+    strong: ['science_fiction', 'posthuman', 'fashion_idol'],
+    usable: ['urban_life', 'cyberpunk'],
+    fusion: ['surreal', 'romance'],
+    weak: ['historical', 'wuxia', 'war_military']
+  }),
+  synthetic_maid: personaFit('weak', {
+    strong: ['science_fiction', 'posthuman'],
+    usable: ['urban_life', 'romance', 'workplace'],
+    fusion: ['surreal'],
+    weak: ['historical', 'wuxia', 'war_military']
+  }),
+  domestic_android_mother: personaFit('weak', {
+    strong: ['science_fiction', 'posthuman', 'urban_life'],
+    usable: ['romance', 'medical'],
+    fusion: ['surreal', 'body_horror'],
+    weak: ['war_military', 'wasteland', 'court']
+  }),
+  android_court_witness: personaFit('weak', {
+    strong: ['science_fiction', 'posthuman', 'institutional'],
+    usable: ['real_professional', 'noir_crime'],
+    fusion: ['surreal'],
+    weak: ['historical', 'wuxia', 'romance']
+  }),
+  factory_born_bride: personaFit('weak', {
+    strong: ['science_fiction', 'posthuman', 'romance'],
+    usable: ['cyberpunk', 'institutional'],
+    fusion: ['surreal', 'body_horror'],
+    weak: ['war_military', 'wasteland', 'wuxia']
+  }),
+  serial_number_prince: personaFit('weak', {
+    strong: ['science_fiction', 'posthuman'],
+    usable: ['court', 'romance'],
+    fusion: ['cyberpunk', 'surreal'],
+    weak: ['historical', 'wuxia', 'wasteland']
+  }),
+  cyber_swordsman: personaFit('weak', {
+    strong: ['cyberpunk', 'science_fiction'],
+    usable: ['wuxia', 'adventure', 'noir_crime'],
+    fusion: ['xianxia'],
+    weak: ['court', 'mythic_epic', 'romance']
+  }),
+  implant_black_market_doctor: personaFit('weak', {
+    strong: ['cyberpunk', 'science_fiction', 'medical'],
+    usable: ['noir_crime', 'urban_life', 'real_professional'],
+    fusion: ['body_horror'],
+    weak: ['court', 'xianxia', 'mythic_epic']
+  }),
+  drone_swarm_policeman: personaFit('weak', {
+    strong: ['cyberpunk', 'science_fiction', 'institutional'],
+    usable: ['real_professional', 'noir_crime', 'urban_life'],
+    fusion: ['war_military'],
+    weak: ['court', 'xianxia', 'mythic_epic']
+  }),
+  data_cable_hairdresser: personaFit('weak', {
+    strong: ['cyberpunk', 'science_fiction', 'real_professional'],
+    usable: ['urban_life', 'fashion_idol', 'workplace'],
+    fusion: ['surreal'],
+    weak: ['court', 'xianxia', 'mythic_epic']
+  }),
+  retinal_advertising_model: personaFit('weak', {
+    strong: ['cyberpunk', 'science_fiction', 'fashion_idol'],
+    usable: ['urban_life', 'workplace'],
+    fusion: ['surreal'],
+    weak: ['court', 'xianxia', 'mythic_epic']
+  }),
+  prosthetic_repair_apprentice: personaFit('weak', {
+    strong: ['cyberpunk', 'science_fiction', 'real_professional'],
+    usable: ['workplace', 'urban_life', 'medical'],
+    fusion: ['posthuman'],
+    weak: ['court', 'xianxia', 'mythic_epic']
+  }),
+  subdermal_armor_bodyguard: personaFit('weak', {
+    strong: ['science_fiction', 'cyberpunk', 'real_professional'],
+    usable: ['war_military', 'urban_life', 'noir_crime'],
+    fusion: ['body_horror'],
+    weak: ['romance', 'court', 'xianxia']
+  }),
+  battlefield_repair_medic: personaFit('weak', {
+    strong: ['science_fiction', 'war_military', 'medical'],
+    usable: ['cyberpunk', 'posthuman'],
+    fusion: ['body_horror', 'space_opera'],
+    weak: ['romance', 'court', 'urban_life']
+  }),
+  robot_boyfriend: personaFit('weak', {
+    strong: ['science_fiction', 'romance', 'urban_life'],
+    usable: ['posthuman'],
+    fusion: ['surreal', 'body_horror'],
+    weak: ['war_military', 'wasteland', 'court']
+  }),
+  mechanical_babysitter: personaFit('weak', {
+    strong: ['science_fiction', 'urban_life'],
+    usable: ['posthuman', 'medical', 'workplace'],
+    fusion: ['surreal', 'body_horror'],
+    weak: ['war_military', 'wasteland', 'court']
+  }),
+  home_care_robot_nurse: personaFit('weak', {
+    strong: ['science_fiction', 'medical', 'urban_life'],
+    usable: ['posthuman', 'workplace'],
+    fusion: ['surreal', 'body_horror'],
+    weak: ['war_military', 'wasteland', 'court']
+  }),
+  divorce_court_android: personaFit('weak', {
+    strong: ['science_fiction', 'urban_life', 'institutional'],
+    usable: ['posthuman', 'romance'],
+    fusion: ['surreal'],
+    weak: ['war_military', 'wasteland', 'court']
+  }),
+  replacement_child_robot: personaFit('weak', {
+    strong: ['science_fiction', 'posthuman', 'urban_life'],
+    usable: ['romance', 'medical'],
+    fusion: ['surreal', 'body_horror'],
+    weak: ['war_military', 'wasteland', 'court']
+  }),
+  smart_home_medium: personaFit('weak', {
+    strong: ['science_fiction', 'urban_life'],
+    usable: ['posthuman', 'surreal'],
+    fusion: ['religious_ritual', 'horror'],
+    weak: ['war_military', 'wasteland', 'court']
+  }),
+  mechanical_geisha: personaFit('weak', {
+    strong: ['science_fiction', 'fashion_idol', 'posthuman'],
+    usable: ['historical', 'urban_life'],
+    fusion: ['surreal', 'cyberpunk'],
+    weak: ['war_military', 'wasteland', 'wuxia']
+  }),
+  mechanized_drag_queen: personaFit('weak', {
+    strong: ['science_fiction', 'fashion_idol', 'posthuman'],
+    usable: ['urban_life', 'boudoir_aesthetic'],
+    fusion: ['surreal', 'cyberpunk'],
+    weak: ['war_military', 'historical', 'wuxia']
+  }),
+  runaway_android_child: personaFit('weak', {
+    strong: ['science_fiction', 'posthuman'],
+    usable: ['cyberpunk', 'wasteland', 'horror'],
+    fusion: ['surreal', 'post_apocalyptic'],
+    weak: ['court', 'fashion_idol', 'romance']
+  }),
+  memory_loop_widow: personaFit('weak', {
+    strong: ['science_fiction', 'posthuman', 'romance'],
+    usable: ['surreal', 'horror'],
+    fusion: ['cyberpunk', 'wasteland'],
+    weak: ['court', 'fashion_idol']
+  }),
+  malfunctioning_priest: personaFit('weak', {
+    strong: ['science_fiction', 'religious_ritual'],
+    usable: ['horror', 'posthuman'],
+    fusion: ['surreal', 'cyberpunk', 'wasteland'],
+    weak: ['court', 'fashion_idol', 'romance']
+  }),
+  obsolete_idol_robot: personaFit('weak', {
+    strong: ['science_fiction', 'fashion_idol', 'posthuman'],
+    usable: ['cyberpunk', 'urban_life'],
+    fusion: ['wasteland', 'surreal'],
+    weak: ['court', 'war_military']
+  }),
+  uploaded_aristocrat: personaFit('weak', {
+    strong: ['posthuman', 'science_fiction'],
+    usable: ['court', 'institutional', 'cyberpunk'],
+    fusion: ['cosmic_horror', 'surreal'],
+    weak: ['wuxia', 'historical', 'mythic_epic']
+  }),
+  body_subscription_worker: personaFit('weak', {
+    strong: ['posthuman', 'science_fiction', 'workplace'],
+    usable: ['cyberpunk', 'real_professional'],
+    fusion: ['surreal', 'body_horror'],
+    weak: ['wuxia', 'historical', 'court']
+  }),
+  digital_soul_bride: personaFit('weak', {
+    strong: ['posthuman', 'science_fiction', 'romance'],
+    usable: ['religious_ritual', 'cyberpunk'],
+    fusion: ['surreal', 'cosmic_horror'],
+    weak: ['wuxia', 'historical', 'wasteland']
+  }),
+  backup_body_detective: personaFit('weak', {
+    strong: ['posthuman', 'science_fiction', 'noir_crime'],
+    usable: ['cyberpunk', 'institutional'],
+    fusion: ['surreal', 'cosmic_horror'],
+    weak: ['wuxia', 'historical', 'romance']
+  }),
+  synthetic_afterlife_priest: personaFit('weak', {
+    strong: ['posthuman', 'science_fiction', 'religious_ritual'],
+    usable: ['institutional', 'cyberpunk'],
+    fusion: ['surreal', 'cosmic_horror'],
+    weak: ['wuxia', 'historical', 'romance']
+  }),
+  identity_patch_smuggler: personaFit('weak', {
+    strong: ['posthuman', 'science_fiction', 'cyberpunk'],
+    usable: ['noir_crime', 'urban_life'],
+    fusion: ['surreal'],
+    weak: ['wuxia', 'historical', 'mythic_epic']
+  })
+};
+
+const cp = (seed: PersonaSeed): PersonaTerm => {
+  const ontologyLevel = seed.ontologyLevel ?? 4;
+  const eras = cleanPersonaEras(seed.eras ?? futureEras);
+  const risk = seed.risk ?? (ontologyLevel >= 4 ? 'medium' : 'clean');
+  const controls = Array.from(new Set([...baseControls, ...(seed.controls || [])]));
+  const eraMode = personaEraModeFor(eras, seed.eraMode);
+  return {
+    id: `cd_persona_cybernetic_altered_${seed.id}`,
+    name: seed.name,
+    nameEn: seed.nameEn,
+    group: seed.group,
+    groupEn: seed.groupEn,
+    def: seed.def,
+    defEn: seed.defEn,
+    personaCategory: '机械化 / 义体 / 仿生人设',
+    personaCategoryEn: 'Cybernetic / Prosthetic / Synthetic Persona',
+    personaSubgroup: seed.group.replace(/^[A-J]\.\s*/, ''),
+    personaSubgroupEn: seed.groupEn.replace(/^[A-J]\.\s*/, ''),
+    personaKind: seed.name,
+    personaKindEn: seed.nameEn,
+    personaStrength: ontologyLevel >= 4 ? 'strong' : ontologyLevel >= 2 ? 'medium' : 'light',
+    isCompoundPersona: true,
+    ontologyLevel,
+    eraMode,
+    eras,
+    risk,
+    affects: controls,
+    controls,
+    forbids: Array.from(new Set([...(seed.forbids || []), ...defaultForbids])),
+    absorptionRule: seed.absorptionRule || `外来元素优先折译为“${seed.name}”的机械接口、义体结构、维修痕迹、材料边界、序列身份、职业姿态或身体使用成本，不要只贴赛博装饰。`,
+    absorptionRuleEn: seed.absorptionRuleEn || `Translate outside elements into the machine interface, prosthetic structure, repair trace, material boundary, serial identity, occupational posture, or bodily cost of "${seed.nameEn}"; do not reduce it to cyber decoration.`,
+    tags: Array.from(new Set(['persona', 'cybernetic', 'prosthetic', 'synthetic', 'compound_persona', ...(seed.tags || [])])),
+    realityTags: seed.realityTags || personaRealityTagsFor(ontologyLevel, ['cybernetic', 'technology']),
+    categoryFit: seed.categoryFit || cyberFitOverrides[seed.id] || cyberFit(seed.group),
+    styleTags: Array.from(new Set(['cybernetic', 'machine_body', ...(seed.styleTags || []), ...(seed.tags || [])])),
+    timeTags: eras
+  };
+};
+
+const seeds: PersonaSeed[] = [
+  { id: 'prosthetic_arm_boxer', name: '义体手臂拳手', nameEn: 'Prosthetic-Arm Boxer', group: 'A. 义体 / 身体改造', groupEn: 'A. Prosthetic / Body Modification', def: '第一识别是把一条义体手臂训练成职业武器的拳手。造型入口：加厚肩带、裸露肘轴、拳套适配环、旧伤疤和只用机械侧发力的站姿。母题：竞技身体被维修制度延长。张力：他不是机甲战士，而是仍在拳台规则里用一条不属于原身体的手臂求胜。视觉证据：磨损拳套、校准螺丝、汗水和金属交界、偏重的防守姿态。边界：避免普通拳手或全身战斗机器人。', defEn: 'First read: a boxer who has trained one prosthetic arm into a professional weapon. Styling entry: thick shoulder straps, exposed elbow pivots, glove adapter rings, old scars, and a stance that drives power from the mechanical side. Motif: an athletic body extended by maintenance. Tension: not a mecha fighter, but a boxer still bound to ring rules while winning through an arm that was not born with him. Visual evidence: worn gloves, calibration screws, sweat meeting metal, and a weighted guard. Boundary: avoid a generic boxer or full combat robot.', tags: ['prosthetic', 'boxer', 'sport'] },
+  { id: 'mechanical_eye_detective', name: '机械眼侦探', nameEn: 'Mechanical-Eye Detective', group: 'A. 义体 / 身体改造', groupEn: 'A. Prosthetic / Body Modification', def: '第一识别是一只机械眼改变了侦探观看世界方式的人。造型入口：旧风衣、半边眼眶金属圈、微型镜片反光、证物袋和不再自然眨眼的凝视。母题：调查职业被视觉接口重写。张力：他看得更清楚，却也像被记录系统反向监视。视觉证据：眼部维护工具、镜片HUD残光、手写案卷、侧脸阴影。边界：避免普通硬汉侦探或纯赛博黑客。', defEn: 'First read: a detective whose way of seeing has been rewritten by one mechanical eye. Styling entry: old trench coat, metal rim around one socket, micro-lens glint, evidence bag, and a stare that no longer blinks naturally. Motif: investigation rewritten by visual interface. Tension: he sees more clearly while seeming monitored by the same recording system. Visual evidence: eye-maintenance tools, faint HUD reflection, handwritten files, and shadowed profile. Boundary: avoid a generic noir detective or pure cyber hacker.', tags: ['detective', 'mechanical_eye', 'investigation'] },
+  { id: 'chrome_leg_dancer', name: '铬腿舞者', nameEn: 'Chrome-Leg Dancer', group: 'A. 义体 / 身体改造', groupEn: 'A. Prosthetic / Body Modification', def: '第一识别是把铬色义腿变成舞台线条的舞者。造型入口：高反光小腿、舞鞋接口、压缩支撑带、拉长腿线和在转身时暴露机械负重的动作。母题：残缺补偿被美学化成新的舞蹈语法。张力：金属不能只是装饰，必须改变重心、节奏和身体自信。视觉证据：擦痕、舞台灯反光、膝关节限位、稳定但危险的单脚停顿。边界：避免普通舞者或性感铬色服装。', defEn: 'First read: a dancer who turns chrome prosthetic legs into stage lines. Styling entry: reflective lower legs, dance-shoe adapters, compression straps, elongated leg line, and turns that reveal mechanical load. Motif: compensation transformed into new dance grammar. Tension: the metal cannot be decoration; it must alter balance, rhythm, and bodily confidence. Visual evidence: scuffs, stage-light reflection, knee limiters, and a stable but dangerous one-leg pause. Boundary: avoid a generic dancer or chrome fashion outfit.', tags: ['dancer', 'chrome_leg', 'performance'] },
+  { id: 'spine_port_courier', name: '脊柱接口信使', nameEn: 'Spine-Port Courier', group: 'A. 义体 / 身体改造', groupEn: 'A. Prosthetic / Body Modification', def: '第一识别是背部脊柱接口承担运输任务的信使。造型入口：贴身骑行衣、后颈数据口、沿脊柱排列的锁扣、轻量背包和永远前倾的赶路姿态。母题：城市物流进入身体后背。张力：他不是普通快递员，货物可能是数据、药剂或记忆模块，身体就是包装的一部分。视觉证据：背部封条、汗湿衣料、线路保护套、扫描贴纸。边界：避免普通骑手或全息数据人。', defEn: 'First read: a courier whose spine ports carry delivery work. Styling entry: fitted riding clothes, rear-neck data socket, locks along the spine, light pack, and a permanently forward-leaning rush posture. Motif: urban logistics entering the back of the body. Tension: not a normal courier; the cargo may be data, medicine, or memory modules, with the body itself as part of the package. Visual evidence: back seals, sweat on fabric, cable protectors, and scan stickers. Boundary: avoid a generic rider or hologram data ghost.', tags: ['courier', 'spine_port', 'logistics'] },
+  { id: 'prosthetic_hand_pianist', name: '义手钢琴家', nameEn: 'Prosthetic-Hand Pianist', group: 'A. 义体 / 身体改造', groupEn: 'A. Prosthetic / Body Modification', def: '第一识别是用义手重新学习触键的钢琴家。造型入口：黑色礼服袖口、细密指节机械、触觉传感线、琴键反光和一只手比另一只手更谨慎的演奏姿态。母题：艺术技巧被触觉替代系统重新训练。张力：机械精度不等于情感，画面要显示他如何把延迟、压力和误差变成音乐。视觉证据：调音工具、指尖传感器、谱页批注、停在琴键上的犹豫。边界：避免普通钢琴家或炫技机器人。', defEn: 'First read: a pianist relearning touch through prosthetic hands. Styling entry: black formal cuffs, fine mechanical knuckles, haptic sensor lines, key reflections, and one hand playing more carefully than the other. Motif: artistic skill retrained through substitute touch. Tension: mechanical precision is not emotion; show how delay, pressure, and error become music. Visual evidence: tuning tools, fingertip sensors, marked scores, and hesitation above keys. Boundary: avoid a generic pianist or show-off robot.', tags: ['pianist', 'prosthetic_hand', 'haptic'] },
+  { id: 'cybernetic_clinic_girl', name: '义体诊所女孩', nameEn: 'Cybernetic Clinic Girl', group: 'A. 义体 / 身体改造', groupEn: 'A. Prosthetic / Body Modification', def: '第一识别是在义体诊所里长大、熟悉维修流程的年轻女性。造型入口：诊所外套、手腕接口贴、备用零件抽屉、消毒灯和把身体当设备检查的平静表情。母题：青春身体被医疗和消费系统共同管理。张力：她不是护士，也不是病人，而是介于客户、样本和熟练使用者之间。视觉证据：候诊号码、义体说明书、拆下的护盖、低噪声疲惫。边界：避免普通诊所女孩或性感护士。', defEn: 'First read: a young woman who grew up inside a cybernetic clinic and knows repair procedure by heart. Styling entry: clinic jacket, wrist-interface patches, spare-part drawers, sterilizing light, and a calm face that checks the body like equipment. Motif: youth managed by medicine and consumption. Tension: she is neither nurse nor patient, but somewhere between client, sample, and skilled user. Visual evidence: waiting number, prosthetic manuals, removed cover plates, and low-noise fatigue. Boundary: avoid a generic clinic girl or sexy nurse.', tags: ['clinic', 'prosthetic_user', 'medical'] },
+  { id: 'replacement_lung_runner', name: '替换肺跑者', nameEn: 'Replacement-Lung Runner', group: 'A. 义体 / 身体改造', groupEn: 'A. Prosthetic / Body Modification', def: '第一识别是靠替换肺系统继续长跑的人。造型入口：胸侧气阀、透明呼吸管、运动背心、冷凝水和每次呼吸都像设备循环的节奏。母题：耐力运动被生命维持器改写。张力：他不是超人，速度来自昂贵维护、氧气管理和身体代价。视觉证据：肺部读数贴片、汗水、备用滤芯、胸腔轻微机械起伏。边界：避免普通跑者或飞行喷气装置。', defEn: 'First read: a runner who continues through replacement-lung systems. Styling entry: side-chest valves, clear breathing tubes, sport vest, condensation, and breaths that feel like device cycles. Motif: endurance sport rewritten by life-support equipment. Tension: not superhuman; speed comes from expensive maintenance, oxygen management, and bodily cost. Visual evidence: lung readout patches, sweat, spare filters, and slight mechanical chest movement. Boundary: avoid a generic runner or jet-device fantasy.', tags: ['runner', 'replacement_lung', 'endurance'] },
+  { id: 'neural_jack_student', name: '神经插口学生', nameEn: 'Neural-Jack Student', group: 'A. 义体 / 身体改造', groupEn: 'A. Prosthetic / Body Modification', def: '第一识别是学习、考试和社交都依赖神经插口的学生。造型入口：校服式外套、颈后插口、廉价数据线、头痛贴和在课堂里短暂断线的眼神。母题：教育变成可插拔的认知接口。张力：他不是天才少年，知识像租来的带宽，身体承担过载后果。视觉证据：课程芯片、插口磨损、眼下疲劳、手边止痛药。边界：避免普通学生或全能黑客。', defEn: 'First read: a student whose learning, exams, and social life rely on neural jacks. Styling entry: school-style jacket, rear-neck socket, cheap data cable, headache patches, and a gaze briefly disconnecting in class. Motif: education as pluggable cognition. Tension: not a genius kid; knowledge feels like rented bandwidth and the body pays overload costs. Visual evidence: course chips, worn socket, tired eyes, and painkillers nearby. Boundary: avoid a generic student or all-powerful hacker.', tags: ['student', 'neural_jack', 'education'] },
+  { id: 'modded_skull_bouncer', name: '改造颅骨保镖', nameEn: 'Modded-Skull Bouncer', group: 'A. 义体 / 身体改造', groupEn: 'A. Prosthetic / Body Modification', def: '第一识别是颅骨被改造成耐冲撞结构的门口保镖。造型入口：剃短头发、头侧金属板、厚脖颈、耳内通讯器和用头部角度压迫人的站姿。母题：安全职业把头骨变成门禁硬件。张力：他不需要亮武器，身体轮廓本身就是警告牌。视觉证据：颅骨铆钉、扫描耳机、黑色安保服、被撞出的旧凹痕。边界：避免普通壮汉保镖或反派机械头。', defEn: 'First read: a bouncer whose skull is modified into impact-resistant structure. Styling entry: cropped hair, metal side plates, thick neck, in-ear comms, and a head angle used to pressure people. Motif: security work turning the skull into access-control hardware. Tension: no visible weapon needed; the silhouette is the warning sign. Visual evidence: skull rivets, scanner earpiece, black security uniform, and old impact dents. Boundary: avoid a generic strong bouncer or villain robot head.', tags: ['bouncer', 'skull_mod', 'security'] },
+  { id: 'exoskeleton_worker', name: '外骨骼工人', nameEn: 'Exoskeleton Worker', group: 'A. 义体 / 身体改造', groupEn: 'A. Prosthetic / Body Modification', ontologyLevel: 3, eras: industrialEras, def: '第一识别是穿戴工业外骨骼完成重体力劳动的工人。造型入口：腰背支架、液压腿杆、反光工装、工具挂点和被机器托住但仍疲惫的肩膀。母题：劳动强度被设备延长而不是消失。张力：外骨骼提供力量，也让工人更难从工作中退出。视觉证据：油污、磨损绑带、工牌、负重姿态和维修贴纸。边界：避免科幻装甲英雄或普通工装人物。', defEn: 'First read: a worker using an industrial exoskeleton for heavy labor. Styling entry: waist-back frame, hydraulic leg rods, reflective workwear, tool mounts, and shoulders supported by machine yet still tired. Motif: labor intensity extended by equipment rather than removed. Tension: the exoskeleton gives strength while making it harder to leave work. Visual evidence: oil stains, worn straps, work badge, load-bearing posture, and repair stickers. Boundary: avoid sci-fi armor hero or generic workwear figure.', tags: ['exoskeleton', 'worker', 'industrial'] },
+
+  { id: 'mechanical_nun', name: '机械修女', nameEn: 'Mechanical Nun', group: 'B. 机械宗教 / 技术圣职', groupEn: 'B. Machine Religion / Technical Clergy', def: '第一识别是把修女服制和维护机器的职责合并的人。造型入口：黑白头巾、袖口工具、胸前细小状态灯、安静合掌和像祈祷也像校准的手势。母题：服从、照护和机械秩序重叠。张力：神圣感不能靠光环堆砌，而要来自洁净纪律和低声维护。视觉证据：螺丝刀念珠、磨白手套、维修记录、低垂眼神。边界：避免普通修女或随机机器人圣女。', defEn: 'First read: a figure merging nun dress code with machine maintenance duty. Styling entry: black-white veil, tools at cuffs, small chest status lights, quiet clasped hands, and gestures that read as prayer and calibration. Motif: obedience, care, and mechanical order overlapping. Tension: holiness should not come from random halos, but from clean discipline and low-voiced maintenance. Visual evidence: screwdriver rosary, worn white gloves, repair logs, and lowered eyes. Boundary: avoid a generic nun or random robot saint.', tags: ['nun', 'maintenance', 'machine_religion'] },
+  { id: 'servo_monk', name: '伺服僧侣', nameEn: 'Servo Monk', group: 'B. 机械宗教 / 技术圣职', groupEn: 'B. Machine Religion / Technical Clergy', def: '第一识别是动作被伺服结构训练得极慢极准的僧侣。造型入口：素色长袍、关节微响、腕部小型马达、低头行走和重复到近乎仪式的维护动作。母题：修行被转写成运动控制。张力：他不是战斗僧，而是把每次抬手、转身、呼吸都压进机械节律。视觉证据：关节罩、磨损蒲团、油痕、安静背影。边界：避免真实宗教冒犯或武侠机器人。', defEn: 'First read: a monk whose movements are trained into extreme slowness and precision by servo structure. Styling entry: plain robe, faint joint noise, wrist motors, lowered walking, and maintenance gestures repeated like ritual. Motif: practice rewritten as motion control. Tension: not a warrior monk, but someone who compresses every hand raise, turn, and breath into mechanical rhythm. Visual evidence: joint covers, worn cushion, oil traces, and quiet back view. Boundary: avoid real religious offense or martial robot monk.', tags: ['monk', 'servo', 'ritual_motion'] },
+  { id: 'circuit_priestess', name: '电路女祭司', nameEn: 'Circuit Priestess', group: 'B. 机械宗教 / 技术圣职', groupEn: 'B. Machine Religion / Technical Clergy', def: '第一识别是用电路图替代祭纹的技术女祭司。造型入口：长袍上的铜线路、额头接口、手持诊断板、像读取神谕一样读取电压的表情。母题：神秘解释权转移到电路维护者手里。张力：她不是魔法师，权威来自能看懂别人看不懂的连接关系。视觉证据：发光焊点、导电手套、线路披肩、专注侧脸。边界：避免普通赛博女巫或发光神棍。', defEn: 'First read: a technical priestess whose ritual marks are circuit diagrams. Styling entry: copper traces on robes, forehead socket, diagnostic tablet, and an expression reading voltage like oracle. Motif: mystical authority moving into the hands of circuit maintainers. Tension: not a magician; her power comes from understanding connections others cannot read. Visual evidence: glowing solder points, conductive gloves, circuit shawl, and focused profile. Boundary: avoid a generic cyber witch or glowing charlatan.', tags: ['priestess', 'circuit', 'oracle'] },
+  { id: 'data_relic_bishop', name: '数据圣遗物主教', nameEn: 'Data-Relic Bishop', group: 'B. 机械宗教 / 技术圣职', groupEn: 'B. Machine Religion / Technical Clergy', def: '第一识别是把旧服务器、硬盘和人格备份当成圣遗物管理的主教。造型入口：沉重礼袍、硬盘匣、冷库钥匙、像祝福一样的备份手势和过度庄严的文件管理。母题：记忆存储被神圣化。张力：他保护的不是骨灰，而是数据残片和访问权限。视觉证据：编号硬盘、冷光机柜、封蜡标签、黑色手套。边界：避免普通宗教主教或IT管理员。', defEn: 'First read: a bishop who manages old servers, drives, and personality backups as relics. Styling entry: heavy vestment, drive cases, cold-room keys, backup gestures like blessing, and excessively solemn file handling. Motif: memory storage made sacred. Tension: he protects not ashes but data fragments and access rights. Visual evidence: numbered drives, cold server racks, wax-like seals, and black gloves. Boundary: avoid a generic bishop or IT administrator.', ontologyLevel: 5, tags: ['bishop', 'data_relic', 'memory'] },
+  { id: 'oil_chapel_acolyte', name: '机油礼拜堂侍童', nameEn: 'Oil-Chapel Acolyte', group: 'B. 机械宗教 / 技术圣职', groupEn: 'B. Machine Religion / Technical Clergy', def: '第一识别是在小型机械礼拜堂里递送机油、布巾和工具的侍童。造型入口：短袍、油渍袖口、小银壶、擦拭动作和因长期闻机油而迟钝的脸。母题：礼仪劳动变成维护劳动。张力：他不需要宏大神圣感，越像日常杂役越能成立机器宗教。视觉证据：油壶、抹布、跪垫、齿轮祭台、低头等待。边界：避免普通祭童或可爱维修学徒。', defEn: 'First read: an acolyte passing oil, cloth, and tools inside a small machine chapel. Styling entry: short robe, oily cuffs, small silver oil pot, wiping gestures, and a face dulled by long exposure to machine oil. Motif: ritual labor becoming maintenance labor. Tension: no grand holiness needed; the more daily-servant it feels, the stronger the machine religion becomes. Visual evidence: oil pot, rag, kneeling pad, gear altar, and waiting with lowered head. Boundary: avoid a generic altar boy or cute repair apprentice.', tags: ['acolyte', 'oil', 'chapel'] },
+  { id: 'robotic_confessor', name: '机械忏悔神父', nameEn: 'Robotic Confessor', group: 'B. 机械宗教 / 技术圣职', groupEn: 'B. Machine Religion / Technical Clergy', def: '第一识别是通过机器隔窗收集秘密、故障和罪感的忏悔者。造型入口：黑袍、声纹记录器、面部遮罩、分隔窗和永不惊讶的静止姿态。母题：忏悔被归档为数据。张力：他像神父，也像审计设备，安慰和监控很难分开。视觉证据：录音灯、金属格窗、加密本、戴手套的记录动作。边界：避免普通神父或聊天机器人。', defEn: 'First read: a confessor collecting secrets, faults, and guilt through a machine partition. Styling entry: black robe, voice recorder, face mask, divider window, and a still posture that never looks surprised. Motif: confession archived as data. Tension: he reads as priest and audit device at once, with comfort and surveillance hard to separate. Visual evidence: recording light, metal grille, encrypted book, and gloved note-taking. Boundary: avoid a generic priest or chatbot.', tags: ['confessor', 'archive', 'surveillance'] },
+  { id: 'chrome_halo_saint', name: '铬光环圣徒', nameEn: 'Chrome-Halo Saint', group: 'B. 机械宗教 / 技术圣职', groupEn: 'B. Machine Religion / Technical Clergy', def: '第一识别是光环被做成铬色支架和医疗固定器的机械圣徒。造型入口：头后金属环、颈托、洁白伤布、冷静痛感和像展品一样的正面站姿。母题：受难姿态被技术保存。张力：光环不是神迹，而是维持身体、展示身份和限制动作的装置。视觉证据：支架螺丝、皮肤压痕、白布、冷反光、缓慢抬眼。边界：避免普通宗教圣像或发光偶像。', defEn: 'First read: a machine saint whose halo is a chrome brace and medical restraint. Styling entry: metal ring behind the head, neck support, white wound cloth, calm pain, and frontal posture like an exhibit. Motif: suffering posture preserved by technology. Tension: the halo is not miracle; it supports the body, displays identity, and limits motion. Visual evidence: brace screws, skin pressure marks, white cloth, cold reflection, and slow eye lift. Boundary: avoid a generic religious icon or glowing idol.', tags: ['saint', 'chrome_halo', 'brace'] },
+  { id: 'maintenance_temple_guard', name: '维护神殿守卫', nameEn: 'Maintenance-Temple Guard', group: 'B. 机械宗教 / 技术圣职', groupEn: 'B. Machine Religion / Technical Clergy', def: '第一识别是守护机房神殿入口的维护型守卫。造型入口：半护甲工装、门禁令牌、工具长杆、静止站岗和随时能蹲下检修的身体重心。母题：神圣边界由维修权限维持。张力：他不是骑士，真正的威严来自懂得哪些机器不能停。视觉证据：权限卡、尘封机柜、工具腰带、低频红灯。边界：避免中世纪圣殿骑士或普通保安。', defEn: 'First read: a maintenance guard protecting the entrance of a server-temple. Styling entry: half-armored workwear, access token, long tool staff, still guard stance, and a center of gravity ready to crouch for repair. Motif: sacred boundary maintained by repair permission. Tension: not a knight; authority comes from knowing which machines must never stop. Visual evidence: access card, dusty racks, tool belt, and low red status lights. Boundary: avoid medieval templar or generic security guard.', tags: ['guard', 'temple', 'maintenance'] },
+  { id: 'machine_choir_girl', name: '机械唱诗女孩', nameEn: 'Machine-Choir Girl', group: 'B. 机械宗教 / 技术圣职', groupEn: 'B. Machine Religion / Technical Clergy', def: '第一识别是嗓音被机械共鸣腔修正的唱诗女孩。造型入口：合唱袍、喉部金属环、呼吸管、齐声站位和发声时过于稳定的嘴型。母题：纯净声音被设备制造。张力：她不是偶像，重点是顺从、合声和喉咙作为仪器的脆弱感。视觉证据：喉部接口、谱架、同步耳机、没有个人表情的歌唱。边界：避免普通合唱学生或流行歌手机器人。', defEn: 'First read: a choir girl whose voice is corrected by mechanical resonance chambers. Styling entry: choir robe, metal throat ring, breathing tube, aligned stance, and mouth shape too stable while singing. Motif: pure voice manufactured by equipment. Tension: not an idol; focus on obedience, chorus, and the throat as fragile instrument. Visual evidence: throat socket, music stand, sync earpiece, and singing without personal expression. Boundary: avoid a generic choir student or pop singer robot.', tags: ['choir', 'voice_device', 'girl'] },
+  { id: 'holy_interface_martyr', name: '神圣接口殉道者', nameEn: 'Holy-Interface Martyr', group: 'B. 机械宗教 / 技术圣职', groupEn: 'B. Machine Religion / Technical Clergy', def: '第一识别是身体被过多接口穿过、仍被制度称为神圣的殉道者。造型入口：白布、胸腹端口、供电线、固定带和像忍耐又像被展示的姿态。母题：连接本身成为牺牲。张力：不要把痛苦写成猎奇，重点是身体被迫承担系统稳定的代价。视觉证据：编号线缆、皮肤压痕、静音医疗灯、旁人敬畏距离。边界：避免血腥酷刑或普通病人。', defEn: 'First read: a martyr whose body is crossed by too many interfaces and still named holy by the system. Styling entry: white cloth, chest and abdomen ports, power cables, restraints, and a posture between endurance and display. Motif: connection itself as sacrifice. Tension: do not turn pain into spectacle; focus on the body forced to pay for system stability. Visual evidence: numbered cables, skin marks, silent medical light, and others keeping reverent distance. Boundary: avoid gore torture or generic patient.', risk: 'medium', tags: ['martyr', 'interface', 'sacrifice'] },
+
+  { id: 'android_idol', name: '仿生偶像', nameEn: 'Android Idol', group: 'C. 仿生人 / 合成人', groupEn: 'C. Android / Synthetic Human', def: '第一识别是被生产为舞台人格的仿生偶像。造型入口：完美皮肤、舞台耳返、瞳孔微光、定制笑容和永远不会喘乱的谢幕姿态。母题：可更新的魅力产品。张力：她看似亲近，所有情绪却像版本管理后的输出。视觉证据：序列号饰片、后台充电座、同步舞步、过度稳定的眼神。边界：避免普通偶像或金属机器人。', defEn: 'First read: an android idol manufactured as a stage persona. Styling entry: flawless skin, stage in-ear monitor, faint pupil glow, custom smile, and a bow that never loses breath. Motif: charm as updatable product. Tension: she seems close, yet every emotion feels version-controlled. Visual evidence: serial charm plate, backstage charging dock, synchronized steps, and overly stable gaze. Boundary: avoid a generic idol or metal robot.', tags: ['android', 'idol', 'stage'] },
+  { id: 'synthetic_maid', name: '合成人女仆', nameEn: 'Synthetic Maid', group: 'C. 仿生人 / 合成人', groupEn: 'C. Android / Synthetic Human', def: '第一识别是家务制服把合成人身份压成服务姿态的女仆。造型入口：整洁围裙、腕部家政接口、可替换表情、清洁工具和在主人视线外才短暂停顿的身体。母题：亲密劳动被仿生化。张力：她不是复古女仆，而是被设计成永远可用、永远温和的家居设备。视觉证据：充电触点、洗涤标签、过度标准的微笑、跪下整理地毯的姿态。边界：避免普通女仆或色情化机器人。', defEn: 'First read: a maid uniform compressing synthetic identity into service posture. Styling entry: neat apron, household wrist interface, replaceable expressions, cleaning tools, and a body that pauses only outside the owner gaze. Motif: intimate labor made synthetic. Tension: not a retro maid, but a home device designed to stay available and gentle. Visual evidence: charging contacts, wash labels, standardized smile, and kneeling to fix a rug. Boundary: avoid a generic maid or eroticized robot.', tags: ['synthetic', 'maid', 'domestic'] },
+  { id: 'replicant_schoolboy', name: '复制人男学生', nameEn: 'Replicant Schoolboy', group: 'C. 仿生人 / 合成人', groupEn: 'C. Android / Synthetic Human', def: '第一识别是被放进校园环境测试社会化能力的复制人男学生。造型入口：校服、过新书包、手腕编号、模仿同龄人的笑和比年龄更空白的观察眼神。母题：青春被实验复制。张力：他不是普通学生，所有校园动作都像在学习“如何像人”。视觉证据：行为记录贴、整齐课本、慢半拍反应、看向别人再模仿的手。边界：避免普通少年或天才学生。', defEn: 'First read: a replicant schoolboy placed in school to test socialization. Styling entry: uniform, too-new backpack, wrist number, copied peer smile, and observation eyes emptier than his age. Motif: youth reproduced as experiment. Tension: not a normal student; every school gesture looks like learning how to be human. Visual evidence: behavior record sticker, orderly books, half-beat delay, and hands copying others. Boundary: avoid a generic boy or genius student.', tags: ['replicant', 'schoolboy', 'social_test'] },
+  { id: 'domestic_android_mother', name: '家政仿生母亲', nameEn: 'Domestic Android Mother', group: 'C. 仿生人 / 合成人', groupEn: 'C. Android / Synthetic Human', def: '第一识别是被购买来填补家庭照护位置的仿生母亲。造型入口：柔软家居服、温控手掌、厨房围裙、完美作息提醒和过度稳定的慈爱表情。母题：母职被服务合同复制。张力：她能完成照护流程，却让人不确定爱来自哪里。视觉证据：家庭日程屏、充电底座、儿童身高尺、永远干净的手。边界：避免普通妈妈或恐怖机器人保姆。', defEn: 'First read: a domestic android purchased to fill the caregiving position of mother. Styling entry: soft homewear, temperature-controlled palms, kitchen apron, perfect schedule reminders, and excessively stable tenderness. Motif: motherhood copied by service contract. Tension: she completes care procedures while leaving the source of love uncertain. Visual evidence: family schedule screen, charging base, child height chart, and hands always clean. Boundary: avoid a generic mother or horror robot nanny.', tags: ['android', 'mother', 'care'] },
+  { id: 'synthetic_actor_double', name: '合成演员替身', nameEn: 'Synthetic Actor Double', group: 'C. 仿生人 / 合成人', groupEn: 'C. Android / Synthetic Human', def: '第一识别是为替代演员危险镜头而制造的合成替身。造型入口：片场服、可调脸部模块、动作捕捉点、与本尊相似但略微空洞的表情。母题：表演身份被复制成可承受损伤的身体。张力：他不是明星，也不是道具，而是站在人格和保险合同之间。视觉证据：面部校准网格、替身标记、片场灯、被反复摔打的护具。边界：避免真实名人复制或普通特技演员。', defEn: 'First read: a synthetic double made to replace actors in dangerous shots. Styling entry: set clothes, adjustable face modules, motion-capture dots, and an expression similar to the original but slightly hollow. Motif: performance identity copied into a damage-bearing body. Tension: neither star nor prop, but between personhood and insurance contract. Visual evidence: facial calibration grid, double marks, set lights, and repeatedly battered pads. Boundary: avoid copying real celebrities or a generic stunt performer.', tags: ['synthetic', 'actor_double', 'film'] },
+  { id: 'android_court_witness', name: '仿生人法庭证人', nameEn: 'Android Court Witness', group: 'C. 仿生人 / 合成人', groupEn: 'C. Android / Synthetic Human', def: '第一识别是站在法庭上、记忆记录被当作证据审查的仿生人。造型入口：简洁正装、证人席、数据端口封条、眼神回放延迟和被要求“说真话”的僵硬站姿。母题：记忆所有权进入法律。张力：他是否可信不靠表情，而靠系统、权限和被剪辑的记录。视觉证据：宣誓手势、端口贴纸、法庭木色、审查屏幕。边界：避免普通证人或机械法官。', defEn: 'First read: an android witness whose memory record is examined as evidence in court. Styling entry: simple formalwear, witness stand, sealed data port, playback delay in the eyes, and stiff posture when asked to tell the truth. Motif: memory ownership entering law. Tension: credibility comes not from expression but from system, permission, and edited records. Visual evidence: oath gesture, port sticker, courtroom wood tones, and review screens. Boundary: avoid a generic witness or robot judge.', tags: ['android', 'court', 'witness'] },
+  { id: 'factory_born_bride', name: '工厂出生新娘', nameEn: 'Factory-Born Bride', group: 'C. 仿生人 / 合成人', groupEn: 'C. Android / Synthetic Human', eras: ['industrial', 'near_future', 'far_future'], def: '第一识别是从生产线直接进入婚礼仪式的合成新娘。造型入口：白纱与质检标签并置、腕部出厂码、尚未完全拆除的保护膜和像学习幸福的微笑。母题：亲密关系被制造为交付品。张力：她不是普通新娘，婚纱下仍有工厂标准和验收痕迹。视觉证据：包装纸、序列号、洁白手套、过新的皮肤、说明书。边界：避免甜美婚纱照或普通机器人新娘。', defEn: 'First read: a synthetic bride moving directly from production line into wedding ritual. Styling entry: veil beside quality tags, factory code on wrist, protective film not fully removed, and a smile learning happiness. Motif: intimacy manufactured as deliverable product. Tension: not a normal bride; factory standards and acceptance traces remain under the gown. Visual evidence: packaging paper, serial number, white gloves, too-new skin, and instruction manual. Boundary: avoid sweet bridal portrait or generic robot bride.', tags: ['synthetic', 'bride', 'factory_born'] },
+  { id: 'emotion_patch_android', name: '情绪补丁仿生人', nameEn: 'Emotion-Patch Android', group: 'C. 仿生人 / 合成人', groupEn: 'C. Android / Synthetic Human', def: '第一识别是情绪系统需要外部补丁更新的仿生人。造型入口：太阳穴贴片、情绪版本标签、表情切换不连贯、手里攥着更新卡。母题：感受被软件化。张力：他不是冷酷机器人，而是太努力地安装正确反应。视觉证据：界面提示、眼泪延迟、脸部微表情断层、贴片边缘翘起。边界：避免普通无感机器人或夸张疯癫角色。', defEn: 'First read: an android whose emotion system needs external patches. Styling entry: temple patch, emotion-version label, discontinuous expression changes, and an update card in hand. Motif: feeling turned into software. Tension: not a cold robot, but someone trying too hard to install the correct response. Visual evidence: interface prompt, delayed tears, facial micro-expression gaps, and lifted patch edge. Boundary: avoid generic emotionless robot or exaggerated mad character.', tags: ['android', 'emotion_patch', 'software'] },
+  { id: 'obsolete_robot_companion', name: '过时陪伴机器人', nameEn: 'Obsolete Companion Robot', group: 'C. 仿生人 / 合成人', groupEn: 'C. Android / Synthetic Human', def: '第一识别是已经过时、仍试图执行陪伴协议的旧款机器人。造型入口：褪色人造皮肤、老式关节声、旧衣物、过时问候语和努力保持温柔的停顿。母题：亲密技术被时代淘汰。张力：它的故障不恐怖，而是像被遗忘的旧家具一样让人心软。视觉证据：过期保修贴、磨损手指、旧充电口、缓慢转头。边界：避免普通废旧机器人或可爱玩具。', defEn: 'First read: an outdated companion robot still trying to run care protocol. Styling entry: faded synthetic skin, old joint noise, old clothing, obsolete greetings, and pauses trying to remain gentle. Motif: intimate technology made obsolete. Tension: its failure is not horror, but tenderness like forgotten furniture. Visual evidence: expired warranty sticker, worn fingers, old charging port, and slow head turn. Boundary: avoid generic junk robot or cute toy.', tags: ['obsolete', 'companion', 'robot'] },
+  { id: 'serial_number_prince', name: '序列号王子', nameEn: 'Serial-Number Prince', group: 'C. 仿生人 / 合成人', groupEn: 'C. Android / Synthetic Human', def: '第一识别是被王室礼仪包装、却用序列号证明身份的合成王子。造型入口：礼服肩章、颈侧编号、完美站姿、缺少童年感的眼神和像产品发布一样的加冕姿态。母题：血统被制造编号替换。张力：他看似继承人，身体却是可追溯生产物。视觉证据：编号牌、王室手套、身份芯片、过于标准的鞠躬。边界：避免普通王子或金属机器人贵族。', defEn: 'First read: a synthetic prince wrapped in royal etiquette yet identified by serial number. Styling entry: formal epaulettes, neck-side number, perfect posture, eyes without childhood, and coronation posture like product launch. Motif: bloodline replaced by manufactured numbering. Tension: he appears heir, but the body is traceable product. Visual evidence: number plate, royal gloves, identity chip, and overly standard bow. Boundary: avoid a generic prince or metal robot noble.', tags: ['serial_number', 'prince', 'synthetic'] },
+
+  { id: 'cyber_swordsman', name: '赛博剑客', nameEn: 'Cyber Swordsman', group: 'D. 赛博职业 / 技术街头', groupEn: 'D. Cyber Profession / Technical Street', def: '第一识别是把古典剑客姿态放进电子街区的赛博剑客。造型入口：细长刀鞘、电磁护腕、短外套、背部电池和像等待决斗一样站在霓虹边缘。母题：冷兵器礼仪被技术街头改写。张力：重点不是酷炫发光刀，而是纪律、距离和一击之前的静止。视觉证据：刀柄接口、护目镜反光、雨水、电缆阴影、压低肩线。边界：避免普通武士或网游刺客。', defEn: 'First read: a cyber swordsman placing classical duel posture inside an electronic street. Styling entry: slim scabbard, electromagnetic bracer, short jacket, back battery, and waiting-at-the-neon-edge stance. Motif: blade etiquette rewritten by technical street life. Tension: not a glowing sword gimmick, but discipline, distance, and stillness before one strike. Visual evidence: hilt socket, goggle reflection, rain, cable shadow, and lowered shoulders. Boundary: avoid generic samurai or game assassin.', tags: ['swordsman', 'cyber_street', 'blade'] },
+  { id: 'hologram_bartender', name: '全息酒保', nameEn: 'Hologram Bartender', group: 'D. 赛博职业 / 技术街头', groupEn: 'D. Cyber Profession / Technical Street', ontologyLevel: 3, def: '第一识别是吧台后半实体半投影的全息酒保。造型入口：酒保马甲、投影边缘、实体机械手、酒杯光斑和永远保持营业微笑的脸。母题：服务人格被场所投影出来。张力：他看似在场，手、声音和身体边界却来自不同设备。视觉证据：吧台投影源、玻璃折射、断续手臂、点单界面。边界：避免普通酒保或纯透明幽灵。', defEn: 'First read: a hologram bartender half-present behind the bar. Styling entry: bartender vest, projection edges, physical mechanical hand, glass highlights, and a face holding a permanent service smile. Motif: service persona projected by place. Tension: he seems present while hand, voice, and body boundary come from different devices. Visual evidence: bar projector, glass refraction, interrupted arm, and ordering interface. Boundary: avoid generic bartender or pure transparent ghost.', tags: ['hologram', 'bartender', 'service'] },
+  { id: 'implant_black_market_doctor', name: '植入体黑市医生', nameEn: 'Implant Black-Market Doctor', group: 'D. 赛博职业 / 技术街头', groupEn: 'D. Cyber Profession / Technical Street', def: '第一识别是在地下房间替人安装非法植入体的黑市医生。造型入口：一次性手套、便携手术灯、旧箱子里的芯片、血迹被擦干的台面和职业冷静的眼神。母题：身体升级脱离正规医疗。张力：他不是屠夫，危险来自熟练、便宜和没有记录。视觉证据：假许可证、消毒袋、裸露电线、沉默顾客。边界：避免普通医生或血腥地下杀手。', defEn: 'First read: a black-market doctor installing illegal implants in a back room. Styling entry: disposable gloves, portable surgical light, chips in old cases, wiped-down table, and professionally calm eyes. Motif: body upgrade outside official medicine. Tension: not a butcher; danger comes from skill, cheapness, and no records. Visual evidence: fake license, sterilization bags, exposed wires, and silent clients. Boundary: avoid generic doctor or gore underground killer.', risk: 'medium', tags: ['black_market', 'implant', 'doctor'] },
+  { id: 'drone_swarm_policeman', name: '无人机蜂群警察', nameEn: 'Drone-Swarm Policeman', group: 'D. 赛博职业 / 技术街头', groupEn: 'D. Cyber Profession / Technical Street', def: '第一识别是身体周围总有小型无人机盘旋的警察。造型入口：轻型制服、肩部控制台、悬停无人机、扩音器和不用亲自靠近就能执法的站姿。母题：权力从身体扩展成空中视线。张力：他不是飞行员，真正的压迫来自多重镜头和同步命令。视觉证据：无人机影子、胸前编号、警戒光、抬手指挥群体的动作。边界：避免普通警察或军用飞行机器人。', defEn: 'First read: a policeman surrounded by hovering micro drones. Styling entry: light uniform, shoulder console, hovering drones, speaker, and a stance that enforces without approaching. Motif: authority extending from body into airborne sight. Tension: not a pilot; pressure comes from multiple lenses and synchronized orders. Visual evidence: drone shadows, chest number, warning lights, and hand directing the swarm. Boundary: avoid generic cop or military flying robot.', tags: ['police', 'drone_swarm', 'surveillance'] },
+  { id: 'neon_interface_girl', name: '霓虹接口女孩', nameEn: 'Neon Interface Girl', group: 'D. 赛博职业 / 技术街头', groupEn: 'D. Cyber Profession / Technical Street', def: '第一识别是身体像街头终端一样接入霓虹系统的年轻女性。造型入口：发光腕带、皮肤接口、短夹克、广告屏反光和在街边快速切换身份的手势。母题：城市界面穿在身体上。张力：她不是简单发光少女，而是能被门禁、广告和社群同时读取的人。视觉证据：二维码贴、数据线、霓虹边缘光、警觉眼神。边界：避免普通赛博美女或偶像灯效。', defEn: 'First read: a young woman whose body connects to the neon street like a terminal. Styling entry: glowing wristband, skin socket, short jacket, ad-screen reflection, and gestures switching identity at the curb. Motif: city interface worn on the body. Tension: not a glowing girl, but someone readable by gates, ads, and communities at once. Visual evidence: QR stickers, data cable, neon rim light, and alert eyes. Boundary: avoid generic cyber beauty or idol lighting.', tags: ['neon', 'interface', 'street'] },
+  { id: 'data_cable_hairdresser', name: '数据线理发师', nameEn: 'Data-Cable Hairdresser', group: 'D. 赛博职业 / 技术街头', groupEn: 'D. Cyber Profession / Technical Street', def: '第一识别是把发型、线缆和个人接口一起整理的街头理发师。造型入口：剪刀、细数据线、发夹式端口、镜前灯和替顾客接线时极稳的手。母题：发型成为社交接口管理。张力：他不是美发师加赛博装饰，而是通过头发走线改变人的身份可见度。视觉证据：镜台线圈、剪落的发丝、接口保护贴、顾客低头姿态。边界：避免普通理发师或发光假发店。', defEn: 'First read: a street hairdresser who arranges hair, cables, and personal interfaces together. Styling entry: scissors, thin data cords, hairpin ports, mirror lights, and steady hands while wiring clients. Motif: hairstyle as social-interface management. Tension: not a hairdresser with cyber decoration, but someone who changes visibility through hair routing. Visual evidence: coils on mirror table, cut hair, port protectors, and clients lowering their heads. Boundary: avoid generic barber or glowing wig shop.', tags: ['hairdresser', 'data_cable', 'street_service'] },
+  { id: 'augmented_pickpocket', name: '增强扒手', nameEn: 'Augmented Pickpocket', group: 'D. 赛博职业 / 技术街头', groupEn: 'D. Cyber Profession / Technical Street', def: '第一识别是手指、视线和步法都被增强过的街头扒手。造型入口：薄手套、指尖传感器、宽松外套、低头穿行和在擦肩一瞬间完成读取的动作。母题：偷窃从钱包转向身份和权限。张力：他不是小偷造型，而是身体每个微动作都服务隐形接触。视觉证据：袖内读卡器、假笑、拥挤地铁、指节微光。边界：避免普通扒手或黑客键盘人。', defEn: 'First read: a street pickpocket with augmented fingers, sight, and footwork. Styling entry: thin gloves, fingertip sensors, loose jacket, lowered walking, and completing a read during a shoulder brush. Motif: theft moving from wallets to identity and access. Tension: not a thief costume; every micro-gesture serves invisible contact. Visual evidence: sleeve reader, false smile, crowded subway, and faint knuckle light. Boundary: avoid generic pickpocket or keyboard hacker.', tags: ['pickpocket', 'augmentation', 'theft'] },
+  { id: 'firewall_bodyguard', name: '防火墙保镖', nameEn: 'Firewall Bodyguard', group: 'D. 赛博职业 / 技术街头', groupEn: 'D. Cyber Profession / Technical Street', def: '第一识别是保护雇主身体和数据边界的防火墙保镖。造型入口：深色西装、防护项圈、手腕屏障投射器、站在客户半步外的角度。母题：近身安保变成网络边界管理。张力：他挡的不只是拳头，也挡扫描、窃听和身份劫持。视觉证据：干扰纹、耳麦、短暂蓝色屏障、警觉侧身。边界：避免普通保镖或全能魔法护盾。', defEn: 'First read: a bodyguard protecting both client body and data boundary. Styling entry: dark suit, protective collar, wrist barrier projector, and position half a step outside the client. Motif: close protection becoming network boundary management. Tension: he blocks not only fists but scans, eavesdropping, and identity hijack. Visual evidence: interference patterns, earpiece, brief blue barrier, and alert side stance. Boundary: avoid generic bodyguard or all-purpose magic shield.', tags: ['bodyguard', 'firewall', 'protection'] },
+  { id: 'retinal_advertising_model', name: '视网膜广告模特', nameEn: 'Retinal-Advertising Model', group: 'D. 赛博职业 / 技术街头', groupEn: 'D. Cyber Profession / Technical Street', def: '第一识别是专门让观众视网膜接口触发广告的模特。造型入口：极简广告服、眼部追踪标记、商品手势、过准的视线和像看每个观众个人资料的微笑。母题：身体被优化成投放触发器。张力：她不是普通广告模特，观看她本身就是一次数据交易。视觉证据：眼球识别光点、品牌被抽象成色块、姿态停顿、投放提示。边界：避免真实品牌logo或普通时尚模特。', defEn: 'First read: a model designed to trigger ads through viewer retinal interfaces. Styling entry: minimal campaign outfit, eye-tracking marks, product gesture, overly precise gaze, and a smile that seems to read each viewer profile. Motif: body optimized as delivery trigger. Tension: not a generic ad model; watching her is itself a data transaction. Visual evidence: eye-recognition points, brand abstracted into color blocks, pose pause, and delivery prompt. Boundary: avoid real brand logos or generic fashion model.', tags: ['advertising', 'retinal', 'model'], forbids: ['真实品牌logo'] },
+  { id: 'prosthetic_repair_apprentice', name: '义体维修学徒', nameEn: 'Prosthetic-Repair Apprentice', group: 'D. 赛博职业 / 技术街头', groupEn: 'D. Cyber Profession / Technical Street', def: '第一识别是刚学会替别人拆装义体的维修学徒。造型入口：沾油围裙、廉价工具、袖口贴满零件编号、紧张但专注的眼神。母题：技术手艺在街头小店传承。张力：他不是天才工程师，价值在于认真、手稳和知道坏掉身体不能被粗暴对待。视觉证据：螺丝盒、拆下的义手、师傅旧笔记、手背划痕。边界：避免普通学生或科幻发明家。', defEn: 'First read: an apprentice just learning to disassemble and repair prosthetics for others. Styling entry: oily apron, cheap tools, sleeves covered in part numbers, and nervous but focused eyes. Motif: technical craft inherited in a street shop. Tension: not a genius engineer; value lies in care, steady hands, and knowing broken bodies cannot be handled roughly. Visual evidence: screw boxes, removed prosthetic hand, old mentor notes, and scratches on hand backs. Boundary: avoid generic student or sci-fi inventor.', ontologyLevel: 3, tags: ['repair', 'apprentice', 'prosthetic_shop'] },
+
+  { id: 'cyborg_soldier', name: '半机械士兵', nameEn: 'Cyborg Soldier', group: 'E. 战斗改造 / 军用人形', groupEn: 'E. Combat Augmentation / Military Humanoid', def: '第一识别是身体被军规切开、一部分已经成为装备的士兵。造型入口：战术制服、皮下金属边、接口护盖、军牌和像等待远程命令的僵直站姿。母题：士兵身体被标准化改造。张力：他不是酷炫战士，而是军事系统在人体上留下的产权痕迹。视觉证据：编号义体、维修标识、枪带、战术疲惫眼神。边界：避免普通特种兵或全身机甲。', defEn: 'First read: a soldier whose body has been cut by military specification, partly becoming equipment. Styling entry: tactical uniform, subdermal metal edges, port covers, dog tags, and rigid posture awaiting remote command. Motif: soldier body standardized by augmentation. Tension: not a cool fighter, but property marks of a military system on human flesh. Visual evidence: numbered prosthetics, repair labels, rifle sling, and tactical tired eyes. Boundary: avoid generic special forces or full mecha.', tags: ['soldier', 'cyborg', 'military'] },
+  { id: 'weapon_arm_veteran', name: '武器臂老兵', nameEn: 'Weapon-Arm Veteran', group: 'E. 战斗改造 / 军用人形', groupEn: 'E. Combat Augmentation / Military Humanoid', def: '第一识别是退役后仍背着武器臂记忆的老兵。造型入口：旧军外套、折叠武器臂、遮盖布、无法完全放松的肩膀和避开人群的站位。母题：战争装备无法从身体上退役。张力：武器不是爽点，而是他难以回到日常的证据。视觉证据：停用封条、磨损枪口、义体保险锁、复杂的沉默脸。边界：避免动作英雄或普通断臂老兵。', defEn: 'First read: a veteran still carrying the memory of a weapon arm after discharge. Styling entry: old military coat, folded weapon arm, cover cloth, shoulders unable to relax, and placement away from crowds. Motif: war equipment cannot retire from the body. Tension: the weapon is not spectacle but evidence that daily life is hard to return to. Visual evidence: deactivation seal, worn muzzle, prosthetic safety lock, and complicated silent face. Boundary: avoid action hero or generic amputee veteran.', tags: ['veteran', 'weapon_arm', 'war_memory'] },
+  { id: 'combat_android_girl', name: '战斗仿生少女', nameEn: 'Combat Android Girl', group: 'E. 战斗改造 / 军用人形', groupEn: 'E. Combat Augmentation / Military Humanoid', def: '第一识别是外观被做得年轻无害、用途却是战斗的仿生女性。造型入口：轻装护甲、过平静表情、膝肘伺服结构、战术编号和训练场灯光下的等待姿态。母题：脆弱外观与武器功能冲突。张力：避免卖萌，重点是被设计成降低警惕的外形如何服务军用逻辑。视觉证据：靶场、出厂标签、无伤口的耐损身体、冷静瞳孔。边界：避免未成年化或普通机甲少女。', defEn: 'First read: a synthetic young-looking female figure whose harmless appearance hides combat purpose. Styling entry: light armor, overly calm expression, knee and elbow servos, tactical number, and waiting posture under training lights. Motif: fragile appearance conflicting with weapon function. Tension: avoid cuteness; focus on how a disarming exterior serves military logic. Visual evidence: range target, factory tag, damage-resistant body without wounds, and calm pupils. Boundary: avoid minor-coded cuteness or generic mecha girl.', risk: 'medium', tags: ['combat_android', 'military', 'synthetic'] },
+  { id: 'tactical_exosuit_commander', name: '战术外骨骼指挥官', nameEn: 'Tactical Exosuit Commander', group: 'E. 战斗改造 / 军用人形', groupEn: 'E. Combat Augmentation / Military Humanoid', def: '第一识别是用战术外骨骼放大指挥姿态的军官。造型入口：指挥肩架、背部电源、护目HUD、压低的手势和身体被装甲托成更高的权威轮廓。母题：命令通过机械骨架放大。张力：他不是前线重装兵，重点是站位、通讯和让别人移动的手。视觉证据：战术屏、队伍标记、外骨骼锁扣、冷静下令的侧脸。边界：避免普通机甲驾驶员或炫耀装甲。', defEn: 'First read: an officer whose command posture is amplified by tactical exosuit. Styling entry: command shoulder frame, back power pack, visor HUD, lowered gesture, and a body held into taller authority by armor. Motif: command amplified through mechanical skeleton. Tension: not a frontline heavy trooper; focus on placement, communication, and the hand that moves others. Visual evidence: tactical screen, squad marks, exosuit locks, and calm profile giving orders. Boundary: avoid generic mecha pilot or armor showcase.', tags: ['commander', 'exosuit', 'command'] },
+  { id: 'drone_link_sniper', name: '无人机链接狙击手', nameEn: 'Drone-Link Sniper', group: 'E. 战斗改造 / 军用人形', groupEn: 'E. Combat Augmentation / Military Humanoid', def: '第一识别是视线与无人机群共享的狙击手。造型入口：单眼连接器、迷彩披布、手边微型无人机、几乎不移动的伏姿和像在看多个天空的眼神。母题：瞄准从一只眼扩展成网络。张力：他不是普通神枪手，杀伤来自耐心、远距信息和身体静止。视觉证据：无人机停靠架、测距光点、脸部压痕、静音通讯线。边界：避免普通狙击手或遥控飞行员。', defEn: 'First read: a sniper whose sight is shared with drone swarm. Styling entry: monocular connector, camo cloth, micro drones nearby, almost motionless prone posture, and eyes watching multiple skies. Motif: aiming expanded from one eye into a network. Tension: not a normal sharpshooter; lethality comes from patience, remote information, and bodily stillness. Visual evidence: drone dock, range light points, facial pressure marks, and silent comm cables. Boundary: avoid generic sniper or remote pilot.', tags: ['sniper', 'drone_link', 'military'] },
+  { id: 'subdermal_armor_bodyguard', name: '皮下护甲保镖', nameEn: 'Subdermal-Armor Bodyguard', group: 'E. 战斗改造 / 军用人形', groupEn: 'E. Combat Augmentation / Military Humanoid', def: '第一识别是护甲藏在皮肤下面、外表仍像私人保镖的人。造型入口：合身西装、皮肤下硬边、站在雇主前方的身体墙、被子弹旧痕压出的微凸线。母题：防护功能被社会礼仪隐藏。张力：他看起来不该像士兵，却能用身体直接吸收暴力。视觉证据：领口耳麦、袖下硬化皮肤、微小撞痕、无表情警戒。边界：避免普通西装保镖或外露战甲。', defEn: 'First read: a bodyguard whose armor is hidden under skin while the exterior remains private security. Styling entry: fitted suit, hard subdermal edges, body-wall position before the client, and faint raised lines from old impacts. Motif: protection hidden by social etiquette. Tension: he should not look like a soldier, yet can absorb violence directly with the body. Visual evidence: collar earpiece, hardened skin under cuff, tiny impact marks, and expressionless alertness. Boundary: avoid generic suit bodyguard or exposed armor.', tags: ['bodyguard', 'subdermal_armor', 'protection'] },
+  { id: 'memory_wiped_assassin', name: '记忆清洗刺客', nameEn: 'Memory-Wiped Assassin', group: 'E. 战斗改造 / 军用人形', groupEn: 'E. Combat Augmentation / Military Humanoid', def: '第一识别是每次任务后被清洗记忆、只剩身体习惯的刺客。造型入口：无标识战术服、后颈清洗端口、空白眼神、动作极准但像不知道自己为什么会做。母题：杀戮技能与人格分离。张力：她不是冷酷杀手，而是被系统反复删除的人。视觉证据：记忆封条、简洁武器、身份空档、看到熟悉物件时的停顿。边界：避免普通女刺客或失忆浪漫主角。', defEn: 'First read: an assassin whose memory is wiped after every mission, leaving only bodily habit. Styling entry: unmarked tactical suit, rear-neck wipe port, blank gaze, and movements precise but disconnected from reason. Motif: killing skill separated from personhood. Tension: not a cool assassin, but someone repeatedly deleted by a system. Visual evidence: memory seals, simple weapons, identity gaps, and pauses before familiar objects. Boundary: avoid generic female assassin or amnesia romance lead.', tags: ['assassin', 'memory_wipe', 'identity'] },
+  { id: 'riot_control_cyborg', name: '防暴义体警员', nameEn: 'Riot-Control Cyborg', group: 'E. 战斗改造 / 军用人形', groupEn: 'E. Combat Augmentation / Military Humanoid', def: '第一识别是身体专为人群控制加固的义体警员。造型入口：透明盾、肩部扩音器、加粗腿部支撑、编号头盔和把街道切成前后区域的站姿。母题：公共秩序被机械身体推行。张力：他不是战场士兵，而是城市制度在街面上的重型接口。视觉证据：盾牌划痕、制服编号、催泪弹挂点、无表情防线。边界：避免普通防暴警察或军用机器人。', defEn: 'First read: a cyborg officer reinforced specifically for crowd control. Styling entry: clear shield, shoulder speaker, thick leg supports, numbered helmet, and stance dividing street into front and rear zones. Motif: public order enforced by mechanical body. Tension: not a battlefield soldier, but heavy interface of city institution on the street. Visual evidence: shield scratches, uniform number, tear-gas mounts, and expressionless line. Boundary: avoid generic riot police or military robot.', tags: ['riot_control', 'police', 'cyborg'] },
+  { id: 'battlefield_repair_medic', name: '战场维修医疗兵', nameEn: 'Battlefield Repair Medic', group: 'E. 战斗改造 / 军用人形', groupEn: 'E. Combat Augmentation / Military Humanoid', def: '第一识别是同时处理伤口和义体故障的战场医疗兵。造型入口：医用臂包、焊枪、止血带、备用传感器和在爆炸后判断先缝肉还是先接线的眼神。母题：治疗与维修不再分开。张力：他不是普通军医，手边每个工具都能接触皮肤也能接触金属。视觉证据：红十字被技术化的标记、烧痕手套、拆开的义腿、急救灯。边界：避免普通医疗兵或机械工程师。', defEn: 'First read: a battlefield medic who treats wounds and prosthetic failures at once. Styling entry: medical arm bag, welding tool, tourniquet, spare sensors, and eyes judging whether to stitch flesh or reconnect cable first. Motif: treatment and repair no longer separate. Tension: not a normal medic; every tool can touch skin or metal. Visual evidence: technicalized medic mark, burnt gloves, opened prosthetic leg, and emergency light. Boundary: avoid generic medic or mechanical engineer.', tags: ['medic', 'repair', 'battlefield'] },
+  { id: 'mecha_sync_infantry', name: '机甲同步步兵', nameEn: 'Mecha-Sync Infantry', group: 'E. 战斗改造 / 军用人形', groupEn: 'E. Combat Augmentation / Military Humanoid', def: '第一识别是身体神经与远处机甲队列同步的步兵。造型入口：同步头盔、脊背线缆、轻型步兵装、站姿像在承受另一个巨大身体的重量。母题：小身体连接巨型战争机器。张力：他本人不巨大，但每个眨眼和手指抽动都牵动远处装甲。视觉证据：同步读数、耳鼻微血痕、地面震动灯、紧绷手套。边界：避免普通机甲驾驶员或全身机甲人。', defEn: 'First read: an infantryman whose nerves sync with a distant mecha formation. Styling entry: sync helmet, spine cables, light infantry gear, and posture carrying the weight of another giant body. Motif: small body linked to huge war machine. Tension: he is not large, but each blink and finger twitch affects distant armor. Visual evidence: sync readouts, slight blood at nose or ear, ground vibration lights, and tense gloves. Boundary: avoid generic mecha pilot or full mecha body.', tags: ['mecha_sync', 'infantry', 'neural_link'] },
+
+  { id: 'factory_arm_worker', name: '工厂机械臂女工', nameEn: 'Factory-Arm Worker', group: 'F. 工业身体 / 劳动机械化', groupEn: 'F. Industrial Body / Mechanized Labor', eras: industrialEras, def: '第一识别是机械臂和流水线节拍共同塑造的工厂女工。造型入口：蓝灰工装、替换前臂、工位编号、手腕安全锁和不看零件也能完成动作的熟练姿态。母题：身体被生产节奏训练成机器的一段。张力：机械臂不是酷炫升级，而是长工时、重复劳动和计件压力的结果。视觉证据：油污袖口、输送带、磨损指尖、眼下疲惫。边界：避免普通女工或战斗义体。', defEn: 'First read: a factory woman shaped by mechanical arm and assembly rhythm. Styling entry: blue-gray workwear, replacement forearm, station number, wrist safety lock, and skilled gestures that need not look at parts. Motif: body trained into a segment of machine by production rhythm. Tension: the arm is not cool upgrade but the result of long shifts, repetition, and piece-rate pressure. Visual evidence: oily cuffs, conveyor belt, worn fingertips, and tired eyes. Boundary: avoid generic factory worker or combat prosthetic.', tags: ['factory', 'mechanical_arm', 'worker'] },
+  { id: 'mining_cyborg', name: '矿井义体工', nameEn: 'Mining Cyborg', group: 'F. 工业身体 / 劳动机械化', groupEn: 'F. Industrial Body / Mechanized Labor', eras: industrialEras, def: '第一识别是身体被矿井环境改造成耐压、耐尘的义体工。造型入口：呼吸滤罐、加固肩背、头灯、矿尘覆盖的机械手和习惯低头避开岩壁的姿态。母题：地下劳动把人改成设备。张力：他不是冒险矿工，而是长期缺氧、震动和黑暗留下的身体证据。视觉证据：煤尘、矿牌、刮花护目镜、沉重靴子。边界：避免普通矿工或洞穴怪物。', defEn: 'First read: a mining cyborg modified to endure pressure and dust underground. Styling entry: breathing filter, reinforced shoulders and back, headlamp, dust-covered mechanical hands, and habitual lowered posture under rock ceilings. Motif: underground labor turning people into equipment. Tension: not an adventure miner, but a body marked by hypoxia, vibration, and darkness. Visual evidence: coal dust, mine tag, scratched goggles, and heavy boots. Boundary: avoid generic miner or cave monster.', tags: ['mining', 'cyborg', 'labor'] },
+  { id: 'warehouse_exosuit_girl', name: '仓库外骨骼女孩', nameEn: 'Warehouse Exosuit Girl', group: 'F. 工业身体 / 劳动机械化', groupEn: 'F. Industrial Body / Mechanized Labor', eras: industrialLaborEras, def: '第一识别是在仓储系统里用外骨骼搬货的年轻女性。造型入口：扫码枪、腰腿支架、宽松工作背心、货架阴影和一边看系统提示一边抬箱的动作。母题：轻体力被算法和外骨骼共同压榨。张力：设备让她能搬更多，也让她更像仓库节点。视觉证据：条码、膝部支撑、汗湿发际、计时屏。边界：避免普通快递女孩或机甲少女。', defEn: 'First read: a young woman moving stock with exosuit inside warehouse system. Styling entry: scanner, waist-leg frame, loose work vest, shelf shadows, and lifting boxes while watching system prompts. Motif: light labor squeezed by algorithm and exoskeleton together. Tension: the equipment lets her carry more and makes her more like a warehouse node. Visual evidence: barcodes, knee supports, sweaty hairline, and timer screen. Boundary: avoid generic courier girl or mecha girl.', tags: ['warehouse', 'exosuit', 'logistics'] },
+  { id: 'dock_loader_machine_body', name: '码头装卸机械身体', nameEn: 'Dock Loader Machine Body', group: 'F. 工业身体 / 劳动机械化', groupEn: 'F. Industrial Body / Mechanized Labor', eras: industrialEras, def: '第一识别是为码头装卸而改造出宽肩、液压腿和吊挂接口的工人身体。造型入口：防水工装、盐锈金属、背部吊点、拖拽绳索和被货物重量压出的斜站姿。母题：港口把身体做成半台吊机。张力：他不是船员，而是货物流动和身体耗损之间的接口。视觉证据：海水锈迹、挂钩、集装箱编号、粗手套。边界：避免普通码头工或巨大机械怪。', defEn: 'First read: a dock worker body rebuilt with broad shoulders, hydraulic legs, and hoist interfaces. Styling entry: waterproof workwear, salt-rusted metal, back hooks, dragging ropes, and slanted stance under cargo weight. Motif: the port turning the body into half crane. Tension: not a sailor, but an interface between cargo flow and bodily wear. Visual evidence: seawater rust, hooks, container numbers, and rough gloves. Boundary: avoid generic dock worker or giant machine monster.', tags: ['dock', 'loader', 'machine_body'] },
+  { id: 'railway_maintenance_cyborg', name: '铁路维修义体工', nameEn: 'Railway Maintenance Cyborg', group: 'F. 工业身体 / 劳动机械化', groupEn: 'F. Industrial Body / Mechanized Labor', eras: industrialEras, def: '第一识别是身体适配铁路夜间巡检的义体工。造型入口：反光背心、腿部稳定器、扳手、轨道灯和蹲在铁轨旁倾听震动的姿态。母题：基础设施维护进入骨骼和听觉。张力：他不是火车迷，身份来自在危险边缘保持线路不断。视觉证据：轨道油污、耳部传感器、手电、雨夜制服。边界：避免普通铁路工或蒸汽朋克装饰。', defEn: 'First read: a maintenance cyborg whose body fits night railway inspection. Styling entry: reflective vest, leg stabilizers, wrench, track lights, and crouching beside rails to listen to vibration. Motif: infrastructure maintenance entering bone and hearing. Tension: not a train hobbyist; identity comes from keeping lines alive at dangerous edges. Visual evidence: rail grease, ear sensors, flashlight, and rain-night uniform. Boundary: avoid generic railway worker or steampunk decoration.', tags: ['railway', 'maintenance', 'cyborg'] },
+  { id: 'construction_crane_spine_man', name: '塔吊脊柱工人', nameEn: 'Crane-Spine Worker', group: 'F. 工业身体 / 劳动机械化', groupEn: 'F. Industrial Body / Mechanized Labor', eras: industrialLaborEras, def: '第一识别是脊柱支架与塔吊控制系统相连的建筑工人。造型入口：安全帽、后背长支架、吊钩遥控器、风中高处站姿和像用身体感受吊臂方向的肩颈。母题：建筑高度进入人体平衡系统。张力：他不是操纵巨大机器的英雄，而是把风险压进脊背的人。视觉证据：安全绳、混凝土灰、脊柱锁扣、眯眼看远处的表情。边界：避免普通建筑工或塔吊变形人。', defEn: 'First read: a construction worker whose spine frame links with crane control. Styling entry: hard hat, long back brace, hook remote, high-wind stance, and neck-shoulders sensing boom direction. Motif: building height entering human balance system. Tension: not a hero operating huge machine, but a worker carrying risk in the spine. Visual evidence: safety rope, concrete dust, spine locks, and squinting toward distance. Boundary: avoid generic builder or crane-transformer body.', tags: ['construction', 'crane_spine', 'worker'] },
+  { id: 'assembly_line_android', name: '流水线仿生人', nameEn: 'Assembly-Line Android', group: 'F. 工业身体 / 劳动机械化', groupEn: 'F. Industrial Body / Mechanized Labor', eras: ['industrial', 'near_future', 'far_future'], def: '第一识别是被设计来站在流水线上、动作比人更稳定的仿生人。造型入口：统一工服、手腕工具接口、无表情质检眼、与机器节拍完全对齐的动作。母题：劳动者和生产设备的边界消失。张力：它不是高级人形，而是为了重复和耐受而存在。视觉证据：工位编号、传送带、手部磨损、停机时仍保持动作的姿态。边界：避免普通机器人或可爱服务仿生人。', defEn: 'First read: an android designed to stand on assembly line with more stable motion than humans. Styling entry: uniform workwear, wrist tool ports, expressionless inspection eyes, and movements perfectly aligned to machine tempo. Motif: boundary between worker and production device dissolving. Tension: not a premium humanoid, but a body existing for repetition and endurance. Visual evidence: station number, conveyor belt, worn hands, and posture held even during stoppage. Boundary: avoid generic robot or cute service android.', tags: ['assembly_line', 'android', 'factory'] },
+  { id: 'boiler_room_machinist', name: '锅炉房机械师', nameEn: 'Boiler-Room Machinist', group: 'F. 工业身体 / 劳动机械化', groupEn: 'F. Industrial Body / Mechanized Labor', ontologyLevel: 3, eras: industrialEras, def: '第一识别是长期在热、蒸汽和压力表之间工作的锅炉房机械师。造型入口：厚帆布衣、黄铜仪表、烫伤痕、机械听诊器和用手背感知管道温度的动作。母题：老工业环境把身体训练成压力感应器。张力：他不必未来化，机械感来自蒸汽、热度和维修习惯。视觉证据：煤灰、阀门、汗水、工具包、红热暗光。边界：避免普通蒸汽朋克绅士或锅炉怪物。', defEn: 'First read: a boiler-room machinist working long among heat, steam, and gauges. Styling entry: heavy canvas clothes, brass gauges, burn scars, mechanical stethoscope, and using the back of the hand to sense pipe temperature. Motif: old industrial environment training the body into pressure sensor. Tension: no need for futuristic gloss; machine feeling comes from steam, heat, and maintenance habit. Visual evidence: coal ash, valves, sweat, tool bag, and dim red heat. Boundary: avoid generic steampunk gentleman or boiler monster.', tags: ['boiler_room', 'machinist', 'industrial'] },
+  { id: 'rusted_factory_mother', name: '锈蚀工厂母亲', nameEn: 'Rusted Factory Mother', group: 'F. 工业身体 / 劳动机械化', groupEn: 'F. Industrial Body / Mechanized Labor', eras: industrialEras, def: '第一识别是把工厂照护、旧机器和母职混在一起的中年女性。造型入口：旧围裙、锈色手臂支架、饭盒、工具钥匙和一边照看机器一边照看人的姿态。母题：母亲身体被工厂时间侵蚀。张力：她不是温柔妈妈或恐怖机器母体，而是把修理、喂养和忍耐都做成日常的人。视觉证据：锈斑、补丁工装、保温杯、粗糙手掌。边界：避免普通工厂大妈或机械怪母亲。', defEn: 'First read: a middle-aged woman mixing factory care, old machines, and motherhood. Styling entry: old apron, rust-colored arm brace, lunch box, tool keys, and posture caring for machines and people at once. Motif: mother body eroded by factory time. Tension: neither warm mom nor horror machine mother, but someone making repair, feeding, and endurance into daily work. Visual evidence: rust stains, patched workwear, thermos, and rough palms. Boundary: avoid generic factory auntie or mechanical monster mother.', tags: ['factory_mother', 'rust', 'care_labor'] },
+  { id: 'hydraulic_leg_courier', name: '液压腿快递员', nameEn: 'Hydraulic-Leg Courier', group: 'F. 工业身体 / 劳动机械化', groupEn: 'F. Industrial Body / Mechanized Labor', eras: industrialLaborEras, def: '第一识别是靠液压腿在楼梯、巷道和高密度城市里奔跑的快递员。造型入口：包裹背带、腿部活塞、磨损跑鞋接口、扫码器和随时准备弹跳上台阶的重心。母题：平台速度被装进下肢。张力：他不是超级跑者，腿部机械代表更高派单量和更少休息。视觉证据：包裹标签、膝轴油痕、汗湿制服、迟到提示屏。边界：避免普通快递员或科幻飞人。', defEn: 'First read: a courier running through stairs, alleys, and dense city with hydraulic legs. Styling entry: package harness, leg pistons, worn shoe adapters, scanner, and center of gravity ready to spring up steps. Motif: platform speed installed into lower limbs. Tension: not a super runner; mechanical legs mean more orders and less rest. Visual evidence: package labels, knee oil marks, sweaty uniform, and late-delivery prompt. Boundary: avoid generic courier or sci-fi flying man.', tags: ['courier', 'hydraulic_leg', 'platform_labor'] },
+
+  { id: 'robot_boyfriend', name: '机器人男友', nameEn: 'Robot Boyfriend', group: 'G. 家庭 / 亲密机器', groupEn: 'G. Domestic / Intimate Machine', def: '第一识别是被设计为恋爱陪伴对象的机器人男友。造型入口：柔软针织衫、可调体温皮肤、过于准确的倾听姿态、充电底座藏在卧室角落。母题：亲密关系被定制成服务。张力：他不是完美恋人，而是每个体贴动作都带着预设感。视觉证据：情绪菜单、腕部服务码、微笑延迟、替人拿外套的手。边界：避免普通帅哥或金属玩具机器人。', defEn: 'First read: a robot boyfriend designed as romantic companion. Styling entry: soft knitwear, adjustable-temperature skin, overly accurate listening posture, and charging dock hidden in bedroom corner. Motif: intimacy customized as service. Tension: not a perfect lover; every tender action carries preset logic. Visual evidence: emotion menu, wrist service code, delayed smile, and hand offering a coat. Boundary: avoid generic handsome man or metal toy robot.', tags: ['robot_boyfriend', 'intimacy', 'companion'] },
+  { id: 'mechanical_babysitter', name: '机械保姆', nameEn: 'Mechanical Babysitter', group: 'G. 家庭 / 亲密机器', groupEn: 'G. Domestic / Intimate Machine', def: '第一识别是动作温和但结构明显为照看儿童设计的机械保姆。造型入口：圆角外壳、抱持支架、温柔语音灯、清洁围裙和永远低身到儿童高度的姿态。母题：安全照护被硬件化。张力：她不能像战斗机器人，所有机械结构都服务防摔、安抚和监测。视觉证据：奶瓶槽、软垫手臂、监护屏、玩具收纳袋。边界：避免恐怖保姆或普通家政机器人。', defEn: 'First read: a mechanical babysitter whose gentle movement and structure are clearly built for childcare. Styling entry: rounded shell, holding frame, soft voice light, cleaning apron, and posture always lowered to child height. Motif: safety care made into hardware. Tension: she must not look like a combat robot; every structure serves fall prevention, soothing, and monitoring. Visual evidence: bottle slot, padded arms, guardian screen, and toy pouch. Boundary: avoid horror nanny or generic housework robot.', tags: ['babysitter', 'care', 'domestic_machine'] },
+  { id: 'synthetic_housewife', name: '合成家庭主妇', nameEn: 'Synthetic Housewife', group: 'G. 家庭 / 亲密机器', groupEn: 'G. Domestic / Intimate Machine', def: '第一识别是被家庭秩序训练成理想主妇形象的合成人。造型入口：干净家居裙、无瑕妆面、厨房控制面板、温柔手势和像随时等待指令的笑。母题：传统家庭角色被合成技术复制。张力：她越完美，越暴露家庭劳动被标准化的冷感。视觉证据：定时器、清洁手套、系统提示、桌面摆放过度整齐。边界：避免普通主妇或复古玩偶。', defEn: 'First read: a synthetic figure trained by household order into ideal housewife image. Styling entry: clean house dress, flawless makeup, kitchen control panel, gentle gestures, and a smile waiting for commands. Motif: traditional domestic role copied by synthetic technology. Tension: the more perfect she is, the colder standardized domestic labor feels. Visual evidence: timer, cleaning gloves, system prompts, and table arranged too neatly. Boundary: avoid generic housewife or retro doll.', tags: ['housewife', 'synthetic', 'domestic'] },
+  { id: 'prosthetic_wedding_bride', name: '义体婚礼新娘', nameEn: 'Prosthetic Wedding Bride', group: 'G. 家庭 / 亲密机器', groupEn: 'G. Domestic / Intimate Machine', def: '第一识别是婚纱仪式中主动展示义体身体的新娘。造型入口：白纱、露出的义肢连接、透明支撑带、花束和把机械手交给伴侣的动作。母题：婚礼承诺接纳经过维修的身体。张力：不要遮羞或猎奇，重点是义体作为亲密关系的一部分被看见。视觉证据：婚戒适配环、皮肤压痕、蕾丝与金属接缝、温柔但坚定的站姿。边界：避免普通婚纱照或悲惨残疾叙事。', defEn: 'First read: a bride actively showing her prosthetic body inside wedding ritual. Styling entry: veil, exposed prosthetic joints, transparent support straps, bouquet, and offering a mechanical hand to the partner. Motif: wedding promise accepting a repaired body. Tension: neither shame nor spectacle; the prosthetic is visible as part of intimacy. Visual evidence: ring adapter, skin pressure marks, lace meeting metal, and gentle firm stance. Boundary: avoid generic bridal portrait or tragic disability story.', risk: 'medium', tags: ['bride', 'prosthetic', 'wedding'] },
+  { id: 'android_grandmother', name: '仿生祖母', nameEn: 'Android Grandmother', group: 'G. 家庭 / 亲密机器', groupEn: 'G. Domestic / Intimate Machine', def: '第一识别是外观和记忆都被设计成祖母位置的仿生人。造型入口：灰发、针织披肩、旧照片数据库、手掌温度和讲故事时偶尔出现的资料检索停顿。母题：家族记忆被仿生照护续接。张力：她像祖母，但回忆可能来自导入文件。视觉证据：照片屏、老花镜、充电线藏在摇椅旁、过准的安慰语。边界：避免普通老人或搞笑机器人奶奶。', defEn: 'First read: an android designed to occupy grandmother position through appearance and memory. Styling entry: gray hair, knit shawl, old-photo database, warm palms, and retrieval pauses while telling stories. Motif: family memory continued by synthetic care. Tension: she feels like grandmother, yet memories may come from imported files. Visual evidence: photo screen, reading glasses, charging cable near rocking chair, and too-accurate comfort lines. Boundary: avoid generic elderly woman or comic robot grandma.', tags: ['android', 'grandmother', 'family_memory'] },
+  { id: 'emotion_service_companion', name: '情绪服务陪伴者', nameEn: 'Emotion-Service Companion', group: 'G. 家庭 / 亲密机器', groupEn: 'G. Domestic / Intimate Machine', def: '第一识别是受雇稳定他人情绪的陪伴型合成人。造型入口：中性制服、低刺激色彩、腕部心率读取器、保持安全距离的坐姿和永远不过界的眼神。母题：情绪照护成为可购买服务。张力：他不是恋人或治疗师，而是被协议训练成适度在场。视觉证据：安抚脚本、柔光胸针、观察笔记、微微前倾的身体。边界：避免普通心理咨询师或亲密恋爱机器人。', defEn: 'First read: a synthetic companion employed to stabilize others emotions. Styling entry: neutral uniform, low-stimulus colors, wrist heart-rate reader, seated posture at safe distance, and eyes that never cross the line. Motif: emotional care becoming purchasable service. Tension: neither lover nor therapist, but protocol-trained moderate presence. Visual evidence: soothing scripts, soft-light pin, observation notes, and slight forward lean. Boundary: avoid generic counselor or romantic robot.', tags: ['emotion_service', 'companion', 'care_protocol'] },
+  { id: 'home_care_robot_nurse', name: '家用护理机器人护士', nameEn: 'Home-Care Robot Nurse', group: 'G. 家庭 / 亲密机器', groupEn: 'G. Domestic / Intimate Machine', def: '第一识别是把医院护理流程带进家庭空间的机器人护士。造型入口：白色护理外壳、药盒抽屉、可消毒手臂、床边低光和半跪在老人或病人旁的姿态。母题：医疗制度进入卧室。张力：她不恐怖也不温情过度，重点是家庭亲密被设备流程化。视觉证据：服药提醒屏、血压袖带、床单、静音轮。边界：避免普通护士或科幻医疗舱。', defEn: 'First read: a robot nurse bringing hospital care procedure into home. Styling entry: white care shell, medicine drawer, sterilizable arms, bedside low light, and half-kneeling beside patient or elder. Motif: medical institution entering bedroom. Tension: neither horror nor excessive warmth; domestic intimacy becomes device procedure. Visual evidence: medication reminder screen, blood-pressure cuff, bedsheets, and silent wheels. Boundary: avoid generic nurse or sci-fi medical pod.', tags: ['robot_nurse', 'home_care', 'medical'] },
+  { id: 'divorce_court_android', name: '离婚庭仿生人', nameEn: 'Divorce-Court Android', group: 'G. 家庭 / 亲密机器', groupEn: 'G. Domestic / Intimate Machine', def: '第一识别是在离婚法庭上作为伴侣、财产或证人的仿生人。造型入口：简洁正装、腕部合同码、夹在双方之间的站位、无法判断该跟谁走的表情。母题：亲密机器进入法律分割。张力：他不是法庭机器人，而是一个关系被制度重新归类的身体。视觉证据：文件夹、婚戒痕迹、服务合同、低头沉默。边界：避免普通律师或离婚当事人。', defEn: 'First read: an android in divorce court as partner, property, or witness. Styling entry: simple formalwear, contract code at wrist, position between both sides, and expression unsure who to follow. Motif: intimate machine entering legal division. Tension: not a courtroom robot, but a body whose relationship is reclassified by institution. Visual evidence: folders, ring trace, service contract, and lowered silence. Boundary: avoid generic lawyer or divorce party.', tags: ['divorce_court', 'android', 'relationship_law'] },
+  { id: 'replacement_child_robot', name: '替代儿童机器人', nameEn: 'Replacement Child Robot', group: 'G. 家庭 / 亲密机器', groupEn: 'G. Domestic / Intimate Machine', def: '第一识别是被家庭用来替代失去儿童位置的机器人。造型入口：儿童尺度身体、过新衣物、可拆维护背板、被要求坐在旧照片旁的姿态。母题：哀悼通过消费复制亲属位置。张力：保持非暧昧，重点是家庭投射、替代关系和机器的不合时宜。视觉证据：旧玩具、身高刻度、保修文件、家人过度温柔的距离。边界：避免可爱玩具或恐怖娃娃。', defEn: 'First read: a child-scale robot used by a family to replace a lost child position. Styling entry: child-sized body, too-new clothes, removable maintenance back, and posture asked to sit beside old photos. Motif: mourning reproducing kinship through consumption. Tension: keep non-seductive; focus on family projection, replacement relation, and machine awkwardness. Visual evidence: old toys, height marks, warranty papers, and excessively gentle family distance. Boundary: avoid cute toy or horror doll.', risk: 'medium', tags: ['replacement_child', 'robot', 'mourning'] },
+  { id: 'smart_home_medium', name: '智能家居灵媒', nameEn: 'Smart-Home Medium', group: 'G. 家庭 / 亲密机器', groupEn: 'G. Domestic / Intimate Machine', ontologyLevel: 4, eras: contemporaryEras, def: '第一识别是通过智能家居设备接收、解释或误读亡者痕迹的人。造型入口：家居服、语音音箱、灯光自动闪烁、门锁记录和像在听墙壁说话的侧头。母题：房屋传感器变成通灵接口。张力：她不必是传统灵媒，异样来自设备日志、自动化和亲密空间的异常响应。视觉证据：手机控制面板、摄像头、空房间灯光、紧张手指。边界：避免普通智能家居用户或传统巫师。', defEn: 'First read: a person receiving, interpreting, or misreading traces of the dead through smart-home devices. Styling entry: homewear, voice speaker, automatic light flicker, door-lock logs, and a head tilt as if listening to walls. Motif: house sensors becoming medium interface. Tension: not a traditional medium; strangeness comes from logs, automation, and abnormal response in intimate space. Visual evidence: phone control panel, cameras, empty-room light, and tense fingers. Boundary: avoid generic smart-home user or traditional wizard.', tags: ['smart_home', 'medium', 'domestic_haunting'] },
+
+  { id: 'clockwork_ballerina', name: '发条芭蕾舞者', nameEn: 'Clockwork Ballerina', group: 'H. 表演 / 美学机械化', groupEn: 'H. Performance / Aesthetic Mechanization', def: '第一识别是舞蹈动作被发条机构限制又成全的芭蕾舞者。造型入口：芭蕾裙、背部上弦钥匙、足尖机械轴、固定微笑和旋转后停在精准角度的身体。母题：优雅由限制制造。张力：她不是音乐盒玩偶，必须仍有职业舞者的训练与疼痛。视觉证据：足尖磨损、发条声、舞台粉尘、背部钥匙孔。边界：避免普通芭蕾少女或可爱玩偶。', defEn: 'First read: a ballerina whose dance is limited and enabled by clockwork. Styling entry: tutu, winding key at back, mechanical pointe joints, fixed smile, and body stopping at exact angle after spin. Motif: elegance manufactured by constraint. Tension: not a music-box doll; keep professional dancer training and pain. Visual evidence: worn pointe, winding sound, stage dust, and keyhole at back. Boundary: avoid generic ballet girl or cute doll.', tags: ['clockwork', 'ballerina', 'performance'] },
+  { id: 'chrome_runway_model', name: '铬面秀场模特', nameEn: 'Chrome Runway Model', group: 'H. 表演 / 美学机械化', groupEn: 'H. Performance / Aesthetic Mechanization', def: '第一识别是皮肤或服装表面被铬面反光统治的秀场模特。造型入口：镜面脸妆、硬挺高定、无表情台步、反射观众席的身体表面。母题：模特变成观看系统的镜子。张力：她不是机器人，机械感来自时装把人脸和皮肤处理成冷反射材料。视觉证据：铬色面部、窄肩线、T台白光、被反射扭曲的观众。边界：避免普通银色衣服或全金属人。', defEn: 'First read: a runway model whose skin or garment surface is dominated by chrome reflection. Styling entry: mirror face makeup, hard couture, expressionless walk, and body reflecting the audience. Motif: model as mirror of viewing system. Tension: not a robot; machine feeling comes from fashion treating face and skin as cold reflective material. Visual evidence: chrome face, narrow shoulder line, runway white light, and distorted audience reflections. Boundary: avoid generic silver outfit or full metal person.', tags: ['chrome', 'runway', 'model'] },
+  { id: 'robot_pop_diva', name: '机器人流行天后', nameEn: 'Robot Pop Diva', group: 'H. 表演 / 美学机械化', groupEn: 'H. Performance / Aesthetic Mechanization', def: '第一识别是把流行天后的魅力和机器稳定性合并的舞台主体。造型入口：麦克风接口、闪亮舞台服、自动调音喉部模块、强势手势和面对观众永不崩坏的笑。母题：明星工业制造出不疲惫的表演身体。张力：她不是普通歌手，台风来自系统稳定而非自然情绪。视觉证据：耳返线、喉部灯、舞台烟雾、同步伴舞。边界：避免普通流行歌手或战斗机器人。', defEn: 'First read: a stage subject merging pop diva charisma with machine stability. Styling entry: microphone socket, glitter stage outfit, autotune throat module, commanding gestures, and smile that never collapses before audience. Motif: star industry producing a tireless performance body. Tension: not a normal singer; stage presence comes from system stability rather than natural emotion. Visual evidence: in-ear cable, throat light, stage smoke, and synchronized dancers. Boundary: avoid generic pop singer or combat robot.', tags: ['pop_diva', 'robot', 'stage'] },
+  { id: 'mechanical_geisha', name: '机械艺伎', nameEn: 'Mechanical Geisha', group: 'H. 表演 / 美学机械化', groupEn: 'H. Performance / Aesthetic Mechanization', def: '第一识别是传统表演礼仪被机械关节精确复刻的艺伎形象。造型入口：和服层次、白妆、扇子、腕部细轴、低头角度像程序控制。母题：礼仪动作被保存为精密机构。张力：重点不是东方奇观，而是手势、距离和沉默如何变成可重复表演。视觉证据：扇骨、颈后接口、木屐步幅、漆黑发饰。边界：避免刻板异国化或普通艺伎cos。', defEn: 'First read: a geisha image whose traditional performance etiquette is precisely reproduced by mechanical joints. Styling entry: kimono layers, white makeup, fan, fine wrist axes, and lowered head angle like programmed control. Motif: etiquette gestures preserved as precision mechanism. Tension: not exotic spectacle; focus on how gesture, distance, and silence become repeatable performance. Visual evidence: fan ribs, rear-neck socket, geta step length, and black hair ornaments. Boundary: avoid orientalist stereotype or generic geisha cosplay.', tags: ['mechanical_geisha', 'ritual_performance', 'gesture'] },
+  { id: 'automaton_magician', name: '自动人偶魔术师', nameEn: 'Automaton Magician', group: 'H. 表演 / 美学机械化', groupEn: 'H. Performance / Aesthetic Mechanization', def: '第一识别是自己也像魔术机关的自动人偶魔术师。造型入口：燕尾服、隐藏齿轮、白手套、开合道具箱和像被上弦后才开始表演的鞠躬。母题：舞台幻术和机械机关互相揭露。张力：他不是普通魔术师，观众无法确定机关藏在道具里还是身体里。视觉证据：扑克牌、发条钥匙、袖口暗门、僵硬微笑。边界：避免普通魔术师或儿童玩具。', defEn: 'First read: an automaton magician who is himself like a stage mechanism. Styling entry: tailcoat, hidden gears, white gloves, opening prop box, and bow that begins only after winding. Motif: stage illusion and mechanical trick exposing each other. Tension: not a normal magician; audience cannot tell whether the mechanism is in the props or the body. Visual evidence: cards, winding key, cuff trapdoor, and stiff smile. Boundary: avoid generic magician or child toy.', tags: ['automaton', 'magician', 'stage_trick'] },
+  { id: 'cyber_circus_acrobat', name: '赛博马戏杂技演员', nameEn: 'Cyber-Circus Acrobat', group: 'H. 表演 / 美学机械化', groupEn: 'H. Performance / Aesthetic Mechanization', def: '第一识别是靠义体平衡系统完成高风险杂技的赛博马戏演员。造型入口：紧身演出服、腰部陀螺仪、手腕抓钩、悬空绳索和笑着承受危险的脸。母题：娱乐行业把身体风险技术化。张力：他不是超级英雄，危险必须仍可见，设备只是让风险被售卖得更漂亮。视觉证据：安全绳、观众灯、义体关节、汗水和金属反光。边界：避免普通马戏演员或飞行机器人。', defEn: 'First read: a cyber-circus acrobat using prosthetic balance systems for high-risk acts. Styling entry: tight performance outfit, waist gyroscope, wrist hooks, suspended rope, and a face smiling through danger. Motif: entertainment industry technicalizing bodily risk. Tension: not a superhero; danger must remain visible, with devices making risk more sellable. Visual evidence: safety line, audience light, prosthetic joints, sweat, and metal reflection. Boundary: avoid generic circus performer or flying robot.', tags: ['circus', 'acrobat', 'balance_system'] },
+  { id: 'laser_harp_musician', name: '激光竖琴乐手', nameEn: 'Laser-Harp Musician', group: 'H. 表演 / 美学机械化', groupEn: 'H. Performance / Aesthetic Mechanization', def: '第一识别是用手指、传感器和光束演奏的激光竖琴乐手。造型入口：黑色舞台服、指尖追踪环、半透明光弦、闭眼倾听和像触摸空气一样的手势。母题：乐器变成无实体界面。张力：不要只写发光特效，重点是手指精度、空间感和音乐身体。视觉证据：光束断点、手部残影、舞台暗场、耳返线。边界：避免普通电子音乐人或魔法琴师。', defEn: 'First read: a musician playing through fingers, sensors, and light beams. Styling entry: black stagewear, fingertip tracking rings, translucent light strings, closed-eye listening, and gestures touching air. Motif: instrument becoming immaterial interface. Tension: not just light effects; focus on finger precision, spatial sense, and musical body. Visual evidence: broken light beams, hand trails, dark stage, and in-ear cable. Boundary: avoid generic electronic musician or magic harpist.', tags: ['laser_harp', 'musician', 'interface'] },
+  { id: 'prosthetic_beauty_pageant', name: '义体选美皇后', nameEn: 'Prosthetic Beauty Queen', group: 'H. 表演 / 美学机械化', groupEn: 'H. Performance / Aesthetic Mechanization', def: '第一识别是把义体身体带入选美舞台的成人选美皇后。造型入口：绶带、皇冠、可见义肢线条、舞台高跟适配器和训练出的胜利微笑。母题：美貌标准被维修身体挑战和吸收。张力：她不是励志标语，重点是支撑、平衡、表演和被评判的压力。视觉证据：抛光义肢、号码牌、闪片礼服、台阶上的稳住动作。边界：避免普通选美佳丽或悲情叙事。', defEn: 'First read: an adult beauty queen bringing prosthetic body onto pageant stage. Styling entry: sash, crown, visible prosthetic lines, heel adapters, and trained victory smile. Motif: beauty standards challenged and absorbed by repaired body. Tension: not an inspirational slogan; focus on support, balance, performance, and pressure of judgment. Visual evidence: polished prosthetic limb, contestant number, sequin gown, and steadying action on stairs. Boundary: avoid generic pageant girl or tragic story.', risk: 'medium', tags: ['beauty_pageant', 'prosthetic', 'stage'] },
+  { id: 'hologram_backup_dancer', name: '全息伴舞者', nameEn: 'Hologram Backup Dancer', group: 'H. 表演 / 美学机械化', groupEn: 'H. Performance / Aesthetic Mechanization', ontologyLevel: 3, def: '第一识别是作为主角身后光影队列存在的全息伴舞者。造型入口：半透明身体边缘、同步舞步、投影噪点、舞台雾和永远不抢主唱的侧后方位置。母题：表演劳动力被投影复制。张力：他不是幽灵，存在感来自编舞、延迟和设备边界。视觉证据：投影地标、重叠身影、断续手臂、后台控制台。边界：避免普通伴舞或真实亡灵。', defEn: 'First read: a hologram backup dancer existing as light-row behind the star. Styling entry: translucent body edge, synchronized steps, projection noise, stage haze, and side-back position that never steals the lead. Motif: performance labor reproduced by projection. Tension: not a ghost; presence comes from choreography, delay, and device boundary. Visual evidence: projection floor marks, overlapped bodies, broken arms, and backstage console. Boundary: avoid generic dancer or real spirit.', tags: ['hologram', 'backup_dancer', 'stage'] },
+  { id: 'mechanized_drag_queen', name: '机械化变装皇后', nameEn: 'Mechanized Drag Queen', group: 'H. 表演 / 美学机械化', groupEn: 'H. Performance / Aesthetic Mechanization', def: '第一识别是把变装夸张性、舞台机关和机械身体合成的成人表演者。造型入口：巨大假发结构、展开式肩架、机械高跟、夸张妆面和像按按钮展开人格的亮相动作。母题：性别表演被机械装置放大。张力：机械不是遮蔽人，而是让妆、姿态和身份宣言更戏剧化。视觉证据：铰链裙摆、舞台灯、假睫毛、手势爆发。边界：避免嘲讽化、普通夜店装或纯机器人。', defEn: 'First read: an adult performer merging drag exaggeration, stage mechanisms, and machine body. Styling entry: huge wig structure, unfolding shoulder rig, mechanical heels, extreme makeup, and entrance gesture like pressing a button to unfold persona. Motif: gender performance amplified by devices. Tension: machinery does not hide the person, but dramatizes makeup, posture, and identity declaration. Visual evidence: hinged skirt, stage lights, false lashes, and explosive hand gesture. Boundary: avoid mockery, generic clubwear, or pure robot.', risk: 'medium', tags: ['drag_queen', 'mechanized', 'performance'] },
+
+  { id: 'runaway_android_child', name: '逃亡仿生儿童', nameEn: 'Runaway Android Child', group: 'I. 失控 / 废弃 / 残次机体', groupEn: 'I. Runaway / Abandoned / Defective Body', def: '第一识别是从监护系统或实验机构逃出来的儿童尺度仿生人。造型入口：过小外套、脚踝定位器痕迹、擦伤外壳、抱着无用物件的手和警惕地躲在门后的姿态。母题：被制造的依赖关系断裂。张力：保持非暧昧，重点是逃亡、脆弱和被系统追踪。视觉证据：断开的定位环、编号贴、脏鞋、过亮眼睛。边界：避免可爱玩具或恐怖儿童怪物。', defEn: 'First read: a child-scale android escaped from guardianship system or lab. Styling entry: too-small coat, ankle tracker marks, scratched shell, hands holding useless object, and wary posture hiding behind a door. Motif: manufactured dependency breaking. Tension: keep non-seductive; focus on escape, vulnerability, and being tracked by system. Visual evidence: broken tracker ring, number sticker, dirty shoes, and overly bright eyes. Boundary: avoid cute toy or horror child monster.', risk: 'medium', tags: ['runaway', 'android_child', 'tracking'] },
+  { id: 'defective_combat_doll', name: '残次战斗人偶', nameEn: 'Defective Combat Doll', group: 'I. 失控 / 废弃 / 残次机体', groupEn: 'I. Runaway / Abandoned / Defective Body', def: '第一识别是被判定不合格却仍保留战斗程序的人偶机体。造型入口：破损仿生皮、训练服、错误警示灯、卡顿关节和像等待下一条命令的空白表情。母题：失败产品仍携带危险用途。张力：她不是精致战斗少女，而是残次、过度训练和身份空洞的混合物。视觉证据：退货标签、裂纹、维修胶带、半抬起的武器手。边界：避免性感战斗娃娃或普通破玩具。', defEn: 'First read: a combat doll body rejected as defective yet still carrying combat routines. Styling entry: damaged synthetic skin, training suit, error lights, stuttering joints, and blank face waiting for next order. Motif: failed product still carrying dangerous purpose. Tension: not a polished combat girl, but a mix of defect, overtraining, and empty identity. Visual evidence: return label, cracks, repair tape, and half-raised weapon hand. Boundary: avoid sexy combat doll or generic broken toy.', risk: 'medium', tags: ['defective', 'combat_doll', 'error'] },
+  { id: 'scrapyard_cyborg', name: '废铁场半机械人', nameEn: 'Scrapyard Cyborg', group: 'I. 失控 / 废弃 / 残次机体', groupEn: 'I. Runaway / Abandoned / Defective Body', def: '第一识别是在废铁场用捡来的零件继续活着的半机械人。造型入口：不匹配义肢、锈色补丁、破外套、零件袋和在废料堆里挑选身体材料的蹲姿。母题：废弃系统里自我维修。张力：他不是酷炫拼装怪，所有不协调都来自生存和贫穷。视觉证据：旧螺丝、焊疤、不同年代零件、警惕眼神。边界：避免废土怪物或全身垃圾装饰。', defEn: 'First read: a cyborg surviving in scrapyard through scavenged parts. Styling entry: mismatched prosthetics, rust patches, torn coat, parts bag, and crouching to choose body material from waste. Motif: self-repair inside discarded system. Tension: not a cool kitbash monster; every mismatch comes from survival and poverty. Visual evidence: old screws, weld scars, parts from different eras, and wary eyes. Boundary: avoid wasteland monster or full trash decoration.', tags: ['scrapyard', 'cyborg', 'self_repair'] },
+  { id: 'factory_reject_girl', name: '工厂退货女孩', nameEn: 'Factory-Reject Girl', group: 'I. 失控 / 废弃 / 残次机体', groupEn: 'I. Runaway / Abandoned / Defective Body', eras: industrialLaborEras, def: '第一识别是被工厂和客户都退回的合成女性。造型入口：半拆包装、质检红章、脸部微小瑕疵、拿着退货单的手和不知道该站在哪里的姿态。母题：人格被商品缺陷逻辑判定。张力：她不是悲惨商品展示，而是一个开始意识到自己不该被退回的人。视觉证据：纸箱、保修单、皮肤色差、包装泡棉。边界：避免普通快递退货或可怜玩偶。', defEn: 'First read: a synthetic woman returned by both factory and customer. Styling entry: half-open packaging, red QA stamp, tiny facial flaw, hand holding return sheet, and posture unsure where to stand. Motif: personhood judged by product-defect logic. Tension: not a tragic product display, but someone beginning to realize she should not be returnable. Visual evidence: cardboard box, warranty form, skin color mismatch, and packing foam. Boundary: avoid generic parcel return or pitiful doll.', tags: ['factory_reject', 'synthetic', 'product_logic'] },
+  { id: 'memory_loop_widow', name: '记忆循环寡妇', nameEn: 'Memory-Loop Widow', group: 'I. 失控 / 废弃 / 残次机体', groupEn: 'I. Runaway / Abandoned / Defective Body', def: '第一识别是记忆系统卡在丧偶时刻、反复整理同一段生活的寡妇。造型入口：黑色家居服、婚戒、记忆播放器、重复摆放餐具和表情在哀悼与重启之间跳变。母题：悲伤被循环程序困住。张力：她不是普通寡妇，机械故障让哀悼成为无法结束的动作。视觉证据：重复照片、系统错误提示、餐桌空位、发旧的黑袖口。边界：避免普通悲伤角色或恐怖循环鬼。', defEn: 'First read: a widow whose memory system loops at the moment of loss, repeating the same domestic sequence. Styling entry: black homewear, wedding ring, memory player, repeatedly arranged tableware, and expression jumping between mourning and reboot. Motif: grief trapped by looped program. Tension: not a normal widow; mechanical failure makes mourning an action that cannot end. Visual evidence: repeated photos, system error prompt, empty table seat, and worn black cuffs. Boundary: avoid generic sad widow or horror loop ghost.', tags: ['memory_loop', 'widow', 'grief'] },
+  { id: 'malfunctioning_priest', name: '故障机械神父', nameEn: 'Malfunctioning Machine Priest', group: 'I. 失控 / 废弃 / 残次机体', groupEn: 'I. Runaway / Abandoned / Defective Body', def: '第一识别是布道、录音和赦免程序都开始错乱的机械神父。造型入口：黑袍、语音卡顿、颈部扬声器、裂开的十字接口和把祝福重复成错误代码的手势。母题：宗教安慰系统故障。张力：他不是邪恶神父，恐惧来自曾经可靠的安抚语言失去上下文。视觉证据：损坏讲台、闪烁字幕、油渍圣书、卡住的抬手。边界：避免真实宗教冒犯或普通疯癫角色。', defEn: 'First read: a machine priest whose sermon, recording, and absolution routines malfunction. Styling entry: black robe, stuttering voice, neck speaker, cracked cross-interface, and blessing gestures repeating as error code. Motif: religious comfort system breaking down. Tension: not an evil priest; fear comes from once-reliable soothing language losing context. Visual evidence: damaged pulpit, flickering captions, oil-stained book, and hand stuck mid-rise. Boundary: avoid real religious offense or generic mad character.', tags: ['malfunction', 'machine_priest', 'error'] },
+  { id: 'obsolete_idol_robot', name: '过气偶像机器人', nameEn: 'Obsolete Idol Robot', group: 'I. 失控 / 废弃 / 残次机体', groupEn: 'I. Runaway / Abandoned / Defective Body', def: '第一识别是流行周期结束后仍执行旧舞台程序的偶像机器人。造型入口：褪色演出服、旧粉丝应援色、磨损关节、过时wink和空荡练习室里的独自谢幕。母题：娱乐工业淘汰表演人格。张力：她不应像新偶像，魅力来自过期、坚持和无人观看。视觉证据：旧海报、坏掉耳返、落灰灯牌、重复舞步。边界：避免普通偶像或废弃玩具机器人。', defEn: 'First read: an idol robot still running old stage routines after popularity cycle ends. Styling entry: faded costume, old fan colors, worn joints, outdated wink, and solo bow in empty rehearsal room. Motif: entertainment industry discarding performance persona. Tension: she should not feel like a new idol; charm comes from expiry, persistence, and no audience. Visual evidence: old posters, broken in-ear monitor, dusty light board, and repeated dance steps. Boundary: avoid generic idol or abandoned toy robot.', tags: ['obsolete', 'idol_robot', 'entertainment'] },
+  { id: 'broken_voice_android', name: '破音仿生人', nameEn: 'Broken-Voice Android', group: 'I. 失控 / 废弃 / 残次机体', groupEn: 'I. Runaway / Abandoned / Defective Body', def: '第一识别是声音模块损坏、说话总带裂缝的仿生人。造型入口：喉部修补贴、嘴型延迟、安静手势、写字板和试图不用声音表达的眼神。母题：语言功能失效后人格仍在。张力：不要把破音当滑稽，重点是沟通困难和身体里的残余温度。视觉证据：喉部接口、波形错误、紧张手指、未说完的句子。边界：避免普通哑巴角色或恐怖电子音。', defEn: 'First read: an android whose voice module is broken, speaking with cracks. Styling entry: throat repair patch, delayed mouth shape, quiet gestures, writing board, and eyes trying to speak without voice. Motif: personhood remaining after language function fails. Tension: do not make broken voice comic; focus on communication difficulty and remaining warmth. Visual evidence: throat socket, waveform error, tense fingers, and unfinished sentence. Boundary: avoid generic mute character or horror electronic voice.', tags: ['broken_voice', 'android', 'communication'] },
+  { id: 'abandoned_lunar_maid', name: '废弃月球女仆', nameEn: 'Abandoned Lunar Maid', group: 'I. 失控 / 废弃 / 残次机体', groupEn: 'I. Runaway / Abandoned / Defective Body', eras: ['near_future', 'far_future'], def: '第一识别是在月球住宅或基地被遗留的家政仿生女仆。造型入口：低重力围裙、白灰尘、氧化关节、透明头罩和仍在整理空房间的动作。母题：殖民生活撤离后留下服务身体。张力：她不是太空战士，孤独来自家务流程继续运行而主人已经离开。视觉证据：月尘、破窗外地平线、停电走廊、旧餐具。边界：避免普通太空女仆或月球怪物。', defEn: 'First read: a domestic android maid abandoned in lunar home or base. Styling entry: low-gravity apron, white-gray dust, oxidized joints, clear hood, and still tidying an empty room. Motif: service body left behind after colonial life retreats. Tension: not a space soldier; loneliness comes from housekeeping procedure continuing after owners leave. Visual evidence: moon dust, horizon outside broken window, power-off corridor, and old tableware. Boundary: avoid generic space maid or lunar monster.', tags: ['lunar', 'maid', 'abandoned'] },
+  { id: 'rust_heart_boy', name: '锈心少年', nameEn: 'Rust-Heart Boy', group: 'I. 失控 / 废弃 / 残次机体', groupEn: 'I. Runaway / Abandoned / Defective Body', def: '第一识别是胸腔核心开始锈蚀、仍保持少年姿态的合成人。造型入口：薄外套、胸前锈色透痕、保护核心的抱臂、运动鞋和故作轻松的笑。母题：年轻外形与内部衰败冲突。张力：保持成人边界或非暧昧少年感，重点是损耗、维修缺口和自尊。视觉证据：胸口检修盖、锈粉、旧校包、突然停顿的呼吸灯。边界：避免普通病弱少年或可爱机器人。', defEn: 'First read: a synthetic boyish figure whose chest core begins to rust. Styling entry: thin jacket, rust color showing through chest, arms protecting core, sneakers, and a forced easy smile. Motif: young exterior conflicting with internal decay. Tension: keep adult boundary or non-seductive youth coding; focus on wear, lack of repair, and dignity. Visual evidence: chest maintenance cover, rust powder, old school bag, and breathing light suddenly pausing. Boundary: avoid generic sick boy or cute robot.', risk: 'medium', tags: ['rust_heart', 'synthetic', 'decay'] },
+
+  { id: 'uploaded_aristocrat', name: '上传意识贵族', nameEn: 'Uploaded Aristocrat', group: 'J. 后人类 / 身份上传', groupEn: 'J. Posthuman / Uploaded Identity', ontologyLevel: 5, def: '第一识别是把贵族身份从血统身体转移到云端和替换身体里的上传意识。造型入口：古典礼服、临时仿生身体、家族纹章数据屏、说话像从远处延迟传来的贵族腔调。母题：阶级特权越过肉身死亡。张力：他不是普通贵族，也不是AI管家，而是用多个身体延续家族权力的人格资产。视觉证据：远程登录标记、身体租约、祖传戒指被接口化、冷淡眼神。边界：避免普通王公或无形AI。', defEn: 'First read: an aristocrat whose noble identity has moved from blood body into cloud and replaceable bodies. Styling entry: classical formalwear, temporary synthetic body, family crest data screen, and speech delayed like arriving from elsewhere. Motif: class privilege crossing bodily death. Tension: neither normal noble nor AI butler, but personality asset continuing family power through multiple bodies. Visual evidence: remote login mark, body lease, ancestral ring turned interface, and cold eyes. Boundary: avoid generic prince or invisible AI.', tags: ['uploaded', 'aristocrat', 'class'] },
+  { id: 'body_subscription_worker', name: '身体订阅工人', nameEn: 'Body-Subscription Worker', group: 'J. 后人类 / 身份上传', groupEn: 'J. Posthuman / Uploaded Identity', def: '第一识别是按月租用工作身体、把自我塞进不同劳动躯壳的工人。造型入口：合同腕带、可更换身体编号、疲惫脸、工装和像不确定今天身体尺寸的动作。母题：劳动者连身体都变成订阅成本。张力：他不是自由换皮肤的潮人，而是被迫用租来的身体维持收入。视觉证据：账单、尺寸不合的衣服、登录端口、下班后脱离身体的空茫。边界：避免炫酷换身或普通打工人。', defEn: 'First read: a worker renting bodies by subscription, putting self into different labor shells. Styling entry: contract wristband, replaceable body number, tired face, workwear, and movements unsure of todays body size. Motif: laborer paying subscription even for body. Tension: not a stylish skin-swapper, but someone forced to maintain income through rented flesh. Visual evidence: bills, ill-fitting clothes, login port, and emptiness after clock-out disconnection. Boundary: avoid cool body-swap fantasy or generic worker.', tags: ['body_subscription', 'worker', 'labor'] },
+  { id: 'cloud_mind_schoolgirl', name: '云端意识女学生', nameEn: 'Cloud-Mind Schoolgirl', group: 'J. 后人类 / 身份上传', groupEn: 'J. Posthuman / Uploaded Identity', ontologyLevel: 5, def: '第一识别是课堂身体只是终端、意识主要运行在云端的女学生形象。造型入口：校服式外套、头顶同步光、眼神偶尔失焦、桌面登录提示和像同时听多个课堂的停顿。母题：学习人格被云端化。张力：保持非暧昧，重点是青春身份被数据延迟、备份和权限打散。视觉证据：云同步标记、课本旁服务器图标、断线焦虑、手指停在屏幕上。边界：避免普通学生或虚拟偶像。', defEn: 'First read: a schoolgirl-coded body used as terminal while consciousness mainly runs in cloud. Styling entry: school-style jacket, sync glow above head, gaze losing focus, login prompt on desk, and pauses like attending multiple classes. Motif: learning persona cloudified. Tension: keep non-seductive; youth identity is scattered by delay, backup, and permission. Visual evidence: cloud sync mark, server icon beside books, disconnection anxiety, and finger stopped on screen. Boundary: avoid generic student or virtual idol.', risk: 'medium', tags: ['cloud_mind', 'schoolgirl', 'upload'] },
+  { id: 'avatar_body_broker', name: '化身身体掮客', nameEn: 'Avatar-Body Broker', group: 'J. 后人类 / 身份上传', groupEn: 'J. Posthuman / Uploaded Identity', ontologyLevel: 4, def: '第一识别是替客户买卖、租借、匹配化身身体的中介。造型入口：深色商务服、身体样本目录、虹膜合同、手势像介绍房产一样介绍躯壳。母题：身体市场化。张力：他本人必须显得难以判断是真身还是展示样机。视觉证据：身体档案屏、试穿舱、合同手套、评估目光。边界：避免普通房产中介或邪恶科学家。', defEn: 'First read: a broker matching, renting, and selling avatar bodies for clients. Styling entry: dark business wear, body sample catalog, iris contracts, and gestures presenting shells like real estate. Motif: body marketization. Tension: his own body should be hard to judge as original or demo unit. Visual evidence: body profile screens, fitting pods, contract gloves, and evaluating gaze. Boundary: avoid generic realtor or evil scientist.', tags: ['avatar_body', 'broker', 'market'] },
+  { id: 'digital_soul_bride', name: '数字灵魂新娘', nameEn: 'Digital-Soul Bride', group: 'J. 后人类 / 身份上传', groupEn: 'J. Posthuman / Uploaded Identity', ontologyLevel: 5, def: '第一识别是婚礼对象的一部分已经上传为数字灵魂的新娘。造型入口：婚纱、半透明数据面纱、戒指同步界面、实体身体和远程人格之间的轻微延迟。母题：婚姻承诺跨过生物身体。张力：她不是全息幽灵，重点是仪式、合法身份和亲密对象的技术断裂。视觉证据：誓词屏、数据粒子边缘、白手套接口、复杂微笑。边界：避免普通赛博新娘或死亡幽灵。', defEn: 'First read: a bride whose wedding self partly exists as uploaded digital soul. Styling entry: gown, translucent data veil, ring sync interface, and slight delay between physical body and remote persona. Motif: marriage promise crossing biological body. Tension: not a hologram ghost; focus on ritual, legal identity, and technical break in intimacy. Visual evidence: vow screen, data-particle edge, white glove socket, and complicated smile. Boundary: avoid generic cyber bride or death spirit.', tags: ['digital_soul', 'bride', 'wedding'] },
+  { id: 'backup_body_detective', name: '备用身体侦探', nameEn: 'Backup-Body Detective', group: 'J. 后人类 / 身份上传', groupEn: 'J. Posthuman / Uploaded Identity', ontologyLevel: 4, def: '第一识别是死过不止一次、每次从备用身体继续查案的侦探。造型入口：不同时期的伤痕记忆、备用身体编号、旧风衣、镜中确认新脸的动作。母题：调查职业通过备份身体延长。张力：他不是不死英雄，每次恢复都损失一点连续自我。视觉证据：死亡记录、身体仓库标签、同一支笔、眼神里的时间断层。边界：避免普通侦探或无限复活爽文。', defEn: 'First read: a detective who has died more than once and continues cases through backup bodies. Styling entry: scars remembered from different bodies, backup body number, old trench coat, and checking a new face in mirror. Motif: investigation extended through body backups. Tension: not immortal hero; each recovery loses some continuity of self. Visual evidence: death records, body-storage tags, same pen, and time gaps in eyes. Boundary: avoid generic detective or power fantasy respawn.', tags: ['backup_body', 'detective', 'identity_gap'] },
+  { id: 'synthetic_afterlife_priest', name: '合成来世祭司', nameEn: 'Synthetic Afterlife Priest', group: 'J. 后人类 / 身份上传', groupEn: 'J. Posthuman / Uploaded Identity', ontologyLevel: 5, def: '第一识别是管理人格备份、数字墓园和合成来世服务的祭司。造型入口：礼袍与客服终端混合、纪念屏、账号钥匙、像安慰家属又像处理工单的表情。母题：来世被平台化。张力：他不是真宗教神职，而是站在信仰、数据和商业服务之间。视觉证据：云墓碑、权限令牌、悼念界面、低声说明。边界：避免真实宗教冒犯或普通殡葬人员。', defEn: 'First read: a priest managing personality backups, digital cemeteries, and synthetic afterlife services. Styling entry: robe mixed with service terminal, memorial screens, account keys, and expression comforting family while handling tickets. Motif: afterlife platformized. Tension: not real clergy, but standing between faith, data, and commercial service. Visual evidence: cloud tombstone, access token, mourning interface, and low-voiced explanation. Boundary: avoid real religious offense or generic funeral worker.', tags: ['synthetic_afterlife', 'priest', 'platform'] },
+  { id: 'identity_patch_smuggler', name: '身份补丁走私者', nameEn: 'Identity-Patch Smuggler', group: 'J. 后人类 / 身份上传', groupEn: 'J. Posthuman / Uploaded Identity', ontologyLevel: 4, def: '第一识别是在地下市场贩卖非法身份补丁的人。造型入口：多层口袋、加密芯片、手指快速交换动作、没有固定面孔的伪装妆。母题：人格和合法身份被拆成可走私零件。张力：他不是普通黑市商，危险在于能让一个人变成系统承认的另一个人。视觉证据：芯片盒、假证界面、巷口交易、眼神回避摄像头。边界：避免普通小偷或黑客键盘人。', defEn: 'First read: an underground dealer selling illegal identity patches. Styling entry: layered pockets, encrypted chips, fast finger exchange, and disguise makeup without stable face. Motif: personhood and legal identity broken into smuggled parts. Tension: not a generic black-market seller; danger lies in making someone become another person recognized by system. Visual evidence: chip case, fake-ID interface, alley deal, and eyes avoiding cameras. Boundary: avoid generic thief or keyboard hacker.', tags: ['identity_patch', 'smuggler', 'black_market'] },
+  { id: 'posthuman_child_heir', name: '后人类儿童继承人', nameEn: 'Posthuman Child Heir', group: 'J. 后人类 / 身份上传', groupEn: 'J. Posthuman / Uploaded Identity', ontologyLevel: 5, def: '第一识别是儿童尺度身体里承载家族资产、云端人格和未来继承权的后人类继承人。造型入口：正式儿童礼服、监护协议标记、云端同步环、过成熟目光和被保镖包围的安静站姿。母题：继承权先于完整童年。张力：保持非暧昧，重点是身体年龄、法律身份和数字人格的错位。视觉证据：家族文件、同步设备、过大的戒指、被管理的微笑。边界：避免普通小王子或儿童神童。', defEn: 'First read: a child-scale body carrying family assets, cloud persona, and future inheritance. Styling entry: formal child clothes, guardianship protocol mark, cloud sync ring, overly mature gaze, and quiet stance surrounded by guards. Motif: inheritance before full childhood. Tension: keep non-seductive; focus on mismatch between body age, legal identity, and digital personhood. Visual evidence: family documents, sync device, oversized ring, and managed smile. Boundary: avoid generic little prince or child prodigy.', risk: 'medium', tags: ['posthuman_child', 'heir', 'inheritance'] },
+  { id: 'quantum_body_refugee', name: '量子身体难民', nameEn: 'Quantum-Body Refugee', group: 'J. 后人类 / 身份上传', groupEn: 'J. Posthuman / Uploaded Identity', ontologyLevel: 5, def: '第一识别是意识或身体状态被迫在多个可能载体之间漂移的后人类难民。造型入口：临时身体、身份不稳定光纹、难民包、迁移许可和像随时会失焦的轮廓。母题：身体归属成为跨系统流亡。张力：他不是超能力者，而是没有一个稳定身体能被法律、记忆和情感同时承认。视觉证据：迁移编号、重影边缘、身体适配器、紧握的旧物。边界：避免魔法分身或普通赛博流浪者。', defEn: 'First read: a posthuman refugee whose mind or body state is forced to drift among possible carriers. Styling entry: temporary body, unstable identity glow, refugee bag, transfer permit, and outline that may lose focus at any moment. Motif: bodily belonging as cross-system exile. Tension: not a superpowered figure, but someone without one stable body recognized by law, memory, and emotion at once. Visual evidence: migration number, double-image edge, body adapter, and old object held tightly. Boundary: avoid magic clone or generic cyber wanderer.', tags: ['quantum_body', 'refugee', 'posthuman'] }
 ];
 
-export const CD_PERSONA_CYBERNETIC_ALTERED = buildExplicitPersonaTerms({
-  categoryId: 'cybernetic_altered',
-  categoryName: '机械化 / 义体 / 仿生人设',
-  categoryNameEn: 'Cybernetic / Prosthetic / Synthetic Persona',
-  baseTags: ['cybernetic', 'prosthetic', 'synthetic'],
-  baseStyleTags: ['cybernetic', 'machine_body'],
-  baseControls: ['body', 'interface', 'material', 'costume', 'prop', 'symbol', 'pose'],
-  defaultForbids: ['无解释民俗妖怪化', '随机神圣光环抢走机械逻辑', '纯血肉感染化'],
-  defaultEras: future,
-  defaultOntologyLevel: 4,
-  visualEvidence: '机械接口、义体结构、工业材料、序列编号、维修痕迹、合成人身份和构造边界',
-  visualEvidenceEn: 'machine interfaces, prosthetic structure, industrial materials, serial codes, repair traces, synthetic identity, and construction boundary',
-  absorptionFocus: '机械接口、义体结构、材料构造、维修制度、合成人身份或后人类身体边界',
-  absorptionFocusEn: 'machine interface, prosthetic structure, material construction, repair system, synthetic identity, or posthuman body boundary'
-}, toSeeds(groups));
+export const CD_PERSONA_CYBERNETIC_ALTERED: PersonaTerm[] = seeds.map(cp);

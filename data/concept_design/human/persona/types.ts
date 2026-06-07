@@ -14,6 +14,7 @@ export type PersonaEra =
   | 'mythic';
 
 export type PersonaRisk = 'clean' | 'medium' | 'high';
+export type PersonaCategoryFit = NonNullable<LibraryItemDef['categoryFit']>;
 
 export type PersonaTerm = LibraryItemDef & {
   ontologyLevel: 1 | 2 | 3 | 4 | 5;
@@ -32,6 +33,54 @@ export type PersonaTerm = LibraryItemDef & {
   styleTags: string[];
   timeTags: string[];
 };
+
+const uniq = (items: readonly string[]) => Array.from(new Set(items.filter(Boolean)));
+
+export const cleanPersonaEras = (items: readonly PersonaEra[] = []): PersonaEra[] => (
+  uniq(items.filter(era => era !== 'timeless')) as PersonaEra[]
+);
+
+export const personaEraModeFor = (
+  eras: readonly PersonaEra[] = [],
+  eraMode?: LibraryItemDef['eraMode']
+): NonNullable<LibraryItemDef['eraMode']> => eraMode || (cleanPersonaEras(eras).length ? 'specific' : 'universal');
+
+export const personaRealityTagsFor = (ontologyLevel: 1 | 2 | 3 | 4 | 5, extra: readonly string[] = []): string[] => {
+  const base = ['persona_evidence'];
+  const reality = ontologyLevel <= 1
+    ? ['physical', 'realistic']
+    : ontologyLevel <= 2
+      ? ['physical', 'stylized', 'semi_real']
+      : ontologyLevel <= 3
+        ? ['stylized', 'semi_surreal']
+        : ontologyLevel <= 4
+          ? ['non_realist', 'surreal']
+          : ['abstract', 'surreal', 'symbolic'];
+  return uniq([...base, ...reality, ...extra]);
+};
+
+export const personaFit = (
+  unlisted: NonNullable<PersonaCategoryFit['unlisted']>,
+  patch: Omit<PersonaCategoryFit, 'unlisted'> = {}
+): PersonaCategoryFit => ({
+  unlisted,
+  strong: uniq(patch.strong || []),
+  usable: uniq(patch.usable || []),
+  fusion: uniq(patch.fusion || []),
+  weak: uniq(patch.weak || []),
+  exclude: uniq(patch.exclude || [])
+});
+
+export const mergePersonaFit = (
+  base: PersonaCategoryFit,
+  patch?: LibraryItemDef['categoryFit']
+): PersonaCategoryFit => patch ? personaFit(patch.unlisted || base.unlisted || 'none', {
+  strong: uniq([...(base.strong || []), ...(patch.strong || [])]),
+  usable: uniq([...(base.usable || []), ...(patch.usable || [])]),
+  fusion: uniq([...(base.fusion || []), ...(patch.fusion || [])]),
+  weak: uniq([...(base.weak || []), ...(patch.weak || [])]),
+  exclude: uniq([...(base.exclude || []), ...(patch.exclude || [])])
+}) : base;
 
 export type PersonaSubgroup = {
   id: string;
@@ -89,6 +138,9 @@ export type ExplicitPersonaSeed = {
   forbids?: string[];
   absorptionRule?: string;
   absorptionRuleEn?: string;
+  eraMode?: LibraryItemDef['eraMode'];
+  realityTags?: string[];
+  categoryFit?: LibraryItemDef['categoryFit'];
 };
 
 export type ExplicitPersonaCategoryConfig = {
@@ -106,6 +158,9 @@ export type ExplicitPersonaCategoryConfig = {
   absorptionFocus: string;
   absorptionFocusEn: string;
   appendVisualEvidence?: boolean;
+  categoryFit?: LibraryItemDef['categoryFit'];
+  realityTags?: string[];
+  eraMode?: LibraryItemDef['eraMode'];
 };
 
 export const buildExplicitPersonaTerms = (
@@ -113,9 +168,10 @@ export const buildExplicitPersonaTerms = (
   seeds: ExplicitPersonaSeed[]
 ): PersonaTerm[] => seeds.map(seed => {
   const ontologyLevel = seed.ontologyLevel ?? config.defaultOntologyLevel ?? 1;
-  const eras = seed.eras ?? config.defaultEras;
+  const eras = cleanPersonaEras(seed.eras ?? config.defaultEras);
   const risk = seed.risk ?? (ontologyLevel >= 4 ? 'medium' : 'clean');
   const controls = Array.from(new Set([...config.baseControls, ...(seed.controls || [])]));
+  const eraMode = personaEraModeFor(eras, seed.eraMode || config.eraMode);
   return {
     id: `cd_persona_${config.categoryId}_${seed.id}`,
     name: seed.name,
@@ -133,6 +189,7 @@ export const buildExplicitPersonaTerms = (
     personaStrength: ontologyLevel >= 4 ? 'strong' : ontologyLevel >= 2 ? 'medium' : 'light',
     isCompoundPersona: true,
     ontologyLevel,
+    eraMode,
     eras,
     risk,
     affects: controls,
@@ -141,7 +198,8 @@ export const buildExplicitPersonaTerms = (
     absorptionRule: seed.absorptionRule || `外来元素优先折译为“${seed.name}”的${config.absorptionFocus}，不要让随机细节抢走人设主轴。`,
     absorptionRuleEn: seed.absorptionRuleEn || `Translate outside elements into the ${config.absorptionFocusEn} of "${seed.nameEn}"; do not let random details steal the persona axis.`,
     tags: Array.from(new Set(['persona', 'compound_persona', ...config.baseTags, ...(seed.tags || [])])),
-    realityTags: ontologyLevel <= 1 ? ['realist_safe'] : ontologyLevel <= 3 ? ['stylized_boundary'] : ['nonreal_ontology'],
+    realityTags: seed.realityTags || config.realityTags || personaRealityTagsFor(ontologyLevel),
+    categoryFit: mergePersonaFit(personaFit('none'), seed.categoryFit || config.categoryFit),
     styleTags: Array.from(new Set([...config.baseStyleTags, ...(seed.styleTags || []), ...(seed.tags || [])])),
     timeTags: eras
   } satisfies PersonaTerm;
@@ -157,6 +215,7 @@ export const buildPersonaTerms = (config: PersonaCategoryConfig): PersonaTerm[] 
       const group = `${groupIndex}. ${subgroup.name}`;
       const groupEn = `${groupIndex}. ${subgroup.nameEn}`;
       const ontologyLevel = subgroup.ontologyLevel;
+      const eras = cleanPersonaEras(subgroup.eras);
       const risk = subgroup.risk || (ontologyLevel >= 4 ? 'medium' : 'clean');
       return {
         id,
@@ -175,7 +234,8 @@ export const buildPersonaTerms = (config: PersonaCategoryConfig): PersonaTerm[] 
         def: `${subgroup.def}${role.def} 视觉证据优先落在${config.baseControls.join('、')}。`,
         defEn: `${subgroup.defEn} ${role.defEn} Visual evidence should land first in ${config.baseControls.join(', ')}.`,
         ontologyLevel,
-        eras: subgroup.eras,
+        eraMode: personaEraModeFor(eras),
+        eras,
         risk,
         affects: Array.from(new Set([...config.baseControls, ...role.controls])),
         controls: Array.from(new Set([...config.baseControls, ...role.controls])),
@@ -183,9 +243,10 @@ export const buildPersonaTerms = (config: PersonaCategoryConfig): PersonaTerm[] 
         absorptionRule: subgroup.absorptionRule || `外来元素优先折译进${subgroup.name}的服装制度、姿态、材料、道具和符号，不要让随机细节抢走人设主轴。`,
         absorptionRuleEn: subgroup.absorptionRuleEn || `Translate outside elements into the costume system, posture, material, props, and symbols of ${subgroup.nameEn}; do not let random details steal the persona axis.`,
         tags: Array.from(new Set([...config.baseTags, ...subgroup.tags, ...role.tags])),
-        realityTags: ontologyLevel <= 1 ? ['realist_safe'] : ontologyLevel <= 3 ? ['stylized_boundary'] : ['nonreal_ontology'],
+        realityTags: personaRealityTagsFor(ontologyLevel),
+        categoryFit: personaFit('none'),
         styleTags: Array.from(new Set([...subgroup.styleTags, ...role.tags])),
-        timeTags: subgroup.eras
+        timeTags: eras
       } satisfies PersonaTerm;
     })
   ))
