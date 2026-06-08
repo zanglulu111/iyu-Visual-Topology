@@ -22,7 +22,7 @@ const toList = (value: unknown): string[] => {
 
 const normalizeCategoryFit = (fit?: LibraryItemDef['categoryFit']): CategoryFit => {
   const merged = {
-    unlisted: (fit?.unlisted === 'usable' || fit?.unlisted === 'weak' || fit?.unlisted === 'exclude' ? fit.unlisted : 'none') as CategoryUnlistedFit,
+    unlisted: (fit?.unlisted === 'usable' || fit?.unlisted === 'fusion' || fit?.unlisted === 'weak' || fit?.unlisted === 'exclude' ? fit.unlisted : 'none') as CategoryUnlistedFit,
     strong: uniq(toList(fit?.strong)),
     usable: uniq(toList(fit?.usable)),
     fusion: uniq(toList(fit?.fusion)),

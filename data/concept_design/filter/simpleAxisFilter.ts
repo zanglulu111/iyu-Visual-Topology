@@ -2,11 +2,12 @@ import type { LibraryItemDef } from '../../../types';
 import { normalizeConceptAxisTags } from './axisTags';
 import { CONCEPT_CATEGORY_AXIS_IDS } from './categoryAxis';
 
-export type ConceptSimpleAxisFilterTags = Partial<Record<'eraTags' | 'realityTags' | 'categoryTags', readonly string[]>>;
+export type ConceptSimpleAxisFilterTags = Partial<Record<'creatureTaxonomyTags' | 'eraTags' | 'realityTags' | 'categoryTags', readonly string[]>>;
 
 export type ConceptSimpleAxisAffinity = 'strong' | 'usable' | 'neutral' | 'weak' | 'conflict';
 export type ConceptCategoryFitLevel = 'strong' | 'usable' | 'fusion' | 'weak' | 'neutral' | 'exclude';
-type ConceptUnlistedFitLevel = 'none' | 'usable' | 'weak' | 'exclude';
+export type ConceptCreatureTaxonomyFitLevel = 'strong' | 'usable' | 'fusion' | 'weak' | 'neutral' | 'exclude';
+type ConceptUnlistedFitLevel = 'none' | 'usable' | 'fusion' | 'weak' | 'exclude';
 
 export type ConceptSimpleAxisMatch = {
   affinityLevel: ConceptSimpleAxisAffinity;
@@ -14,8 +15,12 @@ export type ConceptSimpleAxisMatch = {
   eraScore: number;
   realityScore: number;
   categoryScore: number;
+  creatureTaxonomyScore: number;
   categoryFilterActive: boolean;
+  creatureTaxonomyFilterActive: boolean;
   categoryFitLevel: ConceptCategoryFitLevel;
+  creatureTaxonomyFitLevel: ConceptCreatureTaxonomyFitLevel;
+  matchedCreatureTaxonomy: string[];
   matchedEra: string[];
   matchedReality: string[];
   matchedCategory: string[];
@@ -85,6 +90,7 @@ const eraAliases: Record<string, string[]> = {
 
 const normalizeEraTag = (value: string) => value.trim().toLowerCase();
 const normalizeCategoryTag = (value: string) => value.trim().toLowerCase();
+const normalizeCreatureTaxonomyTag = (value: string) => value.trim().toLowerCase();
 
 const normalizeCategoryTags = (values: readonly string[]) => uniq(values
   .map(normalizeCategoryTag)
@@ -114,8 +120,33 @@ const normalizeCategoryFit = (item: LibraryItemDef): Record<ConceptCategoryFitLe
   };
 };
 
+const normalizeCreatureTaxonomyFit = (item: LibraryItemDef): Record<ConceptCreatureTaxonomyFitLevel, string[]> => {
+  const fit = item.creatureTaxonomyFit;
+  const merged = {
+    strong: uniq(toList(fit?.strong).map(normalizeCreatureTaxonomyTag)),
+    usable: uniq(toList(fit?.usable).map(normalizeCreatureTaxonomyTag)),
+    fusion: uniq(toList(fit?.fusion).map(normalizeCreatureTaxonomyTag)),
+    weak: uniq(toList(fit?.weak).map(normalizeCreatureTaxonomyTag)),
+    exclude: uniq(toList(fit?.exclude).map(normalizeCreatureTaxonomyTag)),
+    neutral: []
+  };
+  const excludeSet = new Set(merged.exclude);
+  const strongSet = new Set(merged.strong.filter(tag => !excludeSet.has(tag)));
+  const usableSet = new Set(merged.usable.filter(tag => !excludeSet.has(tag) && !strongSet.has(tag)));
+  const fusionSet = new Set(merged.fusion.filter(tag => !excludeSet.has(tag) && !strongSet.has(tag) && !usableSet.has(tag)));
+  const weakSet = new Set(merged.weak.filter(tag => !excludeSet.has(tag) && !strongSet.has(tag) && !usableSet.has(tag) && !fusionSet.has(tag)));
+  return {
+    strong: Array.from(strongSet),
+    usable: Array.from(usableSet),
+    fusion: Array.from(fusionSet),
+    weak: Array.from(weakSet),
+    exclude: merged.exclude,
+    neutral: []
+  };
+};
+
 const normalizeUnlistedFit = (value: unknown): ConceptUnlistedFitLevel => {
-  if (value === 'usable' || value === 'weak' || value === 'exclude') return value;
+  if (value === 'usable' || value === 'fusion' || value === 'weak' || value === 'exclude') return value;
   return 'none';
 };
 
@@ -135,8 +166,32 @@ const getCategoryFitMatch = (item: LibraryItemDef, activeCategoryTags: readonly 
   if (weak.length) return { level: 'weak' as ConceptCategoryFitLevel, score: -2, matched: weak };
   const unlisted = normalizeUnlistedFit(item.categoryFit?.unlisted);
   if (unlisted === 'usable') return { level: 'usable' as ConceptCategoryFitLevel, score: 5, matched: ['unlisted'] };
+  if (unlisted === 'fusion') return { level: 'fusion' as ConceptCategoryFitLevel, score: 3, matched: ['unlisted'] };
   if (unlisted === 'weak') return { level: 'weak' as ConceptCategoryFitLevel, score: -2, matched: ['unlisted'] };
   if (unlisted === 'exclude') return { level: 'exclude' as ConceptCategoryFitLevel, score: -24, matched: ['unlisted'] };
+  return empty;
+};
+
+const getCreatureTaxonomyFitMatch = (item: LibraryItemDef, activeCreatureTags: readonly string[]) => {
+  const empty = { level: 'neutral' as ConceptCreatureTaxonomyFitLevel, score: 0, matched: [] as string[] };
+  if (!activeCreatureTags.length) return empty;
+  const fit = normalizeCreatureTaxonomyFit(item);
+  const activeTags = uniq(activeCreatureTags.map(normalizeCreatureTaxonomyTag));
+  const excluded = intersect(fit.exclude, activeTags);
+  if (excluded.length) return { level: 'exclude' as ConceptCreatureTaxonomyFitLevel, score: -24, matched: excluded };
+  const strong = intersect(fit.strong, activeTags);
+  if (strong.length) return { level: 'strong' as ConceptCreatureTaxonomyFitLevel, score: 18, matched: strong };
+  const usable = intersect(fit.usable, activeTags);
+  if (usable.length) return { level: 'usable' as ConceptCreatureTaxonomyFitLevel, score: 12, matched: usable };
+  const fusion = intersect(fit.fusion, activeTags);
+  if (fusion.length) return { level: 'fusion' as ConceptCreatureTaxonomyFitLevel, score: 7, matched: fusion };
+  const weak = intersect(fit.weak, activeTags);
+  if (weak.length) return { level: 'weak' as ConceptCreatureTaxonomyFitLevel, score: -2, matched: weak };
+  const unlisted = normalizeUnlistedFit(item.creatureTaxonomyFit?.unlisted);
+  if (unlisted === 'usable') return { level: 'usable' as ConceptCreatureTaxonomyFitLevel, score: 5, matched: ['unlisted'] };
+  if (unlisted === 'fusion') return { level: 'fusion' as ConceptCreatureTaxonomyFitLevel, score: 3, matched: ['unlisted'] };
+  if (unlisted === 'weak') return { level: 'weak' as ConceptCreatureTaxonomyFitLevel, score: -2, matched: ['unlisted'] };
+  if (unlisted === 'exclude') return { level: 'exclude' as ConceptCreatureTaxonomyFitLevel, score: -24, matched: ['unlisted'] };
   return empty;
 };
 
@@ -168,10 +223,10 @@ const normalizeRealityFilters = (values: readonly string[]) => uniq(values.flatM
 
 export const CONCEPT_REALITY_AXIS = [
   { id: 'realistic', label: '现实', labelEn: 'Realistic' },
-  { id: 'stylized', label: '风格化现实', labelEn: 'Stylized Real' },
-  { id: 'semi_surreal', label: '轻度超现实', labelEn: 'Semi-Surreal' },
-  { id: 'nonreal', label: '非现实本体', labelEn: 'Non-Real Ontology' },
-  { id: 'abstract', label: '抽象强超现实', labelEn: 'Abstract Surreal' }
+  { id: 'stylized', label: '风格', labelEn: 'Stylized' },
+  { id: 'semi_surreal', label: '微超', labelEn: 'Semi' },
+  { id: 'nonreal', label: '非实', labelEn: 'Nonreal' },
+  { id: 'abstract', label: '抽象', labelEn: 'Abstract' }
 ] as const;
 
 export const VISUAL_STYLE_AXIS_FREE_BLOCK_IDS = new Set([
@@ -239,7 +294,9 @@ export const getConceptSimpleAxisMatch = (
   const activeEraTags = expandEraTags(toList(filters.eraTags));
   const activeRealityTags = normalizeRealityFilters(toList(filters.realityTags));
   const activeCategoryTags = normalizeCategoryTags(toList(filters.categoryTags));
+  const activeCreatureTaxonomyTags = uniq(toList(filters.creatureTaxonomyTags).map(normalizeCreatureTaxonomyTag));
   const categoryFilterActive = activeCategoryTags.length > 0;
+  const creatureTaxonomyFilterActive = activeCreatureTaxonomyTags.length > 0;
   const itemEraTags = expandEraTags([
     ...toList(item.eraTags),
     ...toList(item.eras)
@@ -272,11 +329,16 @@ export const getConceptSimpleAxisMatch = (
       : (realityLevelOk ? -2 : -10);
   const categoryMatch = getCategoryFitMatch(item, activeCategoryTags);
   const categoryScore = categoryMatch.score;
+  const creatureTaxonomyMatch = getCreatureTaxonomyFitMatch(item, activeCreatureTaxonomyTags);
+  const creatureTaxonomyScore = creatureTaxonomyMatch.score;
 
-  const score = eraScore + realityScore + categoryScore;
-  const affinityLevel: ConceptSimpleAxisAffinity = categoryFilterActive && (categoryMatch.level === 'neutral' || categoryMatch.level === 'weak')
+  const score = eraScore + realityScore + categoryScore + creatureTaxonomyScore;
+  const affinityLevel: ConceptSimpleAxisAffinity = (
+    (categoryFilterActive && (categoryMatch.level === 'neutral' || categoryMatch.level === 'weak')) ||
+    (creatureTaxonomyFilterActive && (creatureTaxonomyMatch.level === 'neutral' || creatureTaxonomyMatch.level === 'weak'))
+  )
     ? 'weak'
-    : categoryMatch.level === 'exclude' || score < -6
+    : categoryMatch.level === 'exclude' || creatureTaxonomyMatch.level === 'exclude' || score < -6
     ? 'conflict'
     : score >= 18
       ? 'strong'
@@ -292,8 +354,12 @@ export const getConceptSimpleAxisMatch = (
     eraScore,
     realityScore,
     categoryScore,
+    creatureTaxonomyScore,
     categoryFilterActive,
+    creatureTaxonomyFilterActive,
     categoryFitLevel: categoryMatch.level,
+    creatureTaxonomyFitLevel: creatureTaxonomyMatch.level,
+    matchedCreatureTaxonomy: creatureTaxonomyMatch.matched,
     matchedEra,
     matchedReality,
     matchedCategory: categoryMatch.matched,

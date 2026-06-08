@@ -3315,6 +3315,7 @@ const App: React.FC = () => {
                                             conceptGlobalRandomizeRef.current = handler;
                                         }}
                                         conceptWorkspacePage={conceptWorkspacePage}
+                                        onConceptWorkspacePageChange={setConceptWorkspacePage}
                                         isAdmin={isAdmin}
                                     />
                                 </div>

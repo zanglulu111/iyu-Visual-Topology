@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Globe, Wand2, History as HistoryIcon, Cpu, GitFork, BookOpen, Settings, User as UserIcon, Aperture, Sun, Moon, FolderOpen } from 'lucide-react';
+import { Globe, Wand2, History as HistoryIcon, Cpu, GitFork, BookOpen, Settings, User as UserIcon, Aperture, Sun, Moon, FolderOpen, FileText, ListChecks, TerminalSquare } from 'lucide-react';
 import { ConceptDesignWorkspacePage, DriverType, User, ViewMode } from '../types';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -139,7 +139,9 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
     labelEn: string;
   }> = [
     { id: 'ENGINE', icon: Cpu, labelCn: '律令引擎', labelEn: 'EDICT ENGINE' },
-    { id: 'VARIABLES', icon: BookOpen, labelCn: '变量 / 律令', labelEn: 'VARIABLES / EDICT' }
+    { id: 'COMPILE', icon: FileText, labelCn: '编译页', labelEn: 'COMPILE' },
+    { id: 'RESULT', icon: ListChecks, labelCn: '编译结果', labelEn: 'RESULT' },
+    { id: 'FINAL', icon: TerminalSquare, labelCn: '终稿指令', labelEn: 'FINAL INSTRUCTION' }
   ];
 
   return (

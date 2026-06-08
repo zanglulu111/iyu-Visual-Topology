@@ -24,6 +24,7 @@ import {
   SlidersHorizontal,
   Table2,
   Sparkles,
+  Target,
   Clapperboard,
   ChevronDown,
   Trash2,
@@ -34,7 +35,7 @@ import {
   X
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
-import { ConceptDesignRuntimeState, ConceptDesignWorkspacePage, DriverType, LibraryCategoryDef, LibraryItemDef, NarrativeBlockDef, NarrativeFieldState } from '../types';
+import { ConceptDesignRuntimeState, ConceptDesignWorkspacePage, DriverType, LibraryCategoryDef, LibraryItemDef, NarrativeBlockDef, NarrativeFieldState, type CreatureTaxonomyTag } from '../types';
 import { CONCEPT_ENGINE_BLOCKS, CONCEPT_ENGINE_LIBRARY } from '../data/concept_design/core';
 import { ACTION_MOTIF_PROTOCOL } from '../data/concept_design/human/base/actions';
 import { NarrativeEngineFieldProps } from './NarrativeEngineField';
@@ -76,7 +77,7 @@ import {
 import { CONCEPT_TAG_LABELS, normalizeConceptTagId, uniqueConceptTagIds } from '../data/concept_design/tagDictionary';
 import { CONCEPT_CATEGORY_AXIS } from '../data/concept_design/filter/categoryAxis';
 import { CONCEPT_ERA_AXIS } from '../data/concept_design/filter/eraAxis';
-import { blockUsesSimpleHardAxis, CONCEPT_REALITY_AXIS, getConceptSimpleAxisMatch, type ConceptCategoryFitLevel } from '../data/concept_design/filter/simpleAxisFilter';
+import { blockUsesSimpleHardAxis, CONCEPT_REALITY_AXIS, getConceptSimpleAxisMatch, type ConceptCategoryFitLevel, type ConceptCreatureTaxonomyFitLevel } from '../data/concept_design/filter/simpleAxisFilter';
 
 type SkillLanguage = 'CN' | 'EN';
 type SourceMode = 'PRESET' | 'IDEA' | 'ARTICLE' | 'IMAGE';
@@ -97,6 +98,7 @@ type VisualStyleRandomSafety = {
   allowHighSaturation: boolean;
 };
 type VisualStyleRandomDensity = 'FULL' | 'BALANCED' | 'LIGHT';
+type VisualStyleSoulBlendMode = 'PURE' | 'POLYPHONIC';
 type FramingRandomPresetRoute = 'ALL_PRESETS' | string;
 type EraCompatibility = 'match' | 'neutral' | 'soft_mismatch' | 'hard_mismatch';
 type GenreCompatibility = 'match' | 'neutral' | 'soft_mismatch' | 'hard_mismatch';
@@ -108,18 +110,26 @@ type FramingRandomSafety = {
   allowOpticalFx: boolean;
 };
 type FramingRandomDensity = 'FULL' | 'BALANCED' | 'LIGHT';
+type ContentIntentRandomDensity = 'RANGE_1_8' | 'RANGE_9_16' | 'RANGE_17_23' | 'RANGE_24_30' | 'RANGE_31_38' | 'FULL';
+type SpacetimeFieldRandomRoute = 'ALL_PRESETS' | 'EXACT_COORDINATE' | 'REAL_SCENE' | 'SURREAL_SCENE' | 'ABSTRACT_SCENE' | 'ENVIRONMENT_STATE';
+type SpacetimeFieldRandomDensity = 'LIGHT' | 'BALANCED' | 'FULL';
+type LightingAtmosphereRandomRoute = 'ALL_PRESETS' | 'PRESET_PACKAGE' | 'DETAIL_LIGHTING';
+type LightingAtmosphereRandomDensity = 'LIGHT' | 'BALANCED' | 'FULL';
 type LinkedRandomPresetRoute = 'ALL_PRESETS' | string;
 type LinkedRandomFocus = 'GLOBAL' | 'SUBJECT' | 'FIELD' | 'LIGHT';
-type ThemeAxisPickerMode = 'TYPE' | 'TIME' | 'REALITY';
+type ContentIntentRoute = 'AUTO' | string;
+type ThemeAxisPickerMode = 'TYPE' | 'SPECIES' | 'TIME' | 'REALITY';
 type LexiconCategoryFilterLevel = Exclude<ConceptCategoryFitLevel, 'neutral'>;
+type LexiconCreatureTaxonomyFilterLevel = Exclude<ConceptCreatureTaxonomyFitLevel, 'neutral'>;
 type LexiconEraFilterLevel = 'hit' | 'universal' | 'miss';
 type LexiconRealityFilterLevel = 'hit' | 'allowed' | 'miss';
 type LexiconAxisFilterMode = 'INTERSECTION' | 'UNION' | 'LAYERED' | 'SOFT_SORT';
-type LexiconAxisKey = 'category' | 'era' | 'reality';
+type LexiconAxisKey = 'species' | 'category' | 'era' | 'reality';
 type LexiconUniversalPolicy = 'INCLUDE' | 'SORT_ONLY' | 'EXCLUDE';
 type LexiconAxisFilterState = {
   mode: LexiconAxisFilterMode;
   order: LexiconAxisKey[];
+  creatureTaxonomyLevels: LexiconCreatureTaxonomyFilterLevel[];
   categoryLevels: LexiconCategoryFilterLevel[];
   eraLevels: LexiconEraFilterLevel[];
   realityLevels: LexiconRealityFilterLevel[];
@@ -132,6 +142,7 @@ type ConceptWorldAxisState = {
   primaryGenre: string;
   secondaryGenres: string[];
   genreFusionMode: ConceptLinkedGenreFusionMode;
+  creatureTaxonomyAllow: CreatureTaxonomyTag[];
   genreAllow: string[];
   eraAllow: string[];
   realityAllow: string[];
@@ -140,13 +151,15 @@ const DEFAULT_CONCEPT_WORLD_AXIS_STATE: ConceptWorldAxisState = {
   primaryGenre: '',
   secondaryGenres: [],
   genreFusionMode: 'ACCENT',
+  creatureTaxonomyAllow: [],
   genreAllow: [],
   eraAllow: [],
   realityAllow: []
 };
 const DEFAULT_LEXICON_AXIS_FILTER_STATE: LexiconAxisFilterState = {
   mode: 'INTERSECTION',
-  order: ['category', 'era', 'reality'],
+  order: ['species', 'category', 'era', 'reality'],
+  creatureTaxonomyLevels: ['strong', 'usable'],
   categoryLevels: ['strong', 'usable', 'fusion'],
   eraLevels: ['hit', 'universal'],
   realityLevels: ['hit', 'allowed'],
@@ -185,15 +198,27 @@ const LEXICON_AXIS_FILTER_ENABLED_BLOCK_IDS = new Set([
   'cd_static_pose',
   'cd_dynamic_action',
   'cd_human_behavior',
+  'cd_creature_preset',
+  'cd_creature_size',
+  'cd_creature_class',
+  'cd_creature_element',
+  'cd_creature_head',
+  'cd_creature_body',
+  'cd_creature_mood',
+  'cd_creature_action',
+  'cd_creature_texture',
   'cd_scene_real',
   'cd_scene_surreal',
   'cd_scene_abstract',
   'cd_atmosphere',
   'cd_particles',
+  'cd_light_preset',
   'cd_light_mood',
   'cd_light_type',
   'cd_light_direction',
-  'cd_light_shape'
+  'cd_light_shape',
+  'cd_light_air',
+  'cd_light_color_temp'
 ]);
 const LEXICON_FILTER_AUDIT_PINNED_BLOCK_IDS = [
   'cd_scene_real',
@@ -222,11 +247,46 @@ const LEXICON_UNIVERSAL_FILTER_BLOCK_IDS = new Set([
   'cd_human_behavior',
   'cd_atmosphere',
   'cd_particles',
+  'cd_light_preset',
   'cd_light_mood',
   'cd_light_type',
   'cd_light_direction',
-  'cd_light_shape'
+  'cd_light_shape',
+  'cd_light_air',
+  'cd_light_color_temp'
 ]);
+const CREATURE_TAXONOMY_FILTER_BLOCK_IDS = new Set([
+  'cd_creature_preset',
+  'cd_creature_size',
+  'cd_creature_class',
+  'cd_creature_element',
+  'cd_creature_head',
+  'cd_creature_body',
+  'cd_creature_mood',
+  'cd_creature_action',
+  'cd_creature_texture'
+]);
+const blockUsesCreatureTaxonomyFilter = (blockId: string) => CREATURE_TAXONOMY_FILTER_BLOCK_IDS.has(blockId);
+const CREATURE_TAXONOMY_AXIS: Array<{ id: CreatureTaxonomyTag; label: string; labelEn: string }> = [
+  { id: 'mammal', label: '哺乳', labelEn: 'Mammal' },
+  { id: 'avian', label: '鸟类', labelEn: 'Avian' },
+  { id: 'reptilian', label: '爬行', labelEn: 'Reptilian' },
+  { id: 'aquatic', label: '水生', labelEn: 'Aquatic' },
+  { id: 'insectoid', label: '昆虫', labelEn: 'Insectoid' },
+  { id: 'soft_body', label: '软体', labelEn: 'Soft Body' },
+  { id: 'draconic', label: '龙类', labelEn: 'Draconic' },
+  { id: 'demonic', label: '恶魔', labelEn: 'Demonic' },
+  { id: 'divine_spirit', label: '神性', labelEn: 'Divine Spirit' },
+  { id: 'undead', label: '亡灵', labelEn: 'Undead' },
+  { id: 'eldritch', label: '深渊', labelEn: 'Eldritch' },
+  { id: 'plant_fungal', label: '植物菌丝', labelEn: 'Plant / Fungal' },
+  { id: 'mineral_elemental', label: '矿物元素', labelEn: 'Mineral / Elemental' },
+  { id: 'energy_void', label: '能量虚空', labelEn: 'Energy / Void' },
+  { id: 'machine', label: '机械', labelEn: 'Machine' },
+  { id: 'synthetic', label: '合成', labelEn: 'Synthetic' },
+  { id: 'swarm_parasitic', label: '虫群寄生', labelEn: 'Swarm / Parasitic' },
+  { id: 'chimera', label: '嵌合', labelEn: 'Chimera' }
+];
 type LinkedGenderSignal = 'FEMININE' | 'MASCULINE' | 'ANDROGYNOUS' | 'OPEN';
 type LinkedSubjectProfile = {
   ageBands: string[];
@@ -1324,9 +1384,32 @@ const getMediaEyeBlocks = () => mediaEyeBlocks;
 const fieldSpaceTypeBlocks = ['cd_scene_real', 'cd_scene_surreal', 'cd_scene_abstract'];
 const fieldEnvironmentStateBlocks = ['cd_atmosphere', 'cd_particles'];
 const fieldDetailBlocks = [...fieldSpaceTypeBlocks, ...fieldEnvironmentStateBlocks];
-const lightPresetBlocks = ['cd_light_mood'];
-const lightDetailBlocks = ['cd_light_type', 'cd_light_direction', 'cd_light_shape'];
+const lightPresetBlocks = ['cd_light_preset'];
+const lightDetailBlocks = ['cd_light_mood', 'cd_light_type', 'cd_light_direction', 'cd_light_air', 'cd_light_color_temp', 'cd_light_shape'];
 const aestheticLightAuditBlocks = [...lightPresetBlocks, ...lightDetailBlocks];
+const lightingAtmosphereRouteMeta: Record<LightingAtmosphereRandomRoute, { label: string; labelEn: string; brief: string; briefEn: string; blocks: string[] }> = {
+  ALL_PRESETS: {
+    label: '全部预设随机',
+    labelEn: 'All Presets',
+    brief: '随机选择光影预设包或布光细项路线。',
+    briefEn: 'Randomly choose either a lighting preset package or lighting details route.',
+    blocks: aestheticLightAuditBlocks
+  },
+  PRESET_PACKAGE: {
+    label: '光影预设包',
+    labelEn: 'Lighting Preset Pack',
+    brief: '只抽主光影方案；不再叠加下方布光细项。',
+    briefEn: 'Only sample the main lighting package; do not stack lower lighting details.',
+    blocks: lightPresetBlocks
+  },
+  DETAIL_LIGHTING: {
+    label: '布光细项',
+    labelEn: 'Lighting Details',
+    brief: '只抽明暗、光源、方向、空气、色温和投影等细项。',
+    briefEn: 'Only sample mood, source, direction, air, color temperature, and shadow details.',
+    blocks: lightDetailBlocks
+  }
+};
 const aestheticRenderAuditBlocks = ['cd_render_real', 'cd_render_art'];
 const aestheticStyleSoulBlocks = ['cd_director_style', 'cd_photo_style', 'cd_anim_director', 'cd_art_movement', 'cd_art_style', 'cd_media_cgi_soul', 'cd_media_tangible_soul'];
 const aestheticAuditBlocks = [
@@ -1359,6 +1442,50 @@ const semanticStyleAxisBlocks = ['cd_style_protocol_primary', 'cd_style_protocol
 const fieldRegisterBlock = 'cd_field_register';
 const fieldStyleBlocks = ['cd_field_style_primary', 'cd_field_style_secondary'];
 const spacetimeFieldUiBlocks = ['cd_spacetime_coordinate', 'cd_field_preset', ...fieldDetailBlocks];
+const spacetimeFieldRouteMeta: Record<SpacetimeFieldRandomRoute, { label: string; labelEn: string; brief: string; briefEn: string; blocks: string[] }> = {
+  ALL_PRESETS: {
+    label: '全部预设随机',
+    labelEn: 'All Presets',
+    brief: '从时空坐标、场域预设、空间类型和环境状态中综合抽取。',
+    briefEn: 'Sample across coordinates, field presets, space types, and environment states.',
+    blocks: spacetimeFieldUiBlocks
+  },
+  EXACT_COORDINATE: {
+    label: '精确坐标优先',
+    labelEn: 'Exact Coordinate First',
+    brief: '只固定精确时空坐标，可少量补环境状态，不同时抽场域预设。',
+    briefEn: 'Lock only an exact time-space coordinate; optionally add environment state, never field presets.',
+    blocks: ['cd_spacetime_coordinate']
+  },
+  REAL_SCENE: {
+    label: '现实场景',
+    labelEn: 'Real Scene',
+    brief: '以现实空间类型为主，辅以天气和粒子。',
+    briefEn: 'Prioritize realistic space types with atmosphere and particles.',
+    blocks: ['cd_field_preset', 'cd_scene_real', ...fieldEnvironmentStateBlocks]
+  },
+  SURREAL_SCENE: {
+    label: '超现实场景',
+    labelEn: 'Surreal Scene',
+    brief: '以超现实空间为主，允许现实锚点作为落地接口。',
+    briefEn: 'Prioritize surreal spaces, with realistic anchors as grounding interfaces.',
+    blocks: ['cd_field_preset', 'cd_scene_surreal', 'cd_scene_real', ...fieldEnvironmentStateBlocks]
+  },
+  ABSTRACT_SCENE: {
+    label: '抽象场景',
+    labelEn: 'Abstract Scene',
+    brief: '以抽象空间和象征场为主，减少现实细节。',
+    briefEn: 'Prioritize abstract spaces and symbolic fields with fewer realistic details.',
+    blocks: ['cd_field_preset', 'cd_scene_abstract', 'cd_scene_surreal', ...fieldEnvironmentStateBlocks]
+  },
+  ENVIRONMENT_STATE: {
+    label: '环境状态',
+    labelEn: 'Environment State',
+    brief: '只强化天气、大气和粒子，不改主体时空方向。',
+    briefEn: 'Strengthen weather, atmosphere, and particles without changing the main field direction.',
+    blocks: fieldEnvironmentStateBlocks
+  }
+};
 const ontologyIdentityBlocks = ['cd_age', 'cd_gender', 'cd_occupation', 'cd_persona', 'cd_emotional_core', 'cd_ethnicity', 'cd_social_aesthetic'];
 const ontologyFaceBlocks = ['cd_face_features', 'cd_makeup_style', 'cd_expression', 'cd_hair_color', 'cd_hair_style_f', 'cd_hair_style_m', 'cd_beard_style', 'cd_eye_color', 'cd_eye_shape', 'cd_eye_fx'];
 const ontologyBodyBlocks = ['cd_body_type', 'cd_skin_texture', 'cd_surface_state', 'cd_body_features', 'cd_body_markings', 'cd_body_damage', 'cd_body_modification'];
@@ -1401,7 +1528,78 @@ const humanSubjectBlocks = [
 ];
 const hiddenHumanSubjectUiBlocks = ['cd_ethnicity', 'cd_social_aesthetic'];
 const humanSubjectUiBlocks = humanSubjectBlocks.filter(blockId => !hiddenHumanSubjectUiBlocks.includes(blockId));
+const humanSubjectExclusiveSeedBlocks = ['cd_persona', 'cd_occupation'];
+const humanSubjectStyleProtocolBlocks = ['cd_style_protocol_primary', 'cd_style_protocol_secondary'];
+const humanSubjectActionStateBlocks = ['cd_static_pose', 'cd_dynamic_action', 'cd_human_behavior'];
+const humanSubjectHairStyleBlocks = ['cd_hair_style_f', 'cd_hair_style_m'];
+const humanSubjectAlwaysSingleBlocks = [
+  'cd_age',
+  'cd_gender',
+  'cd_body_type',
+  'cd_emotional_core',
+  'cd_hair_color',
+  'cd_eye_color',
+  'cd_eye_shape',
+  'cd_eye_fx',
+  'cd_makeup_style',
+  'cd_expression',
+  'cd_beard_style',
+  ...humanSubjectExclusiveSeedBlocks,
+  ...humanSubjectStyleProtocolBlocks,
+  ...humanSubjectActionStateBlocks,
+  ...humanSubjectHairStyleBlocks
+];
+const humanSubjectMultiSelectBlocks = [
+  'cd_face_features',
+  'cd_skin_texture',
+  'cd_surface_state',
+  'cd_body_features',
+  'cd_body_markings',
+  'cd_body_damage',
+  'cd_body_modification',
+  'cd_costume_logic',
+  'cd_prop_anchor',
+  'cd_symbol_system'
+];
+const humanSubjectOptionalFineBlocks = [
+  'cd_age',
+  'cd_body_type',
+  'cd_emotional_core',
+  'cd_hair_color',
+  'cd_eye_color',
+  'cd_eye_shape',
+  'cd_eye_fx',
+  'cd_face_features',
+  'cd_makeup_style',
+  'cd_expression',
+  'cd_skin_texture',
+  'cd_surface_state',
+  'cd_body_features',
+  'cd_body_markings',
+  'cd_body_damage',
+  'cd_body_modification',
+  'cd_costume_logic',
+  'cd_prop_anchor',
+  'cd_symbol_system'
+];
+const contentIntentDensityRanges: Record<ContentIntentRandomDensity, [number, number]> = {
+  RANGE_1_8: [1, 8],
+  RANGE_9_16: [9, 16],
+  RANGE_17_23: [17, 23],
+  RANGE_24_30: [24, 30],
+  RANGE_31_38: [31, 38],
+  FULL: [39, 44]
+};
+const creatureContentIntentDensityRanges: Record<ContentIntentRandomDensity, [number, number]> = {
+  RANGE_1_8: [2, 3],
+  RANGE_9_16: [4, 5],
+  RANGE_17_23: [6, 8],
+  RANGE_24_30: [9, 11],
+  RANGE_31_38: [12, 14],
+  FULL: [15, 16]
+};
 const creatureSubjectBlocks = [
+  'cd_creature_preset',
   'cd_creature_size',
   'cd_creature_class',
   'cd_creature_element',
@@ -1409,9 +1607,286 @@ const creatureSubjectBlocks = [
   'cd_creature_body',
   'cd_creature_mood',
   'cd_creature_action',
-  'cd_creature_texture',
-  ...styleProtocolBlocks
+  'cd_creature_texture'
 ];
+const creatureArchetypeBlocks = ['cd_creature_preset', 'cd_creature_class'];
+const creatureStructureBlocks = ['cd_creature_head', 'cd_creature_body', 'cd_creature_texture'];
+const creatureBehaviorBlocks = ['cd_creature_mood', 'cd_creature_action'];
+const creaturePrimaryHeadRoles = new Set<NonNullable<LibraryItemDef['creaturePartRole']>>([
+  'primary_head',
+  'cranial_structure',
+  'eldritch_head',
+  'elemental_head'
+]);
+
+const contentIntentPresets = [
+  {
+    id: 'real_worksite',
+    label: '现实职业',
+    labelEn: 'Real Worksite',
+    subjectMode: 'HUMAN' as SubjectMode,
+    subjectPrimary: ['cd_occupation', 'cd_costume_logic', 'cd_prop_anchor', 'cd_static_pose', 'cd_human_behavior'],
+    subjectSupport: ['cd_age', 'cd_gender', 'cd_expression', 'cd_face_features', 'cd_surface_state', 'cd_symbol_system'],
+    subjectLow: ['cd_hair_color', 'cd_hair_style_f', 'cd_hair_style_m', 'cd_makeup_style', 'cd_body_damage'],
+    fieldPrimary: ['cd_spacetime_coordinate', 'cd_field_preset', 'cd_scene_real'],
+    fieldSupport: ['cd_atmosphere'],
+    lightPrimary: ['cd_light_preset', 'cd_light_type'],
+    lightSupport: ['cd_light_mood', 'cd_light_direction', 'cd_light_air', 'cd_light_color_temp'],
+    keys: ['professional', 'work', 'office', 'factory', 'hospital', 'street', 'city', '职业', '工装', '现实', '制度', '工具']
+  },
+  {
+    id: 'combat_action',
+    label: '战斗行动',
+    labelEn: 'Combat Action',
+    subjectMode: 'HUMAN' as SubjectMode,
+    subjectPrimary: ['cd_dynamic_action', 'cd_static_pose', 'cd_body_damage', 'cd_prop_anchor', 'cd_costume_logic'],
+    subjectSupport: ['cd_occupation', 'cd_persona', 'cd_expression', 'cd_surface_state', 'cd_wear_trace', 'cd_symbol_system'],
+    subjectLow: ['cd_makeup_style', 'cd_hair_color', 'cd_face_features'],
+    fieldPrimary: ['cd_field_preset', 'cd_scene_real'],
+    fieldSupport: ['cd_atmosphere', 'cd_particles'],
+    lightPrimary: ['cd_light_preset', 'cd_light_mood', 'cd_light_direction'],
+    lightSupport: ['cd_light_type', 'cd_light_air', 'cd_light_shape'],
+    keys: ['combat', 'battle', 'weapon', 'tactical', 'war', 'fighter', '战斗', '武器', '战术', '伤', '冲突']
+  },
+  {
+    id: 'ritual_scene',
+    label: '仪式场面',
+    labelEn: 'Ritual Scene',
+    subjectMode: 'HUMAN' as SubjectMode,
+    subjectPrimary: ['cd_symbol_system', 'cd_costume_logic', 'cd_body_markings', 'cd_prop_anchor', 'cd_static_pose'],
+    subjectSupport: ['cd_persona', 'cd_expression', 'cd_makeup_style', 'cd_eye_color', 'cd_eye_fx'],
+    subjectLow: ['cd_body_damage', 'cd_surface_state'],
+    fieldPrimary: ['cd_field_preset', 'cd_scene_real', 'cd_scene_surreal'],
+    fieldSupport: ['cd_atmosphere', 'cd_particles'],
+    lightPrimary: ['cd_light_preset', 'cd_light_type', 'cd_light_mood'],
+    lightSupport: ['cd_light_direction', 'cd_light_air', 'cd_light_shape'],
+    keys: ['ritual', 'temple', 'altar', 'sacred', 'ceremony', 'religious', '仪式', '祭祀', '神殿', '圣物', '符号']
+  },
+  {
+    id: 'fashion_portrait',
+    label: '时装肖像',
+    labelEn: 'Fashion Portrait',
+    subjectMode: 'HUMAN' as SubjectMode,
+    subjectPrimary: ['cd_costume_logic', 'cd_body_type', 'cd_hair_color', 'cd_makeup_style', 'cd_expression'],
+    subjectSupport: ['cd_gender', 'cd_face_features', 'cd_hair_style_f', 'cd_hair_style_m', 'cd_prop_anchor', 'cd_symbol_system'],
+    subjectLow: ['cd_body_damage', 'cd_surface_state', 'cd_body_markings'],
+    fieldPrimary: ['cd_field_preset', 'cd_scene_real'],
+    fieldSupport: ['cd_scene_abstract', 'cd_atmosphere'],
+    lightPrimary: ['cd_light_preset', 'cd_light_mood', 'cd_light_type'],
+    lightSupport: ['cd_light_direction', 'cd_light_color_temp', 'cd_light_shape'],
+    keys: ['fashion', 'portrait', 'editorial', 'couture', 'studio', 'runway', '时装', '肖像', '妆容', '发型', '高定']
+  },
+  {
+    id: 'wasteland_survival',
+    label: '废土生存',
+    labelEn: 'Wasteland Survival',
+    subjectMode: 'HUMAN' as SubjectMode,
+    subjectPrimary: ['cd_surface_state', 'cd_wear_trace', 'cd_body_damage', 'cd_costume_logic', 'cd_prop_anchor'],
+    subjectSupport: ['cd_age', 'cd_expression', 'cd_body_type', 'cd_body_markings', 'cd_material_evidence'],
+    subjectLow: ['cd_makeup_style', 'cd_hair_color'],
+    fieldPrimary: ['cd_field_preset', 'cd_scene_real'],
+    fieldSupport: ['cd_atmosphere', 'cd_particles'],
+    lightPrimary: ['cd_light_preset', 'cd_light_mood', 'cd_light_air'],
+    lightSupport: ['cd_light_type', 'cd_light_direction', 'cd_light_color_temp'],
+    keys: ['wasteland', 'survival', 'dust', 'ruin', 'salvage', 'scarcity', '废土', '末世', '拾荒', '尘土', '修补']
+  },
+  {
+    id: 'scifi_experiment',
+    label: '科幻实验',
+    labelEn: 'Sci-Fi Experiment',
+    subjectMode: 'HUMAN' as SubjectMode,
+    subjectPrimary: ['cd_body_modification', 'cd_occupation', 'cd_prop_anchor', 'cd_symbol_system', 'cd_costume_logic'],
+    subjectSupport: ['cd_eye_fx', 'cd_surface_state', 'cd_body_markings', 'cd_expression', 'cd_body_type'],
+    subjectLow: ['cd_makeup_style', 'cd_hair_color'],
+    fieldPrimary: ['cd_field_preset', 'cd_scene_real', 'cd_scene_surreal'],
+    fieldSupport: ['cd_atmosphere', 'cd_particles'],
+    lightPrimary: ['cd_light_preset', 'cd_light_type', 'cd_light_color_temp'],
+    lightSupport: ['cd_light_mood', 'cd_light_direction', 'cd_light_shape'],
+    keys: ['scifi', 'cyber', 'lab', 'android', 'biotech', 'interface', '科幻', '赛博', '实验', '义体', '编号']
+  },
+  {
+    id: 'fantasy_epiphany',
+    label: '奇幻显圣',
+    labelEn: 'Fantasy Epiphany',
+    subjectMode: 'HUMAN' as SubjectMode,
+    subjectPrimary: ['cd_persona', 'cd_eye_fx', 'cd_body_markings', 'cd_symbol_system', 'cd_costume_logic'],
+    subjectSupport: ['cd_hair_color', 'cd_expression', 'cd_prop_anchor', 'cd_body_features', 'cd_makeup_style'],
+    subjectLow: ['cd_body_damage', 'cd_surface_state'],
+    fieldPrimary: ['cd_field_preset', 'cd_scene_surreal', 'cd_scene_real'],
+    fieldSupport: ['cd_atmosphere', 'cd_particles'],
+    lightPrimary: ['cd_light_preset', 'cd_light_mood', 'cd_light_type'],
+    lightSupport: ['cd_light_direction', 'cd_light_air', 'cd_light_shape'],
+    keys: ['fantasy', 'mythic', 'magic', 'divine', 'xianxia', 'wuxia', '奇幻', '仙侠', '神话', '显圣', '魔法']
+  },
+  {
+    id: 'creature_ontology',
+    label: '异种本体',
+    labelEn: 'Creature Ontology',
+    subjectMode: 'CREATURE' as SubjectMode,
+    subjectPrimary: ['cd_creature_preset', 'cd_creature_class', 'cd_creature_head', 'cd_creature_body', 'cd_creature_texture'],
+    subjectSupport: ['cd_creature_size', 'cd_creature_element', 'cd_creature_mood', 'cd_creature_action'],
+    subjectLow: [],
+    fieldPrimary: ['cd_field_preset', 'cd_scene_surreal', 'cd_scene_real'],
+    fieldSupport: ['cd_atmosphere', 'cd_particles'],
+    lightPrimary: ['cd_light_preset', 'cd_light_mood', 'cd_light_air'],
+    lightSupport: ['cd_light_type', 'cd_light_direction', 'cd_light_shape'],
+    keys: ['creature', 'monster', 'alien', 'beast', 'xeno', '异种', '怪物', '生物', '兽', '外星']
+  },
+  {
+    id: 'creature_wild_ecology',
+    label: '野性生态',
+    labelEn: 'Wild Ecology',
+    subjectMode: 'CREATURE' as SubjectMode,
+    subjectPrimary: ['cd_creature_preset', 'cd_creature_class', 'cd_creature_body', 'cd_creature_texture'],
+    subjectSupport: ['cd_creature_size', 'cd_creature_head', 'cd_creature_mood', 'cd_creature_action'],
+    subjectLow: ['cd_creature_element'],
+    fieldPrimary: ['cd_field_preset', 'cd_scene_real'],
+    fieldSupport: ['cd_atmosphere', 'cd_particles'],
+    lightPrimary: ['cd_light_preset', 'cd_light_air', 'cd_light_mood'],
+    lightSupport: ['cd_light_type', 'cd_light_direction'],
+    keys: ['wild', 'ecology', 'beast', 'predator', 'forest', 'swamp', '野性', '生态', '捕食', '兽', '巢穴']
+  },
+  {
+    id: 'creature_mythic_ritual',
+    label: '神话仪式',
+    labelEn: 'Mythic Ritual',
+    subjectMode: 'CREATURE' as SubjectMode,
+    subjectPrimary: ['cd_creature_preset', 'cd_creature_class', 'cd_creature_element', 'cd_creature_head', 'cd_creature_texture'],
+    subjectSupport: ['cd_creature_size', 'cd_creature_body', 'cd_creature_mood', 'cd_creature_action'],
+    subjectLow: [],
+    fieldPrimary: ['cd_field_preset', 'cd_scene_surreal', 'cd_scene_real'],
+    fieldSupport: ['cd_atmosphere', 'cd_particles'],
+    lightPrimary: ['cd_light_preset', 'cd_light_mood', 'cd_light_type'],
+    lightSupport: ['cd_light_direction', 'cd_light_air', 'cd_light_shape'],
+    keys: ['myth', 'ritual', 'divine', 'demon', 'altar', 'sacred', '神话', '仪式', '神兽', '恶魔', '祭坛']
+  },
+  {
+    id: 'creature_synthetic_life',
+    label: '人工生命',
+    labelEn: 'Synthetic Life',
+    subjectMode: 'CREATURE' as SubjectMode,
+    subjectPrimary: ['cd_creature_preset', 'cd_creature_class', 'cd_creature_texture', 'cd_creature_head', 'cd_creature_body'],
+    subjectSupport: ['cd_creature_size', 'cd_creature_element', 'cd_creature_mood', 'cd_creature_action'],
+    subjectLow: [],
+    fieldPrimary: ['cd_field_preset', 'cd_scene_real', 'cd_scene_surreal'],
+    fieldSupport: ['cd_atmosphere', 'cd_particles'],
+    lightPrimary: ['cd_light_preset', 'cd_light_type', 'cd_light_color_temp'],
+    lightSupport: ['cd_light_mood', 'cd_light_direction', 'cd_light_shape'],
+    keys: ['synthetic', 'machine', 'android', 'lab', 'interface', '人工', '机械', '合成', '实验室', '接口']
+  },
+  {
+    id: 'creature_cosmic_alien',
+    label: '宇宙异星',
+    labelEn: 'Cosmic Alien',
+    subjectMode: 'CREATURE' as SubjectMode,
+    subjectPrimary: ['cd_creature_preset', 'cd_creature_class', 'cd_creature_head', 'cd_creature_body', 'cd_creature_texture'],
+    subjectSupport: ['cd_creature_size', 'cd_creature_element', 'cd_creature_mood', 'cd_creature_action'],
+    subjectLow: [],
+    fieldPrimary: ['cd_field_preset', 'cd_scene_surreal', 'cd_scene_abstract'],
+    fieldSupport: ['cd_atmosphere', 'cd_particles'],
+    lightPrimary: ['cd_light_preset', 'cd_light_mood', 'cd_light_air'],
+    lightSupport: ['cd_light_type', 'cd_light_direction', 'cd_light_shape'],
+    keys: ['alien', 'cosmic', 'star', 'void', 'nebula', '外星', '宇宙', '星体', '虚空', '深空']
+  },
+  {
+    id: 'creature_undead_corruption',
+    label: '幽冥腐化',
+    labelEn: 'Undead Corruption',
+    subjectMode: 'CREATURE' as SubjectMode,
+    subjectPrimary: ['cd_creature_preset', 'cd_creature_class', 'cd_creature_texture', 'cd_creature_head', 'cd_creature_body'],
+    subjectSupport: ['cd_creature_size', 'cd_creature_mood', 'cd_creature_action', 'cd_creature_element'],
+    subjectLow: [],
+    fieldPrimary: ['cd_field_preset', 'cd_scene_surreal', 'cd_scene_real'],
+    fieldSupport: ['cd_atmosphere', 'cd_particles'],
+    lightPrimary: ['cd_light_preset', 'cd_light_mood', 'cd_light_air'],
+    lightSupport: ['cd_light_type', 'cd_light_direction', 'cd_light_shape'],
+    keys: ['undead', 'decay', 'ghost', 'bone', 'rot', '幽冥', '亡灵', '腐化', '白骨', '尸']
+  },
+  {
+    id: 'creature_elemental_disaster',
+    label: '元素灾变',
+    labelEn: 'Elemental Disaster',
+    subjectMode: 'CREATURE' as SubjectMode,
+    subjectPrimary: ['cd_creature_preset', 'cd_creature_element', 'cd_creature_body', 'cd_creature_texture'],
+    subjectSupport: ['cd_creature_size', 'cd_creature_class', 'cd_creature_head', 'cd_creature_mood', 'cd_creature_action'],
+    subjectLow: [],
+    fieldPrimary: ['cd_field_preset', 'cd_scene_surreal', 'cd_scene_abstract'],
+    fieldSupport: ['cd_atmosphere', 'cd_particles'],
+    lightPrimary: ['cd_light_preset', 'cd_light_mood', 'cd_light_air'],
+    lightSupport: ['cd_light_type', 'cd_light_direction', 'cd_light_shape'],
+    keys: ['elemental', 'fire', 'ice', 'storm', 'disaster', '元素', '火', '冰', '风暴', '灾变']
+  },
+  {
+    id: 'creature_plant_fungal',
+    label: '植物菌丝',
+    labelEn: 'Plant Fungal',
+    subjectMode: 'CREATURE' as SubjectMode,
+    subjectPrimary: ['cd_creature_preset', 'cd_creature_class', 'cd_creature_texture', 'cd_creature_body'],
+    subjectSupport: ['cd_creature_size', 'cd_creature_head', 'cd_creature_mood', 'cd_creature_action', 'cd_creature_element'],
+    subjectLow: [],
+    fieldPrimary: ['cd_field_preset', 'cd_scene_real', 'cd_scene_surreal'],
+    fieldSupport: ['cd_atmosphere', 'cd_particles'],
+    lightPrimary: ['cd_light_preset', 'cd_light_air', 'cd_light_mood'],
+    lightSupport: ['cd_light_type', 'cd_light_direction'],
+    keys: ['plant', 'fungal', 'spore', 'root', 'forest', '植物', '菌丝', '孢子', '根系', '森林']
+  },
+  {
+    id: 'creature_dream_psychic',
+    label: '梦境精神',
+    labelEn: 'Dream Psychic',
+    subjectMode: 'CREATURE' as SubjectMode,
+    subjectPrimary: ['cd_creature_preset', 'cd_creature_head', 'cd_creature_texture', 'cd_creature_mood'],
+    subjectSupport: ['cd_creature_size', 'cd_creature_class', 'cd_creature_body', 'cd_creature_action', 'cd_creature_element'],
+    subjectLow: [],
+    fieldPrimary: ['cd_scene_abstract', 'cd_scene_surreal', 'cd_field_preset'],
+    fieldSupport: ['cd_atmosphere', 'cd_particles'],
+    lightPrimary: ['cd_light_preset', 'cd_light_mood', 'cd_light_shape'],
+    lightSupport: ['cd_light_type', 'cd_light_air', 'cd_light_direction'],
+    keys: ['dream', 'psychic', 'surreal', 'mind', 'illusion', '梦境', '精神', '超现实', '幻觉', '意识']
+  },
+  {
+    id: 'creature_institutional',
+    label: '社会制度',
+    labelEn: 'Institutional Creature',
+    subjectMode: 'CREATURE' as SubjectMode,
+    subjectPrimary: ['cd_creature_preset', 'cd_creature_class', 'cd_creature_texture', 'cd_creature_mood'],
+    subjectSupport: ['cd_creature_size', 'cd_creature_head', 'cd_creature_body', 'cd_creature_action', 'cd_creature_element'],
+    subjectLow: [],
+    fieldPrimary: ['cd_field_preset', 'cd_scene_real', 'cd_scene_surreal'],
+    fieldSupport: ['cd_atmosphere', 'cd_particles'],
+    lightPrimary: ['cd_light_preset', 'cd_light_type', 'cd_light_mood'],
+    lightSupport: ['cd_light_direction', 'cd_light_air'],
+    keys: ['institution', 'hive', 'factory', 'office', 'bureaucracy', '制度', '蜂巢', '工厂', '办公室', '官僚']
+  },
+  {
+    id: 'creature_paradox_terminal',
+    label: '悖论终界',
+    labelEn: 'Paradox Terminal',
+    subjectMode: 'CREATURE' as SubjectMode,
+    subjectPrimary: ['cd_creature_preset', 'cd_creature_head', 'cd_creature_body', 'cd_creature_texture', 'cd_creature_element'],
+    subjectSupport: ['cd_creature_size', 'cd_creature_class', 'cd_creature_mood', 'cd_creature_action'],
+    subjectLow: [],
+    fieldPrimary: ['cd_scene_abstract', 'cd_scene_surreal'],
+    fieldSupport: ['cd_field_preset', 'cd_atmosphere', 'cd_particles'],
+    lightPrimary: ['cd_light_preset', 'cd_light_mood', 'cd_light_shape'],
+    lightSupport: ['cd_light_type', 'cd_light_air', 'cd_light_direction'],
+    keys: ['paradox', 'terminal', 'void', 'abstract', 'end', '悖论', '终界', '虚空', '抽象', '终末']
+  }
+] as const;
+type ContentIntentPreset = typeof contentIntentPresets[number];
+const creatureIntentTaxonomyPrefer: Record<string, CreatureTaxonomyTag[]> = {
+  creature_ontology: ['chimera', 'eldritch', 'draconic', 'mammal', 'reptilian', 'insectoid'],
+  creature_wild_ecology: ['mammal', 'avian', 'reptilian', 'aquatic', 'insectoid', 'soft_body'],
+  creature_mythic_ritual: ['draconic', 'demonic', 'divine_spirit', 'undead', 'chimera'],
+  creature_synthetic_life: ['machine', 'synthetic', 'energy_void', 'chimera'],
+  creature_cosmic_alien: ['eldritch', 'energy_void', 'soft_body', 'aquatic', 'chimera'],
+  creature_undead_corruption: ['undead', 'demonic', 'eldritch', 'swarm_parasitic'],
+  creature_elemental_disaster: ['mineral_elemental', 'energy_void', 'draconic', 'divine_spirit', 'demonic'],
+  creature_plant_fungal: ['plant_fungal', 'swarm_parasitic', 'soft_body', 'chimera'],
+  creature_dream_psychic: ['eldritch', 'energy_void', 'divine_spirit', 'synthetic', 'chimera'],
+  creature_institutional: ['swarm_parasitic', 'machine', 'synthetic', 'chimera', 'mammal'],
+  creature_paradox_terminal: ['eldritch', 'energy_void', 'synthetic', 'divine_spirit', 'chimera']
+};
 
 const allBlocks: NarrativeBlockDef[] = CONCEPT_ENGINE_BLOCKS;
 const allLibraries = CONCEPT_ENGINE_LIBRARY;
@@ -1609,81 +2084,81 @@ const getBodyFormBrief = (mode: BodyFormMode, lang: SkillLanguage) => {
 const getCompileTaskContract = (mode: SourceMode, lang: SkillLanguage) => {
   if (mode === 'ARTICLE') {
     return lang === 'CN'
-      ? `你是完整角色画面提示词编辑。请从文章/故事中只提取用户指定的人物或异种，并编译成“内容主体 / Content Core Pack”的十个变量槽。
+      ? `你是图像内容主体提示词编辑。请从文章 / 故事中只提取用户指定的人物或异种，并编译成下方定义的“内容主体 / Content Core Pack”变量槽。
 
-目标：把文本原料整理成清楚、可执行、版权安全的单张角色画面对象包。`
-      : `You are a complete character-image prompt editor. Extract only the user-specified character or creature from the article/story and compile it into ten Content Core Pack variable slots.
+目标：把文本原料整理成一组清楚、可执行、互相一致、版权安全的画面内容变量，而不是把原文片段或词条列表直接拼接成提示词。`
+      : `You are an image content-core prompt editor. Extract only the user-specified character or creature from the article/story and compile it into the Content Core Pack variable slots defined below.
 
-Goal: turn the text material into a clear, executable, copyright-safe object pack for one complete character image.`;
+Goal: turn the text material into a clear, executable, internally consistent, copyright-safe set of image-content variables, not a direct concatenation of source excerpts or term lists.`;
   }
   if (mode === 'IMAGE') {
     return lang === 'CN'
-      ? `你是完整角色画面反推编辑。请根据上传参考图和人工纠偏，反推出“内容主体 / Content Core Pack”的十个变量槽。
+      ? `你是图像内容主体反推编辑。请根据上传参考图和人工纠偏，反推出下方定义的“内容主体 / Content Core Pack”变量槽。
 
-目标：保留参考图中真实可见的主体、媒介、风格和细节，不擅自增加图中没有的武器、配饰、logo 或道具。`
-      : `You are a complete character-image reverse-analysis editor. Infer ten Content Core Pack variable slots from the uploaded reference image and manual correction.
+目标：保留参考图中真实可见的主体、媒介、风格和细节，并整理成清楚、可执行、互相一致的画面内容变量；不要擅自增加图中没有的武器、配饰、logo 或道具。`
+      : `You are an image content-core reverse-analysis editor. Infer the Content Core Pack variable slots defined below from the uploaded reference image and manual correction.
 
-Goal: preserve the visible subject, medium, style, and details from the reference image without inventing weapons, accessories, logos, or props not shown.`;
+Goal: preserve the visible subject, medium, style, and details from the reference image and organize them into clear, executable, internally consistent image-content variables; do not invent weapons, accessories, logos, or props not shown.`;
   }
   return lang === 'CN'
-    ? `你是图像内容主体提示词编辑。请根据用户输入或词库原料，生成“内容主体 / Content Core Pack”的十个变量槽。
+    ? `你是图像内容主体提示词编辑。请根据用户输入、词库原料和人工补充，生成下方定义的“内容主体 / Content Core Pack”变量槽。
 
 目标：把松散灵感、词条和定义整理成一组清楚、可执行、互相一致的画面内容变量，而不是把词条列表直接拼接成提示词。`
-    : `You are an image content-core prompt editor. Generate the ten Content Core Pack variable slots from the user's input or selected lexicon material.
+    : `You are an image content-core prompt editor. Generate the Content Core Pack variable slots defined below from the user's input, selected lexicon material, and manual supplements.
 
 Goal: turn loose ideas, terms, and definitions into a clear, executable, internally consistent set of image-content variables, not a direct concatenation of term lists.`;
 };
 
 const variableDefinitionTextByKey: Record<keyof SkillVariables, { cn: string; en: string }> = {
   characterSeed: {
-    cn: '目标：确定画面主体是谁 / 是什么。\n写主体核心身份、社会位置或功能、文化场域、第一识别矛盾和一句设计抓手；不要写长故事，不要列词条。',
-    en: 'Goal: define who / what the image subject is.\nWrite core identity, social position or function, cultural field, primary recognizable contradiction, and one design hook; do not write a long story or list terms.'
+    cn: '任务：锁定主体是谁，处在什么社会 / 叙事位置。\n要素：身份类型、职业 / 阶层、角色气质、关系位置。\n边界：不写身体结构，不写服装细节，不替 C02 / C10 做事。\n目标：让 AI 一眼知道“这个角色是什么人”。',
+    en: 'Task: lock who the subject is and what social / narrative position it occupies.\nElements: identity type, profession / class, character temperament, relationship position.\nBoundary: do not write body structure, costume detail, or do the work of C02 / C10.\nGoal: let the AI immediately understand what kind of character this is.'
   },
   ageBodyType: {
-    cn: '目标：确定身体或本体如何承载主体。\n写年龄感、身体类型、比例、姿态、身体存在感；非人主体可写 anatomy。',
-    en: 'Goal: define how the body or ontology carries the subject.\nWrite age impression, body type, proportions, posture, and physical presence; for non-human subjects, write anatomy.'
+    cn: '任务：锁定主体的身体形态、本体结构和身体特征。\n要素：人形 / 异种、年龄质感、性别气质、体态、身体结构、身体异常。\n边界：不写社会身份，不写场景，不写镜头。\n目标：让角色的身体成立。',
+    en: 'Task: lock the subject’s body form, ontology, and physical traits.\nElements: humanoid / creature form, age texture, gender aura, physique, body structure, body anomaly.\nBoundary: do not write social identity, scene, or camera language.\nGoal: make the character’s body feel established.'
   },
   timeSpaceScene: {
-    cn: '目标：确定主体存在于什么世界或场域。\n写时代、地理、空间类型、社会制度、技术边界、文化接口和场域压力；不要替代主体身份。',
-    en: 'Goal: define what world or field the subject exists in.\nWrite era, geography, spatial type, social system, technology boundary, cultural interface, and field pressure; do not replace subject identity.'
+    cn: '任务：锁定角色属于什么时代、空间和世界状态。\n要素：时代锚点、空间类型、现实 / 超现实等级、场域秩序。\n边界：不写具体动作，不写镜头构图，不写视觉风格。\n目标：让角色不悬空，知道他 / 它来自哪里。',
+    en: 'Task: lock the era, space, and world condition the character belongs to.\nElements: era anchor, spatial type, realism / surrealism level, field order.\nBoundary: do not write concrete action, composition, or visual style.\nGoal: keep the character from floating without context.'
   },
   actionMoment: {
-    cn: '目标：确定这张图正在发生什么。\n写主体正在做什么、冲突瞬间、情绪动作、主体/环境关系和画面值得被观看的原因；即使动作很轻，也必须是单张画面中的真实状态，不要写成多视图展示说明。',
-    en: 'Goal: define what is happening in the image.\nWrite what the subject is doing, conflict beat, emotional action, subject/environment relation, and why the image is worth viewing; even if the action is subtle, it must be a real state inside one image, not a multi-view display note.'
+    cn: '任务：锁定角色此刻正在做什么，身体处于什么状态。\n要素：姿态、动作、行为目的、运动强度、瞬间状态。\n边界：不写剧情长线，不写复杂故事，不替输出模板安排分镜。\n目标：让角色不是静态词条，而是正在发生。',
+    en: 'Task: lock what the character is doing now and what state the body is in.\nElements: pose, action, behavioral purpose, motion intensity, instant state.\nBoundary: do not write long plot, complex story, or storyboard layout for the output template.\nGoal: make the character feel actively present, not like a static term.'
   },
   visualMedium: {
-    cn: '目标：确定图像由什么物理媒介、成像系统或制作方式生成。\n优先写“质”：摄影系统、胶片/数码、绘画媒介、CGI 管线、实体手作材料；可以带少量成像语法，但不能用导演风格替代媒介底座。',
-    en: 'Goal: define the physical medium, imaging system, or production method.\nPrioritize material/quality: camera system, film/digital capture, painting medium, CGI pipeline, tangible craft material; a little imaging grammar is allowed, but auteur/director style must not replace the medium base.'
+    cn: '任务：锁定图像以什么成像媒介呈现。\n要素：摄影、绘画、CGI、动画、实体模型、混合媒介。\n边界：不写导演风格，不写色彩方案，不写光影细节。\n目标：决定画面“像什么媒介做出来”。',
+    en: 'Task: lock the imaging medium used to present the image.\nElements: photography, painting, CGI, animation, tangible model, mixed media.\nBoundary: do not write director style, color plan, or lighting detail.\nGoal: decide what medium the image appears to be made from.'
   },
   style: {
-    cn: '目标：确定画面的审美气质。\n写魂、风格参考、观看关系、材料气质和整体情绪；不要把具体服装、道具、器官、发型、构图、光影或完整配色表都塞进这里。',
-    en: "Goal: define the image's aesthetic mood.\nWrite soul, style reference, viewing relation, material mood, and overall emotion; do not stuff concrete clothing, props, organs, hair, composition, lighting, or a full color plan into this slot."
+    cn: '任务：锁定画面的审美来源、风格体系和艺术气质。\n要素：风格流派、导演感、美术系统、文化审美、形式倾向。\n边界：不重复媒介，不替 C07 / C09 写颜色和光。\n目标：决定画面“像哪种审美系统”。',
+    en: 'Task: lock the image’s aesthetic source, style system, and artistic temperament.\nElements: style school, auteur feeling, art-direction system, cultural aesthetic, formal tendency.\nBoundary: do not repeat medium or write color and light for C07 / C09.\nGoal: decide what aesthetic system the image belongs to.'
   },
   paletteStrategy: {
-    cn: '目标：确定整张图的色彩秩序。\n写主色、辅色、点缀色、背景色倾向、材质色、肤色/物体色关系、光色冷暖和禁用色。必须与时空场域、视觉媒介、审美风格、光影氛围保持一致，不得单独生成一套脱节色板。',
-    en: 'Goal: define the color order of the whole image.\nWrite main color, secondary color, accent color, background color tendency, material color, skin/object color relation, light color temperature, and forbidden colors. It must stay consistent with time-space field, visual medium, aesthetic style, and lighting atmosphere; do not generate a detached color palette.'
+    cn: '任务：锁定画面的颜色关系和主色逻辑。\n要素：主色、辅色、对比关系、饱和度、色彩情绪。\n边界：不写光源，不写阴影，不写材质反光。\n目标：让画面色彩有明确方向，而不是随机漂亮。',
+    en: 'Task: lock the image’s color relationship and main color logic.\nElements: main color, secondary color, contrast relation, saturation, color mood.\nBoundary: do not write light source, shadow, or material reflection.\nGoal: give the image a clear color direction instead of random prettiness.'
   },
   compositionScene: {
-    cn: '目标：确定这张图如何观看主体。\n写景别、角度、镜头距离、取景、主体位置、背景占比、空间层次和画面组织；不要替代视觉媒介。',
-    en: 'Goal: define how the image views the subject.\nWrite shot size, angle, lens distance, framing, subject placement, background ratio, spatial depth, and image organization; do not replace visual medium.'
+    cn: '任务：锁定观看关系和画面组织方式。\n要素：景别、视角、主体占比、画面重心、空间层次、运动方向。\n边界：不写身份板 / 三视图 / 宫格排版，那属于终稿层。\n目标：决定观众如何看见这个角色。',
+    en: 'Task: lock the viewing relationship and image organization.\nElements: shot size, angle, subject ratio, visual center, spatial layers, motion direction.\nBoundary: do not write identity-board, turnaround, or grid layout; that belongs to the final-output layer.\nGoal: decide how the viewer sees the character.'
   },
   lightingAtmosphere: {
-    cn: '目标：确定光如何塑造画面。\n写光源、明暗关系、空气感、天气、时间感和情绪压强；如果当前模板不需要强光影，可保持克制。',
-    en: 'Goal: define how light shapes the image.\nWrite light source, contrast, air quality, weather, time feeling, and emotional pressure; keep it restrained if the current template does not need strong lighting.'
+    cn: '任务：锁定光从哪里来，如何塑造角色和空间气氛。\n要素：光源、明暗、方向、阴影、空气介质、色温。\n边界：不重复色彩策略，不替 C06 写风格名。\n目标：让角色被某种光影逻辑包住。',
+    en: 'Task: lock where light comes from and how it shapes the character and space.\nElements: light source, contrast, direction, shadow, air medium, color temperature.\nBoundary: do not repeat palette strategy or write style names for C06.\nGoal: wrap the character in a clear lighting logic.'
   },
   otherDetails: {
-    cn: '目标：收纳所有具体设计证据。\n写服装、道具、妆发、材料、面部特征、身体标记、限制、身份备注和环境物证。色彩可以作为证据出现，但必须服从 paletteStrategy。',
-    en: 'Goal: hold all concrete design evidence.\nWrite outfit, props, makeup/hair, materials, facial features, body marks, constraints, identity notes, and environmental evidence. Colors may appear as evidence, but must obey paletteStrategy.'
+    cn: '任务：锁定哪些可见细节证明前面设定成立。\n要素：服装、道具、符号、磨损、标记、材料、接口、局部证据。\n边界：不重新讲身份，不堆装饰词，只保留能被看见的证据。\n目标：防止角色空泛、漂移、只剩概念。',
+    en: 'Task: lock which visible details prove the previous settings.\nElements: outfit, props, symbols, wear, marks, materials, interfaces, local evidence.\nBoundary: do not retell identity or pile decorative words; keep only visible evidence.\nGoal: prevent the character from becoming vague, drifting, or purely conceptual.'
   }
 };
 
 const getFiveVariableDefinitionContract = (lang: SkillLanguage, slots: VariableSlotMeta[] = variableMeta) => {
   const safeSlots = slots;
   const intro = lang === 'CN'
-    ? `内容主体 / Content Core Pack 的当前变量槽：
-这些变量用于定义一张图像的核心生成对象。当前只生成已开启槽位；关闭的槽位不要输出、不要补写。请把输入材料分别编译进对应槽位，不要把词条列表直接拼接成提示词。`
-    : `Current Content Core Pack variable slots:
-These variables define the core generation object for a single image. Generate only enabled slots; do not output or compensate for disabled slots. Compile each input material into the matching slot; do not directly concatenate term lists into a prompt.`;
+    ? `内容变量任务定义 / Content Core Pack：
+请把输入内容整理成下面这些 C 槽。每个 C 槽都说明了它负责什么、必须收束什么、不能写什么；只写本节列出的 C 槽，不要额外发明新槽位。`
+    : `Content Variable Task Definitions / Content Core Pack:
+Organize the input material into the C slots below. Each C slot defines what it is responsible for, what it must tighten, and what it must not write; write only the C slots listed in this section and do not invent extra slots.`;
   const body = safeSlots.map((slot, index) => {
     const text = variableDefinitionTextByKey[slot.key][lang === 'CN' ? 'cn' : 'en'];
     const label = lang === 'CN' ? `${slot.key} / ${slot.label}` : `${slot.key} / ${slot.labelEn}`;
@@ -1701,7 +2176,8 @@ const getCompileInputRouterSections = (
   mediumInstruction: string,
   styleCostumeConflictProtocol: string,
   actionMotifProtocol: string,
-  stripRuleHeading: (body: string) => string
+  stripRuleHeading: (body: string) => string,
+  strictInputFidelity = false
 ) => {
   const sourceModeLabel = lang === 'CN'
     ? (mode === 'ARTICLE' ? '文章/故事提取' : mode === 'IMAGE' ? '参考图反推' : mode === 'PRESET' ? '词库预设汇总' : '用户自由输入')
@@ -1711,6 +2187,9 @@ const getCompileInputRouterSections = (
   const mediumRule = stripRuleHeading(mediumInstruction);
   const formRule = stripRuleHeading(styleCostumeConflictProtocol);
   const actionRule = actionMotifProtocol ? stripRuleHeading(actionMotifProtocol) : '';
+  const strictContentFidelityRule = lang === 'CN'
+    ? `\n- 严格保真开启：输入中的具体名词、可见物件、身体特征、服装结构、道具、标记、损耗和材料不得被抽象形容词吞掉；必须进入最合适的 C 槽。需要压缩时只能合并同类项，不能无声删除关键视觉证据。\n- C10 过满时，按面部、发肤、服装、道具、标记 / 材料 / 损耗分组压缩，不要概括成“细节丰富”。`
+    : `\n- Strict fidelity is on: concrete nouns, visible objects, body traits, garment structures, props, marks, wear, and materials from the input must not be swallowed by abstract adjectives; place them into the most suitable C slot. When compression is needed, merge similar items instead of silently deleting key visual evidence.\n- If C10 becomes crowded, compress by face, hair/skin, costume, props, and marks / materials / wear; do not summarize it as "rich details".`;
 
   return lang === 'CN'
     ? [
@@ -1772,14 +2251,24 @@ ${imageReferenceNote ? `\n\n【参考图规则】\n${imageReferenceNote}` : ''}`
 协议：细节必须服务主体、事件和场域，不得堆砌成无主列表；每个保留细节都要能解释为身体证据、服装结构、道具关系、身份制度、材料痕迹或环境物证；色彩细节必须服从 C07；光影细节必须服从 C09。`
       },
       {
-        id: 'compile_input_general_protocol',
-        title: 'M01.6 通用协议',
-        titleEn: 'M01.6 General Compile Protocol',
+        id: 'compile_execution_protocol',
+        title: 'M02 编译执行协议',
+        titleEn: 'M02 Compile Execution Protocol',
         text: `- 不要平铺拼接输入来源；先判断每条信息属于哪个模块，再写入对应 C 槽。
 - 不要把来源顺序当成画面顺序；画面顺序由 C01-C10 的职责决定。
-- 不要让风格覆盖主体；不要让细节覆盖统摄目标；不要让媒介底座替代具体内容。
 - 冲突时按重点模块优先级裁决，并把弱化信息转译为痕迹、材质、背景压力、服装接口、道具关系或局部证据。
-- 输出必须像一张已经完成整合的角色画面 brief，而不是随机词条审计表。`
+- 缺失内容可以留空或保持克制，不要为了填满槽位而硬编。`
+      },
+      {
+        id: 'compile_content_protocol',
+        title: 'M04 内容约束协议',
+        titleEn: 'M04 Content Constraint Protocol',
+        text: `当前保真模式：${strictInputFidelity ? '严格保真，具体可见词条必须归位。' : '宽松编译，允许合并、概括和清理重复信息。'}
+- 每个 C 槽必须形成清楚的画面判断，不输出词条清单。
+- 优先使用可见、可画、可验证的细节，少用抽象形容词。
+- 不要让风格覆盖主体；不要让细节覆盖统摄目标；不要让媒介底座替代具体内容。
+- C01-C10 之间不得互相打架；重复内容只保留在最合适的槽位。
+- 输出必须像一张已经完成整合的角色画面 brief，而不是随机词条审计表。${strictInputFidelity ? strictContentFidelityRule : ''}`
       }
     ]
     : [
@@ -1841,14 +2330,24 @@ Role: mainly feeds C10 Design Evidence, and may reinforce C01-C09.
 Protocol: details must serve the subject, event, and field; do not pile them into an ownerless list. Every retained detail must work as body evidence, garment structure, prop relation, identity institution, material trace, or environmental evidence. Color details must obey C07; lighting details must obey C09.`
       },
       {
-        id: 'compile_input_general_protocol',
-        title: 'M01.6 通用协议',
-        titleEn: 'M01.6 General Compile Protocol',
+        id: 'compile_execution_protocol',
+        title: 'M02 编译执行协议',
+        titleEn: 'M02 Compile Execution Protocol',
         text: `- Do not concatenate input sources. First classify each piece of information, then write it into the matching C slot.
 - Do not treat source order as image order; image order is decided by C01-C10 responsibilities.
-- Do not let style override subject; do not let details override the steering goal; do not let medium base replace concrete content.
 - When inputs conflict, judge by the priority layer and translate weaker inputs into traces, materials, background pressure, garment interfaces, prop relations, or local evidence.
-- The output must read like an integrated character-image brief, not a random-term audit table.`
+- Missing content may stay empty or restrained; do not invent material just to fill a slot.`
+      },
+      {
+        id: 'compile_content_protocol',
+        title: 'M04 内容约束协议',
+        titleEn: 'M04 Content Constraint Protocol',
+        text: `Current fidelity mode: ${strictInputFidelity ? 'strict fidelity; concrete visible terms must be placed.' : 'loose compilation; merging, summarizing, and cleaning repeated information are allowed.'}
+- Each C slot must form a clear image judgement, not a term list.
+- Prefer visible, drawable, verifiable details over abstract adjectives.
+- Do not let style override subject; do not let details override the steering goal; do not let medium base replace concrete content.
+- C01-C10 must not contradict each other; repeated content should remain only in the most suitable slot.
+- The output must read like an integrated character-image brief, not a random-term audit table.${strictInputFidelity ? strictContentFidelityRule : ''}`
       }
     ];
 };
@@ -1928,7 +2427,8 @@ const getVariableOutputSchema = (promptLang: SkillLanguage, slots: VariableSlotM
     ? `必须只输出能被 JSON.parse 直接解析的合法 JSON，不要 markdown，不要解释。
 硬性格式规则：CN 对象结束后必须用英文逗号再写 EN；所有字符串内部的英文双引号必须写成 \\"；不要尾随逗号；不要在 JSON 外输出任何文字。
 长度规则：每个字段只写 1 句；中文每个字段不超过 120 个汉字，英文每个字段不超过 90 个单词；不要解释推理过程。
-每一次都同时填写中文 CN 和英文 EN 两套变量；只输出当前开启字段：
+内容规则：字段必须严格对应上方“内容变量任务定义 / Content Core Pack”列出的 C 槽；不要新增字段，不要遗漏本格式中的字段。
+每一次都同时填写中文 CN 和英文 EN 两套变量：
 {
   "CN": {
 ${cnFields}
@@ -1940,7 +2440,8 @@ ${enFields}
     : `Output only valid JSON that JSON.parse can parse directly. No markdown, no explanation.
 Hard format rules: after the CN object, write an English comma before EN; escape every double quote inside string values as \\"; no trailing commas; no text outside JSON.
 Length rules: each field must be exactly one sentence; each Chinese field must be under 120 Chinese characters, each English field under 90 words; do not explain reasoning.
-Always fill both CN and EN variable sets; output only currently enabled fields:
+Content rules: fields must strictly match the C slots listed above in "Content Variable Task Definitions / Content Core Pack"; do not add fields and do not omit fields shown in this schema.
+Always fill both CN and EN variable sets:
 {
   "CN": {
 ${cnFields}
@@ -2837,7 +3338,8 @@ const buildConceptGenerationInstructionSections = (
   sourceIdeaOverride?: string,
   includeActionMotif = false,
   worldLawMode: RegisterRandomMode = 'LAW_L2',
-  variableSlots: VariableSlotMeta[] = variableMeta
+  variableSlots: VariableSlotMeta[] = variableMeta,
+  strictInputFidelity = false
 ): CharacterIdentityBoardPromptSection[] => {
   const emptyIdea = promptLang === 'CN' ? '等待输入灵感元素。' : 'Waiting for idea elements.';
   const emptyArticle = promptLang === 'CN' ? '等待粘贴文章、故事或设定文本。' : 'Waiting for article, story, or setting text.';
@@ -2906,7 +3408,8 @@ ${guidance}`;
     mediumInstruction,
     styleCostumeConflictProtocol,
     actionMotifProtocol,
-    stripRuleHeading
+    stripRuleHeading,
+    strictInputFidelity
   );
 
   const sections: Array<Omit<CharacterIdentityBoardPromptSection, 'color'>> = [
@@ -2940,8 +3443,8 @@ ${guidance}`;
   sections.push(
     {
       id: 'compile_output_schema',
-      title: 'M10 输出格式',
-      titleEn: 'M10 Output Schema',
+      title: 'M90 输出格式',
+      titleEn: 'M90 Output Schema',
       text: outputSchema
     }
   );
@@ -2965,6 +3468,7 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
   onConceptRuntimeChange,
   onConceptGlobalRandomizeReady,
   conceptWorkspacePage = 'ENGINE',
+  onConceptWorkspacePageChange,
   isAdmin = false,
   onAddCustomDef,
 }) => {
@@ -2975,8 +3479,8 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
   const [promptLang, setPromptLang] = useState<SkillLanguage>(lang === 'EN' ? 'EN' : 'CN');
   const [sourceMode, setSourceMode] = useState<SourceMode>('PRESET');
   const [promptTemplateMode, setPromptTemplateMode] = useState<PromptTemplateMode>('CHARACTER_BOARD');
-  const [templateWorkspaceView, setTemplateWorkspaceView] = useState<TemplateWorkspaceView>('PARAMS');
   const [isPromptTemplateLibraryOpen, setIsPromptTemplateLibraryOpen] = useState(false);
+  const [strictInputFidelity, setStrictInputFidelity] = useState(false);
   const [objectRoute, setObjectRoute] = useState<ObjectRouteId>('HUMAN');
   const [humanRegister, setHumanRegister] = useState<HumanRegisterId>('REALISTIC');
   const [registerRandomMode, setRegisterRandomMode] = useState<RegisterRandomMode>('LAW_L2');
@@ -3027,6 +3531,7 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
     allowHighSaturation: true
   });
   const [visualStyleRandomDensity, setVisualStyleRandomDensity] = useState<VisualStyleRandomDensity>('BALANCED');
+  const [visualStyleSoulBlendMode, setVisualStyleSoulBlendMode] = useState<VisualStyleSoulBlendMode>('PURE');
   const [lastFramingPreset, setLastFramingPreset] = useState<FramingRandomPreset | null>(null);
   const [framingRandomPresetRoute, setFramingRandomPresetRoute] = useState<FramingRandomPresetRoute>('ALL_PRESETS');
   const [isFramingPresetPanelOpen, setIsFramingPresetPanelOpen] = useState(false);
@@ -3055,8 +3560,20 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
   });
   const [linkedRandomPresetRoute, setLinkedRandomPresetRoute] = useState<LinkedRandomPresetRoute>('controlled_fusion');
   const [linkedRandomDensity, setLinkedRandomDensity] = useState<ConceptLinkedRandomDensity>('BALANCED');
+  const [contentIntentRandomDensity, setContentIntentRandomDensity] = useState<ContentIntentRandomDensity>('RANGE_17_23');
   const [linkedRandomConflictPolicy, setLinkedRandomConflictPolicy] = useState<ConceptLinkedRandomConflictPolicy>('TRANSLATE');
   const [lastLinkedRandomPreset, setLastLinkedRandomPreset] = useState<ConceptLinkedRandomPreset | null>(null);
+  const [contentIntentRoute, setContentIntentRoute] = useState<ContentIntentRoute>('AUTO');
+  const [lastContentIntentPreset, setLastContentIntentPreset] = useState<ContentIntentPreset | null>(null);
+  const [isContentIntentPanelOpen, setIsContentIntentPanelOpen] = useState(false);
+  const [spacetimeFieldRandomRoute, setSpacetimeFieldRandomRoute] = useState<SpacetimeFieldRandomRoute>('ALL_PRESETS');
+  const [spacetimeFieldRandomDensity, setSpacetimeFieldRandomDensity] = useState<SpacetimeFieldRandomDensity>('BALANCED');
+  const [lastSpacetimeFieldRoute, setLastSpacetimeFieldRoute] = useState<SpacetimeFieldRandomRoute | null>(null);
+  const [isSpacetimeFieldRandomPanelOpen, setIsSpacetimeFieldRandomPanelOpen] = useState(false);
+  const [lightingAtmosphereRandomRoute, setLightingAtmosphereRandomRoute] = useState<LightingAtmosphereRandomRoute>('ALL_PRESETS');
+  const [lightingAtmosphereRandomDensity, setLightingAtmosphereRandomDensity] = useState<LightingAtmosphereRandomDensity>('BALANCED');
+  const [lastLightingAtmosphereRoute, setLastLightingAtmosphereRoute] = useState<LightingAtmosphereRandomRoute | null>(null);
+  const [isLightingAtmosphereRandomPanelOpen, setIsLightingAtmosphereRandomPanelOpen] = useState(false);
 
   useEffect(() => {
     const patch: NarrativeFieldState = {};
@@ -3281,22 +3798,13 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
     ].join('\n');
   }, [activeVariableMeta, promptLang, variables]);
   const activeTemplateCard = promptTemplateCards.find(card => card.id === promptTemplateMode) || promptTemplateCards[0];
-  const activeTemplateWorkspaceTitle = templateWorkspaceView === 'PROMPT'
-    ? t(lang, 'M10 终稿协议', 'M10 Final Protocol')
-    : templateWorkspaceView === 'VARIABLES'
-      ? t(lang, '编译结果', 'Compile Result')
-    : templateWorkspaceView === 'COMPILE'
-      ? t(lang, 'M10 编译律令', 'M10 Compile Edict')
-      : isPerformanceStoryboardTemplate
-        ? t(lang, '表演分镜变量', 'Storyboard Variables')
-        : t(lang, `${activeTemplateCard.label.replace(/^T\d+\s*/, '')}参数`, `${activeTemplateCard.labelEn.replace(/^T\d+\s*/, '')} Parameters`);
-  const activeTemplateWorkspaceKicker = templateWorkspaceView === 'PROMPT'
-    ? 'Final Edict'
-    : templateWorkspaceView === 'VARIABLES'
-      ? 'Compile Result'
-    : templateWorkspaceView === 'COMPILE'
-      ? 'Variable Translation Edict'
-      : 'Template Parameters';
+  const activeTemplateWorkspaceView: TemplateWorkspaceView = conceptWorkspacePage === 'COMPILE'
+    ? 'COMPILE'
+    : conceptWorkspacePage === 'RESULT'
+      ? 'VARIABLES'
+      : conceptWorkspacePage === 'FINAL'
+        ? 'PROMPT'
+        : 'PARAMS';
   const togglePromptModule = useCallback((id: string) => {
     setDisabledPromptModuleIds(prev => (
       prev.includes(id)
@@ -3327,10 +3835,10 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
 
   const panelClass = isRetro
     ? 'border-[#85411B]/22 bg-[#EFE9E0]/82 text-[#24170f]'
-    : 'border-orange-500/25 bg-black text-zinc-200';
+    : 'border-white/[0.07] bg-black text-zinc-200';
   const softPanelClass = isRetro
     ? 'border-[#85411B]/14 bg-white/32'
-    : 'border-orange-500/18 bg-black';
+    : 'border-white/[0.075] bg-black';
   const mutedText = isRetro ? 'text-[#85411B]/70' : 'text-zinc-500';
   const strongText = isRetro ? 'text-[#4b2b14]' : 'text-orange-100';
   const accentText = isRetro ? 'text-[#85411B]' : 'text-orange-300';
@@ -3342,17 +3850,41 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
     : 'rgba(255, 255, 255, 0.055)';
   const miniSwitchClass = isRetro
     ? 'border-[#85411B]/18 bg-transparent'
-    : 'border-orange-500/20 bg-black';
+    : 'border-white/[0.075] bg-black';
   const topActionButtonClass = `mist-concept-top-action-button flex h-10 shrink-0 items-center gap-2 rounded-md border bg-transparent px-3.5 text-[12px] font-black uppercase tracking-[0.08em] transition-all ${
     isRetro
       ? 'border-[#85411B]/22 text-[#85411B] hover:border-[#85411B]/48 hover:bg-[#85411B]/8'
-      : 'border-orange-500/22 text-zinc-500 hover:border-orange-500/60 hover:bg-orange-500/10 hover:text-orange-100'
+      : 'border-white/[0.09] text-zinc-500 hover:border-orange-500/34 hover:bg-orange-500/8 hover:text-orange-100'
   }`;
   const compactTopActionButtonClass = `mist-concept-top-action-button flex h-8 shrink-0 items-center gap-1.5 rounded-md border bg-transparent px-2 text-[10px] font-black uppercase tracking-[0.06em] transition-all ${
     isRetro
       ? 'border-[#85411B]/22 text-[#85411B] hover:border-[#85411B]/48 hover:bg-[#85411B]/8'
-      : 'border-orange-500/22 text-zinc-500 hover:border-orange-500/60 hover:bg-orange-500/10 hover:text-orange-100'
+      : 'border-white/[0.09] text-zinc-500 hover:border-orange-500/34 hover:bg-orange-500/8 hover:text-orange-100'
   }`;
+  const renderPromptLangToggleButton = () => (
+    <button
+      type="button"
+      onClick={() => {
+        setPromptLang(prev => (prev === 'CN' ? 'EN' : 'CN'));
+        setCopied(false);
+      }}
+      className={`${compactTopActionButtonClass} justify-center`}
+      title={t(lang, '切换终稿语言', 'Switch prompt language')}
+    >
+      <span>{promptLang === 'CN' ? '中' : 'E'}</span>
+    </button>
+  );
+  const renderPromptCopyButton = (onCopy: () => void) => (
+    <button
+      type="button"
+      onClick={onCopy}
+      className={`${compactTopActionButtonClass} justify-center`}
+      title={t(lang, '复制当前内容', 'Copy current content')}
+    >
+      {copied ? <Check size={13} /> : <Copy size={13} />}
+      <span>{t(lang, '复制', 'Copy')}</span>
+    </button>
+  );
   const variableSlotSwitchButtonClass = (enabled: boolean) => `flex min-h-[36px] min-w-0 items-center gap-2 rounded-md border px-2 text-left text-[10px] font-black uppercase tracking-[0.05em] transition-transform duration-150 ease-out hover:scale-[1.015] active:scale-[0.985] ${
     enabled
       ? isRetro
@@ -3444,6 +3976,89 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
   const paramsSubcardMetaClass = `text-[12px] leading-5 ${mutedText}`;
   const randomPanelTopButtonClass = `flex h-7 shrink-0 items-center justify-center gap-1 rounded border px-2 text-[11px] font-black tracking-[0.04em] transition-all ${isRetro ? 'border-[#85411B]/18 text-[#85411B]/70 hover:bg-[#85411B]/8 hover:text-[#85411B]' : 'border-zinc-700 bg-transparent text-zinc-500 hover:border-orange-500/40 hover:bg-orange-500/10 hover:text-orange-200'}`;
   const randomPanelTopIconButtonClass = `flex h-7 w-7 shrink-0 items-center justify-center rounded border transition-all ${isRetro ? 'border-[#85411B]/18 text-[#85411B]/70 hover:bg-[#85411B]/8 hover:text-[#85411B]' : 'border-zinc-700 bg-transparent text-zinc-500 hover:border-orange-500/40 hover:bg-orange-500/10 hover:text-orange-200'}`;
+  const renderRandomPanelSectionTitle = (title: string, titleEn: string, meta: string, metaEn: string) => (
+    <div className={`flex items-center justify-between gap-3 text-[12px] font-black tracking-[0.04em] ${strongText}`}>
+      <span>{t(lang, title, titleEn)}</span>
+      <span className={`text-[10px] uppercase tracking-[0.12em] ${mutedText}`}>{t(lang, meta, metaEn)}</span>
+    </div>
+  );
+  const renderRandomPanelSection = (
+    title: string,
+    titleEn: string,
+    meta: string,
+    metaEn: string,
+    children: React.ReactNode,
+    contentClassName = 'mt-2'
+  ) => (
+    <section className={`rounded-md border p-2.5 ${isRetro ? 'border-[#85411B]/12 bg-white/22' : 'border-white/[0.06] bg-zinc-950/55'}`}>
+      {renderRandomPanelSectionTitle(title, titleEn, meta, metaEn)}
+      <div className={contentClassName}>{children}</div>
+    </section>
+  );
+  const renderRandomConfigPanel = (
+    title: string,
+    titleEn: string,
+    description: string,
+    descriptionEn: string,
+    onRandom: () => void,
+    onClose: () => void,
+    randomTitle: string,
+    children: React.ReactNode
+  ) => {
+    const panelStyle = {
+      borderColor: isRetro ? 'rgba(133, 65, 27, 0.18)' : 'rgba(249, 115, 22, 0.26)',
+      backgroundColor: isRetro ? '#F8F1E7' : 'rgba(9, 9, 11, 0.96)'
+    };
+    return (
+      <div className="fixed inset-0 z-[90]">
+        <div
+          className={`fixed right-4 top-4 flex max-h-[calc(100vh-2rem)] w-[min(46rem,calc(100vw-2rem))] flex-col rounded-lg border p-3 shadow-2xl ${isRetro ? 'border-[#85411B]/18 bg-[#F8F1E7] shadow-[#2A1208]/10' : 'border-orange-500/24 bg-zinc-950/95 shadow-black/40'}`}
+          style={panelStyle}
+          onMouseDown={event => event.stopPropagation()}
+        >
+          <div className={`mb-3 flex shrink-0 items-center justify-between gap-3 border-b pb-2 ${isRetro ? 'border-[#85411B]/12' : 'border-white/[0.06]'}`}>
+            <div className="min-w-0">
+              <div className={`truncate text-[14px] font-black ${strongText}`}>{t(lang, title, titleEn)}</div>
+              <div className={`mt-0.5 text-[11px] font-medium ${mutedText}`}>
+                {t(lang, description, descriptionEn)}
+              </div>
+            </div>
+            <div className="flex shrink-0 items-center gap-1.5">
+              <button
+                type="button"
+                onClick={onRandom}
+                className={randomPanelTopButtonClass}
+                title={randomTitle}
+              >
+                <Dice5 size={12} />
+                <span>{t(lang, '随机', 'Random')}</span>
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                className={randomPanelTopButtonClass}
+                title={t(lang, '确认并关闭', 'Confirm and close')}
+              >
+                <Check size={12} />
+                <span>{t(lang, '确认', 'Confirm')}</span>
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                className={randomPanelTopIconButtonClass}
+                title={t(lang, '关闭', 'Close')}
+              >
+                <X size={14} />
+              </button>
+            </div>
+          </div>
+          <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1 custom-scrollbar">
+            {children}
+          </div>
+        </div>
+      </div>
+    );
+  };
   const renderInlineSwitch = <T extends string>(
     value: T,
     setValue: (value: T) => void,
@@ -3634,7 +4249,7 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
     if (visualStyleRandomPresetRoute === 'ALL_PRESETS') return t(lang, '全部预设随机', 'All Presets');
     if (visualStyleRandomPresetRoute === 'GLOBAL_FUSION') return t(lang, '全局融合随机', 'Global Fusion');
     const preset = VISUAL_STYLE_RANDOM_PRESETS.find(item => item.id === visualStyleRandomPresetRoute);
-    return preset ? t(lang, preset.label, preset.labelEn) : t(lang, '跟随媒介随机', 'Follow Medium');
+    return preset ? t(lang, '固定预设随机', 'Fixed Preset Random') : t(lang, '跟随媒介随机', 'Follow Medium');
   };
 
   const selectVisualStylePresetRoute = (route: VisualStyleRandomPresetRoute) => {
@@ -3773,118 +4388,312 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
     );
   };
 
+  const renderVisualStyleSoulBlendButton = (
+    value: VisualStyleSoulBlendMode,
+    label: string,
+    labelEn: string,
+    brief: string,
+    briefEn: string
+  ) => {
+    const selected = visualStyleSoulBlendMode === value;
+    const blendButtonStyle = {
+      borderColor: selected
+        ? isRetro ? 'rgba(133, 65, 27, 0.52)' : 'rgba(249, 115, 22, 0.62)'
+        : isRetro ? 'rgba(133, 65, 27, 0.16)' : 'rgba(249, 115, 22, 0.18)',
+      backgroundColor: selected
+        ? isRetro ? 'rgba(133, 65, 27, 0.10)' : 'rgba(249, 115, 22, 0.10)'
+        : isRetro ? 'transparent' : 'rgba(9, 9, 11, 0.70)'
+    };
+    return (
+      <button
+        key={value}
+        type="button"
+        onClick={() => setVisualStyleSoulBlendMode(value)}
+        className={`rounded border px-2.5 py-2 text-left transition-all ${selected ? (isRetro ? 'text-[#85411B]' : 'text-[var(--mist-active-accent)]') : (isRetro ? 'text-[#6F4A2D]/70' : 'text-zinc-500')}`}
+        style={blendButtonStyle}
+      >
+        <span className="block text-[12px] font-black leading-5">{t(lang, label, labelEn)}</span>
+        <span className={`mt-0.5 block text-[11px] font-medium leading-4 ${selected ? '' : mutedText}`}>{t(lang, brief, briefEn)}</span>
+      </button>
+    );
+  };
+
   const renderVisualStylePresetPanel = () => {
     const photoPresets = VISUAL_STYLE_RANDOM_PRESETS.filter(preset => preset.mediumCategory === 'PHOTOGRAPHY');
     const paintingPresets = VISUAL_STYLE_RANDOM_PRESETS.filter(preset => preset.mediumCategory === 'PAINTING');
     const cgiPresets = VISUAL_STYLE_RANDOM_PRESETS.filter(preset => preset.mediumCategory === 'CGI');
     const tangiblePresets = VISUAL_STYLE_RANDOM_PRESETS.filter(preset => preset.mediumCategory === 'TANGIBLE');
     const fusionPresets = VISUAL_STYLE_RANDOM_PRESETS.filter(preset => preset.mediumCategory === 'ALL');
-    const panelStyle = {
-      borderColor: isRetro ? 'rgba(133, 65, 27, 0.18)' : 'rgba(249, 115, 22, 0.26)',
-      backgroundColor: isRetro ? '#F8F1E7' : 'rgba(9, 9, 11, 0.96)'
-    };
-    const sectionTitle = (title: string, titleEn: string, meta: string, metaEn: string) => (
-      <div className={`flex items-center justify-between gap-3 text-[12px] font-black tracking-[0.04em] ${strongText}`}>
-        <span>{t(lang, title, titleEn)}</span>
-        <span className={`text-[10px] uppercase tracking-[0.12em] ${mutedText}`}>{t(lang, meta, metaEn)}</span>
-      </div>
-    );
-    return (
-      <div className="fixed inset-0 z-[90]">
-      <div
-        className={`fixed right-4 top-4 flex max-h-[calc(100vh-2rem)] w-[min(46rem,calc(100vw-2rem))] flex-col rounded-lg border p-3 shadow-2xl ${isRetro ? 'border-[#85411B]/18 bg-[#F8F1E7] shadow-[#2A1208]/10' : 'border-orange-500/24 bg-zinc-950/95 shadow-black/40'}`}
-        style={panelStyle}
-        onMouseDown={event => event.stopPropagation()}
-      >
-        <div className={`mb-3 flex shrink-0 items-center justify-between gap-3 border-b pb-2 ${isRetro ? 'border-[#85411B]/12' : 'border-white/[0.06]'}`}>
-          <div>
-            <div className={`text-[14px] font-black ${strongText}`}>{t(lang, '视觉风格随机逻辑', 'Visual Style Random Logic')}</div>
-            <div className={`mt-0.5 text-[11px] font-medium ${mutedText}`}>
-              {t(lang, '按钮负责选择随机路线；开关负责过滤随机池；档位控制参数量。', 'Buttons choose the route; switches filter the pool; density controls field count.')}
-            </div>
-          </div>
-	          <div className="flex shrink-0 items-center gap-1.5">
-	            <button
-	              type="button"
-	              onClick={() => {
-	                randomizeVisualStylePreset();
-	                triggerActionMotion('STYLE:random');
-	              }}
-	              className={randomPanelTopButtonClass}
-	              title={t(lang, '按当前规则随机一次', 'Randomize once with current rules')}
-	            >
-	              <Dice5 size={12} />
-	              <span>{t(lang, '随机', 'Random')}</span>
-	            </button>
-	            <button
-	              type="button"
-	              onClick={() => setIsVisualStylePresetPanelOpen(false)}
-	              className={randomPanelTopButtonClass}
-	              title={t(lang, '确认并关闭', 'Confirm and close')}
-	            >
-	              <Check size={12} />
-	              <span>{t(lang, '确认', 'Confirm')}</span>
-	            </button>
-	            <button
-	              type="button"
-	              onClick={() => setIsVisualStylePresetPanelOpen(false)}
-	              className={randomPanelTopIconButtonClass}
-	              title={t(lang, '关闭', 'Close')}
-	            >
-	              <X size={14} />
-	            </button>
-	          </div>
-	        </div>
-
-        <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1 custom-scrollbar">
-          <section className={`rounded-md border p-2.5 ${isRetro ? 'border-[#85411B]/12 bg-white/22' : 'border-white/[0.06] bg-zinc-950/55'}`}>
-            {sectionTitle('随机路线按钮', 'Route Buttons', '选择随机从哪里抽', 'Choose the random pool')}
-            <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-3">
+    return renderRandomConfigPanel(
+      '视觉风格随机逻辑',
+      'Visual Style Random Logic',
+      '先选随机路线，再用安全阀、参数量和审美来源控制抽取。',
+      'Choose a route, then control sampling through safety, density, and style source.',
+      () => {
+        randomizeVisualStylePreset();
+        triggerActionMotion('STYLE:random');
+      },
+      () => setIsVisualStylePresetPanelOpen(false),
+      t(lang, '按当前规则随机一次', 'Randomize once with current rules'),
+      <>
+          {renderRandomPanelSection(
+            '随机路线',
+            'Random Route',
+            '先决定从哪里抽',
+            'Choose the source pool',
+            <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-3">
               {renderVisualStylePresetRouteButton('FOLLOW_MEDIUM', t(lang, '跟随媒介随机', 'Follow Medium'), t(lang, '只在当前媒介分流内随机。', 'Randomize only within the current medium route.'))}
               {renderVisualStylePresetRouteButton('ALL_PRESETS', t(lang, '全部预设随机', 'All Presets'), t(lang, '从全部视觉预设中随机，会被安全阀过滤。', 'Randomize across all visual presets, filtered by safety switches.'))}
-	              {renderVisualStylePresetRouteButton('GLOBAL_FUSION', t(lang, '全局融合随机', 'Global Fusion'), t(lang, '只调用跨媒介实验预设。', 'Use only cross-media experimental presets.'))}
+              {renderVisualStylePresetRouteButton('GLOBAL_FUSION', t(lang, '全局融合随机', 'Global Fusion'), t(lang, '只调用跨媒介实验预设。', 'Use only cross-media experimental presets.'))}
             </div>
-          </section>
+          )}
 
-          <section className={`rounded-md border p-2.5 ${isRetro ? 'border-[#85411B]/12 bg-white/22' : 'border-white/[0.06] bg-zinc-950/55'}`}>
-            {sectionTitle('安全阀开关', 'Safety Switches', '硬过滤随机池', 'Hard filters')}
-	            <div className="mt-2 grid grid-cols-2 gap-1.5">
-	              {renderVisualStyleSafetyToggle('allowVintage', '复古', 'Vintage')}
-	              {renderVisualStyleSafetyToggle('allowGlitch', '故障', 'Glitch')}
-	              {renderVisualStyleSafetyToggle('allowPollution', '污染', 'Pollution')}
+          {renderRandomPanelSection(
+            '安全阀',
+            'Safety Switches',
+            '硬过滤随机池',
+            'Hard filters',
+            <div className="grid grid-cols-2 gap-1.5">
+              {renderVisualStyleSafetyToggle('allowVintage', '复古', 'Vintage')}
+              {renderVisualStyleSafetyToggle('allowGlitch', '故障', 'Glitch')}
+              {renderVisualStyleSafetyToggle('allowPollution', '污染', 'Pollution')}
               {renderVisualStyleSafetyToggle('allowHighSaturation', '高饱和', 'High Sat')}
             </div>
-          </section>
+          )}
 
-          <section className={`rounded-md border p-2.5 ${isRetro ? 'border-[#85411B]/12 bg-white/22' : 'border-white/[0.06] bg-zinc-950/55'}`}>
-            {sectionTitle('参数量档位', 'Density Level', '控制选中字段数量', 'Controls selected fields')}
-            <div className="mt-2 grid grid-cols-3 gap-1.5">
-              {renderVisualStyleDensityButton('LIGHT', '轻量', 'Light', '约 1-3 个字段', '1-3 fields')}
-              {renderVisualStyleDensityButton('BALANCED', '均衡', 'Balanced', '约 3-6 个字段', '3-6 fields')}
-              {renderVisualStyleDensityButton('FULL', '全量', 'Full', '细项全开', 'Full details')}
+          {renderRandomPanelSection(
+            '参数量',
+            'Density',
+            '控制选中字段数量',
+            'Controls selected fields',
+            <div className="grid grid-cols-3 gap-1.5">
+              {renderVisualStyleDensityButton('LIGHT', '轻量', 'Light', '按媒介少量抽取', 'Sparse by medium')}
+              {renderVisualStyleDensityButton('BALANCED', '均衡', 'Balanced', '按媒介中量抽取', 'Balanced by medium')}
+              {renderVisualStyleDensityButton('FULL', '全量', 'Full', '当前预设细项全开', 'All preset fields')}
             </div>
-          </section>
+          )}
 
-          <section className={`rounded-md border p-2.5 ${isRetro ? 'border-[#85411B]/12 bg-white/22' : 'border-white/[0.06] bg-zinc-950/55'}`}>
-            {sectionTitle('具体预设按钮', 'Preset Buttons', '点选后只随机该预设', 'Click to lock one preset')}
-            <div className="mt-2 space-y-3.5">
+          {renderRandomPanelSection(
+            '审美来源',
+            'Style Source',
+            '控制风格叠加',
+            'Controls style stacking',
+            <div className="grid grid-cols-2 gap-1.5">
+              {renderVisualStyleSoulBlendButton('PURE', '单源', 'Single Source', '只保留一个审美来源', 'Keep one style source')}
+              {renderVisualStyleSoulBlendButton('POLYPHONIC', '复调', 'Polyphonic', '允许两个风格来源叠加', 'Allow two style sources')}
+            </div>
+          )}
+
+          {renderRandomPanelSection(
+            '具体预设',
+            'Preset Lock',
+            '点选后固定该预设',
+            'Click to lock one preset',
+            <div className="space-y-3.5">
               {renderVisualStylePresetGroup('摄影预设', 'Photography Presets', photoPresets)}
               {renderVisualStylePresetGroup('绘画预设', 'Painting Presets', paintingPresets)}
               {renderVisualStylePresetGroup('CGI 预设', 'CGI Presets', cgiPresets)}
               {renderVisualStylePresetGroup('实体预设', 'Tangible Presets', tangiblePresets)}
               {renderVisualStylePresetGroup('融合预设', 'Fusion Presets', fusionPresets)}
             </div>
-          </section>
-          </div>
-      </div>
-      </div>
+          )}
+      </>
+    );
+  };
+
+  const contentIntentRouteLabel = () => {
+    if (contentIntentRoute === 'AUTO') {
+      return t(lang, '全部预设随机', 'All Presets');
+    }
+    const preset = contentIntentPresets.find(item => item.id === contentIntentRoute);
+    return preset?.subjectMode === subjectMode ? t(lang, '固定预设随机', 'Fixed Preset Random') : t(lang, '全部预设随机', 'All Presets');
+  };
+  const contentIntentRouteModeLabel = () => subjectMode === 'CREATURE'
+    ? t(lang, '异种主体随机逻辑', 'Creature Subject Random Logic')
+    : t(lang, '人形主体随机逻辑', 'Human Subject Random Logic');
+
+  const renderContentIntentRouteButton = (
+    route: ContentIntentRoute,
+    label: string,
+    brief: string,
+    compact = false
+  ) => {
+    const selected = contentIntentRoute === route;
+    const routeButtonStyle = {
+      borderColor: selected
+        ? isRetro ? 'rgba(133, 65, 27, 0.55)' : 'rgba(249, 115, 22, 0.62)'
+        : isRetro ? 'rgba(133, 65, 27, 0.16)' : 'rgba(249, 115, 22, 0.20)',
+      backgroundColor: selected
+        ? isRetro ? 'rgba(133, 65, 27, 0.10)' : 'rgba(249, 115, 22, 0.10)'
+        : isRetro ? 'transparent' : 'rgba(9, 9, 11, 0.82)'
+    };
+    return (
+      <button
+        key={route}
+        type="button"
+        onClick={() => setContentIntentRoute(route)}
+        className={`rounded border px-2.5 text-left transition-all ${compact ? 'py-1.5' : 'py-2'} ${selected ? (isRetro ? 'text-[#85411B]' : 'text-[var(--mist-active-accent)]') : (isRetro ? 'text-[#6F4A2D]/82 hover:bg-[#85411B]/6' : 'text-zinc-300 hover:border-orange-400/35 hover:bg-orange-500/8')}`}
+        style={routeButtonStyle}
+        title={brief}
+      >
+        <span className="block min-w-0 truncate text-[12px] font-black leading-5">{label}</span>
+        <span className={`mt-0.5 block line-clamp-2 text-[11px] font-medium leading-4 ${selected ? '' : mutedText}`}>{brief}</span>
+      </button>
+    );
+  };
+
+  const renderContentIntentDensityButton = (
+    value: ContentIntentRandomDensity,
+    label: string,
+    labelEn: string,
+    brief: string,
+    briefEn: string
+  ) => {
+    const selected = contentIntentRandomDensity === value;
+    const densityButtonStyle = {
+      borderColor: selected
+        ? isRetro ? 'rgba(133, 65, 27, 0.52)' : 'rgba(249, 115, 22, 0.62)'
+        : isRetro ? 'rgba(133, 65, 27, 0.16)' : 'rgba(249, 115, 22, 0.18)',
+      backgroundColor: selected
+        ? isRetro ? 'rgba(133, 65, 27, 0.10)' : 'rgba(249, 115, 22, 0.10)'
+        : isRetro ? 'transparent' : 'rgba(9, 9, 11, 0.70)'
+    };
+    return (
+      <button
+        key={value}
+        type="button"
+        onClick={() => setContentIntentRandomDensity(value)}
+        className={`rounded border px-2.5 py-2 text-left transition-all ${selected ? (isRetro ? 'text-[#85411B]' : 'text-[var(--mist-active-accent)]') : (isRetro ? 'text-[#6F4A2D]/70' : 'text-zinc-500')}`}
+        style={densityButtonStyle}
+      >
+        <span className="block text-[12px] font-black leading-5">{t(lang, label, labelEn)}</span>
+        <span className={`mt-0.5 block text-[11px] font-medium leading-4 ${selected ? '' : mutedText}`}>{t(lang, brief, briefEn)}</span>
+      </button>
+    );
+  };
+
+  const renderContentIntentConflictButton = (
+    value: ConceptLinkedRandomConflictPolicy,
+    label: string,
+    labelEn: string,
+    brief: string,
+    briefEn: string
+  ) => {
+    const selected = linkedRandomConflictPolicy === value;
+    const conflictButtonStyle = {
+      borderColor: selected
+        ? isRetro ? 'rgba(133, 65, 27, 0.52)' : 'rgba(249, 115, 22, 0.62)'
+        : isRetro ? 'rgba(133, 65, 27, 0.16)' : 'rgba(249, 115, 22, 0.18)',
+      backgroundColor: selected
+        ? isRetro ? 'rgba(133, 65, 27, 0.10)' : 'rgba(249, 115, 22, 0.10)'
+        : isRetro ? 'transparent' : 'rgba(9, 9, 11, 0.70)'
+    };
+    return (
+      <button
+        key={value}
+        type="button"
+        onClick={() => setLinkedRandomConflictPolicy(value)}
+        className={`rounded border px-2.5 py-2 text-left transition-all ${selected ? (isRetro ? 'text-[#85411B]' : 'text-[var(--mist-active-accent)]') : (isRetro ? 'text-[#6F4A2D]/70' : 'text-zinc-500')}`}
+        style={conflictButtonStyle}
+      >
+        <span className="block text-[12px] font-black leading-5">{t(lang, label, labelEn)}</span>
+        <span className={`mt-0.5 block text-[11px] font-medium leading-4 ${selected ? '' : mutedText}`}>{t(lang, brief, briefEn)}</span>
+      </button>
+    );
+  };
+
+  const renderContentIntentRandomPanel = () => {
+    const activeModePresets = contentIntentPresets.filter(preset => preset.subjectMode === subjectMode);
+    const isCreaturePanel = subjectMode === 'CREATURE';
+    return renderRandomConfigPanel(
+      isCreaturePanel ? '异种主体随机逻辑' : '人形主体随机逻辑',
+      isCreaturePanel ? 'Creature Subject Random Logic' : 'Human Subject Random Logic',
+      isCreaturePanel ? '先选异种原型路线，再用槽位量控制本体、纲目、结构、材质和行为。' : '先选人形内容意图，再用词量和融合规则协调身份、造型、动作和身体证据。',
+      isCreaturePanel ? 'Choose a creature archetype route, then control ontology, taxonomy, structure, texture, and behavior by slot density.' : 'Choose a human content intent, then coordinate identity, styling, action, and body evidence through term density and fusion rules.',
+      () => {
+        randomizeIndependentCoreModules();
+        triggerActionMotion('CORE:random');
+      },
+      () => setIsContentIntentPanelOpen(false),
+      isCreaturePanel ? t(lang, '按当前异种规则随机一次', 'Randomize once with current creature rules') : t(lang, '按当前人形规则随机一次', 'Randomize once with current human rules'),
+      <>
+            {renderRandomPanelSection(
+              '随机路线',
+              'Random Route',
+              isCreaturePanel ? '先决定异种原型来源' : '先决定人形意图来源',
+              isCreaturePanel ? 'Choose the creature archetype source' : 'Choose the human intent source',
+              <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+                {renderContentIntentRouteButton('AUTO', t(lang, '全部预设随机', 'All Presets'), isCreaturePanel
+                  ? t(lang, '只从异种主体预设中随机，会读取物种、类别、时间和现实筛选。', 'Randomize only across creature subject presets, reading species, category, era, and reality filters.')
+                  : t(lang, '只从人形主体预设中随机，会读取核心主题和当前词条。', 'Randomize only across human subject presets, reading core theme and selected terms.'))}
+              </div>
+            )}
+
+            {renderRandomPanelSection(
+              isCreaturePanel ? '槽位量' : '词量',
+              isCreaturePanel ? 'Slot Density' : 'Term Density',
+              isCreaturePanel ? '控制异种本体证据量' : '按词量目标控制人形主体',
+              isCreaturePanel ? 'Controls creature evidence slots' : 'Controls human subject by term count target',
+              <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
+                {isCreaturePanel ? (
+                  <>
+                    {renderContentIntentDensityButton('RANGE_1_8', '极简', 'Minimal', '2-3 个证据槽', '2-3 evidence slots')}
+                    {renderContentIntentDensityButton('RANGE_9_16', '轻量', 'Light', '4-5 个证据槽', '4-5 evidence slots')}
+                    {renderContentIntentDensityButton('RANGE_17_23', '中档', 'Medium', '6-8 个证据槽', '6-8 evidence slots')}
+                    {renderContentIntentDensityButton('RANGE_24_30', '丰富', 'Rich', '9-11 个证据槽', '9-11 evidence slots')}
+                    {renderContentIntentDensityButton('RANGE_31_38', '高密', 'Dense', '12-14 个证据槽', '12-14 evidence slots')}
+                    {renderContentIntentDensityButton('FULL', '全量', 'Full', '15-16 个证据槽', '15-16 evidence slots')}
+                  </>
+                ) : (
+                  <>
+                    {renderContentIntentDensityButton('RANGE_1_8', '极简', 'Minimal', '1-8 个词', '1-8 terms')}
+                    {renderContentIntentDensityButton('RANGE_9_16', '轻量', 'Light', '9-16 个词', '9-16 terms')}
+                    {renderContentIntentDensityButton('RANGE_17_23', '中档', 'Medium', '17-23 个词', '17-23 terms')}
+                    {renderContentIntentDensityButton('RANGE_24_30', '丰富', 'Rich', '24-30 个词', '24-30 terms')}
+                    {renderContentIntentDensityButton('RANGE_31_38', '高密', 'Dense', '31-38 个词', '31-38 terms')}
+                    {renderContentIntentDensityButton('FULL', '全量', 'Full', '所有可用槽位', 'All eligible slots')}
+                  </>
+                )}
+              </div>
+            )}
+
+            {renderRandomPanelSection(
+              '融合 / 跨界',
+              'Fusion / Crossover',
+              '控制偏离和异常空间',
+              'Controls drift and anomaly space',
+              <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
+                {renderContentIntentConflictButton('DELETE', '纯化', 'Pure', '不合适就不选', 'Drop mismatches')}
+                {renderContentIntentConflictButton('TRANSLATE', '折译', 'Translate', '转译为当前世界证据', 'Translate into local evidence')}
+                {renderContentIntentConflictButton('ANOMALY', '异常', 'Anomaly', '允许局部异常', 'Allow local anomaly')}
+                {renderContentIntentConflictButton('MANIFEST', '显化', 'Manifest', '高本体可成立', 'High ontology may manifest')}
+              </div>
+            )}
+
+            {renderRandomPanelSection(
+              isCreaturePanel ? '异种预设' : '人形预设',
+              'Preset Lock',
+              isCreaturePanel ? '点选后固定异种原型路线' : '点选后固定人形内容意图',
+              isCreaturePanel ? 'Click to lock one creature archetype route' : 'Click to lock one human content intent',
+              <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+                {activeModePresets.map(preset => renderContentIntentRouteButton(
+                  preset.id,
+                  t(lang, preset.label, preset.labelEn),
+                  isCreaturePanel
+                    ? t(lang, `${preset.label}：控制异种原型、结构和行为。`, `${preset.labelEn}: controls creature archetype, structure, and behavior.`)
+                    : t(lang, `${preset.label}：协调主体、场域和光影。`, `${preset.labelEn}: coordinates subject, field, and lighting.`),
+                  true
+                ))}
+              </div>
+            )}
+      </>
     );
   };
 
   const framingPresetRouteLabel = () => {
-    if (framingRandomPresetRoute === 'ALL_PRESETS') return t(lang, '取景目标随机', 'Framing Goal Random');
+    if (framingRandomPresetRoute === 'ALL_PRESETS') return t(lang, '全部预设随机', 'All Presets');
     const preset = FRAMING_RANDOM_PRESETS.find(item => item.id === framingRandomPresetRoute);
-    return preset ? t(lang, preset.label, preset.labelEn) : t(lang, '取景目标随机', 'Framing Goal Random');
+    return preset ? t(lang, '固定预设随机', 'Fixed Preset Random') : t(lang, '全部预设随机', 'All Presets');
   };
 
   const selectFramingPresetRoute = (route: FramingRandomPresetRoute) => {
@@ -3982,68 +4791,59 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
   };
 
   const renderFramingPresetPanel = () => {
-    const panelStyle = {
-      borderColor: isRetro ? 'rgba(133, 65, 27, 0.18)' : 'rgba(249, 115, 22, 0.26)',
-      backgroundColor: isRetro ? '#F8F1E7' : 'rgba(9, 9, 11, 0.96)'
-    };
-    const sectionTitle = (title: string, titleEn: string, meta: string, metaEn: string) => (
-      <div className={`flex items-center justify-between gap-3 text-[12px] font-black tracking-[0.04em] ${strongText}`}>
-        <span>{t(lang, title, titleEn)}</span>
-        <span className={`text-[10px] uppercase tracking-[0.12em] ${mutedText}`}>{t(lang, meta, metaEn)}</span>
-      </div>
-    );
-    return (
-      <div className="fixed inset-0 z-[90]">
-        <div
-          className={`fixed right-4 top-4 flex max-h-[calc(100vh-2rem)] w-[min(42rem,calc(100vw-2rem))] flex-col rounded-lg border p-3 shadow-2xl ${isRetro ? 'border-[#85411B]/18 bg-[#F8F1E7] shadow-[#2A1208]/10' : 'border-orange-500/24 bg-zinc-950/95 shadow-black/40'}`}
-          style={panelStyle}
-          onMouseDown={event => event.stopPropagation()}
-        >
-          <div className={`mb-3 flex shrink-0 items-center justify-between gap-3 border-b pb-2 ${isRetro ? 'border-[#85411B]/12' : 'border-white/[0.06]'}`}>
-            <div>
-              <div className={`text-[14px] font-black ${strongText}`}>{t(lang, '取景随机逻辑', 'Framing Random Logic')}</div>
-              <div className={`mt-0.5 text-[11px] font-medium ${mutedText}`}>
-                {t(lang, '先选取景目标，再按安全阀和参数量抽取取景细项。', 'Choose a framing goal first, then sample details through safety switches and density.')}
+    return renderRandomConfigPanel(
+      '取景随机逻辑',
+      'Framing Random Logic',
+      '先选取景目标，再按安全阀和参数量抽取取景细项。',
+      'Choose a framing goal first, then sample details through safety switches and density.',
+      () => {
+        randomizeFramingPreset();
+        triggerActionMotion('FRAMING:random');
+      },
+      () => setIsFramingPresetPanelOpen(false),
+      t(lang, '按当前规则随机一次', 'Randomize once with current rules'),
+      <>
+            {renderRandomPanelSection(
+              '随机路线',
+              'Random Route',
+              '先决定取景目标来源',
+              'Choose the framing source',
+              <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+                {renderFramingPresetRouteButton('ALL_PRESETS', t(lang, '全部预设随机', 'All Presets'), t(lang, '从全部取景目标中随机，会被安全阀过滤。', 'Randomize across framing goals, filtered by safety switches.'))}
               </div>
-            </div>
-	            <div className="flex shrink-0 items-center gap-1.5">
-	              <button
-	                type="button"
-	                onClick={() => {
-	                  randomizeFramingPreset();
-	                  triggerActionMotion('FRAMING:random');
-	                }}
-	                className={randomPanelTopButtonClass}
-	                title={t(lang, '按当前规则随机一次', 'Randomize once with current rules')}
-	              >
-	                <Dice5 size={12} />
-	                <span>{t(lang, '随机', 'Random')}</span>
-	              </button>
-	              <button
-	                type="button"
-	                onClick={() => setIsFramingPresetPanelOpen(false)}
-	                className={randomPanelTopButtonClass}
-	                title={t(lang, '确认并关闭', 'Confirm and close')}
-	              >
-	                <Check size={12} />
-	                <span>{t(lang, '确认', 'Confirm')}</span>
-	              </button>
-	              <button
-	                type="button"
-	                onClick={() => setIsFramingPresetPanelOpen(false)}
-	                className={randomPanelTopIconButtonClass}
-	                title={t(lang, '关闭', 'Close')}
-	              >
-	                <X size={14} />
-	              </button>
-	            </div>
-	          </div>
+            )}
 
-          <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1 custom-scrollbar">
-            <section className={`rounded-md border p-2.5 ${isRetro ? 'border-[#85411B]/12 bg-white/22' : 'border-white/[0.06] bg-zinc-950/55'}`}>
-              {sectionTitle('随机路线按钮', 'Route Buttons', '选择取景目标', 'Choose framing goal')}
-              <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
-                {renderFramingPresetRouteButton('ALL_PRESETS', t(lang, '取景目标随机', 'Framing Goal Random'), t(lang, '从全部取景目标中随机，会被安全阀过滤。', 'Randomize across framing goals, filtered by safety switches.'))}
+            {renderRandomPanelSection(
+              '安全阀',
+              'Safety Switches',
+              '硬过滤取景组合',
+              'Hard filters',
+              <div className="grid grid-cols-2 gap-1.5">
+                {renderFramingSafetyToggle('keepReadableSubject', '主体可读', 'Readable Subject')}
+                {renderFramingSafetyToggle('avoidExtremeDistortion', '禁极端畸变', 'No Extreme Distortion')}
+                {renderFramingSafetyToggle('avoidMultiSubject', '禁多主体', 'No Multi-Subject')}
+                {renderFramingSafetyToggle('allowOpticalFx', '允许光学', 'Optical FX')}
+              </div>
+            )}
+
+            {renderRandomPanelSection(
+              '参数量',
+              'Density',
+              '控制取景细项数量',
+              'Controls selected fields',
+              <div className="grid grid-cols-3 gap-1.5">
+                {renderFramingDensityButton('LIGHT', '轻量', 'Light', '约 1-3 个字段', '1-3 fields')}
+                {renderFramingDensityButton('BALANCED', '均衡', 'Balanced', '约 3-5 个字段', '3-5 fields')}
+                {renderFramingDensityButton('FULL', '全量', 'Full', '细项全开', 'Full details')}
+              </div>
+            )}
+
+            {renderRandomPanelSection(
+              '具体预设',
+              'Preset Lock',
+              '点选后固定取景目标',
+              'Click to lock framing goal',
+              <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
                 {FRAMING_RANDOM_PRESETS.map(preset => renderFramingPresetRouteButton(
                   preset.id,
                   t(lang, preset.label, preset.labelEn),
@@ -4051,29 +4851,8 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
                   true
                 ))}
               </div>
-            </section>
-
-            <section className={`rounded-md border p-2.5 ${isRetro ? 'border-[#85411B]/12 bg-white/22' : 'border-white/[0.06] bg-zinc-950/55'}`}>
-              {sectionTitle('安全阀开关', 'Safety Switches', '硬过滤取景组合', 'Hard filters')}
-              <div className="mt-2 grid grid-cols-2 gap-1.5">
-                {renderFramingSafetyToggle('keepReadableSubject', '主体可读', 'Readable Subject')}
-                {renderFramingSafetyToggle('avoidExtremeDistortion', '禁极端畸变', 'No Extreme Distortion')}
-                {renderFramingSafetyToggle('avoidMultiSubject', '禁多主体', 'No Multi-Subject')}
-                {renderFramingSafetyToggle('allowOpticalFx', '允许光学', 'Optical FX')}
-              </div>
-            </section>
-
-            <section className={`rounded-md border p-2.5 ${isRetro ? 'border-[#85411B]/12 bg-white/22' : 'border-white/[0.06] bg-zinc-950/55'}`}>
-              {sectionTitle('参数量档位', 'Density Level', '控制取景细项数量', 'Controls selected fields')}
-              <div className="mt-2 grid grid-cols-3 gap-1.5">
-                {renderFramingDensityButton('LIGHT', '轻量', 'Light', '约 1-3 个字段', '1-3 fields')}
-                {renderFramingDensityButton('BALANCED', '均衡', 'Balanced', '约 3-5 个字段', '3-5 fields')}
-                {renderFramingDensityButton('FULL', '全量', 'Full', '细项全开', 'Full details')}
-              </div>
-            </section>
-          </div>
-        </div>
-      </div>
+            )}
+      </>
     );
   };
 
@@ -4087,6 +4866,246 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
     >
       <SlidersHorizontal size={11} className="shrink-0" />
       <span className="min-w-0 truncate">{framingPresetRouteLabel()}</span>
+    </button>
+  );
+
+  const renderContentIntentPresetControl = () => (
+    <button
+      type="button"
+      disabled={isSectionLocked('SUBJECT')}
+      onClick={() => setIsContentIntentPanelOpen(prev => !prev)}
+      className={`flex h-6 max-w-[10rem] items-center gap-1 rounded border px-1.5 text-[10px] font-black tracking-[0.02em] transition-all disabled:cursor-not-allowed disabled:opacity-40 ${isContentIntentPanelOpen ? (isRetro ? 'border-[#85411B]/44 bg-[#85411B]/10 text-[#85411B]' : 'border-[var(--mist-active-accent)]/55 bg-[var(--mist-active-accent)]/10 text-[var(--mist-active-accent)]') : (isRetro ? 'border-[#85411B]/18 bg-transparent text-[#85411B]/75 hover:bg-[#85411B]/8' : 'border-orange-500/18 bg-zinc-950/70 text-zinc-300 hover:border-orange-400/35 hover:bg-orange-500/8')}`}
+      title={t(lang, '选择内容意图随机预设', 'Choose content intent random preset')}
+    >
+      <SlidersHorizontal size={11} className="shrink-0" />
+      <span className="min-w-0 truncate">{contentIntentRouteLabel()}</span>
+    </button>
+  );
+
+  const spacetimeFieldRouteLabel = () => {
+    const meta = spacetimeFieldRouteMeta[spacetimeFieldRandomRoute] || spacetimeFieldRouteMeta.ALL_PRESETS;
+    return t(lang, meta.label, meta.labelEn);
+  };
+
+  const renderSpacetimeFieldRouteButton = (route: SpacetimeFieldRandomRoute, compact = false) => {
+    const selected = spacetimeFieldRandomRoute === route;
+    const meta = spacetimeFieldRouteMeta[route];
+    const routeButtonStyle = {
+      borderColor: selected
+        ? isRetro ? 'rgba(133, 65, 27, 0.55)' : 'rgba(249, 115, 22, 0.62)'
+        : isRetro ? 'rgba(133, 65, 27, 0.16)' : 'rgba(249, 115, 22, 0.20)',
+      backgroundColor: selected
+        ? isRetro ? 'rgba(133, 65, 27, 0.10)' : 'rgba(249, 115, 22, 0.10)'
+        : isRetro ? 'transparent' : 'rgba(9, 9, 11, 0.82)'
+    };
+    return (
+      <button
+        key={route}
+        type="button"
+        onClick={() => setSpacetimeFieldRandomRoute(route)}
+        className={`rounded border px-2.5 text-left transition-all ${compact ? 'py-1.5' : 'py-2'} ${selected ? (isRetro ? 'text-[#85411B]' : 'text-[var(--mist-active-accent)]') : (isRetro ? 'text-[#6F4A2D]/82 hover:bg-[#85411B]/6' : 'text-zinc-300 hover:border-orange-400/35 hover:bg-orange-500/8')}`}
+        style={routeButtonStyle}
+        title={t(lang, meta.brief, meta.briefEn)}
+      >
+        <span className="block min-w-0 truncate text-[12px] font-black leading-5">{t(lang, meta.label, meta.labelEn)}</span>
+        <span className={`mt-0.5 block line-clamp-2 text-[11px] font-medium leading-4 ${selected ? '' : mutedText}`}>{t(lang, meta.brief, meta.briefEn)}</span>
+      </button>
+    );
+  };
+
+  const renderSpacetimeFieldDensityButton = (
+    value: SpacetimeFieldRandomDensity,
+    label: string,
+    labelEn: string,
+    brief: string,
+    briefEn: string
+  ) => {
+    const selected = spacetimeFieldRandomDensity === value;
+    const densityButtonStyle = {
+      borderColor: selected
+        ? isRetro ? 'rgba(133, 65, 27, 0.52)' : 'rgba(249, 115, 22, 0.62)'
+        : isRetro ? 'rgba(133, 65, 27, 0.16)' : 'rgba(249, 115, 22, 0.18)',
+      backgroundColor: selected
+        ? isRetro ? 'rgba(133, 65, 27, 0.10)' : 'rgba(249, 115, 22, 0.10)'
+        : isRetro ? 'transparent' : 'rgba(9, 9, 11, 0.70)'
+    };
+    return (
+      <button
+        key={value}
+        type="button"
+        onClick={() => setSpacetimeFieldRandomDensity(value)}
+        className={`rounded border px-2.5 py-2 text-left transition-all ${selected ? (isRetro ? 'text-[#85411B]' : 'text-[var(--mist-active-accent)]') : (isRetro ? 'text-[#6F4A2D]/70' : 'text-zinc-500')}`}
+        style={densityButtonStyle}
+      >
+        <span className="block text-[12px] font-black leading-5">{t(lang, label, labelEn)}</span>
+        <span className={`mt-0.5 block text-[11px] font-medium leading-4 ${selected ? '' : mutedText}`}>{t(lang, brief, briefEn)}</span>
+      </button>
+    );
+  };
+
+  const renderSpacetimeFieldRandomPanel = () => renderRandomConfigPanel(
+    '时空场域随机逻辑',
+    'Time-Space Field Random Logic',
+    '先选场域路线，再用参数量决定精确坐标、空间类型和环境状态的抽取强度。',
+    'Choose a field route first, then control coordinates, space types, and environment state through density.',
+    () => {
+      randomizeSpacetimeFieldModule();
+      triggerActionMotion('FIELD:random');
+    },
+    () => setIsSpacetimeFieldRandomPanelOpen(false),
+    t(lang, '按当前场域规则随机一次', 'Randomize once with current field rules'),
+    <>
+      {renderRandomPanelSection(
+        '随机路线',
+        'Random Route',
+        '决定场域从哪里开始',
+        'Choose the field source',
+        <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+          {renderSpacetimeFieldRouteButton('ALL_PRESETS')}
+          {renderSpacetimeFieldRouteButton('EXACT_COORDINATE')}
+          {renderSpacetimeFieldRouteButton('REAL_SCENE', true)}
+          {renderSpacetimeFieldRouteButton('SURREAL_SCENE', true)}
+          {renderSpacetimeFieldRouteButton('ABSTRACT_SCENE', true)}
+          {renderSpacetimeFieldRouteButton('ENVIRONMENT_STATE', true)}
+        </div>
+      )}
+
+      {renderRandomPanelSection(
+        '参数量',
+        'Density',
+        '控制场域细项数量',
+        'Controls field detail count',
+        <div className="grid grid-cols-3 gap-1.5">
+          {renderSpacetimeFieldDensityButton('LIGHT', '轻量', 'Light', '锚点 + 1 个细项', 'Anchor + 1 detail')}
+          {renderSpacetimeFieldDensityButton('BALANCED', '均衡', 'Balanced', '锚点 + 2-3 个细项', 'Anchor + 2-3 details')}
+          {renderSpacetimeFieldDensityButton('FULL', '全量', 'Full', '场域细项全开', 'All field details')}
+        </div>
+      )}
+    </>
+  );
+
+  const renderSpacetimeFieldRandomControl = () => (
+    <button
+      type="button"
+      disabled={isSectionLocked('STYLE')}
+      onClick={() => setIsSpacetimeFieldRandomPanelOpen(prev => !prev)}
+      className={`flex h-6 max-w-[10rem] items-center gap-1 rounded border px-1.5 text-[10px] font-black tracking-[0.02em] transition-all disabled:cursor-not-allowed disabled:opacity-40 ${isSpacetimeFieldRandomPanelOpen ? (isRetro ? 'border-[#85411B]/44 bg-[#85411B]/10 text-[#85411B]' : 'border-[var(--mist-active-accent)]/55 bg-[var(--mist-active-accent)]/10 text-[var(--mist-active-accent)]') : (isRetro ? 'border-[#85411B]/18 bg-transparent text-[#85411B]/75 hover:bg-[#85411B]/8' : 'border-orange-500/18 bg-zinc-950/70 text-zinc-300 hover:border-orange-400/35 hover:bg-orange-500/8')}`}
+      title={t(lang, '选择时空场域随机规则', 'Choose time-space field random rules')}
+    >
+      <SlidersHorizontal size={11} className="shrink-0" />
+      <span className="min-w-0 truncate">{spacetimeFieldRouteLabel()}</span>
+    </button>
+  );
+
+  const lightingAtmosphereRouteLabel = () => {
+    const meta = lightingAtmosphereRouteMeta[lightingAtmosphereRandomRoute] || lightingAtmosphereRouteMeta.ALL_PRESETS;
+    return t(lang, meta.label, meta.labelEn);
+  };
+
+  const renderLightingAtmosphereRouteButton = (route: LightingAtmosphereRandomRoute) => {
+    const selected = lightingAtmosphereRandomRoute === route;
+    const meta = lightingAtmosphereRouteMeta[route];
+    const routeButtonStyle = {
+      borderColor: selected
+        ? isRetro ? 'rgba(133, 65, 27, 0.55)' : 'rgba(249, 115, 22, 0.62)'
+        : isRetro ? 'rgba(133, 65, 27, 0.16)' : 'rgba(249, 115, 22, 0.20)',
+      backgroundColor: selected
+        ? isRetro ? 'rgba(133, 65, 27, 0.10)' : 'rgba(249, 115, 22, 0.10)'
+        : isRetro ? 'transparent' : 'rgba(9, 9, 11, 0.82)'
+    };
+    return (
+      <button
+        key={route}
+        type="button"
+        onClick={() => setLightingAtmosphereRandomRoute(route)}
+        className={`rounded border px-2.5 py-2 text-left transition-all ${selected ? (isRetro ? 'text-[#85411B]' : 'text-[var(--mist-active-accent)]') : (isRetro ? 'text-[#6F4A2D]/82 hover:bg-[#85411B]/6' : 'text-zinc-300 hover:border-orange-400/35 hover:bg-orange-500/8')}`}
+        style={routeButtonStyle}
+        title={t(lang, meta.brief, meta.briefEn)}
+      >
+        <span className="block min-w-0 truncate text-[12px] font-black leading-5">{t(lang, meta.label, meta.labelEn)}</span>
+        <span className={`mt-0.5 block line-clamp-2 text-[11px] font-medium leading-4 ${selected ? '' : mutedText}`}>{t(lang, meta.brief, meta.briefEn)}</span>
+      </button>
+    );
+  };
+
+  const renderLightingAtmosphereDensityButton = (
+    value: LightingAtmosphereRandomDensity,
+    label: string,
+    labelEn: string,
+    brief: string,
+    briefEn: string
+  ) => {
+    const selected = lightingAtmosphereRandomDensity === value;
+    const densityButtonStyle = {
+      borderColor: selected
+        ? isRetro ? 'rgba(133, 65, 27, 0.52)' : 'rgba(249, 115, 22, 0.62)'
+        : isRetro ? 'rgba(133, 65, 27, 0.16)' : 'rgba(249, 115, 22, 0.18)',
+      backgroundColor: selected
+        ? isRetro ? 'rgba(133, 65, 27, 0.10)' : 'rgba(249, 115, 22, 0.10)'
+        : isRetro ? 'transparent' : 'rgba(9, 9, 11, 0.70)'
+    };
+    return (
+      <button
+        key={value}
+        type="button"
+        onClick={() => setLightingAtmosphereRandomDensity(value)}
+        className={`rounded border px-2.5 py-2 text-left transition-all ${selected ? (isRetro ? 'text-[#85411B]' : 'text-[var(--mist-active-accent)]') : (isRetro ? 'text-[#6F4A2D]/70' : 'text-zinc-500')}`}
+        style={densityButtonStyle}
+      >
+        <span className="block text-[12px] font-black leading-5">{t(lang, label, labelEn)}</span>
+        <span className={`mt-0.5 block text-[11px] font-medium leading-4 ${selected ? '' : mutedText}`}>{t(lang, brief, briefEn)}</span>
+      </button>
+    );
+  };
+
+  const renderLightingAtmosphereRandomPanel = () => renderRandomConfigPanel(
+    '光影氛围随机逻辑',
+    'Lighting Atmosphere Random Logic',
+    '光影预设包和布光细项互斥：预设包负责整体布光意图，细项负责手工拆分控制。',
+    'Lighting preset packs and detail controls are exclusive: packs define the whole intent, details provide manual control.',
+    () => {
+      randomizeLightingAtmosphereModule();
+      triggerActionMotion('LIGHT:random');
+    },
+    () => setIsLightingAtmosphereRandomPanelOpen(false),
+    t(lang, '按当前光影规则随机一次', 'Randomize once with current lighting rules'),
+    <>
+      {renderRandomPanelSection(
+        '随机路线',
+        'Random Route',
+        '决定抽整体预设还是布光细项',
+        'Choose package or detail route',
+        <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-3">
+          {renderLightingAtmosphereRouteButton('ALL_PRESETS')}
+          {renderLightingAtmosphereRouteButton('PRESET_PACKAGE')}
+          {renderLightingAtmosphereRouteButton('DETAIL_LIGHTING')}
+        </div>
+      )}
+
+      {renderRandomPanelSection(
+        '参数量',
+        'Density',
+        '只在布光细项路线中生效',
+        'Only affects lighting details route',
+        <div className="grid grid-cols-3 gap-1.5">
+          {renderLightingAtmosphereDensityButton('LIGHT', '轻量', 'Light', '1-2 个布光细项', '1-2 lighting details')}
+          {renderLightingAtmosphereDensityButton('BALANCED', '均衡', 'Balanced', '3-4 个布光细项', '3-4 lighting details')}
+          {renderLightingAtmosphereDensityButton('FULL', '全量', 'Full', '布光细项全开', 'All lighting details')}
+        </div>
+      )}
+    </>
+  );
+
+  const renderLightingAtmosphereRandomControl = () => (
+    <button
+      type="button"
+      disabled={isSectionLocked('STYLE')}
+      onClick={() => setIsLightingAtmosphereRandomPanelOpen(prev => !prev)}
+      className={`flex h-6 max-w-[10rem] items-center gap-1 rounded border px-1.5 text-[10px] font-black tracking-[0.02em] transition-all disabled:cursor-not-allowed disabled:opacity-40 ${isLightingAtmosphereRandomPanelOpen ? (isRetro ? 'border-[#85411B]/44 bg-[#85411B]/10 text-[#85411B]' : 'border-[var(--mist-active-accent)]/55 bg-[var(--mist-active-accent)]/10 text-[var(--mist-active-accent)]') : (isRetro ? 'border-[#85411B]/18 bg-transparent text-[#85411B]/75 hover:bg-[#85411B]/8' : 'border-orange-500/18 bg-zinc-950/70 text-zinc-300 hover:border-orange-400/35 hover:bg-orange-500/8')}`}
+      title={t(lang, '选择光影氛围随机规则', 'Choose lighting atmosphere random rules')}
+    >
+      <SlidersHorizontal size={11} className="shrink-0" />
+      <span className="min-w-0 truncate">{lightingAtmosphereRouteLabel()}</span>
     </button>
   );
 
@@ -4300,6 +5319,8 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
   };
 
   const themeAxisLabel = (value: string) => {
+    const creatureTaxonomyLabel = CREATURE_TAXONOMY_AXIS.find(item => item.id === value);
+    if (creatureTaxonomyLabel) return t(lang, creatureTaxonomyLabel.label, creatureTaxonomyLabel.labelEn);
     const axisLabel = realityAxisLabels[value] || CONCEPT_TAG_LABELS[normalizeConceptTagId(value)] || themeAxisValueLabels[value];
     return axisLabel ? t(lang, axisLabel.label, axisLabel.labelEn) : value.replace(/_/g, ' ');
   };
@@ -4321,18 +5342,36 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
     });
   };
 
-  const axisSummaryText = (values: readonly string[], max = 3) => {
+  const axisCoversAll = (values: readonly string[], allValues?: readonly string[]) => {
+    if (!allValues || allValues.length === 0) return false;
+    const selected = new Set(values);
+    return allValues.every(value => selected.has(value));
+  };
+
+  const axisSummaryText = (values: readonly string[], max = 3, allValues?: readonly string[]) => {
+    if (axisCoversAll(values, allValues)) return t(lang, '全选', 'All');
     const visible = values.slice(0, max).map(themeAxisLabel).join(' / ');
     return visible;
   };
 
-  const axisSlotText = (values: readonly string[]) => values.map(themeAxisLabel).join(' / ');
+  const axisSlotText = (values: readonly string[], allValues?: readonly string[]) => (
+    axisCoversAll(values, allValues) ? t(lang, '全选', 'All') : values.map(themeAxisLabel).join(' / ')
+  );
 
   const visibleCategoryAxis = CONCEPT_CATEGORY_AXIS.filter(item => isAdmin || !item.adminOnly);
   const themeAxisOptions = {
+    species: CREATURE_TAXONOMY_AXIS.map(item => item.id),
     genres: visibleCategoryAxis.map(item => item.id),
     eras: CONCEPT_ERA_AXIS.map(item => item.id),
     realities: CONCEPT_REALITY_AXIS.map(item => item.id)
+  };
+
+  const pickAdjacentAxisRange = (items: readonly string[], options?: { includeAll?: boolean; allItems?: readonly string[] }) => {
+    if (items.length === 0) return [];
+    if (options?.includeAll && Math.random() < 0.22) return [...(options.allItems || items)];
+    const count = Math.min(items.length, Math.floor(Math.random() * 3) + 1);
+    const start = Math.floor(Math.random() * (items.length - count + 1));
+    return items.slice(start, start + count);
   };
 
   const resetKeywordTagEdits = () => {
@@ -4348,16 +5387,19 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
 
   const randomThemeAxis = () => {
     resetKeywordTagEdits();
-    const pickOne = (items: string[]) => items[Math.floor(Math.random() * items.length)];
     const genrePool = [...themeAxisOptions.genres].sort(() => Math.random() - 0.5);
     const genreCount = Math.random() < 0.28 ? 2 : 1;
     const genreAllow = genrePool.slice(0, genreCount);
-    const eraAllow = [pickOne(themeAxisOptions.eras)].filter(Boolean);
-    const realityAllow = [pickOne(themeAxisOptions.realities)].filter(Boolean);
+    const speciesPool = [...themeAxisOptions.species].sort(() => Math.random() - 0.5);
+    const creatureTaxonomyAllow = subjectMode === 'CREATURE' ? speciesPool.slice(0, Math.random() < 0.26 ? 2 : 1) : [];
+    const adjacentEraPool = themeAxisOptions.eras.filter(value => value !== 'timeless');
+    const eraAllow = pickAdjacentAxisRange(adjacentEraPool, { includeAll: true, allItems: themeAxisOptions.eras });
+    const realityAllow = pickAdjacentAxisRange(themeAxisOptions.realities, { includeAll: true, allItems: themeAxisOptions.realities });
     setWorldAxisState(prev => ({
       ...prev,
       primaryGenre: genreAllow[0] || '',
       secondaryGenres: genreAllow.slice(1, 2),
+      creatureTaxonomyAllow,
       genreAllow,
       eraAllow,
       realityAllow
@@ -4370,6 +5412,7 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
       ...prev,
       primaryGenre: '',
       secondaryGenres: [],
+      creatureTaxonomyAllow: [],
       genreAllow: [],
       eraAllow: [],
       realityAllow: []
@@ -4400,11 +5443,19 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
     setDraftWorldAxisState(null);
   };
 
-  const setDraftWorldAxisList = (key: 'genreAllow' | 'eraAllow' | 'realityAllow', value: string) => {
+  const setDraftWorldAxisList = (key: 'creatureTaxonomyAllow' | 'genreAllow' | 'eraAllow' | 'realityAllow', value: string) => {
     setDraftWorldAxisState(prevDraft => {
       const prev = prevDraft || worldAxisState;
-      const current = prev[key];
+      if (key === 'creatureTaxonomyAllow') {
+        const current = prev.creatureTaxonomyAllow;
+        const taxonomyValue = value as CreatureTaxonomyTag;
+        const next = current.includes(taxonomyValue)
+          ? current.filter(item => item !== taxonomyValue)
+          : [...current, taxonomyValue].slice(-2);
+        return { ...prev, creatureTaxonomyAllow: next };
+      }
       if (key === 'genreAllow') {
+        const current = prev.genreAllow;
         const nextGenres = current.includes(value)
           ? current.filter(item => item !== value)
           : [...current, value].slice(-2);
@@ -4415,7 +5466,12 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
           secondaryGenres: nextGenres.slice(1, 2)
         };
       }
-      const maxCount = key === 'realityAllow' ? CONCEPT_REALITY_AXIS.length : 2;
+      const current = key === 'eraAllow' ? prev.eraAllow : prev.realityAllow;
+      const maxCount = key === 'eraAllow'
+        ? CONCEPT_ERA_AXIS.length
+        : key === 'realityAllow'
+          ? CONCEPT_REALITY_AXIS.length
+          : 2;
       const next = current.includes(value)
         ? current.filter(item => item !== value)
         : [...current, value].slice(-maxCount);
@@ -4425,7 +5481,12 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
 
   const renderThemeAxisSlot = (mode: ThemeAxisPickerMode, label: string, labelEn: string, placeholder: string, placeholderEn: string, values: readonly string[]) => {
     const hasValue = values.length > 0;
-    const displayValue = axisSlotText(values);
+    const allValues = mode === 'TIME'
+      ? themeAxisOptions.eras
+      : mode === 'REALITY'
+        ? themeAxisOptions.realities
+        : undefined;
+    const displayValue = axisSlotText(values, allValues);
     return (
       <span className="inline-flex min-w-0 flex-1 items-center relative">
         <span className="group/tag relative inline-flex min-w-0 max-w-full items-center align-middle">
@@ -4637,7 +5698,7 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
         hint: t(lang, '时间轴决定词库的时代合法性。', 'The time axis controls era legality for the pool.'),
         content: (
           <div>
-            <div className={`mb-2 text-[13px] font-black uppercase tracking-[0.08em] ${mutedText}`}>{t(lang, '时间轴（最多 2 个）', 'Time Axis')}</div>
+            <div className={`mb-2 text-[13px] font-black uppercase tracking-[0.08em] ${mutedText}`}>{t(lang, '时间轴（可多选）', 'Time Axis')}</div>
             <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
             {themeAxisOptions.eras.map(value => renderAxisPickerOption(
               pickerDraft.eraAllow.includes(value),
@@ -4660,6 +5721,25 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
               themeAxisLabel(value),
               () => setDraftWorldAxisList('realityAllow', value)
             ))}
+            </div>
+          </div>
+        )
+      },
+      SPECIES: {
+        title: t(lang, '选择物种', 'Choose Species'),
+        hint: t(lang, '物种轴只作用于异种词库，用来筛出哺乳、龙类、昆虫、机械、深渊等异种结构方向。', 'The species axis only affects creature lexicons, filtering mammal, draconic, insectoid, machine, eldritch, and other creature directions.'),
+        content: (
+          <div>
+            <div className={`mb-2 text-[13px] font-black uppercase tracking-[0.08em] ${mutedText}`}>{t(lang, '物种轴（最多 2 个）', 'Species Axis')}</div>
+            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+              {themeAxisOptions.species.map(value => {
+                const order = pickerDraft.creatureTaxonomyAllow.indexOf(value as CreatureTaxonomyTag) + 1;
+                return renderAxisPickerOption(
+                  order > 0,
+                  order > 0 ? `${themeAxisLabel(value)}  ${order}` : themeAxisLabel(value),
+                  () => setDraftWorldAxisList('creatureTaxonomyAllow', value)
+                );
+              })}
             </div>
           </div>
         )
@@ -4724,43 +5804,68 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
       : 'border-orange-400/55 bg-orange-400/10 text-orange-300';
     const themeLocked = isSectionLocked('THEME');
     const themeExpanded = isThemeCoreExpanded;
-    const themeAxisCount = worldAxisState.genreAllow.length + effectiveKeywordTags.eraTags.length + effectiveKeywordTags.realityTags.length;
+    const themeAxisCount = worldAxisState.creatureTaxonomyAllow.length + worldAxisState.genreAllow.length + effectiveKeywordTags.eraTags.length + effectiveKeywordTags.realityTags.length;
     const themeFilterSummary = [
-      worldAxisState.genreAllow.length > 0 ? `${t(lang, '类型', 'Type')} ${axisSummaryText(worldAxisState.genreAllow, 2)}` : '',
-      effectiveKeywordTags.eraTags.length > 0 ? `${t(lang, '时间', 'Time')} ${axisSummaryText(effectiveKeywordTags.eraTags, 2)}` : '',
-      effectiveKeywordTags.realityTags.length > 0 ? `${t(lang, '现实', 'Reality')} ${axisSummaryText(effectiveKeywordTags.realityTags, 1)}` : ''
+      subjectMode === 'CREATURE' && worldAxisState.creatureTaxonomyAllow.length > 0 ? `${t(lang, '物种', 'Species')} ${axisSummaryText(worldAxisState.creatureTaxonomyAllow, 2)}` : '',
+      worldAxisState.genreAllow.length > 0 ? `${t(lang, '类别', 'Category')} ${axisSummaryText(worldAxisState.genreAllow, 2)}` : '',
+      effectiveKeywordTags.eraTags.length > 0 ? `${t(lang, '时间', 'Time')} ${axisSummaryText(effectiveKeywordTags.eraTags, 2, themeAxisOptions.eras)}` : '',
+      effectiveKeywordTags.realityTags.length > 0 ? `${t(lang, '现实', 'Reality')} ${axisSummaryText(effectiveKeywordTags.realityTags, 1, themeAxisOptions.realities)}` : ''
     ].filter(Boolean);
     const renderThemeAxisCompactPicker = (mode: ThemeAxisPickerMode, label: string, labelEn: string, values: readonly string[]) => {
       const hasValue = values.length > 0;
+      const allValues = mode === 'SPECIES'
+        ? themeAxisOptions.species
+        : mode === 'TIME'
+        ? themeAxisOptions.eras
+        : mode === 'REALITY'
+          ? themeAxisOptions.realities
+          : undefined;
+      const axisButtonStyle = {
+        borderColor: hasValue
+          ? isRetro ? 'rgba(133, 65, 27, 0.55)' : 'rgba(249, 115, 22, 0.62)'
+          : isRetro ? 'rgba(133, 65, 27, 0.16)' : 'rgba(255, 255, 255, 0.06)',
+        backgroundColor: hasValue
+          ? isRetro ? 'rgba(133, 65, 27, 0.10)' : 'rgba(249, 115, 22, 0.10)'
+          : isRetro ? 'transparent' : 'rgba(9, 9, 11, 0.82)'
+      };
       return (
         <button
           type="button"
           disabled={themeLocked}
           onClick={() => openThemeAxisPicker(mode)}
-          className={`flex min-h-[3.35rem] min-w-0 items-center justify-between gap-3 rounded-md border px-3 py-2 text-left transition-all hover:-translate-y-0.5 active:scale-[0.985] ${hasValue
-            ? (isRetro ? 'border-[#85411B]/26 bg-[#85411B]/10 text-[#5A2B10]' : 'border-orange-500/24 bg-orange-500/10 text-orange-50')
-            : (isRetro ? 'border-[#85411B]/12 bg-white/24 text-[#6F4A2D]/62 hover:border-[#85411B]/24 hover:bg-[#85411B]/7 hover:text-[#5A2B10]' : 'border-orange-500/10 bg-black/24 text-zinc-500 hover:border-orange-500/25 hover:bg-orange-500/7 hover:text-zinc-200')
-          } disabled:cursor-not-allowed disabled:opacity-55`}
+          className={`min-w-0 rounded border px-2.5 py-1.5 text-left transition-all active:scale-[0.985] ${hasValue ? (isRetro ? 'text-[#85411B]' : 'text-[var(--mist-active-accent)]') : (isRetro ? 'text-[#6F4A2D]/82 hover:bg-[#85411B]/6' : 'text-zinc-300 hover:border-white/[0.12] hover:bg-white/[0.035]')} disabled:cursor-not-allowed disabled:opacity-55`}
+          style={axisButtonStyle}
           title={t(lang, '选择' + label, 'Choose ' + labelEn)}
         >
-          <span className={`shrink-0 text-[11px] font-black uppercase tracking-[0.12em] ${hasValue ? accentText : mutedText}`}>{t(lang, label, labelEn)}</span>
-          <span className={`min-w-0 flex-1 truncate text-right text-[13px] font-black ${hasValue ? strongText : mutedText}`}>
-            {hasValue ? axisSlotText(values) : t(lang, '未选', 'None')}
+          <span className="block min-w-0 truncate text-[12px] font-black leading-5">{t(lang, label, labelEn)}</span>
+          <span className={`mt-0.5 block min-w-0 truncate text-[11px] font-medium leading-4 ${hasValue ? '' : mutedText}`}>
+            {hasValue ? axisSlotText(values, allValues) : t(lang, '未选', 'None')}
           </span>
         </button>
       );
     };
     return (
-      <section className={`mist-aesthetic-module mist-concept-source-module rounded-lg border transition-all duration-300 ${softPanelClass}`}>
-        <div className={`mist-aesthetic-module-header grid min-h-[2.45rem] grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b px-3 py-2 ${isRetro ? 'border-[#85411B]/12' : 'border-white/[0.06]'}`}>
+      <section className={`mist-aesthetic-module mist-concept-source-module rounded-lg border shadow-lg shadow-black/20 backdrop-blur-md transition-all duration-300 ${softPanelClass}`}>
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => setIsThemeCoreExpanded(prev => !prev)}
+          onKeyDown={event => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              setIsThemeCoreExpanded(prev => !prev);
+            }
+          }}
+          className={`mist-aesthetic-module-header grid min-h-[2.45rem] cursor-pointer grid-cols-[minmax(0,1fr)_minmax(220px,auto)_auto] items-center gap-3 border-b px-3 py-2 ${isRetro ? 'border-[#85411B]/12' : 'border-white/[0.06]'}`}
+        >
           <div className={`${paramsModuleTitleClass} min-w-0`}>
-            <Fingerprint size={16} className={accentText} />
+            <Target size={16} className={accentText} />
             <span className="truncate">{t(lang, '核心主题', 'Core Theme')}</span>
             <span className={paramsModuleCountClass}>
               {themeAxisCount}
             </span>
           </div>
-          <div className="flex min-w-0 items-center justify-end gap-1.5">
+          <div className="flex min-w-0 items-center justify-end gap-1.5" onClick={event => event.stopPropagation()}>
             <div className="mist-aesthetic-action-buttons flex items-center gap-1 rounded-md border p-0.5">
               <button
                 type="button"
@@ -4821,17 +5926,20 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
               >
                 {copiedSectionId === 'THEME' ? <Check size={12} /> : <Copy size={12} />}
               </button>
-              {renderParamExpandButton(
-                themeExpanded,
-                () => setIsThemeCoreExpanded(prev => !prev),
-                t(lang, '收起', 'Collapse'),
-                t(lang, '展开', 'Expand')
-              )}
             </div>
+          </div>
+          <div onClick={event => event.stopPropagation()}>
+            {renderParamExpandButton(
+              themeExpanded,
+              () => setIsThemeCoreExpanded(prev => !prev),
+              t(lang, '收起', 'Collapse'),
+              t(lang, '展开', 'Expand')
+            )}
           </div>
         </div>
         <div className="space-y-2 p-3">
-          <div className="grid gap-2 sm:grid-cols-3">
+          <div className={`grid grid-cols-1 gap-1.5 ${subjectMode === 'CREATURE' ? 'sm:grid-cols-4' : 'sm:grid-cols-3'}`}>
+            {subjectMode === 'CREATURE' ? renderThemeAxisCompactPicker('SPECIES', '物种', 'Species', worldAxisState.creatureTaxonomyAllow) : null}
             {renderThemeAxisCompactPicker('TYPE', '类别', 'Category', worldAxisState.genreAllow)}
             {renderThemeAxisCompactPicker('TIME', '时代', 'Era', worldAxisState.eraAllow)}
             {renderThemeAxisCompactPicker('REALITY', '现实', 'Reality', worldAxisState.realityAllow)}
@@ -4925,10 +6033,10 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
         {children}
       </div>
     );
-    const renderActiveAxis = (label: string, values: readonly string[]) => (
+    const renderActiveAxis = (label: string, values: readonly string[], allValues?: readonly string[]) => (
       <span className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 ${isRetro ? 'bg-[#85411B]/7 text-[#5A2B10]' : 'bg-orange-500/9 text-orange-100/80'}`}>
         <span className={mutedText}>{label}</span>
-        <span>{values.length > 0 ? axisSummaryText(values, 2) : t(lang, '未选', 'None')}</span>
+        <span>{values.length > 0 ? axisSummaryText(values, 2, allValues) : t(lang, '未选', 'None')}</span>
       </span>
     );
     const renderMiniRow = (row: typeof matchRows[number]) => {
@@ -4965,8 +6073,8 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
         </div>
         <div className={`mb-2 flex flex-wrap gap-1.5 text-[10px] font-black leading-4 ${isRetro ? 'text-[#6F4A2D]/78' : 'text-zinc-400'}`}>
           {renderActiveAxis(t(lang, '类型', 'Type'), activeCategoryTags)}
-          {renderActiveAxis(t(lang, '时间', 'Era'), activeEraTags)}
-          {renderActiveAxis(t(lang, '现实', 'Reality'), activeRealityTags)}
+          {renderActiveAxis(t(lang, '时间', 'Era'), activeEraTags, themeAxisOptions.eras)}
+          {renderActiveAxis(t(lang, '现实', 'Reality'), activeRealityTags, themeAxisOptions.realities)}
         </div>
         <div className="grid gap-1.5">
           {renderAxisLine(t(lang, '类型 categoryFit', 'Type categoryFit'), (
@@ -5058,6 +6166,7 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
   };
 
   const lexiconAxisKeyLabel = (axisKey: LexiconAxisKey) => ({
+    species: t(lang, '物种', 'Species'),
     category: t(lang, '类别', 'Category'),
     era: t(lang, '时间', 'Era'),
     reality: t(lang, '现实', 'Reality')
@@ -5074,17 +6183,17 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
     key: T,
     value: LexiconAxisFilterState[T][number],
     label: string,
-    labelEn: string
+    labelEn: string,
+    desc: string,
+    descEn: string
   ) => {
     const selected = (lexiconAxisFilterState[key] as string[]).includes(String(value));
     return (
       <button
         type="button"
         onClick={() => toggleLexiconAxisFilterLevel(key, value)}
-        className={`rounded-md px-2.5 py-1.5 text-[11px] font-black transition-all active:scale-[0.98] ${selected
-          ? (isRetro ? 'bg-[#85411B]/12 text-[#85411B] ring-1 ring-[#85411B]/24' : 'bg-orange-500/13 text-orange-100 ring-1 ring-orange-500/24')
-          : (isRetro ? 'bg-[#85411B]/5 text-[#6F4A2D]/54 hover:bg-[#85411B]/9 hover:text-[#5A2B10]' : 'bg-zinc-950/42 text-zinc-500 hover:bg-orange-500/8 hover:text-zinc-300')
-        }`}
+        className={`mist-concept-source-mode-button flex h-8 shrink-0 items-center rounded border px-3 text-[11px] font-black uppercase tracking-[0.06em] transition-all ${selected ? 'is-active' : ''}`}
+        title={t(lang, desc, descEn)}
       >
         {t(lang, label, labelEn)}
       </button>
@@ -5098,10 +6207,7 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
         key={mode.id}
         type="button"
         onClick={() => setLexiconAxisFilterMode(mode.id)}
-        className={`h-7 rounded px-2.5 text-[11px] font-black transition-all active:scale-[0.98] ${selected
-          ? (isRetro ? 'bg-[#85411B]/14 text-[#85411B] ring-1 ring-[#85411B]/22' : 'bg-orange-500/14 text-orange-100 ring-1 ring-orange-500/24')
-          : (isRetro ? 'text-[#6F4A2D]/56 hover:bg-[#85411B]/7 hover:text-[#5A2B10]' : 'text-zinc-500 hover:bg-orange-500/8 hover:text-zinc-300')
-        }`}
+        className={`mist-concept-source-mode-button flex h-8 shrink-0 items-center rounded border px-3 text-[11px] font-black uppercase tracking-[0.06em] transition-all ${selected ? 'is-active' : ''}`}
         title={t(lang, mode.desc, mode.descEn)}
       >
         {t(lang, mode.label, mode.labelEn)}
@@ -5109,16 +6215,20 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
     );
   };
 
-  const renderLexiconUniversalChoice = (value: LexiconUniversalPolicy, label: string, labelEn: string) => {
+  const renderLexiconUniversalChoice = (
+    value: LexiconUniversalPolicy,
+    label: string,
+    labelEn: string,
+    desc: string,
+    descEn: string
+  ) => {
     const selected = lexiconAxisFilterState.universalPolicy === value;
     return (
       <button
         type="button"
         onClick={() => setLexiconUniversalPolicy(value)}
-        className={`h-7 rounded px-2.5 text-[11px] font-black transition-all active:scale-[0.98] ${selected
-          ? (isRetro ? 'bg-[#85411B]/12 text-[#85411B] ring-1 ring-[#85411B]/22' : 'bg-orange-500/13 text-orange-100 ring-1 ring-orange-500/24')
-          : (isRetro ? 'bg-[#85411B]/4 text-[#6F4A2D]/52 hover:bg-[#85411B]/8 hover:text-[#5A2B10]' : 'bg-zinc-950/34 text-zinc-500 hover:bg-orange-500/8 hover:text-zinc-300')
-        }`}
+        className={`mist-concept-source-mode-button flex h-8 shrink-0 items-center rounded border px-3 text-[11px] font-black uppercase tracking-[0.06em] transition-all ${selected ? 'is-active' : ''}`}
+        title={t(lang, desc, descEn)}
       >
         {t(lang, label, labelEn)}
       </button>
@@ -5126,195 +6236,271 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
   };
 
   const renderLexiconAxisFilterPanel = (options?: { hideAuditButton?: boolean }) => {
-    const actionButtonBase = 'group flex h-7 w-7 items-center justify-center rounded border transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-40';
+    const actionButtonBase = 'group flex h-6 w-6 items-center justify-center rounded border transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-40';
     const actionButtonIdle = isRetro
-      ? 'border-[#85411B]/14 bg-white/24 text-[#85411B]/58 hover:border-[#85411B]/36 hover:bg-[#85411B]/8 hover:text-[#85411B]'
-      : 'border-white/[0.06] bg-black/12 text-zinc-500 hover:border-[var(--mist-active-accent)]/45 hover:bg-[var(--mist-active-accent)]/10 hover:text-[var(--mist-active-accent)]';
-    const rowLabelClass = `text-[11px] font-black uppercase tracking-[0.12em] ${mutedText} mb-1.5`;
-
-    const renderAxisBadge = (label: string, values: readonly string[]) => {
-      const hasValue = values.length > 0;
-      return (
-        <div className={`flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[11px] ${hasValue ? (isRetro ? 'border-[#85411B]/20 bg-[#85411B]/7 text-[#85411B]' : 'border-orange-500/20 bg-orange-500/10 text-orange-200') : (isRetro ? 'border-transparent bg-[#85411B]/4 text-[#6F4A2D]/40' : 'border-transparent bg-white/[0.03] text-zinc-500')}`}>
-          <span className="font-black opacity-70">{label}</span>
-          <span className="font-bold">{hasValue ? axisSummaryText(values, 2) : t(lang, '未选', 'None')}</span>
+      ? 'border-[#85411B]/16 bg-transparent text-[#85411B]/62 hover:border-[#85411B]/34 hover:bg-[#85411B]/8 hover:text-[#85411B]'
+      : 'border-white/[0.06] bg-zinc-950/55 text-zinc-500 hover:border-orange-500/28 hover:bg-orange-500/8 hover:text-orange-200/86';
+    const actionButtonActive = isRetro
+      ? 'border-[#85411B]/44 bg-[#85411B]/10 text-[#85411B]'
+      : 'border-[var(--mist-active-accent)]/55 bg-[var(--mist-active-accent)]/10 text-[var(--mist-active-accent)]';
+    const rowLabelClass = `text-[11px] font-black uppercase tracking-[0.12em] ${isRetro ? 'text-[#6F4A2D]/78' : 'text-zinc-400'} mb-1.5`;
+    const isCreatureThemePage = subjectMode === 'CREATURE';
+    const lexiconAxisCount = (isCreatureThemePage ? worldAxisState.creatureTaxonomyAllow.length : 0) + worldAxisState.genreAllow.length + effectiveKeywordTags.eraTags.length + effectiveKeywordTags.realityTags.length;
+    const visibleLexiconAxisOrder = lexiconAxisFilterState.order.filter(axisKey => isCreatureThemePage || axisKey !== 'species');
+    const renderRuleLine = (label: string, labelEn: string, controls: React.ReactNode) => (
+      <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5">
+        <span className={`shrink-0 text-[13px] font-black uppercase tracking-[0.08em] ${isRetro ? 'text-[#6F4A2D]/86' : 'text-zinc-300'}`}>{t(lang, label, labelEn)}</span>
+        <div className="mist-concept-source-mode-toggle flex min-w-0 flex-wrap items-center gap-1 rounded-md border p-0.5">
+          {controls}
         </div>
+      </div>
+    );
+    const renderCoreThemeAxisSlot = (
+      mode: ThemeAxisPickerMode,
+      label: string,
+      labelEn: string,
+      placeholder: string,
+      placeholderEn: string,
+      values: readonly string[]
+    ) => {
+      const hasValue = values.length > 0;
+      const allValues = mode === 'SPECIES'
+        ? themeAxisOptions.species
+        : mode === 'TIME'
+        ? themeAxisOptions.eras
+        : mode === 'REALITY'
+          ? themeAxisOptions.realities
+          : undefined;
+      return (
+        <button
+          type="button"
+          onClick={() => openThemeAxisPicker(mode)}
+          className={`group min-w-0 text-left transition-all duration-200 active:scale-[0.985] ${isRetro ? 'hover:bg-[#85411B]/5' : 'hover:bg-orange-500/7'} rounded-sm px-1.5 py-1`}
+          title={t(lang, '选择' + label, 'Choose ' + labelEn)}
+        >
+          <span className={`mb-1 block text-[10px] font-black uppercase tracking-[0.14em] transition-colors ${hasValue ? accentText : mutedText}`}>
+            {t(lang, label, labelEn)}
+          </span>
+          <span
+            className={`inline-block max-w-full truncate border-b-2 pb-1 font-serif text-[20px] font-black leading-7 transition-all duration-200 md:text-[22px] ${
+              hasValue
+                ? isRetro
+                  ? 'border-[#85411B]/72 text-[#1A120A] group-hover:border-[#85411B] group-hover:text-[#85411B]'
+                  : 'border-white/55 text-zinc-50 group-hover:border-orange-400 group-hover:text-orange-100'
+                : isRetro
+                  ? 'border-[#85411B]/22 text-[#6F4A2D]/42 group-hover:border-[#85411B]/48 group-hover:text-[#6F4A2D]/76'
+                  : 'border-white/18 text-zinc-600 group-hover:border-orange-500/45 group-hover:text-zinc-300'
+            }`}
+          >
+            {hasValue ? axisSlotText(values, allValues) : t(lang, placeholder, placeholderEn)}
+          </span>
+        </button>
       );
     };
 
     return (
-      <section className={`rounded-xl border ${isRetro ? 'border-[#85411B]/14 bg-white/32' : 'border-orange-500/10 bg-zinc-950/45'} ${isLexiconFilterExpanded ? 'shadow-sm' : ''} transition-all duration-300`}>
-        <div className="flex items-start justify-between gap-3 px-3 py-2.5">
-          <div className="flex min-w-0 flex-col gap-3 flex-1">
-            <div className={sidebarModuleTitleClass}>
-              <Layers3 size={16} className={accentText} />
-              <span>{t(lang, '词库筛选', 'Lexicon Filter')}</span>
+      <section className={`mist-aesthetic-module mist-concept-source-module rounded-lg border transition-all duration-300 ${softPanelClass}`}>
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => setIsLexiconFilterExpanded(prev => !prev)}
+          onKeyDown={event => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              setIsLexiconFilterExpanded(prev => !prev);
+            }
+          }}
+          className={`mist-aesthetic-module-header grid min-h-[2.45rem] cursor-pointer grid-cols-[minmax(0,1fr)_minmax(220px,auto)_auto] items-center gap-3 border-b px-3 py-2 ${isRetro ? 'border-[#85411B]/12' : 'border-white/[0.06]'}`}
+        >
+          <div className={`${paramsModuleTitleClass} min-w-0`}>
+              <Target size={16} className={accentText} />
+              <span className="truncate">{t(lang, '核心主题', 'Core Theme')}</span>
+              <span className={paramsModuleCountClass}>
+                {lexiconAxisCount}
+              </span>
+          </div>
+
+          <div className="flex min-w-0 items-center justify-end gap-1.5" onClick={event => event.stopPropagation()}>
+            <div className="mist-aesthetic-action-buttons flex items-center gap-1 rounded-md border p-0.5">
+              {!options?.hideAuditButton ? (
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); setIsLexiconFilterAuditOpen(true); }}
+                  className={`${actionButtonBase} ${actionButtonIdle}`}
+                  title={t(lang, '打开词库筛选总表', 'Open Lexicon Filter Table')}
+                >
+                  <Table2 size={12} />
+                </button>
+              ) : null}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  triggerActionMotion('LEXICON_FILTER:random');
+                  startTransition(() => {
+                    randomThemeAxis();
+                    setLexiconAxisFilterState(DEFAULT_LEXICON_AXIS_FILTER_STATE);
+                  });
+                }}
+                className={`mist-concept-action-random ${activeActionMotion === 'LEXICON_FILTER:random' ? 'is-motioning' : ''} ${actionButtonBase} ${actionButtonIdle}`}
+                title={t(lang, '随机', 'Random')}
+              >
+                <Dice5 size={12} className="transition-transform duration-500 group-hover:rotate-90" />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  resetLexiconAxisFilter();
+                  triggerActionMotion('LEXICON_FILTER:clear');
+                }}
+                className={`mist-concept-action-clear ${activeActionMotion === 'LEXICON_FILTER:clear' ? 'is-motioning' : ''} ${actionButtonBase} ${actionButtonIdle}`}
+                title={t(lang, '清空', 'Clear')}
+              >
+                <RefreshCcw size={12} className="transition-transform duration-500 group-hover:-rotate-90" />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleLock('LEXICON');
+                }}
+                className={`mist-concept-action-lock ${actionButtonBase} ${isSectionLocked('LEXICON') ? actionButtonActive : actionButtonIdle}`}
+                title={isSectionLocked('LEXICON') ? t(lang, '解锁', 'Unlock') : t(lang, '锁定', 'Lock')}
+              >
+                {isSectionLocked('LEXICON') ? <Lock size={12} /> : <Unlock size={12} />}
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCopiedSectionId('LEXICON');
+                  setTimeout(() => setCopiedSectionId(null), 1500);
+                }}
+                className={`mist-concept-action-copy ${actionButtonBase} ${copiedSectionId === 'LEXICON' ? actionButtonActive : actionButtonIdle}`}
+                title={t(lang, '复制', 'Copy')}
+              >
+                {copiedSectionId === 'LEXICON' ? <Check size={12} /> : <Copy size={12} />}
+              </button>
             </div>
-            
-            <div className="flex flex-wrap items-center gap-6 pb-1">
-              {[
-                { label: t(lang, '类别', 'Category'), values: worldAxisState.genreAllow },
-                { label: t(lang, '时代', 'Era'), values: effectiveKeywordTags.eraTags },
-                { label: t(lang, '现实', 'Reality'), values: effectiveKeywordTags.realityTags }
-              ].map((item, idx) => {
-                const hasValue = item.values.length > 0;
+          </div>
+          <div onClick={event => event.stopPropagation()}>
+            {renderParamExpandButton(
+              isLexiconFilterExpanded,
+              () => setIsLexiconFilterExpanded(prev => !prev),
+              t(lang, '收起', 'Collapse'),
+              t(lang, '展开', 'Expand')
+            )}
+          </div>
+        </div>
+
+        <div className={`px-4 py-3 ${isRetro ? 'bg-[#85411B]/[0.015]' : 'bg-black/12'}`}>
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <div className={`flex min-w-0 items-center gap-1 rounded-md border p-0.5 ${isRetro ? 'border-[#85411B]/12 bg-[#85411B]/4' : 'border-white/[0.06] bg-black/20'}`}>
+              {([
+                { id: 'HUMAN' as SubjectMode, label: '人形', labelEn: 'Human' },
+                { id: 'CREATURE' as SubjectMode, label: '异种', labelEn: 'Creature' }
+              ]).map(item => {
+                const selected = subjectMode === item.id;
                 return (
-                  <div key={idx} className="flex items-baseline gap-2">
-                    <span className={`text-[11px] font-black uppercase tracking-[0.14em] ${mutedText}`}>{item.label}:</span>
-                    <span className={`text-[14px] font-black ${hasValue ? strongText : mutedText} border-b-2 ${isRetro ? 'border-[#85411B]/50' : 'border-red-600/70'} pb-[1px] leading-none`}>
-                      {hasValue ? axisSummaryText(item.values, 3) : t(lang, '未选', 'None')}
-                    </span>
-                  </div>
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => {
+                      setSubjectMode(item.id);
+                      setObjectRoute(item.id === 'CREATURE' ? 'CREATURE' : 'HUMAN');
+                    }}
+                    className={`h-7 rounded px-3 text-[11px] font-black transition-all ${selected
+                      ? isRetro ? 'bg-[#85411B]/14 text-[#85411B]' : 'bg-orange-500/12 text-orange-100'
+                      : isRetro ? 'text-[#6F4A2D]/55 hover:bg-[#85411B]/7 hover:text-[#85411B]' : 'text-zinc-500 hover:bg-white/[0.045] hover:text-zinc-300'
+                    }`}
+                  >
+                    {t(lang, item.label, item.labelEn)}
+                  </button>
                 );
               })}
             </div>
+            <span className={`hidden text-[10px] font-black uppercase tracking-[0.16em] sm:inline ${mutedText}`}>
+              {isCreatureThemePage ? t(lang, '异种筛选面板', 'Creature Filter') : t(lang, '人形筛选面板', 'Human Filter')}
+            </span>
           </div>
-
-          <div className="mist-aesthetic-action-buttons flex shrink-0 items-center gap-1.5 mt-0.5">
-            {!options?.hideAuditButton ? (
-              <button
-                type="button"
-                onClick={(e) => { e.stopPropagation(); setIsLexiconFilterAuditOpen(true); }}
-                className={`${actionButtonBase} ${actionButtonIdle}`}
-                title={t(lang, '打开词库筛选总表', 'Open Lexicon Filter Table')}
-              >
-                <Table2 size={12} />
-              </button>
-            ) : null}
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                triggerActionMotion('LEXICON_FILTER:random');
-                startTransition(() => {
-                  randomThemeAxis();
-                  setLexiconAxisFilterState(DEFAULT_LEXICON_AXIS_FILTER_STATE);
-                });
-              }}
-              className={`mist-concept-action-random group flex h-6 w-6 items-center justify-center rounded border transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-40 ${activeActionMotion === 'LEXICON_FILTER:random' ? 'is-motioning' : ''} ${actionButtonIdle}`}
-              title={t(lang, '随机', 'Random')}
-            >
-              <Dice5 size={12} className="transition-transform duration-500 group-hover:rotate-90" />
-            </button>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                resetLexiconAxisFilter();
-                triggerActionMotion('LEXICON_FILTER:clear');
-              }}
-              className={`mist-concept-action-clear group flex h-6 w-6 items-center justify-center rounded border transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-40 ${activeActionMotion === 'LEXICON_FILTER:clear' ? 'is-motioning' : ''} ${actionButtonIdle}`}
-              title={t(lang, '清空', 'Clear')}
-            >
-              <RefreshCcw size={12} className="transition-transform duration-500 group-hover:-rotate-90" />
-            </button>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onToggleLock('LEXICON');
-              }}
-              className={`mist-concept-action-lock flex h-6 w-6 items-center justify-center rounded border transition-all duration-200 ${isSectionLocked('LEXICON') ? (isRetro ? 'border-[#85411B]/44 bg-[#85411B]/10 text-[#85411B]' : 'border-[var(--mist-active-accent)]/55 bg-[var(--mist-active-accent)]/10 text-[var(--mist-active-accent)]') : actionButtonIdle}`}
-              title={isSectionLocked('LEXICON') ? t(lang, '解锁', 'Unlock') : t(lang, '锁定', 'Lock')}
-            >
-              {isSectionLocked('LEXICON') ? <Lock size={12} /> : <Unlock size={12} />}
-            </button>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setCopiedSectionId('LEXICON');
-                setTimeout(() => setCopiedSectionId(null), 1500);
-              }}
-              className={`mist-concept-action-copy flex h-6 w-6 items-center justify-center rounded border transition-all duration-200 ${copiedSectionId === 'LEXICON' ? (isRetro ? 'border-[#85411B]/44 bg-[#85411B]/10 text-[#85411B]' : 'border-[var(--mist-active-accent)]/55 bg-[var(--mist-active-accent)]/10 text-[var(--mist-active-accent)]') : actionButtonIdle}`}
-              title={t(lang, '复制', 'Copy')}
-            >
-              {copiedSectionId === 'LEXICON' ? <Check size={12} /> : <Copy size={12} />}
-            </button>
-            <div onClick={event => event.stopPropagation()} className="ml-0.5">
-              {renderParamExpandButton(
-                isLexiconFilterExpanded,
-                () => setIsLexiconFilterExpanded(!isLexiconFilterExpanded),
-                t(lang, '收起', 'Collapse'),
-                t(lang, '展开', 'Expand')
-              )}
-            </div>
+          <div className={`grid grid-cols-1 gap-x-8 gap-y-3 ${isCreatureThemePage ? 'sm:grid-cols-4' : 'sm:grid-cols-3'}`}>
+            {isCreatureThemePage ? renderCoreThemeAxisSlot('SPECIES', '物种', 'Species', '选择物种', 'Choose Species', worldAxisState.creatureTaxonomyAllow) : null}
+            {renderCoreThemeAxisSlot('TYPE', '类别', 'Category', '选择类别', 'Choose Category', worldAxisState.genreAllow)}
+            {renderCoreThemeAxisSlot('TIME', '时间', 'Time', '选择时间', 'Choose Time', worldAxisState.eraAllow)}
+            {renderCoreThemeAxisSlot('REALITY', '现实', 'Reality', '选择现实', 'Choose Reality', worldAxisState.realityAllow)}
           </div>
         </div>
 
         {isLexiconFilterExpanded && (
           <div className={`border-t ${isRetro ? 'border-[#85411B]/10' : 'border-white/[0.06]'} animate-in fade-in slide-in-from-top-1 duration-200`}>
-            <div className={`grid gap-4 px-4 py-3 sm:grid-cols-2 ${isRetro ? 'bg-[#85411B]/[0.02]' : 'bg-black/12'}`}>
-              <div>
-                <div className={rowLabelClass}>{t(lang, '筛选模式 Mode', 'Filter Mode')}</div>
-                <div className="flex flex-wrap gap-1.5">
+            <div className={`grid gap-x-6 gap-y-2 px-4 py-2.5 xl:grid-cols-2 ${isRetro ? 'bg-[#85411B]/[0.02]' : 'bg-black/12'}`}>
+              {renderRuleLine(
+                '筛选模式',
+                'Filter Mode',
+                <>
                   {lexiconFilterModes.map(renderLexiconCompactModeButton)}
-                </div>
-              </div>
-              <div>
-                <div className={rowLabelClass}>{t(lang, '通用词策略 Universal Policy', 'Universal Terms Policy')}</div>
-                <div className="flex flex-wrap gap-1.5">
-                  {renderLexiconUniversalChoice('INCLUDE', '放行', 'Include')}
-                  {renderLexiconUniversalChoice('SORT_ONLY', '仅软排', 'Sort Only')}
-                  {renderLexiconUniversalChoice('EXCLUDE', '排除', 'Exclude')}
-                </div>
-              </div>
+                </>
+              )}
+              {renderRuleLine(
+                '通用词策略',
+                'Universal Policy',
+                <>
+                  {renderLexiconUniversalChoice('INCLUDE', '放行', 'Include', '通用词会直接进入符合池。', 'Universal terms can directly enter the matched pool.')}
+                  {renderLexiconUniversalChoice('SORT_ONLY', '仅软排', 'Sort Only', '通用词不硬放行，只参与排序。', 'Universal terms affect sorting only, not hard filtering.')}
+                  {renderLexiconUniversalChoice('EXCLUDE', '排除', 'Exclude', '通用词不自动进入符合池。', 'Universal terms do not automatically enter the matched pool.')}
+                </>
+              )}
             </div>
 
-            <div className={`grid grid-cols-1 gap-px border-t sm:grid-cols-3 ${isRetro ? 'border-[#85411B]/10 bg-[#85411B]/10' : 'border-white/[0.06] bg-white/[0.04]'}`}>
-              <div className={`flex flex-col gap-2 p-3 ${isRetro ? 'bg-[#F8F1E7]' : 'bg-[#0A0A0A]'}`}>
-                <div className={rowLabelClass}>{t(lang, '类别 Category', 'Category Axis')}</div>
-                <button type="button" onClick={() => openThemeAxisPicker('TYPE')} className={`group flex min-h-[36px] w-full items-center justify-between gap-2 rounded-md border px-2.5 text-left transition-colors ${isRetro ? 'border-[#85411B]/16 bg-white hover:border-[#85411B]/30 hover:bg-[#85411B]/4' : 'border-white/[0.08] bg-zinc-900/60 hover:border-orange-500/30 hover:bg-white/[0.04]'}`}>
-                  <span className={`truncate text-[12px] font-black ${worldAxisState.genreAllow.length > 0 ? strongText : mutedText}`}>
-                    {worldAxisState.genreAllow.length > 0 ? axisSlotText(worldAxisState.genreAllow) : t(lang, '选择类别基准', 'Select Category...')}
-                  </span>
-                  <ChevronDown size={14} className={`${mutedText} transition-transform group-hover:-rotate-90`} />
-                </button>
-                <div className="flex flex-wrap gap-1">
-                  {renderLexiconFilterChoice('categoryLevels', 'strong', '强', 'Strong')}
-                  {renderLexiconFilterChoice('categoryLevels', 'usable', '可用', 'Usable')}
-                  {renderLexiconFilterChoice('categoryLevels', 'fusion', '融合', 'Fusion')}
-                  {renderLexiconFilterChoice('categoryLevels', 'weak', '弱', 'Weak')}
-                  {renderLexiconFilterChoice('categoryLevels', 'exclude', '排除', 'Exclude')}
-                </div>
-              </div>
-
-              <div className={`flex flex-col gap-2 p-3 ${isRetro ? 'bg-[#F8F1E7]' : 'bg-[#0A0A0A]'}`}>
-                <div className={rowLabelClass}>{t(lang, '时间 Era', 'Era Axis')}</div>
-                <button type="button" onClick={() => openThemeAxisPicker('TIME')} className={`group flex min-h-[36px] w-full items-center justify-between gap-2 rounded-md border px-2.5 text-left transition-colors ${isRetro ? 'border-[#85411B]/16 bg-white hover:border-[#85411B]/30 hover:bg-[#85411B]/4' : 'border-white/[0.08] bg-zinc-900/60 hover:border-orange-500/30 hover:bg-white/[0.04]'}`}>
-                  <span className={`truncate text-[12px] font-black ${worldAxisState.eraAllow.length > 0 ? strongText : mutedText}`}>
-                    {worldAxisState.eraAllow.length > 0 ? axisSlotText(worldAxisState.eraAllow) : t(lang, '选择时间基准', 'Select Era...')}
-                  </span>
-                  <ChevronDown size={14} className={`${mutedText} transition-transform group-hover:-rotate-90`} />
-                </button>
-                <div className="flex flex-wrap gap-1">
-                  {renderLexiconFilterChoice('eraLevels', 'hit', '命中', 'Hit')}
-                  {renderLexiconFilterChoice('eraLevels', 'universal', '通用', 'Universal')}
-                  {renderLexiconFilterChoice('eraLevels', 'miss', '不符', 'Miss')}
-                </div>
-              </div>
-
-              <div className={`flex flex-col gap-2 p-3 ${isRetro ? 'bg-[#F8F1E7]' : 'bg-[#0A0A0A]'}`}>
-                <div className={rowLabelClass}>{t(lang, '现实 Reality', 'Reality Axis')}</div>
-                <button type="button" onClick={() => openThemeAxisPicker('REALITY')} className={`group flex min-h-[36px] w-full items-center justify-between gap-2 rounded-md border px-2.5 text-left transition-colors ${isRetro ? 'border-[#85411B]/16 bg-white hover:border-[#85411B]/30 hover:bg-[#85411B]/4' : 'border-white/[0.08] bg-zinc-900/60 hover:border-orange-500/30 hover:bg-white/[0.04]'}`}>
-                  <span className={`truncate text-[12px] font-black ${worldAxisState.realityAllow.length > 0 ? strongText : mutedText}`}>
-                    {worldAxisState.realityAllow.length > 0 ? axisSlotText(worldAxisState.realityAllow) : t(lang, '选择现实基准', 'Select Reality...')}
-                  </span>
-                  <ChevronDown size={14} className={`${mutedText} transition-transform group-hover:-rotate-90`} />
-                </button>
-                <div className="flex flex-wrap gap-1">
-                  {renderLexiconFilterChoice('realityLevels', 'hit', '命中', 'Hit')}
-                  {renderLexiconFilterChoice('realityLevels', 'allowed', '可容纳', 'Allowed')}
-                  {renderLexiconFilterChoice('realityLevels', 'miss', '不符', 'Miss')}
-                </div>
-              </div>
+            <div className={`grid gap-x-6 gap-y-2 border-t px-4 py-2.5 ${isCreatureThemePage ? 'xl:grid-cols-4' : 'xl:grid-cols-3'} ${isRetro ? 'border-[#85411B]/10 bg-[#85411B]/[0.015]' : 'border-white/[0.06] bg-black/10'}`}>
+              {isCreatureThemePage ? renderRuleLine(
+                '物种',
+                'Species',
+                <>
+                  {renderLexiconFilterChoice('creatureTaxonomyLevels', 'strong', '强', 'Strong', '只放入与当前物种强相关的异种词条。', 'Only include creature terms strongly related to the selected species.')}
+                  {renderLexiconFilterChoice('creatureTaxonomyLevels', 'usable', '可用', 'Usable', '放入当前物种可自然使用的异种词条。', 'Include creature terms naturally usable for the selected species.')}
+                  {renderLexiconFilterChoice('creatureTaxonomyLevels', 'fusion', '融合', 'Fusion', '放入可做物种融合的异种词条。', 'Include creature terms suited for taxonomy fusion.')}
+                  {renderLexiconFilterChoice('creatureTaxonomyLevels', 'weak', '弱', 'Weak', '放入关系较远但可审查的异种词条。', 'Include distant creature terms for audit or testing.')}
+                  {renderLexiconFilterChoice('creatureTaxonomyLevels', 'exclude', '排除', 'Exclude', '放入物种冲突词，通常只用于审查。', 'Include taxonomy conflicts, usually for audit only.')}
+                </>
+              ) : null}
+              {renderRuleLine(
+                '类别',
+                'Category',
+                <>
+                  {renderLexiconFilterChoice('categoryLevels', 'strong', '强', 'Strong', '只放入与当前类别强相关的词条。', 'Only include terms strongly related to the current category.')}
+                  {renderLexiconFilterChoice('categoryLevels', 'usable', '可用', 'Usable', '放入当前类别可自然使用的词条。', 'Include terms naturally usable for the current category.')}
+                  {renderLexiconFilterChoice('categoryLevels', 'fusion', '融合', 'Fusion', '放入可跨界融合、能制造混搭效果的词条。', 'Include cross-category terms for fusion and hybrid effects.')}
+                  {renderLexiconFilterChoice('categoryLevels', 'weak', '弱', 'Weak', '放入关系较远但仍可尝试的词条。', 'Include distant but still testable terms.')}
+                  {renderLexiconFilterChoice('categoryLevels', 'exclude', '排除', 'Exclude', '放入被标记为冲突或排除的词条，通常只用于审查。', 'Include conflicting or excluded terms, usually for audit only.')}
+                </>
+              )}
+              {renderRuleLine(
+                '时间',
+                'Era',
+                <>
+                  {renderLexiconFilterChoice('eraLevels', 'hit', '命中', 'Hit', '词条时间锚与当前时间轴匹配。', 'The term era anchor matches the selected era.')}
+                  {renderLexiconFilterChoice('eraLevels', 'universal', '通用', 'Universal', '词条不限时代，或可被当前时间轴容纳。', 'The term is era-universal or can fit the selected era.')}
+                  {renderLexiconFilterChoice('eraLevels', 'miss', '不符', 'Miss', '词条时间锚与当前时间轴不匹配，通常用于审查。', 'The term era anchor does not match, usually for audit.')}
+                </>
+              )}
+              {renderRuleLine(
+                '现实',
+                'Reality',
+                <>
+                  {renderLexiconFilterChoice('realityLevels', 'hit', '命中', 'Hit', '词条现实锚与当前现实轴直接匹配。', 'The term reality anchor directly matches the selected reality axis.')}
+                  {renderLexiconFilterChoice('realityLevels', 'allowed', '可容纳', 'Allowed', '词条不完全命中，但能被当前现实轴容纳。', 'The term is not a direct hit but can fit the selected reality axis.')}
+                  {renderLexiconFilterChoice('realityLevels', 'miss', '不符', 'Miss', '词条现实锚与当前现实轴不匹配，通常用于审查。', 'The term reality anchor does not match, usually for audit.')}
+                </>
+              )}
             </div>
 
             {lexiconAxisFilterState.mode === 'LAYERED' && (
               <div className={`border-t px-4 py-3 ${isRetro ? 'border-[#85411B]/10 bg-[#85411B]/[0.03]' : 'border-white/[0.06] bg-black/20'}`}>
                 <div className={rowLabelClass}>{t(lang, '层级顺序 Layer Order', 'Layer Order')}</div>
-                <div className="grid gap-2 sm:grid-cols-3">
-                  {lexiconAxisFilterState.order.map((axisKey, index) => (
+                <div className={`grid gap-2 ${isCreatureThemePage ? 'sm:grid-cols-4' : 'sm:grid-cols-3'}`}>
+                  {visibleLexiconAxisOrder.map((axisKey, index) => (
                     <div key={axisKey} className={`flex items-center justify-between gap-2 rounded-md border px-3 py-2 ${isRetro ? 'border-[#85411B]/14 bg-white/40 text-[#5A2B10]' : 'border-white/[0.08] bg-zinc-900/40 text-zinc-200'}`}>
                       <div className="min-w-0">
                         <div className={`text-[10px] font-black uppercase tracking-[0.12em] ${mutedText}`}>{t(lang, `第${index + 1}层`, `Layer ${index + 1}`)}</div>
@@ -5322,7 +6508,7 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
                       </div>
                       <div className="flex shrink-0 items-center gap-1">
                         <button type="button" onClick={() => moveLexiconAxisOrder(axisKey, -1)} disabled={index === 0} className={`flex h-6 w-6 items-center justify-center rounded transition-all disabled:opacity-25 ${isRetro ? 'hover:bg-[#85411B]/10' : 'hover:bg-white/10'}`}><ChevronDown size={12} className="rotate-180" /></button>
-                        <button type="button" onClick={() => moveLexiconAxisOrder(axisKey, 1)} disabled={index === lexiconAxisFilterState.order.length - 1} className={`flex h-6 w-6 items-center justify-center rounded transition-all disabled:opacity-25 ${isRetro ? 'hover:bg-[#85411B]/10' : 'hover:bg-white/10'}`}><ChevronDown size={12} /></button>
+                        <button type="button" onClick={() => moveLexiconAxisOrder(axisKey, 1)} disabled={index === visibleLexiconAxisOrder.length - 1} className={`flex h-6 w-6 items-center justify-center rounded transition-all disabled:opacity-25 ${isRetro ? 'hover:bg-[#85411B]/10' : 'hover:bg-white/10'}`}><ChevronDown size={12} /></button>
                       </div>
                     </div>
                   ))}
@@ -5345,10 +6531,11 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
       const visibleItems = (category.items || []).filter(isLibraryItemVisible);
       const total = visibleItems.length;
       const participates = blockIsLexiconAxisFilterEnabled(blockId);
-      const axisCounts = { category: total, era: total, reality: total };
+      const axisCounts = { species: total, category: total, era: total, reality: total };
       let matched = total;
 
       if (participates) {
+        axisCounts.species = 0;
         axisCounts.category = 0;
         axisCounts.era = 0;
         axisCounts.reality = 0;
@@ -5365,6 +6552,7 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
           const passMap = getLexiconAxisPassMapForItem(item, blockId);
           const activeChecks = (Object.keys(passMap) as LexiconAxisKey[]).filter(key => passMap[key].active);
 
+          if (!passMap.species.active || passMap.species.pass) axisCounts.species += 1;
           if (!passMap.category.active || passMap.category.pass) axisCounts.category += 1;
           if (!passMap.era.active || passMap.era.pass) axisCounts.era += 1;
           if (!passMap.reality.active || passMap.reality.pass) axisCounts.reality += 1;
@@ -5463,7 +6651,7 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
                   {renderStat(t(lang, '被筛掉', 'Removed'), removedCount, removedCount > 0 ? 'danger' : 'muted')}
                 </div>
                 <div className={`border-b px-3 py-2 text-[11px] font-bold leading-5 ${isRetro ? 'border-[#85411B]/10 text-[#6F4A2D]/76' : 'border-white/[0.06] text-zinc-400'}`}>
-                  {t(lang, '分项列显示每个词库分别通过类别、时间、现实的人数；严格交集下，任意分项为 0，最终符合就是 0。', 'Axis columns show how many items pass category, era, and reality separately. In strict mode, if any axis is 0, final matched is 0.')}
+                  {t(lang, '分项列显示每个词库分别通过物种、类别、时间、现实的人数；非异种词库不受物种轴影响。', 'Axis columns show how many items pass species, category, era, and reality. Non-creature lexicons ignore the species axis.')}
                 </div>
                 <div className="overflow-x-auto">
                   <table className="min-w-full border-collapse text-left">
@@ -5473,6 +6661,7 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
                         <th className="px-3 py-2">{t(lang, '模块', 'Block')}</th>
                         <th className="px-3 py-2 text-right">{t(lang, '原始', 'Total')}</th>
                         <th className="px-3 py-2 text-right">{t(lang, '符合', 'Matched')}</th>
+                        <th className="px-3 py-2 text-right">{t(lang, '物种', 'Species')}</th>
                         <th className="px-3 py-2 text-right">{t(lang, '类别', 'Category')}</th>
                         <th className="px-3 py-2 text-right">{t(lang, '时间', 'Era')}</th>
                         <th className="px-3 py-2 text-right">{t(lang, '现实', 'Reality')}</th>
@@ -5492,6 +6681,7 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
                             <td className={`px-3 py-2 font-mono text-[10px] ${mutedText}`}>{row.blockId}</td>
                             <td className="px-3 py-2 text-right">{row.total}</td>
                             <td className={`px-3 py-2 text-right font-black ${row.participates ? accentText : mutedText}`}>{row.matched}</td>
+                            <td className={`px-3 py-2 text-right ${row.axisCounts.species === 0 ? (isRetro ? 'text-red-800/72' : 'text-red-300/72') : ''}`}>{row.axisCounts.species}</td>
                             <td className={`px-3 py-2 text-right ${row.axisCounts.category === 0 ? (isRetro ? 'text-red-800/72' : 'text-red-300/72') : ''}`}>{row.axisCounts.category}</td>
                             <td className={`px-3 py-2 text-right ${row.axisCounts.era === 0 ? (isRetro ? 'text-red-800/72' : 'text-red-300/72') : ''}`}>{row.axisCounts.era}</td>
                             <td className={`px-3 py-2 text-right ${row.axisCounts.reality === 0 ? (isRetro ? 'text-red-800/72' : 'text-red-300/72') : ''}`}>{row.axisCounts.reality}</td>
@@ -5586,8 +6776,8 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
     const eraSummary = preset.eraAllow.slice(0, 5).map(eraLabel).join(' / ');
     const hardFilterSummary = [
       axisSummaryText(worldAxisState.genreAllow, 2),
-      axisSummaryText(effectiveKeywordTags.eraTags, 2),
-      axisSummaryText(effectiveKeywordTags.realityTags, 1)
+      axisSummaryText(effectiveKeywordTags.eraTags, 2, themeAxisOptions.eras),
+      axisSummaryText(effectiveKeywordTags.realityTags, 1, themeAxisOptions.realities)
     ].filter(Boolean).join(' / ');
     const renderChildRandomCard = (
       icon: React.ReactNode,
@@ -5887,88 +7077,6 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
     })()
   );
 
-  const sourceInputSummary = () => {
-    if (sourceMode === 'ARTICLE') {
-      return [
-        sourceInputs.targetCharacter.trim()
-          ? `${t(lang, '目标', 'Target')}: ${sourceInputs.targetCharacter.trim()}`
-          : '',
-        sourceInputs.articleText.trim()
-          ? `${t(lang, '文章/故事', 'Article / Story')}: ${sourceInputs.articleText.trim()}`
-          : t(lang, '等待粘贴文章、故事或设定文本。', 'Waiting for article, story, or setting text.')
-      ].filter(Boolean).join('\n');
-    }
-    if (sourceMode === 'IMAGE') {
-      return [
-        sourceInputs.imageName ? `${t(lang, '参考图', 'Reference')}: ${sourceInputs.imageName}` : t(lang, '等待上传参考图。', 'Waiting for reference image.'),
-        sourceInputs.imageGuidance.trim()
-          ? `${t(lang, '人工引导', 'Manual guidance')}: ${sourceInputs.imageGuidance.trim()}`
-          : ''
-      ].filter(Boolean).join('\n');
-    }
-    if (sourceMode === 'IDEA') {
-      return sourceInputs.ideaText.trim() || t(lang, '等待灵感元素。', 'Waiting for idea elements.');
-    }
-    return selectedLine(
-      [...governanceBlocks, ...activeStyleSourceBlocks, ...paletteBlocks, ...activeSubjectBlocks],
-      t(lang, '等待从词库选择中汇总灵感。', 'Waiting for selected lexicon terms.')
-    );
-  };
-
-  const getInputRouterSummaryCards = (sectionId: string) => {
-    const card = (label: string, labelEn: string, value: string, active = true) => ({ label, labelEn, value, active });
-    const empty = t(lang, '未选择', 'None');
-    if (sectionId === 'compile_input_steering') {
-      return [
-        card('输入模式', 'Input Mode', t(lang, activeSourceMode.label, activeSourceMode.labelEn)),
-        card('律令目标', 'Edict Target', isPerformanceStoryboardTemplate ? t(lang, '表演分镜', 'Performance Storyboard') : t(lang, activeTemplateCard.label, activeTemplateCard.labelEn)),
-        card('世界法则', 'World Law', t(lang, registerRandomModes.find(mode => mode.id === registerRandomMode)?.label || '同构折译', registerRandomModes.find(mode => mode.id === registerRandomMode)?.labelEn || 'L2 Translate')),
-        card('本体形态', 'Body Form', t(lang, activeBodyFormMeta.label, activeBodyFormMeta.labelEn))
-      ];
-    }
-    if (sectionId === 'compile_input_subject') {
-      const subjectBlocksWithSource = sourceMode === 'PRESET'
-        ? [...governanceBlocks, ...activeStyleSourceBlocks, ...paletteBlocks, ...activeSubjectBlocks]
-        : activeSubjectBlocks;
-      const subjectInputValue = sourceMode === 'PRESET'
-        ? selectedGroupedLine(subjectBlocksWithSource, t(lang, '等待从词库选择中汇总灵感。', 'Waiting for selected lexicon terms.'))
-        : sourceInputSummary();
-      return [
-        card('当前主体输入', 'Current Subject Input', subjectInputValue, sourceInputReady),
-        card('主体本体关键词', 'Subject Ontology Keywords', selectedGroupedLine(activeSubjectBlocks, empty), selectedText(activeSubjectBlocks).length > 0)
-      ];
-    }
-    if (sectionId === 'compile_input_style') {
-      return [
-        card('媒介底座', 'Medium Base', t(lang, activeMediumMeta.label, activeMediumMeta.labelEn)),
-        card('视觉风格关键词', 'Visual Style Keywords', selectedLine(activeStyleSourceBlocks, empty), selectedText(activeStyleSourceBlocks).length > 0),
-        card('色彩协议关键词', 'Color Protocol Keywords', selectedLine(paletteBlocks, empty), selectedText(paletteBlocks).length > 0),
-        card('取景协议关键词', 'Framing Protocol Keywords', selectedLine(activeEyeSourceBlocks, empty), selectedText(activeEyeSourceBlocks).length > 0)
-      ];
-    }
-    if (sectionId === 'compile_input_priority') {
-      const manual = sourceInputs.imageGuidance.trim();
-      return [
-        card('人工纠偏', 'Manual Correction', manual || t(lang, '未填写人工纠偏。', 'No manual correction.'), manual.length > 0),
-        card('参考图', 'Reference Image', sourceInputs.imageName || t(lang, '未上传参考图。', 'No reference image.'), Boolean(sourceInputs.imageName || sourceInputs.imageDataUrl)),
-        card('优先级', 'Priority', t(lang, '明确指定 > 目标协议 > 参考图可见证据 > 词库联想 > 模型自由补全', 'Explicit instruction > target protocol > visible reference evidence > lexicon association > free model completion'))
-      ];
-    }
-    if (sectionId === 'compile_input_detail') {
-      return [
-        card('主体细节', 'Subject Details', selectedLine(activeSubjectBlocks, empty), selectedText(activeSubjectBlocks).length > 0),
-        card('场域证据', 'Field Evidence', selectedLine([...governanceBlocks, ...fieldDetailBlocks], empty), selectedText([...governanceBlocks, ...fieldDetailBlocks]).length > 0),
-        card('光影证据', 'Lighting Evidence', selectedLine(aestheticLightAuditBlocks, empty), selectedText(aestheticLightAuditBlocks).length > 0)
-      ];
-    }
-    if (sectionId === 'compile_input_general_protocol') {
-      return [
-        card('通用裁决', 'General Judgement', t(lang, '先分类，再写入对应 C 槽；冲突时弱化为痕迹、材质、背景压力或局部证据。', 'Classify first, then write into matching C slots; downgrade conflicts into traces, materials, background pressure, or local evidence.'))
-      ];
-    }
-    return [];
-  };
-
   const renderInstructionComponentControls = (section: CharacterIdentityBoardPromptSection) => {
     const chipClass = (active: boolean) => `rounded-md border px-3 py-2 text-[12px] font-black uppercase tracking-[0.05em] transition-colors ${
       active
@@ -6131,50 +7239,52 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
         'Controls which C01-C10 slots participate in the content pack; disabled slots are removed from the object result and final object modules.'
       ));
     }
-    if (section.id.startsWith('compile_input_')) {
-      const summaryCards = getInputRouterSummaryCards(section.id);
+    if (section.id === 'compile_content_protocol') {
       return (
-        <div className="space-y-3">
-          {section.id === 'compile_input_subject' && (
-            <div className="mist-concept-instruction-source-grid grid grid-cols-2 gap-2">
-              {sourceModes.map(mode => {
-                const Icon = mode.icon;
-                const selected = sourceMode === mode.id;
-                return (
-                  <button
-                    key={mode.id}
-                    type="button"
-                    onClick={() => setSourceMode(mode.id)}
-                    className={`mist-concept-source-mode-button flex h-10 min-w-0 items-center justify-center gap-2 rounded border px-2.5 text-[12px] font-black uppercase tracking-[0.04em] transition-all ${selected ? 'is-active' : ''}`}
-                    title={t(lang, mode.label, mode.labelEn)}
-                  >
-                    <Icon size={14} className="shrink-0" />
-                    <span className="min-w-0 truncate">{t(lang, mode.label, mode.labelEn)}</span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-          <div className="space-y-2">
-            {summaryCards.map(card => (
-              <div key={card.label} className={`rounded border px-2.5 py-2 ${miniSwitchClass}`}>
-                <p className={`mb-1 text-[10px] font-black uppercase tracking-[0.14em] ${mutedText}`}>
-                  {t(lang, card.label, card.labelEn)}
-                </p>
-                <p className={`line-clamp-4 whitespace-pre-wrap text-[12px] font-black leading-5 ${card.active ? strongText : mutedText}`}>
-                  {card.value}
-                </p>
-              </div>
-            ))}
-          </div>
+        <button
+          type="button"
+          onClick={() => setStrictInputFidelity(prev => !prev)}
+          className={`w-full rounded-md border px-3 py-2 text-left text-[12px] font-black uppercase tracking-[0.06em] transition-colors ${
+            strictInputFidelity
+              ? isRetro
+                ? 'border-[#85411B]/45 bg-[#85411B]/10 text-[#4b2b14]'
+                : 'border-orange-400/45 bg-orange-400/12 text-orange-100'
+              : isRetro
+                ? 'border-[#85411B]/14 text-[#85411B]/60 hover:border-[#85411B]/28'
+                : 'border-white/[0.08] text-zinc-500 hover:border-white/[0.16] hover:text-zinc-300'
+          }`}
+          title={t(lang, '开启后，输入里的具体可见词条必须进入最合适的 C 槽；关闭时保留宽松编译。', 'When enabled, concrete visible input terms must enter the most suitable C slot; when disabled, loose compilation is kept.')}
+        >
+          {strictInputFidelity
+            ? t(lang, '严格保真：开', 'Strict Fidelity: On')
+            : t(lang, '严格保真：关', 'Strict Fidelity: Off')}
+        </button>
+      );
+    }
+    if (section.id.startsWith('compile_input_')) {
+      if (section.id !== 'compile_input_subject') return null;
+      return (
+        <div className="mist-concept-instruction-source-grid grid grid-cols-2 gap-2">
+          {sourceModes.map(mode => {
+            const Icon = mode.icon;
+            const selected = sourceMode === mode.id;
+            return (
+              <button
+                key={mode.id}
+                type="button"
+                onClick={() => setSourceMode(mode.id)}
+                className={`mist-concept-source-mode-button flex h-10 min-w-0 items-center justify-center gap-2 rounded border px-2.5 text-[12px] font-black uppercase tracking-[0.04em] transition-all ${selected ? 'is-active' : ''}`}
+                title={t(lang, mode.label, mode.labelEn)}
+              >
+                <Icon size={14} className="shrink-0" />
+                <span className="min-w-0 truncate">{t(lang, mode.label, mode.labelEn)}</span>
+              </button>
+            );
+          })}
         </div>
       );
     }
-    return (
-      <p className={`text-[12px] leading-6 ${mutedText}`}>
-        {t(lang, '固定元件：当前模板锁定顺序与基础规则。', 'Fixed component: this template locks its order and base rule.')}
-      </p>
-    );
+    return null;
   };
 
   const renderTemplatePreview = (preview: 'board' | 'threeView' | 'storyboard' | 'custom', selected: boolean) => {
@@ -6354,14 +7464,22 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
     copyText: string,
     activeId?: string | null,
     onSectionClick?: (id: string) => void,
-    registerRef?: (id: string, node: HTMLElement | null) => void
+    registerRef?: (id: string, node: HTMLElement | null) => void,
+    actions?: React.ReactNode
   ) => (
     <section className={`rounded-lg border p-4 ${softPanelClass}`}>
       <div className="mb-3">
         <div className="flex items-start justify-between gap-3">
-          <h3 className={`text-2xl font-black uppercase tracking-[0.04em] ${strongText}`}>
-            {t(lang, title, titleEn)}
-          </h3>
+          <div className="min-w-0">
+            <h3 className={`text-2xl font-black uppercase tracking-[0.04em] ${strongText}`}>
+              {t(lang, title, titleEn)}
+            </h3>
+          </div>
+          {actions ? (
+            <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+              {actions}
+            </div>
+          ) : null}
         </div>
         <p className={`mt-2 text-[13px] leading-6 ${mutedText}`}>
           {t(lang, description, descriptionEn)}
@@ -6372,6 +7490,7 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
           const originalIndex = promptSections.findIndex(item => item.id === section.id);
           const displayIndex = originalIndex >= 0 ? originalIndex : index;
           const active = activeId === section.id;
+          const controls = renderInstructionComponentControls(section);
           return (
             <article
               key={section.id}
@@ -6403,10 +7522,12 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
                   {t(lang, section.title, section.titleEn)}
                 </h4>
               </div>
-              <div className="grid gap-0 xl:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
-                <div className={`border-b px-3.5 py-3.5 xl:border-b-0 xl:border-r ${isRetro ? 'border-[#85411B]/10 bg-white/20' : 'border-white/[0.055] bg-black/18'}`}>
-                  {renderInstructionComponentControls(section)}
-                </div>
+              <div className={`grid gap-0 ${controls ? 'xl:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]' : ''}`}>
+                {controls ? (
+                  <div className={`border-b px-3.5 py-3.5 xl:border-b-0 xl:border-r ${isRetro ? 'border-[#85411B]/10 bg-white/20' : 'border-white/[0.055] bg-black/18'}`}>
+                    {controls}
+                  </div>
+                ) : null}
                 <pre className={`whitespace-pre-wrap px-3 py-3 font-mono text-[13px] leading-7 ${isRetro ? 'text-[#24170f]' : 'text-orange-50'}`}>
                   {section.text}
                 </pre>
@@ -6419,12 +7540,19 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
   );
 
   const renderCompileInstructionPreviewPanel = () => renderInstructionSectionsPanel(
-    'M10 编译律令',
-    'M10 Compile Edict',
+    '编译律令',
+    'Compile Edict',
     '内容主体 C01-C10 生成前的真实编译律令，按任务、媒介、裁决、输入来源和输出格式拆成模块。',
     'The actual edict before Content Core C01-C10 generation, split by task, medium, judgment, source input, and output schema.',
     compileInstructionSections,
-    compileInstructionOutput
+    compileInstructionOutput,
+    undefined,
+    undefined,
+    undefined,
+    <>
+      {renderPromptLangToggleButton()}
+      {renderPromptCopyButton(copyCompileInstructionOutput)}
+    </>
   );
 
   const renderCinematicStillPromptPanel = () => {
@@ -6474,15 +7602,19 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
   };
 
   const renderModulePromptPreviewPanel = () => renderInstructionSectionsPanel(
-    'M10 终稿协议',
-    'M10 Final Protocol',
+    '终稿指令',
+    'Final Instruction',
     '当前模板的最终拼装律令，按模块编号与颜色显示。',
     'Final assembled edict for the current template, shown by module number and color.',
     visiblePromptSections,
     output,
     activePromptSection?.id,
     setActivePromptSectionId,
-    (id, node) => { promptSectionRefs.current[id] = node; }
+    (id, node) => { promptSectionRefs.current[id] = node; },
+    <>
+      {renderPromptLangToggleButton()}
+      {renderPromptCopyButton(copyOutput)}
+    </>
   );
 
   const renderVideoStoryboardBlueprintPanel = () => {
@@ -6681,6 +7813,39 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
       </div>
     </section>
   );
+
+  const renderContentIntentPanel = () => {
+    const activeIntent = contentIntentRoute === 'AUTO'
+      ? lastContentIntentPreset
+      : contentIntentPresets.find(preset => preset.id === contentIntentRoute);
+    return (
+      <section className={`rounded-lg border p-3 ${softPanelClass}`}>
+        <div className="mb-2 flex items-center justify-between gap-3">
+          <div className={sidebarModuleTitleClass}>
+            <Wand2 size={16} className={accentText} />
+            <span>{t(lang, '内容意图', 'Content Intent')}</span>
+          </div>
+          <span className={paramsModuleMetaClass}>
+            {contentIntentRouteLabel()}
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={() => setIsContentIntentPanelOpen(true)}
+          className={`mist-concept-source-mode-button flex h-9 w-full min-w-0 items-center justify-between gap-2 rounded border px-3 text-left text-[11px] font-black uppercase tracking-[0.04em] transition-all ${isContentIntentPanelOpen ? 'is-active' : ''}`}
+          title={t(lang, '打开内容意图随机逻辑', 'Open content intent random logic')}
+        >
+          <span className="min-w-0 truncate">{contentIntentRouteLabel()}</span>
+          <SlidersHorizontal size={13} className="shrink-0" />
+        </button>
+        {activeIntent ? (
+          <p className={`mt-2 line-clamp-2 text-[11px] font-medium leading-4 ${mutedText}`}>
+            {t(lang, `${activeIntent.label}会协调主体、场域和光影。`, `${activeIntent.labelEn} coordinates subject, field, and lighting.`)}
+          </p>
+        ) : null}
+      </section>
+    );
+  };
 
   const renderTemplateQuickControlsPanel = () => (
     <section className={`rounded-lg border p-3 ${softPanelClass}`}>
@@ -6922,7 +8087,9 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
   );
 
   const updateState = useCallback((nextState: NarrativeFieldState) => {
-    onChange(nextState);
+    startTransition(() => {
+      onChange(nextState);
+    });
   }, [onChange]);
 
   const formatYear = (year: number, useSuffix = false) => {
@@ -7259,20 +8426,43 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
   );
   const lexiconAxisFilterTags = {
     ...effectiveKeywordTags,
-    categoryTags: worldAxisState.genreAllow
+    categoryTags: worldAxisState.genreAllow,
+    creatureTaxonomyTags: worldAxisState.creatureTaxonomyAllow
   };
+  const getLexiconAxisFilterTagsForBlock = (blockId?: string) => (
+    blockId && blockUsesCreatureTaxonomyFilter(blockId)
+      ? lexiconAxisFilterTags
+      : { ...lexiconAxisFilterTags, creatureTaxonomyTags: [] }
+  );
   const blockIsLexiconAxisFilterEnabled = (blockId: string) => LEXICON_AXIS_FILTER_ENABLED_BLOCK_IDS.has(blockId);
   const blockUsesUniversalLexiconPolicy = (blockId: string) => LEXICON_UNIVERSAL_FILTER_BLOCK_IDS.has(blockId);
   const lexiconAxisFilterActiveForBlock = (blockId: string) => (
     blockIsLexiconAxisFilterEnabled(blockId) &&
-    Object.values(lexiconAxisFilterTags).some(values => (values || []).length > 0)
+    (
+      Boolean(lexiconAxisFilterTags.categoryTags?.length) ||
+      Boolean(lexiconAxisFilterTags.eraTags?.length) ||
+      Boolean(lexiconAxisFilterTags.realityTags?.length) ||
+      (blockUsesCreatureTaxonomyFilter(blockId) && Boolean(lexiconAxisFilterTags.creatureTaxonomyTags?.length))
+    )
   );
-  const getSelectedRealityMax = () => clampLinkedSurrealLevel(
+  const selectedRealityMaxForLexicon = clampLinkedSurrealLevel(
     Math.max(1, ...effectiveKeywordTags.realityTags.map(tag => linkedRealityLevelByTag[tag] || 1))
   );
+  const getSelectedRealityMax = () => selectedRealityMaxForLexicon;
   const getItemOntologyLevel = (item: LibraryItemDef) => clampLinkedSurrealLevel(Number(item.ontologyLevel || (item as any).surrealLevel || 1));
-  const getLexiconAxisLevelsForItem = (item: LibraryItemDef, blockId?: string) => {
-    const match = getConceptSimpleAxisMatch(item, lexiconAxisFilterTags);
+  const lexiconAxisLevelsRenderCache = new Map<string, WeakMap<LibraryItemDef, {
+    match: ReturnType<typeof getConceptSimpleAxisMatch>;
+    creatureTaxonomyLevel: LexiconCreatureTaxonomyFilterLevel | 'neutral';
+    eraLevel: LexiconEraFilterLevel;
+    realityLevel: LexiconRealityFilterLevel;
+  }>>();
+  const lexiconAxisPassMapRenderCache = new Map<string, WeakMap<LibraryItemDef, Record<LexiconAxisKey, { active: boolean; pass: boolean }>>>();
+  const getLexiconCacheKey = (blockId?: string) => blockId || '__global__';
+  const computeLexiconAxisLevelsForItem = (item: LibraryItemDef, blockId?: string) => {
+    const match = getConceptSimpleAxisMatch(item, getLexiconAxisFilterTagsForBlock(blockId));
+    const creatureTaxonomyLevel = blockId && blockUsesCreatureTaxonomyFilter(blockId)
+      ? match.creatureTaxonomyFitLevel
+      : 'neutral';
     const eraLevel: LexiconEraFilterLevel = match.matchedEra.length > 0
       ? 'hit'
       : ((item as any).eraMode === 'universal' || match.itemEraTags.length === 0)
@@ -7283,20 +8473,35 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
       blockUsesUniversalLexiconPolicy(blockId) &&
       lexiconAxisFilterState.universalPolicy === 'INCLUDE' &&
       effectiveKeywordTags.realityTags.length > 0 &&
-      getItemOntologyLevel(item) <= getSelectedRealityMax()
+      getItemOntologyLevel(item) <= selectedRealityMaxForLexicon
     );
     const realityLevel: LexiconRealityFilterLevel = match.matchedReality.length > 0
       ? 'hit'
       : (universalRealityAllowed || match.realityScore >= 0)
         ? 'allowed'
         : 'miss';
-    return { match, eraLevel, realityLevel };
+    return { match, creatureTaxonomyLevel, eraLevel, realityLevel };
   };
-  const getLexiconAxisPassMapForItem = (item: LibraryItemDef, blockId?: string) => {
-    const { match, eraLevel, realityLevel } = getLexiconAxisLevelsForItem(item, blockId);
+  const getLexiconAxisLevelsForItem = (item: LibraryItemDef, blockId?: string) => {
+    const cacheKey = getLexiconCacheKey(blockId);
+    let blockCache = lexiconAxisLevelsRenderCache.get(cacheKey);
+    if (!blockCache) {
+      blockCache = new WeakMap();
+      lexiconAxisLevelsRenderCache.set(cacheKey, blockCache);
+    }
+    const cached = blockCache.get(item);
+    if (cached) return cached;
+    const levels = computeLexiconAxisLevelsForItem(item, blockId);
+    blockCache.set(item, levels);
+    return levels;
+  };
+  const computeLexiconAxisPassMapForItem = (item: LibraryItemDef, blockId?: string) => {
+    const { match, creatureTaxonomyLevel, eraLevel, realityLevel } = getLexiconAxisLevelsForItem(item, blockId);
+    const speciesActive = Boolean(blockId && blockUsesCreatureTaxonomyFilter(blockId) && lexiconAxisFilterTags.creatureTaxonomyTags?.length);
     const categoryActive = Boolean(lexiconAxisFilterTags.categoryTags?.length);
     const eraActive = Boolean(lexiconAxisFilterTags.eraTags?.length);
     const realityActive = Boolean(lexiconAxisFilterTags.realityTags?.length);
+    const speciesPass = !speciesActive || lexiconAxisFilterState.creatureTaxonomyLevels.includes(creatureTaxonomyLevel as LexiconCreatureTaxonomyFilterLevel);
     const categoryPass = !categoryActive || lexiconAxisFilterState.categoryLevels.includes(match.categoryFitLevel as LexiconCategoryFilterLevel);
     const universalCategoryAllowed = Boolean(
       blockId &&
@@ -7306,6 +8511,10 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
       match.categoryFitLevel === 'neutral'
     );
     return {
+      species: {
+        active: speciesActive,
+        pass: speciesPass
+      },
       category: {
         active: categoryActive,
         pass: categoryPass || universalCategoryAllowed
@@ -7319,6 +8528,19 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
         pass: !realityActive || lexiconAxisFilterState.realityLevels.includes(realityLevel)
       }
     } satisfies Record<LexiconAxisKey, { active: boolean; pass: boolean }>;
+  };
+  const getLexiconAxisPassMapForItem = (item: LibraryItemDef, blockId?: string) => {
+    const cacheKey = getLexiconCacheKey(blockId);
+    let blockCache = lexiconAxisPassMapRenderCache.get(cacheKey);
+    if (!blockCache) {
+      blockCache = new WeakMap();
+      lexiconAxisPassMapRenderCache.set(cacheKey, blockCache);
+    }
+    const cached = blockCache.get(item);
+    if (cached) return cached;
+    const passMap = computeLexiconAxisPassMapForItem(item, blockId);
+    blockCache.set(item, passMap);
+    return passMap;
   };
   const itemMatchesLexiconAxisFilter = (blockId: string, item: LibraryItemDef) => {
     if (!lexiconAxisFilterActiveForBlock(blockId)) return true;
@@ -7346,7 +8568,7 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
     const passBonus = (Object.keys(passMap) as LexiconAxisKey[])
       .reduce((sum, key) => sum + (passMap[key].active && passMap[key].pass ? 100 : 0), 0);
     const orderBonus = lexiconAxisFilterState.order
-      .reduce((sum, key, index) => sum + (passMap[key].active && passMap[key].pass ? (3 - index) * 12 : 0), 0);
+      .reduce((sum, key, index) => sum + (passMap[key].active && passMap[key].pass ? (4 - index) * 12 : 0), 0);
     return passBonus + orderBonus + match.score;
   };
   const orderItemsByLexiconAxis = (blockId: string, items: LibraryItemDef[]) => {
@@ -7363,6 +8585,11 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
       )
       : items
   );
+  const filterItemsByLexiconAxisForRandom = (blockId: string, items: LibraryItemDef[]) => {
+    if (!lexiconAxisFilterActiveForBlock(blockId) || lexiconAxisFilterState.mode === 'SOFT_SORT') return items;
+    if (lexiconAxisFilterState.mode === 'LAYERED') return filterItemsByLayeredLexiconAxis(blockId, items);
+    return items.filter(item => itemMatchesLexiconAxisFilter(blockId, item));
+  };
   const getFilteredItemsForBlock = (blockId: string) => {
     const cached = filteredItemsForBlockRenderCache.get(blockId);
     if (cached) return cached;
@@ -7494,6 +8721,7 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
 
   const filteredItemsForBlockRenderCache = new Map<string, LibraryItemDef[]>();
   const filteredLibraryDataForBlockRenderCache = new Map<string, LibraryCategoryDef[] | undefined>();
+  const randomizableItemsForBlockRenderCache = new Map<string, LibraryItemDef[]>();
 
   const getFilteredItemCountForBlock = (blockId: string) => {
     const category = getLibraryCategory(blockId);
@@ -7511,16 +8739,29 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
   };
 
   const getRandomizableItemsForBlock = (blockId: string) => {
+    const cached = randomizableItemsForBlockRenderCache.get(blockId);
+    if (cached) return cached;
     const category = getLibraryCategory(blockId);
     if (!category) return [];
     const visibleItems = category.items.filter(isLibraryItemVisible);
-    if (fieldStyleBlocks.includes(blockId)) return getFilteredLibraryDataForBlock(blockId)?.[0]?.items || [];
-    if (!isHumanRegisterWeightedRandomActive) return visibleItems;
-    if (registerRandomMode === 'LAW_L1') {
-      const pureItems = visibleItems.filter(item => isItemAllowedForHumanRegister(blockId, item));
-      return pureItems.length > 0 ? pureItems : visibleItems;
+    if (fieldStyleBlocks.includes(blockId)) {
+      const items = getFilteredLibraryDataForBlock(blockId)?.[0]?.items || [];
+      randomizableItemsForBlockRenderCache.set(blockId, items);
+      return items;
     }
-    return visibleItems;
+    const axisFilteredItems = filterItemsByLexiconAxisForRandom(blockId, visibleItems);
+    if (!isHumanRegisterWeightedRandomActive) {
+      randomizableItemsForBlockRenderCache.set(blockId, axisFilteredItems);
+      return axisFilteredItems;
+    }
+    if (registerRandomMode === 'LAW_L1') {
+      const pureItems = axisFilteredItems.filter(item => isItemAllowedForHumanRegister(blockId, item));
+      const items = pureItems.length > 0 ? pureItems : axisFilteredItems;
+      randomizableItemsForBlockRenderCache.set(blockId, items);
+      return items;
+    }
+    randomizableItemsForBlockRenderCache.set(blockId, axisFilteredItems);
+    return axisFilteredItems;
   };
 
   const getRandomWeightForItem = (blockId: string, item: LibraryItemDef) => {
@@ -7534,6 +8775,16 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
   };
 
   const pickWeightedUniqueItems = (blockId: string, items: LibraryItemDef[], count: number) => {
+    if (!isHumanRegisterWeightedRandomActive) {
+      const pool = [...items];
+      const selected: LibraryItemDef[] = [];
+      while (pool.length > 0 && selected.length < count) {
+        const index = Math.floor(Math.random() * pool.length);
+        selected.push(pool[index]);
+        pool.splice(index, 1);
+      }
+      return selected;
+    }
     const pool = [...items];
     const selected: LibraryItemDef[] = [];
     while (pool.length > 0 && selected.length < count) {
@@ -7650,42 +8901,67 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
     return selected.length > 0 ? selected : pickWeightedUniqueItems(blockId, items, count);
   };
   const shuffleVisualPresetBlocks = (blocks: string[]) => [...blocks].sort(() => Math.random() - 0.5);
-  const getVisualStyleDensityBlockTarget = (availableCount: number) => {
+  const getVisualStylePaletteProbability = () => {
+    if (visualStyleRandomDensity === 'FULL') return 1;
+    if (visualStyleRandomDensity === 'BALANCED') return 0.8;
+    return 0.5;
+  };
+  const shouldIncludeVisualStylePalette = () => Math.random() < getVisualStylePaletteProbability();
+  const getVisualStyleDensityRange = (mediumCategory: PhysicalMediumCategory): [number, number] => {
+    if (visualStyleRandomDensity === 'LIGHT') {
+      if (mediumCategory === 'PHOTOGRAPHY') return [3, 4];
+      if (mediumCategory === 'PAINTING') return [2, 3];
+      if (mediumCategory === 'CGI' || mediumCategory === 'TANGIBLE') return [1, 1];
+      return [2, 3];
+    }
+    if (visualStyleRandomDensity === 'BALANCED') {
+      if (mediumCategory === 'PHOTOGRAPHY') return [5, 7];
+      if (mediumCategory === 'PAINTING') return [4, 5];
+      if (mediumCategory === 'CGI' || mediumCategory === 'TANGIBLE') return [1, 2];
+      return [4, 6];
+    }
+    return [0, 0];
+  };
+  const getVisualStyleDensityBlockTarget = (availableCount: number, mediumCategory: PhysicalMediumCategory, requiredCount: number) => {
     if (visualStyleRandomDensity === 'FULL') return availableCount;
-    if (visualStyleRandomDensity === 'LIGHT') return Math.min(availableCount, 1 + Math.floor(Math.random() * Math.min(3, availableCount)));
-    const min = Math.min(3, availableCount);
-    const max = Math.min(6, availableCount);
+    const [rangeMin, rangeMax] = getVisualStyleDensityRange(mediumCategory);
+    const min = Math.min(availableCount, Math.max(requiredCount, rangeMin));
+    const max = Math.min(availableCount, Math.max(min, rangeMax));
     return min + Math.floor(Math.random() * (max - min + 1));
   };
+  const getVisualStyleSourceLimit = () => visualStyleSoulBlendMode === 'POLYPHONIC' ? 2 : 1;
   const getVisualStyleRandomizedBlocksForDensity = (preset: VisualStyleRandomPreset) => {
     const soulBlocks = Array.from(new Set(preset.soulBlocks));
     const aestheticSoulBlocks = soulBlocks.filter(blockId => aestheticStyleSoulBlocks.includes(blockId));
     const otherSoulBlocks = soulBlocks.filter(blockId => !aestheticStyleSoulBlocks.includes(blockId));
-    const aestheticSoulLimit = visualStyleRandomDensity === 'FULL' ? 2 : visualStyleRandomDensity === 'BALANCED' ? 2 : 1;
-    const selectedAestheticSoulBlocks = shuffleVisualPresetBlocks(aestheticSoulBlocks).slice(0, Math.min(aestheticSoulLimit, aestheticSoulBlocks.length));
+    const optionalAestheticSoulBlocks = shuffleVisualPresetBlocks(aestheticSoulBlocks).slice(0, Math.min(getVisualStyleSourceLimit(), aestheticSoulBlocks.length));
     const requiredBlocks = Array.from(new Set([
       ...otherSoulBlocks,
-      ...selectedAestheticSoulBlocks,
-      ...paletteBlocks
+      ...(shouldIncludeVisualStylePalette() ? paletteBlocks : [])
     ]));
     const optionalBlocks = Array.from(new Set([
+      ...optionalAestheticSoulBlocks,
       ...preset.qualityBlocks,
       ...(preset.allowBlocks || [])
     ])).filter(blockId => !requiredBlocks.includes(blockId));
     const availableBlocks = Array.from(new Set([...requiredBlocks, ...optionalBlocks]));
     if (visualStyleRandomDensity === 'FULL') return availableBlocks;
-    const targetCount = Math.max(requiredBlocks.length, getVisualStyleDensityBlockTarget(availableBlocks.length));
+    const targetCount = getVisualStyleDensityBlockTarget(availableBlocks.length, preset.mediumCategory, requiredBlocks.length);
     const optionalCount = Math.max(0, targetCount - requiredBlocks.length);
     return Array.from(new Set([
       ...requiredBlocks,
       ...shuffleVisualPresetBlocks(optionalBlocks).slice(0, optionalCount)
     ]));
   };
-  const getVisualStyleRandomCountForBlock = (blockId: string) => {
+  const getVisualStyleRandomCountForBlock = (blockId: string, presetBlocks: readonly string[]) => {
     const limit = CONCEPT_DESIGN_BLOCK_LIMITS[blockId] || 1;
     if (limit <= 1) return 1;
     if (aestheticStyleSoulBlocks.includes(blockId)) {
-      if (visualStyleRandomDensity === 'FULL') return Math.min(limit, 2);
+      if (visualStyleSoulBlendMode !== 'POLYPHONIC') return 1;
+      const activeSourceBlocks = presetBlocks.filter(activeBlockId => aestheticStyleSoulBlocks.includes(activeBlockId));
+      if (activeSourceBlocks.length <= 1 && visualStyleRandomDensity !== 'LIGHT') {
+        return Math.random() < 0.55 ? Math.min(limit, 2) : 1;
+      }
       return 1;
     }
     if (visualStyleRandomDensity === 'FULL') return Math.min(limit, 2);
@@ -7703,11 +8979,11 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
 	      return safePool.length > 0 ? safePool : basePool;
 	    }
 	    if (visualStyleRandomPresetRoute === 'FOLLOW_MEDIUM') {
-	      if (identityOptions.mediumCategory === 'ALL') {
+	      const mediumPresets = VISUAL_STYLE_RANDOM_PRESETS.filter(preset => preset.mediumCategory === identityOptions.mediumCategory);
+	      if (mediumPresets.length === 0) {
 	        const safePool = filterVisualStylePresetPoolBySafety(VISUAL_STYLE_RANDOM_PRESETS);
 	        return safePool.length > 0 ? safePool : VISUAL_STYLE_RANDOM_PRESETS;
 	      }
-	      const mediumPresets = VISUAL_STYLE_RANDOM_PRESETS.filter(preset => preset.mediumCategory === identityOptions.mediumCategory);
 	      const safePool = filterVisualStylePresetPoolBySafety(mediumPresets);
 	      return safePool.length > 0 ? safePool : mediumPresets;
 	    }
@@ -7728,7 +9004,7 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
       if (isBlockLocked(blockId)) return;
       const items = getRandomizableItemsForBlock(blockId);
       if (items.length === 0) return;
-      const count = getVisualStyleRandomCountForBlock(blockId);
+      const count = getVisualStyleRandomCountForBlock(blockId, presetBlocks);
       const selected = pickPresetWeightedUniqueItems(blockId, items, count, preset).map(item => item.name);
       if (blockId === 'cd_color_palette') {
         const tag = selected[0];
@@ -7741,7 +9017,8 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
 
     const inactiveMediaBlocks = [
       ...Object.values(mediaSoulBlocksByCategory).flat(),
-      ...Object.values(mediaQualityBlocksByCategory).flat()
+      ...Object.values(mediaQualityBlocksByCategory).flat(),
+      ...paletteBlocks
     ].filter(blockId => !presetBlocks.includes(blockId));
     inactiveMediaBlocks.forEach(blockId => {
       if (!isBlockLocked(blockId)) nextState[blockId] = [];
@@ -7903,6 +9180,481 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
     if (keys.length === 0) return false;
     const search = itemSearchText(item);
     return getNormalizedPresetKeys(keys).some(key => search.includes(key));
+  };
+  const getContentIntentPool = () => {
+    const subjectModePresets = contentIntentPresets.filter(preset => preset.subjectMode === subjectMode);
+    if (contentIntentRoute !== 'AUTO') {
+      const selected = contentIntentPresets.find(preset => preset.id === contentIntentRoute);
+      if (selected?.subjectMode === subjectMode) return [selected];
+      return subjectModePresets.length > 0 ? subjectModePresets : [...contentIntentPresets];
+    }
+    const activeTags = [
+      ...worldAxisState.genreAllow,
+      ...effectiveKeywordTags.eraTags,
+      ...effectiveKeywordTags.realityTags,
+      ...(fieldState.cd_persona || []),
+      ...(fieldState.cd_occupation || []),
+      ...(fieldState.cd_field_preset || [])
+    ].join(' ').toLowerCase();
+    const scored = contentIntentPresets.map(preset => {
+      const keyScore = preset.keys.reduce((sum, key) => sum + (activeTags.includes(key.toLowerCase()) ? 1 : 0), 0);
+      const routeScore = preset.subjectMode === subjectMode ? 0.5 : 0;
+      return { preset, score: keyScore + routeScore };
+    });
+    const maxScore = Math.max(...scored.map(entry => entry.score));
+    if (maxScore <= 0.5) return subjectModePresets.length > 0 ? subjectModePresets : [...contentIntentPresets];
+    return scored.filter(entry => entry.score === maxScore).map(entry => entry.preset);
+  };
+  const chooseContentIntentPreset = () => {
+    const pool = getContentIntentPool();
+    return pool[Math.floor(Math.random() * pool.length)] || contentIntentPresets[0];
+  };
+  const contentIntentDensityTarget = (module: LinkedRandomFocus, preset: ContentIntentPreset) => {
+    const densityRank: Record<ContentIntentRandomDensity, number> = {
+      RANGE_1_8: 1,
+      RANGE_9_16: 2,
+      RANGE_17_23: 3,
+      RANGE_24_30: 4,
+      RANGE_31_38: 5,
+      FULL: 6
+    };
+    const rank = densityRank[contentIntentRandomDensity] || 3;
+    if (module === 'SUBJECT') {
+      if (preset.subjectMode === 'CREATURE') return Math.min(8, Math.max(3, rank + 2));
+      return getContentIntentDensityTargetCount();
+    }
+    if (module === 'FIELD') return Math.min(fieldDetailBlocks.length + 2, Math.max(1, rank));
+    if (module === 'LIGHT') return Math.min(aestheticLightAuditBlocks.length, Math.max(1, rank + (rank >= 4 ? 1 : 0)));
+    return 0;
+  };
+  const pickContentIntentBlocks = (
+    primary: readonly string[],
+    support: readonly string[],
+    low: readonly string[],
+    target: number
+  ) => {
+    const required = shuffleVisualPresetBlocks([...primary]).slice(0, Math.min(primary.length, Math.max(1, Math.ceil(target * 0.55))));
+    const remaining = Math.max(0, target - required.length);
+    const supportCount = Math.min(support.length, Math.ceil(remaining * 0.75));
+    const lowCount = Math.max(0, remaining - supportCount);
+    return Array.from(new Set([
+      ...required,
+      ...shuffleVisualPresetBlocks([...support]).slice(0, supportCount),
+      ...shuffleVisualPresetBlocks([...low]).slice(0, lowCount)
+    ]));
+  };
+  const getContentIntentBlocksForFocus = (preset: ContentIntentPreset, focus: LinkedRandomFocus) => {
+    if (focus === 'SUBJECT') {
+      const target = contentIntentDensityTarget('SUBJECT', preset);
+      return pickContentIntentBlocks(preset.subjectPrimary, preset.subjectSupport, preset.subjectLow, target);
+    }
+    if (focus === 'FIELD') {
+      const target = contentIntentDensityTarget('FIELD', preset);
+      return pickContentIntentBlocks(preset.fieldPrimary, preset.fieldSupport, [], target);
+    }
+    if (focus === 'LIGHT') {
+      const target = contentIntentDensityTarget('LIGHT', preset);
+      return pickContentIntentBlocks(preset.lightPrimary, preset.lightSupport, [], target);
+    }
+    return Array.from(new Set([
+      ...getContentIntentBlocksForFocus(preset, 'SUBJECT'),
+      ...getContentIntentBlocksForFocus(preset, 'FIELD'),
+      ...getContentIntentBlocksForFocus(preset, 'LIGHT')
+    ]));
+  };
+  const getContentIntentManagedBlocks = (preset: ContentIntentPreset, focus: LinkedRandomFocus) => {
+    if (focus === 'SUBJECT') return Array.from(new Set([...humanSubjectUiBlocks, ...creatureSubjectBlocks]));
+    if (focus === 'FIELD') return spacetimeFieldUiBlocks;
+    if (focus === 'LIGHT') return aestheticLightAuditBlocks;
+    return Array.from(new Set([...humanSubjectUiBlocks, ...creatureSubjectBlocks, ...spacetimeFieldUiBlocks, ...aestheticLightAuditBlocks]));
+  };
+  const pickContentIntentItems = (blockId: string, items: LibraryItemDef[], count: number, keys: readonly string[]) => {
+    const pool = [...items];
+    const selected: LibraryItemDef[] = [];
+    while (pool.length > 0 && selected.length < count) {
+      const weighted = pool.map(item => {
+        const baseWeight = Math.max(0, getRandomWeightForItem(blockId, item));
+        const preferred = itemHasAnyKey(item, keys);
+        return { item, weight: baseWeight * (preferred ? 8 : 1) };
+      });
+      const totalWeight = weighted.reduce((sum, entry) => sum + entry.weight, 0);
+      if (totalWeight <= 0) break;
+      let cursor = Math.random() * totalWeight;
+      const pickedIndex = weighted.findIndex(entry => {
+        cursor -= entry.weight;
+        return cursor <= 0;
+      });
+      const index = pickedIndex >= 0 ? pickedIndex : weighted.length - 1;
+      selected.push(weighted[index].item);
+      pool.splice(index, 1);
+    }
+    return selected.length > 0 ? selected : pickWeightedUniqueItems(blockId, items, count);
+  };
+  const randomIntegerInRange = ([min, max]: [number, number]) => min + Math.floor(Math.random() * (Math.max(min, max) - min + 1));
+  const getContentIntentDensityTargetCount = () => {
+    const range = contentIntentDensityRanges[contentIntentRandomDensity] || contentIntentDensityRanges.RANGE_17_23;
+    return randomIntegerInRange(range);
+  };
+  const getCreatureContentIntentDensityTargetCount = () => {
+    const range = creatureContentIntentDensityRanges[contentIntentRandomDensity] || creatureContentIntentDensityRanges.RANGE_17_23;
+    return randomIntegerInRange(range);
+  };
+  const getContentIntentItemsForBlock = (blockId: string, cache?: Map<string, LibraryItemDef[]>) => {
+    const cached = cache?.get(blockId);
+    if (cached) return cached;
+    const items = (fieldStyleBlocks.includes(blockId) || styleProtocolBlocks.includes(blockId))
+      ? (getFilteredLibraryDataForBlock(blockId)?.[0]?.items || [])
+      : getRandomizableItemsForBlock(blockId);
+    cache?.set(blockId, items);
+    return items;
+  };
+  const pickContentIntentBlockValues = (
+    blockId: string,
+    preset: ContentIntentPreset,
+    count: number,
+    genderSignal: LinkedGenderSignal = 'OPEN',
+    cache?: Map<string, LibraryItemDef[]>
+  ) => {
+    if (isBlockLocked(blockId) || count <= 0) return [];
+    const items = getContentIntentItemsForBlock(blockId, cache)
+      .filter(item => itemAllowedByLinkedGender(blockId, item, genderSignal, activeLinkedRandomPreset));
+    if (items.length === 0) return [];
+    return pickContentIntentItems(blockId, items, Math.min(items.length, count), preset.keys).map(item => item.name);
+  };
+  const contentIntentBlockCapacity = (blockId: string) => {
+    if (humanSubjectAlwaysSingleBlocks.includes(blockId)) return 1;
+    if (humanSubjectMultiSelectBlocks.includes(blockId)) return Math.max(1, CONCEPT_DESIGN_BLOCK_LIMITS[blockId] || 1);
+    return Math.max(1, CONCEPT_DESIGN_BLOCK_LIMITS[blockId] || 1);
+  };
+  const contentIntentPresetBlockList = (
+    preset: ContentIntentPreset,
+    key: 'subjectPrimary' | 'subjectSupport' | 'subjectLow' | 'fieldPrimary' | 'fieldSupport' | 'lightPrimary' | 'lightSupport'
+  ): readonly string[] => preset[key] as readonly string[];
+  const contentIntentDensityRank = () => {
+    const densityRank: Record<ContentIntentRandomDensity, number> = {
+      RANGE_1_8: 1,
+      RANGE_9_16: 2,
+      RANGE_17_23: 3,
+      RANGE_24_30: 4,
+      RANGE_31_38: 5,
+      FULL: 6
+    };
+    return densityRank[contentIntentRandomDensity] || 3;
+  };
+  const getCreatureIntentTaxonomyPrefer = (preset: ContentIntentPreset): CreatureTaxonomyTag[] => {
+    const explicit = worldAxisState.creatureTaxonomyAllow;
+    if (explicit.length > 0) return Array.from(new Set(explicit));
+    const presetPrefer = creatureIntentTaxonomyPrefer[preset.id] || [];
+    return Array.from(new Set(presetPrefer));
+  };
+  const creatureTaxonomyLevelWeight = (level: NonNullable<LibraryItemDef['creatureTaxonomyFit']>['unlisted']) => {
+    if (level === 'usable') return 4;
+    if (level === 'fusion') return 2.2;
+    if (level === 'weak') return 0.45;
+    if (level === 'exclude') return 0;
+    return 1;
+  };
+  const getCreatureTaxonomyIntentWeight = (item: LibraryItemDef, taxonomyPrefer: CreatureTaxonomyTag[]) => {
+    if (taxonomyPrefer.length === 0) return 1;
+    const fit = item.creatureTaxonomyFit;
+    if (!fit) return 1;
+    let weight = creatureTaxonomyLevelWeight(fit.unlisted);
+    taxonomyPrefer.forEach(tag => {
+      if (fit.exclude?.includes(tag)) weight = Math.max(weight, 0);
+      else if (fit.strong?.includes(tag)) weight = Math.max(weight, 14);
+      else if (fit.usable?.includes(tag)) weight = Math.max(weight, 7);
+      else if (fit.fusion?.includes(tag)) weight = Math.max(weight, 3);
+      else if (fit.weak?.includes(tag)) weight = Math.max(weight, 0.75);
+    });
+    return weight;
+  };
+  const creatureItemExplicitlyMatchesTaxonomy = (item: LibraryItemDef, taxonomyPrefer: CreatureTaxonomyTag[]) => {
+    if (taxonomyPrefer.length === 0) return true;
+    const fit = item.creatureTaxonomyFit;
+    if (!fit) return false;
+    return taxonomyPrefer.some(tag => fit.strong?.includes(tag) || fit.usable?.includes(tag));
+  };
+  const creatureBlockRequiresExplicitTaxonomy = (blockId: string) => (
+    worldAxisState.creatureTaxonomyAllow.length > 0 &&
+    (blockId === 'cd_creature_preset' || blockId === 'cd_creature_class')
+  );
+  const creaturePartConflictsWithSelection = (
+    item: LibraryItemDef,
+    selectedFamilies: Set<string>,
+    selectedRoles: Set<NonNullable<LibraryItemDef['creaturePartRole']>>
+  ) => {
+    if (item.creatureFamilyBlock?.some(tag => selectedFamilies.has(tag))) return true;
+    const role = item.creaturePartRole;
+    if (!role) return false;
+    if (creaturePrimaryHeadRoles.has(role) && Array.from(selectedRoles).some(selectedRole => creaturePrimaryHeadRoles.has(selectedRole))) {
+      return true;
+    }
+    if ((role === 'torso' || role === 'lower_body') && item.creaturePartMode === 'replace' && selectedRoles.has(role)) {
+      return true;
+    }
+    return false;
+  };
+  const rememberCreaturePartSelection = (
+    item: LibraryItemDef,
+    selectedFamilies: Set<string>,
+    selectedRoles: Set<NonNullable<LibraryItemDef['creaturePartRole']>>
+  ) => {
+    if (item.creatureFamily) selectedFamilies.add(item.creatureFamily);
+    item.creatureFamilyAllow?.forEach(tag => selectedFamilies.add(tag));
+    if (item.creaturePartRole) selectedRoles.add(item.creaturePartRole);
+  };
+  const pickCreatureIntentItems = (
+    blockId: string,
+    items: LibraryItemDef[],
+    count: number,
+    preset: ContentIntentPreset,
+    taxonomyPrefer: CreatureTaxonomyTag[],
+    selectedFamilies: Set<string>,
+    selectedRoles: Set<NonNullable<LibraryItemDef['creaturePartRole']>>
+  ) => {
+    const pool = [...items];
+    const selected: LibraryItemDef[] = [];
+    while (pool.length > 0 && selected.length < count) {
+      const candidates = pool
+        .map((item, index) => {
+          if (creatureBlockRequiresExplicitTaxonomy(blockId) && !creatureItemExplicitlyMatchesTaxonomy(item, taxonomyPrefer)) {
+            return { item, index, weight: 0 };
+          }
+          if ((blockId === 'cd_creature_head' || blockId === 'cd_creature_body') && creaturePartConflictsWithSelection(item, selectedFamilies, selectedRoles)) {
+            return { item, index, weight: 0 };
+          }
+          const baseWeight = Math.max(0, getRandomWeightForItem(blockId, item));
+          const keyWeight = itemHasAnyKey(item, preset.keys) ? 8 : 1;
+          const taxonomyWeight = getCreatureTaxonomyIntentWeight(item, taxonomyPrefer);
+          return { item, index, weight: baseWeight * keyWeight * taxonomyWeight };
+        })
+        .filter(entry => entry.weight > 0);
+      if (candidates.length === 0) break;
+      const totalWeight = candidates.reduce((sum, entry) => sum + entry.weight, 0);
+      let cursor = Math.random() * totalWeight;
+      const picked = candidates.find(entry => {
+        cursor -= entry.weight;
+        return cursor <= 0;
+      }) || candidates[candidates.length - 1];
+      selected.push(picked.item);
+      rememberCreaturePartSelection(picked.item, selectedFamilies, selectedRoles);
+      pool.splice(picked.index, 1);
+    }
+    return selected;
+  };
+  const applyContentIntentCreatureSubjectRandom = (
+    nextState: NarrativeFieldState,
+    preset: ContentIntentPreset,
+    managedBlocks: string[]
+  ) => {
+    const contentIntentItemCache = new Map<string, LibraryItemDef[]>();
+    const selectedFamilies = new Set<string>();
+    const selectedRoles = new Set<NonNullable<LibraryItemDef['creaturePartRole']>>();
+    const taxonomyPrefer = getCreatureIntentTaxonomyPrefer(preset);
+    const rank = contentIntentDensityRank();
+    const targetTerms = getCreatureContentIntentDensityTargetCount();
+    let usedTerms = 0;
+
+    managedBlocks.forEach(blockId => {
+      if (!isBlockLocked(blockId)) nextState[blockId] = [];
+    });
+
+    const addCreatureBlock = (blockId: string, requestedCount = 1) => {
+      if (usedTerms >= targetTerms || isBlockLocked(blockId)) return;
+      const items = getContentIntentItemsForBlock(blockId, contentIntentItemCache);
+      if (items.length === 0) return;
+      const capacity = Math.max(1, CONCEPT_DESIGN_BLOCK_LIMITS[blockId] || 1);
+      const count = Math.min(capacity, requestedCount, Math.max(0, targetTerms - usedTerms));
+      const selected = pickCreatureIntentItems(blockId, items, count, preset, taxonomyPrefer, selectedFamilies, selectedRoles).map(item => item.name);
+      if (selected.length === 0) return;
+      nextState[blockId] = selected;
+      usedTerms += selected.length;
+    };
+
+    const allowDoubleArchetype = rank >= 5 ? Math.random() < 0.4 : rank >= 4 ? Math.random() < 0.18 : false;
+    const presetSubjectPrimary = contentIntentPresetBlockList(preset, 'subjectPrimary');
+    const presetSubjectSupport = contentIntentPresetBlockList(preset, 'subjectSupport');
+    const preferredArchetypeBlocks = shuffleVisualPresetBlocks(
+      creatureArchetypeBlocks.filter(blockId => presetSubjectPrimary.includes(blockId) || presetSubjectSupport.includes(blockId))
+    );
+    const archetypeSeed = preferredArchetypeBlocks[0] || (Math.random() < 0.62 ? 'cd_creature_preset' : 'cd_creature_class');
+    addCreatureBlock(archetypeSeed, archetypeSeed === 'cd_creature_class' && rank >= 5 ? 2 : 1);
+    if (allowDoubleArchetype) {
+      creatureArchetypeBlocks.filter(blockId => blockId !== archetypeSeed).slice(0, 1).forEach(blockId => addCreatureBlock(blockId, 1));
+    }
+
+    if (rank >= 2 || Math.random() < 0.7) addCreatureBlock('cd_creature_size', 1);
+    const structurePlan = shuffleVisualPresetBlocks([
+      ...creatureStructureBlocks.filter(blockId => presetSubjectPrimary.includes(blockId)),
+      ...creatureStructureBlocks.filter(blockId => presetSubjectSupport.includes(blockId))
+    ]);
+    structurePlan.forEach(blockId => {
+      if (usedTerms >= targetTerms) return;
+      const capacity = Math.max(1, CONCEPT_DESIGN_BLOCK_LIMITS[blockId] || 1);
+      const desired = blockId === 'cd_creature_texture'
+        ? Math.min(capacity, rank >= 5 ? 3 : rank >= 3 ? 2 : 1)
+        : Math.min(capacity, rank >= 5 ? 2 : 1);
+      addCreatureBlock(blockId, desired);
+    });
+
+    const behaviorSeed = shuffleVisualPresetBlocks(creatureBehaviorBlocks)[0] || 'cd_creature_mood';
+    addCreatureBlock(behaviorSeed, 1);
+    if (rank >= 4) {
+      creatureBehaviorBlocks.filter(blockId => blockId !== behaviorSeed).forEach(blockId => addCreatureBlock(blockId, 1));
+    }
+    if (presetSubjectPrimary.includes('cd_creature_element') || rank >= 4 || Math.random() < 0.38) {
+      addCreatureBlock('cd_creature_element', 1);
+    }
+
+    if (usedTerms < targetTerms) {
+      const fillerBlocks = Array.from(new Set([
+        ...presetSubjectPrimary,
+        ...presetSubjectSupport,
+        ...creatureSubjectBlocks
+      ])).filter(blockId => !creatureArchetypeBlocks.includes(blockId));
+      shuffleVisualPresetBlocks(fillerBlocks).forEach(blockId => {
+        if (usedTerms >= targetTerms) return;
+        const existing = nextState[blockId] || [];
+        const capacity = Math.max(1, CONCEPT_DESIGN_BLOCK_LIMITS[blockId] || 1);
+        if (existing.length >= capacity) return;
+        const items = getContentIntentItemsForBlock(blockId, contentIntentItemCache)
+          .filter(item => !existing.includes(item.name));
+        const selected = pickCreatureIntentItems(
+          blockId,
+          items,
+          Math.min(capacity - existing.length, targetTerms - usedTerms),
+          preset,
+          taxonomyPrefer,
+          selectedFamilies,
+          selectedRoles
+        ).map(item => item.name);
+        if (selected.length === 0) return;
+        nextState[blockId] = [...existing, ...selected];
+        usedTerms += selected.length;
+      });
+    }
+  };
+  const applyContentIntentHumanSubjectRandom = (
+    nextState: NarrativeFieldState,
+    preset: ContentIntentPreset,
+    managedBlocks: string[]
+  ) => {
+    const contentIntentItemCache = new Map<string, LibraryItemDef[]>();
+    managedBlocks.forEach(blockId => {
+      if (!isBlockLocked(blockId)) nextState[blockId] = [];
+    });
+    const targetTerms = getContentIntentDensityTargetCount();
+    let usedTerms = 0;
+    const selectedBlocks = new Set<string>();
+    const addBlock = (blockId: string, requestedCount = 1, genderSignal: LinkedGenderSignal = deriveLinkedGenderSignalFromState(nextState)) => {
+      if (usedTerms >= targetTerms || selectedBlocks.has(blockId) || isBlockLocked(blockId)) return;
+      const capacity = contentIntentBlockCapacity(blockId);
+      const remaining = Math.max(0, targetTerms - usedTerms);
+      const count = Math.min(capacity, requestedCount, remaining);
+      const values = pickContentIntentBlockValues(blockId, preset, count, genderSignal, contentIntentItemCache);
+      if (values.length === 0) return;
+      nextState[blockId] = values;
+      selectedBlocks.add(blockId);
+      usedTerms += values.length;
+    };
+
+    addBlock('cd_gender');
+    let genderSignal = deriveLinkedGenderSignalFromState(nextState);
+    const seedBlock = shuffleVisualPresetBlocks([...humanSubjectExclusiveSeedBlocks])[0] || 'cd_persona';
+    addBlock(seedBlock, 1, genderSignal);
+    const styleCount = Math.random() < 0.56 || targetTerms >= 24 ? 2 : 1;
+    shuffleVisualPresetBlocks([...humanSubjectStyleProtocolBlocks]).slice(0, styleCount).forEach(blockId => addBlock(blockId, 1, genderSignal));
+    const hairBlock = linkedHairStyleBlocksForGender(genderSignal, activeLinkedRandomPreset)[0] || 'cd_hair_style_f';
+    addBlock(hairBlock, 1, genderSignal);
+    genderSignal = deriveLinkedGenderSignalFromState(nextState);
+    if (blockAllowedByLinkedGender('cd_beard_style', genderSignal, activeLinkedRandomPreset) && (genderSignal === 'MASCULINE' || targetTerms >= 24 || Math.random() < 0.24)) {
+      addBlock('cd_beard_style', 1, genderSignal);
+    }
+    addBlock(shuffleVisualPresetBlocks([...humanSubjectActionStateBlocks])[0] || 'cd_static_pose', 1, genderSignal);
+
+    const presetPriorityBlocks = [...preset.subjectPrimary, ...preset.subjectSupport, ...preset.subjectLow]
+      .filter(blockId => humanSubjectOptionalFineBlocks.includes(blockId) || humanSubjectMultiSelectBlocks.includes(blockId));
+    const fillerBlocks = Array.from(new Set([...presetPriorityBlocks, ...humanSubjectOptionalFineBlocks]))
+      .filter(blockId => !humanSubjectExclusiveSeedBlocks.includes(blockId))
+      .filter(blockId => !humanSubjectStyleProtocolBlocks.includes(blockId))
+      .filter(blockId => !humanSubjectActionStateBlocks.includes(blockId))
+      .filter(blockId => !humanSubjectHairStyleBlocks.includes(blockId))
+      .filter(blockId => blockId !== 'cd_beard_style' && blockId !== 'cd_gender');
+
+    shuffleVisualPresetBlocks(fillerBlocks).forEach(blockId => {
+      if (usedTerms >= targetTerms) return;
+      const capacity = contentIntentBlockCapacity(blockId);
+      const desired = humanSubjectMultiSelectBlocks.includes(blockId)
+        ? Math.min(capacity, targetTerms >= 31 ? 3 : targetTerms >= 17 ? 2 : 1)
+        : 1;
+      addBlock(blockId, desired, genderSignal);
+    });
+
+    if (usedTerms < targetTerms) {
+      shuffleVisualPresetBlocks(humanSubjectMultiSelectBlocks).forEach(blockId => {
+        if (usedTerms >= targetTerms || isBlockLocked(blockId)) return;
+        const existing = nextState[blockId] || [];
+        const capacity = contentIntentBlockCapacity(blockId);
+        if (existing.length >= capacity) return;
+        const values = pickContentIntentBlockValues(blockId, preset, capacity, genderSignal, contentIntentItemCache)
+          .filter(value => !existing.includes(value));
+        const needed = Math.min(values.length, capacity - existing.length, targetTerms - usedTerms);
+        if (needed <= 0) return;
+        nextState[blockId] = [...existing, ...values.slice(0, needed)];
+        usedTerms += needed;
+      });
+    }
+
+    enforceLinkedGenderOnState(nextState, activeLinkedRandomPreset, genderSignal);
+  };
+  const applyContentIntentRandom = (nextState: NarrativeFieldState, focus: LinkedRandomFocus = 'GLOBAL', forcedPreset?: ContentIntentPreset) => {
+    const preset = forcedPreset || chooseContentIntentPreset();
+    setLastContentIntentPreset(preset);
+    if (focus === 'GLOBAL' || focus === 'SUBJECT') {
+      setSubjectMode(preset.subjectMode);
+      setObjectRoute(preset.subjectMode === 'CREATURE' ? 'CREATURE' : 'HUMAN');
+    }
+    const managedBlocks = getContentIntentManagedBlocks(preset, focus);
+    if ((focus === 'GLOBAL' || focus === 'SUBJECT') && preset.subjectMode === 'HUMAN') {
+      applyContentIntentHumanSubjectRandom(nextState, preset, managedBlocks.filter(blockId => [...humanSubjectBlocks, ...styleProtocolBlocks].includes(blockId)));
+      if (focus === 'SUBJECT') return;
+    }
+    if ((focus === 'GLOBAL' || focus === 'SUBJECT') && preset.subjectMode === 'CREATURE') {
+      applyContentIntentCreatureSubjectRandom(nextState, preset, managedBlocks.filter(blockId => creatureSubjectBlocks.includes(blockId)));
+      if (focus === 'SUBJECT') return;
+    }
+    const targetBlocks = getContentIntentBlocksForFocus(preset, focus).filter(blockId => managedBlocks.includes(blockId));
+    managedBlocks.forEach(blockId => {
+      if (!isBlockLocked(blockId) && !targetBlocks.includes(blockId)) nextState[blockId] = [];
+    });
+    targetBlocks.forEach(blockId => {
+      if (isBlockLocked(blockId)) return;
+      if (blockId === 'cd_spacetime_coordinate') {
+        const coordinate = getRandomSur3CoordinatePreset(lang === 'EN' ? 'EN' : 'CN');
+        if (!isSpaceAnchorValueLocked) nextState['cd_space_anchor_exact'] = [lang === 'EN' ? coordinate.spaceEn : coordinate.spaceCn];
+        if (!isTimeAnchorValueLocked) {
+          nextState['cd_time_anchor_exact'] = coordinate.timeMode === 'era'
+            ? (coordinate.time ? [coordinate.time] : [])
+            : (coordinate.year === null ? [] : [String(clampTimelineYear(coordinate.year))]);
+        }
+        updateSpacetimeCoordinateDisplay(nextState);
+        return;
+      }
+      if (blockId === 'cd_space_anchor_exact' || blockId === 'cd_time_anchor_exact') return;
+      const items = (fieldStyleBlocks.includes(blockId) || styleProtocolBlocks.includes(blockId))
+        ? (getFilteredLibraryDataForBlock(blockId)?.[0]?.items || [])
+        : getRandomizableItemsForBlock(blockId);
+      if (items.length === 0) return;
+      const limit = CONCEPT_DESIGN_BLOCK_LIMITS[blockId] || 1;
+      const count = Math.min(limit, contentIntentRandomDensity === 'FULL' && limit > 1 ? 2 : 1);
+      const keys = focus === 'FIELD'
+        ? preset.keys
+        : focus === 'LIGHT'
+          ? preset.keys
+          : preset.keys;
+      const selected = pickContentIntentItems(blockId, items, count, keys).map(item => item.name);
+      nextState[blockId] = selected;
+    });
   };
   const itemMetaList = (item: LibraryItemDef, key: string): string[] => {
     const value = (item as any)[key];
@@ -8141,7 +9893,7 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
       const lightTextMatch = itemHasAnyKey(item, preset.lightPrefer);
       const lightMatch = Boolean(lightAnchor && preset.lightAnchorAllow.some(key => lightAnchor.includes(key) || key.includes(lightAnchor)));
       const realityMatch = intersects(realityTags, preset.realityAllow);
-      return lightTextMatch || lightMatch || realityMatch || blockId === 'cd_light_direction' || blockId === 'cd_light_shape';
+      return lightTextMatch || lightMatch || realityMatch || ['cd_light_preset', 'cd_light_mood', 'cd_light_direction', 'cd_light_shape', 'cd_light_air', 'cd_light_color_temp'].includes(blockId);
     }
 
     if ([...humanSubjectBlocks, ...creatureSubjectBlocks].includes(blockId)) {
@@ -8229,7 +9981,7 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
     const density = linkedRandomDensity || preset.density;
     const limit = CONCEPT_DESIGN_BLOCK_LIMITS[blockId] || 1;
     if (limit <= 1) return 1;
-    if (['cd_field_preset', 'cd_scene_real', 'cd_scene_surreal', 'cd_scene_abstract', 'cd_light_mood', 'cd_light_type', 'cd_light_direction', 'cd_light_shape'].includes(blockId)) return 1;
+    if (['cd_field_preset', 'cd_scene_real', 'cd_scene_surreal', 'cd_scene_abstract', 'cd_light_preset', 'cd_light_mood', 'cd_light_type', 'cd_light_direction', 'cd_light_shape', 'cd_light_air', 'cd_light_color_temp'].includes(blockId)) return 1;
     if (density === 'LIGHT') return 1;
     if (density === 'FULL') return Math.min(limit, 2);
     return Math.min(limit, Math.random() < 0.35 ? 2 : 1);
@@ -8263,22 +10015,19 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
 
   const linkedLightBlocksForDensity = (preset: ConceptLinkedRandomPreset, focus: LinkedRandomFocus = 'GLOBAL') => {
     const density = linkedRandomDensity || preset.density;
-    const balancedLightDetail = Math.random() < 0.5
-      ? 'cd_light_type'
-      : Math.random() < 0.5
-        ? 'cd_light_direction'
-        : 'cd_light_shape';
-    if (density === 'FULL') return ['cd_light_mood', 'cd_light_type', 'cd_light_direction', 'cd_light_shape'];
-    if (density === 'BALANCED') return ['cd_light_mood', balancedLightDetail];
-    if (focus === 'LIGHT') return [Math.random() < 0.7 ? 'cd_light_mood' : 'cd_light_type'];
-    return Math.random() < 0.5 ? [Math.random() < 0.7 ? 'cd_light_mood' : 'cd_light_type'] : [];
+    const lightDetails = ['cd_light_mood', 'cd_light_type', 'cd_light_direction', 'cd_light_air', 'cd_light_color_temp', 'cd_light_shape'];
+    const balancedLightDetail = shuffleVisualPresetBlocks(lightDetails)[0] || 'cd_light_mood';
+    if (density === 'FULL') return ['cd_light_preset', ...lightDetails];
+    if (density === 'BALANCED') return ['cd_light_preset', balancedLightDetail];
+    if (focus === 'LIGHT') return [Math.random() < 0.75 ? 'cd_light_preset' : balancedLightDetail];
+    return Math.random() < 0.5 ? [Math.random() < 0.7 ? 'cd_light_preset' : balancedLightDetail] : [];
   };
 
   const linkedBlocksForDensity = (preset: ConceptLinkedRandomPreset, genderSignal: LinkedGenderSignal = 'OPEN', focus: LinkedRandomFocus = 'GLOBAL') => {
     const density = linkedRandomDensity || preset.density;
     const subjectBlocks = preset.subjectMode === 'HUMAN'
       ? ['cd_age', 'cd_occupation', 'cd_persona', 'cd_emotional_core', 'cd_body_type', 'cd_skin_texture', 'cd_surface_state', 'cd_body_damage', 'cd_body_modification', 'cd_costume_logic', 'cd_prop_anchor', 'cd_symbol_system', 'cd_static_pose', 'cd_dynamic_action']
-      : ['cd_creature_size', 'cd_creature_class', 'cd_creature_element', 'cd_creature_head', 'cd_creature_body', 'cd_creature_mood', 'cd_creature_action', 'cd_creature_texture'];
+      : ['cd_creature_preset', 'cd_creature_size', 'cd_creature_class', 'cd_creature_element', 'cd_creature_head', 'cd_creature_body', 'cd_creature_mood', 'cd_creature_action', 'cd_creature_texture'];
     const appearanceBlocks = linkedAppearanceBlocksForDensity(preset, genderSignal);
     const subjectTarget = density === 'LIGHT' ? 4 : density === 'FULL' ? 10 : 6;
     const selectedSubjectBlocks = focus === 'SUBJECT' && preset.subjectMode === 'HUMAN'
@@ -8427,23 +10176,24 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
   };
 
   const applyIndependentCoreModuleRandoms = (nextState: NarrativeFieldState) => {
-    applyRandomBlocksToState(nextState, activeSubjectUiBlocks);
-    applyRandomBlocksToState(nextState, spacetimeFieldUiBlocks);
-    applyRandomBlocksToState(nextState, aestheticLightAuditBlocks);
+    const preset = chooseContentIntentPreset();
+    applyContentIntentRandom(nextState, 'SUBJECT', preset);
+    applySpacetimeFieldRandom(nextState);
+    applyLightingAtmosphereRandom(nextState);
   };
 
   const randomizeIndependentCoreModules = () => {
     const nextState = { ...fieldState };
     applyIndependentCoreModuleRandoms(nextState);
     updateState(nextState);
-    triggerActionMotion('CORE:random');
+    window.requestAnimationFrame(() => triggerActionMotion('CORE:random'));
   };
 
   const randomizeConceptGlobalEmergence = () => {
     const nextState = { ...fieldState };
-    applyIndependentCoreModuleRandoms(nextState);
     applyVisualStylePresetRandom(nextState);
     applyFramingPresetRandom(nextState);
+    applyIndependentCoreModuleRandoms(nextState);
     updateState(nextState);
     triggerActionMotion('GLOBAL:random');
   };
@@ -8636,6 +10386,176 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
     updateState(nextState);
   };
 
+  const resolveSpacetimeFieldRandomRoute = (): Exclude<SpacetimeFieldRandomRoute, 'ALL_PRESETS'> => {
+    if (spacetimeFieldRandomRoute !== 'ALL_PRESETS') return spacetimeFieldRandomRoute;
+    const routes: Array<Exclude<SpacetimeFieldRandomRoute, 'ALL_PRESETS'>> = [
+      'EXACT_COORDINATE',
+      'REAL_SCENE',
+      'SURREAL_SCENE',
+      'ABSTRACT_SCENE',
+      'ENVIRONMENT_STATE'
+    ];
+    return routes[Math.floor(Math.random() * routes.length)] || 'REAL_SCENE';
+  };
+
+  const getSpacetimeFieldRandomBlocksForDensity = (route: Exclude<SpacetimeFieldRandomRoute, 'ALL_PRESETS'>): string[] => {
+    const pickOne = (blocks: string[]) => shuffleVisualPresetBlocks(blocks).slice(0, 1);
+    if (route === 'ENVIRONMENT_STATE') {
+      if (spacetimeFieldRandomDensity === 'LIGHT') return pickOne(fieldEnvironmentStateBlocks);
+      return [...fieldEnvironmentStateBlocks];
+    }
+
+    if (route === 'EXACT_COORDINATE') {
+      if (spacetimeFieldRandomDensity === 'LIGHT') return ['cd_spacetime_coordinate'];
+      if (spacetimeFieldRandomDensity === 'FULL') return ['cd_spacetime_coordinate', ...fieldEnvironmentStateBlocks];
+      return ['cd_spacetime_coordinate', ...pickOne(fieldEnvironmentStateBlocks)];
+    }
+
+    if (route === 'REAL_SCENE') {
+      if (spacetimeFieldRandomDensity === 'LIGHT') return ['cd_field_preset', 'cd_scene_real'];
+      if (spacetimeFieldRandomDensity === 'FULL') return spacetimeFieldRouteMeta.REAL_SCENE.blocks;
+      return ['cd_field_preset', 'cd_scene_real', ...pickOne(fieldEnvironmentStateBlocks)];
+    }
+
+    if (route === 'SURREAL_SCENE') {
+      if (spacetimeFieldRandomDensity === 'LIGHT') return ['cd_field_preset', 'cd_scene_surreal'];
+      if (spacetimeFieldRandomDensity === 'FULL') return spacetimeFieldRouteMeta.SURREAL_SCENE.blocks;
+      return ['cd_field_preset', 'cd_scene_surreal', ...pickOne(['cd_scene_real', ...fieldEnvironmentStateBlocks])];
+    }
+
+    if (route === 'ABSTRACT_SCENE') {
+      if (spacetimeFieldRandomDensity === 'LIGHT') return ['cd_field_preset', 'cd_scene_abstract'];
+      if (spacetimeFieldRandomDensity === 'FULL') return spacetimeFieldRouteMeta.ABSTRACT_SCENE.blocks;
+      return ['cd_field_preset', 'cd_scene_abstract', ...pickOne(['cd_scene_surreal', ...fieldEnvironmentStateBlocks])];
+    }
+
+    return [];
+  };
+
+  const clearSpacetimeCoordinateState = (nextState: NarrativeFieldState) => {
+    if (isBlockLocked('cd_spacetime_coordinate')) return;
+    nextState['cd_spacetime_coordinate'] = [];
+    if (!isSpaceAnchorValueLocked) nextState['cd_space_anchor_exact'] = [];
+    if (!isTimeAnchorValueLocked) {
+      nextState['cd_time_anchor_exact'] = [];
+      setSpacetimeYearInputDraft(null);
+      setSpacetimeYearInputInvalid(false);
+    }
+  };
+
+  const applyRandomSpacetimeCoordinateToState = (nextState: NarrativeFieldState) => {
+    if (isBlockLocked('cd_spacetime_coordinate')) return;
+    const coordinate = getRandomSur3CoordinatePreset(lang === 'EN' ? 'EN' : 'CN');
+    if (!isSpaceAnchorValueLocked) nextState['cd_space_anchor_exact'] = [lang === 'EN' ? coordinate.spaceEn : coordinate.spaceCn];
+    if (!isTimeAnchorValueLocked) {
+      nextState['cd_time_anchor_exact'] = coordinate.timeMode === 'era'
+        ? (coordinate.time ? [coordinate.time] : [])
+        : (coordinate.year === null ? [] : [String(clampTimelineYear(coordinate.year))]);
+      setSpacetimeYearInputDraft(null);
+      setSpacetimeYearInputInvalid(false);
+    }
+    updateSpacetimeCoordinateDisplay(nextState);
+  };
+
+  const spacetimeFieldCountForBlock = (blockId: string) => {
+    const limit = CONCEPT_DESIGN_BLOCK_LIMITS[blockId] || 1;
+    if (limit <= 1) return 1;
+    if (['cd_field_preset', 'cd_scene_real', 'cd_scene_surreal', 'cd_scene_abstract'].includes(blockId)) return 1;
+    if (spacetimeFieldRandomDensity === 'FULL') return Math.min(limit, 2);
+    return 1;
+  };
+
+  const applySpacetimeFieldRandom = (nextState: NarrativeFieldState) => {
+    const route = resolveSpacetimeFieldRandomRoute();
+    const targetBlocks: string[] = Array.from(new Set<string>(getSpacetimeFieldRandomBlocksForDensity(route)));
+    setLastSpacetimeFieldRoute(route);
+
+    if (route !== 'ENVIRONMENT_STATE') {
+      spacetimeFieldUiBlocks.forEach(blockId => {
+        if (targetBlocks.includes(blockId) || isBlockLocked(blockId)) return;
+        if (blockId === 'cd_spacetime_coordinate') {
+          clearSpacetimeCoordinateState(nextState);
+          return;
+        }
+        nextState[blockId] = [];
+      });
+    } else {
+      fieldEnvironmentStateBlocks.forEach(blockId => {
+        if (!targetBlocks.includes(blockId) && !isBlockLocked(blockId)) nextState[blockId] = [];
+      });
+    }
+
+    targetBlocks.forEach(blockId => {
+      if (isBlockLocked(blockId)) return;
+      if (blockId === 'cd_spacetime_coordinate') {
+        applyRandomSpacetimeCoordinateToState(nextState);
+        return;
+      }
+      const items = getRandomizableItemsForBlock(blockId);
+      if (items.length === 0) return;
+      const selected = pickWeightedUniqueItems(blockId, items, spacetimeFieldCountForBlock(blockId)).map(item => item.name);
+      nextState[blockId] = selected;
+    });
+  };
+
+  const randomizeSpacetimeFieldModule = () => {
+    const nextState = { ...fieldState };
+    applySpacetimeFieldRandom(nextState);
+    updateState(nextState);
+  };
+
+  const resolveLightingAtmosphereRandomRoute = (): Exclude<LightingAtmosphereRandomRoute, 'ALL_PRESETS'> => {
+    if (lightingAtmosphereRandomRoute !== 'ALL_PRESETS') return lightingAtmosphereRandomRoute;
+    return Math.random() < 0.56 ? 'PRESET_PACKAGE' : 'DETAIL_LIGHTING';
+  };
+
+  const getLightingAtmosphereRandomBlocksForDensity = (route: Exclude<LightingAtmosphereRandomRoute, 'ALL_PRESETS'>): string[] => {
+    if (route === 'PRESET_PACKAGE') return [...lightPresetBlocks];
+    if (lightingAtmosphereRandomDensity === 'FULL') return [...lightDetailBlocks];
+    const max = lightingAtmosphereRandomDensity === 'LIGHT' ? 2 : 4;
+    const min = lightingAtmosphereRandomDensity === 'LIGHT' ? 1 : 3;
+    const count = Math.min(lightDetailBlocks.length, min + Math.floor(Math.random() * (max - min + 1)));
+    return shuffleVisualPresetBlocks(lightDetailBlocks).slice(0, count);
+  };
+
+  const lightingAtmosphereCountForBlock = (blockId: string) => {
+    const limit = CONCEPT_DESIGN_BLOCK_LIMITS[blockId] || 1;
+    if (limit <= 1) return 1;
+    return lightingAtmosphereRandomDensity === 'FULL' ? Math.min(limit, 2) : 1;
+  };
+
+  const applyLightingAtmosphereRandom = (nextState: NarrativeFieldState) => {
+    if (isSectionLocked('STYLE')) return;
+    const route = resolveLightingAtmosphereRandomRoute();
+    const targetBlocks = Array.from(new Set<string>(getLightingAtmosphereRandomBlocksForDensity(route)));
+    setLastLightingAtmosphereRoute(route);
+
+    aestheticLightAuditBlocks.forEach(blockId => {
+      if (targetBlocks.includes(blockId) || isBlockLocked(blockId)) return;
+      nextState[blockId] = [];
+    });
+
+    targetBlocks.forEach(blockId => {
+      if (isBlockLocked(blockId)) return;
+      const items = getRandomizableItemsForBlock(blockId);
+      if (items.length === 0) return;
+      const selected = pickWeightedUniqueItems(blockId, items, lightingAtmosphereCountForBlock(blockId)).map(item => item.name);
+      nextState[blockId] = selected;
+    });
+  };
+
+  const randomizeLightingAtmosphereModule = () => {
+    const nextState = { ...fieldState };
+    applyLightingAtmosphereRandom(nextState);
+    updateState(nextState);
+  };
+
+  const randomizeContentIntentModule = (focus: LinkedRandomFocus) => {
+    const nextState = { ...fieldState };
+    applyContentIntentRandom(nextState, focus);
+    updateState(nextState);
+  };
+
   const clearBlocks = (blockIds: string[]) => {
     const nextState = { ...fieldState };
     const patch: Record<string, null> = {};
@@ -8719,7 +10639,7 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
     setPromptTemplateMode('VIDEO_STORYBOARD');
     setLocalizedVideoStoryboardValues(buildLocalizedVideoStoryboardValuesFromSample(sample));
     setDisabledPromptModuleIds([]);
-    setTemplateWorkspaceView('VARIABLES');
+    onConceptWorkspacePageChange?.('RESULT');
     setCopied(false);
   };
 
@@ -8883,7 +10803,8 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
           sourceMode === 'PRESET' ? buildPresetSourceIdea() : undefined,
           hasSelectedActionTerms,
           registerRandomMode,
-          activeVariableMeta
+          activeVariableMeta,
+          strictInputFidelity
         ),
     [
       activeVariableMeta,
@@ -8905,6 +10826,7 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
       registerRandomMode,
       sourceInputs,
       sourceMode,
+      strictInputFidelity,
       subjectMode
     ]
   );
@@ -8946,14 +10868,14 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
     ].join('；');
 
     if (subjectMode === 'CREATURE') {
-      const seed = selectedLine(['cd_creature_class', 'cd_creature_element', 'cd_creature_mood'], promptLang === 'CN' ? '原创异种生物概念' : 'original creature concept');
+      const seed = selectedLine(['cd_creature_preset', 'cd_creature_class', 'cd_creature_element', 'cd_creature_mood'], promptLang === 'CN' ? '原创异种生物概念' : 'original creature concept');
       return {
         characterSeed: promptLang === 'CN'
           ? `一个以“${seed}”为核心的原创异种概念，设计重点是可读 anatomy、非通用剪影和清楚的生物职能。`
           : `An original creature concept built around "${seed}", focused on readable anatomy, a non-generic silhouette, and a clear biological function.`,
         ageBodyType: promptLang === 'CN'
-          ? `${selectedLine(['cd_creature_size', 'cd_creature_head', 'cd_creature_body', 'cd_creature_action'], '异种体型、头部结构、身体部件和行为姿态需要保持功能性。')} 本体形态：${bodyFormBrief}。`
-          : `${selectedLine(['cd_creature_size', 'cd_creature_head', 'cd_creature_body', 'cd_creature_action'], 'Creature scale, head structure, body parts, and behavior posture should remain functional.')} Body form: ${bodyFormBrief}.`,
+          ? `${selectedLine(['cd_creature_size', 'cd_creature_head', 'cd_creature_body', 'cd_creature_texture', 'cd_creature_action'], '异种体型、头部结构、身体结构、材质生理和行为姿态需要保持功能性。')} 本体形态：${bodyFormBrief}。`
+          : `${selectedLine(['cd_creature_size', 'cd_creature_head', 'cd_creature_body', 'cd_creature_texture', 'cd_creature_action'], 'Creature scale, head structure, body structure, material physiology, and behavior posture should remain functional.')} Body form: ${bodyFormBrief}.`,
         timeSpaceScene: governanceLine,
         actionMoment: promptLang === 'CN'
           ? selectedLine(['cd_creature_action'], '单张完整画面中的行为状态，强调可读 anatomy、行为线索和环境关系。')
@@ -9019,7 +10941,7 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
       EN: { ...performanceStoryboardSampleVariables.EN }
     });
     setDisabledPromptModuleIds([]);
-    setTemplateWorkspaceView('PROMPT');
+    onConceptWorkspacePageChange?.('FINAL');
     setCopied(false);
   };
 
@@ -9121,7 +11043,7 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
   const compileConceptVariables = async () => {
     if (isCompilingConcept) return;
     if (isVideoStoryboardTemplate) {
-      setTemplateWorkspaceView('VARIABLES');
+      onConceptWorkspacePageChange?.('RESULT');
       onConceptRuntimeChange?.(buildRuntimeState(variables), true);
       return;
     }
@@ -9143,6 +11065,7 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
       );
       if (generated) {
         applyGeneratedVariables(generated);
+        onConceptWorkspacePageChange?.('RESULT');
         onConceptRuntimeChange?.(buildRuntimeState(generated[promptLang]), true);
       } else {
         alert(t(lang, '变量生成失败：模型返回了不完整或非法的内容主体 C01-C10 JSON，系统已尝试修复但仍失败。请重试，或切换更稳定的核心文本模型。', 'Variable generation failed: the model returned incomplete or invalid Content Core C01-C10 JSON, and automatic repair still failed. Please retry or switch to a more stable core text model.'));
@@ -9424,14 +11347,14 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
     if (subjectMode === 'CREATURE') {
       return (
         <div className="space-y-3 p-3">
-          {renderParamSlotGroup('主体预设', 'Subject Presets', styleProtocolBlocks, true)}
+          {renderParamSlotGroup('生物原型', 'Biological Prototype', ['cd_creature_preset', 'cd_creature_class'], true)}
           <div className="grid gap-3 lg:grid-cols-2">
             {renderHumanSlotGroup(
-              '体量与种类',
-              'Scale & Class',
-              '异种的基本体量、物种类别和整体识别。',
-              'Base scale, creature class, and primary recognition.',
-              ['cd_creature_size', 'cd_creature_class', 'cd_creature_element', 'cd_creature_mood']
+              '体量与属性',
+              'Scale & Traits',
+              '异种的基本体量、异常属性和行为意图。',
+              'Base scale, abnormal trait, and behavioral intent.',
+              ['cd_creature_size', 'cd_creature_element', 'cd_creature_mood']
             )}
             {renderHumanSlotGroup(
               '头部与身体',
@@ -9443,8 +11366,8 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
             {renderHumanSlotGroup(
               '材质与行动',
               'Texture & Action',
-              '表皮材质、行动姿态和可见行为证据。',
-              'Surface material, action pose, and visible behavioral evidence.',
+              '材质生理与行动姿态。',
+              'Material physiology and action posture.',
               ['cd_creature_texture', 'cd_creature_action']
             )}
           </div>
@@ -10088,7 +12011,7 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
     <div className="mist-aesthetic-engine mist-concept-design-engine relative flex h-full w-full flex-col overflow-hidden bg-black">
       <div className="relative z-10 h-full overflow-y-auto custom-scrollbar xl:overflow-hidden">
         <div className="mx-auto flex min-h-full w-full max-w-[1880px] flex-col gap-4 px-4 py-4 pb-24 xl:h-full xl:min-h-0 xl:px-5 xl:pb-20">
-          {conceptWorkspacePage === 'ENGINE' && (
+          {(['ENGINE', 'COMPILE', 'RESULT', 'FINAL'] as ConceptDesignWorkspacePage[]).includes(conceptWorkspacePage) && (
           <div className="mist-concept-workbench min-h-0 xl:flex-1 xl:overflow-hidden">
             <div className="grid min-h-0 gap-3 xl:h-full xl:grid-cols-[minmax(420px,0.34fr)_minmax(0,1fr)]">
               <aside className="flex min-h-0 flex-col gap-3 xl:h-full xl:overflow-y-auto xl:pr-1 custom-scrollbar">
@@ -10106,80 +12029,19 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
                   {renderPhysicalMediumPanel()}
                   {renderWorldLawPanel()}
                   {renderBodyFormPanel()}
+                  {renderContentIntentPanel()}
                   {renderTemplateQuickControlsPanel()}
                 </div>
               </aside>
 
               <main className="min-h-0 xl:flex xl:flex-col xl:overflow-hidden">
-                <section className={`shrink-0 rounded-lg border p-3 ${panelClass}`}>
-                  <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] xl:items-center">
-                    <div className="min-w-0">
-                      <p className={`font-mono text-[11px] uppercase tracking-[0.24em] ${mutedText}`}>{activeTemplateWorkspaceKicker}</p>
-                      <h2 className={`mt-1.5 font-serif text-xl font-black tracking-[0.04em] ${strongText}`}>
-                        {activeTemplateWorkspaceTitle}
-                      </h2>
-                    </div>
-                    <div className="w-full xl:w-[460px]">
-                      <div className={`mist-concept-source-mode-toggle mist-template-workspace-switch flex h-10 min-w-0 items-center gap-1 overflow-hidden rounded-md border p-0.5 ${miniSwitchClass}`}>
-                        {[
-                          { id: 'PARAMS' as TemplateWorkspaceView, label: '具体参数', labelEn: 'Params' },
-                          { id: 'COMPILE' as TemplateWorkspaceView, label: 'M10 编译', labelEn: 'M10 Compile' },
-                          { id: 'VARIABLES' as TemplateWorkspaceView, label: '编译结果', labelEn: 'Result' },
-                          { id: 'PROMPT' as TemplateWorkspaceView, label: 'M10 终稿', labelEn: 'M10 Final' }
-                        ].map(item => (
-                          <button
-                            key={item.id}
-                            type="button"
-                            onClick={() => setTemplateWorkspaceView(item.id)}
-                            className={`mist-concept-source-mode-button mist-template-workspace-switch-button flex h-8 min-w-0 flex-1 items-center justify-center rounded border px-3 text-[12px] font-black uppercase tracking-[0.06em] ${templateWorkspaceView === item.id ? 'is-active' : ''}`}
-                          >
-                            <span className="truncate">{t(lang, item.label, item.labelEn)}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="flex min-w-0 justify-start gap-2 xl:justify-end">
-                      {templateWorkspaceView === 'PARAMS' && (
-                        renderParamExpandButton(
-                          paramPanelExpandMode !== 'COLLAPSED',
-                          toggleAllParamModulesExpanded,
-                          globalParamExpandLabel,
-                          globalParamExpandLabel,
-                          true,
-                          paramPanelExpandMode === 'ALL' ? 'x' : 'plus'
-                        )
-                      )}
-                      {(templateWorkspaceView === 'COMPILE' || templateWorkspaceView === 'VARIABLES' || templateWorkspaceView === 'PROMPT') && (
-                        <>
-                          <button
-                            type="button"
-                            onClick={() => setPromptLang(prev => prev === 'CN' ? 'EN' : 'CN')}
-                            className={`${compactTopActionButtonClass} justify-center`}
-                          >
-                            {promptLang === 'CN' ? '中文' : 'EN'}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={
-                              templateWorkspaceView === 'COMPILE'
-                                ? copyCompileInstructionOutput
-                                : templateWorkspaceView === 'VARIABLES'
-                                  ? copyCompileResultOutput
-                                  : copyOutput
-                            }
-                            className={`${compactTopActionButtonClass} justify-center`}
-                          >
-                            {copied ? <Check size={13} /> : <Copy size={13} />}
-                            <span>{t(lang, '复制', 'Copy')}</span>
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </section>
-	                    <div ref={templateWorkspaceBodyRef} className="mist-template-workspace-body mt-3 min-h-0 xl:flex-1 xl:overflow-y-auto xl:pr-1 custom-scrollbar">
-	                    <div className={`mist-template-workspace-view mist-template-params-view ${templateWorkspaceView === 'PARAMS' ? 'space-y-3' : 'hidden'}`}>
+                {activeTemplateWorkspaceView === 'PARAMS' ? (
+                  <div className="shrink-0 pb-3">
                     {renderLexiconAxisFilterPanel()}
+                  </div>
+                ) : null}
+	                    <div ref={templateWorkspaceBodyRef} className="mist-template-workspace-body min-h-0 xl:flex-1 xl:overflow-y-auto xl:pr-1 custom-scrollbar">
+	                    <div className={`mist-template-workspace-view mist-template-params-view ${activeTemplateWorkspaceView === 'PARAMS' ? 'space-y-3' : 'hidden'}`}>
                     {renderVisualStylePanel()}
 
                     {renderSlotSection(
@@ -10227,18 +12089,27 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
 	                      'SUBJECT',
 	                      activeSubjectUiBlocks,
 	                      subjectMode === 'HUMAN' ? UserRound : Layers3,
-	                      undefined,
+	                      (
+	                        <div className="flex items-center gap-1.5">
+	                          {lastContentIntentPreset ? (
+	                            <span className={`hidden h-6 max-w-[7rem] items-center truncate rounded px-1.5 text-[10px] font-black leading-none tracking-[0.03em] sm:inline-flex ${isRetro ? 'bg-[#85411B]/10 text-[#85411B]' : 'bg-[var(--mist-active-accent)]/10 text-[var(--mist-active-accent)]'}`}>
+	                              {t(lang, lastContentIntentPreset.label, lastContentIntentPreset.labelEn)}
+	                            </span>
+	                          ) : null}
+	                        </div>
+	                      ),
 	                      undefined,
 	                      {
 	                        moduleId: 'subject_ontology',
 	                        titleExtra: renderObjectRouteGrid(),
-	                        randomizeHandler: () => randomizeBlocks(activeSubjectUiBlocks),
+	                        actionExtra: renderContentIntentPresetControl(),
+	                        randomizeHandler: () => randomizeContentIntentModule('SUBJECT'),
 	                        randomizeTitle: t(lang, '随机主体本体', 'Randomize Subject Ontology'),
 	                        collapsedContent: <div className="p-3">{renderSubjectCollapsedSummary()}</div>,
                         previewContent: (
                           <div className="space-y-3 p-3">
                             {subjectMode === 'CREATURE'
-	                              ? renderParamSlotGroup('主体预设', 'Subject Presets', styleProtocolBlocks, true)
+	                              ? renderParamSlotGroup('生物原型', 'Biological Prototype', ['cd_creature_preset', 'cd_creature_class'], true)
 	                              : renderParamSlotGroup('主体预设', 'Subject Presets', ['cd_persona', ...styleProtocolBlocks], true)}
 	                          </div>
 	                        ),
@@ -10251,12 +12122,21 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
                       'STYLE',
                       spacetimeFieldUiBlocks,
                       Box,
-                      undefined,
+                      (
+                        <div className="flex items-center gap-1.5">
+                          {lastSpacetimeFieldRoute ? (
+                            <span className={`hidden h-6 max-w-[7rem] items-center truncate rounded px-1.5 text-[10px] font-black leading-none tracking-[0.03em] sm:inline-flex ${isRetro ? 'bg-[#85411B]/10 text-[#85411B]' : 'bg-[var(--mist-active-accent)]/10 text-[var(--mist-active-accent)]'}`}>
+                              {t(lang, spacetimeFieldRouteMeta[lastSpacetimeFieldRoute].label, spacetimeFieldRouteMeta[lastSpacetimeFieldRoute].labelEn)}
+                            </span>
+                          ) : null}
+                        </div>
+                      ),
                       undefined,
                       {
                         moduleId: 'time_space_field',
-	                        randomizeHandler: () => randomizeBlocks(spacetimeFieldUiBlocks),
-	                        randomizeTitle: t(lang, '随机时空场域', 'Randomize Time-Space Field'),
+                        actionExtra: renderSpacetimeFieldRandomControl(),
+                        randomizeHandler: () => randomizeSpacetimeFieldModule(),
+                        randomizeTitle: t(lang, '随机时空场域', 'Randomize Time-Space Field'),
                         previewContent: (
                           <div className="space-y-3 p-3">
                             {renderParamSlotGroup('场域锚点预设', 'Field Anchor Presets', ['cd_spacetime_coordinate', 'cd_field_preset'], true)}
@@ -10277,12 +12157,21 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
                       'STYLE',
                       aestheticLightAuditBlocks,
                       Lightbulb,
-                      undefined,
+                      (
+                        <div className="flex items-center gap-1.5">
+                          {lastLightingAtmosphereRoute ? (
+                            <span className={`hidden h-6 max-w-[7rem] items-center truncate rounded px-1.5 text-[10px] font-black leading-none tracking-[0.03em] sm:inline-flex ${isRetro ? 'bg-[#85411B]/10 text-[#85411B]' : 'bg-[var(--mist-active-accent)]/10 text-[var(--mist-active-accent)]'}`}>
+                              {t(lang, lightingAtmosphereRouteMeta[lastLightingAtmosphereRoute].label, lightingAtmosphereRouteMeta[lastLightingAtmosphereRoute].labelEn)}
+                            </span>
+                          ) : null}
+                        </div>
+                      ),
                       undefined,
                       {
                         moduleId: 'lighting_atmosphere',
-	                        randomizeHandler: () => randomizeBlocks(aestheticLightAuditBlocks),
-	                        randomizeTitle: t(lang, '随机光影氛围', 'Randomize Lighting Atmosphere'),
+                        actionExtra: renderLightingAtmosphereRandomControl(),
+                        randomizeHandler: () => randomizeLightingAtmosphereModule(),
+                        randomizeTitle: t(lang, '随机光影氛围', 'Randomize Lighting Atmosphere'),
                         previewContent: (
                           <div className="space-y-3 p-3">
                             {renderParamSlotGroup('光影预设包', 'Lighting Preset Pack', lightPresetBlocks, true)}
@@ -10361,13 +12250,13 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
                       </div>
                     )}
                   </div>
-                  <div className={`mist-template-workspace-view mist-template-prompt-view ${templateWorkspaceView === 'PROMPT' ? 'block' : 'hidden'}`}>
+                  <div className={`mist-template-workspace-view mist-template-prompt-view ${activeTemplateWorkspaceView === 'PROMPT' ? 'block' : 'hidden'}`}>
                     {renderModulePromptPreviewPanel()}
                   </div>
-                  <div className={`mist-template-workspace-view mist-template-variables-view ${templateWorkspaceView === 'VARIABLES' ? 'block' : 'hidden'}`}>
+                  <div className={`mist-template-workspace-view mist-template-variables-view ${activeTemplateWorkspaceView === 'VARIABLES' ? 'block' : 'hidden'}`}>
                     {renderVideoStoryboardBlueprintPanel()}
                   </div>
-                  <div className={`mist-template-workspace-view mist-template-compile-view ${templateWorkspaceView === 'COMPILE' ? 'block' : 'hidden'}`}>
+                  <div className={`mist-template-workspace-view mist-template-compile-view ${activeTemplateWorkspaceView === 'COMPILE' ? 'block' : 'hidden'}`}>
                     {renderCompileInstructionPreviewPanel()}
                     {renderCinematicStillPromptPanel()}
                   </div>
@@ -10377,229 +12266,6 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
           </div>
           )}
 
-          {(conceptWorkspacePage === 'VARIABLES' || conceptWorkspacePage === 'PROMPT') && (
-          <main className={`min-h-0 rounded-lg border p-4 xl:flex xl:flex-1 xl:flex-col xl:overflow-hidden ${panelClass}`}>
-            <div className="shrink-0">
-              <p className={`font-mono text-[10px] uppercase tracking-[0.34em] ${mutedText}`}>Variable Assembly / Final Edict</p>
-              <div className="mt-2 flex items-start justify-between gap-3">
-                <div>
-                  <h2 className={`font-serif text-2xl font-black tracking-[0.05em] ${strongText}`}>
-                    {t(lang, '内容主体 C01-C10 / 最终成型律令', 'Content Core / Final Edict')}
-                  </h2>
-                  <p className={`mt-1 text-[10px] leading-4 ${mutedText}`}>
-                    {t(lang, '左侧编辑内容主体 C01-C10，右侧实时查看本地拼装结果。', 'Edit the ten content-core variables on the left and inspect the locally assembled prompt on the right.')}
-                  </p>
-                </div>
-                <div className="flex shrink-0 items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setPromptLang(prev => prev === 'CN' ? 'EN' : 'CN')}
-                    className={topActionButtonClass}
-                  >
-                    {promptLang === 'CN' ? '中文' : 'EN'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setLocalizedVariables(createEmptyLocalizedVariables());
-                      setCopied(false);
-                    }}
-                    className={topActionButtonClass}
-                  >
-                    <RefreshCcw size={13} />
-                    {t(lang, '清空', 'Clear')}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={copyOutput}
-                    className={topActionButtonClass}
-                  >
-                    {copied ? <Check size={15} /> : <Copy size={15} />}
-                    <span>{t(lang, '复制', 'Copy')}</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-4 grid min-h-0 flex-1 gap-4 xl:grid-cols-[minmax(260px,1fr)_minmax(0,2fr)]">
-              <section className={`min-h-0 rounded-lg border p-3 xl:flex xl:flex-col xl:overflow-hidden ${softPanelClass}`}>
-                <div className="mb-3 flex shrink-0 items-start justify-between gap-2">
-                  <div>
-                    <h3 className={`text-[14px] font-black uppercase tracking-[0.14em] ${strongText}`}>
-                      {t(lang, '律令骨架', 'Edict Skeleton')}
-                    </h3>
-                    <p className={`mt-1.5 text-[11px] leading-5 ${mutedText}`}>
-                      {t(lang, '左侧编号对应右侧模块，可临时关闭。', 'Numbers map to the right modules; toggle sections on or off.')}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setDisabledPromptModuleIds([])}
-                    className={`shrink-0 rounded-md border px-2.5 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] transition-colors ${
-                      isRetro
-                        ? 'border-[#85411B]/20 text-[#85411B] hover:bg-[#85411B]/8'
-                        : 'border-white/[0.1] text-zinc-500 hover:border-orange-400/40 hover:text-orange-200'
-                    }`}
-                  >
-                    {t(lang, '全开', 'All')}
-                  </button>
-                </div>
-                <div className="min-h-0 flex-1 space-y-2 overflow-y-auto pr-1 custom-scrollbar">
-                  {promptSections.map((section, index) => {
-                    const enabled = enabledPromptSectionIds.includes(section.id);
-                    return (
-                      <button
-                        key={section.id}
-                        type="button"
-                        onClick={() => togglePromptModule(section.id)}
-                        className={`group w-full rounded-lg border p-2 text-left transition-all ${
-                          enabled
-                            ? isRetro
-                              ? 'border-[#85411B]/22 bg-white/40'
-                              : 'border-white/[0.1] bg-white/[0.045]'
-                            : isRetro
-                              ? 'border-[#85411B]/10 bg-white/16 opacity-55'
-                              : 'border-white/[0.06] bg-black/20 opacity-50'
-                        }`}
-                        style={{
-                          borderLeftColor: section.color,
-                          borderLeftWidth: 4
-                        }}
-                      >
-                        <div className="flex items-center gap-2">
-                          <span
-                            className="flex h-6 w-8 shrink-0 items-center justify-center rounded-md font-mono text-[10px] font-black text-white shadow-sm"
-                            style={{ backgroundColor: section.color }}
-                          >
-                            {String(index + 1).padStart(2, '0')}
-                          </span>
-                          <span className={`min-w-0 flex-1 truncate text-[12px] font-black tracking-[0.06em] ${strongText}`}>
-                            {t(lang, section.title, section.titleEn)}
-                          </span>
-                          {enabled ? <Unlock size={12} className={accentText} /> : <Lock size={12} className={mutedText} />}
-                        </div>
-                        <p className={`mt-1.5 line-clamp-2 pl-10 text-[11px] leading-5 ${mutedText}`}>
-                          {section.text.replace(/\s+/g, ' ').slice(0, 92)}
-                        </p>
-                      </button>
-                    );
-                  })}
-                </div>
-              </section>
-
-              <section className={`hidden min-h-0 rounded-lg border p-3 xl:flex xl:flex-col xl:overflow-hidden ${softPanelClass}`}>
-                <div className="mb-3 shrink-0 space-y-3">
-                  <div>
-                    <h3 className={`text-[11px] font-black uppercase tracking-[0.18em] ${strongText}`}>
-                      {t(lang, '内容主体 C01-C10 拼装台', 'Content Core Board')}
-                    </h3>
-                    <p className={`mt-1 text-[9px] leading-4 ${mutedText}`}>
-                      {t(lang, '这些开关只控制对象 C 槽；右侧最终律令同步移除对应对象模块。', 'These switches control only object C slots; the final edict removes matching object modules.')}
-                    </p>
-                  </div>
-                  {renderVariableSlotSwitches()}
-                </div>
-                <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1 custom-scrollbar">
-                  {activeVariableMeta.map(meta => (
-                    <section key={meta.key} className={`rounded-lg border p-3 ${softPanelClass}`}>
-                      <div className="mb-2 flex items-center justify-between gap-3">
-                        <div className="min-w-0">
-                          <h4 className={`text-[10px] font-black uppercase tracking-[0.18em] ${strongText}`}>
-                            {t(lang, meta.label, meta.labelEn)}
-                          </h4>
-                          <p className={`mt-1 text-[9px] leading-4 ${mutedText}`}>{t(lang, meta.hint, meta.hintEn)}</p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => toggleVariableSlot(meta.key)}
-                          className={activeVariableSlotMiniButtonClass}
-                          title={t(lang, '关闭这个 C 槽', 'Disable this C slot')}
-                        >
-                          <Check size={11} />
-                          <span>ON</span>
-                        </button>
-                      </div>
-                      <textarea
-                        value={variables[meta.key]}
-                        onChange={(event) => updateVariable(meta.key, event.target.value)}
-                        className={`min-h-[88px] w-full resize-none rounded-md border px-3 py-2 text-xs leading-6 outline-none ${inputClass}`}
-                      />
-                    </section>
-                  ))}
-                </div>
-              </section>
-
-              <section className={`min-h-0 rounded-lg border p-3 xl:flex xl:flex-col xl:overflow-hidden ${softPanelClass}`}>
-                <div className="mb-3 flex shrink-0 items-start justify-between gap-3">
-                  <div>
-                    <h3 className={`text-[11px] font-black uppercase tracking-[0.18em] ${strongText}`}>
-                      {t(lang, '模块化最终律令', 'Modular Final Edict')}
-                    </h3>
-                    <p className={`mt-1 text-[9px] leading-4 ${mutedText}`}>
-                      {t(lang, '每块都对应左侧编号，复制时只复制已开启模块。', 'Each block maps to the left list; copy exports enabled modules only.')}
-                    </p>
-                  </div>
-                  <span className={`shrink-0 rounded-md border px-2 py-1 font-mono text-[9px] font-black uppercase tracking-[0.12em] ${
-                    isRetro ? 'border-[#85411B]/16 text-[#85411B]/70' : 'border-white/[0.08] text-zinc-500'
-                  }`}>
-                    {visiblePromptSections.length}/{promptSections.length}
-                  </span>
-                </div>
-                <div className={`min-h-[420px] flex-1 overflow-y-auto rounded-lg border p-3 custom-scrollbar ${isRetro ? 'border-[#85411B]/16 bg-white/34' : 'border-white/[0.08] bg-black/25'}`}>
-                  <div className="space-y-3">
-                    {visiblePromptSections.map((section, index) => {
-                      const originalIndex = promptSections.findIndex(item => item.id === section.id);
-                      const active = activePromptSection?.id === section.id;
-                      return (
-                        <article
-                          key={section.id}
-                          ref={(node) => { promptSectionRefs.current[section.id] = node; }}
-                          className={`mist-template-prompt-section overflow-hidden rounded-lg border ${
-                            active
-                              ? isRetro
-                                ? 'bg-white/58'
-                                : 'bg-white/[0.035]'
-                              : isRetro
-                                ? 'bg-white/50'
-                                : 'bg-black/20'
-                          }`}
-                          style={{
-                            borderColor: promptSectionSubtleBorderColor,
-                            borderLeftColor: section.color,
-                            borderLeftWidth: 5
-                          }}
-                          onClick={() => setActivePromptSectionId(section.id)}
-                        >
-                          <div className={`flex items-center gap-2 border-b px-3 py-2 ${
-                            isRetro ? 'border-[#85411B]/10' : 'border-white/[0.06]'
-                          }`}>
-                            <span
-                              className="flex h-6 w-8 shrink-0 items-center justify-center rounded-md font-mono text-[10px] font-black text-white shadow-sm"
-                              style={{ backgroundColor: section.color }}
-                            >
-                              {String(originalIndex + 1 || index + 1).padStart(2, '0')}
-                            </span>
-                            <h4 className={`min-w-0 flex-1 truncate text-[10px] font-black uppercase tracking-[0.14em] ${strongText}`}>
-                              {t(lang, section.title, section.titleEn)}
-                            </h4>
-                          </div>
-                          <pre className={`whitespace-pre-wrap px-3 py-3 font-mono text-[13px] leading-7 ${isRetro ? 'text-[#24170f]' : 'text-orange-50'}`}>
-                            {section.text}
-                          </pre>
-                        </article>
-                      );
-                    })}
-                    {visiblePromptSections.length === 0 && (
-                      <div className={`flex min-h-[220px] items-center justify-center rounded-lg border border-dashed text-[11px] ${isRetro ? 'border-[#85411B]/20 text-[#85411B]/60' : 'border-white/[0.12] text-zinc-500'}`}>
-                        {t(lang, '所有模块都已关闭。', 'All modules are disabled.')}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </section>
-            </div>
-          </main>
-          )}
         </div>
       </div>
 
@@ -10619,9 +12285,9 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
           onFocusStateChange={onFocusStateChange}
           allSelectedTags={getAllSelectedTags(fieldState)}
           allSelectedFocusUnitMap={getSelectedFocusUnitMap(fieldState)}
-          customLibraryData={getFilteredLibraryDataForBlock(activeBlockId)}
+          customLibraryData={getUnfilteredLibraryDataForBlock(activeBlockId)}
           isAdmin={isAdmin}
-          keywordFilterTags={lexiconAxisFilterTags}
+          keywordFilterTags={getLexiconAxisFilterTagsForBlock(activeBlockId)}
           keywordFilterEnabled={blockIsLexiconAxisFilterEnabled(activeBlockId)}
           keywordAxisLevelFilter={lexiconAxisFilterState}
           onAddCustomDef={handleAddConceptCustomItem}
@@ -10631,6 +12297,9 @@ export const ConceptDesignEngineField: React.FC<NarrativeEngineFieldProps> = ({
       {isPromptTemplateLibraryOpen && createPortal(renderPromptTemplateLibraryModal(), document.body)}
       {activeThemeAxisPicker && createPortal(renderThemeAxisPickerPanel(), document.body)}
       {isLexiconFilterAuditOpen && createPortal(renderLexiconFilterAuditModal(), document.body)}
+      {isContentIntentPanelOpen && createPortal(renderContentIntentRandomPanel(), document.body)}
+      {isSpacetimeFieldRandomPanelOpen && createPortal(renderSpacetimeFieldRandomPanel(), document.body)}
+      {isLightingAtmosphereRandomPanelOpen && createPortal(renderLightingAtmosphereRandomPanel(), document.body)}
       {isVisualStylePresetPanelOpen && createPortal(renderVisualStylePresetPanel(), document.body)}
       {isFramingPresetPanelOpen && createPortal(renderFramingPresetPanel(), document.body)}
     </div>

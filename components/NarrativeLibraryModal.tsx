@@ -62,7 +62,8 @@ interface NarrativeLibraryModalProps {
     keywordFilterEnabled?: boolean;
     keywordAxisLevelFilter?: {
         mode?: 'INTERSECTION' | 'UNION' | 'LAYERED' | 'SOFT_SORT';
-        order?: Array<'category' | 'era' | 'reality'>;
+        order?: Array<'species' | 'category' | 'era' | 'reality'>;
+        creatureTaxonomyLevels?: Array<'strong' | 'usable' | 'fusion' | 'weak' | 'exclude'>;
         categoryLevels?: Exclude<ConceptCategoryFitLevel, 'neutral'>[];
         eraLevels?: Array<'hit' | 'universal' | 'miss'>;
         realityLevels?: Array<'hit' | 'allowed' | 'miss'>;
@@ -104,6 +105,19 @@ const getDisplayGroupName = (name: string, en: string | undefined, lang: Bluepri
     const cleanedEn = stripLibraryGroupPrefix(en);
     if (lang === 'EN') return cleanedEn || getEnglishLabel(cleanedName, cleanedEn) || cleanedName;
     return displayCnTag(cleanedName);
+};
+
+const splitCreaturePresetGroup = (item: LibraryItemDef, lang: BlueprintLanguage) => {
+    const group = lang === 'EN' ? (item.groupEn || item.group || '') : (item.group || '');
+    const fallbackPrimary = lang === 'EN' ? 'Uncategorized Creature' : '未分类异种';
+    const fallbackSecondary = lang === 'EN' ? 'General' : '通用';
+    const parts = String(group || '').split('/').map(part => part.trim()).filter(Boolean);
+    return {
+        primaryId: parts[0] || fallbackPrimary,
+        primaryName: parts[0] ? getDisplayGroupName(parts[0], undefined, lang) : fallbackPrimary,
+        secondaryId: parts.slice(0, 2).join(' / ') || fallbackSecondary,
+        secondaryName: parts[1] ? getDisplayGroupName(parts[1], undefined, lang) : fallbackSecondary
+    };
 };
 
 const getLocalizedText = (item: any, cnKey: string, enKey: string, lang: BlueprintLanguage) => {
@@ -149,13 +163,15 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
     const [activeSuperGroup, setActiveSuperGroup] = useState<string | null>(null);
     const [activePersonaCategory, setActivePersonaCategory] = useState<string | null>(null);
     const [activeProtocolCategory, setActiveProtocolCategory] = useState<string | null>(null);
+    const [activeCreatureCategory, setActiveCreatureCategory] = useState<string | null>(null);
     const [copiedItemId, setCopiedItemId] = useState<string | null>(null);
     const [useAltGroup, setUseAltGroup] = useState(false);
     const [protocolOpenId, setProtocolOpenId] = useState<string | null>(null);
     const isSkinSV = blockId === 'skin_structure' || blockId === 'skin_volume';
     const isPersonaLibrary = blockId === 'cd_persona';
     const isStyleProtocolLibrary = blockId === 'cd_style_protocol_primary' || blockId === 'cd_style_protocol_secondary';
-    const useTwoLevelSidebar = isPersonaLibrary || isStyleProtocolLibrary;
+    const isCreaturePresetLibrary = blockId === 'cd_creature_preset';
+    const useTwoLevelSidebar = isPersonaLibrary || isStyleProtocolLibrary || isCreaturePresetLibrary;
     const limit = BLOCK_LIMITS[blockId] || 1;
     const [activeSlotIndex, setActiveSlotIndex] = useState(0);
     const [selectionPast, setSelectionPast] = useState<string[][]>([]);
@@ -170,9 +186,7 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
     useEffect(() => {
         if (keywordAxisLevelFilter?.mode === 'SOFT_SORT') {
             setHideKeywordUnmatched(false);
-            return;
         }
-        if (keywordFilterActive) setHideKeywordUnmatched(true);
     }, [keywordFilterActive, blockId, keywordAxisLevelFilter?.mode]);
     const isMajorSceneKeywordBlock = [
         'cd_field_preset',
@@ -262,12 +276,15 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
         if (keywordAxisLevelFilter?.mode === 'SOFT_SORT' || keywordAxisLevelFilter?.mode === 'LAYERED') return true;
         const { match, eraLevel, realityLevel } = getKeywordAxisLevels(item);
         const categoryLevels = keywordAxisLevelFilter?.categoryLevels || (['strong', 'usable', 'fusion'] as Exclude<ConceptCategoryFitLevel, 'neutral'>[]);
+        const creatureTaxonomyLevels = keywordAxisLevelFilter?.creatureTaxonomyLevels || (['strong', 'usable', 'fusion'] as Array<'strong' | 'usable' | 'fusion' | 'weak' | 'exclude'>);
         const eraLevels = keywordAxisLevelFilter?.eraLevels || (['hit', 'universal'] as Array<'hit' | 'universal' | 'miss'>);
         const realityLevels = keywordAxisLevelFilter?.realityLevels || (['hit', 'allowed'] as Array<'hit' | 'allowed' | 'miss'>);
+        const speciesActive = Boolean((keywordFilterTags?.creatureTaxonomyTags || []).length);
         const categoryActive = Boolean((keywordFilterTags?.categoryTags || []).length);
         const eraActive = Boolean((keywordFilterTags?.eraTags || []).length);
         const realityActive = Boolean((keywordFilterTags?.realityTags || []).length);
         const checks = [
+            { key: 'species' as const, active: speciesActive, pass: creatureTaxonomyLevels.includes(match.creatureTaxonomyFitLevel as Exclude<typeof match.creatureTaxonomyFitLevel, 'neutral'>) },
             { key: 'category' as const, active: categoryActive, pass: categoryLevels.includes(match.categoryFitLevel as Exclude<ConceptCategoryFitLevel, 'neutral'>) },
             { key: 'era' as const, active: eraActive, pass: eraLevels.includes(eraLevel) },
             { key: 'reality' as const, active: realityActive, pass: realityLevels.includes(realityLevel) }
@@ -277,11 +294,20 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
         if (keywordAxisLevelFilter?.mode === 'UNION') return activeChecks.some(check => check.pass);
         return activeChecks.every(check => check.pass);
     };
+    const shouldHideKeywordEmptyGroups = keywordFilterActive && hideKeywordUnmatched;
     const orderItemsByKeywordFilter = (items: LibraryItemDef[]) => {
         if (!keywordFilterActive) return items;
         return [...items]
             .filter(item => !hideKeywordUnmatched || itemMatchesKeywordFilter(item))
             .sort((a, b) => getKeywordAffinitySortScore(b) - getKeywordAffinitySortScore(a));
+    };
+    const getVisibleFitCount = (items: readonly LibraryItemDef[]) => (
+        keywordFilterActive ? items.filter(item => itemMatchesKeywordFilter(item)).length : items.length
+    );
+    const formatFitCount = (items: readonly LibraryItemDef[]) => {
+        const total = items.length;
+        const fitCount = getVisibleFitCount(items);
+        return keywordFilterActive ? `${fitCount}/${total}` : String(total);
     };
     // Content version control: 'academic' shows def+core, 'ai' shows directive
     const [contentVersion, setContentVersion] = useState<'academic' | 'ai'>('ai'); // Default to AI version
@@ -409,7 +435,7 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
     const personaCategoryOptions = useMemo(() => {
         if (!isPersonaLibrary) return [];
         const canSeeItem = (item: any) => isAdmin || !item?.adminOnly;
-        const categoryMap = new Map<string, { id: string; name: string; count: number }>();
+        const categoryMap = new Map<string, { id: string; name: string; count: number; items: LibraryItemDef[] }>();
         libraryData.flatMap(cat => cat.items || []).filter(canSeeItem).forEach((item: any) => {
             const id = String(item.personaCategory || (currentLang === 'EN' ? 'Uncategorized Persona' : '未分类人设'));
             const name = currentLang === 'EN'
@@ -418,17 +444,21 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
             const existing = categoryMap.get(id);
             if (existing) {
                 existing.count += 1;
+                existing.items.push(item);
             } else {
-                categoryMap.set(id, { id, name: getDisplayGroupName(name, undefined, currentLang) || name, count: 1 });
+                categoryMap.set(id, { id, name: getDisplayGroupName(name, undefined, currentLang) || name, count: 1, items: [item] });
             }
         });
-        return Array.from(categoryMap.values());
-    }, [currentLang, isAdmin, isPersonaLibrary, libraryData]);
+        const categories = Array.from(categoryMap.values());
+        return shouldHideKeywordEmptyGroups
+            ? categories.filter(category => category.items.some(item => itemMatchesKeywordFilter(item)))
+            : categories;
+    }, [currentLang, isAdmin, isPersonaLibrary, libraryData, shouldHideKeywordEmptyGroups, keywordFilterTags, keywordAxisLevelFilter]);
 
     const protocolCategoryOptions = useMemo(() => {
         if (!isStyleProtocolLibrary) return [];
         const canSeeItem = (item: any) => isAdmin || !item?.adminOnly;
-        const categoryMap = new Map<string, { id: string; name: string; count: number }>();
+        const categoryMap = new Map<string, { id: string; name: string; count: number; items: LibraryItemDef[] }>();
         libraryData.flatMap(cat => cat.items || []).filter(canSeeItem).forEach((item: any) => {
             const fallbackName = item.group || (currentLang === 'EN' ? 'Uncategorized Protocol' : '未分类协议');
             const fallbackNameEn = item.groupEn || item.group || 'Uncategorized Protocol';
@@ -439,12 +469,36 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
             const existing = categoryMap.get(id);
             if (existing) {
                 existing.count += 1;
+                existing.items.push(item);
             } else {
-                categoryMap.set(id, { id, name: getDisplayGroupName(name, undefined, currentLang) || name, count: 1 });
+                categoryMap.set(id, { id, name: getDisplayGroupName(name, undefined, currentLang) || name, count: 1, items: [item] });
             }
         });
-        return Array.from(categoryMap.values());
-    }, [currentLang, isAdmin, isStyleProtocolLibrary, libraryData]);
+        const categories = Array.from(categoryMap.values());
+        return shouldHideKeywordEmptyGroups
+            ? categories.filter(category => category.items.some(item => itemMatchesKeywordFilter(item)))
+            : categories;
+    }, [currentLang, isAdmin, isStyleProtocolLibrary, libraryData, shouldHideKeywordEmptyGroups, keywordFilterTags, keywordAxisLevelFilter]);
+
+    const creatureCategoryOptions = useMemo(() => {
+        if (!isCreaturePresetLibrary) return [];
+        const canSeeItem = (item: any) => isAdmin || !item?.adminOnly;
+        const categoryMap = new Map<string, { id: string; name: string; count: number; items: LibraryItemDef[] }>();
+        libraryData.flatMap(cat => cat.items || []).filter(canSeeItem).forEach((item: LibraryItemDef) => {
+            const groupMeta = splitCreaturePresetGroup(item, currentLang);
+            const existing = categoryMap.get(groupMeta.primaryId);
+            if (existing) {
+                existing.count += 1;
+                existing.items.push(item);
+            } else {
+                categoryMap.set(groupMeta.primaryId, { id: groupMeta.primaryId, name: groupMeta.primaryName, count: 1, items: [item] });
+            }
+        });
+        const categories = Array.from(categoryMap.values());
+        return shouldHideKeywordEmptyGroups
+            ? categories.filter(category => category.items.some(item => itemMatchesKeywordFilter(item)))
+            : categories;
+    }, [currentLang, isAdmin, isCreaturePresetLibrary, libraryData, shouldHideKeywordEmptyGroups, keywordFilterTags, keywordAxisLevelFilter]);
 
     const activePersonaCategoryId = isPersonaLibrary
         ? (activePersonaCategory && personaCategoryOptions.some(item => item.id === activePersonaCategory)
@@ -456,6 +510,12 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
         ? (activeProtocolCategory && protocolCategoryOptions.some(item => item.id === activeProtocolCategory)
             ? activeProtocolCategory
             : protocolCategoryOptions[0]?.id || null)
+        : null;
+
+    const activeCreatureCategoryId = isCreaturePresetLibrary
+        ? (activeCreatureCategory && creatureCategoryOptions.some(item => item.id === activeCreatureCategory)
+            ? activeCreatureCategory
+            : creatureCategoryOptions[0]?.id || null)
         : null;
 
     const fullPersonaGroups = useMemo(() => {
@@ -554,10 +614,13 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
                 ? (cat.items || []).filter((item: any) => String(item.personaCategory || (currentLang === 'EN' ? 'Uncategorized Persona' : '未分类人设')) === activePersonaCategoryId)
                 : isStyleProtocolLibrary && activeProtocolCategoryId
                     ? (cat.items || []).filter((item: any) => String(item.protocolCategory || item.group || (currentLang === 'EN' ? 'Uncategorized Protocol' : '未分类协议')) === activeProtocolCategoryId)
-                    : (cat.items || []);
+                    : isCreaturePresetLibrary && activeCreatureCategoryId
+                        ? (cat.items || []).filter((item: LibraryItemDef) => splitCreaturePresetGroup(item, currentLang).primaryId === activeCreatureCategoryId)
+                        : (cat.items || []);
 
             sourceItems.forEach(item => {
-                const groupKey = useAltGroup && item.altGroup ? item.altGroup : (item.group || '');
+                const creatureGroupMeta = isCreaturePresetLibrary ? splitCreaturePresetGroup(item, currentLang) : null;
+                const groupKey = creatureGroupMeta?.secondaryId || (useAltGroup && item.altGroup ? item.altGroup : (item.group || ''));
                 if (groupKey) {
                     if (!groupedItems[groupKey]) groupedItems[groupKey] = [];
                     groupedItems[groupKey].push(item);
@@ -570,29 +633,34 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
 
             const groups = Object.keys(groupedItems).map(groupName => {
                 const firstItem = groupedItems[groupName].find(i => useAltGroup && i.altGroupEn ? true : i.groupEn);
-                const enName = useAltGroup && firstItem?.altGroupEn ? firstItem.altGroupEn : firstItem?.groupEn;
+                const creatureGroupMeta = isCreaturePresetLibrary && firstItem ? splitCreaturePresetGroup(firstItem, currentLang) : null;
+                const enName = creatureGroupMeta ? undefined : (useAltGroup && firstItem?.altGroupEn ? firstItem.altGroupEn : firstItem?.groupEn);
                 return {
                     id: groupName,
-                    name: formatName(groupName, enName) || (currentLang === 'EN' ? 'Group' : groupName),
+                    name: creatureGroupMeta?.secondaryName || formatName(groupName, enName) || (currentLang === 'EN' ? 'Group' : groupName),
                     items: groupedItems[groupName]
                 };
             });
 
-            if (groups.length === 0) {
+            const visibleGroups = shouldHideKeywordEmptyGroups
+                ? groups.filter(group => (group.items || []).some(item => itemMatchesKeywordFilter(item)))
+                : groups;
+
+            if (visibleGroups.length === 0) {
                 return [{
                     id: "default_empty",
                     name: currentLang === 'EN' ? "General" : "通用",
                     items: []
                 }];
             }
-            return groups;
+            return visibleGroups;
         }
         return [{
             id: "default_empty",
             name: currentLang === 'EN' ? "General" : "通用",
             items: []
         }];
-    }, [libraryData, currentLang, blockId, activeSuperGroup, useAltGroup, isAdmin, isPersonaLibrary, activePersonaCategoryId, isStyleProtocolLibrary, activeProtocolCategoryId]);
+    }, [libraryData, currentLang, blockId, activeSuperGroup, useAltGroup, isAdmin, isPersonaLibrary, activePersonaCategoryId, isStyleProtocolLibrary, activeProtocolCategoryId, isCreaturePresetLibrary, activeCreatureCategoryId, shouldHideKeywordEmptyGroups, keywordFilterTags, keywordAxisLevelFilter]);
 
     useEffect(() => {
         if (!isPersonaLibrary) {
@@ -617,12 +685,32 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
     }, [activeProtocolCategory, isStyleProtocolLibrary, protocolCategoryOptions]);
 
     useEffect(() => {
+        if (!isCreaturePresetLibrary) {
+            if (activeCreatureCategory) setActiveCreatureCategory(null);
+            return;
+        }
+        if (creatureCategoryOptions.length === 0) return;
+        if (!activeCreatureCategory || !creatureCategoryOptions.some(item => item.id === activeCreatureCategory)) {
+            setActiveCreatureCategory(creatureCategoryOptions[0].id);
+        }
+    }, [activeCreatureCategory, isCreaturePresetLibrary, creatureCategoryOptions]);
+
+    useEffect(() => {
         if (processedGroups.length > 0) {
             if (!activeTab || !processedGroups.find(g => g.id === activeTab)) {
                 setActiveTab(processedGroups[0].id);
             }
         }
     }, [processedGroups]);
+
+    const globalSearchGroups = useMemo(() => {
+        if (blockId === 'skin_genre') {
+            return GENRE_CATEGORIES.map(cat => ({ id: cat.id, name: cat.name, items: cat.items }));
+        }
+        if (isPersonaLibrary) return fullPersonaGroups;
+        if (isStyleProtocolLibrary) return fullProtocolGroups;
+        return processedGroups;
+    }, [blockId, fullPersonaGroups, fullProtocolGroups, isPersonaLibrary, isStyleProtocolLibrary, processedGroups]);
 
     // Auto-scroll to first selected item when modal opens
     useEffect(() => {
@@ -636,45 +724,58 @@ export const NarrativeLibraryModal: React.FC<NarrativeLibraryModalProps> = ({
         return () => clearTimeout(timer);
     }, [isOpen]);
 
-    const filteredItems = useMemo(() => {
+    const allCurrentLibraryItems = useMemo(() => {
+        const seen = new Set<string>();
+        return globalSearchGroups.flatMap(group =>
+            (group.items || [])
+                .filter(item => {
+                    const key = String(item?.id || item?.name || '');
+                    if (!key || seen.has(key)) return false;
+                    seen.add(key);
+                    return true;
+                })
+                .map(item => ({ ...item, _groupName: group.name }))
+        );
+    }, [globalSearchGroups]);
+
+    const rawFilteredItems = useMemo(() => {
         if (searchQuery.trim()) {
             const lowerQuery = searchQuery.toLowerCase();
-            const searchSource = blockId === 'skin_genre'
-                ? GENRE_CATEGORIES.map(cat => ({ id: cat.id, name: cat.name, items: cat.items }))
-                : processedGroups;
-
-            return orderItemsByKeywordFilter(searchSource.flatMap(group =>
+            return globalSearchGroups.flatMap(group =>
                 (group.items || []).filter(item =>
+                    String(item.id || '').toLowerCase().includes(lowerQuery) ||
                     item.name.toLowerCase().includes(lowerQuery) ||
                     (item.nameEn && item.nameEn.toLowerCase().includes(lowerQuery)) ||
+                    (item.group && item.group.toLowerCase().includes(lowerQuery)) ||
+                    (item.groupEn && item.groupEn.toLowerCase().includes(lowerQuery)) ||
+                    ((item as any).personaCategory && String((item as any).personaCategory).toLowerCase().includes(lowerQuery)) ||
+                    ((item as any).personaCategoryEn && String((item as any).personaCategoryEn).toLowerCase().includes(lowerQuery)) ||
+                    ((item as any).protocolCategory && String((item as any).protocolCategory).toLowerCase().includes(lowerQuery)) ||
+                    ((item as any).protocolCategoryEn && String((item as any).protocolCategoryEn).toLowerCase().includes(lowerQuery)) ||
                     (item.def && item.def.toLowerCase().includes(lowerQuery)) ||
                     (item.defEn && item.defEn.toLowerCase().includes(lowerQuery)) ||
                     (item.core && item.core.toLowerCase().includes(lowerQuery)) ||
                     (item.coreEn && item.coreEn.toLowerCase().includes(lowerQuery)) ||
                     (item.essence && item.essence.toLowerCase().includes(lowerQuery)) ||
                     (item.essenceEn && item.essenceEn.toLowerCase().includes(lowerQuery)) ||
-                    (item.reality && item.reality.toLowerCase().includes(lowerQuery))
+                    (item.reality && item.reality.toLowerCase().includes(lowerQuery)) ||
+                    metaList(item, 'tags').some(tag => tag.toLowerCase().includes(lowerQuery))
                 ).map(item => ({ ...item, _groupName: group.name }))
-            ));
+            );
         }
         if (!activeTab) return [];
         const group = processedGroups.find(g => g.id === activeTab);
         if (!group) return [];
-        return orderItemsByKeywordFilter(group.items || []);
-    }, [activeTab, processedGroups, searchQuery, blockId, currentLang, keywordFilterTags, hideKeywordUnmatched]);
+        return group.items || [];
+    }, [activeTab, processedGroups, searchQuery, globalSearchGroups]);
 
-    const allCurrentLibraryItems = useMemo(() => {
-        const seen = new Set<string>();
-        return processedGroups.flatMap(group =>
-            (group.items || [])
-                .filter(item => {
-                    if (!item?.name || seen.has(item.name)) return false;
-                    seen.add(item.name);
-                    return true;
-                })
-                .map(item => ({ ...item, _groupName: group.name }))
-        );
-    }, [processedGroups]);
+    const filteredItems = useMemo(() => (
+        orderItemsByKeywordFilter(rawFilteredItems)
+    ), [rawFilteredItems, keywordFilterTags, hideKeywordUnmatched, keywordAxisLevelFilter]);
+
+    const filteredScopeCountText = keywordFilterActive
+        ? `${getVisibleFitCount(rawFilteredItems)}/${rawFilteredItems.length}`
+        : String(rawFilteredItems.length);
 
     const activeGroupForCustom = useMemo(() => {
         if (searchQuery) return null;
@@ -1102,10 +1203,7 @@ ${adminNote}
     const handleRandomize = () => {
         if (allCurrentLibraryItems.length === 0) return;
         const targetIndex = getTargetSlotIndex();
-        const recommendedItems = keywordFilterActive
-            ? allCurrentLibraryItems.filter(item => itemMatchesKeywordFilter(item))
-            : allCurrentLibraryItems;
-        const candidateItems = recommendedItems.filter(item => !itemMatchesAnyTag(item, selectedTags));
+        const candidateItems = allCurrentLibraryItems.filter(item => !itemMatchesAnyTag(item, selectedTags));
         if (candidateItems.length === 0) return;
         const randomItem = candidateItems[Math.floor(Math.random() * candidateItems.length)];
         if (randomItem) {
@@ -1220,14 +1318,7 @@ ${adminNote}
     const themeBorder = themeData.border;
     const themeHex = themeData.hex;
 
-    const getLibraryTotalCount = () => {
-        if (blockId === 'skin_genre') {
-            return GENRE_CATEGORIES.reduce((acc, cat) => acc + cat.items.length, 0);
-        }
-        let count = 0;
-        libraryData.forEach(cat => count += (cat.items?.length || 0));
-        return count;
-    };
+    const libraryFitTotalText = formatFitCount(allCurrentLibraryItems.length > 0 ? allCurrentLibraryItems : libraryData.flatMap(cat => cat.items || []));
 
     const getLexiconIdentityLine = () => {
         if (currentLang === 'EN') {
@@ -1267,7 +1358,7 @@ ${adminNote}
                                 </h3>
                                 <div className={`px-3 py-1 rounded-full border ${themeBorder.replace('/50', '')} ${globalTheme === 'retro' ? 'bg-[#F9F7F1]' : 'bg-white/5'} text-[10px] md:text-[11px] font-black uppercase tracking-[0.2em] ${themeText} flex items-center gap-2`}>
                                    <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${globalTheme === 'retro' ? 'bg-[#8B261D]' : themeText.replace('text-', 'bg-')}`} />
-                                   {currentLang === 'EN' ? `TOTAL ${getLibraryTotalCount()} · SELECT ${limit}` : `统计 ${getLibraryTotalCount()} · 可选 ${limit}`}
+                                   {currentLang === 'EN' ? `TOTAL ${libraryFitTotalText} · SELECT ${limit}` : `统计 ${libraryFitTotalText} · 可选 ${limit}`}
                                 </div>
                             </div>
                             <div className="flex items-center gap-4">
@@ -1477,8 +1568,8 @@ ${adminNote}
                                     <button
                                         onClick={() => setHideKeywordUnmatched(prev => !prev)}
                                         className={`mist-lexicon-action-button flex items-center gap-1.5 px-3 h-8 rounded-lg text-[10px] font-black uppercase tracking-[0.16em] transition-all active:scale-95 ${hideKeywordUnmatched
-                                            ? (globalTheme === 'retro' ? 'bg-[#8B261D] text-white' : `${themeText} bg-zinc-800`)
-                                            : (globalTheme === 'retro' ? 'text-[#8B261D]' : 'text-zinc-400 hover:bg-white/10 hover:text-white')
+                                            ? (globalTheme === 'retro' ? 'text-[#8B261D] hover:bg-[#8B261D]/8' : `${themeText} hover:bg-white/10`)
+                                            : (globalTheme === 'retro' ? 'text-[#8B261D]/35 hover:text-[#8B261D]/70 hover:bg-[#8B261D]/5' : 'text-zinc-600 hover:text-zinc-400 hover:bg-white/5')
                                         }`}
                                         title={currentLang === 'EN' ? 'Show matched only' : '只看符合'}
                                     >
@@ -1557,20 +1648,27 @@ ${adminNote}
                                 </div>
                             );
                         })()}
-                        {useTwoLevelSidebar && (isPersonaLibrary ? personaCategoryOptions : protocolCategoryOptions).length > 0 && (
+                        {useTwoLevelSidebar && (isPersonaLibrary ? personaCategoryOptions : isStyleProtocolLibrary ? protocolCategoryOptions : creatureCategoryOptions).length > 0 && (
                             <div className={`p-2 ${globalTheme === 'retro' ? 'bg-white/35' : 'bg-black/20'}`}>
                                 <div className={`mb-2 flex items-center justify-between px-1 text-[9px] font-black uppercase tracking-[0.18em] ${globalTheme === 'retro' ? 'text-[#8B261D]/65' : 'text-zinc-500'}`}>
                                     <span>
                                         {isPersonaLibrary
                                             ? (currentLang === 'EN' ? 'L1 Persona' : '一级人设')
-                                            : (currentLang === 'EN' ? 'L1 Protocol' : '一级协议')
+                                            : isStyleProtocolLibrary
+                                                ? (currentLang === 'EN' ? 'L1 Protocol' : '一级协议')
+                                                : (currentLang === 'EN' ? 'L1 Creature' : '一级异种')
                                         }
                                     </span>
-                                    <span className="font-mono">{(isPersonaLibrary ? personaCategoryOptions : protocolCategoryOptions).length}</span>
+                                    <span className="font-mono">{(isPersonaLibrary ? personaCategoryOptions : isStyleProtocolLibrary ? protocolCategoryOptions : creatureCategoryOptions).length}</span>
                                 </div>
                                 <div className="space-y-1">
-                                    {(isPersonaLibrary ? personaCategoryOptions : protocolCategoryOptions).map(category => {
-                                        const isActive = isPersonaLibrary ? activePersonaCategoryId === category.id : activeProtocolCategoryId === category.id;
+                                    {(isPersonaLibrary ? personaCategoryOptions : isStyleProtocolLibrary ? protocolCategoryOptions : creatureCategoryOptions).map(category => {
+                                        const isActive = isPersonaLibrary
+                                            ? activePersonaCategoryId === category.id
+                                            : isStyleProtocolLibrary
+                                                ? activeProtocolCategoryId === category.id
+                                                : activeCreatureCategoryId === category.id;
+                                        const countText = formatFitCount(category.items || []);
                                         return (
                                             <button
                                                 key={category.id}
@@ -1578,8 +1676,10 @@ ${adminNote}
                                                 onClick={() => {
                                                     if (isPersonaLibrary) {
                                                         setActivePersonaCategory(category.id);
-                                                    } else {
+                                                    } else if (isStyleProtocolLibrary) {
                                                         setActiveProtocolCategory(category.id);
+                                                    } else {
+                                                        setActiveCreatureCategory(category.id);
                                                     }
                                                     setActiveTab(null);
                                                     setSearchQuery("");
@@ -1593,7 +1693,7 @@ ${adminNote}
                                                 <div className="flex items-center justify-between gap-2">
                                                     <span className="truncate text-[12px] font-black tracking-[0.06em]">{category.name}</span>
                                                     <span className={`shrink-0 rounded-full px-1.5 py-0.5 font-mono text-[9px] ${isActive ? 'bg-white/18' : (globalTheme === 'retro' ? 'bg-[#8B261D]/8 text-[#8B261D]/60' : 'bg-white/5 text-zinc-500')}`}>
-                                                        {category.count}
+                                                        {countText}
                                                     </span>
                                                 </div>
                                             </button>
@@ -1608,8 +1708,9 @@ ${adminNote}
                                     const groupItemNames = new Set((group.items || []).map(i => i.name));
                                     const selectedCount = selectedTags.filter(tag => groupItemNames.has(tag)).length;
                                     const isActive = activeTab === group.id && !searchQuery;
+                                    const countText = formatFitCount(group.items || []);
                                     return (
-                                        <button key={group.id} onClick={() => { setActiveTab(group.id); setSearchQuery(""); }} className={`w-full text-left px-3 py-3 rounded-lg text-sm font-bold uppercase tracking-wider transition-all flex items-center justify-between group ${isActive ? (globalTheme === 'retro' ? `bg-[#F9F7F1] border-l-2 border-[#8B261D] text-[#8B261D] shadow-sm` : `bg-zinc-800 border-l-2 ${themeBorder.replace('/50', '')} ${themeText}`) : (globalTheme === 'retro' ? 'text-[#3D1A16]/70 hover:text-[#8B261D] hover:bg-white/50' : 'text-zinc-200 hover:text-white hover:bg-zinc-900/50')}`}><span className="truncate pr-2">{group.name} <span className="opacity-40 text-[10px] ml-1 font-normal">({group.items?.length || 0})</span></span>{selectedCount > 0 && <span className={`flex items-center justify-center min-w-[18px] h-[18px] text-[10px] font-bold rounded-full ${isActive ? (globalTheme === 'retro' ? 'bg-[#8B261D] text-white' : 'bg-white text-black') : (globalTheme === 'retro' ? 'bg-[#8B261D]/10 text-[#8B261D]' : 'bg-zinc-700 text-zinc-100')}`}>{selectedCount}</span>}</button>
+                                        <button key={group.id} onClick={() => { setActiveTab(group.id); setSearchQuery(""); }} className={`w-full text-left px-3 py-3 rounded-lg text-sm font-bold uppercase tracking-wider transition-all flex items-center justify-between group ${isActive ? (globalTheme === 'retro' ? `bg-[#F9F7F1] border-l-2 border-[#8B261D] text-[#8B261D] shadow-sm` : `bg-zinc-800 border-l-2 ${themeBorder.replace('/50', '')} ${themeText}`) : (globalTheme === 'retro' ? 'text-[#3D1A16]/70 hover:text-[#8B261D] hover:bg-white/50' : 'text-zinc-200 hover:text-white hover:bg-zinc-900/50')}`}><span className="truncate pr-2">{group.name} <span className="opacity-45 text-[10px] ml-1 font-mono normal-case">({countText})</span></span>{selectedCount > 0 && <span className={`flex items-center justify-center min-w-[18px] h-[18px] text-[10px] font-bold rounded-full ${isActive ? (globalTheme === 'retro' ? 'bg-[#8B261D] text-white' : 'bg-white text-black') : (globalTheme === 'retro' ? 'bg-[#8B261D]/10 text-[#8B261D]' : 'bg-zinc-700 text-zinc-100')}`}>{selectedCount}</span>}</button>
                                     );
                                 })}
                             </div>
@@ -1620,7 +1721,9 @@ ${adminNote}
                             <div className={`px-3 pt-3 pb-1 text-[9px] font-black uppercase tracking-[0.18em] ${globalTheme === 'retro' ? 'text-[#8B261D]/65' : 'text-zinc-500'}`}>
                                 {isPersonaLibrary
                                     ? (currentLang === 'EN' ? 'Subgroups' : '二级分类')
-                                    : (currentLang === 'EN' ? 'Design Families' : '二级家族')
+                                    : isStyleProtocolLibrary
+                                        ? (currentLang === 'EN' ? 'Design Families' : '二级家族')
+                                        : (currentLang === 'EN' ? 'Subtypes' : '二级原型')
                                 }
                             </div>
                             <div className="p-2 space-y-1">
@@ -1628,8 +1731,9 @@ ${adminNote}
                                 const groupItemNames = new Set((group.items || []).map(i => i.name));
                                 const selectedCount = selectedTags.filter(tag => groupItemNames.has(tag)).length;
                                 const isActive = activeTab === group.id && !searchQuery;
+                                const countText = formatFitCount(group.items || []);
                                 return (
-                                    <button key={group.id} onClick={() => { setActiveTab(group.id); setSearchQuery(""); }} className={`w-full text-left px-3 py-3 rounded-lg text-sm font-bold uppercase tracking-wider transition-all flex items-center justify-between group ${isActive ? (globalTheme === 'retro' ? `bg-[#F9F7F1] border-l-2 border-[#8B261D] text-[#8B261D] shadow-sm` : `bg-zinc-800 border-l-2 ${themeBorder.replace('/50', '')} ${themeText}`) : (globalTheme === 'retro' ? 'text-[#3D1A16]/70 hover:text-[#8B261D] hover:bg-white/50' : 'text-zinc-200 hover:text-white hover:bg-zinc-900/50')}`}><span className="truncate pr-2">{group.name} <span className="opacity-40 text-[10px] ml-1 font-normal">({group.items?.length || 0})</span></span>{selectedCount > 0 && <span className={`flex items-center justify-center min-w-[18px] h-[18px] text-[10px] font-bold rounded-full ${isActive ? (globalTheme === 'retro' ? 'bg-[#8B261D] text-white' : 'bg-white text-black') : (globalTheme === 'retro' ? 'bg-[#8B261D]/10 text-[#8B261D]' : 'bg-zinc-700 text-zinc-100')}`}>{selectedCount}</span>}</button>
+                                    <button key={group.id} onClick={() => { setActiveTab(group.id); setSearchQuery(""); }} className={`w-full text-left px-3 py-3 rounded-lg text-sm font-bold uppercase tracking-wider transition-all flex items-center justify-between group ${isActive ? (globalTheme === 'retro' ? `bg-[#F9F7F1] border-l-2 border-[#8B261D] text-[#8B261D] shadow-sm` : `bg-zinc-800 border-l-2 ${themeBorder.replace('/50', '')} ${themeText}`) : (globalTheme === 'retro' ? 'text-[#3D1A16]/70 hover:text-[#8B261D] hover:bg-white/50' : 'text-zinc-200 hover:text-white hover:bg-zinc-900/50')}`}><span className="truncate pr-2">{group.name} <span className="opacity-45 text-[10px] ml-1 font-mono normal-case">({countText})</span></span>{selectedCount > 0 && <span className={`flex items-center justify-center min-w-[18px] h-[18px] text-[10px] font-bold rounded-full ${isActive ? (globalTheme === 'retro' ? 'bg-[#8B261D] text-white' : 'bg-white text-black') : (globalTheme === 'retro' ? 'bg-[#8B261D]/10 text-[#8B261D]' : 'bg-zinc-700 text-zinc-100')}`}>{selectedCount}</span>}</button>
                                 );
                             })}
                             </div>
@@ -1638,9 +1742,9 @@ ${adminNote}
                     </div>
                     <div className={`flex-1 overflow-y-auto custom-scrollbar p-4 md:p-8 ${globalTheme === 'retro' ? 'bg-white' : 'bg-[#050505]'}`}>
 
-                        {(searchQuery || keywordFilterActive) && (
+                        {searchQuery && (
                             <div className="mb-4 text-xs text-zinc-500 font-mono uppercase tracking-widest flex items-center gap-2">
-                                <Search size={12} /><span>{keywordFilterActive ? (currentLang === 'EN' ? 'Matched Results' : '符合结果') : (currentLang === 'EN' ? "Search Results" : "搜索结果")} ({filteredItems.length})</span>
+                                <Search size={12} /><span>{currentLang === 'EN' ? "Search Results" : "搜索结果"} ({filteredScopeCountText})</span>
                             </div>
                         )}
                         <div className={blockId === 'aes_palette_preset' ? "flex flex-col gap-2 pb-20" : "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 md:gap-5 pb-20"}>

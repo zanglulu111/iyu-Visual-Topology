@@ -1,11 +1,11 @@
 import { LibraryItemDef } from '../../../types';
 
-type LightingMode = 'MOOD' | 'TYPE' | 'DIRECTION' | 'SHAPE';
+type LightingMode = 'PRESET' | 'MOOD' | 'TYPE' | 'DIRECTION' | 'SHAPE' | 'AIR' | 'COLOR_TEMP';
 type CategoryFit = NonNullable<LibraryItemDef['categoryFit']>;
 type CategoryUnlistedFit = NonNullable<CategoryFit['unlisted']>;
 
 type LightingMetaSeed = {
-  lightingMode: 'mood' | 'source_type' | 'direction' | 'projection_shape';
+  lightingMode: 'preset_pack' | 'mood' | 'source_type' | 'direction' | 'projection_shape' | 'air_medium' | 'light_color_temperature';
   lightingKind: string;
   lightAnchor: string;
   spacetimeAnchor: string;
@@ -87,6 +87,66 @@ const fit = (
   unlisted,
   ...patch
 });
+
+const presetMeta = (item: LibraryItemDef): LightingMetaSeed => {
+  const group = item.group || '';
+  const isNeon = item.id === 'lp_night_neon';
+  const isLab = item.id === 'lp_lab_cold_light';
+  const isDream = item.id === 'lp_dream_fog_light';
+  const isWasteland = item.id === 'lp_wasteland_dust_light';
+  const isRitual = item.id === 'lp_candle_ritual';
+  return {
+    lightingMode: 'preset_pack',
+    lightingKind: isNeon
+      ? 'night_neon_scheme'
+      : isLab
+        ? 'laboratory_cold_scheme'
+        : isDream
+          ? 'dream_fog_scheme'
+          : isWasteland
+            ? 'wasteland_dust_scheme'
+            : isRitual
+              ? 'candle_ritual_scheme'
+              : group.includes('棚拍')
+                ? 'controlled_studio_scheme'
+                : group.includes('城市')
+                  ? 'cinematic_city_scheme'
+                  : 'natural_physical_scheme',
+    lightAnchor: isNeon
+      ? 'neon_urban_light_pack'
+      : isLab
+        ? 'clinical_cold_light_pack'
+        : isDream
+          ? 'fog_diffusion_light_pack'
+          : isWasteland
+            ? 'dust_backlight_pack'
+            : isRitual
+              ? 'candle_ritual_light_pack'
+              : 'primary_lighting_pack',
+    spacetimeAnchor: isLab
+      ? 'industrial_modern_scientific_space'
+      : isNeon
+        ? 'modern_or_future_urban_night'
+        : isRitual
+          ? 'pre_electric_or_ritual_interior'
+          : 'physical_or_stylized_space',
+    realityAnchor: isDream
+      ? 'dreamlike_light_scheme'
+      : isNeon || isLab
+        ? 'artificial_light_scheme'
+        : 'physical_light_scheme',
+    surrealLevel: (item.ontologyLevel || 1) as 1 | 2 | 3 | 4 | 5,
+    eras: item.eras || baseEras,
+    eraMode: item.eraMode,
+    eraStrictness: item.eraMode === 'universal' ? 'none' : 'soft',
+    anachronismRisk: isNeon || isLab ? 'medium' : 'low',
+    timeTags: ['lighting_preset_pack', 'primary_lighting_scheme'],
+    realityTags: item.realityTags || ['realistic', 'physical_light'],
+    styleTags: ['lighting_scheme', 'primary_mood'],
+    conflictTags: ['opposite_lighting_pack'],
+    risk: item.risk || (isDream || isNeon || isLab ? 'medium' : 'clean')
+  };
+};
 
 const lightingCategoryFitById: Record<string, CategoryFit> = mapIds([
   [
@@ -700,6 +760,156 @@ const shapeMeta = (item: LibraryItemDef): LightingMetaSeed => {
   };
 };
 
+const airMeta = (item: LibraryItemDef): LightingMetaSeed => {
+  const group = item.group || '';
+  if (group.includes('干净空气')) {
+    return {
+      lightingMode: 'air_medium',
+      lightingKind: 'clear_air_visibility',
+      lightAnchor: 'clear_air_medium',
+      spacetimeAnchor: item.id === 'la_dry_desert_air' ? 'dry_hot_environment' : 'ordinary_physical_air',
+      realityAnchor: 'physical_air_medium',
+      surrealLevel: 1,
+      eras: baseEras,
+      eraStrictness: 'none',
+      anachronismRisk: 'low',
+      timeTags: ['air_medium', 'clear_visibility'],
+      realityTags: ['realistic', 'physical_light', 'air_medium', 'clean_visibility'],
+      styleTags: ['clear', 'readable', 'naturalistic'],
+      conflictTags: ['heavy_fog_only', 'smoke_filled_only'],
+      risk: 'clean'
+    };
+  }
+  if (group.includes('雾气水汽')) {
+    return {
+      lightingMode: 'air_medium',
+      lightingKind: 'mist_or_humidity_scattering',
+      lightAnchor: 'mist_humidity_light_scatter',
+      spacetimeAnchor: 'weather_or_humid_air',
+      realityAnchor: 'physical_air_scattering',
+      surrealLevel: 1,
+      eras: baseEras,
+      eraStrictness: 'none',
+      anachronismRisk: 'low',
+      timeTags: ['air_medium', 'humidity', 'weather_light'],
+      realityTags: ['realistic', 'stylized', 'physical_light', 'air_medium', 'diffusion'],
+      styleTags: ['soft', 'misty', 'atmospheric'],
+      conflictTags: ['crystal_clear_only', 'hard_shadow_only'],
+      risk: 'clean'
+    };
+  }
+  if (group.includes('粉尘烟雾')) {
+    return {
+      lightingMode: 'air_medium',
+      lightingKind: 'dust_smoke_visible_volume',
+      lightAnchor: 'dust_smoke_light_volume',
+      spacetimeAnchor: item.id === 'la_stage_fog' ? 'controlled_stage_or_modern_set' : 'dust_smoke_environment',
+      realityAnchor: 'physical_particle_air',
+      surrealLevel: item.id === 'la_stage_fog' ? 2 : 1,
+      eras: item.id === 'la_stage_fog' ? modernEras : baseEras,
+      eraStrictness: item.id === 'la_stage_fog' ? 'soft' : 'none',
+      anachronismRisk: item.id === 'la_stage_fog' ? 'medium' : 'low',
+      timeTags: ['air_medium', 'visible_particles', 'smoke_or_dust'],
+      realityTags: ['realistic', 'stylized', 'physical_light', 'air_medium', 'particle_volume'],
+      styleTags: ['volumetric', 'dirty_air', 'cinematic'],
+      conflictTags: ['sterile_cleanroom_only', 'transparent_air_only'],
+      risk: item.id === 'la_ash_suspended' ? 'medium' : 'clean'
+    };
+  }
+  return {
+    lightingMode: 'air_medium',
+    lightingKind: 'optical_special_air',
+    lightAnchor: 'prismatic_air_medium',
+    spacetimeAnchor: 'optical_or_surreal_air',
+    realityAnchor: 'optical_refraction_air',
+    surrealLevel: 3,
+    eras: futureEras,
+    eraStrictness: 'soft',
+    anachronismRisk: 'medium',
+    timeTags: ['air_medium', 'optical_refraction'],
+    realityTags: ['semi_surreal', 'stylized', 'physical_light', 'optical_or_abstract'],
+    styleTags: ['prismatic', 'ethereal', 'special_effect'],
+    conflictTags: ['strict_documentary_realism', 'plain_daylight_only'],
+    risk: 'medium'
+  };
+};
+
+const colorTempMeta = (item: LibraryItemDef): LightingMetaSeed => {
+  const group = item.group || '';
+  if (group.includes('基础色温')) {
+    return {
+      lightingMode: 'light_color_temperature',
+      lightingKind: 'basic_light_color_temperature',
+      lightAnchor: item.id,
+      spacetimeAnchor: 'ordinary_physical_light_color',
+      realityAnchor: 'physical_light_color',
+      surrealLevel: 1,
+      eras: baseEras,
+      eraStrictness: 'none',
+      anachronismRisk: 'low',
+      timeTags: ['light_color_temperature', 'basic_color_temp'],
+      realityTags: ['realistic', 'physical_light', 'light_color_temperature'],
+      styleTags: ['neutral', 'warm_or_cool'],
+      conflictTags: [],
+      risk: 'clean'
+    };
+  }
+  if (group.includes('暖色光')) {
+    return {
+      lightingMode: 'light_color_temperature',
+      lightingKind: 'warm_light_color_temperature',
+      lightAnchor: 'warm_light_color',
+      spacetimeAnchor: item.id === 'lct_sodium_yellow' ? 'industrial_modern_city_light' : 'fire_sun_or_warm_practical_light',
+      realityAnchor: 'physical_warm_light_color',
+      surrealLevel: 1,
+      eras: item.id === 'lct_sodium_yellow' ? modernEras : baseEras,
+      eraStrictness: item.id === 'lct_sodium_yellow' ? 'hard' : 'none',
+      anachronismRisk: item.id === 'lct_sodium_yellow' ? 'medium' : 'low',
+      timeTags: ['light_color_temperature', 'warm_light'],
+      realityTags: ['realistic', 'physical_light', 'warm_light_color'],
+      styleTags: ['warm', 'intimate', 'golden'],
+      conflictTags: ['clinical_cold_only', 'pure_moonlight_only'],
+      risk: 'clean'
+    };
+  }
+  if (group.includes('冷色光')) {
+    return {
+      lightingMode: 'light_color_temperature',
+      lightingKind: 'cool_light_color_temperature',
+      lightAnchor: 'cool_light_color',
+      spacetimeAnchor: item.id === 'lct_fluorescent_green' || item.id === 'lct_clinical_cold'
+        ? 'modern_electric_or_clinical_light'
+        : 'night_or_cool_sky_light',
+      realityAnchor: 'physical_cool_light_color',
+      surrealLevel: item.id === 'lct_fluorescent_green' ? 2 : 1,
+      eras: item.id === 'lct_fluorescent_green' || item.id === 'lct_clinical_cold' ? modernEras : baseEras,
+      eraStrictness: item.id === 'lct_fluorescent_green' || item.id === 'lct_clinical_cold' ? 'soft' : 'none',
+      anachronismRisk: item.id === 'lct_fluorescent_green' || item.id === 'lct_clinical_cold' ? 'medium' : 'low',
+      timeTags: ['light_color_temperature', 'cool_light'],
+      realityTags: ['realistic', 'stylized', 'physical_light', 'cool_light_color'],
+      styleTags: ['cold', 'blue', 'clinical'],
+      conflictTags: ['strict_warm_candle_only', 'golden_hour_only'],
+      risk: 'clean'
+    };
+  }
+  return {
+    lightingMode: 'light_color_temperature',
+    lightingKind: 'stylized_light_color_temperature',
+    lightAnchor: 'stylized_neon_or_mixed_color',
+    spacetimeAnchor: item.id === 'lct_mixed_warm_cool' ? 'controlled_mixed_lighting' : 'modern_neon_or_future_light',
+    realityAnchor: 'stylized_light_color',
+    surrealLevel: item.id === 'lct_mixed_warm_cool' ? 2 : 3,
+    eras: modernEras,
+    eraStrictness: 'soft',
+    anachronismRisk: 'medium',
+    timeTags: ['light_color_temperature', 'stylized_color_light'],
+    realityTags: ['stylized', 'semi_surreal', 'physical_light', 'color_light'],
+    styleTags: ['neon', 'synthetic', 'mixed_color'],
+    conflictTags: ['strict_historical_realism', 'natural_light_only', 'plain_daylight_only'],
+    risk: 'medium'
+  };
+};
+
 const lightTypeAxisPatch = (item: LibraryItemDef, meta: LightingMetaSeed): Partial<LibraryItemDef> => {
   if (meta.lightingMode !== 'source_type') return {};
   const patch: Partial<LibraryItemDef> = {};
@@ -869,55 +1079,88 @@ const lightTypeAxisPatch = (item: LibraryItemDef, meta: LightingMetaSeed): Parti
 };
 
 const getMeta = (item: LibraryItemDef, mode: LightingMode): LightingMetaSeed => {
+  if (mode === 'PRESET') return presetMeta(item);
   if (mode === 'MOOD') return moodMeta(item);
   if (mode === 'TYPE') return sourceTypeMeta(item);
   if (mode === 'DIRECTION') return directionMeta(item);
-  return shapeMeta(item);
+  if (mode === 'SHAPE') return shapeMeta(item);
+  if (mode === 'AIR') return airMeta(item);
+  return colorTempMeta(item);
 };
 
 export const withLightingMeta = (item: LibraryItemDef, mode: LightingMode): LibraryItemDef => {
   const meta = getMeta(item, mode);
   const axisPatch = lightTypeAxisPatch(item, meta);
   const name = cleanName(item.name);
-  const isMood = mode === 'MOOD';
+  const isPreset = mode === 'PRESET';
   const eraMode = inferEraMode(item, meta, axisPatch);
   const patchedEras = toStringList(axisPatch.compatibleEras);
   const categoryFit = mergeCategoryFit(lightingCategoryFitById[item.id], item.categoryFit);
+  const labelZh = isPreset
+    ? '光影预设包'
+    : mode === 'MOOD'
+      ? '光影基调'
+      : mode === 'TYPE'
+        ? '光源锚点'
+        : mode === 'AIR'
+          ? '空气介质'
+          : mode === 'COLOR_TEMP'
+            ? '光源色温'
+            : '光影细项';
+  const labelEn = isPreset
+    ? 'Lighting preset pack'
+    : mode === 'MOOD'
+      ? 'Lighting mood'
+      : mode === 'TYPE'
+        ? 'Light source anchor'
+        : mode === 'AIR'
+          ? 'Air medium'
+          : mode === 'COLOR_TEMP'
+            ? 'Light color temperature'
+            : 'Lighting detail';
   return {
     ...item,
     ...axisPatch,
     group: cleanGroup(item.group),
-    def: item.def || `${isMood ? '光影预设包' : mode === 'TYPE' ? '光源锚点' : '光影细项'}：${name}。它只控制光源、明暗、投射关系、空气可见性和阴影纹理，不替代时空、主体、媒介或取景协议。`,
-    defEn: item.defEn || `${isMood ? 'Lighting preset pack' : mode === 'TYPE' ? 'Light source anchor' : 'Lighting detail'}: ${name}. It only controls source, contrast, projection relation, visible air, and shadow texture without replacing spacetime, subject, medium, or framing protocol.`,
+    def: item.def || `${labelZh}：${name}。它只控制光源、明暗、投射关系、空气可见性、光源色温和阴影纹理，不替代时空、主体、媒介、取景协议或美术配色。`,
+    defEn: item.defEn || `${labelEn}: ${name}. It only controls source, contrast, projection relation, visible air, light color temperature, and shadow texture without replacing spacetime, subject, medium, framing protocol, or color palette.`,
     ontologyLevel: item.ontologyLevel || meta.surrealLevel,
     eras: item.eras || (patchedEras.length > 0 ? patchedEras : meta.eras),
     eraMode,
     eraStrictness: item.eraStrictness || meta.eraStrictness,
     anachronismRisk: item.anachronismRisk || meta.anachronismRisk,
-    eraTranslation: item.eraTranslation || (isMood
-      ? '光影基调不绑定世界时代，只控制明暗、反差、空气和情绪压强。'
+    eraTranslation: item.eraTranslation || (isPreset || mode === 'MOOD'
+      ? '光影预设和光影基调不直接改写世界时代，只控制明暗、反差、空气和情绪压强。'
       : mode === 'TYPE'
         ? '光源若与当前时代不匹配，折译为同构的本时代光源、反射、燃烧、窗口光、仪式光或设备痕迹。'
         : '投影、方向和形状优先折译为本场域内可解释的阴影、遮挡、反光或局部光学痕迹。'),
-    eraTranslationEn: item.eraTranslationEn || (isMood
-      ? 'Lighting mood does not bind the world era; it only controls brightness, contrast, air visibility, and emotional pressure.'
+    eraTranslationEn: item.eraTranslationEn || (isPreset || mode === 'MOOD'
+      ? 'Lighting presets and lighting mood do not rewrite the world era; they only control brightness, contrast, air visibility, and emotional pressure.'
       : mode === 'TYPE'
         ? 'If the light source does not match the current era, translate it into an equivalent period-valid source, reflection, flame, window light, ritual light, or device trace.'
         : 'Projection, direction, and shape translate first into explainable shadow, occlusion, reflection, or local optical trace inside the field.'),
     risk: item.risk || meta.risk,
     affects: item.affects || ['lightingAtmosphere', 'paletteStrategy', 'compositionScene', 'otherDetails'],
-    controls: item.controls || ['light source', 'contrast', 'shadow edge', 'visibility', 'projection texture', 'emotional pressure'],
-    forbids: item.forbids || ['replacing spacetime coordinate', 'replacing subject identity', 'replacing visual medium', 'overriding framing protocol'],
-    absorptionRule: item.absorptionRule || (isMood
-      ? '光影基调是 C09 的第一行预设包。随机时通常只选 1 个，用来决定整张图的明暗、硬软、反差和情绪压强；其他光影细项必须服从它。'
+    controls: item.controls || ['light source', 'contrast', 'shadow edge', 'visibility', 'air medium', 'light color temperature', 'projection texture', 'emotional pressure'],
+    forbids: item.forbids || ['replacing spacetime coordinate', 'replacing subject identity', 'replacing visual medium', 'overriding framing protocol', 'overriding whole-image color palette'],
+    absorptionRule: item.absorptionRule || (isPreset
+      ? '光影预设包是 C09 的第一行主方案。随机时通常只选 1 个，用来决定整张图的自然/城市/棚拍/仪式/废土/梦境等主布光意图；下方布光细项必须服从它。'
       : mode === 'TYPE'
         ? '光源锚点必须先通过时空合法性筛选。若当前坐标不支持该光源，L1/L2 必须折译为同构的本时代光源、反光或材料痕迹；L3 可做局部异常；L4/L5 才可字面成立。'
-        : '光影细项可叠加，但必须服务光影基调、场域和主体可读性。若与时空、天气或媒介冲突，优先降级为局部反光、投影痕迹、设备痕迹或直接移除。'),
-    absorptionRuleEn: item.absorptionRuleEn || (isMood
-      ? 'Lighting mood is the first-row C09 preset pack. Random usually selects one to set overall brightness, softness, contrast, and emotional pressure; other lighting details must obey it.'
+        : mode === 'COLOR_TEMP'
+          ? '光源色温只给光染色，不改写美术配色。若与美术配色冲突，优先作为局部边缘光、反光或环境染色处理。'
+          : mode === 'MOOD'
+            ? '光影基调是布光细项之一，只微调整体高调/低调/中调/软调/硬调，不再承担第一行主预设包。'
+            : '光影细项可叠加，但必须服务光影预设包、场域和主体可读性。若与时空、天气或媒介冲突，优先降级为局部反光、投影痕迹、设备痕迹或直接移除。'),
+    absorptionRuleEn: item.absorptionRuleEn || (isPreset
+      ? 'Lighting preset pack is the first-row C09 primary scheme. Random usually selects one to set the main natural, urban, studio, ritual, wasteland, or dream lighting intent; lower lighting details must obey it.'
       : mode === 'TYPE'
         ? 'Light source anchors must pass spacetime legality first. If the current coordinate does not support the source, L1/L2 must translate it into an equivalent period-valid light, reflection, or material trace; L3 may keep it as a local anomaly; only L4/L5 may keep it literally.'
-        : 'Lighting details may stack, but must serve the lighting mood, field, and subject readability. If they conflict with spacetime, weather, or medium, downgrade them to local reflection, projection trace, device evidence, or remove them.'),
+        : mode === 'COLOR_TEMP'
+          ? 'Light color temperature only colors the light source; it does not rewrite the whole-image palette. If it conflicts with the palette, treat it as rim light, reflection, or local environmental tint.'
+          : mode === 'MOOD'
+            ? 'Lighting mood is now one lighting detail. It only fine-tunes high key, low key, mid tone, soft light, or hard light, and no longer acts as the first-row primary preset pack.'
+            : 'Lighting details may stack, but must serve the lighting preset pack, field, and subject readability. If they conflict with spacetime, weather, or medium, downgrade them to local reflection, projection trace, device evidence, or remove them.'),
     tags: [
       ...(item.tags || []),
       'lighting_atmosphere',
@@ -936,13 +1179,13 @@ export const withLightingMeta = (item: LibraryItemDef, mode: LightingMode): Libr
     spacetimeAnchor: meta.spacetimeAnchor,
     realityAnchor: meta.realityAnchor,
     surrealLevel: meta.surrealLevel,
-    randomAxis: isMood ? 'lighting_mood' : 'lighting_detail',
-    randomDominance: isMood ? 'lighting_preset' : 'detail_parameter',
-    randomRole: isMood ? 'c09_primary_lighting_axis' : meta.lightingMode,
-    compatibleRandomModes: isMood ? ['conservative', 'balanced', 'fantasy', 'global_fusion'] : ['balanced', 'fantasy', 'global_fusion'],
+    randomAxis: isPreset ? 'lighting_preset' : 'lighting_detail',
+    randomDominance: isPreset ? 'lighting_preset' : 'detail_parameter',
+    randomRole: isPreset ? 'c09_primary_lighting_axis' : meta.lightingMode,
+    compatibleRandomModes: isPreset ? ['conservative', 'balanced', 'fantasy', 'global_fusion'] : ['balanced', 'fantasy', 'global_fusion'],
     conflictTags: axisPatch.conflictTags || meta.conflictTags,
-    selectionRule: isMood
-      ? '光影预设包默认单选。它决定 C09 主调，细项只能补充光源、方向或投影形状，不得另起一套相反光影。'
-      : '光影细项最多按 1 个光源 + 1 个方向 + 1 个投影形状组合；若与主光影基调、天气/粒子或时空锚冲突，宁愿少选。'
+    selectionRule: isPreset
+      ? '光影预设包默认单选。它决定 C09 主调，细项只能补充光源、方向、空气、色温或投影形状，不得另起一套相反光影。'
+      : '布光细项最多按 1 个光影基调 + 1 个光源 + 1 个方向 + 1 个空气介质 + 1 个光源色温 + 1 个投影形状组合；若与光影预设包、天气/粒子、时空锚或美术配色冲突，宁愿少选。'
   } as LibraryItemDef;
 };

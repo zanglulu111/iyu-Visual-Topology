@@ -842,6 +842,21 @@ export const CONCEPT_MODULE_REGISTRY: ConceptModuleRegistryEntry[] = [
     status: 'active'
   },
   {
+    id: 'cd_light_preset',
+    name: '光影预设包',
+    nameEn: 'Lighting Preset Pack',
+    layer: 'presets',
+    family: 'light',
+    slot: 'preset_pack',
+    dataKind: 'mapping_preset',
+    role: '预设级布光协议：锁定主光源关系、明暗结构、空气显影和阴影组织方式。',
+    randomPolicy: 'single',
+    compilePolicy: 'governing_package',
+    templateRoutes: ['portrait', 'poster', 'cinematic_frame'],
+    source: 'concept_design',
+    status: 'active'
+  },
+  {
     id: 'cd_light_mood',
     name: '光影基调',
     nameEn: 'Lighting Mood',
@@ -895,6 +910,36 @@ export const CONCEPT_MODULE_REGISTRY: ConceptModuleRegistryEntry[] = [
     slot: 'shape',
     dataKind: 'functional_atom',
     role: '窗格、叶影、栅格、投影纹理等光形状。',
+    randomPolicy: 'single',
+    compilePolicy: 'detail_atom',
+    templateRoutes: ['portrait', 'poster', 'cinematic_frame'],
+    source: 'concept_design',
+    status: 'active'
+  },
+  {
+    id: 'cd_light_air',
+    name: '空气介质',
+    nameEn: 'Light Air Medium',
+    layer: 'atoms',
+    family: 'light',
+    slot: 'air_medium',
+    dataKind: 'functional_atom',
+    role: '光线穿过的空气厚度、雾气、烟尘、水汽和可见体积。',
+    randomPolicy: 'single',
+    compilePolicy: 'detail_atom',
+    templateRoutes: ['portrait', 'poster', 'cinematic_frame'],
+    source: 'concept_design',
+    status: 'active'
+  },
+  {
+    id: 'cd_light_color_temp',
+    name: '光源色温',
+    nameEn: 'Light Color Temperature',
+    layer: 'atoms',
+    family: 'light',
+    slot: 'color_temperature',
+    dataKind: 'functional_atom',
+    role: '只控制光源冷暖与染色，不替代整体美术配色。',
     randomPolicy: 'single',
     compilePolicy: 'detail_atom',
     templateRoutes: ['portrait', 'poster', 'cinematic_frame'],
@@ -990,14 +1035,15 @@ export const CONCEPT_ATOM_MODULE_REGISTRY: ConceptModuleRegistryEntry[] = [
   atom('cd_static_pose', '姿态语言', 'Pose Language', 'action', 'static_pose', '概念展示姿态。'),
   atom('cd_dynamic_action', '动态动作', 'Dynamic Action', 'action', 'dynamic_action', '运动、位移、冲击或身体动势。'),
   atom('cd_human_behavior', '人类行为', 'Human Behavior', 'action', 'human_behavior', '经典、可读、低噪声的人类行为动作。'),
+  atom('cd_creature_preset', '异种本体预设', 'Creature Ontology Preset', 'creature', 'ontology_preset', '异种是什么存在：生命形态、生态位、本体权限和第一识别。'),
   atom('cd_creature_size', '异种量级', 'Creature Scale', 'creature', 'size', '异种生物尺度。'),
   atom('cd_creature_class', '异种纲目', 'Creature Taxonomy', 'creature', 'taxonomy', '异种生物分类。', 'multi'),
   atom('cd_creature_element', '元素属性', 'Elemental Trait', 'creature', 'element', '能量或物质属性。'),
   atom('cd_creature_head', '头部结构', 'Head Structure', 'creature', 'head', '异种头部结构。', 'multi'),
-  atom('cd_creature_body', '身体部件', 'Body Parts', 'creature', 'body_parts', '异种肢体和身体部件。', 'multi'),
-  atom('cd_creature_mood', '异种情绪', 'Creature Mood', 'creature', 'mood', '非人情绪状态。'),
+  atom('cd_creature_body', '身体结构/附肢器官', 'Body Structure / Appendages', 'creature', 'body_parts', '异种身体结构、肢体、附肢和非人 anatomy。', 'multi'),
+  atom('cd_creature_mood', '异种意图', 'Creature Intent', 'creature', 'intent', '非人主体的捕食、防御、繁殖、社交、异常或未知趋向。'),
   atom('cd_creature_action', '异种行为', 'Creature Behavior', 'creature', 'behavior', '本能动作或展示行为。'),
-  atom('cd_creature_texture', '异种材质', 'Creature Material', 'creature', 'texture', '异种表皮和触感。', 'multi')
+  atom('cd_creature_texture', '异种材质/生理证据', 'Creature Material / Physiology', 'creature', 'texture', '异种表皮、组织、生理痕迹和可见生命证据。', 'multi')
 ];
 
 const mediaBackground = (

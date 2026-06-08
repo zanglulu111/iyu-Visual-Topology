@@ -105,6 +105,7 @@ export interface NarrativeEngineFieldProps {
     onConceptRuntimeChange?: (state: ConceptDesignRuntimeState, persist?: boolean) => void;
     onConceptGlobalRandomizeReady?: (handler: (() => void) | null) => void;
     conceptWorkspacePage?: ConceptDesignWorkspacePage;
+    onConceptWorkspacePageChange?: (page: ConceptDesignWorkspacePage) => void;
     isAdmin?: boolean;
 }
 

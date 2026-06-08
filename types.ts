@@ -39,7 +39,7 @@ export type AestheticMode = 'REALISM' | 'STYLIZED';
 export type ConceptDesignSourceMode = 'PRESET' | 'IDEA' | 'ARTICLE' | 'IMAGE';
 export type ConceptDesignPhysicalMediumCategory = 'PAINTING' | 'CGI' | 'PHOTOGRAPHY' | 'TANGIBLE' | 'ALL';
 export type ConceptDesignBodyFormMode = 'HUMANOID_DISGUISE' | 'VISIBLE_HYBRID' | 'BEAST_BODY' | 'XENO_BODY';
-export type ConceptDesignWorkspacePage = 'ENGINE' | 'VARIABLES' | 'PROMPT';
+export type ConceptDesignWorkspacePage = 'ENGINE' | 'COMPILE' | 'RESULT' | 'FINAL';
 export type ConceptDesignHumanRegister = 'REALISTIC' | 'HISTORICAL' | 'PROFESSIONAL' | 'FASHION' | 'COMBAT' | 'RITUAL' | 'SOCIAL' | 'SCIFI' | 'FANTASY' | 'WASTELAND';
 
 export interface ConceptDesignRuntimeState {
@@ -131,6 +131,28 @@ export interface FramingProfile {
   multiSubject: boolean;
 }
 
+export type CreatureTaxonomyTag =
+  | 'mammal'
+  | 'avian'
+  | 'reptilian'
+  | 'aquatic'
+  | 'insectoid'
+  | 'soft_body'
+  | 'draconic'
+  | 'demonic'
+  | 'divine_spirit'
+  | 'undead'
+  | 'eldritch'
+  | 'plant_fungal'
+  | 'mineral_elemental'
+  | 'energy_void'
+  | 'machine'
+  | 'synthetic'
+  | 'swarm_parasitic'
+  | 'chimera';
+
+export type CreatureTaxonomyFitLevel = 'none' | 'usable' | 'fusion' | 'weak' | 'exclude';
+
 export interface LibraryItemDef {
   id: string;
   name: string;
@@ -216,10 +238,24 @@ export interface LibraryItemDef {
   personaKindEn?: string;
   personaStrength?: 'light' | 'medium' | 'strong';
   isCompoundPersona?: boolean;
+  creatureFamily?: string;
+  creatureFamilyAllow?: readonly string[];
+  creatureFamilyFusion?: readonly string[];
+  creatureFamilyBlock?: readonly string[];
+  creatureTaxonomyFit?: {
+    unlisted?: CreatureTaxonomyFitLevel;
+    strong?: readonly CreatureTaxonomyTag[];
+    usable?: readonly CreatureTaxonomyTag[];
+    fusion?: readonly CreatureTaxonomyTag[];
+    weak?: readonly CreatureTaxonomyTag[];
+    exclude?: readonly CreatureTaxonomyTag[];
+  };
+  creaturePartRole?: 'primary_head' | 'cranial_structure' | 'eye' | 'mouth' | 'horn' | 'head_tech' | 'eldritch_head' | 'elemental_head' | 'torso' | 'limb' | 'lower_body' | 'wing' | 'tail' | 'internal_mutation' | 'body_tech';
+  creaturePartMode?: 'replace' | 'attach' | 'surface' | 'effect';
   realityTags?: readonly string[];
   eraMode?: 'specific' | 'universal';
   categoryFit?: {
-    unlisted?: 'none' | 'usable' | 'weak' | 'exclude';
+    unlisted?: 'none' | 'usable' | 'fusion' | 'weak' | 'exclude';
     strong?: readonly string[];
     usable?: readonly string[];
     fusion?: readonly string[];
